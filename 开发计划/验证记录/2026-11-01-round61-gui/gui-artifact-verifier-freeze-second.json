@@ -1,0 +1,61 @@
+{
+  "stage": "R61 GUI artifact verifier environment-order correction",
+  "status": "FROZEN_PYTHON_MODELS_PASS_ACTUAL_ARTIFACT_PENDING",
+  "firstVerifier": {
+    "path": "/tmp/fc-round61-gui/evidence/verify-ci-artifact-gui-first.py",
+    "bytes": 64386,
+    "sha256": "7d67265ae31a6684fe87d026a5bedd70fd8be171d3308d3b817c10f332b2c188",
+    "unchanged": true
+  },
+  "secondVerifier": {
+    "path": "/tmp/fc-round61-gui/evidence/verify-ci-artifact-gui-second.py",
+    "bytes": 66125,
+    "sha256": "962646b0c82670bf8553d1670ceddc954917d8a559b27dcfc0c2f4bc4a811836"
+  },
+  "newCiSourcePin": "eac2e9e42cfd073aca58584e8dbc6d9cefa864a5b84711b27e0ab83d43689a7b",
+  "correction": "First model contracts could pass while actual Cargo order kept console flags last. New verifier requires actual product environment metadata and before-product GUI snapshot plus after-product restored default snapshot. No trailing linker override is expected; product rustc exact command is retained.",
+  "metadataContract": {
+    "run-start-and-result": [
+      "rustflags (workspace/test/clippy default)",
+      "product_rustflags (GUI6.01 only for Win7 normal)",
+      "rustflags_scope (explicit product-only exception)"
+    ],
+    "phaseFiles": [
+      "before-vs-crt-flags.json",
+      "after-vs-crt-flags.json",
+      "before-cargo-crt-flags.json",
+      "before-product-crt-flags.json",
+      "after-product-crt-flags.json"
+    ],
+    "checks": "Each phase original RUSTFLAGS present/value/length exact, CARGO_ENCODED_RUSTFLAGS absent; Win7 before-product GUI, after-product CONSOLE."
+  },
+  "astChanges": [
+    "Audit.commands_and_baseline",
+    "cargo_arguments",
+    "self_test"
+  ],
+  "astAdded": [
+    "compiler_flag_phases",
+    "product_rustflags"
+  ],
+  "allOtherOriginalFunctionsAndMethodsUnchanged": true,
+  "actualModel": {
+    "commandRecord": "gui-artifact-model-second.command.json",
+    "status": "PASS_MODEL_ONLY_NO_ARTIFACT",
+    "groups": 26,
+    "exitCode": 0,
+    "reportSha256": "5cb0f94bf96fbc401a7e9c98c6586ac6cb7252a8426f5687c3aa60b676c7b84e",
+    "negativeReport": "gui-artifact-model-second.phase-negative.json",
+    "negativeStatus": "FAIL expected; original CI failure never promoted",
+    "scope": "Pure metadata/expected-command models; does not execute Cargo/linker/CI/artifact."
+  },
+  "limits": "Source20000; genericRows/ZIP10000; all bytes, capture/deadline, CRT and cleanup rules unchanged. Original R59/de7d and first GUI verifier/models remain original bytes.",
+  "localGenerationNote": "The local one-off adapt-gui-artifact-second.py wrote the intended full second verifier, then its final assertion failed because its variable b had been reused for replacement text. This was a helper assertion bug, not evidence of a source change: independent exact SHA checks above confirm first verifier and R59 source unchanged; second verifier actual full model run then exited0. No generation rerun or original file overwrite.",
+  "notRun": [
+    "Cargo",
+    "Windows/SSH",
+    "network/CI",
+    "actual artifact audit"
+  ],
+  "patchSha256": "c24acf4d66c963c63c8a374992e33cdc66677ac9428a102d5015a2c83fdc6e43"
+}

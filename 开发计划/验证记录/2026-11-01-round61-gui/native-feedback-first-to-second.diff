@@ -1,0 +1,31 @@
+--- a/crates/fc-windows/src/startup.rs
++++ b/crates/fc-windows/src/startup.rs
+@@ -1,5 +1,17 @@
+ //! Explicit, synchronous startup failure feedback for an interactive caller.
+ //! Merely loading this module never creates a window or changes console state.
++
++/// Reports whether the calling process currently has a console window handle.
++/// A pseudoconsole can return a message-only HWND, so `true` does not imply a
++/// visible console. `false` is only this call's absence of an associated HWND.
++/// No console is created, attached, detached, or otherwise modified.
++#[cfg(windows)]
++pub fn console_window_present() -> bool {
++    // SAFETY: GetConsoleWindow takes no arguments and returns a borrowed HWND.
++    // This observation neither owns nor closes the returned window.
++    let console = unsafe { windows::Win32::System::Console::GetConsoleWindow() };
++    !console.0.is_null()
++}
+ 
+ /// Displays an OK-only error dialog. The caller decides whether its launch mode
+ /// is interactive; autostart and diagnostic paths must not call this implicitly.
+--- a/crates/fc-windows/Cargo.toml
++++ b/crates/fc-windows/Cargo.toml
+@@ -17,7 +17,7 @@
+ windows = { version = "=0.62.2", features = [
+   "Win32_Foundation", "Win32_Globalization", "Win32_Graphics_Gdi", "Win32_Graphics_Direct2D",
+   "Win32_Graphics_Direct2D_Common", "Win32_Graphics_DirectWrite", "Win32_Graphics_Dxgi_Common",
+-  "Win32_System_Com", "Win32_System_LibraryLoader", "Win32_System_Threading",
++  "Win32_System_Com", "Win32_System_Console", "Win32_System_LibraryLoader", "Win32_System_Threading",
+   "Win32_System_SystemInformation", "Win32_Security", "Win32_Security_Cryptography",
+   "Win32_Storage_FileSystem", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell", "Win32_System_StationsAndDesktops",
+   "Win32_System_Registry", "Win32_Security_Authorization", "Win32_System_RemoteDesktop",

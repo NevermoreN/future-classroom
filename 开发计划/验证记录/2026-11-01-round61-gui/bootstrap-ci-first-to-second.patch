@@ -1,0 +1,109 @@
+--- first/scripts/windows-msvc-ci.ps1
++++ second/scripts/windows-msvc-ci.ps1
+@@ -72,15 +72,14 @@
+         # No explicit crate list: cargo test must include the test crate too.
+         # Clippy is an external Cargo command; forward build-std to its inner check.
+         if ($Command -eq 'clippy') { return ,(@($Command,'-Z','build-std') + $Arguments) }
+-        if ($Command -eq 'rustc') {
+-            # Only the selected final product gets this tail. Dependency/test
+-            # flags stay CONSOLE6.01; actual product GUI/version is checked below.
+-            return ,(@('-Z','build-std',$Command) + $Arguments + @('--','-C','link-arg=/SUBSYSTEM:WINDOWS,6.01'))
+-        }
+         return ,(@('-Z','build-std',$Command) + $Arguments)
+     }
+     # Metadata/fmt do not compile; do not forward unstable flags to cargo-fmt.
+     return ,(@($Command) + $Arguments)
++}
++function Get-ProductRustFlags([ValidateSet('Modern', 'Win7')][string]$Name = 'Modern') {
++    if ($Name -eq 'Win7') { return '-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:WINDOWS,6.01' }
++    return (Get-MsvcBaseline $Name).rustflags
+ }
+ function Test-MsvcExecutableHeader([byte[]]$Bytes,
+     [ValidateSet('Modern', 'Win7')][string]$Name = 'Modern',
+@@ -531,7 +530,9 @@
+     status = 'STARTED_NOT_VALIDATED'; utc = [DateTime]::UtcNow.ToString('o'); expected_source_sha = $ExpectedSourceSha
+     dispatch_source_sha = $env:GITHUB_SHA
+     workflow_sha = $env:GITHUB_WORKFLOW_SHA; target = $Target; toolchain = $Toolchain
+-    rustflags = $BaselineConfiguration.rustflags; baseline = $Baseline; role = $BaselineConfiguration.role; tests = 'COMPILE_ONLY_NO_RUN'
++    rustflags = $BaselineConfiguration.rustflags; product_rustflags = Get-ProductRustFlags $Baseline
++    rustflags_scope = 'Workspace test/clippy default; product-compile uses product_rustflags only and restores the original flags.'
++    baseline = $Baseline; role = $BaselineConfiguration.role; tests = 'COMPILE_ONLY_NO_RUN'
+     windows7 = 'NOT_RUN'; windows10 = 'NOT_RUN'; windows11 = 'NOT_RUN'; seewo_device = 'NOT_RUN'
+ })
+ try {
+@@ -680,7 +681,19 @@
+     Invoke-Logged 'architecture' $python @('scripts/check-architecture.py') 120 | Out-Null
+     Write-CrtFlagState 'before-cargo' $BaselineConfiguration.rustflags
+     $tests = Invoke-Logged 'workspace-test-compile' $cargo (Get-BaselineCargoArguments 'test' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--no-run','--message-format=json') $Baseline) 2400
+-    $binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200
++    # Cargo appends environment RUSTFLAGS after cargo-rustc trailing flags.
++    # The actual final product needs a scoped environment, not a conflicting
++    # trailing /SUBSYSTEM argument. Dependencies may rebuild; budget is unchanged.
++    $productRustFlags = Get-ProductRustFlags $Baseline
++    $originalProductRustFlags = $env:RUSTFLAGS
++    try {
++        $env:RUSTFLAGS = $productRustFlags
++        Write-CrtFlagState 'before-product' $productRustFlags
++        $binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200
++    } finally {
++        $env:RUSTFLAGS = $originalProductRustFlags
++        Write-CrtFlagState 'after-product' $BaselineConfiguration.rustflags
++    }
+     Invoke-Logged 'clippy' $cargo (Get-BaselineCargoArguments 'clippy' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') $Baseline) 1500 | Out-Null
+     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+     foreach ($build in @($tests, $binary)) {
+@@ -757,6 +770,8 @@
+ Write-NewJson (Join-Path $Artifact 'result.json') ([ordered]@{
+     status = $(if ($passed) { 'COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN' } else { 'FAILED_OR_INCOMPLETE' })
+     source_sha = $ExpectedSourceSha; input_manifest_sha256 = $inputDigest; toolchain = $Toolchain; target = $Target; baseline = $Baseline
++    rustflags = $BaselineConfiguration.rustflags; product_rustflags = Get-ProductRustFlags $Baseline
++    rustflags_scope = 'Workspace test/clippy default; product-compile uses product_rustflags only and restores the original flags.'
+     dispatch_source_sha = $env:GITHUB_SHA
+     input_schema = 'future-classroom.ci-input-domains/v1'
+     git_tree_manifest_sha256 = $gitTreeDigest; input_domains_manifest_sha256 = $inputDomainsDigest
+--- first/scripts/check-msvc-gui-contract.ps1
++++ second/scripts/check-msvc-gui-contract.ps1
+@@ -66,7 +66,7 @@
+     $tokens = $null
+     $ast = [Management.Automation.Language.Parser]::ParseInput($TextSource, [ref]$tokens, [ref]$parseErrors)
+     Require (@($parseErrors).Count -eq 0) 'Whole CI source failed ParseInput.'
+-    foreach ($name in @('Get-MsvcBaseline', 'Get-BaselineCargoArguments', 'Test-MsvcExecutableHeader')) {
++    foreach ($name in @('Get-MsvcBaseline', 'Get-BaselineCargoArguments', 'Get-ProductRustFlags', 'Test-MsvcExecutableHeader')) {
+         $definitions = @($ast.FindAll({ param($node)
+             $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -ceq $name
+         }, $true))
+@@ -85,11 +85,32 @@
+         Require ($win7.rustflags -ceq '-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01') 'Win7 dependencies/tests must retain old console flags.'
+         Require ($win7.toolchain -ceq 'nightly-2026-10-29-x86_64-pc-windows-msvc') 'Win7 pinned toolchain changed.'
+     }
+-    Check 'normal rustc selects only product and appends Win7 GUI version to final target' {
++    Check 'normal rustc selects only product without a conflicting final subsystem override' {
+         $modernArgs = [string[]]@('-vv','--release','--locked','--target','i686-pc-windows-msvc','-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json')
+         $win7Args = [string[]]@('-vv','--release','--locked','--target','i686-win7-windows-msvc','-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json')
+         Equal-Arguments (Get-BaselineCargoArguments rustc $modernArgs Modern) (@('rustc') + $modernArgs)
+-        Equal-Arguments (Get-BaselineCargoArguments rustc $win7Args Win7) (@('-Z','build-std','rustc') + $win7Args + @('--','-C','link-arg=/SUBSYSTEM:WINDOWS,6.01'))
++        Equal-Arguments (Get-BaselineCargoArguments rustc $win7Args Win7) (@('-Z','build-std','rustc') + $win7Args)
++    }
++    Check 'product-only environment and finally restore are wired around the real command' {
++        Require ((Get-ProductRustFlags Modern) -ceq '-C target-feature=+crt-static') 'Modern product flags changed.'
++        Require ((Get-ProductRustFlags Win7) -ceq '-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:WINDOWS,6.01') 'Win7 product environment must be GUI6.01.'
++        Require ((Get-MsvcBaseline Win7).rustflags -ceq '-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01') 'Win7 workspace flags must stay console.'
++        $productScopes = @($ast.FindAll({ param($node)
++            $node -is [Management.Automation.Language.TryStatementAst] -and
++            $null -ne $node.Finally -and
++            $node.Finally.Extent.Text.Contains('$env:RUSTFLAGS = $originalProductRustFlags') -and
++            $node.Body.Extent.Text.Contains("Invoke-Logged 'product-compile'")
++        }, $true))
++        Require ($productScopes.Count -eq 1) 'Product command must have exactly one containing try/finally.'
++        $body = [string]$productScopes[0].Body.Extent.Text
++        $final = [string]$productScopes[0].Finally.Extent.Text
++        Require ($body.IndexOf('$env:RUSTFLAGS = $productRustFlags') -ge 0 -and
++            $body.IndexOf('$env:RUSTFLAGS = $productRustFlags') -lt $body.IndexOf("Write-CrtFlagState 'before-product'") -and
++            $body.IndexOf("Write-CrtFlagState 'before-product'") -lt $body.IndexOf("Invoke-Logged 'product-compile'")) 'Product environment is not set and captured before the command.'
++        Require ($final.IndexOf('$env:RUSTFLAGS = $originalProductRustFlags') -ge 0 -and
++            $final.IndexOf('$env:RUSTFLAGS = $originalProductRustFlags') -lt $final.IndexOf("Write-CrtFlagState 'after-product'")) 'Finally must restore before capturing original flags.'
++        Require ($TextSource.Contains('$originalProductRustFlags = $env:RUSTFLAGS')) 'Original product environment was not captured.'
++        Require ($TextSource.Contains('product_rustflags = Get-ProductRustFlags $Baseline')) 'Metadata lost product-only flag exception.'
+     }
+     Check 'test build clippy metadata and fmt argument contracts remain unchanged' {
+         $compileArgs = [string[]]@('--workspace','--all-targets','--release','--target','i686-win7-windows-msvc')

@@ -1,0 +1,113 @@
+{
+  "schema": "future-classroom.ci-artifact-model/v1",
+  "status": "PASS_MODEL_ONLY_NO_ARTIFACT",
+  "checks": [
+    {
+      "name": "exact ordinal prefix and path aliases",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicate JSON and nonfinite rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicates and case collisions rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "typed integer rejects bool and negative",
+      "status": "PASS"
+    },
+    {
+      "name": "exact blob and exact whole LF->CRLF only",
+      "status": "PASS"
+    },
+    {
+      "name": "mixed original CR and NUL do not normalize",
+      "status": "PASS"
+    },
+    {
+      "name": "full metadata/S/H partition and distinct historical checkout bytes",
+      "status": "PASS"
+    },
+    {
+      "name": "missing S and history alias rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "wrong Git OID/domain and false historical SHA claim rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "after content mutation rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged 256MiB aggregate enforced without payload allocation",
+      "status": "PASS"
+    },
+    {
+      "name": "raw NUL Git tree regular-only/truncation checks",
+      "status": "PASS"
+    },
+    {
+      "name": "baseline exact buildstd placement/no metadata fmt leakage",
+      "status": "PASS"
+    },
+    {
+      "name": "real 20000 Git/path entries preserve last row; 20001 rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "full 20000 partitions allow over10000 SHA or historical rows without skipping",
+      "status": "PASS"
+    },
+    {
+      "name": "missing large partition tail/fullGit/SHA tail and old10000 summary rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "new exact CI source pin accepts actual new bytes and rejects actual old helper",
+      "status": "PASS"
+    },
+    {
+      "name": "generic rows and ZIP members stay10000; all byte limits unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "CI failure can never become static PASS",
+      "status": "PASS"
+    },
+    {
+      "name": "actual PE bytes exact GUI product/CUI tests mutual rejection and Win7 exact6.1",
+      "status": "PASS"
+    },
+    {
+      "name": "producer pe_subsystem must be exact integer and match role plus version",
+      "status": "PASS"
+    },
+    {
+      "name": "production ZIP inventory rejects duplicate/symlink/traversal/metadata overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "same production ZipFile.read rejects actual corrupted stored body CRC",
+      "status": "PASS"
+    },
+    {
+      "name": "official JSON connector wrapping/connector error is explicit",
+      "status": "PASS"
+    },
+    {
+      "name": "negative CI phase remains FAIL while independent PE/cleanup still observed",
+      "status": "PASS"
+    }
+  ],
+  "helper": {
+    "path": "/tmp/fc-round61-gui/evidence/verify-ci-artifact-gui-first.py",
+    "bytes": 64386,
+    "sha256": "7d67265ae31a6684fe87d026a5bedd70fd8be171d3308d3b817c10f332b2c188"
+  },
+  "scope": "Pure synthetic Python models only. No official artifact, CI, compiler, PE execution, Windows, remote or repository mutation.",
+  "artifactValidated": false
+}

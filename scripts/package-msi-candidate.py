@@ -462,6 +462,11 @@ def pe_header(data: bytes) -> None:
         raise ValueError("Invalid PE offset/signature")
     if struct.unpack_from("<H", data, offset + 4)[0] != 0x14C or struct.unpack_from("<H", data, offset + 24)[0] != 0x10B:
         raise ValueError("Expected x86 PE32")
+    optional_size = struct.unpack_from("<H", data, offset + 20)[0]
+    if optional_size < 70 or optional_size > len(data) - offset - 24:
+        raise ValueError("Incomplete PE32 optional header")
+    if struct.unpack_from("<H", data, offset + 24 + 68)[0] != 2:
+        raise ValueError("Application payload requires Windows GUI subsystem 2")
     if struct.unpack_from("<HH", data, offset + 24 + 48) != (6, 1):
         raise ValueError("Win7 candidate requires PE subsystem version 6.1")
 

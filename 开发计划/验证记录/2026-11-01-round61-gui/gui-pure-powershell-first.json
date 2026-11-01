@@ -1,0 +1,118 @@
+{
+  "status": "PASS_ACTUAL_POWERSHELL_MEMORY_ONLY",
+  "sourceSha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3",
+  "checkerSha256": "092d0ec685e4a5f51730e2776c53a81d89c6be8b622911cf34aae4325280b20f",
+  "timeoutSeconds": 90,
+  "scope": "Actual Windows PowerShell pure in-memory helper tests only; no hosted CI entrypoint, product, registry, file mutation, browser or foreground interaction.",
+  "remoteInput": {
+    "bytes": 85789,
+    "sha256": "73836846f6585477bf76d5c266d98f0a1ff3026e8f344f3a6ac00a1165679b7f"
+  },
+  "args": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "IdentitiesOnly=yes",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAkAHMAbwB1AHIAYwBlAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzAG8AdQByAGMAZQApACkAOwA="
+  ],
+  "exitCode": 0,
+  "actualSshExit": true,
+  "stdout": {
+    "path": "/tmp/fc-round61-gui/evidence/gui-pure-powershell-first.stdout",
+    "bytes": 1988,
+    "sha256": "cfc6f46546a82cd403cf9e25ff3b0fce332292b6cf99239b17a7673de6d74c3c"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round61-gui/evidence/gui-pure-powershell-first.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "remote-input.ps1": {
+    "path": "/tmp/fc-round61-gui/evidence/gui-pure-powershell-first.remote-input.ps1",
+    "bytes": 85789,
+    "sha256": "73836846f6585477bf76d5c266d98f0a1ff3026e8f344f3a6ac00a1165679b7f"
+  },
+  "originalPowershellReport": {
+    "status": "PASS_PURE_POWERSHELL_GUI_CONTRACT_ONLY",
+    "powershell": "5.1.26100.9711",
+    "sourceSha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3",
+    "sourceExpectedSha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3",
+    "fullSourceParseErrors": 0,
+    "functionBindings": [
+      {
+        "name": "Get-MsvcBaseline",
+        "sha256": "f5a09baeec782b86139b4d0cfb13dbe17c0eb16a0e37351b4dacce06ed893e00",
+        "utf8Bytes": 1814
+      },
+      {
+        "name": "Get-BaselineCargoArguments",
+        "sha256": "f6266f11107f3f79aea54aacd79581fe050f69f316e559ef39ecc8160846ff66",
+        "utf8Bytes": 2231
+      },
+      {
+        "name": "Test-MsvcExecutableHeader",
+        "sha256": "e657d90e88a616121387c260d63d3dcdab2517d008bac524bd329af43437e01d",
+        "utf8Bytes": 1616
+      }
+    ],
+    "checks": [
+      {
+        "name": "fixed baselines retain CRT flags and test-only console version",
+        "status": "PASS",
+        "assertions": 6
+      },
+      {
+        "name": "normal rustc selects only product and appends Win7 GUI version to final target",
+        "status": "PASS",
+        "assertions": 30
+      },
+      {
+        "name": "test build clippy metadata and fmt argument contracts remain unchanged",
+        "status": "PASS",
+        "assertions": 64
+      },
+      {
+        "name": "mis-scoped final rustc calls and wrong Win7 target fail closed",
+        "status": "PASS",
+        "assertions": 23
+      },
+      {
+        "name": "actual PE32 GUI product and CUI tests accepted with role-specific version",
+        "status": "PASS",
+        "assertions": 5
+      },
+      {
+        "name": "GUI tests and console product cannot pass by valid version alone",
+        "status": "PASS",
+        "assertions": 17
+      },
+      {
+        "name": "malformed PE32 headers cannot bypass actual subsystem admission",
+        "status": "PASS",
+        "assertions": 13
+      },
+      {
+        "name": "real product invocation and copy gate bind the checked role without extra build",
+        "status": "PASS",
+        "assertions": 7
+      }
+    ],
+    "assertions": 173,
+    "fatal": null,
+    "scope": "AST-extracted real argument and PE admission helpers, synthetic PE32 header bytes only; no actual linker, executable, Rust build, GUI or console runtime proof.",
+    "ciEntrypointExecuted": false,
+    "filesystemOrEnvironmentWritten": false,
+    "processOrThreadStarted": false,
+    "windowsRuntime": "NOT_RUN",
+    "actualProductPe": "NOT_RUN",
+    "actualRedirectedDiagnostic": "NOT_RUN"
+  },
+  "elapsedSeconds": 0.9928732251282781,
+  "sourceUnchanged": true
+}

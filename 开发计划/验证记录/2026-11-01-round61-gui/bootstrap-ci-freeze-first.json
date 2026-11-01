@@ -1,0 +1,100 @@
+{
+  "stage": "R61 bootstrap and hosted CI GUI candidate",
+  "base": "6082dd0173a0b8884c27ac78fda5054275f99f14",
+  "status": "SOURCE_FROZEN_RUNTIME_NOT_RUN",
+  "ownedFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 21191,
+      "sha256": "22fde2cbcbfd12d188c4c1bf1b4b6744226933869bf87f126e8775b4cb7cef63",
+      "before": {
+        "bytes": 19408,
+        "sha256": "731dbf90fc1b2c297e8010ceacad3b3b257deef52c11b5548210de2bbdc0c50f"
+      }
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 51811,
+      "sha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3",
+      "before": {
+        "bytes": 49976,
+        "sha256": "0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd"
+      }
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 12188,
+      "sha256": "092d0ec685e4a5f51730e2776c53a81d89c6be8b622911cf34aae4325280b20f",
+      "before": "NEW_FILE"
+    }
+  ],
+  "patch": {
+    "path": "bootstrap-ci-first.patch",
+    "bytes": 23458,
+    "sha256": "e13c086da5376624316186dd25913b70c990c134472e2754da8bc877118af3c1"
+  },
+  "actualLocalChecks": [
+    {
+      "name": "rustfmt",
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "--check",
+        "crates/fc-bootstrap/src/main.rs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "name": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-bootstrap/src/main.rs",
+        "scripts/windows-msvc-ci.ps1",
+        "scripts/check-msvc-gui-contract.ps1"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    }
+  ],
+  "behavior": {
+    "normalWindowsBin": "windows subsystem attribute; unit-test cfg excludes attribute",
+    "manualFailureDialog": "only exact zero args or sole --repair on Err; stderr and ExitCode::FAILURE remain",
+    "otherDiagnostics": "no dialog; inherited stdout/stderr handling unchanged",
+    "systemProbe": "existing PASS line gains console_window_present from GetConsoleWindow only; HWND absence is not a general console visibility guarantee",
+    "normalMsvc": "cargo rustc explicitly selects one fc-bootstrap bin",
+    "win7Msvc": "existing dependency/test CONSOLE6.01 rustflags unchanged; final rustc tail WINDOWS6.01 only; actual PE must verify GUI2/product and CUI3/tests plus version6.1",
+    "metadata": "actual integer pe_subsystem added; existing pe_subsystem_version retained"
+  },
+  "tests": {
+    "rust": "1 new pure argument classifier regression; NOT_RUN",
+    "powershell": "8 groups AST-extract exact 3 CI helpers; sourceSHA binding, Modern/Win7 command preservation, scoped final args, synthetic PE role/version/malformed negatives; NOT_RUN (no local pwsh)",
+    "invocation": "& scripts/check-msvc-gui-contract.ps1 -TextSource ([IO.File]::ReadAllText(<exact CI script path>)) -ExpectedSourceSha256 <owned windows-msvc-ci.ps1 sha256>",
+    "limits": "synthetic PE/header/source models are not actual linker/PE/GUI/stdout runtime proof"
+  },
+  "untouched": "check-ci-source-inventory.ps1; all test/clippy arguments and original per-step/log/cleanup budgets; no workflow/target flags outside explicit normal rustc tail",
+  "pending": [
+    "root unified Cargo compile/test/Clippy",
+    "PowerShell pure helper checks under actual target PowerShell",
+    "modern and Win7 hosted normal/test actual PE verification",
+    "Windows GUI/noConsole inherited redirected probe stdout/stderr and actual exit code",
+    "manual startup feedback implementation native behavior (no UI opened here)"
+  ],
+  "prohibitedNotRun": [
+    "Cargo",
+    "Windows/SSH",
+    "CI",
+    "Git commit/push"
+  ],
+  "dependencies": {
+    "nativeAPI": "fc_windows::startup::{show_startup_failure,console_window_present}, service-owned second freeze"
+  }
+}

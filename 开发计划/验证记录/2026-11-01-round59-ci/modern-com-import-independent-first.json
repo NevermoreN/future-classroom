@@ -1,0 +1,220 @@
+{
+  "status": "PASS_EXACT_MSVC_STATIC_ONLY",
+  "sourceSha": "6082dd0173a0b8884c27ac78fda5054275f99f14",
+  "runId": 41272111275,
+  "artifactId": 13070242402,
+  "artifactAuditSha256": "1fe93cf20cba35a92286d536cacc68fc9445f2a02d712c4e78b4ea5e8044fb4f",
+  "programs": [
+    {
+      "role": "tests",
+      "program": "tests/fc-bootstrap/business_storage-aed4569549b3ec7a.exe",
+      "sha256": "899e1ad66037a62aed1f5c6270e32c5cdca7d77d4c7baa48f6b68e9ec1eac950",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-bootstrap/autostart_coordinator-14af56748f5efaa5.exe",
+      "sha256": "d63f7770703b101735b88ccf8703d77c6c684a9726eb3f2a40e3b06c499782b6",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-bootstrap/verify_web_assets-8c89377f296f714f.exe",
+      "sha256": "1af54d587a12981fa67ae30507608f6d386eb9620da622d562055ee6363027b5",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-bootstrap/runtime_storage-760f4cbb0867e285.exe",
+      "sha256": "611fe3e5956f1bc402e6c4551a542ba453df50d89192081fb27cb3f2d6acf915",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-bootstrap/fc_bootstrap-43672a6a20d69e44.exe",
+      "sha256": "f9d65798e41ac27f0b6b8edc461e92f96a22aa91f5b8d1ea7ffe15737fe13ea0",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [
+        "K32GetMappedFileNameW",
+        "QueryDosDeviceW"
+      ],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-bootstrap/voice_storage-4c4095a4a0db66a6.exe",
+      "sha256": "d5cc3707e7b40f349e869b626beee7a488428d9f69cace852da950e2d022f95e",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-bootstrap/voice_limits_storage-4ce1846e6a2e3ee3.exe",
+      "sha256": "da306b48a8c04988d2756c112015ba892cb951d9a10a6b4e39aab96538a683a5",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-bootstrap/schedule_operations-7ec1b8fd8e3b67ed.exe",
+      "sha256": "7bb01b65af1ac43317fdfde4afcde474b91de3ec5e2ff4c272012ccd725af7b8",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-bootstrap/calendar_execution_fence-ade946cbe8bb9732.exe",
+      "sha256": "43f055d8574df794a6c543873d78cf5adde5020bdb0d413b8e4ed1e09b2de7b0",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-windows/fc_windows-2047f5e941623501.exe",
+      "sha256": "07ba20fb25ec37c3b5176b60a0c13e9334cef38700462356786f5ef532ecf61a",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [
+        "K32GetMappedFileNameW",
+        "QueryDosDeviceW"
+      ],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-bootstrap/fc_bootstrap-8542c1044dd555d0.exe",
+      "sha256": "de30faee65ea0b5a8a4b051917adcc10e66abd8ca97d3a316f014b2572e886ae",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [
+        "K32GetMappedFileNameW",
+        "QueryDosDeviceW"
+      ],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-security/fc_security-897ee1bbd038f1a8.exe",
+      "sha256": "e3fc3011d8cf1742796711731f06ff591fb06945609c8642009ce1e647fc8068",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-materials/fc_materials-2e428b959a090e75.exe",
+      "sha256": "f7779cb470ec643595b311bccff356267ba0e0db53373620249be1e6e6ba02ae",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-presentation/fc_presentation-0ebca4673ff953f0.exe",
+      "sha256": "367f345ab693103899c9ef680f3f672a2208992c6d24ae357c57352131edb3c5",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-protocol/fc_protocol-a7cf91af1d25db3b.exe",
+      "sha256": "20002425a2278d283c03ec8f38b14e23ab393a66e47753a46fbb7818c90ed98e",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-runtime/fc_runtime-beae710b833bf51a.exe",
+      "sha256": "635eb9422d5f030ed7b80a73c12e43006ad4c1b76cec15233835160c25871b3b",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-ports/fc_ports-2a65d64830b4e099.exe",
+      "sha256": "1f2f0da0e91651b223ba790e3fda54b7aeccd3c68005e00863e5a40e6906196b",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-audio/fc_audio-3b8d060b615f92df.exe",
+      "sha256": "98931b4993ec66dc2079fdeaffc9a534bdaac21f0216701d2614748172eab345",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-application/fc_application-452d4d2887413f93.exe",
+      "sha256": "5d268bc51fa9a0294738b3c92cd79daf517703362360993954f3613c92ce82bd",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-storage/fc_storage-e351e410d252c84e.exe",
+      "sha256": "165542315ed92a3af9af7d6e4dbd098b26f931286679cc761b233e86e07da284",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "tests",
+      "program": "tests/fc-domain/fc_domain-7c20761d03caf301.exe",
+      "sha256": "a66426890938cfc5f9da3c299619eb6a249633a591872b24ce8e202215c83b83",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [],
+      "subsystem": 3
+    },
+    {
+      "role": "product",
+      "program": "product/fc-bootstrap/fc-bootstrap.exe",
+      "sha256": "e5d2cc68fa2f8fe6794a9acf54b56b613dd379f4d7c739f6a6d645202cd8c1f5",
+      "unexpectedDlls": [],
+      "staticCoTaskMemFreeDlls": [],
+      "kernel32NtImageQueries": [
+        "K32GetMappedFileNameW",
+        "QueryDosDeviceW"
+      ],
+      "subsystem": 3
+    }
+  ],
+  "scope": "All22 exact producer and raw objdump bytes independently rehashed; combase/WinRT error/KtmW32 and static CoTaskMemFree imports absent. Dynamic allocator identity/ABI still needs actual runtime; this old source product is CUI, not new R61 GUI. No target OS compatibility claim."
+}

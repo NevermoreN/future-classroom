@@ -1,0 +1,23 @@
+{
+  "status": "OWNED_BUILD_ROOTS_REMOVED",
+  "roots": [
+    {
+      "root": "target",
+      "removed": true
+    },
+    {
+      "root": "scratch",
+      "removed": true
+    },
+    {
+      "root": "cargo",
+      "removed": true
+    },
+    {
+      "root": "rustup",
+      "removed": true
+    }
+  ],
+  "artifact_lifetime": "Retained for always-upload; hosted VM disposal removes remaining local evidence.",
+  "scope": "Only this exact RunnerTemp run-id/attempt root; no user-machine cleanup or runtime tests."
+}

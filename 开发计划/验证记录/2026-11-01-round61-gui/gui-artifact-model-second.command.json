@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python3",
+    "/tmp/fc-round61-gui/evidence/verify-ci-artifact-gui-second.py",
+    "--self-test",
+    "--report",
+    "/tmp/fc-round61-gui/evidence/gui-artifact-model-second.json"
+  ],
+  "exitCode": 0,
+  "stdout": {
+    "bytes": 506,
+    "sha256": "65d56c54a3c0e1d7abbe47010f0aa576af4db79224ce55d4674e105c0f7de123"
+  },
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "scope": "Pure Python models only. First models did not test actual Cargo order; this checks corrected expected environment/metadata, not a linker or artifact."
+}

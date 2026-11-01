@@ -1,0 +1,175 @@
+--- /tmp/fc-round59-ci-evidence/verify-ci-artifact-first.py
++++ /tmp/fc-round61-gui/evidence/verify-ci-artifact-gui-first.py
+@@ -1,9 +1,9 @@
+ #!/usr/bin/env python3
+-"""R57 finite 20,000-source-path original-artifact audit. No downloads, executable execution or CI dispatch.
++"""R61 GUI-product/CUI-test finite 20,000-source-path original-artifact audit. No downloads, executable execution or CI dispatch.
+ 
+ Examples (all output paths must be fresh and under this script's evidence directory):
+-  python3 verify-ci-artifact-expanded-first.py --self-test --report <fresh-model-report.json>
+-  python3 verify-ci-artifact-expanded-first.py --source <40hex> --baseline Modern \
++  python3 verify-ci-artifact-gui-first.py --self-test --report <fresh-model-report.json>
++  python3 verify-ci-artifact-gui-first.py --source <40hex> --baseline Modern \
+     --zip <original.zip> --zip-bytes <bytes> --zip-sha256 <64hex> \
+     --run-id <id> --job-id <id> --artifact-id <id> \
+     --run-metadata <run.json> --job-metadata <jobs.json> \
+@@ -37,7 +37,7 @@
+ EV = Path(__file__).resolve().parent
+ ROOT = Path('/workspace/共享/Eliora/未来教室计划')
+ PREFIX = '开发计划/验证记录/'
+-CI_SHA256 = '0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd'
++CI_SHA256 = '43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3'
+ MAX_SOURCE_PATHS = 20000 # Source inventory only; artifact/ZIP and byte caps stay unchanged.
+ MAX_FILE = 64 * 1024 * 1024
+ MAX_HASHED = 256 * 1024 * 1024
+@@ -194,7 +194,8 @@
+     if baseline != 'Win7' or command in ('metadata', 'fmt'):
+         return [command] + args
+     need('--target' in args and args[args.index('--target')+1] == BASELINES['Win7']['target'], 'WIN7_TARGET')
+-    return ([command, '-Z', 'build-std'] if command == 'clippy' else ['-Z', 'build-std', command]) + args
++    result = ([command, '-Z', 'build-std'] if command == 'clippy' else ['-Z', 'build-std', command]) + args
++    return result + ['--','-C','link-arg=/SUBSYSTEM:WINDOWS,6.01'] if command == 'rustc' else result
+ 
+ def required_commands(baseline):
+     target = BASELINES[baseline]['target']
+@@ -210,7 +211,7 @@
+       'fmt': cargo_arguments('fmt', ['--all','--','--check'], baseline),
+       'architecture': ['scripts/check-architecture.py'],
+       'workspace-test-compile': cargo_arguments('test', ['-vv','--workspace','--all-targets','--release','--locked','--target',target,'--no-run','--message-format=json'], baseline),
+-      'product-compile': cargo_arguments('build', ['-vv','--release','--locked','--target',target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json'], baseline),
++      'product-compile': cargo_arguments('rustc', ['-vv','--release','--locked','--target',target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json'], baseline),
+       'clippy': cargo_arguments('clippy', ['-vv','--workspace','--all-targets','--release','--locked','--target',target,'--','-D','warnings'], baseline),
+     }
+     install = ['toolchain','install',BASELINES[baseline]['toolchain'],'--profile','minimal','--component','clippy','--component','rustfmt']
+@@ -228,18 +229,30 @@
+ def terminal_pass(result, conclusion):
+     return result.get('status') == 'COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN' and conclusion == 'success'
+ 
+-def pe_header(data, baseline):
++def expected_subsystem(role):
++    need(role in ('product', 'tests'), 'INVALID_PE_ROLE')
++    return 2 if role == 'product' else 3
++
++def producer_subsystem_matches(row, baseline):
++    return (row.get('role') in ('product', 'tests')
++        and type(row.get('pe_subsystem')) is int
++        and row['pe_subsystem'] == expected_subsystem(row['role'])
++        and row.get('pe_subsystem_version') == ('6.1' if baseline == 'Win7' else None))
++
++def pe_header(data, baseline, role):
+     need(len(data) >= 256 and data[:2] == b'MZ', 'PE_TRUNCATED_OR_BAD_DOS')
+     offset = struct.unpack_from('<I', data, 0x3c)[0]
+     need(offset <= len(data)-24 and data[offset:offset+4] == b'PE\0\0', 'PE_SIGNATURE')
+     machine, sections = struct.unpack_from('<HH', data, offset+4)
+     optlen = struct.unpack_from('<H', data, offset+20)[0]; opt = offset+24
+     need(machine == 0x14c and sections > 0 and optlen >= 96 and optlen <= len(data)-opt, 'PE_X86_OPTIONAL_BOUNDS')
+-    need(struct.unpack_from('<H', data, opt)[0] == 0x10b and struct.unpack_from('<H', data, opt+68)[0] == 3, 'PE32_CUI')
++    subsystem = expected_subsystem(role)
++    need(struct.unpack_from('<H', data, opt)[0] == 0x10b, 'PE32_MAGIC')
++    need(struct.unpack_from('<H', data, opt+68)[0] == subsystem, 'PE_ROLE_SUBSYSTEM')
+     version = list(struct.unpack_from('<HH', data, opt+48))
+     need(baseline != 'Win7' or version == [6,1], 'WIN7_SUBSYSTEM_NOT_6_1')
+     need(opt+optlen+40*sections <= len(data), 'PE_SECTION_TABLE_BOUNDS')
+-    return dict(machine='0x014c', optionalMagic='0x010b', subsystem=3, subsystemVersion=version)
++    return dict(machine='0x014c', optionalMagic='0x010b', subsystem=subsystem, subsystemVersion=version)
+ 
+ def unwrap_metadata(value):
+     if isinstance(value, dict) and 'structuredContent' in value:
+@@ -406,7 +419,7 @@
+             process.stdin.close();code=process.wait(timeout=30);need(code==0,'GIT_BATCH_EXIT')
+         self.check('all SHA subset exact blob or exact whole LF->CRLF only',direct+crlf==counts['actualShaSubset'])
+         counts.update(directGitBlobMatches=direct,exactFullLfToCrlfMatches=crlf)
+-        self.check('exact R57 CI helper pinned source',ci_source_matches(self.ci_source))
++        self.check('exact R61 GUI CI helper pinned source',ci_source_matches(self.ci_source))
+         source_text=self.ci_source.decode()
+         for literal in ["$env:CARGO_BUILD_JOBS = '2'",'[int]$TimeoutSeconds = 120',"$Baseline) 2400", "$Baseline) 1200", "$Baseline) 1500",'Get-FileHash -LiteralPath $path -Algorithm SHA256','if ($total -gt 256MB)']:
+             self.check('unchanged source contract '+literal,literal in source_text)
+@@ -488,7 +501,7 @@
+                 and row.get('role') in ['tests','product'] and re.fullmatch('[a-z0-9-]+',row.get('package','')) is not None
+                 and name==row['role']+'/'+row['package']+'/'+PurePosixPath(name).name)
+             safe_path(row.get('package_working_directory'))
+-            self.check('producer baseline subsystem claim '+name,row.get('pe_subsystem_version')==('6.1' if self.args.baseline=='Win7' else None))
++            self.check('producer exact role and baseline subsystem claim '+name,producer_subsystem_matches(row,self.args.baseline))
+         need(payload<=MAX_PAYLOAD,'EXECUTABLE_TOTAL_OVER_512MIB')
+         # Execute only a static inspection tool on PE bytes; never a compiled artifact.
+         pinned=self.pe_source;local=Path(self.args.repo)/'scripts/audit-pe.py'
+@@ -500,9 +513,9 @@
+         self.report['peInspector']=dict(command=self.args.objdump,versionSha256=digest(version),version=version.decode().splitlines()[0],parserSourceSha256=digest(pinned))
+         self.report['peInspectorRawVersion']=dict(bytes=len(version),sha256=digest(version))
+         for number,row in enumerate(rows):
+-            name=row['relative_path'];path=self.programs/name;data=path.read_bytes();header=pe_header(data,self.args.baseline)
++            name=row['relative_path'];path=self.programs/name;data=path.read_bytes();header=pe_header(data,self.args.baseline,row['role'])
+             inspect=subprocess.run([self.args.objdump,'-p',str(path)],check=True,capture_output=True,timeout=60)
+-            parsed=parse(inspect.stdout.decode('utf-8'))
++            parsed=parse(inspect.stdout.decode('utf-8'), 'gui' if row['role']=='product' else 'console')
+             need(not parsed['structural_errors'] and bool(parsed['imports']),'PE_IMPORT_PARSE_FAILED')
+             dlls=[v.lower() for v in parsed['imports']]
+             forbidden=[v for v in dlls if v.startswith(('vcruntime','msvcp','api-ms-win-crt','libgcc_s_','libstdc++','libwinpthread'))
+@@ -617,6 +630,13 @@
+         need(required_commands('Win7')['clippy'][:3]==['clippy','-Z','build-std'],'MODEL_CLIPPY')
+         need(required_commands('Win7')['workspace-test-compile'][:3]==['-Z','build-std','test'],'MODEL_TEST')
+         need('--no-run' in required_commands('Modern')['workspace-test-compile'],'MODEL_NO_RUN')
++        for baseline in ['Modern','Win7']:
++            target=BASELINES[baseline]['target']
++            args=['-vv','--release','--locked','--target',target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json']
++            expected=(['rustc']+args if baseline=='Modern' else ['-Z','build-std','rustc']+args+['--','-C','link-arg=/SUBSYSTEM:WINDOWS,6.01'])
++            need(required_commands(baseline)['product-compile']==expected,'MODEL_PRODUCT_RUSTC_FINAL_ARGS')
++            need('link-arg=/SUBSYSTEM:WINDOWS,6.01' not in required_commands(baseline)['workspace-test-compile']
++                and 'link-arg=/SUBSYSTEM:WINDOWS,6.01' not in required_commands(baseline)['clippy'],'MODEL_GUI_LEAKS_TO_TESTS')
+     test('baseline exact buildstd placement/no metadata fmt leakage',arguments)
+     # Real-sized pure source inventories, not a whole fake CI artifact. Both
+     # variants exceed the old cap in a different partition while total M stays
+@@ -666,12 +686,12 @@
+         reject('SHA_SUBSET_NOT_COMPLETE_PARTITION',lambda:validate_domains(source,oid,rs,changed,copy.deepcopy(changed)))
+     test('missing large partition tail/fullGit/SHA tail and old10000 summary rejected',tail_and_old_limit_rejection)
+     def frozen_source_pin():
+-        # The R57 immutable before/after fixtures are real original bytes. This
++        # R61 immutable before/after fixtures are real original bytes. This
+         # checks the SAME predicate as Audit.sources, not an invented hash map.
+-        before=(EV/'windows-msvc-ci.before.ps1').read_bytes()
+-        after=(EV/'implementation-after-first/scripts/windows-msvc-ci.ps1').read_bytes()
+-        need(digest(before)=='ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418','MODEL_OLD_CI_ORIGINAL_CHANGED')
+-        need(CI_SHA256=='0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd' and ci_source_matches(after),'MODEL_NEW_CI_PIN')
++        before=(EV/'bootstrap-ci-before-first/scripts/windows-msvc-ci.ps1').read_bytes()
++        after=(EV/'bootstrap-ci-after-first/scripts/windows-msvc-ci.ps1').read_bytes()
++        need(digest(before)=='0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd','MODEL_OLD_CI_ORIGINAL_CHANGED')
++        need(CI_SHA256=='43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3' and ci_source_matches(after),'MODEL_NEW_CI_PIN')
+         need(not ci_source_matches(before),'MODEL_OLD_CI_FALSELY_ADMITTED')
+     test('new exact CI source pin accepts actual new bytes and rejects actual old helper',frozen_source_pin)
+     def unrelated_caps_unchanged():
+@@ -688,11 +708,30 @@
+     test('CI failure can never become static PASS',lambda:(need(not terminal_pass(dict(status='FAILED_OR_INCOMPLETE'),'success'),'MODEL_FAILURE'),need(not terminal_pass(dict(status='COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN'),'failure'),'MODEL_OFFICIAL_FAIL')))
+     def pe_cases():
+         data=bytearray(512);data[:2]=b'MZ';struct.pack_into('<I',data,0x3c,64);data[64:68]=b'PE\0\0';struct.pack_into('<HH',data,68,0x14c,1);struct.pack_into('<H',data,84,224);struct.pack_into('<H',data,88,0x10b);struct.pack_into('<HH',data,136,6,1);struct.pack_into('<H',data,156,3)
+-        need(pe_header(data,'Win7')['subsystemVersion']==[6,1],'MODEL_PE')
+-        changed=bytearray(data);struct.pack_into('<H',changed,138,2)
+-        pe_header(changed,'Modern');reject('WIN7_SUBSYSTEM_NOT_6_1',lambda:pe_header(changed,'Win7'))
+-        reject('PE_TRUNCATED_OR_BAD_DOS',lambda:pe_header(data[:100],'Modern'))
+-    test('PE32 subsystem Modern independent/Win7 exact6.1/truncation',pe_cases)
++        need(pe_header(data,'Win7','tests')['subsystemVersion']==[6,1],'MODEL_PE')
++        gui=bytearray(data);struct.pack_into('<H',gui,156,2)
++        for baseline in ['Modern','Win7']:
++            need(pe_header(gui,baseline,'product')['subsystem']==2,'MODEL_GUI')
++            need(pe_header(data,baseline,'tests')['subsystem']==3,'MODEL_CUI')
++            reject('PE_ROLE_SUBSYSTEM',lambda:pe_header(gui,baseline,'tests'))
++            reject('PE_ROLE_SUBSYSTEM',lambda:pe_header(data,baseline,'product'))
++        reject('INVALID_PE_ROLE',lambda:pe_header(gui,'Win7','any'))
++        for role,original in [('product',gui),('tests',data)]:
++            changed=bytearray(original);struct.pack_into('<H',changed,138,2)
++            pe_header(changed,'Modern',role)
++            reject('WIN7_SUBSYSTEM_NOT_6_1',lambda:pe_header(changed,'Win7',role))
++            reject('PE_TRUNCATED_OR_BAD_DOS',lambda:pe_header(original[:100],'Modern',role))
++    test('actual PE bytes exact GUI product/CUI tests mutual rejection and Win7 exact6.1',pe_cases)
++    def producer_subsystem_cases():
++        for baseline in ['Modern','Win7']:
++            for role,subsystem in [('product',2),('tests',3)]:
++                row=dict(role=role,pe_subsystem=subsystem,pe_subsystem_version='6.1' if baseline=='Win7' else None)
++                need(producer_subsystem_matches(row,baseline),'MODEL_PRODUCER_PE_ROLE')
++                for wrong in [None,True,str(subsystem),5-subsystem]:
++                    need(not producer_subsystem_matches(dict(row,pe_subsystem=wrong),baseline),'MODEL_PRODUCER_FALSE_SUBSYSTEM')
++                if baseline=='Win7':
++                    need(not producer_subsystem_matches(dict(row,pe_subsystem_version='6.2'),baseline),'MODEL_PRODUCER_FALSE_VERSION')
++    test('producer pe_subsystem must be exact integer and match role plus version',producer_subsystem_cases)
+     def zip_cases():
+         a=zipfile.ZipInfo('a.json');a.file_size=1
+         need(zip_inventory([a])==['a.json'],'MODEL_ZIP')

@@ -8,6 +8,7 @@ mod com_task;
 pub mod http;
 #[cfg(windows)]
 mod native;
+pub mod startup;
 pub mod tcp_frontdoor;
 pub mod tls_frontdoor;
 #[cfg(windows)]

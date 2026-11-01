@@ -1,0 +1,43 @@
+{
+  "status": "PREPARED_NOT_DISPATCHED_NO_NETWORK_NO_COMPILE_NO_WINDOWS",
+  "purpose": "Next exactly-once dual MSVC after verified source and archive synchronization. New CI pin0cef and explicit source20000 limit; original R55 validator/CI input behavior retained in archived originals.",
+  "helpers": [
+    {
+      "original": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round55-ci/dispatch-ci-once.py",
+      "originalSha256": "179578ac1283897ef13af926adc3f5ee98a3debfc88821184580bdc5a4cca0c8",
+      "destination": "dispatch-ci-once.py",
+      "destinationSha256": "2445d3db5f7298e18823c68fa4a57ad777789a4318a7d595b8e98647294ba1a9",
+      "change": "Only owned evidence directory and report-label round identifier"
+    },
+    {
+      "original": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round55-ci/run-recorded.py",
+      "originalSha256": "630dddd4258ee29f136922d88d883f8f5241904ccd879c947d04f1432bd698fc",
+      "destination": "run-recorded.py",
+      "destinationSha256": "2005f0104838b82ab4936c89414c3da3257aa26e8ab46b5d03ca39353d161dd0",
+      "change": "Only owned evidence directory and report-label round identifier"
+    },
+    {
+      "original": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round55-ci/download-original.py",
+      "originalSha256": "c56583ef058095ec6916ad5b7898ed092b37bd125ea0ebd0539300a3f37ae602",
+      "destination": "download-original.py",
+      "destinationSha256": "c56583ef058095ec6916ad5b7898ed092b37bd125ea0ebd0539300a3f37ae602",
+      "change": "Exact unmodified helper bytes; EV uses own script directory"
+    },
+    {
+      "original": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round57-ci-inventory/verify-ci-artifact-expanded-first.py",
+      "originalSha256": "de7d52d7ca2c04a72b4dcd4de727fd1b1b2882259024e5bbc8b184007679fbb9",
+      "destination": "verify-ci-artifact-first.py",
+      "destinationSha256": "de7d52d7ca2c04a72b4dcd4de727fd1b1b2882259024e5bbc8b184007679fbb9",
+      "change": "Exact unmodified helper bytes; EV uses own script directory"
+    },
+    {
+      "original": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round55-ci/run-windows-runtime-selected-first.py",
+      "originalSha256": "3aeb47c437cee59b91563b15360c994d517fe96642d37f6b7e690b1abd6c9b03",
+      "destination": "run-windows-runtime-selected-first.py",
+      "destinationSha256": "469e0ba034446a5d82fc437550134bb95f6550e3eacdbe8f5270aae96892e403",
+      "change": "Only owned evidence directory and report-label round identifier"
+    }
+  ],
+  "privateKeyContentsRead": false,
+  "dispatchesSent": 0
+}

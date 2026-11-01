@@ -27,14 +27,18 @@ UPDATE_SENSITIVE_APIS = {
 }
 
 
-def parse_objdump(output: str) -> dict:
+def parse_objdump(output: str, expected_subsystem: str = "gui") -> dict:
+    if expected_subsystem not in {"gui", "console"}:
+        raise ValueError("Expected subsystem must be gui or console.")
     errors = []
     if not re.search(r"file format\s+pei-i386\b", output):
         errors.append("Expected an x86 PE image (objdump file format pei-i386).")
     if not re.search(r"^\s*Magic\s+010b\s+\(PE32\)", output, re.MULTILINE):
         errors.append("Expected PE32 optional header; PE32+ is not accepted.")
-    if not re.search(r"^\s*Subsystem\s+0*3\s+\(Windows CUI\)", output, re.MULTILINE):
-        errors.append("Expected Windows console subsystem (CUI = 3).")
+    subsystem_code, subsystem_name = (2, "Windows GUI") if expected_subsystem == "gui" else (3, "Windows CUI")
+    subsystem_pattern = rf"^\s*Subsystem\s+0*{subsystem_code}\s+\({subsystem_name}\)\s*$"
+    if not re.search(subsystem_pattern, output, re.MULTILINE):
+        errors.append(f"Expected {subsystem_name} subsystem ({subsystem_code}).")
     imports: dict[str, set[str]] = {}
     dll = None
     for line in output.splitlines():
@@ -65,7 +69,8 @@ def parse_objdump(output: str) -> dict:
     return {
         "status": "NOT_VALIDATED",
         "format": "PE32-x86" if not errors else "INVALID_PROBE_FORMAT",
-        "subsystem": "Windows CUI" if not errors else "UNCONFIRMED",
+        "subsystem": subsystem_name if not errors else "UNCONFIRMED",
+        "expected_subsystem": expected_subsystem,
         "structural_errors": errors,
         "imports": {name: sorted(symbols) for name, symbols in sorted(imports.items())},
         "risks": risks,
@@ -77,11 +82,11 @@ def parse_objdump(output: str) -> dict:
     }
 
 
-def audit_pe(executable: Path, objdump: str = "i686-w64-mingw32-objdump") -> dict:
+def audit_pe(executable: Path, objdump: str = "i686-w64-mingw32-objdump", expected_subsystem: str = "gui") -> dict:
     if not executable.is_file():
         raise ValueError(f"Executable does not exist: {executable}")
     inspected = subprocess.run([objdump, "-p", str(executable)], check=True, capture_output=True, text=True, timeout=60)
-    result = parse_objdump(inspected.stdout)
+    result = parse_objdump(inspected.stdout, expected_subsystem)
     version = subprocess.run([objdump, "--version"], check=True, capture_output=True, text=True, timeout=10)
     result["inspector"] = version.stdout.splitlines()[0]
     return result
@@ -91,9 +96,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exe", type=Path, required=True, help="Built probe executable to inspect; never executed.")
     parser.add_argument("--objdump", default="i686-w64-mingw32-objdump")
+    parser.add_argument("--expected-subsystem", choices=("gui", "console"), default="gui",
+                        help="Normal application is GUI; select console only for test executables.")
     args = parser.parse_args()
     try:
-        report = audit_pe(args.exe.resolve(), args.objdump)
+        report = audit_pe(args.exe.resolve(), args.objdump, args.expected_subsystem)
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         print(f"PE audit failed: {error}", file=sys.stderr)
         return 2

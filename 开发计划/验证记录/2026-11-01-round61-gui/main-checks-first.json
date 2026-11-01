@@ -1,0 +1,66 @@
+{
+  "status": "PASS",
+  "commands": [
+    {
+      "label": "fmt",
+      "args": [
+        "cargo",
+        "+1.97.1",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "path": "/tmp/fc-round61-gui/evidence/main-fmt-first.stdout.log"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "path": "/tmp/fc-round61-gui/evidence/main-fmt-first.stderr.log"
+      }
+    },
+    {
+      "label": "architecture",
+      "args": [
+        "python3",
+        "-B",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 71,
+        "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+        "path": "/tmp/fc-round61-gui/evidence/main-architecture-first.stdout.log"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "path": "/tmp/fc-round61-gui/evidence/main-architecture-first.stderr.log"
+      }
+    },
+    {
+      "label": "diffcheck",
+      "args": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "path": "/tmp/fc-round61-gui/evidence/main-diffcheck-first.stdout.log"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "path": "/tmp/fc-round61-gui/evidence/main-diffcheck-first.stderr.log"
+      }
+    }
+  ],
+  "scope": "Actual integrated main format/12crate architecture/diff only, no rebuild or runtime inference."
+}

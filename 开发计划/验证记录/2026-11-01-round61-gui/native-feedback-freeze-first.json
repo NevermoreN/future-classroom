@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "status": "FROZEN_NATIVE_FEEDBACK_SOURCE_ONLY_BUILD_AND_RUNTIME_NOT_RUN",
+  "base": "6082dd0173a0b8884c27ac78fda5054275f99f14",
+  "worktree": "/tmp/fc-round61-gui/worktree",
+  "recordedUtc": "2026-11-01T04:25:02.160025+00:00",
+  "ownedFiles": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "bytes": 862,
+      "sha256": "696c61b1aa08a56ed15e64412230c14b18e6ac1ac91aebd08a492d2e8cfb2677",
+      "immutableSnapshot": "/tmp/fc-round61-gui/evidence/native-feedback-after-first/crates/fc-windows/src/lib.rs"
+    },
+    {
+      "path": "crates/fc-windows/src/startup.rs",
+      "bytes": 4373,
+      "sha256": "23d6fa454463fd70a9327b9432d3a7b2303506b8da0a5e054c48e173e2c9b6ad",
+      "immutableSnapshot": "/tmp/fc-round61-gui/evidence/native-feedback-after-first/crates/fc-windows/src/startup.rs"
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round61-gui/evidence/native-feedback-first.diff",
+    "bytes": 4772,
+    "sha256": "68886a08aa3a1d60ae93135feb8928ecc6f654e0f4908a84c5897fed449a25f7"
+  },
+  "originalLibBefore": {
+    "path": "/tmp/fc-round61-gui/evidence/native-feedback-before-first/crates/fc-windows/src/lib.rs",
+    "bytes": 845,
+    "sha256": "4963e6a462e1d9d3dd526e94ebf93d574fede686399aca5505cba49e5efe4919"
+  },
+  "publicApi": {
+    "path": "fc_windows::startup::show_startup_failure",
+    "signature": "#[cfg(windows)] pub fn show_startup_failure(message: &str) -> windows::core::Result<()>",
+    "onFailure": "MessageBoxW result0 immediately returns Error::from_thread(); success returns Ok. Caller keeps original startup failure exit code.",
+    "nativeContract": "One synchronous unowned MessageBoxW, fixed未来教室 title and MB_OK|MB_ICONERROR only. No TOPMOST, SETFOREGROUND, console attach/allocate, standard handle manipulation, pool/thread or persistent native owner. Nothing runs at module initialization.",
+    "callerPolicy": "Bootstrap decides manual[] and sole--repair error invocation; autostart, diagnostic/probe and invalid arguments must remain noninteractive. Classification owned by separate agent."
+  },
+  "encoding": {
+    "maxUtf16ContentUnits": 2048,
+    "terminatorUnits": 1,
+    "allocation": "One Vec requested capacity2049 u16, no full-message copy/count or unbounded scan. Stops at first overflowing scalar.",
+    "nulPolicy": "Embedded U+0000 becomes visible U+2400 so later text is not silently hidden.",
+    "overflowPolicy": "Remove whole final scalar(s), preserving surrogate pairs, then append fixed…（已截断） suffix within same bound.",
+    "emptyPolicy": "Fixed Chinese startup-failed instruction."
+  },
+  "regressionSource": {
+    "tests": 4,
+    "coverage": [
+      "Chinese and supplementary character roundtrip",
+      "EmbeddedNUL cannot hide following text and empty input yields readable fallback",
+      "Exact2048unit boundary retained; overflow explicit and bounded",
+      "Supplementary-character truncation across odd/even boundary decodes without partial surrogate or replacement character"
+    ],
+    "scope": "Pure encoding only, no UI created. Test sources added, NOT_RUN."
+  },
+  "checks": [
+    {
+      "name": "native-feedback-fmt-check-first",
+      "argv": [
+        "rustup",
+        "run",
+        "1.97.1",
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "--check",
+        "crates/fc-windows/src/lib.rs",
+        "crates/fc-windows/src/startup.rs"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.023643268970772624,
+      "stdout": {
+        "path": "/tmp/fc-round61-gui/evidence/native-feedback-fmt-check-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round61-gui/evidence/native-feedback-fmt-check-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "native-feedback-diff-check-first",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-windows/src/lib.rs",
+        "crates/fc-windows/src/startup.rs"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.011214233934879303,
+      "stdout": {
+        "path": "/tmp/fc-round61-gui/evidence/native-feedback-diff-check-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round61-gui/evidence/native-feedback-diff-check-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "localSdkInspection": "Read existing windows0.62.2 MessageBoxW generated signature: Option<HWND>, PCWSTR params, MESSAGEBOX_STYLE -> MESSAGEBOX_RESULT. Existing Win32_UI_WindowsAndMessaging Cargo feature already enabled; no dependency changes.",
+  "validation": {
+    "Cargo": "NOT_RUN_PARENT_OWNS_BUILD",
+    "HostTests": "NOT_RUN",
+    "Windows": "NOT_RUN",
+    "MessageBoxVisibleOrFailureInjection": "NOT_RUN",
+    "NativeProbeAdded": false,
+    "GitCommitOrPush": false
+  },
+  "limitations": [
+    "Modal interaction can activate its own normal message box according to normal Windows behavior; no forced-topmost or explicit foreground flag.",
+    "No claim of automated dialog dismissal, screenshots, all-platform visible QA or actual native failure handling until parent validation.",
+    "Unspecified or unbounded native MessageBox duration is intentional user acknowledgement, not a background worker deadline; only explicit manual error caller may choose it.",
+    "No product startup/CUI-to-GUI routing or CI change owned by this task."
+  ]
+}

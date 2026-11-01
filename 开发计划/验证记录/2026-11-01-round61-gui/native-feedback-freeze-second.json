@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "status": "SECOND_FROZEN_SOURCE_ONLY_CONSOLE_QUERY_NOT_RUN",
+  "base": "6082dd0173a0b8884c27ac78fda5054275f99f14",
+  "worktree": "/tmp/fc-round61-gui/worktree",
+  "recordedUtc": "2026-11-01T04:26:28.637535+00:00",
+  "priorFreezePreserved": {
+    "path": "/tmp/fc-round61-gui/evidence/native-feedback-freeze-first.json",
+    "bytes": 5824,
+    "sha256": "7fd95157b09aa191af88cfbbe434481ddd50a6f291771ad459b9b5992c684f3e"
+  },
+  "ownedFiles": [
+    {
+      "path": "crates/fc-windows/src/startup.rs",
+      "bytes": 4998,
+      "sha256": "2acedef923e5d4a6a5269ef082f7a230928fa9f11a8b9c5f69c6b671614a3903",
+      "immutableSnapshot": "/tmp/fc-round61-gui/evidence/native-feedback-after-second/crates/fc-windows/src/startup.rs"
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1532,
+      "sha256": "b54f0c7b47107edb9a01eca9e35aec972fe12cd44cf53b6968d53af7e710cff8",
+      "immutableSnapshot": "/tmp/fc-round61-gui/evidence/native-feedback-after-second/crates/fc-windows/Cargo.toml"
+    },
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "bytes": 862,
+      "sha256": "696c61b1aa08a56ed15e64412230c14b18e6ac1ac91aebd08a492d2e8cfb2677",
+      "immutableSnapshot": "/tmp/fc-round61-gui/evidence/native-feedback-after-second/crates/fc-windows/src/lib.rs"
+    }
+  ],
+  "deltaFromFirst": {
+    "path": "/tmp/fc-round61-gui/evidence/native-feedback-first-to-second.diff",
+    "bytes": 1861,
+    "sha256": "cbd8c24f362ddd53537a8e6d83315a9f5ef932240c5d8523db5c723238cdc6db"
+  },
+  "publicApiAddition": "#[cfg(windows)] pub fn fc_windows::startup::console_window_present() -> bool",
+  "implementation": "Exactly one read-only GetConsoleWindow call; return whether borrowed HWND pointer is non-null. No owning guard, allocation, logging, thread or handle operation.",
+  "cargoChange": "Only Win32_System_Console enabled in existing windows=0.62.2 dependency; no crate/dependency-edge addition.",
+  "firstVersionRetained": "show_startup_failure, encoding, four pure tests and lib pub mod declaration unchanged.",
+  "officialSource": {
+    "title": "GetConsoleWindow function",
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolewindow",
+    "readOnUtc": "2026-11-01T04:26:28.637687+00:00",
+    "facts": "Returns current process associated console HWND or NULL; available from Windows2000 desktop, Kernel32. Pseudoconsole may return message-only HWND not displayed locally. Microsoft cautions remoting/session-specific behavior.",
+    "observedLines": [
+      33,
+      45,
+      51,
+      52,
+      57,
+      60,
+      61
+    ]
+  },
+  "checks": [
+    {
+      "name": "native-feedback-fmt-check-second",
+      "argv": [
+        "rustup",
+        "run",
+        "1.97.1",
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "--check",
+        "crates/fc-windows/src/startup.rs"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.018344179028645158,
+      "stdout": {
+        "path": "/tmp/fc-round61-gui/evidence/native-feedback-fmt-check-second.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round61-gui/evidence/native-feedback-fmt-check-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "native-feedback-diff-check-second",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-windows/src/startup.rs",
+        "crates/fc-windows/Cargo.toml",
+        "crates/fc-windows/src/lib.rs"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006898094899952412,
+      "stdout": {
+        "path": "/tmp/fc-round61-gui/evidence/native-feedback-diff-check-second.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round61-gui/evidence/native-feedback-diff-check-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "validation": {
+    "Cargo": "NOT_RUN_PARENT_ONLY",
+    "Windows": "NOT_RUN",
+    "UiProbeAdded": false,
+    "mirrorTestAdded": false,
+    "GitCommitPush": false
+  },
+  "boundaries": [
+    "Caller may add field to existing --system-probe; this task adds no CLI or bootstrap changes.",
+    "False only means GetConsoleWindow returned NULL at that instant, not proof every console association/output channel or remote transport is absent.",
+    "True does not prove a visible console; pseudoconsole HWND may be message-only.",
+    "No AttachConsole/AllocConsole/FreeConsole/SetStdHandle or inherited standard-handle changes.",
+    "No claim of real interactive login, visible Seewo/PPT experience, or actual GUI subsystem validation until parent executes its tests."
+  ]
+}

@@ -1,5 +1,6 @@
 //! Composition root. This milestone exposes isolated diagnostics, not unfinished management APIs.
 #![forbid(unsafe_code)]
+#![cfg_attr(all(windows, not(test)), windows_subsystem = "windows")]
 #[cfg(windows)]
 mod application;
 #[cfg(windows)]
@@ -24,14 +25,32 @@ use std::{
 };
 
 fn main() -> ExitCode {
+    #[cfg(windows)]
+    let manual_feedback = manual_startup_feedback(std::env::args_os().skip(1));
     match run() {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("FutureClassroom: {e}");
+            #[cfg(windows)]
+            if manual_feedback {
+                // Error feedback cannot make a failed startup succeed. Only a
+                // manual GUI/repair entry may show it; probes and logon never do.
+                let _ = fc_windows::startup::show_startup_failure(&e);
+            }
             ExitCode::FAILURE
         }
     }
 }
+#[cfg(any(windows, test))]
+fn manual_startup_feedback(args: impl IntoIterator<Item = std::ffi::OsString>) -> bool {
+    let mut args = args.into_iter();
+    match (args.next(), args.next()) {
+        (None, None) => true,
+        (Some(flag), None) => flag == "--repair",
+        _ => false,
+    }
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
@@ -347,7 +366,7 @@ fn run() -> Result<(), String> {
             #[cfg(windows)]
             {
                 let report = fc_windows::system::probe().map_err(debug_error)?;
-                println!("system_discovery=PASS program_data_absolute={} user_sid_resolved={} thread_cpu_clock=PASS autostart_readback={:?}", report.project_data_root.is_absolute(), !report.deployment_user_sid.is_empty(), report.autostart);
+                println!("system_discovery=PASS program_data_absolute={} user_sid_resolved={} thread_cpu_clock=PASS autostart_readback={:?} console_window_present={}", report.project_data_root.is_absolute(), !report.deployment_user_sid.is_empty(), report.autostart, fc_windows::startup::console_window_present());
                 Ok(())
             }
             #[cfg(not(windows))]
@@ -532,4 +551,35 @@ fn self_check() -> Result<(), String> {
     root.cleanup()?;
     println!("isolated_test_cleanup=PASS");
     Ok(())
+}
+
+#[cfg(test)]
+mod startup_feedback_tests {
+    use super::manual_startup_feedback;
+    use std::ffi::OsString;
+
+    #[test]
+    fn only_exact_manual_gui_or_repair_can_request_error_feedback() {
+        let classify = |args: &[&str]| {
+            manual_startup_feedback(args.iter().map(|value| OsString::from(*value)))
+        };
+        assert!(classify(&[]));
+        assert!(classify(&["--repair"]));
+        for args in [
+            vec!["--autostart"],
+            vec!["--self-check"],
+            vec!["--version"],
+            vec!["--public-desktop-probe"],
+            vec!["--tls-business-probe", "public-ref", "owned-marker"],
+            vec!["--repair", "extra"],
+            vec!["--repair-probe"],
+            vec!["--unknown"],
+            vec![""],
+        ] {
+            assert!(
+                !classify(&args),
+                "unexpected interactive failure mode {args:?}"
+            );
+        }
+    }
 }

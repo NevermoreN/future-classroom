@@ -2,6 +2,8 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
 状态：NOT_VALIDATED。此包包含可运行原生管理工作台，完整未来教室应用尚未交付。
 
 直接运行 fc-bootstrap.exe 打开工作台；--autostart 保持锁定并隐藏窗口。
+正常程序使用 Windows GUI 子系统，启动不创建控制台。手动打开工作台或 --repair
+失败时显示错误提示；--autostart 和诊断命令不弹该提示，不附加或新建控制台。
 首次运行在本机 ProgramData 的 FutureClassroom 专属目录准备保护ACL、部署标记、
 数据库和当前Windows用户的DPAPI密钥。请自行设置应用主管理员口令；无默认密码。
 支持学校/班级、基础科目、账号创建/编辑/停用、多班级科目任教范围、首次改密、恢复码、今日作业，
@@ -30,20 +32,23 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
 确认会完整替换教学集合，未映射目标目录保留但其原教学数据也被替换；不是部分合并。
 全部映射预检通过后，还须分别确认教学替换和目标安全资料边界，等待实际关闭及冷切换，重新启动登录。
 
-在 PowerShell 中解压后运行：
-  .\fc-bootstrap.exe --version
-  .\fc-bootstrap.exe --self-check
-  .\fc-bootstrap.exe --system-probe
-  .\fc-bootstrap.exe --host-probe 2
-  .\fc-bootstrap.exe --application-probe
-  .\fc-bootstrap.exe --reinitialization-probe
-  .\fc-bootstrap.exe --migration-probe
-  .\fc-bootstrap.exe --subject-visuals-probe
-  .\fc-bootstrap.exe --public-desktop-probe
-  .\fc-bootstrap.exe --materials-probe
-  .\fc-bootstrap.exe --audio-silent-probe
-  .\fc-bootstrap.exe --web-pairing-probe
-  .\fc-bootstrap.exe --native-probe 30
+在 PowerShell 中解压后运行诊断（显式管道接收输出并等待程序结束）：
+  .\fc-bootstrap.exe --version | Out-Host
+  .\fc-bootstrap.exe --self-check | Out-Host
+  .\fc-bootstrap.exe --system-probe | Out-Host
+  .\fc-bootstrap.exe --host-probe 2 | Out-Host
+  .\fc-bootstrap.exe --application-probe | Out-Host
+  .\fc-bootstrap.exe --reinitialization-probe | Out-Host
+  .\fc-bootstrap.exe --migration-probe | Out-Host
+  .\fc-bootstrap.exe --subject-visuals-probe | Out-Host
+  .\fc-bootstrap.exe --public-desktop-probe | Out-Host
+  .\fc-bootstrap.exe --materials-probe | Out-Host
+  .\fc-bootstrap.exe --audio-silent-probe | Out-Host
+  .\fc-bootstrap.exe --web-pairing-probe | Out-Host
+  .\fc-bootstrap.exe --native-probe 30 | Out-Host
+每条命令结束后读取 $LASTEXITCODE，0为该命令成功，非0为失败。GUI程序直接从
+命令提示符启动时不能依赖控制台输出或自动等待；自动化须显式继承输出管道/文件，
+等待实际进程退出并核对退出码。无标准句柄时不为诊断自动创建控制台。
 
 --self-check 在隔离临时目录中验证 SQLite 提交、权威快照发布、命令幂等、
 Windows 随机源、PBKDF2 与目录互斥；还验证DPAPI密钥与SQLite重开、

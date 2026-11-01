@@ -1,0 +1,24 @@
+{
+  "status": "COUNTEREXAMPLE_FINAL_TARGET_ARGUMENT_DOES_NOT_OVERRIDE_RUSTFLAGS",
+  "scope": "Actual Rust1.97.1 Cargo/GNU scratch compilation, no EXE execution; disproves assuming CLI extra args follow RUSTFLAGS. Does not claim an MSVC candidate was actually run or failed. Product source first GNU build has no globalCONSOLE override and is a separate artifact.",
+  "compilerLog": {
+    "path": "/tmp/fc-round61-gui/evidence/cargo-final-flag-order-first.stderr.log",
+    "bytes": 1809,
+    "sha256": "6c2b328e2aec84d603809569a4e36e005f9c115c39e59515d34d3ee930e2df40"
+  },
+  "program": {
+    "path": "/tmp/fc-round61-gui/link-order-target/i686-pc-windows-gnu/release/fc-gui-link-order-scratch.exe",
+    "bytes": 1249248,
+    "sha256": "0073cd900f2d364f220c5ba0a9ebaeaa54aaf74b186ee0569550db4d57b177f1",
+    "subsystem": 3,
+    "subsystemVersion": [
+      6,
+      0
+    ]
+  },
+  "ordering": {
+    "guiArgumentPosition": 1606,
+    "environmentConsoleArgumentPosition": 1708
+  },
+  "nextAction": "Product phase RUSTFLAGS must itself choose GUI; test phase retains CUI; final actual PE role check remains mandatory."
+}

@@ -1,0 +1,73 @@
+{
+  "stage": "R61 GUI product artifact verifier adaptation",
+  "status": "FROZEN_MODELS_PASS_ACTUAL_ARTIFACT_NOT_RUN",
+  "original": {
+    "path": "/tmp/fc-round59-ci-evidence/verify-ci-artifact-first.py",
+    "bytes": 61502,
+    "sha256": "de7d52d7ca2c04a72b4dcd4de727fd1b1b2882259024e5bbc8b184007679fbb9",
+    "unchangedAfter": true
+  },
+  "adapted": {
+    "path": "/tmp/fc-round61-gui/evidence/verify-ci-artifact-gui-first.py",
+    "bytes": 64386,
+    "sha256": "7d67265ae31a6684fe87d026a5bedd70fd8be171d3308d3b817c10f332b2c188"
+  },
+  "patch": {
+    "path": "verify-ci-artifact-gui-first.patch",
+    "bytes": 13886,
+    "sha256": "862bfb69d082de86c6adda729bed033b792171fda30dbbbe4a3f661569ea302f"
+  },
+  "sourcePin": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3",
+  "scope": [
+    "normal product exact cargo rustc, including Win7 final -- -C link-arg=/SUBSYSTEM:WINDOWS,6.01",
+    "actual product GUI2 versus tests CUI3; independent raw PE32 plus producer exact integer pe_subsystem",
+    "Win7 original subsystem6.1 retained for every role; Modern version stays independently reported",
+    "pinned source fixture moves to immutable R61 before/after bytes; old CI source remains rejected",
+    "objdump parser explicitly selects gui/product or console/tests"
+  ],
+  "astComparison": {
+    "changedFunctions": [
+      "Audit.pe_and_associations",
+      "Audit.sources",
+      "cargo_arguments",
+      "pe_header",
+      "required_commands",
+      "self_test"
+    ],
+    "addedFunctions": [
+      "expected_subsystem",
+      "producer_subsystem_matches"
+    ],
+    "otherOriginalFunctionsAndMethodsByteSemanticAstUnchanged": true,
+    "officialZipCommandsCleanupFailureAndOutputPathsUnchanged": true
+  },
+  "limits": {
+    "sourcePaths": 20000,
+    "genericRowsAndZipMembers": 10000,
+    "perSourceFileBytes": 67108864,
+    "sourceAggregateBytes": 268435456,
+    "metadataAndPerCommandStreamBytes": 16777216,
+    "totalExecutableBytes": 536870912,
+    "deadlinesAndCrtRules": "UNCHANGED"
+  },
+  "actualLocalModel": {
+    "commandRecord": "gui-artifact-model-first.command.json",
+    "exitCode": 0,
+    "groups": 25,
+    "status": "PASS_MODEL_ONLY_NO_ARTIFACT",
+    "reportSha256": "2826ba12d739b2b760f34b48804b5a415b455744ff83935900ee8777374f392f",
+    "originalStdout": "gui-artifact-model-first.stdout.log",
+    "originalStderr": "gui-artifact-model-first.stderr.log",
+    "expectedNegativeFailureReport": "gui-artifact-model-first.phase-negative.json",
+    "negativeStatus": "FAIL (expected synthetic original CI failure, not promoted)"
+  },
+  "actualArtifact": "NOT_RUN; future source commit required via --source; --repo supports chosen repository, default current main",
+  "notRun": [
+    "Cargo",
+    "Windows/SSH",
+    "network",
+    "CI",
+    "actual artifact verification",
+    "worktree source modification"
+  ]
+}

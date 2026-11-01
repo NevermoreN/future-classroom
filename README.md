@@ -43,19 +43,21 @@ cargo run -p fc-bootstrap --locked -- --self-check
 直接运行新构建的 `fc-bootstrap.exe` 打开工作台；`--autostart` 保持锁定并隐藏窗口。首次运行会在本机 ProgramData 的项目专属目录准备保护ACL、部署标记、数据库和当前用户DPAPI密钥，需自行设置应用主管理员口令。缺失或损坏的既有数据不会重新开放首次注册。无恢复码且决定放弃全部本机资料时，可在登录/恢复/修复页进入清除向导，原程序正常关闭后独立启动；也可在原程序关闭后运行 `--repair`。须两项明确确认清除，完成后重启正常程序设置新学校和主管理员；部署内导出备份一并清除，部署外另存副本和Windows设置不被修改。应用角色和Windows账号权限彼此独立。
 
 ```powershell
-.\fc-bootstrap.exe --self-check
-.\fc-bootstrap.exe --system-probe
-.\fc-bootstrap.exe --host-probe 2
-.\fc-bootstrap.exe --application-probe
-.\fc-bootstrap.exe --autostart-probe
-.\fc-bootstrap.exe --subject-visuals-probe
-.\fc-bootstrap.exe --public-desktop-probe
-.\fc-bootstrap.exe --reinitialization-probe
-.\fc-bootstrap.exe --migration-probe
-.\fc-bootstrap.exe --materials-probe
-.\fc-bootstrap.exe --audio-silent-probe
-.\fc-bootstrap.exe --native-probe 30
+.\fc-bootstrap.exe --self-check | Out-Host
+.\fc-bootstrap.exe --system-probe | Out-Host
+.\fc-bootstrap.exe --host-probe 2 | Out-Host
+.\fc-bootstrap.exe --application-probe | Out-Host
+.\fc-bootstrap.exe --autostart-probe | Out-Host
+.\fc-bootstrap.exe --subject-visuals-probe | Out-Host
+.\fc-bootstrap.exe --public-desktop-probe | Out-Host
+.\fc-bootstrap.exe --reinitialization-probe | Out-Host
+.\fc-bootstrap.exe --migration-probe | Out-Host
+.\fc-bootstrap.exe --materials-probe | Out-Host
+.\fc-bootstrap.exe --audio-silent-probe | Out-Host
+.\fc-bootstrap.exe --native-probe 30 | Out-Host
 ```
+
+新正常程序使用Windows GUI子系统，不创建控制台；测试EXE保留CUI。上述PowerShell管道显式接收输出并等待实际退出，结束后检查 `$LASTEXITCODE`。自动化也须提供继承管道/文件并等待进程，不依赖GUI程序直接命令行启动时的输出或等待行为。仅手动无参数启动和 `--repair` 失败显示原生错误提示，自启动和诊断不弹此提示。当前构建/运行证据与真实登录验收范围以实施记录为准。
 
 诊断命令只写独立临时数据并清理；`--application-probe` 用隐藏原生控件执行真实工作台闭环，并验证课表网格、双表差异/历史恢复、独立校历、显示设置保存重读、锁定草稿、临时换课/恢复/旧CAS拒绝、退出保护及真实事实到原生离屏场景；Office校验交给同一双worker池，不访问正式ProgramData。绘制探针限时运行、透明穿透、不激活窗口，仅在确认桌面前台时显示。`rendered_frames=0` 表示没有取得桌面可见绘制证据。`--materials-probe`已通过真实双worker/SQLite/文件校验/固定副本/私有系统关联接收器闭环，使用合成文件和临时关联，不调用日常软件或更改默认关联。本地主管理员可查看并清理已到期未占用副本。`--audio-silent-probe`只生成全零PCM，验证真实文件/原Web会话/SQLite/WinMM自然与取消释放链，并检查正常按需音频域的本地锁定独立性、紧急停止、后续显式任务与关闭顺序；不录音、不改音量或前台，教师管理服务仍待接入。
 

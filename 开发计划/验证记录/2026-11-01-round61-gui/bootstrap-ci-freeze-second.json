@@ -1,0 +1,33 @@
+{
+  "stage": "R61 product environment correction",
+  "status": "SOURCE_FROZEN_POWERSHELL_AND_LINKER_VERIFICATION_PENDING",
+  "files": [
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 52758,
+      "sha256": "eac2e9e42cfd073aca58584e8dbc6d9cefa864a5b84711b27e0ab83d43689a7b",
+      "beforeSha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3"
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 14248,
+      "sha256": "70414b86bba595f323b84af9404bb039af0c1c50f0786cd5e22fcec67a087259",
+      "beforeSha256": "092d0ec685e4a5f51730e2776c53a81d89c6be8b622911cf34aae4325280b20f"
+    }
+  ],
+  "mainUnchangedFromFirst": true,
+  "reason": "Root actual minimal Cargo linker experiment disproved first final-tail override: environment CONSOLE flags occur later. Original first model pass proves only that old source contract, not actual linker behavior. First reports/source retained.",
+  "correction": "Get-ProductRustFlags supplies Win7 staticCRT+WINDOWS6.01 only for product-compile. Capture original RUSTFLAGS, set product flags and before-product snapshot, run original1200sec single cargo rustc, finally restore original flags and after-product snapshot before original clippy. No conflicting trailing subsystem arg. Modern product flags unchanged. run-start/result disclose default and product_rustflags/scope.",
+  "preserved": [
+    "actual GUI2 product / CUI3 tests and Win7 subsystem6.1 mandatory",
+    "Win7 tests/clippy/dependencies default CONSOLE6.01 except unavoidable product-only deps rebuild",
+    "2400/1200/1500s and overall135/105minute budgets",
+    "16MiB log cap, physical child cleanup, hosted identity and original CRT rejection"
+  ],
+  "purePsTests": "9 source/helper groups prepared: fourth extracted pure product-flags helper and actual containing try/finally AST/source order checks. NOT_RUN by editor; no product/linker claim.",
+  "actualLocalChecks": {
+    "diffCheckExitCode": 0
+  },
+  "noCargoWindowsCi": true,
+  "firstFreezeUnchanged": true
+}

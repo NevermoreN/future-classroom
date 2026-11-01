@@ -1,0 +1,102 @@
+--- first/verify-ci-artifact-gui-first.py
++++ second/verify-ci-artifact-gui-second.py
+@@ -2,8 +2,8 @@
+ """R61 GUI-product/CUI-test finite 20,000-source-path original-artifact audit. No downloads, executable execution or CI dispatch.
+ 
+ Examples (all output paths must be fresh and under this script's evidence directory):
+-  python3 verify-ci-artifact-gui-first.py --self-test --report <fresh-model-report.json>
+-  python3 verify-ci-artifact-gui-first.py --source <40hex> --baseline Modern \
++  python3 verify-ci-artifact-gui-second.py --self-test --report <fresh-model-report.json>
++  python3 verify-ci-artifact-gui-second.py --source <40hex> --baseline Modern \
+     --zip <original.zip> --zip-bytes <bytes> --zip-sha256 <64hex> \
+     --run-id <id> --job-id <id> --artifact-id <id> \
+     --run-metadata <run.json> --job-metadata <jobs.json> \
+@@ -37,7 +37,7 @@
+ EV = Path(__file__).resolve().parent
+ ROOT = Path('/workspace/共享/Eliora/未来教室计划')
+ PREFIX = '开发计划/验证记录/'
+-CI_SHA256 = '43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3'
++CI_SHA256 = 'eac2e9e42cfd073aca58584e8dbc6d9cefa864a5b84711b27e0ab83d43689a7b'
+ MAX_SOURCE_PATHS = 20000 # Source inventory only; artifact/ZIP and byte caps stay unchanged.
+ MAX_FILE = 64 * 1024 * 1024
+ MAX_HASHED = 256 * 1024 * 1024
+@@ -195,7 +195,16 @@
+         return [command] + args
+     need('--target' in args and args[args.index('--target')+1] == BASELINES['Win7']['target'], 'WIN7_TARGET')
+     result = ([command, '-Z', 'build-std'] if command == 'clippy' else ['-Z', 'build-std', command]) + args
+-    return result + ['--','-C','link-arg=/SUBSYSTEM:WINDOWS,6.01'] if command == 'rustc' else result
++    return result
++
++def product_rustflags(baseline):
++    return ('-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:WINDOWS,6.01'
++        if baseline == 'Win7' else BASELINES[baseline]['flags'])
++
++def compiler_flag_phases(baseline):
++    default = BASELINES[baseline]['flags']
++    return {'before-vs':default, 'after-vs':default, 'before-cargo':default,
++        'before-product':product_rustflags(baseline), 'after-product':default}
+ 
+ def required_commands(baseline):
+     target = BASELINES[baseline]['target']
+@@ -437,6 +446,10 @@
+             self.check('fixed baseline target/toolchain '+('result' if obj is r else 'start'),all(obj.get(k)==c[k] for k in ['toolchain','target']) and obj.get('baseline')==a.baseline
+                 and all(obj.get(k)=='NOT_RUN' for k in ['windows7','windows10','windows11','seewo_device']))
+         self.check('start fixed flags/role/no runtime',start.get('rustflags')==c['flags'] and start.get('role')==c['role'] and start.get('tests')=='COMPILE_ONLY_NO_RUN')
++        for obj in [start,r]:
++            self.check('actual default versus product-only environment metadata '+('start' if obj is start else 'result'),
++                obj.get('rustflags')==c['flags'] and obj.get('product_rustflags')==product_rustflags(a.baseline)
++                and obj.get('rustflags_scope')=='Workspace test/clippy default; product-compile uses product_rustflags only and restores the original flags.')
+         self.check('actual host metadata PS>=7.2, compiler-host, hosted',host.get('source_sha')==a.source and host.get('compiler_host')=='x86_64-pc-windows-msvc'
+             and host.get('runner_environment')=='github-hosted' and tuple(int(x) for x in host.get('powershell','0.0').split('.')[:2]) >= (7,2))
+         commands=r.get('commands');need(isinstance(commands,list) and 0<len(commands)<=512,'COMMAND_LIST_BOUND')
+@@ -476,9 +489,9 @@
+                 self.check('Win7 selected source bounded exact sysroot '+suffix,PureWindowsPath(item['path'])==PureWindowsPath(provenance['sysroot'])/'lib/rustlib/src/rust/library'/suffix)
+                 integer(item.get('bytes'),MAX_META,minimum=1);hexstr(item.get('sha256'),64)
+         self.check('crt-static target cfg exact line','target_feature="crt-static"' in self.textlog('rust-target-cfg').splitlines())
+-        for phase in ['before-vs','after-vs','before-cargo']:
++        for phase,expected_flags in compiler_flag_phases(a.baseline).items():
+             obj=self.json(f'logs/{phase}-crt-flags.json');flags=obj.get('flags',{});rf=flags.get('RUSTFLAGS',{});ef=flags.get('CARGO_ENCODED_RUSTFLAGS',{})
+-            self.check('actual compiler flags exact/no encoded override '+phase,obj.get('phase')==phase and rf.get('present') is True and rf.get('value')==c['flags'] and rf.get('length')==len(c['flags']) and ef.get('present') is False and ef.get('value') in (None,'') and ef.get('length') in (None,0))
++            self.check('actual compiler flags exact/no encoded override '+phase,obj.get('phase')==phase and rf.get('present') is True and rf.get('value')==expected_flags and rf.get('length')==len(expected_flags) and ef.get('present') is False and ef.get('value') in (None,'') and ef.get('length') in (None,0))
+         sdk=self.json('msvc-sdk.json');self.report['originalMsvcSdk']=sdk
+         for key in ['cl','linker','static_vc_runtime','static_ucrt','sdk_kernel32']:
+             fact=sdk.get(key,{});integer(fact.get('bytes'),128*1024*1024,minimum=1);hexstr(fact.get('sha256'),64)
+@@ -633,11 +646,22 @@
+         for baseline in ['Modern','Win7']:
+             target=BASELINES[baseline]['target']
+             args=['-vv','--release','--locked','--target',target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json']
+-            expected=(['rustc']+args if baseline=='Modern' else ['-Z','build-std','rustc']+args+['--','-C','link-arg=/SUBSYSTEM:WINDOWS,6.01'])
++            expected=(['rustc']+args if baseline=='Modern' else ['-Z','build-std','rustc']+args)
+             need(required_commands(baseline)['product-compile']==expected,'MODEL_PRODUCT_RUSTC_FINAL_ARGS')
+             need('link-arg=/SUBSYSTEM:WINDOWS,6.01' not in required_commands(baseline)['workspace-test-compile']
+                 and 'link-arg=/SUBSYSTEM:WINDOWS,6.01' not in required_commands(baseline)['clippy'],'MODEL_GUI_LEAKS_TO_TESTS')
+     test('baseline exact buildstd placement/no metadata fmt leakage',arguments)
++    def product_environment():
++        for baseline in ['Modern','Win7']:
++            phases=compiler_flag_phases(baseline)
++            need(set(phases)=={'before-vs','after-vs','before-cargo','before-product','after-product'},'MODEL_FLAG_PHASES')
++            need(phases['before-cargo']==phases['after-product']==BASELINES[baseline]['flags'],'MODEL_PRODUCT_RESTORE')
++            expected=('-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:WINDOWS,6.01' if baseline=='Win7' else '-C target-feature=+crt-static')
++            need(phases['before-product']==expected,'MODEL_PRODUCT_ENVIRONMENT')
++            if baseline=='Win7':
++                need(phases['before-product']!=phases['after-product'],'MODEL_ENV_GUI_MISSING_OR_LEAKED')
++                need('link-arg=/SUBSYSTEM:WINDOWS,6.01' not in required_commands(baseline)['product-compile'],'MODEL_FINAL_TAIL_RELIES_ON_ORDER')
++    test('product-only GUI environment and restored default phases are distinct; no linker claim',product_environment)
+     # Real-sized pure source inventories, not a whole fake CI artifact. Both
+     # variants exceed the old cap in a different partition while total M stays
+     # at the new finite maximum. No payload allocation/EXE/network/CI activity.
+@@ -688,10 +712,10 @@
+     def frozen_source_pin():
+         # R61 immutable before/after fixtures are real original bytes. This
+         # checks the SAME predicate as Audit.sources, not an invented hash map.
+-        before=(EV/'bootstrap-ci-before-first/scripts/windows-msvc-ci.ps1').read_bytes()
+-        after=(EV/'bootstrap-ci-after-first/scripts/windows-msvc-ci.ps1').read_bytes()
+-        need(digest(before)=='0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd','MODEL_OLD_CI_ORIGINAL_CHANGED')
+-        need(CI_SHA256=='43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3' and ci_source_matches(after),'MODEL_NEW_CI_PIN')
++        before=(EV/'bootstrap-ci-before-second/scripts/windows-msvc-ci.ps1').read_bytes()
++        after=(EV/'bootstrap-ci-after-second/scripts/windows-msvc-ci.ps1').read_bytes()
++        need(digest(before)=='43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3','MODEL_OLD_CI_ORIGINAL_CHANGED')
++        need(CI_SHA256=='eac2e9e42cfd073aca58584e8dbc6d9cefa864a5b84711b27e0ab83d43689a7b' and ci_source_matches(after),'MODEL_NEW_CI_PIN')
+         need(not ci_source_matches(before),'MODEL_OLD_CI_FALSELY_ADMITTED')
+     test('new exact CI source pin accepts actual new bytes and rejects actual old helper',frozen_source_pin)
+     def unrelated_caps_unchanged():

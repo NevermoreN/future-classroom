@@ -1,0 +1,143 @@
+{
+  "stage": "R61 independent packaging/PE/documentation readonly review",
+  "status": "NO_BLOCKING_SOURCE_DEFECT_FOUND",
+  "scope": "Read-only source and already completed root PowerShell report inspection; no build, checker execution, Windows/SSH, GUI or CI operation by reviewer.",
+  "sourceBindings": [
+    {
+      "path": "scripts/audit-pe.py",
+      "bytes": 6034,
+      "sha256": "6e3669be5cbf697d87502ba4f3c632f33020659ad4117dcea5f616e0d182c5cb"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 36605,
+      "sha256": "4e56ae981d9951da21c6a9d423e25e7e71d27380f16a8889d63b145208d8dbb0"
+    },
+    {
+      "path": "scripts/package-probe.py",
+      "bytes": 29849,
+      "sha256": "bf8339c74b958ae15fb63e04cf135fb13e633694d34453858768267a773ec940"
+    },
+    {
+      "path": "scripts/check-pe-subsystem.py",
+      "bytes": 3388,
+      "sha256": "be702fb06a1adff4c31c308525ccc085d94345d9e530bd9d962f848dc6bc3cdc"
+    },
+    {
+      "path": "README.md",
+      "bytes": 17663,
+      "sha256": "00ffa15cd44756f4373d96f611d7f783bf5d6929110a8b4ea7d7b52058ddfe8c"
+    },
+    {
+      "path": "packaging/PROBE-README.txt",
+      "bytes": 21767,
+      "sha256": "7ebdcc9f18d6f0c1f9d2471f7b496f317e1ac5797264940b0f95be1945f64e09"
+    },
+    {
+      "path": "开发计划/22-自启动与系统变更核对.md",
+      "bytes": 10475,
+      "sha256": "de262ff90d1cdcb19d8ad75e48bc918123049ab73b27b5dbf2194ffbd7dd849a"
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 51811,
+      "sha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3"
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 12188,
+      "sha256": "092d0ec685e4a5f51730e2776c53a81d89c6be8b622911cf34aae4325280b20f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 21191,
+      "sha256": "22fde2cbcbfd12d188c4c1bf1b4b6744226933869bf87f126e8775b4cb7cef63"
+    },
+    {
+      "path": "crates/fc-windows/src/startup.rs",
+      "bytes": 4998,
+      "sha256": "2acedef923e5d4a6a5269ef082f7a230928fa9f11a8b9c5f69c6b671614a3903"
+    },
+    {
+      "path": ".github/workflows/windows-msvc.yml",
+      "bytes": 4639,
+      "sha256": "9142a7dad234808965460a4d0d6a06af11cbe5391bd8c7370fbb62541e5ddec5"
+    },
+    {
+      "path": ".github/workflows/windows-win7-msvc.yml",
+      "bytes": 4885,
+      "sha256": "cd36b5c7f3300bfc4997953553bedcd40d41e8b842741fb56d042977988f86fd"
+    }
+  ],
+  "findings": [],
+  "conclusions": [
+    {
+      "point": "normal/default versus tests",
+      "source": "scripts/audit-pe.py:30,85,99; scripts/package-probe.py:180; scripts/package-msi-candidate.py:457",
+      "detail": "Audit API and CLI default exactly GUI2, explicit console selection requires CUI3; normal development packager calls default GUI audit. MSI independently requires actual GUI2 bytes and original Win7 subsystem version6.1."
+    },
+    {
+      "point": "PE boundaries and regression content",
+      "source": "scripts/package-msi-candidate.py:457; scripts/check-pe-subsystem.py:31",
+      "detail": "New optional-header length validation precedes subsystem access. Checker covers default GUI, explicit CUI, invalid selection, architecture/magic, wrong Win7 version and declared/truncated optional header. These are synthetic metadata tests, not actual product/runtime evidence."
+    },
+    {
+      "point": "original CRT/Win7 gates preserved",
+      "source": "scripts/audit-pe.py:15-67; scripts/package-msi-candidate.py:470,509; scripts/windows-msvc-ci.ps1:85,710",
+      "detail": "Original import-trigger lists and risk collection are byte-identical; MSI still rejects RUNTIME_DEPLOYMENT imports and requires6.1; hosted CI still rejects dynamic CRT and requires exact GUI2/product or CUI3/tests plus Win7 version6.1. Generic audit still reports risks rather than certifying an OS, as before."
+    },
+    {
+      "point": "stdout and user feedback scope",
+      "source": "README.md:46-63; packaging/PROBE-README.txt:4-7,35-52; 开发计划/22-自启动与系统变更核对.md:31-37; crates/fc-bootstrap/src/main.rs:27-53; crates/fc-windows/src/startup.rs:4-47",
+      "detail": "Docs require inherited pipe/file plus physical wait and actual exitcode, with PowerShell Out-Host examples; absence of standard handles does not promise visible output. Only exact manual [] or sole --repair Result::Err invokes error dialog; autostart, probes and invalid args do not. No Attach/AllocConsole or standard-handle replacement introduced. Message text bounded2048UTF16 is not a time limit on modal user dismissal."
+    },
+    {
+      "point": "evidence separation",
+      "source": "开发计划/22-自启动与系统变更核对.md:37; README.md:62; scripts/package-probe.py:222",
+      "detail": "Candidate implementation, actual redirected output/exit and real logon impact remain distinct; new MSVC, Win7/10 hardware and actual login are not claimed passed. Existing archived CUI products/reports are not rewritten."
+    }
+  ],
+  "actualPurePowershellReport": {
+    "path": "/tmp/fc-round61-gui/evidence/gui-pure-powershell-first.json",
+    "bytes": 4519,
+    "sha256": "16b4e3e3d83c59ab93e2c8df4115446c5747014e9b839cbfe5ad80b1dadb4020",
+    "actualExitCode": 0,
+    "sourceShaBound": true,
+    "stdoutOriginalMatchesEmbedded": true,
+    "powershell": "5.1.26100.9711",
+    "groups": 8,
+    "groupAssertions": 165,
+    "setupAssertions": 8,
+    "totalAssertions": 173,
+    "parseErrors": 0,
+    "limit": "Pure actual PowerShell memory-only helper execution; no productPE/linker/runtime/CI proof."
+  },
+  "budgetComparison": {
+    "status": "UNCHANGED",
+    "buildStepSeconds": {
+      "workspace-test-compile": 2400,
+      "product-compile": 1200,
+      "clippy": 1500
+    },
+    "perStreamLogBytes": 16777216,
+    "hostedWorkflowsByteIdenticalToHead": true,
+    "jobMinutes": 135,
+    "buildWrapperMinutes": 105,
+    "cleanupMinutes": 10,
+    "uploadMinutes": 15,
+    "processCaptureAndPhysicalCleanupHelperRegionByteIdenticalToHead": true
+  },
+  "notPerformed": [
+    "Cargo",
+    "Windows/SSH",
+    "Python/PowerShell checker rerun",
+    "CI dispatch",
+    "source mutation"
+  ],
+  "remainingActualEvidence": [
+    "current unified build/strict lint",
+    "new modern and Win7 MSVC original actual product/test PE metadata",
+    "redirected diagnostics stdout/stderr and exit code on new exact normal EXE",
+    "real user logon and visible foreground/no-console acceptance per target OS"
+  ]
+}

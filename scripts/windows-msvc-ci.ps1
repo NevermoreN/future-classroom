@@ -50,8 +50,22 @@ function Get-MsvcBaseline([ValidateSet('Modern', 'Win7')][string]$Name = 'Modern
 }
 function Get-BaselineCargoArguments([string]$Command, [string[]]$Arguments,
     [ValidateSet('Modern', 'Win7')][string]$Name = 'Modern') {
-    if ($Command -notin @('metadata','fmt','test','build','clippy')) { throw 'Unsupported internal Cargo command.' }
-    if ($Name -eq 'Win7' -and $Command -in @('test','build','clippy')) {
+    if ($Command -notin @('metadata','fmt','test','build','rustc','clippy')) { throw 'Unsupported internal Cargo command.' }
+    if ($Command -eq 'rustc') {
+        $packageIndex = [Array]::IndexOf($Arguments, '-p')
+        $binaryIndex = [Array]::IndexOf($Arguments, '--bin')
+        if ($packageIndex -lt 0 -or $packageIndex + 1 -ge $Arguments.Length -or
+            $Arguments[$packageIndex + 1] -cne 'fc-bootstrap' -or
+            $binaryIndex -lt 0 -or $binaryIndex + 1 -ge $Arguments.Length -or
+            $Arguments[$binaryIndex + 1] -cne 'fc-bootstrap' -or
+            @($Arguments | Where-Object { $_ -ceq '-p' }).Count -ne 1 -or
+            @($Arguments | Where-Object { $_ -ceq '--bin' }).Count -ne 1 -or
+            $Arguments -contains '--' -or $Arguments -contains '--all-targets' -or
+            $Arguments -contains '--tests' -or $Arguments -contains '--bins') {
+            throw 'Product rustc requires only the explicit fc-bootstrap binary.'
+        }
+    }
+    if ($Name -eq 'Win7' -and $Command -in @('test','build','rustc','clippy')) {
         $targetIndex = [Array]::IndexOf($Arguments, '--target')
         if ($targetIndex -lt 0 -or $targetIndex + 1 -ge $Arguments.Length -or
             $Arguments[$targetIndex + 1] -cne 'i686-win7-windows-msvc') { throw 'Win7 compilation requires its explicit target.' }
@@ -63,20 +77,30 @@ function Get-BaselineCargoArguments([string]$Command, [string[]]$Arguments,
     # Metadata/fmt do not compile; do not forward unstable flags to cargo-fmt.
     return ,(@($Command) + $Arguments)
 }
+function Get-ProductRustFlags([ValidateSet('Modern', 'Win7')][string]$Name = 'Modern') {
+    if ($Name -eq 'Win7') { return '-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:WINDOWS,6.01' }
+    return (Get-MsvcBaseline $Name).rustflags
+}
 function Test-MsvcExecutableHeader([byte[]]$Bytes,
-    [ValidateSet('Modern', 'Win7')][string]$Name = 'Modern') {
+    [ValidateSet('Modern', 'Win7')][string]$Name = 'Modern',
+    [ValidateSet('tests', 'product')][string]$Role = 'tests') {
     if ($Bytes.Length -lt 256 -or $Bytes[0] -ne 0x4d -or $Bytes[1] -ne 0x5a) { throw 'Not a complete PE executable.' }
     $pe = [BitConverter]::ToInt32($Bytes, 0x3c)
     if ($pe -lt 0 -or $pe -gt $Bytes.Length - 26 -or [BitConverter]::ToUInt32($Bytes, $pe) -ne 0x4550 -or
         [BitConverter]::ToUInt16($Bytes, $pe + 4) -ne 0x14c -or [BitConverter]::ToUInt16($Bytes, $pe + 24) -ne 0x10b) {
         throw 'Executable is not Windows x86 PE32.'
     }
+    # Subsystem is OptionalHeader+68. Check the actual complete field for ALL
+    # baselines, rather than trusting an argument or accepting either subsystem.
+    $optionalLength = [BitConverter]::ToUInt16($Bytes, $pe + 20)
+    if ($pe -gt $Bytes.Length - 94 -or $optionalLength -lt 70 -or
+        $optionalLength -gt $Bytes.Length - $pe - 24) { throw 'Truncated PE32 optional header.' }
+    $actualSubsystem = [BitConverter]::ToUInt16($Bytes, $pe + 92)
+    $expectedSubsystem = if ($Role -eq 'product') { 2 } else { 3 }
+    if ($actualSubsystem -ne $expectedSubsystem) { throw 'PE subsystem differs from exact product GUI or test CUI role.' }
     if ($Name -eq 'Win7') {
         # PE32 OptionalHeader starts at PE+24; subsystem version is +48/+50.
-        $optionalLength = [BitConverter]::ToUInt16($Bytes, $pe + 20)
-        if ($pe -gt $Bytes.Length - 76 -or $optionalLength -lt 52 -or
-            $optionalLength -gt $Bytes.Length - $pe - 24 -or
-            [BitConverter]::ToUInt16($Bytes, $pe + 72) -ne 6 -or
+        if ([BitConverter]::ToUInt16($Bytes, $pe + 72) -ne 6 -or
             [BitConverter]::ToUInt16($Bytes, $pe + 74) -ne 1) { throw 'Win7 candidate must declare PE32 subsystem version 6.1.' }
         return '6.1'
     }
@@ -470,7 +494,8 @@ function Copy-Executable($Message, [string]$Role, [string]$PackageName, [string]
     if ($item.Length -gt 128MB -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Executable bound/reparse rejected.' }
     if ($script:PayloadBytes + $item.Length -gt 512MB) { throw 'Executable package byte bound exceeded before copying.' }
     $bytes = [IO.File]::ReadAllBytes($source)
-    $subsystemVersion = Test-MsvcExecutableHeader $bytes $Baseline
+    $subsystemVersion = Test-MsvcExecutableHeader $bytes $Baseline $Role
+    $actualSubsystem = [BitConverter]::ToUInt16($bytes, [BitConverter]::ToInt32($bytes, 0x3c) + 92)
     $relative = "$Role/$PackageName/$($item.Name)"
     $destination = Join-Path $Artifact $relative
     New-Item -ItemType Directory -Path ([IO.Path]::GetDirectoryName($destination)) -Force | Out-Null
@@ -481,7 +506,7 @@ function Copy-Executable($Message, [string]$Role, [string]$PackageName, [string]
         role = $Role; package = $PackageName; target = $Message.target.name
         kinds = $Message.target.kind; relative_path = $relative; package_working_directory = $PackagePath
         bytes = $item.Length; sha256 = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToLowerInvariant()
-        pe_machine = '0x014c'; pe_optional_magic = '0x010b'; pe_subsystem_version = $subsystemVersion; executed = $false
+        pe_machine = '0x014c'; pe_optional_magic = '0x010b'; pe_subsystem = $actualSubsystem; pe_subsystem_version = $subsystemVersion; executed = $false
     }
 }
 
@@ -505,7 +530,9 @@ Write-NewJson (Join-Path $Artifact 'run-start.json') ([ordered]@{
     status = 'STARTED_NOT_VALIDATED'; utc = [DateTime]::UtcNow.ToString('o'); expected_source_sha = $ExpectedSourceSha
     dispatch_source_sha = $env:GITHUB_SHA
     workflow_sha = $env:GITHUB_WORKFLOW_SHA; target = $Target; toolchain = $Toolchain
-    rustflags = $BaselineConfiguration.rustflags; baseline = $Baseline; role = $BaselineConfiguration.role; tests = 'COMPILE_ONLY_NO_RUN'
+    rustflags = $BaselineConfiguration.rustflags; product_rustflags = Get-ProductRustFlags $Baseline
+    rustflags_scope = 'Workspace test/clippy default; product-compile uses product_rustflags only and restores the original flags.'
+    baseline = $Baseline; role = $BaselineConfiguration.role; tests = 'COMPILE_ONLY_NO_RUN'
     windows7 = 'NOT_RUN'; windows10 = 'NOT_RUN'; windows11 = 'NOT_RUN'; seewo_device = 'NOT_RUN'
 })
 try {
@@ -654,7 +681,19 @@ try {
     Invoke-Logged 'architecture' $python @('scripts/check-architecture.py') 120 | Out-Null
     Write-CrtFlagState 'before-cargo' $BaselineConfiguration.rustflags
     $tests = Invoke-Logged 'workspace-test-compile' $cargo (Get-BaselineCargoArguments 'test' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--no-run','--message-format=json') $Baseline) 2400
-    $binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'build' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200
+    # Cargo appends environment RUSTFLAGS after cargo-rustc trailing flags.
+    # The actual final product needs a scoped environment, not a conflicting
+    # trailing /SUBSYSTEM argument. Dependencies may rebuild; budget is unchanged.
+    $productRustFlags = Get-ProductRustFlags $Baseline
+    $originalProductRustFlags = $env:RUSTFLAGS
+    try {
+        $env:RUSTFLAGS = $productRustFlags
+        Write-CrtFlagState 'before-product' $productRustFlags
+        $binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200
+    } finally {
+        $env:RUSTFLAGS = $originalProductRustFlags
+        Write-CrtFlagState 'after-product' $BaselineConfiguration.rustflags
+    }
     Invoke-Logged 'clippy' $cargo (Get-BaselineCargoArguments 'clippy' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') $Baseline) 1500 | Out-Null
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($build in @($tests, $binary)) {
@@ -731,6 +770,8 @@ $passed = ($null -eq $failure -and $Steps.Count -gt 0 -and @($Steps | Where-Obje
 Write-NewJson (Join-Path $Artifact 'result.json') ([ordered]@{
     status = $(if ($passed) { 'COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN' } else { 'FAILED_OR_INCOMPLETE' })
     source_sha = $ExpectedSourceSha; input_manifest_sha256 = $inputDigest; toolchain = $Toolchain; target = $Target; baseline = $Baseline
+    rustflags = $BaselineConfiguration.rustflags; product_rustflags = Get-ProductRustFlags $Baseline
+    rustflags_scope = 'Workspace test/clippy default; product-compile uses product_rustflags only and restores the original flags.'
     dispatch_source_sha = $env:GITHUB_SHA
     input_schema = 'future-classroom.ci-input-domains/v1'
     git_tree_manifest_sha256 = $gitTreeDigest; input_domains_manifest_sha256 = $inputDomainsDigest

@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round61-gui/target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round61-gui/evidence/windows-bootstrap-tests-compile-first.stdout.log",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--report",
+    "/tmp/fc-round61-gui/evidence/gui-windows-bootstrap-tests-first.json"
+  ],
+  "cwd": "/tmp/fc-round61-gui/worktree",
+  "startedUtc": "2026-11-01T04:47:00.680487+00:00",
+  "stdout": "/tmp/fc-round61-gui/evidence/gui-windows-bootstrap-tests-first.stdout.log",
+  "stderr": "/tmp/fc-round61-gui/evidence/gui-windows-bootstrap-tests-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 11.327230410883203,
+  "completedUtc": "2026-11-01T04:47:12.007958+00:00",
+  "stdoutBytes": 132,
+  "stdoutSha256": "27ae09df08a1a748e440546d359530d6a60376ff0bd9d631b238816bda02dee9",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

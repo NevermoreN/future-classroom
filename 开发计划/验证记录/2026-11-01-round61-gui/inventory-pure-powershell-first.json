@@ -1,0 +1,146 @@
+{
+  "status": "PASS_ACTUAL_POWERSHELL_MEMORY_ONLY",
+  "sourceSha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3",
+  "checkerSha256": "b706d3d68627cc99570550c2e59fac645d66d2c997197393e00f689996bebbb8",
+  "timeoutSeconds": 90,
+  "scope": "Actual Windows PowerShell pure in-memory helper tests only; no hosted CI entrypoint, product, registry, file mutation, browser or foreground interaction.",
+  "remoteInput": {
+    "bytes": 88073,
+    "sha256": "0dc5184b36c90229c4696fb37934cfdde9b58831e4bb2837fb3aa0fd8935997f"
+  },
+  "args": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "IdentitiesOnly=yes",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAkAHMAbwB1AHIAYwBlAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzAG8AdQByAGMAZQApACkAOwA="
+  ],
+  "exitCode": 0,
+  "actualSshExit": true,
+  "stdout": {
+    "path": "/tmp/fc-round61-gui/evidence/inventory-pure-powershell-first.stdout",
+    "bytes": 2714,
+    "sha256": "1481ff4e9d8687a156ef8a724ac08440d7b4f28c82f80b833472c10883bc0fea"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round61-gui/evidence/inventory-pure-powershell-first.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "remote-input.ps1": {
+    "path": "/tmp/fc-round61-gui/evidence/inventory-pure-powershell-first.remote-input.ps1",
+    "bytes": 88073,
+    "sha256": "0dc5184b36c90229c4696fb37934cfdde9b58831e4bb2837fb3aa0fd8935997f"
+  },
+  "originalPowershellReport": {
+    "status": "PASS_PURE_POWERSHELL_INVENTORY_ONLY",
+    "powershell": "5.1.26100.9711",
+    "sourceSha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3",
+    "sourceExpectedSha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3",
+    "fullSourceParseErrors": 0,
+    "functionBindings": [
+      {
+        "name": "Get-SourceInputDomain",
+        "sha256": "4b22ecffb4877c6d806e08f5841e5cf932c08f73eb58e738cf025b2ae841dabc",
+        "utf8Bytes": 515
+      },
+      {
+        "name": "ConvertFrom-SourceGitTree",
+        "sha256": "705bccf9d471c2bd2c45ea3ec3bf7cfff7b98b44ca399e9ada1630598ed9459b",
+        "utf8Bytes": 1812
+      },
+      {
+        "name": "Hash-Inputs",
+        "sha256": "5977c938b99d5802903f2e37b47ea893895356a15c7e189204d69724cb7bd1f9",
+        "utf8Bytes": 3050
+      },
+      {
+        "name": "New-SourceDomainSummary",
+        "sha256": "4a9cceb0c027240cb4fa4615172dae64f0300120f4f1bde049a316230692e72d",
+        "utf8Bytes": 1660
+      },
+      {
+        "name": "paths-Split",
+        "sha256": "e9f4d3bcca9f45658934eb207602f6cd82f4a1abc1b7bdd319fd988e0617921e",
+        "utf8Bytes": 97
+      },
+      {
+        "name": "pathsAfter-Split",
+        "sha256": "7b75a7ab0e29da7bba0f38edb845d06b9bd578525534fdb091dbde392dff7e63",
+        "utf8Bytes": 102
+      }
+    ],
+    "checks": [
+      {
+        "name": "unchanged byte budgets and source-path policy only",
+        "status": "PASS",
+        "assertions": 9
+      },
+      {
+        "name": "20,000 full Git rows accepted with exact last row preserved",
+        "status": "PASS",
+        "assertions": 6
+      },
+      {
+        "name": "20,001 and larger complete Git row counts reject before parsing a tail",
+        "status": "PASS",
+        "assertions": 5
+      },
+      {
+        "name": "last-entry duplicate/case collision cannot hide beyond the old cap",
+        "status": "PASS",
+        "assertions": 3
+      },
+      {
+        "name": "both exact production tracked Split expressions preserve 20,000 and expose 20,001",
+        "status": "PASS",
+        "assertions": 9
+      },
+      {
+        "name": "Hash-Inputs 20,000 count admission reaches a sentinel before any filesystem call",
+        "status": "PASS",
+        "assertions": 3
+      },
+      {
+        "name": "Hash-Inputs count/tree mismatch and both independent count overflows reject first",
+        "status": "PASS",
+        "assertions": 9
+      },
+      {
+        "name": "20,000-entry exact complete S/H partition and honest summary",
+        "status": "PASS",
+        "assertions": 20006
+      },
+      {
+        "name": "exact historical prefix only, no new skip domain",
+        "status": "PASS",
+        "assertions": 8
+      },
+      {
+        "name": "metadata UTF8 16MiB accepted by byte guard, plus one byte rejected",
+        "status": "PASS",
+        "assertions": 9
+      }
+    ],
+    "assertions": 20081,
+    "fatal": null,
+    "scope": "Pure AST-extracted parser/summary and Hash-Inputs count-entry checks with a before-filesystem sentinel; complete fake metadata partition. No real file hash, build, CI or filesystem acceptance claim.",
+    "sourcePathLimit": 20000,
+    "metadataByteLimit": 16777216,
+    "contentByteLimit": 268435456,
+    "perFileByteLimit": 67108864,
+    "ciEntrypointExecuted": false,
+    "filesystemOrEnvironmentWritten": false,
+    "processOrThreadStarted": false,
+    "windowsRuntime": "NOT_RUN",
+    "oldSourceValidators": "Unchanged; old 10000-path validators apply only to their original sources."
+  },
+  "elapsedSeconds": 3.0005324301309884,
+  "sourceUnchanged": true
+}

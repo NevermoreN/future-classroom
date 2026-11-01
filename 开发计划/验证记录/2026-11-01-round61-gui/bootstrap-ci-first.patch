@@ -1,0 +1,368 @@
+diff --git a/crates/fc-bootstrap/src/main.rs b/crates/fc-bootstrap/src/main.rs
+index 410b308..45f8c12 100644
+--- a/crates/fc-bootstrap/src/main.rs
++++ b/crates/fc-bootstrap/src/main.rs
+@@ -1,5 +1,6 @@
+ //! Composition root. This milestone exposes isolated diagnostics, not unfinished management APIs.
+ #![forbid(unsafe_code)]
++#![cfg_attr(all(windows, not(test)), windows_subsystem = "windows")]
+ #[cfg(windows)]
+ mod application;
+ #[cfg(windows)]
+@@ -24,14 +25,32 @@ use std::{
+ };
+ 
+ fn main() -> ExitCode {
++    #[cfg(windows)]
++    let manual_feedback = manual_startup_feedback(std::env::args_os().skip(1));
+     match run() {
+         Ok(()) => ExitCode::SUCCESS,
+         Err(e) => {
+             eprintln!("FutureClassroom: {e}");
++            #[cfg(windows)]
++            if manual_feedback {
++                // Error feedback cannot make a failed startup succeed. Only a
++                // manual GUI/repair entry may show it; probes and logon never do.
++                let _ = fc_windows::startup::show_startup_failure(&e);
++            }
+             ExitCode::FAILURE
+         }
+     }
+ }
++#[cfg(any(windows, test))]
++fn manual_startup_feedback(args: impl IntoIterator<Item = std::ffi::OsString>) -> bool {
++    let mut args = args.into_iter();
++    match (args.next(), args.next()) {
++        (None, None) => true,
++        (Some(flag), None) => flag == "--repair",
++        _ => false,
++    }
++}
++
+ fn run() -> Result<(), String> {
+     let args: Vec<String> = std::env::args().skip(1).collect();
+     match args.as_slice() {
+@@ -347,7 +366,7 @@ fn run() -> Result<(), String> {
+             #[cfg(windows)]
+             {
+                 let report = fc_windows::system::probe().map_err(debug_error)?;
+-                println!("system_discovery=PASS program_data_absolute={} user_sid_resolved={} thread_cpu_clock=PASS autostart_readback={:?}", report.project_data_root.is_absolute(), !report.deployment_user_sid.is_empty(), report.autostart);
++                println!("system_discovery=PASS program_data_absolute={} user_sid_resolved={} thread_cpu_clock=PASS autostart_readback={:?} console_window_present={}", report.project_data_root.is_absolute(), !report.deployment_user_sid.is_empty(), report.autostart, fc_windows::startup::console_window_present());
+                 Ok(())
+             }
+             #[cfg(not(windows))]
+@@ -533,3 +552,34 @@ fn self_check() -> Result<(), String> {
+     println!("isolated_test_cleanup=PASS");
+     Ok(())
+ }
++
++#[cfg(test)]
++mod startup_feedback_tests {
++    use super::manual_startup_feedback;
++    use std::ffi::OsString;
++
++    #[test]
++    fn only_exact_manual_gui_or_repair_can_request_error_feedback() {
++        let classify = |args: &[&str]| {
++            manual_startup_feedback(args.iter().map(|value| OsString::from(*value)))
++        };
++        assert!(classify(&[]));
++        assert!(classify(&["--repair"]));
++        for args in [
++            vec!["--autostart"],
++            vec!["--self-check"],
++            vec!["--version"],
++            vec!["--public-desktop-probe"],
++            vec!["--tls-business-probe", "public-ref", "owned-marker"],
++            vec!["--repair", "extra"],
++            vec!["--repair-probe"],
++            vec!["--unknown"],
++            vec![""],
++        ] {
++            assert!(
++                !classify(&args),
++                "unexpected interactive failure mode {args:?}"
++            );
++        }
++    }
++}
+diff --git a/scripts/windows-msvc-ci.ps1 b/scripts/windows-msvc-ci.ps1
+index 7f14cbd..7f5f6b1 100644
+--- a/scripts/windows-msvc-ci.ps1
++++ b/scripts/windows-msvc-ci.ps1
+@@ -50,33 +50,58 @@ function Get-MsvcBaseline([ValidateSet('Modern', 'Win7')][string]$Name = 'Modern
+ }
+ function Get-BaselineCargoArguments([string]$Command, [string[]]$Arguments,
+     [ValidateSet('Modern', 'Win7')][string]$Name = 'Modern') {
+-    if ($Command -notin @('metadata','fmt','test','build','clippy')) { throw 'Unsupported internal Cargo command.' }
+-    if ($Name -eq 'Win7' -and $Command -in @('test','build','clippy')) {
++    if ($Command -notin @('metadata','fmt','test','build','rustc','clippy')) { throw 'Unsupported internal Cargo command.' }
++    if ($Command -eq 'rustc') {
++        $packageIndex = [Array]::IndexOf($Arguments, '-p')
++        $binaryIndex = [Array]::IndexOf($Arguments, '--bin')
++        if ($packageIndex -lt 0 -or $packageIndex + 1 -ge $Arguments.Length -or
++            $Arguments[$packageIndex + 1] -cne 'fc-bootstrap' -or
++            $binaryIndex -lt 0 -or $binaryIndex + 1 -ge $Arguments.Length -or
++            $Arguments[$binaryIndex + 1] -cne 'fc-bootstrap' -or
++            @($Arguments | Where-Object { $_ -ceq '-p' }).Count -ne 1 -or
++            @($Arguments | Where-Object { $_ -ceq '--bin' }).Count -ne 1 -or
++            $Arguments -contains '--' -or $Arguments -contains '--all-targets' -or
++            $Arguments -contains '--tests' -or $Arguments -contains '--bins') {
++            throw 'Product rustc requires only the explicit fc-bootstrap binary.'
++        }
++    }
++    if ($Name -eq 'Win7' -and $Command -in @('test','build','rustc','clippy')) {
+         $targetIndex = [Array]::IndexOf($Arguments, '--target')
+         if ($targetIndex -lt 0 -or $targetIndex + 1 -ge $Arguments.Length -or
+             $Arguments[$targetIndex + 1] -cne 'i686-win7-windows-msvc') { throw 'Win7 compilation requires its explicit target.' }
+         # No explicit crate list: cargo test must include the test crate too.
+         # Clippy is an external Cargo command; forward build-std to its inner check.
+         if ($Command -eq 'clippy') { return ,(@($Command,'-Z','build-std') + $Arguments) }
++        if ($Command -eq 'rustc') {
++            # Only the selected final product gets this tail. Dependency/test
++            # flags stay CONSOLE6.01; actual product GUI/version is checked below.
++            return ,(@('-Z','build-std',$Command) + $Arguments + @('--','-C','link-arg=/SUBSYSTEM:WINDOWS,6.01'))
++        }
+         return ,(@('-Z','build-std',$Command) + $Arguments)
+     }
+     # Metadata/fmt do not compile; do not forward unstable flags to cargo-fmt.
+     return ,(@($Command) + $Arguments)
+ }
+ function Test-MsvcExecutableHeader([byte[]]$Bytes,
+-    [ValidateSet('Modern', 'Win7')][string]$Name = 'Modern') {
++    [ValidateSet('Modern', 'Win7')][string]$Name = 'Modern',
++    [ValidateSet('tests', 'product')][string]$Role = 'tests') {
+     if ($Bytes.Length -lt 256 -or $Bytes[0] -ne 0x4d -or $Bytes[1] -ne 0x5a) { throw 'Not a complete PE executable.' }
+     $pe = [BitConverter]::ToInt32($Bytes, 0x3c)
+     if ($pe -lt 0 -or $pe -gt $Bytes.Length - 26 -or [BitConverter]::ToUInt32($Bytes, $pe) -ne 0x4550 -or
+         [BitConverter]::ToUInt16($Bytes, $pe + 4) -ne 0x14c -or [BitConverter]::ToUInt16($Bytes, $pe + 24) -ne 0x10b) {
+         throw 'Executable is not Windows x86 PE32.'
+     }
++    # Subsystem is OptionalHeader+68. Check the actual complete field for ALL
++    # baselines, rather than trusting an argument or accepting either subsystem.
++    $optionalLength = [BitConverter]::ToUInt16($Bytes, $pe + 20)
++    if ($pe -gt $Bytes.Length - 94 -or $optionalLength -lt 70 -or
++        $optionalLength -gt $Bytes.Length - $pe - 24) { throw 'Truncated PE32 optional header.' }
++    $actualSubsystem = [BitConverter]::ToUInt16($Bytes, $pe + 92)
++    $expectedSubsystem = if ($Role -eq 'product') { 2 } else { 3 }
++    if ($actualSubsystem -ne $expectedSubsystem) { throw 'PE subsystem differs from exact product GUI or test CUI role.' }
+     if ($Name -eq 'Win7') {
+         # PE32 OptionalHeader starts at PE+24; subsystem version is +48/+50.
+-        $optionalLength = [BitConverter]::ToUInt16($Bytes, $pe + 20)
+-        if ($pe -gt $Bytes.Length - 76 -or $optionalLength -lt 52 -or
+-            $optionalLength -gt $Bytes.Length - $pe - 24 -or
+-            [BitConverter]::ToUInt16($Bytes, $pe + 72) -ne 6 -or
++        if ([BitConverter]::ToUInt16($Bytes, $pe + 72) -ne 6 -or
+             [BitConverter]::ToUInt16($Bytes, $pe + 74) -ne 1) { throw 'Win7 candidate must declare PE32 subsystem version 6.1.' }
+         return '6.1'
+     }
+@@ -470,7 +495,8 @@ function Copy-Executable($Message, [string]$Role, [string]$PackageName, [string]
+     if ($item.Length -gt 128MB -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Executable bound/reparse rejected.' }
+     if ($script:PayloadBytes + $item.Length -gt 512MB) { throw 'Executable package byte bound exceeded before copying.' }
+     $bytes = [IO.File]::ReadAllBytes($source)
+-    $subsystemVersion = Test-MsvcExecutableHeader $bytes $Baseline
++    $subsystemVersion = Test-MsvcExecutableHeader $bytes $Baseline $Role
++    $actualSubsystem = [BitConverter]::ToUInt16($bytes, [BitConverter]::ToInt32($bytes, 0x3c) + 92)
+     $relative = "$Role/$PackageName/$($item.Name)"
+     $destination = Join-Path $Artifact $relative
+     New-Item -ItemType Directory -Path ([IO.Path]::GetDirectoryName($destination)) -Force | Out-Null
+@@ -481,7 +507,7 @@ function Copy-Executable($Message, [string]$Role, [string]$PackageName, [string]
+         role = $Role; package = $PackageName; target = $Message.target.name
+         kinds = $Message.target.kind; relative_path = $relative; package_working_directory = $PackagePath
+         bytes = $item.Length; sha256 = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToLowerInvariant()
+-        pe_machine = '0x014c'; pe_optional_magic = '0x010b'; pe_subsystem_version = $subsystemVersion; executed = $false
++        pe_machine = '0x014c'; pe_optional_magic = '0x010b'; pe_subsystem = $actualSubsystem; pe_subsystem_version = $subsystemVersion; executed = $false
+     }
+ }
+ 
+@@ -654,7 +680,7 @@ try {
+     Invoke-Logged 'architecture' $python @('scripts/check-architecture.py') 120 | Out-Null
+     Write-CrtFlagState 'before-cargo' $BaselineConfiguration.rustflags
+     $tests = Invoke-Logged 'workspace-test-compile' $cargo (Get-BaselineCargoArguments 'test' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--no-run','--message-format=json') $Baseline) 2400
+-    $binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'build' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200
++    $binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200
+     Invoke-Logged 'clippy' $cargo (Get-BaselineCargoArguments 'clippy' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') $Baseline) 1500 | Out-Null
+     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+     foreach ($build in @($tests, $binary)) {
+diff --git a/scripts/check-msvc-gui-contract.ps1 b/scripts/check-msvc-gui-contract.ps1
+new file mode 100644
+index 0000000..ddd4c65
+--- /dev/null
++++ b/scripts/check-msvc-gui-contract.ps1
+@@ -0,0 +1,176 @@
++# Pure checks of the exact injected CI source. This never invokes the hosted
++# entrypoint, Cargo, a linker, a real executable, or filesystem/environment writes.
++[CmdletBinding()]
++param(
++    [Parameter(Mandatory)][ValidateNotNullOrEmpty()][string]$TextSource,
++    [Parameter(Mandatory)][ValidatePattern('\A[0-9a-f]{64}\z')][string]$ExpectedSourceSha256
++)
++Set-StrictMode -Version Latest
++$ErrorActionPreference = 'Stop'
++$script:Assertions = 0
++$Utf8 = [Text.UTF8Encoding]::new($false)
++$cases = [Collections.Generic.List[object]]::new()
++$bindings = [Collections.Generic.List[object]]::new()
++function Text-Sha256([string]$Text) {
++    $hash = [Security.Cryptography.SHA256]::Create()
++    try { return [BitConverter]::ToString($hash.ComputeHash($Utf8.GetBytes($Text))).Replace('-', '').ToLowerInvariant() }
++    finally { $hash.Dispose() }
++}
++function Require([bool]$Condition, [string]$Label) {
++    $script:Assertions += 1
++    if (-not $Condition) { throw $Label }
++}
++function Reject([scriptblock]$Action, [string]$ExpectedMessage) {
++    $caught = $null
++    try { $discard = @(& $Action) } catch { $caught = $_ }
++    Require ($null -ne $caught) 'Expected rejection did not occur.'
++    Require ($caught.Exception.Message.Contains($ExpectedMessage)) 'An unrelated exception hid the expected guard.'
++}
++function Equal-Arguments([string[]]$Actual, [string[]]$Expected) {
++    Require ($Actual.Count -eq $Expected.Count) 'Cargo argument count differs.'
++    for ($index = 0; $index -lt $Actual.Count; $index++) {
++        Require ($Actual[$index] -ceq $Expected[$index]) "Cargo argument at $index differs."
++    }
++}
++function Check([string]$Name, [scriptblock]$Action) {
++    $before = $script:Assertions
++    try {
++        $noise = @(& $Action)
++        Require ($noise.Count -eq 0) 'Unexpected pipeline output.'
++        $cases.Add([ordered]@{ name = $Name; status = 'PASS'; assertions = $script:Assertions - $before })
++    } catch {
++        $cases.Add([ordered]@{ name = $Name; status = 'FAIL'; assertions = $script:Assertions - $before;
++            message = $_.Exception.Message; position = [string]$_.InvocationInfo.PositionMessage })
++    }
++}
++# Synthetic bytes ONLY: no file is produced or executed. Header fields are the
++# published PE32 offsets, deliberately independent of the extracted validator.
++function New-PeFixture([UInt16]$Subsystem, [UInt16]$Minor = 1) {
++    $bytes = [byte[]]::new(512)
++    $bytes[0] = 0x4d; $bytes[1] = 0x5a
++    [BitConverter]::GetBytes([int]128).CopyTo($bytes, 60)
++    [BitConverter]::GetBytes([UInt32]0x4550).CopyTo($bytes, 128)
++    [BitConverter]::GetBytes([UInt16]0x14c).CopyTo($bytes, 132)
++    [BitConverter]::GetBytes([UInt16]224).CopyTo($bytes, 148)
++    [BitConverter]::GetBytes([UInt16]0x10b).CopyTo($bytes, 152)
++    [BitConverter]::GetBytes([UInt16]6).CopyTo($bytes, 200)
++    [BitConverter]::GetBytes($Minor).CopyTo($bytes, 202)
++    [BitConverter]::GetBytes($Subsystem).CopyTo($bytes, 220)
++    return ,$bytes
++}
++$parseErrors = $null
++$fatal = $null
++$sourceSha = Text-Sha256 $TextSource
++try {
++    Require ($sourceSha -ceq $ExpectedSourceSha256) 'Injected source SHA differs.'
++    $tokens = $null
++    $ast = [Management.Automation.Language.Parser]::ParseInput($TextSource, [ref]$tokens, [ref]$parseErrors)
++    Require (@($parseErrors).Count -eq 0) 'Whole CI source failed ParseInput.'
++    foreach ($name in @('Get-MsvcBaseline', 'Get-BaselineCargoArguments', 'Test-MsvcExecutableHeader')) {
++        $definitions = @($ast.FindAll({ param($node)
++            $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -ceq $name
++        }, $true))
++        Require ($definitions.Count -eq 1) 'Missing/duplicate whitelisted pure helper.'
++        $definition = [string]$definitions[0].Extent.Text
++        $bindings.Add([ordered]@{ name = $name; sha256 = Text-Sha256 $definition; utf8Bytes = $Utf8.GetByteCount($definition) })
++        $noise = @(Invoke-Expression $definition)
++        Require ($noise.Count -eq 0) 'Function definition produced output.'
++    }
++    Check 'fixed baselines retain CRT flags and test-only console version' {
++        $modern = Get-MsvcBaseline Modern
++        $win7 = Get-MsvcBaseline Win7
++        Require ($modern.target -ceq 'i686-pc-windows-msvc') 'Modern target changed.'
++        Require ($modern.rustflags -ceq '-C target-feature=+crt-static') 'Modern shared flags changed.'
++        Require ($win7.target -ceq 'i686-win7-windows-msvc') 'Win7 target changed.'
++        Require ($win7.rustflags -ceq '-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01') 'Win7 dependencies/tests must retain old console flags.'
++        Require ($win7.toolchain -ceq 'nightly-2026-10-29-x86_64-pc-windows-msvc') 'Win7 pinned toolchain changed.'
++    }
++    Check 'normal rustc selects only product and appends Win7 GUI version to final target' {
++        $modernArgs = [string[]]@('-vv','--release','--locked','--target','i686-pc-windows-msvc','-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json')
++        $win7Args = [string[]]@('-vv','--release','--locked','--target','i686-win7-windows-msvc','-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json')
++        Equal-Arguments (Get-BaselineCargoArguments rustc $modernArgs Modern) (@('rustc') + $modernArgs)
++        Equal-Arguments (Get-BaselineCargoArguments rustc $win7Args Win7) (@('-Z','build-std','rustc') + $win7Args + @('--','-C','link-arg=/SUBSYSTEM:WINDOWS,6.01'))
++    }
++    Check 'test build clippy metadata and fmt argument contracts remain unchanged' {
++        $compileArgs = [string[]]@('--workspace','--all-targets','--release','--target','i686-win7-windows-msvc')
++        foreach ($command in @('test','build')) {
++            Equal-Arguments (Get-BaselineCargoArguments $command $compileArgs Win7) (@('-Z','build-std',$command) + $compileArgs)
++            Equal-Arguments (Get-BaselineCargoArguments $command $compileArgs Modern) (@($command) + $compileArgs)
++        }
++        $clippyArgs = $compileArgs + @('--','-D','warnings')
++        Equal-Arguments (Get-BaselineCargoArguments clippy $clippyArgs Win7) (@('clippy','-Z','build-std') + $clippyArgs)
++        Equal-Arguments (Get-BaselineCargoArguments clippy $clippyArgs Modern) (@('clippy') + $clippyArgs)
++        Equal-Arguments (Get-BaselineCargoArguments metadata @('--locked','--no-deps') Win7) @('metadata','--locked','--no-deps')
++        Equal-Arguments (Get-BaselineCargoArguments fmt @('--all','--','--check') Win7) @('fmt','--all','--','--check')
++    }
++    Check 'mis-scoped final rustc calls and wrong Win7 target fail closed' {
++        $good = [string[]]@('--target','i686-win7-windows-msvc','-p','fc-bootstrap','--bin','fc-bootstrap')
++        foreach ($bad in @(@('--target','i686-win7-windows-msvc'),
++            @('-p','other','--bin','fc-bootstrap'), @('-p','fc-bootstrap','--bin','other'),
++            ($good + @('-p','fc-bootstrap')), ($good + @('--bin','fc-bootstrap')),
++            ($good + @('--')), ($good + @('--all-targets')), ($good + @('--tests')), ($good + @('--bins')))) {
++            Reject { Get-BaselineCargoArguments rustc $bad Win7 } 'Product rustc requires only the explicit fc-bootstrap binary.'
++        }
++        Reject { Get-BaselineCargoArguments rustc @('--target','i686-pc-windows-msvc','-p','fc-bootstrap','--bin','fc-bootstrap') Win7 } 'Win7 compilation requires its explicit target.'
++        Reject { Get-BaselineCargoArguments test @('--workspace') Win7 } 'Win7 compilation requires its explicit target.'
++    }
++    Check 'actual PE32 GUI product and CUI tests accepted with role-specific version' {
++        Require ($null -eq (Test-MsvcExecutableHeader (New-PeFixture 2) Modern product)) 'Modern GUI product rejected.'
++        Require ($null -eq (Test-MsvcExecutableHeader (New-PeFixture 3) Modern tests)) 'Modern CUI test rejected.'
++        Require ((Test-MsvcExecutableHeader (New-PeFixture 2) Win7 product) -ceq '6.1') 'Win7 GUI product rejected.'
++        Require ((Test-MsvcExecutableHeader (New-PeFixture 3) Win7 tests) -ceq '6.1') 'Win7 CUI test rejected.'
++    }
++    Check 'GUI tests and console product cannot pass by valid version alone' {
++        foreach ($baseline in @('Modern','Win7')) {
++            Reject { Test-MsvcExecutableHeader (New-PeFixture 3) $baseline product } 'PE subsystem differs'
++            Reject { Test-MsvcExecutableHeader (New-PeFixture 2) $baseline tests } 'PE subsystem differs'
++            Reject { Test-MsvcExecutableHeader (New-PeFixture 0) $baseline product } 'PE subsystem differs'
++        }
++        Reject { Test-MsvcExecutableHeader (New-PeFixture 2 0) Win7 product } 'must declare PE32 subsystem version 6.1'
++        Reject { Test-MsvcExecutableHeader (New-PeFixture 3 0) Win7 tests } 'must declare PE32 subsystem version 6.1'
++    }
++    Check 'malformed PE32 headers cannot bypass actual subsystem admission' {
++        Reject { Test-MsvcExecutableHeader ([byte[]]::new(255)) Modern product } 'Not a complete PE'
++        $bad = New-PeFixture 2
++        [BitConverter]::GetBytes([int]500).CopyTo($bad, 60)
++        Reject { Test-MsvcExecutableHeader $bad Modern product } 'not Windows x86 PE32'
++        $bad = New-PeFixture 2
++        [BitConverter]::GetBytes([UInt16]0x8664).CopyTo($bad, 132)
++        Reject { Test-MsvcExecutableHeader $bad Modern product } 'not Windows x86 PE32'
++        $bad = New-PeFixture 2
++        [BitConverter]::GetBytes([UInt16]0x20b).CopyTo($bad, 152)
++        Reject { Test-MsvcExecutableHeader $bad Modern product } 'not Windows x86 PE32'
++        $bad = New-PeFixture 2
++        [BitConverter]::GetBytes([UInt16]68).CopyTo($bad, 148)
++        Reject { Test-MsvcExecutableHeader $bad Modern product } 'Truncated PE32 optional header'
++        $bad = New-PeFixture 2
++        [BitConverter]::GetBytes([UInt16]512).CopyTo($bad, 148)
++        Reject { Test-MsvcExecutableHeader $bad Modern product } 'Truncated PE32 optional header'
++    }
++    Check 'real product invocation and copy gate bind the checked role without extra build' {
++        $productCalls = @($ast.FindAll({ param($node)
++            $node -is [Management.Automation.Language.CommandAst] -and $node.GetCommandName() -ceq 'Invoke-Logged' -and
++            $node.CommandElements.Count -gt 1 -and $node.CommandElements[1].Extent.Text -ceq "'product-compile'"
++        }, $true))
++        Require ($productCalls.Count -eq 1) 'Expected exactly one normal product compilation.'
++        Require ($productCalls[0].Extent.Text.Contains("Get-BaselineCargoArguments 'rustc'")) 'Product does not use final-target rustc.'
++        Require ($productCalls[0].Extent.Text.Contains("'--bin','fc-bootstrap'")) 'Product is not explicitly selected.'
++        Require ($TextSource.Contains('Test-MsvcExecutableHeader $bytes $Baseline $Role')) 'Copy admission lost actual role.'
++        Require ($TextSource.Contains('pe_subsystem = $actualSubsystem')) 'Metadata lost actual subsystem.'
++        Require ($TextSource.Contains('$LogLimit = 16MB')) 'Original stdout/stderr cap changed.'
++    }
++} catch {
++    $fatal = [ordered]@{ kind = $_.Exception.GetType().Name; message = $_.Exception.Message;
++        position = [string]$_.InvocationInfo.PositionMessage }
++}
++$failed = @($cases | Where-Object { $_.status -cne 'PASS' })
++$status = 'PASS_PURE_POWERSHELL_GUI_CONTRACT_ONLY'
++if ($null -ne $fatal -or $failed.Count -gt 0) { $status = 'FAIL_PURE_POWERSHELL_GUI_CONTRACT_ONLY' }
++[ordered]@{ status = $status; powershell = $PSVersionTable.PSVersion.ToString(); sourceSha256 = $sourceSha;
++    sourceExpectedSha256 = $ExpectedSourceSha256; fullSourceParseErrors = @($parseErrors).Count;
++    functionBindings = $bindings.ToArray(); checks = $cases.ToArray(); assertions = $script:Assertions; fatal = $fatal;
++    scope = 'AST-extracted real argument and PE admission helpers, synthetic PE32 header bytes only; no actual linker, executable, Rust build, GUI or console runtime proof.';
++    ciEntrypointExecuted = $false; filesystemOrEnvironmentWritten = $false; processOrThreadStarted = $false;
++    windowsRuntime = 'NOT_RUN'; actualProductPe = 'NOT_RUN'; actualRedirectedDiagnostic = 'NOT_RUN'
++} | ConvertTo-Json -Depth 12 -Compress
++if ($status -cne 'PASS_PURE_POWERSHELL_GUI_CONTRACT_ONLY') { throw 'Pure GUI contract checks failed; original JSON above is retained.' }

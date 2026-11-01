@@ -1,0 +1,45 @@
+{
+  "status": "PASS_ACTUAL_GUI_INHERITED_PIPES_AND_EXIT_CODES",
+  "cleanup": "PASS",
+  "exeSha256": "9095d86eeb7d7c1e4c82dd4a278a6b33fbe71af1454ba14ca7270a24a97797e4",
+  "scope": "Actual GUI --version and invalid-argument inherited pipe/exit checks only; no normal/autostart/repair launch, MessageBox, installed data or foreground change.",
+  "perChildDeadlineMillis": 5000,
+  "ownedRemoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-GuiDiagnostics-3194e0137f7249fd825708f2081f26f8",
+  "remoteScript": {
+    "path": "/tmp/fc-round61-gui/evidence/gui-diagnostics-first.remote.ps1",
+    "bytes": 1945,
+    "sha256": "25e462d5ed6385277e5a17ea51512f1eacf50db74648b4dea551cd6f08d58e0f"
+  },
+  "observed": {
+    "exeSha256": "9095d86eeb7d7c1e4c82dd4a278a6b33fbe71af1454ba14ca7270a24a97797e4",
+    "noConsoleApisCalled": true,
+    "operations": [
+      {
+        "stdout": "FutureClassroom 0.1.0 / D11 / development; Win7/Win10/Win11 product acceptance NOT_VALIDATED\n",
+        "redirectedPipes": true,
+        "useShellExecute": false,
+        "stderr": "",
+        "pid": 30144,
+        "timedOut": false,
+        "argument": "--version",
+        "createNoWindow": false,
+        "actualExit": true,
+        "exitCode": 0
+      },
+      {
+        "stdout": "",
+        "redirectedPipes": true,
+        "useShellExecute": false,
+        "stderr": "FutureClassroom: unknown arguments; run without arguments for usage\n",
+        "pid": 5352,
+        "timedOut": false,
+        "argument": "--future-classroom-invalid-launch-probe",
+        "createNoWindow": false,
+        "actualExit": true,
+        "exitCode": 1
+      }
+    ]
+  },
+  "elapsedSeconds": 1.7423772031906992,
+  "inputUnchanged": true
+}
