@@ -1,0 +1,170 @@
+{
+  "status": "PASS_ALL9_FINISHED_OWNED_ROOTS_AND3_BRANCHES_REMOVED",
+  "sourceCommit": "eba8e2d77ab7deb67aba9e0c084235a40e5fcdf7",
+  "proofSha256": "b394e0d8fa3bda4aa906284d661a8a1a092eb40bd2f03d2f2b74957ae4c58b25",
+  "startedUtc": "2026-11-01T03:36:46.843952+00:00",
+  "ownershipGuards": [
+    {
+      "root": "/tmp/fc-round55-ci-evidence",
+      "archive": "开发计划/验证记录/2026-11-01-round55-ci",
+      "includedOriginalsVerified": 527,
+      "excludedWithOriginalIdentities": 47,
+      "sourcePathSetUnchanged": true
+    },
+    {
+      "root": "/tmp/fc-round56-transactional-autorun-evidence",
+      "archive": "开发计划/验证记录/2026-11-01-round56-txr-experiment",
+      "includedOriginalsVerified": 140,
+      "excludedWithOriginalIdentities": 2,
+      "sourcePathSetUnchanged": true
+    },
+    {
+      "root": "/tmp/fc-round57-ci-inventory-evidence",
+      "archive": "开发计划/验证记录/2026-11-01-round57-ci-inventory",
+      "includedOriginalsVerified": 35,
+      "excludedWithOriginalIdentities": 1,
+      "sourcePathSetUnchanged": true
+    },
+    {
+      "root": "/tmp/fc-round58-msvc-task-memory-evidence",
+      "archive": "开发计划/验证记录/2026-11-01-round58-task-memory",
+      "includedOriginalsVerified": 104,
+      "excludedWithOriginalIdentities": 2,
+      "sourcePathSetUnchanged": true
+    },
+    {
+      "root": "/tmp/fc-round56-transactional-autorun-worktree",
+      "branch": "codex/transactional-autorun",
+      "base": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+      "allChangedPathsArchivedAndExact": 4,
+      "gitWorktreeRegistered": true
+    },
+    {
+      "root": "/tmp/fc-round57-ci-inventory-worktree",
+      "branch": "codex/ci-inventory-capacity",
+      "base": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+      "allChangedPathsArchivedAndExact": 3,
+      "gitWorktreeRegistered": true
+    },
+    {
+      "root": "/tmp/fc-round58-msvc-task-memory-worktree",
+      "branch": "codex/msvc-task-memory",
+      "base": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+      "allChangedPathsArchivedAndExact": 7,
+      "gitWorktreeRegistered": true
+    }
+  ],
+  "activeOwnedConsumers": [],
+  "roots": [
+    {
+      "root": "/tmp/fc-round55-ci-evidence",
+      "regularFiles": 574,
+      "logicalBytes": 388596464,
+      "ownerMarkerSha256": "2636cd3b709268b2695788f90ca9b3d5fedecbd4f01f0e09d7c6379ecee354d3",
+      "removed": true
+    },
+    {
+      "root": "/tmp/fc-round56-transactional-autorun-worktree",
+      "regularFiles": 9972,
+      "logicalBytes": 739010819,
+      "ownerMarkerSha256": null,
+      "removed": true
+    },
+    {
+      "root": "/tmp/fc-round56-transactional-autorun-target",
+      "regularFiles": 2498,
+      "logicalBytes": 1346168311,
+      "ownerMarkerSha256": "d7b5d340c356722a8368b352346043981a965fdb3433cb2811fe514a985ae134",
+      "removed": true
+    },
+    {
+      "root": "/tmp/fc-round56-transactional-autorun-evidence",
+      "regularFiles": 142,
+      "logicalBytes": 8073638,
+      "ownerMarkerSha256": "5546b7321ab8e1df5c7b37596ed303f39e05325684be45490f99bf7fa872b0bc",
+      "removed": true
+    },
+    {
+      "root": "/tmp/fc-round57-ci-inventory-worktree",
+      "regularFiles": 9973,
+      "logicalBytes": 738989151,
+      "ownerMarkerSha256": null,
+      "removed": true
+    },
+    {
+      "root": "/tmp/fc-round57-ci-inventory-evidence",
+      "regularFiles": 36,
+      "logicalBytes": 398958,
+      "ownerMarkerSha256": "3bc3d428494cc1b4fa90c2fd3f0aca9ffe9f48bf30ac495f67c7d039f307da0e",
+      "removed": true
+    },
+    {
+      "root": "/tmp/fc-round58-msvc-task-memory-worktree",
+      "regularFiles": 9973,
+      "logicalBytes": 738995039,
+      "ownerMarkerSha256": null,
+      "removed": true
+    },
+    {
+      "root": "/tmp/fc-round58-msvc-task-memory-target",
+      "regularFiles": 1,
+      "logicalBytes": 61,
+      "ownerMarkerSha256": "7deabde5412f7337ed5ffe7d20cf4c0b95a24328c71187764c9d7fa9cabc9c51",
+      "removed": true
+    },
+    {
+      "root": "/tmp/fc-round58-msvc-task-memory-evidence",
+      "regularFiles": 106,
+      "logicalBytes": 5713261,
+      "ownerMarkerSha256": "7deabde5412f7337ed5ffe7d20cf4c0b95a24328c71187764c9d7fa9cabc9c51",
+      "removed": true
+    }
+  ],
+  "branchRemoval": [
+    {
+      "branch": "codex/transactional-autorun",
+      "exitCode": 0,
+      "stdout": "Deleted branch codex/transactional-autorun (was 9ebe818).\n",
+      "stderr": ""
+    },
+    {
+      "branch": "codex/ci-inventory-capacity",
+      "exitCode": 0,
+      "stdout": "Deleted branch codex/ci-inventory-capacity (was 9ebe818).\n",
+      "stderr": ""
+    },
+    {
+      "branch": "codex/msvc-task-memory",
+      "exitCode": 0,
+      "stdout": "Deleted branch codex/msvc-task-memory (was 9ebe818).\n",
+      "stderr": ""
+    }
+  ],
+  "scope": "Only nine finished owned /tmp roots. Worktree changes fully archived; no cleanup of project main target, global caches, persistent SSH authorization/private key or intentional development ZIPs.",
+  "preserved": {
+    "persistentPrivateKey": {
+      "path": "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "mode": "0o600",
+      "contentsRead": false
+    },
+    "mainTargetDebugExists": true,
+    "intentionalDevelopmentZipMetadata": [
+      {
+        "path": "/mnt/data/FutureClassroom-0.1.0-public-desktop-dev.zip",
+        "bytes": 6115463
+      },
+      {
+        "path": "/mnt/data/FutureClassroom-0.1.0-continuous-accept-dev.zip",
+        "bytes": 5968710
+      },
+      {
+        "path": "/mnt/data/FutureClassroom-0.1.0-voice-capability-dev.zip",
+        "bytes": 5203704
+      }
+    ],
+    "newActiveR59EvidencePreserved": true,
+    "WindowsServiceAndAuthorization": "Unchanged per last actual read-only Windows audit; no Windows mutation or SSH test in this local cleanup."
+  },
+  "removedLogicalBytes": 3965945702,
+  "completedUtc": "2026-11-01T03:36:49.224622+00:00"
+}
