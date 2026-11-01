@@ -21,6 +21,7 @@ use windows::{
 };
 
 pub(super) mod broker;
+mod inner_guard;
 
 const HANDLE_LIMIT: usize = 64;
 const PROCESS_OWNERS: usize = 8;

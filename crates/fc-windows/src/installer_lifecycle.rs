@@ -11,6 +11,7 @@ pub mod broker;
 // original native API owner and broker are integrated and jointly validated.
 #[allow(dead_code)]
 pub(crate) mod controlled;
+pub(crate) mod guard_contract;
 mod native;
 #[cfg(test)]
 mod tests;

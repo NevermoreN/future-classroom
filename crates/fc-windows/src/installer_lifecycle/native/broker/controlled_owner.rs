@@ -1,8 +1,11 @@
 //! Original native Begin owner, separate from the legacy embedded Join route.
 //! No public Setup entry or controlled-inner MSI guard is released here. The
 //! fixed package seal is absent from existing helpers, which reject this route.
+use super::super::super::guard_contract::{Bridge, BridgeKind, Nonce};
 use super::*;
 use windows::Win32::System::SystemInformation::GetTickCount64;
+
+mod guard_context;
 
 pub(crate) const PACKAGE_SEAL_MAGIC: &[u8; 16] = b"FC-SETUP-MSI\0v1\0";
 const INNER_MSI: &str = "FutureClassroom.msi";
@@ -146,30 +149,81 @@ impl Message {
     }
 }
 fn send(s: &Session, pipe: HANDLE, m: Message) -> Result<()> {
-    current(s.deadline)?;
+    send_frame(s.deadline, pipe, &m.bytes())
+}
+fn send_frame(deadline: Instant, pipe: HANDLE, bytes: &[u8; FRAME]) -> Result<()> {
+    current(deadline)?;
     let mut n = 0;
     unsafe {
-        WriteFile(pipe, Some(&m.bytes()), Some(&mut n), None)?;
+        WriteFile(pipe, Some(bytes), Some(&mut n), None)?;
     }
     if n as usize != FRAME {
         return Err(LifecycleError::Unsettled);
     }
-    current(s.deadline)
+    current(deadline)
 }
 fn receive(s: &Session, pipe: HANDLE) -> Result<Message> {
+    Message::parse(receive_frame(s.deadline, pipe)?)
+}
+fn receive_frame(deadline: Instant, pipe: HANDLE) -> Result<[u8; FRAME]> {
     let mut b = [0; FRAME];
     let mut offset = 0;
     while offset < FRAME {
-        current(s.deadline)?;
+        current(deadline)?;
         let mut n = 0;
         match unsafe { ReadFile(pipe, Some(&mut b[offset..]), Some(&mut n), None) } {
             Ok(()) if n != 0 => offset += n as usize,
-            Ok(()) => pause(s.deadline)?,
-            Err(e) if e.code() == ERROR_NO_DATA.to_hresult() => pause(s.deadline)?,
+            Ok(()) => pause(deadline)?,
+            Err(e) if e.code() == ERROR_NO_DATA.to_hresult() => pause(deadline)?,
             Err(e) => return Err(e.into()),
         }
     }
-    Message::parse(b)
+    Ok(b)
+}
+
+/// Association belongs to this original authenticated G's one active Run.
+/// A nonce, callback return or UI text alone cannot satisfy this state machine.
+struct GuardAssociation {
+    transaction: u32,
+    nonce: Option<Nonce>,
+    returned: bool,
+}
+impl GuardAssociation {
+    fn new(transaction: u32) -> Self {
+        Self {
+            transaction,
+            nonce: None,
+            returned: false,
+        }
+    }
+    fn observe(&mut self, bridge: Bridge) -> Result<Option<Bridge>> {
+        if bridge.transaction_id() != self.transaction || bridge.code() != 0 {
+            return Err(LifecycleError::Invalid);
+        }
+        match bridge.kind() {
+            BridgeKind::Request if self.nonce.is_none() => {
+                self.nonce = Some(bridge.nonce());
+                Ok(Some(Bridge::new(
+                    BridgeKind::Ack,
+                    self.transaction,
+                    bridge.nonce(),
+                    0,
+                )?))
+            }
+            BridgeKind::Returned if self.nonce == Some(bridge.nonce()) && !self.returned => {
+                self.returned = true;
+                Ok(None)
+            }
+            _ => Err(LifecycleError::Invalid),
+        }
+    }
+    fn require_returned(&self) -> Result<()> {
+        if self.returned {
+            Ok(())
+        } else {
+            Err(LifecycleError::Unsettled)
+        }
+    }
 }
 fn pipe_name(base: &HSTRING, parent: GuardianIdentity) -> HSTRING {
     HSTRING::from(format!(
@@ -268,10 +322,15 @@ impl ApiOwner {
             windows::core::w!("REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown");
         Ok(unsafe {
             match operation {
-            1=>MsiInstallProductW(&HSTRING::from(path.as_os_str()),quiet),
-            2=>MsiInstallProductW(&HSTRING::from(path.as_os_str()),windows::core::w!("REINSTALL=ALL REINSTALLMODE=amus REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown")),
-            _=>return Err(LifecycleError::Invalid),
-        }
+                1 => MsiInstallProductW(&HSTRING::from(path.as_os_str()), quiet),
+                2 => MsiInstallProductW(
+                    &HSTRING::from(path.as_os_str()),
+                    windows::core::w!(
+                        "REINSTALL=ALL REINSTALLMODE=amus REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown"
+                    ),
+                ),
+                _ => return Err(LifecycleError::Invalid),
+            }
         })
     }
     fn end(&mut self, commit: bool) -> Result<u32> {
@@ -291,9 +350,12 @@ impl ApiOwner {
             self.resources.close_handle(event)?;
             self.changed = None;
         }
-        self.resources.release()?;
         if code != 0 {
+            // Keep the original claim even when the known event was returned;
+            // a failed actual End is not a successful resource settlement.
             self.resources.retain_until_exit();
+        } else {
+            self.resources.release()?;
         }
         Ok(code)
     }
@@ -303,13 +365,9 @@ impl Drop for ApiOwner {
         if self.begin == 0 && !self.ended {
             // Negative cleanup only, including a broken parent pipe or expired
             // wait. This cannot become a successful receipt or a replacement G.
-            if self.same_thread().is_err() {
-                self.resources.retain_until_exit();
-                return;
-            }
-            self.ended = true;
-            let rc = unsafe { MsiEndTransaction(MSITRANSACTIONSTATE_ROLLBACK) };
-            if rc != 0 {
+            // Same one-attempt End/event-close path as the explicit decision.
+            // Any error retains the original claim; Drop emits no receipt.
+            if self.end(false).is_err() {
                 self.resources.retain_until_exit();
             }
         }
@@ -357,7 +415,20 @@ pub(super) fn guardian(s: &mut Session) -> Result<()> {
             return Err(LifecycleError::Invalid);
         }
         current(s.deadline)?;
-        let rc = api.install(&path, run.outcome)?;
+        // No Session/API reference is passed through FFI. During this synchronous
+        // call only the independent callback context uses the original pipe.
+        let context = guard_context::Registration::new(
+            pipe,
+            s.deadline,
+            ready.ticks,
+            api.transaction.0,
+            s.resources.sid.clone(),
+        )?;
+        let install = api.install(&path, run.outcome);
+        // Unregister/check callback controls even when the native API fails.
+        // No INSTALLED receipt is sent without the real guard's successor.
+        context.finish()?;
+        let rc = install?;
         let mut installed = Message::new(INSTALLED);
         installed.transaction = api.transaction.0;
         installed.code = rc;
@@ -577,12 +648,26 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
         run.transaction = began.transaction;
         run.outcome = operation.tag();
         send(&s, pipe, run)?;
-        let installed = receive(&s, pipe)?;
+        let mut guard = GuardAssociation::new(began.transaction);
+        let installed = loop {
+            let frame = receive_frame(s.deadline, pipe)?;
+            if &frame[..4] == b"FCGB" {
+                // This is still the original CreateProcess capability and the
+                // same authenticated pipe; no PID/image string substitutes it.
+                live(child.process)?;
+                if let Some(ack) = guard.observe(Bridge::parse(&frame)?)? {
+                    send_frame(s.deadline, pipe, &ack.encode())?;
+                }
+            } else {
+                guard.require_returned()?;
+                break Message::parse(frame)?;
+            }
+        };
         if installed.kind != INSTALLED || installed.transaction != began.transaction {
             return Err(LifecycleError::Invalid);
         }
         let decision = if installed.code == 0 {
-            effects::staged(&mut s, &admission)?
+            effects::staged_present(&mut s, &admission)?
         } else {
             effects::failed_install(&admission)
         };
@@ -671,5 +756,48 @@ mod tests {
         assert!(Message::parse(failed.bytes()).is_ok());
         failed.transaction = 7;
         assert!(Message::parse(failed.bytes()).is_err());
+    }
+    #[test]
+    fn guard_bridge_needs_one_original_transaction_request_and_successor() {
+        let nonce = Nonce::from_bytes([7; 16]).unwrap();
+        let mut guard = GuardAssociation::new(42);
+        assert!(guard.require_returned().is_err());
+        assert!(guard
+            .observe(Bridge::new(BridgeKind::Returned, 42, nonce, 0).unwrap())
+            .is_err());
+        assert!(guard
+            .observe(Bridge::new(BridgeKind::Request, 43, nonce, 0).unwrap())
+            .is_err());
+        let request = Bridge::new(BridgeKind::Request, 42, nonce, 0).unwrap();
+        let ack = guard.observe(request).unwrap().unwrap();
+        assert_eq!(ack.kind(), BridgeKind::Ack);
+        assert_eq!(ack.transaction_id(), 42);
+        assert_eq!(ack.nonce(), nonce);
+        assert!(guard.observe(request).is_err());
+        assert!(guard.require_returned().is_err());
+        assert!(guard
+            .observe(Bridge::new(BridgeKind::Returned, 42, nonce, 1603).unwrap())
+            .is_err());
+        assert!(guard.require_returned().is_err());
+        let returned = Bridge::new(BridgeKind::Returned, 42, nonce, 0).unwrap();
+        assert!(guard.observe(returned).unwrap().is_none());
+        guard.require_returned().unwrap();
+        assert!(guard.observe(returned).is_err());
+    }
+    #[test]
+    fn guard_bridge_ack_or_other_nonce_cannot_complete_run() {
+        let nonce = Nonce::from_bytes([7; 16]).unwrap();
+        let other = Nonce::from_bytes([8; 16]).unwrap();
+        let mut guard = GuardAssociation::new(42);
+        assert!(guard
+            .observe(Bridge::new(BridgeKind::Ack, 42, nonce, 0).unwrap())
+            .is_err());
+        guard
+            .observe(Bridge::new(BridgeKind::Request, 42, nonce, 0).unwrap())
+            .unwrap();
+        assert!(guard
+            .observe(Bridge::new(BridgeKind::Returned, 42, other, 0).unwrap())
+            .is_err());
+        assert!(guard.require_returned().is_err());
     }
 }

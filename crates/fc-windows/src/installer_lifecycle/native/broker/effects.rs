@@ -79,6 +79,16 @@ impl Decision {
     pub(super) fn outcome(self) -> SettledOutcome {
         self.outcome
     }
+    fn require_present(self, admission: Admission) -> Self {
+        if self.outcome == SettledOutcome::Commit && self.expected == ExpectedState::Present {
+            self
+        } else {
+            Self {
+                outcome: SettledOutcome::Rollback,
+                expected: admission.preimage(),
+            }
+        }
+    }
 }
 
 fn local() -> Result<PathBuf> {
@@ -794,6 +804,12 @@ pub(super) fn failed_install(admission: &Admitted) -> Decision {
         expected: admission.kind.preimage(),
     }
 }
+/// The closed Setup install/repair intent requires the complete present payload.
+/// Legacy MSI may also request removal, so its generic staged decision remains
+/// separate. A missing tree cannot turn a repair into a successful uninstall.
+pub(super) fn staged_present(session: &mut Session, admission: &Admitted) -> Result<Decision> {
+    Ok(staged(session, admission)?.require_present(admission.kind))
+}
 pub(super) fn reconcile(
     session: &mut Session,
     admission: &Admitted,
@@ -833,6 +849,32 @@ mod tests {
     use super::super::super::super::broker::manifest::Entry;
     use super::*;
     use std::{fs, os::windows::io::AsRawHandle};
+
+    #[test]
+    fn setup_repair_cannot_commit_an_absent_payload_as_success() {
+        // The generic legacy decision permits a real uninstall. The separate
+        // Setup install/repair intent must roll back that same observation.
+        let absent = Decision::observed(Admission::SameManifest, Observation::Absent);
+        assert_eq!(absent.outcome(), SettledOutcome::Commit);
+        assert_eq!(absent.expected, ExpectedState::Absent);
+        for admission in [Admission::Fresh, Admission::SameManifest] {
+            for observation in [
+                Observation::Present,
+                Observation::Absent,
+                Observation::Other,
+            ] {
+                let decision =
+                    Decision::observed(admission, observation).require_present(admission);
+                if observation == Observation::Present {
+                    assert_eq!(decision.outcome(), SettledOutcome::Commit);
+                    assert_eq!(decision.expected, ExpectedState::Present);
+                } else {
+                    assert_eq!(decision.outcome(), SettledOutcome::Rollback);
+                    assert_eq!(decision.expected, admission.preimage());
+                }
+            }
+        }
+    }
 
     #[test]
     fn maintenance_decision_preserves_original_preimage_and_pending_tags() {

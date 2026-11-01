@@ -131,6 +131,76 @@ class SetupSealTests(unittest.TestCase):
         self.rejected(SEAL["seal_setup_image"], legacy[:-len(body)] + b"x" + body, self.msi)
         self.rejected(SEAL["parse_sealed_setup_image"], legacy + bytes(49), self.msi)
 
+    def test_zero_slot_template_has_no_final_digest_or_circular_dependency(self):
+        template = SEAL["make_setup_template"](self.legacy)
+        slot = len(self.helper)
+        self.assertEqual(template[slot:slot + 16], b"FC-SETUP-MSI\0v1\0")
+        self.assertEqual(template[slot + 16:slot + 48], bytes(32))
+        self.assertEqual(template[:slot] + template[slot + 48:], self.legacy)
+        self.assertEqual(SEAL["parse_setup_template"](template),
+                         BUILDER["parse_lifecycle_image"](self.legacy))
+        # Synthetic MSI contains the already-fixed zero template, never its own hash.
+        inner = b"synthetic final MSI with Binary.FcGuardClientTemplate:" + template
+        setup = SEAL["bind_setup_template"](template, inner)
+        hole = slot + 16
+        self.assertEqual(setup[:hole], template[:hole])
+        self.assertEqual(setup[hole:hole + 32], hashlib.sha256(inner).digest())
+        self.assertEqual(setup[hole + 32:], template[hole + 32:])
+        self.assertEqual(SEAL["seal_setup_image"](template, inner), setup)
+        self.assertEqual(SEAL["verify_setup_template_binding"](template, setup, inner),
+                         BUILDER["parse_lifecycle_image"](self.legacy))
+        self.assertEqual(template[hole:hole + 32], bytes(32))
+
+    def test_template_slot_must_be_all_zero_and_unique(self):
+        template = SEAL["make_setup_template"](self.legacy)
+        hole = len(self.helper) + 16
+        for offset in range(32):
+            bad = bytearray(template)
+            bad[hole + offset] = 1
+            self.rejected(SEAL["parse_setup_template"], bytes(bad))
+            self.rejected(SEAL["bind_setup_template"], bytes(bad), self.msi)
+        self.rejected(SEAL["make_setup_template"], template)
+        self.rejected(SEAL["make_setup_template"], self.sealed)
+        self.rejected(SEAL["parse_setup_template"], self.legacy)
+        self.rejected(SEAL["parse_setup_template"], self.sealed)
+        start = len(self.helper)
+        double = template[:start] + template[start:start + 48] + template[start:]
+        self.rejected(SEAL["parse_setup_template"], double)
+        self.rejected(SEAL["bind_setup_template"], double, self.msi)
+
+    def test_binding_proof_rejects_valid_pe_or_manifest_changes_outside_hole(self):
+        template = SEAL["make_setup_template"](self.legacy)
+        # These mutations remain valid to the individual format parsers. The
+        # cross-image proof must still reject them instead of normalizing fields.
+        digest_offset = template.find(hashlib.sha256(b"LICENSE").digest())
+        self.assertGreater(digest_offset, len(self.helper) + 48)
+        for offset in (len(self.helper) - 1, digest_offset):
+            changed_template = bytearray(template)
+            changed_template[offset] ^= 1
+            changed_template = bytes(changed_template)
+            SEAL["parse_setup_template"](changed_template)
+            self.rejected(SEAL["verify_setup_template_binding"],
+                          changed_template, self.sealed, self.msi)
+            changed_setup = bytearray(self.sealed)
+            changed_setup[offset] ^= 1
+            changed_setup = bytes(changed_setup)
+            SEAL["parse_sealed_setup_image"](changed_setup, self.msi)
+            self.rejected(SEAL["verify_setup_template_binding"],
+                          template, changed_setup, self.msi)
+        self.rejected(SEAL["verify_setup_template_binding"],
+                      template, self.sealed, self.msi + b"tail")
+
+    def test_template_rejects_truncation_bad_pe_and_bad_footer(self):
+        template = SEAL["make_setup_template"](self.legacy)
+        for n in (0, 19, len(template) - 1):
+            self.rejected(SEAL["parse_setup_template"], template[:n])
+        for offset in (0, len(self.helper), len(template) - 1):
+            changed = bytearray(template)
+            changed[offset] ^= 1
+            self.rejected(SEAL["parse_setup_template"], bytes(changed))
+        self.rejected(SEAL["bind_setup_template"], template, b"")
+        self.rejected(SEAL["parse_sealed_setup_image"], template, self.msi)
+
     def test_sources_parse_without_bytecode_or_product_cli(self):
         for name in ("controlled-setup-seal.py", "test-controlled-setup-seal.py"):
             ast.parse((HERE / name).read_text(), filename=name)
