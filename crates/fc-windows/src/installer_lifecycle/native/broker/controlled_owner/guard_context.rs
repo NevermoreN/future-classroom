@@ -339,8 +339,11 @@ impl Context {
         } else if kind == INSTALLMESSAGE_ACTIONSTART.0 as u32 && text == "InstallInitialize" {
             // A native typed successor, rather than an INFO log or callback
             // return, proves the preceding immediate guard actually returned0.
-            if !state.granted || state.returned {
-                return Err(LifecycleError::Unsettled);
+            if !first_successor(state.granted, state.returned)? {
+                // InstallExecute can replay this typed action while running
+                // the queued script. The original guard was already returned;
+                // this notification owns no new pipe, grant or bridge receipt.
+                return Ok(());
             }
             let pipe = state.pipe.ok_or(LifecycleError::Unsettled)?;
             state.resources.close_handle(pipe)?;
@@ -556,5 +559,32 @@ impl Context {
         }
         live(process)?;
         Ok(process)
+    }
+}
+
+fn first_successor(granted: bool, returned: bool) -> Result<bool> {
+    if !granted {
+        return Err(LifecycleError::Unsettled);
+    }
+    Ok(!returned)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn script_replay_does_not_return_original_guard_twice() {
+        assert_eq!(
+            first_successor(false, false),
+            Err(LifecycleError::Unsettled)
+        );
+        assert_eq!(first_successor(false, true), Err(LifecycleError::Unsettled));
+        // The scheduling notification consumes the original return exactly
+        // once; the later InstallExecute script notification does not cancel
+        // MSI or perform a second native close/bridge send. Actual MSI replay
+        // and transaction/effects settlement remain integration requirements.
+        assert_eq!(first_successor(true, false), Ok(true));
+        assert_eq!(first_successor(true, true), Ok(false));
     }
 }
