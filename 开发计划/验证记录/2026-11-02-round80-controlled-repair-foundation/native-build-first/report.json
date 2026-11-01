@@ -1,0 +1,102 @@
+{
+  "status": "PASS_BUILD_ONLY_TARGET_RUNTIME_NOT_RUN",
+  "actualExit": 0,
+  "originalParentReaped": true,
+  "budgetSeconds": 900,
+  "budgetExceeded": false,
+  "seconds": 175.52536113099995,
+  "argv": [
+    "cargo",
+    "test",
+    "--release",
+    "--offline",
+    "--locked",
+    "-p",
+    "fc-windows",
+    "--all-targets",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--target-dir",
+    "/tmp/fc-round80-controlled-repair/target-first",
+    "--no-run",
+    "--message-format=json-render-diagnostics"
+  ],
+  "sourceBase": "52d6392552679e7cedb564cd52db08e6e2ebc04b",
+  "sourcesBefore": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 10906,
+      "sha256": "85781f14de7b958c18cc24b1a5c495ddd05a26908a49a4148d9485b5e5eee6f2"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 40573,
+      "sha256": "23c8183fa0bf15caa2d36775c9ba5d3d6474636774884f18a1aa09284d9c1131"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "bytes": 32915,
+      "sha256": "6663c385ff7395e3abe3eeff9a5ef1a9f2e32b87f10735b1313a4613cd4baf19"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/controlled.rs",
+      "bytes": 8849,
+      "sha256": "9eb4a3e521ac6719ac90f696955c3bc07de3b717e9840c6fc5989ee36a75b52a"
+    }
+  ],
+  "sourcesAfter": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 10906,
+      "sha256": "85781f14de7b958c18cc24b1a5c495ddd05a26908a49a4148d9485b5e5eee6f2"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 40573,
+      "sha256": "23c8183fa0bf15caa2d36775c9ba5d3d6474636774884f18a1aa09284d9c1131"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "bytes": 32915,
+      "sha256": "6663c385ff7395e3abe3eeff9a5ef1a9f2e32b87f10735b1313a4613cd4baf19"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/controlled.rs",
+      "bytes": 8849,
+      "sha256": "9eb4a3e521ac6719ac90f696955c3bc07de3b717e9840c6fc5989ee36a75b52a"
+    }
+  ],
+  "sourceUnchanged": true,
+  "outputs": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows-1366a52ab22cb440.exe",
+      "bytes": 4139987,
+      "sha256": "36f8687c3bc4b12afa8995c72514a79f9ad4e7f85e88152af6225e4cd631b471",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_windows",
+        "src_path": "/tmp/fc-round80-controlled-repair/checkout-52d6392-first/crates/fc-windows/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    }
+  ],
+  "stdout": {
+    "bytes": 40159,
+    "sha256": "543c1515993f3ab4d90c291508489246d37eca2104a273701fbdb01cecd39bbc"
+  },
+  "stderr": {
+    "bytes": 1749,
+    "sha256": "ef5d52063fc5899e4db22b9c3185b9cf7e2210ebba65e06a51bbb14feeebe13e"
+  },
+  "runtime": "NOT_RUN",
+  "productionAdmission": false
+}

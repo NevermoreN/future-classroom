@@ -1,0 +1,439 @@
+{
+  "status": "PASS_CONTROLLED_REPAIR_FOUNDATION_NATIVE_TESTS_WIN11_ONLY",
+  "authority": "NATIVE_GATE_REGRESSION_ONLY_NOT_PRODUCTION_MSI_ADAPTER",
+  "sourceBase": "52d6392552679e7cedb564cd52db08e6e2ebc04b",
+  "sourceInputs": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 10906,
+      "sha256": "85781f14de7b958c18cc24b1a5c495ddd05a26908a49a4148d9485b5e5eee6f2"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 40573,
+      "sha256": "23c8183fa0bf15caa2d36775c9ba5d3d6474636774884f18a1aa09284d9c1131"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "bytes": 32915,
+      "sha256": "6663c385ff7395e3abe3eeff9a5ef1a9f2e32b87f10735b1313a4613cd4baf19"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/controlled.rs",
+      "bytes": 8849,
+      "sha256": "9eb4a3e521ac6719ac90f696955c3bc07de3b717e9840c6fc5989ee36a75b52a"
+    }
+  ],
+  "expectedScopes": {
+    "controlled": 6,
+    "lifecycle": 52
+  },
+  "scopeOverlap": "52 includes the 6 controlled and 11 effects tests; do not sum",
+  "producer": {
+    "path": "/tmp/fc-round80-controlled-repair/native-build-first/report.json",
+    "bytes": 3075,
+    "sha256": "ca3ac65670daed294271f5835f2fa27fc1fd2079570b4fe423e3e09676993106"
+  },
+  "nativeInput": {
+    "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows-1366a52ab22cb440.exe",
+    "bytes": 4139987,
+    "sha256": "36f8687c3bc4b12afa8995c72514a79f9ad4e7f85e88152af6225e4cd631b471"
+  },
+  "capture": {
+    "path": "/tmp/fc-round80-controlled-repair/native-reference-first/Capture.cs",
+    "bytes": 9814,
+    "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a"
+  },
+  "operations": [
+    {
+      "name": "create",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.4966234790008457,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/create.stdout.log",
+        "bytes": 142,
+        "sha256": "68396d15ca8b72e49aaa36c72bedc0e9150aa576cb4b055b6f35467ad1f86be9"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/create.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "name": "upload-Capture.cs",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/native-runtime-first/upload/Capture.cs",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-controlled-native-b73e6025094e18fa34864a656ccc896c/"
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.21626516599826573,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/upload-Capture.cs.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/upload-Capture.cs.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "upload-candidate-tests.exe",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/native-runtime-first/upload/candidate-tests.exe",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-controlled-native-b73e6025094e18fa34864a656ccc896c/"
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.2809259759997076,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/upload-candidate-tests.exe.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/upload-candidate-tests.exe.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "run",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 1.7704232279993448,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/run.stdout.log",
+        "bytes": 10460,
+        "sha256": "9e24ee5cdba556de0aa61016f0a12899229d517d5ee5fc49493e233de1fc3eff"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/run.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "name": "owned-processes",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.5680709950011078,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/owned-processes.stdout.log",
+        "bytes": 13,
+        "sha256": "7886222597aa503c7fcb97ba200bf66c918aaf8bb08b6c702386457d30bdf0d7"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/owned-processes.stderr.log",
+        "bytes": 596,
+        "sha256": "be2a813c5e264e6e4b05c9816b17dc6eb039a1cc247767c8927d259fa5541e12"
+      }
+    },
+    {
+      "name": "inventory",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.5302997580001829,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/inventory.stdout.log",
+        "bytes": 516,
+        "sha256": "99434ef3fa727b8619b267720cde43a4ecbfda1bc47c8aff90273d10a362bb38"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/inventory.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "name": "download",
+      "argv": [
+        "scp",
+        "-q",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-controlled-native-b73e6025094e18fa34864a656ccc896c",
+        "/tmp/fc-round80-controlled-repair/native-runtime-first/download"
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.29283702000066114,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/download.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/download.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "delete",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.5570611869989079,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/delete.stdout.log",
+        "bytes": 117,
+        "sha256": "76886eeb33cd209d9b28341d21f2ebc789015b8ce9d7a75f6120f615959c265d"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/native-runtime-first/delete.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    }
+  ],
+  "cleanup": "PASS_EXACT_DOWNLOADED_OWNED_SCRATCH_ONLY",
+  "outerSeconds": 900,
+  "windowsRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-native-b73e6025094e18fa34864a656ccc896c",
+  "native": {
+    "originalWholeSeconds": 600,
+    "originalObjects": [
+      {
+        "Pid": 2384,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380394452880580,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-native-b73e6025094e18fa34864a656ccc896c\\candidate-tests.exe",
+        "Sha256": "36f8687c3bc4b12afa8995c72514a79f9ad4e7f85e88152af6225e4cd631b471",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true
+      },
+      {
+        "Pid": 29580,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380394455008327,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-native-b73e6025094e18fa34864a656ccc896c\\candidate-tests.exe",
+        "Sha256": "36f8687c3bc4b12afa8995c72514a79f9ad4e7f85e88152af6225e4cd631b471",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true
+      }
+    ],
+    "productionMsiAdapter": "NOT_EXERCISED",
+    "originalParentReturned": true,
+    "status": "PASS_CONTROLLED_FOUNDATION_AND_FULL_LIFECYCLE_NATIVE_TESTS_WIN11_ONLY",
+    "cases": [
+      {
+        "stdout": "\nrunning 6 tests\ntest installer_lifecycle::tests::controlled_arm_uses_original_tag5_and_cannot_settle_with_synthetic_join0 ... ok\ntest installer_lifecycle::tests::controlled_begin_draft_expiry_requires_real_empty_end_observation_and_actual_exit ... ok\ntest installer_lifecycle::tests::controlled_draft_blocks_startup_without_creating_pending_and_checked_aborts ... ok\ntest installer_lifecycle::tests::controlled_draft_checked_close_failure_has_no_pending_and_no_release_until_exit ... ok\ntest installer_lifecycle::tests::controlled_failed_begin_requires_original_guardian_exit_before_draft_abort ... ok\ntest installer_lifecycle::tests::controlled_unknown_original_draft_owner_retains_gate_until_actual_process_exit ... ok\n\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 279 filtered out; finished in 0.17s\n\n",
+        "originalDeadlineWholeMilliseconds": 150110,
+        "name": "controlled",
+        "pid": 2384,
+        "stderr": "",
+        "startedWholeMilliseconds": 110,
+        "originalSeconds": 150,
+        "endedWholeMilliseconds": 356,
+        "actualExit": true,
+        "argv": "installer_lifecycle::tests::controlled_ --test-threads=1 --nocapture",
+        "original": {
+          "Pid": 2384,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380394452880580,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-native-b73e6025094e18fa34864a656ccc896c\\candidate-tests.exe",
+          "Sha256": "36f8687c3bc4b12afa8995c72514a79f9ad4e7f85e88152af6225e4cd631b471",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true
+        },
+        "exitCode": 0,
+        "creation": 134380394452880580
+      },
+      {
+        "stdout": "\nrunning 52 tests\ntest installer_lifecycle::broker::manifest::tests::actual_closed_format_accepts_full_set_and_rejects_truncation_tail_and_aliases ... ok\ntest installer_lifecycle::broker::manifest::tests::paths_cannot_escape_or_create_win32_aliases ... ok\ntest installer_lifecycle::broker::tests::role_grammar_has_no_external_authority_fields ... ok\ntest installer_lifecycle::native::broker::context_probe::engine_parent_context_observer ... ok\ntest installer_lifecycle::native::broker::context_probe::observer_carrier_has_no_path_alias_or_normal_role ... ok\ntest installer_lifecycle::native::broker::effects::preimage::tests::rollback_requires_original_bad_bytes_and_absence_but_not_old_object_ids ... ok\ntest installer_lifecycle::native::broker::effects::preimage::tests::traversal_requires_every_expected_original_ancestor_pin ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_closed_file_effects_pin_bytes_and_reject_extra_changed_and_linked_files ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_damaged_preimage_pins_zero_and_bad_bytes_and_requires_exact_rollback ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_preimage_distinguishes_missing_tree_and_rejects_foreign_link_locked_and_large ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_preimage_rejects_missing_ancestor_created_after_directory_snapshot ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_run_absence_guard_never_changes_any_present_value ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_target_fact_cannot_select_directory_or_alias ... ok\ntest installer_lifecycle::native::broker::effects::tests::enum_absence_and_x86_registry_component_paths_are_exact ... ok\ntest installer_lifecycle::native::broker::effects::tests::maintenance_decision_preserves_original_preimage_and_pending_tags ... ok\ntest installer_lifecycle::native::broker::effects::tests::registered_product_and_user_sid_must_match_exact_native_identity ... ok\ntest installer_lifecycle::native::broker::retirement::tests::namespace_replacement_is_rejected_while_original_read_cap_stays_held ... ok\ntest installer_lifecycle::native::broker::retirement::tests::only_exact_os_installer_temp_namespace_is_eligible ... ok\ntest installer_lifecycle::native::broker::retirement::tests::original_read_cap_survives_strict_pin_then_retires_same_file ... ok\ntest installer_lifecycle::native::broker::retirement::tests::replacement_even_with_same_size_or_hash_cannot_match_original_object ... ok\ntest installer_lifecycle::native::broker::supervisor::tests::child_image_comparison_is_exact_path_not_leaf_or_prefix ... ok\ntest installer_lifecycle::native::broker::tests::actual_local_pipe_binds_original_process_sid_image_and_returns_controls ... \nrunning 1 test\ntest installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 284 filtered out; finished in 0.02s\n\nok\ntest installer_lifecycle::native::broker::tests::empty_control_packets_have_no_transaction_or_settlement_fields ... ok\ntest installer_lifecycle::native::broker::tests::engine_parent_sid_policy_accepts_only_same_user_or_exact_local_system ... ok\ntest installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok\ntest installer_lifecycle::native::broker::tests::real_pipe_cleanup_fault_retains_original_and_faults_only_subprocess ... \nrunning 1 test\ntest installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 284 filtered out; finished in 0.00s\n\nok\ntest installer_lifecycle::native::broker::tests::supervisor_hello_is_transaction_only_and_old_notices_are_rejected ... ok\ntest installer_lifecycle::native::broker::tests::unconnected_pipe_timeout_has_no_outstanding_io_or_replacement ... ok\ntest installer_lifecycle::native::broker::tests::unknown_short_peer_close_never_grants_released_ack ... \nrunning 1 test\ntest installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 284 filtered out; finished in 0.01s\n\nok\ntest installer_lifecycle::tests::close_failure_retains_physical_owner_in_child_without_replacement ... ok\ntest installer_lifecycle::tests::common_startup_helper_does_not_enter_body_under_maintenance ... ok\ntest installer_lifecycle::tests::common_startup_helper_holds_during_success_body_until_checked_return ... ok\ntest installer_lifecycle::tests::common_startup_helper_retains_after_caught_panic_until_actual_process_exit ... ok\ntest installer_lifecycle::tests::common_startup_helper_retains_after_error_until_actual_process_exit ... ok\ntest installer_lifecycle::tests::controlled_arm_uses_original_tag5_and_cannot_settle_with_synthetic_join0 ... ok\ntest installer_lifecycle::tests::controlled_begin_draft_expiry_requires_real_empty_end_observation_and_actual_exit ... ok\ntest installer_lifecycle::tests::controlled_draft_blocks_startup_without_creating_pending_and_checked_aborts ... ok\ntest installer_lifecycle::tests::controlled_draft_checked_close_failure_has_no_pending_and_no_release_until_exit ... ok\ntest installer_lifecycle::tests::controlled_failed_begin_requires_original_guardian_exit_before_draft_abort ... ok\ntest installer_lifecycle::tests::controlled_unknown_original_draft_owner_retains_gate_until_actual_process_exit ... ok\ntest installer_lifecycle::tests::coordination_rejects_gate_hardlink_alias_before_pending_or_school_data ... ok\ntest installer_lifecycle::tests::existing_broad_gate_dacl_is_rejected_without_repair_or_pending ... ok\ntest installer_lifecycle::tests::isolated_parent_delete_child_grant_is_rejected ... ok\ntest installer_lifecycle::tests::malformed_or_torn_pending_is_negative_not_dead_owner_recovery ... ok\ntest installer_lifecycle::tests::native_child ... ok\ntest installer_lifecycle::tests::original_expiry_never_renews_or_clears_negative_state ... ok\ntest installer_lifecycle::tests::os_parent_owner_trust_does_not_relax_exact_private_owner ... ok\ntest installer_lifecycle::tests::physical_maintenance_blocks_child_and_owner_loss_keeps_pending ... ok\ntest installer_lifecycle::tests::physical_shared_child_blocks_maintenance_until_actual_return ... ok\ntest installer_lifecycle::tests::producer_close_failure_remains_negative_after_original_process_exit ... ok\ntest installer_lifecycle::tests::receipt_before_actual_guardian_exit_cannot_clear_pending ... ok\ntest installer_lifecycle::tests::settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate ... ok\n\ntest result: ok. 52 passed; 0 failed; 0 ignored; 0 measured; 233 filtered out; finished in 0.86s\n\n",
+        "originalDeadlineWholeMilliseconds": 300358,
+        "name": "lifecycle",
+        "pid": 29580,
+        "stderr": "",
+        "startedWholeMilliseconds": 358,
+        "originalSeconds": 300,
+        "endedWholeMilliseconds": 1231,
+        "actualExit": true,
+        "argv": "installer_lifecycle:: --test-threads=1 --nocapture",
+        "original": {
+          "Pid": 29580,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380394455008327,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-native-b73e6025094e18fa34864a656ccc896c\\candidate-tests.exe",
+          "Sha256": "36f8687c3bc4b12afa8995c72514a79f9ad4e7f85e88152af6225e4cd631b471",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true
+        },
+        "exitCode": 0,
+        "creation": 134380394455008327
+      }
+    ],
+    "controlledNativeReturns": "CFG_TEST_SYNTHETIC_BEGIN_END_OBSERVATIONS_ONLY",
+    "captureSourceOnlyProcessMethods": true,
+    "cleanup": "ROOT_DOWNLOAD_THEN_EXACT_DELETE_REQUIRED",
+    "elapsedMilliseconds": 1235
+  },
+  "qualifiedCases": [
+    {
+      "name": "controlled",
+      "outerTotals": {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 279
+      },
+      "outerRunningCount": 6,
+      "expectedOuterStarts": 6,
+      "summaryCount": 1,
+      "nestedSummaryCount": 0,
+      "summaryAuthority": "FINAL_ORIGINAL_PARENT_SUMMARY_WITH_ORIGINAL_PARENT_EXIT0_AND_CHECKED_CLOSE"
+    },
+    {
+      "name": "lifecycle",
+      "outerTotals": {
+        "passed": 52,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 233
+      },
+      "outerRunningCount": 52,
+      "expectedOuterStarts": 52,
+      "summaryCount": 4,
+      "nestedSummaryCount": 3,
+      "summaryAuthority": "FINAL_ORIGINAL_PARENT_SUMMARY_WITH_ORIGINAL_PARENT_EXIT0_AND_CHECKED_CLOSE"
+    }
+  ],
+  "ownedProcessReadback": {
+    "count": 0
+  },
+  "inventory": {
+    "directories": [
+      "compiler-temp",
+      "test-temp"
+    ],
+    "files": [
+      {
+        "path": ".owner",
+        "sha256": "4bc32bf4d87f8cd7ee61aa857235843a56e4370341f7c8ec8d3ff440685840bf",
+        "bytes": 56
+      },
+      {
+        "path": "candidate-tests.exe",
+        "sha256": "36f8687c3bc4b12afa8995c72514a79f9ad4e7f85e88152af6225e4cd631b471",
+        "bytes": 4139987
+      },
+      {
+        "path": "Capture.cs",
+        "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a",
+        "bytes": 9814
+      },
+      {
+        "path": "native-result.json",
+        "sha256": "b656ad7cf2eec12bf0bbf1ea9e0f37c005ef3d2f266b045c29e159eb75d832b5",
+        "bytes": 13586
+      }
+    ]
+  },
+  "delete": {
+    "nonce": "b73e6025094e18fa34864a656ccc896c",
+    "status": "REMOVED_EXACT_REPAIR_NATIVE_RUNTIME_ROOT",
+    "knownAbsent": true
+  },
+  "elapsedSeconds": 4.7483490590002475,
+  "candidateSourcesUnchanged": true,
+  "compiledExeUnchanged": true
+}
