@@ -1,0 +1,73 @@
+{
+  "status": "PASS_OWNED_LOCAL_BATCH_CLEANUP",
+  "commitProved": "39f40f361b45397f3408e87b335e3c478d076fc8",
+  "proofSha256": "bcec0fdb007d8f62731733389bf84748b075b3e4357773db136271d790c7b8ca",
+  "removed": [
+    {
+      "path": "/tmp/fc-round53-msi-candidate-worktree",
+      "kind": "owned-worktree",
+      "files": 15320,
+      "bytes": 738394532,
+      "absent": true,
+      "branchRemoved": true
+    },
+    {
+      "path": "/tmp/fc-round54-win7-loader-worktree",
+      "kind": "owned-worktree",
+      "files": 8935,
+      "bytes": 553947716,
+      "absent": true,
+      "branchRemoved": true
+    },
+    {
+      "path": "/tmp/fc-round52-ci-evidence",
+      "kind": "owned-root",
+      "files": 676,
+      "bytes": 385956959,
+      "absent": true
+    },
+    {
+      "path": "/tmp/fc-round53-msi-evidence",
+      "kind": "owned-root",
+      "files": 310,
+      "bytes": 88906522,
+      "absent": true
+    },
+    {
+      "path": "/tmp/fc-round53-msi-tools",
+      "kind": "owned-root",
+      "files": 187,
+      "bytes": 3680904,
+      "absent": true
+    },
+    {
+      "path": "/tmp/fc-round54-win7-loader-evidence",
+      "kind": "owned-root",
+      "files": 145,
+      "bytes": 33157828,
+      "absent": true
+    },
+    {
+      "path": "/tmp/fc-round54-win7-loader-target",
+      "kind": "owned-root",
+      "files": 2355,
+      "bytes": 911538647,
+      "absent": true
+    }
+  ],
+  "outsideReportsRemoved": [
+    "/tmp/fc-round52-archive-sealed-first.json",
+    "/tmp/fc-round52-archive-preparation-first.json",
+    "/tmp/fc-round53-archive-sealed-first.json",
+    "/tmp/fc-round53-archive-preparation-first.json",
+    "/tmp/fc-round54-archive-sealed-first.json"
+  ],
+  "helperSha256": "8715d6f70b917b09b1b57df1110d90350d718931b0f07b755cde240c1e3b03a8",
+  "preserved": [
+    "main target/debug and global developer caches",
+    "persistent SSH private key and authorization/service",
+    "three intentional /mnt/data development ZIPs",
+    "new active R55 CI evidence root"
+  ],
+  "windows": "Separate final R54 read-only audit already PASS; no new remote mutation or observation by this local cleanup"
+}
