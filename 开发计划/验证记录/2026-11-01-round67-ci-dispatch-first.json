@@ -1,0 +1,41 @@
+{
+  "status": "BOTH_SINGLE_DISPATCH_RUNS_IDENTIFIED_COMPILE_IN_PROGRESS",
+  "recordedUtc": "2026-11-01T07:05:00.117337+00:00",
+  "runs": [
+    {
+      "baseline": "modern",
+      "sourceSha": "54397fdd358a42bf8896e86b048c6b43a4e12028",
+      "runId": 41283223610,
+      "htmlUrl": "https://github.com/NevermoreN/future-classroom/actions/runs/41283223610",
+      "originalDispatch": {
+        "file": "FutureClassroom-round67-windows-msvc-dispatch.json",
+        "bytes": 21357,
+        "sha256": "f2ff1e8d1835be11c2dad4e9931967b73b36c343f523ebab3452b554c3ce2865"
+      },
+      "initialJobs": {
+        "file": "modern-jobs-first.json",
+        "sha256": "8eeacb0ec3544eae0e2eb207c242d87483e2714f94425dfd7b1cfbb558eed6e7"
+      },
+      "observedStatus": "COMPILE_IN_PROGRESS",
+      "runtimeAcceptance": "NOT_YET_VALIDATED"
+    },
+    {
+      "baseline": "win7",
+      "sourceSha": "54397fdd358a42bf8896e86b048c6b43a4e12028",
+      "runId": 41283223767,
+      "htmlUrl": "https://github.com/NevermoreN/future-classroom/actions/runs/41283223767",
+      "originalDispatch": {
+        "file": "FutureClassroom-round67-windows-win7-msvc-dispatch.json",
+        "bytes": 21445,
+        "sha256": "ffeae98a9fc9a3e619c0d742808863b54fc03e462b3e31d6d7d73237d870e76f"
+      },
+      "initialJobs": {
+        "file": "win7-jobs-first.json",
+        "sha256": "39e49f5df1476b70a81e5040d303b70a00391f4fb38a16daba7676328c220a6f"
+      },
+      "observedStatus": "COMPILE_IN_PROGRESS",
+      "runtimeAcceptance": "NOT_YET_VALIDATED"
+    }
+  ],
+  "scope": "Exactly one dispatch per workflow for the final synchronized source; actual job observations are in_progress. No compile/runtime/Win7 or Win10 OS success presumed. Original API wrappers will be archived with terminal R67 evidence."
+}
