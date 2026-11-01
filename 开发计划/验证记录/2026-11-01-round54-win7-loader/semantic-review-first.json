@@ -1,0 +1,27 @@
+{
+  "status": "PASS_STATIC_NARROW_SEMANTIC_REVIEW_NOT_RUNTIME",
+  "checks": {
+    "endpointBodyOnlyReleaseImportChanged": true,
+    "exactOneReleaseAfterBoundedRead": true,
+    "sameE_FAILColorResult": true,
+    "sameColorCancellation": true,
+    "capacityClassifierStillE_BOUNDS": true,
+    "noNewErrorOrigination": true
+  },
+  "unchangedUserFacingCallers": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 260347,
+      "sha256": "9924f860568ef6adf521411caa01a5331674b6deccdfc027963b7b9fe4794671",
+      "unchangedFromGitBase": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+      "bytes": 60894,
+      "sha256": "e7b78e9557f40c791268d2f4b0007179948b38b954bde52e0cd39e0f030c353d",
+      "unchangedFromGitBase": true
+    }
+  ],
+  "tradeoff": "Three locally authored extended debugging strings no longer originate WinRT ErrorInfo. Exact HRESULT and the existing localized user-facing capacity/color-failure text are retained; general COM IErrorInfo support remains enabled.",
+  "windowsRuntime": "NOT_RUN_BY_AGENT; existing native capacity/passive-card and color/device unit cases compile withalltargets but require root actual Windows execution."
+}

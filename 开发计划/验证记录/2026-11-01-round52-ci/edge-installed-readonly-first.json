@@ -1,0 +1,45 @@
+{
+  "status": "PASS_CURRENT_INSTALLED_SIGNED_EDGE_READONLY",
+  "scope": "Read-only fixed installed Edge file/hash/version and Authenticode signature. No browser/task/registry/service/update/volume/trust changes.",
+  "command": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "IdentitiesOnly=yes",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe -NoProfile -NonInteractive -EncodedCommand JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AE8AdQB0AHAAdQB0AEUAbgBjAG8AZABpAG4AZwA9AFsAVABlAHgAdAAuAFUAVABGADgARQBuAGMAbwBkAGkAbgBnAF0AOgA6AG4AZQB3ACgAJABmAGEAbABzAGUAKQA7AAoAJABwAD0AJwBDADoAXABQAHIAbwBnAHIAYQBtACAARgBpAGwAZQBzACAAKAB4ADgANgApAFwATQBpAGMAcgBvAHMAbwBmAHQAXABFAGQAZwBlAFwAQQBwAHAAbABpAGMAYQB0AGkAbwBuAFwAbQBzAGUAZABnAGUALgBlAHgAZQAnADsACgAkAGkAdABlAG0APQBHAGUAdAAtAEkAdABlAG0AIAAtAEwAaQB0AGUAcgBhAGwAUABhAHQAaAAgACQAcAA7AAoAJABoAGEAcwBoAD0AKABHAGUAdAAtAEYAaQBsAGUASABhAHMAaAAgAC0ATABpAHQAZQByAGEAbABQAGEAdABoACAAJABwACAALQBBAGwAZwBvAHIAaQB0AGgAbQAgAFMASABBADIANQA2ACkALgBIAGEAcwBoAC4AVABvAEwAbwB3AGUAcgBJAG4AdgBhAHIAaQBhAG4AdAAoACkAOwAKACQAcwBpAGcAPQBHAGUAdAAtAEEAdQB0AGgAZQBuAHQAaQBjAG8AZABlAFMAaQBnAG4AYQB0AHUAcgBlACAALQBMAGkAdABlAHIAYQBsAFAAYQB0AGgAIAAkAHAAOwAKAEAAewBwAGEAdABoAD0AJABpAHQAZQBtAC4ARgB1AGwAbABOAGEAbQBlADsAYgB5AHQAZQBzAD0AJABpAHQAZQBtAC4ATABlAG4AZwB0AGgAOwBzAGgAYQAyADUANgA9ACQAaABhAHMAaAA7AGYAaQBsAGUAVgBlAHIAcwBpAG8AbgA9ACQAaQB0AGUAbQAuAFYAZQByAHMAaQBvAG4ASQBuAGYAbwAuAEYAaQBsAGUAVgBlAHIAcwBpAG8AbgA7AHAAcgBvAGQAdQBjAHQAVgBlAHIAcwBpAG8AbgA9ACQAaQB0AGUAbQAuAFYAZQByAHMAaQBvAG4ASQBuAGYAbwAuAFAAcgBvAGQAdQBjAHQAVgBlAHIAcwBpAG8AbgA7AAoAcwBpAGcAbgBhAHQAdQByAGUAUwB0AGEAdAB1AHMAPQAkAHMAaQBnAC4AUwB0AGEAdAB1AHMALgBUAG8AUwB0AHIAaQBuAGcAKAApADsAcwBpAGcAbgBhAHQAdQByAGUAVAB5AHAAZQA9ACQAcwBpAGcALgBTAGkAZwBuAGEAdAB1AHIAZQBUAHkAcABlAC4AVABvAFMAdAByAGkAbgBnACgAKQA7AAoAcwBpAGcAbgBlAHIAUwB1AGIAagBlAGMAdAA9ACQAcwBpAGcALgBTAGkAZwBuAGUAcgBDAGUAcgB0AGkAZgBpAGMAYQB0AGUALgBTAHUAYgBqAGUAYwB0ADsAcwBpAGcAbgBlAHIASQBzAHMAdQBlAHIAPQAkAHMAaQBnAC4AUwBpAGcAbgBlAHIAQwBlAHIAdABpAGYAaQBjAGEAdABlAC4ASQBzAHMAdQBlAHIAOwBzAGkAZwBuAGUAcgBUAGgAdQBtAGIAcAByAGkAbgB0AD0AJABzAGkAZwAuAFMAaQBnAG4AZQByAEMAZQByAHQAaQBmAGkAYwBhAHQAZQAuAFQAaAB1AG0AYgBwAHIAaQBuAHQAOwAKAHIAZQBwAGEAcgBzAGUAUABvAGkAbgB0AD0AKAAoACQAaQB0AGUAbQAuAEEAdAB0AHIAaQBiAHUAdABlAHMAIAAtAGIAYQBuAGQAIABbAEkATwAuAEYAaQBsAGUAQQB0AHQAcgBpAGIAdQB0AGUAcwBdADoAOgBSAGUAcABhAHIAcwBlAFAAbwBpAG4AdAApAC0AbgBlACAAMAApADsACgBiAHIAbwB3AHMAZQByAFMAdABhAHIAdABlAGQAPQAkAGYAYQBsAHMAZQA7AGYAaQBsAGUAQwBoAGEAbgBnAGUAZAA9ACQAZgBhAGwAcwBlADsAcwB5AHMAdABlAG0AUwBlAHQAdABpAG4AZwBzAEMAaABhAG4AZwBlAGQAPQAkAGYAYQBsAHMAZQB9ACAAfAAgAEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0AQwBvAG0AcAByAGUAcwBzAAoA"
+  ],
+  "powershellSource": "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);\n$p='C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';\n$item=Get-Item -LiteralPath $p;\n$hash=(Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash.ToLowerInvariant();\n$sig=Get-AuthenticodeSignature -LiteralPath $p;\n@{path=$item.FullName;bytes=$item.Length;sha256=$hash;fileVersion=$item.VersionInfo.FileVersion;productVersion=$item.VersionInfo.ProductVersion;\nsignatureStatus=$sig.Status.ToString();signatureType=$sig.SignatureType.ToString();\nsignerSubject=$sig.SignerCertificate.Subject;signerIssuer=$sig.SignerCertificate.Issuer;signerThumbprint=$sig.SignerCertificate.Thumbprint;\nreparsePoint=(($item.Attributes -band [IO.FileAttributes]::ReparsePoint)-ne 0);\nbrowserStarted=$false;fileChanged=$false;systemSettingsChanged=$false} | ConvertTo-Json -Compress\n",
+  "exitCode": 0,
+  "stdout": {
+    "bytes": 628,
+    "sha256": "55b821e2fc56b0a368680d72d9b032194f49e6700f7ab37339ad7bd3ea514bf7",
+    "base64": "eyJzaWduZXJTdWJqZWN0IjoiQ049TWljcm9zb2Z0IENvcnBvcmF0aW9uLCBPPU1pY3Jvc29mdCBDb3Jwb3JhdGlvbiwgTD1SZWRtb25kLCBTPVdhc2hpbmd0b24sIEM9VVMiLCJmaWxlQ2hhbmdlZCI6ZmFsc2UsInJlcGFyc2VQb2ludCI6ZmFsc2UsImZpbGVWZXJzaW9uIjoiMTU2LjAuNDMxNC41OCIsInN5c3RlbVNldHRpbmdzQ2hhbmdlZCI6ZmFsc2UsInNpZ25hdHVyZVN0YXR1cyI6IlZhbGlkIiwicHJvZHVjdFZlcnNpb24iOiIxNTYuMC40MzE0LjU4Iiwic2lnbmVyVGh1bWJwcmludCI6IjQwMjhDQUQ2Mzc1MDlENDc0NEIxN0VDNUI0MkFFRDhEN0EzMUU2QUYiLCJzaWduYXR1cmVUeXBlIjoiQXV0aGVudGljb2RlIiwicGF0aCI6IkM6XFxQcm9ncmFtIEZpbGVzICh4ODYpXFxNaWNyb3NvZnRcXEVkZ2VcXEFwcGxpY2F0aW9uXFxtc2VkZ2UuZXhlIiwiYnJvd3NlclN0YXJ0ZWQiOmZhbHNlLCJieXRlcyI6NTQ1MzEyOCwic2lnbmVySXNzdWVyIjoiQ049TWljcm9zb2Z0IENvZGUgU2lnbmluZyBQQ0EgMjAyNCwgTz1NaWNyb3NvZnQgQ29ycG9yYXRpb24sIEM9VVMiLCJzaGEyNTYiOiJkMzVkNDhiMTFmMDQzOWVlZWRkYmJmZjBiZjU0ODU2ZTkyMmY1ZTE1MDZhMmYzMDk4YjVhODA4ZmNlYzQwNjhiIn0NCg=="
+  },
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base64": ""
+  },
+  "observed": {
+    "signerSubject": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+    "fileChanged": false,
+    "reparsePoint": false,
+    "fileVersion": "156.0.4314.58",
+    "systemSettingsChanged": false,
+    "signatureStatus": "Valid",
+    "productVersion": "156.0.4314.58",
+    "signerThumbprint": "4028CAD637509D4744B17EC5B42AED8D7A31E6AF",
+    "signatureType": "Authenticode",
+    "path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "browserStarted": false,
+    "bytes": 5453128,
+    "signerIssuer": "CN=Microsoft Code Signing PCA 2024, O=Microsoft Corporation, C=US",
+    "sha256": "d35d48b11f0439eeeddbbff0bf54856e922f5e1506a2f3098b5a808fcec4068b"
+  }
+}

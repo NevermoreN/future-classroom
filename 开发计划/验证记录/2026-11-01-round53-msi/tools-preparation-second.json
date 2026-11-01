@@ -1,0 +1,87 @@
+{
+  "status": "PASS_OWNED_TOOL_EXTRACTION_AND_VERSIONS_ONLY",
+  "packages": [
+    {
+      "name": "wixl",
+      "version": "0.103+repack-1build3",
+      "bytes": 124984,
+      "sha256": "e4b3b395c47ea87d8f74244dccdb242dd8ad80c3632bee101ffe85882cc66a2c",
+      "officialRepositoryPath": "pool/universe/m/msitools/wixl_0.103+repack-1build3_amd64.deb",
+      "transferBase": "https://mirrors.edge.kernel.org/ubuntu/",
+      "extracted": true
+    },
+    {
+      "name": "wixl-data",
+      "version": "0.103+repack-1build3",
+      "bytes": 251662,
+      "sha256": "095fba4e569f6901a2b585cf4bec34234dcb094c036445320b561e23499ae057",
+      "officialRepositoryPath": "pool/universe/m/msitools/wixl-data_0.103+repack-1build3_all.deb",
+      "transferBase": "https://mirrors.edge.kernel.org/ubuntu/",
+      "extracted": true
+    },
+    {
+      "name": "msitools",
+      "version": "0.103+repack-1build3",
+      "bytes": 49618,
+      "sha256": "a524b4ee9abc2d7d1d3cb0fd4a7629510285eb5c5271acab73c5c69e21eb1f58",
+      "officialRepositoryPath": "pool/universe/m/msitools/msitools_0.103+repack-1build3_amd64.deb",
+      "transferBase": "https://mirrors.edge.kernel.org/ubuntu/",
+      "extracted": true
+    },
+    {
+      "name": "libmsi-1.0-0",
+      "version": "0.103+repack-1build3",
+      "bytes": 70066,
+      "sha256": "e6187a2eb31f595e61a3c864d83400060f06ff13517774dcc37e65d6730ff754",
+      "officialRepositoryPath": "pool/universe/m/msitools/libmsi-1.0-0_0.103+repack-1build3_amd64.deb",
+      "transferBase": "https://mirrors.edge.kernel.org/ubuntu/",
+      "extracted": true
+    },
+    {
+      "name": "libgcab-1.0-0",
+      "version": "1.6-1build2",
+      "bytes": 28026,
+      "sha256": "b2ad7b79882a6c15192b88b039eac9ee29c94cd24197baa1caa8acb1169008fa",
+      "officialRepositoryPath": "pool/universe/g/gcab/libgcab-1.0-0_1.6-1build2_amd64.deb",
+      "transferBase": "https://mirrors.edge.kernel.org/ubuntu/",
+      "extracted": true
+    },
+    {
+      "name": "libgsf-1-114",
+      "version": "1.14.51-2ubuntu0.1",
+      "bytes": 104918,
+      "sha256": "fa61257611e56ecbf75f42de477016fbb3792bfce9c837232254bdb0a2820b26",
+      "officialRepositoryPath": "pool/main/libg/libgsf/libgsf-1-114_1.14.51-2ubuntu0.1_amd64.deb",
+      "transferBase": "https://mirrors.edge.kernel.org/ubuntu/",
+      "extracted": true
+    },
+    {
+      "name": "libgsf-1-common",
+      "version": "1.14.51-2ubuntu0.1",
+      "bytes": 13260,
+      "sha256": "6bff0b613089d6ba7fdedddbcd7e60da2936067430524d5a14f3fdda8a14e434",
+      "officialRepositoryPath": "pool/main/libg/libgsf/libgsf-1-common_1.14.51-2ubuntu0.1_all.deb",
+      "transferBase": "https://mirrors.edge.kernel.org/ubuntu/",
+      "extracted": true
+    }
+  ],
+  "tools": [
+    {
+      "path": "/tmp/fc-round53-msi-tools/root/usr/bin/wixl",
+      "exitCode": 0,
+      "sha256": "37fdfb01fb2e3fc752890f1e3eca4a161b5f41e251faa279ded0a9f907d73097"
+    },
+    {
+      "path": "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+      "exitCode": 0,
+      "sha256": "50b25845c863756975a8523fe1b370c4bf5dd1812a2a0229cf22139aa4b5ea81"
+    },
+    {
+      "path": "/tmp/fc-round53-msi-tools/root/usr/bin/msiextract",
+      "exitCode": 0,
+      "sha256": "145ef607aa9127ebaf334aecc799d01cfe0b50484bab1ff7f5d7de544c02e21e"
+    }
+  ],
+  "scope": "Exact Ubuntu official repository package SHA; mirror is transfer only. Owned extraction, no sudo/install/global linker changes/Windows actions.",
+  "finishedUtc": "2026-11-01T01:25:39.887985+00:00"
+}

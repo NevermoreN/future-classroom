@@ -1,0 +1,15 @@
+{
+  "attempts": [
+    {
+      "base": "http://archive.ubuntu.com/ubuntu/",
+      "status": "FAIL",
+      "kind": "HTTPError"
+    },
+    {
+      "base": "https://mirrors.edge.kernel.org/ubuntu/",
+      "status": "PASS_EXACT_PUBLISHED_SHA",
+      "bytes": 124984
+    }
+  ],
+  "scope": "Exact official published SHA required regardless of transfer mirror; TLS verification not disabled"
+}

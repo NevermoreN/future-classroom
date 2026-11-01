@@ -1,0 +1,27 @@
+{
+  "status": "PASS_TEST_BASELINE_UPDATED_AFTER_READONLY_MICROSOFT_SIGNATURE_VALIDATION",
+  "oldSha256": "f87d927bed3597f19c70af67bc786dd22e4eca3b5c7cc050336a016bb42f7fda",
+  "oldVersion": "156.0.4314.50",
+  "newSha256": "d35d48b11f0439eeeddbbff0bf54856e922f5e1506a2f3098b5a808fcec4068b",
+  "newVersion": "156.0.4314.58",
+  "newInstalledEvidenceSha256": "59eba9490068f44803c53ad82620f9e6bcd4bde7d2bff656f65ef40082f4b41f",
+  "scriptBeforeSha256": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5",
+  "scriptAfterSha256": "8687830a4db9fe5a336949797ff58a0534097569680172ae55cf11c915817009",
+  "unchangedOwnershipControls": {
+    "CSHARP": "b700a971ac39524b6696ac2850b555e248618806ea85782b26354b2dd20882e9",
+    "SUPERVISE": "309e6804b22000d36bf9005bbe47f0118b2989ead195688863b60e31207349ab",
+    "STOP": "559dc9fe8996daeaab63598db5ed0fab499bd9beaf7672e15683866c1dce8a5e",
+    "CAPTURE": "ac52f9cdac8880066283188ecfe8dfeaae213cc987c7508b2eff896f2f5764d8",
+    "CLEANUP": "06c5c1f4905958b91872b0ef48d9108f01720c6e4e19cdeaf5d1331ce03db439"
+  },
+  "staleControlCapability": {
+    "path": "/tmp/fc-round52-ci-evidence/modern-msvc-default-browser-continuous-first.json.browser-edge-owner.json.control.json",
+    "bytes": 662,
+    "mode": "0o600",
+    "contentsRead": false,
+    "sha256Computed": false,
+    "removed": true
+  },
+  "firstFailure": "Known installed signedEdge changed; startup was rejected before originalEdge process existed. Browser aggregatecleanup FAIL retained; physical owner handles/job/profile/root and TLS cert/key cleanup actualPASS. R46 earlier network failure remains unrelated UNKNOWN.",
+  "scope": "Only two test expected-baseline constants changed in isolated R53 tree. No Windows update, browser/user profile/service/trust changes; no bypass/automatic acceptance of arbitrary browser files."
+}

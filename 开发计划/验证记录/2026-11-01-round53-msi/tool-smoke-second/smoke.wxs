@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+<Product Id="F6D35070-570B-49EC-A9B6-C419F067A689" Name="FutureClassroom tool smoke only" Language="1033" Version="0.1.0" Manufacturer="FutureClassroom" UpgradeCode="33E2681A-F337-4770-A5F5-20593CF55618">
+<Package InstallerVersion="500" Compressed="yes" InstallScope="perUser" />
+<Media Id="1" Cabinet="payload.cab" EmbedCab="yes" />
+<MajorUpgrade AllowDowngrades="no" AllowSameVersionUpgrades="no" DowngradeErrorMessage="A newer version is installed." />
+<Condition Message="This candidate is per-user only.">NOT ALLUSERS</Condition>
+<Condition Message="Windows 7 or later is required.">VersionNT &gt;= 601</Condition>
+<Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+<Directory Id="TARGETDIR" Name="SourceDir"><Directory Id="LocalAppDataFolder"><Directory Id="Programs" Name="Programs"><Directory Id="INSTALLDIR" Name="FutureClassroomToolSmoke"><Component Id="Payload" Guid="C2661F23-D299-4D93-9207-D39D82C80C23" Win64="no"><File Id="PayloadFile" Name="payload.txt" Source="/tmp/fc-round53-msi-evidence/tool-smoke-second/中文输入/payload.txt" KeyPath="yes" /></Component></Directory></Directory></Directory></Directory>
+<Feature Id="Main" Level="1"><ComponentRef Id="Payload" /></Feature>
+</Product></Wix>

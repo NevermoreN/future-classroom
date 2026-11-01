@@ -1,0 +1,60 @@
+{
+  "status": "PASS_AST_AND_LOCAL_DEPENDENCY_IDENTITY_ONLY_NOT_WINDOWS_RUN",
+  "files": [
+    {
+      "source": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round46-msvc/run-windows-runtime-second.py",
+      "sourceSha256": "de2ddd536e852f4d15dafc48e187fe4e86800acbb57e2520881f5d5c37ed889b",
+      "prepared": "/tmp/fc-round52-ci-evidence/run-windows-runtime-first.py",
+      "sha256": "98f8fe3bc7b0ce9607cd8093c383d756c8bf2ae29e593607cd0eb274ee5a640f",
+      "changes": [
+        {
+          "from": "/tmp/fc-round46-ci-evidence",
+          "to": "/tmp/fc-round52-ci-evidence"
+        },
+        {
+          "from": "runtime-second",
+          "to": "runtime-first"
+        }
+      ]
+    },
+    {
+      "source": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round46-msvc/run-recorded.py",
+      "sourceSha256": "c1bdc304c0a8aa2fae74ddc2edd4de4cb651a8602b17b0fd9a6411f8331c73f5",
+      "prepared": "/tmp/fc-round52-ci-evidence/run-recorded.py",
+      "sha256": "e8116b1dd87d866d6a96dc3b55fcb2d8776d5c9214afc4e8a64203172970fe49",
+      "changes": [
+        {
+          "from": "/tmp/fc-round46-ci-evidence",
+          "to": "/tmp/fc-round52-ci-evidence"
+        }
+      ]
+    },
+    {
+      "source": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round46-msvc/audit-windows-readonly.py",
+      "sourceSha256": "8223150dfd259d664483983e2fb7921af79ec889769a1363b0ffc11551acfe23",
+      "prepared": "/tmp/fc-round52-ci-evidence/audit-windows-readonly.py",
+      "sha256": "93addd6f8b3df5a0f6a200d3975542dc0f9962f0da2d38fc04b169443c1be996",
+      "changes": [
+        {
+          "from": "/tmp/fc-round46-ci-evidence",
+          "to": "/tmp/fc-round52-ci-evidence"
+        }
+      ]
+    },
+    {
+      "source": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round50-https-integration/run-https-certificate-native-first.py",
+      "sourceSha256": "6560edfda790e05dc6b58ec381fa72b377b97633079277550ce6a366e7d7c406",
+      "prepared": "/tmp/fc-round52-ci-evidence/run-https-certificate-native-first.py",
+      "sha256": "c029ab1c1b40a194c625dc89c4480fa3fb532ba21ada4b790a7eeaab5b9e0bf4",
+      "changes": [
+        {
+          "from": "Path('/tmp/fc-round48-certificate-query-evidence/prepare-certificate-fixture-third.py')",
+          "to": "Path('/tmp/fc-round52-ci-evidence/certificate-fixture-preparation-first/prepare-certificate-fixture-third.py')"
+        }
+      ]
+    }
+  ],
+  "runtimeBudget": "Original explicit per EXE900 seconds/native1 second/threads2 unchanged; original TCP5 seconds untouched",
+  "certificate": "Frozen third preparer byte-identical B652; original22-step wire/7-fact contract unchanged; exact owned controls match current main; only old source paths relocated",
+  "scope": "Preparation/import validation only; no SSH or EXE execution or native fixture creation"
+}

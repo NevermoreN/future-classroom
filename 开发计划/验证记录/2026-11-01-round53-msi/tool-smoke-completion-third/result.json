@@ -1,0 +1,171 @@
+{
+  "status": "PASS_ACTUAL_MSI_TOOLCHAIN_FIXTURE_ONLY",
+  "scope": "Compiler+8 real tables from second attempt were actualsuccess; its checkerFAIL on assumed absent empty tables is retained. This continuation exports actual empty table data and exact extractor bytes; no compiler repetition, no product/Windows installation or lifecycle proof.",
+  "msi": {
+    "path": "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+    "bytes": 10752,
+    "sha256": "ba5b32c21947480a8234a9634668b7d60eb3c948d9ab7fc3b1914fe7f0156f2a"
+  },
+  "priorCommands": [
+    {
+      "name": "compile",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/wixl",
+        "-a",
+        "x86",
+        "-o",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.wxs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "summary",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "suminfo",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "tables",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "tables",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-Property",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "Property"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-Directory",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "Directory"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-Component",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "Component"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-File",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "File"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-Upgrade",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "Upgrade"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-LaunchCondition",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "LaunchCondition"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-InstallExecuteSequence",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "InstallExecuteSequence"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-Media",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "Media"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "negativeEffectTables": [
+    {
+      "table": "CustomAction",
+      "state": "DEFINED_EMPTY",
+      "rows": 0,
+      "exitCode": 0
+    },
+    {
+      "table": "Registry",
+      "state": "DEFINED_EMPTY",
+      "rows": 0,
+      "exitCode": 0
+    },
+    {
+      "table": "RemoveRegistry",
+      "state": "ABSENT",
+      "rows": 0
+    },
+    {
+      "table": "RemoveFile",
+      "state": "DEFINED_EMPTY",
+      "rows": 0,
+      "exitCode": 0
+    },
+    {
+      "table": "ServiceInstall",
+      "state": "DEFINED_EMPTY",
+      "rows": 0,
+      "exitCode": 0
+    },
+    {
+      "table": "ServiceControl",
+      "state": "DEFINED_EMPTY",
+      "rows": 0,
+      "exitCode": 0
+    }
+  ],
+  "extracted": {
+    "path": "/tmp/fc-round53-msi-evidence/tool-smoke-completion-third/extracted/Programs/FutureClassroomToolSmoke/payload.txt",
+    "bytes": 56,
+    "sha256": "ac24c2bf9d8da9a7954b12dbc472a5847a3ab0845487ddee1892ed4f6d6ea551"
+  },
+  "findings": [
+    "Intel;1033",
+    "Installer500",
+    "perUser NOT ALLUSERS",
+    "Upgrade currentversion bounds both strict; equal version not MajorUpgrade-detected",
+    "RemoveExistingProducts1401 before InstallInitialize1500; rollback not established"
+  ],
+  "WindowsInstallerExecuted": false
+}

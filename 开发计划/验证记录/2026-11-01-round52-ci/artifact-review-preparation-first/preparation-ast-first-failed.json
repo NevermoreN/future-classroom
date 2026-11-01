@@ -1,0 +1,8 @@
+{
+  "status": "PREPARATION_CHECK_FAILED",
+  "scope": "Local preparation checker only; helper/artifact mode was not executed",
+  "errorKind": "KeyError",
+  "errorKey": "MAX_FILE",
+  "actualStderr": "Traceback (most recent call last):\n  File \"<stdin>\", line 19, in <module>\nKeyError: 'MAX_FILE'\n",
+  "cause": "ast.literal_eval does not evaluate arithmetic BinOp constants; extractor omitted MAX_FILE. Use explicit read-only arithmetic AST evaluation in the corrected checker. No helper or historical source change."
+}

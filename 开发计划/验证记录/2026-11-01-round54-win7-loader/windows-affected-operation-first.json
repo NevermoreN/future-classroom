@@ -1,0 +1,102 @@
+{
+  "status": "PASS_ACTUAL_AFFECTED_WIN11_FLOWS",
+  "scope": "Only the affected Windows adapter test executable, then dedicated public/visual flows. Same frozen429 inputs; no repeat of unchanged Host/business tests. Actual OS Win11 only, GNU build does not certify Win7.",
+  "inputs": {
+    "normal": {
+      "path": "/tmp/fc-round54-win7-loader-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "sha256": "508eeb87e7830ad1ba206947b4b809c2e5f2fb234e9b3bf2c01ea802bf0dd4dc"
+    },
+    "test": {
+      "path": "/tmp/fc-round54-win7-loader-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-4026d62a77fcc28b.exe",
+      "sha256": "ca317aa16121beb5bdc7fe618159cfcfac6b7f352835705f461a06ce9881c005"
+    },
+    "selectedOriginalMetadata": {
+      "path": "/tmp/fc-round54-win7-loader-evidence/windows-affected-selected-original-first.jsonl",
+      "sha256": "e921f4dc9d3fbdbc98349d07eb1b55d2ecf11d7fad64c1e7489f32e8a9d48ad3"
+    },
+    "fullOriginalMetadata": {
+      "path": "/tmp/fc-round54-win7-loader-evidence/windows-compile-first.stdout.log",
+      "sha256": "a1299209bb4d5cb3f003f2f2f9803689f85a0a6e38ac7ac65cd171afe5e1ee89"
+    }
+  },
+  "scriptSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "operations": [
+    {
+      "name": "windows-affected-public-first",
+      "args": [
+        "python3",
+        "-B",
+        "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round54-win7-loader-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--test-timeout-seconds",
+        "900",
+        "--native-seconds",
+        "1",
+        "--report",
+        "/tmp/fc-round54-win7-loader-evidence/windows-affected-public-first.json",
+        "--test-metadata",
+        "/tmp/fc-round54-win7-loader-evidence/windows-affected-selected-original-first.jsonl",
+        "--public-desktop",
+        "--system-host"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 39.31803951994516,
+      "stdout": {
+        "path": "/tmp/fc-round54-win7-loader-evidence/windows-affected-public-first.stdout.log",
+        "bytes": 130,
+        "sha256": "eeec28648ee09fd44944539c93852cdd012cfb0949e30eb94fc0cf6880426886"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round54-win7-loader-evidence/windows-affected-public-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "resultStatus": "PASS",
+      "cleanup": "PASS"
+    },
+    {
+      "name": "windows-visual-first",
+      "args": [
+        "python3",
+        "-B",
+        "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round54-win7-loader-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--test-timeout-seconds",
+        "900",
+        "--native-seconds",
+        "1",
+        "--report",
+        "/tmp/fc-round54-win7-loader-evidence/windows-visual-first.json",
+        "--subject-visuals"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 8.18544885981828,
+      "stdout": {
+        "path": "/tmp/fc-round54-win7-loader-evidence/windows-visual-first.stdout.log",
+        "bytes": 93,
+        "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round54-win7-loader-evidence/windows-visual-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "resultStatus": "PASS",
+      "cleanup": "PASS"
+    }
+  ]
+}

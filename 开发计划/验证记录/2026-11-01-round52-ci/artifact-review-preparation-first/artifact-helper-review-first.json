@@ -1,0 +1,100 @@
+{
+  "schema": "future-classroom.r52-artifact-helper-preparation/v1",
+  "status": "READY_BYTE_IDENTICAL_REUSE_AST_ONLY",
+  "recordedUtc": "2026-11-01T01:12:33.729667+00:00",
+  "expectedSourceSha": "f6963919f100618fc482b1bff1a42dcbc571e610",
+  "modernRunId": 41259909480,
+  "win7RunId": 41259929271,
+  "baselineJobsAndArtifacts": "NOT_PROVIDED_NO_GUESSED_IDENTITIES",
+  "source": {
+    "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round46-msvc/verify-ci-artifact-first.py",
+    "bytes": 55618,
+    "sha256": "cf3780a6d08dec8f395383a20a9a1992b5e7d5a4b70f5cf865c16ce0b5e13e9c",
+    "matchesExactGitBlobAtSource": true
+  },
+  "preparedHelper": {
+    "path": "/tmp/fc-round52-artifact-review-owned/verify-ci-artifact-first.py",
+    "bytes": 55618,
+    "sha256": "cf3780a6d08dec8f395383a20a9a1992b5e7d5a4b70f5cf865c16ce0b5e13e9c",
+    "logicChanges": false
+  },
+  "ciHelperAtPinnedSource": {
+    "path": "scripts/windows-msvc-ci.ps1",
+    "sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+    "matchesValidatorRequiredSha": true
+  },
+  "checks": [
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "Source/baseline/run/job/artifact/ZIP digest+size and official metadata are parameters; no historical fixed input/member/executable totals."
+    },
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "Full Git metadata M is read at the exact --source tree; exact regular Git OID/mode/size/path metadata checked before and after."
+    },
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "Actual checkout SHA256 S excludes exact ordinal historical archive prefix H; M=S union H is complete, disjoint, dynamically counted."
+    },
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "Three manifests input-sha256/input-git-tree/input-domains; all six before/after objects agree; original raw digests bound to result/host."
+    },
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "S matches exact Git blob or exact whole LF-to-CRLF only; mixed CR/NUL/arbitrary normalization rejected. H is not claimed full raw SHA."
+    },
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "Complete producer ledger and ZIP set/CRC/size/SHA; traversal/case alias/symlink/encrypted member and payload bounds retained."
+    },
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "Toolchain/buildstd/CRT/PS>=7.2/command arguments and physical command terminal results bound; command/PE counts derive from artifact/compiler/ledger."
+    },
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "PE32/static CRT/Win7 subsystem6.1 are static evidence only; manual API/runtime requirements are not upgraded."
+    },
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "Actual CI failure remains FAIL; PE and original cleanup phases independently attempted; runtime NOT_RUN."
+    },
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "64MiB per file/256MiB SHA subset/10000 paths/16MiB metadata/512MiB payload bounds unchanged."
+    },
+    {
+      "status": "PASS_STATIC_READ_REVIEW",
+      "scope": "No 7508/550/6958 constants. Fixed twelve workspace crates remains the intentional architecture requirement."
+    }
+  ],
+  "astCheck": {
+    "pythonAstParse": "PASS",
+    "compileAstOnly": "PASS",
+    "helperMainOrSelftestExecuted": false,
+    "bytecodeWritten": false,
+    "firstCheckerFailurePreserved": "preparation-ast-first-failed.json"
+  },
+  "deployment": {
+    "reason": "EV is __file__.resolve().parent; original output_path requires fresh outputs under EV.",
+    "rootActionBeforeActualAudit": "Copy unchanged real helper file (not symlink) into /tmp/fc-round52-ci-evidence/verify-ci-artifact-first.py and verify same SHA.",
+    "runActualAuditOnlyAfter": "Root supplies original ZIP and exact official terminal run/job/artifact metadata plus expected digest/bytes.",
+    "suggestedFreshOutputs": {
+      "Modern": "modern-artifact-independent-first.json and modern-artifact-independent-first/",
+      "Win7": "win7-artifact-independent-first.json and win7-artifact-independent-first/"
+    },
+    "reuseWithoutLogicAdaptation": true
+  },
+  "limitations": [
+    "Preparation is not an artifact audit, CI terminal result or executable runtime evidence.",
+    "No downloads/network/remote mutation/Cargo/Windows/cleanup performed.",
+    "No new product code, main or historical original edits.",
+    "Retain failed reports and use fresh names, never overwrite."
+  ],
+  "knownJobsFromParent": {
+    "Modern": 124710857913,
+    "Win7": 124710911257,
+    "status": "IN_PROGRESS_PARENT_NOTIFICATION_NOT_ARTIFACT_VALIDATION"
+  }
+}

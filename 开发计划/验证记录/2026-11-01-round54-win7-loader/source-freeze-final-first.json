@@ -1,0 +1,260 @@
+{
+  "status": "FROZEN_GNU_COMPILE_STRICT_LINT_AND_ALL22_STATIC_PE_PASS_WINDOWS_NOT_RUN",
+  "frozenUtc": "2026-11-01T02:04:31.117474+00:00",
+  "base": "f6963919f100618fc482b1bff1a42dcbc571e610",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 122219,
+      "sha256": "7766d77c5d9c99cf30f64fa8f3ef99f888210d6c08c81ab274fbd07f75759667"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/color_picker.rs",
+      "bytes": 2584,
+      "sha256": "adc8bc74563437c2bb332beb678b3ced880926644b26ab40700e402582e95568"
+    },
+    {
+      "path": "crates/fc-windows/src/audio/device.rs",
+      "bytes": 17804,
+      "sha256": "964a09a22272056b6a19f35ff4ae5b6286a637352a2dad638559ef50a0607016"
+    }
+  ],
+  "sourceCount": 429,
+  "sourceUnchangedAcrossAllCommandsAndAudit": true,
+  "patch": {
+    "path": "/tmp/fc-round54-win7-loader-evidence/implementation-first.diff",
+    "bytes": 2670,
+    "sha256": "371c1b7ba19736d21071301f580f9c59f710e05eeac397a9f4cf7b1219964666"
+  },
+  "firstFreeze": {
+    "path": "/tmp/fc-round54-win7-loader-evidence/source-freeze-first.json",
+    "bytes": 1584,
+    "sha256": "99185c68cfe5c7771d020451d676e0bcb3b6862f0797a36f058d54b3f21d0315"
+  },
+  "commandsReport": {
+    "path": "/tmp/fc-round54-win7-loader-evidence/checks-first.json",
+    "bytes": 154323,
+    "sha256": "3258d7663ae6fc358870e351105c9307bd6f5828c80e146751cca5d623329ffc"
+  },
+  "commandSummary": [
+    {
+      "name": "versions-stable",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 0.30262248404324055,
+      "timeoutSeconds": 900,
+      "timedOut": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "versions-nightly",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 0.3004849290009588,
+      "timeoutSeconds": 900,
+      "timedOut": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "fmt",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 4.553111555986106,
+      "timeoutSeconds": 900,
+      "timedOut": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "architecture",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 0.28424015711061656,
+      "timeoutSeconds": 900,
+      "timedOut": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "diffcheck",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 0.2780475588515401,
+      "timeoutSeconds": 900,
+      "timedOut": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-compile",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 782.1602565629873,
+      "timeoutSeconds": 900,
+      "timedOut": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-product",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 0.770889630774036,
+      "timeoutSeconds": 900,
+      "timedOut": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-stable-strict",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 78.11144020804204,
+      "timeoutSeconds": 900,
+      "timedOut": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-nightly-strict",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 123.14639228908345,
+      "timeoutSeconds": 900,
+      "timedOut": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    }
+  ],
+  "auditReport": {
+    "path": "/tmp/fc-round54-win7-loader-evidence/pe-audit-first.json",
+    "bytes": 346705,
+    "sha256": "b94a992fb3308e214d29b6421bf9ca5b4569333e4532eb677b93e6061f18b262"
+  },
+  "auditDriver": {
+    "path": "/tmp/fc-round54-win7-loader-evidence/audit-pe-first.py",
+    "bytes": 7402,
+    "sha256": "9bd775feb74e6d90bff9b739ab56dc6eb9b8b4a685cd1a9dce121c6d2219520c"
+  },
+  "auditCommand": {
+    "path": "/tmp/fc-round54-win7-loader-evidence/pe-audit-first.command.json",
+    "bytes": 596,
+    "sha256": "3c578a081136a5b55283a237334adafb139c7a0b9b1b14475e9eba6c5f54aacc"
+  },
+  "counts": {
+    "tests": 21,
+    "programs": 22,
+    "actualObjdumpImports": 22,
+    "actualVersionCommands": 22,
+    "forbiddenImports": 0,
+    "additionalDeploymentRuntimeImports": 0,
+    "systemMsvcrt": 22,
+    "programsWithOtherRisk": 22
+  },
+  "normalExecutable": {
+    "path": "/tmp/fc-round54-win7-loader-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13117102,
+    "sha256": "508eeb87e7830ad1ba206947b4b809c2e5f2fb234e9b3bf2c01ea802bf0dd4dc",
+    "test": false,
+    "target": {
+      "kind": [
+        "bin"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "fc-bootstrap",
+      "src_path": "/tmp/fc-round54-win7-loader-worktree/crates/fc-bootstrap/src/main.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": false,
+      "test": true
+    }
+  },
+  "fcWindowsTestExecutable": {
+    "path": "/tmp/fc-round54-win7-loader-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-4026d62a77fcc28b.exe",
+    "bytes": 3496203,
+    "sha256": "ca317aa16121beb5bdc7fe618159cfcfac6b7f352835705f461a06ce9881c005",
+    "test": true,
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "fc_windows",
+      "src_path": "/tmp/fc-round54-win7-loader-worktree/crates/fc-windows/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    }
+  },
+  "metadata": {
+    "path": "/tmp/fc-round54-win7-loader-evidence/windows-test-metadata-first.jsonl",
+    "bytes": 17755,
+    "sha256": "e95d4589a2f6502d90fc8edf6a2227c71da618ecbb495d477e2a71d15babfcc2"
+  },
+  "fcWindowsMetadataLine": 12,
+  "actualImportsAfter": {
+    "CoTaskMemFree": "ole32.dll",
+    "GetErrorInfo": "oleaut32.dll",
+    "api-ms-win-core-winrt-error-l1-1-0.dll": false,
+    "combase.dll": false
+  },
+  "meaningfulExistingWindowsTestsCompiledForFutureRuntime": [
+    "desktop::public_inputs_tests::passive_overflow_is_explicit_capacity_error_after_complete_measurement",
+    "desktop::card_body_tests::shared_body_text_over_fifty_pages_and_full_sixty_four_homework_rows_keep_existing_bounds",
+    "workbench::color_picker::tests::opaque_rgb_colorref_roundtrip_has_no_alpha_or_byte_order_swap",
+    "audio::device::tests::endpoint_changes_ignore_capture_other_roles_and_unrelated_usb"
+  ],
+  "semanticReview": {
+    "path": "/tmp/fc-round54-win7-loader-evidence/semantic-review-first.json",
+    "bytes": 1226,
+    "sha256": "3ce858839a8727f6e41ded8f976ba26b9bd67b9adc9335b9e71fc460e28ade58"
+  },
+  "hostRuntimeScope": "These three source changes are Windows-only. No unrelated Host973 rerun; meaningful native capacity/color/device tests were compiled, actual Windows execution reserved for root.",
+  "remainingNormalGnuRisks": [
+    {
+      "kind": "API_SET_DLL",
+      "dll": "api-ms-win-core-synch-l1-2-0.dll",
+      "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+    },
+    {
+      "kind": "MODERN_API",
+      "dll": "api-ms-win-core-synch-l1-2-0.dll",
+      "api": "WaitOnAddress",
+      "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+    },
+    {
+      "kind": "MODERN_API",
+      "dll": "api-ms-win-core-synch-l1-2-0.dll",
+      "api": "WakeByAddressAll",
+      "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+    },
+    {
+      "kind": "MODERN_API",
+      "dll": "api-ms-win-core-synch-l1-2-0.dll",
+      "api": "WakeByAddressSingle",
+      "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+    },
+    {
+      "kind": "MODERN_API",
+      "dll": "kernel32.dll",
+      "api": "GetSystemTimePreciseAsFileTime",
+      "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+    }
+  ],
+  "boundary": [
+    "No Windows/SSH/CI/EXE execution, main mutation, dependency or cfg changes.",
+    "All22 primary audit statuses remain NOT_VALIDATED; modern GNU imports remain and are not Win7 load/runtime certification.",
+    "Original R52 formalMSVC imports retained; this candidate still needs new formalMSVC artifact proof and Win11 affected tests plus actual Win7 gate.",
+    "Existing COM error details stay enabled; only three authored strings removed, numeric E_BOUNDS/E_FAIL, App localized messages/capacity classification and picker cancellation unchanged.",
+    "Only narrow Ole32 DLL ABI binding changed for the existing exactly-once free, not allocator or ownership.",
+    "All own Cargo command groups physically returned; manual Cargo slot released.",
+    "Owned target/worktree/evidence retained for root active runtime/integration consumer."
+  ]
+}

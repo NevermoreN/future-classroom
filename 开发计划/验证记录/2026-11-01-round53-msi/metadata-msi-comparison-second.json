@@ -1,0 +1,256 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "scope": "Independent read-only comparison of existing first/second actual Linux MSI builds and extraction; no tool execution or Windows installation",
+  "frozen_sources_verified": [
+    {
+      "path": "/tmp/fc-round53-msi-candidate-worktree/scripts/package-msi-candidate.py",
+      "bytes": 36262,
+      "sha256": "d37a1f0275e0dbb45085b5059ced4e415b088b42e093863ecef27feae177679c"
+    },
+    {
+      "path": "/tmp/fc-round53-msi-candidate-worktree/scripts/check-msi-candidate.py",
+      "bytes": 20199,
+      "sha256": "a8b9d7b433a3300d54f77b6c14c1878f6943e97f03770305ebb6a8095783b04c"
+    },
+    {
+      "path": "/tmp/fc-round53-msi-candidate-worktree/packaging/MSI-CANDIDATE.md",
+      "bytes": 7057,
+      "sha256": "22904b474322cb96c2ee7afcf7f7c879919cfb68641f98fc9cb595b61332506e"
+    }
+  ],
+  "build_reports": {
+    "first": {
+      "path": "/tmp/fc-round53-msi-evidence/actual-msi-first/report.json",
+      "bytes": 70967,
+      "sha256": "0008ac2aec399a14ff1e92f79e1369675cba9990f157f403e6335f90b5bff4ce"
+    },
+    "second": {
+      "path": "/tmp/fc-round53-msi-evidence/actual-msi-second/report.json",
+      "bytes": 71466,
+      "sha256": "dd402ab211f54c33cd1a0ea40c7923c8caca060acbe58103c05e84676b0aea4c"
+    }
+  },
+  "msi_artifacts": {
+    "first": {
+      "path": "/tmp/fc-round53-msi-evidence/actual-msi-first/candidate.msi",
+      "bytes": 5938176,
+      "sha256": "d8d414b8229177f59d96f2e218a4ddef0eec057813dec67fdbe6342d8912f8e5"
+    },
+    "second": {
+      "path": "/tmp/fc-round53-msi-evidence/actual-msi-second/candidate.msi",
+      "bytes": 5938688,
+      "sha256": "8bc0071b7912bf3b6c521d75bb5b4d473e80f6b6e3959f96f15b7389fd31ba6a"
+    }
+  },
+  "input_zip": {
+    "first": {
+      "path": "/tmp/fc-round53-msi-evidence/FutureClassroom-0.1.0-win7-msvc-msi-input-dev.zip",
+      "size": 5358934,
+      "sha256": "81712794ba73cf1d0c09909a3b15db64e28d0016a1fde8a5c3f7fb3d4c0c6d9e"
+    },
+    "second": {
+      "path": "/tmp/fc-round53-msi-evidence/FutureClassroom-0.1.0-win7-msvc-msi-input-metadata-dev.zip",
+      "size": 5359406,
+      "sha256": "ed507abbef0f91e06cf2c1dc724569e22cee0d928ca987b1d1048da5a1d04ad4"
+    }
+  },
+  "payloads_per_build": 14,
+  "changed_installed_paths": [
+    "PROBE-README.txt",
+    "manifest.json"
+  ],
+  "unchanged_executable_sha256": "fbbd03cd6c09c7cca468fcb685309c53f30b14e33f33aaab1522d74746e7844b",
+  "unchanged_web_manifest_sha256": "2b4034c8a0f0bfa73812a7f2853ba83b766772ff55096fc1e33c9f2ddb9e4593",
+  "manifest_allowed_changes": {
+    "feature_keys": [
+      "declared_probe_commands",
+      "local_https_settings"
+    ],
+    "derived_fields": [
+      "artifact_name",
+      "files[PROBE-README.txt].size",
+      "files[PROBE-README.txt].sha256"
+    ]
+  },
+  "unchanged_payloads": [
+    "LICENSE",
+    "MSI-CANDIDATE.txt",
+    "THIRD-PARTY-NOTICES.txt",
+    "fc-bootstrap.exe",
+    "web/THIRD-PARTY-NOTICES.txt",
+    "web/assets/favicon-CXuYoSfB.svg",
+    "web/assets/index-BkiZ2CBl.js",
+    "web/assets/index-DrrJeLm9.css",
+    "web/assets/pcm-worklet-B7E4LRoP.js",
+    "web/assets/wav-worker-LSywWbpJ.js",
+    "web/fc-assets.json",
+    "web/index.html"
+  ],
+  "unchanged_authoring": {
+    "path": "candidate.wxs",
+    "sha256": "3bb9acde653dcd6967c9d9a82bc63f2477e140595d309d2b394a4e022117b515",
+    "product_code": "9E50831D-7811-5039-8BC3-4934647448D8",
+    "upgrade_code": "99378807-098D-5F04-8D4D-F181DFA218D5"
+  },
+  "actual_msi_summary_differences": {
+    "Revision number (UUID)": {
+      "first": "{FBE965E5-E0CF-4A7B-8FAA-BEE43D38561B}",
+      "second": "{62BD5D11-3540-4DE2-9533-B43314DAC501}"
+    },
+    "Created": {
+      "first": "Sun Nov  1 09:41:17 2026",
+      "second": "Sun Nov  1 09:56:52 2026"
+    },
+    "Last saved": {
+      "first": "Sun Nov  1 09:41:17 2026",
+      "second": "Sun Nov  1 09:56:52 2026"
+    }
+  },
+  "contracts_rechecked_without_tools": {
+    "first": {
+      "status": "PASS",
+      "template": "Intel;1033",
+      "installer_version": 500,
+      "source_flags": 10,
+      "payload_files": 14,
+      "registry_scope": "Exact installer-only HKCU component markers; no Run cleanup",
+      "transaction_sequence": {
+        "InstallFinalize": 6600,
+        "InstallInitialize": 1500,
+        "RemoveExistingProducts": 1501
+      }
+    },
+    "second": {
+      "status": "PASS",
+      "template": "Intel;1033",
+      "installer_version": 500,
+      "source_flags": 10,
+      "payload_files": 14,
+      "registry_scope": "Exact installer-only HKCU component markers; no Run cleanup",
+      "transaction_sequence": {
+        "InstallFinalize": 6600,
+        "InstallInitialize": 1500,
+        "RemoveExistingProducts": 1501
+      }
+    }
+  },
+  "commands_verified": {
+    "first": {
+      "count": 30,
+      "all_exit_codes": 0,
+      "all_60_original_stream_size_sha_matches": true
+    },
+    "second": {
+      "count": 30,
+      "all_exit_codes": 0,
+      "all_60_original_stream_size_sha_matches": true
+    }
+  },
+  "second_wrapper": {
+    "path": "/tmp/fc-round53-msi-evidence/msi-build-second.command.json",
+    "bytes": 1068,
+    "sha256": "6cb051027fae705a66c35bd501994d6f0a1d1dbacb476fc4030d4ab86b36c976"
+  },
+  "installation": "NOT_RUN",
+  "full_P5_03": "NOT_COMPLETE",
+  "archive_exclusions": {
+    "actual_binary_files": [
+      {
+        "path": "/tmp/fc-round53-msi-evidence/FutureClassroom-0.1.0-win7-msvc-msi-input-dev.zip",
+        "bytes": 5358934,
+        "sha256": "81712794ba73cf1d0c09909a3b15db64e28d0016a1fde8a5c3f7fb3d4c0c6d9e"
+      },
+      {
+        "path": "/tmp/fc-round53-msi-evidence/FutureClassroom-0.1.0-win7-msvc-msi-input-metadata-dev.zip",
+        "bytes": 5359406,
+        "sha256": "ed507abbef0f91e06cf2c1dc724569e22cee0d928ca987b1d1048da5a1d04ad4"
+      },
+      {
+        "path": "/tmp/fc-round53-msi-evidence/actual-msi-first/candidate.msi",
+        "bytes": 5938176,
+        "sha256": "d8d414b8229177f59d96f2e218a4ddef0eec057813dec67fdbe6342d8912f8e5"
+      },
+      {
+        "path": "/tmp/fc-round53-msi-evidence/actual-msi-first/extracted/Programs/FutureClassroom/fc-bootstrap.exe",
+        "bytes": 10696192,
+        "sha256": "fbbd03cd6c09c7cca468fcb685309c53f30b14e33f33aaab1522d74746e7844b"
+      },
+      {
+        "path": "/tmp/fc-round53-msi-evidence/actual-msi-first/payload/fc-bootstrap.exe",
+        "bytes": 10696192,
+        "sha256": "fbbd03cd6c09c7cca468fcb685309c53f30b14e33f33aaab1522d74746e7844b"
+      },
+      {
+        "path": "/tmp/fc-round53-msi-evidence/actual-msi-second/candidate.msi",
+        "bytes": 5938688,
+        "sha256": "8bc0071b7912bf3b6c521d75bb5b4d473e80f6b6e3959f96f15b7389fd31ba6a"
+      },
+      {
+        "path": "/tmp/fc-round53-msi-evidence/actual-msi-second/extracted/Programs/FutureClassroom/fc-bootstrap.exe",
+        "bytes": 10696192,
+        "sha256": "fbbd03cd6c09c7cca468fcb685309c53f30b14e33f33aaab1522d74746e7844b"
+      },
+      {
+        "path": "/tmp/fc-round53-msi-evidence/actual-msi-second/payload/fc-bootstrap.exe",
+        "bytes": 10696192,
+        "sha256": "fbbd03cd6c09c7cca468fcb685309c53f30b14e33f33aaab1522d74746e7844b"
+      },
+      {
+        "path": "/tmp/fc-round53-msi-evidence/tool-profile-keypath-first/profile.msi",
+        "bytes": 11264,
+        "sha256": "3c95d33b42f1a283fc669bfe534715b567c4e99facfe64a0b260a1aa108f0028"
+      },
+      {
+        "path": "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "bytes": 10752,
+        "sha256": "ba5b32c21947480a8234a9634668b7d60eb3c948d9ab7fc3b1914fe7f0156f2a"
+      },
+      {
+        "path": "/tmp/fc-round53-msi-evidence/tool-transaction-order-first/transaction.msi",
+        "bytes": 10752,
+        "sha256": "fdc70377aba568a4930f392d8ea091ecab42268ed3ecf7d99259993e92061009"
+      }
+    ],
+    "duplicate_payload_directories": [
+      {
+        "directory": "/tmp/fc-round53-msi-evidence/actual-msi-first/payload",
+        "files": 14,
+        "bytes": 13643401,
+        "reason": "Duplicate installed payload; retain report/ledger/table/log evidence instead; no copy/delete performed"
+      },
+      {
+        "directory": "/tmp/fc-round53-msi-evidence/actual-msi-first/extracted",
+        "files": 14,
+        "bytes": 13643401,
+        "reason": "Duplicate installed payload; retain report/ledger/table/log evidence instead; no copy/delete performed"
+      },
+      {
+        "directory": "/tmp/fc-round53-msi-evidence/actual-msi-second/payload",
+        "files": 14,
+        "bytes": 13644645,
+        "reason": "Duplicate installed payload; retain report/ledger/table/log evidence instead; no copy/delete performed"
+      },
+      {
+        "directory": "/tmp/fc-round53-msi-evidence/actual-msi-second/extracted",
+        "files": 14,
+        "bytes": 13644645,
+        "reason": "Duplicate installed payload; retain report/ledger/table/log evidence instead; no copy/delete performed"
+      }
+    ],
+    "tool_root": {
+      "path": "/tmp/fc-round53-msi-tools",
+      "reason": "Owned extracted tools/libraries/deb archives are temporary build assets, not source evidence; retain official hash/version/license metadata separately"
+    },
+    "additional_patterns": [
+      "**/__pycache__/**",
+      "web node_modules/build caches and duplicate verified dist if encountered"
+    ]
+  },
+  "no_cleanup_performed": true,
+  "limitations": [
+    "MSI byte differences include changed payload/cabinet and normal package UUID/timestamps; no byte-range attribution inside compound MSI attempted.",
+    "Same stable ProductCode/UpgradeCode/components/authoring persist because product version and installed paths did not change.",
+    "Successful Linux build and table/extraction contracts do not prove Windows Installer execution, ICE validation, active-process refusal, exact Run cleanup, upgrade rollback or Q13."
+  ]
+}

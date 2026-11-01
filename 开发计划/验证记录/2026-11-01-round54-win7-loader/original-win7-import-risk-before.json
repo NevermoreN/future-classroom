@@ -1,0 +1,31 @@
+{
+  "status": "ORIGINAL_FORMAL_WIN7_STATIC_RISK_BEFORE_UNCHANGED",
+  "report": "/tmp/fc-round52-ci-evidence/win7-original-independent-first.json",
+  "reportSha256": "31721708a6db904cb2ed9eec4826f6d751710cf80bfba14dc10a93d277b83610",
+  "sourceSha": "f6963919f100618fc482b1bff1a42dcbc571e610",
+  "normalExecutable": {
+    "role": "product",
+    "package": "fc-bootstrap",
+    "target": "fc-bootstrap",
+    "kinds": [
+      "bin"
+    ],
+    "relative_path": "product/fc-bootstrap/fc-bootstrap.exe",
+    "package_working_directory": "crates/fc-bootstrap",
+    "bytes": 10696192,
+    "sha256": "fbbd03cd6c09c7cca468fcb685309c53f30b14e33f33aaab1522d74746e7844b",
+    "pe_machine": "0x014c",
+    "pe_optional_magic": "0x010b",
+    "pe_subsystem_version": "6.1",
+    "executed": false
+  },
+  "imports": {
+    "api-ms-win-core-winrt-error-l1-1-0.dll": [
+      "RoOriginateErrorW"
+    ],
+    "combase.dll": [
+      "CoTaskMemFree"
+    ]
+  },
+  "scope": "Read-only exact risk metadata from originalactualWin7MSVC staticaudit. No claim actualWin7 runtime or same-toolchain before/afterGNU."
+}

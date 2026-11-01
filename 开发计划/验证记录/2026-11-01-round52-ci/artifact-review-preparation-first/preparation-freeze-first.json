@@ -1,0 +1,64 @@
+{
+  "status": "FROZEN_PREPARATION_ONLY",
+  "recordedUtc": "2026-11-01T01:12:46.455209+00:00",
+  "sourceSha": "f6963919f100618fc482b1bff1a42dcbc571e610",
+  "files": [
+    {
+      "name": ".owner",
+      "bytes": 199,
+      "sha256": "87867c5eedfd7670b5e0fa3e378b19f35dafe1515098b1c57a5a7fc154393e39"
+    },
+    {
+      "name": "artifact-helper-review-first.json",
+      "bytes": 4746,
+      "sha256": "7e38cc8f3b53ae7b6d59b9bdebaf36ba23006e6d2f8cbb3cf505126626edd3e1"
+    },
+    {
+      "name": "audit-command-template-first.json",
+      "bytes": 1048,
+      "sha256": "14f095171df9708f574498e993b98432ed8549875f333d56d107f88d62b54695"
+    },
+    {
+      "name": "preparation-ast-first-failed.json",
+      "bytes": 521,
+      "sha256": "89294814a85632ccd145d09e3e7eaed5e2be7a9380d07a4a46e9fcbe5f608db8"
+    },
+    {
+      "name": "preparation-ast-second.command.json",
+      "bytes": 329,
+      "sha256": "76baceac7f260842b739403e360ae1efa8b5e9e69aceca9eb78b7eafd574b0ff"
+    },
+    {
+      "name": "preparation-ast-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "preparation-ast-second.stdout.log",
+      "bytes": 349,
+      "sha256": "3f0585fd2aeb9e1abdb63d7331d3ac0293158b6061960889cf2fc0e6001da46c"
+    },
+    {
+      "name": "prepare-review-second.py",
+      "bytes": 7290,
+      "sha256": "c6e57bb9c1f68c031c0c440e4bfdc44ce4a68b992df5877584d2d5399f925758"
+    },
+    {
+      "name": "verify-ci-artifact-first.py",
+      "bytes": 55618,
+      "sha256": "cf3780a6d08dec8f395383a20a9a1992b5e7d5a4b70f5cf865c16ce0b5e13e9c"
+    }
+  ],
+  "helperByteIdentical": true,
+  "onlyWrittenDirectory": "/tmp/fc-round52-artifact-review-owned",
+  "notRun": [
+    "artifact audit",
+    "helper selftest",
+    "downloads",
+    "Cargo",
+    "Windows",
+    "remote mutation",
+    "cleanup"
+  ],
+  "note": "First local AST checker extractor KeyError preserved; corrected AST-only preparation succeeded. Not a CI/artifact failure or result."
+}

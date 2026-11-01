@@ -1,0 +1,25 @@
+HTTPS_SETTINGS_NATIVE_STEP index=0 name=setup-local-global-administrator
+HTTPS_SETTINGS_NATIVE_STEP index=1 name=native-device-page-production-unavailable
+HTTPS_SETTINGS_NATIVE_STEP index=2 name=native-open-https-config
+HTTPS_SETTINGS_NATIVE_STEP index=3 name=unconfigured-no-default-port
+HTTPS_SETTINGS_NATIVE_STEP index=4 name=invalid-port-rejected-no-write
+HTTPS_SETTINGS_NATIVE_STEP index=5 name=cancel-draft-confirmed-no-write
+HTTPS_SETTINGS_NATIVE_STEP index=6 name=native-save-localhost-reference
+HTTPS_SETTINGS_NATIVE_STEP index=7 name=saved-config-no-listener
+HTTPS_SETTINGS_CERTIFICATE_OBSERVATION {"scope":"CurrentUserMyCacheOnly","publicationRevision":2,"identityRevision":1,"settingsRevision":1,"found":{"check":"Satisfied","nativeError":null},"currentTime":{"check":"Satisfied","nativeError":null},"privateKey":{"check":"Satisfied","nativeError":null},"serverAuthEku":{"check":"Satisfied","nativeError":null},"serverName":{"check":"Unverified","nativeError":null},"sslChainPolicy":{"check":"Rejected","nativeError":-2146762487},"cachedRevocation":{"check":"Unverified","nativeError":null},"chainTrustErrors":32,"sslPolicyError":2148204809,"readiness":"NOT_GRANTED"}
+HTTPS_SETTINGS_NATIVE_STEP index=8 name=explicit-native-certificate-check
+HTTPS_SETTINGS_NATIVE_STEP index=9 name=native-draft-retained-across-lock
+HTTPS_SETTINGS_NATIVE_STEP index=10 name=native-relogin-preserves-draft
+HTTPS_SETTINGS_NATIVE_STEP index=11 name=native-original-save-admitted
+HTTPS_SETTINGS_NATIVE_STEP index=12 name=real-commit-delivery-cancelled
+HTTPS_SETTINGS_NATIVE_STEP index=13 name=original-request-retained-after-cancel
+HTTPS_SETTINGS_NATIVE_STEP index=14 name=lock-and-relogin-original-owner
+HTTPS_SETTINGS_NATIVE_STEP index=15 name=native-explicit-original-outcome-query
+HTTPS_SETTINGS_NATIVE_STEP index=16 name=historical-receipt-not-current-cas
+HTTPS_SETTINGS_NATIVE_STEP index=17 name=explicit-risk-confirmed-current-reload
+HTTPS_SETTINGS_NATIVE_STEP index=18 name=current-config-readback
+HTTPS_SETTINGS_NATIVE_STEP index=19 name=device-page-remains-unavailable
+HTTPS_SETTINGS_NATIVE_STEP index=20 name=actual-shared-worker-writer-shutdown
+HTTPS_SETTINGS_NATIVE_STEP index=21 name=owned-deployment-cleanup
+HTTPS_SETTINGS_NATIVE_PASS steps=22 shared_workers=2 original_result_query=PASS listener=NOT_ENABLED certificate_scope=CurrentUserMyCacheOnly certificate_query_count=1 readiness=NOT_GRANTED physical_shutdown=PASS isolated_cleanup=PASS elapsed_ms=440
+HTTPS_CERTIFICATE_PROCESS_EXIT {"code":0}

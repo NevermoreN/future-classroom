@@ -1,0 +1,234 @@
+{
+  "status": "PASS_CURRENT_LOCKED_WEB_PRODUCTION_BUILD",
+  "cwd": "/tmp/fc-round53-msi-candidate-worktree/web",
+  "sourceHead": "f6963919f100618fc482b1bff1a42dcbc571e610",
+  "sourceInputs": {
+    ".gitignore": "74140837624a9fd6159c9fcc39706512099c766e055c089fa8b9c912dea4f636",
+    "README.md": "5a6f82e222b73a530fdd4ff6240bc248d5b57d3f5fa590b454d97ccc683182d3",
+    "SHADCN-LICENSE.md": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f",
+    "THIRD-PARTY-NOTICES.txt": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7",
+    "components.json": "402545171089ee61148662f512dfa00674719ddfbbc58ddfbb32a55b0080e10d",
+    "index.html": "c841f960af70c7830267ee30acf6b4d00a03ca4c45fd999e0e6338bb036401fc",
+    "package-lock.json": "62601282a27fae2ee1e37977e38c0f85529c7eb267a5aaa5b4f748543c2180d0",
+    "package.json": "acc11c2c55929a9854a61fbaee215fb04d7fb4262a1f94d8538072a9ee8b031f",
+    "tsconfig.json": "87c47fe75ba6fc4b590e985b04805571d35d3e182fd13be128fdacbb751e6508",
+    "vite.config.ts": "5dbf2580941fa0a1a4b1d249bde58d5249bc9d5df2b9db7da338582cedc5a9ff",
+    "scripts/budget.mjs": "81ab36b8100794cf9e555fa1a7566bdfbb179e2ac300c469edcd7580d0f66f88",
+    "scripts/licenses.mjs": "ee82684c2ede30a17292ebc77767c12dea38f5eb3b5fa06574d643ab399241ea",
+    "src/App.tsx": "6449bed79b9f1e3c119c45dd592c6cae661351257a9c4bcc61ff6951bf0be54d",
+    "src/MaterialsPane.tsx": "3a51172610c41c676658dd38381a2e832c149b461e1d68c858844452b0f1892c",
+    "src/SubjectVisualPreview.tsx": "9ac996390438293757396159e6a33fa6c075351b7b3284e77836dc644dfa74bd",
+    "src/TeacherWorkspace.tsx": "32b4f5f59da0ef7eb35412c38831699c43e8cf72ffc42c7bd3b815fa344e5485",
+    "src/VoicePane.tsx": "eae8fdd9611ab590506f7937e083130a99db6c660ada0c656c5a186810cc716d",
+    "src/favicon.svg": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+    "src/main.tsx": "4539ea4af64c63a1fcb708d2e3b8de4bca9e51ea75ff816569e9c2fbdc64cd02",
+    "src/styles.css": "46a6ffdc2b008ed82d73d91c756fbd9a4ad4a83bf5855d3522e02a206141b3c6",
+    "tests/client.test.ts": "83a75ce8ae175563806c1cb7a5df6c9c8ecab7bc227422ebe611d03879c6c59c",
+    "tests/content-client.test.ts": "2e14e37a9700c1db11d0ea15237ddb337334097434cfc1a082e4d677edd0ee01",
+    "tests/content-controller.test.ts": "350bb7d324bd00aeb4b01d3171453fbbb045db9e25cfee7244fd2f30a37b8ef3",
+    "tests/content-fixtures.ts": "f6c04d5919750ce23e17f86537bc08e92ad0ad7fb5dc0565bd0363288f37b471",
+    "tests/content-protocol.test.ts": "b79691285826d9b6663f92f9b2a462f624a04254488f1d55e8d8d91780215d14",
+    "tests/controller.test.ts": "d53d858971ba27faf5b52c9799a53e980a0c414c4f1a8318900336befab2f97b",
+    "tests/material-client.test.ts": "3ce1ce334eeed1450262a14e84e215022f297798cdba6965cf54c6f6dd5f53e9",
+    "tests/material-controller.test.ts": "d4bd9169ee961dbc106e28af963ba3330fcd84137e09a5c4b1c9b415b29b81cb",
+    "tests/material-protocol.test.ts": "52c88e8d4c5a6435f45ee07f4d332dd2a9521bda1e315071fc5a50aae9344f20",
+    "tests/material-unicode.test.ts": "5edf37bc14a8a3804663f9575f0259367848bc21671491ea195b2d4e834cd1d0",
+    "tests/protocol.test.ts": "06388724db5ffd3747c1282841ce4025c50fd5d3120fe6303cae675818a84922",
+    "tests/subject-visual.test.ts": "2b176a7c03a76985b8b5e1ab87fa1d343300119d0079ee65d32308fc7021adad",
+    "tests/voice-client.test.ts": "9f08dff8a4ea2b922257cdfcadbdf445d654325b15aa4b397afcdb91cc3dfd52",
+    "tests/voice-controller.test.ts": "4fd5af3f1e8142f34aa731b22f3bf8fc3b4bbde7a9418c87bcc2ac35a45a4dce",
+    "tests/voice-fixtures.ts": "a5c5a3ce4b6af558bb6c9f180897e62b6b8b49ecd4a3a7b2b3dfb20ae6b5d94e",
+    "tests/voice-protocol.test.ts": "80d3b3dadd5bcafd739c2563f6a3b6d1e03c82a70bf48f90fe502ceb6b2ff75e",
+    "tests/voice-recorder-capture.test.ts": "8b54420c3de792dad9a0cc55142a347a3757bb6d237cdaf830ca2b1f26eb103a",
+    "tests/voice-recorder-normalize.test.ts": "b4c18ed8fd268d446eb504e03b7b736e757c99be5c353e093304a1569f623ec4",
+    "tests/voice-recorder-pcm.test.ts": "e2b56e03162055f2fd101e21d5e0308e6f43f0a27b1d8cae72ec509aa864072f",
+    "tests/voice-recorder-worklet.test.ts": "30e4daae6ba9fdea759708c7a4d8dd75f8d447a24105301b0180675da57e7f10",
+    "tests/voice-recorder.test.ts": "ed14e87b05bf4337f6257e6172a804c9df4c44e47f0bdbef6f856fee95011600",
+    "src/api/client.ts": "2d8f99c44d3240728681a7e44c58fc912e8a37f4ce8e53797241616d4231f5e0",
+    "src/api/content-controller.ts": "496234e5e13a4fd5e09739b05c51389e96845c6dab9d7a5c287f8865ef5a80bb",
+    "src/api/content-protocol.ts": "8e67c635da345d8c5ea71f3c537153d7e7abf889dd424e3efe8e493f8c96a179",
+    "src/api/controller.ts": "c34b147305470a3afbf0ddaffa08957b91135123c60fc7a6adfbf7e551bf20ff",
+    "src/api/material-client.ts": "fdd2cfd51961e02ed5e1f03a1f391bb6e83e8abbc55b40d13fa60faf099aa4f6",
+    "src/api/material-controller.ts": "0d07ae1994ea3369b2485eec77e5020019b30670121f097d5d7dc0f583b0f91b",
+    "src/api/material-protocol.ts": "3f7adc04cc3cf233c5c66db150a2f8fc6f76fe9e964138dccb94420985a56a4d",
+    "src/api/protocol.ts": "9e7375de562f479f07e8637ade1707cf066afbe206dc00a6486ce5e5df8d7f29",
+    "src/api/subject-visual-controller.ts": "ca21901ea25d4c227230d57463424f9c5df2872361ce35f01636d8fc92915eac",
+    "src/api/subject-visual-protocol.ts": "e93034a2711d35236c70de0641320c94ca2820e3c604e76ee693113ac2f1b5ad",
+    "src/api/voice-client.ts": "e1daf0ccad3c9c910a71f79b6552c38117a38c915af5df27029c7b63609adeda",
+    "src/api/voice-controller.ts": "1134b4dd2d34914dd8dc23f9108e575520a7486099165d8382bf154ff6050342",
+    "src/api/voice-protocol.ts": "2e7dbb5f4ed33bd159f6e833b5bf22565c3522c5f5bb342f1a563427c0d9c555",
+    "src/lib/utils.ts": "00708463d307471ed1a3ac36642e9c00a766730d7be61e2351f283a580017ea6",
+    "src/voice/browser-capture.ts": "0da2e0a6a274ce592517797ab593b1e1e01051a4d7a0b3e61121ed169935bbe2",
+    "src/voice/normalize.ts": "5c14f29c9de0a931efe2adc1d3d9bbbf8620cab039359d6e3184a0dc9616b40f",
+    "src/voice/pcm-worklet.ts": "e3da536a2d8c346d4baeb11fb3ad211c5661fd1f69366cf57d0649a58dbf7a68",
+    "src/voice/pcm.ts": "ad925f133b98596671d17a2f426844477b66577072369fe97b227b88a9eab9ff",
+    "src/voice/ports.ts": "ef92534dde84bce4d75cc5d70c8487d7b665e723822e997437a32c82c74006a5",
+    "src/voice/recorder.ts": "a3932b4335fdae51783eaea8a387b2891ea551272ff1afbc00bd37b7298f9824",
+    "src/voice/wav-worker.ts": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1",
+    "src/components/ui/button.tsx": "c2b999a96781e6c932632bd089095368e973bf5602e1b1a62156b7d2b43f1e84",
+    "src/components/ui/card.tsx": "525c4bb2c051987be64df0e92e1d90174912b219bf541e24ffbc4a3406de49e8",
+    "src/components/ui/input.tsx": "6299a6a387dc55e528aec4342deaea0b83f1ea3a365c135a31a18ee55334f441"
+  },
+  "commands": [
+    [
+      "npm",
+      "ci",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund"
+    ],
+    [
+      "npm",
+      "run",
+      "build"
+    ]
+  ],
+  "scope": "Fresh current locked frontend production build for new MSI payload; no devserver/browser/Cargo/Windows. node_modules/dist created only in owned R53 worktree and cleaned after byte evidence.",
+  "results": [
+    {
+      "args": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "pid": 15378,
+      "ownedProcessGroup": 15378,
+      "exitCode": 0,
+      "elapsedSeconds": 6.796032383106649,
+      "stdout": {
+        "bytes": 25,
+        "sha256": "346d278dfc71f96332e08dfbf1629ea55f06daf1954b076fd5bb57171b44d5d0"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "args": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "pid": 15421,
+      "ownedProcessGroup": 15421,
+      "exitCode": 0,
+      "elapsedSeconds": 2.3723121660295874,
+      "stdout": {
+        "bytes": 939,
+        "sha256": "b90a65d42eb459225297b36787b94314c5c30d4f2d85b16e9f7cef772021cc9b"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "sourceInputAfter": {
+    ".gitignore": "74140837624a9fd6159c9fcc39706512099c766e055c089fa8b9c912dea4f636",
+    "README.md": "5a6f82e222b73a530fdd4ff6240bc248d5b57d3f5fa590b454d97ccc683182d3",
+    "SHADCN-LICENSE.md": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f",
+    "THIRD-PARTY-NOTICES.txt": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7",
+    "components.json": "402545171089ee61148662f512dfa00674719ddfbbc58ddfbb32a55b0080e10d",
+    "index.html": "c841f960af70c7830267ee30acf6b4d00a03ca4c45fd999e0e6338bb036401fc",
+    "package-lock.json": "62601282a27fae2ee1e37977e38c0f85529c7eb267a5aaa5b4f748543c2180d0",
+    "package.json": "acc11c2c55929a9854a61fbaee215fb04d7fb4262a1f94d8538072a9ee8b031f",
+    "tsconfig.json": "87c47fe75ba6fc4b590e985b04805571d35d3e182fd13be128fdacbb751e6508",
+    "vite.config.ts": "5dbf2580941fa0a1a4b1d249bde58d5249bc9d5df2b9db7da338582cedc5a9ff",
+    "scripts/budget.mjs": "81ab36b8100794cf9e555fa1a7566bdfbb179e2ac300c469edcd7580d0f66f88",
+    "scripts/licenses.mjs": "ee82684c2ede30a17292ebc77767c12dea38f5eb3b5fa06574d643ab399241ea",
+    "src/App.tsx": "6449bed79b9f1e3c119c45dd592c6cae661351257a9c4bcc61ff6951bf0be54d",
+    "src/MaterialsPane.tsx": "3a51172610c41c676658dd38381a2e832c149b461e1d68c858844452b0f1892c",
+    "src/SubjectVisualPreview.tsx": "9ac996390438293757396159e6a33fa6c075351b7b3284e77836dc644dfa74bd",
+    "src/TeacherWorkspace.tsx": "32b4f5f59da0ef7eb35412c38831699c43e8cf72ffc42c7bd3b815fa344e5485",
+    "src/VoicePane.tsx": "eae8fdd9611ab590506f7937e083130a99db6c660ada0c656c5a186810cc716d",
+    "src/favicon.svg": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+    "src/main.tsx": "4539ea4af64c63a1fcb708d2e3b8de4bca9e51ea75ff816569e9c2fbdc64cd02",
+    "src/styles.css": "46a6ffdc2b008ed82d73d91c756fbd9a4ad4a83bf5855d3522e02a206141b3c6",
+    "tests/client.test.ts": "83a75ce8ae175563806c1cb7a5df6c9c8ecab7bc227422ebe611d03879c6c59c",
+    "tests/content-client.test.ts": "2e14e37a9700c1db11d0ea15237ddb337334097434cfc1a082e4d677edd0ee01",
+    "tests/content-controller.test.ts": "350bb7d324bd00aeb4b01d3171453fbbb045db9e25cfee7244fd2f30a37b8ef3",
+    "tests/content-fixtures.ts": "f6c04d5919750ce23e17f86537bc08e92ad0ad7fb5dc0565bd0363288f37b471",
+    "tests/content-protocol.test.ts": "b79691285826d9b6663f92f9b2a462f624a04254488f1d55e8d8d91780215d14",
+    "tests/controller.test.ts": "d53d858971ba27faf5b52c9799a53e980a0c414c4f1a8318900336befab2f97b",
+    "tests/material-client.test.ts": "3ce1ce334eeed1450262a14e84e215022f297798cdba6965cf54c6f6dd5f53e9",
+    "tests/material-controller.test.ts": "d4bd9169ee961dbc106e28af963ba3330fcd84137e09a5c4b1c9b415b29b81cb",
+    "tests/material-protocol.test.ts": "52c88e8d4c5a6435f45ee07f4d332dd2a9521bda1e315071fc5a50aae9344f20",
+    "tests/material-unicode.test.ts": "5edf37bc14a8a3804663f9575f0259367848bc21671491ea195b2d4e834cd1d0",
+    "tests/protocol.test.ts": "06388724db5ffd3747c1282841ce4025c50fd5d3120fe6303cae675818a84922",
+    "tests/subject-visual.test.ts": "2b176a7c03a76985b8b5e1ab87fa1d343300119d0079ee65d32308fc7021adad",
+    "tests/voice-client.test.ts": "9f08dff8a4ea2b922257cdfcadbdf445d654325b15aa4b397afcdb91cc3dfd52",
+    "tests/voice-controller.test.ts": "4fd5af3f1e8142f34aa731b22f3bf8fc3b4bbde7a9418c87bcc2ac35a45a4dce",
+    "tests/voice-fixtures.ts": "a5c5a3ce4b6af558bb6c9f180897e62b6b8b49ecd4a3a7b2b3dfb20ae6b5d94e",
+    "tests/voice-protocol.test.ts": "80d3b3dadd5bcafd739c2563f6a3b6d1e03c82a70bf48f90fe502ceb6b2ff75e",
+    "tests/voice-recorder-capture.test.ts": "8b54420c3de792dad9a0cc55142a347a3757bb6d237cdaf830ca2b1f26eb103a",
+    "tests/voice-recorder-normalize.test.ts": "b4c18ed8fd268d446eb504e03b7b736e757c99be5c353e093304a1569f623ec4",
+    "tests/voice-recorder-pcm.test.ts": "e2b56e03162055f2fd101e21d5e0308e6f43f0a27b1d8cae72ec509aa864072f",
+    "tests/voice-recorder-worklet.test.ts": "30e4daae6ba9fdea759708c7a4d8dd75f8d447a24105301b0180675da57e7f10",
+    "tests/voice-recorder.test.ts": "ed14e87b05bf4337f6257e6172a804c9df4c44e47f0bdbef6f856fee95011600",
+    "src/api/client.ts": "2d8f99c44d3240728681a7e44c58fc912e8a37f4ce8e53797241616d4231f5e0",
+    "src/api/content-controller.ts": "496234e5e13a4fd5e09739b05c51389e96845c6dab9d7a5c287f8865ef5a80bb",
+    "src/api/content-protocol.ts": "8e67c635da345d8c5ea71f3c537153d7e7abf889dd424e3efe8e493f8c96a179",
+    "src/api/controller.ts": "c34b147305470a3afbf0ddaffa08957b91135123c60fc7a6adfbf7e551bf20ff",
+    "src/api/material-client.ts": "fdd2cfd51961e02ed5e1f03a1f391bb6e83e8abbc55b40d13fa60faf099aa4f6",
+    "src/api/material-controller.ts": "0d07ae1994ea3369b2485eec77e5020019b30670121f097d5d7dc0f583b0f91b",
+    "src/api/material-protocol.ts": "3f7adc04cc3cf233c5c66db150a2f8fc6f76fe9e964138dccb94420985a56a4d",
+    "src/api/protocol.ts": "9e7375de562f479f07e8637ade1707cf066afbe206dc00a6486ce5e5df8d7f29",
+    "src/api/subject-visual-controller.ts": "ca21901ea25d4c227230d57463424f9c5df2872361ce35f01636d8fc92915eac",
+    "src/api/subject-visual-protocol.ts": "e93034a2711d35236c70de0641320c94ca2820e3c604e76ee693113ac2f1b5ad",
+    "src/api/voice-client.ts": "e1daf0ccad3c9c910a71f79b6552c38117a38c915af5df27029c7b63609adeda",
+    "src/api/voice-controller.ts": "1134b4dd2d34914dd8dc23f9108e575520a7486099165d8382bf154ff6050342",
+    "src/api/voice-protocol.ts": "2e7dbb5f4ed33bd159f6e833b5bf22565c3522c5f5bb342f1a563427c0d9c555",
+    "src/lib/utils.ts": "00708463d307471ed1a3ac36642e9c00a766730d7be61e2351f283a580017ea6",
+    "src/voice/browser-capture.ts": "0da2e0a6a274ce592517797ab593b1e1e01051a4d7a0b3e61121ed169935bbe2",
+    "src/voice/normalize.ts": "5c14f29c9de0a931efe2adc1d3d9bbbf8620cab039359d6e3184a0dc9616b40f",
+    "src/voice/pcm-worklet.ts": "e3da536a2d8c346d4baeb11fb3ad211c5661fd1f69366cf57d0649a58dbf7a68",
+    "src/voice/pcm.ts": "ad925f133b98596671d17a2f426844477b66577072369fe97b227b88a9eab9ff",
+    "src/voice/ports.ts": "ef92534dde84bce4d75cc5d70c8487d7b665e723822e997437a32c82c74006a5",
+    "src/voice/recorder.ts": "a3932b4335fdae51783eaea8a387b2891ea551272ff1afbc00bd37b7298f9824",
+    "src/voice/wav-worker.ts": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1",
+    "src/components/ui/button.tsx": "c2b999a96781e6c932632bd089095368e973bf5602e1b1a62156b7d2b43f1e84",
+    "src/components/ui/card.tsx": "525c4bb2c051987be64df0e92e1d90174912b219bf541e24ffbc4a3406de49e8",
+    "src/components/ui/input.tsx": "6299a6a387dc55e528aec4342deaea0b83f1ea3a365c135a31a18ee55334f441"
+  },
+  "sourceInputUnchanged": true,
+  "outputs": [
+    {
+      "path": "index.html",
+      "bytes": 1232,
+      "sha256": "8761e3d65d2bee4fb860e14b315eec9e634a019b1633aea627c335397f8299f2"
+    },
+    {
+      "path": "fc-assets.json",
+      "bytes": 1073,
+      "sha256": "2b4034c8a0f0bfa73812a7f2853ba83b766772ff55096fc1e33c9f2ddb9e4593"
+    },
+    {
+      "path": "assets/index-BkiZ2CBl.js",
+      "bytes": 415401,
+      "sha256": "cdf0d8f9c8cfa259031cb22e10aacb1ffea7b1f7affb3a4235478069b2138bf3"
+    },
+    {
+      "path": "assets/favicon-CXuYoSfB.svg",
+      "bytes": 282,
+      "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+    },
+    {
+      "path": "assets/index-DrrJeLm9.css",
+      "bytes": 39554,
+      "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f"
+    },
+    {
+      "path": "assets/pcm-worklet-B7E4LRoP.js",
+      "bytes": 1724,
+      "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa"
+    },
+    {
+      "path": "assets/wav-worker-LSywWbpJ.js",
+      "bytes": 884,
+      "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+    }
+  ]
+}

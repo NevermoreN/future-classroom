@@ -1,0 +1,191 @@
+{
+  "schema": "future-classroom.r54-narrow-loader-static-independent/v1",
+  "status": "PASS_NARROW_STATIC_REVIEW_RUNTIME_NOT_REVIEWED",
+  "recordedUtc": "2026-11-01T02:06:57.005105+00:00",
+  "scope": "Only the three frozen Rust changes plus original local GNU compile/lint/static PE and main source-binding evidence. No compiler/test/Windows/SSH/tool execution by reviewer.",
+  "blockingFindings": [],
+  "inputs": {
+    "source-freeze-final-first.json": {
+      "bytes": 8959,
+      "sha256": "ab1e1f53e1488f27eb7095796974b1c71c066324a270a0371a3d8f8c5b9024a2"
+    },
+    "pe-audit-first.json": {
+      "bytes": 346705,
+      "sha256": "b94a992fb3308e214d29b6421bf9ca5b4569333e4532eb677b93e6061f18b262"
+    },
+    "checks-first.json": {
+      "bytes": 154323,
+      "sha256": "3258d7663ae6fc358870e351105c9307bd6f5828c80e146751cca5d623329ffc"
+    },
+    "main-source-binding-first.json": {
+      "bytes": 72276,
+      "sha256": "13ce9cb3ec3640f144d51b71df959f1b6ee49ec3d035cf5a6854ba4aa66c89ae"
+    },
+    "implementation-first.diff": {
+      "bytes": 2670,
+      "sha256": "371c1b7ba19736d21071301f580f9c59f710e05eeac397a9f4cf7b1219964666"
+    },
+    "semantic-review-first.json": {
+      "bytes": 1226,
+      "sha256": "3ce858839a8727f6e41ded8f976ba26b9bd67b9adc9335b9e71fc460e28ade58"
+    }
+  },
+  "sourceFiles": [
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 122219,
+      "sha256": "7766d77c5d9c99cf30f64fa8f3ef99f888210d6c08c81ab274fbd07f75759667"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/color_picker.rs",
+      "bytes": 2584,
+      "sha256": "adc8bc74563437c2bb332beb678b3ced880926644b26ab40700e402582e95568"
+    },
+    {
+      "path": "crates/fc-windows/src/audio/device.rs",
+      "bytes": 17804,
+      "sha256": "964a09a22272056b6a19f35ff4ae5b6286a637352a2dad638559ef50a0607016"
+    }
+  ],
+  "sourceBinding": {
+    "rustBuildInputs": 429,
+    "beforeAfterUnchanged": true,
+    "mainMatchesAll429": true,
+    "mainAndIsolatedAndImmutableThreeChangedFilesMatch": true
+  },
+  "semanticFindings": [
+    {
+      "file": "crates/fc-windows/src/desktop.rs",
+      "lines": [
+        1696,
+        1752
+      ],
+      "fact": "Both removed English Error::new messages still return exact E_BOUNDS. Numeric capacity classifier remains error.code()==E_BOUNDS; original localized passive-content warning in desktop_controller remains unchanged."
+    },
+    {
+      "file": "crates/fc-windows/src/workbench/color_picker.rs",
+      "line": 47,
+      "fact": "Error path still returns HRESULT 0x80004005 E_FAIL. ChooseColor success and CommDlgExtendedError==0 -> Ok(None) cancellation unchanged. Existing Chinese App success/cancel/failure text unchanged; no error string is used as a permission or classifier."
+    },
+    {
+      "file": "crates/fc-windows/src/audio/device.rs",
+      "lines": [
+        20,
+        291
+      ],
+      "fact": "Only DLL import binding changes to explicit ole32/stdcall CoTaskMemFree. Same returned COM task-allocator pointer, nullable call semantics, exactly one release after original bounded endpoint-ID loop. GetId failure exits before successful transfer; no new ownership/control-flow branch, no allocator substitution."
+    },
+    {
+      "fact": "No global windows_slim_errors/windows_core option, Cargo/config/feature/dependency edits or disabled COM error-info support. Narrow delta removes three locally authored WinRT-originated debug strings, not user-facing Chinese guidance."
+    }
+  ],
+  "commands": [
+    {
+      "name": "versions-stable",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 0.30262248404324055
+    },
+    {
+      "name": "versions-nightly",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 0.3004849290009588
+    },
+    {
+      "name": "fmt",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 4.553111555986106
+    },
+    {
+      "name": "architecture",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 0.28424015711061656
+    },
+    {
+      "name": "diffcheck",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 0.2780475588515401
+    },
+    {
+      "name": "windows-compile",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 782.1602565629873
+    },
+    {
+      "name": "windows-product",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 0.770889630774036
+    },
+    {
+      "name": "windows-stable-strict",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 78.11144020804204
+    },
+    {
+      "name": "windows-nightly-strict",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 123.14639228908345
+    }
+  ],
+  "staticPe": {
+    "programs": 22,
+    "tests": 21,
+    "actualObjdumpImportCommands": 22,
+    "versionCommands": 22,
+    "allRawCommandLogBytesAndShaBound": true,
+    "twoNamedForbiddenDllsAbsentInAll22": true,
+    "normalCoTaskMemFreeDll": "ole32.dll",
+    "normalGetErrorInfoDll": "oleaut32.dll",
+    "systemMsvcrtImportedPrograms": 22,
+    "primaryAuditorStatuses": "All NOT_VALIDATED preserved",
+    "normalSha256": "508eeb87e7830ad1ba206947b4b809c2e5f2fb234e9b3bf2c01ea802bf0dd4dc",
+    "normalBytes": 13117102,
+    "remainingNormalGnuRisks": [
+      {
+        "kind": "API_SET_DLL",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WaitOnAddress",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WakeByAddressAll",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WakeByAddressSingle",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "kernel32.dll",
+        "api": "GetSystemTimePreciseAsFileTime",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      }
+    ]
+  },
+  "explicitLimits": [
+    "Original R52 formal Win7 MSVC before-artifact is a different toolchain and retains its original DLL risks. This GNU result does not certify a new formal MSVC artifact.",
+    "Modern GNU WaitOnAddress/WakeByAddress*/GetSystemTimePreciseAsFileTime/API-set risks remain; real Win7 load/API/update compatibility is unvalidated.",
+    "System msvcrt.dll remains; absence of added deployment-runtime imports does not mean GNU links every CRT statically.",
+    "No blanket COM extended-error-data disable or readiness/production-listener acceptance is inferred.",
+    "Root Windows affected tests/public20/visual22 activity is separate; no runtime JSON was read or interpreted by this static review.",
+    "No visible chooser/foreground/Seewo/Win7/10 runtime or complete product acceptance is established."
+  ]
+}

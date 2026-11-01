@@ -1,0 +1,73 @@
+diff --git a/crates/fc-windows/src/audio/device.rs b/crates/fc-windows/src/audio/device.rs
+index a9f326a..58a0149 100644
+--- a/crates/fc-windows/src/audio/device.rs
++++ b/crates/fc-windows/src/audio/device.rs
+@@ -16,6 +16,15 @@ use windows::{
+         System::Com::*,
+     },
+ };
++// The same COM task allocator is available through Ole32 on the Win7 baseline.
++// The generated binding targets combase.dll; keep this import narrow as in the
++// native KnownFolder and file-picker adapters without changing ownership.
++#[link(name = "ole32")]
++unsafe extern "system" {
++    #[link_name = "CoTaskMemFree"]
++    fn free_task_memory(memory: *const core::ffi::c_void);
++}
++
+ static ACTIVE: AtomicBool = AtomicBool::new(false);
+ static POISONED: AtomicBool = AtomicBool::new(false);
+ const MAX_ID_UNITS: usize = 32_768;
+@@ -278,7 +287,7 @@ fn endpoint_id(enumerator: &IMMDeviceEnumerator, role: ERole) -> Result<Option<V
+     }
+     // SAFETY: GetId transfers CoTaskMem ownership, including an empty/null result.
+     unsafe {
+-        CoTaskMemFree(Some(id.0.cast()));
++        free_task_memory(id.0.cast());
+     }
+     result
+ }
+diff --git a/crates/fc-windows/src/desktop.rs b/crates/fc-windows/src/desktop.rs
+index e05e8d6..4858ce3 100644
+--- a/crates/fc-windows/src/desktop.rs
++++ b/crates/fc-windows/src/desktop.rs
+@@ -1693,10 +1693,7 @@ fn prepare_content_with_note(
+                 .len()
+                 > limit)
+     {
+-        return Err(Error::new(
+-            E_BOUNDS,
+-            "Read-only classroom content does not fit its complete display area",
+-        ));
++        return Err(Error::from_hresult(E_BOUNDS));
+     }
+     let mut starts = Vec::new();
+     for b in &blocks {
+@@ -1752,10 +1749,7 @@ fn prepare_content_with_note(
+     }
+ 
+     if read_only_classroom(c) && pages.len() > 1 {
+-        return Err(Error::new(
+-            E_BOUNDS,
+-            "Read-only classroom content does not fit its complete display area",
+-        ));
++        return Err(Error::from_hresult(E_BOUNDS));
+     }
+     Ok(ContentLayout {
+         top_inset,
+diff --git a/crates/fc-windows/src/workbench/color_picker.rs b/crates/fc-windows/src/workbench/color_picker.rs
+index 34ba8f0..1cfbc50 100644
+--- a/crates/fc-windows/src/workbench/color_picker.rs
++++ b/crates/fc-windows/src/workbench/color_picker.rs
+@@ -44,10 +44,7 @@ pub(super) fn choose(owner: HWND, initial: Rgb) -> Result<Option<Rgb>> {
+     if error == 0 {
+         Ok(None)
+     } else {
+-        Err(Error::new(
+-            HRESULT(0x80004005u32 as i32),
+-            "system colour dialog failed",
+-        ))
++        Err(Error::from_hresult(HRESULT(0x80004005u32 as i32)))
+     }
+ }
+ #[cfg(test)]

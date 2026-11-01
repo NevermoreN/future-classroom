@@ -1,0 +1,186 @@
+{
+  "schema": "future-classroom.r53-independent-static-candidate-review/v1",
+  "status": "PASS_CANDIDATE_BUILD_STATIC_ONLY_WITH_RECORDED_LIMITS",
+  "reviewedUtc": "2026-11-01T01:44:23.868013+00:00",
+  "scope": "Independent reading of frozen author/source and existing real wixl/msiinfo/extraction originals; no packaging/checker/MSI tool was run and no installation performed.",
+  "blockingFindings": [],
+  "originalInputs": [
+    {
+      "path": "/tmp/fc-round53-msi-evidence/editor-source-freeze-final-second.json",
+      "bytes": 1938,
+      "sha256": "7973acb6eb4d8414d145669b6378eab1aa81ff4c0e432af8498851b3692097b4"
+    },
+    {
+      "path": "/tmp/fc-round53-msi-evidence/actual-msi-first/report.json",
+      "bytes": 70967,
+      "sha256": "0008ac2aec399a14ff1e92f79e1369675cba9990f157f403e6335f90b5bff4ce"
+    },
+    {
+      "path": "/tmp/fc-round53-msi-evidence/FutureClassroom-0.1.0-win7-msvc-msi-input-dev.zip",
+      "bytes": 5358934,
+      "sha256": "81712794ba73cf1d0c09909a3b15db64e28d0016a1fde8a5c3f7fb3d4c0c6d9e"
+    },
+    {
+      "path": "/tmp/fc-round53-msi-evidence/actual-msi-first/candidate.msi",
+      "bytes": 5938176,
+      "sha256": "d8d414b8229177f59d96f2e218a4ddef0eec057813dec67fdbe6342d8912f8e5"
+    },
+    {
+      "path": "/tmp/fc-round52-ci-evidence/win7-original-independent-first.json",
+      "bytes": 478714,
+      "sha256": "31721708a6db904cb2ed9eec4826f6d751710cf80bfba14dc10a93d277b83610"
+    },
+    {
+      "path": "/tmp/fc-round53-msi-evidence/web-build-first/run.json",
+      "bytes": 15687,
+      "sha256": "8a606906219a077666e70a5ccd3cc7fc11fc85e81b8369072377a5031cc6d0aa"
+    }
+  ],
+  "sourceFreezeMatches": {
+    "scripts/package-msi-candidate.py": {
+      "bytes": 36262,
+      "sha256": "d37a1f0275e0dbb45085b5059ced4e415b088b42e093863ecef27feae177679c"
+    },
+    "scripts/check-msi-candidate.py": {
+      "bytes": 20199,
+      "sha256": "a8b9d7b433a3300d54f77b6c14c1878f6943e97f03770305ebb6a8095783b04c"
+    },
+    "packaging/MSI-CANDIDATE.md": {
+      "bytes": 7057,
+      "sha256": "22904b474322cb96c2ee7afcf7f7c879919cfb68641f98fc9cb595b61332506e"
+    }
+  },
+  "checks": [
+    "three author source files exact final freeze",
+    "build report binds frozen author",
+    "candidate-only status no install/readiness",
+    "actual MSI bytes and digest",
+    "command wixl-version terminal/log binding",
+    "command msiinfo-version terminal/log binding",
+    "command msiextract-version terminal/log binding",
+    "command objdump-version terminal/log binding",
+    "command payload-pe terminal/log binding",
+    "command wixl-build terminal/log binding",
+    "command msi-summary terminal/log binding",
+    "command msi-tables terminal/log binding",
+    "command table-Binary terminal/log binding",
+    "command table-Component terminal/log binding",
+    "command table-CreateFolder terminal/log binding",
+    "command table-CustomAction terminal/log binding",
+    "command table-Directory terminal/log binding",
+    "command table-Feature terminal/log binding",
+    "command table-FeatureComponents terminal/log binding",
+    "command table-File terminal/log binding",
+    "command table-IniFile terminal/log binding",
+    "command table-InstallExecuteSequence terminal/log binding",
+    "command table-InstallUISequence terminal/log binding",
+    "command table-LaunchCondition terminal/log binding",
+    "command table-Media terminal/log binding",
+    "command table-Property terminal/log binding",
+    "command table-Registry terminal/log binding",
+    "command table-RemoveFile terminal/log binding",
+    "command table-RemoveIniFile terminal/log binding",
+    "command table-ServiceControl terminal/log binding",
+    "command table-ServiceInstall terminal/log binding",
+    "command table-Shortcut terminal/log binding",
+    "command table-Upgrade terminal/log binding",
+    "command msi-extract terminal/log binding",
+    "input ZIP exact recorded bytes/hash",
+    "ZIP exact names no duplicates or aliased files",
+    "real source manifest",
+    "actual features match real packager literal including list",
+    "ZIP closed exact ledger/CRC/size/SHA",
+    "14 extracted files equal admitted source plus exact candidate text",
+    "payload report full binding",
+    "normal EXE exact R52 f696 Win7MSVC source",
+    "existing current Web65 input/npm build proof",
+    "all 7 Web build outputs equal input and extracted payload",
+    "per-user scope and secure upgrade properties",
+    "private FcInstallDir exact LocalAppData chain",
+    "component/file/HKCU marker fc-bootstrap.exe",
+    "component/file/HKCU marker LICENSE",
+    "component/file/HKCU marker PROBE-README.txt",
+    "component/file/HKCU marker THIRD-PARTY-NOTICES.txt",
+    "component/file/HKCU marker web/THIRD-PARTY-NOTICES.txt",
+    "component/file/HKCU marker web/assets/favicon-CXuYoSfB.svg",
+    "component/file/HKCU marker web/assets/index-BkiZ2CBl.js",
+    "component/file/HKCU marker web/assets/index-DrrJeLm9.css",
+    "component/file/HKCU marker web/assets/pcm-worklet-B7E4LRoP.js",
+    "component/file/HKCU marker web/assets/wav-worker-LSywWbpJ.js",
+    "component/file/HKCU marker web/fc-assets.json",
+    "component/file/HKCU marker web/index.html",
+    "component/file/HKCU marker manifest.json",
+    "component/file/HKCU marker MSI-CANDIDATE.txt",
+    "one-to-one exact component/registry/file sets",
+    "single feature binds all components",
+    "single embedded CAB",
+    "actual transactional removal 1500<1501<6600",
+    "actual downgrade/scope/OS conditions",
+    "two exact actual upgrade version ranges",
+    "every present exported forbidden side-effect table empty",
+    "known WinRT loader risks retained"
+  ],
+  "counts": {
+    "actualCommands": 30,
+    "zipMembers": 13,
+    "manifestLedger": 12,
+    "payloadFiles": 14,
+    "components": 14,
+    "registryMarkers": 14,
+    "featureComponents": 14,
+    "declaredProbeCommands": 24,
+    "webInputs": 65,
+    "webManifestAssets": 6,
+    "webBuildOutputsIncludingManifest": 7
+  },
+  "msi": {
+    "path": "candidate.msi",
+    "size": 5938176,
+    "sha256": "d8d414b8229177f59d96f2e218a4ddef0eec057813dec67fdbe6342d8912f8e5"
+  },
+  "nonblockingEvidenceLimits": [
+    {
+      "topic": "Additional MSI default tables",
+      "facts": "Actual table-name inventory includes additional compiler default tables not individually exported by the current Required union Forbidden export loop. Fixed trusted source XML does not author them, but their contents were not independently checked empty.",
+      "tables": [
+        "ActionText",
+        "AdminExecuteSequence",
+        "AdminUISequence",
+        "AdvtExecuteSequence",
+        "AppSearch",
+        "Error",
+        "Icon",
+        "MsiFileHash",
+        "RegLocator",
+        "Signature",
+        "_ForceCodepage",
+        "_SummaryInformation"
+      ],
+      "recommendation": "Do not claim all additional tables independently proven empty; exporting remaining tables is a follow-up if that stronger static claim is needed."
+    }
+  ],
+  "retainedRisks": [
+    {
+      "kind": "WINRT_DLL",
+      "dll": "api-ms-win-core-winrt-error-l1-1-0.dll",
+      "reason": "WinRT/COM import requires baseline OS export validation; Win7 is not established."
+    },
+    {
+      "kind": "WINRT_DLL",
+      "dll": "combase.dll",
+      "reason": "WinRT/COM import requires baseline OS export validation; Win7 is not established."
+    }
+  ],
+  "notEstablished": [
+    "Actual Windows Installer install/repair/upgrade rollback/downgrade/uninstall behavior",
+    "Live-process upgrade/uninstall refusal (not implemented)",
+    "Exact type/value/owner HKCU Run cleanup (not implemented)",
+    "Standard-user ProgramData ACL/DPAPI handover and school data behavior on launch",
+    "Win7 loader/export compatibility (known static WinRT DLL risks)",
+    "Actual Win7/10/11/Seewo installation acceptance",
+    "Production listener/TLS/certificate readiness or strict firstTCP5s acceptance"
+  ],
+  "runtime": "NOT_RUN",
+  "readiness": "NOT_GRANTED",
+  "writes": "This review JSON only; main/source/original report unchanged."
+}

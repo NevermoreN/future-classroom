@@ -1,0 +1,27 @@
+{
+  "status": "PASS_COMMAND",
+  "args": [
+    "python3",
+    "-B",
+    "/tmp/fc-round53-msi-candidate-worktree/scripts/package-msi-candidate.py",
+    "--input-zip",
+    "/tmp/fc-round53-msi-evidence/FutureClassroom-0.1.0-win7-msvc-msi-input-dev.zip",
+    "--input-sha256",
+    "81712794ba73cf1d0c09909a3b15db64e28d0016a1fde8a5c3f7fb3d4c0c6d9e",
+    "--output-dir",
+    "/tmp/fc-round53-msi-evidence/actual-msi-first",
+    "--wixl",
+    "/tmp/fc-round53-msi-tools/root/usr/bin/wixl",
+    "--msiinfo",
+    "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+    "--msiextract",
+    "/tmp/fc-round53-msi-tools/root/usr/bin/msiextract",
+    "--objdump",
+    "/usr/bin/i686-w64-mingw32-objdump"
+  ],
+  "scriptSha256": "d37a1f0275e0dbb45085b5059ced4e415b088b42e093863ecef27feae177679c",
+  "scope": "Actual Linux MSI compiler/table audit/extraction only. No Windows Installer or product launch. Input EXE from original sourcef696 Win7MSVC CI; complete freshly rebuilt current web.",
+  "exitCode": 0,
+  "elapsedSeconds": 2.2019462168682367,
+  "scriptUnchanged": true
+}

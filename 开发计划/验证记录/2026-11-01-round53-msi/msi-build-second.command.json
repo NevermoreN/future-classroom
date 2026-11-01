@@ -1,0 +1,27 @@
+{
+  "status": "PASS_COMMAND",
+  "args": [
+    "python3",
+    "-B",
+    "/tmp/fc-round53-msi-candidate-worktree/scripts/package-msi-candidate.py",
+    "--input-zip",
+    "/tmp/fc-round53-msi-evidence/FutureClassroom-0.1.0-win7-msvc-msi-input-metadata-dev.zip",
+    "--input-sha256",
+    "ed507abbef0f91e06cf2c1dc724569e22cee0d928ca987b1d1048da5a1d04ad4",
+    "--output-dir",
+    "/tmp/fc-round53-msi-evidence/actual-msi-second",
+    "--wixl",
+    "/tmp/fc-round53-msi-tools/root/usr/bin/wixl",
+    "--msiinfo",
+    "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+    "--msiextract",
+    "/tmp/fc-round53-msi-tools/root/usr/bin/msiextract",
+    "--objdump",
+    "/usr/bin/i686-w64-mingw32-objdump"
+  ],
+  "scriptSha256": "d37a1f0275e0dbb45085b5059ced4e415b088b42e093863ecef27feae177679c",
+  "scope": "Metadata-updated input ZIP; same real R52 Win7 MSVC EXE and fresh locked Web payload. Actual Linux MSI build/table audit/extraction only, no Windows install or application launch.",
+  "exitCode": 0,
+  "elapsedSeconds": 2.6889518990647048,
+  "scriptUnchanged": true
+}

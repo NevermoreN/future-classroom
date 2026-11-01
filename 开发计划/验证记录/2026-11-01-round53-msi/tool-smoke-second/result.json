@@ -1,0 +1,118 @@
+{
+  "status": "FAIL",
+  "scope": "Actual native Linux MSI compiler/database/extractor fixture only; no product EXE or Windows Installer execution.",
+  "commands": [
+    {
+      "name": "compile",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/wixl",
+        "-a",
+        "x86",
+        "-o",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.wxs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "summary",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "suminfo",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "tables",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "tables",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-Property",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "Property"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-Directory",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "Directory"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-Component",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "Component"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-File",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "File"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-Upgrade",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "Upgrade"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-LaunchCondition",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "LaunchCondition"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-InstallExecuteSequence",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "InstallExecuteSequence"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "table-Media",
+      "args": [
+        "/tmp/fc-round53-msi-tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round53-msi-evidence/tool-smoke-second/smoke.msi",
+        "Media"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "errorKind": "AssertionError",
+  "failedStep": ""
+}

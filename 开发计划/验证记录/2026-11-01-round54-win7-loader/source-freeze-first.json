@@ -1,0 +1,32 @@
+{
+  "status": "FROZEN_SOURCE_BEFORE_BUILD",
+  "base": "f6963919f100618fc482b1bff1a42dcbc571e610",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 122219,
+      "sha256": "7766d77c5d9c99cf30f64fa8f3ef99f888210d6c08c81ab274fbd07f75759667"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/color_picker.rs",
+      "bytes": 2584,
+      "sha256": "adc8bc74563437c2bb332beb678b3ced880926644b26ab40700e402582e95568"
+    },
+    {
+      "path": "crates/fc-windows/src/audio/device.rs",
+      "bytes": 17804,
+      "sha256": "964a09a22272056b6a19f35ff4ae5b6286a637352a2dad638559ef50a0607016"
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round54-win7-loader-evidence/implementation-first.diff",
+    "bytes": 2670,
+    "sha256": "371c1b7ba19736d21071301f580f9c59f710e05eeac397a9f4cf7b1219964666"
+  },
+  "runner": {
+    "path": "/tmp/fc-round54-win7-loader-evidence/run-checks-first.py",
+    "sha256": "87e924b63c8f9f2d09ebd0f9220aae7647d779d9ae29175688df51db27349fdf"
+  },
+  "semantics": "Only3 local Error::new removed preserving2E_BOUNDS+1E_FAIL. Existing App capacity classification/local Chinese status and picker cancellation remain unchanged. Audio pointer acquisition/bounded read/result/free position unchanged; one narrow Ole32 ABI changes only DLL import, same COM allocator and thread/ownership.",
+  "runtimeBoundary": "Windows native modules do not execute on Host. Existing meaningful Windows capacity/card-body/color/device tests will be compiled in alltargets, actual Windows runtime reserved for root. No unrelated973Host repeats."
+}

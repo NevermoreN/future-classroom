@@ -1,0 +1,51 @@
+{
+  "status": "PASS_ACTUAL_207_AFFECTED_WIN11_TESTS_AND_PUBLIC20_VISUAL22",
+  "testSummary": {
+    "passed": 207,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered": 0
+  },
+  "normalSha256": "508eeb87e7830ad1ba206947b4b809c2e5f2fb234e9b3bf2c01ea802bf0dd4dc",
+  "testSha256": "ca317aa16121beb5bdc7fe618159cfcfac6b7f352835705f461a06ce9881c005",
+  "publicSteps": 20,
+  "visualSteps": 22,
+  "cleanup": "PASS_BOTH_ORIGINAL_REPORTS",
+  "facts": [
+    {
+      "path": "windows-affected-public-first.json",
+      "bytes": 39214,
+      "sha256": "b90cf74220843143b4ddd55c94ca895f994af7f410c029d69d25ff3b7ed4af1a"
+    },
+    {
+      "path": "windows-visual-first.json",
+      "bytes": 9897,
+      "sha256": "adab03d904cdbfb136d72c05d2268856468f884b7a77e6f2aa4b4a9f46bafbdb"
+    },
+    {
+      "path": "windows-affected-operation-first.json",
+      "bytes": 4058,
+      "sha256": "8ce394e7ac504dbc8fe520597b3984de388de25ec3436ea0e7e34161f0c32bc7"
+    },
+    {
+      "path": "pe-audit-first.json",
+      "bytes": 346705,
+      "sha256": "b94a992fb3308e214d29b6421bf9ca5b4569333e4532eb677b93e6061f18b262"
+    },
+    {
+      "path": "source-freeze-final-first.json",
+      "bytes": 8959,
+      "sha256": "ab1e1f53e1488f27eb7095796974b1c71c066324a270a0371a3d8f8c5b9024a2"
+    },
+    {
+      "path": "main-source-binding-first.json",
+      "bytes": 72276,
+      "sha256": "13ce9cb3ec3640f144d51b71df959f1b6ee49ec3d035cf5a6854ba4aa66c89ae"
+    }
+  ],
+  "limitations": [
+    "Only affected Windows adapter tests executed in this round. Other unchanged business/Host tests were not repeated.",
+    "Actual OS Win11/WOW64; GNU modern target retains separate modern API risks. No actual Win7/Win10/MSVC new delta runtime or visible Seewo claim."
+  ]
+}

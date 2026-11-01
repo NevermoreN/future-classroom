@@ -1,0 +1,6 @@
+Condition	Description
+s255	l255
+LaunchCondition	Condition
+NOT WIX_DOWNGRADE_DETECTED	A newer FutureClassroom candidate is installed.
+NOT ALLUSERS	This candidate supports only the current user installation context.
+Installed OR VersionNT >= 601	Windows 7 or later is required; actual OS compatibility remains unvalidated.

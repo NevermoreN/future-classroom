@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="9E50831D-7811-5039-8BC3-4934647448D8" Name="FutureClassroom MSI candidate" Language="1033" Codepage="1252" Version="0.1.0" Manufacturer="FutureClassroom" UpgradeCode="99378807-098D-5F04-8D4D-F181DFA218D5">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perUser" />
+    <Media Id="1" Cabinet="payload.cab" EmbedCab="yes" />
+    <MajorUpgrade AllowDowngrades="no" AllowSameVersionUpgrades="no" DowngradeErrorMessage="A newer FutureClassroom candidate is installed." />
+    <InstallExecuteSequence>
+      <RemoveExistingProducts After="InstallInitialize" />
+    </InstallExecuteSequence>
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+    <Condition Message="This candidate supports only the current user installation context.">NOT ALLUSERS</Condition>
+    <Condition Message="Windows 7 or later is required; actual OS compatibility remains unvalidated.">Installed OR VersionNT &gt;= 601</Condition>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder">
+        <Directory Id="UserPrograms" Name="Programs">
+          <Directory Id="FcInstallDir" Name="FutureClassroom">
+            <Component Id="Cc693279643b8cd5d248172d9" Guid="BF8ECC92-DF5E-5031-AF8F-B122A05E64E6" Win64="no">
+              <File Id="Fc693279643b8cd5d248172d9" Source="payload/LICENSE" Name="LICENSE" KeyPath="no" DiskId="1" />
+              <RegistryValue Id="Rc693279643b8cd5d248172d9" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="BF8ECC92-DF5E-5031-AF8F-B122A05E64E6" Type="integer" Value="1" KeyPath="yes" />
+            </Component>
+            <Component Id="Ce61b854577338fd5a75cbdbf" Guid="00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC" Win64="no">
+              <File Id="Fe61b854577338fd5a75cbdbf" Source="payload/MSI-CANDIDATE.txt" Name="MSI-CANDIDATE.txt" KeyPath="no" DiskId="1" />
+              <RegistryValue Id="Re61b854577338fd5a75cbdbf" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC" Type="integer" Value="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C74981d2baab2ca1978fa3139" Guid="1F2DCDC9-9F80-51BE-A10D-F294D45FDB05" Win64="no">
+              <File Id="F74981d2baab2ca1978fa3139" Source="payload/PROBE-README.txt" Name="PROBE-README.txt" KeyPath="no" DiskId="1" />
+              <RegistryValue Id="R74981d2baab2ca1978fa3139" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="1F2DCDC9-9F80-51BE-A10D-F294D45FDB05" Type="integer" Value="1" KeyPath="yes" />
+            </Component>
+            <Component Id="Caf59ad43ec2920fd346dcd48" Guid="44E7E505-D3CB-5DC8-9730-50964BA3CC8C" Win64="no">
+              <File Id="Faf59ad43ec2920fd346dcd48" Source="payload/THIRD-PARTY-NOTICES.txt" Name="THIRD-PARTY-NOTICES.txt" KeyPath="no" DiskId="1" />
+              <RegistryValue Id="Raf59ad43ec2920fd346dcd48" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="44E7E505-D3CB-5DC8-9730-50964BA3CC8C" Type="integer" Value="1" KeyPath="yes" />
+            </Component>
+            <Component Id="Cb4591484ed1e8e854c88c63f" Guid="0CA01C62-B71F-5C57-905B-B6C979ACB487" Win64="no">
+              <File Id="Fb4591484ed1e8e854c88c63f" Source="payload/fc-bootstrap.exe" Name="fc-bootstrap.exe" KeyPath="no" DiskId="1" />
+              <RegistryValue Id="Rb4591484ed1e8e854c88c63f" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="0CA01C62-B71F-5C57-905B-B6C979ACB487" Type="integer" Value="1" KeyPath="yes" />
+            </Component>
+            <Component Id="Cffa5b716b5a57837f7929dfc" Guid="8D7F75D1-8AD6-5097-AEE4-62389B788737" Win64="no">
+              <File Id="Fffa5b716b5a57837f7929dfc" Source="payload/manifest.json" Name="manifest.json" KeyPath="no" DiskId="1" />
+              <RegistryValue Id="Rffa5b716b5a57837f7929dfc" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="8D7F75D1-8AD6-5097-AEE4-62389B788737" Type="integer" Value="1" KeyPath="yes" />
+            </Component>
+            <Directory Id="D4b5e57f6eb2f42b9039b3d1e" Name="web">
+              <Component Id="C55abfed5453a84683c7f34ab" Guid="51201E26-0CF3-5876-A591-91F68B3A94DB" Win64="no">
+                <File Id="F55abfed5453a84683c7f34ab" Source="payload/web/THIRD-PARTY-NOTICES.txt" Name="THIRD-PARTY-NOTICES.txt" KeyPath="no" DiskId="1" />
+                <RegistryValue Id="R55abfed5453a84683c7f34ab" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="51201E26-0CF3-5876-A591-91F68B3A94DB" Type="integer" Value="1" KeyPath="yes" />
+              </Component>
+              <Directory Id="D7b144e7d5cf5146fdc8a96c4" Name="assets">
+                <Component Id="Cd04f9f0bbb15d02df958ca57" Guid="D0B2E913-0457-5E64-A66B-EC1EE7DA7138" Win64="no">
+                  <File Id="Fd04f9f0bbb15d02df958ca57" Source="payload/web/assets/favicon-CXuYoSfB.svg" Name="favicon-CXuYoSfB.svg" KeyPath="no" DiskId="1" />
+                  <RegistryValue Id="Rd04f9f0bbb15d02df958ca57" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="D0B2E913-0457-5E64-A66B-EC1EE7DA7138" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+                <Component Id="Cbcf155810b3f3fc734c76f43" Guid="18B1A37C-EE86-5233-ACC2-773B48D189BB" Win64="no">
+                  <File Id="Fbcf155810b3f3fc734c76f43" Source="payload/web/assets/index-BkiZ2CBl.js" Name="index-BkiZ2CBl.js" KeyPath="no" DiskId="1" />
+                  <RegistryValue Id="Rbcf155810b3f3fc734c76f43" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="18B1A37C-EE86-5233-ACC2-773B48D189BB" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+                <Component Id="C15b357e3ccee0cd90f0305dd" Guid="B9ADCF83-BCB1-5F42-97D8-967FF84A306F" Win64="no">
+                  <File Id="F15b357e3ccee0cd90f0305dd" Source="payload/web/assets/index-DrrJeLm9.css" Name="index-DrrJeLm9.css" KeyPath="no" DiskId="1" />
+                  <RegistryValue Id="R15b357e3ccee0cd90f0305dd" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="B9ADCF83-BCB1-5F42-97D8-967FF84A306F" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+                <Component Id="Cf83899d1877e8d140ae1b17d" Guid="28DB1C02-71DB-5DAF-8D0C-9844E24D16DC" Win64="no">
+                  <File Id="Ff83899d1877e8d140ae1b17d" Source="payload/web/assets/pcm-worklet-B7E4LRoP.js" Name="pcm-worklet-B7E4LRoP.js" KeyPath="no" DiskId="1" />
+                  <RegistryValue Id="Rf83899d1877e8d140ae1b17d" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="28DB1C02-71DB-5DAF-8D0C-9844E24D16DC" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+                <Component Id="C1afa55483054c67bd3d5b866" Guid="C0EC8190-410A-52A3-895E-AD6564B75C1E" Win64="no">
+                  <File Id="F1afa55483054c67bd3d5b866" Source="payload/web/assets/wav-worker-LSywWbpJ.js" Name="wav-worker-LSywWbpJ.js" KeyPath="no" DiskId="1" />
+                  <RegistryValue Id="R1afa55483054c67bd3d5b866" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="C0EC8190-410A-52A3-895E-AD6564B75C1E" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+              </Directory>
+              <Component Id="C42f1b2c2752f7b8628b04b1e" Guid="0C6686BF-2327-51F5-89A6-4243C1FD11CF" Win64="no">
+                <File Id="F42f1b2c2752f7b8628b04b1e" Source="payload/web/fc-assets.json" Name="fc-assets.json" KeyPath="no" DiskId="1" />
+                <RegistryValue Id="R42f1b2c2752f7b8628b04b1e" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="0C6686BF-2327-51F5-89A6-4243C1FD11CF" Type="integer" Value="1" KeyPath="yes" />
+              </Component>
+              <Component Id="C8f62b6ced28d3396b501d2e8" Guid="58B108D4-3264-56B1-9DE5-19636D8437E2" Win64="no">
+                <File Id="F8f62b6ced28d3396b501d2e8" Source="payload/web/index.html" Name="index.html" KeyPath="no" DiskId="1" />
+                <RegistryValue Id="R8f62b6ced28d3396b501d2e8" Root="HKCU" Key="Software\FutureClassroom\Installer\Components" Name="58B108D4-3264-56B1-9DE5-19636D8437E2" Type="integer" Value="1" KeyPath="yes" />
+              </Component>
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+    <Feature Id="Main" Title="FutureClassroom candidate" Level="1">
+      <ComponentRef Id="Cc693279643b8cd5d248172d9" />
+      <ComponentRef Id="Ce61b854577338fd5a75cbdbf" />
+      <ComponentRef Id="C74981d2baab2ca1978fa3139" />
+      <ComponentRef Id="Caf59ad43ec2920fd346dcd48" />
+      <ComponentRef Id="Cb4591484ed1e8e854c88c63f" />
+      <ComponentRef Id="Cffa5b716b5a57837f7929dfc" />
+      <ComponentRef Id="C55abfed5453a84683c7f34ab" />
+      <ComponentRef Id="Cd04f9f0bbb15d02df958ca57" />
+      <ComponentRef Id="Cbcf155810b3f3fc734c76f43" />
+      <ComponentRef Id="C15b357e3ccee0cd90f0305dd" />
+      <ComponentRef Id="Cf83899d1877e8d140ae1b17d" />
+      <ComponentRef Id="C1afa55483054c67bd3d5b866" />
+      <ComponentRef Id="C42f1b2c2752f7b8628b04b1e" />
+      <ComponentRef Id="C8f62b6ced28d3396b501d2e8" />
+    </Feature>
+  </Product>
+</Wix>

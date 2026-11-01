@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "scope": "Host pure hostile ZIP/real packager features schema/authoring/compiled-IDT mutation models; no MSI tool execution or Windows installation",
+  "files": {
+    "scripts/package-msi-candidate.py": {
+      "bytes": 36257,
+      "sha256": "82d7ede1075dd3206db9b506427879bdc201d2f530502a53d302914006476082"
+    },
+    "scripts/check-msi-candidate.py": {
+      "bytes": 20124,
+      "sha256": "9f0a4cec25da7ce5311c6ca51272207a15e028e931d68cae2fa8eaf6df5f0e13"
+    },
+    "packaging/MSI-CANDIDATE.md": {
+      "bytes": 6730,
+      "sha256": "73c9cf92810e684ab5503b288c02fc7a675410ec5d5777cb91c0f4cf548d92df"
+    }
+  },
+  "tests_exit_code": 0,
+  "test_groups": 17,
+  "diff_check_exit_code": 0,
+  "new_file_trailing_whitespace": [],
+  "changed_during_checks": false,
+  "first_source_bytes": "editor-first-before-review/manifest.json",
+  "first_freeze_preserved": "editor-source-freeze-first.json",
+  "corrections": [
+    "Real package-probe features.declared_probe_commands list[str], other values strings; regression extracts actual literal from existing source AST",
+    "No MSI or CLI candidate ACK/password/reading gate",
+    "HKCU installer-only one-value-per-component markers provide ICE38 registry KeyPaths; no Run action",
+    "Bounded actual summary and IDT closed contracts cover x86/500/per-user flags, properties, fixed directories, component/file/Registry/Feature mappings, embedded CAB, exact upgrade ranges, launch conditions, sequences and expanded forbidden side effects"
+  ],
+  "actual_msi_build": "ROOT_TO_RUN",
+  "windows_installation": "NOT_RUN",
+  "full_lifecycle_readiness": "NOT_GRANTED"
+}

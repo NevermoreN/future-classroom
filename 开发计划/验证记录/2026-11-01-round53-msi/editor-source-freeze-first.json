@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "scope": "Only Host pure hostile ZIP/input admission and authoring/IDT rules; actual MSI generation/Windows install not executed by this agent",
+  "status": "PASS",
+  "tests_exit_code": 0,
+  "test_groups": 14,
+  "diff_check_exit_code": 0,
+  "files": {
+    "scripts/package-msi-candidate.py": {
+      "bytes": 25968,
+      "sha256": "1192ae7c02e50903a1e394c09aff59056b5b102c34ec623cc6db104566cf024d"
+    },
+    "scripts/check-msi-candidate.py": {
+      "bytes": 11923,
+      "sha256": "c19739bbb5fd67c5b07d5f86b4681ed7658f8113882238e83ed4552e6445ddf7"
+    },
+    "packaging/MSI-CANDIDATE.md": {
+      "bytes": 6302,
+      "sha256": "a69abcacf57836859f0be62cc7a1ded9051a85b077e80865fb34f1977c014a86"
+    }
+  },
+  "changed_during_checks": false,
+  "earlier_failure": "editor-input-authoring-first.json retained: oversized existing native notices rejected; final fixed 4MiB per native notice and unchanged 30MiB total",
+  "native_installation": "NOT_RUN",
+  "actual_msi_build": "ROOT_TO_RUN",
+  "actual_root_export_readonly_validation": {
+    "InstallInitialize": 1500,
+    "RemoveExistingProducts": 1501,
+    "InstallFinalize": 6600
+  },
+  "limitations": [
+    "Current source admits complete Web payload and only i686-win7-windows-msvc ZIP, not GNU/native-only",
+    "No active-process refusal or exact Run cleanup; no complete Q13/P5-03 claim",
+    "No Cargo/Windows/installation/network tool downloads by editor during implementation"
+  ]
+}
