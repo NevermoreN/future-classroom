@@ -1,0 +1,118 @@
+{
+  "source": "$ErrorActionPreference='Stop';[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);$paths='[\"C:\\\\Windows\\\\Installer\\\\33f27267.msi\", \"C:\\\\Windows\\\\Installer\\\\33f2726b.msi\", \"C:\\\\Windows\\\\Installer\\\\MSI72B5.tmp\", \"C:\\\\Windows\\\\Installer\\\\MSI7391.tmp\", \"C:\\\\Windows\\\\Installer\\\\MSI75E5.tmp\", \"C:\\\\Windows\\\\Installer\\\\MSIED48.tmp\", \"C:\\\\Windows\\\\Installer\\\\MSIEE34.tmp\", \"C:\\\\Windows\\\\Installer\\\\MSIF049.tmp\", \"C:\\\\Windows\\\\Installer\\\\MSIF1F0.tmp\", \"C:\\\\Windows\\\\Installer\\\\MSIF2EB.tmp\", \"C:\\\\Windows\\\\Installer\\\\MSIF445.tmp\"]'|ConvertFrom-Json;$facts=@();foreach($p in $paths){try{$a=[IO.File]::GetAttributes($p);$facts+=@{path=$p;status='PRESENT_REVIEW_REQUIRED';attributes=$a.ToString()}}catch{$e=$_.Exception;while($e.InnerException){$e=$e.InnerException};if($e-is[IO.FileNotFoundException]-or$e-is[IO.DirectoryNotFoundException]){$facts+=@{path=$p;status='KNOWN_ABSENT'}}else{throw}}};@{status=$(if(@($facts|Where-Object{$_.status-cne'KNOWN_ABSENT'}).Count-eq0){'PASS_ALL_EXACT_ORIGINAL_INSTALLER_PATHS_ABSENT'}else{'REVIEW_REQUIRED'});facts=$facts;mutations=$false;scope='Only original held images and exact original MSI log cached paths; no cache enumeration or manual deletion'}|ConvertTo-Json -Depth 8 -Compress",
+  "sourceSha256": "6f33d1317db2d0bd681da8d8297c9507da478aa161202b545252cbcff8849f30",
+  "inputs": [
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/report.json",
+      "bytes": 48323,
+      "sha256": "89a2056df13664771d86113652b2c75566e1752f02ed344501e8c0ae6840f118"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b/fresh-msi.log",
+      "bytes": 161318,
+      "sha256": "24d60374856453ba5a462f1173b9049a0494c409f2295d644a0b9bc7cb7f4b07"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-continuation-first/report.json",
+      "bytes": 92387,
+      "sha256": "c315be4f7dcf762cb9140b770cdd115238c73231d7d7e6048e132dc4b2a1d08c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-continuation-first/download/Continuation-70772302d5c24ed2a8850ecb185d26c7/reapply-msi.log",
+      "bytes": 155528,
+      "sha256": "f09dc5d406005c9c07ac4a6412fbf0992fca1712d715ae6b264a4b4e82962d43"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-continuation-first/download/Continuation-70772302d5c24ed2a8850ecb185d26c7/uninstall-msi.log",
+      "bytes": 129588,
+      "sha256": "23ca4cbbc5e328906e5676126b8eef5f38fef617562301e4001b5a96f2da629c"
+    }
+  ],
+  "command": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe",
+    "-NoLogo",
+    "-NoProfile",
+    "-NonInteractive",
+    "-EncodedCommand",
+    "WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+  ],
+  "actualExit": true,
+  "exitCode": 0,
+  "reaped": true,
+  "elapsedSeconds": 0.4841828108765185,
+  "stdout": {
+    "path": "/tmp/fc-round76-ci-evidence/root-original-msi-cache-readonly-first.stdout.log",
+    "bytes": 1162,
+    "sha256": "133a91008b43607b2b52d7ebc68a0f275341262d47e74daa26c3c63191cf296a"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round76-ci-evidence/root-original-msi-cache-readonly-first.stderr.log",
+    "bytes": 393,
+    "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+  },
+  "actual": {
+    "facts": [
+      {
+        "path": "C:\\Windows\\Installer\\33f27267.msi",
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\33f2726b.msi",
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI72B5.tmp",
+        "attributes": "Archive",
+        "status": "PRESENT_REVIEW_REQUIRED"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI7391.tmp",
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI75E5.tmp",
+        "attributes": "Archive",
+        "status": "PRESENT_REVIEW_REQUIRED"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSIED48.tmp",
+        "attributes": "Archive",
+        "status": "PRESENT_REVIEW_REQUIRED"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSIEE34.tmp",
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSIF049.tmp",
+        "attributes": "Archive",
+        "status": "PRESENT_REVIEW_REQUIRED"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSIF1F0.tmp",
+        "attributes": "Archive",
+        "status": "PRESENT_REVIEW_REQUIRED"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSIF2EB.tmp",
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSIF445.tmp",
+        "attributes": "Archive",
+        "status": "PRESENT_REVIEW_REQUIRED"
+      }
+    ],
+    "status": "REVIEW_REQUIRED",
+    "scope": "Only original held images and exact original MSI log cached paths; no cache enumeration or manual deletion",
+    "mutations": false
+  }
+}

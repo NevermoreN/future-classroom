@@ -148,6 +148,29 @@ The current parent-process SID/context assumption also needs a separate
 test-only observer before invoking production Begin. An observer's success does
 not prove broker/guardian success, and must not create production Pending.
 
+## Original compiler identity and builder source
+
+Cargo package IDs are opaque values. Both normal compiler-artifact messages
+must match the exact package ID, manifest path and complete binary-target object
+from the accepted original `cargo metadata --locked --format-version 1 --no-deps`
+output. The original successful command, complete nontruncated log at
+`logs/cargo-metadata.stdout.log`, result-pinned SHA and workspace-local
+`fc-bootstrap` name/version are required. A suffix such as `#0.1.0` or
+`#fc-bootstrap@0.1.0` is never independent package authority. The normal GUI
+application and lifecycle helper still require their own original non-test
+compiler output and PE/provenance checks; a model metadata file or test harness
+cannot substitute for those raw CI records.
+
+`--source-root` explicitly selects the original CI compile/source checkout. Its
+Git HEAD and every selected input must match the accepted CI bytes, including
+the original checkout's line endings. It does not normalize a failed source
+check or rewrite CI inventories. The default remains the builder repository
+root. When a separately reviewed newer builder packages older accepted normal
+binaries, its actual script bytes and builder identity remain separate from
+the original source checkout, compiler metadata and normal PE identities. The
+report records both identities and the actual packaging dependencies; it never
+claims the newer builder was compiled in the older CI job.
+
 ## Build and inspect
 
 Use reviewed Ubuntu noble tools `wixl`, `wixl-data`, `msitools` and
@@ -177,6 +200,7 @@ python3 scripts/package-msi-candidate.py \
   --lifecycle-helper /owned/ci/product/fc-bootstrap/fc-installer-lifecycle.exe \
   --lifecycle-helper-sha256 EXPECTED_NORMAL_HELPER_SHA256 \
   --build-evidence /owned/ci --build-result-sha256 EXPECTED_CI_RESULT_SHA256 \
+  --source-root /owned/original-ci-source-checkout \
   --output-dir /owned/new-output \
   --wixl /owned/tools/usr/bin/wixl \
   --msibuild /owned/tools/usr/bin/msibuild --msibuild-sha256 EXPECTED_TOOL_SHA256 \

@@ -1,0 +1,161 @@
+{
+  "status": "PASS_B5_THREE_FILE_MAIN_INTEGRATION_AND_HOST_CHECKS_ONLY",
+  "head": "3bad94949012e840cd1dda6a73a0ea1ddb067697",
+  "changedFiles": [
+    {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/package-msi-candidate.py",
+      "bytes": 63279,
+      "sha256": "8ca2f818b481f5cd4a2c9fd4cee4f4d282c505f4f3ccb45ec28b0dc719757378"
+    },
+    {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/check-msi-candidate.py",
+      "bytes": 40422,
+      "sha256": "18dc6664d514858af926ca6cb5cd605b188ab5fb842d13d66661e0b16f4605df"
+    },
+    {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/packaging/MSI-CANDIDATE.md",
+      "bytes": 16077,
+      "sha256": "2e2e9d734986c037e71043f0c54ae18dfc36073e18f4a6b3643b48d18e8fd65e"
+    }
+  ],
+  "builderAndCheckerExactFrozenB5": true,
+  "gitDirtyExactThreeAllowed": true,
+  "checks": [
+    {
+      "name": "pure26",
+      "command": [
+        "/config/.python/python/bin/python3",
+        "scripts/check-msi-candidate.py"
+      ],
+      "pid": 4378,
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "elapsedSeconds": 4.1737155669834465
+    },
+    {
+      "name": "ast",
+      "command": [
+        "/config/.python/python/bin/python3",
+        "-c",
+        "import ast;from pathlib import Path;[ast.parse(Path(p).read_text()) for p in ['scripts/package-msi-candidate.py','scripts/check-msi-candidate.py']];print('AST PASS 2 files')"
+      ],
+      "pid": 4382,
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "elapsedSeconds": 0.12844979693181813
+    },
+    {
+      "name": "architecture",
+      "command": [
+        "/config/.python/python/bin/python3",
+        "scripts/check-architecture.py"
+      ],
+      "pid": 4381,
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "elapsedSeconds": 0.17965361895039678
+    },
+    {
+      "name": "diffcheck",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "pid": 4380,
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "elapsedSeconds": 0.12865050393156707
+    }
+  ],
+  "testSummary": "26 pure host tests PASS; Python AST2 PASS; architecture12 crates/33 edges PASS; git diff --check PASS",
+  "temporaryTestDirectoriesRemaining": [],
+  "windowsOrMsiExecutedByThisIntegration": false,
+  "continuationRuntimeResult": "UNKNOWN_NOT_CLAIMED",
+  "commitOrPush": false,
+  "evidence": [
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/.owner",
+      "bytes": 50,
+      "sha256": "0ca08bcfe5dc71a04a92c4362691ebd5c8ad7cf5053cb7c026114de4d290fe91"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/ast.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/ast.stdout.log",
+      "bytes": 17,
+      "sha256": "98980e97968200da826267f13e811314c94c0fee165ed4a066713a8ddff21287"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/before-MSI-CANDIDATE.md",
+      "bytes": 14564,
+      "sha256": "9efa5656201a962705536316cc374b4d47d37e74c8d5e981576ad655e79d0d17"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/before-check-msi-candidate.py",
+      "bytes": 35469,
+      "sha256": "d23f912eecdb556352c8ebd97796ad1de2d86f1185e0c5feb2c29a11f53329d1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/before-package-msi-candidate.py",
+      "bytes": 58160,
+      "sha256": "d0fbb23a5dab2d3329e935110265609ea53674b31896102d1139e21cee193059"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/checks-first.json",
+      "bytes": 1254,
+      "sha256": "c87759bad5051201627a1b7f98bd703dcc620e620b0f7e654cc67fdad2a34b79"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/diffcheck.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/diffcheck.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/main-source-diff-first.diff",
+      "bytes": 19976,
+      "sha256": "5b550112f9bc9f23238e9b49639243b3b52489774a79022bd8a1f6114b2b988c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/pure26.stderr.log",
+      "bytes": 4029,
+      "sha256": "f84cfd3b57dbe065a53f156ddcc966764a5c0d23ddc7e3d3698ec6b93b26844c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/pure26.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/source-before-first.json",
+      "bytes": 463,
+      "sha256": "f725a98f5ae1e2802382051758610fcafff553f02a3a9e820b26b10ee504c481"
+    }
+  ]
+}

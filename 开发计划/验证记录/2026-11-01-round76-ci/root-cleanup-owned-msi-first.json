@@ -1,0 +1,181 @@
+{
+  "status": "PASS",
+  "controllerSource": {
+    "path": "/tmp/fc-round76-ci-evidence/root-cleanup-owned-msi-first.py",
+    "bytes": 6793,
+    "sha256": "94f8c9ab8e38e623e7242e9bbf0713339772fb07db56e13d5c0f03a0e675489c"
+  },
+  "continuationReport": {
+    "path": "/tmp/fc-round76-ci-evidence/product-msi-continuation-first/report.json",
+    "bytes": 92387,
+    "sha256": "c315be4f7dcf762cb9140b770cdd115238c73231d7d7e6048e132dc4b2a1d08c"
+  },
+  "originalRegistryAbsence": {
+    "path": "/tmp/fc-round76-ci-evidence/windows-msi-registry-ancestor-before-first.json",
+    "bytes": 3733,
+    "sha256": "85d92073ca3fec243adbffbc938d6f866a9ab1fbd9d7751e27824197aad1e186"
+  },
+  "command": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe",
+    "-NoLogo",
+    "-NoProfile",
+    "-NonInteractive",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-EncodedCommand",
+    "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+  ],
+  "stdin": {
+    "bytes": 15843,
+    "sha256": "423e0302c51ecb6d65a8de209a822f3c578ecb9f8be90084c517702e1ccd0422"
+  },
+  "actualExit": true,
+  "exitCode": 0,
+  "reaped": true,
+  "elapsedSeconds": 0.8109462079592049,
+  "stdout": {
+    "path": "/tmp/fc-round76-ci-evidence/root-cleanup-owned-msi-first.stdout.log",
+    "bytes": 3338,
+    "sha256": "a5b7e579a3bc7513a30a97e8de35e99c18a947f101c1ed45b52fe832a04eebd2"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round76-ci-evidence/root-cleanup-owned-msi-first.stderr.log",
+    "bytes": 618,
+    "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0"
+  },
+  "actual": {
+    "cacheManualDelete": false,
+    "processKill": false,
+    "removedLogicalBytes": 7537850,
+    "productManualDelete": false,
+    "runWrite": false,
+    "finalAbsence": {
+      "mutations": false,
+      "run": {
+        "contentsRetained": false,
+        "knownAbsent": true,
+        "view": "Registry32",
+        "writePerformed": false,
+        "value": "FutureClassroom"
+      },
+      "sourceGit": "3bad94949012e840cd1dda6a73a0ea1ddb067697",
+      "componentMarkers": {
+        "knownAbsent": true,
+        "key": "Software\\FutureClassroom\\Installer\\Components",
+        "view": "Registry32"
+      },
+      "localKnownFolder": "C:\\Users\\Elior\\AppData\\Local",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "registration": {
+        "contexts": 7,
+        "otherUsers": "NOT_QUERIED",
+        "relatedCount": 0,
+        "relatedFamily": "99378807-098D-5F04-8D4D-F181DFA218D5",
+        "knownAbsent": true,
+        "sidArgument": "",
+        "state": -1,
+        "count": 0,
+        "product": "{9E50831D-7811-5039-8BC3-4934647448D8}"
+      },
+      "status": "PASS_BEFORE_KNOWN_ABSENCE_ONLY_NOT_EXECUTION_ADMISSION",
+      "target": "i686-win7-windows-msvc",
+      "scope": "Current authorized admin Win11 only; other users/cache/school data not queried; candidate helper independently rechecks under original native owner.",
+      "fixedPaths": [
+        {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "status": "KNOWN_ABSENT"
+        },
+        {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+          "status": "KNOWN_ABSENT"
+        }
+      ],
+      "normalRustHelper": "NOT_EXECUTED",
+      "productMSI": "NOT_EXECUTED"
+    },
+    "persistentSsh": "NOT_MODIFIED",
+    "removedFiles": 37,
+    "status": "PASS_EXACT_OWNED_MSI_TEST_RESIDUE_REMOVED",
+    "registryAncestorCleanup": [
+      {
+        "recursiveDelete": false,
+        "beforeAbsentBaselinePinned": true,
+        "key": "Software\\FutureClassroom\\Installer\\Components",
+        "emptyOnlyDelete": false,
+        "knownAbsent": true,
+        "view": "Registry32"
+      },
+      {
+        "recursiveDelete": false,
+        "beforeAbsentBaselinePinned": true,
+        "key": "Software\\FutureClassroom\\Installer",
+        "emptyOnlyDelete": false,
+        "knownAbsent": true,
+        "view": "Registry32"
+      },
+      {
+        "recursiveDelete": false,
+        "beforeAbsentBaselinePinned": true,
+        "key": "Software\\FutureClassroom",
+        "emptyOnlyDelete": false,
+        "knownAbsent": true,
+        "view": "Registry32"
+      }
+    ],
+    "predeleteAbsence": {
+      "mutations": false,
+      "run": {
+        "contentsRetained": false,
+        "knownAbsent": true,
+        "view": "Registry32",
+        "writePerformed": false,
+        "value": "FutureClassroom"
+      },
+      "sourceGit": "3bad94949012e840cd1dda6a73a0ea1ddb067697",
+      "componentMarkers": {
+        "knownAbsent": true,
+        "key": "Software\\FutureClassroom\\Installer\\Components",
+        "view": "Registry32"
+      },
+      "localKnownFolder": "C:\\Users\\Elior\\AppData\\Local",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "registration": {
+        "contexts": 7,
+        "otherUsers": "NOT_QUERIED",
+        "relatedCount": 0,
+        "relatedFamily": "99378807-098D-5F04-8D4D-F181DFA218D5",
+        "knownAbsent": true,
+        "sidArgument": "",
+        "state": -1,
+        "count": 0,
+        "product": "{9E50831D-7811-5039-8BC3-4934647448D8}"
+      },
+      "status": "PASS_BEFORE_KNOWN_ABSENCE_ONLY_NOT_EXECUTION_ADMISSION",
+      "target": "i686-win7-windows-msvc",
+      "scope": "Current authorized admin Win11 only; other users/cache/school data not queried; candidate helper independently rechecks under original native owner.",
+      "fixedPaths": [
+        {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "status": "KNOWN_ABSENT"
+        },
+        {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+          "status": "KNOWN_ABSENT"
+        }
+      ],
+      "normalRustHelper": "NOT_EXECUTED",
+      "productMSI": "NOT_EXECUTED"
+    },
+    "removedDirectories": 4,
+    "sharedMsiService": "NOT_STOPPED",
+    "rootKnownAbsent": true
+  }
+}

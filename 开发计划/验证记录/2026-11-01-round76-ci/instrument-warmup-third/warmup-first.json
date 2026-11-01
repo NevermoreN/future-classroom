@@ -1,0 +1,375 @@
+{
+  "status": "PASS_INSTRUMENT_WARMUP_ONLY",
+  "scope": "COMPILE_PARSE_IDLE_WMI_ONLY_NO_MSI_OR_PRODUCT_PE",
+  "startedUtc": "2026-11-01T15:01:30.770720+00:00",
+  "originalWholeBudgetSeconds": 180,
+  "inputs": [
+    {
+      "path": "/tmp/fc-round76-ci-evidence/production-msi-preparation-first/ProcessObserver.cs",
+      "bytes": 15250,
+      "sha256": "ae5ad0205854e0f2e731394e6f72a0f2481818da1efabf88abeccd716a256b31"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/production-msi-preparation-first/GateRetirement.cs",
+      "bytes": 10693,
+      "sha256": "6384a7e0ab90e91fc3eeed9f0d922fc73f7a1f6d9c70062cf949253265d6cf01"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/production-msi-preparation-first/ReadOnlyPreflightFunction.ps1",
+      "bytes": 4962,
+      "sha256": "1843f75e8165a043575c89a49416825e5f007f3f2b0730e6b2f43250f87546ae"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-state-preparation-third/ProductState.cs",
+      "bytes": 22514,
+      "sha256": "13e94e6a04275a29473757ed77ad8d9d36c29e2725d5cb86ff0c36e76bd3b528"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-state-preparation-third/ProductState.ps1",
+      "bytes": 3433,
+      "sha256": "0bfbc62da1da4d28babd88700fecf3ece88408deb31c932009ccbec54ad3e294"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-runtime-orchestrator-preparation-first/Invoke-ProductionMsiPhases.ps1",
+      "bytes": 21763,
+      "sha256": "6bcf21fa01350a2ac835263d7de1dc370062497b33cd566a18acf0b68ddff62a"
+    }
+  ],
+  "operations": [
+    {
+      "name": "01-create",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 0.5477454029023647,
+      "stdin": {
+        "bytes": 4568,
+        "sha256": "90384ecec5ba4a8af2ac917420f564cba2aa28541c39d7522963e34377f1fd79"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round76-ci-evidence/instrument-warmup-third/01-create.stdout.log",
+        "bytes": 340,
+        "sha256": "356de3e9af1e6615e6483910732ba386b8dbe74ede50928779a1bfe7d9b660ca"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round76-ci-evidence/instrument-warmup-third/01-create.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0"
+      }
+    },
+    {
+      "name": "02-upload",
+      "command": [
+        "scp",
+        "-q",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "/tmp/fc-round76-ci-evidence/production-msi-preparation-first/ProcessObserver.cs",
+        "/tmp/fc-round76-ci-evidence/production-msi-preparation-first/GateRetirement.cs",
+        "/tmp/fc-round76-ci-evidence/production-msi-preparation-first/ReadOnlyPreflightFunction.ps1",
+        "/tmp/fc-round76-ci-evidence/msi-state-preparation-third/ProductState.cs",
+        "/tmp/fc-round76-ci-evidence/msi-state-preparation-third/ProductState.ps1",
+        "/tmp/fc-round76-ci-evidence/msi-runtime-orchestrator-preparation-first/Invoke-ProductionMsiPhases.ps1",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r76-instrument-b296c1529529426693c5e6cd455800df/"
+      ],
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 0.25169206294231117,
+      "stdout": {
+        "path": "/tmp/fc-round76-ci-evidence/instrument-warmup-third/02-upload.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round76-ci-evidence/instrument-warmup-third/02-upload.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-compile-parse-idle",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 1.1147257587872446,
+      "stdin": {
+        "bytes": 5742,
+        "sha256": "ef3cbfafd70e90f318056b9ed8c3a9ebbcca78e3cf054e33afb5da2dd42867d1"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round76-ci-evidence/instrument-warmup-third/03-compile-parse-idle.stdout.log",
+        "bytes": 2010,
+        "sha256": "5e3eee9c39a5cd33bb856549586ba4e53df360d2a2c33f8651cb8e4a15e844bf"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round76-ci-evidence/instrument-warmup-third/03-compile-parse-idle.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0"
+      }
+    },
+    {
+      "name": "91-post-parent-inventory",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 0.5643702519591898,
+      "stdin": {
+        "bytes": 3204,
+        "sha256": "265ea39713ceb0738cec8886c90cccf9d76c155551fea6b744dd676f1687346a"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round76-ci-evidence/instrument-warmup-third/91-post-parent-inventory.stdout.log",
+        "bytes": 885,
+        "sha256": "0cdeb8edbb7b0d9aa7a4166fe9b2b20f85437b7ce40ab29ed64fe379b9d51db6"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round76-ci-evidence/instrument-warmup-third/91-post-parent-inventory.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0"
+      }
+    },
+    {
+      "name": "99-cleanup",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 0.567415185039863,
+      "stdin": {
+        "bytes": 5220,
+        "sha256": "07f566ee7f15ab40c8e23f4282ce3ed1dbab5501917bc7f5266c19443013dbd1"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round76-ci-evidence/instrument-warmup-third/99-cleanup.stdout.log",
+        "bytes": 102,
+        "sha256": "26f7293d5e54892aaf18c75b54ae726a70e4684e557563ee142430a319a5f2fb"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round76-ci-evidence/instrument-warmup-third/99-cleanup.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0"
+      }
+    }
+  ],
+  "cleanup": "PASS",
+  "before": {
+    "powershell": "5.1.26100.9711",
+    "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r76-instrument-b296c1529529426693c5e6cd455800df",
+    "localAppData": "C:\\Users\\Elior\\AppData\\Local",
+    "nonce": "b296c1529529426693c5e6cd455800df",
+    "status": "CREATED_ONLY_OWNED_INSTRUMENT_ROOT",
+    "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001"
+  },
+  "actual": {
+    "errors": [],
+    "normalRustHelper": "NOT_RUN",
+    "observer": {
+      "Scope": "ORIGINAL_HELD_PROCESS_FACTS_NOT_PRODUCT_SETTLEMENT",
+      "WmiStarted": true,
+      "MissesPossible": true,
+      "Closed": true,
+      "Errors": [],
+      "Processes": []
+    },
+    "status": "PASS_ACTUAL_CSHARP_COMPILE_PS_PARSE_AND_IDLE_WMI_ONLY",
+    "scope": "Only actual C# compilation, PowerShell parsing and idle WMI subscription. No product PE/MSI/gate operation; prefix hash is an explicit inert expected-image model, not an overlay/admission proof.",
+    "compilation": [
+      {
+        "name": "ProcessObserver.cs",
+        "status": "ACTUAL_COMPILED"
+      },
+      {
+        "name": "GateRetirement.cs",
+        "status": "ACTUAL_COMPILED"
+      },
+      {
+        "name": "ProductState.cs",
+        "status": "ACTUAL_COMPILED"
+      }
+    ],
+    "productMSI": "NOT_RUN",
+    "parsing": [
+      {
+        "name": "ReadOnlyPreflightFunction.ps1",
+        "errors": [],
+        "errorCount": 0
+      },
+      {
+        "name": "ProductState.ps1",
+        "errors": [],
+        "errorCount": 0
+      },
+      {
+        "name": "Invoke-ProductionMsiPhases.ps1",
+        "errors": [],
+        "errorCount": 0
+      }
+    ],
+    "inventory": {
+      "directories": [
+        "compiler-temp",
+        "compiler-temp/2aa4hmzw",
+        "compiler-temp/hcyzr1tx",
+        "compiler-temp/tfbfchvi"
+      ],
+      "files": [
+        {
+          "path": ".owner",
+          "sha256": "ba32f8333c20c7ec152befb41efcca54357d3de736533d8dfb244ace7101d2fa",
+          "bytes": 48
+        },
+        {
+          "path": "GateRetirement.cs",
+          "sha256": "6384a7e0ab90e91fc3eeed9f0d922fc73f7a1f6d9c70062cf949253265d6cf01",
+          "bytes": 10693
+        },
+        {
+          "path": "Invoke-ProductionMsiPhases.ps1",
+          "sha256": "6bcf21fa01350a2ac835263d7de1dc370062497b33cd566a18acf0b68ddff62a",
+          "bytes": 21763
+        },
+        {
+          "path": "ProcessObserver.cs",
+          "sha256": "ae5ad0205854e0f2e731394e6f72a0f2481818da1efabf88abeccd716a256b31",
+          "bytes": 15250
+        },
+        {
+          "path": "ProductState.cs",
+          "sha256": "13e94e6a04275a29473757ed77ad8d9d36c29e2725d5cb86ff0c36e76bd3b528",
+          "bytes": 22514
+        },
+        {
+          "path": "ProductState.ps1",
+          "sha256": "0bfbc62da1da4d28babd88700fecf3ece88408deb31c932009ccbec54ad3e294",
+          "bytes": 3433
+        },
+        {
+          "path": "ReadOnlyPreflightFunction.ps1",
+          "sha256": "1843f75e8165a043575c89a49416825e5f007f3f2b0730e6b2f43250f87546ae",
+          "bytes": 4962
+        }
+      ]
+    },
+    "idleSnapshot": {
+      "Scope": "ORIGINAL_HELD_PROCESS_FACTS_NOT_PRODUCT_SETTLEMENT",
+      "WmiStarted": true,
+      "MissesPossible": true,
+      "Closed": false,
+      "Errors": [],
+      "Processes": []
+    }
+  },
+  "postParentInventory": {
+    "directories": [
+      "compiler-temp"
+    ],
+    "files": [
+      {
+        "path": ".owner",
+        "sha256": "ba32f8333c20c7ec152befb41efcca54357d3de736533d8dfb244ace7101d2fa",
+        "bytes": 48
+      },
+      {
+        "path": "GateRetirement.cs",
+        "sha256": "6384a7e0ab90e91fc3eeed9f0d922fc73f7a1f6d9c70062cf949253265d6cf01",
+        "bytes": 10693
+      },
+      {
+        "path": "Invoke-ProductionMsiPhases.ps1",
+        "sha256": "6bcf21fa01350a2ac835263d7de1dc370062497b33cd566a18acf0b68ddff62a",
+        "bytes": 21763
+      },
+      {
+        "path": "ProcessObserver.cs",
+        "sha256": "ae5ad0205854e0f2e731394e6f72a0f2481818da1efabf88abeccd716a256b31",
+        "bytes": 15250
+      },
+      {
+        "path": "ProductState.cs",
+        "sha256": "13e94e6a04275a29473757ed77ad8d9d36c29e2725d5cb86ff0c36e76bd3b528",
+        "bytes": 22514
+      },
+      {
+        "path": "ProductState.ps1",
+        "sha256": "0bfbc62da1da4d28babd88700fecf3ece88408deb31c932009ccbec54ad3e294",
+        "bytes": 3433
+      },
+      {
+        "path": "ReadOnlyPreflightFunction.ps1",
+        "sha256": "1843f75e8165a043575c89a49416825e5f007f3f2b0730e6b2f43250f87546ae",
+        "bytes": 4962
+      }
+    ]
+  },
+  "automaticallyDisappearedOwnedCompilerFiles": [],
+  "cleanupActual": {
+    "nonce": "b296c1529529426693c5e6cd455800df",
+    "status": "REMOVED_EXACT_WARMUP_ROOT",
+    "knownAbsent": true
+  },
+  "elapsedSeconds": 3.0526260000187904,
+  "actualControllerReturned": true
+}

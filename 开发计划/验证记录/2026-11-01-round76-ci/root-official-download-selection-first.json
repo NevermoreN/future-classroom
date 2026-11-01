@@ -1,0 +1,8 @@
+{
+  "status": "OFFICIAL_BINARY_TRANSFER_SELECTED_NO_PLUGIN_BINARY_DOWNLOAD_ATTEMPT_IN_R76",
+  "sourceSha": "3bad94949012e840cd1dda6a73a0ea1ddb067697",
+  "reason": "The connected GitHub fetch API supports UTF-8 only and explicitly rejects binary bodies. The file-URI transfer used in R74 exceeded its bounded budget; that is historical evidence, not a new failed download in R76.",
+  "scopeClarification": "The retained download helper's scope sentence about a file-URI transfer exceeding or not fitting its budget refers to that known historical limitation. R76 starts with the exact official artifact API byte transfer, despite the helper's retained 'second' filename. No new file-URI attempt or timeout is claimed.",
+  "credentialHandling": "Normal git credential transport in memory only; never forward the GitHub credential to a redirect host or retain a signed redirect URL.",
+  "productExecution": "NOT_RUN_BY_DOWNLOAD"
+}

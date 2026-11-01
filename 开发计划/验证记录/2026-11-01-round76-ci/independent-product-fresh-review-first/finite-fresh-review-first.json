@@ -1,0 +1,298 @@
+{
+  "status": "PASS_FINITE_FRESH_PHYSICAL_RETURN_AND_HEALTHY_STATE_WITH_METADATA_GAPS",
+  "firstControllerStatusRetained": "FAIL_PRODUCT_PHASE_OR_COVERAGE_RETAINED",
+  "firstPhaseStatusRetained": "FAIL_NOT_COMPLETE",
+  "scope": "Same source3bad Win7-target original product MSI on current authorized administrator Win11 only. Finite fresh observation; healthy reapply/uninstall/cleanup not yet run.",
+  "originals": [
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/report.json",
+      "bytes": 48323,
+      "sha256": "89a2056df13664771d86113652b2c75566e1752f02ed344501e8c0ae6840f118"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b/fresh-phase.json",
+      "bytes": 11034,
+      "sha256": "424df902c7acf451f3f6a0b2f2ada9d12453cb525479f1b5807185b1bdbceb8a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b/phase-runner-result.json",
+      "bytes": 86619,
+      "sha256": "29d2f37f33c048196d296da11565b53263c5c2cf6489a62f276b70ec695a54ac"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b/fresh-original-observer.jsonl",
+      "bytes": 17080,
+      "sha256": "ff435f843fa38ec63745b2e93d59fb2447ed0aa995bed2257545c0afa238b8a7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b/fresh-msi.log",
+      "bytes": 161318,
+      "sha256": "24d60374856453ba5a462f1173b9049a0494c409f2295d644a0b9bc7cb7f4b07"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b/candidate-inputs.json",
+      "bytes": 8478,
+      "sha256": "c1fb126c13840162f9a980262a7c84889c02df8c3710722f083200c43cd11692"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b/ProcessObserver.cs",
+      "bytes": 15250,
+      "sha256": "ae5ad0205854e0f2e731394e6f72a0f2481818da1efabf88abeccd716a256b31"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b/Invoke-ProductionMsiPhases.ps1",
+      "bytes": 21763,
+      "sha256": "6bcf21fa01350a2ac835263d7de1dc370062497b33cd566a18acf0b68ddff62a"
+    }
+  ],
+  "compiledSourceBoundFilesEqualSource3bad": [
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 41207,
+      "sha256": "9fc3247c353b4a20b689b0611e4ca7b08994a9ef09bf360936581522ca1fc091"
+    },
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb"
+    },
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "bytes": 1162,
+      "sha256": "4b4c5b1a4e81d5e80094743f211d8c3f262aed4a0a99ab973d6c6903bf0b6292"
+    },
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f"
+    }
+  ],
+  "physicalReturns": [
+    {
+      "CaptureSource": "10MS_NAME_POLL",
+      "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+      "Image": "C:\\Windows\\Installer\\MSI72B5.tmp",
+      "Sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+      "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "Role": "UNKNOWN",
+      "CommandStatus": "UNKNOWN_NO_ORIGINAL_WMI_INSTANCE",
+      "ParentLink": "UNKNOWN",
+      "Pid": 31640,
+      "ParentPid": 0,
+      "CreationFiletime": 134380195172926982,
+      "ParentCreationFiletime": 0,
+      "ParentImage": null,
+      "ParentSid": null,
+      "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+      "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+      "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+      "ActualWait": 0,
+      "ActualExitCode": 0,
+      "ExactCandidateArgv": null
+    },
+    {
+      "CaptureSource": "10MS_NAME_POLL",
+      "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+      "Image": "C:\\Windows\\Installer\\MSI72B5.tmp",
+      "Sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+      "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "Role": "broker",
+      "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+      "ParentLink": "UNKNOWN",
+      "Pid": 27436,
+      "ParentPid": 31640,
+      "CreationFiletime": 134380195173167142,
+      "ParentCreationFiletime": 0,
+      "ParentImage": null,
+      "ParentSid": null,
+      "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+      "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+      "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+      "ActualWait": 0,
+      "ActualExitCode": 0,
+      "ExactCandidateArgv": [
+        "C:\\Windows\\Installer\\MSI72B5.tmp",
+        "broker"
+      ]
+    },
+    {
+      "CaptureSource": "10MS_NAME_POLL",
+      "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+      "Image": "C:\\Windows\\Installer\\MSI7391.tmp",
+      "Sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+      "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "Role": "guardian",
+      "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+      "ParentLink": "ORIGINAL_ENGINE_INSTANCE_FACT_NOT_SESSION_ID",
+      "Pid": 8288,
+      "ParentPid": 23940,
+      "CreationFiletime": 134380195176540544,
+      "ParentCreationFiletime": 134380195171220427,
+      "ParentImage": "C:\\Windows\\System32\\msiexec.exe",
+      "ParentSid": "S-1-5-18",
+      "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+      "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+      "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+      "ActualWait": 0,
+      "ActualExitCode": 0,
+      "ExactCandidateArgv": [
+        "C:\\Windows\\Installer\\MSI7391.tmp",
+        "2",
+        "guardian"
+      ]
+    },
+    {
+      "CaptureSource": "10MS_NAME_POLL",
+      "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+      "Image": "C:\\Windows\\Installer\\MSI75E5.tmp",
+      "Sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+      "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "Role": "UNKNOWN",
+      "CommandStatus": "UNKNOWN_NO_ORIGINAL_WMI_INSTANCE",
+      "ParentLink": "UNKNOWN",
+      "Pid": 18260,
+      "ParentPid": 0,
+      "CreationFiletime": 134380195180854364,
+      "ParentCreationFiletime": 0,
+      "ParentImage": null,
+      "ParentSid": null,
+      "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+      "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+      "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+      "ActualWait": 0,
+      "ActualExitCode": 0,
+      "ExactCandidateArgv": null
+    }
+  ],
+  "originalBrokerLiveSnapshotsOneBased": [
+    3,
+    4,
+    5,
+    6
+  ],
+  "originalBrokerFinalExit": 0,
+  "allFourOriginalCapturedHandlesCheckedClosed": true,
+  "directClient": {
+    "creationFiletime": 134380195170819456,
+    "pipesComplete": true,
+    "started": true,
+    "pid": 7600,
+    "timedOut": false,
+    "exitCode": 0,
+    "arguments": "/i \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b\\candidate.msi\" /qn /norestart REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown /L*vx \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b\\fresh-msi.log\"",
+    "actualExit": true,
+    "file": "C:\\Windows\\System32\\msiexec.exe"
+  },
+  "independentPoststate": {
+    "classification": "HEALTHY_PRESENT",
+    "manifestFiles": 14,
+    "exactRegistry32Markers": 14,
+    "exactComponentContext2LocalKeypaths": 14,
+    "oneCurrentSidProductVersionAndRelated": true,
+    "runAbsent": true,
+    "pendingKnownAbsent": true
+  },
+  "supplementalMetadataError": {
+    "exact": "candidate_metadata:27436:Win32Exception:image",
+    "reason": "Observer source lines141-145 appends an identity-verified held Fact before Command/Parent metadata. Initial own-image/handle/token/hash failures use capture: and cannot yield this prefix. Role broker and exact WMI argv/creation were already set; Image() inside the subsequent Parent() query fails at source116. Original process wait/exit/checkedclose succeeded independently.",
+    "originalBrokerParentPid": 31640,
+    "capturedEarlierHelper": {
+      "pid": 31640,
+      "creationFiletime": 134380195172926982,
+      "sameImageAndShaAndUser": true
+    },
+    "independentBrokerParentCreation": "UNKNOWN_NOT_CAPTURED",
+    "originalShortHelperArgvAndRole": "UNKNOWN_NOT_REWRITTEN",
+    "allowedTreatment": "Supplemental parent-image observation gap only, under all exact physical/source/effects facts. Preserve the original error and incomplete coverage status."
+  },
+  "engineEvidence": {
+    "rawEncoding": "UTF16LE_BOM",
+    "rawLog": {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b/fresh-msi.log",
+      "bytes": 161318,
+      "sha256": "24d60374856453ba5a462f1173b9049a0494c409f2295d644a0b9bc7cb7f4b07"
+    },
+    "logicalLineExtract": [
+      {
+        "utf16DecodedLogicalLine": 355,
+        "text": "MSI (s) (84:90) [23:11:57:240]: Doing action: FcBeginGate"
+      },
+      {
+        "utf16DecodedLogicalLine": 357,
+        "text": "MSI (s) (84:90) [23:11:57:240]: Note: 1: 2235 2:  3: ExtendedType 4: SELECT `Action`,`Type`,`Source`,`Target`, NULL, `ExtendedType` FROM `CustomAction` WHERE `Action` = 'FcBeginGate' "
+      },
+      {
+        "utf16DecodedLogicalLine": 358,
+        "text": "Action start 23:11:57: FcBeginGate."
+      },
+      {
+        "utf16DecodedLogicalLine": 359,
+        "text": "MSI (s) (84:90) [23:11:57:451]: Doing action: InstallInitialize"
+      },
+      {
+        "utf16DecodedLogicalLine": 360,
+        "text": "Action ended 23:11:57: FcBeginGate. Return value 1."
+      },
+      {
+        "utf16DecodedLogicalLine": 363,
+        "text": "MSI (s) (84:90) [23:11:57:452]: Embedded Chainer - Searching for a valid Embedded Chainer to run"
+      },
+      {
+        "utf16DecodedLogicalLine": 364,
+        "text": "MSI (s) (84:90) [23:11:57:452]: Embedded Chainer - Scheduled to run after install"
+      },
+      {
+        "utf16DecodedLogicalLine": 482,
+        "text": "MSI (s) (84:90) [23:11:57:487]: Executing op: CustomActionSchedule(Action=FcRollbackNotify,ActionType=1282,Source=BinaryData,Target=rollback,)"
+      },
+      {
+        "utf16DecodedLogicalLine": 484,
+        "text": "MSI (s) (84:90) [23:11:57:488]: Executing op: CustomActionSchedule(Action=FcCommitNotify,ActionType=1538,Source=BinaryData,Target=commit,)"
+      },
+      {
+        "utf16DecodedLogicalLine": 629,
+        "text": "Action ended 23:11:57: InstallFinalize. Return value 1."
+      },
+      {
+        "utf16DecodedLogicalLine": 630,
+        "text": "Action ended 23:11:57: INSTALL. Return value 1."
+      }
+    ],
+    "exactExtractedImagePathsPresentInRawLog": false,
+    "directEngineActionToExtractedImageBinding": "NOT_AVAILABLE_IN_THIS_RAW_LOG",
+    "roleInference": "FcBeginGate synchronous success and exact source-bound broker parent PID/same image/user/earlier creation support Begin role inference; they are not independent OS parent-creation evidence. Fourth short helper may be advisory commit by source/order; keep original role UNKNOWN.",
+    "exitProof": "All four exit0 facts come from original held OS GetExitCodeProcess, never Action Return1.",
+    "joinEndApiIntegerSampling": "NOT_INDEPENDENTLY_SAMPLED; broker/guardian source-bound successful code paths only"
+  },
+  "sourceBoundSettlementReason": {
+    "brokerServer": "native/broker.rs730-858 authenticates original Begin/engine, requires real guardian ENDED matching decision/transaction and zero Join/End receipt, waits original guardian0, independently reconciles, checked-releases proof/session, then owner.try_release before Ok.",
+    "entrypoint": "Normal helper returns exit1603 on any run_helper Err; actual original broker exit0 therefore supports this original successful release path in this controlled candidate scope. No raw native API return integers are invented.",
+    "durableEvidence": "Actual Pending known absent corroborates source-bound release; healthy exact poststate corroborates independent effect settlement.",
+    "sharedEngine": "Guardian parent engine23940 LocalSystem is a shared OS service instance, not a per-session ID or a death-wait target."
+  },
+  "minimumBeforeContinuation": [
+    "Freshly requery same owned exact HEALTHY_PRESENT/currentSID/version/family14component/file/marker and Runabsent facts; original config/MSI/overlay hashes unchanged.",
+    "Require original captured controls/direct client terminal and no new unrelated owner/unknown state; use captured broker argv and exact physical facts, not WMI completeness.",
+    "Pending remains known absent. Capture exact original gate snapshot now after settled fresh and before next mutation; its exclusive open/identity/ACL/member checks must succeed. Do not clear Pending or retire gate while product remains installed.",
+    "Continue same original MSI healthy SameManifest reapply then formal/x with a new explicitly recorded bounded continuation receipt/clock; do not rewrite first FAIL into original full-three-phase PASS or renew any native120 deadline.",
+    "After formal/x, independent exact absent product/context/related/components/manifest/marker/Pending and original owner return are still mandatory before test-only original gate retirement. Unknown/nonzero/live/capture/close errors still fail and retain."
+  ],
+  "narrowFutureErrorClassification": "Only exact candidate_metadata:<that observed broker PID>:Win32Exception:image with successful initial identity, original broker argv, parentPID matching earlier captured same overlay/user helper, and all original wait0/exit0/close0 facts may be supplemental. Do not generalize capture:, close, wait, getexit, own-token/image/hash, other errors or missing broker to successful return. Missing guardian/Begin metadata stays UNKNOWN even if finite physical/source release gate is met.",
+  "notAcceptedYet": [
+    "healthy same-manifest reapply",
+    "formal uninstall",
+    "gate retirement and complete cleanup",
+    "Win7 OS",
+    "Win10 OS",
+    "standard user/no elevation",
+    "arbitrary foreign MSI/transform or malicious same-user guarantee"
+  ],
+  "actionsByReviewer": {
+    "windows": false,
+    "network": false,
+    "cargo": false,
+    "productionSourceEdit": false,
+    "originalReportEdit": false,
+    "formalUninstall": false
+  }
+}

@@ -289,6 +289,14 @@ class AuthoredContract(unittest.TestCase):
             inventory = json.dumps(inputs).encode()
             for path in ("input-sha256.json", "input-sha256-after.json"):
                 (root / path).write_bytes(inventory)
+            package_id = "path+file:///C:/owned/source/crates/fc-bootstrap#fc-bootstrap@0.1.0"
+            manifest_path = "C:/owned/source/crates/fc-bootstrap/Cargo.toml"
+            metadata_targets = {target: {"name": target, "kind": ["bin"], "crate_types": ["bin"],
+                "src_path": "C:/owned/source/crates/fc-bootstrap/" + relative} for target, relative in (
+                ("fc-bootstrap", "src/main.rs"), ("fc-installer-lifecycle", "src/bin/fc-installer-lifecycle.rs"))}
+            metadata = {"version": 1, "workspace_root": "C:/owned/source", "workspace_members": [package_id],
+                "packages": [{"name": "fc-bootstrap", "version": "0.1.0", "id": package_id, "source": None,
+                              "manifest_path": manifest_path, "targets": list(metadata_targets.values())}]}
             ledger, steps, binaries = [], [], {}
             for target, phase in (("fc-bootstrap", "product-compile"), ("fc-installer-lifecycle", "lifecycle-compile")):
                 data = normal_pe_fixture() + target.encode()
@@ -300,14 +308,20 @@ class AuthoredContract(unittest.TestCase):
                 ledger.append({"role": "product", "package": "fc-bootstrap", "target": target,
                     "cargo_profile_test": False, "pe_subsystem": 2, "relative_path": relative,
                     "bytes": len(data), "sha256": SHA(data)})
-                log = (json.dumps({"reason": "compiler-artifact", "target": {"name": target, "kind": ["bin"]},
-                    "package_id": "path+file:///owned/source#fc-bootstrap@0.1.0",
+                log = (json.dumps({"reason": "compiler-artifact", "target": metadata_targets[target],
+                    "package_id": package_id, "manifest_path": manifest_path,
                     "profile": {"test": False}, "executable": "C:/owned/" + target + ".exe"}) + "\n").encode()
                 log_path = "logs/" + phase + ".stdout.log"
                 (root / "logs").mkdir(exist_ok=True)
                 (root / log_path).write_bytes(log)
                 steps.append({"name": phase, "passed": True, "exit_code": 0, "parent_exited": True,
                               "stdout": log_path, "stdout_sha256": SHA(log)})
+            metadata_raw = json.dumps(metadata).encode()
+            (root / "logs/cargo-metadata.stdout.log").write_bytes(metadata_raw)
+            steps.append({"name": "cargo-metadata", "passed": True, "exit_code": 0, "parent_exited": True,
+                "timed_out_or_pipe_stalled": False, "log_truncated": False,
+                "arguments": ["metadata", "--locked", "--format-version", "1", "--no-deps"],
+                "stdout": "logs/cargo-metadata.stdout.log", "stdout_sha256": SHA(metadata_raw)})
             ledger_raw = json.dumps(ledger).encode()
             (root / "executables.json").write_bytes(ledger_raw)
             result = {"status": "COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN", "target": M["TARGET"], "baseline": "Win7",
@@ -340,6 +354,50 @@ class AuthoredContract(unittest.TestCase):
                     M["admit_normal_helper"](args, {"fc-bootstrap.exe": b"different payload"}, "0.1.0")
                 with self.assertRaises(ValueError):
                     M["admit_normal_helper"](args, {"fc-bootstrap.exe": binaries["fc-bootstrap"]}, "0.1.1")
+
+    def test_metadata_binds_both_opaque_package_id_forms_and_rejects_wrong_identity(self):
+        # Original metadata/Cargo streams are modeled, not actual compiler evidence.
+        with tempfile.TemporaryDirectory(prefix="FutureClassroom-metadata-admission-") as name:
+            root = Path(name)
+            (root / "logs").mkdir()
+            for package_id in ("path+file:///C:/owned/source/crates/fc-bootstrap#0.1.0",
+                               "path+file:///C:/owned/source/crates/fc-bootstrap#fc-bootstrap@0.1.0"):
+                package = {"name": "fc-bootstrap", "version": "0.1.0", "source": None, "id": package_id,
+                    "manifest_path": "C:/owned/source/crates/fc-bootstrap/Cargo.toml", "targets": [
+                        {"name": target, "kind": ["bin"], "crate_types": ["bin"], "src_path": "C:/owned/source/crates/fc-bootstrap/" + relative}
+                        for target, relative in (("fc-bootstrap", "src/main.rs"), ("fc-installer-lifecycle", "src/bin/fc-installer-lifecycle.rs"))]}
+                metadata = {"version": 1, "packages": [package], "workspace_members": [package_id], "workspace_root": "C:/owned/source"}
+                def original_result(value):
+                    raw = json.dumps(value).encode()
+                    (root / "logs/cargo-metadata.stdout.log").write_bytes(raw)
+                    return {"commands": [{"name": "cargo-metadata", "passed": True, "exit_code": 0, "parent_exited": True,
+                        "timed_out_or_pipe_stalled": False, "log_truncated": False,
+                        "arguments": ["metadata", "--locked", "--format-version", "1", "--no-deps"],
+                        "stdout": "logs/cargo-metadata.stdout.log", "stdout_sha256": SHA(raw)}]}
+                result = original_result(metadata)
+                accepted, targets, _ = M["cargo_metadata_normal_package"](root, result, "0.1.0")
+                for target in targets:
+                    message = {"package_id": package_id, "manifest_path": package["manifest_path"], "target": targets[target]}
+                    M["match_normal_metadata"](message, target, accepted, targets)
+                    for key, value in (("package_id", "path+file:///wrong#fc-bootstrap@0.1.0"),
+                                       ("manifest_path", "C:/wrong/Cargo.toml"),
+                                       ("target", dict(targets[target], src_path="C:/wrong.rs"))):
+                        altered = dict(message, **{key: value})
+                        with self.subTest(package_id=package_id, field=key), self.assertRaises(ValueError):
+                            M["match_normal_metadata"](altered, target, accepted, targets)
+                for field, value in (("name", "wrong-bootstrap"), ("version", "0.1.1"), ("targets", [])):
+                    altered = copy.deepcopy(metadata)
+                    altered["packages"][0][field] = value
+                    with self.subTest(package_id=package_id, field=field), self.assertRaises(ValueError):
+                        M["cargo_metadata_normal_package"](root, original_result(altered), "0.1.0")
+                result = original_result(metadata)
+                (root / "logs/cargo-metadata.stdout.log").write_bytes(b"changed original")
+                with self.assertRaises(ValueError):
+                    M["cargo_metadata_normal_package"](root, result, "0.1.0")
+                result = original_result(metadata)
+                result["commands"][0]["arguments"] = ["metadata", "--no-deps"]
+                with self.assertRaises(ValueError):
+                    M["cargo_metadata_normal_package"](root, result, "0.1.0")
 
     def test_overlay_preserves_normal_pe_prefix_and_exact_closed_effects(self):
         normal = normal_pe_fixture()

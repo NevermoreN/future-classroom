@@ -1,0 +1,439 @@
+{
+  "status": "PASS",
+  "source": {
+    "path": "/tmp/fc-round76-ci-evidence/exact-msi-image-retirement-preparation-first/ExactMsiImageRetirement.cs",
+    "bytes": 11814,
+    "sha256": "41d40922c0c86fe420fcde8e12f670bc8bd623b5609632480936bdc00d8bf122"
+  },
+  "config": {
+    "path": "/tmp/fc-round76-ci-evidence/runtime-config-first/candidate-inputs.json",
+    "bytes": 8478,
+    "sha256": "c1fb126c13840162f9a980262a7c84889c02df8c3710722f083200c43cd11692"
+  },
+  "originalCleanup": {
+    "path": "/tmp/fc-round76-ci-evidence/root-cleanup-owned-msi-first.json",
+    "bytes": 6627,
+    "sha256": "d341f782442e5a6e2c5acba4ee69d1b58ba22906148e910e5348ea77fb9e2848"
+  },
+  "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r76-image-retirement-d237ef3fb1bc40a88fd90b17f3ae30ee",
+  "operations": [
+    {
+      "name": "01-retire-exact-original-images",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "elapsedSeconds": 0.8114041259977967,
+      "stdin": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/01-retire-exact-original-images.stdin.log",
+        "bytes": 32276,
+        "sha256": "664b2025b96af541a7ccba533eb9b6d486bead59b3442315faef40a7a4997f95"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/01-retire-exact-original-images.stdout.log",
+        "bytes": 7247,
+        "sha256": "e38bf4d0f6a57324a368e6a2d537a4b907893e26b5b0d9559429561dd07a4fb1"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/01-retire-exact-original-images.stderr.log",
+        "bytes": 618,
+        "sha256": "57aa5ca00c305862c0dcde30c4865943b5e6bc6218de1e727fd9ce4a76614423"
+      }
+    },
+    {
+      "name": "02-inventory-after-original-parent-return",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "elapsedSeconds": 0.5432987329550087,
+      "stdin": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/02-inventory-after-original-parent-return.stdin.log",
+        "bytes": 25250,
+        "sha256": "dae2929c35a6147a158ff40faf439c3326bd0354043c7a4ba86bcee4499bcf3f"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/02-inventory-after-original-parent-return.stdout.log",
+        "bytes": 247,
+        "sha256": "842c5291ce8bd7266ee1015e01e83d3bdd05b86b5352bf4dd735b2da8c3a07db"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/02-inventory-after-original-parent-return.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0"
+      }
+    },
+    {
+      "name": "03-download-compiler-and-native-receipt-originals",
+      "command": [
+        "scp",
+        "-q",
+        "-r",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r76-image-retirement-d237ef3fb1bc40a88fd90b17f3ae30ee",
+        "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/download/"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "elapsedSeconds": 0.2429647808894515,
+      "stdout": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/03-download.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/03-download.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-clean-exact-instrument-compiler-scratch",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "elapsedSeconds": 0.5622202360536903,
+      "stdin": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/04-clean-exact-instrument-compiler-scratch.stdin.log",
+        "bytes": 26446,
+        "sha256": "cc55a8e5f19ce6d2906ab9e294dce6caa8f863b25417ef4891c9159f3fb0b32e"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/04-clean-exact-instrument-compiler-scratch.stdout.log",
+        "bytes": 85,
+        "sha256": "00ed3a8a754187cd7a9fc0ebcde03f3173d3af94ae9af73841b031e8a230e267"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/04-clean-exact-instrument-compiler-scratch.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0"
+      }
+    }
+  ],
+  "actual": {
+    "productAutomaticCleanup": "GAP_RETAINED_NOT_FIXED_BY_TEST_ONLY_TOOL",
+    "status": "PASS_SIX_EXACT_OWNED_TEST_TEMP_IMAGES_RETIRED",
+    "before": {
+      "mutations": false,
+      "run": {
+        "contentsRetained": false,
+        "knownAbsent": true,
+        "view": "Registry32",
+        "writePerformed": false,
+        "value": "FutureClassroom"
+      },
+      "sourceGit": "3bad94949012e840cd1dda6a73a0ea1ddb067697",
+      "componentMarkers": {
+        "knownAbsent": true,
+        "key": "Software\\FutureClassroom\\Installer\\Components",
+        "view": "Registry32"
+      },
+      "localKnownFolder": "C:\\Users\\Elior\\AppData\\Local",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "registration": {
+        "contexts": 7,
+        "otherUsers": "NOT_QUERIED",
+        "relatedCount": 0,
+        "relatedFamily": "99378807-098D-5F04-8D4D-F181DFA218D5",
+        "knownAbsent": true,
+        "sidArgument": "",
+        "state": -1,
+        "count": 0,
+        "product": "{9E50831D-7811-5039-8BC3-4934647448D8}"
+      },
+      "status": "PASS_BEFORE_KNOWN_ABSENCE_ONLY_NOT_EXECUTION_ADMISSION",
+      "target": "i686-win7-windows-msvc",
+      "scope": "Current authorized admin Win11 only; other users/cache/school data not queried; candidate helper independently rechecks under original native owner.",
+      "fixedPaths": [
+        {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "status": "KNOWN_ABSENT"
+        },
+        {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+          "status": "KNOWN_ABSENT"
+        }
+      ],
+      "normalRustHelper": "NOT_EXECUTED",
+      "productMSI": "NOT_EXECUTED"
+    },
+    "native": {
+      "Status": "PASS_SIX_EXACT_TEST_IMAGE_PATHS_ABSENT_CHECKED_ORIGINAL_RETIREMENT",
+      "Scope": "TEST_ONLY_SIX_FIXED_ORIGINAL_OVERLAY_IMAGES_NO_CACHED_MSI_NO_SERVICE_MUTATION",
+      "ExpectedSha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+      "ExpectedImageBytes": 395144,
+      "OriginalBudgetMilliseconds": 30000,
+      "SourceCalledOnce": true,
+      "AllPreflightPassed": true,
+      "ProcessMutation": false,
+      "RegistryMutation": false,
+      "ServiceMutation": false,
+      "ElapsedMilliseconds": 7,
+      "FailureStage": null,
+      "FailureType": null,
+      "FailureHresult": null,
+      "Files": [
+        {
+          "Path": "C:\\Windows\\Installer\\MSI72B5.tmp",
+          "Status": "ORIGINAL_DISPOSITION_AND_CLOSE_SUCCEEDED",
+          "Stage": "ABSENT",
+          "BeforeIdentity": "9a59d62d:002300000004c880:01dd6a1356193f8c:01dd6a135619766d",
+          "AfterIdentity": "9a59d62d:002300000004c880:01dd6a1356193f8c:01dd6a135619766d",
+          "ActualSha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+          "FinalHeldPath": "\\\\?\\C:\\Windows\\Installer\\MSI72B5.tmp",
+          "Bytes": 395144,
+          "Links": 1,
+          "Attributes": 32,
+          "OpenError": null,
+          "DispositionError": null,
+          "CloseError": 0,
+          "AbsenceError": 2,
+          "DispositionSuccess": true,
+          "CloseSuccess": true,
+          "ExternalPathStatus": "KNOWN_ABSENT"
+        },
+        {
+          "Path": "C:\\Windows\\Installer\\MSI75E5.tmp",
+          "Status": "ORIGINAL_DISPOSITION_AND_CLOSE_SUCCEEDED",
+          "Stage": "ABSENT",
+          "BeforeIdentity": "9a59d62d:002600000004c866:01dd6a135693f2b9:01dd6a135693f2b9",
+          "AfterIdentity": "9a59d62d:002600000004c866:01dd6a135693f2b9:01dd6a135693f2b9",
+          "ActualSha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+          "FinalHeldPath": "\\\\?\\C:\\Windows\\Installer\\MSI75E5.tmp",
+          "Bytes": 395144,
+          "Links": 1,
+          "Attributes": 32,
+          "OpenError": null,
+          "DispositionError": null,
+          "CloseError": 0,
+          "AbsenceError": 2,
+          "DispositionSuccess": true,
+          "CloseSuccess": true,
+          "ExternalPathStatus": "KNOWN_ABSENT"
+        },
+        {
+          "Path": "C:\\Windows\\Installer\\MSIED48.tmp",
+          "Status": "ORIGINAL_DISPOSITION_AND_CLOSE_SUCCEEDED",
+          "Stage": "ABSENT",
+          "BeforeIdentity": "9a59d62d:002e00000004d352:01dd6a14c85bb3ac:01dd6a14c85bdb48",
+          "AfterIdentity": "9a59d62d:002e00000004d352:01dd6a14c85bb3ac:01dd6a14c85bdb48",
+          "ActualSha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+          "FinalHeldPath": "\\\\?\\C:\\Windows\\Installer\\MSIED48.tmp",
+          "Bytes": 395144,
+          "Links": 1,
+          "Attributes": 32,
+          "OpenError": null,
+          "DispositionError": null,
+          "CloseError": 0,
+          "AbsenceError": 2,
+          "DispositionSuccess": true,
+          "CloseSuccess": true,
+          "ExternalPathStatus": "KNOWN_ABSENT"
+        },
+        {
+          "Path": "C:\\Windows\\Installer\\MSIF049.tmp",
+          "Status": "ORIGINAL_DISPOSITION_AND_CLOSE_SUCCEEDED",
+          "Stage": "ABSENT",
+          "BeforeIdentity": "9a59d62d:002e00000004d344:01dd6a14c8d03360:01dd6a14c8d05af1",
+          "AfterIdentity": "9a59d62d:002e00000004d344:01dd6a14c8d03360:01dd6a14c8d05af1",
+          "ActualSha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+          "FinalHeldPath": "\\\\?\\C:\\Windows\\Installer\\MSIF049.tmp",
+          "Bytes": 395144,
+          "Links": 1,
+          "Attributes": 32,
+          "OpenError": null,
+          "DispositionError": null,
+          "CloseError": 0,
+          "AbsenceError": 2,
+          "DispositionSuccess": true,
+          "CloseSuccess": true,
+          "ExternalPathStatus": "KNOWN_ABSENT"
+        },
+        {
+          "Path": "C:\\Windows\\Installer\\MSIF1F0.tmp",
+          "Status": "ORIGINAL_DISPOSITION_AND_CLOSE_SUCCEEDED",
+          "Stage": "ABSENT",
+          "BeforeIdentity": "9a59d62d:002200000004c8af:01dd6a14c9120050:01dd6a14c9122758",
+          "AfterIdentity": "9a59d62d:002200000004c8af:01dd6a14c9120050:01dd6a14c9122758",
+          "ActualSha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+          "FinalHeldPath": "\\\\?\\C:\\Windows\\Installer\\MSIF1F0.tmp",
+          "Bytes": 395144,
+          "Links": 1,
+          "Attributes": 32,
+          "OpenError": null,
+          "DispositionError": null,
+          "CloseError": 0,
+          "AbsenceError": 2,
+          "DispositionSuccess": true,
+          "CloseSuccess": true,
+          "ExternalPathStatus": "KNOWN_ABSENT"
+        },
+        {
+          "Path": "C:\\Windows\\Installer\\MSIF445.tmp",
+          "Status": "ORIGINAL_DISPOSITION_AND_CLOSE_SUCCEEDED",
+          "Stage": "ABSENT",
+          "BeforeIdentity": "9a59d62d:002600000004c89c:01dd6a14c96afbcb:01dd6a14c96b23c1",
+          "AfterIdentity": "9a59d62d:002600000004c89c:01dd6a14c96afbcb:01dd6a14c96b23c1",
+          "ActualSha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+          "FinalHeldPath": "\\\\?\\C:\\Windows\\Installer\\MSIF445.tmp",
+          "Bytes": 395144,
+          "Links": 1,
+          "Attributes": 32,
+          "OpenError": null,
+          "DispositionError": null,
+          "CloseError": 0,
+          "AbsenceError": 2,
+          "DispositionSuccess": true,
+          "CloseSuccess": true,
+          "ExternalPathStatus": "KNOWN_ABSENT"
+        }
+      ],
+      "Parents": [
+        {
+          "Path": "C:\\",
+          "Identity": "9a59d62d:0005000000000005:01d6be0276938d2e:01dd6a14c987107f",
+          "CloseSuccess": true,
+          "CloseError": 0
+        },
+        {
+          "Path": "C:\\Windows",
+          "Identity": "9a59d62d:0160000000016f2d:01da84052f2a227c:01dd67d2db0e8cce",
+          "CloseSuccess": true,
+          "CloseError": 0
+        },
+        {
+          "Path": "C:\\Windows\\Installer",
+          "Identity": "9a59d62d:0005000000019f4f:01da8405dc81c710:01dd6a14c99812c6",
+          "CloseSuccess": true,
+          "CloseError": 0
+        }
+      ],
+      "Errors": []
+    },
+    "after": {
+      "mutations": false,
+      "run": {
+        "contentsRetained": false,
+        "knownAbsent": true,
+        "view": "Registry32",
+        "writePerformed": false,
+        "value": "FutureClassroom"
+      },
+      "sourceGit": "3bad94949012e840cd1dda6a73a0ea1ddb067697",
+      "componentMarkers": {
+        "knownAbsent": true,
+        "key": "Software\\FutureClassroom\\Installer\\Components",
+        "view": "Registry32"
+      },
+      "localKnownFolder": "C:\\Users\\Elior\\AppData\\Local",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "registration": {
+        "contexts": 7,
+        "otherUsers": "NOT_QUERIED",
+        "relatedCount": 0,
+        "relatedFamily": "99378807-098D-5F04-8D4D-F181DFA218D5",
+        "knownAbsent": true,
+        "sidArgument": "",
+        "state": -1,
+        "count": 0,
+        "product": "{9E50831D-7811-5039-8BC3-4934647448D8}"
+      },
+      "status": "PASS_BEFORE_KNOWN_ABSENCE_ONLY_NOT_EXECUTION_ADMISSION",
+      "target": "i686-win7-windows-msvc",
+      "scope": "Current authorized admin Win11 only; other users/cache/school data not queried; candidate helper independently rechecks under original native owner.",
+      "fixedPaths": [
+        {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "status": "KNOWN_ABSENT"
+        },
+        {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+          "status": "KNOWN_ABSENT"
+        }
+      ],
+      "normalRustHelper": "NOT_EXECUTED",
+      "productMSI": "NOT_EXECUTED"
+    }
+  },
+  "phaseExit": 0,
+  "inventory": {
+    "directories": [],
+    "files": [
+      {
+        "path": ".owner",
+        "sha256": "3f76173390011cc1acd5c297d349771ab4c7a238ae28a9f4cd3f5d923ef00dbc",
+        "bytes": 48
+      },
+      {
+        "path": "result.json",
+        "sha256": "92fe019a8510fcc2010a58019d343961cb5b3ee3ff177619a64483ba8e17d5da",
+        "bytes": 7245
+      }
+    ]
+  },
+  "downloadVerified": true,
+  "scratchCleanup": {
+    "status": "PASS_EXACT_INSTRUMENT_SCRATCH_REMOVED",
+    "files": 2,
+    "rootKnownAbsent": true
+  },
+  "elapsedSeconds": 2.167189010884613
+}

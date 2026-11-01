@@ -19,7 +19,8 @@ import uuid
 import xml.etree.ElementTree as ET
 import zipfile
 
-ROOT = Path(__file__).absolute().parent.parent
+BUILDER_ROOT = Path(__file__).absolute().parent.parent
+ROOT = BUILDER_ROOT
 PROBE = runpy.run_path(str(ROOT / "scripts/package-probe.py"))
 PE = runpy.run_path(str(ROOT / "scripts/audit-pe.py"))
 TARGET = "i686-win7-windows-msvc"
@@ -313,6 +314,72 @@ def parse_lifecycle_image(image: bytes) -> tuple[bytes, dict]:
     return prefix, records
 
 
+def configure_source_root(source_root: Path) -> None:
+    """Explicit original compile/source checkout, separate from this builder file."""
+    global ROOT, PROBE, PE
+    source_root = source_root.absolute()
+    PROBE["real_directory"](source_root)
+    ROOT = source_root
+    PROBE = runpy.run_path(str(ROOT / "scripts/package-probe.py"))
+    PE = runpy.run_path(str(ROOT / "scripts/audit-pe.py"))
+
+
+def cargo_metadata_normal_package(root: Path, result: dict, version: str) -> tuple[dict, dict, str]:
+    """Read the original successful metadata command; Cargo package IDs are opaque."""
+    steps = [row for row in result["commands"] if row.get("name") == "cargo-metadata"]
+    if (len(steps) != 1 or steps[0].get("passed") is not True or steps[0].get("exit_code") != 0
+        or steps[0].get("parent_exited") is not True or steps[0].get("timed_out_or_pipe_stalled") is not False
+        or steps[0].get("log_truncated") is not False
+        or steps[0].get("arguments") != ["metadata", "--locked", "--format-version", "1", "--no-deps"]
+        or steps[0].get("stdout") != "logs/cargo-metadata.stdout.log"):
+        raise ValueError("Original Cargo metadata command did not complete with the closed arguments")
+    raw = PROBE["bounded_regular_file"](root / "logs/cargo-metadata.stdout.log", MAX_LOG)
+    if digest(raw) != steps[0].get("stdout_sha256"):
+        raise ValueError("Original Cargo metadata log no longer matches the accepted result")
+    metadata = json_document(raw)
+    if (type(metadata.get("version")) is not int or metadata["version"] != 1
+        or not isinstance(metadata.get("packages"), list) or not 1 <= len(metadata["packages"]) <= 256
+        or not isinstance(metadata.get("workspace_members"), list)):
+        raise ValueError("Invalid original Cargo metadata format")
+    if not all(isinstance(row, dict) for row in metadata["packages"]):
+        raise ValueError("Invalid Cargo metadata package record")
+    ids = [row.get("id") for row in metadata["packages"]]
+    members = metadata["workspace_members"]
+    if (not all(isinstance(i, str) and 1 <= len(i) <= 4096 for i in ids + members)
+        or len(set(ids)) != len(ids) or len(set(members)) != len(members)):
+        raise ValueError("Ambiguous Cargo metadata package identity")
+    matches = [row for row in metadata["packages"] if row.get("name") == "fc-bootstrap"]
+    if len(matches) != 1:
+        raise ValueError("Metadata must identify exactly one fc-bootstrap workspace package")
+    package = matches[0]
+    workspace = metadata.get("workspace_root")
+    if (not isinstance(workspace, str) or not re.fullmatch(r"[A-Za-z]:[/\\].+", workspace)
+        or any(p in (".", "..", "") for p in workspace.replace("\\", "/").split("/")[1:])):
+        raise ValueError("Original metadata must identify the actual Windows workspace")
+    workspace = workspace.replace("\\", "/").rstrip("/")
+    manifest = package.get("manifest_path")
+    if (package.get("version") != version or package.get("source") is not None
+        or package["id"] not in members or not isinstance(manifest, str)
+        or manifest.replace("\\", "/") != workspace + "/crates/fc-bootstrap/Cargo.toml"
+        or not isinstance(package.get("targets"), list)):
+        raise ValueError("Metadata workspace package/version/manifest differs from the admitted ZIP")
+    targets = {}
+    for name, relative in (("fc-bootstrap", "src/main.rs"), ("fc-installer-lifecycle", "src/bin/fc-installer-lifecycle.rs")):
+        rows = [t for t in package["targets"] if t.get("name") == name]
+        if (len(rows) != 1 or rows[0].get("kind") != ["bin"] or rows[0].get("crate_types") != ["bin"]
+            or not isinstance(rows[0].get("src_path"), str)
+            or rows[0]["src_path"].replace("\\", "/") != workspace + "/crates/fc-bootstrap/" + relative):
+            raise ValueError("Metadata does not identify the exact normal binary target")
+        targets[name] = rows[0]
+    return package, targets, digest(raw)
+
+
+def match_normal_metadata(message: dict, target: str, package: dict, targets: dict) -> None:
+    if (message.get("package_id") != package["id"] or message.get("manifest_path") != package["manifest_path"]
+        or message.get("target") != targets[target]):
+        raise ValueError("Original Cargo normal package/manifest/target does not equal its actual metadata")
+
+
 def admit_normal_helper(args, payloads: dict[str, bytes], version: str) -> tuple[bytes, dict]:
     """Bind both actual non-test compiler artifacts to one original CI ledger."""
     root = args.build_evidence.absolute()
@@ -341,6 +408,7 @@ def admit_normal_helper(args, payloads: dict[str, bytes], version: str) -> tuple
         data = PROBE["bounded_regular_file"](ROOT / name, 64 * 1024 * 1024)
         if inputs.get(name) != {"path": name, "bytes": len(data), "sha256": digest(data)}:
             raise ValueError("Current source differs from helper's actual CI input: " + name)
+    package, metadata_targets, metadata_sha = cargo_metadata_normal_package(root, result, version)
     ledger_raw = PROBE["bounded_regular_file"](root / "executables.json", MAX_LOG)
     if digest(ledger_raw) != result.get("executables_manifest_sha256"):
         raise ValueError("Normal artifact ledger is not bound by the accepted CI result")
@@ -376,8 +444,7 @@ def admit_normal_helper(args, payloads: dict[str, bytes], version: str) -> tuple
                     messages.append(message)
         if len(messages) != 1 or messages[0].get("profile", {}).get("test") is not False or messages[0].get("target", {}).get("kind") != ["bin"]:
             raise ValueError("Original Cargo JSON does not prove the actual normal artifact")
-        if not messages[0].get("package_id", "").endswith("#fc-bootstrap@" + version):
-            raise ValueError("Normal compiler artifact package/version differs from the admitted ZIP")
+        match_normal_metadata(messages[0], target, package, metadata_targets)
         if not messages[0]["executable"].replace("\\", "/").endswith("/" + target + ".exe"):
             raise ValueError("Cargo normal executable identity differs")
         admitted[target] = data
@@ -385,7 +452,8 @@ def admit_normal_helper(args, payloads: dict[str, bytes], version: str) -> tuple
     if digest(helper) != args.lifecycle_helper_sha256 or helper != admitted["fc-installer-lifecycle"] or payloads["fc-bootstrap.exe"] != admitted["fc-bootstrap"]:
         raise ValueError("Both ordinary payload and helper must be exact same-source normal CI bytes")
     return helper, {"result_sha256": digest(result_raw), "source_sha": head, "normal_helper_sha256": digest(helper),
-                    "main_sha256": digest(admitted["fc-bootstrap"]), "profile_test": False, "current_inputs_verified": len(selected)}
+                    "main_sha256": digest(admitted["fc-bootstrap"]), "profile_test": False, "current_inputs_verified": len(selected),
+                    "cargo_metadata_sha256": metadata_sha, "cargo_package_id": package["id"], "cargo_manifest_path": package["manifest_path"]}
 
 
 def chainer_idt() -> bytes:
@@ -709,6 +777,7 @@ def pe_header(data: bytes) -> None:
 
 
 def build(args) -> dict:
+    configure_source_root(getattr(args, "source_root", ROOT))
     source = args.input_zip.absolute()
     PROBE["real_directory"](source.parent)
     raw = PROBE["bounded_regular_file"](source, MAX_ZIP)
@@ -723,7 +792,10 @@ def build(args) -> dict:
     output = fresh_output(args.output_dir)
     report = {"schema_version": 1, "status": "FAIL", "candidate_status": "NOT_VALIDATED", "scope": "MSI_CANDIDATE_BUILD_AND_STATIC_TABLE_INSPECTION_ONLY", "readiness": "NOT_GRANTED", "installation": "NOT_RUN", "target": TARGET,
               "source_zip": {"path": str(source), "size": len(raw), "sha256": digest(raw)}, "source_manifest": manifest,
-              "script_sha256": digest(Path(__file__).read_bytes()), "commands": [], "limitations": LIMITATIONS,
+              "script_sha256": digest(Path(__file__).read_bytes()),
+              "builder_source": {"script_path": str(Path(__file__).absolute()), "script_sha256": digest(Path(__file__).read_bytes()), "default_root": str(BUILDER_ROOT)},
+              "source_checkout": {"path": str(ROOT), "head": helper_provenance["source_sha"], "original_ci_inputs_verified": helper_provenance["current_inputs_verified"]},
+              "commands": [], "limitations": LIMITATIONS,
               "lifecycle_capabilities": lifecycle_capabilities(),
               "normal_helper_provenance": helper_provenance,
               "installation_scope": "per-user; fixed LocalAppData/Programs/FutureClassroom; business data remains original protected ProgramData",
@@ -838,6 +910,7 @@ def build(args) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source-root", type=Path, default=ROOT, help="Original CI source checkout; HEAD and every selected raw input must match the accepted result; builder identity remains separate")
     parser.add_argument("--input-zip", type=Path, required=True)
     parser.add_argument("--input-sha256", required=True)
     parser.add_argument("--lifecycle-helper", type=Path, required=True, help="Actual same-source profile.test=false normal CI helper")

@@ -1,0 +1,526 @@
+{
+  "status": "PASS_R76_FINITE_DUAL_MSVC_WIN11_OWNED_PRODUCT_LIFECYCLE_AND_TEST_CLEANUP",
+  "sourceSha": "3bad94949012e840cd1dda6a73a0ea1ddb067697",
+  "scope": "Finite accepted candidate: two exact-source MSVC artifact sets run on authorized admin Windows11; actual Win7-target normal Rust helper/controlled MSI fresh healthy facts, separate healthy same-manifest reapplication and formal uninstall, exact test cleanup. Original first failure remains unchanged.",
+  "ciAndRuntime": [
+    {
+      "label": "modern",
+      "staticReport": {
+        "path": "/tmp/fc-round76-ci-evidence/ui-preparation-first/modern-independent-first.json",
+        "bytes": 586738,
+        "sha256": "9332522f72060251877f1a978db603928a1b52a3fd0bc41df9c68d7abea65c22"
+      },
+      "runtimeReport": {
+        "path": "/tmp/fc-round76-ci-evidence/modern-msvc-runtime-first.json",
+        "bytes": 224875,
+        "sha256": "89ebc4499a8fb0f1ed0bb330e27d73eb3175a9938af51747744325ab1240277f"
+      },
+      "outerHarnesses": 22,
+      "outerPassed": 1560,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "publicDesktopSteps": 20,
+      "cleanup": "PASS",
+      "runtimeOS": "authorized admin Windows11 only",
+      "harnesses": [
+        {
+          "name": "runtime_storage-15c693100780ca27.exe",
+          "sha256": "f3b6ead8701a48b89d541b05dad4093678c4c7bc4019ebd4d587799aa1380bb7",
+          "outerPassed": 3
+        },
+        {
+          "name": "voice_storage-9a09faea7de6e275.exe",
+          "sha256": "f8c0f7e07b6788c396e352eed22d14698d94173db1257c26ecc768cfce13fe04",
+          "outerPassed": 6
+        },
+        {
+          "name": "schedule_operations-de7d48ef80c09271.exe",
+          "sha256": "c37cc0a90a5221dfc32d2fc2c2d8e9d3342928b3652bd1f543ebe43de665e61e",
+          "outerPassed": 5
+        },
+        {
+          "name": "voice_limits_storage-85dfbb116c0a27fc.exe",
+          "sha256": "073d8994354340f16add0dd1913cdd80cc7932daa725faa93ee403cbaf5a53a3",
+          "outerPassed": 4
+        },
+        {
+          "name": "fc_bootstrap-1f379e8fc9721e9a.exe",
+          "sha256": "ada51531b73f885b3d10f9bea1d4e9a999fcad2e2e3c7f61cbd9ede516007941",
+          "outerPassed": 348
+        },
+        {
+          "name": "calendar_execution_fence-4ea19c121455e89e.exe",
+          "sha256": "494df44590fc74d3912f47fb9d93c6907220df3f1f8b0fb0234213c33143d947",
+          "outerPassed": 4
+        },
+        {
+          "name": "business_storage-012e6208d459f883.exe",
+          "sha256": "9c39c0ef9d5555992c8b30e67cf9343610f56ac0316fc9ba6789ef081cb14f14",
+          "outerPassed": 43
+        },
+        {
+          "name": "verify_web_assets-f09c7f87b2ce0e25.exe",
+          "sha256": "7250d8098d8d5454f5222429ac3d2e32739fc3d9996d238c5c27b95369c2bdc9",
+          "outerPassed": 0
+        },
+        {
+          "name": "autostart_coordinator-35e94d18352c3ece.exe",
+          "sha256": "2468d7e7b6a3841f158dcbb905dd3ca710a1ef78be6d4a6d9eb1ba5fabd740fc",
+          "outerPassed": 13
+        },
+        {
+          "name": "fc_installer_lifecycle-69e68a0892726b9f.exe",
+          "sha256": "ce5101bc0f9f8c781f58aefa6bdb1fdaa8bd5a5f26c15abd8166e5c52de41664",
+          "outerPassed": 1
+        },
+        {
+          "name": "fc_bootstrap-d11d42cb4133ba64.exe",
+          "sha256": "ae10be257093ac4ce4b145e28dea1a7c2ec8713d0e3505ffb73811591a802255",
+          "outerPassed": 223
+        },
+        {
+          "name": "fc_windows-d0107c6860c2a3fb.exe",
+          "sha256": "d3418de5eb53fd91a53fe05e197c3ef1bc8f9f1ac23ddf04a5f776d369c283f5",
+          "outerPassed": 267
+        },
+        {
+          "name": "fc_security-897ee1bbd038f1a8.exe",
+          "sha256": "4f163c774103b1edc30bf15e7e395cd74fc7f9759f79fe0de046e7f0277bd3d2",
+          "outerPassed": 19
+        },
+        {
+          "name": "fc_materials-2e428b959a090e75.exe",
+          "sha256": "1836753fd754d70aa2b54764036ec25bc9205d83b14b30389bc8496fd9bd89d1",
+          "outerPassed": 39
+        },
+        {
+          "name": "fc_presentation-0ebca4673ff953f0.exe",
+          "sha256": "e04fe154a016b53d3cae240cf48acaa457432bce64f95f512e18206c9240daa3",
+          "outerPassed": 58
+        },
+        {
+          "name": "fc_protocol-a7cf91af1d25db3b.exe",
+          "sha256": "d58677c096c30ebc60646af68fa83d341688356914dece955eaea6bc25abe56b",
+          "outerPassed": 82
+        },
+        {
+          "name": "fc_application-452d4d2887413f93.exe",
+          "sha256": "b6fd740f94014a4d5178b134db772724f2c4ed5e9c3abe726eed573a2cf950ff",
+          "outerPassed": 25
+        },
+        {
+          "name": "fc_runtime-beae710b833bf51a.exe",
+          "sha256": "dc08cef085081110ab89b6433891b8cd586033e8b2ca338b70962f188bf19896",
+          "outerPassed": 33
+        },
+        {
+          "name": "fc_audio-3b8d060b615f92df.exe",
+          "sha256": "9e9a27bebe4ea4a0fb1d09cb5677a9b4dcf1f1260434004ac91fe908a000baa3",
+          "outerPassed": 22
+        },
+        {
+          "name": "fc_storage-e351e410d252c84e.exe",
+          "sha256": "ee71eccfc9f801d400cb8f7e94ae0009758ff38606650acc0a75fd425ccc5bac",
+          "outerPassed": 208
+        },
+        {
+          "name": "fc_ports-2a65d64830b4e099.exe",
+          "sha256": "f28c9c3f9263c75cc4523d47ea5a1f8e0772cbb4334ce01cb0856affb3ba72a0",
+          "outerPassed": 8
+        },
+        {
+          "name": "fc_domain-7c20761d03caf301.exe",
+          "sha256": "932534f8a096620cd9914b0b189166a01620a17bafc202e7c7027018cd4069b6",
+          "outerPassed": 149
+        }
+      ],
+      "countQualification": "Last original summary per source-bound harness; inherited child exact cases remain separate and are not added to outer total."
+    },
+    {
+      "label": "win7-target-on-win11",
+      "staticReport": {
+        "path": "/tmp/fc-round76-ci-evidence/ui-preparation-first/win7-independent-first.json",
+        "bytes": 562680,
+        "sha256": "36ea9d1547ba3dec8d4cf5c53c92d57878ee37cc8095df17bcffde3dcb663ef1"
+      },
+      "runtimeReport": {
+        "path": "/tmp/fc-round76-ci-evidence/win7target-msvc-on-win11-runtime-first.json",
+        "bytes": 224875,
+        "sha256": "9dc397361d04c806e6af69548d3562d89d884c9892e3ad76f0b061d280f19b74"
+      },
+      "outerHarnesses": 22,
+      "outerPassed": 1560,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "publicDesktopSteps": 20,
+      "cleanup": "PASS",
+      "runtimeOS": "authorized admin Windows11 only",
+      "harnesses": [
+        {
+          "name": "fc_materials-27e90f6481865594.exe",
+          "sha256": "3678c30e04afb9553061b6d7c3be7ccdbd61d2d5749b228815b08d95421e0f7d",
+          "outerPassed": 39
+        },
+        {
+          "name": "calendar_execution_fence-c228a7aa7951baf5.exe",
+          "sha256": "4e4a14a6f067cd9d466805d94116e4ecfded8554ed98c33d1267d81e02229fb4",
+          "outerPassed": 4
+        },
+        {
+          "name": "fc_installer_lifecycle-d09aedd3dca2ea60.exe",
+          "sha256": "a7495a96d0d029d7cf4f37bc73cc497ddea196ad992075d4ce4249fd81c1bac9",
+          "outerPassed": 1
+        },
+        {
+          "name": "voice_limits_storage-62943725a08ea322.exe",
+          "sha256": "a313d308ba8969039f87f70cf66aa9b9dfb8614fc9b162f68cb6f7989ece26a7",
+          "outerPassed": 4
+        },
+        {
+          "name": "voice_storage-968d582fbca570dd.exe",
+          "sha256": "2b73be6a87a15b51ebb9e31d4d408d916a61d7764cc3fb11f6192af7a8d4acab",
+          "outerPassed": 6
+        },
+        {
+          "name": "fc_bootstrap-ab3fe02d74b0cc4f.exe",
+          "sha256": "a5ea1c38f050392abcd6abb5e4648352be31172c4041eb75645806c4dbbe096f",
+          "outerPassed": 348
+        },
+        {
+          "name": "autostart_coordinator-2c053326fea8b495.exe",
+          "sha256": "1bb24644c364bb590a5eac53e97dbb9b7e7439e739ebde9a6045c549fbebc8aa",
+          "outerPassed": 13
+        },
+        {
+          "name": "schedule_operations-73449ff9470d3218.exe",
+          "sha256": "f0fda96c36a3f70ccbab17c1f64a08e82e7293f65e5ec981aa190c37dc044ba2",
+          "outerPassed": 5
+        },
+        {
+          "name": "runtime_storage-b05b4c919790cafc.exe",
+          "sha256": "32f384dcb301846b51539a702c8a1a36413da3a68acecde10ddf1597d8046782",
+          "outerPassed": 3
+        },
+        {
+          "name": "verify_web_assets-8af12de420811c64.exe",
+          "sha256": "c89e5b0dd81d4aa0285d2c2d98b374af2dcea62408fdd7bf4e27bc6dac370942",
+          "outerPassed": 0
+        },
+        {
+          "name": "business_storage-2d8bfba34cc4c638.exe",
+          "sha256": "3d0130a7f1fa3bc675215576a5c244d17daab95c1f464bcfd4c573347a798910",
+          "outerPassed": 43
+        },
+        {
+          "name": "fc_windows-f3ce076b8a82cb9a.exe",
+          "sha256": "2656a26b5b9bc7be71c71498c2ae0963b4de9e9ba41d9f32eb9b3f5243c2b5af",
+          "outerPassed": 267
+        },
+        {
+          "name": "fc_security-3bf217f9b927aa4c.exe",
+          "sha256": "fb32086ec9e0e080d93a024c1926ed0d1e158a0aa50fdac1ace9a227b7ab9ba2",
+          "outerPassed": 19
+        },
+        {
+          "name": "fc_bootstrap-236069e453c22287.exe",
+          "sha256": "701314aa58fc2c02993f6e599834be8ddea2a1bf032fa333f3913f9c9863e500",
+          "outerPassed": 223
+        },
+        {
+          "name": "fc_ports-7edd2d56c0c9c5d7.exe",
+          "sha256": "5317c6a904d5889d98f7248b53256f82b029e9c9b26ab038616b50ef042cbb20",
+          "outerPassed": 8
+        },
+        {
+          "name": "fc_application-9e82411b268941a8.exe",
+          "sha256": "92947a2cb87dea99bdd15612a9aefae6482a4aabfa8c358f4745e5914d039c14",
+          "outerPassed": 25
+        },
+        {
+          "name": "fc_presentation-ebc9347ec035f379.exe",
+          "sha256": "ef3f8134977a2a591d8d007c5f6f8759fa4fd7e0121fbedefac458539d29809b",
+          "outerPassed": 58
+        },
+        {
+          "name": "fc_runtime-93d068d0c2da548f.exe",
+          "sha256": "9b823657ec8b28d5864d9ae822f21d47f1e6d91c969a4acc2a2713ade30b3738",
+          "outerPassed": 33
+        },
+        {
+          "name": "fc_audio-ccd283b0aa061f9d.exe",
+          "sha256": "36934aaa3b9258fb6bd0aeb5ba58217440668ed75616c11c4eb3f683a26d0071",
+          "outerPassed": 22
+        },
+        {
+          "name": "fc_protocol-46c0f0d76d445238.exe",
+          "sha256": "d5919980d2f5979f6a4c0330e8cac4e449c4bc713f578200faa0dcb37e2b1557",
+          "outerPassed": 82
+        },
+        {
+          "name": "fc_storage-f6972f806e9d4523.exe",
+          "sha256": "51baba3bf038c67412b084bbdb74ca2c1dc478979f4a801f9b3a7071f05311f1",
+          "outerPassed": 208
+        },
+        {
+          "name": "fc_domain-858bf456d034c981.exe",
+          "sha256": "dab4026d02e63a49bba78d72f1be2da6dbbfd95610b5e01d60ee8cf63b9511fe",
+          "outerPassed": 149
+        }
+      ],
+      "countQualification": "Last original summary per source-bound harness; inherited child exact cases remain separate and are not added to outer total."
+    }
+  ],
+  "candidate": {
+    "sourceGit": "3bad94949012e840cd1dda6a73a0ea1ddb067697",
+    "target": "i686-win7-windows-msvc",
+    "normalHelper": {
+      "path": "/tmp/fc-round76-ci-evidence/metadata-ci-namespace-first/product/fc-bootstrap/fc-installer-lifecycle.exe",
+      "bytes": 393728,
+      "sha256": "a01e5eb72667a398771640928d21b2ae6d97a9a9555f657aa5867f00d1b39d3d"
+    },
+    "embeddedHelper": {
+      "path": "/tmp/fc-round76-ci-evidence/msi-candidate-win7-first/lifecycle/fc-installer-lifecycle.exe",
+      "bytes": 395144,
+      "sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8"
+    },
+    "msi": {
+      "path": "/tmp/fc-round76-ci-evidence/msi-candidate-win7-first/candidate.msi",
+      "bytes": 6434304,
+      "sha256": "bb43f2505c70456ba26cf9a110a12b399008ac6269ea713d43fcc606a9c4521d"
+    },
+    "builderScript": {
+      "path": "/tmp/fc-round76-ci-evidence/b5-cargo-package-id-preparation-first/scripts/package-msi-candidate.py",
+      "bytes": 63279,
+      "sha256": "8ca2f818b481f5cd4a2c9fd4cee4f4d282c505f4f3ccb45ec28b0dc719757378"
+    },
+    "builderFreeze": {
+      "path": "/tmp/fc-round76-ci-evidence/b5-cargo-package-id-preparation-first/b5-implementation-freeze-first.json",
+      "bytes": 9681,
+      "sha256": "1b615dde2d168892cd992054b14787e46399fd4d8f385fac4235ba811deb684d"
+    },
+    "sourcePackagerGitBlobContentSha256": "d0fbb23a5dab2d3329e935110265609ea53674b31896102d1139e21cee193059"
+  },
+  "builderQualification": "New B5 packaging tool is separately identified; actual normal PE and 542 original selected checkout files remain source3bad. New B5 tool bytes are not claimed to be old CI input bytes.",
+  "mainB5Integration": {
+    "path": "/tmp/fc-round76-ci-evidence/b5-main-integration-first/main-integrated-source-first.json",
+    "bytes": 5745,
+    "sha256": "7c1e81773abbd270585b283b650ff1d947c1be2b5b53b56df3d0e8b4de938732"
+  },
+  "mainPureTests": 26,
+  "freshFactsReview": {
+    "path": "/tmp/fc-round76-ci-evidence/independent-product-fresh-review-first/finite-fresh-review-first.json",
+    "bytes": 15186,
+    "sha256": "810f80d3b23e0bce60c2ecb0d6f944c69af71cffbde3c5760764732136d7c751"
+  },
+  "firstFailRetained": {
+    "path": "/tmp/fc-round76-ci-evidence/product-msi-runtime-first/report.json",
+    "bytes": 48323,
+    "sha256": "89a2056df13664771d86113652b2c75566e1752f02ed344501e8c0ae6840f118"
+  },
+  "continuation": {
+    "report": {
+      "path": "/tmp/fc-round76-ci-evidence/product-msi-continuation-first/report.json",
+      "bytes": 92387,
+      "sha256": "c315be4f7dcf762cb9140b770cdd115238c73231d7d7e6048e132dc4b2a1d08c"
+    },
+    "phases": [
+      {
+        "phase": "reapply",
+        "originalClient": {
+          "creationFiletime": 134380201382874167,
+          "pipesComplete": true,
+          "started": true,
+          "pid": 31152,
+          "timedOut": false,
+          "exitCode": 0,
+          "arguments": "/i \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b\\candidate.msi\" REINSTALL=ALL REINSTALLMODE=amus /qn /norestart REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown /L*vx \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b\\Continuation-70772302d5c24ed2a8850ecb185d26c7\\reapply-msi.log\"",
+          "actualExit": true,
+          "file": "C:\\Windows\\System32\\msiexec.exe"
+        },
+        "originalProcesses": [
+          {
+            "pid": 32888,
+            "creation": 134380201384769338,
+            "image": "C:\\Windows\\Installer\\MSIED48.tmp",
+            "sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+            "role": "begin",
+            "actualWait": 0,
+            "actualExit": 0,
+            "close": "CHECKED_CLOSE_SUCCESS"
+          },
+          {
+            "pid": 29776,
+            "creation": 134380201385123475,
+            "image": "C:\\Windows\\Installer\\MSIED48.tmp",
+            "sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+            "role": "broker",
+            "actualWait": 0,
+            "actualExit": 0,
+            "close": "CHECKED_CLOSE_SUCCESS"
+          },
+          {
+            "pid": 14840,
+            "creation": 134380201388863881,
+            "image": "C:\\Windows\\Installer\\MSIEE34.tmp",
+            "sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+            "role": "guardian",
+            "actualWait": 0,
+            "actualExit": 0,
+            "close": "CHECKED_CLOSE_SUCCESS"
+          },
+          {
+            "pid": 29924,
+            "creation": 134380201392354111,
+            "image": "C:\\Windows\\Installer\\MSIF049.tmp",
+            "sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+            "role": "UNKNOWN",
+            "actualWait": 0,
+            "actualExit": 0,
+            "close": "CHECKED_CLOSE_SUCCESS"
+          }
+        ],
+        "metadataQualification": [
+          "SHORT_ROLE_OR_PARENT_METADATA_UNKNOWN"
+        ],
+        "engineSupplement": "UNKNOWN_NO_INDEPENDENT_EXPLICIT_ENGINE_RESULT_PARSER"
+      },
+      {
+        "phase": "uninstall",
+        "originalClient": {
+          "creationFiletime": 134380201395402008,
+          "pipesComplete": true,
+          "started": true,
+          "pid": 13864,
+          "timedOut": false,
+          "exitCode": 0,
+          "arguments": "/x {9E50831D-7811-5039-8BC3-4934647448D8} /qn /norestart REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown /L*vx \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r76-production-msi-a835c46e54774a709d6696a2f8b4885b\\Continuation-70772302d5c24ed2a8850ecb185d26c7\\uninstall-msi.log\"",
+          "actualExit": true,
+          "file": "C:\\Windows\\System32\\msiexec.exe"
+        },
+        "originalProcesses": [
+          {
+            "pid": 27712,
+            "creation": 134380201396674203,
+            "image": "C:\\Windows\\Installer\\MSIF1F0.tmp",
+            "sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+            "role": "begin",
+            "actualWait": 0,
+            "actualExit": 0,
+            "close": "CHECKED_CLOSE_SUCCESS"
+          },
+          {
+            "pid": 23576,
+            "creation": 134380201397014959,
+            "image": "C:\\Windows\\Installer\\MSIF1F0.tmp",
+            "sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+            "role": "broker",
+            "actualWait": 0,
+            "actualExit": 0,
+            "close": "CHECKED_CLOSE_SUCCESS"
+          },
+          {
+            "pid": 33612,
+            "creation": 134380201399910267,
+            "image": "C:\\Windows\\Installer\\MSIF2EB.tmp",
+            "sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+            "role": "guardian",
+            "actualWait": 0,
+            "actualExit": 0,
+            "close": "CHECKED_CLOSE_SUCCESS"
+          },
+          {
+            "pid": 41660,
+            "creation": 134380201402500205,
+            "image": "C:\\Windows\\Installer\\MSIF445.tmp",
+            "sha256": "b4e4626c2d3eca60b72b0f2e934da5606ba0eb09bfc42d025e5c36b41fb27be8",
+            "role": "UNKNOWN",
+            "actualWait": 0,
+            "actualExit": 0,
+            "close": "CHECKED_CLOSE_SUCCESS"
+          }
+        ],
+        "metadataQualification": [
+          "SHORT_ROLE_OR_PARENT_METADATA_UNKNOWN"
+        ],
+        "engineSupplement": "UNKNOWN_NO_INDEPENDENT_EXPLICIT_ENGINE_RESULT_PARSER"
+      }
+    ],
+    "healthyPayloadsAndComponents": 14,
+    "uninstallAbsent": true,
+    "pendingAndGateNamespaceAbsent": true,
+    "wholeMilliseconds": 2979,
+    "nativeOriginalSeconds": 120,
+    "newExperimentSeconds": 600,
+    "cleanupReserveSeconds": 180,
+    "rawLogs": [
+      {
+        "path": "/tmp/fc-round76-ci-evidence/product-msi-continuation-first/download/Continuation-70772302d5c24ed2a8850ecb185d26c7/reapply-msi.log",
+        "bytes": 155528,
+        "sha256": "f09dc5d406005c9c07ac4a6412fbf0992fca1712d715ae6b264a4b4e82962d43"
+      },
+      {
+        "path": "/tmp/fc-round76-ci-evidence/product-msi-continuation-first/download/Continuation-70772302d5c24ed2a8850ecb185d26c7/uninstall-msi.log",
+        "bytes": 129588,
+        "sha256": "23ca4cbbc5e328906e5676126b8eef5f38fef617562301e4001b5a96f2da629c"
+      }
+    ]
+  },
+  "qualifications": [
+    "Short unclassified helper argv/parent metadata remains UNKNOWN; all actually captured controls have original held identity, actual Wait0/Exit0/checkedClose. No guarantee WMI captures every short process.",
+    "MSI Action Return1 is not used as OS Exit0; OS exits come from original held process handles. No independent raw Rust Join/End return integer observation is invented.",
+    "finallyProductState raw FAIL_READONLY_POSTSTATE is retained: it asks ExpectedPresent after successful uninstall and reports knownAbsent true. Separate uninstallAbsent explicitly ExpectedAbsent passed.",
+    "Test-only gate and six-image retirement are instrumentation cleanup, not a product automatic cleanup implementation.",
+    "Final project readonly audit preceded six-image retirement; exact retirement receipt independently proves its new compiler scratch cleanup and product/Run/Pending/gate remain absent."
+  ],
+  "ownedScratchCleanup": {
+    "path": "/tmp/fc-round76-ci-evidence/root-cleanup-owned-msi-first.json",
+    "bytes": 6627,
+    "sha256": "d341f782442e5a6e2c5acba4ee69d1b58ba22906148e910e5348ea77fb9e2848"
+  },
+  "sixImageRetirement": {
+    "path": "/tmp/fc-round76-ci-evidence/six-msi-test-images-retirement-first/report.json",
+    "bytes": 18133,
+    "sha256": "6e75758122178f84df0f52859e3fd6a29b8e8bf1b89e7fdbbd220812deee0920"
+  },
+  "finalProjectReadonly": {
+    "path": "/tmp/fc-round76-ci-evidence/windows-readonly-final-first.json",
+    "bytes": 17115,
+    "sha256": "e8c7d1fcc6fc9784659a5e0684504c46c48d9a965334e6db8391e05cbf02706c"
+  },
+  "cleanupGap": {
+    "status": "OBSERVED_PRODUCT_AUTOMATIC_TYPE2_IMAGE_CLEANUP_GAP_NOT_FIXED",
+    "initialExactReadOnlyReceipt": {
+      "path": "/tmp/fc-round76-ci-evidence/root-original-msi-cache-readonly-first.json",
+      "bytes": 5431,
+      "sha256": "8fde8036f94364033ebe652fb9b61f9bf52267d90f86bbf9df8c32bd21e580a8"
+    },
+    "sixImagesTestOnlyRetired": true,
+    "source": {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 41207,
+      "sha256": "9fc3247c353b4a20b689b0611e4ca7b08994a9ef09bf360936581522ca1fc091"
+    },
+    "lines": "authenticate_image365-398; transient peer process close823; resources.release857",
+    "sourceBackedHypothesis": "Peer image handles use FILE_SHARE_READ only and remain Role::Control until session release. An earlier Type2 return may let MSI attempt deletion while its image is still pinned without DELETE share. Actual failed DeleteFile/error was not observed, so this is a plausible mechanism rather than proven sole cause.",
+    "futureFix": "Separate narrow production design and CI/runtime verification required; adding DELETE share must preserve image inode/namespace/owner guarantees. No Rust change in this batch."
+  },
+  "notClaimed": [
+    "Windows7 OS runtime",
+    "Windows10 OS runtime",
+    "standard nonadmin per-user install",
+    "Seewo hardware",
+    "damaged repair",
+    "major upgrade",
+    "Run-present cleanup",
+    "arbitrary transformed/external MSI coverage"
+  ],
+  "reviewActions": {
+    "localOriginalReadOnly": true,
+    "newTestsRun": false,
+    "WindowsOrNetworkOrCargoExecuted": false,
+    "mainSourceEdited": false,
+    "privateKeyContentRead": false
+  }
+}

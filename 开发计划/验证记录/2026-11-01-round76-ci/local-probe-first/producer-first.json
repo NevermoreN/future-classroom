@@ -1,0 +1,3419 @@
+{
+  "status": "PASS_LOCAL_SAME_SOURCE_PROBE_ZIP_ONLY_RUNTIME_NOT_RUN",
+  "sourceSha": "3bad94949012e840cd1dda6a73a0ea1ddb067697",
+  "target": "i686-win7-windows-msvc",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/package-probe.py",
+    "--exe",
+    "/tmp/fc-round76-ci-evidence/production-msi-preparation-second/original-ci-namespace-first/product/fc-bootstrap/fc-bootstrap.exe",
+    "--output",
+    "/tmp/fc-round76-ci-evidence/local-probe-first/FutureClassroom-0.1.0-windows-x86-dev.zip",
+    "--target",
+    "i686-win7-windows-msvc",
+    "--objdump",
+    "/usr/bin/i686-w64-mingw32-objdump",
+    "--toolchain",
+    "nightly-2026-10-29-x86_64-pc-windows-msvc",
+    "--web-dist",
+    "/tmp/fc-round76-ci-evidence/web-build-first/source/web/dist"
+  ],
+  "originalBudgetSeconds": 300,
+  "acceptedStatic": {
+    "path": "/tmp/fc-round76-ci-evidence/ui-preparation-first/win7-independent-first.json",
+    "bytes": 562680,
+    "sha256": "36ea9d1547ba3dec8d4cf5c53c92d57878ee37cc8095df17bcffde3dcb663ef1"
+  },
+  "normalApp": {
+    "path": "/tmp/fc-round76-ci-evidence/production-msi-preparation-second/original-ci-namespace-first/product/fc-bootstrap/fc-bootstrap.exe",
+    "bytes": 10874368,
+    "sha256": "853430b68d304ea4b130c8ab8e6dc232e078a7c431b378a799b5bbd77bbbbc4b"
+  },
+  "script": {
+    "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/package-probe.py",
+    "bytes": 30177,
+    "sha256": "bf7ee9f5e0148920ca42a044de2a994aee44453962152e2e3f993e77dac202cb"
+  },
+  "webBuild": {
+    "path": "/tmp/fc-round76-ci-evidence/web-build-first/build-report-first.json",
+    "bytes": 245447,
+    "sha256": "2c9fd214c70b9d09c8f551f04edaa8c3e01d4162292c1f8e07e25dd3a6b338b0"
+  },
+  "webDist": "/tmp/fc-round76-ci-evidence/web-build-first/source/web/dist",
+  "objdump": {
+    "path": "/usr/bin/i686-w64-mingw32-objdump",
+    "bytes": 2642464,
+    "sha256": "521df27111c0ac3c8f6b6498505cbd35e8f087551418f4e084055f8ac308379a"
+  },
+  "sourceInputs": [
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/.cargo/config.toml",
+      "bytes": 395,
+      "sha256": "44dc16e7f8ca161c77083f90e8e0a466420f63d65b7f346ca27d27c93e05fdc1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/Cargo.lock",
+      "bytes": 21862,
+      "sha256": "8f55c410d3bd5abaefddc36168d38cd4d35a4131f85ebcd111aa6e65fe689542"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/Cargo.toml",
+      "bytes": 1218,
+      "sha256": "eefeba7b5fe1211e09b0344cd3014be908679470054ad9ab68fa17d6f8ec8fd0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-application/Cargo.toml",
+      "bytes": 244,
+      "sha256": "bddd506d2db9c63c7244a0685c8796c569133f3a8f70b4f8f5dfa43e23c88104"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-application/src/identity.rs",
+      "bytes": 16712,
+      "sha256": "ba59d105e5ce06b2775b7be373e46958d875d8d35514b70a0ba7be2c251039b6"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-application/src/identity/tests.rs",
+      "bytes": 22663,
+      "sha256": "4a40b95f215f8312f5c147328a7aa8f42e9f40faad204abbdacf4161991bbc3e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-application/src/lib.rs",
+      "bytes": 725,
+      "sha256": "6c39d3d58a5dc64594ec96cab2706c68d0fa8a1dc342f1388e9791d821b4453b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-application/src/tests.rs",
+      "bytes": 9263,
+      "sha256": "2b7eee9a0f27b69ef8723d8f071c3867b764895bd1ead3d1f2e17d12fb9df2f1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-audio/Cargo.toml",
+      "bytes": 238,
+      "sha256": "0e284602d1a415a7e0939f83f97fc93fc0b26858e5548036abcff5ce0b484e44"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-audio/src/execution.rs",
+      "bytes": 27113,
+      "sha256": "dbdc063eae6f3ae8cc86cdf334c3626c64fd9505664c0982d981906e521b7352"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-audio/src/execution/tests.rs",
+      "bytes": 25689,
+      "sha256": "d5e71a27ee2d2264f073000af73189a64e6c31fd62759954925e8b58bd042ae1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-audio/src/lib.rs",
+      "bytes": 14908,
+      "sha256": "b56bb90d67bc7ac3f867c38fcae9bf803ea9d3171b5a5ac167a48e83f4a19d0d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/Cargo.toml",
+      "bytes": 706,
+      "sha256": "7dce3f71269f50fe95ecc784738fa7a253eaae9da9c99d0ec3cf920d833328b0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/build.rs",
+      "bytes": 249,
+      "sha256": "08d5eac5729c316375cd6ddbdaa9640baea35169db6f7afa1f12dab9ec5f3e50"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/examples/verify_web_assets.rs",
+      "bytes": 4118,
+      "sha256": "d6707969dccba207d165d2f5528f7a177c0034936460fe9b25d9f142730910ab"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application.rs",
+      "bytes": 269310,
+      "sha256": "24d595f24d69d4ed9f1724aadf9bf7aa9decb22041f209ad8715c0737ab7f503"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/accounts_editor.rs",
+      "bytes": 59443,
+      "sha256": "799166bb803dabb02aa32c227f78e4b1bc62a1848979ef445a3a0b3847f2a554"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/accounts_probe.rs",
+      "bytes": 10502,
+      "sha256": "d5f87b4bd59b7042f221f3fed95e5f226cfb1ea6ac80cfc0ca5ab879aa44a95a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/autostart_controller.rs",
+      "bytes": 5753,
+      "sha256": "67d6ea84e7024b8ba06a533567196c2f36a1c83d25e30d051fd9bec1feb048b3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/autostart_editor.rs",
+      "bytes": 8597,
+      "sha256": "e83c75abbd0fa263e3da164e74b310ce39f5dfbf99acbdcdad3a7d4a6611c70d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/autostart_editor_tests.rs",
+      "bytes": 6040,
+      "sha256": "15087f595764c3056eb5f0d5cc8407cea274f04c47874ddab42b0d327cdbdde7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/autostart_probe.rs",
+      "bytes": 16590,
+      "sha256": "fa00c634f0af0daeff45474bd51d5598976b5ca49cbd434e878771c184cf33a1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/backup_controller.rs",
+      "bytes": 34384,
+      "sha256": "0b72124536a44beb7d00eb7112861cf03d431829a28f32f84a42bfdff231ffee"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/backup_editor.rs",
+      "bytes": 15520,
+      "sha256": "94f59de9977f63ac39ea74d894488ec698fff51673917b03b78eeaa1a08630b7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/backup_editor/tests.rs",
+      "bytes": 11139,
+      "sha256": "2ca79bf086f3230a32edf63b86f660739d86b800ad2b477497d911cfe0a93790"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/backup_probe.rs",
+      "bytes": 30950,
+      "sha256": "d5e579e1a6a6052e72317f7bb06cd67a21aeee1f4fb03c428808a9d79ad78139"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/backup_shutdown_tests.rs",
+      "bytes": 12312,
+      "sha256": "475fab5d4398571e9c579fdbf2370fddf22815471725becbfbcda99e3e6e6636"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/calendar_controller.rs",
+      "bytes": 9729,
+      "sha256": "bfc734e8a98616e2ca20fdb1d595e6c5b9a2d6b23233080fb53065118b7c9033"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/calendar_editor.rs",
+      "bytes": 44564,
+      "sha256": "1782a31c8c88d81bfdcd3e0f053404295d98621084d6d57b075335f52b3c4b61"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/calendar_flow.rs",
+      "bytes": 11175,
+      "sha256": "9148b1e169df1595c003d544b40a52752742ec21b0b8884fd4d479049d5fbf4e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/calendar_probe.rs",
+      "bytes": 20721,
+      "sha256": "5dad1d7ce0a4e0969679395c77d6e350c169553812a5b7bd56c096df222cc758"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/desktop_content_tests.rs",
+      "bytes": 14788,
+      "sha256": "09c7ed53fc105ff77fe7ffac4a4f9140063509ace6154faf41c10c909748580d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/desktop_controller.rs",
+      "bytes": 62578,
+      "sha256": "2c8c2c4c5422277aed61791f936f89d57524bf433bb2884ffd9ac5bb7c842885"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/display_editor.rs",
+      "bytes": 35218,
+      "sha256": "002531304c956d68a46fec175903bc576b7a225e12ddb4d950284f919e306ecc"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/display_editor/visual_tests.rs",
+      "bytes": 8788,
+      "sha256": "06850c397a6f9ecfb2e6f1f2ae3d1dc1c606acfc3d01a5c4418ac59c5630ba9a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/display_editor/visuals.rs",
+      "bytes": 8732,
+      "sha256": "8edcb0da9ae998887c110902dd9936947c7b164934b3c0bb2e02a0a5af945e8d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/display_flow.rs",
+      "bytes": 2731,
+      "sha256": "8a16359848b585d91c4ce92de68952a56fa402f9c433dc2e01f4544dcf4b9bc9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 30349,
+      "sha256": "e26bed9c3d827e7ae24c858c3b6d9f3a757a13dc4e327ed9e7196f4230aea739"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/http_executor.rs",
+      "bytes": 7927,
+      "sha256": "42643d5aab2f95fbdcf90dea3d50c21f02e9513f59e110974a9c5b0aab806dc8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+      "bytes": 14314,
+      "sha256": "d155d3609df220467003af17a7d30902e8a76dc5722c12c35efb2c8f29c4cadf"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/https_settings_controller.rs",
+      "bytes": 21588,
+      "sha256": "5bb7609e2c244bcaf02bc802c298fc0f37eb4c18f6c7e7d26c7b93294a8cdb7c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/https_settings_controller/tests.rs",
+      "bytes": 6627,
+      "sha256": "c57b93b6becaccfdf30fb2e5a00763636c57d5992910f02b1a5d66fa956f34ef"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/https_settings_editor.rs",
+      "bytes": 21224,
+      "sha256": "1479b3886f36fb341f328954706fe637a95018526903220180632e1a6c1861a9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/https_settings_editor/tests.rs",
+      "bytes": 10943,
+      "sha256": "331ebb11e7a42e05a0603332c066c1fa5dbaa9588d7279c0e2814f40603093c1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/https_settings_probe.rs",
+      "bytes": 16390,
+      "sha256": "0b2d5db0ebc207f951cee38756f003e28e3178411e8391b8b77bead7b3442079"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/lesson_editor.rs",
+      "bytes": 18310,
+      "sha256": "22a3bf03185fe7f14ec959f81e3baa1b2103b8390301e19968a2de884c166cb7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/material_flow.rs",
+      "bytes": 29394,
+      "sha256": "846fd34a074bbbd7786c3a1a5c815878327d1297b0f7d7ccfeda2adc6a5952bf"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/material_probe.rs",
+      "bytes": 36264,
+      "sha256": "d9d799ef1ada4d8b0ded1739da0f49ca0252fc3f3cca89ea6490c1a094d9656d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/materials_editor.rs",
+      "bytes": 32890,
+      "sha256": "4c77612cd1d77fcf838ee00a4b9a5db873f9ff3bfacc3b1d45d97bdbccc18571"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/migration_controller.rs",
+      "bytes": 11104,
+      "sha256": "40acb8e20026e90484d81f161561f8b69089689287c2bea2f0372fbf673b20d3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/migration_editor.rs",
+      "bytes": 35199,
+      "sha256": "ccd3af36ec5d1bb3ce6716d9e6b4c18b1839a46d12f07ec3dfb0c11fc7e279c2"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/migration_editor/tests.rs",
+      "bytes": 20439,
+      "sha256": "4452cdf44a95e60334daeb26fe5d0cfef9e1b8738c302c67091669905ed08e34"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/migration_probe.rs",
+      "bytes": 22969,
+      "sha256": "cc05163e7c3ea5cfda9c6c93e436697f78f857ccd4e44121dc9adf256a039bfd"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/migration_probe_fixture.rs",
+      "bytes": 33280,
+      "sha256": "954e1af18bd5746b4305a7ceaded3f5e165eb69aa81f9353d653c2414363daa8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25958,
+      "sha256": "65383be4d153855e111cc76bb89d7567781441bbc327fd1cf93551392fe338c4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/profile_content_editor.rs",
+      "bytes": 24802,
+      "sha256": "6ebdbc4dfb82a0cc59aba7575bf54fcca605b5c61ff696125acdecfa966d7fcf"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/profile_content_editor_tests.rs",
+      "bytes": 10297,
+      "sha256": "0100d2d11f55352134eb41ce7ecaa69a5bef643fc3d8e0640863ea3df3d19109"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/profile_content_flow.rs",
+      "bytes": 19912,
+      "sha256": "29e941c4396e494efd96c0f3cf3393cbacba7d8d3bf0ae09d8a4344c7a125c93"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+      "bytes": 52373,
+      "sha256": "c0adcbd332b36a6323aefbc50075a679ec5d33df78b0d81be0e8b8ee8f547145"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/profile_content_probe.rs",
+      "bytes": 22822,
+      "sha256": "2103693c6b8cbebbe6fbbbe1847155fa9195fcf5e45905c0516e55082f675316"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/profile_flow.rs",
+      "bytes": 4812,
+      "sha256": "f252805110bb4ba75b01ebedc81dd73d0d7609836c5a47e29a456bd607f47886"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/profiles_editor.rs",
+      "bytes": 112389,
+      "sha256": "92c3178018241b444823e678c1b6bb7a79a3077f6eefc740e302b9d1f1bf6950"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "bytes": 43255,
+      "sha256": "28a400b6cf4d00634971dce163f163d8f8cd745a28e93b2d6267f2c5184b4559"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/profiles_preview_flow.rs",
+      "bytes": 15450,
+      "sha256": "c71512c5ea7fdfe6fe8de7939b045682eaddeaa7edd7fb8911a41a42372dd0ac"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/profiles_probe.rs",
+      "bytes": 13371,
+      "sha256": "5c5e01d8415cdd5b5863320f760471cc7d3743f6692f9db433d552ca86879768"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/public_desktop_probe.rs",
+      "bytes": 14653,
+      "sha256": "628aec784b10d69f4cfb9dd1f7c21adb5c05d6471d521bd2db3d5ee04837ce40"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/public_lesson_editor.rs",
+      "bytes": 11261,
+      "sha256": "1c3589c0fdfe20f166317ebabde071c1db339a59ceaf81dc5dfdcac88b87e336"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/public_lesson_editor/tests.rs",
+      "bytes": 6472,
+      "sha256": "d0ad7d098811995cb50c63cea11b573498f8e822b083d12338bd20e780c0b843"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/reinitialize_editor.rs",
+      "bytes": 9096,
+      "sha256": "a2da0e4a7f5757836fc4c5f87a5a11a281e80a790bb27da53cf82854a9e08631"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/reinitialize_editor/tests.rs",
+      "bytes": 10815,
+      "sha256": "19cb24d0273d9ce4bff9bee107e2818f7480ad70341895ff4afa2bb79dccd63b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/reinitialize_entry_tests.rs",
+      "bytes": 3613,
+      "sha256": "ab926d2fe31e2ee218866c9db83374e1d90b266050ee0af795474f34e5310488"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/reinitialize_probe.rs",
+      "bytes": 20496,
+      "sha256": "9a43eb266d0f4ba3dd05708466010a520abca38d84597c88a0d769628896ff4d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/schedule_editor.rs",
+      "bytes": 93530,
+      "sha256": "946207e907457137fb9393fec870b4ddb95ba222a52fd460c811f7f91017211a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/schedule_editor/operations_tests.rs",
+      "bytes": 9293,
+      "sha256": "ffdab45d5be453f6d19e807021a40a556488bf9e99bb01fd5e5531c9f7806b8b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/schedule_operations_probe.rs",
+      "bytes": 22775,
+      "sha256": "bc801d6210c09007e941a6f2c9ab607e112c54b0aa4ae77414525e9ce4d23b8e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/shared_pool.rs",
+      "bytes": 1652,
+      "sha256": "12df0f3573c52015bf650e526e092c175ba1fb7b8f7c1e5649230a293ab9d787"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/subject_visual_probe.rs",
+      "bytes": 11630,
+      "sha256": "b2dbe5fcd50db55b72f65394ad7b1f63516aae12addf10a67d4cc0d83dfd4994"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/voice_controller.rs",
+      "bytes": 12474,
+      "sha256": "7e23d768248eebe441d9a28bf7c4d39f30c571eb0c92f363f4b397360e225b24"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/voice_editor.rs",
+      "bytes": 24450,
+      "sha256": "37bdd2d6fdec4783cc109925534c64dfb3c751f824d67ef36459d9ccaad4910c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/voice_editor/tests.rs",
+      "bytes": 26274,
+      "sha256": "ee07066a56462e9ec48bd2f4f9bd12b5993e54f61df45e27af65d2d7102972aa"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/voice_management_probe.rs",
+      "bytes": 26378,
+      "sha256": "e420cc994e398bf71a49a28ca6c8ed8f922816b832e9a516418e8b9d235ac311"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/voice_output_probe.rs",
+      "bytes": 9985,
+      "sha256": "6686f4d422a6fcf09036eb694319f359af9b9e2eec61f0fcf6e3654c93f4f48c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 25954,
+      "sha256": "5da1846898afc0d58cfda4dbf9ae0f2771298107091ce371e4cff1f22a9026b0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/application/web_editor/tests.rs",
+      "bytes": 22469,
+      "sha256": "ea2a46ef9a6a9fb18239cba56387eafa75fa576ee48a25c1660139e2d2299bfc"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/autostart.rs",
+      "bytes": 9957,
+      "sha256": "a960ec38c15cd6c5280d98d3ddd5998b11c5c2fc5be57483be72e18058083617"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend.rs",
+      "bytes": 110323,
+      "sha256": "d467aa3f8b078a12fa8d9a0ff8a955acddc53a85f9d0f4efa448fec7c7295808"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/account_management_tests.rs",
+      "bytes": 41079,
+      "sha256": "423d66b0431a9b37f35aafd73d8d3f67779354d469bca6bcc8d24f3b643294db"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/autostart.rs",
+      "bytes": 5797,
+      "sha256": "9abfa70455d522f20bef160d8bf8a636cff36acac13e1c4687ed51ab1007f7d4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/calendar.rs",
+      "bytes": 4969,
+      "sha256": "c4ab0944f76e98d1ddddd94237f69ed08ec60897be64a4007015eb56a893e3e8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/content_web.rs",
+      "bytes": 11438,
+      "sha256": "8d8b5ef4630ba166443d812d72539b82cbc458f5c99708bc679fcedc5a53b055"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/desktop_lesson.rs",
+      "bytes": 14968,
+      "sha256": "87035bdc159ff2295b055c5ce5ca85a02109a5f2566a52b43e8cf68af39b2950"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs",
+      "bytes": 24490,
+      "sha256": "d84d8c2e062bb86ba76b631d0420d7c90fb19e99b226e21985cd86f7d039da5d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/execution_scope_tests.rs",
+      "bytes": 8025,
+      "sha256": "202dd3220bdf32f3579938305c0824b8e88008ad54ecf31a6fc9b5232c34969f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/https_certificate.rs",
+      "bytes": 11636,
+      "sha256": "a3fec3a5f5b430c1a2fcb5062e2e481a79c162358c4d22ec07d09ee5ecfe0261"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/https_certificate/tests.rs",
+      "bytes": 12521,
+      "sha256": "c8a00229f93037475363a0cf7fa2f418173e6d0e133da64443eaafbe5b4a7449"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/https_settings.rs",
+      "bytes": 4205,
+      "sha256": "2920cc1588c45bb54d7303f688883eefc1feb1e0693c8cfc7bfaf22da175e432"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/materials_web.rs",
+      "bytes": 11762,
+      "sha256": "fecd3e3a9c771b8b0c6142da9275f8a82c9ea96ddaacb0b58e51f433928dd390"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/profile_content.rs",
+      "bytes": 73749,
+      "sha256": "58773d6a4190b136f3fd76cdf835d7478583b87e06e9755aa26a205f49accd16"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/profiles.rs",
+      "bytes": 3014,
+      "sha256": "dc4cf760f202350d2d992bcf48fd0b062a77fbeb3d76e86c591ca583cb4a857a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/profiles/tests.rs",
+      "bytes": 18983,
+      "sha256": "a37782253f6953829dddb37da3dde4ed83e037c54dd2f5f37b212d90c083ecde"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/recovery.rs",
+      "bytes": 13747,
+      "sha256": "0d32070c5138e2b261f969dfdf7ca13197d0f9e21f228d956f1c01c58c24f42c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/recovery/migration.rs",
+      "bytes": 5494,
+      "sha256": "45ef27a7f7c08423f969ef5388f54e410bdbdea2350f87d6c8eff4c757db91ea"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/recovery/migration/tests.rs",
+      "bytes": 7064,
+      "sha256": "03c1ae2d465066f627597245c6b13fb53362a314014b151c5836b99a605b56b2"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/recovery/tests.rs",
+      "bytes": 10851,
+      "sha256": "35db868b35c410c1ba2a8af627d4448aed209d6bd40df9eec22707eaf7d6f1a3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/subject_visuals.rs",
+      "bytes": 6796,
+      "sha256": "46039cce8e9119a078adb24c446fe8b68d80f938e54e3ae69ed7d5338ade1e41"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice.rs",
+      "bytes": 102079,
+      "sha256": "1eea5df3db21222a5f8aa7839e5372d896d148acc2e7b6571a10712bdae7e037"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/limits_tests.rs",
+      "bytes": 17601,
+      "sha256": "e6d0df5f8243382de56ee6f08ac043584547c1e0420c8ed84d2831dba8e746d2"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/management.rs",
+      "bytes": 12238,
+      "sha256": "f2f5c14672aff0a0a641c40aeca7f251feda5db9d1f53cb95f9bc7b50cc47fb5"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/management/device_check.rs",
+      "bytes": 7807,
+      "sha256": "5a3e86c2384938b6f4be03870722e5f3c5ba61a04e6c8a0c91fbcdf40d60791e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/management/device_check/tests.rs",
+      "bytes": 21164,
+      "sha256": "abac9e051417fabd6291630434f29fc44e62864231338db5c139b18e7d584f95"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/management/tests.rs",
+      "bytes": 26148,
+      "sha256": "f2a9b9028bf988ac7c0ff202fa568f131239cdd58ecbf9096043f221eb5bcad0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/native_participation.rs",
+      "bytes": 1330,
+      "sha256": "e1178677ce96e9e4bdc36ed8cb55974621c69d30bbb29f95126e83baaec5951e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/native_participation/tests.rs",
+      "bytes": 4219,
+      "sha256": "07039fe0aae16ebb72d6b42d6f06ed05d8dd1637dcc8cd6ba0edfff28ee6c565"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/policy_handoff.rs",
+      "bytes": 7520,
+      "sha256": "84780f652ad2a8273bbccd6921364a03ac16068fffb1ddfcf3a62f8f6666fcdf"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/policy_handoff/tests.rs",
+      "bytes": 14175,
+      "sha256": "32de67b7d676f9b9829372e606dee09360c2a64e3417351ce9c369b26cf315df"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/request_fence_tests.rs",
+      "bytes": 3834,
+      "sha256": "6c10d9be7b323073a2e8483392fcd82eabfb36d54db4721acee696f1e1464d65"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/upload_authorization_tests.rs",
+      "bytes": 17055,
+      "sha256": "1555046cc206aa9dca88ae6b488a29d15be91b5b1b288050f95736062b5a8257"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/web_device.rs",
+      "bytes": 13322,
+      "sha256": "f41a2e5e81d5927598bea51f3404cf5bd1c7fb3f4071a517992057247f517162"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/voice/web_device/tests.rs",
+      "bytes": 36143,
+      "sha256": "5aebba86e427f18e85e5895767056e422c94c092c52dcc27df2b468e18589b66"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 48077,
+      "sha256": "cb0616fbf1fb399c3e8b9dbe99de7fc06b0b1bfb11c80e63dd7bf832e1fb8f72"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/web/https_settings_tests.rs",
+      "bytes": 10615,
+      "sha256": "0df08d0adc27204e6225fc70f9ddd4bc83a216683a4793adc1f89a357d8e1f01"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/web/material_send_fence_tests.rs",
+      "bytes": 4630,
+      "sha256": "7bdd4068796c3d301502fb3f3ce176ee265b887ff7ba96b93ec0fb10daddb79c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "bytes": 10168,
+      "sha256": "350dbdb9225da8d8a6d3d3eba23b14ecf54e42d0d4b29482af5c2bb8afd98e6c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+      "bytes": 14285,
+      "sha256": "b533438eea5dd6a9070857944a5a97245a85c19b831dede14be41565a4516a4f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/backend/web/tests.rs",
+      "bytes": 38340,
+      "sha256": "ae66355921f79ea0105950b869df97015d97d3cd786c1e082dd4246390a873fc"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "bytes": 1195,
+      "sha256": "1235cbed6f1d5fb38fe56f8528b4a3b99007ef5ee51fb520ac22750a37525216"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/calendar_download_probe.rs",
+      "bytes": 2565,
+      "sha256": "fb4c5fa0410ce5030228078b11b76636b54453f611cf3d505f44814dab54c849"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/credential_probe.rs",
+      "bytes": 19769,
+      "sha256": "4d8e1b61159ce594be653f07a2299e160d08caba4cb43a2746dce035f9952e13"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/https_runtime.rs",
+      "bytes": 23295,
+      "sha256": "c09b95c098dbb7d6b8007245466dd361f5663cec9a2e99c1a9af50a86f230547"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/installation_startup.rs",
+      "bytes": 865,
+      "sha256": "36c4b06c4b41377d9f143b0993092bba8e0cbd32afad0b111937c0c6a52fb002"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/lib.rs",
+      "bytes": 651,
+      "sha256": "260fb575c3b8b93efcc8560a626c284a492a9f62ccaee9e7d1b9f59e3aa4a9c1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/main.rs",
+      "bytes": 22459,
+      "sha256": "b8c42c86eee11b49817ff06cb7c9df0dda293fb4c5f5bf460d858821a3ff6945"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/material_helper.rs",
+      "bytes": 3384,
+      "sha256": "e9ab25772c96a3b8f2bb2532eef8464b3966beaf8f0043522e1083f0873ff48b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/physical_thread.rs",
+      "bytes": 405,
+      "sha256": "b685c6b6f227ac8f298f9f897548bc0d71495c9e001a7eaa3b026aa989eaa367"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/profile_content_cache.rs",
+      "bytes": 14848,
+      "sha256": "3001d71f7ec96860abe3410e0ccba38383471a1c98149ac6fe7621ce95a33d51"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/profile_content_files.rs",
+      "bytes": 25826,
+      "sha256": "bec9845e450a9e9e9f164d8475cf951f12c869cc8e57fc5de86f2f4a797d73b3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/profile_content_files/inventory.rs",
+      "bytes": 5489,
+      "sha256": "9d3ffd7d66c5257b997b687509120da403ab0d2f65a7f2456885fb74f015032e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/profile_content_files_tests.rs",
+      "bytes": 14453,
+      "sha256": "004bb5464a6100a0ca238f1549ecd968a42ee1141f5142298f70798a9819e550"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/profile_content_startup.rs",
+      "bytes": 7171,
+      "sha256": "97a34ba3dc482c3a2f0e39e12cad956ca021db04c32555869a613e81d83c8caa"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/profile_content_startup_tests.rs",
+      "bytes": 16100,
+      "sha256": "436a20f3ebe5979f4e1d0992466a5f62f3ef80f02e74f652693e32e41ed4fcc3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery.rs",
+      "bytes": 9166,
+      "sha256": "81cf44a8098f30fb9a5cba02c1c5d560b4c516fddecc85284cdc42c97b552cc1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery/integration_windows.rs",
+      "bytes": 22041,
+      "sha256": "5b9b9edd5ebd52b40b8d87b995a0b8e86b137c9e8f093e8ec2c135d9411e35e0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery/test_support.rs",
+      "bytes": 7833,
+      "sha256": "01da2c75c45ef9d6f5ee722acaf04ac5f0f3cf3aac3bc17271eaaf6d3793ab92"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery/tests.rs",
+      "bytes": 5956,
+      "sha256": "ab7408c3e3d16e22b62f9717c78f92c74887f5d6c09fb721414baa633e5f9aae"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_files.rs",
+      "bytes": 5792,
+      "sha256": "650fd0bfcbd4b1d8f580e30bac5c367eb1c17bc5178f428861a50115ede48f74"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_files/windows.rs",
+      "bytes": 28469,
+      "sha256": "467acd66631db1c05e7b6750ecd428c547862a1f64d5ab9057944187a35a9546"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_files/windows/journal.rs",
+      "bytes": 40981,
+      "sha256": "4f5745826884aef63a43f5c55f4b4b0b9db6b0f990ac6355fd42a91fbfbe1299"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_files/windows/migration.rs",
+      "bytes": 15451,
+      "sha256": "70496e0dfe891347771149cbf0a2bfcd8a4c50f79549b310ad13fcff7ccec046"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_files/windows/migration/tests.rs",
+      "bytes": 14922,
+      "sha256": "dc8dae02d6c62c3690b5242c265ce3919f71aa0425c7222bd7440637bf891e33"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_files/windows/tests.rs",
+      "bytes": 10372,
+      "sha256": "a7c56afcdb43f1b83377b774d60312b27744a796f9e63b92f57487fda694fb25"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_workflow.rs",
+      "bytes": 343,
+      "sha256": "18eed70c1b1a6a9255a03eb7a5e07e226c33ed96a72d09df61bdfcb01a6b351f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_workflow/slot.rs",
+      "bytes": 9252,
+      "sha256": "b787d460f4e1db932a1a2ab130b9337a9622505ab299b647ea5d4f46bda3f718"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_workflow/windows.rs",
+      "bytes": 23674,
+      "sha256": "a32e03857c38071326247327a02cd0b74eefba1e760ad77b81192cc4da6a881a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_workflow/windows/migration.rs",
+      "bytes": 8839,
+      "sha256": "6a15b12554b2d1ffa7e57ab392537c16d26d624b8afbe89ccdd464898bd8e9f3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_workflow/windows/tests.rs",
+      "bytes": 11664,
+      "sha256": "fdd4e74f6dd96f8870d183c5131743b837ad17a2692154069e6614ae34410402"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/recovery_workflow/windows/tests/migration_tests.rs",
+      "bytes": 11351,
+      "sha256": "70d9c24b3b8594d9ca5f42fe89b0dfbbd66684713af1a9a132a4c2d4e8909c61"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization.rs",
+      "bytes": 12132,
+      "sha256": "90751ec595453154bd8feafed40cd7bd179314a2ded78edef4e89584e5177bd4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization/tests.rs",
+      "bytes": 11701,
+      "sha256": "4259a6a859d0ed43589448cdd34b67bef3130fd799474c374105f1f62abc0c8f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "bytes": 5168,
+      "sha256": "aba7639a1a59848e783508a59b986f333d491738af5e543ba9120fc9fb77991c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization_files.rs",
+      "bytes": 1022,
+      "sha256": "a58d11e5a9a096ff3ce9a64d705caa5526bdf73c0dfac8c89402e946379f105f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization_files/windows.rs",
+      "bytes": 10900,
+      "sha256": "a541b25587b7dbb2cdcd44a0c9ca165df3d34624324b3df295481fec9ec65636"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization_files/windows/journal.rs",
+      "bytes": 37575,
+      "sha256": "fdbe4244366a81c00d649519a8455d30143be0ca7a3f824ffa52d8a99d00506d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization_files/windows/journal/tests.rs",
+      "bytes": 12949,
+      "sha256": "995c33395d7df4d4691e91b9d55df22e4447e9abafc85418aa6dbf030165b518"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization_files/windows/objects.rs",
+      "bytes": 16144,
+      "sha256": "162754111f3e78dd551a17fd65151339bb28a57b47a0732280cbf214811d9c62"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization_files/windows/tests.rs",
+      "bytes": 11707,
+      "sha256": "0216184ddbe3b46afe19529318f9cffa3eb48e40eea5e83765fddc95d4b7a7e8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization_workflow.rs",
+      "bytes": 150,
+      "sha256": "4f80f69ca52fe626cc740517008446587da2b2220086a8a5192aecbfcf807fad"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialization_workflow/windows.rs",
+      "bytes": 8031,
+      "sha256": "427f1b0a36a5164b218e91f4796e094f6056d07ae7194f1119319cb509e8716e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialize_application.rs",
+      "bytes": 24293,
+      "sha256": "23ec16f657f1ecad6a1113a137a1afd0879fc1d9e6d18f5498a6028dd21e6072"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/reinitialize_application/slot.rs",
+      "bytes": 4341,
+      "sha256": "b40cb9d8f317e825964f2e9a938a44a0ef86d8bcd9e404503de763f2b73a5bb0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/voice_files.rs",
+      "bytes": 26719,
+      "sha256": "0b7d5352f266221f777f12aba58887de6d64fd5c46baba81744430622989bb0d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "bytes": 22617,
+      "sha256": "476dba50a66ee945221773a7249141589bab52632f055e5bd83a3e4011326db9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/voice_runtime.rs",
+      "bytes": 19189,
+      "sha256": "9bb6628e3c6e91f00ffb6c1d17d92c4573d1f96c7256988e75f948d4d8efd898"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/voice_runtime/native.rs",
+      "bytes": 15790,
+      "sha256": "dcba7c5c512db5fde0a26e91fdbd01a236162f4961a13e792b814963214193b1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/voice_runtime/native_policy_tests.rs",
+      "bytes": 17900,
+      "sha256": "67e2129ae6b8a3e5b4e32059ad67b7d358a41a27be699b5720af5124d626a8f3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/voice_runtime/tests.rs",
+      "bytes": 12744,
+      "sha256": "52091c92959e4044e369e5f848c65615792dbe34afb319c7124b1f9e19aa98de"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "bytes": 7082,
+      "sha256": "2a4593a3050ab741c0467762b295437e5a3489ef515820a3db2638379ae3b7dd"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application.rs",
+      "bytes": 17325,
+      "sha256": "1aceab813091eb44d536aae6e811a26447ac53efba8e3ab59770559778ee5ffa"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/content.rs",
+      "bytes": 9301,
+      "sha256": "bb4f261f5d2dac4e33ccfd29aab2b1b06dc00530b937a70a98b05752e1a6982b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/content/subject_visual_tests.rs",
+      "bytes": 11981,
+      "sha256": "06a3a428fc42433054925c63fb2bb30f306610b8100ecb28a59daba7202e7e09"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/content/tests.rs",
+      "bytes": 16019,
+      "sha256": "e15651c3a2b122d75b3842da5e5588502dd28ba2cfb8d4d2c845bef65c7f9290"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/material_download_stream_tests.rs",
+      "bytes": 10647,
+      "sha256": "f69a015e9f967bfbbf491b18f448ebf82e3e305a51980cb457664ff338d1c137"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/material_files.rs",
+      "bytes": 68620,
+      "sha256": "a1036c8df44c56a4f71da6f46389d85d788d2617e8661475033e3cac4108f45f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/material_stream_tests.rs",
+      "bytes": 34139,
+      "sha256": "7910b083fa5356cfc7f026a97c4b06271014d4ebe5f83b66fea6eb931ee307de"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/materials.rs",
+      "bytes": 9093,
+      "sha256": "560429df78c5af7efb038a7b07eceb08418ba823a94a52c8e5c6e5c7177d89d1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/materials_tests.rs",
+      "bytes": 25898,
+      "sha256": "5d7b622bfca0091e0be98b816d7bd3a4e3b574d7e0a5122f1acdbe94fef81a22"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/shared_upload.rs",
+      "bytes": 5163,
+      "sha256": "b66af0019230a59e666c726f1a9c9f4c01151c674159b9cccf85cd15c5467b3a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/shared_upload/cleanup_tests.rs",
+      "bytes": 5663,
+      "sha256": "78150107b3cb21a986bec3afe021f17ae54a98c6fbe920268ee7e972fcc30b3c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/tests.rs",
+      "bytes": 22076,
+      "sha256": "adaecef21080de43e30271952bfc2f4c42374121246d000590edad4ad3bebe5f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/voice.rs",
+      "bytes": 6794,
+      "sha256": "93992ff43eaf6e45a96ff4b0fbab633d5e8c31539f29dac8357a9f2b37404899"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/voice_capabilities.rs",
+      "bytes": 3543,
+      "sha256": "57cb1a66c1e47b76e69e77637772170966adffee0ebeab6abee4bf7bd27a254e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/voice_capabilities_tests.rs",
+      "bytes": 9831,
+      "sha256": "73a28852e0d96adecb1185e72b67e366219e4be083f66b8071cd06b0d745e9a3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "bytes": 18481,
+      "sha256": "eef9874a57048c5697746464d02b547bc8a15c27fecdda2d7e0731925bce18dd"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/voice_files/voice_stream_tests.rs",
+      "bytes": 23795,
+      "sha256": "4f06fd2f28bace856b7087ada60e3efb703ae2da7fc43d460433e0ebfb0be3ff"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_application/voice_tests.rs",
+      "bytes": 25029,
+      "sha256": "11980ad2522ecb3bda3d4a67f36be9624f15b9e4d13ecd813eebb8cfe51aafee"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_assets.rs",
+      "bytes": 9664,
+      "sha256": "231a56b51410d71eea281bfac6a1cf5054fa634308984eed79789947f7cf3ae9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_assets/loader.rs",
+      "bytes": 5317,
+      "sha256": "132ff43e65a9e61ed8abeaa6391a667108bcb06a0b6b930333c8607a04d4b938"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_assets/loader/tests.rs",
+      "bytes": 9192,
+      "sha256": "df5cc1d028706cc135a7c247d102bb0c19b012853234d85af9f24d0b243e38e9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_assets/tests.rs",
+      "bytes": 12850,
+      "sha256": "f82d5ca211d51f1be2d83597b1799b0dc70ddb5a9aeb43b9bbf8fc2b6fa62133"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_pairing_probe.rs",
+      "bytes": 13812,
+      "sha256": "5e5fc884e8bc7c2d3f40c5ab5e92d264a1b655d757fca5e4a88e878939e69977"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_pairing_probe/content_probe.rs",
+      "bytes": 7216,
+      "sha256": "f220485d438f0d4cabb5dc1fdee1194e4efe68ab6e44e093a2d75f54c8b874ee"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_pairing_probe/materials_probe.rs",
+      "bytes": 12855,
+      "sha256": "44cb4937ea0e2c77c5355b4c8648cc0d353473bfedc9869ee2abbcc95a965f9e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_pairing_probe/voice_probe.rs",
+      "bytes": 10730,
+      "sha256": "4f341a48f6cfe54863da28b64c88d090003377d1db028a4b7f318a28004692c1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer.rs",
+      "bytes": 11246,
+      "sha256": "0323950120ddb20cce7bde06935be47fbbdd44160b77cf0def0f5e8c474cf020"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/download_work.rs",
+      "bytes": 4991,
+      "sha256": "5f13094743ac5a9ba94619c95991ca0719b1d5b211a57790b2368a3f124a31d0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/download_work/tests.rs",
+      "bytes": 2824,
+      "sha256": "627512f57d86309b110185a338b80097a999219f22feb3e68c5e92db72865f84"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/downloads.rs",
+      "bytes": 20576,
+      "sha256": "94074d0da4434bbc1447f521cfe969c2c3fd6b59573fdb7274818c87a5f116e8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/downloads/tests.rs",
+      "bytes": 11115,
+      "sha256": "946839e42c766440323583632aaad52c4320942021327b90d1cfe27dae14acd3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/executor.rs",
+      "bytes": 3720,
+      "sha256": "22f260593e6f517e80bcbe78b421d6d42df46571b5d18ffcc7f18665780e332c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/live_cleanup.rs",
+      "bytes": 1993,
+      "sha256": "362418b1c6d3291d835f596f7b432ce50524a3c63cb2f28dc79612dd671d2550"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 61571,
+      "sha256": "e5839cf21b75ddf29c63c2e81d2135d032fe269cb84df880f125d9f09cb655f9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/network/tests.rs",
+      "bytes": 16141,
+      "sha256": "6d3a51d272964c238bee54c20f9e32eb65630ff428d46f80747701d8cb575088"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/tests.rs",
+      "bytes": 7126,
+      "sha256": "cb815789c16a9f7ce3f267bec6c744fb4b887e4de02eb70b5dd6e49043479266"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/upload_work.rs",
+      "bytes": 11893,
+      "sha256": "a2b96ea688768b52ccc354003cc4f99519ca013a9475bf887356581779831837"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/upload_work/tests.rs",
+      "bytes": 5826,
+      "sha256": "f475787ecbb59b0153282f57eb425a9e2ff87c58b142025045cc792c9eb4f267"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "bytes": 39187,
+      "sha256": "785546eb4dd219f11fcbdde76d5722fc117fc113b7a5aca4071f89a3b638ce44"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "bytes": 50752,
+      "sha256": "b9b32cfb20fdacee619e12488c546168d9976c4879aaade7bcc136e99868e6c4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/work.rs",
+      "bytes": 10141,
+      "sha256": "4bf472f8b5684e54165c8249a3ff63b4de4d85106a4a2f9417fff647f4ed8e7b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+      "bytes": 9238,
+      "sha256": "8da7c856735b7f7b685797191378aa51dc39e24e660dd77feb0f4bb0b78a7b70"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/tests/autostart_coordinator.rs",
+      "bytes": 23392,
+      "sha256": "4dcc0e379e1606d54865dbc76261d69c2b37430b176aede7308f9e94baff6202"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/tests/business_storage.rs",
+      "bytes": 166755,
+      "sha256": "c846c6c6f3d010c2541ac3f00c4f54e694027773fe2bab6e420b52f41cfb8e9c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/tests/calendar_execution_fence.rs",
+      "bytes": 14373,
+      "sha256": "2ee31be9b88666efb6432473e0893afbfd7e612a0f36bd4f579cb41f4fda39c2"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/tests/fixtures/README.txt",
+      "bytes": 332,
+      "sha256": "56c6163565f9916061d8ab5f24b3e75738c795841f06d8688bfe344a8d2a79c4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/tests/fixtures/minimal.docx",
+      "bytes": 768,
+      "sha256": "67f52b08c3dacda0c45aeb6a6370220aa68079d8e77d93147c48fec26b976675"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/tests/runtime_storage.rs",
+      "bytes": 13344,
+      "sha256": "eec8e1a146f4cc10a7f0915ea9ea1a15813b7d80253741eb710fc78a87aaeea1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/tests/schedule_operations.rs",
+      "bytes": 27081,
+      "sha256": "6505668c3c98c785c89ae4246ee800af337c16074cf67755867a2c70dcaadb5d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/tests/voice_limits_storage.rs",
+      "bytes": 23297,
+      "sha256": "7af4dfecdb468ab4b496db8a34f4c201dbe72ac4f5d0e9d5a4b26caa6834b718"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-bootstrap/tests/voice_storage.rs",
+      "bytes": 28728,
+      "sha256": "ef85148e6be64736a89ea019cfeda5f91ce8686c5ed894e31836575a7b0c0153"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/Cargo.toml",
+      "bytes": 184,
+      "sha256": "ef76665c58a777c963a9ca20aee4cdc96dc6f1addc53de298c9ade70efc63618"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/auth.rs",
+      "bytes": 4755,
+      "sha256": "c1b347607bf746139579bf7661142b5eaa9544e48f5d8b17e7669d107150c929"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/autostart.rs",
+      "bytes": 9443,
+      "sha256": "bae1142b10a540b0ea274be2177f325b97a393c04cc6b4f285f57a35ec1966dc"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/calendar.rs",
+      "bytes": 14618,
+      "sha256": "15ae34210025e99acc8d9e01e7464b0f2f0002e1d8014e2caee9301eb43f78b3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/calendar_tests.rs",
+      "bytes": 22517,
+      "sha256": "e6c0713b5e1e82770edf4469da878b1778e149c412ded80ec6a1836ddb7325f1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/content.rs",
+      "bytes": 3902,
+      "sha256": "43f6350371613aeb9be059f35e0c2476368b0400ae118818a96bc49208c4ce80"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/desktop.rs",
+      "bytes": 21662,
+      "sha256": "059481e389b6362e36d934b56b87cbe9775f8656fcfd26f814b38ee2ae7426b6"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/https_settings.rs",
+      "bytes": 7027,
+      "sha256": "797b2450eab6f3f34dc64373ba622370b0e2175a7362ffa5417b246039640494"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/https_settings/source_networks.rs",
+      "bytes": 6701,
+      "sha256": "98b3d39fdaea86d484d09d7ab502d8b6c67fefbb323b0d1a371248f7c8c487d0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/https_settings/tests.rs",
+      "bytes": 2651,
+      "sha256": "9835739413fd8e690b658a23af593f0f06b164f7be6eb07a3073d2b02bf5baf1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/identity.rs",
+      "bytes": 32930,
+      "sha256": "74f7628983b83fd3fe426f5a338b39ecd2ae8debf284dbc86c9e6b0db99219f5"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/identity/tests.rs",
+      "bytes": 18028,
+      "sha256": "9a592cb2793d857e68f5508a5d08cbd8793e3463dfc29be7fc05cd6f8c17038c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/ids.rs",
+      "bytes": 1824,
+      "sha256": "2e449b3f4e1d71cca631670448934feb4582bcbe061e0de19607ea7f34ef52c6"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/layout.rs",
+      "bytes": 23139,
+      "sha256": "b1c3cff7f1fb47f7386f007f217df5b5321db9aa3a50dd305d09933aadaf763c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/lesson_context.rs",
+      "bytes": 22656,
+      "sha256": "41272b8e8209f14e633bcfb6b3ae8f62cf2b9233d4cd5694ceae069284e99510"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/lesson_context/tests.rs",
+      "bytes": 3547,
+      "sha256": "fd3672607906e1d25b975ed8f4666f24db30932d46a064c7089b2b6125cc88a0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/lesson_context/tests/public_desktop.rs",
+      "bytes": 8840,
+      "sha256": "31aaa96ec9166f17a9229688f6c20234ff7996182c928acfe7c40af5e23676ee"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/lib.rs",
+      "bytes": 409,
+      "sha256": "d276d4079cf27466b7faecd5f436831103a7847ebd3f43793a5f3f21dc95c31e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/materials.rs",
+      "bytes": 25172,
+      "sha256": "3c30791384dd3374106104d7daed6cbe8c5e649a24123f84363da8b9063a1341"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/materials/tests.rs",
+      "bytes": 16842,
+      "sha256": "9e28aed61aae492c0563ca2a5ca53f69c5b17a1da405591ecbde4365e9e7e880"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/profile.rs",
+      "bytes": 42398,
+      "sha256": "4bea784f9489e29d020af6adab1728b27cb434174ee7a002df9cb6536d252553"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/profile_content.rs",
+      "bytes": 51244,
+      "sha256": "44a30430a6ffedda421c9521100ba904a74b9f7ba44dee02d0a1a814c722ae9e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/recovery.rs",
+      "bytes": 9863,
+      "sha256": "cdd5476ccf6e9ce6757116ed2d478cadd10d1f137555bd94a3da0170be078a5d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/recovery/migration.rs",
+      "bytes": 13364,
+      "sha256": "0ee534cc5a7c25dd3c443cab45b77724a04af656b91fea132a94758eb5131214"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/schedule.rs",
+      "bytes": 22460,
+      "sha256": "6a6f1368c1c171f53a2c7e5633cff28541e9417d68edfd3ec023cf46a7a769ab"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/schedule/tests.rs",
+      "bytes": 12731,
+      "sha256": "9b206df5862ac80828570a08c849344dffa27a9f8026f902d2fef72098fcce4b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/schedule_document.rs",
+      "bytes": 62534,
+      "sha256": "5b140651762ab09853e33528b9095e9f72417e02f54bdbac253dd34c57200611"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/schedule_document/row_operations.rs",
+      "bytes": 15597,
+      "sha256": "1bca94cd6b832e3de4be6df188c0dd367794007f7627d513215b4463608b8023"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/schedule_document/row_operations_tests.rs",
+      "bytes": 23417,
+      "sha256": "c1f773888209b888056691f6d52274f05332a54ee1c1290724942155fd5c2af8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/schedule_document/tests.rs",
+      "bytes": 28881,
+      "sha256": "868e0bf95227fa735c3ee6e06ff2ab116be734c9ddb9f30de5b6f372e687bc65"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/subject_visual.rs",
+      "bytes": 4956,
+      "sha256": "f0d25f2c112840ac47649c8dba739c21c2d23992770fa3a6640fff344444d521"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/subject_visual/tests.rs",
+      "bytes": 9112,
+      "sha256": "3362fe39184cc3772c5e1124306b92ef7ab80303463fe3eab571bc6d1e2debd8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/time.rs",
+      "bytes": 10646,
+      "sha256": "b753321ab5823818095b2f5ab250f0a9fc5e8224873acd373efa62a9311a8590"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-domain/src/voice.rs",
+      "bytes": 54248,
+      "sha256": "e78afd0b96359d185d32ef7eee435e5d8fba153201892dcd3db7ccb8bd19bcb7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-materials/Cargo.toml",
+      "bytes": 521,
+      "sha256": "3a48b8ed1fae3557e5e02fe4f1b12ab8dcc496f251b8f575181e80ffcd8ad903"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-materials/src/lib.rs",
+      "bytes": 12998,
+      "sha256": "141c7ec40ac9dc97b3762a7e459b6adf9ecbeb425893f68e5bc1338c1bc73705"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-materials/src/office.rs",
+      "bytes": 20125,
+      "sha256": "015cec968cb944bda7363ccf2106d79db7662adac3c4b8253f1e085a57ec01c6"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-materials/src/office/tests.rs",
+      "bytes": 14248,
+      "sha256": "2f9b1fd60dd1f2dc9ea8b2ecb1d17188898f0030541cc908fd5b67ab71182002"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-materials/src/office/xml.rs",
+      "bytes": 24259,
+      "sha256": "998ca82765ee4a4c8ce51a2d48c488fc1a60aa45d4941d4be8ad8204095b84c8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-materials/src/pdf_validation.rs",
+      "bytes": 46743,
+      "sha256": "561d7f7b5eb49c0f1a0904e1c5fb03f0de3f3f79be5adb3e5c64c3532910bef2"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-materials/src/validation.rs",
+      "bytes": 33062,
+      "sha256": "68a096b66023f7e6457613a9827fa30168a736d73447da4ce59599b4e666fe7b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/Cargo.toml",
+      "bytes": 211,
+      "sha256": "39dc35db65ecde12c7d5f27d5e82031eb6a3d021afb4590c20b930a0b70d1f26"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/audio.rs",
+      "bytes": 3181,
+      "sha256": "f9faa75534c6ffb8f07afa9c19c3df88e9a6e7366c0a6da00caac0a5a7fe5c0d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/autostart.rs",
+      "bytes": 2255,
+      "sha256": "7e44ea40f960a81bdd067affdd49698cb261efe66fef51c08fddb1bc33ad8d9b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/calendar.rs",
+      "bytes": 4825,
+      "sha256": "c34eb61ff4b4f0c9c8957a9a0b896494688cd394c6430ae9de80a4aa5683f5f2"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/content_web.rs",
+      "bytes": 1368,
+      "sha256": "2a8409a1aa83a20e8d1634c0d38832d8225260605a6ccbac31696615a3b3ba51"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/desktop_lesson.rs",
+      "bytes": 1700,
+      "sha256": "f73054f38d7cfb15ce162a4ff3fb7c18f534aa97eb7eea9898e6eea9802d7f58"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/http.rs",
+      "bytes": 13747,
+      "sha256": "125fe93ad107ebfbad7096e3fa1cbde6860e55e075c2521866772f96bdc9f5ca"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/https_settings.rs",
+      "bytes": 1675,
+      "sha256": "182045c860a1b8bd08af53a22952d35db9b5f4145812da558a1303d345a1281d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/lib.rs",
+      "bytes": 22951,
+      "sha256": "5d6bea713c9f19f88681ae2f9718eb0b7cb87ef0e52292201e17f7125853063c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/material_outcome.rs",
+      "bytes": 1344,
+      "sha256": "0d582d81bdd2cd984922d82e31442e449b93f1469db808eda575938681145f55"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/profile_content.rs",
+      "bytes": 11289,
+      "sha256": "fdc9759a35167009e344e7ccf0a4e28216e28628b100db5b5673933d12bf1d3c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/profiles.rs",
+      "bytes": 2499,
+      "sha256": "08fb1082af1a9e4e723fc643cadf430d2f8dc00edc6784aa206771e88272a35d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/subject_visual.rs",
+      "bytes": 2136,
+      "sha256": "dcfd6d2da2b495d57cb9cf6aa92f3d1f8921e34f7de6d22bc4b77daf325ec25f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-ports/src/voice.rs",
+      "bytes": 3639,
+      "sha256": "ecf0243637128b36de17a913d50ddc8f1473328df8c288fdcc1705f4e9407fb8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-presentation/Cargo.toml",
+      "bytes": 265,
+      "sha256": "e46f9744a113af7fa5a4b9c300e1ee860e08b3dea863ea68088257f451fb2ba3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-presentation/src/card_body.rs",
+      "bytes": 19990,
+      "sha256": "50437d241704bff44995da29f9f0e926a632370e59f85ed33f8dbccc9b5a6fad"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-presentation/src/card_body_tests.rs",
+      "bytes": 13293,
+      "sha256": "18ebb1ec0c34d4d68f0fd0f9da0385ea596e9779119d1c08ebfa2d1d2da7583f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-presentation/src/layout.rs",
+      "bytes": 24390,
+      "sha256": "9f48a91eb51cdddaa66749a6768fd192d706e2937a2462b3ad3da75f7d6b3983"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-presentation/src/layout_tests.rs",
+      "bytes": 18801,
+      "sha256": "624607a8b5ee7ab6a8d1a89c7a0c2c1787fbfb58a689ebb5be3ad0bd50e3da4c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-presentation/src/lib.rs",
+      "bytes": 15933,
+      "sha256": "1489e84c06239ccd5f51243d1745a6f7e8ed6d9706a3db351a8de4bb2250750c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-presentation/src/scene.rs",
+      "bytes": 32804,
+      "sha256": "ae9cc69df6eb02f32862ce33667cf95174ac0105b4b13b4dd6c5b90ebddd2aaa"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-presentation/src/scene_content_tests.rs",
+      "bytes": 15324,
+      "sha256": "685c46030a5716e0c8847ef3a6ab5a95decc0ef2a5a76e10b67a23150480942a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-presentation/src/scene_tests.rs",
+      "bytes": 39565,
+      "sha256": "6f22ff23e305ca0cc346f27c544decab0e6b89a6dc528ab8b80865ce30d41cb1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-presentation/src/workbench.rs",
+      "bytes": 13336,
+      "sha256": "f629fe940cb01c7af1f897a3ed0e8f785e5a9dc37c47525d292249fd0df462d8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/Cargo.toml",
+      "bytes": 317,
+      "sha256": "4f597ccdfcd49c4b7211b15169e7ce922c835be9fadfc9044fbacf731e5c4065"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/calendar_feed.rs",
+      "bytes": 8715,
+      "sha256": "1190248994792773f0c8d4282715740d7f152ef543add82500013b83acc55efe"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/http1.rs",
+      "bytes": 11375,
+      "sha256": "b23055c3e2f34b4dbe4766aa5005fb7333968b779845dc32468cf3cec10e2fad"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/http1/response.rs",
+      "bytes": 10927,
+      "sha256": "bb2a8d0e400e67b881c4814f1cae7d3c95ce1dc5fae2721c99fa6cf5914deae6"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/http1/response/tests.rs",
+      "bytes": 18154,
+      "sha256": "f1c09f706eb1c05d6c0fdd736d787c2d4bbac58ad52142c3c3ec7cb0d9a6212d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/http1/tests.rs",
+      "bytes": 11496,
+      "sha256": "3748d0087c17cb98dd25dc047cc1c65ddff856ed39593f6e21771a948fdc92c3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/lib.rs",
+      "bytes": 8225,
+      "sha256": "b2803bd6f1f3f6160176e9853c083a080dc310470c7970c5ca0eb5fa56320493"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/recovery.rs",
+      "bytes": 35498,
+      "sha256": "8e477f043c5b49a3cb597be021538497b8fc02fd9b3e1fee646e83723d4e7b12"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/web.rs",
+      "bytes": 39607,
+      "sha256": "5d2b2f8ae3d0a0044a669dacee82a52cc64a120f1b1148a67e45a86ac4ce93f2"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/web/assets.rs",
+      "bytes": 11888,
+      "sha256": "2ff03b94ce248cd1cfee13fcf913d2f7782f11fb515e557e7e6fdc5b3cd1afb4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/web/content.rs",
+      "bytes": 13410,
+      "sha256": "f2d05aedbdd20f716ee7cd7bcde1dc4a918152772c4d49af8e432bb9769644cc"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/web/content/tests.rs",
+      "bytes": 9840,
+      "sha256": "78d14aa02e00e97ef43de76ec5491282f987f17e28d920d618d6c77c239a0e4d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/web/materials.rs",
+      "bytes": 19897,
+      "sha256": "40e1d475dae2b6ba984edfb29f41e5ceb480de97f9e1cf440d869461de693ce5"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/web/pairing.rs",
+      "bytes": 6142,
+      "sha256": "63347400f6a571f3ac7b4d13650d633b36efdcefc4f162d19a9f6017613e0e5c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/web/responses.rs",
+      "bytes": 10282,
+      "sha256": "6abc3dcc6aeef91d895a960d4a4ae7876c8515e1931c27c66420f4660543d29c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/web/subject_visual.rs",
+      "bytes": 5531,
+      "sha256": "fb19a55b3b256fb6e1ac78b5bae23e0da0fd1fe82ae809710ab331aac2b46a4f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-protocol/src/web/voice.rs",
+      "bytes": 12071,
+      "sha256": "991d686a212e24d89dd904388abbdd1b0d22ab93d61ce10029e3fe8fe6ee2120"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/Cargo.toml",
+      "bytes": 240,
+      "sha256": "93b3ada12ab433a152fd8b7f035d78f11d3689006c5608f8be86c35f5f6a5018"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/src/authority.rs",
+      "bytes": 18021,
+      "sha256": "9b27b9814ff2fb466c905edb50beec0a9bd6f2e589e72745dec8daf82823fb07"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/src/cancel.rs",
+      "bytes": 2106,
+      "sha256": "19a10498db57e0c392750564f7fab32ed9c95a05cfa51ed1ce0e22666fbe7d65"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/src/control.rs",
+      "bytes": 1139,
+      "sha256": "eb4e84c6966616b49b814c1531c5937678ec6388a7c780f2d021eebeef572bbd"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/src/health.rs",
+      "bytes": 9128,
+      "sha256": "a1679f385cf71ae878e898e5aa2ff94620b4f440bb06cde810d716c1acdb3a8e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/src/lib.rs",
+      "bytes": 172,
+      "sha256": "205d54988165c8d5eb0ae01812ea0e0dcfa7015bc9246a2ffaa375614656de03"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/src/mailbox.rs",
+      "bytes": 8239,
+      "sha256": "043086a8a7d0ebd4aa12fe60883d678090e6a83e72046ae259566dc986c5dc5f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/src/observer.rs",
+      "bytes": 3716,
+      "sha256": "e16b3fc3d838bac3ebb133c739fc7290e2a63975e7994f650856a44efa861a4f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/src/shutdown.rs",
+      "bytes": 5758,
+      "sha256": "1de8a3f4347cdce4f805a0cf2b8b8a2e0cdf8e14c96bb4839aedeb623d0e04b9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/src/worker.rs",
+      "bytes": 20705,
+      "sha256": "852d30a3cd7d8f4b85e083cfd4003e0914a9afbeb631caa2608dfde7a1d2bfe4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-runtime/src/worker/tests.rs",
+      "bytes": 25221,
+      "sha256": "04bd75044a0687e449653001c8eab8589d8483ee8483b612806071fc73ff3ada"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-security/Cargo.toml",
+      "bytes": 341,
+      "sha256": "34c2bff83eb58a5b5c65ddfb76fbd53404a44546904d7b5e4255a7200f16ad02"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-security/src/codec.rs",
+      "bytes": 11494,
+      "sha256": "40e010907ecfc934e094f5e3bf6cb70ed5d5f6b482c5b2422c3c756c19bc999b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-security/src/lib.rs",
+      "bytes": 11268,
+      "sha256": "7142d7fbfbc8ed3c8b74a584156bc4fa183a9bf82db187e6675a4b9ca8ab44d5"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-security/src/recovery.rs",
+      "bytes": 8676,
+      "sha256": "a28acd2431723c2ddd9354a0aae846c32896388b07063a2f3bfa95cc89a701a0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-security/src/web.rs",
+      "bytes": 14402,
+      "sha256": "fbc6a2cf68ddcb3d107d87359a162808ae6720eb319193d301d7212c59d9ba1b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/Cargo.toml",
+      "bytes": 405,
+      "sha256": "2da47ff841584b5122c89381135556b114d2b15c762f7f019409a8f16c1f0f17"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/autostart.rs",
+      "bytes": 19615,
+      "sha256": "609311f418315b8c6b00bf3735165a8656e2b93dbde5b290bc47490778a48623"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/autostart_codec.rs",
+      "bytes": 7352,
+      "sha256": "ecac3fe82195d04a5c1e39e3617ad43f77a813d2ffe9c838fa15aab20044c665"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/calendar.rs",
+      "bytes": 36769,
+      "sha256": "b6b12e70d82baa5cff94bc7614256f1bffa60fca59a1c190e75bceaae51ff5f3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/calendar_codec.rs",
+      "bytes": 12026,
+      "sha256": "f7a2a15adf1aca1699927477a52e3fb235d6a5700092e6fecde773e1d905ee51"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/codec.rs",
+      "bytes": 15556,
+      "sha256": "82ccc1bff07068be18b38a01798fdf5fae2d39a03d03232e57427167fd642c89"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/content_web.rs",
+      "bytes": 14094,
+      "sha256": "2263fb29dd4af386821edb3b90985b0553afc6252bac99b5e16a8d2b07865d13"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/desktop.rs",
+      "bytes": 12469,
+      "sha256": "05a2d254528172ff19ba3a452a6f0ee5d2b28ac385b5526df3977e811befc4fc"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/desktop_lesson.rs",
+      "bytes": 20521,
+      "sha256": "a8cdc76fea930c3593d9036f3b65e92624fffd032f72f06a000f3cd266442800"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/desktop_lesson/tests.rs",
+      "bytes": 31465,
+      "sha256": "197f373b440abe1dbca40cdf12ef04154eddb36467861f733283f332cb71b685"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/display.rs",
+      "bytes": 11773,
+      "sha256": "c937f7d4810dc71b5f7442d96bab5065e084c65a841f7c34b5288cc3199e6649"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/display_codec.rs",
+      "bytes": 11202,
+      "sha256": "6740eaeb2fb06524a3bcbc097ede9f450753ea93f34c31dcdcbb335f1ff7f183"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/https_settings.rs",
+      "bytes": 18081,
+      "sha256": "42555e20993c8b5e14d076a5c62c7ec5c097131f27ba71e592002fb1860b37a1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/https_settings/tests.rs",
+      "bytes": 33506,
+      "sha256": "590e95e6c1d828204139d03035b3cd50b30867cb39fcda9520f13526bceb9539"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/lesson.rs",
+      "bytes": 16798,
+      "sha256": "cb83d09c27f7cd74d8029c924dd15001f5bc4a89945501e8ff472918bb27b7b2"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/lesson_codec.rs",
+      "bytes": 14297,
+      "sha256": "d71252e1e39d9b6d934ecc689b83837929fba3c40ff8f3ef0fa39184a2af3fa9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/materials.rs",
+      "bytes": 60807,
+      "sha256": "f09dfe635d4f958149593258c21512b5de6d71493c20e13d11cf9fe87486d679"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/materials_codec.rs",
+      "bytes": 11022,
+      "sha256": "266387f89a6131528d97c6143763858070c5b8a110805f17572c869c370eff4e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/materials_outcome_tests.rs",
+      "bytes": 20203,
+      "sha256": "0c2585a908994793b5bf28431dc9fba28ff5f448b80db6ed0a3c4c071c98ec0f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/migration.rs",
+      "bytes": 8409,
+      "sha256": "0c11acf2d6d4281ed5ec10b9f197ce5d49b3141d4014056e8489feaa81528996"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/migration/documents.rs",
+      "bytes": 10614,
+      "sha256": "2030c0c0b752a0b0828f2d0e8a98e253084ef0dd418c886dbaecf3f181f19e14"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/mod.rs",
+      "bytes": 44289,
+      "sha256": "b5aa42c477eba41bc03f1ac74e6e78d34e01dfa5e9755a322dafe89c421d713a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/profile_content.rs",
+      "bytes": 44288,
+      "sha256": "3c33c121b3429c64315ee5feca6d06e6f546eaa953b935edac7e5cbb55637376"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/profile_content_codec.rs",
+      "bytes": 10019,
+      "sha256": "c0158e4db1e134ced67720f8072000682496394925baac1a70afe908fd22b608"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/profile_content_media.rs",
+      "bytes": 26815,
+      "sha256": "412921d2715d1987b9e94b43e46c1a0aaf1b17bd0c18a6ee1da08873c34ce620"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/profiles.rs",
+      "bytes": 34956,
+      "sha256": "c307bd866343c31519d25f4b8175883855d0fc8d43e3531eb98e534faea6e0b3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/profiles/tests.rs",
+      "bytes": 35623,
+      "sha256": "28ec0ffe45ff43d65f6e69387a75f57119e92256ba86a08fd4f6fa6bac7f3a3b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/profiles_codec.rs",
+      "bytes": 17652,
+      "sha256": "eb0816c54ce3e023df3f0c9a5ed5af2d3644edd45cb8f095bdbd6534cf0dba05"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/recovery.rs",
+      "bytes": 55274,
+      "sha256": "0143ab6763d9b52d593ccdd500ea90b4adc5fc1efe2461d8b9e3870aaf791789"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/schedule.rs",
+      "bytes": 16155,
+      "sha256": "959b5b8117ef919092b9eb5c519531214b5d663a6486c158b89f446a0c235072"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/schedule_codec.rs",
+      "bytes": 14588,
+      "sha256": "77a12dcd59fd461f35a758370da15dc767e7ec2237acede79bc40de3e605376a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/subject_visual.rs",
+      "bytes": 20696,
+      "sha256": "2ef5f66161576675dbf2aa7b5e7a77fb4b9a6a265164f70c44049da957daf4d7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/subject_visual/tests.rs",
+      "bytes": 34598,
+      "sha256": "3fd8f227667582ef0b9a642fcd8b7338a9daa145030098c6c38eb8feb60fde82"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/tests/autostart.rs",
+      "bytes": 32111,
+      "sha256": "72e18cabe7353a0fa29e2b89d0521c2b180df7399c0aa746ff73aeba4cbcd0bc"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/tests/calendar.rs",
+      "bytes": 38884,
+      "sha256": "be5aa0ca480b195435347d7f97f16ed2e43cdc2b1257e9c687155ce2d0976d77"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/tests/content_web.rs",
+      "bytes": 25907,
+      "sha256": "e5b68c135af6c18c1006f73ecf5b8af0fa6cdc22969404a99cb3b033d92e8a5d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/tests/json.rs",
+      "bytes": 6701,
+      "sha256": "630e790619b42f640e61ebc74f913898f1d6cfb968761465374ceadb41c4cc88"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/tests/logout.rs",
+      "bytes": 13262,
+      "sha256": "4d692cd88ca06872c0073b2ccb75485c788fc83b8c43c1464ca558198a82fde1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/tests/profile_content.rs",
+      "bytes": 29053,
+      "sha256": "00182ea126e0c77de1e8001215f8cff44497f9115c7e718c8b338d2e5f96181a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/voice.rs",
+      "bytes": 35631,
+      "sha256": "81356da41dcd9c0f72dcbd9903cec9a23c55d0f23cccae384efed49aff32779b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/business/voice_codec.rs",
+      "bytes": 22850,
+      "sha256": "83630a820c5763bcf4f9c6433590f2b070ece227b0b11e0a07ab704307b2152f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/execution_fence_tests.rs",
+      "bytes": 14550,
+      "sha256": "4cb3861ba63bf72da2a23125e3db6f261e9c4f9e67c812015265229373241ead"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/lib.rs",
+      "bytes": 71179,
+      "sha256": "88e9b9bbbcfc78aa8732b3afbf5b2ddbfd5a71c5de68aaa6bffb1047e0955513"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/login.rs",
+      "bytes": 20267,
+      "sha256": "9f78c838229aaab7aed045f19ad282d3fbac0eb3179ef8ea2bfa6d30eea479ac"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/migration_tests.rs",
+      "bytes": 20793,
+      "sha256": "5879045512f61e9ddcb9c66d6480913646edd4a07544ff93df3081563ff79206"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/recovery.rs",
+      "bytes": 34202,
+      "sha256": "057a56bb16ba66ac82b215801f7650024657cc7612d805f98999163abc3a8fd0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/recovery/migration.rs",
+      "bytes": 9076,
+      "sha256": "c53e05935df607f2ebae218e21ad0a61954707297b4dd5a755e0524ad9e1dcd6"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/recovery_tests.rs",
+      "bytes": 44293,
+      "sha256": "391621bf7e6496517be3aed1909bc1a9984d86d4d3e3fec80ec76517619263ee"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-storage/src/recovery_voice_policy_tests.rs",
+      "bytes": 5158,
+      "sha256": "4dfd2629da3f61c1cacbdab6a29b659808d82e7b6e440b74526e2d5580357664"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/Cargo.toml",
+      "bytes": 1674,
+      "sha256": "0a870677c80970a9822c4c5f5000e74f95ad527eba027959190d32bc6bd39a59"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/audio/capability.rs",
+      "bytes": 2070,
+      "sha256": "c3d86e65d2497aeb9de07b124f0e01e7a3731bd407bbbd26e23b0e0d6fcc293c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/audio/capability/tests.rs",
+      "bytes": 1736,
+      "sha256": "8cb00d721f3a74f557e331646a06d4b848a8ff4dbb6e85aa2f1770e5aa3d53ef"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/audio/device.rs",
+      "bytes": 18006,
+      "sha256": "7e9019888096aa1ebed212550a103a4520652e0cf42084fcac717f81576b7f0f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/audio/diagnostic.rs",
+      "bytes": 3988,
+      "sha256": "9f4d298b013874e4886519e88b10d6897eadbba08599411b7f88f88c8fe13ffc"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/audio/mod.rs",
+      "bytes": 24139,
+      "sha256": "1ebc7aa688d20fae92e8006881e9796a8bdacd425f7dd56df85ef37084347901"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/audio/tests.rs",
+      "bytes": 11443,
+      "sha256": "d75dbdebe69fe52dccca471a686e40a815330b2b000a241923b9436a67983a05"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/calendar_download.rs",
+      "bytes": 17431,
+      "sha256": "a8306514b4d046afaa0ced3b91542264dce819babf823003c7aabbe533f68cca"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/com_task.rs",
+      "bytes": 13080,
+      "sha256": "2e69f985a334375c8cd7d09ffe802161f3ba3db9d391ad270ca1d8d18a5f91ad"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/com_task/tests.rs",
+      "bytes": 10353,
+      "sha256": "faee7c1773eb25e63f94933e8a9476e202f3538604a9cbdf3fc44a73b8ff6244"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/desktop.rs",
+      "bytes": 125447,
+      "sha256": "b94aa9461ac45bce5d79214e5c5181aaa3d700db9c28ad7ea16ce1a0c34e1b4a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/desktop/backdrop.rs",
+      "bytes": 18131,
+      "sha256": "8f7ae186eb8299e2b619d33682d62d3a24b408f8748e64299c665a6be46ba033"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/desktop/card_body_tests.rs",
+      "bytes": 19214,
+      "sha256": "8f0e3afb84932e985c2807d7d78ba6340abc10aa7ae17cfebb9295e033703107"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/desktop/content.rs",
+      "bytes": 9666,
+      "sha256": "bb11af5b46e2914b37aaf592f76f49b888ac49223e66d8eec02e2fd2c4df6994"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/desktop/content_tests.rs",
+      "bytes": 13497,
+      "sha256": "9d76128b6d3c47eee747befb3d2e7eb47e607e7ff745c2ea7e6a61ccfc7a5c79"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/desktop/public_inputs_tests.rs",
+      "bytes": 4640,
+      "sha256": "0bc902637e65791bed9d7cb8b8bd73dceb4fa65e8b651372cc4fe3fcb02dab3f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/desktop/tree.rs",
+      "bytes": 74092,
+      "sha256": "5ccd98fbbd4e827d8ebf519fe4b1736cc3cb444ebc892c338225a79d5316919a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/host.rs",
+      "bytes": 27973,
+      "sha256": "1331c2fa675b9da5cd5d59f384266b9ca1439113400d87f34b614932a4010433"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/http/README.md",
+      "bytes": 10846,
+      "sha256": "b1727ac6e83cdc9b898b72a2766faa8decb284d49101b8ef1882182cc9347379"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/http/diagnostic.rs",
+      "bytes": 12665,
+      "sha256": "a641f0fd06d73cfdad3174cc34d4815e7b0ff3dd6338a522f670b254ac7ba708"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/http/lifecycle.rs",
+      "bytes": 8256,
+      "sha256": "8f9341f0760919e47401bdd4706a3e272bc48a9d89d81878adc2d349b2f968f8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/http/mod.rs",
+      "bytes": 456,
+      "sha256": "07cc32422445fb311b70a3d5f3da31e9de085c3d812b3720103754b192bbc188"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/http/native.rs",
+      "bytes": 58213,
+      "sha256": "6bf3a3a798c5a4863f6220a64cb9b5cb9941b826760f06c3e41a592171b32b05"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 10081,
+      "sha256": "1a335aed40fe15e618ac6bc5fcc5514858533bf4314bb4b81580c672d202efb6"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3286,
+      "sha256": "513ab09e08c5545c91b9164f03130e6f66e0d2bcd6851f6016db3286bf2ca872"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8521,
+      "sha256": "74364d4fcbb9cac22ba78820326694516806eeba1d3272c7f0daf27d9a8d4208"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 37495,
+      "sha256": "0fdfc13b99037f023d455efa666ce64267538e58c7f2baff173b1ddd32f5bb31"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 42305,
+      "sha256": "eb36913209081b07c774f4bc8c233a91d4cd2df6e6f045d1cf39c3f1fe12f84f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10554,
+      "sha256": "172372ff526deab9b65da042913f3ef107168b9a5b0fc23cc83a184fba295eff"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 41879,
+      "sha256": "47ba74f5f47aec65a57a178d6b994b61fdf1236b53548929dd7bc9f6f6226f14"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "bytes": 22779,
+      "sha256": "21cae358e53a16aa557fff05481bcbb2985276cbdce08525ceb49063e24f3cd5"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/lib.rs",
+      "bytes": 944,
+      "sha256": "ecb00308f3e93e39b2d91f7d8203c1d455ad5447763edb0f6c1a983a9443a330"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/chooser.rs",
+      "bytes": 9763,
+      "sha256": "d2257b9c8da05e7273a4db50828592cd13d18255ecf20ad16c1b1a4dfa1e8c01"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/chooser/backup_destination.rs",
+      "bytes": 10803,
+      "sha256": "ec4f51a03f6bf82bd930bca60a9b9b8cfcfa278038ef94971e85266ea9e68737"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/chooser/backup_destination_tests.rs",
+      "bytes": 8745,
+      "sha256": "ebc32e5c385a8980775884fd573166121740cbf87085b9e602181beaf75ec53a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/chooser/validation.rs",
+      "bytes": 7524,
+      "sha256": "dca3a5449547f997a072c0dff67a012e4ef9f2b8c4b30742e679cb27e25f89d8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/files.rs",
+      "bytes": 38423,
+      "sha256": "d999db10aad96d2dc1fed08c5e9bfdb6779208c3034591199747a9f4eba82725"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/helper.rs",
+      "bytes": 4487,
+      "sha256": "fede55ecab7f8c556125142ab1c977bb932876c4b86d931fda84058ca0c2a797"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/image.rs",
+      "bytes": 6185,
+      "sha256": "89a5d069f73a348546323f27651e64a958ede97552f46b7230335f33ce892cc7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/image_admission_tests.rs",
+      "bytes": 10106,
+      "sha256": "857822c29cfa54383ce25a49582362e54bcc1a80b936fd73eef085d2edf83248"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/mod.rs",
+      "bytes": 163,
+      "sha256": "74413482682f581685f12069a155d7b56b21e0f0b64f8ec6c4ece7d12364a646"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/raster.rs",
+      "bytes": 11745,
+      "sha256": "f796618c267eefda32f63617d7b0782913d3986b7441bc8d8dd92e2261bda708"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/raster_tests.rs",
+      "bytes": 10071,
+      "sha256": "06ab7c2209feeb55d423083d0707ca39561450c4dc8b1b66f650d49ced7e707a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/materials/shell.rs",
+      "bytes": 40083,
+      "sha256": "514dc7ceea0cf33a01e90401f8b160ffb330d7afddf78209ecd796357aad5a1e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/native.rs",
+      "bytes": 21683,
+      "sha256": "2cd676f3604cbc1dc415daea1069d855e3264d8870bace77491a367ca34f5701"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/startup.rs",
+      "bytes": 5124,
+      "sha256": "53231f2eb30fa5d55c9906dfe2c12333e7835f48c875ff0ceb54de1b1635840b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/system/autorun.rs",
+      "bytes": 14907,
+      "sha256": "1dae547635d719714e82ce0ce22abff3cb78c57c883e4ec5c57aa134bb08bcf7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/system/autorun_tests.rs",
+      "bytes": 12147,
+      "sha256": "af9e5213429faa60e34b8bf16a10f0174dd2b71fadd2491c99ee9dfa44836b2a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/system/clock.rs",
+      "bytes": 1980,
+      "sha256": "ea7adba6ed25fe27a5de9a3b12393c7556b7390500341cf8626b7ed5ac087a77"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/system/crypto.rs",
+      "bytes": 5403,
+      "sha256": "f3ffc9cb7340dc9c220fb4db1b69ca468bfa13b162580a12bf7ba7f75e8b0100"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/system/mod.rs",
+      "bytes": 2851,
+      "sha256": "3c05519b7994732ea5161d5846158fcda77cc8b8fe6824c27510288a67943eaa"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/system/paths.rs",
+      "bytes": 23854,
+      "sha256": "51a8125b6e4148d3f3e4ce8603bb00f54e3b827d08adc64275261cb15064df0d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/system/thread_exit.rs",
+      "bytes": 1252,
+      "sha256": "9574f4070dd87b718308c8b917fc04045340b3ee54fbf1de5a5552d11c06d440"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tcp_frontdoor/mod.rs",
+      "bytes": 3186,
+      "sha256": "c83f04c1ca17db86a82c3fc531c4224c44e061614b0f1336b0dda5c79cc58806"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tcp_frontdoor/native.rs",
+      "bytes": 22677,
+      "sha256": "ea36089264114b2bedf2997f847c5994aacc5b27c437d02c92d6d3f3ef871f4b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/certificate_query.rs",
+      "bytes": 11951,
+      "sha256": "cb3a6eed7d28d5ef31a7efa4490cf4284ca6dae2332a34427f007869eff33bc9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/certificate_query/flight.rs",
+      "bytes": 6432,
+      "sha256": "989df1fc5335b3b1981e9f7da892c417cdcfb4878f46b6daf5b1ac62f1352276"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/certificate_query/native.rs",
+      "bytes": 9373,
+      "sha256": "399b06c741b941566acf4724fa7fdb45619a875e9f3a8957ca2e67bf9bcf2418"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/certificate_query/tests.rs",
+      "bytes": 11418,
+      "sha256": "b0eee932892caa97f50a7693a9204fb168f7ea4fbec9413378b16bb6e238503c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/certificate_selection.rs",
+      "bytes": 8167,
+      "sha256": "d2bc8fda19ed15defb90e22b20fd34cb5134c01bd54877d946c6245fa4009f52"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 9245,
+      "sha256": "2e084e8dd6719e59dc6e133a434d9290c1d0314211ff384263f4f6e1f0d4a950"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/credentials/host.rs",
+      "bytes": 7123,
+      "sha256": "a86c612ec0b203b779dd7cb68f4da43e555951f3cf3bc740c893b468963c5de4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/http_date.rs",
+      "bytes": 4276,
+      "sha256": "f7c60f9a2bcb6ec0267fcb1aaa7bb7d800b2360ab1eec83dd9d37bcfa907e374"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/http_date/tests.rs",
+      "bytes": 8933,
+      "sha256": "dda67311a0ff00b773358725252dce9946d38cc3e88ae5240e5386317467b11d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10922,
+      "sha256": "6465c71e95d07539e72993a29d01bbd7f2d056b47ab2c503824314d4a56c9471"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 65672,
+      "sha256": "a6a9d22a3912b8019e5a97776018a1bae1fe9c5165dcd5b2677d6cd118b73d38"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 17943,
+      "sha256": "319f734025931b1e55b9321c76e1bb0f8a302223f833c5923fcae118a71065f5"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/native/configured.rs",
+      "bytes": 6652,
+      "sha256": "030b28d11388ca00d34b1f8dedcc11c58cd7c2daf88e12bf684b697999b41dff"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 43824,
+      "sha256": "5677c9d03f057497283ea2855b013ddcbb78f6631c5caa44a0ec79679496e17e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 101627,
+      "sha256": "e10b85995cb5ac341eebefbce4b73adc353ca9ad0253fff13d51b14bbf0b81a5"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/native/tests.rs",
+      "bytes": 16242,
+      "sha256": "4548bb1e2ff701649a7cb5ef18fd5ff21d78c269ebacecc7934ecf9d83004766"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/schannel.rs",
+      "bytes": 31250,
+      "sha256": "d9bc5e343e00f38029167aa649688e66b0dc08802a85a595fdd95cb0e6e31426"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/worker.rs",
+      "bytes": 17073,
+      "sha256": "111fd28ebd8e1ee18cb9ba3619ed92baa85d787588de98112945a62363c53e55"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/tls_frontdoor/worker/tests.rs",
+      "bytes": 30175,
+      "sha256": "9da1bb9708f01b170e10e57953cdaa4d2ce39d415f2d9ad477f221364c36d7e4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/workbench.rs",
+      "bytes": 106275,
+      "sha256": "f66a5ba6370aae16c0f77ff10241a8760a33f01c9d8cf196855be0137cd2db4c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/workbench/color_picker.rs",
+      "bytes": 2660,
+      "sha256": "01ee9cce1acb133862ade3b9d5b2b143af8c16915677ca0ef43841f031f4930a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/workbench/empty_action_tests.rs",
+      "bytes": 8842,
+      "sha256": "bcbbf1b9edb28ad51c00ba70ea908e79f23a39ae8cba952f6f2375c069d05308"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/workbench/preview.rs",
+      "bytes": 29423,
+      "sha256": "00cf1d522ca027528152390619893e0cf2d87cbfbeaa80e068ff00b12e6b104f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/crates/fc-windows/src/workbench/widgets.rs",
+      "bytes": 26238,
+      "sha256": "4c8977d68a276b12180702d73732ac4d1848ffbdc23feff16ffa969ec10474ba"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/CI-SOURCE-INVENTORY.md",
+      "bytes": 2453,
+      "sha256": "663b2083018830080811bb4bbacccf7344c12c0fca6fd88d8452ce713b45468b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/audit-pe.py",
+      "bytes": 6146,
+      "sha256": "ed7f49a056f7e8ddc5d7b9e09d4e7a8617dcdb41abdfde2eb04fec76f746e950"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/check-architecture.py",
+      "bytes": 4331,
+      "sha256": "38900639eeee6b6bca497ecd817ccdfbc33f4597e694ce09f6009f971d2ca061"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/check-ci-source-inventory.ps1",
+      "bytes": 14099,
+      "sha256": "865661cf4d14db69cfa335348841571b4d2cf1c685b98a610b9ec046bb7d42e6"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/check-msi-candidate.py",
+      "bytes": 36002,
+      "sha256": "333449e8408b43d208dda28b611a4db0ba3a6655985edb9dedb4d1a80775bbc3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/check-msvc-crt-phases.ps1",
+      "bytes": 5752,
+      "sha256": "83989c26ca04feaf4938028a668799004c4ff9e085790bea826c235fe68417b3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/check-msvc-gui-contract.ps1",
+      "bytes": 15541,
+      "sha256": "baa7bf8dac29b367cc8d6f670a6b2292abf1857caa1bec18e00de81efc028fc4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/check-native-browser-diagnostics.py",
+      "bytes": 10765,
+      "sha256": "c93cee729bb4cd73f63b05aaff7b10cb3ab5e6994c440c8cb99152d686e7f150"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/check-native-browser-observer.py",
+      "bytes": 10670,
+      "sha256": "240a278542f48023eba75eab6047c53492052bdc79b1076b72f38027841b5617"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/check-pe-subsystem.py",
+      "bytes": 3464,
+      "sha256": "92beb2ffa5c3f8a5697ff2edaf405dfa11515cb609fd100f1087964e28d64d24"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/link-win7-gnu.sh",
+      "bytes": 2082,
+      "sha256": "a83120fab8aca5818cdb8cada34806d65bf6cdc37fabb5586e801778d261327a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/package-msi-candidate.py",
+      "bytes": 59022,
+      "sha256": "abc207951da6638b71cc2d9cd65858d7a4c1c027a57f534d63e54441a24d4aa8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/package-probe.py",
+      "bytes": 30177,
+      "sha256": "bf7ee9f5e0148920ca42a044de2a994aee44453962152e2e3f993e77dac202cb"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/update-third-party-notices.py",
+      "bytes": 11745,
+      "sha256": "1fa910f706fdc7ae0b9c04ad010b0e67c43c67b768ddc7d11c9f20d9ce2b2341"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/verify.sh",
+      "bytes": 804,
+      "sha256": "1ebf43080dc90090a7467085c652ccf0c2a67def5da06a6d9a1e64b5ee3f858a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/windows-http-probe.py",
+      "bytes": 27175,
+      "sha256": "21f1e631948678388c394a91a424af0da1d564f85fa5fb71c8253fc3a4ad4e0c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/windows-msvc-ci.ps1",
+      "bytes": 55268,
+      "sha256": "02456c3bb571695b13b07c214a75357bd17377784ca7d532060076763e94eea9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/windows-native-browser-harness.mjs",
+      "bytes": 83614,
+      "sha256": "bdb785d0c13aa7842edbb568e0a54d4c0b52682b17b2062e19b3d0f76f9ca790"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/windows-native-browser-observer.py",
+      "bytes": 44158,
+      "sha256": "e3efc0ffcfe83b64f3e39b1be488bbbf0898944f5814f7bcf8302ed0f5a8c4b2"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/windows-ordinary-https-probe.py",
+      "bytes": 79990,
+      "sha256": "d41f1814d1e30da6425a8b1953cf38cf627489d721962be65c83f00011530d5f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/windows-probe.py",
+      "bytes": 60406,
+      "sha256": "1de1ace568312667488f663d95b9cf5c5b277fb21aa54b4adddbafaba68cc21a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/windows-test-edge-owner.py",
+      "bytes": 53656,
+      "sha256": "d54bbe150c1bea63f25d99ef95be99006ad779ed26564215757d24ac966ae5f1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/windows-tls-business-probe.py",
+      "bytes": 164729,
+      "sha256": "e447e51b2196578107fd62ac8480956987903a63440a377ae01913f0b06b41d8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/scripts/windows-tls-probe.py",
+      "bytes": 51808,
+      "sha256": "de8acc8165f86ffa375faca70d733a1e557d508b9ed114c03fca16fcedb9b022"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/.gitignore",
+      "bytes": 70,
+      "sha256": "1ccaf8954cc7030376fe3a1497fb38c152e265474dc193a9a25f0007f8ca1f56"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/README.md",
+      "bytes": 9602,
+      "sha256": "51abbc027285771f746355bf6b63819daa66290c83ef6acefa336a14e3f00a0b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/SHADCN-LICENSE.md",
+      "bytes": 1084,
+      "sha256": "a14c2d6fb5ba9925cba04633226a3b93e6c5566ca6b550dbfaead7ab3fa93b24"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/THIRD-PARTY-NOTICES.txt",
+      "bytes": 26033,
+      "sha256": "7e717fcd0c465c72e70e46d223b3a819b4b03a12c13877c896e194626815f33b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/components.json",
+      "bytes": 328,
+      "sha256": "c12aa70df30a51127c80bdd7ec372edf8e8cdd58225580130d3dc77805e1a478"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/index.html",
+      "bytes": 1136,
+      "sha256": "9cfaeb55236eea6d802923624e1ac8dd057bda91d14adcb4199e60f0ed9a71cd"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/package-lock.json",
+      "bytes": 78101,
+      "sha256": "3ff4a896d0c2890c682802553269ba90ee075bd153f91105d7c4373ba01e70a7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/package.json",
+      "bytes": 1026,
+      "sha256": "b9e84817f8f05b19fe4ba3448e46fccd7217c965eff3bfea28b5b505bf267c1d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/scripts/budget.mjs",
+      "bytes": 2081,
+      "sha256": "3a7dc80c42865dc58ef0d8f3fa347d7cf151529113c2b087e245a7e934702ac5"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/scripts/licenses.mjs",
+      "bytes": 1100,
+      "sha256": "02fa428981ea9701710724c56d6ee343e8b67ca33432921b9a78d1d11efb585e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/App.tsx",
+      "bytes": 9558,
+      "sha256": "c4b760963c75bf1bd3e2f61b66bdff5df1bcc8ea91df2d3d3980aa8817e2b658"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/MaterialsPane.tsx",
+      "bytes": 9408,
+      "sha256": "c735f5531488451f68f17ff5d8a711646eed09589af8e6e00c23a8fa851954c1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/SubjectVisualPreview.tsx",
+      "bytes": 4458,
+      "sha256": "ac16c86b15107ef0c2220ec304574f25a360e4ea53c2e2fc7cb02a72b9e6a029"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/TeacherWorkspace.tsx",
+      "bytes": 18287,
+      "sha256": "576fe7897cc4c43b81ac606846fd2f87fa386540c9b7be29213fb3c641a92705"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/VoicePane.tsx",
+      "bytes": 10172,
+      "sha256": "0ff1f3c1a7d0824978cae1944122ce3792f29e6c6170492c40437884d0d3d5e9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/client.ts",
+      "bytes": 9068,
+      "sha256": "df6bf3eddd7bbedb69f856c4216ebe656a7a92bdb507932589d07e4d3bd929f8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/content-controller.ts",
+      "bytes": 16154,
+      "sha256": "381200ea1fd4846c62b8510932ab226fa3e81d2a64af9e46fe464d4e0abd4422"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/content-protocol.ts",
+      "bytes": 10841,
+      "sha256": "7f81e04897a3a7da9befbb7e68132b9df8c5097f6e3a54b46a621470cac50c0b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/controller.ts",
+      "bytes": 7855,
+      "sha256": "911ac18af9aea527813c6957f58a0b3e6b7c75fd0c8a4d90531cea6578603912"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/material-client.ts",
+      "bytes": 7899,
+      "sha256": "bf819e41a27a21f33bc2eae515b74be8052f912464f3cb6b96b725251348e94f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/material-controller.ts",
+      "bytes": 17083,
+      "sha256": "02f454a0cdaad690b02d44583db289fea8d98a1b59bc95db8526622819d291b5"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/material-protocol.ts",
+      "bytes": 11292,
+      "sha256": "d13cdb95e7b1e3ba59fc1670f7cefa14b0fe1ae936a4449e1aa39fd8b17f572c"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/protocol.ts",
+      "bytes": 8175,
+      "sha256": "382d78e3bf1c5983791eb06ea69dfdfaea0e7f55cb795b5b404b25835f7bab70"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/subject-visual-controller.ts",
+      "bytes": 1981,
+      "sha256": "762b1b2ebcf813360463638d68c5cf6e6411efbf135ce8c5d0a2419a431e752a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/subject-visual-protocol.ts",
+      "bytes": 3678,
+      "sha256": "5a0d35931818aed6b45d361de5bfcbdc2ef266dd2f04ada879487e916983f3a3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/voice-client.ts",
+      "bytes": 3564,
+      "sha256": "5dc907720036f9bb523f5b13a76e2be06de477d62f17a1eaeb1af7c61c11bea9"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/voice-controller.ts",
+      "bytes": 15784,
+      "sha256": "7ff9f0a63fec26d8140562d0592baa88ca5a449f71d451eba45f239978c03ca3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/api/voice-protocol.ts",
+      "bytes": 8662,
+      "sha256": "41b445de2cecddeac99fbb73458580765a6091e44d17f59d64f06f741f8315ea"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/components/ui/button.tsx",
+      "bytes": 1959,
+      "sha256": "5f06bd981938bcbc23ef34331a932b4f7bf2786551e1f5b53c60e465037f5a51"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/components/ui/card.tsx",
+      "bytes": 1904,
+      "sha256": "c58a39198aab485b7bec9dde033dca0b25be3fce06c00a101c2561dceff775a1"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/components/ui/input.tsx",
+      "bytes": 790,
+      "sha256": "cacc180f0367350b3fe134949e04a562e027878131faadabeb300148c6cd84fb"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/favicon.svg",
+      "bytes": 283,
+      "sha256": "9e223a398bd90c05881ef61402832a45852ee0a4a61fc5dc9b8e28862124be51"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/lib/utils.ts",
+      "bytes": 166,
+      "sha256": "29937be2a6523c2f84934ab5bb5d60e9d80f84a8426c93d6d8bcf50b6de0c5a8"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/main.tsx",
+      "bytes": 225,
+      "sha256": "b15885bef300175f72e0c06f6adf8e608360fdf2455da1a3af46a9c430c39ac7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/styles.css",
+      "bytes": 28832,
+      "sha256": "b95ccb4d216c87b7e1738efc40bd0ff661f3139515e94f2040168339982297ea"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/voice/browser-capture.ts",
+      "bytes": 7735,
+      "sha256": "8ea5fadc62ec7b483c5df744f418aa801ea6af887700651d6df49a1ce22b4d30"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/voice/normalize.ts",
+      "bytes": 4936,
+      "sha256": "da5876800c2c2ac63dcb54c6aa9fdbed8f3a93a5c4e3532fd4a96bce2ed6a82d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/voice/pcm-worklet.ts",
+      "bytes": 2382,
+      "sha256": "e8c2d64dfcf6c92dbf8364b50aee65dcaabdd29fc263dd71b978fba480a07d4a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/voice/pcm.ts",
+      "bytes": 3406,
+      "sha256": "c4340b556ce05317c46bae822d16a0faf7719c8309c43cbf5a91a7c9ed24a2da"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/voice/ports.ts",
+      "bytes": 2158,
+      "sha256": "645c10129efc6f8e2173c5e7551546c2da110876694f6691c1f34a70a7d51a69"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/voice/recorder.ts",
+      "bytes": 9281,
+      "sha256": "b0a2beb7e2f6328fef7b0b31fecb37d900b0270febda9ad6550a8692c7a9b6fa"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/src/voice/wav-worker.ts",
+      "bytes": 479,
+      "sha256": "0251cf65d3a13e02c2b22c3b8cb3ac7f8ebce29b2cab5bc4e428a05c2b6110d0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/client.test.ts",
+      "bytes": 5114,
+      "sha256": "e6e62c0ba481e24af2a2cb1d54994a1635201cb87a59ba0b607ca5c7cab69a8b"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/content-client.test.ts",
+      "bytes": 3772,
+      "sha256": "cdb17e03cd77757c4af6820c8bc26b996e03dc34dfa145c17582a7b8dbc49854"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/content-controller.test.ts",
+      "bytes": 15976,
+      "sha256": "5ac12256d0f91e06fccbdb96ac6f82399c70c557335b84000c88cd79afdd8a0e"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/content-fixtures.ts",
+      "bytes": 1948,
+      "sha256": "c711f6b16fe0fa8e93d7e3d9c1310080bcf494cac89aa51ab279cf2a036814f0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/content-protocol.test.ts",
+      "bytes": 7837,
+      "sha256": "75bedd5b86b5a1d86787337bce92b6e31f4ca9a3d8e210911782e73c4c9ba515"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/controller.test.ts",
+      "bytes": 11194,
+      "sha256": "bdd3476345f7de9b3cdf3beba25af186ba6353291deea871fdcf724bca033f47"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/material-client.test.ts",
+      "bytes": 11794,
+      "sha256": "2efaa66e2f9e660dafa1295fbb0fcd76312b18bd436977dd13de2e2d472310ea"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/material-controller.test.ts",
+      "bytes": 21844,
+      "sha256": "2fc240d7e4d7d16a9e06ad1074dc634c1658141e487503d277824fb154974fa0"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/material-protocol.test.ts",
+      "bytes": 9910,
+      "sha256": "43d23555c5a3a9cb6ce89d13f35fc52d834846a0126c7e285eb53114c2867549"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/material-unicode.test.ts",
+      "bytes": 2360,
+      "sha256": "b79ce46231a35a93e647b051985707b41601822c9842f37cf2e0a646b82c2de3"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/protocol.test.ts",
+      "bytes": 6362,
+      "sha256": "32cbd6ea34e27f28506a6558289f7f44b0ac083bc22b975cf49ac6344df4559f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/subject-visual.test.ts",
+      "bytes": 6265,
+      "sha256": "48dad8a6eb723852f3570cc2dde788339bf77dd221301188a28dd09cf59bcae2"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/voice-client.test.ts",
+      "bytes": 5956,
+      "sha256": "4425af5c7a1df76c54e73b85b8001203625dfb19e81c5800965776632d457112"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/voice-controller.test.ts",
+      "bytes": 26615,
+      "sha256": "5f5ed3ecd1a85a0ea07f35505f0145cf4e1c7f45f8133d1df16863c33964d0b7"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/voice-fixtures.ts",
+      "bytes": 2926,
+      "sha256": "9651d7543e5c7e80bc5c6060c6ec7650023e3435862b44785c0938e5a0b19963"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/voice-protocol.test.ts",
+      "bytes": 8510,
+      "sha256": "feabfd01da24051a15f6de635715fff1c673ad05defacc8f26a9f481d1374f3d"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/voice-recorder-capture.test.ts",
+      "bytes": 16163,
+      "sha256": "ca5328ed005424654bfb38a51e739b957933daff9f2fe35286f9e55e41ffb828"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/voice-recorder-normalize.test.ts",
+      "bytes": 15143,
+      "sha256": "e31b54d79f5b278de5faa8f5bf79458872eee3d8c0e2edc2b8b4a22f7de20e6a"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/voice-recorder-pcm.test.ts",
+      "bytes": 3685,
+      "sha256": "073bf99e0c865d5133006aaa278ce80814e5eeaf99a2c417028a0086a9d4c73f"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/voice-recorder-worklet.test.ts",
+      "bytes": 7096,
+      "sha256": "df550757160f547d12d66d4e06a4c6259226b9469212cedb3c7d633ad478b144"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tests/voice-recorder.test.ts",
+      "bytes": 18024,
+      "sha256": "224ecae0e15acc495602360ea965139d4bcd9a51448796d143b8cbe8c81fe2e4"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/tsconfig.json",
+      "bytes": 469,
+      "sha256": "7082191375b715a7b432a0abfdc26040d7ac752666d10b5c6fe7d990ce707974"
+    },
+    {
+      "path": "/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first/web/vite.config.ts",
+      "bytes": 883,
+      "sha256": "7751a7fdebb8afded0752e6634efab170b12b24f503c243ccb6796ce61af6e9e"
+    }
+  ],
+  "origin": "LOCAL_PACKAGE_PROBE_NOT_CI_ARTIFACT_MEMBER",
+  "productMSI": "NOT_RUN",
+  "runtime": "NOT_RUN_BY_PACKAGING",
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 2.209995724959299,
+  "stdout": {
+    "path": "/tmp/fc-round76-ci-evidence/local-probe-first/producer-first.stdout.log",
+    "bytes": 320,
+    "sha256": "1f7e304e66e01babe3cea31bb020c4936507de88192110034e368922405cc904"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round76-ci-evidence/local-probe-first/producer-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sourceInputsUnchanged": true,
+  "artifact": {
+    "path": "/tmp/fc-round76-ci-evidence/local-probe-first/FutureClassroom-0.1.0-windows-x86-dev.zip",
+    "bytes": 5444933,
+    "sha256": "7d1da0cf768461a7ffcbdeae21ecfeb612d47594f0538e00436551ec2089fbad"
+  },
+  "closedPayloadCount": 13,
+  "manifest": {
+    "artifact_name": "FutureClassroom-0.1.0-windows-x86-dev.zip",
+    "artifact_type": "development-probe",
+    "features": {
+      "autostart_system_change": "local global-admin captured revision/preimage explicit review; fixed current-user project Run value/current-exe quoted command; durable Prepared/Applying/Succeeded/Failed/NeedsReconcile intent, exact ticket factual settlement and read-only startup CAS reconciliation without replay/automatic repair; fresh session/authority/execution checks, no HTTP effect API; actual logoff/login, Win7/Win10/MSVC and visible Seewo acceptance incomplete",
+      "complete_application": "NOT_IMPLEMENTED",
+      "compound_timetable_drafts": "local global-admin Odd/Even role swap preserving physical table identity and content; lossless shared activity weekday split and compatible merge, synchronized dual-table atomic structure edits; explicit kind-change loss review/cancel/owner lock resume; only final complete-document CAS Save publishes; visible touch/DPI and three-OS acceptance incomplete",
+      "content_measurement": "complete shared card-body description; width-first actual text width, per-block padding/row gaps/action minima and source warnings; full UTF16 bounded text paging, no truncated measurement sample; native geometry and preview use the same rules; visible/device performance acceptance incomplete",
+      "declared_probe_commands": [
+        "--version",
+        "--self-check",
+        "--system-probe",
+        "--host-probe <1..30>",
+        "--application-probe",
+        "--https-settings-probe [--certificate-thumbprint <40hex-current-user-MY-thumbprint>]",
+        "--reinitialization-probe",
+        "--migration-probe",
+        "--recovery-probe",
+        "--recovery-probe-reopen <isolated-root> <nonce>",
+        "--autostart-probe",
+        "--voice-settings-probe",
+        "--voice-output-probe",
+        "--subject-visuals-probe",
+        "--public-desktop-probe",
+        "--calendar-probe",
+        "--calendar-download-probe",
+        "--materials-probe",
+        "--audio-silent-probe",
+        "--web-pairing-probe",
+        "--web-voice-probe",
+        "--http-iocp-probe <port> <FutureClassroom-Test-marker> <1..120>",
+        "--tls-lifecycle-probe <40hex-current-user-MY-thumbprint> <FutureClassroom-Test-TLS-32hex>",
+        "--tls-business-probe <40hex-current-user-MY-thumbprint> <FutureClassroom-Test-TLS-32hex>",
+        "--native-probe <1..300>"
+      ],
+      "default_output_history": "local global-admin explicit query-only WAVE_MAPPER format observation on the original two workers; exact lease/publication/identity/voice/runtime binding, unchanged draft/settings/jobs, original thirty-second lifetime, refresh without requery and lock/new-login invalidation; historical format support only, no physical playback or current-device/audibility certification",
+      "desktop_limits": "16 MiB compositor application RGBA admission including DIB caches, simultaneous CPU scratch and conservative software-target reserve; preview releases the hidden classroom cache and exports at most 960x540/2MiB without a full-screen intermediate; 128 composed logical nodes/depth16, two glass levels/eight outer glass cards/64 actual visible leaves; OS backing, visible display and actual device acceptance remain incomplete",
+      "explicit_mapping_restore": "complete explicit injective source class/subject/principal mapping to existing current targets, no numeric/name auto-match or credential/authority import; typed fresh ordinary projection bound to source bytes/mapping/current target revision, preserves current installation/full directory labels/security/permissions and replaces the whole teaching collection; original ordinary foreign-installation guard unchanged; single owned slot, worker retirement, double acknowledgements and real physical cold restore; visible picker/touch/device and formal three-OS acceptance incomplete",
+      "gui_startup": "normal PE uses Windows GUI subsystem; test harnesses remain CUI; diagnostics preserve inherited pipes/files without attaching or allocating a console and require actual parent wait/exit-code checks; manual normal/repair startup failure has bounded native error feedback, autostart/diagnostics do not show it; exact-binary/runtime/logon evidence recorded separately",
+      "http_transport": "HTTP.sys v2 aligned fixed slots/OVERLAPPED/IOCP with bounded body/response pieces, cancel/drain and cycle tokens; explicit two-cycle synthetic loopback diagnostic only; production listener, TLS deployment and browser application incomplete",
+      "http_transport_initial_header_deadline": "NOT_VALIDATED: HTTP.sys uses driver defaults before the first complete header is attributed to a URL group; group HeaderWait=5 does not prove a first-request 5s bound. Kernel connection limits/QoS and P0 platform decision remain open.",
+      "independent_content": "local global-admin node text/TXT and ordered PNG/JPEG/BMP pages; durable latest Begin, exact session/content CAS, explicit Clear/target-revision Undo, actual SHA and complete WIC preparation, worker execution checks at COMMIT, exact-current-scene manual page CAS; teacher Web has no generic content/layout write API",
+      "independent_content_limits": "10000 Unicode scalars/40000 UTF8 bytes, TXT UTF8 or BOM UTF16, at most 50 image pages, each 10MiB/8MP; shared 32MiB physical raster cache and 4MiB text cache; original bytes share 2GiB with materials, references retain current plus one Undo version; actual owner exit/retire/exclusive delete/finalize and startup namespace reconciliation; registry 8192/head 16384/receipt 65536 lifetime bounds; hard synchronous-call deadlines and full device coverage remain unvalidated",
+      "lesson_history": "durable bounded 64 actual intervals, override revision and complete timetable key; in-lesson/recess restart and rollback invalidation; stable cross-day baseline trust materializes only provable unobserved intervals; legacy unproved history remains neutral",
+      "local_https_settings": "local global-admin current-user MY certificate reference, canonical DNS/IP and nonzero port; disabled-Web configuration CAS, target-local backup preservation and explicit historical command-result query; cache-only seven-fact certificate observation without readiness or listener enablement; production TLS and three-OS acceptance remain incomplete",
+      "local_voice_policy": "local global-admin explicit review with default-unconfirmed acknowledgement, captured voice/identity/runtime versions, exact local lease, fail-closed stop and same-writer configuration CAS; bounded configured duration/queue/repeat ceilings without raising fixed hard limits, task counts, lock discards review, actual SQLite close/reopen and exact policy epoch retirement; current target policy preserved across ordinary/mapped teaching restore; no audio job or physical playback claim in settings probe; production network and formal three-OS acceptance incomplete",
+      "material_limits": "original <=50MiB/image<=10MiB/8MP, originals2GiB, launchcopies200MiB/128files/24h grace; local global-admin inspection and expired exclusive cleanup; full adversarial/device matrices incomplete",
+      "materials": "local owner/global management20 and current-scene5 filename rows; validated pinned immutable originals and independent editable launch copies; constrained PDF helper and full WIC decode; dedicated STA association open; no Web launch",
+      "native_browser_content_probe": "separate owned Win11 headless Edge/CDP observer against the finite Native TLS instance; reuses the client's already-approved HttpOnly cookie, obtains actual session CSRF, selects the synthetic homework scope, submits once and reloads to verify durable content; manifest/CSP assets and wire responses are separated from browser cache hits; original Windows Job actual exit/profile cleanup tracked separately; no browser pairing UI, real microphone, playback, foreground or product/Win7/Win10/MSVC acceptance claim",
+      "native_management_workbench": "initial setup/login, school/classes/subjects, account list/create/edit/disable with multiple teaching scopes, explicit review/cancel/CAS and self-change re-login, independent busy lock action, password/recovery rotation, homework, native timetable grid/digit mask/dual history/calendar and display drafts, authenticated management current-lesson override/restore and separate public desktop single-lesson actions with captured CAS and durable actual-teacher intervals, unsaved-exit guard; full application incomplete",
+      "native_visual_probe": "3% glass, clock text, click-through and foreground avoidance; hidden scene tests do not replace interactive QA",
+      "no_code_reinitialization": "explicit abandon-all-local-data wizard in a separate never-opened repair process; real physical close, root identity claim and fixed 13-tree journaled switch retain root/runtime instance lock; two default-unconfirmed sequence-bound acknowledgements; clears local exports/credentials/media/voice, preserves external saved copies and Windows settings; restart creates new school/admin/DPAPI/install identity; hardware power-loss/real Win7/Win10 acceptance incomplete",
+      "normal_start": "manual workbench; --autostart stays locked and hidden; creates project-only protected ProgramData deployment",
+      "ordinary_backup_restore": "local global-admin native export and opaque-picker verified non-overwrite save; full same-install isolated preflight, sequence-bound explicit impact review, current-security barrier, fixed shared-worker retirement, independent final physical-drain coordinator, three-tree cold switch/startup reconciliation and mandatory new login; visible dialogs/device/power-loss and formal three-OS acceptance incomplete",
+      "public_and_subject_layout": "local global-admin public tree and joint display/layout captured CAS; independent exact class/subject/teacher profiles with Materials styles/1..5 rows/gap and per-node text/image styles; bounded paged catalog, stable scoped node IDs, draft review/cancel/owner lock/exit guard; native preview uses examples for builtins and actual published standalone content; visible device acceptance incomplete",
+      "public_calendar_candidates": "replaceable provider, bounded fixed HTTPS WinHTTP source and strict parser; independent cache, exact-source-year SHA/notice provenance, cross-year conflict and manual-priority mapping; explicit review/adoption with candidate+schedule CAS; default-off durable admin grant for same-source pure Rest/Absent changes only; synchronous hard preemption and actual Win7/Win10 remain unvalidated",
+      "resident_desktop": "coherent SQLite facts with selected exact class/subject/teacher profile; width-first Row/Column/Wrap tree, native premultiplied subtree group opacity, clipped same-generation inputs, 12/24/analog clocks and fully passive schedule/date/countdown surfaces; permitted homework/material paging, full recess region backgrounds and small dynamic patches; separate public current-lesson control strip requires no application account/session/login; full scene/catalog/schedule/lesson binding and cancellation remain internal, settings stay managed; actual visibility QA incomplete",
+      "subject_visuals": "school subject colour is the single truth; local global-admin complete palette/display dual-CAS draft, explicit colour picker and shared native synthetic preview; teacher Web has one authorized subject read-only appearance preview and preserves content drafts; visible picker/device acceptance incomplete",
+      "teacher_content_port": "Authenticated current-day homework/shared-reminder scopes/read/save/clear, exact CAS, durable command outcome, midnight expiry and observed-day rollback protection; direct CNG/DPAPI/SQLite application-port probes plus finite real Native TLS Win11 Edge synthetic homework UI single-save/reload evidence with original approved session; shared-reminder browser, visible classroom and ordinary network delivery remain separate acceptance gates",
+      "teacher_management_web_application": "PARTIAL: pairing/session, homework/shared reminders with CAS and durable original-command query; material metadata and controlled file preparation/upload/download ports; voice canonical WAV upload/job/cancel ports and browser AudioWorklet recording; normal TLS/listener disabled; payload inclusion is recorded separately in frontend.included",
+      "teacher_material_port": "Authenticated material scopes/classes paging, fixed-slot controlled staging, validation before append, versioned delete/download and sender-only command query; local synthetic probe includes full50MiB; finite actual TLS verifies smaller synthetic streaming upload/download, JSON Ready cancellation/reuse and durable append retry; full size/adversarial/network-deadline/campus matrices remain unvalidated",
+      "teacher_voice_port": "Current-bound-class/exact Web authorization; canonical PCM16 mono16k WAV typed upload, durable jobs/status/cancel and original-command query; AudioWorklet/Offline/Worker browser capture; STOPPING awaits actual driver return; finite actual TLS diagnostic verifies zero PCM WAV upload only, not TLS broadcast/playback or hardware capture; device capability UNVERIFIED and production network deadlines not validated",
+      "timetable_limits": "64 KiB complete document including bounded dual history; candidate/adopted provenance implemented; declared notice body is not automatically authenticated or interpreted",
+      "tls_business_probe": "explicit 45-second isolated loopback Native TLS diagnostic with synthetic accounts and trusted fixture approval, same two shared business workers, bounded streaming material upload/download, JSON Ready cancellation/reuse and durable append retry; HEAD errors have zero wire body/no fabricated CL0, 405 carries exact Allow, transport Date and 304 framing/revalidation, exact static manifest/SHA/CSP resources; actual native drain, shared-worker join, upload/download Hub cleanup and owned deployment cleanup required; not visible pairing approval UI, ordinary listener, campus deployment, real OS trust provisioning or strict5s acceptance",
+      "tls_frontdoor_candidate": "explicit finite two-batch loopback Schannel TLS1.2 lifecycle diagnostic; bounded HTTP1 parser, explicit body admission and linear response send receipts; four pinned IOCP slots/frames and one SSPI thread; actual close_notify send and exact-token context retirement before reuse, native cleanup and actual thread termination; read-only CurrentUser MY identity selection, externally owned test certificate/key, clean TLS EOF and wrong-CA/hostname rejection; separate finite business probe covers event-to-stage routing; ordinary continuous listener disabled, strict TCP-to-header5s not passed and formal three-OS acceptance incomplete",
+      "voice_execution": "exact original Web session independent of Backend/KDF lock; bounded writer wait and on-demand single physical WinMM thread, tray/WTS/power/shutdown stop fence and endpoint monitor; canonical staged WAV/3x16KiB buffers; teacher Web upload/submit/status/cancel ports and browser recording implemented; finite actual TLS diagnostic uploads canonical zero PCM WAV only, without broadcast/playback or hardware microphone; production TLS/campus/microphone integration incomplete",
+      "web_pairing_port": "direct CNG/DPAPI/SQLite service probe plus finite real HTTPS POST pairing/poll/session dispatch with one synthetic fixture-approved device, 256-bit poll/cookie/CSRF secrets and independent exact leases; isolated browser observer reuses that cookie rather than creating a second device; visible local approval UI, browser pairing UI and ordinary listener/campus delivery remain incomplete"
+    },
+    "files": [
+      {
+        "path": "fc-bootstrap.exe",
+        "sha256": "853430b68d304ea4b130c8ab8e6dc232e078a7c431b378a799b5bbd77bbbbc4b",
+        "size": 10874368
+      },
+      {
+        "path": "LICENSE",
+        "sha256": "32b48e0a752c101a54d4ea1affc589dd99d8b553c72bedba17c6e2e30d319b30",
+        "size": 1088
+      },
+      {
+        "path": "PROBE-README.txt",
+        "sha256": "e5ee6a5c2843c98d66e496cd59797ba1fd759a5df5aec35f77c104e200e880f9",
+        "size": 21941
+      },
+      {
+        "path": "THIRD-PARTY-NOTICES.txt",
+        "sha256": "0bf19c345f74c394a7ba30f0059db8bd1943d30d564165eefe3eb3205c2c72c9",
+        "size": 2448718
+      },
+      {
+        "path": "web/THIRD-PARTY-NOTICES.txt",
+        "sha256": "7e717fcd0c465c72e70e46d223b3a819b4b03a12c13877c896e194626815f33b",
+        "size": 26033
+      },
+      {
+        "path": "web/assets/favicon-C6G-1bcP.svg",
+        "sha256": "9e223a398bd90c05881ef61402832a45852ee0a4a61fc5dc9b8e28862124be51",
+        "size": 283
+      },
+      {
+        "path": "web/assets/index-Bwi7Ogvq.js",
+        "sha256": "4b4bffe103b8cba601173fb34b9bb866240f8783296afdd72bd8c7356478f048",
+        "size": 415422
+      },
+      {
+        "path": "web/assets/index-DrrJeLm9.css",
+        "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+        "size": 39554
+      },
+      {
+        "path": "web/assets/pcm-worklet-B7E4LRoP.js",
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+        "size": 1724
+      },
+      {
+        "path": "web/assets/wav-worker-LSywWbpJ.js",
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+        "size": 884
+      },
+      {
+        "path": "web/fc-assets.json",
+        "sha256": "0745cfba78e96b75020d6891f67200fd1cc6265061784fae959dfdefdec8f433",
+        "size": 1073
+      },
+      {
+        "path": "web/index.html",
+        "sha256": "9834e50615deb61988b923871a429d16cfd04e4047d8d0d85c613516717f6661",
+        "size": 1255
+      }
+    ],
+    "frontend": {
+      "api_version": 1,
+      "asset_bytes": 459122,
+      "asset_count": 6,
+      "included": true,
+      "manifest_path": "web/fc-assets.json",
+      "manifest_sha256": "0745cfba78e96b75020d6891f67200fd1cc6265061784fae959dfdefdec8f433",
+      "schema_version": 1,
+      "scope": "Partial pairing/session, homework/shared-reminder, material and voice UI/ports; finite isolated Native TLS business diagnostics bridge HTTP events to file/SQL stages on the same two shared workers, with separate Win11 headless Edge homework save/reload evidence using an injected already-approved HttpOnly cookie and actual session CSRF; ordinary continuous TLS/listener remains disabled, strict TCP-to-header5s and full product acceptance remain unvalidated; exact-binary evidence is recorded separately.",
+      "status": "PARTIAL_NOT_VALIDATED",
+      "third_party_notices": "web/THIRD-PARTY-NOTICES.txt",
+      "ui_compatibility_version": 1
+    },
+    "gates": {
+      "Win7_SP1_x86": "NOT_VALIDATED",
+      "Windows_10": "NOT_VALIDATED",
+      "Windows_11_complete_product": "NOT_VALIDATED",
+      "formal_MSVC_baseline": "NOT_VALIDATED",
+      "real_machine_acceptance": "NOT_VALIDATED",
+      "release_tag": "NOT_ALLOWED"
+    },
+    "pe_audit": {
+      "expected_subsystem": "gui",
+      "format": "PE32-x86",
+      "imports": {
+        "advapi32.dll": [
+          "AddAccessAllowedAceEx",
+          "ConvertSidToStringSidW",
+          "ConvertStringSecurityDescriptorToSecurityDescriptorW",
+          "CreateWellKnownSid",
+          "CryptReleaseContext",
+          "EqualSid",
+          "GetAce",
+          "GetKernelObjectSecurity",
+          "GetNamedSecurityInfoW",
+          "GetSecurityDescriptorControl",
+          "GetSecurityDescriptorDacl",
+          "GetSecurityDescriptorOwner",
+          "GetTokenInformation",
+          "InitializeAcl",
+          "InitializeSecurityDescriptor",
+          "IsValidAcl",
+          "IsValidSid",
+          "OpenProcessToken",
+          "RegCloseKey",
+          "RegCreateKeyExW",
+          "RegDeleteKeyW",
+          "RegDeleteTreeW",
+          "RegDeleteValueW",
+          "RegOpenKeyExW",
+          "RegQueryValueExW",
+          "RegSetValueExW",
+          "SetSecurityDescriptorControl",
+          "SetSecurityDescriptorDacl",
+          "SetSecurityDescriptorOwner",
+          "SystemFunction036"
+        ],
+        "bcrypt.dll": [
+          "BCryptCloseAlgorithmProvider",
+          "BCryptCreateHash",
+          "BCryptDestroyHash",
+          "BCryptFinishHash",
+          "BCryptGenRandom",
+          "BCryptGetProperty",
+          "BCryptHashData",
+          "BCryptOpenAlgorithmProvider"
+        ],
+        "comctl32.dll": [
+          "DefSubclassProc",
+          "RemoveWindowSubclass",
+          "SetWindowSubclass"
+        ],
+        "comdlg32.dll": [
+          "ChooseColorW",
+          "CommDlgExtendedError"
+        ],
+        "crypt32.dll": [
+          "CertCloseStore",
+          "CertFindCertificateInStore",
+          "CertFreeCertificateChain",
+          "CertFreeCertificateContext",
+          "CertGetCertificateChain",
+          "CertGetCertificateContextProperty",
+          "CertGetEnhancedKeyUsage",
+          "CertOpenStore",
+          "CertVerifyCertificateChainPolicy",
+          "CertVerifyTimeValidity",
+          "CryptAcquireCertificatePrivateKey",
+          "CryptProtectData",
+          "CryptUnprotectData"
+        ],
+        "d2d1.dll": [
+          "D2D1CreateFactory"
+        ],
+        "dwrite.dll": [
+          "DWriteCreateFactory"
+        ],
+        "gdi32.dll": [
+          "CombineRgn",
+          "CreateCompatibleDC",
+          "CreateDIBSection",
+          "CreateFontW",
+          "CreateRectRgn",
+          "CreateRoundRectRgn",
+          "CreateSolidBrush",
+          "DeleteDC",
+          "DeleteObject",
+          "GetRegionData",
+          "GetStockObject",
+          "SelectObject",
+          "SetBkMode",
+          "SetTextColor",
+          "StretchDIBits"
+        ],
+        "httpapi.dll": [
+          "HttpAddUrlToUrlGroup",
+          "HttpCancelHttpRequest",
+          "HttpCloseRequestQueue",
+          "HttpCloseServerSession",
+          "HttpCloseUrlGroup",
+          "HttpCreateRequestQueue",
+          "HttpCreateServerSession",
+          "HttpCreateUrlGroup",
+          "HttpInitialize",
+          "HttpReceiveHttpRequest",
+          "HttpReceiveRequestEntityBody",
+          "HttpRemoveUrlFromUrlGroup",
+          "HttpSendHttpResponse",
+          "HttpSendResponseEntityBody",
+          "HttpSetRequestQueueProperty",
+          "HttpSetUrlGroupProperty",
+          "HttpShutdownRequestQueue",
+          "HttpTerminate"
+        ],
+        "kernel32.dll": [
+          "AcquireSRWLockExclusive",
+          "AddVectoredExceptionHandler",
+          "AreFileApisANSI",
+          "AssignProcessToJobObject",
+          "CancelIoEx",
+          "CloseHandle",
+          "CompareStringOrdinal",
+          "CompareStringW",
+          "CopyFileExW",
+          "CreateDirectoryW",
+          "CreateEventW",
+          "CreateFileA",
+          "CreateFileMappingA",
+          "CreateFileMappingW",
+          "CreateFileW",
+          "CreateIoCompletionPort",
+          "CreateJobObjectW",
+          "CreateMutexA",
+          "CreateMutexW",
+          "CreateProcessW",
+          "CreateThread",
+          "CreateWaitableTimerExW",
+          "DecodePointer",
+          "DeleteCriticalSection",
+          "DeleteFileA",
+          "DeleteFileW",
+          "DuplicateHandle",
+          "EncodePointer",
+          "EnterCriticalSection",
+          "ExitProcess",
+          "ExitThread",
+          "FindClose",
+          "FindFirstFileExW",
+          "FindNextFileW",
+          "FlsAlloc",
+          "FlsFree",
+          "FlsGetValue",
+          "FlsSetValue",
+          "FlushFileBuffers",
+          "FlushViewOfFile",
+          "FormatMessageA",
+          "FormatMessageW",
+          "FreeEnvironmentStringsW",
+          "FreeLibrary",
+          "FreeLibraryAndExitThread",
+          "GetACP",
+          "GetCPInfo",
+          "GetCommandLineA",
+          "GetCommandLineW",
+          "GetConsoleMode",
+          "GetConsoleOutputCP",
+          "GetConsoleWindow",
+          "GetCurrentDirectoryW",
+          "GetCurrentProcess",
+          "GetCurrentProcessId",
+          "GetCurrentThread",
+          "GetCurrentThreadId",
+          "GetDiskFreeSpaceA",
+          "GetDiskFreeSpaceW",
+          "GetDriveTypeW",
+          "GetEnvironmentStringsW",
+          "GetEnvironmentVariableW",
+          "GetExitCodeProcess",
+          "GetFileAttributesA",
+          "GetFileAttributesExW",
+          "GetFileAttributesW",
+          "GetFileInformationByHandle",
+          "GetFileInformationByHandleEx",
+          "GetFileSize",
+          "GetFileType",
+          "GetFinalPathNameByHandleW",
+          "GetFullPathNameA",
+          "GetFullPathNameW",
+          "GetLastError",
+          "GetLocalTime",
+          "GetLogicalDrives",
+          "GetModuleFileNameW",
+          "GetModuleHandleA",
+          "GetModuleHandleExW",
+          "GetModuleHandleW",
+          "GetNativeSystemInfo",
+          "GetOEMCP",
+          "GetProcAddress",
+          "GetProcessHeap",
+          "GetQueuedCompletionStatus",
+          "GetStartupInfoW",
+          "GetStdHandle",
+          "GetStringTypeW",
+          "GetSystemDirectoryW",
+          "GetSystemInfo",
+          "GetSystemTime",
+          "GetSystemTimeAsFileTime",
+          "GetSystemWow64DirectoryW",
+          "GetTempPathA",
+          "GetTempPathW",
+          "GetThreadTimes",
+          "GetTickCount",
+          "GetTimeZoneInformation",
+          "GetVersionExA",
+          "GetVersionExW",
+          "GetWindowsDirectoryW",
+          "GlobalLock",
+          "GlobalSize",
+          "GlobalUnlock",
+          "HeapAlloc",
+          "HeapCompact",
+          "HeapCreate",
+          "HeapDestroy",
+          "HeapFree",
+          "HeapReAlloc",
+          "HeapSize",
+          "HeapValidate",
+          "InitOnceBeginInitialize",
+          "InitOnceComplete",
+          "InitializeCriticalSection",
+          "InitializeCriticalSectionAndSpinCount",
+          "InitializeCriticalSectionEx",
+          "InitializeSListHead",
+          "IsDebuggerPresent",
+          "IsProcessorFeaturePresent",
+          "IsThreadAFiber",
+          "IsValidCodePage",
+          "IsWow64Process",
+          "K32GetMappedFileNameW",
+          "LCMapStringW",
+          "LeaveCriticalSection",
+          "LoadLibraryA",
+          "LoadLibraryExA",
+          "LoadLibraryExW",
+          "LoadLibraryW",
+          "LocalFree",
+          "LockFile",
+          "LockFileEx",
+          "MapViewOfFile",
+          "MultiByteToWideChar",
+          "OutputDebugStringA",
+          "OutputDebugStringW",
+          "ProcessIdToSessionId",
+          "QueryDosDeviceW",
+          "QueryInformationJobObject",
+          "QueryPerformanceCounter",
+          "QueryPerformanceFrequency",
+          "RaiseException",
+          "ReadConsoleW",
+          "ReadFile",
+          "ReadFileEx",
+          "ReleaseMutex",
+          "ReleaseSRWLockExclusive",
+          "RemoveDirectoryW",
+          "RtlCaptureContext",
+          "RtlUnwind",
+          "SetEndOfFile",
+          "SetEnvironmentVariableW",
+          "SetFileInformationByHandle",
+          "SetFilePointer",
+          "SetFilePointerEx",
+          "SetFileTime",
+          "SetInformationJobObject",
+          "SetLastError",
+          "SetStdHandle",
+          "SetThreadStackGuarantee",
+          "SetUnhandledExceptionFilter",
+          "SetWaitableTimer",
+          "Sleep",
+          "SleepConditionVariableSRW",
+          "SleepEx",
+          "SwitchToThread",
+          "SystemTimeToFileTime",
+          "TerminateJobObject",
+          "TerminateProcess",
+          "TlsAlloc",
+          "TlsFree",
+          "TlsGetValue",
+          "TlsSetValue",
+          "TryAcquireSRWLockExclusive",
+          "TryEnterCriticalSection",
+          "UnhandledExceptionFilter",
+          "UnlockFile",
+          "UnlockFileEx",
+          "UnmapViewOfFile",
+          "VirtualProtect",
+          "WaitForSingleObject",
+          "WaitForSingleObjectEx",
+          "WakeAllConditionVariable",
+          "WakeConditionVariable",
+          "WideCharToMultiByte",
+          "WriteConsoleW",
+          "WriteFile",
+          "WriteFileEx",
+          "lstrlenW"
+        ],
+        "ncrypt.dll": [
+          "NCryptFreeObject"
+        ],
+        "ntdll.dll": [
+          "NtCreateNamedPipeFile",
+          "NtOpenFile",
+          "NtReadFile",
+          "NtWriteFile",
+          "RtlNtStatusToDosError"
+        ],
+        "ole32.dll": [
+          "CoCreateInstance",
+          "CoInitializeEx",
+          "CoUninitialize"
+        ],
+        "oleaut32.dll": [
+          "GetErrorInfo",
+          "SysFreeString",
+          "SysStringLen"
+        ],
+        "secur32.dll": [
+          "AcceptSecurityContext",
+          "AcquireCredentialsHandleW",
+          "ApplyControlToken",
+          "DecryptMessage",
+          "DeleteSecurityContext",
+          "EncryptMessage",
+          "FreeCredentialsHandle",
+          "QueryContextAttributesW"
+        ],
+        "shell32.dll": [
+          "SHGetKnownFolderPath",
+          "ShellExecuteExW",
+          "Shell_NotifyIconW"
+        ],
+        "user32.dll": [
+          "AppendMenuW",
+          "BeginPaint",
+          "CloseClipboard",
+          "CloseDesktop",
+          "CreatePopupMenu",
+          "CreateWindowExW",
+          "DefWindowProcW",
+          "DestroyMenu",
+          "DestroyWindow",
+          "DispatchMessageW",
+          "DrawTextW",
+          "EnableWindow",
+          "EndMenu",
+          "EndPaint",
+          "FillRect",
+          "FrameRect",
+          "GetCapture",
+          "GetClassNameW",
+          "GetClientRect",
+          "GetClipboardData",
+          "GetCursorPos",
+          "GetDesktopWindow",
+          "GetForegroundWindow",
+          "GetKeyState",
+          "GetMessageW",
+          "GetScrollInfo",
+          "GetUserObjectInformationW",
+          "GetWindowLongW",
+          "GetWindowTextLengthW",
+          "GetWindowTextW",
+          "GetWindowThreadProcessId",
+          "InvalidateRect",
+          "IsChild",
+          "IsDialogMessageW",
+          "IsWindow",
+          "IsWindowEnabled",
+          "IsWindowVisible",
+          "KillTimer",
+          "LoadCursorW",
+          "LoadIconW",
+          "MessageBoxW",
+          "MoveWindow",
+          "OpenClipboard",
+          "OpenInputDesktop",
+          "PeekMessageW",
+          "PostMessageW",
+          "PostQuitMessage",
+          "RedrawWindow",
+          "RegisterClassW",
+          "RegisterWindowMessageW",
+          "ReleaseCapture",
+          "ScreenToClient",
+          "SendMessageW",
+          "SetCapture",
+          "SetFocus",
+          "SetForegroundWindow",
+          "SetLayeredWindowAttributes",
+          "SetScrollInfo",
+          "SetTimer",
+          "SetWinEventHook",
+          "SetWindowLongW",
+          "SetWindowPos",
+          "SetWindowRgn",
+          "SetWindowTextW",
+          "ShowWindow",
+          "SystemParametersInfoW",
+          "TrackMouseEvent",
+          "TrackPopupMenu",
+          "TranslateMessage",
+          "UnhookWinEvent",
+          "UnregisterClassW",
+          "UpdateLayeredWindow",
+          "UpdateLayeredWindowIndirect"
+        ],
+        "winhttp.dll": [
+          "WinHttpCloseHandle",
+          "WinHttpConnect",
+          "WinHttpOpen",
+          "WinHttpOpenRequest",
+          "WinHttpQueryHeaders",
+          "WinHttpReadData",
+          "WinHttpReceiveResponse",
+          "WinHttpSendRequest",
+          "WinHttpSetOption",
+          "WinHttpSetTimeouts"
+        ],
+        "winmm.dll": [
+          "waveOutClose",
+          "waveOutOpen",
+          "waveOutPrepareHeader",
+          "waveOutReset",
+          "waveOutUnprepareHeader",
+          "waveOutWrite"
+        ],
+        "ws2_32.dll": [
+          "WSACleanup",
+          "WSAGetLastError",
+          "WSAIoctl",
+          "WSARecv",
+          "WSASend",
+          "WSASocketW",
+          "WSAStartup",
+          "bind",
+          "closesocket",
+          "freeaddrinfo",
+          "getaddrinfo",
+          "getpeername",
+          "getsockname",
+          "listen",
+          "setsockopt",
+          "shutdown"
+        ],
+        "wtsapi32.dll": [
+          "WTSFreeMemory",
+          "WTSQuerySessionInformationW",
+          "WTSRegisterSessionNotification",
+          "WTSUnRegisterSessionNotification"
+        ]
+      },
+      "inspector": "GNU objdump (GNU Binutils) 2.41.90.20240122",
+      "limitations": [
+        "Static import inspection cannot establish Win7 compatibility.",
+        "Dynamic loads, delayed paths, prerequisite updates and actual OS behavior require separate validation.",
+        "Formal MSVC baseline and real Win7 SP1 x86 machine gates remain NOT_VALIDATED."
+      ],
+      "risks": [],
+      "status": "NOT_VALIDATED",
+      "structural_errors": [],
+      "subsystem": "Windows GUI"
+    },
+    "product": "FutureClassroom",
+    "schema_version": 1,
+    "sha256": "853430b68d304ea4b130c8ab8e6dc232e078a7c431b378a799b5bbd77bbbbc4b",
+    "status": "NOT_VALIDATED",
+    "target": "i686-win7-windows-msvc",
+    "target_role": "formal-candidate-unvalidated",
+    "toolchain": {
+      "declared_build_toolchain": "nightly-2026-10-29-x86_64-pc-windows-msvc",
+      "packaging_environment": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6",
+      "provenance": "Toolchain output records the packager environment; binary build provenance is not independently established."
+    },
+    "version": "0.1.0"
+  }
+}
