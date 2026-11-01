@@ -1,0 +1,58 @@
+{
+  "status": "SOURCE_FROZEN_TESTS_RUNNING",
+  "runtimeScope": "Host-only; no Windows execution, native certificate inspection, actual listener or readiness permission",
+  "tests": {
+    "crates/fc-domain/src/https_settings/tests.rs": [
+      "canonical_dns_ip_and_certificate_identity_do_not_claim_readiness",
+      "host_path_wildcard_unspecified_ambiguous_ip_and_invalid_port_reject",
+      "configured_save_and_clear_have_independent_cas_no_default_port"
+    ],
+    "crates/fc-storage/src/business/https_settings/tests.rs": [
+      "canonical_save_clear_replay_and_cold_reopen_preserve_identity_and_never_create_voice_or_autostart",
+      "local_global_exact_session_must_change_and_default_deny_configuration_permit",
+      "identity_cas_and_config_cas_are_independent_even_when_host_is_unchanged",
+      "precommit_session_revocation_or_disabled_permit_loss_rolls_back_without_publication",
+      "queued_execution_cancel_and_precommit_cancel_use_original_writer_fence_without_faulting",
+      "strict_protected_document_rejects_bad_shape_store_noncanonical_values_and_corruption_on_startup",
+      "ordinary_restore_keeps_target_security_row_exact_and_export_omits_configuration",
+      "mapped_restore_keeps_current_target_configuration_exact",
+      "mapped_restore_keeps_missing_target_unconfigured_not_source_configuration",
+      "ordinary_input_injected_protected_https_configuration_is_rejected",
+      "actual_commit_then_canceled_delivery_is_unknown_not_rollback_and_original_command_reconciles",
+      "read_rechecks_original_exact_session_at_final_writer_guard_without_mutation",
+      "committed_command_uses_stable_actor_scope_but_every_new_lease_is_still_authorized",
+      "outcome_query_without_receipt_never_saves_or_publishes_and_needs_no_configuration_permit",
+      "outcome_query_rejects_changed_payload_actor_digest_and_final_revoked_session_without_mutation"
+    ],
+    "crates/fc-bootstrap/src/backend/web/https_settings_tests.rs": [
+      "local_configuration_only_save_replay_and_physical_reopen_leave_web_disabled",
+      "real_web_global_session_active_web_and_canceled_scope_cannot_save_https_configuration",
+      "configuration_owner_and_actual_last_writer_guard_exclude_enable_and_next_owner",
+      "queued_real_writer_save_retains_disabled_owner_until_old_local_session_cancellation_settles",
+      "same_committed_command_on_real_new_local_lease_returns_original_outcome_without_expiry_in_fingerprint",
+      "preexisting_enable_snapshot_cannot_survive_configuration_publication"
+    ]
+  },
+  "newTestCount": 24,
+  "originalFailures": [
+    {
+      "report": "core-host-first.json",
+      "actual": "bootstrap 201 passed / 1 failed; other requested crate runtime tests not executed",
+      "cause": "Disabled configuration ownership was acquired after synchronous SQL identity read while the regression deliberately held that writer. Original 5s held task timed out before setup observed ownership.",
+      "fix": "Claim existing fully authenticated disabled WebService owner before SQL identity read. Retained 5s held task; setup now fails by 2s. This regression actually passed in second run."
+    },
+    {
+      "report": "core-host-second.json",
+      "actual": "targeted bootstrap 5 passed / 1 failed; compilation passed; other requested crate runtime tests not executed",
+      "cause": "New test compared SessionLease IDs across a Backend reopen, although process-local sequential IDs restart. Test assertion failed before reaching fingerprint check.",
+      "fix": "Single real Backend lifecycle with adjustable clock, actual lock_local revocation, and new real login. Third run pending."
+    }
+  ],
+  "queryContract": {
+    "backend": "query_https_settings_outcome(&self,lease,original:HttpsSettingsRequest)->Result<Option<HttpsSettingsState>>",
+    "sideEffects": "No Mutation, no new command, no disabled/configuration owner; queries allowed while logical Web admission enabled.",
+    "matching": "Original commandId, stable principal/school/authEpoch/trustedOrigin and full canonical payload including both expected revisions. Expiry freshly authorized, not fingerprinted.",
+    "delivery": "Exact current Local GlobalAdmin, no password change obligation; original request execution fence plus precommit/session checks. Historical Some is not a current read.",
+    "uncertainty": "Only actual SQL commit followed by cancellation may produce unknown delivery. A query None does not authorize replay."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "status": "FAIL_LOCAL_MODEL_FIXTURE_PRESERVED",
+  "sourcePath": "/tmp/fc-round50-https-integration-evidence/runtime-certificate-parser-model-first.py",
+  "sourceSha256": "2c2035ff98b7f5d96de8f4bd064ed676f7f1885912c0a84dc50250cb2ac6e8b7",
+  "actualFailure": "RuntimeError: bad test model accepted",
+  "cause": "The negative model edited output[-1], which was a trailing empty line in the legitimate zero-test transcript, leaving the actual summary unchanged. Parser correctly accepted unchanged valid input.",
+  "fix": "Find all exact test result summary lines and replace targeted count; explicitly assert malformed copy differs from original before requesting rejection.",
+  "originalStderrScope": "Initial traceback was returned by tool but not separately captured as a raw file; no reconstructed stderr is called original.",
+  "productOrRuntimeFailure": false
+}

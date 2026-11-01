@@ -1,0 +1,61 @@
+diff --git a/tmp/fc-round48-certificate-query-evidence/service-implementation-after-first/crates/fc-bootstrap/src/backend/https_certificate.rs b/tmp/fc-round48-certificate-query-worktree/crates/fc-bootstrap/src/backend/https_certificate.rs
+index 0eb2f62..c1dcb64 100644
+--- a/tmp/fc-round48-certificate-query-evidence/service-implementation-after-first/crates/fc-bootstrap/src/backend/https_certificate.rs
++++ b/tmp/fc-round48-certificate-query-worktree/crates/fc-bootstrap/src/backend/https_certificate.rs
+@@ -129,7 +129,10 @@ impl HttpsCertificateService {
+         let actor = {
+             // Contention means uncertainty. This callback never waits behind a
+             // Backend/KDF owner and never holds metadata across a native call.
+-            let mut ledger = self.ledger.try_lock().map_err(|_| BackendError::Closed)?;
++            let mut ledger = self
++                .ledger
++                .try_lock()
++                .map_err(|_| BackendError::Storage(StorageError::AuthorityUnavailable))?;
+             ledger.synchronize(&self.control, &review.snapshot.data, now, tick);
+             ledger.sessions.actor(
+                 &review.snapshot.data,
+@@ -224,7 +227,7 @@ impl HttpsCertificateService {
+         let snapshot = self
+             .authority
+             .snapshot()
+-            .map_err(|_| BackendError::Closed)?;
++            .map_err(|_| BackendError::Storage(StorageError::AuthorityUnavailable))?;
+         if snapshot.data.revision != expected.identity_revision {
+             return Err(HttpsCertificateError::ConfigurationChanged);
+         }
+diff --git a/tmp/fc-round48-certificate-query-evidence/service-implementation-after-first/crates/fc-bootstrap/src/backend/https_certificate/tests.rs b/tmp/fc-round48-certificate-query-worktree/crates/fc-bootstrap/src/backend/https_certificate/tests.rs
+index 0a1a68c..4305f61 100644
+--- a/tmp/fc-round48-certificate-query-evidence/service-implementation-after-first/crates/fc-bootstrap/src/backend/https_certificate/tests.rs
++++ b/tmp/fc-round48-certificate-query-worktree/crates/fc-bootstrap/src/backend/https_certificate/tests.rs
+@@ -106,6 +106,31 @@ fn model(
+     Ok(CertificateQueryReport::default())
+ }
+ 
++#[test]
++fn https_certificate_held_ledger_is_recoverable_uncertainty_and_explicit_retry_works() {
++    let mut f = Fixture::new();
++    let expected = f.configured(805);
++    let service = f.service();
++    let before = f.backend.session_control().health_gate().status();
++    let ledger = service.ledger.lock().unwrap();
++    let result = service.inspect_with(f.admin, expected.clone(), |_, _| {
++        panic!("contended ledger must not enter native query")
++    });
++    assert_eq!(
++        result,
++        Err(HttpsCertificateError::Backend(BackendError::Storage(
++            StorageError::AuthorityUnavailable
++        )))
++    );
++    assert_eq!(before.health, Health::Healthy);
++    assert_eq!(f.backend.session_control().health_gate().status(), before);
++    drop(ledger);
++    let observation = service
++        .inspect_with(f.admin, expected.clone(), model)
++        .unwrap();
++    assert!(observation.is_current_for(&expected, f.admin, &f.backend.session_control()));
++}
++
+ #[test]
+ fn https_certificate_requires_configured_exact_state_and_original_nonrelaxable_fence() {
+     let mut f = Fixture::new();

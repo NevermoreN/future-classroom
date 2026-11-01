@@ -1,0 +1,25 @@
+
+running 6 tests
+test backend::web::tests::https_settings_tests::configuration_owner_and_actual_last_writer_guard_exclude_enable_and_next_owner ... ok
+test backend::web::tests::https_settings_tests::local_configuration_only_save_replay_and_physical_reopen_leave_web_disabled ... ok
+test backend::web::tests::https_settings_tests::preexisting_enable_snapshot_cannot_survive_configuration_publication ... ok
+test backend::web::tests::https_settings_tests::queued_real_writer_save_retains_disabled_owner_until_old_local_session_cancellation_settles ... ok
+test backend::web::tests::https_settings_tests::real_web_global_session_active_web_and_canceled_scope_cannot_save_https_configuration ... ok
+test backend::web::tests::https_settings_tests::same_committed_command_on_real_new_local_lease_returns_original_outcome_without_expiry_in_fingerprint ... FAILED
+
+failures:
+
+---- backend::web::tests::https_settings_tests::same_committed_command_on_real_new_local_lease_returns_original_outcome_without_expiry_in_fingerprint stdout ----
+
+thread 'backend::web::tests::https_settings_tests::same_committed_command_on_real_new_local_lease_returns_original_outcome_without_expiry_in_fingerprint' (21291) panicked at crates/fc-bootstrap/src/backend/web/https_settings_tests.rs:212:5:
+assertion `left != right` failed
+  left: SessionLease { id: 1, principal_id: PrincipalId(1), auth_epoch: AuthEpoch(1), origin: Local }
+ right: SessionLease { id: 1, principal_id: PrincipalId(1), auth_epoch: AuthEpoch(1), origin: Local }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    backend::web::tests::https_settings_tests::same_committed_command_on_real_new_local_lease_returns_original_outcome_without_expiry_in_fingerprint
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 198 filtered out; finished in 6.06s
+

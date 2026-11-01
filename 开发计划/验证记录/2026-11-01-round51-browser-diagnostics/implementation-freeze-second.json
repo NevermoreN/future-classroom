@@ -1,0 +1,214 @@
+{
+  "schema": "future-classroom.r51-browser-failure-diagnostics-freeze/v1",
+  "status": "FROZEN_SECOND_LOCAL_MODELS_PASS_WINDOWS_NOT_RUN",
+  "recordedUtc": "2026-11-01T00:23:59.702732+00:00",
+  "base": "e23bd538d828aeed4378a88f69cf81cb85a4389f",
+  "snapshot": "/tmp/fc-round51-browser-diagnostics-evidence/implementation-after-second",
+  "ownedFiles": [
+    {
+      "path": "scripts/windows-native-browser-harness.mjs",
+      "bytes": 82544,
+      "sha256": "a154ab071100c677fbaf54d3b274fa8456c7533aa929da7daef51de6cb20725e",
+      "firstSha256": "30f9f32d4c49978cf70b69590ab2b5d05814c65eb57ccc31e9dd693e438a7784"
+    },
+    {
+      "path": "scripts/windows-native-browser-observer.py",
+      "bytes": 43475,
+      "sha256": "e52c31ac7e49eee6cceba708c5b1d6db5c3aea7f68a9f471616f513e3b4a9e47",
+      "firstSha256": "59fe55aefc93c675b1676bb5ef163f20f0518ec286e64574decf74a52687f3f8"
+    },
+    {
+      "path": "scripts/check-native-browser-diagnostics.py",
+      "bytes": 10593,
+      "sha256": "30871b8ddf1cc508bc51fd332e71951e21e5205be9fdce45e4b966ad4a82230a",
+      "firstSha256": "18142a9a4776a104f656ec8050bc80aef54883f82d52a6466b90d1c2f1daf2d7"
+    }
+  ],
+  "firstFreeze": {
+    "path": "/tmp/fc-round51-browser-diagnostics-evidence/implementation-freeze-first.json",
+    "sha256": "901c4744cfcb17e9dc2e1cef5af29dfd077c3cc6ff772d3d893831fca19aff02",
+    "preserved": true
+  },
+  "firstToSecondDelta": {
+    "path": "/tmp/fc-round51-browser-diagnostics-evidence/implementation-first-to-second.patch",
+    "bytes": 7325,
+    "sha256": "94363f19fe33a59996566ee3065e3f62749ffaeffc89ee5a663f6ebd8fe36083"
+  },
+  "reason": "First regex admitted arbitrary syntactically valid ERR_<uppercase hex credential>. Restrict both Node producer and Python validator to the same 26 static names; every unknown name becomes OTHER. No regex fallback and no change to _safe.",
+  "closedNames": {
+    "status": "PASS_STATIC_LITERAL_CHECK",
+    "names": [
+      "net::ERR_ABORTED",
+      "net::ERR_ADDRESS_UNREACHABLE",
+      "net::ERR_BLOCKED_BY_CLIENT",
+      "net::ERR_BLOCKED_BY_RESPONSE",
+      "net::ERR_CERT_AUTHORITY_INVALID",
+      "net::ERR_CERT_COMMON_NAME_INVALID",
+      "net::ERR_CERT_DATE_INVALID",
+      "net::ERR_CERT_INVALID",
+      "net::ERR_CONNECTION_ABORTED",
+      "net::ERR_CONNECTION_CLOSED",
+      "net::ERR_CONNECTION_FAILED",
+      "net::ERR_CONNECTION_REFUSED",
+      "net::ERR_CONNECTION_RESET",
+      "net::ERR_CONTENT_LENGTH_MISMATCH",
+      "net::ERR_EMPTY_RESPONSE",
+      "net::ERR_FAILED",
+      "net::ERR_HTTP2_PROTOCOL_ERROR",
+      "net::ERR_INCOMPLETE_CHUNKED_ENCODING",
+      "net::ERR_INTERNET_DISCONNECTED",
+      "net::ERR_INVALID_CHUNKED_ENCODING",
+      "net::ERR_NAME_NOT_RESOLVED",
+      "net::ERR_NETWORK_CHANGED",
+      "net::ERR_QUIC_PROTOCOL_ERROR",
+      "net::ERR_SSL_PROTOCOL_ERROR",
+      "net::ERR_SSL_VERSION_OR_CIPHER_MISMATCH",
+      "net::ERR_TIMED_OUT"
+    ],
+    "count": 26,
+    "regexFallback": false
+  },
+  "actualChecks": [
+    {
+      "command": "/tmp/fc-round51-browser-diagnostics-evidence/node-diagnostics-selftest-second.command.json",
+      "argv": [
+        "node",
+        "scripts/windows-native-browser-harness.mjs",
+        "--self-test"
+      ],
+      "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "exitCode": 0,
+      "recordedUtc": "2026-11-01T00:23:35.843854+00:00",
+      "scope": "Host selftest/models only; no Windows/TLS browser execution",
+      "stdout": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/node-diagnostics-selftest-second.stdout.log",
+        "bytes": 1244,
+        "sha256": "26414f9a7f6220b4ae90f1a2e57f5c4c1e44459b6c911099af2e43a7f166c8a4"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/node-diagnostics-selftest-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "/tmp/fc-round51-browser-diagnostics-evidence/node-syntax-second.command.json",
+      "argv": [
+        "node",
+        "--check",
+        "scripts/windows-native-browser-harness.mjs"
+      ],
+      "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "exitCode": 0,
+      "recordedUtc": "2026-11-01T00:23:35.678582+00:00",
+      "scope": "Host selftest/models only; no Windows/TLS browser execution",
+      "stdout": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/node-syntax-second.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/node-syntax-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "/tmp/fc-round51-browser-diagnostics-evidence/owned-diff-whitespace-second.command.json",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "scripts/windows-native-browser-harness.mjs",
+        "scripts/windows-native-browser-observer.py",
+        "scripts/check-native-browser-diagnostics.py"
+      ],
+      "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "exitCode": 0,
+      "recordedUtc": "2026-11-01T00:23:36.229556+00:00",
+      "scope": "Host selftest/models only; no Windows/TLS browser execution",
+      "stdout": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/owned-diff-whitespace-second.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/owned-diff-whitespace-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "/tmp/fc-round51-browser-diagnostics-evidence/python-diagnostics-selftest-second.command.json",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check-native-browser-diagnostics.py"
+      ],
+      "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "exitCode": 0,
+      "recordedUtc": "2026-11-01T00:23:35.923607+00:00",
+      "scope": "Host selftest/models only; no Windows/TLS browser execution",
+      "stdout": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/python-diagnostics-selftest-second.stdout.log",
+        "bytes": 3592,
+        "sha256": "6f8936cf66dd3f798cdd0a94260dcf9177edd22f1da2946a106a208b4cc4da3c"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/python-diagnostics-selftest-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "/tmp/fc-round51-browser-diagnostics-evidence/python-original-observer-model-second.command.json",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check-native-browser-observer.py"
+      ],
+      "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "exitCode": 0,
+      "recordedUtc": "2026-11-01T00:23:36.221723+00:00",
+      "scope": "Host selftest/models only; no Windows/TLS browser execution",
+      "stdout": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/python-original-observer-model-second.stdout.log",
+        "bytes": 2862,
+        "sha256": "e387f7a286410755a6da964e34d233959a16047b3b5a8c971b5cf554948149b1"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/python-original-observer-model-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "counts": {
+    "nodeSelftestGroups": 12,
+    "newPythonDiagnosticChecks": 50,
+    "unchangedOriginalObserverChecks": 36
+  },
+  "negativeCasesAdded": [
+    "net::ERR_<64 uppercase cookie hex> maps OTHER and is independently rejected if forged",
+    "net::ERR_<64 uppercase CSRF hex> maps OTHER and is independently rejected if forged",
+    "unknown syntactically valid error name maps OTHER and is independently rejected if forged"
+  ],
+  "unchanged": [
+    "optional first-failure shape/cardinality/timing/counter/cleanup semantics",
+    "NETWORK_LOAD_FAILED remains failure",
+    "Node actual exit0 success gate",
+    "all original assets/CSP/auth/session/API/COMMITTED checks",
+    "original _safe secret guard",
+    "12/30/45s budgets and no retries",
+    "all first snapshots/model reports and editor first ISSUE"
+  ],
+  "actualFirstDiagnosticBoundary": "Root reports actual first R51 diagnostic PASS/cleanup with no loadingFailure; that run neither exercises this whitelist nor attributes the preserved original R46 failure. This second source has no Windows run yet.",
+  "noExecution": [
+    "SSH",
+    "Cargo",
+    "Windows",
+    "CI"
+  ],
+  "integration": "Copy only three owned immutable files or apply minimal first-to-second delta to root first source; no Rust/Web/native changes."
+}

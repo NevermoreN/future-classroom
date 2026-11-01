@@ -1,0 +1,73 @@
+{
+  "schema": "future-classroom.ci-artifact-model/v1",
+  "status": "PASS_MODEL_ONLY_NO_ARTIFACT",
+  "checks": [
+    {
+      "name": "exact ordinal prefix and path aliases",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicate JSON and nonfinite rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicates and case collisions rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "typed integer rejects bool and negative",
+      "status": "PASS"
+    },
+    {
+      "name": "exact blob and exact whole LF->CRLF only",
+      "status": "PASS"
+    },
+    {
+      "name": "mixed original CR and NUL do not normalize",
+      "status": "PASS"
+    },
+    {
+      "name": "full metadata/S/H partition and distinct historical checkout bytes",
+      "status": "PASS"
+    },
+    {
+      "name": "missing S and history alias rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "wrong Git OID/domain and false historical SHA claim rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "after content mutation rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged 256MiB aggregate enforced without payload allocation",
+      "status": "PASS"
+    },
+    {
+      "name": "raw NUL Git tree regular-only/truncation checks",
+      "status": "PASS"
+    },
+    {
+      "name": "baseline exact buildstd placement/no metadata fmt leakage",
+      "status": "PASS"
+    },
+    {
+      "name": "CI failure can never become static PASS",
+      "status": "PASS"
+    },
+    {
+      "name": "PE32 subsystem Modern independent/Win7 exact6.1/truncation",
+      "status": "PASS"
+    }
+  ],
+  "helper": {
+    "path": "/tmp/fc-round46-ci-evidence/verify-ci-artifact-first.py",
+    "bytes": 51829,
+    "sha256": "ad0b8413369e7aa65df3c680cbfcd7a4a6eac4979a702984b1f682ffce716025"
+  },
+  "scope": "Pure synthetic Python models only. No official artifact, CI, compiler, PE execution, Windows, remote or repository mutation.",
+  "artifactValidated": false
+}

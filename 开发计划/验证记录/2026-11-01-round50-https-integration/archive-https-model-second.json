@@ -1,0 +1,179 @@
+{
+  "schema": "fc.https.archive.local-models/v1",
+  "status": "PASS_SYNTHETIC_MODELS_ONLY",
+  "scope": "Pure scanner/malformed metadata and synthetic owned filesystem models only. Does not inventory real R47-R51 evidence, write main, seal, execute tests/browser/SSH/Cargo or clean real evidence.",
+  "checks": [
+    {
+      "name": "ordinary raw/source/originalFAIL included",
+      "status": "PASS"
+    },
+    {
+      "name": "exact synthetic byte copy includes original failure",
+      "status": "PASS"
+    },
+    {
+      "name": "safe reader forbids symlink ancestor",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "existing destination never overwritten",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "same-size source mutation caught",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "new membership caught",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "symlink never followed",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "case collision",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "single file bound before read",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "relative path escape",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "key/database/LIVEcontrol/binary/unknownPEM/target never opened or hashed",
+      "status": "PASS"
+    },
+    {
+      "name": "unknown eligible type blocks archive",
+      "status": "PASS"
+    },
+    {
+      "name": "binary magic disguised as text blocks",
+      "status": "PASS"
+    },
+    {
+      "name": "invalid JSON retained as blocking original",
+      "status": "PASS"
+    },
+    {
+      "name": "private key marker blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "private key marker blocked findings expose only path/type",
+      "status": "PASS"
+    },
+    {
+      "name": "provider token blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "provider token blocked findings expose only path/type",
+      "status": "PASS"
+    },
+    {
+      "name": "signed URL blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "signed URL blocked findings expose only path/type",
+      "status": "PASS"
+    },
+    {
+      "name": "nested JSON base64 session blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "UTF16 PowerShell wrapper secret decoded and blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "inline base64 executable blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "explicit repetitive synthetic fixture annotated",
+      "status": "PASS"
+    },
+    {
+      "name": "explicit expired synthetic fixture classified only",
+      "status": "PASS"
+    },
+    {
+      "name": "exact retired owned stop scope classified only",
+      "status": "PASS"
+    },
+    {
+      "name": "JSON reference never followed",
+      "status": "PASS"
+    },
+    {
+      "name": "late copy mutation retains truthful partial",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "partial destination retained with actual copied count",
+      "status": "PASS"
+    },
+    {
+      "name": "original owner mismatch denied",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "all-finished explicit model proof accepted",
+      "status": "PASS"
+    },
+    {
+      "name": "active consumer",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "integration missing",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "missing Host role",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "proof bytes changed",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "outside proof reference",
+      "status": "PASS",
+      "expectation": "rejected"
+    },
+    {
+      "name": "RUNNING cannot be final",
+      "status": "PASS",
+      "expectation": "rejected"
+    }
+  ],
+  "count": 37,
+  "helper": {
+    "path": "/tmp/fc-round50-https-integration-evidence/archive-https-rounds.py",
+    "bytes": 26051,
+    "sha256": "d443b4c6bf4275f189439595194b9f32e378d18267e940dd53f2af7d3eeb4ba9"
+  },
+  "fixtureRoot": "/tmp/fc-round50-https-integration-evidence/.archive-https-model-first-0kyjjtw4",
+  "ownedFixtureCleanup": "PASS"
+}

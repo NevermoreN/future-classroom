@@ -1,0 +1,212 @@
+{
+  "schema": "future-classroom.r51-browser-failure-diagnostics-freeze/v1",
+  "status": "FROZEN_LOCAL_MODELS_PASS_WINDOWS_NOT_RUN",
+  "recordedUtc": "2026-11-01T00:13:21.547447+00:00",
+  "base": "e23bd538d828aeed4378a88f69cf81cb85a4389f",
+  "branch": "codex/browser-failure-diagnostics",
+  "worktree": "/tmp/fc-round51-browser-diagnostics-worktree",
+  "snapshot": "/tmp/fc-round51-browser-diagnostics-evidence/implementation-after-first",
+  "ownedFiles": [
+    {
+      "path": "scripts/windows-native-browser-harness.mjs",
+      "bytes": 81529,
+      "sha256": "30f9f32d4c49978cf70b69590ab2b5d05814c65eb57ccc31e9dd693e438a7784",
+      "before": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/before/scripts/windows-native-browser-harness.mjs",
+        "bytes": 71760,
+        "sha256": "64f679b292fac18cb3935f66c880a23c2a703026679f22e563b2421da72b6b4d"
+      }
+    },
+    {
+      "path": "scripts/windows-native-browser-observer.py",
+      "bytes": 42553,
+      "sha256": "59fe55aefc93c675b1676bb5ef163f20f0518ec286e64574decf74a52687f3f8",
+      "before": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/before/scripts/windows-native-browser-observer.py",
+        "bytes": 36008,
+        "sha256": "1d242c161fe573b0b77540b0e9033666b2b37576042c3db1772dc4a5c2f11f86"
+      }
+    },
+    {
+      "path": "scripts/check-native-browser-diagnostics.py",
+      "bytes": 10212,
+      "sha256": "18142a9a4776a104f656ec8050bc80aef54883f82d52a6466b90d1c2f1daf2d7",
+      "before": null
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round51-browser-diagnostics-evidence/implementation-first.patch",
+    "bytes": 36647,
+    "sha256": "a263545253a66497a5168ec69d305ebe938a0374e4b9ecb5c69d82570f042581"
+  },
+  "actualChecks": [
+    {
+      "command": "/tmp/fc-round51-browser-diagnostics-evidence/node-diagnostics-selftest-final.command.json",
+      "argv": [
+        "node",
+        "scripts/windows-native-browser-harness.mjs",
+        "--self-test"
+      ],
+      "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "exitCode": 0,
+      "recordedUtc": "2026-11-01T00:12:46.511474+00:00",
+      "scope": "Host selftest/models only; no Windows/TLS browser execution",
+      "stdout": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/node-diagnostics-selftest-final.stdout.log",
+        "bytes": 1244,
+        "sha256": "4876e15869b828c85cf9b6dc9c392a85ece57f129b02e733e0ffbab8f10fbd50"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/node-diagnostics-selftest-final.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "/tmp/fc-round51-browser-diagnostics-evidence/node-syntax-final.command.json",
+      "argv": [
+        "node",
+        "--check",
+        "scripts/windows-native-browser-harness.mjs"
+      ],
+      "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "exitCode": 0,
+      "recordedUtc": "2026-11-01T00:12:46.290117+00:00",
+      "scope": "Host selftest/models only; no Windows/TLS browser execution",
+      "stdout": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/node-syntax-final.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/node-syntax-final.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "/tmp/fc-round51-browser-diagnostics-evidence/owned-diff-whitespace-final.command.json",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "scripts/windows-native-browser-harness.mjs",
+        "scripts/windows-native-browser-observer.py",
+        "scripts/check-native-browser-diagnostics.py"
+      ],
+      "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "exitCode": 0,
+      "recordedUtc": "2026-11-01T00:12:46.718325+00:00",
+      "scope": "Host selftest/models only; no Windows/TLS browser execution",
+      "stdout": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/owned-diff-whitespace-final.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/owned-diff-whitespace-final.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "/tmp/fc-round51-browser-diagnostics-evidence/python-diagnostics-selftest-final.command.json",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check-native-browser-diagnostics.py"
+      ],
+      "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "exitCode": 0,
+      "recordedUtc": "2026-11-01T00:12:46.624048+00:00",
+      "scope": "Host selftest/models only; no Windows/TLS browser execution",
+      "stdout": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/python-diagnostics-selftest-final.stdout.log",
+        "bytes": 3346,
+        "sha256": "91159c780ebcf143fa5f3d88a2f649505fe7180baf7bd6ce4eec2de59f2c11ca"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/python-diagnostics-selftest-final.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "/tmp/fc-round51-browser-diagnostics-evidence/python-original-observer-model-final.command.json",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check-native-browser-observer.py"
+      ],
+      "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "exitCode": 0,
+      "recordedUtc": "2026-11-01T00:12:46.711119+00:00",
+      "scope": "Host selftest/models only; no Windows/TLS browser execution",
+      "stdout": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/python-original-observer-model-final.stdout.log",
+        "bytes": 2862,
+        "sha256": "1e65e67a191f372707c625a38e867d5aaad5fabbce9cf9a72a90eda9a622f6a3"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/python-original-observer-model-final.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "checkCounts": {
+    "nodeSelftestGroups": 12,
+    "newPythonDiagnosticChecks": 47,
+    "unchangedOriginalObserverChecks": 36
+  },
+  "diagnosticContract": {
+    "field": "network[i].failure (optional); repeated only by exact wireResponses subset",
+    "cardinality": "At most one first tracked loadingFailed; existing MAX_REQUESTS 128 unchanged",
+    "shape": [
+      "requestOrdinal",
+      "kind",
+      "path",
+      "phase",
+      "canceled",
+      "errorText",
+      "blockedReason",
+      "failureMillis",
+      "requestMillis",
+      "responseMillis",
+      "extraInfoMillis",
+      "finishedMillis",
+      "bodyVerifiedMillis",
+      "responseReceived",
+      "finished",
+      "bodyVerified",
+      "dataEvents",
+      "dataBytes",
+      "encodedBytes",
+      "countsClamped"
+    ],
+    "timing": "Node CDP event receipt relative to original RUN receipt; floor integer ms 0..60000 or null (unknown). 60000 is only diagnostic scalar bound, never a request budget. Not CDP transport/kernel/native timing proof.",
+    "counterBounds": {
+      "dataEvents": 65536,
+      "dataBytes": 8388608,
+      "encodedBytes": 8388608
+    },
+    "counterClamping": "countsClamped marks overflow or malformed scalar; not claimed exact after clamping.",
+    "sanitization": "only approved relative path, closed kind/phase/blockedReason, errorText net::ERR_[A-Z0-9_]{1,80} without CR/LF or OTHER, integer/null/bool. No requestId/header/body/postData/rawCDP.",
+    "snapshot": "Frozen synchronously before original throw/fail/dispose. An already pending analysis may advance final record flags during cleanup; failure snapshot does not change.",
+    "observer": "Validates optional shape/path/identity/range/whitelist before original nonzero Node-exit rejection; report.networkFailureDiagnostics retains validated negative facts only. Normal PASS cannot contain failure."
+  },
+  "unchanged": [
+    "original NETWORK_LOAD_FAILED negative result",
+    "original context/dispose event filter",
+    "original actual Node exit0 requirement for success",
+    "original strict CSP/assets/API/session/CSRF/COMMITTED checks",
+    "HOMEWORK13/4visual and REMINDER9/0visual ledgers",
+    "12s Node / 30s client / 45s native deadlines",
+    "no retry/new fetch/navigation",
+    "no Web/Rust/CI/protocol changes"
+  ],
+  "scopeLimit": "Pure Node/Python models and existing owned local loopback WebSocket selftest only; no actual Edge/TLS/Windows or cause attribution for R46 first failure.",
+  "sourceAndBuild": "No Cargo/SSH/remote, no commit/push. Independent worktree only.",
+  "cleanup": "Selftests exited0; no spawned Windows/browser process or profile/control capability; worktree/evidence intentionally retained for root integration."
+}

@@ -1,0 +1,97 @@
+{
+  "schema": "future-classroom.r49-https-ui-fix-freeze/v1",
+  "status": "SOURCE_FROZEN_NOT_BUILT_NOT_RUN",
+  "recordedUtc": "2026-11-01T00:02:46.438491+00:00",
+  "rootCause": "Probe referenced serde_json although fc-bootstrap has no dependency; replaced only probe serialization with constant/closed-enum strings and integer/null formatting.",
+  "firstFreezeUnchanged": true,
+  "firstFreeze": "/tmp/fc-round49-https-settings-ui-evidence/ui-source-freeze-first.json",
+  "changedFiles": [
+    "crates/fc-bootstrap/src/application/https_settings_probe.rs"
+  ],
+  "snapshot": "/tmp/fc-round49-https-settings-ui-evidence/ui-implementation-after-second",
+  "ownedFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 260347,
+      "sha256": "9924f860568ef6adf521411caa01a5331674b6deccdfc027963b7b9fe4794671"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 19408,
+      "sha256": "731dbf90fc1b2c297e8010ceacad3b3b257deef52c11b5548210de2bbdc0c50f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 22828,
+      "sha256": "c7ef558c7ee0923beeb90eda6e6d18c29bd2e56d24f50a0c10d482eb1f356cda"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+      "bytes": 17040,
+      "sha256": "d6ef17cef5d726b007cda1dd12ae6c75db14e9165c16b12fdfb538106664703a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_editor.rs",
+      "bytes": 19304,
+      "sha256": "e72621498a23c864ba7cc16f26aa20d06a5d0be43fb487793bae08311c05b0a1"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_editor/tests.rs",
+      "bytes": 8905,
+      "sha256": "de7da26c9d830d264921b8bac12230afea681aee9249dbd94a804b0ea8edef81"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_controller.rs",
+      "bytes": 21063,
+      "sha256": "7cea5958edcbfe8aa479e5a6c64e92ef9301048333167c2e926b1edaf18ebe48"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_controller/tests.rs",
+      "bytes": 6354,
+      "sha256": "b4d88fe87fb246a0c816ec7702a299edcf8ef9343bbbf619c678a31adfeb3d44"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_probe.rs",
+      "bytes": 15847,
+      "sha256": "48fa60b98669f9b10c7ead070a519b7d3564349950d762fc9ac4c8aa4a7aa071"
+    }
+  ],
+  "beforeProbe": {
+    "bytes": 14959,
+    "sha256": "feaac367ea006f5333d040b267f4269c26e442a2034f662f69d3c54ff89ce296"
+  },
+  "afterProbe": {
+    "bytes": 15847,
+    "sha256": "48fa60b98669f9b10c7ead070a519b7d3564349950d762fc9ac4c8aa4a7aa071"
+  },
+  "delta": {
+    "path": "/tmp/fc-round49-https-settings-ui-evidence/ui-implementation-first-to-second.patch",
+    "bytes": 3137,
+    "sha256": "8d04cc3b2a74af4f826fc0036bdc9aa887548bc816ed01f8d33c4522b2aae9cf"
+  },
+  "contract": "14 keys/7 facts; same CLI, steps and footer; JSON object key order has no contract meaning.",
+  "checks": [
+    {
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "--check",
+        "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/application/https_settings_probe.rs"
+      ],
+      "cwd": "/tmp/fc-round49-https-settings-ui-worktree",
+      "exitCode": 0,
+      "scope": "Formatting only; no Rust compile or execution"
+    }
+  ],
+  "formatModel": {
+    "path": "/tmp/fc-round49-https-settings-ui-evidence/ui-probe-wire-format-model-second.json",
+    "cases": 144,
+    "status": "PASS_FORMAT_MODEL_ONLY"
+  },
+  "cargo": "NOT_RUN",
+  "windows": "NOT_RUN",
+  "dependenciesChanged": false
+}

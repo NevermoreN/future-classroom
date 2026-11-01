@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round46-ci-evidence/win7-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe",
+    "--public-desktop",
+    "--report",
+    "/tmp/fc-round46-ci-evidence/win7-msvc-public-native-first.json"
+  ],
+  "cwd": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+  "startedUtc": "2026-11-01T00:05:40.427891+00:00",
+  "stdout": "/tmp/fc-round46-ci-evidence/win7-msvc-public-native-first.stdout.log",
+  "stderr": "/tmp/fc-round46-ci-evidence/win7-msvc-public-native-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 13.84856634796597,
+  "completedUtc": "2026-11-01T00:05:54.277319+00:00",
+  "stdoutBytes": 93,
+  "stdoutSha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

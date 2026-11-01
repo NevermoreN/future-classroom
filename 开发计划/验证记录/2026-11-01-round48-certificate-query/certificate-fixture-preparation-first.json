@@ -1,0 +1,102 @@
+{
+  "status": "PREPARED_NOT_RUN_AWAITING_R49_FINAL_WIRE_CONTRACT",
+  "scope": "Only own /tmp R48 evidence changed; no product source changed after service second freeze",
+  "preparer": {
+    "path": "/tmp/fc-round48-certificate-query-evidence/prepare-certificate-fixture-first.py",
+    "bytes": 12441,
+    "sha256": "d2aab2ee701d8d4887aed6b29748e5ebaa7ab99ca90cd5f3e85b8aa97d84a85e"
+  },
+  "ownershipBinding": {
+    "path": "/tmp/fc-round48-certificate-query-evidence/certificate-fixture-ownership-binding-first.json",
+    "bytes": 649,
+    "sha256": "22fa4505f8c7a74da66bd497eb9a8609b651e8daa31a40faaf96411ba2bdc354"
+  },
+  "nativeFixture": {
+    "scope": "One unique marker + existing CurrentUser MY user; exact named MicrosoftSoftwareCNG 2048 RSA nonexportable localhost/127.0.0.1 SAN serverAuth selfsigned. NoRoot trust/network/security settings.",
+    "certificateIdentity": "Public40hex only; actual value is produced by owned setup, never guessed/enumerated from unrelated certificates",
+    "privacy": "Unrelated MY entries only contribute aggregate count/hash. No certificate collection output or private-key export. Own public PEM is allowed raw evidence."
+  },
+  "cli": {
+    "owned": "fc-bootstrap.exe --https-settings-probe --certificate-thumbprint <owned40hex>",
+    "missing": "fc-bootstrap.exe --https-settings-probe (R49 separate missing-ref fixture; exact expected contract still pending)",
+    "host": "localhost:8443 set by hidden probe, not a general host/path input",
+    "dependency": "Final ordered steps, exact PASSfooter and exact OBSERVATION JSON fields still require R49 freeze. Current validator explicitly rejects nonfrozen contract or unimplemented real-wire adapter."
+  },
+  "executionRecipe": [
+    "Root coordinator obtains Windows serial slot and freezes exact appEXESHA + R49CLI/steps + source inputs. No execution authorized by this preparation.",
+    "Create unique TEMP root FutureClassroom-Test-TLS-<32hex> and .tls-probe-root exactmarker using original owned Remote (never read SSH private-key contents).",
+    "Run preparer with actualroot/marker/plainEXEname/output, WITHOUTthumb: upload four controls and parse-owned-controls.ps1; actual target PS5.1 Parser::ParseFile validates all scripts before any fixture action.",
+    "Upload/check exact EXESHA; execute tls-setup.ps1 via existing bounded Remote.run_file to create only ownedCurrentUser MY cert/key. Preserve original setup stdout/stderr bytes/base64/SHA and complete PS source.",
+    "Take setup outputpublic40hex; run preparer in a NEW outputdirectory with --thumbprint actualref; upload only new tls-launch.ps1 and independently AST parse its SHA. No report/control overwrite.",
+    "Run original owned hidden supervisor (90s unchanged bound, may conservatively fail before App120s). Capture original native stdout/stderr, exactprocess identity/actualexit; no foreground activation/second businesspool.",
+    "Validate exact R49steps, exactly one observation, four required factsSatisfied, all other facts knownenum and cacheonlyscope, finalnativefooter and actualEXEexit0. Do not equate an untrusted selfsigned chain with listener readiness.",
+    "On success or failure: run exact owned stop, verify actual originalprocesses gone, capture+download all original raw files and match bytes/SHA to remote metadata, then and only then exact ownedcertificate/CNG cleanup and root deletion.",
+    "PASS requires native query validation AND actual stop/owner physicaljoin proof AND rawpreservation PASS AND cleanup certremoved/keyExistsFalse/MYdigestRestored/rootAbsent. Any failed proof keeps FAIL and precise root/journal; no blind retries or broad process/certificate sweeps."
+  ],
+  "futureWindowsCommands": {
+    "prepareControlSyntax": "python3 prepare-certificate-fixture-first.py --root <exactownedWindowsRoot> --marker FutureClassroom-Test-TLS-<32hex> --exe-name fc-bootstrap.exe --output <newlocalcontrolDir> [--thumbprint <actualsetup40hex>]",
+    "astOnly": "powershell.exe -NoProfile -NonInteractive -File <ownedroot>\\parse-owned-controls.ps1 -OwnedScriptRoot <ownedroot>",
+    "launch": "existing Remote.run_file(<ownedroot>\\tls-launch.ps1, original bounded observation timeout); root owns execution and records exact command/source/stdout/stderr",
+    "cleanupOrder": [
+      "tls-stop.ps1",
+      "tls-capture.ps1 + original preserve_raw and perfile bytes/SHA",
+      "tls-cleanup.ps1"
+    ]
+  },
+  "localModels": {
+    "actualExitCode": 0,
+    "stdout": {
+      "path": "/tmp/fc-round48-certificate-query-evidence/certificate-fixture-model-first.stdout.log",
+      "bytes": 165,
+      "sha256": "1fc1498483cea73d875542d3bc459cc8233c87ab683d35ebb99181ac9c0db125"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round48-certificate-query-evidence/certificate-fixture-model-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "result": {
+      "status": "PURE_MODEL_PASS",
+      "positiveCases": 2,
+      "negativeCases": 15,
+      "scope": "Model only; no PowerShell AST, SSH, Windows, CryptoAPI or EXE execution"
+    },
+    "modelsOnly": true
+  },
+  "localPreparation": {
+    "actualExitCode": 0,
+    "stdout": {
+      "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-prepare-first.stdout.log",
+      "bytes": 75,
+      "sha256": "d45eac376e510537f54952c2035bc8a929c37301da22604c8685d7e8958a5f45"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-prepare-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "modelControlsOnly": true,
+    "launchGenerated": false,
+    "syntheticWindowsPathDoesNotExistAndWasNotAccessed": true
+  },
+  "powershellAst": "NOT_RUN (no local pwsh, no Windows/SSH authorized); AST-only script prepared",
+  "notExercised": [
+    "Windowsnativequery",
+    "certificate/CNGcreationorcleanup",
+    "missing40hexcase",
+    "wronghostnamecase",
+    "actualmid-nativecancellation",
+    "TLSHandshake",
+    "listener",
+    "onlineRevocation",
+    "clientTrust",
+    "Win7",
+    "Win10",
+    "Seewo"
+  ],
+  "officialDocsReviewed": [
+    "https://learn.microsoft.com/en-us/powershell/module/pki/new-selfsignedcertificate",
+    "Microsoft CertGetCertificateChain/Policy and private-key ownership contracts from source-before-first.json"
+  ],
+  "reuseLimits": "Existing ownership template source is byte/SHA bound; only launcharguments+exitmarker and STOPflag narrowed. This does not assert all native/application code unchanged or any current Windows runtime PASS."
+}

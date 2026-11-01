@@ -1,0 +1,55 @@
+{
+  "status": "PREPARED_BASELINE_COMMAND_RESTORED",
+  "firstAttempt": "Actual default60s timed out; FAIL original retained, cleanup PASS. No tests product mutation. No Win7 first attempt occurred because serial coordinator stopped.",
+  "scope": "900s full-test-process budget exactly matches R41 and R42 archived actual commands; unrelated strict TCP5s requirement unchanged.",
+  "priorCommands": [
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-third.command.json",
+      "sha256": "2ab44bc4e21709107d4380aa72e891be9ba57266aacd8d08f8ef74228aa3bb82",
+      "args": [
+        "python3",
+        "-B",
+        "scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round41-programs-third/fc-bootstrap.exe",
+        "--test-metadata",
+        "/tmp/fc-round41-frontdoor-deadline-evidence/windows-test-metadata-third.jsonl",
+        "--test-timeout-seconds",
+        "900",
+        "--native-seconds",
+        "1",
+        "--system-host",
+        "--report",
+        "/tmp/fc-round41-frontdoor-deadline-evidence/windows-gnu-runtime-third.json"
+      ]
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round42-ci/modern-msvc-runtime-first.command.json",
+      "sha256": "4e98bbbbab19b47a109bd18b5823cbeb4283747445e757cd6aee432f3f67c04c",
+      "args": [
+        "python3",
+        "-B",
+        "scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round42-modern-programs/fc-bootstrap.exe",
+        "--test-metadata",
+        "/tmp/fc-round42-ci-evidence/modern-test-metadata-first.jsonl",
+        "--test-timeout-seconds",
+        "900",
+        "--native-seconds",
+        "1",
+        "--system-host",
+        "--report",
+        "/tmp/fc-round42-ci-evidence/modern-msvc-runtime-first.json"
+      ]
+    }
+  ]
+}

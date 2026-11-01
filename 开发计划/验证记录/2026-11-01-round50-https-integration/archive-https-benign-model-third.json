@@ -1,0 +1,169 @@
+{
+  "schema": "fc.https.archive.exact-benign-model/v1",
+  "status": "PASS_LOCAL_EXACT_BENIGN_MODELS_ONLY",
+  "helper": {
+    "path": "/tmp/fc-round50-https-integration-evidence/archive-https-rounds-second.py",
+    "bytes": 31157,
+    "sha256": "3927ba54313decd3274b72a35d34c75dcc3c4d21160757cecdbd3693b62b90f4"
+  },
+  "checks": [
+    {
+      "name": "exact reviewed original 0",
+      "status": "PASS"
+    },
+    {
+      "name": "whole-file bytes change still blocked 0",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at unreviewed path blocked 0",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at foreign root blocked 0",
+      "status": "PASS"
+    },
+    {
+      "name": "real token rule never exempt 0",
+      "status": "PASS"
+    },
+    {
+      "name": "exact reviewed original 1",
+      "status": "PASS"
+    },
+    {
+      "name": "whole-file bytes change still blocked 1",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at unreviewed path blocked 1",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at foreign root blocked 1",
+      "status": "PASS"
+    },
+    {
+      "name": "real token rule never exempt 1",
+      "status": "PASS"
+    },
+    {
+      "name": "exact reviewed original 2",
+      "status": "PASS"
+    },
+    {
+      "name": "whole-file bytes change still blocked 2",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at unreviewed path blocked 2",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at foreign root blocked 2",
+      "status": "PASS"
+    },
+    {
+      "name": "real token rule never exempt 2",
+      "status": "PASS"
+    },
+    {
+      "name": "exact reviewed original 3",
+      "status": "PASS"
+    },
+    {
+      "name": "whole-file bytes change still blocked 3",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at unreviewed path blocked 3",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at foreign root blocked 3",
+      "status": "PASS"
+    },
+    {
+      "name": "real token rule never exempt 3",
+      "status": "PASS"
+    },
+    {
+      "name": "exact reviewed original 4",
+      "status": "PASS"
+    },
+    {
+      "name": "whole-file bytes change still blocked 4",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at unreviewed path blocked 4",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at foreign root blocked 4",
+      "status": "PASS"
+    },
+    {
+      "name": "real token rule never exempt 4",
+      "status": "PASS"
+    },
+    {
+      "name": "exact reviewed original 5",
+      "status": "PASS"
+    },
+    {
+      "name": "whole-file bytes change still blocked 5",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at unreviewed path blocked 5",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at foreign root blocked 5",
+      "status": "PASS"
+    },
+    {
+      "name": "real token rule never exempt 5",
+      "status": "PASS"
+    },
+    {
+      "name": "exact reviewed original 6",
+      "status": "PASS"
+    },
+    {
+      "name": "whole-file bytes change still blocked 6",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at unreviewed path blocked 6",
+      "status": "PASS"
+    },
+    {
+      "name": "same contents at foreign root blocked 6",
+      "status": "PASS"
+    },
+    {
+      "name": "real token rule never exempt 6",
+      "status": "PASS"
+    },
+    {
+      "name": "changed actual Authorization token blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "unreviewed same key remains review blocker",
+      "status": "PASS"
+    },
+    {
+      "name": "signed URL unchanged rejection",
+      "status": "PASS"
+    },
+    {
+      "name": "unreviewed Rust format string still rejected",
+      "status": "PASS"
+    }
+  ],
+  "count": 39,
+  "scope": "Memory models reading six exact original files only. No original edits, actual archive, main, SSH, Cargo or cleanup."
+}

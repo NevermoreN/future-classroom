@@ -1,0 +1,27 @@
+{
+  "name": "install-fixed-rust",
+  "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+  "arguments": [
+    "toolchain",
+    "install",
+    "nightly-2026-10-29-x86_64-pc-windows-msvc",
+    "--profile",
+    "minimal",
+    "--component",
+    "clippy",
+    "--component",
+    "rustfmt",
+    "--component",
+    "rust-src"
+  ],
+  "started_utc": "2026-10-31T23:20:58.0895194Z",
+  "duration_seconds": 1.8597762,
+  "exit_code": 0,
+  "parent_exited": true,
+  "timed_out_or_pipe_stalled": false,
+  "log_truncated": false,
+  "log_limit_bytes_per_stream": 16777216,
+  "stdout": "logs/install-fixed-rust.stdout.log",
+  "stderr": "logs/install-fixed-rust.stderr.log",
+  "passed": true
+}

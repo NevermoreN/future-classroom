@@ -1,0 +1,384 @@
+
+running 25 tests
+test identity::tests::approval_requires_the_live_local_global_manage_lease_from_this_store ... ok
+test identity::tests::approval_rejects_unknown_disabled_initial_password_and_foreign_school_targets ... ok
+test identity::tests::approved_admission_bounds_fail_without_replacing_or_consuming_sequence ... ok
+test identity::tests::approved_maximum_lifetime_and_independent_wall_deadlines_are_exclusive ... ok
+test identity::tests::domain_epoch_change_revokes_even_before_event_delivery_and_new_lease_is_not_old_lease ... ok
+test identity::tests::first_login_is_password_change_only_and_monotonic_regression_fails_closed ... ok
+test identity::tests::invalid_lifetimes_and_sequence_overflow_do_not_mutate_live_sessions ... ok
+test identity::tests::local_global_approval_adds_independent_devices_and_exact_revoke_is_scoped ... ok
+test identity::tests::lock_local_does_not_revoke_independent_web_channel ... ok
+test identity::tests::login_penalty_survives_restart_and_cannot_be_skipped_by_wall_clock_changes ... ok
+test identity::tests::password_web_login_still_replaces_all_older_web_leases_for_that_account ... ok
+test identity::tests::real_input_extends_idle_only_up_to_absolute_session_deadline ... ok
+test identity::tests::recovery_and_epoch_changes_reject_old_approvers_and_approved_devices_before_events ... ok
+test identity::tests::snapshot_reads_do_not_renew_five_minute_local_idle_and_wall_rollback_does_not_help ... ok
+test identity::tests::stale_queued_logout_cannot_revoke_replacement_lease_but_current_logout_revokes_all_channels ... ok
+test identity::tests::verified_continuous_input_stream_preserves_exact_lease_idle_and_absolute_limits ... ok
+test tests::idempotency_does_not_bypass_cas_or_allow_changed_payload ... ok
+test tests::local_reminder_write_is_denied_even_for_global_admin ... ok
+test tests::midnight_commit_and_reads_expire_without_waiting_for_cleanup ... ok
+test tests::own_homework_is_independent_of_other_teacher_same_subject ... ok
+test tests::role_is_independent_of_residual_teaching_assignments ... ok
+test tests::school_scope_disabled_assignment_and_session_expiry_are_enforced ... ok
+test tests::shared_reminders_cover_managed_classes_without_teaching_scope ... ok
+test tests::writer_rechecks_revocation_after_admission ... ok
+test identity::tests::approved_sessions_are_bounded_and_pruning_recovers_expired_capacity ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 22 tests
+test execution::tests::cancel_before_done_drains_exact_old_generation_without_counting ... ok
+test execution::tests::cancel_between_native_first_write_and_commit_and_between_done_and_commit_wins ... ok
+test execution::tests::crossing_a_civil_second_does_not_shortcut_the_full_monotonic_repeat_gap ... ok
+test execution::tests::durable_three_repeats_have_first_write_before_natural_and_release_before_next ... ok
+test execution::tests::fifo_next_job_cannot_start_until_the_canceled_device_is_confirmed_released ... ok
+test execution::tests::first_five_minute_expiry_opens_no_file_or_device ... ok
+test execution::tests::lost_release_response_is_settled_only_from_inventory_and_known_device_release ... ok
+test execution::tests::new_executor_cannot_adopt_persisted_live_or_gap_ownership ... ok
+test execution::tests::no_device_and_midstream_driver_error_fail_and_drain_then_preserve_error_without_replay ... ok
+test execution::tests::persistent_clock_rollback_still_settles_durable_terminal_without_replay ... ok
+test execution::tests::read_fault_source_fault_revocation_timeout_and_rollback_fail_closed ... ok
+test execution::tests::preparation_and_open_deadlines_are_fresh_and_playback_budget_starts_at_first_write ... ok
+test execution::tests::ten_max_duration_repeats_are_not_expired_at_the_initial_five_minute_deadline ... ok
+test execution::tests::unknown_storage_after_first_write_stops_and_cannot_replay_on_recovery ... ok
+test execution::tests::updating_defers_queued_first_write_and_natural_without_reopening_or_counting ... ok
+test execution::tests::wait_return_time_starts_gap_and_expired_wait_cannot_count_completion ... ok
+test tests::cancellation_done_is_never_counted_and_next_job_waits_for_release ... ok
+test tests::late_cleanup_cannot_finish_a_reused_id_with_a_new_generation ... ok
+test tests::later_jobs_do_not_start_during_repeat_gap_and_emergency_cancels_all ... ok
+test tests::quota_expiry_revocation_and_emergency_are_independent_of_desktop ... ok
+test tests::submission_failure_waits_for_release_and_never_counts_as_a_repeat ... ok
+test tests::total_three_means_three_and_one_second_gaps ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 208 tests
+test backend::account_management_tests::accounts_active_default_and_retained_history_references_reject_atomically_without_revoking ... ok
+test backend::account_management_tests::accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_without_revocation ... ok
+test backend::account_management_tests::accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected_records ... ok
+test backend::account_management_tests::accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_access ... ok
+test backend::execution_scope_tests::actual_shared_worker_cancellation_fences_backend_scope_and_restores_next_request ... ok
+test backend::execution_scope_tests::cancelled_scope_restores_base_but_previously_cloned_repository_stays_cancelled ... ok
+test backend::execution_scope_tests::nested_scope_cannot_relax_outer_fence_and_drop_restores_exact_outer_scope ... ok
+test backend::execution_scope_tests::panicking_memory_fence_cancels_only_request_and_does_not_poison_backend ... ok
+test backend::execution_scope_tests::unwind_of_nested_request_scopes_restores_repository_and_health_without_clearing_outer_fence ... ok
+test backend::https_certificate::tests::https_certificate_actual_shared_worker_cancel_retains_job_until_query_returns_without_backend_lock ... ok
+test backend::account_management_tests::accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_atomically ... ok
+test backend::https_certificate::tests::https_certificate_discards_query_after_configuration_publication_or_local_lock_and_keeps_native_error ... ok
+test backend::https_certificate::tests::https_certificate_held_ledger_is_recoverable_uncertainty_and_explicit_retry_works ... ok
+test backend::https_certificate::tests::https_certificate_requires_configured_exact_state_and_original_nonrelaxable_fence ... ok
+test backend::profile_content::tests::backend_guest_page_requires_published_generation_global_view_and_live_time_window ... ok
+test backend::profile_content::tests::actual_job_fence_cancellation_deadline_stop_and_fault_at_sqlite_precommit_roll_back ... ok
+test backend::profile_content::tests::backend_text_hydration_clear_undo_outcome_and_locked_original_lease_use_real_sqlite ... ok
+test backend::profile_content::tests::preparation_guard_rechecks_actual_account_epoch_and_fails_closed_on_health_fault ... ok
+test backend::profiles::tests::profiles_backend_exact_management_lease_joint_cas_and_restart ... ok
+test backend::profile_content::tests::guest_page_job_cancel_and_deadline_at_real_precommit_do_not_advance_view ... ok
+test backend::profiles::tests::profiles_backend_retained_disabled_owner_can_be_managed_but_not_reenabled ... ok
+test backend::recovery::migration::tests::fresh_target_access_cannot_rebless_old_inspection_and_lock_closes_mapping_admission ... ok
+test backend::recovery::migration::tests::source_manifest_and_source_database_must_match_before_any_mapping_review ... ok
+test backend::recovery::migration::tests::mapped_projection_is_inert_and_ordinary_guard_still_rejects_original_foreign_package ... ok
+test backend::recovery::tests::captured_backup_rejects_revision_drift_and_lock_without_renewing_session ... ok
+test backend::recovery::tests::canceled_barrier_leaves_live_data_and_authorization_floor_unchanged ... ok
+test backend::recovery::tests::full_preflight_binds_the_actual_database_bytes_not_only_its_revision_and_media ... ok
+test backend::recovery::tests::confirmed_candidate_blocks_new_login_keeps_current_password_and_advances_both_floors ... ok
+test backend::recovery::tests::manifest_media_comparison_is_order_independent_and_includes_ownership_hash_and_namespace ... ok
+test backend::recovery::tests::restore_review_digest_school_and_stale_lease_cannot_authorize_barrier ... ok
+test backend::recovery::tests::full_preflight_is_inert_and_its_exact_target_revision_cannot_be_reblessed_after_drift ... ok
+test backend::tests::authorized_close_requires_fresh_local_admin_and_consumes_exact_permission ... ok
+test backend::recovery::tests::same_numeric_school_and_principal_ids_do_not_allow_a_different_installation ... ok
+test backend::tests::display_backend_uses_captured_cas_and_public_facts_do_not_renew_management ... ok
+test backend::tests::lesson_backend_requires_exact_local_admin_and_persists_override_restore_cas ... ok
+test backend::tests::material_backend_owner_and_guest_permissions_are_fresh_memory_guards ... ok
+test backend::tests::public_desktop_lesson::public_desktop_cancel_after_real_commit_suppresses_delivery_but_does_not_claim_rollback ... ok
+test backend::tests::public_desktop_lesson::public_desktop_cancellation_and_original_budget_do_not_mutate_or_rebind ... ok
+test backend::tests::public_desktop_lesson::public_desktop_entry_rejects_stale_publication_and_uses_earlier_original_scene_end ... ok
+test backend::tests::public_desktop_lesson::public_desktop_external_catalog_or_schedule_change_does_not_rebase_original_binding ... ok
+test backend::tests::public_desktop_lesson::public_desktop_monotonic_regression_and_health_failure_cannot_deliver_late_success ... ok
+test backend::tests::public_desktop_lesson::public_desktop_foreign_backend_and_request_execution_scope_are_not_authority ... ok
+test backend::tests::public_desktop_lesson::public_desktop_os_callback_also_invalidates_unconsumed_published_entry ... ok
+test backend::tests::public_desktop_lesson::public_desktop_os_callback_revokes_active_flow_and_old_scene_before_main_pump_cleanup ... ok
+test backend::tests::public_desktop_lesson::public_desktop_precommit_os_callback_rolls_back_without_fault_and_never_renews_capability ... ok
+test backend::tests::public_desktop_lesson::public_desktop_requires_exact_published_entry_and_only_one_cancellable_flow ... ok
+test backend::tests::public_desktop_lesson::public_desktop_single_liveness_check_survives_a_deterministic_updating_to_healthy_phase_flip ... ok
+test backend::tests::public_desktop_lesson::public_desktop_waiting_is_not_submit_authority_and_allows_own_real_publication_to_finish ... ok
+test backend::tests::public_desktop_lesson::public_desktop_waiting_never_defers_original_deadline_during_real_precommit_phase ... ok
+test backend::tests::public_desktop_lesson::public_desktop_without_login_survives_local_lock_and_commits_honest_origin_then_new_entry_restores ... ok
+test backend::tests::session_control_faults_actual_authority_while_backend_mutex_is_unavailable ... ok
+test backend::tests::timetable_backend_uses_ui_revision_and_recovers_independent_schedule_state ... ok
+test backend::voice::limits_tests::changed_limits_cancel_queued_and_playing_jobs_without_claiming_the_old_device_released ... ok
+test backend::voice::limits_tests::committed_limits_cannot_resume_a_later_stop_or_replay_the_old_review ... ok
+test backend::voice::limits_tests::invalid_limits_cannot_stop_wake_or_persist_before_the_real_writer ... ok
+test backend::voice::limits_tests::limits_require_exact_local_manager_and_all_three_captured_versions_before_invalidation ... ok
+test backend::voice::limits_tests::limits_writer_checks_the_captured_epoch_during_evaluation_and_before_commit ... ok
+test backend::voice::limits_tests::rejected_limits_persistence_keeps_the_original_policy_and_fails_runtime_closed ... ok
+test backend::voice::limits_tests::saved_limits_reach_current_caps_retire_old_upload_epoch_and_survive_database_reopen ... ok
+test backend::voice::limits_tests::saving_limits_while_disabled_does_not_reenable_the_persisted_or_runtime_switch ... ok
+test backend::voice::management::device_check::tests::cancellation_and_original_deadline_suppress_late_query_result_but_keep_worker_until_return ... ok
+test backend::voice::management::device_check::tests::device_checks_require_global_role_and_password_change_without_querying ... ok
+test backend::voice::management::device_check::tests::device_observation_is_local_historical_and_never_changes_voice_or_opens_admission ... ok
+test backend::voice::management::device_check::tests::monotonic_regression_during_the_query_cannot_publish_an_observation ... ok
+test backend::tests::real_backend_accounts_catalog_homework_recovery_and_exact_local_input_survive_reopen ... ok
+test backend::voice::management::device_check::tests::native_results_after_lock_revoke_publication_voice_change_or_epoch_change_are_discarded ... ok
+test backend::voice::management::device_check::tests::saving_policy_invalidates_an_observation_and_lock_cannot_rebind_it_to_a_new_lease ... ok
+test backend::voice::management::device_check::tests::stale_reviews_and_unauthorized_leases_never_invoke_the_native_query ... ok
+test backend::voice::management::tests::disabling_wakes_before_writer_rejection_and_keeps_runtime_closed_without_faking_completion ... ok
+test backend::voice::management::tests::management_distinguishes_starting_playing_and_stopping_until_exact_release ... ok
+test backend::voice::management::tests::management_metadata_counts_jobs_and_disabled_setting_survives_reopen_and_cas_conflict ... ok
+test backend::voice::management::tests::management_reads_never_renew_the_original_local_idle_deadline ... ok
+test backend::voice::management::tests::management_rejects_web_stale_revoked_expired_and_lock_or_faulted_local_leases ... ok
+test backend::voice::management::tests::management_requires_global_admin_and_completed_initial_password_change ... ok
+test backend::voice::management::tests::management_revalidates_original_lease_health_and_runtime_after_the_writer_read ... ok
+test backend::voice::management::tests::reviewed_change_rejects_identity_only_or_runtime_only_changes_with_unchanged_voice_revision ... ok
+test backend::voice::management::tests::reviewed_enable_does_not_adopt_a_later_stop_after_its_commit ... ok
+test backend::voice::management::tests::reviewed_writer_guard_rejects_identity_or_runtime_changed_after_disable_cas_before_enqueue ... ok
+test backend::voice::management::tests::reviewed_writer_rechecks_exact_epoch_during_evaluation_and_immediately_before_commit ... ok
+test backend::voice::native_participation::tests::only_one_native_domain_can_participate_and_registration_has_no_business_effects ... ok
+test backend::voice::native_participation::tests::participation_never_blocks_atomic_independent_stop_or_extends_old_policy_authority ... ok
+test backend::voice::native_participation::tests::terminal_database_jobs_do_not_authorize_helper_resume_while_a_domain_still_participates ... ok
+test backend::voice::policy_handoff::tests::an_abandoned_post_commit_owner_never_publishes_committed_or_reopens_admission ... ok
+test backend::voice::policy_handoff::tests::bounded_receipt_merges_contiguous_policy_epochs_but_never_an_independent_stop_gap ... ok
+test backend::voice::policy_handoff::tests::committed_disable_retires_normally_and_explicit_enable_updates_the_same_stop_serial ... ok
+test backend::voice::policy_handoff::tests::enable_of_a_running_policy_does_not_create_a_new_native_stop_receipt ... ok
+test backend::voice::policy_handoff::tests::failed_writer_keeps_the_known_endpoint_closed_and_allows_only_negative_retirement ... ok
+test backend::voice::policy_handoff::tests::pending_is_published_before_wake_and_rejects_concurrent_policy_without_another_cas ... ok
+test backend::voice::policy_handoff::tests::real_negative_driver_precommit_rolls_back_on_pending_and_can_later_settle_the_same_release ... ok
+test backend::voice::request_fence_tests::request_voice_fence_reaches_the_actual_writer_without_faulting_or_late_reservation ... ok
+test backend::voice::request_fence_tests::request_voice_fences_only_tighten_the_clone_and_never_close_the_shared_runtime ... ok
+test backend::voice::tests::actor_wait_then_publish_rechecks_actual_new_binding_without_replaying_sql ... ok
+test backend::voice::tests::actor_waits_for_real_publication_and_busy_preserves_exact_voice_runtime ... ok
+test backend::voice::tests::exact_original_voice_session_guards_cancel_disable_and_terminal_retry_are_real ... ok
+test backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding ... ok
+test backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf ... ok
+test backend::voice::tests::voice_timeout_invalidates_runtime_and_late_submit_cannot_commit_or_reopen_admission ... ok
+test backend::voice::upload_authorization_tests::upload_checkpoint_checks_original_deadline_even_after_a_coherent_successful_authorization ... ok
+test backend::voice::upload_authorization_tests::upload_checkpoints_bound_publication_wait_and_leave_runtime_and_reservation_unchanged ... ok
+test backend::voice::upload_authorization_tests::upload_checkpoints_wait_for_short_unrelated_publication_in_the_same_exact_epoch ... ok
+test backend::voice::upload_authorization_tests::upload_publication_wait_never_adopts_a_replacement_lease_or_runtime_epoch ... ok
+test backend::voice::upload_authorization_tests::upload_wait_rechecks_the_actual_new_class_binding_after_publication_without_sql_replay ... ok
+test backend::voice::web_device::tests::actual_original_deadline_does_not_retire_a_blocked_query_or_admit_its_late_fact ... ok
+test backend::voice::web_device::tests::both_ttl_clocks_expire_exactly_and_cache_hits_never_renew_completion ... ok
+test backend::voice::web_device::tests::completed_queries_cannot_cache_or_deliver_after_revocation_request_cancel_or_authority_change ... ok
+test backend::voice::web_device::tests::concurrent_cancelled_query_keeps_physical_flight_and_worker_until_its_actual_return ... ok
+test backend::voice::web_device::tests::disabled_closed_wrong_origin_and_cancelled_requests_never_query_or_reuse_negative_fact ... ok
+test backend::voice::web_device::tests::final_delivery_check_rejects_expired_missing_or_changed_negative_facts_and_old_versions ... ok
+test backend::voice::web_device::tests::native_query_runs_without_backend_ledger_cache_or_writer_locks ... ok
+test backend::voice::web_device::tests::only_authorized_teacher_or_global_web_can_query_and_no_password_change_or_user_bypasses_it ... ok
+test backend::voice::web_device::tests::negative_output_fact_is_shared_but_every_request_still_needs_its_exact_web_session ... ok
+test backend::voice::web_device::tests::real_catalog_voice_policy_runtime_and_class_changes_never_reuse_old_cache_stamp ... ok
+test backend::voice::web_device::tests::supported_driver_error_and_query_panic_remain_unverified_without_fault_or_sql_mutation ... ok
+test backend::voice::web_device::tests::withdrawing_a_cancelled_publication_does_not_wait_for_a_contended_cache_mutex ... ok
+test backend::web::tests::cookie_has_one_fixed_host_name_canonical_secret_and_strict_security_attributes ... ok
+test backend::web::tests::device_revocation_is_exact_and_local_lock_does_not_revoke_existing_web_leases ... ok
+test backend::web::tests::approval_captures_current_binding_and_rejects_a_different_class_before_grant ... ok
+test backend::web::tests::disabled_default_and_only_exact_local_global_administrator_manages_pairing ... ok
+test backend::web::tests::disabling_revokes_all_captured_leases_and_restart_never_restores_web_secrets ... ok
+test backend::web::tests::eight_digit_code_only_creates_pending_and_poll_secret_approval_are_one_use ... ok
+test backend::web::tests::https_settings_tests::configuration_owner_and_actual_last_writer_guard_exclude_enable_and_next_owner ... ok
+test backend::web::tests::https_settings_tests::preexisting_enable_snapshot_cannot_survive_configuration_publication ... ok
+test backend::web::tests::https_settings_tests::queued_real_writer_save_retains_disabled_owner_until_old_local_session_cancellation_settles ... ok
+test backend::web::tests::https_settings_tests::local_configuration_only_save_replay_and_physical_reopen_leave_web_disabled ... ok
+test backend::web::tests::https_settings_tests::real_web_global_session_active_web_and_canceled_scope_cannot_save_https_configuration ... ok
+test backend::web::tests::input_absorbed_during_poll_uses_fresh_issue_time_without_revoking_other_sessions ... ok
+test backend::web::tests::https_settings_tests::same_committed_command_on_real_new_local_lease_returns_original_outcome_without_expiry_in_fingerprint ... ok
+test backend::web::tests::locking_and_relogging_cannot_transfer_pending_or_approved_local_authority ... ok
+test backend::web::tests::management_snapshot_denies_web_stale_locked_and_logged_out_local_leases ... ok
+test backend::web::tests::management_snapshot_expires_at_deadline_and_never_renews_the_admin_or_web_admission ... ok
+test backend::web::tests::management_snapshot_tracks_consumed_code_original_revision_and_exact_devices ... ok
+test backend::web::tests::material_send_fence_tests::material_send_fence_preserves_original_transfer_cancellation_and_closed_state ... ok
+test backend::web::tests::material_send_fence_tests::material_send_fence_rechecks_exact_device_enablement_and_every_publication ... ok
+test backend::web::tests::material_send_fence_tests::material_send_fence_try_locks_never_wait_and_local_lock_does_not_revoke_web ... ok
+test backend::web::tests::pairing_deadline_is_exact_and_clock_regression_disables_all_admission ... ok
+test backend::web::tests::material_send_fence_tests::material_send_fence_uses_original_session_expiry_and_latches_clock_regression ... ok
+test backend::web::tests::request_cancellation_while_waiting_for_pairing_lock_preserves_original_code_and_global_service ... ok
+test backend::web::tests::ten_code_attempts_are_shared_across_windows_and_reset_only_after_the_period ... ok
+test profile_content_cache::tests::a_new_shared_handle_cannot_reset_billing_for_an_old_external_body ... ok
+test profile_content_cache::tests::clearing_index_and_dropping_frame_do_not_release_live_external_arc_charge ... ok
+test profile_content_cache::tests::exact_owner_revision_hash_and_missing_nodes_never_fall_back ... ok
+test profile_content_cache::tests::full_four_mib_budget_counts_retained_bodies_across_many_frames ... ok
+test profile_content_cache::tests::retired_metadata_has_a_hard_cap_even_when_bodies_are_tiny ... ok
+test backend::web::tests::teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_change ... ok
+test recovery::tests::cold_switch_permit_waits_for_physical_worker_audio_destructors_and_writer_close ... ok
+test recovery_files::tests::cold_switch_accepts_only_three_recoverable_locations ... ok
+test recovery_files::tests::typed_paths_are_canonical_and_cannot_contain_teacher_text ... ok
+test recovery_workflow::slot::tests::cancellation_during_preflight_keeps_task_busy_until_worker_returns ... ok
+test recovery_workflow::slot::tests::committed_confirmation_survives_cancellation_and_rejected_ui_result ... ok
+test recovery_workflow::slot::tests::last_ui_owner_does_not_drop_a_preview_and_close_waits_for_worker ... ok
+test recovery_workflow::slot::tests::retirement_does_not_free_or_reuse_the_slot_until_real_destruction ... ok
+test reinitialization::tests::blocked_worker_cannot_be_replaced_by_a_cancelled_ticket_or_a_reset_permit ... ok
+test reinitialization::tests::claimed_repair_startup_rejects_future_open_and_a_second_claim ... ok
+test reinitialization::tests::deployment_and_sequence_mismatch_close_owners_but_never_mint_a_permit ... ok
+test recovery::tests::invalid_deployment_still_retains_actual_worker_and_audio_until_final_settlement ... ok
+test reinitialization::tests::open_and_repair_claim_are_one_atomic_decision ... ok
+test reinitialization::tests::healthy_backend_revokes_admission_before_worker_drain_and_closes_writer_before_permit ... ok
+test reinitialization::tests::started_open_is_not_never_opened_even_before_database_creation ... ok
+test reinitialization::tests::poisoned_backend_retains_ownership_until_explicit_safe_close_and_never_grants_reset ... ok
+test voice_runtime::tests::independent_stop_blocks_writes_then_ack_requires_native_release_and_no_old_replay ... ok
+test voice_runtime::tests::ordinary_listener_callback_drain_does_not_fault_or_start_new_jobs_on_unregistered_listener ... ok
+test voice_runtime::tests::retained_driver_never_gets_a_replacement_and_shutdown_waits_for_actual_release ... ok
+test voice_runtime::tests::service_waker_is_weak_and_empty_shutdown_needs_no_audio_device ... ok
+test voice_runtime::tests::wake_during_native_finish_is_pending_until_the_old_physical_thread_exits ... ok
+test voice_runtime::tests::writer_resume_and_finish_never_hold_the_supervisor_ui_lock ... ok
+test voice_runtime::tests::concurrent_wake_and_idle_exit_never_lose_jobs_or_create_two_audio_domains ... ok
+test web_application::tests::content_tests::content_http_authority_and_csrf_injection_fail_before_durable_mutation ... ok
+test web_application::tests::content_tests::content_http_clear_keeps_cas_and_receipts_keep_original_result_without_automatic_rewrite ... ok
+test web_application::tests::content_tests::content_http_midnight_rejects_old_routes_and_receipts_and_day_floor_survives_clock_rollback ... ok
+test web_application::tests::content_tests::subject_visual_tests::subject_visual_cancel_lock_and_day_floor_cannot_return_old_scope_as_current ... ok
+test web_application::tests::content_tests::content_http_teacher_scope_global_pagination_and_receipt_privacy_use_actual_accounts ... ok
+test web_application::tests::content_tests::subject_visual_tests::subject_visual_get_is_read_only_and_original_content_schema_still_rejects_visual_fields ... ok
+test web_application::tests::content_tests::subject_visual_tests::subject_visual_joint_save_keeps_exact_lease_and_web_preview_discloses_only_one_derived_subject ... ok
+test web_application::tests::dispatcher_rejects_another_backend_even_when_exact_lease_numbers_collide ... ok
+test web_application::tests::head_admission_authenticates_before_body_without_creating_pairing_or_sql_work ... ok
+test web_application::tests::content_tests::subject_visual_tests::subject_visual_management_denies_initial_teacher_user_and_preview_remains_owned ... ok
+test web_application::tests::head_admission_rejects_another_backend_and_rechecks_sensitive_headers ... ok
+test web_application::tests::material_tests::material_cursor_never_rebinds_to_mutated_folder_and_binary_slice_is_not_a_spool ... ok
+test web_application::tests::material_tests::material_class_pages_preserve_all_classes_under_the_same_identity_revision ... ok
+test web_application::tests::material_tests::material_http_metadata_delete_cas_fixed_version_and_historical_receipts ... ok
+test web_application::tests::method_rejections_report_exact_allowed_methods_without_changing_other_boundary_errors ... ok
+test web_application::tests::material_tests::material_scopes_are_numeric_pages_and_original_device_checkpoint_never_rebinds ... ok
+test web_application::tests::pairing_session_csrf_and_account_logout_cross_the_real_backend_and_persist_epoch ... ok
+test web_application::tests::voice_tests::capability_tests::actual_web_worker_releases_backend_for_query_authenticates_cache_hits_and_never_claims_available ... ok
+test web_application::tests::voice_tests::voice_http_post_commit_stop_reports_unknown_and_original_command_is_queryable_without_replay ... ok
+test web_application::tests::public_status_is_non_sensitive_and_frame_origin_cookie_fail_before_mutation ... ok
+test web_application::tests::voice_tests::voice_http_submit_is_durable_idempotent_queryable_and_never_claims_device_or_sound ... ok
+test web_application::tests::voice_tests::voice_http_readonly_user_pairing_never_discloses_remote_voice_capabilities_or_jobs ... ok
+test web_assets::tests::allocation_counts_the_shared_bundle_once_and_each_response_only_owns_a_cursor ... ok
+test web_assets::tests::assets_never_fall_back_for_api_traversal_bad_headers_or_wrong_transport ... ok
+test web_assets::tests::conditional_get_uses_weak_comparison_lists_and_wildcard ... ok
+test web_assets::tests::configured_static_root_and_real_css_hash_keep_api_separate_and_cache_consistent ... ok
+test web_assets::tests::missing_extra_duplicate_and_corrupt_payloads_fail_closed_at_load ... ok
+test web_assets::tests::trusted_startup_rebind_still_rejects_diagnostic_http_transport ... ok
+test web_assets::tests::trusted_startup_rebinds_host_and_origin_without_copying_verified_payloads ... ok
+test web_assets::tests::verified_payload_mapping_etag_and_chunk_ownership ... ok
+test web_transfer::tests::dropping_control_cancels_all_stable_owners_without_renewal ... ok
+test web_transfer::tests::foreign_stale_wrong_offset_kind_and_unplanned_acks_fail_closed ... ok
+test web_transfer::tests::no_second_chunk_or_eof_can_overtake_physical_write ... ok
+test web_transfer::tests::one_original_admission_bounds_every_cloned_phase ... ok
+test web_transfer::tests::only_exact_disk_ack_advances_body_and_framing_eof ... ok
+test web_transfer::tests::per_job_ticket_retirement_does_not_cancel_stable_transfer ... ok
+test web_transfer::tests::weak_network_cancel_needs_no_busy_stage_lock_and_normal_handle_drop_preserves_ready ... ok
+test web_transfer::work::tests::canceled_or_expired_request_returns_no_positive_body_and_next_request_survives ... ok
+test web_application::tests::voice_tests::voice_http_teacher_current_target_and_old_job_stop_survive_binding_disable_and_closed_admission ... ok
+test web_transfer::work::tests::capability_head_and_json_share_original_hundred_milliseconds_including_queue_time ... ok
+test web_transfer::work::tests::real_worker_head_then_json_share_original_lifetime_without_creating_another_pool ... ok
+test web_transfer::work::tests::weak_job_cannot_keep_a_native_application_alive_and_unused_capacity_is_charged ... ok
+
+test result: ok. 208 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 290.46s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 13 tests
+test cancellation_does_not_release_physical_gate_before_native_return ... ok
+test changed_physical_preimage_requires_a_new_review_without_overwriting_it ... ok
+test enable_disable_and_old_path_repair_are_explicit_and_release_backend_mutex ... ok
+test expired_lease_before_effect_blocks_write_but_exact_ticket_can_settle ... ok
+test external_policy_removal_is_drift_and_never_auto_repaired ... ok
+test failures_before_and_after_effect_preserve_separate_intent_and_observation ... ok
+test finalize_failure_remains_unsettled_and_startup_only_observes ... ok
+test late_observation_cannot_overwrite_a_newer_journal_revision ... ok
+test moved_executable_after_review_requires_a_new_review_before_persisting_intent ... ok
+test revocation_during_effect_records_uncertainty_without_rollback ... ok
+test stale_review_and_completion_cannot_overwrite_newer_intent ... ok
+test startup_before_initialization_only_reads_the_fixed_system_item ... ok
+test startup_prepared_record_is_interrupted_without_replaying_registry ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 33.99s
+
+
+running 43 tests
+test baseline_preclass_proof_restores_unobserved_lesson_after_real_sqlite_restart ... ok
+test baseline_legacy_sqlite_document_migrates_without_promoting_observed_time_to_proof ... ok
+test baseline_proof_does_not_infer_from_old_documents_cleared_history_or_changed_default ... ok
+test baseline_stable_scope_survives_offline_night_without_retaining_yesterdays_override ... ok
+test commit_rechecks_midnight_after_snapshot_preparation_and_stop_rejects_new_work ... ok
+test baseline_proof_cannot_cross_postlesson_catalog_schedule_rollback_or_day_barriers ... ok
+test corrupt_one_credential_kind_preserves_healthy_other_kind_and_repairs_only_new_versions ... ok
+test desktop_content_commit_persists_new_day_before_first_frame_and_does_not_revive_old_content ... ok
+test display_and_desktop_postcommit_publication_fault_recover_committed_state_and_day_floor ... ok
+test display_and_desktop_strict_codec_rejects_tampering_without_registering_or_cross_owner_release ... ok
+test display_precommit_rechecks_exact_lease_and_desktop_midnight_floor_rolls_back_atomically ... ok
+test display_storage_cas_receipts_and_desktop_facts_survive_restart_and_wall_rollback ... ok
+test exact_local_session_lock_between_admission_and_commit_revokes_local_but_keeps_web ... ok
+test failed_desktop_facts_only_persist_actual_rollback_invalidation_not_forward_baseline_observation ... ok
+test desktop_facts_pages_full_texts_with_explicit_totals_and_actual_json_byte_budget ... ok
+test lesson_override_cas_restore_restart_final_teacher_and_rollback_are_durable ... ok
+test lesson_override_bounded_history_keeps_natural_expiry_and_unassigned_base_safe ... ok
+test login_admission_rechecks_owned_clock_before_committing_reservation ... ok
+test lesson_override_revocation_and_schedule_edits_terminate_in_the_same_business_commit ... ok
+test login_backoff_is_atomic_exponential_capped_and_survives_restart_and_wall_changes ... ok
+test login_clock_regression_is_rejected_without_releasing_running_worker ... ok
+test login_completion_crossing_deadline_inside_transaction_cannot_authenticate ... ok
+test login_kdf_capacity_is_shared_across_different_databases_in_one_process ... ok
+test login_reservations_bound_actual_workers_even_after_authorization_times_out ... ok
+test material_desktop_facts_guest_scope_and_recess_proof_are_transaction_consistent ... ok
+test material_postcommit_publication_fault_preserves_original_quota_and_idempotent_result ... ok
+test material_precommit_exact_lease_revocation_rolls_back_index_receipt_registry_and_quota ... ok
+test material_storage_independent_appends_reverse_order_scope_cursor_and_receipts_survive_reopen ... ok
+test material_strict_metadata_and_receipt_tampering_fail_closed_at_read_and_startup ... ok
+test material_storage_original_quota_retirement_and_finalization_keep_active_references_safe ... ok
+test plain_identity_port_cannot_fabricate_credentials_and_corruption_is_not_registration ... ok
+test pending_login_restart_counts_failure_and_stale_or_corrupt_records_never_authenticate ... ok
+test queued_content_rechecks_current_identity_and_midnight_in_writer ... ok
+test reopening_writer_cannot_create_more_kdfs_while_old_worker_tokens_still_live ... ok
+test sqlite_content_row_or_receipt_copied_between_owners_is_rejected_before_release ... ok
+test timetable_commit_publication_failure_blocks_old_authority_and_reopens_committed_receipt ... ok
+test timetable_codec_rejects_tampered_unknown_duplicate_revision_and_oversize_without_truncation ... ok
+test timetable_commit_rechecks_captured_session_after_preparation_and_rolls_back_every_row ... ok
+test timetable_storage_preserves_id_high_water_after_deletion_and_reopen ... ok
+test timetable_storage_rejects_invalid_references_catalog_revocation_and_silent_default_switch ... ok
+test timetable_storage_uses_independent_cas_persists_both_calendars_history_and_atomic_receipts ... ok
+test typed_commit_then_publication_failure_is_durable_and_old_reads_fail_closed ... ok
+test typed_identity_and_content_survive_restart_with_per_owner_cas_and_receipts ... ok
+
+test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 152.06s
+
+
+running 4 tests
+test real_worker_cancel_at_precommit_blocks_reservation_policy_and_adoption ... ok
+test real_worker_cancel_cannot_publish_late_body_and_same_ticket_failure_settles ... ok
+test real_worker_deadline_at_adoption_precommit_preserves_exact_original_cas ... ok
+test real_worker_deadline_at_precommit_cannot_publish_late_body ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.04s
+
+
+running 3 tests
+test sqlite_commit_then_publication_error_blocks_old_permissions_and_recovers_facts ... ok
+test commit_cas_journal_and_recovery_keep_database_and_authority_consistent ... ok
+test sqlite_commit_then_publication_panic_blocks_old_permissions_and_recovers_facts ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.81s
+
+
+running 5 tests
+test activity_split_and_merge_preserve_both_week_contents_and_retire_all_replaced_rows ... ok
+test conversion_requires_explicit_save_clears_both_weeks_and_cannot_cross_revoked_lease ... ok
+test every_published_identity_namespace_stays_retired_after_full_term_replacement_and_restart ... ok
+test public_calendar_real_lease_cache_review_adoption_manual_priority_and_offline_reopen ... ok
+test role_swap_publishes_selection_only_and_survives_restart_with_document_cas ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 13.51s
+
+
+running 4 tests
+test sqlite_policy_changes_preserve_disabled_switch_and_runtime_generation_guard ... ok
+test sqlite_policy_exact_authority_cas_and_guard_at_evaluation_and_precommit ... ok
+test sqlite_policy_atomic_stop_retirement_exact_old_release_and_reopen ... ok
+test sqlite_policy_publish_duration_and_per_owner_queue_are_actual_writer_checks ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.38s
+
+
+running 6 tests
+test sqlite_voice_canonical_three_repeats_deadline_and_backup_strip_active_bytes ... ok
+test sqlite_voice_commit_idempotency_cancel_release_and_restart_never_replay ... ok
+test sqlite_voice_exact_lease_binding_revocation_and_fifo_limits ... ok
+test sqlite_voice_expire_before_write_ignores_revoked_lease_but_requires_exact_release ... ok
+test sqlite_voice_first_boot_idle_recovery_is_read_only_and_expired_reads_are_redacted ... ok

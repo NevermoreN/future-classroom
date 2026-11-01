@@ -1,0 +1,65 @@
+{
+  "status": "PASS_SOURCE_INTEGRATED_TESTS_REQUIRED",
+  "atUtc": "2026-10-31T23:47:53.208708+00:00",
+  "oldCoreBase": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3",
+  "newGitBase": "e23bd538d828aeed4378a88f69cf81cb85a4389f",
+  "coreFinalFiles": 15,
+  "coreFinalFilesUnchanged": 14,
+  "coreBackendExtension": "Only four module/reexport lines added; exact removal restores final-core bytes. No dirty file restore/reapply, all15 core bytes survived fast-forward unchanged.",
+  "nativeFilesExact": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10221,
+      "sha256": "2ac2e9b3cea4d6f6ef8aaa329398f93abca4b5ed3fa9707efde978010dde0174"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 8515,
+      "sha256": "9e937f565f2482ec663cf7c1f1a7605998118d9508a54fd6aac2bc4199a8f7f8"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_selection.rs",
+      "bytes": 7957,
+      "sha256": "9bbdba8dc571e4efb20ab919c2dc9608b0139c59b496cce7b541a603de6b8439"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query.rs",
+      "bytes": 11640,
+      "sha256": "0ff1cb290b171afae1a5f88dbd62153adaa82e80b88bab4437acaf2ba1a3fcb0"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query/native.rs",
+      "bytes": 9137,
+      "sha256": "88a1d2bb8eeebdb36d42da436357afaa6e8ab60f4098a8f1b38d6ea38d9e850d"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query/flight.rs",
+      "bytes": 6238,
+      "sha256": "2efa101d4cb2dffc01998e1232af7deea7cc9a766ada52126cfcea1d139666e4"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query/tests.rs",
+      "bytes": 11067,
+      "sha256": "9bb1aced8d7ea605f0f58375ba546532ce36a731e3d29434357d3a2843c90bba"
+    }
+  ],
+  "serviceFilesExact": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 107143,
+      "sha256": "24df808e779f556d5c50e207342b4261ca84d5b4246ec566ecb27b0077cbbcf9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_certificate.rs",
+      "bytes": 11340,
+      "sha256": "800e0994b9d80f9d93ab0fb8e855351731e4200c6ea73604e245d5504b6a4cc2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_certificate/tests.rs",
+      "bytes": 12173,
+      "sha256": "482c098aa35305c2ab770ff89c9856427ddce025613a5b30cadef54b56df7683"
+    }
+  ],
+  "sourceTree": "/tmp/fc-round47-https-settings-worktree",
+  "scope": "Integrated frozen final core plus R48 native and second service, preserving final fourth backup test fixes. No R49 UI yet, no Windows/runtime or new compile claim."
+}

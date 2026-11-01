@@ -1,0 +1,92 @@
+{
+  "status": "SOURCE_CONTRACT_NOT_RUN",
+  "source": {
+    "path": "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/application/https_settings_probe.rs",
+    "bytes": 14959,
+    "sha256": "feaac367ea006f5333d040b267f4269c26e442a2034f662f69d3c54ff89ce296"
+  },
+  "commands": [
+    "--https-settings-probe",
+    "--https-settings-probe --certificate-thumbprint <exact40hex-public-reference>"
+  ],
+  "steps": [
+    "setup-local-global-administrator",
+    "native-device-page-production-unavailable",
+    "native-open-https-config",
+    "unconfigured-no-default-port",
+    "invalid-port-rejected-no-write",
+    "cancel-draft-confirmed-no-write",
+    "native-save-localhost-reference",
+    "saved-config-no-listener",
+    "explicit-native-certificate-check",
+    "native-draft-retained-across-lock",
+    "native-relogin-preserves-draft",
+    "native-original-save-admitted",
+    "real-commit-delivery-cancelled",
+    "original-request-retained-after-cancel",
+    "lock-and-relogin-original-owner",
+    "native-explicit-original-outcome-query",
+    "historical-receipt-not-current-cas",
+    "explicit-risk-confirmed-current-reload",
+    "current-config-readback",
+    "device-page-remains-unavailable",
+    "actual-shared-worker-writer-shutdown",
+    "owned-deployment-cleanup"
+  ],
+  "stepWire": "HTTPS_SETTINGS_NATIVE_STEP index=<0..21> name=<exact ordered name>; plain line, not JSON",
+  "observation": {
+    "prefix": "HTTPS_SETTINGS_CERTIFICATE_OBSERVATION ",
+    "count": 1,
+    "jsonKeys": [
+      "scope",
+      "publicationRevision",
+      "identityRevision",
+      "settingsRevision",
+      "found",
+      "currentTime",
+      "privateKey",
+      "serverAuthEku",
+      "serverName",
+      "sslChainPolicy",
+      "cachedRevocation",
+      "chainTrustErrors",
+      "sslPolicyError",
+      "readiness"
+    ],
+    "scope": "CurrentUserMyCacheOnly",
+    "factShape": {
+      "check": [
+        "Satisfied",
+        "Rejected",
+        "Unverified",
+        "NotChecked"
+      ],
+      "nativeError": "signed int or null"
+    },
+    "readiness": "NOT_GRANTED",
+    "ownedReferenceRequiredFacts": [
+      "found",
+      "currentTime",
+      "privateKey",
+      "serverAuthEku"
+    ],
+    "ownedReferenceRequiredFactValue": "Satisfied",
+    "otherFacts": "Original actual values; never require trust/cache/name PASS or infer readiness"
+  },
+  "footer": "HTTPS_SETTINGS_NATIVE_PASS steps=22 shared_workers=2 original_result_query=PASS listener=NOT_ENABLED certificate_scope=CurrentUserMyCacheOnly certificate_query_count=1 readiness=NOT_GRANTED physical_shutdown=PASS isolated_cleanup=PASS elapsed_ms=<actual int>",
+  "budgets": {
+    "finiteNativeWorkflowSeconds": 120,
+    "ordinaryEachSharedJobSeconds": 90,
+    "source": "Same original 90s per ordinary worker task; a returned unadmitted Busy task never gets a new deadline. This distinct no-listener UI probe does not change existing HTTP/TLS12/30/45 budgets."
+  },
+  "notExercised": [
+    "wrong host variant",
+    "arbitrary provider stall/heldquery cancellation",
+    "new independent physical database reopen",
+    "actual other-device certificate trust",
+    "actual teacher browser enable/listener",
+    "Win7/10/visibleSeewo"
+  ],
+  "native": "Exact hidden native controls; no OS foreground/input injection. Public certificate reference only, no certificate/key creation/trust install by the EXE.",
+  "unvalidated": "No Cargo/EXE/Windows invocation performed; root builds and executes later."
+}

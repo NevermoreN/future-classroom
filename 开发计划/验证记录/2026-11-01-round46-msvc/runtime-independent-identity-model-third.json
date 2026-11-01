@@ -1,0 +1,70 @@
+{
+  "status": "PASS_PURE_RUNTIME_IDENTITY_MODELS_ONLY",
+  "helperSha256": "441cfec76d8c91f9509197b0ac07a46e630e792e2db9cb8a2511944f1d9451c8",
+  "positive": 1,
+  "negative": [
+    {
+      "name": "nonterminal_command",
+      "rejected": true
+    },
+    {
+      "name": "command_not_exited",
+      "rejected": true
+    },
+    {
+      "name": "wrong_metadata",
+      "rejected": true
+    },
+    {
+      "name": "runtime_failed",
+      "rejected": true
+    },
+    {
+      "name": "cleanup_failed",
+      "rejected": true
+    },
+    {
+      "name": "normal_sha_changed",
+      "rejected": true
+    },
+    {
+      "name": "test_sha_changed",
+      "rejected": true
+    },
+    {
+      "name": "missing_test",
+      "rejected": true
+    },
+    {
+      "name": "duplicate_test",
+      "rejected": true
+    },
+    {
+      "name": "uploaded_sha_changed",
+      "rejected": true
+    },
+    {
+      "name": "timeout_even_with_pass_status",
+      "rejected": true
+    },
+    {
+      "name": "wrong_os_scope",
+      "rejected": true
+    },
+    {
+      "name": "formal_win7_upgrade",
+      "rejected": true
+    },
+    {
+      "name": "hidden_host_failed",
+      "rejected": true
+    },
+    {
+      "name": "noninteractive_session",
+      "rejected": true
+    }
+  ],
+  "limitations": [
+    "Synthetic in-memory reports only; no real executable, Windows, SSH, CI, Cargo, cleanup or runtime pass is implied."
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "status": "FINAL_HELPER_FROZEN_PREPARE_ONLY_R51_CONSUMER_ACTIVE",
+  "helper": {
+    "path": "/tmp/fc-round46-ci-evidence/archive-r46.py",
+    "bytes": 22296,
+    "sha256": "91c754baaa196001fc406ce50fb00cdf32a4247247b6bb1ea04c74677d6260ea"
+  },
+  "preparation": {
+    "path": "/tmp/fc-round46-ci-evidence/archive-r46-preparation-final.json",
+    "bytes": 190418,
+    "sha256": "da3e7db749161fc821ae28b8b1776b916290bbe6fa75bc9eaa8acc7853f80609"
+  },
+  "scannerModels": {
+    "path": "/tmp/fc-round46-ci-evidence/archive-r46-scanner-model-final.json",
+    "bytes": 2954,
+    "sha256": "68b53bfa92ac52c19037e314cfc23985dcc7009941d4a15f09f3341b25581492"
+  },
+  "scannerModelSource": {
+    "path": "/tmp/fc-round46-ci-evidence/archive-r46-scanner-model-final.py",
+    "bytes": 3058,
+    "sha256": "44924cbe1324c5505a81d48234e1bbe7174292113c897340a8a8046e0d8c12d8"
+  },
+  "fileCount": 628,
+  "totalNonbinaryBytes": 134988197,
+  "decodedPayloadCount": 67,
+  "sensitiveFindingCount": 0,
+  "excludedFiles": 46,
+  "copyOrArchiveExecuted": false,
+  "mainModified": false,
+  "cleanupExecuted": false,
+  "original520Manifest": "runtime-independent-counts-and-archive-manifest-first.json remains unchanged and NOT_SEALED; subsequent point-in-time inventories add original firstFAIL/second finite retry/source/owner/raw data.",
+  "knownFailuresPreserved": [
+    "Original modern runtime default60s actualFAIL+cleanupPASS",
+    "First browser actual Network.loadingFailed FAIL+fullcleanupPASS; cause undetermined, later finite PASS not claimed as fix",
+    "First archive preparation rejected source membership change while R51 run created new files; no main copied"
+  ],
+  "finalExecutionMustWait": "Root must confirm R50/R51/all owned consumers physically finished. Existing browser diagnostic second PASS is not all-finished authorization. Then supply actual final browser and a later fresh readonly report with original terminal command logs.",
+  "writeGuard": {
+    "destination": "开发计划/验证记录/2026-11-01-round46-msvc",
+    "createNewOnly": true,
+    "allConsumersExplicitFlagRequired": true,
+    "finalBrowserAndReadonlyProofRequired": true,
+    "freshReadonlyAfterBrowserLocalReportFileOrder": true,
+    "perOriginalByteAndShaBeforeAfterCopy": true,
+    "sourceMembershipRecheckAfterCopy": true,
+    "partialCopyFailureHonestAndRetained": true,
+    "generatedINDEXExcludedFromOwnLedger": true,
+    "independentArchiveReportMustBeOutsideEvidenceAndDestination": true
+  },
+  "parentFutureCommand": [
+    "python3",
+    "-B",
+    "/tmp/fc-round46-ci-evidence/archive-r46.py",
+    "--write-archive",
+    "--all-consumers-finished",
+    "--final-browser-report",
+    "REPLACE_WITH_ACTUAL_FINAL_BROWSER_JSON_INSIDE_R46",
+    "--final-readonly-report",
+    "REPLACE_WITH_ACTUAL_POST_BROWSER_READONLY_JSON_INSIDE_R46",
+    "--report",
+    "/tmp/fc-round46-archive-report-first.json"
+  ],
+  "noOperations": [
+    "SSH",
+    "Windows",
+    "Cargo",
+    "Git writes",
+    "main copy",
+    "active root cleanup",
+    "private-key content read or hash"
+  ],
+  "scope": "Pattern/recursive encoding review is bounded and cannot prove arbitrary unknown encodings secret-free. Findings show location/type only; public cert/hash data and explicit expired synthetic controls classified. No environment reference path is followed."
+}

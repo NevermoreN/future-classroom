@@ -1,0 +1,21 @@
+
+running 16 tests
+test tls_frontdoor::certificate_query::flight::tests::certificate_query_failed_owner_is_retained_and_fault_is_permanent ... ok
+test tls_frontdoor::certificate_query::flight::tests::certificate_query_flight_is_busy_until_explicit_physical_release ... ok
+test tls_frontdoor::certificate_query::flight::tests::certificate_query_unfinished_claim_cannot_silently_publish_idle ... ok
+test tls_frontdoor::certificate_query::flight::tests::certificate_query_poison_preserves_original_retained_owner_and_rejects_claim ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_api_failure_cannot_be_treated_like_zero_policy_status ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_cached_revocation_unknown_and_revoked_remain_distinct ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_cancellation_at_each_checkpoint_closes_exact_original_driver ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_delivers_only_after_original_driver_cleanup_and_keeps_scope ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_incomplete_chain_never_promises_cached_revocation_success ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_independent_negative_facts_are_retained_without_skipping_cleanup ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_ip_and_ipv6_name_stay_unverified_even_with_zero_policy_error ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_missing_or_failed_lookup_never_inspects_another_certificate ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_panicking_authority_is_cancelled_and_still_closes ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_policy_true_with_error_is_not_policy_or_name_success ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_rejects_noncanonical_or_unbounded_input_before_native_work ... ok
+test tls_frontdoor::certificate_query::tests::certificate_query_release_failure_overrides_success_cancel_and_missing_certificate ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 31 filtered out; finished in 0.00s
+

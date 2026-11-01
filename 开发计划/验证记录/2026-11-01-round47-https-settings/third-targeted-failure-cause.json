@@ -1,0 +1,8 @@
+{
+  "actual": "24 new targeted cases executed: bootstrap6/6,domain3/3,storage13/15; no full libs or Clippy",
+  "sourceUnchanged": true,
+  "cause": "New fixture passed exported ordinary SQLite backup to live open_connection, whose required command_journal/user_version differ from original ORDINARY_SCHEMA. Both failures occurred before recovery calls.",
+  "fixScope": "crates/fc-storage/src/business/https_settings/tests.rs",
+  "beforeSha256": "52fb1f672f03244dba3a68ad2272e1d974bda1a4e2a56521e784004fdbba858e",
+  "productionCodeChanged": false
+}

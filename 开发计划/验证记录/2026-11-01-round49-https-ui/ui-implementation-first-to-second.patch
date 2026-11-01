@@ -1,0 +1,56 @@
+--- a/crates/fc-bootstrap/src/application/https_settings_probe.rs
++++ b/crates/fc-bootstrap/src/application/https_settings_probe.rs
+@@ -86,8 +86,22 @@
+     submit(app, web_editor::HTTPS_SETTINGS, &[], deadline)?;
+     require(app.screen == Screen::HttpsSettings, "HTTPS native page")
+ }
+-fn fact(value: CertificateFact) -> serde_json::Value {
+-    serde_json::json!({"check":format!("{:?}",value.check),"nativeError":value.native_error})
++// Wire strings are a closed set of constants. Only integers/null are formatted
++// from observations; no configuration, provider text or user input is encoded.
++fn optional_number(value: Option<i64>) -> String {
++    value.map_or_else(|| "null".to_owned(), |value| value.to_string())
++}
++fn fact(value: CertificateFact) -> String {
++    let check = match value.check {
++        CertificateCheck::Satisfied => "Satisfied",
++        CertificateCheck::Rejected => "Rejected",
++        CertificateCheck::Unverified => "Unverified",
++        CertificateCheck::NotChecked => "NotChecked",
++    };
++    format!(
++        "{{\"check\":\"{check}\",\"nativeError\":{}}}",
++        optional_number(value.native_error.map(i64::from))
++    )
+ }
+ fn workflow(
+     app: &mut App,
+@@ -204,8 +218,26 @@
+     }
+     let report = &observation.report;
+     println!(
+-        "HTTPS_SETTINGS_CERTIFICATE_OBSERVATION {}",
+-        serde_json::json!({"scope":"CurrentUserMyCacheOnly","publicationRevision":observation.publication_revision.get(),"identityRevision":observation.identity_revision.get(),"settingsRevision":observation.settings_revision.get(),"found":fact(report.found),"currentTime":fact(report.current_time),"privateKey":fact(report.private_key),"serverAuthEku":fact(report.server_auth_eku),"serverName":fact(report.server_name),"sslChainPolicy":fact(report.ssl_chain_policy),"cachedRevocation":fact(report.cached_revocation),"chainTrustErrors":report.chain_trust_errors,"sslPolicyError":report.ssl_policy_error,"readiness":"NOT_GRANTED"})
++        concat!(
++            "HTTPS_SETTINGS_CERTIFICATE_OBSERVATION ",
++            "{{\"scope\":\"CurrentUserMyCacheOnly\",",
++            "\"publicationRevision\":{},\"identityRevision\":{},\"settingsRevision\":{},",
++            "\"found\":{},\"currentTime\":{},\"privateKey\":{},\"serverAuthEku\":{},",
++            "\"serverName\":{},\"sslChainPolicy\":{},\"cachedRevocation\":{},",
++            "\"chainTrustErrors\":{},\"sslPolicyError\":{},\"readiness\":\"NOT_GRANTED\"}}"
++        ),
++        observation.publication_revision.get(),
++        observation.identity_revision.get(),
++        observation.settings_revision.get(),
++        fact(report.found),
++        fact(report.current_time),
++        fact(report.private_key),
++        fact(report.server_auth_eku),
++        fact(report.server_name),
++        fact(report.ssl_chain_policy),
++        fact(report.cached_revocation),
++        optional_number(report.chain_trust_errors.map(i64::from)),
++        optional_number(report.ssl_policy_error.map(i64::from))
+     );
+     mark(step, "explicit-native-certificate-check")?;
+     // Actual native draft capture: request reload with changed form, then

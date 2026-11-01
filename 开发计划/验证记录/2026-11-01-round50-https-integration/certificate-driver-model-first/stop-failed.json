@@ -1,0 +1,31 @@
+{
+  "scope": "PURE MOCK; NO SSH/WINDOWS",
+  "calls": [
+    "tls-stop.ps1"
+  ],
+  "report": {
+    "status": "FAIL",
+    "ownedProcessCleanup": {
+      "status": "FAIL",
+      "ownedProcessesRemaining": 0
+    },
+    "remoteCaptureError": {
+      "kind": "RuntimeError",
+      "phase": "preserve-complete-original-artifacts",
+      "message": "physical process stop unproven; original logs may still change"
+    },
+    "cleanup": "FAIL",
+    "cleanupError": {
+      "kind": "RuntimeError",
+      "phase": "cleanup-owned-fixture",
+      "message": "owned process stop unproven; preserving certificate/key/root"
+    },
+    "retainedRemoteEvidence": {
+      "root": "C:\\SyntheticNotWindows",
+      "processStopProven": false,
+      "completeLocalArtifactsProven": false,
+      "cleanupIncomplete": true,
+      "nextAction": "recover complete originals then use this root's exact tls-cleanup.ps1; retain SSH authorization"
+    }
+  }
+}

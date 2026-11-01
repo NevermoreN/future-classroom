@@ -1,0 +1,60 @@
+{
+  "scope": "Read-only schema compatibility against original archived R42 official metadata only. No R46 artifact or CI validation, no download, no ZIP/PE/runtime execution.",
+  "helper": {
+    "path": "/tmp/fc-round46-ci-evidence/verify-ci-artifact-first.py",
+    "bytes": 52089,
+    "sha256": "824731fabec97ec84423c94de6b0434a85e6f4887c3e6698cd7bac87240c2073"
+  },
+  "status": "PASS_OLD_METADATA_SCHEMA_ONLY",
+  "observations": {
+    "inputs": [
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round42-ci/modern-run-second.json",
+        "bytes": 28372,
+        "sha256": "bf05682a1878011197449cb432503f557739a7f3efeace07791ca28c2ad4de97"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round42-ci/modern-jobs-third.json",
+        "bytes": 1905,
+        "sha256": "e07d1ef8b2225f265787fc6963f707c70427f3c2ddac76c2578bf70d19d6b389"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round42-ci/modern-artifacts-first.json",
+        "bytes": 1079,
+        "sha256": "3a5aca4ec57eed9c01ca8440d9d2d3ae400bfae5357dc614cdf35b9e54866d96"
+      }
+    ],
+    "checks": [
+      {
+        "name": "official exact run/source/completed/workflow",
+        "status": "PASS"
+      },
+      {
+        "name": "official exact completed job belongs original run",
+        "status": "PASS"
+      },
+      {
+        "name": "official artifact exact identity/ZIP digest/bytes/source",
+        "status": "PASS"
+      },
+      {
+        "name": "official artifact original baseline/run/attempt name",
+        "status": "PASS"
+      }
+    ],
+    "officialIdentity": {
+      "sourceSha": "bc2a86fb4413dcb3e8acf6b0d4bb2dfe601c22dc",
+      "runId": 41244281175,
+      "jobId": 124664360125,
+      "artifactId": 13058962672,
+      "runAttempt": 1,
+      "runStatus": "completed",
+      "runConclusion": "success",
+      "jobConclusion": "success",
+      "workflow": ".github/workflows/windows-msvc.yml",
+      "artifactName": "future-classroom-msvc-i686-bc2a86fb4413dcb3e8acf6b0d4bb2dfe601c22dc-41244281175-1",
+      "jobSourceBinding": "EXACT_JOB_ID_AND_RUN_ID_TO_SOURCE_BOUND_OFFICIAL_RUN",
+      "jobHeadShaProvided": false
+    }
+  }
+}

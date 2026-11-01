@@ -1,0 +1,83 @@
+{
+  "status": "DRIVER_FROZEN_MODELS_ONLY_REAL_WINDOWS_NOT_RUN",
+  "driver": {
+    "path": "/tmp/fc-round50-https-integration-evidence/run-https-certificate-native-first.py",
+    "bytes": 17136,
+    "sha256": "6560edfda790e05dc6b58ec381fa72b377b97633079277550ce6a366e7d7c406"
+  },
+  "rootExecutionCommand": "python3 /tmp/fc-round50-https-integration-evidence/run-https-certificate-native-first.py --execute --host future-classroom-win11 --identity <existing-private-key-path-passed-to-SSH-only> --exe <final-tested-GNU-fc-bootstrap.exe> --report <new-native-certificate-report.json>",
+  "sourceBindings": {
+    "preparer": "/tmp/fc-round48-certificate-query-evidence/prepare-certificate-fixture-third.py",
+    "preparerSha256": "b652832f1ca4fe8c86f7e6fb105e232cc042f4a02d2df27e8493427365240df3",
+    "r49ContractSha256": "017da7e35aec46dbf522db43716ed8f316b44837b51255ddb894f84212596943",
+    "mainOwnershipFunctions": "Hard-bound current main scripts/windows-tls-business-probe.py cleanup_owned + _tls Remote/COMMON/CAPTURE/SETUP/CLEANUP/preserve_raw. SHA changes reject before Remote creation."
+  },
+  "actualLocalModels": {
+    "exitCode": 0,
+    "source": {
+      "path": "/tmp/fc-round50-https-integration-evidence/run-https-certificate-native-first.py",
+      "bytes": 17136,
+      "sha256": "6560edfda790e05dc6b58ec381fa72b377b97633079277550ce6a366e7d7c406"
+    },
+    "stdout": {
+      "path": "/tmp/fc-round50-https-integration-evidence/certificate-driver-model-second.stdout.log",
+      "bytes": 693,
+      "sha256": "3d34cb458a1e59c55d03c36a5ae8fe79a1eb7c82965e523ac08cdf8fdeeefc0b"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round50-https-integration-evidence/certificate-driver-model-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "result": {
+      "status": "PURE_LOCAL_MODELS_PASS",
+      "wireModels": {
+        "status": "PURE_MODEL_PASS",
+        "positiveCases": 2,
+        "negativeCases": 32,
+        "contractSha256": "017da7e35aec46dbf522db43716ed8f316b44837b51255ddb894f84212596943",
+        "wire": "Actual22 plainsteps +exact14key nativeobservation +footer +ownedprocess exit",
+        "scope": "Synthetic transcript models only; no PowerShell AST, SSH, Windows, CryptoAPI or EXE execution"
+      },
+      "astSourceModels": {
+        "positive": 1,
+        "negative": 4
+      },
+      "cleanupModels": [
+        "success",
+        "native-failed",
+        "stop-failed",
+        "capture-failed",
+        "cleanup-failed"
+      ],
+      "windows": "NOT_RUN",
+      "ssh": "NOT_RUN",
+      "native": "NOT_RUN"
+    }
+  },
+  "priorLocalModelPreserved": {
+    "directory": "/tmp/fc-round50-https-integration-evidence/certificate-driver-model-first",
+    "driverBeforeFinalStatic": {
+      "path": "/tmp/fc-round50-https-integration-evidence/certificate-driver-before-final-static.py",
+      "bytes": 16669,
+      "sha256": "f94c3fc4040ec6b6b6702d38e6f130c8e330aa1d8575ce496bbb246608abb84b"
+    },
+    "note": "Final static followup only adds per-process explicit AST file ExecutionPolicy Bypass (matching existing run_file) and names normalized decoded transcript accurately. No Windows was executed in either local model."
+  },
+  "contracts": [
+    "Original90s owned supervisor unchanged; root uses bounded100s SSH observation; App120s footer remains separately validated, no network/browser/TLSforward needed",
+    "Initial four own controls AST and exact sourceSHA checked before certificate creation; exact EXESHA checked remote and local. After setup derives actual owned40hex, prepare launch and independently AST/hash all fivecontrols",
+    "Actual query must produce four independent factsSatisfied; exact22 plainwire/native14key observation/footer/actualprocess exit0 checked by third frozenvalidator",
+    "All remote command/file stdout/stderr retained full bytes/base64/SHA including failures/timeouts. Own full script sources persist in marker-bound localcontrol root, not TemporaryDirectory",
+    "Decoded transcript is normalized for parser only; exact SSH/child original streams separately retained. SSHprivate-key content is never read or hashed byPython",
+    "Success/failure always call existing cleanup_owned: originalphysical stop -> capture and complete rawdownload/hash -> exact certificate+CNG/MYdigest+rootcleanup. If stop/rawcapture fails, no key/root deletion; failure report keeps preciseowner recovery path",
+    "FinalPASS additionally independently checks zeroownedprocesses, originalpreservationPASS, oneownedcertremoved, CNGkeyfalse, MYafter==setupMYbefore, rootAbsent. NativeFAIL cannot becomePASS merely becausecleanup succeeded",
+    "No extra businesspool/thread, certificate enumeration output, PFX/privatekeyexport, trust/HTTPsys/firewall/Run/SSHconfiguration mutation"
+  ],
+  "optionalMissingReference": "NOT_IMPLEMENTED in this owned-positive driver. R49noarg false reference is not presumed absent; any later separate negative run must require actual foundRejected and allotherfactsNotChecked. No arbitrary certificate/store assumption.",
+  "powershellAst": "Prepared but NOT_RUN; Python ast.parse only passed",
+  "realWindows": "NOT_RUN",
+  "ssh": "NOT_RUN",
+  "cargo": "NOT_RUN",
+  "productSourceChanges": false
+}

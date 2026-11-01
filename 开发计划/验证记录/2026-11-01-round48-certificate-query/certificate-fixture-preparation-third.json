@@ -1,0 +1,130 @@
+{
+  "status": "SOURCE_PREPARED_REAL_WIRE_MODELS_PASS_WINDOWS_NOT_RUN",
+  "preparer": {
+    "path": "/tmp/fc-round48-certificate-query-evidence/prepare-certificate-fixture-third.py",
+    "bytes": 16060,
+    "sha256": "b652832f1ca4fe8c86f7e6fb105e232cc042f4a02d2df27e8493427365240df3"
+  },
+  "priorVersionsPreserved": [
+    {
+      "path": "/tmp/fc-round48-certificate-query-evidence/prepare-certificate-fixture-second.py",
+      "bytes": 12620,
+      "sha256": "366e10830623f305f6a5279a00729635f48bded224aa78f7527b126e86424a98"
+    },
+    {
+      "path": "/tmp/fc-round48-certificate-query-evidence/prepare-certificate-fixture-first.py",
+      "bytes": 12441,
+      "sha256": "d2aab2ee701d8d4887aed6b29748e5ebaa7ab99ca90cd5f3e85b8aa97d84a85e"
+    }
+  ],
+  "boundR49Contract": {
+    "path": "/tmp/fc-round48-certificate-query-evidence/r49-probe-contract-bound-third.json",
+    "bytes": 3711,
+    "sha256": "017da7e35aec46dbf522db43716ed8f316b44837b51255ddb894f84212596943"
+  },
+  "ownershipBinding": {
+    "path": "/tmp/fc-round48-certificate-query-evidence/certificate-fixture-ownership-binding-first.json",
+    "bytes": 649,
+    "sha256": "22fa4505f8c7a74da66bd497eb9a8609b651e8daa31a40faaf96411ba2bdc354"
+  },
+  "ownershipAnd90SecondSupervisorUnchanged": true,
+  "actualLocalModel": {
+    "exitCode": 0,
+    "result": {
+      "status": "PURE_MODEL_PASS",
+      "positiveCases": 2,
+      "negativeCases": 32,
+      "contractSha256": "017da7e35aec46dbf522db43716ed8f316b44837b51255ddb894f84212596943",
+      "wire": "Actual22 plainsteps +exact14key nativeobservation +footer +ownedprocess exit",
+      "scope": "Synthetic transcript models only; no PowerShell AST, SSH, Windows, CryptoAPI or EXE execution"
+    },
+    "stdout": {
+      "path": "/tmp/fc-round48-certificate-query-evidence/certificate-fixture-model-third.stdout.log",
+      "bytes": 365,
+      "sha256": "7af519bbc3de1b726eb7d066c63428dca0d9e79c0bc88d6be98f9136303057bd"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round48-certificate-query-evidence/certificate-fixture-model-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "actualLocalPreparation": {
+    "exitCode": 0,
+    "controls": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-model-third",
+    "scope": "Synthetic nonexistent Windows path/placeholder public reference only, no Windows access",
+    "files": [
+      {
+        "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-model-third/parse-owned-controls.ps1",
+        "bytes": 664,
+        "sha256": "ac1e65c165c484730ac00e35891e57b63b5187e77ed282e8e9c2e653ae9b8d07"
+      },
+      {
+        "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-model-third/preparation.json",
+        "bytes": 30412,
+        "sha256": "cf35bb673aaeb157055e154311a4c8d9d716163f03f6aa2dcb82287a25eff70c"
+      },
+      {
+        "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-model-third/tls-capture.ps1",
+        "bytes": 2444,
+        "sha256": "733861adec1380a8256740aa03f92eea0b206c6165f7cc03ae0ab60c60b27b5c"
+      },
+      {
+        "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-model-third/tls-cleanup.ps1",
+        "bytes": 4989,
+        "sha256": "38ce6f64b3cd86f52ae1f04755e4908c2b986446585ca9a3462f0184e0389e55"
+      },
+      {
+        "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-model-third/tls-launch.ps1",
+        "bytes": 4398,
+        "sha256": "27b15f422bc1baea50ad1baa81ebe879ec8ccd561358d08d03ed09cbdeef4f60"
+      },
+      {
+        "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-model-third/tls-setup.ps1",
+        "bytes": 4287,
+        "sha256": "5a3c09e16ebd24e6b1a88323b67df4fe38a7776270486fc6188aee1542607e1d"
+      },
+      {
+        "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-model-third/tls-stop.ps1",
+        "bytes": 4303,
+        "sha256": "7e9cb478295ad88a07f573de6b4185a87264c58e4e8922de05375821856dca1a"
+      }
+    ],
+    "stdout": {
+      "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-prepare-third.stdout.log",
+      "bytes": 75,
+      "sha256": "8034231031b8a87c084f0d6b332fa720f831841e740a79545ed6f625ac05e1f6"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round48-certificate-query-evidence/certificate-controls-prepare-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "validation": [
+    "Exact bound22 plainindex/name steps, uniquely ordered, no JSON step fiction",
+    "Exactly one actual14key observation, seven exact check/nativeError objects, strict primitive bounds and duplicateJSONkey rejection",
+    "Four independent owned cert facts Satisfied; preserve actual untrusted/unknown name/chain/cache outcomes; cache-only and readiness NOT_GRANTED explicit",
+    "Policy/name positives cannot contradict chainTrustErrors or sslPolicyError",
+    "Exact footer fields+canonical actualelapsed <=original120000ms, all steps beforefooter, supervisor actualexit0 afterfooter",
+    "Observation placed between saved-no-listener step7 and explicit-check step8 according to frozen actual source"
+  ],
+  "notRun": [
+    "PowerShell AST",
+    "SSH/Windows",
+    "certificate/CNG creation/query/cleanup",
+    "actual EXE/TLS",
+    "Cargo/CI/Git"
+  ],
+  "readonlyUiReview": {
+    "source": "R49 ui-implementation-after-first immutable snapshot per ui-source-freeze-first.json",
+    "scope": [
+      "https_settings_controller.rs Check branch releases Backend+BackendExecution scope before native service call and uses originalJobContextANDfence",
+      "Completion binds original lease/Appgeneration/screen+Healthyglobalpublication and observation.is_current_for loaded config before display",
+      "CANCEL_WAIT cancels originalticket and clears certificate; workercontext recheck prevents latepositive delivery. Provider cancellation itself remains cooperative until actualreturn."
+    ],
+    "concreteBlockersFound": [],
+    "limits": "Read-only static review, not a runtime proof. R50 root integration Error::from_thread correction is not copied over originalR48 frozennative source."
+  },
+  "executionDependency": "Root owns Windows serial slot and testedEXESHA/source binding. Preparer still intentionally has no SSHexecution mode; root uses existing owned Remote.run_file+preserve_raw pipeline as recorded in second preparation recipe. OverallPASS additionally requires actual native/exit and precise cert+CNG+root cleanup proof."
+}

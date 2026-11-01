@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-tls-business-probe.py",
+    "--ssh-target",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round50-https-programs-preliminary/fc-bootstrap.exe",
+    "--web-bundle",
+    "/mnt/data/FutureClassroom-0.1.0-voice-capability-dev.zip",
+    "--continuous-accept",
+    "--browser",
+    "--voice-capabilities",
+    "--report",
+    "/tmp/fc-round50-https-integration-evidence/windows-default-browser-continuous-first.json"
+  ],
+  "cwd": "/tmp/fc-round51-browser-diagnostics-worktree",
+  "startedUtc": "2026-11-01T00:26:59.552820+00:00",
+  "stdout": "/tmp/fc-round50-https-integration-evidence/windows-default-browser-continuous-first.stdout.log",
+  "stderr": "/tmp/fc-round50-https-integration-evidence/windows-default-browser-continuous-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 69.42530470900238,
+  "completedUtc": "2026-11-01T00:28:08.978429+00:00",
+  "stdoutBytes": 285,
+  "stdoutSha256": "6939d2045e104c4aef1bbd59d5e3784c9298b7d899abe108c99794423c2129db",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

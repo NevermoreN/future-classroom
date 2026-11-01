@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_PURE_MODELS_ONLY",
+  "scope": "Host-only actual metadata copies deliberately corrupted. No remote, product tests or browser runs. Cached200 and confirmed304 semantics explicitly differ.",
+  "helper": {
+    "path": "/tmp/fc-round50-https-integration-evidence/verify-final-browser-readonly-second.py",
+    "bytes": 28608,
+    "sha256": "f7c0aa961fe86bef9d65ff181ad34ed0ec718c5afde27ecf807ae4f18723dbd4"
+  },
+  "checks": [
+    {
+      "name": "original actual completed network and13API",
+      "expected": "accept",
+      "status": "PASS"
+    },
+    {
+      "name": "original actual readonly complete raw agrees baseline",
+      "expected": "accept",
+      "status": "PASS"
+    },
+    {
+      "name": "actual304 remains wire even cache flags",
+      "expected": "accept",
+      "status": "PASS"
+    },
+    {
+      "name": "cached200 excluded without waiting extraInfo",
+      "expected": "accept",
+      "status": "PASS"
+    },
+    {
+      "name": "network finished",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "network bodyVerified",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicate contentPOST",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "missing visual response",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "cached API",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "bad API status",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "unauthorized other write",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "PASS must not contain failureDiagnostics",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "PASS must not contain error",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "PASS must not contain status",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "raw binding bytes",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "raw binding sha256",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "raw binding captureScope",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "raw binding observedBytes",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "readonly status",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "readonly integrityStatus",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "readonly sshd",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "readonly ownedProcesses",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "readonly ownedTasks",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "readonly scratchDirectories",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "readonly publicAuthorizationUnchanged",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "readonly projectRunUnchanged",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "baseline sshPublicAuthorizationSha256",
+      "expected": "reject",
+      "status": "PASS"
+    },
+    {
+      "name": "baseline projectRunReadOnlySnapshot",
+      "expected": "reject",
+      "status": "PASS"
+    }
+  ],
+  "positiveCount": 4,
+  "negativeCount": 24
+}

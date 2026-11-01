@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "status": "FROZEN_PASS_LOCAL_INDEPENDENT_RECOMPUTATION",
+  "scope": "Only local evidence reads. No SSH, Windows, browser, Cargo, product/source changes or cleanup. All new files under R50; R46 directory was never written by this task.",
+  "files": [
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/browser-readonly-independent-first.json",
+      "bytes": 92301,
+      "sha256": "567e860f70dfc803ab48e8a6f1576173e799c13bf95a3b9f7796f098980645fe"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/verify-final-browser-readonly-first.py",
+      "bytes": 25884,
+      "sha256": "6d2f8a0631423e41af34e7127eae27ec455688f1c2c1cf686888af1c8a155817"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/browser-readonly-independent-second.json",
+      "bytes": 95074,
+      "sha256": "dc422c21ac2dfc955ea96db83bc34bb00b0cee9f96ad3e8c5d1462a32d531a0b"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/verify-final-browser-readonly-second.py",
+      "bytes": 28608,
+      "sha256": "f7c0aa961fe86bef9d65ff181ad34ed0ec718c5afde27ecf807ae4f18723dbd4"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/browser-readonly-parser-model-first.py",
+      "bytes": 4509,
+      "sha256": "25ba6304a93bb7efdb9e78e83288fc8cdf54179099be8481db9d746078ce31c2"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/browser-readonly-parser-model-first.json",
+      "bytes": 3551,
+      "sha256": "1c8dd4d217bd70a44e586e30d42eb8dff419387a5c7a150ac4636481a1e81b22"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/browser-readonly-parser-model-first.command.json",
+      "bytes": 865,
+      "sha256": "96e91be972f66f5d18c9b3b2fc007ab3e6a8fd287e5e0d653f520e6378051529"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/browser-readonly-parser-model-first.stdout.log",
+      "bytes": 145,
+      "sha256": "149f8cf61545f978066bf9270c0868d4a1afdebb964e5650444f049c6d4a59ce"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/browser-readonly-parser-model-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "inputCount": 52,
+  "checkCount": 433,
+  "flows": [
+    {
+      "browser": "/tmp/fc-round46-ci-evidence/modern-msvc-default-browser-continuous-final-third.json",
+      "readonlyReport": "/tmp/fc-round46-ci-evidence/windows-readonly-final-second.json",
+      "exeSha256": "bc8f224a97797311e76182486bfa6502f8c11110e3a7151893f5212ff9d911aa",
+      "artifactProvenance": {
+        "audit": "/tmp/fc-round46-ci-evidence/modern-original-independent-first.json",
+        "binding": "Original exact Modern MSVC artifact; separately completed original runtime review"
+      },
+      "status": "PASS_FINITE_ACTUAL_BROWSER_AND_FRESH_READONLY",
+      "sourceSha256": {
+        "observer": "e52c31ac7e49eee6cceba708c5b1d6db5c3aea7f68a9f471616f513e3b4a9e47",
+        "edgeOwner": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5",
+        "nodeHarness": "a154ab071100c677fbaf54d3b274fa8456c7533aa929da7daef51de6cb20725e",
+        "tlsOwnershipHelpers": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df"
+      },
+      "counts": {
+        "rawEvents": 68,
+        "rawHTTP": 64,
+        "browserObserved": 21,
+        "browserWire": 18,
+        "browserCacheOnly": 3,
+        "nativeHeads": 82,
+        "nativeResponses": 82,
+        "api": 13,
+        "posts": 1,
+        "visualReads": 4,
+        "shortcutClicks": 0,
+        "recursiveRawContainers": 38
+      },
+      "voiceCapabilities": {
+        "status": "PASS",
+        "additionalWireRequests": 3,
+        "unauthenticatedStatus": 401,
+        "authenticatedStatuses": [
+          200,
+          200
+        ],
+        "identityRevision": "5",
+        "runtimeGeneration": "1",
+        "currentClassId": "1",
+        "targetAuthorized": true,
+        "enabled": true,
+        "admission": "OPEN",
+        "deviceAvailability": "UNVERIFIED",
+        "limits": {
+          "minRepeatTotal": 1,
+          "defaultRepeatTotal": 3,
+          "maxRepeatTotal": 10,
+          "minDurationMillis": 500,
+          "maxDurationMillis": 60000,
+          "maxWavBytes": 1920044,
+          "sampleRate": 16000,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "uploadTtlSeconds": 600
+        },
+        "stableFieldsExcludingServerNow": "MATCH",
+        "nativeQueryCount": "NOT_OBSERVED",
+        "cacheBehavior": "NOT_DETERMINED_BY_GET",
+        "operation": "THREE_GETS_NO_RECORDING_UPLOAD_SUBMIT_OR_PLAYBACK",
+        "supportMeaning": "A historical format observation is not a reservation or a guarantee of current audibility."
+      },
+      "edgePhysicalOutcome": {
+        "originalPrimaryExited": true,
+        "originalPrimaryExitCode": 1,
+        "actualJobProcessesZero": true,
+        "originalHandlesClosed": true,
+        "reason": "capability-stop",
+        "failure": null
+      },
+      "readonly": {
+        "authorizationUnchanged": true,
+        "projectRunUnchanged": true,
+        "sshd": "Running",
+        "ownedResiduals": 0
+      },
+      "budgets": {
+        "nodeMaxMillis": 12000,
+        "nodeElapsedMillis": 841,
+        "edgeSessionCapSeconds": 180
+      }
+    },
+    {
+      "browser": "/tmp/fc-round50-https-integration-evidence/windows-default-browser-continuous-first.json",
+      "readonlyReport": "/tmp/fc-round50-https-integration-evidence/windows-readonly-final-first.json",
+      "exeSha256": "b6368400a58b87d4725cbd664b5bde88a4f51927a74656e5c566010e8bbf6930",
+      "artifactProvenance": {
+        "audit": "/tmp/fc-round50-https-integration-evidence/runtime-certificate-independent-second.json",
+        "binding": "R50 actual429-input compiled normal and runtime22EXE audit"
+      },
+      "status": "PASS_FINITE_ACTUAL_BROWSER_AND_FRESH_READONLY",
+      "sourceSha256": {
+        "observer": "e52c31ac7e49eee6cceba708c5b1d6db5c3aea7f68a9f471616f513e3b4a9e47",
+        "edgeOwner": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5",
+        "nodeHarness": "a154ab071100c677fbaf54d3b274fa8456c7533aa929da7daef51de6cb20725e",
+        "tlsOwnershipHelpers": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df"
+      },
+      "counts": {
+        "rawEvents": 68,
+        "rawHTTP": 64,
+        "browserObserved": 21,
+        "browserWire": 18,
+        "browserCacheOnly": 3,
+        "nativeHeads": 82,
+        "nativeResponses": 82,
+        "api": 13,
+        "posts": 1,
+        "visualReads": 4,
+        "shortcutClicks": 0,
+        "recursiveRawContainers": 38
+      },
+      "voiceCapabilities": {
+        "status": "PASS",
+        "additionalWireRequests": 3,
+        "unauthenticatedStatus": 401,
+        "authenticatedStatuses": [
+          200,
+          200
+        ],
+        "identityRevision": "5",
+        "runtimeGeneration": "1",
+        "currentClassId": "1",
+        "targetAuthorized": true,
+        "enabled": true,
+        "admission": "OPEN",
+        "deviceAvailability": "UNVERIFIED",
+        "limits": {
+          "minRepeatTotal": 1,
+          "defaultRepeatTotal": 3,
+          "maxRepeatTotal": 10,
+          "minDurationMillis": 500,
+          "maxDurationMillis": 60000,
+          "maxWavBytes": 1920044,
+          "sampleRate": 16000,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "uploadTtlSeconds": 600
+        },
+        "stableFieldsExcludingServerNow": "MATCH",
+        "nativeQueryCount": "NOT_OBSERVED",
+        "cacheBehavior": "NOT_DETERMINED_BY_GET",
+        "operation": "THREE_GETS_NO_RECORDING_UPLOAD_SUBMIT_OR_PLAYBACK",
+        "supportMeaning": "A historical format observation is not a reservation or a guarantee of current audibility."
+      },
+      "edgePhysicalOutcome": {
+        "originalPrimaryExited": true,
+        "originalPrimaryExitCode": 1,
+        "actualJobProcessesZero": true,
+        "originalHandlesClosed": true,
+        "reason": "capability-stop",
+        "failure": null
+      },
+      "readonly": {
+        "authorizationUnchanged": true,
+        "projectRunUnchanged": true,
+        "sshd": "Running",
+        "ownedResiduals": 0
+      },
+      "budgets": {
+        "nodeMaxMillis": 12000,
+        "nodeElapsedMillis": 913,
+        "edgeSessionCapSeconds": 180
+      }
+    }
+  ],
+  "finalDebtChecks": [
+    {
+      "browser": "/tmp/fc-round46-ci-evidence/modern-msvc-default-browser-continuous-final-third.json",
+      "posts": 94,
+      "completions": 94,
+      "idleCancellations": 7,
+      "idleReturns": 7,
+      "readySlots": 0,
+      "boundSlots": 0,
+      "nativePending": 0,
+      "ownedSockets": 0,
+      "closedEqualsRetired": 88,
+      "nativePhysicalDrainReceipt": true,
+      "scope": "Application native-drain receipt and exact IOCP accounting, no independent kernel trace or SSP forced-cancel assertion."
+    },
+    {
+      "browser": "/tmp/fc-round50-https-integration-evidence/windows-default-browser-continuous-first.json",
+      "posts": 94,
+      "completions": 94,
+      "idleCancellations": 7,
+      "idleReturns": 7,
+      "readySlots": 0,
+      "boundSlots": 0,
+      "nativePending": 0,
+      "ownedSockets": 0,
+      "closedEqualsRetired": 88,
+      "nativePhysicalDrainReceipt": true,
+      "scope": "Application native-drain receipt and exact IOCP accounting, no independent kernel trace or SSP forced-cancel assertion."
+    }
+  ],
+  "models": {
+    "positive": 4,
+    "negative": 24,
+    "scope": "Pure malformed-metadata copies only, not product execution."
+  },
+  "originalFailure": {
+    "firstActualR46": "FAIL_NETWORK_LOAD_FAILED_ORIGINAL_UNCHANGED",
+    "rootCause": "UNKNOWN",
+    "subsequentPassMeaning": "Finite successful later observations only; no proven correction of original failure."
+  },
+  "limitations": [
+    "Only local evidence recomputation, no network/browser/tests/build/cleanup run.",
+    "Original R46 NETWORK_LOAD_FAILED remains unknown and unchanged. Later PASS does not prove a fix.",
+    "Actual observed capabilities UNVERIFIED; no inference of native query, cache efficacy, current output or audible playback.",
+    "Normal PASS has no failure diagnostics; negative diagnostic mechanisms are separately modeled, not exercised by this success.",
+    "R50 full Host all-target matrix is separate and not promoted by this runtime review.",
+    "StrictP0 firstTCP5s, ordinary production listener, Win7/10 actual OS, visible Seewo, campus trust and72h remain separate gates.",
+    "Original Edge primary exit1 on deliberate capability-stop is preserved; supervisor exit0, Job0, handles closed and profile/root absent prove cleanup."
+  ],
+  "matrix": "R50 all-workspace Host/all-target matrix is a separate root-owned consumer and not graded by this audit."
+}

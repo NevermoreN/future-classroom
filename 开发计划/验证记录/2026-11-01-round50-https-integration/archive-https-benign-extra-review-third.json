@@ -1,0 +1,34 @@
+{
+  "status": "SEVENTH_EXACT_COMMITTED_SOURCE_SNAPSHOT_REVIEWED",
+  "sourceRoot": "/tmp/fc-round50-https-integration-evidence",
+  "exception": {
+    "root": "/tmp/fc-round50-https-integration-evidence",
+    "file": "core-final-before-integration/crates/fc-domain/src/https_settings.rs",
+    "rawSha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96",
+    "kind": "MALFORMED_URL_REVIEW",
+    "location": "core-final-before-integration/crates/fc-domain/src/https_settings.rs",
+    "reason": "Exact domain-source snapshot identical to committed source; only two reviewed Rust origin-format templates, no real/signed URL or credential.",
+    "statementSha256": [
+      "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+      "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+    ]
+  },
+  "secondHelperBefore": {
+    "path": "/tmp/fc-round50-https-integration-evidence/archive-https-rounds-second.before-extra-snapshot.py",
+    "bytes": 30512,
+    "sha256": "bbb39adcafaee098bd02166a04ecab56777bdb9bafb34d33cafb001098b714a5"
+  },
+  "secondHelperAfter": {
+    "path": "/tmp/fc-round50-https-integration-evidence/archive-https-rounds-second.py",
+    "bytes": 31157,
+    "sha256": "3927ba54313decd3274b72a35d34c75dcc3c4d21160757cecdbd3693b62b90f4"
+  },
+  "allFivePrepareOriginal": {
+    "path": "/tmp/fc-round47-51-archive-prepare-second.json",
+    "sha256": "2513cbb53d3c145fe43b28bc1659250818cf41f2ef9ef3a64a9c620cbd350cf2",
+    "status": "FAIL",
+    "mainModified": false,
+    "additionalFindingCount": 1
+  },
+  "scope": "One exact additional source snapshot, not a blanket source-file or URL exemption. Original prepare FAIL retained; no second full inventory performed."
+}

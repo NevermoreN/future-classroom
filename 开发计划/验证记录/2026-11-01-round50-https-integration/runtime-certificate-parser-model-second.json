@@ -1,0 +1,61 @@
+{
+  "status": "PASS_LOCAL_PARSER_REPLAY_AND_NEGATIVE_MODELS_ONLY",
+  "helperSha256": "7d3b5584ebdde5913cb5aed7f0bcdeff4f7a5580372f1aaa4bcdf65e908a6922",
+  "wireOriginalSha256": "e8863f17156aaf3d83db222ff0a281528acc57600f87cec08d29ace65b64ac27",
+  "positiveCases": 3,
+  "negativeCases": [
+    {
+      "case": "missing_first_step",
+      "rejected": true
+    },
+    {
+      "case": "duplicate_step",
+      "rejected": true
+    },
+    {
+      "case": "grant_readiness",
+      "rejected": true
+    },
+    {
+      "case": "wrong_worker_count",
+      "rejected": true
+    },
+    {
+      "case": "supervisor_overrun",
+      "rejected": true
+    },
+    {
+      "case": "nonzero_original_process",
+      "rejected": true
+    },
+    {
+      "case": "changed_forwarded_child",
+      "rejected": true
+    },
+    {
+      "case": "fact_boolean_not_error_int",
+      "rejected": true
+    },
+    {
+      "case": "missing_fact_key",
+      "rejected": true
+    },
+    {
+      "case": "raw_sha_mismatch",
+      "rejected": true
+    },
+    {
+      "case": "failed",
+      "rejected": true
+    },
+    {
+      "case": "ignored",
+      "rejected": true
+    },
+    {
+      "case": "filtered",
+      "rejected": true
+    }
+  ],
+  "scope": "Read-only original wire/libtest replay and injected malformed copies only; no new Windows/CryptoAPI/native/SSH/Cargo execution."
+}

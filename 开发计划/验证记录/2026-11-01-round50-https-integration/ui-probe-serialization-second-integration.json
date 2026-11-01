@@ -1,0 +1,14 @@
+{
+  "status": "SOURCE_INTEGRATED_FULL_MATRIX_REQUIRED",
+  "beforeSha256": "feaac367ea006f5333d040b267f4269c26e442a2034f662f69d3c54ff89ce296",
+  "afterSha256": "48fa60b98669f9b10c7ead070a519b7d3564349950d762fc9ac4c8aa4a7aa071",
+  "bytes": 15847,
+  "changedFile": "crates/fc-bootstrap/src/application/https_settings_probe.rs",
+  "fix": "Replace undeclared serde_json usage with bounded literal-key JSON formatter using exhaustive known enum and integer/null values only; no dependency/14field/7fact/22step/footer contract change.",
+  "uiFreezeSecondSha256": "b4de8547c14056a9c4e99f1b84a0efa15e7dc7a26ea79a08b369cc216f7f266f",
+  "wireContractRemains": {
+    "path": "/tmp/fc-round49-https-settings-ui-evidence/native-probe-contract-final-first.json",
+    "sha256": "017da7e35aec46dbf522db43716ed8f316b44837b51255ddb894f84212596943",
+    "sourceNote": "Wire contract first snapshot source identity is historical; actual runtime candidate must bind matrix input corrected SHA48fa, not pretend it is old feaa source."
+  }
+}

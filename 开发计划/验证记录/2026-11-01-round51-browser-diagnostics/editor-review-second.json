@@ -1,0 +1,92 @@
+{
+  "schema": "future-classroom.r51-editor-independent-review/v1",
+  "status": "PASS_SCOPED_STATIC_REVIEW_WINDOWS_NOT_RUN",
+  "inputFreeze": {
+    "path": "/tmp/fc-round51-browser-diagnostics-evidence/implementation-freeze-second.json",
+    "bytes": 9053,
+    "sha256": "38555fe4cdcab3bdb34dcafe41f8249aab94d36d7dbc199ae3a81bff3ae74530"
+  },
+  "sourceFiles": [
+    {
+      "path": "scripts/windows-native-browser-harness.mjs",
+      "bytes": 82544,
+      "sha256": "a154ab071100c677fbaf54d3b274fa8456c7533aa929da7daef51de6cb20725e",
+      "firstSha256": "30f9f32d4c49978cf70b69590ab2b5d05814c65eb57ccc31e9dd693e438a7784"
+    },
+    {
+      "path": "scripts/windows-native-browser-observer.py",
+      "bytes": 43475,
+      "sha256": "e52c31ac7e49eee6cceba708c5b1d6db5c3aea7f68a9f471616f513e3b4a9e47",
+      "firstSha256": "59fe55aefc93c675b1676bb5ef163f20f0518ec286e64574decf74a52687f3f8"
+    },
+    {
+      "path": "scripts/check-native-browser-diagnostics.py",
+      "bytes": 10593,
+      "sha256": "30871b8ddf1cc508bc51fd332e71951e21e5205be9fdce45e4b966ad4a82230a",
+      "firstSha256": "18142a9a4776a104f656ec8050bc80aef54883f82d52a6466b90d1c2f1daf2d7"
+    }
+  ],
+  "firstIssuePreserved": {
+    "path": "/tmp/fc-round51-browser-diagnostics-evidence/editor-review-first.json",
+    "sha256": "10c436af812dfcbdb43fc3efa88b91bbbb5734e24e79dc8d9d16787ab5453750",
+    "status": "ISSUE_FOUND_STATIC_ONLY",
+    "issue": "R51-DIAGNOSTIC-NETERROR-GRAMMAR",
+    "disposition": "Closed for second frozen source by finite producer+consumer name sets; original ISSUE/firstfreeze/models remain unchanged"
+  },
+  "scope": "Only first->second NetError allowlist and related negative models; no repeated whole-project review or new test execution. No active tree changes/SSH/Cargo/Windows.",
+  "findings": [],
+  "verified": {
+    "staticNames": [
+      "net::ERR_ABORTED",
+      "net::ERR_ADDRESS_UNREACHABLE",
+      "net::ERR_BLOCKED_BY_CLIENT",
+      "net::ERR_BLOCKED_BY_RESPONSE",
+      "net::ERR_CERT_AUTHORITY_INVALID",
+      "net::ERR_CERT_COMMON_NAME_INVALID",
+      "net::ERR_CERT_DATE_INVALID",
+      "net::ERR_CERT_INVALID",
+      "net::ERR_CONNECTION_ABORTED",
+      "net::ERR_CONNECTION_CLOSED",
+      "net::ERR_CONNECTION_FAILED",
+      "net::ERR_CONNECTION_REFUSED",
+      "net::ERR_CONNECTION_RESET",
+      "net::ERR_CONTENT_LENGTH_MISMATCH",
+      "net::ERR_EMPTY_RESPONSE",
+      "net::ERR_FAILED",
+      "net::ERR_HTTP2_PROTOCOL_ERROR",
+      "net::ERR_INCOMPLETE_CHUNKED_ENCODING",
+      "net::ERR_INTERNET_DISCONNECTED",
+      "net::ERR_INVALID_CHUNKED_ENCODING",
+      "net::ERR_NAME_NOT_RESOLVED",
+      "net::ERR_NETWORK_CHANGED",
+      "net::ERR_QUIC_PROTOCOL_ERROR",
+      "net::ERR_SSL_PROTOCOL_ERROR",
+      "net::ERR_SSL_VERSION_OR_CIPHER_MISMATCH",
+      "net::ERR_TIMED_OUT"
+    ],
+    "sameNamesOnBothEnds": true,
+    "count": 26,
+    "longestNameBytes": 39,
+    "producer": "requestFailure only Set.has chooses exact known public string or OTHER; regex fallback removed",
+    "consumer": "validate_network_failures accepts OTHER or exact finite set only, rejects arbitrary syntactically valid unknown enums",
+    "secretReflection": "Arbitrary prefixed uppercase64hex cannot match any fixed name; Node maps OTHER before creating/writing frozen report; Python rejects a forged unnormalized value",
+    "newNegativeSources": [
+      "uppercase actual synthetic cookie hex prefix maps OTHER in Node",
+      "uppercase actual synthetic CSRF hex prefix maps OTHER in Node",
+      "unknown syntactically valid NetError maps OTHER in Node",
+      "Python forged uppercase D*64/E*64/unknown enum inputs explicitly rejected"
+    ],
+    "unchangedFunctionsByteCompared": [
+      "observer._safe (case-insensitive original check preserved)",
+      "observer.run (original actualNodeexit0 and resultFAIL handling)",
+      "observer._validate_result",
+      "observer.close (original physicalcleanup guards)",
+      "Node Harness.event (original first snapshot/NETWORK_LOAD_FAILED throw and cleanupfilter)",
+      "Node main (original finalFAIL/exit1 and report path)"
+    ],
+    "constraintsRetained": "Existing128records/one20keyfirstfailure/scalars/countercaps/timerange and12/30/45 runtime limits remain firstfreeze contract; no retry/promotion or new variable-size payload added"
+  },
+  "historicalCorrection": "Reviewer initially misstated observer _safe case handling, immediately corrected after full direct read: original code lowercases raw+secret. First issue was Node-local report reflection; outer observer already rejected copying credential into TLS report. No actual credential leak was observed/claimed.",
+  "actualEvidenceBoundary": "Service reports local second Node12groups/Python50/original36 models exit0. This independent review reads frozen source/model assertions and does not rerun or treat them as Windows evidence. Root first diagnostic84257 PASS/cleanup had no loadingFailure and does not reproduce/explain oldfirstFAIL or prove this narrow hardening in-browser. Later real regression remains root-owned.",
+  "allChecks": "Static source hashes, set equality, exact unchanged safety-critical function bytes and required negative model-source assertions passed."
+}

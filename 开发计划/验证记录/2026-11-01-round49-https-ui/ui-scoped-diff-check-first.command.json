@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    "crates/fc-bootstrap/src/application.rs",
+    "crates/fc-bootstrap/src/main.rs",
+    "crates/fc-bootstrap/src/application/web_editor.rs",
+    "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+    "crates/fc-bootstrap/src/application/https_settings_editor.rs",
+    "crates/fc-bootstrap/src/application/https_settings_editor/tests.rs",
+    "crates/fc-bootstrap/src/application/https_settings_controller.rs",
+    "crates/fc-bootstrap/src/application/https_settings_controller/tests.rs",
+    "crates/fc-bootstrap/src/application/https_settings_probe.rs"
+  ],
+  "cwd": "/tmp/fc-round49-https-settings-ui-worktree",
+  "exitCode": 0,
+  "scope": "Narrow formatting/patch whitespace only, no compilation or tests",
+  "stdout": {
+    "path": "/tmp/fc-round49-https-settings-ui-evidence/ui-scoped-diff-check-first.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round49-https-settings-ui-evidence/ui-scoped-diff-check-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

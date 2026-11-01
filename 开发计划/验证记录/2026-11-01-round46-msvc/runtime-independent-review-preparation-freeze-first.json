@@ -1,0 +1,35 @@
+{
+  "status": "PREPARED_RUNTIME_NOT_PASSED",
+  "files": [
+    {
+      "path": "/tmp/fc-round46-ci-evidence/verify-runtime-and-archive.py",
+      "bytes": 16953,
+      "sha256": "105d958233431ae053908f174ef646bafcf91b2fd55c7eaaf2dc358f47add943"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/runtime-independent-identity-model.py",
+      "bytes": 3354,
+      "sha256": "fb3548dfc88341afb1a7467e4c37da7e324814755121a1b7a8db061a609c3f16"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/runtime-independent-summary-model-second.json",
+      "bytes": 1060,
+      "sha256": "27b82b80c641d8e01d2e5057fe30d1a4d95d38354dcb47910d9375beebb4f4b7"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/runtime-independent-identity-model-first.json",
+      "bytes": 1396,
+      "sha256": "917d35c4ff73ccb6cf7d3f4eb5a7cbc23beb17cb52869acf6e69a2538803d677"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/runtime-independent-archive-prepare-second.json",
+      "bytes": 271751,
+      "sha256": "9cfe9f4ab330c1e7bd2bb974a7589864c27e4efee6d08fbd31dcda5479ca1a8c"
+    }
+  ],
+  "artifactPreparation": "Both original whole ZIPs CRC/complete producer ledger/audited SHA to local22EXE/header/21metadata and all199+208 nonbinary raw files plus each22objdump outputs checked. No new extraction/archive/remote activity.",
+  "runtime": "Modern first actual report observed FAIL/cleanupPASS: original60s bootstrap test timeout, only12 completed; Win7 suite not deemed executed/passed. Final mode must reject incomplete/failed reports. Await parent terminal instruction before final independent audit.",
+  "knownEvidenceLimit": "Original CI auditor recorded objdump version first line and full raw bytes/SHA in JSON but did not persist complete raw --version stdout separately. No reconstruction is called an original. PerEXE objdump raw is retained and mapped.",
+  "firstPrepareFailurePreserved": "runtime-independent-archive-prepare-first.json and verify-runtime-and-archive-first-prepare-failed-source.py; local helper incorrectly expected a separate raw objdump version file, corrected source explicitly reports actual retention scope.",
+  "executionBoundary": "No compiled EXE/Windows/SSH/Cargo/CI/Git write or cleanup by reviewer."
+}

@@ -1,0 +1,44 @@
+
+running 6 tests
+test backend::web::tests::https_settings_tests::configuration_owner_and_actual_last_writer_guard_exclude_enable_and_next_owner ... ok
+test backend::web::tests::https_settings_tests::local_configuration_only_save_replay_and_physical_reopen_leave_web_disabled ... ok
+test backend::web::tests::https_settings_tests::preexisting_enable_snapshot_cannot_survive_configuration_publication ... ok
+test backend::web::tests::https_settings_tests::queued_real_writer_save_retains_disabled_owner_until_old_local_session_cancellation_settles ... ok
+test backend::web::tests::https_settings_tests::real_web_global_session_active_web_and_canceled_scope_cannot_save_https_configuration ... ok
+test backend::web::tests::https_settings_tests::same_committed_command_on_real_new_local_lease_returns_original_outcome_without_expiry_in_fingerprint ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 198 filtered out; finished in 6.93s
+
+
+running 3 tests
+test https_settings::tests::configured_save_and_clear_have_independent_cas_no_default_port ... ok
+test https_settings::tests::canonical_dns_ip_and_certificate_identity_do_not_claim_readiness ... ok
+test https_settings::tests::host_path_wildcard_unspecified_ambiguous_ip_and_invalid_port_reject ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 145 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+
+running 15 tests
+test business::https_settings::tests::actual_commit_then_canceled_delivery_is_unknown_not_rollback_and_original_command_reconciles ... ok
+test business::https_settings::tests::canonical_save_clear_replay_and_cold_reopen_preserve_identity_and_never_create_voice_or_autostart ... ok
+test business::https_settings::tests::committed_command_uses_stable_actor_scope_but_every_new_lease_is_still_authorized ... ok
+test business::https_settings::tests::identity_cas_and_config_cas_are_independent_even_when_host_is_unchanged ... ok
+test business::https_settings::tests::local_global_exact_session_must_change_and_default_deny_configuration_permit ... ok
+test business::https_settings::tests::mapped_restore_keeps_current_target_configuration_exact ... ok
+test business::https_settings::tests::mapped_restore_keeps_missing_target_unconfigured_not_source_configuration ... ok
+test business::https_settings::tests::ordinary_input_injected_protected_https_configuration_is_rejected ... ok
+test business::https_settings::tests::outcome_query_rejects_changed_payload_actor_digest_and_final_revoked_session_without_mutation ... ok
+test business::https_settings::tests::outcome_query_without_receipt_never_saves_or_publishes_and_needs_no_configuration_permit ... ok
+test business::https_settings::tests::ordinary_restore_keeps_target_security_row_exact_and_export_omits_configuration ... ok
+test business::https_settings::tests::precommit_session_revocation_or_disabled_permit_loss_rolls_back_without_publication ... ok
+test business::https_settings::tests::queued_execution_cancel_and_precommit_cancel_use_original_writer_fence_without_faulting ... ok
+test business::https_settings::tests::read_rechecks_original_exact_session_at_final_writer_guard_without_mutation ... ok
+test business::https_settings::tests::strict_protected_document_rejects_bad_shape_store_noncanonical_values_and_corruption_on_startup ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 191 filtered out; finished in 27.59s
+

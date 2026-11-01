@@ -1,0 +1,173 @@
+{
+  "schema": "future-classroom.r46-artifact-validator-freeze/v1",
+  "status": "READY_HELPER_ONLY_NO_R46_ARTIFACT",
+  "recordedUtc": "2026-10-31T23:20:38.947134+00:00",
+  "helper": {
+    "path": "/tmp/fc-round46-ci-evidence/verify-ci-artifact-first.py",
+    "bytes": 55618,
+    "sha256": "cf3780a6d08dec8f395383a20a9a1992b5e7d5a4b70f5cf865c16ce0b5e13e9c"
+  },
+  "sourceInputs": [
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-msvc-ci.ps1",
+      "bytes": 49874,
+      "sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418"
+    },
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round45-ci-input-domains/service-readonly-review-first.json",
+      "bytes": 18747,
+      "sha256": "893521a5e2a96e25c718522eebeb6db7820ce2ac9bd9fa932106ee15a5f149ba"
+    }
+  ],
+  "checks": {
+    "syntax": "PASS_COMPILE_NO_BYTECODE",
+    "helpExit": 0,
+    "pureModelGroups": 19,
+    "pureModelStatus": "PASS_MODEL_ONLY_NO_ARTIFACT",
+    "oldR42OfficialMetadataSchemaChecks": 4,
+    "oldR42Status": "PASS_OLD_METADATA_SCHEMA_ONLY"
+  },
+  "history": [
+    {
+      "path": "validator-model-debug-first.command.json",
+      "status": "FAIL_MODEL_TEST_KEY_NOT_CI",
+      "meaning": "Actual preserved traceback at self-test lookup metadata rather than cargo-metadata; original failed source preserved. Subsequent tests corrected only model key."
+    },
+    {
+      "path": "validator-model-final-first.phase-negative.json",
+      "status": "EXPECTED_SYNTHETIC_FAIL",
+      "meaning": "Intentional synthetic CI failure must remain FAIL while independent PE/cleanup callbacks still execute; NOT actual CI."
+    }
+  ],
+  "auditPlan": [
+    "Official run/job/artifact source/baseline/attempt/size/SHA identity; no download/token/signedURL support.",
+    "Whole original ZIP size/SHA and every CRC, safe canonical no-alias regular paths, complete producer ledger; derive member count.",
+    "Six original input files: before/after SHA subset, full Git metadata, partition summary; raw digest references result/host.",
+    "Pinned full Git mode/type/OID/blob size/root tree and original ls-files/NUL ls-tree/tree-id/source-clean/HEAD before and after.",
+    "Exact historical slash prefix partitions M into S+H. S bytes/SHA exact Git blob or complete exact LF->CRLF only, per64MiB/total256MiB; H metadata-only never raw historical SHA claim.",
+    "Fixed baseline compiler/CRT/Win7 rust-src/buildstd, source-bound jobs2 and original120/2400/1200/1500s; required command argument set derived plus PE commands, not old fixed counts.",
+    "Original commands physically exited/no timeout/truncation and per-command result/raw logs; original/official CI failure remains report FAIL.",
+    "22 actual PE files (21 test/1 product), original Cargo metadata associations, actual PE32/CUI/static CRT import audit; Win7 subsystem6.1 static-only; no EXE execution.",
+    "Independent original four-root cleanup and official cleanup/upload steps even if earlier phases fail; preserve all failed/partial outputs."
+  ],
+  "runtime": "NOT_RUN",
+  "newArtifact": "NOT_PROVIDED_NOT_VALIDATED",
+  "files": [
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-help-first.command.json",
+      "bytes": 730,
+      "sha256": "0aa98d9884d2a49e2164e085513cc517c4aba006665b3f8e60424a6fa5d14436"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-help-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-help-first.stdout.log",
+      "bytes": 2044,
+      "sha256": "8d7707ca91a865117ec9e03af3444dc221e14ab463945cead79359cc27084803"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-debug-first.command.json",
+      "bytes": 985,
+      "sha256": "68cf14ac1b089c299e0f2b2950e57194e2d79b23944278694f72661abaefa17b"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-final-first.command.json",
+      "bytes": 635,
+      "sha256": "0f63d6369013e9edc63ca7c6fdac066cea499bbe75470feb1d3264fad3ee809d"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-final-first.json",
+      "bytes": 2474,
+      "sha256": "c704d99cf11a51b847821d0fba72d3cfb0f2b11f959afacdb2a16e16d227d3b6"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-final-first.phase-negative.json",
+      "bytes": 1044,
+      "sha256": "751b7452deff5b2ec827fb40e682ddde14d07aa28c17352504feeba3cb8d8b43"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-final-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-final-first.stdout.log",
+      "bytes": 508,
+      "sha256": "785b0264f39ccc7592c247e65710e746a862ee72b16ea09758ad2ad6e33b102e"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-second.command.json",
+      "bytes": 630,
+      "sha256": "a774549727aa5bb7b00d4db4841e9573be9d7c94e341b148413a74f56b3e14e0"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-second.json",
+      "bytes": 1977,
+      "sha256": "a61230821ec36b346e82e4c5f659ee2f919d4222e3ca2d975aab8647220fe8f6"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-second.stdout.log",
+      "bytes": 228,
+      "sha256": "463c92e997ba896462c2deea21c0c41c7f81130d5ba4ddaa067b9ef0efd5af9b"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-third.command.json",
+      "bytes": 629,
+      "sha256": "c999644e03486f2984557a2b9bc55dba7925293f49c94eb8137350d0eee2b7f2"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-third.json",
+      "bytes": 2474,
+      "sha256": "a16a554aea6535a76d4dfbab584565b6b72136cd96668b1be48fb9db72267e34"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-third.phase-negative.json",
+      "bytes": 1044,
+      "sha256": "acbc85e13af93bf2fb4b769b1ef591a90ea5a583e536f30403eb3b351920afa2"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-model-third.stdout.log",
+      "bytes": 496,
+      "sha256": "def5bc2744405cc8c5eacd3d02db34ab8cba2e9f5bb7e833bd24a74e58858542"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-old-metadata-schema-final-first.json",
+      "bytes": 2290,
+      "sha256": "3503813a2047050bb132fd5ba0e47973a705660103ca69321fb1029f9dffac2a"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/validator-old-metadata-schema-first.json",
+      "bytes": 2302,
+      "sha256": "896ac5081384df37c19f0e33f108b86d710b99f2f64b18c6f38512015a6eef7e"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/verify-ci-artifact-first-model-failed-source.py",
+      "bytes": 50206,
+      "sha256": "d4fa3ff134a850902266d3857b4770a1f6afa86f042167371c56d257ff18df5b"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/verify-ci-artifact-first.py",
+      "bytes": 55618,
+      "sha256": "cf3780a6d08dec8f395383a20a9a1992b5e7d5a4b70f5cf865c16ce0b5e13e9c"
+    }
+  ],
+  "limitations": [
+    "No R46 artifact, CI, Cargo, Windows, network, EXE runtime or Git mutation executed.",
+    "Only a pure model and archived R42 metadata schema smoke check are executed locally.",
+    "If future source deliberately changes the CI script from exact ed26, helper fails closed for separate review, not a silent expectation update."
+  ],
+  "inventoryPreparationNote": "Initial freeze inventory attempt resolved old /tmp R45 review after parent had archived/removed it; this inventory uses the exact unchanged archived R45 source instead. No helper or model rerun/change resulted."
+}

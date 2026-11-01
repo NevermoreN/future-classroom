@@ -1,0 +1,892 @@
+{
+  "status": "PASS_FORMAT_MODEL_ONLY",
+  "cases": 144,
+  "sourceSha256": "48fa60b98669f9b10c7ead070a519b7d3564349950d762fc9ac4c8aa4a7aa071",
+  "keys": [
+    "cachedRevocation",
+    "chainTrustErrors",
+    "currentTime",
+    "found",
+    "identityRevision",
+    "privateKey",
+    "publicationRevision",
+    "readiness",
+    "scope",
+    "serverAuthEku",
+    "serverName",
+    "settingsRevision",
+    "sslChainPolicy",
+    "sslPolicyError"
+  ],
+  "notEvidence": [
+    "Rust compile",
+    "native query",
+    "Windows execution"
+  ],
+  "boundaryCases": [
+    {
+      "check": "Satisfied",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Satisfied",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Rejected",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "Unverified",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": null,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": null,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": null,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": -2147483648,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": -2147483648,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 0,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 0,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 0,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 2147483647,
+      "chainTrustErrors": null,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 0,
+      "sslPolicyError": 4294967295
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": null
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 0
+    },
+    {
+      "check": "NotChecked",
+      "nativeError": 2147483647,
+      "chainTrustErrors": 4294967295,
+      "sslPolicyError": 4294967295
+    }
+  ]
+}

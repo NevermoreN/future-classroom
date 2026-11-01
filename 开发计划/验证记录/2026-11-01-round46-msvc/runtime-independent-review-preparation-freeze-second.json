@@ -1,0 +1,87 @@
+{
+  "status": "PREPARED_SECOND_RUNTIME_PENDING",
+  "files": [
+    {
+      "path": "/tmp/fc-round46-ci-evidence/verify-runtime-and-archive-second.py",
+      "bytes": 18808,
+      "sha256": "441cfec76d8c91f9509197b0ac07a46e630e792e2db9cb8a2511944f1d9451c8"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/runtime-independent-identity-model-third.py",
+      "bytes": 3426,
+      "sha256": "fe2621251a04fb4781b2d3a29735a5d5fd1a2cc0d6911eb9e794f0a4af519b66"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/runtime-independent-summary-model-fourth.json",
+      "bytes": 1067,
+      "sha256": "0d26637c2d4cd4dda40adbfd0371ea7028175f714b7043cb2c6887e6753d063a"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/runtime-independent-identity-model-third.json",
+      "bytes": 1396,
+      "sha256": "62688d0263308fbd21f5966ea11e6b790f685135c1d807dd978f1a5f7f405c10"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/runtime-independent-archive-prepare-fourth.json",
+      "bytes": 272959,
+      "sha256": "85a099239ce5808acfcf480e8f7c9419073d1ccf94f93824ecd6deff3ec2f664"
+    },
+    {
+      "path": "/tmp/fc-round46-ci-evidence/runtime-budget-correction-first.json",
+      "bytes": 2156,
+      "sha256": "439d13102b0d3395e03a9d10e4bf09c3e52c421b29302c7e06c635b0e51ff26f"
+    }
+  ],
+  "helperImmutableFirstVersionPreserved": "verify-runtime-and-archive.py SHA105d958233431ae053908f174ef646bafcf91b2fd55c7eaaf2dc358f47add943 remains unchanged; second helper reads second runtime names and requires original archived900/native1 args.",
+  "budgetProof": {
+    "proof": {
+      "path": "/tmp/fc-round46-ci-evidence/runtime-budget-correction-first.json",
+      "bytes": 2156,
+      "sha256": "439d13102b0d3395e03a9d10e4bf09c3e52c421b29302c7e06c635b0e51ff26f"
+    },
+    "priorOriginalCommands": [
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-third.command.json",
+        "bytes": 1231,
+        "sha256": "2ab44bc4e21709107d4380aa72e891be9ba57266aacd8d08f8ef74228aa3bb82"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-runtime-first.command.json",
+        "bytes": 1191,
+        "sha256": "4e98bbbbab19b47a109bd18b5823cbeb4283747445e757cd6aee432f3f67c04c"
+      }
+    ],
+    "firstActualFailPreserved": {
+      "path": "/tmp/fc-round46-ci-evidence/modern-msvc-runtime-first.json",
+      "bytes": 109298,
+      "sha256": "6eed9c84c5bf075f100b6acb52aa1fcda1ecfef9a3219ad0a5bf21ff4751a8fc"
+    },
+    "scope": "900s per complete test EXE/native1s restores existing archived full-run invocation; no TLS deadline or test filtering change."
+  },
+  "artifactMappings": {
+    "modern": {
+      "zipMembers": 221,
+      "nonbinaryRaw": 199,
+      "EXEs": 22,
+      "testMetadataRows": 21,
+      "objdumpRawFiles": 22
+    },
+    "win7": {
+      "zipMembers": 230,
+      "nonbinaryRaw": 208,
+      "EXEs": 22,
+      "testMetadataRows": 21,
+      "objdumpRawFiles": 22
+    }
+  },
+  "statusLimit": "This is preparation/static/model verification only. First default60s actualFAIL+cleanupPASS stays unchanged. No second runtime report is classified until parent confirms both physical executions/cleanup terminal.",
+  "localHelperFailurePreserved": "Third prepare failed KeyError because R41 original command uses key command while R42 uses args; correction accepts only those actual schemas and still compares exact list to SHA-bound original proof. Original failed source/report retained.",
+  "noOperations": [
+    "SSH",
+    "Windows EXE",
+    "Cargo",
+    "CI",
+    "Git mutation",
+    "active root cleanup"
+  ]
+}

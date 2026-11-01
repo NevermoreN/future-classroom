@@ -1,0 +1,200 @@
+{
+  "schema": "future-classroom.r49-https-ui-freeze/v1",
+  "status": "SOURCE_FROZEN_NOT_BUILT_NOT_RUN",
+  "recordedUtc": "2026-10-31T23:53:58.380915+00:00",
+  "base": "e23bd538d828aeed4378a88f69cf81cb85a4389f",
+  "branch": "codex/https-settings-ui",
+  "worktree": "/tmp/fc-round49-https-settings-ui-worktree",
+  "ownedFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 260347,
+      "sha256": "9924f860568ef6adf521411caa01a5331674b6deccdfc027963b7b9fe4794671",
+      "kind": "modified",
+      "testCount": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 19408,
+      "sha256": "731dbf90fc1b2c297e8010ceacad3b3b257deef52c11b5548210de2bbdc0c50f",
+      "kind": "modified",
+      "testCount": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 22828,
+      "sha256": "c7ef558c7ee0923beeb90eda6e6d18c29bd2e56d24f50a0c10d482eb1f356cda",
+      "kind": "modified",
+      "testCount": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+      "bytes": 17040,
+      "sha256": "d6ef17cef5d726b007cda1dd12ae6c75db14e9165c16b12fdfb538106664703a",
+      "kind": "modified",
+      "testCount": 8
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_editor.rs",
+      "bytes": 19304,
+      "sha256": "e72621498a23c864ba7cc16f26aa20d06a5d0be43fb487793bae08311c05b0a1",
+      "kind": "new",
+      "testCount": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_editor/tests.rs",
+      "bytes": 8905,
+      "sha256": "de7da26c9d830d264921b8bac12230afea681aee9249dbd94a804b0ea8edef81",
+      "kind": "new",
+      "testCount": 11
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_controller.rs",
+      "bytes": 21063,
+      "sha256": "7cea5958edcbfe8aa479e5a6c64e92ef9301048333167c2e926b1edaf18ebe48",
+      "kind": "new",
+      "testCount": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_controller/tests.rs",
+      "bytes": 6354,
+      "sha256": "b4d88fe87fb246a0c816ec7702a299edcf8ef9343bbbf619c678a31adfeb3d44",
+      "kind": "new",
+      "testCount": 4
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_probe.rs",
+      "bytes": 14959,
+      "sha256": "feaac367ea006f5333d040b267f4269c26e442a2034f662f69d3c54ff89ce296",
+      "kind": "new",
+      "testCount": null
+    }
+  ],
+  "snapshot": "/tmp/fc-round49-https-settings-ui-evidence/ui-implementation-after-first",
+  "patch": {
+    "path": "/tmp/fc-round49-https-settings-ui-evidence/ui-implementation-first.patch",
+    "bytes": 87577,
+    "sha256": "0731d2fa615e1e878890d3af92af8485f9adfe64d8b8e38876d85f6f037316ef"
+  },
+  "readonlyImports": [
+    {
+      "manifest": "core-third-readonly-import-first.json",
+      "bytes": 6867,
+      "sha256": "8cba4ec5555880cb4545ed2504672bc12eda879565f5e4dbda9658d2c2a968e4"
+    },
+    {
+      "manifest": "r48-readonly-import-first.json",
+      "bytes": 5004,
+      "sha256": "49562474f3ea458eab8219bac8509e843aafc0dcd0941c168813b0a2c00c2c8c"
+    },
+    {
+      "manifest": "r48-service-second-readonly-import-first.json",
+      "bytes": 1238,
+      "sha256": "f86bbde5ad53a7a32c332b704f96bbb8ed0febc03c95af1c2cc25ae3db997d72"
+    }
+  ],
+  "readonlyImportUniqueFiles": 24,
+  "readonlyImportBytesUnchanged": true,
+  "ownedFileCount": 9,
+  "tests": {
+    "newEditorPureState": 11,
+    "newController": 4,
+    "newWebNavigation": 1,
+    "totalNewTestSources": 16,
+    "run": "NOT_RUN",
+    "note": "One controller test invokes the actual 22-step hidden native workflow using the same product Work pool and real SQLite; still only source, not an execution claim."
+  },
+  "actualChecks": [
+    {
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "--check",
+        "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/application.rs",
+        "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/main.rs",
+        "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/application/web_editor.rs",
+        "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/application/web_editor/tests.rs",
+        "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/application/https_settings_editor.rs",
+        "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/application/https_settings_editor/tests.rs",
+        "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/application/https_settings_controller.rs",
+        "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/application/https_settings_controller/tests.rs",
+        "/tmp/fc-round49-https-settings-ui-worktree/crates/fc-bootstrap/src/application/https_settings_probe.rs"
+      ],
+      "cwd": "/tmp/fc-round49-https-settings-ui-worktree",
+      "exitCode": 0,
+      "scope": "Narrow formatting/patch whitespace only, no compilation or tests",
+      "stdout": {
+        "path": "/tmp/fc-round49-https-settings-ui-evidence/ui-scoped-format-check-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round49-https-settings-ui-evidence/ui-scoped-format-check-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-bootstrap/src/application.rs",
+        "crates/fc-bootstrap/src/main.rs",
+        "crates/fc-bootstrap/src/application/web_editor.rs",
+        "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+        "crates/fc-bootstrap/src/application/https_settings_editor.rs",
+        "crates/fc-bootstrap/src/application/https_settings_editor/tests.rs",
+        "crates/fc-bootstrap/src/application/https_settings_controller.rs",
+        "crates/fc-bootstrap/src/application/https_settings_controller/tests.rs",
+        "crates/fc-bootstrap/src/application/https_settings_probe.rs"
+      ],
+      "cwd": "/tmp/fc-round49-https-settings-ui-worktree",
+      "exitCode": 0,
+      "scope": "Narrow formatting/patch whitespace only, no compilation or tests",
+      "stdout": {
+        "path": "/tmp/fc-round49-https-settings-ui-evidence/ui-scoped-diff-check-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round49-https-settings-ui-evidence/ui-scoped-diff-check-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "contracts": {
+    "ordinaryPool": "Existing SharedPool<Work> two workers, no new thread/pool",
+    "ordinarySubmit": "Other App::submit behavior unchanged; HTTPS alone uses its own admission path and one existing Pending",
+    "deadline": "Original90s absolute shared-job budget. Only returned Busy Work can be re-admitted with exact original task/deadline; accepted save never replayed.",
+    "requests": "Original full Request and commandId saved before admission in one owner-bound editor; canceled/late saves retain it for explicit read-only reconciliation.",
+    "historical": "Query None only 未查到原操作结果; Some historical never sets editable current CAS, no automatic new ID/save.",
+    "privacy": "Another account sees only an empty explicit discard/return warning, no original fields or receipt.",
+    "nativeCheck": "Explicit saved-clean/no-unconfirmed-request only. Short scoped Backend lock clones service; actual inspect runs after that lock is released with current JobContext fence.",
+    "facts": "Check-time historical facts only; no TTL or ongoing validity promise, no Available/ready/enable. Alter/cancel/lock/association change clears visible old receipt.",
+    "busyUi": "This page uses read-only fields/disabled ordinary actions while pending, retaining only Cancel Waiting and Lock; native full-window busy would disable Cancel. Other pages unchanged.",
+    "webNavigation": "Default page uses HTTPS action instead of two targetless pagination actions, preserving<=12 native-action bound; selected request keeps original twelve review/pagination actions.",
+    "productGate": "Existing Web Readiness::Unavailable, Enable/Begin and ordinary production listener gate remain unchanged.",
+    "publicDesktop": "Public no-account lesson controls and display-only schedule/clock/calendar untouched."
+  },
+  "nativeProbeContract": {
+    "path": "/tmp/fc-round49-https-settings-ui-evidence/native-probe-contract-final-first.json",
+    "bytes": 3711,
+    "sha256": "017da7e35aec46dbf522db43716ed8f316b44837b51255ddb894f84212596943"
+  },
+  "notPerformed": [
+    "Cargo/rustc/Clippy/test execution",
+    "Windows/SSH/native run",
+    "CI/download/dispatch",
+    "main source mutation",
+    "commit/push",
+    "certificate/key/trust/firewall install",
+    "ordinary listener enable"
+  ],
+  "pending": "Parent merges final R47 core (its fourth fixes only test openers) and final R48 dependencies, then performs unified compilation, strict lint, actual Windows tests/probe and cleanup. Core imports are not this agents owned modifications."
+}

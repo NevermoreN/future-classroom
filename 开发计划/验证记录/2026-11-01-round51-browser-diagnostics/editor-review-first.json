@@ -1,0 +1,84 @@
+{
+  "schema": "future-classroom.r51-editor-independent-review/v1",
+  "status": "ISSUE_FOUND_STATIC_ONLY",
+  "inputFreeze": {
+    "path": "/tmp/fc-round51-browser-diagnostics-evidence/implementation-freeze-first.json",
+    "bytes": 9232,
+    "sha256": "901c4744cfcb17e9dc2e1cef5af29dfd077c3cc6ff772d3d893831fca19aff02"
+  },
+  "sourceFiles": [
+    {
+      "path": "scripts/windows-native-browser-harness.mjs",
+      "bytes": 81529,
+      "sha256": "30f9f32d4c49978cf70b69590ab2b5d05814c65eb57ccc31e9dd693e438a7784"
+    },
+    {
+      "path": "scripts/windows-native-browser-observer.py",
+      "bytes": 42553,
+      "sha256": "59fe55aefc93c675b1676bb5ef163f20f0518ec286e64574decf74a52687f3f8"
+    },
+    {
+      "path": "scripts/check-native-browser-diagnostics.py",
+      "bytes": 10212,
+      "sha256": "18142a9a4776a104f656ec8050bc80aef54883f82d52a6466b90d1c2f1daf2d7"
+    }
+  ],
+  "reviewScope": "Immutable frozen snapshots only; no active source edits, Cargo, SSH, Windows, browser or test execution. Current actual root diagnostic session84257 unaffected.",
+  "findings": [
+    {
+      "id": "R51-DIAGNOSTIC-NETERROR-GRAMMAR",
+      "severity": "required-hardening-before-security-pass",
+      "file": "scripts/windows-native-browser-harness.mjs",
+      "lines": [
+        355,
+        359,
+        768,
+        773
+      ],
+      "pairedObserverFile": "scripts/windows-native-browser-observer.py",
+      "pairedObserverLines": [
+        114,
+        115,
+        265,
+        269
+      ],
+      "trigger": "A synthetic allowed64hex credential represented in uppercase and prefixed net::ERR_ matches the current errorText grammar. This is not proof Chromium actually emitted hostile text or any real credential leaked.",
+      "mechanism": "requestFailure copies any matching <=80 uppercase/digit/underscore suffix into the frozen failure. main clears run cookie/CSRF variables but then serializes the already retained failure to the local Node report file. An arbitrary matching suffix is not a finite Chromium NetError enum allowlist.",
+      "containment": "Observer _safe is CASE-INSENSITIVE raw/secret substring checking. It rejects reading/copying such report into outer TLS evidence, retaining overall FAIL. _node_raw also drops secret-containing base64. No FAIL-to-PASS bypass found.",
+      "minimalFix": "After root terminal/reap, use the same finite static NetError name set in Node and Python. Unknown strings, including prefixed64hex, become OTHER in Node and are rejected if passed unnormalized to observer. Preserve first-fault snapshot, bounds, immediate NETWORK_LOAD_FAILED and exact original budgets.",
+      "suggestedModels": [
+        "prefixed uppercase equivalent64hex CSRF ->OTHER",
+        "prefixed numeric64hex token ->OTHER",
+        "unknown syntactically plausible enum ->OTHER",
+        "existing CONTENT_LENGTH_MISMATCH recognized",
+        "observer rejects arbitrary prefixed64hex diagnostic",
+        "actual loadingFailed still fault/dispose/exit1"
+      ],
+      "disclosureCorrection": "Initial parent message incorrectly described observer _safe as case-sensitive; later direct read proved raw.lower/secret.lower. The correction was immediately sent to root and service. This report records the actual narrower Node-local-output issue."
+    }
+  ],
+  "boundednessReview": {
+    "requestBudget": 128,
+    "addedPerRequest": "One fixed scalar-only diagnostic object; optional one20key firstfailure, no new data/header/body/event arrays",
+    "counterBounds": {
+      "events": 65536,
+      "dataBytes": 8388608,
+      "encodedBytes": 8388608,
+      "overflow": "saturating with countsClamped, invalid/negative input ignored+flagged"
+    },
+    "timeScope": "Local performance.now relative RUN only; scalar integer0..60000 ornull. Not kernel/TCP/SSPI timing or a deadline extension.",
+    "paths": "classified exact configured asset or known API/content/visual paths; no query/hash/username/password; observer rechecks route and<=512 length",
+    "phaseAndBlockedReason": "Finite sets+OTHER/NONE; booleans normalized; no raw arbitrary error params other than identified NetError grammar gap",
+    "singleFirstFault": "if !this.fault copies Object.freeze before throwing NETWORK_LOAD_FAILED; later events cannot add another firstfailure, cleanup/session filters retained"
+  },
+  "failClosedReview": {
+    "loadingFailed": "Unconditional original tracked NETWORK_LOAD_FAILED throw remains, never retry/success",
+    "passCannotContainFailure": "Node checkApiLedger rejects any failure, observer validate_network_failures requires FAIL+NETWORK_LOAD_FAILED for any diagnostic and _validate_result still requiresPASS",
+    "actualExit": "Observer node.returncode==0 required before _validate_result/resultPASS, and Node main exits1 forFAIL",
+    "lateFlags": "Failure is immutable snapshot; observer allows later analyzed/finished false->true only, never erase true. No second false-success inference.",
+    "cleanup": "Original node/Edge owner stop+actualexit/rootAbsent checks retained; diagnostic capture does not mark cleanupPASS",
+    "budgets": "No changed Native45/client30/Node<=12s fields or execution deadlines; diagnostic60000ms is metadata validity bound only"
+  },
+  "validationEvidenceScope": "Service host Node12groups/Python47/old36 remain original recorded model checks; independent reviewer did not rerun them or upgrade to Windows evidence.",
+  "nextAction": "Keep firstfreeze/firstactual diagnostic and models immutable. Root reaps84257 before service applies minimal allowlist and produces newfreeze/review. No user credential values are included."
+}

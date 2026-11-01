@@ -1,0 +1,18 @@
+usage: archive-https-rounds.py [-h] [--round {47,48,49,50,51}] --report REPORT
+                               [--write-archive] [--all-consumers-finished]
+                               [--final-proof FINAL_PROOF]
+
+Local exact nonbinary evidence archiver for R47-R51. Default prepare never
+seals. Write mode requires the coordinator's explicit all-consumers-finished
+declaration and an exact-hash final-proof file. This script never stops
+processes, follows artifact reference paths, opens private keys/databases/live
+control capabilities, or cleans source roots. A failed partial archive is
+retained, never retried over.
+
+options:
+  -h, --help            show this help message and exit
+  --round {47,48,49,50,51}
+  --report REPORT
+  --write-archive
+  --all-consumers-finished
+  --final-proof FINAL_PROOF

@@ -1,0 +1,224 @@
+--- prepare-certificate-fixture-second.py
++++ prepare-certificate-fixture-third.py
+@@ -53,61 +53,91 @@
+             "capture": ownership.CAPTURE, "cleanup": ownership.CLEANUP}
+ 
+ 
+-FACTS = ("found", "current_time", "private_key", "server_auth_eku",
+-         "server_name", "ssl_chain_policy", "cached_revocation")
++CONTRACT_SHA = "017da7e35aec46dbf522db43716ed8f316b44837b51255ddb894f84212596943"
++FACTS = ("found", "currentTime", "privateKey", "serverAuthEku", "serverName", "sslChainPolicy", "cachedRevocation")
+ CHECKS = {"Satisfied", "Rejected", "Unverified", "NotChecked"}
+ 
+ 
+-def validate_observation(observation, contract, owned_reference):
+-    """Strict semantic model; final wire-key spellings come from R49 freeze."""
++def load_contract():
++    data = (EVIDENCE / "r49-probe-contract-bound-third.json").read_bytes()
++    require(sha(data) == CONTRACT_SHA, "exact R49 final contract SHA changed")
++    value = json.loads(data)
++    require(value["status"] == "FROZEN_SOURCE_CONTRACT_NOT_BUILT_NOT_RUN", "not frozen source contract")
++    require(len(value["steps"]) == 22 and len(set(value["steps"])) == 22, "exact22 steps required")
++    return value
++
++
++def integer(value, minimum, maximum):
++    return type(value) is int and minimum <= value <= maximum
++
++
++def validate_observation(observation, contract, owned_reference=True):
+     require(isinstance(observation, dict), "observation object missing")
+-    required = {"scope", "facts", "publication_revision", "identity_revision", "settings_revision"}
+-    require(set(observation) == required, "observation unknown/missing fields")
+-    require(observation["scope"] == "CurrentUserMyCacheOnly", "cache-only scope missing")
+-    for field in ("publication_revision", "identity_revision", "settings_revision"):
+-        require(type(observation[field]) is int and observation[field] > 0, "invalid revision")
+-    require(isinstance(observation["facts"], dict) and set(observation["facts"]) == set(FACTS), "seven exact native facts required")
+-    for item in observation["facts"].values():
+-        require(isinstance(item, str) and item in CHECKS, "unknown native check outcome")
++    require(set(observation) == set(contract["observation"]["jsonKeys"]), "observation unknown/missing fields")
++    require(observation["scope"] == "CurrentUserMyCacheOnly" and observation["readiness"] == "NOT_GRANTED", "cache-only/no-permit scope missing")
++    for field in ("publicationRevision", "identityRevision", "settingsRevision"):
++        require(integer(observation[field], 1, 2**64-1), "invalid revision")
++    for field in ("chainTrustErrors", "sslPolicyError"):
++        require(observation[field] is None or integer(observation[field], 0, 2**32-1), "invalid chain/policy status")
++    for field in FACTS:
++        item = observation[field]
++        require(isinstance(item, dict) and set(item) == {"check", "nativeError"}, "fact shape invalid")
++        require(type(item["check"]) is str and item["check"] in CHECKS, "unknown check outcome")
++        require(item["nativeError"] is None or integer(item["nativeError"], -2**31, 2**31-1), "invalid native status")
++        require(item["check"] not in {"Satisfied", "NotChecked"} or item["nativeError"] is None, "success/unchecked fact has error")
+     if owned_reference:
+-        for field in FACTS[:4]:
+-            require(observation["facts"][field] == "Satisfied", "owned certificate required fact failed: " + field)
+-    require(contract["listener"] == "NOT_ENABLED", "query must not enable listener")
+-    return {"facts": observation["facts"], "scope": observation["scope"],
+-            "positiveProductionPermit": False, "actualTlsHandshake": "NOT_EXERCISED",
+-            "onlineRevocation": "NOT_EXERCISED", "otherClientTrust": "NOT_EXERCISED"}
+-
+-
+-def validate_transcript(text, contract):
+-    require(contract.get("status") == "FROZEN_R49_PROBE_CONTRACT", "R49 contract is not frozen")
+-    expected = contract.get("steps")
+-    require(isinstance(expected, list) and expected and all(isinstance(x, str) and x for x in expected)
+-            and len(set(expected)) == len(expected), "exact unique step contract missing")
++        for field in contract["observation"]["ownedReferenceRequiredFacts"]:
++            require(observation[field]["check"] == "Satisfied", "owned certificate required fact failed: " + field)
++    else:
++        require(observation["found"]["check"] == "Rejected" and all(observation[x]["check"] == "NotChecked" for x in FACTS[1:]), "missing-reference case is not an actual absent selection")
++    if observation["sslChainPolicy"]["check"] == "Satisfied" or observation["serverName"]["check"] == "Satisfied":
++        require(observation["sslPolicyError"] == 0 and observation["chainTrustErrors"] == 0, "positive policy/name contradicts actual status")
++    return {"facts": {x: observation[x] for x in FACTS}, "scope": observation["scope"],
++            "readiness": "NOT_GRANTED", "positiveProductionPermit": False,
++            "actualTlsHandshake": "NOT_EXERCISED", "onlineRevocation": "NOT_EXERCISED", "otherClientTrust": "NOT_EXERCISED"}
++
++
++def strict_json(text):
++    def unique(pairs):
++        result = {}
++        for key, value in pairs:
++            require(key not in result, "duplicate JSON key")
++            result[key] = value
++        return result
++    return json.loads(text, object_pairs_hook=unique)
++
++
++def validate_transcript(text, contract=None, owned_reference=True):
++    contract = load_contract() if contract is None else contract
++    # An explicit caller cannot silently substitute a different step/shape.
++    require(contract == load_contract(), "validator contract differs from bound final source")
+     steps, observations, finals, exits = [], [], [], []
+-    step_positions, final_positions, exit_positions = [], [], []
++    step_positions, observation_positions, final_positions, exit_positions = [], [], [], []
+     for position, line in enumerate(text.splitlines()):
+-        if line.startswith("HTTPS_SETTINGS_NATIVE_STEP "):
+-            entry = json.loads(line[len("HTTPS_SETTINGS_NATIVE_STEP "):])
+-            require(set(entry) == {"index", "name"} and type(entry["index"]) is int, "step shape invalid")
+-            steps.append(entry)
+-            step_positions.append(position)
+-        elif line.startswith("HTTPS_SETTINGS_CERTIFICATE_OBSERVATION "):
+-            observations.append(json.loads(line[len("HTTPS_SETTINGS_CERTIFICATE_OBSERVATION "):]))
+-        elif line.startswith("HTTPS_SETTINGS_NATIVE_PASS "):
+-            finals.append(line)
+-            final_positions.append(position)
+-        elif line.startswith("HTTPS_CERTIFICATE_PROCESS_EXIT "):
+-            exits.append(json.loads(line[len("HTTPS_CERTIFICATE_PROCESS_EXIT "):]))
+-            exit_positions.append(position)
+-    require(steps == [{"index": i, "name": name} for i, name in enumerate(expected)], "ordered exact native steps mismatch")
+-    require(len(observations) == 1, "exactly one actual certificate observation required")
+-    require(len(finals) == 1 and finals[0] == contract["finalLine"], "exact native final footer mismatch")
+-    require(exits == [{"code": 0}], "actual owned EXE exit0 missing")
++        if line.startswith("HTTPS_SETTINGS_NATIVE_STEP"):
++            match = re.fullmatch(r"HTTPS_SETTINGS_NATIVE_STEP index=(0|[1-9][0-9]*) name=([a-z0-9-]+)", line)
++            require(match is not None, "step plain-wire shape invalid")
++            steps.append({"index": int(match[1]), "name": match[2]}); step_positions.append(position)
++        elif line.startswith("HTTPS_SETTINGS_CERTIFICATE_OBSERVATION"):
++            require(line.startswith("HTTPS_SETTINGS_CERTIFICATE_OBSERVATION "), "observation prefix invalid")
++            observations.append(strict_json(line[len("HTTPS_SETTINGS_CERTIFICATE_OBSERVATION "):])); observation_positions.append(position)
++        elif line.startswith("HTTPS_SETTINGS_NATIVE_PASS"):
++            finals.append(line); final_positions.append(position)
++        elif line.startswith("HTTPS_CERTIFICATE_PROCESS_EXIT"):
++            require(line.startswith("HTTPS_CERTIFICATE_PROCESS_EXIT "), "exit prefix invalid")
++            exits.append(strict_json(line[len("HTTPS_CERTIFICATE_PROCESS_EXIT "):])); exit_positions.append(position)
++    require(steps == [{"index": i, "name": name} for i, name in enumerate(contract["steps"])], "ordered exact22 native steps mismatch")
++    require(len(observations) == 1 and len(finals) == 1 and exits == [{"code": 0}] and type(exits[0]["code"]) is int, "observation/footer/actual exit count or status failed")
++    prefix = contract["footer"].removesuffix("<actual int>")
++    require(finals[0].startswith(prefix), "exact final footer mismatch")
++    elapsed = finals[0][len(prefix):]
++    require(re.fullmatch(r"0|[1-9][0-9]*", elapsed) is not None and len(elapsed) <= 6 and int(elapsed) <= contract["budgets"]["finiteNativeWorkflowSeconds"]*1000, "actual native elapsed missing/out-of-budget")
+     require(max(step_positions) < final_positions[0] < exit_positions[0], "final/actual exit order invalid")
+-    # Normalize only through an explicit frozen field map; never infer success
+-    # from a PASS substring or silently drop unknown observation fields.
+-    require(contract.get("observationWireFormat") == "R48_MODEL_V1", "await exact R49 wire normalization")
+-    return validate_observation(observations[0], contract, True)
++    check_index = contract["steps"].index("explicit-native-certificate-check")
++    require(step_positions[check_index-1] < observation_positions[0] < step_positions[check_index], "observation not in actual native check interval")
++    result = validate_observation(observations[0], contract, owned_reference)
++    result.update(exactSteps=22, actualProcessExit=0, nativeElapsedMillis=int(elapsed))
++    return result
+ 
+ 
+ def prepare(root, marker, exe, thumbprint, output):
+@@ -142,7 +172,7 @@
+     ast_check = ast_check.replace("@('setup','launch','stop','capture','cleanup')", "@(" + ast_names + ")")
+     (output / "parse-owned-controls.ps1").write_text(ast_check, encoding="utf-8-sig")
+     report = {"status": "PREPARED_NOT_RUN", "windows": "NOT_RUN", "powershellAst": "NOT_RUN",
+-              "r49Contract": "AWAITING_FINAL_FREEZE", "root": root, "marker": marker,
++              "r49Contract": CONTRACT_SHA, "root": root, "marker": marker,
+               "launchPrepared": thumbprint is not None, "publicReferenceOnly": True, "sources": binding["sources"], "scripts": facts,
+               "launchBudgetMillis": 90000, "ownershipObservationBudgetScope": "Original TLS supervisor bound unchanged; may honestly fail before the App's own120s deadline",
+               "scriptChanges": "Only LAUNCH argument list/process-exit marker and STOP diagnostic flag differ. COMMON/SETUP/CAPTURE/CLEANUP exact original templates.",
+@@ -155,35 +185,45 @@
+ 
+ 
+ def self_test():
+-    observation = {"scope": "CurrentUserMyCacheOnly", "facts": {x: "Satisfied" for x in FACTS},
+-                   "publication_revision": 4, "identity_revision": 1, "settings_revision": 2}
+-    contract = {"listener": "NOT_ENABLED"}
+-    validate_observation(observation, contract, True)
+-    cases = []
++    contract = load_contract()
++    observation = {"scope": "CurrentUserMyCacheOnly", "publicationRevision": 4, "identityRevision": 1, "settingsRevision": 2,
++                   "chainTrustErrors": 32, "sslPolicyError": 0x800b0109, "readiness": "NOT_GRANTED"}
++    observation.update({x: {"check": "Satisfied" if x in FACTS[:4] else "Unverified", "nativeError": None} for x in FACTS})
++    def transcript(obs=observation):
++        lines = ["HTTPS_SETTINGS_NATIVE_STEP index=" + str(i) + " name=" + name for i,name in enumerate(contract["steps"])]
++        lines.insert(8, "HTTPS_SETTINGS_CERTIFICATE_OBSERVATION " + json.dumps(obs))
++        lines += [contract["footer"].replace("<actual int>", "1234"), "HTTPS_CERTIFICATE_PROCESS_EXIT {\"code\":0}"]
++        return lines
++    positive = [transcript()]
++    clean = json.loads(json.dumps(observation)); clean.update(chainTrustErrors=0, sslPolicyError=0)
++    for field in FACTS: clean[field] = {"check":"Satisfied", "nativeError":None}
++    positive.append(transcript(clean))
++    for lines in positive: validate_transcript("\n".join(lines))
++    negatives = []
+     for field in FACTS[:4]:
+-        bad = json.loads(json.dumps(observation)); bad["facts"][field] = "Unverified"; cases.append(bad)
+-    for mutation in (lambda x: x.update(scope="Online"), lambda x: x.update(ready=True),
+-                     lambda x: x["facts"].update(server_name="READY"), lambda x: x.update(publication_revision=True),
+-                     lambda x: x["facts"].pop("cached_revocation")):
+-        bad = json.loads(json.dumps(observation)); mutation(bad); cases.append(bad)
+-    for bad in cases:
+-        try: validate_observation(bad, contract, True)
+-        except ValueError: pass
+-        else: raise AssertionError("bad certificate model accepted")
+-    contract.update(status="FROZEN_R49_PROBE_CONTRACT", steps=["saved", "queried"],
+-                    finalLine="HTTPS_SETTINGS_NATIVE_PASS model-only", observationWireFormat="R48_MODEL_V1")
+-    lines = ["HTTPS_SETTINGS_NATIVE_STEP " + json.dumps({"index": i, "name": name}) for i, name in enumerate(contract["steps"])]
+-    lines += ["HTTPS_SETTINGS_CERTIFICATE_OBSERVATION " + json.dumps(observation), contract["finalLine"], "HTTPS_CERTIFICATE_PROCESS_EXIT " + json.dumps({"code": 0})]
+-    validate_transcript("\n".join(lines), contract)
+-    transcripts = [lines[:-1], lines+[lines[-2]], [lines[1],lines[0],*lines[2:]],
+-                   [lines[-2],*lines[:-2],lines[-1]], lines[:2]+[lines[2],lines[2]]+lines[3:],
+-                   lines[:-1]+["HTTPS_CERTIFICATE_PROCESS_EXIT " + json.dumps({"code": 1})]]
+-    for bad in transcripts:
+-        try: validate_transcript("\n".join(bad), contract)
+-        except ValueError: pass
+-        else: raise AssertionError("bad transcript model accepted")
+-    return {"status": "PURE_MODEL_PASS", "positiveCases": 2, "negativeCases": len(cases)+len(transcripts),
+-            "scope": "Model only; no PowerShell AST, SSH, Windows, CryptoAPI or EXE execution"}
++        bad = json.loads(json.dumps(observation)); bad[field]["check"]="Unverified"; negatives.append(transcript(bad))
++    for mutation in (lambda x:x.update(scope="Online"), lambda x:x.update(readiness="GRANTED"), lambda x:x.update(extra=True),
++        lambda x:x.pop("cachedRevocation"), lambda x:x["serverName"].update(check="READY"), lambda x:x.update(publicationRevision=True),
++        lambda x:x.update(settingsRevision=0), lambda x:x.update(identityRevision=2**64), lambda x:x.update(chainTrustErrors=-1),
++        lambda x:x.update(sslPolicyError=2**32), lambda x:x["privateKey"].update(nativeError=True),
++        lambda x:x["privateKey"].update(nativeError=-2**31-1), lambda x:x["found"].update(nativeError=5),
++        lambda x:x["privateKey"].update(extra=1), lambda x:x["sslChainPolicy"].update(check="Satisfied")):
++        bad=json.loads(json.dumps(observation)); mutation(bad); negatives.append(transcript(bad))
++    base=transcript()
++    negatives += [base[:-1], base+[base[-2]], [base[1],base[0],*base[2:]],
++                  [base[-2],*base[:-2],base[-1]], base[:8]+[base[8],base[8]]+base[9:],
++                  base[:-1]+['HTTPS_CERTIFICATE_PROCESS_EXIT {"code":1}'], base[:-1]+['HTTPS_CERTIFICATE_PROCESS_EXIT {"code":false}'],
++                  base[:-2]+[base[-2].replace("elapsed_ms=1234","elapsed_ms=120001"),base[-1]],
++                  base[:-2]+[base[-2].replace("elapsed_ms=1234","elapsed_ms=01"),base[-1]],
++                  base[:8]+base[9:]+[base[8]], base[:8]+[base[8].replace('"readiness": "NOT_GRANTED"','"readiness": "NOT_GRANTED", "readiness":"GRANTED"')]+base[9:],
++                  [base[0]+" extra=1",*base[1:]], base[:-2]+[base[-2].replace("shared_workers=2","shared_workers=3"),base[-1]]]
++    for lines in negatives:
++        try: validate_transcript("\n".join(lines))
++        except (ValueError, TypeError): pass
++        else: raise AssertionError("bad real-wire model accepted")
++    return {"status":"PURE_MODEL_PASS", "positiveCases":len(positive), "negativeCases":len(negatives),
++            "contractSha256":CONTRACT_SHA, "wire":"Actual22 plainsteps +exact14key nativeobservation +footer +ownedprocess exit",
++            "scope":"Synthetic transcript models only; no PowerShell AST, SSH, Windows, CryptoAPI or EXE execution"}
+ 
+ 
+ def main():

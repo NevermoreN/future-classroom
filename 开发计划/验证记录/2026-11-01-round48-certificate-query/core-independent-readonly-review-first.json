@@ -1,0 +1,163 @@
+{
+  "status": "PASS_STATIC_NO_REPRODUCIBLE_BLOCKER_FOUND",
+  "createdUtc": "2026-10-31T23:48:57.289019+00:00",
+  "scope": "Independent read-only review of native first freeze (7 files) plus service second freeze (3 files,4 tests); no source changes, Cargo/rustc, Windows/SSH/native/CI execution. Not a runtime or compatibility pass.",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10221,
+      "sha256": "2ac2e9b3cea4d6f6ef8aaa329398f93abca4b5ed3fa9707efde978010dde0174",
+      "freeze": "implementation-freeze-first.json",
+      "readAfterSha256": "2ac2e9b3cea4d6f6ef8aaa329398f93abca4b5ed3fa9707efde978010dde0174",
+      "frozenBytesMatch": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 8515,
+      "sha256": "9e937f565f2482ec663cf7c1f1a7605998118d9508a54fd6aac2bc4199a8f7f8",
+      "freeze": "implementation-freeze-first.json",
+      "readAfterSha256": "9e937f565f2482ec663cf7c1f1a7605998118d9508a54fd6aac2bc4199a8f7f8",
+      "frozenBytesMatch": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_selection.rs",
+      "bytes": 7957,
+      "sha256": "9bbdba8dc571e4efb20ab919c2dc9608b0139c59b496cce7b541a603de6b8439",
+      "freeze": "implementation-freeze-first.json",
+      "readAfterSha256": "9bbdba8dc571e4efb20ab919c2dc9608b0139c59b496cce7b541a603de6b8439",
+      "frozenBytesMatch": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query.rs",
+      "bytes": 11640,
+      "sha256": "0ff1cb290b171afae1a5f88dbd62153adaa82e80b88bab4437acaf2ba1a3fcb0",
+      "freeze": "implementation-freeze-first.json",
+      "readAfterSha256": "0ff1cb290b171afae1a5f88dbd62153adaa82e80b88bab4437acaf2ba1a3fcb0",
+      "frozenBytesMatch": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query/native.rs",
+      "bytes": 9137,
+      "sha256": "88a1d2bb8eeebdb36d42da436357afaa6e8ab60f4098a8f1b38d6ea38d9e850d",
+      "freeze": "implementation-freeze-first.json",
+      "readAfterSha256": "88a1d2bb8eeebdb36d42da436357afaa6e8ab60f4098a8f1b38d6ea38d9e850d",
+      "frozenBytesMatch": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query/flight.rs",
+      "bytes": 6238,
+      "sha256": "2efa101d4cb2dffc01998e1232af7deea7cc9a766ada52126cfcea1d139666e4",
+      "freeze": "implementation-freeze-first.json",
+      "readAfterSha256": "2efa101d4cb2dffc01998e1232af7deea7cc9a766ada52126cfcea1d139666e4",
+      "frozenBytesMatch": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query/tests.rs",
+      "bytes": 11067,
+      "sha256": "9bb1aced8d7ea605f0f58375ba546532ce36a731e3d29434357d3a2843c90bba",
+      "freeze": "implementation-freeze-first.json",
+      "readAfterSha256": "9bb1aced8d7ea605f0f58375ba546532ce36a731e3d29434357d3a2843c90bba",
+      "frozenBytesMatch": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 107143,
+      "sha256": "24df808e779f556d5c50e207342b4261ca84d5b4246ec566ecb27b0077cbbcf9",
+      "freeze": "service-source-freeze-second.json",
+      "readAfterSha256": "24df808e779f556d5c50e207342b4261ca84d5b4246ec566ecb27b0077cbbcf9",
+      "frozenBytesMatch": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_certificate.rs",
+      "bytes": 11340,
+      "sha256": "800e0994b9d80f9d93ab0fb8e855351731e4200c6ea73604e245d5504b6a4cc2",
+      "freeze": "service-source-freeze-second.json",
+      "readAfterSha256": "800e0994b9d80f9d93ab0fb8e855351731e4200c6ea73604e245d5504b6a4cc2",
+      "frozenBytesMatch": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_certificate/tests.rs",
+      "bytes": 12173,
+      "sha256": "482c098aa35305c2ab770ff89c9856427ddce025613a5b30cadef54b56df7683",
+      "freeze": "service-source-freeze-second.json",
+      "readAfterSha256": "482c098aa35305c2ab770ff89c9856427ddce025613a5b30cadef54b56df7683",
+      "frozenBytesMatch": true
+    }
+  ],
+  "blockers": [],
+  "findings": [
+    {
+      "area": "Ownership and cancellation",
+      "references": [
+        "certificate_query/native.rs:33-68",
+        "certificate_query.rs:235-297",
+        "certificate_query/flight.rs:39-121",
+        "certificate_selection.rs:177-215"
+      ],
+      "conclusion": "One physical FLIGHT is claimed before store open. All cooperative-cancel/native-failure paths explicitly close original owner before released; checked key/cert failures retain original dependencies, and a failed cleanup keeps an inert ManuallyDrop exact owner in the permanently Faulted process singleton. Cancelled is never used as physical completion. Native resources stay on creator thread; no native operation spans the metadata lock."
+    },
+    {
+      "area": "Native policy and key usage",
+      "references": [
+        "certificate_query/native.rs:129-208",
+        "certificate_query.rs:302-351",
+        "credentials.rs:120-213",
+        "certificate_selection.rs:102-136"
+      ],
+      "conclusion": "Server-auth RequestedUsage is explicit. SSL policy success requires BOOL true and dwError==0 and clean chain trust; API failure/nonzero policy are not interpreted as success. EKU flags0 use documented effective extension/property semantics; successful zero-count is separated by immediate GetLastError. CallerFree false keeps key with selected certificate, true closes the correct CNG/CSP handle. CHECK store false consumes handle exactly once, consistent with official always-closed contract."
+    },
+    {
+      "area": "Identity, SQL and publication",
+      "references": [
+        "backend/https_certificate.rs:105-190",
+        "backend/https_certificate.rs:218-288"
+      ],
+      "conclusion": "Fresh exact Local Manage session plus GlobalAdmin/no must-change checked before SQL/native and repeatedly afterward; original expected settings and identity are read coherently through sole writer, and repository precommit checks original review authority. Any global publication/health/generation change makes review stale, including non-identity settings saves. Ledger contention is recoverable AuthorityUnavailable. Backend/ledger/writer locks do not span native query; caller must obey the factory composition contract to release its Backend mutex before inspect."
+    },
+    {
+      "area": "Original JobContext",
+      "references": [
+        "backend/https_certificate.rs:88-108",
+        "backend/https_certificate.rs:211-225",
+        "backend/https_certificate/tests.rs:278-361"
+      ],
+      "conclusion": "Service requires a bound execution fence, AND-composes later fences, never stores JobContext or creates a replacement deadline, and propagates original fence into SQL. Actual worker model test retains running job after cancel until query returns and real pool join. Actual CryptoAPI calls remain synchronous/uninterruptible; query completion/OS allocation limits are not asserted."
+    },
+    {
+      "area": "Historical observation and cached trust",
+      "references": [
+        "backend/https_certificate.rs:30-60",
+        "certificate_query.rs:37-77",
+        "certificate_query/native.rs:143-146"
+      ],
+      "conclusion": "No cross-request live certificate cache/start permission is implemented. Observation contains timestamped historical facts. is_current_for only correlates original configuration/publication/session, not passage of certificate validity time; it has no TTL or new trust query. UI must retain checked-at wording and its usual exact-session delivery gate, never reinterpret this method as proof that certificate is still valid now or listener may start. Revocation is local cache-only chain-excluding-root; IP name remains Unverified, private key acquisition is not signing proof."
+    }
+  ],
+  "remainingVerification": [
+    "Parent compilation must establish GNU/MSVC signature/cfg compatibility; this review did not run compiler.",
+    "Real Windows CurrentUser MY tests must cover missing/found cert, wrong name, expired cert, no/failed silent key, trust/revocation errors and actual cleanup; existing injected tests are explicitly models.",
+    "No claim of client trust, online revocation freshness, TLS handshake, bounded arbitrary native provider duration, production listener eligibility or P0 closure."
+  ],
+  "primarySources": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certverifycertificatechainpolicy",
+      "use": "BOOL indicates policy evaluation; actual dwError is required, revocation delegated to chain build."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certgetcertificatechain",
+      "use": "Current-user default chain, both independent cache-only flags, explicit root auto-update suppression, returned chain cleanup."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certgetenhancedkeyusage",
+      "use": "Effective EKU extension/property combination; successful zero-count uses immediate last error to distinguish unrestricted from no uses."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecertificateprivatekey",
+      "use": "Silent/no-healing behavior; cached-key comparison caveat and CallerFree-dependent release."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certclosestore",
+      "use": "CHECK false still closes store, forbids retrying same consumed handle."
+    }
+  ]
+}

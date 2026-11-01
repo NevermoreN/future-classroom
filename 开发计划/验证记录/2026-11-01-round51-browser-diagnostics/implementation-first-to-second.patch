@@ -1,0 +1,84 @@
+diff --git a/scripts/windows-native-browser-harness.mjs b/scripts/windows-native-browser-harness.mjs
+--- a/scripts/windows-native-browser-harness.mjs
++++ b/scripts/windows-native-browser-harness.mjs
+@@ -25,6 +25,16 @@
+   'read-original-content', 'visual-original', 'enter-synthetic-text', 'visual-refresh-with-draft',
+   'save-once', 'visual-after-save', 'reload-and-read-durable-content', 'visual-after-reload',
+   'settle-observed-responses', 'complete']);
++// Closed names only: a syntactically valid ERR_<hex credential> is not a safe diagnostic.
++const NETWORK_ERRORS = new Set(['net::ERR_FAILED', 'net::ERR_ABORTED', 'net::ERR_TIMED_OUT',
++  'net::ERR_CONNECTION_CLOSED', 'net::ERR_CONNECTION_RESET', 'net::ERR_CONNECTION_REFUSED',
++  'net::ERR_CONNECTION_ABORTED', 'net::ERR_CONNECTION_FAILED', 'net::ERR_EMPTY_RESPONSE',
++  'net::ERR_CONTENT_LENGTH_MISMATCH', 'net::ERR_INCOMPLETE_CHUNKED_ENCODING', 'net::ERR_INVALID_CHUNKED_ENCODING',
++  'net::ERR_NAME_NOT_RESOLVED', 'net::ERR_ADDRESS_UNREACHABLE', 'net::ERR_INTERNET_DISCONNECTED',
++  'net::ERR_NETWORK_CHANGED', 'net::ERR_SSL_PROTOCOL_ERROR', 'net::ERR_SSL_VERSION_OR_CIPHER_MISMATCH',
++  'net::ERR_CERT_AUTHORITY_INVALID', 'net::ERR_CERT_COMMON_NAME_INVALID', 'net::ERR_CERT_DATE_INVALID',
++  'net::ERR_CERT_INVALID', 'net::ERR_BLOCKED_BY_CLIENT', 'net::ERR_BLOCKED_BY_RESPONSE',
++  'net::ERR_HTTP2_PROTOCOL_ERROR', 'net::ERR_QUIC_PROTOCOL_ERROR']);
+ const BLOCKED_REASONS = new Set(['other', 'csp', 'mixed-content', 'origin', 'inspector', 'subresource-filter',
+   'content-type', 'coep-frame-resource-needs-coep-header', 'coop-sandboxed-iframe-cannot-navigate-to-coop-page',
+   'corp-not-same-origin', 'corp-not-same-origin-after-defaulted-to-same-origin-by-coep', 'corp-not-same-site']);
+@@ -355,8 +365,7 @@
+     return Object.freeze({ requestOrdinal: d.requestOrdinal, kind: record.kind, path: record.path,
+       phase: FAILURE_PHASES.has(this.phase) ? this.phase : 'OTHER',
+       canceled: params.canceled === true,
+-      errorText: typeof params.errorText === 'string' && !/[\r\n]/.test(params.errorText)
+-        && /^net::ERR_[A-Z0-9_]{1,80}$/.test(params.errorText) ? params.errorText : 'OTHER',
++      errorText: NETWORK_ERRORS.has(params.errorText) ? params.errorText : 'OTHER',
+       blockedReason: params.blockedReason === undefined ? 'NONE' : BLOCKED_REASONS.has(params.blockedReason) ? params.blockedReason : 'OTHER',
+       failureMillis: this.diagnosticMillis(), requestMillis: d.requestMillis, responseMillis: d.responseMillis,
+       extraInfoMillis: d.extraInfoMillis, finishedMillis: d.finishedMillis, bodyVerifiedMillis: d.bodyVerifiedMillis,
+@@ -988,7 +997,8 @@
+   assert(!before.includes('postData')); assert(!before.includes('headers')); assert(!before.includes('requestId'));
+   await h.disposePromise;
+   for (const [errorText, sanitized] of [['net::ERR_ABORTED', 'net::ERR_ABORTED'], ['net::ERR_CONNECTION_RESET', 'net::ERR_CONNECTION_RESET'],
+-    [run.cookie, 'OTHER'], ['net::ERR_ABORTED\n', 'OTHER'], ['net::ERR_ABORTED\nCookie: ' + run.cookie, 'OTHER'], ['net::ERR_' + 'A'.repeat(81), 'OTHER']]) {
++    [run.cookie, 'OTHER'], ['net::ERR_' + COOKIE.exec(run.cookie)[1].toUpperCase(), 'OTHER'],
++    ['net::ERR_' + run.expectedCsrf.toUpperCase(), 'OTHER'], ['net::ERR_UNRECOGNIZED_NAME', 'OTHER'], ['net::ERR_ABORTED\n', 'OTHER'], ['net::ERR_ABORTED\nCookie: ' + run.cookie, 'OTHER'], ['net::ERR_' + 'A'.repeat(81), 'OTHER']]) {
+     const x = setup(); x.phase = run.cookie;
+     x.event('Network.loadingFailed', { requestId: 'visual', errorText, canceled: true, blockedReason: run.expectedCsrf }, 'owned');
+     const d = x.requests.get('visual').failure;
+diff --git a/scripts/windows-native-browser-observer.py b/scripts/windows-native-browser-observer.py
+--- a/scripts/windows-native-browser-observer.py
++++ b/scripts/windows-native-browser-observer.py
+@@ -49,6 +49,18 @@
+     "connect", "await-run", "inject-existing-approved-cookie", "navigate-native", "read-original-content",
+     "visual-original", "enter-synthetic-text", "visual-refresh-with-draft", "save-once", "visual-after-save",
+     "reload-and-read-durable-content", "visual-after-reload", "settle-observed-responses", "complete", "OTHER",
++))
++# Same finite names as Node; do not reflect an arbitrary ERR_<credential>.
++NETWORK_ERRORS = frozenset((
++    "net::ERR_FAILED", "net::ERR_ABORTED", "net::ERR_TIMED_OUT",
++    "net::ERR_CONNECTION_CLOSED", "net::ERR_CONNECTION_RESET", "net::ERR_CONNECTION_REFUSED",
++    "net::ERR_CONNECTION_ABORTED", "net::ERR_CONNECTION_FAILED", "net::ERR_EMPTY_RESPONSE",
++    "net::ERR_CONTENT_LENGTH_MISMATCH", "net::ERR_INCOMPLETE_CHUNKED_ENCODING", "net::ERR_INVALID_CHUNKED_ENCODING",
++    "net::ERR_NAME_NOT_RESOLVED", "net::ERR_ADDRESS_UNREACHABLE", "net::ERR_INTERNET_DISCONNECTED",
++    "net::ERR_NETWORK_CHANGED", "net::ERR_SSL_PROTOCOL_ERROR", "net::ERR_SSL_VERSION_OR_CIPHER_MISMATCH",
++    "net::ERR_CERT_AUTHORITY_INVALID", "net::ERR_CERT_COMMON_NAME_INVALID", "net::ERR_CERT_DATE_INVALID",
++    "net::ERR_CERT_INVALID", "net::ERR_BLOCKED_BY_CLIENT", "net::ERR_BLOCKED_BY_RESPONSE",
++    "net::ERR_HTTP2_PROTOCOL_ERROR", "net::ERR_QUIC_PROTOCOL_ERROR",
+ ))
+ BLOCKED_REASONS = frozenset((
+     "NONE", "OTHER", "other", "csp", "mixed-content", "origin", "inspector", "subresource-filter", "content-type",
+@@ -112,7 +124,7 @@
+                 and isinstance(observation["phase"], str) and observation["phase"] in FAILURE_PHASES
+                 and type(observation["canceled"]) is bool
+                 and isinstance(observation["errorText"], str)
+-                and (observation["errorText"] == "OTHER" or re.fullmatch(r"net::ERR_[A-Z0-9_]{1,80}", observation["errorText"]))
++                and (observation["errorText"] == "OTHER" or observation["errorText"] in NETWORK_ERRORS)
+                 and isinstance(observation["blockedReason"], str) and observation["blockedReason"] in BLOCKED_REASONS,
+                 "NODE_FAILURE_CLASSIFICATION")
+         for key in ("failureMillis", "requestMillis", "responseMillis", "extraInfoMillis", "finishedMillis", "bodyVerifiedMillis"):
+diff --git a/scripts/check-native-browser-diagnostics.py b/scripts/check-native-browser-diagnostics.py
+--- a/scripts/check-native-browser-diagnostics.py
++++ b/scripts/check-native-browser-diagnostics.py
+@@ -56,6 +56,9 @@
+     ('extra header field', lambda v: v['network'][0]['failure'].update(headers={'Cookie': 'PRIVATE'})),
+     ('extra raw frame field', lambda v: v['network'][0]['failure'].update(rawCDP='PRIVATE')),
+     ('extra request body field', lambda v: v['network'][0]['failure'].update(postData='PRIVATE')),
++    ('prefixed uppercase cookie credential', lambda v: v['network'][0]['failure'].update(errorText='net::ERR_' + 'D' * 64)),
++    ('prefixed uppercase CSRF credential', lambda v: v['network'][0]['failure'].update(errorText='net::ERR_' + 'E' * 64)),
++    ('unknown syntactically valid error name', lambda v: v['network'][0]['failure'].update(errorText='net::ERR_UNRECOGNIZED_NAME')),
+     ('unfiltered error', lambda v: v['network'][0]['failure'].update(errorText='net::ERR_ABORTED Cookie: PRIVATE')),
+     ('linebreak error', lambda v: v['network'][0]['failure'].update(errorText='net::ERR_ABORTED\n')),
+     ('overlong error', lambda v: v['network'][0]['failure'].update(errorText='net::ERR_' + 'X' * 81)),

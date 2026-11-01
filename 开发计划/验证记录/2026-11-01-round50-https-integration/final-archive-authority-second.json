@@ -1,0 +1,73 @@
+{
+  "schema": "fc.https-rounds.final-archive-authority/v1",
+  "status": "ALL_CONSUMERS_FINISHED_SOURCE_INTEGRATED",
+  "recordedUtc": "2026-11-01T00:57:54.520111+00:00",
+  "activeConsumers": [],
+  "sourceIntegration": "EXACT_VALIDATED_BYTES_INTEGRATED",
+  "gitHead": "b9c24b62d124976776a6819b0cd21cc9667738be",
+  "proofs": [
+    {
+      "role": "source-integration",
+      "path": "/tmp/fc-round50-https-integration-evidence/source-code-committed-proof-first.json",
+      "sha256": "c2e45a8a13cfb79edb96f3708a5073e0b25dc8ab43cc735a1633b01baa2a73e7",
+      "status": "PASS_CODE_COMMITTED_BYTES_EXACT"
+    },
+    {
+      "role": "host-full-matrix",
+      "path": "/tmp/fc-round50-https-integration-evidence/final-local-batch-first.json",
+      "sha256": "c52730a235b85a594609846c46337fc3b3fec4774300376f4ab4d498d91cd30a",
+      "status": "PASS_VALIDATED_LOCAL_BATCH_SOURCE_HOST_GNU_WIN11_FINITE"
+    },
+    {
+      "role": "windows-runtime",
+      "path": "/tmp/fc-round50-https-integration-evidence/windows-gnu-runtime-first.json",
+      "sha256": "5cf339c28ffb2f68972e9555a9a6656b6ffe0a7a534df1847150490d9b8bfd20",
+      "status": "PASS",
+      "cleanupRequired": true
+    },
+    {
+      "role": "certificate-native",
+      "path": "/tmp/fc-round50-https-integration-evidence/windows-https-certificate-native-first.json",
+      "sha256": "2e5395405096ba6ea2b0b54c3f823859fa81bb6e05795da001a32919de4a5d75",
+      "status": "PASS",
+      "cleanupRequired": true
+    },
+    {
+      "role": "browser-final",
+      "path": "/tmp/fc-round50-https-integration-evidence/windows-default-browser-continuous-first.json",
+      "sha256": "9091fdd30ad8bde7fd79948150ef6a23d6e043417294c7a8628b9fa8ccfb0f67",
+      "status": "PASS",
+      "cleanupRequired": true
+    },
+    {
+      "role": "readonly-final",
+      "path": "/tmp/fc-round50-https-integration-evidence/windows-readonly-final-first.json",
+      "sha256": "e94f266f09fbd2ddeaca39d4458249d2a3721ef8784a8c0248fe34cc218d7b04",
+      "status": "PASS"
+    },
+    {
+      "role": "independent-runtime",
+      "path": "/tmp/fc-round50-https-integration-evidence/runtime-certificate-independent-second.json",
+      "sha256": "2b6852cd0bb0f75851966450138351aef9b40b4dc1ad27a57e027fbd7c10f00c",
+      "status": "PASS_COMPLETED_WIN11_RUNTIME_AND_CERTIFICATE_ONLY"
+    },
+    {
+      "role": "independent-browser",
+      "path": "/tmp/fc-round50-https-integration-evidence/browser-readonly-independent-second.json",
+      "sha256": "dc422c21ac2dfc955ea96db83bc34bb00b0cee9f96ad3e8c5d1462a32d531a0b",
+      "status": "PASS_TWO_FINITE_ACTUAL_BROWSERS_AND_FRESH_READONLY"
+    },
+    {
+      "role": "static-pe",
+      "path": "/tmp/fc-round50-https-integration-evidence/gnu-programs-independent-first.json",
+      "sha256": "c0ecd9695cde55b45e6a71d01f71db5cd678e787d956940b336d5bdca2f853ae",
+      "status": "PASS_STATIC_PE32_GNU_IDENTITY_NOT_OS_COMPATIBILITY"
+    }
+  ],
+  "scope": "Root confirms all owned R47\u2013R51 implementation, manual Cargo, Windows and review consumers actually terminal. Archive command itself reads these immutable source roots; no claim production/Win7Win10 runtime/full goal complete. R46 original browser interruption cause remainsUNKNOWN.",
+  "archiveReview": {
+    "helperSha256": "7e10e37a200edda569ab879cc8a8288aff5700bc271ad6a588e298d29924e774",
+    "freeze": "archive-https-final-freeze-third.json",
+    "consumers": "All final reviewer turns terminal; no owned manual Cargo or Windows job active"
+  }
+}

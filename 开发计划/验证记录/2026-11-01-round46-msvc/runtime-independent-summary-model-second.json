@@ -1,0 +1,50 @@
+{
+  "status": "PASS_LOCAL_PURE_SUMMARY_MODELS_ONLY",
+  "scope": "No runtime/artifact/native/Cargo execution; pure malformed-summary decisions only.",
+  "helper": {
+    "path": "/tmp/fc-round46-ci-evidence/verify-runtime-and-archive.py",
+    "bytes": 16953,
+    "sha256": "105d958233431ae053908f174ef646bafcf91b2fd55c7eaaf2dc358f47add943"
+  },
+  "createdUtc": "2026-10-31T23:55:35.126154+00:00",
+  "positive": 1,
+  "negative": [
+    {
+      "case": "nonzero_exit",
+      "rejected": true
+    },
+    {
+      "case": "changed_budget",
+      "rejected": true
+    },
+    {
+      "case": "missing_output",
+      "rejected": true
+    },
+    {
+      "case": "missing_summary",
+      "rejected": true
+    },
+    {
+      "case": "duplicate_summary",
+      "rejected": true
+    },
+    {
+      "case": "failed",
+      "rejected": true
+    },
+    {
+      "case": "ignored",
+      "rejected": true
+    },
+    {
+      "case": "filtered",
+      "rejected": true
+    },
+    {
+      "case": "wrong_announced_count",
+      "rejected": true
+    }
+  ],
+  "helperUnchanged": true
+}

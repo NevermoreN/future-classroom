@@ -1,0 +1,11 @@
+from pathlib import Path
+import json,subprocess,hashlib,datetime,sys
+root=Path('/tmp/fc-round47-https-settings-worktree');ev=Path('/tmp/fc-round50-https-integration-evidence');out=ev/'windows-regressions-first.json';assert not out.exists();artifact=json.loads((ev/'compiled-programs-preliminary-first.json').read_text());normal=[x for x in artifact['artifacts'] if not x['test']];assert len(normal)==1;exe=normal[0]['path'];assert hashlib.sha256(Path(exe).read_bytes()).hexdigest()==normal[0]['sha256']
+cert=json.loads((ev/'windows-https-certificate-native-first.json').read_text());assert cert['status']=='PASS' and cert['cleanup']=='PASS' and cert['exe']['sha256']==normal[0]['sha256']
+r={'status':'RUNNING','startedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'normalSha256':normal[0]['sha256'],'scope':'Strict serial actual Win11 regression for final429-source GNU program. Prior Host/nightly matrix still independently pending; no strictpreconnect timing/Win7/Win10 proof.','operations':[]};out.write_text(json.dumps(r,indent=2)+'\n')
+common=['python3','-B','scripts/windows-probe.py','--host','elior@192.168.10.212','--identity','/config/.local/share/future-classroom-test-access/win11-192.168.10.212','--exe',exe]
+commands=[('windows-gnu-runtime-first',common+['--test-metadata',str(ev/'windows-test-metadata-preliminary.jsonl'),'--test-timeout-seconds','900','--native-seconds','1','--system-host','--report',str(ev/'windows-gnu-runtime-first.json')]),('windows-public-native-first',common+['--public-desktop','--report',str(ev/'windows-public-native-first.json')]),('windows-visual-native-first',common+['--subject-visuals','--report',str(ev/'windows-visual-native-first.json')])]
+for name,args in commands:
+ print('REGRESSION_STARTED '+name,flush=True);c=subprocess.run(['python3','-B',str(ev/'run-recorded.py'),name,*args],cwd=root);r['operations'].append({'name':name,'exitCode':c.returncode});out.write_text(json.dumps(r,indent=2)+'\n')
+ if c.returncode:r.update(status='FAIL',failedOperation=name);out.write_text(json.dumps(r,indent=2)+'\n');sys.exit(c.returncode)
+r.update(status='PASS',completedUtc=datetime.datetime.now(datetime.timezone.utc).isoformat());out.write_text(json.dumps(r,indent=2)+'\n');print('WINDOWS_REGRESSIONS_TERMINAL_PASS',flush=True)

@@ -1,0 +1,32 @@
+{
+  "scope": "PURE MOCK; NO SSH/WINDOWS",
+  "calls": [
+    "tls-stop.ps1",
+    "tls-capture.ps1"
+  ],
+  "report": {
+    "status": "FAIL",
+    "ownedProcessCleanup": {
+      "status": "PASS",
+      "ownedProcessesRemaining": 0
+    },
+    "remoteCaptureError": {
+      "kind": "RuntimeError",
+      "phase": "preserve-complete-original-artifacts",
+      "message": "synthetic capture failure"
+    },
+    "cleanup": "FAIL",
+    "cleanupError": {
+      "kind": "RuntimeError",
+      "phase": "cleanup-owned-fixture",
+      "message": "original evidence preservation unproven; retaining remote root"
+    },
+    "retainedRemoteEvidence": {
+      "root": "C:\\SyntheticNotWindows",
+      "processStopProven": true,
+      "completeLocalArtifactsProven": false,
+      "cleanupIncomplete": true,
+      "nextAction": "recover complete originals then use this root's exact tls-cleanup.ps1; retain SSH authorization"
+    }
+  }
+}

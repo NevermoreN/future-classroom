@@ -1,0 +1,54 @@
+{
+  "scope": "PURE MOCK; NO SSH/WINDOWS",
+  "calls": [
+    "tls-stop.ps1",
+    "tls-capture.ps1",
+    "download-verified-original",
+    "tls-cleanup.ps1"
+  ],
+  "report": {
+    "status": "FAIL",
+    "ownedProcessCleanup": {
+      "status": "PASS",
+      "ownedProcessesRemaining": 0
+    },
+    "remoteRawEvidence": {
+      "tls.stdout": {
+        "bytes": 27,
+        "sha256": "42458cf1816a7946983ecb1f524c843b001dab6ad05cd7118353eab6579178e3"
+      }
+    },
+    "rawPreservation": {
+      "status": "PASS",
+      "directory": "/tmp/fc-round50-https-integration-evidence/certificate-driver-model-first/cleanup-failed-cleanup-failed-raw",
+      "files": {
+        "tls.stdout": {
+          "status": "PASS",
+          "remote": {
+            "bytes": 27,
+            "sha256": "42458cf1816a7946983ecb1f524c843b001dab6ad05cd7118353eab6579178e3"
+          },
+          "downloaded": {
+            "bytes": 27,
+            "sha256": "42458cf1816a7946983ecb1f524c843b001dab6ad05cd7118353eab6579178e3"
+          },
+          "artifact": "/tmp/fc-round50-https-integration-evidence/certificate-driver-model-first/cleanup-failed-cleanup-failed-raw/tls.stdout",
+          "base64": "U1lOVEhFVElDIExPQ0FMIE1PREVMIE9OTFkK"
+        }
+      }
+    },
+    "cleanup": "FAIL",
+    "cleanupError": {
+      "kind": "RuntimeError",
+      "phase": "cleanup-owned-fixture",
+      "message": "synthetic cleanup failure"
+    },
+    "retainedRemoteEvidence": {
+      "root": "C:\\SyntheticNotWindows",
+      "processStopProven": true,
+      "completeLocalArtifactsProven": true,
+      "cleanupIncomplete": true,
+      "nextAction": "recover complete originals then use this root's exact tls-cleanup.ps1; retain SSH authorization"
+    }
+  }
+}

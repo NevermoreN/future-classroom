@@ -1,0 +1,125 @@
+{
+  "status": "PASS_PURE_MEMORY_SCANNER_MODELS_ONLY",
+  "helperSha256": "3b90b9717b71e373416fa4d9b2cc3c476b282bae7fe9a3b6a79c5046aad96920",
+  "cases": [
+    {
+      "case": "benign_source",
+      "expectedBlocked": false,
+      "findingKinds": [],
+      "annotationKinds": []
+    },
+    {
+      "case": "public_certificate",
+      "expectedBlocked": false,
+      "findingKinds": [],
+      "annotationKinds": []
+    },
+    {
+      "case": "private_pem",
+      "expectedBlocked": true,
+      "findingKinds": [
+        "PRIVATE_KEY"
+      ],
+      "annotationKinds": []
+    },
+    {
+      "case": "github_pattern",
+      "expectedBlocked": true,
+      "findingKinds": [
+        "GITHUB_TOKEN"
+      ],
+      "annotationKinds": []
+    },
+    {
+      "case": "api_pattern",
+      "expectedBlocked": true,
+      "findingKinds": [
+        "API_TOKEN"
+      ],
+      "annotationKinds": []
+    },
+    {
+      "case": "real_cookie_review",
+      "expectedBlocked": true,
+      "findingKinds": [
+        "SESSION_COOKIE"
+      ],
+      "annotationKinds": []
+    },
+    {
+      "case": "explicit_retired_synthetic_cookie",
+      "expectedBlocked": false,
+      "findingKinds": [],
+      "annotationKinds": [
+        "EXPIRED_EXPLICIT_SYNTHETIC_FIXTURE_SECRET"
+      ]
+    },
+    {
+      "case": "repetitive_fixture_cookie",
+      "expectedBlocked": false,
+      "findingKinds": [],
+      "annotationKinds": [
+        "REPETITIVE_SYNTHETIC_FIXTURE"
+      ]
+    },
+    {
+      "case": "signed_url",
+      "expectedBlocked": true,
+      "findingKinds": [
+        "SIGNED_OR_CREDENTIALED_URL"
+      ],
+      "annotationKinds": []
+    },
+    {
+      "case": "json_unknown_password",
+      "expectedBlocked": true,
+      "findingKinds": [
+        "JSON_PASSWORD_OR_ACCESS_TOKEN_REVIEW"
+      ],
+      "annotationKinds": []
+    },
+    {
+      "case": "retired_exact_stop",
+      "expectedBlocked": false,
+      "findingKinds": [],
+      "annotationKinds": [
+        "EXPIRED_EXACT_OWNED_STOP_CAPABILITY"
+      ]
+    },
+    {
+      "case": "unproven_stop",
+      "expectedBlocked": true,
+      "findingKinds": [
+        "CAPABILITY_OR_CSRF"
+      ],
+      "annotationKinds": []
+    },
+    {
+      "case": "recursive_json_base64_password",
+      "expectedBlocked": true,
+      "findingKinds": [
+        "JSON_PASSWORD_OR_ACCESS_TOKEN_REVIEW"
+      ],
+      "annotationKinds": []
+    },
+    {
+      "case": "recursive_ps_utf16_private_pem",
+      "expectedBlocked": true,
+      "findingKinds": [
+        "PRIVATE_KEY"
+      ],
+      "annotationKinds": []
+    },
+    {
+      "case": "nested_encoding_explicit_depth_bound",
+      "expectedBlocked": true,
+      "findingKinds": [
+        "DECODE_DEPTH_BOUND"
+      ],
+      "annotationKinds": []
+    }
+  ],
+  "privateAndControlPathsClassifiedWithoutOpening": 4,
+  "ownerMarkerIncluded": true,
+  "scope": "No real credential/key read or hashed; dummy input strings only; no files copied/main modified/native/SSH/Cargo/cleanup."
+}

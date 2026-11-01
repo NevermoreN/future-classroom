@@ -168,3 +168,17 @@ R39最终本地矩阵以[第五次原报告](验证记录/2026-11-01-round39-voi
 七Rust/两Python文件精确集成后，410份Rust输入绑定最终第三GNU全workspace/all-targets编译与两套严格Clippy；实际授权Win1121份程序1420通过/0失败/0忽略，正常程序SHA `b1f25364f488d6e8ffdb45ef53d5e99ff7fa717e3a226dd9ddf75d48bf7dee6f`，另Host受影响fc-windows31项及严格Clippy通过。最终公开桌面20步、配色22步、默认HOMEWORK/连续接纳/语音GET/隔离Edge均PASS并物理清理，不能替代可见希沃或实际Win7/Win10。保留首次900秒编译、SSH解析、Edge stop共享异常及检查器原失败，详见[实施记录](10-实施进度与验证记录.md)R41最终补证。
 
 原post+5秒不变，25毫秒提前alarm及受检abortive close只构成候选整改。最终四TLS滴流/一个裸TCP有限样本最大4978421422纳秒，小于原5000000000；不解除精确ESTABLISHED/backlog/调度硬界、内核/SSP和原第十三轮FAIL。生产listener关闭，新整合源码Hosted MSVC和所有正式发布门槛继续独立验收。
+
+
+### R46完整MSVC补证
+
+`e23bd538…` 现代run41252067358与Win7候选run41252096527均实际SUCCESS。新合同核对7508项完整Git元数据、550项实际SHA及6958项历史元数据；历史不进入实际SHA总量。550项中的6份直接Git字节与544份精确完整CRLF转换分别证明，不将Git LF脚本SHA冒充Windows检出SHA。各套21程序在授权Win11实际1420/0/0/0，公开20步/配色22步均PASS；Win7候选在Win11运行仍不等于Win7实机通过。
+
+现代正常程序的最终默认HOMEWORK/连续接纳/语音能力/隔离Edge有限流程及最后清理通过，首次浏览器真实Network.loadingFailed仍保留且原因未知，后续PASS不称修复；首次运行漏用前轮900秒完整测试参数导致默认60秒超时亦保留。完整原件、二进制来源、检出域区别与失败边界见[实施记录R46](10-实施进度与验证记录.md)及[INDEX](验证记录/2026-11-01-round46-msvc/INDEX.json)。原严格五秒整体FAIL、生产listener关闭及正式平台/发布门槛不变，不提前套用到后续HTTPS配置源码。
+
+
+### R47–R51本地配置与证书检查批次
+
+代码提交 `b9c24b62…` 精确包含33Rust+3测试观测文件，429份已知Rust/构建输入逐字节绑定最终候选。GNU完整测试编译/正常构建/stable及固定nightly严格Clippy均PASS，Host独立完整21组973/0/0/0与strict PASS；原编译加测试900秒超时保留，缓存编译后完整测试819.79秒仍使用原900秒、jobs2/threads2。实际授权Win11同GNU正常程序21EXE1481/0/0/0、公开20步/配色22步、证书配置22步及完整默认浏览器流程分别PASS/cleanup PASS。构建时HEAD与工作树改动通过精确字节映射到后续代码提交，不宣称该提交已完成Hosted CI或动态build.rs全沙箱。
+
+22份GNU PE32/x86/CUI全部原objdump保留，系统msvcrt.dll与现代/update风险不隐去，不等于Win7兼容。证书四项检查时Satisfied不授予监听或信任许可；缓存/名称/链逐项如实报告。R51二版有限失败诊断保留原立即FAIL、实际exit0、原期限和物理清理门槛；首次浏览器真实中断仍根因未知。新源码完整MSVC、三系统实机及生产发布门槛单独验收，详见[实施记录](10-实施进度与验证记录.md)与[最终本地整批证明](验证记录/2026-11-01-round50-https-integration/final-local-batch-first.json)。

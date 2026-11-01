@@ -1,0 +1,529 @@
+diff --git a/scripts/windows-native-browser-harness.mjs b/scripts/windows-native-browser-harness.mjs
+--- a/scripts/windows-native-browser-harness.mjs
++++ b/scripts/windows-native-browser-harness.mjs
+@@ -17,6 +17,23 @@
+ const MAX_CDP = 8 * 1024 * 1024;
+ const MAX_REQUESTS = 128;
+ const MAX_BUNDLE = 5 * 1024 * 1024;
++// Diagnostics are observations of local CDP delivery, not socket/native clocks.
++// One fixed record per already bounded request; no frame/header/body storage.
++const DIAGNOSTIC_MILLIS = 60000;
++const DIAGNOSTIC_EVENTS = 65536;
++const FAILURE_PHASES = new Set(['connect', 'await-run', 'inject-existing-approved-cookie', 'navigate-native',
++  'read-original-content', 'visual-original', 'enter-synthetic-text', 'visual-refresh-with-draft',
++  'save-once', 'visual-after-save', 'reload-and-read-durable-content', 'visual-after-reload',
++  'settle-observed-responses', 'complete']);
++const BLOCKED_REASONS = new Set(['other', 'csp', 'mixed-content', 'origin', 'inspector', 'subresource-filter',
++  'content-type', 'coep-frame-resource-needs-coep-header', 'coop-sandboxed-iframe-cannot-navigate-to-coop-page',
++  'corp-not-same-origin', 'corp-not-same-origin-after-defaulted-to-same-origin-by-coep', 'corp-not-same-site']);
++function diagnosticCount(record, key, value, maximum) {
++  if (!Number.isSafeInteger(value) || value < 0) { record.countsClamped = true; return; }
++  if (value > maximum - record[key]) { record[key] = maximum; record.countsClamped = true; }
++  else record[key] += value;
++}
++
+ const U64_MAX = (1n << 64n) - 1n;
+ const SHA = /^[0-9a-f]{64}$/;
+ const HEX_SECRET = /^[0-9a-fA-F]{64}$/;
+@@ -281,7 +298,7 @@
+     this.requests = new Map(); this.earlyExtra = new Map(); this.bodies = new Set(); this.scope = null; this.initial = null; this.committed = null;
+     this.reloaded = null; this.post = null; this.saveClicks = 0; this.sessionCount = 0; this.statusCount = 0;
+     this.pageErrors = 0; this.consoleErrors = 0; this.scopeReads = 0; this.contentReads = 0;
+-    this.visualReads = 0; this.visualPayloads = []; this.visualObservations = [];
++    this.visualReads = 0; this.visualPayloads = []; this.visualObservations = []; this.runStartedAt = null;
+     this.reminderShortcutClicks = 0; this.reminderObservations = [];
+     this.report = { schemaVersion: 1, status: 'FAIL', marker: init.marker, contentKind: init.contentKind,
+       scope: init.contentKind === 'REMINDER'
+@@ -327,6 +344,25 @@
+     if (!reminder && method === 'GET' && /^\/fc\/api\/v1\/content\/homework\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[0-9]{4}-[0-9]{2}-[0-9]{2}\/visual$/.test(path)) return { kind: 'visual', path };
+     return null;
+   }
++  diagnosticMillis() {
++    if (!Number.isFinite(this.runStartedAt)) return null;
++    const elapsed = Math.floor(performance.now() - this.runStartedAt);
++    // A missing/out-of-bound clock is explicit unknown, never a deadline claim.
++    return Number.isSafeInteger(elapsed) && elapsed >= 0 && elapsed <= DIAGNOSTIC_MILLIS ? elapsed : null;
++  }
++  requestFailure(record, params) {
++    const d = record.diagnostic;
++    return Object.freeze({ requestOrdinal: d.requestOrdinal, kind: record.kind, path: record.path,
++      phase: FAILURE_PHASES.has(this.phase) ? this.phase : 'OTHER',
++      canceled: params.canceled === true,
++      errorText: typeof params.errorText === 'string' && !/[\r\n]/.test(params.errorText)
++        && /^net::ERR_[A-Z0-9_]{1,80}$/.test(params.errorText) ? params.errorText : 'OTHER',
++      blockedReason: params.blockedReason === undefined ? 'NONE' : BLOCKED_REASONS.has(params.blockedReason) ? params.blockedReason : 'OTHER',
++      failureMillis: this.diagnosticMillis(), requestMillis: d.requestMillis, responseMillis: d.responseMillis,
++      extraInfoMillis: d.extraInfoMillis, finishedMillis: d.finishedMillis, bodyVerifiedMillis: d.bodyVerifiedMillis,
++      responseReceived: record.response, finished: record.finished, bodyVerified: record.analyzed,
++      dataEvents: d.dataEvents, dataBytes: d.dataBytes, encodedBytes: d.encodedBytes, countsClamped: d.countsClamped });
++  }
+   event(method, params, session) {
+     if (session !== this.sessionId || !this.run || this.disposePromise) return;
+     try {
+@@ -339,7 +375,10 @@
+         check(classified, 'UNEXPECTED_NETWORK_TARGET_OR_METHOD');
+         const record = { method: request.method, url: request.url, kind: classified.kind, path: classified.path,
+           servedFromCache: false, fromDiskCache: false, fromServiceWorker: false, fromPrefetchCache: false,
+-          response: false, finished: false, analyzed: false, extraStatus: null };
++          response: false, finished: false, analyzed: false, extraStatus: null,
++          diagnostic: { requestOrdinal: this.requests.size + 1, requestMillis: this.diagnosticMillis(), responseMillis: null,
++            extraInfoMillis: null, finishedMillis: null, bodyVerifiedMillis: null,
++            dataEvents: 0, dataBytes: 0, encodedBytes: 0, countsClamped: false } };
+         this.requests.set(params.requestId, record);
+         if (this.earlyExtra.has(params.requestId)) { record.extraStatus = this.earlyExtra.get(params.requestId); this.earlyExtra.delete(params.requestId); }
+         if (record.method === 'POST') {
+@@ -370,17 +409,30 @@
+           record.csp = this.init.expectedCsp;
+           check(record.status === 200, 'STATIC_HTTP_STATUS');
+         } else check(record.status === 200 && record.mime === 'application/json', 'API_HTTP_STATUS_OR_MIME');
+-        record.response = true;
++        record.response = true; record.diagnostic.responseMillis = this.diagnosticMillis();
+       } else if (method === 'Network.responseReceivedExtraInfo') {
+         check(Number.isInteger(params.statusCode) && [200, 304].includes(params.statusCode), 'WIRE_HTTP_STATUS');
+         const record = this.requests.get(params.requestId);
+-        if (record) { check(record.extraStatus === null, 'DUPLICATE_EXTRA_RESPONSE'); record.extraStatus = params.statusCode; }
++        if (record) { check(record.extraStatus === null, 'DUPLICATE_EXTRA_RESPONSE'); record.extraStatus = params.statusCode; record.diagnostic.extraInfoMillis = this.diagnosticMillis(); }
+         else { check(this.earlyExtra.size < MAX_REQUESTS && !this.earlyExtra.has(params.requestId), 'EXTRA_RESPONSE_BUDGET'); this.earlyExtra.set(params.requestId, params.statusCode); }
++      } else if (method === 'Network.dataReceived') {
++        const record = this.requests.get(params.requestId);
++        if (record) {
++          diagnosticCount(record.diagnostic, 'dataEvents', 1, DIAGNOSTIC_EVENTS);
++          diagnosticCount(record.diagnostic, 'dataBytes', params.dataLength, MAX_CDP);
++          diagnosticCount(record.diagnostic, 'encodedBytes', params.encodedDataLength, MAX_CDP);
++        }
+       } else if (method === 'Network.loadingFailed') {
+-        if (this.requests.has(params.requestId)) throw new Fault('NETWORK_LOAD_FAILED');
++        const record = this.requests.get(params.requestId);
++        if (record) {
++          // Freeze the FIRST fault synchronously before original fail/dispose.
++          // Unknown request/context/cleanup events retain the original filter.
++          if (!this.fault) record.failure = this.requestFailure(record, params);
++          throw new Fault('NETWORK_LOAD_FAILED');
++        }
+       } else if (method === 'Network.loadingFinished') {
+         const record = this.requests.get(params.requestId); check(record && record.response, 'UNMATCHED_FINISH');
+-        check(!record.finished, 'DUPLICATE_FINISH'); record.finished = true;
++        check(!record.finished, 'DUPLICATE_FINISH'); record.finished = true; record.diagnostic.finishedMillis = this.diagnosticMillis();
+         const task = this.analyze(params.requestId, record).catch(error => this.fail(error));
+         this.bodies.add(task); void task.finally(() => this.bodies.delete(task));
+       }
+@@ -455,7 +507,7 @@
+         this.contentReads++;
+       }
+     }
+-    record.analyzed = true;
++    record.analyzed = true; record.diagnostic.bodyVerifiedMillis = this.diagnosticMillis();
+   }
+   async evaluate(expression) {
+     const result = await this.command('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: false });
+@@ -554,7 +606,7 @@
+       revision: document.revision, ...dom });
+   }
+   async execute(run, receivedAt) {
+-    this.run = run; this.until = receivedAt + run.maxMillis; this.text = `Synthetic Native Edge content ${run.marker}`;
++    this.run = run; this.runStartedAt = receivedAt; this.until = receivedAt + run.maxMillis; this.text = `Synthetic Native Edge content ${run.marker}`;
+     this.report.generation = run.generation; this.report.origin = run.origin; this.report.maxMillis = run.maxMillis;
+     this.report.syntheticTextSha256 = hash(this.text); const began = performance.now();
+     this.phase = 'inject-existing-approved-cookie';
+@@ -614,6 +666,7 @@
+     this.phase = 'complete';
+   }
+   checkApiLedger() {
++    check(![...this.requests.values()].some(r => r.failure), 'NETWORK_FAILURE_NOT_SUCCESS');
+     const api = [...this.requests.values()].filter(r => r.kind !== 'asset');
+     check(api.length === Object.values(this.apiOperations).reduce((a, b) => a + b, 0)
+       && this.sessionCount === this.apiOperations.sessionGets && this.statusCount === this.apiOperations.statusGets
+@@ -651,7 +704,8 @@
+       mime: typeof r.mime === 'string' && /^[a-zA-Z0-9.+/-]{1,100}$/.test(r.mime) ? r.mime : null,
+       ...(r.csp ? { csp: r.csp } : {}), servedFromCache: r.servedFromCache, fromDiskCache: r.fromDiskCache,
+       fromServiceWorker: r.fromServiceWorker, fromPrefetchCache: r.fromPrefetchCache,
+-      wireStatus: r.extraStatus, finished: r.finished, bodyVerified: r.analyzed }));
++      wireStatus: r.extraStatus, finished: r.finished, bodyVerified: r.analyzed,
++      ...(r.failure ? { failure: r.failure } : {}) }));
+     this.report.network = records;
+     // Cached 200 ExtraInfo alone does not prove a new wire response; a raw
+     // 304 proves revalidation even when the effective page response is 200.
+@@ -883,14 +937,84 @@
+   owned.until = performance.now() - 1;
+   await assert.rejects(owned.command('Runtime.evaluate'), error => error.code === 'RUN_DEADLINE');
+   assert.equal(await owned.dispose(), true); assert.equal(calls, 1); assert.equal(owned.report.contextDisposed, true);
++  await diagnosticSelfTest(init, run);
+   await socketSelfTest();
+   writeSync(1, JSON.stringify({ type: 'SELF_TEST', status: 'PASS', builtinWebSocket: typeof WebSocket,
+     checks: ['synthetic scoped visual payload/DOM CSS alpha and border checks; exact HOMEWORK13-operation workflow (not browser evidence)',
+       'mandatory contentKind; strict REMINDER9 versus HOMEWORK13 routes/scopes/keys/ledger; cross-kind and any reminder visual rejected',
+       'bottom-only reminder selector hit test rejects decoy/disabled/duplicate; shortcut count increments only after successful mouse ACKs',
+       'reminder title/date/expiry/draft/no-visual DOM booleans validated without recording body', 'strict INIT/RUN and finite budget', 'pairing/logout/foreign target rejection', 'cached response excluded; raw304 wire status counted',
+-      'Cookie/CSRF/Set-Cookie omitted from summaries', 'actual loopback WebSocket CDP correlation and deadline', 'unknown/failed/owned context disposal and expired positive command rejection', 'verified cached assets do not wait for absent ExtraInfo; incomplete bodies/API/wire proof still block'],
++      'Cookie/CSRF/Set-Cookie omitted from summaries', 'actual loopback WebSocket CDP correlation and deadline', 'unknown/failed/owned context disposal and expired positive command rejection', 'verified cached assets do not wait for absent ExtraInfo; incomplete bodies/API/wire proof still block',
++      'first loadingFailed snapshot precedes dispose; fixed path/enum/counter/timing facts, hostile text omitted, cleanup events filtered and no success/retry'],
+     windowsBrowser: 'NOT_RUN', sourceSha256: hash(readFileSync(fileURLToPath(import.meta.url))) }) + '\n');
++}
++
++// Pure event-handler models only. No website, TLS or Windows evidence.
++async function diagnosticSelfTest(init, run) {
++  const target = run.origin + '/fc/api/v1/content/homework/1/1/1/2026-11-01/visual';
++  const setup = () => {
++    const h = new Harness(init); h.sessionId = 'owned'; h.run = { ...run };
++    h.runStartedAt = performance.now() - 10; h.phase = 'visual-refresh-with-draft';
++    h.event('Network.requestWillBeSent', { requestId: 'visual', request: { method: 'GET', url: target } }, 'owned');
++    return h;
++  };
++  const h = setup();
++  h.event('Network.responseReceived', { requestId: 'visual', response: { url: target, status: 200,
++    mimeType: 'application/json', headers: { 'Set-Cookie': run.cookie } } }, 'owned');
++  h.event('Network.responseReceivedExtraInfo', { requestId: 'visual', statusCode: 200, headers: { 'Set-Cookie': run.cookie } }, 'owned');
++  h.event('Network.dataReceived', { requestId: 'visual', dataLength: 31, encodedDataLength: 17, data: run.expectedCsrf }, 'owned');
++  let disposals = 0;
++  h.contextId = 'own'; h.cdp = { send: async () => {
++    disposals++; assert.equal(h.requests.get('visual').failure.errorText, 'net::ERR_CONTENT_LENGTH_MISMATCH');
++  } };
++  h.event('Network.loadingFailed', { requestId: 'visual', canceled: false, errorText: 'net::ERR_CONTENT_LENGTH_MISMATCH',
++    headers: { Cookie: run.cookie }, postData: run.expectedCsrf }, 'owned');
++  assert.equal(h.fault.code, 'NETWORK_LOAD_FAILED'); assert.equal(disposals, 1);
++  const failure = h.requests.get('visual').failure;
++  assert(Object.isFrozen(failure)); assert.equal(failure.requestOrdinal, 1); assert.equal(failure.kind, 'visual');
++  assert.equal(failure.path, '/fc/api/v1/content/homework/1/1/1/2026-11-01/visual');
++  assert.equal(failure.phase, 'visual-refresh-with-draft'); assert.equal(failure.responseReceived, true);
++  assert.equal(failure.finished, false); assert.equal(failure.bodyVerified, false);
++  assert.equal(failure.dataEvents, 1); assert.equal(failure.dataBytes, 31); assert.equal(failure.encodedBytes, 17);
++  assert.equal(failure.countsClamped, false); assert.equal(failure.blockedReason, 'NONE');
++  for (const key of ['requestMillis', 'responseMillis', 'extraInfoMillis', 'failureMillis'])
++    assert(Number.isInteger(failure[key]) && failure[key] >= 0 && failure[key] <= 60000);
++  assert.equal(failure.finishedMillis, null); assert.equal(failure.bodyVerifiedMillis, null);
++  const before = JSON.stringify(h.summary());
++  h.event('Network.loadingFailed', { requestId: 'visual', canceled: true, errorText: 'net::ERR_ABORTED' }, 'owned');
++  h.event('Network.dataReceived', { requestId: 'visual', dataLength: 999, encodedDataLength: 999 }, 'owned');
++  assert.equal(JSON.stringify(h.summary()), before); // original cleanup filter
++  assert(!before.includes(run.cookie)); assert(!before.includes(run.expectedCsrf));
++  assert(!before.includes('postData')); assert(!before.includes('headers')); assert(!before.includes('requestId'));
++  await h.disposePromise;
++  for (const [errorText, sanitized] of [['net::ERR_ABORTED', 'net::ERR_ABORTED'], ['net::ERR_CONNECTION_RESET', 'net::ERR_CONNECTION_RESET'],
++    [run.cookie, 'OTHER'], ['net::ERR_ABORTED\n', 'OTHER'], ['net::ERR_ABORTED\nCookie: ' + run.cookie, 'OTHER'], ['net::ERR_' + 'A'.repeat(81), 'OTHER']]) {
++    const x = setup(); x.phase = run.cookie;
++    x.event('Network.loadingFailed', { requestId: 'visual', errorText, canceled: true, blockedReason: run.expectedCsrf }, 'owned');
++    const d = x.requests.get('visual').failure;
++    assert.equal(d.errorText, sanitized); assert.equal(d.phase, 'OTHER'); assert.equal(d.blockedReason, 'OTHER'); assert.equal(d.canceled, true);
++    assert.equal(x.fault.code, 'NETWORK_LOAD_FAILED');
++    const encoded = JSON.stringify(x.summary()); assert(!encoded.includes(run.cookie)); assert(!encoded.includes(run.expectedCsrf));
++    assert.throws(() => x.checkApiLedger(), error => error.code === 'NETWORK_FAILURE_NOT_SUCCESS');
++    const first = JSON.stringify(d);
++    x.event('Network.loadingFailed', { requestId: 'visual', errorText: 'net::ERR_NEW_ERROR' }, 'owned');
++    assert.equal(JSON.stringify(x.requests.get('visual').failure), first); // first fault only, even without context
++  }
++  const bounded = setup(), r = bounded.requests.get('visual');
++  bounded.event('Network.dataReceived', { requestId: 'visual', dataLength: MAX_CDP + 1, encodedDataLength: -1 }, 'owned');
++  assert.equal(r.diagnostic.dataBytes, MAX_CDP); assert.equal(r.diagnostic.encodedBytes, 0); assert.equal(r.diagnostic.countsClamped, true);
++  r.diagnostic.dataEvents = DIAGNOSTIC_EVENTS;
++  bounded.event('Network.dataReceived', { requestId: 'visual', dataLength: 1, encodedDataLength: 1.5 }, 'owned');
++  assert.equal(r.diagnostic.dataEvents, DIAGNOSTIC_EVENTS); assert.equal(r.diagnostic.dataBytes, MAX_CDP);
++  bounded.runStartedAt = performance.now() - 60001;
++  bounded.event('Network.loadingFailed', { requestId: 'visual', errorText: 'arbitrary', blockedReason: 'csp' }, 'owned');
++  assert.equal(r.failure.failureMillis, null); assert.equal(r.failure.blockedReason, 'csp');
++  const ignored = setup();
++  ignored.event('Network.loadingFailed', { requestId: 'foreign', errorText: run.cookie }, 'owned');
++  ignored.event('Network.loadingFailed', { requestId: 'visual', errorText: run.cookie }, 'foreign');
++  assert.equal(ignored.fault, null); assert.equal(ignored.requests.get('visual').failure, undefined);
++  assert(!Object.hasOwn(ignored.summary().network[0], 'failure'));
++  ignored.runStartedAt = null; assert.equal(ignored.diagnosticMillis(), null);
+ }
+ 
+ // A tiny owned loopback RFC6455 peer tests Node's REAL builtin WebSocket; it
+diff --git a/scripts/windows-native-browser-observer.py b/scripts/windows-native-browser-observer.py
+--- a/scripts/windows-native-browser-observer.py
++++ b/scripts/windows-native-browser-observer.py
+@@ -37,7 +37,23 @@
+ ))
+ RECORD_KEYS = frozenset((
+     "method", "url", "status", "mime", "csp", "servedFromCache", "fromDiskCache",
+-    "fromServiceWorker", "fromPrefetchCache", "wireStatus", "finished", "bodyVerified",
++    "fromServiceWorker", "fromPrefetchCache", "wireStatus", "finished", "bodyVerified", "failure",
++))
++
++FAILURE_KEYS = frozenset((
++    "requestOrdinal", "kind", "path", "phase", "canceled", "errorText", "blockedReason",
++    "failureMillis", "requestMillis", "responseMillis", "extraInfoMillis", "finishedMillis", "bodyVerifiedMillis",
++    "responseReceived", "finished", "bodyVerified", "dataEvents", "dataBytes", "encodedBytes", "countsClamped",
++))
++FAILURE_PHASES = frozenset((
++    "connect", "await-run", "inject-existing-approved-cookie", "navigate-native", "read-original-content",
++    "visual-original", "enter-synthetic-text", "visual-refresh-with-draft", "save-once", "visual-after-save",
++    "reload-and-read-durable-content", "visual-after-reload", "settle-observed-responses", "complete", "OTHER",
++))
++BLOCKED_REASONS = frozenset((
++    "NONE", "OTHER", "other", "csp", "mixed-content", "origin", "inspector", "subresource-filter", "content-type",
++    "coep-frame-resource-needs-coep-header", "coop-sandboxed-iframe-cannot-navigate-to-coop-page",
++    "corp-not-same-origin", "corp-not-same-origin-after-defaulted-to-same-origin-by-coep", "corp-not-same-site",
+ ))
+ 
+ 
+@@ -58,6 +74,73 @@
+     # Exception messages can contain private stdin, a CDP capability or a remote
+     # response body. Only static phase/type metadata belongs in the QA report.
+     return {"phase": phase, "kind": type(error).__name__}
++
++
++def validate_network_failures(value, run, manifest, content_kind):
++    """Validate only finite diagnostic facts, never relax the PASS contract.
++
++    Milliseconds describe local Node CDP event receipt relative to RUN receipt;
++    null means unavailable/outside the 60s observation bound. Counters are
++    capped with an explicit countsClamped flag. No socket/native clock claim.
++    """
++    records = value.get("network", [])
++    require(isinstance(records, list) and len(records) <= 128, "NODE_FAILURE_NETWORK_BOUND")
++    failures = []
++    for index, record in enumerate(records):
++        require(isinstance(record, dict), "NODE_FAILURE_RECORD_SHAPE")
++        if "failure" not in record:
++            continue
++        require(set(record) <= RECORD_KEYS and value.get("status") == "FAIL"
++                and isinstance(value.get("error"), dict) and value["error"].get("code") == "NETWORK_LOAD_FAILED",
++                "NODE_FAILURE_OUTCOME")
++        observation = record["failure"]
++        require(isinstance(observation, dict) and set(observation) == FAILURE_KEYS, "NODE_FAILURE_SHAPE")
++        path = observation["path"]
++        require(isinstance(path, str) and len(path) <= 512 and record.get("url") == run["origin"] + path
++                and record.get("method") in ("GET", "POST"), "NODE_FAILURE_PATH")
++        prefix = "homework" if content_kind == "HOMEWORK" else "reminders"
++        fixed_api = ("/fc/api/v1/status", "/fc/api/v1/session", f"/fc/api/v1/content/{prefix}/scopes/0")
++        ids = r"[1-9][0-9]{0,19}/" * (3 if content_kind == "HOMEWORK" else 1)
++        content = f"/fc/api/v1/content/{prefix}/" + ids + r"[0-9]{4}-[0-9]{2}-[0-9]{2}"
++        assets = {"/fc/" + asset["path"] for asset in manifest["assets"]} | {"/fc/"}
++        kind = ("content" if re.fullmatch(content, path) else
++                "visual" if content_kind == "HOMEWORK" and re.fullmatch(content + r"/visual", path) else
++                "api" if path in fixed_api else "asset" if path in assets else None)
++        require(kind is not None and observation["kind"] == kind
++                and (kind == "content" or record["method"] == "GET"), "NODE_FAILURE_UNEXPECTED_TARGET")
++        require(type(observation["requestOrdinal"]) is int and observation["requestOrdinal"] == index + 1
++                and isinstance(observation["phase"], str) and observation["phase"] in FAILURE_PHASES
++                and type(observation["canceled"]) is bool
++                and isinstance(observation["errorText"], str)
++                and (observation["errorText"] == "OTHER" or re.fullmatch(r"net::ERR_[A-Z0-9_]{1,80}", observation["errorText"]))
++                and isinstance(observation["blockedReason"], str) and observation["blockedReason"] in BLOCKED_REASONS,
++                "NODE_FAILURE_CLASSIFICATION")
++        for key in ("failureMillis", "requestMillis", "responseMillis", "extraInfoMillis", "finishedMillis", "bodyVerifiedMillis"):
++            number = observation[key]
++            require(number is None or type(number) is int and 0 <= number <= 60000, "NODE_FAILURE_TIME_BOUND")
++            require(number is None or observation["failureMillis"] is None or number <= observation["failureMillis"],
++                    "NODE_FAILURE_TIME_ORDER")
++        for key in ("responseReceived", "finished", "bodyVerified", "countsClamped"):
++            require(type(observation[key]) is bool, "NODE_FAILURE_FLAG")
++        # This is a fault-instant snapshot: an already pending body-analysis
++        # promise may complete during cleanup before summary. Facts may advance
++        # false -> true afterwards, never erase something already observed.
++        require(type(record.get("finished")) is bool and type(record.get("bodyVerified")) is bool
++                and (not observation["finished"] or record["finished"])
++                and (not observation["bodyVerified"] or record["bodyVerified"])
++                and (not observation["responseReceived"] or record.get("status") is not None), "NODE_FAILURE_LIFECYCLE")
++        for key, bound in (("dataEvents", 65536), ("dataBytes", 8 * 1024 * 1024), ("encodedBytes", 8 * 1024 * 1024)):
++            require(type(observation[key]) is int and 0 <= observation[key] <= bound, "NODE_FAILURE_COUNTER")
++        failures.append(dict(observation))
++    require(len(failures) <= 1, "NODE_MULTIPLE_FIRST_FAILURES")
++    # Summary's wire subset may repeat that same record, never add a hidden
++    # second diagnostic or change its snapshot. It remains partial evidence.
++    wires = value.get("wireResponses", [])
++    require(isinstance(wires, list) and len(wires) <= 128, "NODE_FAILURE_WIRE_BOUND")
++    for record in wires:
++        if isinstance(record, dict) and "failure" in record:
++            require(record in records, "NODE_FAILURE_WIRE_SUBSET")
++    return failures
+ 
+ 
+ API_OPERATIONS = {"statusGets": 2, "sessionGets": 2, "scopeGets": 2,
+@@ -326,6 +409,7 @@
+             raise RuntimeError("NATIVE_BROWSER_PREPARE_FAILED") from None
+ 
+     def _validate_result(self, value, message, run):
++        validate_network_failures(value, run, self.manifest, self.content_kind)
+         expected_operations = API_OPERATIONS if self.content_kind == "HOMEWORK" else REMINDER_OPERATIONS
+         require(set(value) <= REPORT_KEYS and value.get("schemaVersion") == 1
+                 and value.get("status") == "PASS" and value.get("marker") == self.marker
+@@ -472,6 +556,13 @@
+             self._node_raw()
+             value, identity = self._file(self.node_report)
+             self.report["nodeReport"] = identity
++            diagnostics = validate_network_failures(value, run, self.manifest, self.content_kind)
++            if diagnostics:
++                require(value.get("marker") == self.marker and value.get("generation") == run["generation"]
++                        and value.get("origin") == run["origin"] and value.get("maxMillis") == run["maxMillis"]
++                        and value.get("sourceSha256") == self._node_source_sha and value.get("contentKind") == self.content_kind,
++                        "NODE_FAILURE_REPORT_IDENTITY")
++                self.report["networkFailureDiagnostics"] = diagnostics
+             require(self.node.returncode == 0, "NODE_ACTUAL_EXIT_FAILED")
+             stdout_lines = bytes(self.node_logs.stdout).decode("utf-8", "strict").splitlines()
+             require(len(stdout_lines) == 2 and json.loads(stdout_lines[0]).get("type") == "READY"
+diff --git a/scripts/check-native-browser-diagnostics.py b/scripts/check-native-browser-diagnostics.py
+new file mode 100644
+--- /dev/null
++++ b/scripts/check-native-browser-diagnostics.py
+@@ -0,0 +1,169 @@
++#!/usr/bin/env python3
++"""Pure R51 diagnostic models: no process, network, browser or Windows execution."""
++import copy
++import hashlib
++import importlib.util
++import json
++from pathlib import Path
++import sys
++import time
++from types import SimpleNamespace
++
++sys.dont_write_bytecode = True
++source = Path(__file__).resolve().with_name('windows-native-browser-observer.py')
++spec = importlib.util.spec_from_file_location('fc_observer_diagnostics_pure', source)
++m = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(m)
++origin = 'https://localhost:12345'
++path = '/fc/api/v1/content/homework/1/1/1/2026-11-01/visual'
++manifest = {'schemaVersion': 1, 'apiVersion': 1, 'uiCompatibilityVersion': 1,
++            'assets': [{'path': 'index.html', 'sizeBytes': 1, 'sha256': 'a' * 64}]}
++run = {'origin': origin, 'generation': 1, 'maxMillis': 12000}
++fact = {'requestOrdinal': 1, 'kind': 'visual', 'path': path, 'phase': 'visual-refresh-with-draft',
++        'canceled': False, 'errorText': 'net::ERR_CONTENT_LENGTH_MISMATCH', 'blockedReason': 'NONE',
++        'failureMillis': 90, 'requestMillis': 10, 'responseMillis': 80, 'extraInfoMillis': 85,
++        'finishedMillis': None, 'bodyVerifiedMillis': None, 'responseReceived': True, 'finished': False,
++        'bodyVerified': False, 'dataEvents': 2, 'dataBytes': 130, 'encodedBytes': 100, 'countsClamped': False}
++record = {'method': 'GET', 'url': origin + path, 'status': 200, 'mime': 'application/json',
++          'servedFromCache': False, 'fromDiskCache': False, 'fromServiceWorker': False,
++          'fromPrefetchCache': False, 'wireStatus': 200, 'finished': False, 'bodyVerified': False, 'failure': fact}
++value = {'schemaVersion': 1, 'status': 'FAIL', 'error': {'phase': fact['phase'], 'code': 'NETWORK_LOAD_FAILED'},
++         'network': [record], 'wireResponses': [record]}
++checks = []
++
++def valid(candidate, kind='HOMEWORK'):
++    return m.validate_network_failures(candidate, run, manifest, kind)
++
++assert valid(value) == [fact]
++checks.append('200/ExtraInfo200 partial-body first failure preserved without claiming body completion')
++for error in ('net::ERR_ABORTED', 'net::ERR_CONNECTION_RESET', 'OTHER'):
++    candidate = copy.deepcopy(value)
++    candidate['network'][0]['failure'].update(errorText=error, canceled=True)
++    assert valid(candidate)[0]['errorText'] == error
++checks.append('aborted/reset/unknown remain failed diagnostics, never success')
++candidate = copy.deepcopy(value)
++candidate['network'][0]['failure'].update(countsClamped=True, dataEvents=65536, dataBytes=8 * 1024 * 1024,
++                                         encodedBytes=8 * 1024 * 1024, failureMillis=None)
++assert valid(candidate)[0]['countsClamped'] is True
++checks.append('saturation explicitly labeled and missing clock remains unknown')
++candidate = copy.deepcopy(value)
++candidate['network'][0].update(finished=True, bodyVerified=True)
++assert valid(candidate)[0]['finished'] is False
++checks.append('fault-instant frozen facts survive a later already pending body-analysis completion')
++assert valid({'status': 'PASS', 'network': [], 'wireResponses': []}) == []
++checks.append('normal reports omit diagnostics')
++mutations = [
++    ('extra header field', lambda v: v['network'][0]['failure'].update(headers={'Cookie': 'PRIVATE'})),
++    ('extra raw frame field', lambda v: v['network'][0]['failure'].update(rawCDP='PRIVATE')),
++    ('extra request body field', lambda v: v['network'][0]['failure'].update(postData='PRIVATE')),
++    ('unfiltered error', lambda v: v['network'][0]['failure'].update(errorText='net::ERR_ABORTED Cookie: PRIVATE')),
++    ('linebreak error', lambda v: v['network'][0]['failure'].update(errorText='net::ERR_ABORTED\n')),
++    ('overlong error', lambda v: v['network'][0]['failure'].update(errorText='net::ERR_' + 'X' * 81)),
++    ('unknown blocked reason', lambda v: v['network'][0]['failure'].update(blockedReason='PRIVATE')),
++    ('nonstring blocked reason', lambda v: v['network'][0]['failure'].update(blockedReason=[])),
++    ('unknown phase', lambda v: v['network'][0]['failure'].update(phase='PRIVATE')),
++    ('nonstring phase', lambda v: v['network'][0]['failure'].update(phase=[])),
++    ('query in path', lambda v: v['network'][0]['failure'].update(path=path + '?Cookie=PRIVATE')),
++    ('foreign approved-looking path', lambda v: v['network'][0].update(url='https://wrong.invalid' + path)),
++    ('kind mismatch', lambda v: v['network'][0]['failure'].update(kind='asset')),
++    ('unapproved API', lambda v: (v['network'][0]['failure'].update(path='/fc/api/v1/subject-visuals'),
++                                v['network'][0].update(url=origin + '/fc/api/v1/subject-visuals'))),
++    ('bool ordinal', lambda v: v['network'][0]['failure'].update(requestOrdinal=True)),
++    ('wrong ordinal', lambda v: v['network'][0]['failure'].update(requestOrdinal=2)),
++    ('bool canceled', lambda v: v['network'][0]['failure'].update(canceled=1)),
++    ('bool counter', lambda v: v['network'][0]['failure'].update(dataBytes=True)),
++    ('negative counter', lambda v: v['network'][0]['failure'].update(dataBytes=-1)),
++    ('fraction counter', lambda v: v['network'][0]['failure'].update(dataEvents=1.5)),
++    ('overflow events', lambda v: v['network'][0]['failure'].update(dataEvents=65537)),
++    ('overflow bytes', lambda v: v['network'][0]['failure'].update(encodedBytes=8 * 1024 * 1024 + 1)),
++    ('unlabeled clamp', lambda v: v['network'][0]['failure'].update(countsClamped=1)),
++    ('bool time', lambda v: v['network'][0]['failure'].update(failureMillis=True)),
++    ('NaN time', lambda v: v['network'][0]['failure'].update(failureMillis=float('nan'))),
++    ('negative time', lambda v: v['network'][0]['failure'].update(requestMillis=-1)),
++    ('out-of-bound time', lambda v: v['network'][0]['failure'].update(failureMillis=60001)),
++    ('time after frozen failure', lambda v: v['network'][0]['failure'].update(responseMillis=91)),
++    ('unobserved response claimed', lambda v: v['network'][0].update(status=None)),
++    ('unobserved EOF claimed', lambda v: v['network'][0]['failure'].update(finished=True)),
++    ('unverified body claimed', lambda v: v['network'][0]['failure'].update(bodyVerified=True)),
++    ('null diagnostic', lambda v: v['network'][0].update(failure=None)),
++    ('missing diagnostic field', lambda v: v['network'][0]['failure'].pop('canceled')),
++    ('failure carried by PASS', lambda v: v.update(status='PASS')),
++    ('different original failure', lambda v: v['error'].update(code='RUN_DEADLINE')),
++    ('wrong record method', lambda v: v['network'][0].update(method='POST')),
++]
++for label, mutate in mutations:
++    candidate = copy.deepcopy(value)
++    mutate(candidate)
++    try:
++        valid(candidate)
++    except RuntimeError as error:
++        checks.append(label + ': rejected ' + str(error))
++    else:
++        raise AssertionError('accepted invalid diagnostic: ' + label)
++# One first failure may appear in both the network ledger and exact wire subset.
++candidate = copy.deepcopy(value)
++second = copy.deepcopy(record)
++second['failure']['requestOrdinal'] = 2
++candidate['network'].append(second)
++try:
++    valid(candidate)
++except RuntimeError as error:
++    checks.append('multiple first failures rejected: ' + str(error))
++else:
++    raise AssertionError('accepted more than one first failure')
++for records in ([{}] * 129, 'PRIVATE'):
++    try:
++        valid({**value, 'network': records})
++    except RuntimeError:
++        checks.append('network cardinality/type rejected')
++    else:
++        raise AssertionError('unbounded network accepted')
++candidate = copy.deepcopy(value)
++candidate['wireResponses'][0] = copy.deepcopy(record)
++candidate['wireResponses'][0]['failure']['errorText'] = 'OTHER'
++try:
++    valid(candidate)
++except RuntimeError:
++    checks.append('wire subset cannot replace frozen diagnostic')
++else:
++    raise AssertionError('different wire snapshot accepted')
++try:
++    valid(value, 'REMINDER')
++except RuntimeError:
++    checks.append('reminder still rejects homework visual')
++else:
++    raise AssertionError('reminder accepted visual')
++
++# Run the actual coordinator failure path with ONLY in-memory capabilities.
++# This proves diagnostics are checked/preserved before the existing nonzero-exit
++# rejection, without launching Node/Edge or touching a report/control file.
++marker = 'FutureClassroom-Test-TLS-' + 'a' * 32
++observer = m.BrowserObserver(None, '/tmp/unused', '/tmp/unused-report.json', marker, manifest,
++                             "script-src 'self'; connect-src 'self'", None, 'unused')
++observer.prepared = True
++observer._node_source_sha = 'b' * 64
++observer.node_report = Path('/tmp/unused-node-report.json')
++observer.node = SimpleNamespace(returncode=1, stdin=SimpleNamespace(close=lambda: None), wait=lambda timeout: None)
++observer.node_logs = None
++node_value = {**value, 'marker': marker, 'origin': origin, 'generation': 1, 'maxMillis': 12000,
++              'contentKind': 'HOMEWORK', 'sourceSha256': 'b' * 64}
++observer._send = lambda payload, deadline: None
++observer._line = lambda *args: json.dumps({'type': 'RESULT', 'status': 'FAIL'})
++observer._node_raw = lambda: None
++observer._file = lambda path: (node_value, {'path': str(path), 'bytes': 1, 'sha256': 'c' * 64})
++client = SimpleNamespace(deadline=time.monotonic() + 30, ready={'origin': origin, 'generation': 1},
++                         cookie='__Host-FutureClassroom=' + 'd' * 64, csrf='e' * 64)
++try:
++    observer.run(client)
++except RuntimeError as error:
++    assert str(error) == 'NATIVE_BROWSER_RUN_FAILED'
++else:
++    raise AssertionError('nonzero Node became success')
++assert observer.report['status'] == 'FAIL' and observer.result == {}
++assert observer.report['networkFailureDiagnostics'] == [fact]
++assert observer.report['nodeActualExitCode'] == 1
++checks.append('actual coordinator control flow retains validated diagnostics before original exit1 failure; no positive result')
++print(json.dumps({'status': 'PURE_LOCAL_MODEL_CHECKS_PASS', 'scope': __doc__, 'checks': checks,
++                  'observerSourceSha256': hashlib.sha256(source.read_bytes()).hexdigest(),
++                  'mockSourceSha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
++                  'python': sys.version, 'windows': 'NOT_RUN', 'browser': 'NOT_RUN', 'tls': 'NOT_RUN'}, indent=2))

@@ -1,0 +1,41 @@
+{
+  "status": "FAIL_COMMAND",
+  "args": [
+    "python3",
+    "-B",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round46-ci-evidence/modern-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round46-ci-evidence/modern-artifact-original/test-metadata.jsonl",
+    "--system-host",
+    "--report",
+    "/tmp/fc-round46-ci-evidence/modern-msvc-runtime-first.json"
+  ],
+  "scriptSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "sourceSha": "e23bd538d828aeed4378a88f69cf81cb85a4389f",
+  "inputNormalSha256": "bc8f224a97797311e76182486bfa6502f8c11110e3a7151893f5212ff9d911aa",
+  "metadataSha256": "d1fb9980c7353606787c4f401ee2c4bd3b448c673d78e098633e91960a5d0f93",
+  "scope": "Actual serial Win11 WOW64 execution only; Win7 candidate does not establish Win7 OS compatibility. Original per-test60s,threads2 and hidden/read-only system/host checks retained.",
+  "exitCode": 1,
+  "actualExit": true,
+  "pid": 3057,
+  "elapsedSeconds": 129.76106745097786,
+  "scriptUnchanged": true,
+  "resultStatus": "FAIL",
+  "cleanup": "PASS",
+  "stdout": {
+    "path": "/tmp/fc-round46-ci-evidence/modern-msvc-runtime-first.stdout.log",
+    "bytes": 528,
+    "sha256": "eec4e66f6f6c202884252da0300171fee58c93e847e88526133e337de8ee14b0"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round46-ci-evidence/modern-msvc-runtime-first.stderr.log",
+    "bytes": 468,
+    "sha256": "cbacff0f6d892719e16932207ed5d00eebfc49e8615afb1006d3dd1f7a3da018"
+  }
+}

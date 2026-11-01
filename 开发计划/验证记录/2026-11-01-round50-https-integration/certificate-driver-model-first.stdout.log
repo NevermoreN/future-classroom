@@ -1,0 +1,25 @@
+{
+  "status": "PURE_LOCAL_MODELS_PASS",
+  "wireModels": {
+    "status": "PURE_MODEL_PASS",
+    "positiveCases": 2,
+    "negativeCases": 32,
+    "contractSha256": "017da7e35aec46dbf522db43716ed8f316b44837b51255ddb894f84212596943",
+    "wire": "Actual22 plainsteps +exact14key nativeobservation +footer +ownedprocess exit",
+    "scope": "Synthetic transcript models only; no PowerShell AST, SSH, Windows, CryptoAPI or EXE execution"
+  },
+  "astSourceModels": {
+    "positive": 1,
+    "negative": 4
+  },
+  "cleanupModels": [
+    "success",
+    "native-failed",
+    "stop-failed",
+    "capture-failed",
+    "cleanup-failed"
+  ],
+  "windows": "NOT_RUN",
+  "ssh": "NOT_RUN",
+  "native": "NOT_RUN"
+}

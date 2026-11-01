@@ -1,0 +1,41 @@
+{
+  "status": "PASS_SOURCE_BYTE_REVIEW_ACTUAL_DIAGNOSTIC_REQUIRED",
+  "freezeSha256": "901c4744cfcb17e9dc2e1cef5af29dfd077c3cc6ff772d3d893831fca19aff02",
+  "sourceFiles": [
+    {
+      "path": "scripts/windows-native-browser-harness.mjs",
+      "bytes": 81529,
+      "sha256": "30f9f32d4c49978cf70b69590ab2b5d05814c65eb57ccc31e9dd693e438a7784",
+      "before": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/before/scripts/windows-native-browser-harness.mjs",
+        "bytes": 71760,
+        "sha256": "64f679b292fac18cb3935f66c880a23c2a703026679f22e563b2421da72b6b4d"
+      }
+    },
+    {
+      "path": "scripts/windows-native-browser-observer.py",
+      "bytes": 42553,
+      "sha256": "59fe55aefc93c675b1676bb5ef163f20f0518ec286e64574decf74a52687f3f8",
+      "before": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/before/scripts/windows-native-browser-observer.py",
+        "bytes": 36008,
+        "sha256": "1d242c161fe573b0b77540b0e9033666b2b37576042c3db1772dc4a5c2f11f86"
+      }
+    },
+    {
+      "path": "scripts/check-native-browser-diagnostics.py",
+      "bytes": 10212,
+      "sha256": "18142a9a4776a104f656ec8050bc80aef54883f82d52a6466b90d1c2f1daf2d7",
+      "before": null
+    }
+  ],
+  "exeSha256": "bc8f224a97797311e76182486bfa6502f8c11110e3a7151893f5212ff9d911aa",
+  "rootReview": [
+    "Only approved existing request record receives fixed failure scalar snapshot",
+    "Immediate old NETWORK_LOAD_FAILED and dispose filter maintained",
+    "Counter caps/phase/neterror/blockedReason whitelists; no headers/cookie/rawCDP stored",
+    "Observer verifies failure identity before publishing negative diagnostics; original actual Nodeexit0 requirement retained",
+    "PASS cannot include anyfailure; original R46 firstFAIL preserved"
+  ],
+  "scope": "Finite extra failure evidence only. Does not fix or waive actual browser failure."
+}

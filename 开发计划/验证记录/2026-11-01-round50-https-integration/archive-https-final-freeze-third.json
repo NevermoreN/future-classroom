@@ -1,0 +1,69 @@
+{
+  "schema": "fc.https.archive-second-helper-final-freeze/v2",
+  "status": "SECOND_HELPER_READY_SEVEN_PRECISE_BENIGN_EXCEPTIONS_STRICT_BYTES_ANCHORS_NOT_SEALED",
+  "secondHelper": {
+    "path": "/tmp/fc-round50-https-integration-evidence/archive-https-rounds-second.py",
+    "bytes": 31472,
+    "sha256": "7e10e37a200edda569ab879cc8a8288aff5700bc271ad6a588e298d29924e774"
+  },
+  "files": [
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/archive-https-rounds-second.py",
+      "bytes": 31472,
+      "sha256": "7e10e37a200edda569ab879cc8a8288aff5700bc271ad6a588e298d29924e774"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/archive-https-rounds-second.before-strict-anchor.py",
+      "bytes": 31157,
+      "sha256": "3927ba54313decd3274b72a35d34c75dcc3c4d21160757cecdbd3693b62b90f4"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/archive-https-final-freeze-second.json",
+      "bytes": 10065,
+      "sha256": "89fac1d168d1e4a7ce22d9255c8140bcba4bd6264ea0e190a14ef9c83e5b9d00"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/archive-https-benign-model-fourth.py",
+      "bytes": 3771,
+      "sha256": "e0a6adcbc2c548fdcd76c244487a40c71f38a32b91da1801411f5361c6dc10d1"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/archive-https-benign-model-fourth.json",
+      "bytes": 4263,
+      "sha256": "a9a220a12dec8b06daa95ed780e698d71772f324d004e42b61611cc3211e8317"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/archive-https-benign-model-fourth.command.json",
+      "bytes": 773,
+      "sha256": "bfc73aaa41b7578c15bcaa76c7f6ebf3e05e3e24fde0df27fa616ca56c44ddc4"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/archive-https-benign-model-fourth.stdout.log",
+      "bytes": 142,
+      "sha256": "2638de0c466bd02f0766e039739950f92199248bda30592b64f2c6cc5742af84"
+    },
+    {
+      "path": "/tmp/fc-round50-https-integration-evidence/archive-https-benign-model-fourth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "precedingReview": {
+    "path": "/tmp/fc-round50-https-integration-evidence/archive-https-final-freeze-second.json",
+    "sha256": "89fac1d168d1e4a7ce22d9255c8140bcba4bd6264ea0e190a14ef9c83e5b9d00",
+    "supersededOnlyForHelperHashAndStricterAnchor": true
+  },
+  "reason": "Requirement any later bytes change blocks is enforced as REVIEWED_FILE_BYTES_CHANGED, even if original suspicious pattern disappears. This does not make general source/prose policies less strict.",
+  "reviewedExceptions": 7,
+  "actualModels": {
+    "status": "PASS_LOCAL_EXACT_BENIGN_MODELS_ONLY",
+    "checks": 41,
+    "coversRemovedPatternAfterFileChange": true
+  },
+  "actualFullPrepare": "One authorized5root prepare-only scan with previous six-exception candidate: originalFAIL retained, four rounds clear, one exact R50 source-format snapshot identified and reviewed as7th exception. No second full scan performed, no PASS retroactively assigned. All9 outside originals copied byte-exact insideR50; mapping in precedingfreeze.",
+  "firstHelperFreezeAndFailureUnchanged": true,
+  "mainModified": false,
+  "sourceOriginalsModified": false,
+  "archivePerformed": false,
+  "scope": "All new files underR50. No SSH/Cargo/Windows, main changes, broad regex weakening or cleanup. Root must use this finalsecondhelper+fresh final authority/report."
+}

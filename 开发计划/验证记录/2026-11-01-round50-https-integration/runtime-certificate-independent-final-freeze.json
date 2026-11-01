@@ -1,0 +1,394 @@
+{
+  "status": "PASS_COMPLETED_RUNTIME_SCOPE_FINAL_FREEZE",
+  "independentReport": {
+    "path": "/tmp/fc-round50-https-integration-evidence/runtime-certificate-independent-second.json",
+    "bytes": 106111,
+    "sha256": "2b6852cd0bb0f75851966450138351aef9b40b4dc1ad27a57e027fbd7c10f00c"
+  },
+  "helper": {
+    "path": "/tmp/fc-round50-https-integration-evidence/verify-runtime-certificate-second.py",
+    "bytes": 19604,
+    "sha256": "7d3b5584ebdde5913cb5aed7f0bcdeff4f7a5580372f1aaa4bcdf65e908a6922"
+  },
+  "modelReport": {
+    "path": "/tmp/fc-round50-https-integration-evidence/runtime-certificate-parser-model-second.json",
+    "bytes": 1346,
+    "sha256": "c9c6ecd028089e73c55b5ed848ae0ae76b3aa6d8af94ebe5a6bc25ac5a00c52d"
+  },
+  "modelSource": {
+    "path": "/tmp/fc-round50-https-integration-evidence/runtime-certificate-parser-model-second.py",
+    "bytes": 3264,
+    "sha256": "5ca9cebeacbd540ec382e6c6dfb0054aa16412968e08a60e4c5560d8514e93ba"
+  },
+  "modelOriginalCommand": {
+    "path": "/tmp/fc-round50-https-integration-evidence/runtime-certificate-parser-model-second.command.json",
+    "bytes": 793,
+    "sha256": "30b0406555c5612e4fd837199927db588dce414d89c29ee2388439d9549d782b"
+  },
+  "source429BeforeAfterSame": true,
+  "actualNormalSha256": "b6368400a58b87d4725cbd664b5bde88a4f51927a74656e5c566010e8bbf6930",
+  "runtimeTestGroups": [
+    {
+      "name": "fc_bootstrap-e6c3a587f31bdfb6.exe",
+      "sha256": "6c8481c9c219384c5df57da834d03d47ba36ace3fee24ecedc00aebf783c4779",
+      "passed": 339,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 339 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 65.86s",
+      "outputUtf8Bytes": 42211,
+      "outputUtf8Sha256": "da8d55d53921201aa23cd0836d2bf73658222aed499d2af0d6d42c3b7c37d3d5"
+    },
+    {
+      "name": "business_storage-17284d3ac1a257da.exe",
+      "sha256": "f67c12d2af6f6e4c648ed1beceee52f3b375aaabad48dd9266bfa29d59d2ed49",
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.50s",
+      "outputUtf8Bytes": 4136,
+      "outputUtf8Sha256": "46f20c5bfc11e849e7f8cec79445b265472c99a01f904461357a43c7530515e3"
+    },
+    {
+      "name": "voice_limits_storage-0b21db1adf2928be.exe",
+      "sha256": "9ef7897d31bbf26b72a8bd0f4ed77757d891626867eaf64a891641685341b4e6",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s",
+      "outputUtf8Bytes": 450,
+      "outputUtf8Sha256": "ef912a1d4b9812249fdfaa4f2afab74d5a8dcd3c5814e3d67474897bab350759"
+    },
+    {
+      "name": "verify_web_assets-2cd688c78134cd47.exe",
+      "sha256": "38ba0ab2b46c0b205dbbb6dd9a86cce41fbd0ae1d0994c13ee2ea2e2d24b62f9",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "outputUtf8Bytes": 112,
+      "outputUtf8Sha256": "48537503aca8cbeec335d46a2da57cd5800765bc0703600b35d4917848d3a5d5"
+    },
+    {
+      "name": "fc_bootstrap-dd30f52d529302ea.exe",
+      "sha256": "e193ea55242dd40423c8c6eb9dc6d7473424d97228d949ec4a74d83cbb49bd00",
+      "passed": 217,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 217 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.19s",
+      "outputUtf8Bytes": 26448,
+      "outputUtf8Sha256": "da10d0303feb013fdd598b747752d02ca43b598fc335fba51d125b8d7539d293"
+    },
+    {
+      "name": "schedule_operations-2019e4752789692d.exe",
+      "sha256": "f66356ae910f2ffafaf112aaf1af9f762f10c013b80f37f778811cd136a8b40a",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.24s",
+      "outputUtf8Bytes": 584,
+      "outputUtf8Sha256": "3681eb6e87278aa4890ed24c1e491350e4ae4341987e3a0f4f829bdad1a57360"
+    },
+    {
+      "name": "autostart_coordinator-3f86162353dcbd5b.exe",
+      "sha256": "9d56c73fe52584a11d4fbd40a10db0f1c8730f899e0e3320297dc594d94e2979",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.12s",
+      "outputUtf8Bytes": 1126,
+      "outputUtf8Sha256": "d2c94f55217b47e5d510264ed43870f2dd26369a9ef4e177fe84527e0abe810f"
+    },
+    {
+      "name": "voice_storage-fee498fb1bb1e971.exe",
+      "sha256": "b2477304e8b80a062af832944516f20fe3d8bff9e62351dfd6b0a5c24ee82ffb",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.72s",
+      "outputUtf8Bytes": 620,
+      "outputUtf8Sha256": "912c07d50b1a0840a388af1cee86f774b2654affbaf9f84e165184882a6082a8"
+    },
+    {
+      "name": "calendar_execution_fence-1ec83488dbed4f30.exe",
+      "sha256": "0bb373f233cd84895013497438c08cddcab43ce9a0774893ec55b8ece428d259",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.67s",
+      "outputUtf8Bytes": 438,
+      "outputUtf8Sha256": "361f903175224843d7191c6686dbce2097cc762aafe453554512ceaedd9fff8f"
+    },
+    {
+      "name": "runtime_storage-6432f0544bdb6c95.exe",
+      "sha256": "7780276d9cc250a1337fff28b74e65cc778947b53df08bb60b5bf7333be537e6",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s",
+      "outputUtf8Bytes": 377,
+      "outputUtf8Sha256": "6dfd18e25495530d8b22cee250ee087437a87f65e76fe5bf4531eacf611142ee"
+    },
+    {
+      "name": "fc_materials-f1a7d58c131e95d5.exe",
+      "sha256": "8fdbac20911b499c57845a535f86c6bcc468b5fbb5cdc208345cc647ddfb95b3",
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+      "outputUtf8Bytes": 3684,
+      "outputUtf8Sha256": "501d6ea3210b62c8d56d7d9d17f17521e240873d994200363764dbac718843e0"
+    },
+    {
+      "name": "fc_security-2889fa9301b88e80.exe",
+      "sha256": "0c2ec3357853ef0cc54f8a4bd95bdf4dbdbcc720000bda112d77cdb8938057e0",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s",
+      "outputUtf8Bytes": 1652,
+      "outputUtf8Sha256": "c123d031aa3abeb2078662461f165a8bc72fe632e41d6db907511eb7197bb0a5"
+    },
+    {
+      "name": "fc_windows-4026d62a77fcc28b.exe",
+      "sha256": "8e43ccde619dd7e1291a5d6e388057b43ce1ce4a68b90c0785487a716d2f308e",
+      "passed": 207,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 207 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 25.34s",
+      "outputUtf8Bytes": 27142,
+      "outputUtf8Sha256": "a911e78ec6cead5771989d9c6abf933cd45d5cb28648f57258303539a085dbc9"
+    },
+    {
+      "name": "fc_presentation-b847dfa3b68d1237.exe",
+      "sha256": "ebef93354e309b71e6a24198f179c0276e42969ca9bfb2bee37f291ac4a39359",
+      "passed": 58,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+      "outputUtf8Bytes": 5638,
+      "outputUtf8Sha256": "e0d51f50936db58fb167b4ca508f48fe6149d712cf76e319b1da45114b95ca8a"
+    },
+    {
+      "name": "fc_protocol-4316bb63b92dda4d.exe",
+      "sha256": "23dbdddf21375b3d8e50925f14bb2a196e64bdf88f9682635973cac27cc0f293",
+      "passed": 82,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 82 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s",
+      "outputUtf8Bytes": 7871,
+      "outputUtf8Sha256": "eeb26f05bebcd2910b84047c2c609cd3a14fbeb011f1713c3703d64ca3e37432"
+    },
+    {
+      "name": "fc_runtime-a09be73363edd23a.exe",
+      "sha256": "1e0928ca062809d3845762db226aa773e1eecd8521894625ab416e7fcd5719b5",
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+      "outputUtf8Bytes": 3109,
+      "outputUtf8Sha256": "f6af98ac8f6b897693a6ba269edb7e25666a4ba09a94f2cf862f6ef50319ed88"
+    },
+    {
+      "name": "fc_application-fb16268b5eff3acf.exe",
+      "sha256": "0ec87ff63b4b94d5efdc67a66cdd1153d78147ad80e1a096060d7a3e333a4b4c",
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "outputUtf8Bytes": 2467,
+      "outputUtf8Sha256": "93f554a0b35e18ff999caeb7809561df110a16000e6229f86608cba773736d1f"
+    },
+    {
+      "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+      "sha256": "76b09099110f3ca495103c41376378e6f3dffc932710c2b09c166ce75d73b2dd",
+      "passed": 206,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 206 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.68s",
+      "outputUtf8Bytes": 23056,
+      "outputUtf8Sha256": "739b6673bd515eccdf4f1e2d945164049d6cd5e73e7bd3d4bbfdae0681cff953"
+    },
+    {
+      "name": "fc_audio-e1b4eabc9ef1420f.exe",
+      "sha256": "0f06abd8af36dbd42379c5b1886c0684754c1c93330c1b31d7ede75f31c62aa3",
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "outputUtf8Bytes": 2233,
+      "outputUtf8Sha256": "b405fac2d2ce2770690a9ef994d92ed86f6180607c1c7b666276d23d5db122e8"
+    },
+    {
+      "name": "fc_ports-15b1ad689f79c490.exe",
+      "sha256": "96f4cce80eaed441a0c76564c47b78af2dda6db142499cf5f9a0105fa786cfd8",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "outputUtf8Bytes": 814,
+      "outputUtf8Sha256": "a43f31386ebbe9b0cc547e175052cceafea7eb201faf1f7d68d80944a5db11b8"
+    },
+    {
+      "name": "fc_domain-367747e306a1dd0e.exe",
+      "sha256": "6156fc6b8e3eb540c7b81e2324c01751f8bbf3d53bb2fbf5a24069e6379e66fd",
+      "passed": 148,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "summary": "test result: ok. 148 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+      "outputUtf8Bytes": 14894,
+      "outputUtf8Sha256": "e4f88e0011025a16b7e3651465c676a1d0829a27e43e42306dc5bfc1d60d78d9"
+    }
+  ],
+  "actualTests": 1481,
+  "testExecutables": 21,
+  "zeroTestTargets": [
+    "verify_web_assets-2cd688c78134cd47.exe"
+  ],
+  "nativePublicSteps": 20,
+  "nativeVisualSteps": 22,
+  "certificateQuery": {
+    "steps": 22,
+    "wire": {
+      "orderedSteps": [
+        "setup-local-global-administrator",
+        "native-device-page-production-unavailable",
+        "native-open-https-config",
+        "unconfigured-no-default-port",
+        "invalid-port-rejected-no-write",
+        "cancel-draft-confirmed-no-write",
+        "native-save-localhost-reference",
+        "saved-config-no-listener",
+        "explicit-native-certificate-check",
+        "native-draft-retained-across-lock",
+        "native-relogin-preserves-draft",
+        "native-original-save-admitted",
+        "real-commit-delivery-cancelled",
+        "original-request-retained-after-cancel",
+        "lock-and-relogin-original-owner",
+        "native-explicit-original-outcome-query",
+        "historical-receipt-not-current-cas",
+        "explicit-risk-confirmed-current-reload",
+        "current-config-readback",
+        "device-page-remains-unavailable",
+        "actual-shared-worker-writer-shutdown",
+        "owned-deployment-cleanup"
+      ],
+      "exactSteps": 22,
+      "actualProcessExit": 0,
+      "elapsedMillis": 443,
+      "observation": {
+        "scope": "CurrentUserMyCacheOnly",
+        "publicationRevision": 2,
+        "identityRevision": 1,
+        "settingsRevision": 1,
+        "found": {
+          "check": "Satisfied",
+          "nativeError": null
+        },
+        "currentTime": {
+          "check": "Satisfied",
+          "nativeError": null
+        },
+        "privateKey": {
+          "check": "Satisfied",
+          "nativeError": null
+        },
+        "serverAuthEku": {
+          "check": "Satisfied",
+          "nativeError": null
+        },
+        "serverName": {
+          "check": "Unverified",
+          "nativeError": null
+        },
+        "sslChainPolicy": {
+          "check": "Rejected",
+          "nativeError": -2146762487
+        },
+        "cachedRevocation": {
+          "check": "Unverified",
+          "nativeError": null
+        },
+        "chainTrustErrors": 32,
+        "sslPolicyError": 2148204809,
+        "readiness": "NOT_GRANTED"
+      },
+      "footer": "HTTPS_SETTINGS_NATIVE_PASS steps=22 shared_workers=2 original_result_query=PASS listener=NOT_ENABLED certificate_scope=CurrentUserMyCacheOnly certificate_query_count=1 readiness=NOT_GRANTED physical_shutdown=PASS isolated_cleanup=PASS elapsed_ms=443",
+      "wireChildLines": 24,
+      "wireForwardedLines": 25,
+      "normalization": "UTF8 optional BOM and edge whitespace/line terminators for parsing only; original raw bytes/SHA remain separately verified."
+    },
+    "nativeProcessExit": 0,
+    "remoteASTScriptCounts": [
+      4,
+      5
+    ],
+    "remoteRawOriginalCount": 7,
+    "fullRemoteFileRuns": 5,
+    "fullTransportInvocations": 19,
+    "cleanup": "PASS",
+    "physicalSharedWorkers": 2,
+    "scope": "CurrentUserMyCacheOnly historical metadata, not a start permit. No real native-held cancellation, missing reference, wrong host, online revocation, other-client trust or TLS handshake."
+  },
+  "firstIndependentHelperFailurePreserved": {
+    "path": "/tmp/fc-round50-https-integration-evidence/runtime-certificate-independent-first.json",
+    "bytes": 558,
+    "sha256": "e92295f449a47076693478cb3f188560744171674c179a5dcf7f364afe73d197"
+  },
+  "firstModelFixtureFailurePreserved": {
+    "path": "/tmp/fc-round50-https-integration-evidence/runtime-certificate-parser-model-first-failure.json",
+    "bytes": 869,
+    "sha256": "6258de6556c84a530ac47243bd0f2aeba40e415d43438c4dc42d13013997a062"
+  },
+  "HostWholeMatrixNotPromoted": true,
+  "matrixSnapshotStatusAtReview": "RUNNING",
+  "actualMatrixSnapshot": {
+    "path": "/tmp/fc-round50-https-integration-evidence/runtime-certificate-matrix-snapshot-second.json",
+    "bytes": 151786,
+    "sha256": "c793942c950c89c1220f275e4360544082d5bf30a1b94eee5e4dd153d0766697"
+  },
+  "sourceCorrection": {
+    "proof": {
+      "path": "/tmp/fc-round50-https-integration-evidence/ui-probe-serialization-second-integration.json",
+      "bytes": 1018,
+      "sha256": "0c5e56ecdcfacab21334ebed9649fbc2879c4c8a559c5805e50de875a9fe6406"
+    },
+    "historicalWireSnapshotSha256": "feaac367ea006f5333d040b267f4269c26e442a2034f662f69d3c54ff89ce296",
+    "actualCompiledProbeSha256": "48fa60b98669f9b10c7ead070a519b7d3564349950d762fc9ac4c8aa4a7aa071",
+    "contract": {
+      "path": "/tmp/fc-round49-https-settings-ui-evidence/native-probe-contract-final-first.json",
+      "bytes": 3711,
+      "sha256": "017da7e35aec46dbf522db43716ed8f316b44837b51255ddb894f84212596943"
+    }
+  },
+  "noOperations": [
+    "SSH",
+    "Windows EXE execution",
+    "Cargo",
+    "Git mutation",
+    "main change",
+    "cleanup"
+  ],
+  "scope": "Only already completed R50 GNU Windows runtime/native-certificate evidence. R46/R51 active consumers and final broader gate closure remain separate; no actual Win7/Win10, production/P0 or visible Seewo claim."
+}

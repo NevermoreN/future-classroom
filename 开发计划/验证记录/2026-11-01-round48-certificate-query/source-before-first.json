@@ -1,0 +1,28 @@
+{
+  "status": "IMPLEMENTATION_PREPARED_NOT_BUILT_NOT_RUN",
+  "base": "bcd51dacb5ba69a184546e5180569a8fd1b3ebad",
+  "branch": "codex/https-certificate-query",
+  "worktree": "/tmp/fc-round48-certificate-query-worktree",
+  "sourceBefore": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 10011,
+      "sha256": "7c50bac6203b3e191815084db9e67c29d4372bb5b86870c23e00d4c7e1d4004a"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10151,
+      "sha256": "61dd03becca3db6a8d834f583513836810179a0a68693b9d826f70839313e384"
+    }
+  ],
+  "scope": "Read-only CurrentUser MY exact thumbprint; native DTO only; no listener/start permit; no Cargo/Windows/CI/commit",
+  "officialSources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certgetcertificatechain",
+    "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certverifycertificatechainpolicy",
+    "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/ns-wincrypt-httpspolicycallbackdata",
+    "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecertificateprivatekey",
+    "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certclosestore",
+    "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certfreecertificatechain",
+    "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certgetenhancedkeyusage"
+  ]
+}

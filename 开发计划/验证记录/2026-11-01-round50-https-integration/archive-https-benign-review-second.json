@@ -1,0 +1,163 @@
+{
+  "schema": "fc.https.archive.exact-benign-review/v1",
+  "status": "SIX_EXACT_BYTES_LOCATIONS_REVIEWED_NOT_GLOBAL_EXEMPTION",
+  "originalFirstHelper": {
+    "path": "/tmp/fc-round50-https-integration-evidence/archive-https-rounds.py",
+    "sha256": "d443b4c6bf4275f189439595194b9f32e378d18267e940dd53f2af7d3eeb4ba9"
+  },
+  "originalFailure": {
+    "path": "/tmp/fc-round47-51-archive-first.round47.json",
+    "sha256": "dffc117b5f0ec69f339cc2e0b08d5d82dee27a1ed8f32356199b93f7f370f9b4"
+  },
+  "policyProseReviewMetadataOnly": {
+    "chars": 397,
+    "Local": true,
+    "GlobalAdmin": true,
+    "session": true,
+    "passwordPolicy": true,
+    "hex64": false,
+    "URLs": false,
+    "longBase64": false,
+    "SSHkeyPrefix": false
+  },
+  "reviewedExceptions": [
+    {
+      "root": "/tmp/fc-round47-https-settings-evidence",
+      "file": "https-settings-design-first.json",
+      "rawSha256": "adbc5044b78e67554f3b64945bfc56e950391a412214be98ea7bea132688b44c",
+      "kind": "JSON_PASSWORD_OR_ACCESS_TOKEN_REVIEW",
+      "location": "https-settings-design-first.json/normative_contract_proposal/authorization",
+      "reason": "Exact397-character normative Local GlobalAdmin/exact-session/password policy prose, not a credential value; reviewed token/hex/URL/key markers absent."
+    },
+    {
+      "root": "/tmp/fc-round47-https-settings-evidence",
+      "file": "implementation-after/crates/fc-domain/src/https_settings.rs",
+      "rawSha256": "b3b7707c7982f5b0c65a3ace6c3bd8c1fde96a50c31c06375c1efc530e2bc324",
+      "kind": "MALFORMED_URL_REVIEW",
+      "location": "implementation-after/crates/fc-domain/src/https_settings.rs",
+      "reason": "Only two reviewed Rust origin-format statement templates; placeholders are substituted from validated typed host/port. Neither is a real URL, signed URL or credential.",
+      "statementSha256": [
+        "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+        "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+      ]
+    },
+    {
+      "root": "/tmp/fc-round47-https-settings-evidence",
+      "file": "implementation-after-fourth/crates/fc-domain/src/https_settings.rs",
+      "rawSha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96",
+      "kind": "MALFORMED_URL_REVIEW",
+      "location": "implementation-after-fourth/crates/fc-domain/src/https_settings.rs",
+      "reason": "Only two reviewed Rust origin-format statement templates; placeholders are substituted from validated typed host/port. Neither is a real URL, signed URL or credential.",
+      "statementSha256": [
+        "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+        "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+      ]
+    },
+    {
+      "root": "/tmp/fc-round47-https-settings-evidence",
+      "file": "implementation-after-second/crates/fc-domain/src/https_settings.rs",
+      "rawSha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96",
+      "kind": "MALFORMED_URL_REVIEW",
+      "location": "implementation-after-second/crates/fc-domain/src/https_settings.rs",
+      "reason": "Only two reviewed Rust origin-format statement templates; placeholders are substituted from validated typed host/port. Neither is a real URL, signed URL or credential.",
+      "statementSha256": [
+        "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+        "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+      ]
+    },
+    {
+      "root": "/tmp/fc-round47-https-settings-evidence",
+      "file": "implementation-after-third/crates/fc-domain/src/https_settings.rs",
+      "rawSha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96",
+      "kind": "MALFORMED_URL_REVIEW",
+      "location": "implementation-after-third/crates/fc-domain/src/https_settings.rs",
+      "reason": "Only two reviewed Rust origin-format statement templates; placeholders are substituted from validated typed host/port. Neither is a real URL, signed URL or credential.",
+      "statementSha256": [
+        "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+        "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+      ]
+    },
+    {
+      "root": "/tmp/fc-round47-https-settings-evidence",
+      "file": "second-change-before/crates/fc-domain/src/https_settings.rs",
+      "rawSha256": "b3b7707c7982f5b0c65a3ace6c3bd8c1fde96a50c31c06375c1efc530e2bc324",
+      "kind": "MALFORMED_URL_REVIEW",
+      "location": "second-change-before/crates/fc-domain/src/https_settings.rs",
+      "reason": "Only two reviewed Rust origin-format statement templates; placeholders are substituted from validated typed host/port. Neither is a real URL, signed URL or credential.",
+      "statementSha256": [
+        "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+        "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+      ]
+    }
+  ],
+  "sourceStatements": [
+    {
+      "path": "implementation-after/crates/fc-domain/src/https_settings.rs",
+      "bytes": 5514,
+      "sha256": "b3b7707c7982f5b0c65a3ace6c3bd8c1fde96a50c31c06375c1efc530e2bc324",
+      "urlTokenCount": 2,
+      "statementSha256": [
+        "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+        "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+      ]
+    },
+    {
+      "path": "implementation-after-fourth/crates/fc-domain/src/https_settings.rs",
+      "bytes": 6192,
+      "sha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96",
+      "urlTokenCount": 2,
+      "statementSha256": [
+        "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+        "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+      ]
+    },
+    {
+      "path": "implementation-after-second/crates/fc-domain/src/https_settings.rs",
+      "bytes": 6192,
+      "sha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96",
+      "urlTokenCount": 2,
+      "statementSha256": [
+        "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+        "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+      ]
+    },
+    {
+      "path": "implementation-after-third/crates/fc-domain/src/https_settings.rs",
+      "bytes": 6192,
+      "sha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96",
+      "urlTokenCount": 2,
+      "statementSha256": [
+        "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+        "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+      ]
+    },
+    {
+      "path": "second-change-before/crates/fc-domain/src/https_settings.rs",
+      "bytes": 5514,
+      "sha256": "b3b7707c7982f5b0c65a3ace6c3bd8c1fde96a50c31c06375c1efc530e2bc324",
+      "urlTokenCount": 2,
+      "statementSha256": [
+        "a3bb92c0fbdefe00ced4b92513f1856e71c2dbec2d2240d09bc3cfc2d7a62aef",
+        "77d4531baddc49df926f99a3acb90192f835118d3eabd7c307bc6b68e5b60cda"
+      ]
+    }
+  ],
+  "committedCurrentSource": {
+    "gitHead": "b9c24b62d124976776a6819b0cd21cc9667738be",
+    "gitPath": "crates/fc-domain/src/https_settings.rs",
+    "blobBytes": 6192,
+    "blobSha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96",
+    "exactMatchingSnapshots": [
+      "implementation-after-fourth/crates/fc-domain/src/https_settings.rs",
+      "implementation-after-second/crates/fc-domain/src/https_settings.rs",
+      "implementation-after-third/crates/fc-domain/src/https_settings.rs"
+    ],
+    "scope": "Exact current Git blob match where listed; older5514-byte snapshots separately reviewed both literal templates, not claimed identical to current."
+  },
+  "secondHelper": {
+    "path": "/tmp/fc-round50-https-integration-evidence/archive-https-rounds-second.py",
+    "bytes": 30512,
+    "sha256": "bbb39adcafaee098bd02166a04ecab56777bdb9bafb34d33cafb001098b714a5"
+  },
+  "safety": "Only finding kind+exact root+relativefile+complete rawSHA+location are exempted; other rules still run on full text and recursively decoded contents. No prose/credential contents emitted. Bytes change or unreviewed location remains blocked."
+}

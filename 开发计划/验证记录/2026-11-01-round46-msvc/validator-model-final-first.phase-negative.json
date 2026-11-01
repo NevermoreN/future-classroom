@@ -1,0 +1,48 @@
+{
+  "schema": "SYNTHETIC_MODEL_NOT_CI",
+  "status": "FAIL",
+  "checks": [],
+  "helper": {
+    "path": "/tmp/fc-round46-ci-evidence/verify-ci-artifact-first.py",
+    "bytes": 55618,
+    "sha256": "cf3780a6d08dec8f395383a20a9a1992b5e7d5a4b70f5cf865c16ce0b5e13e9c"
+  },
+  "phases": [
+    {
+      "name": "officialIdentity",
+      "status": "PASS"
+    },
+    {
+      "name": "originalZip",
+      "status": "PASS"
+    },
+    {
+      "name": "sourceDomains",
+      "status": "PASS"
+    },
+    {
+      "name": "commandsAndBaseline",
+      "status": "FAIL",
+      "failureCode": "EXPECTED_SYNTHETIC_CI_FAILURE",
+      "errorKind": "Invalid"
+    },
+    {
+      "name": "peAndAssociations",
+      "status": "PASS"
+    },
+    {
+      "name": "originalCleanup",
+      "status": "PASS"
+    }
+  ],
+  "phaseFailures": [
+    {
+      "name": "commandsAndBaseline",
+      "status": "FAIL",
+      "failureCode": "EXPECTED_SYNTHETIC_CI_FAILURE",
+      "errorKind": "Invalid"
+    }
+  ],
+  "failureCode": "EXPECTED_SYNTHETIC_CI_FAILURE",
+  "helperUnchanged": true
+}

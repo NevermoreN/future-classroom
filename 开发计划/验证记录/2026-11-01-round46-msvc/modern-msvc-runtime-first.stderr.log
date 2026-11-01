@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 730, in <module>
+    main()
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 426, in main
+    raise RuntimeError(f"remote test timed out: {path.name} ({args.test_timeout_seconds}s); inspect timedOutTest") from None
+RuntimeError: remote test timed out: fc_bootstrap-5b56e4a05549cc59.exe (60s); inspect timedOutTest

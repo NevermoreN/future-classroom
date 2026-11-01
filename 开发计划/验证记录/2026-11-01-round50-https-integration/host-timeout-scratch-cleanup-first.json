@@ -1,0 +1,70 @@
+{
+  "status": "PASS_EXACT_OWNED_TIMEOUT_SCRATCH_REMOVED",
+  "scope": "One exact generated synthetic SQLite scratch from killed owned Host voice_storage test; no generic TEMP sweep and no signals. No DB contents read or archived.",
+  "root": "/tmp/FutureClassroom-Business-23836-1793493138680888507-0",
+  "observedOldTestPid": 23836,
+  "oldCargoGroup": 16878,
+  "originalActualTimeout": {
+    "name": "host-tests",
+    "args": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--all-targets",
+      "--release",
+      "--locked",
+      "--offline",
+      "--target-dir",
+      "/tmp/fc-round47-https-settings-target",
+      "--",
+      "--test-threads=2"
+    ],
+    "exitCode": -15,
+    "actualExit": true,
+    "ownedProcessGroup": 16878,
+    "timedOut": true,
+    "elapsedSeconds": 900.0053003178909,
+    "stdout": {
+      "path": "/tmp/fc-round50-https-integration-evidence/full-matrix-second.host-tests.stdout.log",
+      "bytes": 37887,
+      "sha256": "80c5785d6074a0edfd92210171eec8e71541d333a0266cfd62fc01baab6985f0"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round50-https-integration-evidence/full-matrix-second.host-tests.stderr.log",
+      "bytes": 2289,
+      "sha256": "8c9476e5962afe6e3e2b93beca2783a6df5e817078ccb0736e6760819b9f3a09"
+    }
+  },
+  "source": {
+    "path": "/tmp/fc-round47-https-settings-worktree/crates/fc-bootstrap/tests/voice_storage.rs",
+    "sha256": "efc0f2e7ec05fefcc280664b55b1a3b5da77e3bfdc789aa8cc358d728e3396d8"
+  },
+  "ownership": "voice_storage.rs Directory::new exact FutureClassroom-Business-<processid>-<SystemTime nanos>-<counter>; old testPID23836 recorded by root ps during owned originalCargo group. Original process and all exact-path references must be gone.",
+  "removed": [
+    "state.sqlite3",
+    "state.sqlite3-wal",
+    "state.sqlite3-shm"
+  ],
+  "ownedLeafMetadata": [
+    {
+      "name": "state.sqlite3",
+      "inode": 1308877,
+      "device": 1048772,
+      "bytes": 4096
+    },
+    {
+      "name": "state.sqlite3-wal",
+      "inode": 1308884,
+      "device": 1048772,
+      "bytes": 2204232
+    },
+    {
+      "name": "state.sqlite3-shm",
+      "inode": 1308885,
+      "device": 1048772,
+      "bytes": 32768
+    }
+  ],
+  "oldGroupLivePids": [],
+  "exactPathReferences": []
+}

@@ -1,0 +1,71 @@
+{
+  "status": "ACTIVE_CONTINUATION",
+  "atUtc": "2026-10-31T23:24:38.585502+00:00",
+  "goal": "按照计划完成全部开发。 active; not complete, not blocked",
+  "main": {
+    "head": "e23bd538d828aeed4378a88f69cf81cb85a4389f",
+    "synced": true,
+    "clean": true
+  },
+  "latestUserRequirement": "Public desktop actions including change/restore require no account/password/identity. Timetable/clock/calendar/countdown purely display/no input. Existing R36 code and plan fulfilled; final b1f public20 PASS and source synced. Management/Web boundaries remain separate.",
+  "completed": {
+    "r41Commit": "bcd51dacb5ba69a184546e5180569a8fd1b3ebad",
+    "r41Archive": "开发计划/验证记录/2026-11-01-round41-frontdoor-deadline",
+    "r41Originals": 449,
+    "r41Bytes": 63692494,
+    "r41IndexSha256": "90cd9cc3fcccb0937b15d7c1f8af2d5a85de1a609624e6dc764da6b829c2ee80",
+    "r45Archive": "开发计划/验证记录/2026-11-01-round45-ci-input-domains",
+    "committedBlobProof": 517,
+    "requiredArchiveFiles": 497,
+    "localCleanup": "9 completed roots removed, PASS; extra proof-helper copy removed. R41/R45 worktrees/branches/evidence/target/program copies and old R42 temporary web/package dependencies removed. Actual sources/originals retained in Git. Main target/debug, SSH/key0600 and intentional mnt/data ZIPs retained.",
+    "finalGnuNormalSha256": "b1f25364f488d6e8ffdb45ef53d5e99ff7fa717e3a226dd9ddf75d48bf7dee6f",
+    "tests": "Final410Rust input GNU compile + stable/nightly strict Clippy, actualWin11 21programs1420pass/0fail/0ignore; targetedHost31pass/clippy; public20/visual22/defaultHOMEWORK82native/Edge owner cleanup PASS; finalheader751checks/5finite<5e9. First failures preserved."
+  },
+  "r46": {
+    "source": "e23bd538d828aeed4378a88f69cf81cb85a4389f",
+    "modern": {
+      "run": 41252067358,
+      "job": 124687474753,
+      "lastStatus": "in_progress"
+    },
+    "win7": {
+      "run": 41252096527,
+      "job": 124687555667,
+      "lastStatus": "in_progress"
+    },
+    "dispatch": "Exactly once each, acceptedHTTP200; never duplicate/rerun old failures. Full initial dispatch/API originals retained in this root.",
+    "inputCiSourceSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+    "artifactValidator": "verify-ci-artifact-first.py sha256 cf3780a6d08dec8f395383a20a9a1992b5e7d5a4b70f5cf865c16ce0b5e13e9c;19models+4oldmetadata checks PASS only; NO NEW ARTIFACT YET",
+    "next": "Use GitHub plugin GET run/jobs/artifacts (never print full wrapper/export URL); save new filenames. After actual artifact, safe official API download if plugin export cannot persist without signed URL. Validator args documented --source --baseline --zip --zip-bytes --zip-sha256 --run-id --job-id --artifact-id --run-metadata --job-metadata --artifact-metadata --output-dir --report. Actual CI failures stay FAIL. Adapt validator only on proven checker mistakes, preserve firstFAIL."
+  },
+  "r47": {
+    "owner": "voice_limits_core",
+    "tree": "/tmp/fc-round47-https-settings-worktree",
+    "branch": "codex/https-settings",
+    "evidence": "/tmp/fc-round47-https-settings-evidence",
+    "scope": "Core domain/ports/protected storage/backend HTTPS configuration only. No UI/listener/cert query yet. Baseab5 excludes current main P0/R45; later integrate/ff carefully.",
+    "cargo": "Core owns sole localCargo jobs2/tests2/900percommand, currently second runner session42849. Root must not start another Cargo. First actual bootstrap201pass/1newheld-writerFAIL and compile294s preserved, remaining crates not run in that FAIL. Second freeze22newHTTPS tests, API stable read/save, tests pending.",
+    "fixes": "Acquire existing fully-authenticated WebService disabled config owner before SQL identity read; mutualEnable/save lock, writer-held Arc keeps physical slot after cancellation until actual return. Stable principal/school/authEpoch/origin fingerprint excludes transientexpires. Fresh exactlease before everydelivery/commit, receipt historicalidentityrevision is not current config.",
+    "requiredNextApi": "After second runner TERMINAL, core must add query_https_settings_outcome(lease,originalRequest)->Result<Option<State>> read-only receipt/resultdigest+stablefullfingerprint. Notfound neverMutation. No disabled owner needed to query saved outcome. UI unknown result only explicit read-onlyquery, never replay save. Add notfound no-write, committed+cancel/newlease query, oldlease denial. Do not mutate frozen source midCargo."
+  },
+  "r48": {
+    "owner": "voice_management_editor",
+    "tree": "/tmp/fc-round48-certificate-query-worktree (confirm actual path with agent)",
+    "branch": "codex/https-certificate-query",
+    "base": "bcd51dacb5ba69a184546e5180569a8fd1b3ebad",
+    "scope": "Native readonly CurrentUserMY exact40hex + normalizedhost certificate query, fc-windows local DTO, no new deps/SSPI/threads/credential handle calls from query. SelectedCertificate factoring preserves legacy Credentials behavior.",
+    "state": "Source implementation active, NO Cargo/Windows granted. Per-check Satisfied/Rejected/Unverified/NotChecked, no ready aggregate. DNS SSL BOOL+dwError0; IP/IPv6 name UNVERIFIED; cache-onlychain/revocation limits. Fixed8192EKU, boundedhost.",
+    "resourceRequirement": "Global Idle/Active/Faulted query gate. No native call under mutex. Actualcleanup success only→Idle; any failed release retains exact original owner in single fixed permanent quarantine, stickyFaulted rejects newquery. No cancellation/Drop resets; no new pool/thread. Private ManuallyDrop retention Send only justified for never again invoked/dropped after physical synchronous call returns; do not generalize NativeQuery Send. Original legacycleanup untouched."
+  },
+  "uiDesign": {
+    "owner": "voice_management_service",
+    "task": "Read-only R47 UI integration design only. Writes /tmp/fc-round47-https-settings-evidence/ui-integration-design-first.json; no UI tree/code/Cargo/Windows granted. Core read/save stable, pure outcome query pending. Keep draft/originalID/cancel/globalLocal role, save no listener, blocked truthful state. R48 native query pending freeze."
+  },
+  "constraints": {
+    "windows": "No root Windows session active. Preserve SSH authorization. Future Windows tests strictlyserial, synthetic/hidden/headless only; no real Run/firewall/HTTPsys/trust/profile/focus/audio/login/reboot.",
+    "cargo": "No root Cargo; R47 core sole owner. 12crates33edges no new pools.",
+    "p0": "Original strict5_000_000_000ns Round13FAIL and production listenerOFF preserved. New finite five samples do not certify kernelEST/backlog/SSP/dispatch hardbounds. Win7/Win10 runtime and visibleSeewo unverified.",
+    "cleanup": "R46/R47/R48 are ACTIVE, retain until all source/evidence committed and byte proven. Do not re-clean nonexistentR41/R45 roots or repeat dispatch.",
+    "github": "NevermoreN/future-classroom; verified whole batches nonforce sync, no Release/tag."
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "startedUtc": "2026-11-01T00:25:43.486322+00:00",
+  "sourceFreeze": {
+    "path": "/tmp/fc-round51-browser-diagnostics-evidence/implementation-freeze-second.json",
+    "sha256": "38555fe4cdcab3bdb34dcafe41f8249aab94d36d7dbc199ae3a81bff3ae74530"
+  },
+  "review": {
+    "path": "/tmp/fc-round51-browser-diagnostics-evidence/editor-review-second.json",
+    "sha256": "b73349a738af590f82e47924c7864327851f90e4c88679cac27b1e61389c2f5b"
+  },
+  "scope": "One final finite run per program after fixed diagnostics. R46 originalfirstFAIL retained causeUNKNOWN; a later PASS is not its fix. No strict5s sample while NAS Cargo active. Root only Windows slot, serial cleanup before next.",
+  "operations": [
+    {
+      "name": "modern-msvc-default-browser-continuous-final-third",
+      "exitCode": 0
+    },
+    {
+      "name": "windows-readonly-final-second",
+      "exitCode": 0
+    },
+    {
+      "name": "windows-default-browser-continuous-first",
+      "exitCode": 0
+    },
+    {
+      "name": "windows-readonly-final-first",
+      "exitCode": 0
+    }
+  ],
+  "completedUtc": "2026-11-01T00:28:10.454129+00:00"
+}

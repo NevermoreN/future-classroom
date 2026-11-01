@@ -1,0 +1,35 @@
+{
+  "status": "SOURCE_FROZEN_NOT_BUILT_NOT_RUN",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 107143,
+      "sha256": "24df808e779f556d5c50e207342b4261ca84d5b4246ec566ecb27b0077cbbcf9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_certificate.rs",
+      "bytes": 11340,
+      "sha256": "800e0994b9d80f9d93ab0fb8e855351731e4200c6ea73604e245d5504b6a4cc2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_certificate/tests.rs",
+      "bytes": 12173,
+      "sha256": "482c098aa35305c2ab770ff89c9856427ddce025613a5b30cadef54b56df7683"
+    }
+  ],
+  "snapshot": "/tmp/fc-round48-certificate-query-evidence/service-implementation-after-second",
+  "previousFreezeSha256": "651f4e1d6c9dd485c11ac7631dae04732eb3671978e6eff706b1d362838ce465",
+  "change": "Only ledger try_lock and authority snapshot uncertainty now map StorageError::AuthorityUnavailable rather than BackendError::Closed; true Backend factory Closed/impossible actor remain unchanged. Added actual-held-ledger recoverability model using real credential/SQLite fixture.",
+  "newTestSourceCount": 4,
+  "original3TestsPreserved": true,
+  "original7NativeFilesUnchanged": true,
+  "diff": {
+    "path": "service-implementation-second.patch",
+    "sha256": "572cc9112bb6801a8a75e4d665492f358b47e2cf1094858bfef1f5fe050980be"
+  },
+  "validation": [
+    "rustfmt",
+    "git diff --check"
+  ],
+  "execution": "No Cargo/Windows/SSH/CI/commit"
+}

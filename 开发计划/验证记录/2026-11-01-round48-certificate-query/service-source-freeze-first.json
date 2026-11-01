@@ -1,0 +1,78 @@
+{
+  "status": "SOURCE_FROZEN_NOT_COMPILED_NOT_RUN",
+  "base": "bcd51dacb5ba69a184546e5180569a8fd1b3ebad",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 107143,
+      "sha256": "24df808e779f556d5c50e207342b4261ca84d5b4246ec566ecb27b0077cbbcf9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_certificate.rs",
+      "bytes": 11215,
+      "sha256": "6f133ef36d57b4ff1fc916c8394664eeac94d99a7b33042d3a6916cb16a163fe"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_certificate/tests.rs",
+      "bytes": 11207,
+      "sha256": "e380b054a80148bd9a6b3674c76cfa4d679efdae7025cba8f8fcc88b43cf1e37"
+    }
+  ],
+  "snapshot": "/tmp/fc-round48-certificate-query-evidence/service-implementation-after-first",
+  "importManifest": "r47-third-import-first.json",
+  "importedCoreOther14ByteUnchanged": true,
+  "originalNative7ByteUnchanged": true,
+  "patch": {
+    "path": "service-implementation-first.patch",
+    "bytes": 24313,
+    "sha256": "a91c0e26b1cb4d1f54ee93a353e620f2068af7e5ded9d1736d5f90471b5d5d8c"
+  },
+  "api": {
+    "factory": "Backend::https_certificate_service(&self)->backend::Result<HttpsCertificateService>",
+    "fence": "service.with_execution_fence(TransactionExecutionFence)->Self (AND only)",
+    "inspect": "service.inspect_certificate(lease, expected:fc_ports::HttpsSettingsState)->Result<HttpsCertificateObservation,HttpsCertificateError>",
+    "observation": [
+      "publication_revision:Revision (global delivery, distinct from identity)",
+      "identity_revision:Revision",
+      "settings_revision:Revision",
+      "configuration:HttpsConfiguration",
+      "observed_at:LocalDateTime (immediately after native return)",
+      "observed_monotonic_millis:u64",
+      "report:CertificateQueryReport"
+    ],
+    "current": "observation.is_current_for(&HttpsSettingsState,SessionLease,&SessionControl)->bool; local historical delivery only, no TTL/cache/startpermit",
+    "errorVariants": [
+      "Backend(BackendError)",
+      "NotConfigured",
+      "ConfigurationChanged",
+      "MissingExecutionFence",
+      "Native(CertificateQueryError)",
+      "UnsupportedPlatform"
+    ]
+  },
+  "contracts": [
+    "Factory clones only repository/authority/ledger/control/clock/original execution fence under short Backend lock; caller must release Backend before inspect",
+    "No provider call spans Backend/KDF/SQL/ledger locks. Native active callback uses original immutable authority snapshot, exact full health/publication status, exact local lease/generation, try_lock ledger, management+global-local authorization and original execution fence",
+    "Both SQL reads use original sole writer repository with execution fence and exact session guard. Expected identity/settings/configuration must all match before native and again afterward",
+    "Original health/pub/auth epoch/cancellation generation and local lease/generation checked before query, in callback and at final delivery. Any change/cancel rejects late positive. Native Busy/Faulted/Cleanup remain exact typed failures",
+    "No listener, positive permit, new worker, thread, pool, global cache or persistent state added. Host native query is UnsupportedPlatform, never fake Windows proof"
+  ],
+  "tests": {
+    "newTestSourceCount": 3,
+    "filter": "https_certificate_",
+    "scope": "Real strong-password Backend/SQLite + real paired Web lease denial/config CAS/lock/fence; one real WorkerPool2 JobContext cancellation with injected query and actual pool join. Injected native reports are models, not CryptoAPI runtime evidence.",
+    "execution": "NOT_RUN"
+  },
+  "staticValidation": [
+    "rustfmt on three scoped service files",
+    "git diff --check",
+    "architecture12crates33edges PASS",
+    "all original7 native and imported other14 core files byte/SHA rechecked"
+  ],
+  "notPerformed": [
+    "Cargo/rustc",
+    "Windows/SSH",
+    "CI",
+    "Git commit/push"
+  ]
+}

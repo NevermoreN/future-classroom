@@ -1,0 +1,391 @@
+{
+  "status": "DESIGN_ONLY_REVIEWABLE_NOT_IMPLEMENTED_NOT_RUN",
+  "utc": "2026-10-31T22:54:10.229654+00:00",
+  "source_commit": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3",
+  "purpose": "First real product HTTPS settings vertical slice: normal local GlobalAdmin can persist endpoint/certificate intent, explicitly inspect that exact certificate, and see why production cannot start. This is not another diagnostic-only entrypoint and must never turn a saved setting or successful certificate check into listener permission.",
+  "baseline_facts": [
+    {
+      "fact": "M11/P6-01 requires fixed reachable address/internal DNS/trusted certificate, explicit deployment steps, default disabled listener, restricted networks and project-owned system effects; an application password does not confer Windows administration. M07 schedule/day mechanics do not grant HTTPS administration or supply a fake teacher/local lease.",
+      "sources": [
+        {
+          "path": "开发计划/模块/06-局域网与React管理端.md",
+          "line": 14,
+          "anchor": "办公室到白板可达"
+        },
+        {
+          "path": "开发计划/模块/06-局域网与React管理端.md",
+          "line": 16,
+          "anchor": "## 2. P6-01"
+        },
+        {
+          "path": "开发计划/模块/02-设置认证权限与自启动.md",
+          "line": 24,
+          "anchor": "应用口令不等于Windows管理员权限"
+        }
+      ]
+    },
+    {
+      "fact": "Normal App creates a native window, original SharedPool and Backend, but web_readiness is always Unavailable. Native web settings reject Enable/Begin before logical service changes.",
+      "sources": [
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 4721,
+          "anchor": "fn create_app("
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 4770,
+          "anchor": "web_readiness: web_editor::Readiness::Unavailable"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+          "line": 73,
+          "anchor": "if matches!(operation, Operation::Enable"
+        }
+      ]
+    },
+    {
+      "fact": "WebService enabled flag is process-local admission, not a persisted HTTPS configuration or port owner. Its actual local-admin check is available as a pattern.",
+      "sources": [
+        {
+          "path": "crates/fc-bootstrap/src/backend/web.rs",
+          "line": 378,
+          "anchor": "/// Logical Web admission only."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/web.rs",
+          "line": 275,
+          "anchor": "fn admin("
+        }
+      ]
+    },
+    {
+      "fact": "Credentials::new uses current-user MY read-only by SHA1 thumbprint, current time/serverAuth and silent matching private-key acquisition, then also creates inbound Schannel credentials. Do not call this whole constructor just to inspect a certificate.",
+      "sources": [
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "line": 30,
+          "anchor": "CERT_STORE_READONLY_FLAG"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "line": 78,
+          "anchor": "CertVerifyTimeValidity"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "line": 90,
+          "anchor": "CRYPT_ACQUIRE_SILENT_FLAG"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "line": 120,
+          "anchor": "AcquireCredentialsHandleW("
+        }
+      ]
+    },
+    {
+      "fact": "Https configuration does not yet exist as a domain/ports/storage model. ListenPrefix is pure transport validation and currently allows DNS, IPv4 and bracketed IPv6 authorities; it is not certificate authentication or a network restriction.",
+      "sources": [
+        {
+          "path": "crates/fc-ports/src/http.rs",
+          "line": 25,
+          "anchor": "pub struct ListenPrefix"
+        },
+        {
+          "path": "crates/fc-ports/src/http.rs",
+          "line": 47,
+          "anchor": "fn validate(value: &str, diagnostic: bool)"
+        }
+      ]
+    }
+  ],
+  "normative_contract_proposal": {
+    "authorization": "Every read/save/check/start-management operation requires the exact current Local SessionLease, active enabled GlobalAdmin, no must-change-password state, current identity/auth epoch and original monotonic session validity. Enforce explicit Local origin at backend and writer, not merely authorize_management. Use the real session; no fake actor/admin identity. No corresponding teacher Web route.",
+    "certificate_source": {
+      "store": "Only the current application Windows logon identity CurrentUser\\MY existing read-only store in the first slice. The application GlobalAdmin may differ from that Windows identity; its password cannot open another user store or grant access to that user private key.",
+      "selection": "Exact existing CertificateThumbprint bytes [u8;20], accepted/displayed as canonical 40 hex; SHA1 is the Windows certificate lookup identifier, not a claim about the signature algorithm/security strength. No PFX path/password, private-key export, store import, CA/ROOT changes or arbitrary store selector.",
+      "future": "If deployment later adopts another service identity or machine store, that must be a separately authorized fixed deployment mode with key ACL and lifecycle design, not silently broadened fallback.",
+      "ui": "Enter exact certificate thumbprint in this first slice; avoid unbounded MY enumeration. Show which Windows user store is used and local-only inspection outcome. A bounded native chooser can be added separately without changing certificate truth."
+    },
+    "domain_model": {
+      "module": "new fc-domain::https_settings; pure std value types only, no Windows paths/handles/cert contexts/SessionLease/JobContext",
+      "types": [
+        "HttpsSettings { revision: Revision, configuration: Option<HttpsConfiguration> }",
+        "HttpsConfiguration { server_name: HttpsServerName, port: NonZeroU16, certificate: HttpsCertificateRef, network_scope: HttpsNetworkScope }",
+        "HttpsCertificateRef { thumbprint_sha1: [u8;20] }; store is fixed CurrentUserMy by contract/version, not arbitrary input",
+        "HttpsServerName: canonical ASCII DNS/A-label, IPv4, or IPv6 with one derived canonical origin; no scheme/path/userinfo/wildcards/whitespace/NUL. Port explicit 1..=65535; base path fixed /fc/ in first product UI. IPv6 brackets only when formatting the authority.",
+        "HttpsNetworkScope: Unconfigured or Restricted { exact_bind_address, allowed_cidrs } with <=8 canonical nonduplicate IPv4/IPv6 networks; empty/unconfigured never grants listener permission. Do not silently default to all interfaces/0.0.0.0/0. This metadata is defined now so saved settings are not mistaken for an implemented network allowlist."
+      ],
+      "bounds": "Proposed canonical DNS name <=253 ASCII bytes/labels<=63; CIDR list<=8; complete encoded document/request/outcome <= existing64KiB. No new file/thread/worker budgets. Proposed field bounds need domain tests; a hostname such as an internal single label must not be rejected merely for lacking a dot.",
+      "default": "Absent document -> revision0/configuration None; listener remains disabled. Malformed existing document, unknown schema/fields or invalid revisions -> fail closed, never silently default. Configured but missing/untrusted/not-yet-valid certificate may still be saved for later deployment; it is not start-ready.",
+      "normalization": "Canonicalize host/IP/hex/network set before fingerprinting and compare canonical semantics; exact command retry with equivalent casing/list order returns original result. Validate endpoint without binding a socket, DNS probing or internet lookup. Network restrictions are not implemented just because parsed metadata is valid."
+    },
+    "ports_and_repository": {
+      "module": "new fc-ports::https_settings; export through existing fc-ports/lib.rs, storage implements same sole writer",
+      "signatures": [
+        "HttpsSettingsRequest { command_id: CommandId, expected_revision: Revision, expected_identity_revision: Revision, configuration: Option<HttpsConfiguration> }",
+        "trait HttpsSettingsRepository { fn https_settings(&self, actor:&ActorContext)->Result<HttpsSettings,HttpsSettingsRepositoryError>; fn execute_https_settings(&mut self, request:HttpsSettingsRequest, actor:&ActorContext)->Result<HttpsSettings,HttpsSettingsRepositoryError>; }",
+        "trait HttpsCertificateQuery { fn inspect(&self, request:&HttpsCertificateQueryRequest, active:&dyn Fn()->bool)->Result<HttpsCertificateAssessment,HttpsCertificateQueryError>; } -- synchronous port, active is cooperative pre/post/stage check, never an interruption guarantee"
+      ],
+      "errors": "Typed domain validation/revision conflict/idempotency conflict/Denied/Unavailable/Busy/cancel vs true Faulted; preserve underlying execution cancellation, do not turn an expired request into a global storage fault.",
+      "document": "business/security/https/v1, format1 strict complete fields; an installation-local safety configuration, not teaching content. Exact existing business/security/ prefix already participates in protected/known_omitted recovery semantics; still add explicit startup validation and regression coverage.",
+      "save": "Authorize exact local session and expected identity/config CAS on writer evaluation; canonical idempotent receipt/result patterned on display/subject-visual; one transaction writes settings+receipt/result and prepares original Factory snapshot with unchanged IdentityState. Recheck exact session/local role/current identity/config and execution fence at precommit. No writer/native lock across certificate inspection, no split identity/config transactions. Read also performs evaluation and final/precommit authorization/fence recheck.",
+      "revision": "Successful new explicit save advances own settings revision and global publication; exact idempotent retry returns original state without new mutation. Identity/catalog/schedule revisions themselves are unchanged by pure HTTPS configuration. Do not emit CatalogChanged or revoke independent teacher leases merely because a draft was inspected or saved while listener is stopped.",
+      "receipt_recovery": "Use existing bounded receipt/outcome machinery and retirement rules, not unbounded new history. Non-replayable command identities are omitted/retired by original recovery rules; malformed new receipt shape must fail closed."
+    },
+    "backend_and_worker_flow": {
+      "service": "Prefer process-local HttpsManagementService obtained from Backend by short clone, alongside existing WebService rather than burying config/native work inside process-local pairing State. It owns authority/session/clock readers, scoped repository and a single physical inspection flight, not an App/Backend/native handle or request cache. A direct Backend method is acceptable only if it returns a prepared memory-only action before any synchronous native work.",
+      "proposed_api": [
+        "Backend::https_management_service() -> HttpsManagementService",
+        "HttpsManagementService::settings(lease) -> Result<HttpsManagementSnapshot>",
+        "HttpsManagementService::save_settings_reviewed(lease, request, expected_runtime_generation) -> Result<HttpsSettings>",
+        "HttpsManagementService::inspect_certificate(lease, expected_config_revision, expected_identity_revision, draft_configuration, original_deadline, query) -> Result<HttpsCertificateObservation>",
+        "HttpsManagementService::request_start_reviewed(...) -> Err(ProductionBlocked) in this slice, with no SQL/native/OS enable effect"
+      ],
+      "lock_boundary": [
+        "Native Submit builds owned bounded Work with the original absolute deadline and cancellation.",
+        "Worker takes Backend mutex only to clone same-instance management service and required captured stamps, then releases it. Do not hold BackendExecution/Backend mutex across native certificate query.",
+        "Service validates original exact local lease/current authority/settings/runtime and claims one non-reusable physical inspection flight; release all ledger/writer/service metadata locks.",
+        "Inspect certificate on that original shared worker. No SSPI credential/context or socket is allocated by inspection; no new thread/pool/Process spawn.",
+        "Close all certificate/store/chain and caller-owned CAPI/CNG handles on the same worker before returning pure metadata. A cancelled/superseded query retains flight/worker until actual return and cleanup; cleanup failure poisons the one-flight admission and reports retained failure, not ready/available/retryable completion.",
+        "Revalidate original deadline+JobContext execution fence, precise original lease, all captured config/identity/publication/runtime stamps; late results are neither cached nor delivered. Only then metadata result reaches native editor."
+      ],
+      "deadline": "Use one caller-supplied original absolute deadline from Submit/JobContext; queueing and all stages consume it. Existing general App Work limit is90s, so this action may choose a stricter fixed explicit action budget (recommend5s UI budget) but never extend it on worker start, query return or retry. Synchronous WinCrypt/provider calls cannot be hard-preempted; logical timeout is not physical worker/flight release. This is unrelated to the strict5s TCP gate and must not be described as satisfying it.",
+      "observation": "No shared certificate cache needed in first slice. Return only bounded assessment/captured exact candidate+config version and actual completion time, retained in the current editor. Input edits/settings publication/local lock discard it; Refresh must not issue a native query. No observation grants start permission; start always reinspects its saved exact configuration. Do not reuse local voice output receipts or the R39 teacher device cache.",
+      "locking": "Lock/session expiry cancels outstanding HTTPS config/check actions and drops sensitive editor intent; native query remains physically owned until return. Unsaved nonsecret draft may follow existing same-owner draft policy, but cannot become valid by logging in as another account. Local management lock does NOT automatically disable an already-running independent authorized teacher Web service under the existing D11 local/Web separation. Explicit disable, recovery, owner shutdown or actual configured policy does stop it."
+    },
+    "native_certificate_inspection": {
+      "factor": "Extract a private thread-bound SelectedCertificate RAII for exact MY lookup/time/EKU/silent key access, reused by real Credentials::new and the new inspection adapter. Do not call Credentials::new for inspection: it currently invokes AcquireCredentialsHandleW and would create additional SSP ownership outside the host worker protocol.",
+      "checks": [
+        "Store exists/readable; exact thumbprint; current validity; serverAuth allowed under existing EKU semantics; matching private key accessible without UI/healing. Respect callerFree flag: cached/noncaller-owned key handles are not freed independently and cert remains alive for their lifetime.",
+        "Use CertGetCertificateChain with requested serverAuth and local/cache-only scope, then CERT_CHAIN_POLICY_SSL with AUTHTYPE_SERVER, configured server name and fdwChecks=0; check both API success and policy dwError. No ignoring wrong hostname/CA/date/usage/revocation errors to make the result green.",
+        "Cache-only chain assessment uses CERT_CHAIN_CACHE_ONLY_URL_RETRIEVAL plus CERT_CHAIN_REVOCATION_CHECK_CACHE_ONLY and disables auth-root auto-update; preserve Unknown/offline revocation distinctly. These flags deliberately do not prove live online revocation or arbitrary client trust.",
+        "DNS wildcard/IDN/IP SAN edge behavior must be verified on fixed Windows targets. Do not hand-roll permissive CN matching or infer IP SAN behavior solely from DNS docs; unproven name result remains Unknown and cannot authorize start.",
+        "Limit returned public labels/error codes/name metadata; no PFX/key/container path/provider secret/certificate bytes or native pointer in TaskOutput. Exact thumbprint lookup avoids enumerating an unbounded certificate store."
+      ],
+      "boundedness": "All native-owned cert/key/chain allocations live only inside the one synchronous worker invocation; the application output is small metadata. Crypt32/provider internal allocation and synchronous duration are not proven bounded by setting a Rust Vec cap or checking cancellation. Record those scope limits rather than claiming the 16MiB app-owned allocation proof covers provider/kernel/other processes.",
+      "assessment": "Separated factual fields Lookup, Time, ServerAuth, NameMatch, PrivateKeyAccess, LocalChainPolicy, RevocationCache. Result language: local historical inspection only, never certificate/browser/campus globally trusted, listener active, teacher reachable or microphone allowed. An untrusted or unknown result blocks any future positive start gate without preventing syntactically valid config save."
+    },
+    "readiness_and_effects": {
+      "source_of_truth": "One trusted coordinator supplies a coherent snapshot {saved_config/revision, optional historical certificate assessment, immutable ProductionTlsGate status, actual runtime phase/generation/actual_endpoint, actual logical admission}. UI renders it; it does not manufacture a positive bool. Backend rechecks identical gate/config/runtime facts independently of button visibility.",
+      "states": [
+        "NotConfigured",
+        "ConfiguredButBlocked { reasons: production P0 gate, network scope incomplete, unverified cert/assets, etc. }",
+        "Future only: Starting, Listening { actual bound endpoint + owner generation }, Stopping, RetainedFaulted"
+      ],
+      "current_gate": "ProductionTlsGate::Blocked with original strict first-TCP and native/provider resource reasons stays mandatory/unconstructible from a form. A valid certificate observation or saved settings cannot turn it Ready. Existing test SyntheticFixture remains cfg(test) and is not a deployment toggle.",
+      "save_effects": "SQLite configuration+command receipt publication only. No listener, bind/port probe, MY/ROOT/key import, registry/firewall/URLACL write, DNS change, start permit or teacher session issuance. Clear/report stale inspection after save.",
+      "inspect_effects": "Read-only MY/public chain metadata plus silent private-key handle access, local cache-only chain checks and native cleanup; no certificate mutation, UI prompt, network probe or SSP credential context. A private provider may block synchronously, so its real return remains physical boundary.",
+      "start_effects": "Separate explicit reviewed local command, requiring exact saved config CAS/runtime generation/new authorization and gate pass. First slice always returns ProductionBlocked with no positive effects. Future host start must check static package, selected cert, configured network restrictions and actual address bind, then expose a trusted same-generation admission permit; logical WebService enabled or configured bool alone never suffices.",
+      "config_while_running": "Minimal safe rule: reject Save/Clear with Busy unless current host is fully Stopped and drained; callback repeats exact runtime-generation/stopped check in writer execution/precommit. UI offers explicit Disable and waits for actual stopped state before resaving; no silent hot rebind or restart. This avoids pretending SQL config save atomically replaced a native listener.",
+      "disable_effects": "Future explicit negative action closes logical Web admission/pair windows, revokes Web leases and cancels new upload/Net admission first; original owner drives actual socket/IOCP/SSPI/Hub release and reports Stopping until physical completion. No replacement while retained. Application-local documents/content remain.",
+      "os_effects": "A socket/Schannel host does not itself require an HTTP.sys URLACL/SSL binding, so do not copy old HTTP.sys netsh recipes into settings. If campus firewall/OS deployment is later implemented, use separate fixed project-owned Prepared/Applying/factual-result/reconcile intent and original preimage; explicit Windows permission, precise ownership and cleanup, never a generic shell, ROOT install or overwrite of another service. Cert config does not grant OS administration."
+    },
+    "backup_and_restore": {
+      "policy": "HTTPS endpoint/certificate/network configuration is installation-local security/deployment state. Ordinary teaching backup omits it; restore never adopts source host/certificate/port/enable or trusted-readiness from another/older package. Both same-install and explicit mapped restore preserve CURRENT TARGET config. Current target absent -> default unconfigured, not source config.",
+      "existing_mechanism": "business/security/https/v1 falls within recovery::protected() and known_omitted(); allowed() remains false. Export/ordinary-file validation rejects injected source config; Projected::get reads current protected rows, preparation copies current target DB then clears only !protected rows. Mapping first produces an ordinary projection and subsequent target preparation retains same protections.",
+      "required_touchpoints": [
+        "fc-storage/src/business/mod.rs::validate_documents must call strict https_settings::load/startup_check, including during projected backup validation",
+        "fc-storage/src/business/recovery.rs::protected/known_omitted/allowed: explicitly document/test the new exact row policy; no accidental source import",
+        "fc-storage/src/recovery.rs Projected/preparation validation and mapped recovery path tests; ensure protected target bytes/revision remain exact after cold reopen",
+        "Backend/App recovery closure invalidates all pending checks/local approvals, performs actual host/worker/Hub drain, new process has no positive readiness/flight/lease even if target config bytes persist"
+      ],
+      "export_warning": "Ordinary backup documentation must say it is not a deployment/PKI backup; it cannot restore a private key or configure another Windows user. Existing full teaching/media backup semantics are not reduced. New local config is intentionally nonportable by explicit policy, not silently dropped as an unknown document.",
+      "revision_and_cold_state": "Protected target config own revision stays exact across teaching restore, subject to its strict <=global-revision invariant. Existing recovery advances identity/security and resets runtime/process observations; no old lease/runtime receipt or positive start permit survives. Never replay a pending enabled/start intent merely because it exists in old data."
+    }
+  },
+  "recommended_small_first_implementation": {
+    "title": "Normal native teacher-connection settings: save exact config + explicit local certificate inspection + honest production-blocked status",
+    "scope": [
+      "New pure typed config/repository/native query ports and strict same-writer document, preserving existing64KiB and execution fences",
+      "Backend management wrapper and one-flight inspection ownership, short Backend lock only; no global WebState query under mutex",
+      "Extend existing native web_editor page with host/port/thumbprint/restricted-network draft, Save/Cancel/Check controls and immutable blocked-reason/actual-stopped display",
+      "Read-only Windows inspection adapter factored before AcquireCredentialsHandleW; do not change existing real host credential release semantics",
+      "Recovery omission/protection/mapped candidate/reopen regression; normal entrypoint fixture proves controls reach actual repository/query, not only a probe CLI"
+    ],
+    "not_in_this_slice": [
+      "Opening any production listener or changing the strictTCP threshold/startpoint",
+      "Private key/certificate import, CA trust/firewall/URLACL/DNS modification",
+      "Installing a new service identity, MSI implementation or another worker pool",
+      "Claiming cached/local chain observations establish browser trust, campus reachability or supported microphone"
+    ],
+    "future_step": "Once this settings slice is real and validated, implement the normal App-owned long-lived host lifecycle using saved exact config and a private trusted admission permit, while retaining the production block until P0 gates independently pass."
+  },
+  "meaningful_test_matrix": [
+    "Domain/codec: DNS single label/A-label case canonicalization, IPv4/IPv6 and bracket formatting, port0/65536, injection/path/userinfo/NUL rejection; CIDR count/duplicates/canonical bounds; unknown/missing/new/oversize shape and absent old DB default.",
+    "Real SQLite writer: LocalGlobalAdmin only; Web GlobalAdmin, TeacherAdmin/User and must-change denied; exact session revoked during queued evaluation and during Factory/precommit; dual settings/identity CAS; same-command reordered canonical networks/hostcase same receipt and changed payload conflict; cancellation never global Fault; physical reopen exact settings.",
+    "Actual concurrency with original WorkerPool2: hold synchronous query, cancel/deadline/lock/relogin/config revision/identity/publication changes; no late positive delivery, no flight reuse or replacement until actual query/cleanup returns. Other worker can acquire Backend/ledger/read settings while query is blocked, proving all long locks released.",
+    "Native Windows only in owned certificate fixture: missing MY thumbprint, expired/notyetvalid/wrongEKU/wrongname/no privatekey/key requiring UI or access denied; positive exact cert, caller-owned vs cached key handle cleanup and explicit cleanupfailure poison. No ROOT insertion or store mutation by inspection; original real Schannel credential regression remains required.",
+    "Trust semantics: API TRUE with nonzero chain policy dwError is negative; cache-only offline revocation is Unknown, not Good. Local trust cannot imply remote browser trust. Verify DNS wildcard/IDN/IP SAN behavior per supported OS rather than inventing compatibility.",
+    "Recovery: export contains no config/key/readiness; injected ordinary row rejected; same/mapped restore keep current target config even when source differs; default absent target stays unconfigured; reopen validates protected row; pending/cached observation/start capability not revived.",
+    "Native normal workbench: exact config saves/reloads through same original workers; real controls retain or cancel draft per owner rules; explicit check returns bounded actual assessment; lock/cancel closes intent while physical query retained; Refresh does not requery; Save never enables; Enable/Begin remain ProductionBlocked at backend and UI even for a valid certificate.",
+    "Lifecycle scaffold: non-Stopped runtime blocks config change on evaluation/precommit; later explicit disable must wait actual native/SSPI/Hub/worker release before replacement. Keep tests separate from any production/campus/OS release pass."
+  ],
+  "source_ownership_for_implementation": {
+    "core": [
+      "fc-domain/src/https_settings.rs + lib export",
+      "fc-ports/src/https_settings.rs + lib export",
+      "fc-storage/src/business/https_settings.rs + codec/tests + business/mod.rs + necessary typed errors",
+      "fc-storage recovery/migration tests to preserve exact target config"
+    ],
+    "service": [
+      "fc-bootstrap/src/backend.rs",
+      "new backend/https_management.rs or narrowly scoped equivalent",
+      "backend/web.rs only required readiness/admission integration, do not merge native lookup into pairing State"
+    ],
+    "native_ui": [
+      "fc-windows/src/tls_frontdoor/credentials.rs and new certificate_query adapter/test module",
+      "fc-bootstrap/src/application.rs, application/web_editor.rs and shared worker Work branches",
+      "fc-presentation workbench generic controls only if existing fields/actions cannot express bounded draft"
+    ],
+    "constraints": "Keep12 crates/33 first-party dependency edges: domain pure std, ports->domain; storage/windows/bootstrap use existing allowed edges. No new crate/runtime/TLS library, worker/KDF/SSPI thread, per-connection thread or query-side network dispatcher. Existing windows feature set should be checked before adding narrowly required crypt32 bindings; any Cargo feature change must be explicit and architecture-checked, not a new dependency."
+  },
+  "primary_sources": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecertificateprivatekey",
+      "basis": "SILENT refuses required UI, NO_HEALING avoids recreating cert provider metadata, callerFree/COMPARE_KEY lifetime must be respected. Queried official API docs; no actual call executed."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certgetcertificatechain",
+      "basis": "Default chain engine is current-user; chain construction may otherwise fetch URLs. Cached chain and cached revocation require different flags; auth-root auto-update has an explicit disabling flag. Local cache-only observation cannot prove live revocation or client trust."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certverifycertificatechainpolicy",
+      "basis": "CERT_CHAIN_POLICY_SSL and serverAuth usage; successful BOOL is not policy success, dwError must be0. Policy call itself does not perform revocation checks."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/ns-wincrypt-httpspolicycallbackdata",
+      "basis": "SSL_EXTRA_CERT_CHAIN_POLICY_PARA alias, AUTHTYPE_SERVER, server name and ignore flags. Use no ignore errors to claim successful assessment; DNS wildcard/IDN behavior documented, IP SAN compatibility still needs actual tests."
+    }
+  ],
+  "evidence_bindings": [
+    {
+      "path": "开发计划/00-开发导航与需求追踪.md",
+      "bytes": 16192,
+      "sha256": "7de8ab49edb90b6abd943a9b8676adaea8e1b28d9a52bebaa5446b1efa1882e0"
+    },
+    {
+      "path": "开发计划/04-开发阶段与任务步骤.md",
+      "bytes": 27109,
+      "sha256": "8df93f5d6b332e930eee6e18a978c1b19559cb14f253a8ae5610017150846e14"
+    },
+    {
+      "path": "开发计划/05-测试验收与发布清理.md",
+      "bytes": 39834,
+      "sha256": "e1fc342d7ddf5924f59d41753368cf706d842055c917c45f3239c3b66f836565"
+    },
+    {
+      "path": "开发计划/模块/02-设置认证权限与自启动.md",
+      "bytes": 13837,
+      "sha256": "a59d799a4e2f9db4d4ec36775e71bdc4aec67de675c0c02182ee52f5828afac9"
+    },
+    {
+      "path": "开发计划/模块/04-课表双表校历与倒计时.md",
+      "bytes": 22321,
+      "sha256": "44885d852937c98eb49e1e96e31a9700ce79ccd498409a69ddb1bbdaaccb5e3b"
+    },
+    {
+      "path": "开发计划/模块/06-局域网与React管理端.md",
+      "bytes": 20104,
+      "sha256": "2f0cadef2b7f29b100917d11b9cbfc81246955213d71ca2cd5c331634e3c53bb"
+    },
+    {
+      "path": "开发计划/23-完整备份与受控恢复.md",
+      "bytes": 13451,
+      "sha256": "b6530fe6d3e2b731384a618800c77885f28e237408fd8bd87c4afacea16eb0aa"
+    },
+    {
+      "path": "开发计划/25-跨安装显式映射恢复.md",
+      "bytes": 10353,
+      "sha256": "7f4d05e68ef1a665053b402e3ea7ecf5f5d520295ab8342cfc0793c4c887ab92"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 257477,
+      "sha256": "2cc9f3e5bebcd4c6018f93d824fe7e48a2cb16dd870c9341f5366c8865922e25"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 22196,
+      "sha256": "4103d908c78eb4037d54c739e95a33fb9630141dcd95ec1dd57f606b0300621f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 106743,
+      "sha256": "8590ea1e58b220c3e744cfee9b6d5d11fa53d62f12ae915cd77f13326199515d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 41749,
+      "sha256": "df3502bd6cd6e99daeda405ae252b4ccf1001ee3f5c3f0fc67ecf8739104c33d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/management.rs",
+      "bytes": 11928,
+      "sha256": "90d817bddf6a8c1dd855dde1a1cf98e0ac9add78e88a5c5e9fd52b0511efc9f8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 26252,
+      "sha256": "41bdd32c9b487b27e04842b1f80e3690f28722e508f868063996ca0f26a4c059"
+    },
+    {
+      "path": "crates/fc-ports/src/http.rs",
+      "bytes": 13327,
+      "sha256": "059fa91aa0217c43610914268e9305e32ef6b4eb93929004512bd4083d9b8b32"
+    },
+    {
+      "path": "crates/fc-domain/src/auth.rs",
+      "bytes": 4600,
+      "sha256": "ee29aac2c7f2d157fe0c50cfbe8813c9bc3ca11a4a60c1531a0949f83e77cc9d"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 42365,
+      "sha256": "336a1672ff1059e4566089501cfd1f7174a6f6c2a7b9c361330c1beade60d1a6"
+    },
+    {
+      "path": "crates/fc-storage/src/business/display.rs",
+      "bytes": 11471,
+      "sha256": "df1c073229fee6646f6c91c0b449a9e5f4b948a0647b1b05e01e5a986cb37ab9"
+    },
+    {
+      "path": "crates/fc-storage/src/business/recovery.rs",
+      "bytes": 53741,
+      "sha256": "6c7b11e3355760cd04f7693e3ca0088719b13cf3ff9528e2d1817be419e9a520"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery.rs",
+      "bytes": 33364,
+      "sha256": "8e705461090bbcc837fb3db25fe3417cb703192ad02d6e955762b6b584ea0293"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery/migration.rs",
+      "bytes": 8807,
+      "sha256": "c2d5999a901d24b2098e531670e3cb3101a57f9f45a7e6c5d853d3206962a990"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 10011,
+      "sha256": "7c50bac6203b3e191815084db9e67c29d4372bb5b86870c23e00d4c7e1d4004a"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 38739,
+      "sha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00"
+    }
+  ],
+  "not_run": [
+    "Rust implementation/source mutation",
+    "Cargo/npm/compiler/tests",
+    "Windows/native certificate calls",
+    "Listener/OS configuration/CI/Git writes"
+  ],
+  "open_implementation_decisions": [
+    "Exact user-facing default port, if a default is shown: plan does not fix one; use explicit nonzero port, no silent choice of443 or ephemeral0.",
+    "CIDR UI syntax/bounds and eventual exact-bind vs peer-filter enforcement must be finalized before real activation; Unconfigured scope always blocks start.",
+    "Certificate chain-only local assessment is advisory and cache-only by this proposal; production trust/revocation policy still needs explicit final specification/actual OS evidence. Do not resolve by ignore flags."
+  ],
+  "source_read_before_after_unchanged": true
+}

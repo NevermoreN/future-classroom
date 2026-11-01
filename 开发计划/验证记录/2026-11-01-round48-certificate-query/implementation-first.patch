@@ -1,0 +1,1587 @@
+diff --git a/crates/fc-windows/src/tls_frontdoor/credentials.rs b/crates/fc-windows/src/tls_frontdoor/credentials.rs
+index 7452345..297e8d0 100644
+--- a/crates/fc-windows/src/tls_frontdoor/credentials.rs
++++ b/crates/fc-windows/src/tls_frontdoor/credentials.rs
+@@ -1,7 +1,7 @@
+ //! Read-only certificate selection. Provisioning belongs to the administrator;
+ //! this module never imports certificates or creates/deletes key containers.
++use super::certificate_selection::SelectedCertificate;
+ use super::{CertificateThumbprint, TlsError};
+-use std::{marker::PhantomData, rc::Rc};
+ use windows::Win32::Security::{
+     Authentication::Identity::*, Credentials::SecHandle, Cryptography::*,
+ };
+@@ -9,102 +9,37 @@ use windows::Win32::Security::{
+ pub(super) struct Credentials {
+     pub handle: SecHandle,
+     acquired: bool,
+-    certificate: *mut CERT_CONTEXT,
+-    store: Option<HCERTSTORE>,
+-    key: Option<(HCRYPTPROV_OR_NCRYPT_KEY_HANDLE, CERT_KEY_SPEC)>,
+-    // Construction, use and destruction all belong to the fixed SSPI thread.
+-    _thread_bound: PhantomData<Rc<()>>,
++    selected: SelectedCertificate,
+ }
+ 
+ impl Credentials {
+     pub fn new(thumbprint: CertificateThumbprint) -> Result<Self, TlsError> {
+-        let name = windows::core::w!("MY");
+-        // SAFETY: constant provider/name, read-only existing current-user store.
+-        let store = unsafe {
+-            CertOpenStore(
+-                CERT_STORE_PROV_SYSTEM_W,
+-                CERT_QUERY_ENCODING_TYPE(0),
+-                None,
+-                CERT_OPEN_STORE_FLAGS(CERT_SYSTEM_STORE_CURRENT_USER)
+-                    | CERT_STORE_OPEN_EXISTING_FLAG
+-                    | CERT_STORE_READONLY_FLAG,
+-                Some(name.as_ptr().cast()),
+-            )
+-        }
+-        .map_err(|_| TlsError::Certificate)?;
++        let selected = SelectedCertificate::open().map_err(|_| TlsError::Certificate)?;
+         let mut result = Self {
+             handle: SecHandle::default(),
+             acquired: false,
+-            certificate: std::ptr::null_mut(),
+-            store: Some(store),
+-            key: None,
+-            _thread_bound: PhantomData,
++            selected,
+         };
+         let initialized = (|| -> Result<(), TlsError> {
+-            let hash = CRYPT_INTEGER_BLOB {
+-                cbData: 20,
+-                pbData: thumbprint.bytes().as_ptr().cast_mut(),
+-            };
+-            // SAFETY: hash remains live and points to exactly twenty public bytes.
+-            result.certificate = unsafe {
+-                CertFindCertificateInStore(
+-                    store,
+-                    X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+-                    0,
+-                    CERT_FIND_HASH,
+-                    Some((&hash as *const CRYPT_INTEGER_BLOB).cast()),
+-                    None,
+-                )
+-            };
+-            if result.certificate.is_null() {
+-                return Err(TlsError::Certificate);
+-            }
+-            let mut actual = [0u8; 20];
+-            let mut actual_len = 20;
+-            // SAFETY: owned live certificate and exactly-sized writable hash buffer.
+-            unsafe {
+-                CertGetCertificateContextProperty(
+-                    result.certificate,
+-                    CERT_SHA1_HASH_PROP_ID,
+-                    Some(actual.as_mut_ptr().cast()),
+-                    &mut actual_len,
+-                )
+-            }
+-            .map_err(|_| TlsError::Certificate)?;
+-            if actual_len != 20 || &actual != thumbprint.bytes() {
++            if !result
++                .selected
++                .find(thumbprint)
++                .map_err(|_| TlsError::Certificate)?
++            {
+                 return Err(TlsError::Certificate);
+             }
+             // SAFETY: CertFindCertificateInStore returned a live context owned above.
+-            if unsafe { CertVerifyTimeValidity(None, (*result.certificate).pCertInfo) } != 0
+-                || !server_auth_usage(result.certificate)?
++            if unsafe { CertVerifyTimeValidity(None, (*result.selected.certificate()).pCertInfo) }
++                != 0
++                || server_auth_usage(result.selected.certificate())? != ServerAuthUsage::Explicit
+             {
+                 return Err(TlsError::Certificate);
+             }
+-            let mut key = HCRYPTPROV_OR_NCRYPT_KEY_HANDLE::default();
+-            let mut spec = CERT_KEY_SPEC::default();
+-            let mut free = windows::core::BOOL(0);
+-            // SAFETY: only opens the selected existing private key, never prompts.
+-            unsafe {
+-                CryptAcquireCertificatePrivateKey(
+-                    result.certificate,
+-                    CRYPT_ACQUIRE_SILENT_FLAG
+-                        | CRYPT_ACQUIRE_ALLOW_NCRYPT_KEY_FLAG
+-                        | CRYPT_ACQUIRE_NO_HEALING
+-                        | CRYPT_ACQUIRE_COMPARE_KEY_FLAG,
+-                    None,
+-                    &mut key,
+-                    Some(&mut spec),
+-                    Some(&mut free),
+-                )
+-            }
+-            .map_err(|_| TlsError::Certificate)?;
+-            if free.as_bool() {
+-                result.key = Some((key, spec));
+-            }
+-            if key.0 == 0 {
+-                return Err(TlsError::Certificate);
+-            }
+-            let mut certificate = result.certificate;
++            result
++                .selected
++                .acquire_private_key()
++                .map_err(|_| TlsError::Certificate)?;
++            let mut certificate = result.selected.certificate();
+             let config = SCHANNEL_CRED {
+                 dwVersion: SCHANNEL_CRED_VERSION,
+                 cCreds: 1,
+@@ -158,26 +93,27 @@ impl Credentials {
+             if std::mem::replace(&mut self.acquired, false) {
+                 remember(FreeCredentialsHandle(&self.handle));
+             }
+-            if let Some((key, spec)) = self.key.take() {
+-                if spec == CERT_NCRYPT_KEY_SPEC {
+-                    remember(NCryptFreeObject(NCRYPT_HANDLE(key.0)));
+-                } else {
+-                    remember(CryptReleaseContext(key.0, 0));
+-                }
+-            }
+-            let certificate = std::mem::replace(&mut self.certificate, std::ptr::null_mut());
+-            if !certificate.is_null() {
+-                remember(CertFreeCertificateContext(Some(certificate)).ok());
+-            }
+-            if let Some(store) = self.store.take() {
+-                remember(CertCloseStore(Some(store), 0));
+-            }
++        }
++        if let Err(error) = self.selected.close(false) {
++            failure.get_or_insert(error);
+         }
+         failure.map_or(Ok(()), Err)
+     }
+ }
+ 
+-fn server_auth_usage(certificate: *const CERT_CONTEXT) -> Result<bool, TlsError> {
++/// Explicit is the historical Schannel admission requirement. Inspection also
++/// distinguishes unrestricted usage (the documented zero-count/not-found case).
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(super) enum ServerAuthUsage {
++    Explicit,
++    Unrestricted,
++    Rejected,
++    Unverified,
++}
++
++pub(super) fn server_auth_usage(
++    certificate: *const CERT_CONTEXT,
++) -> Result<ServerAuthUsage, TlsError> {
+     let mut bytes = 0;
+     // SAFETY: live caller-owned certificate; first call only obtains buffer size.
+     unsafe { CertGetEnhancedKeyUsage(certificate, 0, None, &mut bytes) }
+@@ -190,16 +126,24 @@ fn server_auth_usage(certificate: *const CERT_CONTEXT) -> Result<bool, TlsError>
+     let capacity = backing.len() * 8;
+     let base = backing.as_mut_ptr().cast::<u8>();
+     // SAFETY: aligned writable region of at least the requested bounded size.
+-    unsafe { CertGetEnhancedKeyUsage(certificate, 0, Some(base.cast()), &mut bytes) }
+-        .map_err(|_| TlsError::Certificate)?;
++    unsafe { windows::Win32::Foundation::SetLastError(windows::Win32::Foundation::WIN32_ERROR(0)) };
++    let usage_result =
++        unsafe { CertGetEnhancedKeyUsage(certificate, 0, Some(base.cast()), &mut bytes) };
++    // GetLastError distinguishes unrestricted zero usage from an empty allowed
++    // intersection; capture it before any other native call.
++    let usage_error = unsafe { windows::Win32::Foundation::GetLastError() }.0;
++    usage_result.map_err(|_| TlsError::Certificate)?;
+     if bytes as usize > capacity || bytes < std::mem::size_of::<CTL_USAGE>() as u32 {
+         return Err(TlsError::Certificate);
+     }
+     // SAFETY: the first call required at least a CTL_USAGE and second succeeded.
+     let usage = unsafe { &*base.cast::<CTL_USAGE>() };
+     let count = usage.cUsageIdentifier as usize;
+-    if count == 0 || count > 128 {
+-        return Ok(false);
++    if count == 0 {
++        return Ok(empty_usage(usage_error));
++    }
++    if count > 128 {
++        return Ok(ServerAuthUsage::Unverified);
+     }
+     let start = base as usize;
+     let end = start
+@@ -232,7 +176,36 @@ fn server_auth_usage(certificate: *const CERT_CONTEXT) -> Result<bool, TlsError>
+             .ok_or(TlsError::Certificate)?;
+         found |= &value[..=nul] == SERVER_AUTH;
+     }
+-    Ok(found)
++    Ok(if found {
++        ServerAuthUsage::Explicit
++    } else {
++        ServerAuthUsage::Rejected
++    })
++}
++
++fn empty_usage(last_error: u32) -> ServerAuthUsage {
++    match last_error {
++        0x80092004 => ServerAuthUsage::Unrestricted, // CRYPT_E_NOT_FOUND
++        0 => ServerAuthUsage::Rejected,
++        _ => ServerAuthUsage::Unverified,
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn certificate_query_empty_eku_preserves_unrestricted_empty_and_unknown_distinction() {
++        assert_eq!(empty_usage(0x80092004), ServerAuthUsage::Unrestricted);
++        assert_eq!(empty_usage(0), ServerAuthUsage::Rejected);
++        assert_eq!(empty_usage(5), ServerAuthUsage::Unverified);
++        // None of those becomes Explicit, so legacy Credentials admission
++        // still rejects every zero-count case exactly as before extraction.
++        for error in [0x80092004, 0, 5] {
++            assert_ne!(empty_usage(error), ServerAuthUsage::Explicit);
++        }
++    }
+ }
+ 
+ impl Drop for Credentials {
+diff --git a/crates/fc-windows/src/tls_frontdoor/mod.rs b/crates/fc-windows/src/tls_frontdoor/mod.rs
+index 65cd15b..f30c59f 100644
+--- a/crates/fc-windows/src/tls_frontdoor/mod.rs
++++ b/crates/fc-windows/src/tls_frontdoor/mod.rs
+@@ -215,6 +215,9 @@ pub(super) trait Driver {
+         Ok(())
+     }
+ }
++pub mod certificate_query;
++#[cfg(windows)]
++mod certificate_selection;
+ #[cfg(windows)]
+ mod credentials;
+ #[cfg(any(windows, test))]
+diff --git a/crates/fc-windows/src/tls_frontdoor/certificate_selection.rs b/crates/fc-windows/src/tls_frontdoor/certificate_selection.rs
+new file mode 100644
+index 0000000..8ba5712
+--- /dev/null
++++ b/crates/fc-windows/src/tls_frontdoor/certificate_selection.rs
+@@ -0,0 +1,210 @@
++//! Exact existing CurrentUser\\MY selection shared by Schannel credentials and
++//! the explicit read-only inspection. No credential/SSPI acquisition here.
++use super::{CertificateThumbprint, TlsError};
++use std::{marker::PhantomData, rc::Rc};
++use windows::Win32::{
++    Foundation::{GetLastError, CRYPT_E_NOT_FOUND, E_UNEXPECTED},
++    Security::Cryptography::*,
++};
++
++pub(super) struct SelectedCertificate {
++    certificate: *mut CERT_CONTEXT,
++    store: Option<HCERTSTORE>,
++    key: Option<(HCRYPTPROV_OR_NCRYPT_KEY_HANDLE, CERT_KEY_SPEC)>,
++    // All native ownership stays on the synchronous creating worker.
++    _thread_bound: PhantomData<Rc<()>>,
++}
++
++impl SelectedCertificate {
++    pub fn open() -> windows::core::Result<Self> {
++        // SAFETY: constant existing current-user store; no write or fallback.
++        let store = unsafe {
++            CertOpenStore(
++                CERT_STORE_PROV_SYSTEM_W,
++                CERT_QUERY_ENCODING_TYPE(0),
++                None,
++                CERT_OPEN_STORE_FLAGS(CERT_SYSTEM_STORE_CURRENT_USER)
++                    | CERT_STORE_OPEN_EXISTING_FLAG
++                    | CERT_STORE_READONLY_FLAG,
++                Some(windows::core::w!("MY").as_ptr().cast()),
++            )
++        }?;
++        Ok(Self {
++            certificate: std::ptr::null_mut(),
++            store: Some(store),
++            key: None,
++            _thread_bound: PhantomData,
++        })
++    }
++
++    pub fn find(&mut self, thumbprint: CertificateThumbprint) -> windows::core::Result<bool> {
++        // This is a one-shot owner, never an enumeration cursor.
++        if !self.certificate.is_null() || self.key.is_some() {
++            return Err(E_UNEXPECTED.into());
++        }
++        let store = self
++            .store
++            .ok_or_else(|| windows::core::Error::from(E_UNEXPECTED))?;
++        let hash = CRYPT_INTEGER_BLOB {
++            cbData: 20,
++            pbData: thumbprint.bytes().as_ptr().cast_mut(),
++        };
++        // SAFETY: exactly twenty live public hash bytes, no previous context.
++        self.certificate = unsafe {
++            CertFindCertificateInStore(
++                store,
++                X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
++                0,
++                CERT_FIND_HASH,
++                Some((&hash as *const CRYPT_INTEGER_BLOB).cast()),
++                None,
++            )
++        };
++        if self.certificate.is_null() {
++            // SAFETY: immediately captures the failed native lookup's status.
++            let error = unsafe { GetLastError() };
++            return if error.0 == CRYPT_E_NOT_FOUND.0 as u32 {
++                Ok(false)
++            } else {
++                Err(windows::core::Error::from_hresult(if error.0 == 0 {
++                    E_UNEXPECTED
++                } else {
++                    windows::core::HRESULT::from_win32(error.0)
++                }))
++            };
++        }
++        let mut actual = [0u8; 20];
++        let mut actual_len = 20;
++        // SAFETY: owned selected context and exactly-sized writable buffer.
++        unsafe {
++            CertGetCertificateContextProperty(
++                self.certificate,
++                CERT_SHA1_HASH_PROP_ID,
++                Some(actual.as_mut_ptr().cast()),
++                &mut actual_len,
++            )
++        }?;
++        if actual_len != 20 || &actual != thumbprint.bytes() {
++            return Err(E_UNEXPECTED.into());
++        }
++        Ok(true)
++    }
++
++    pub fn certificate(&self) -> *mut CERT_CONTEXT {
++        self.certificate
++    }
++
++    pub fn store(&self) -> Option<HCERTSTORE> {
++        self.store
++    }
++
++    pub fn acquire_private_key(&mut self) -> windows::core::Result<()> {
++        if self.certificate.is_null() || self.key.is_some() {
++            return Err(E_UNEXPECTED.into());
++        }
++        let mut key = HCRYPTPROV_OR_NCRYPT_KEY_HANDLE::default();
++        let mut spec = CERT_KEY_SPEC::default();
++        let mut caller_free = windows::core::BOOL(0);
++        // SAFETY: same existing-key flags as historical Credentials::new. No
++        // UI/cache creation/healing flag. Borrowed handles live with the cert.
++        unsafe {
++            CryptAcquireCertificatePrivateKey(
++                self.certificate,
++                CRYPT_ACQUIRE_SILENT_FLAG
++                    | CRYPT_ACQUIRE_ALLOW_NCRYPT_KEY_FLAG
++                    | CRYPT_ACQUIRE_NO_HEALING
++                    | CRYPT_ACQUIRE_COMPARE_KEY_FLAG,
++                None,
++                &mut key,
++                Some(&mut spec),
++                Some(&mut caller_free),
++            )
++        }?;
++        if caller_free.as_bool() {
++            self.key = Some((key, spec));
++        }
++        if key.0 == 0 {
++            return Err(E_UNEXPECTED.into());
++        }
++        Ok(())
++    }
++
++    pub fn close(&mut self, check_store: bool) -> Result<(), TlsError> {
++        if check_store {
++            return self.close_checked();
++        }
++        let mut failure = None;
++        let mut remember = |result: windows::core::Result<()>| {
++            if let Err(error) = result {
++                failure.get_or_insert(TlsError::Cleanup(error.code().0));
++            }
++        };
++        // SAFETY: unique thread-bound owner; consume each original reference
++        // once and attempt every release even after a preceding failure.
++        unsafe {
++            if let Some((key, spec)) = self.key.take() {
++                if spec == CERT_NCRYPT_KEY_SPEC {
++                    remember(NCryptFreeObject(NCRYPT_HANDLE(key.0)));
++                } else {
++                    remember(CryptReleaseContext(key.0, 0));
++                }
++            }
++            let certificate = std::mem::replace(&mut self.certificate, std::ptr::null_mut());
++            if !certificate.is_null() {
++                remember(CertFreeCertificateContext(Some(certificate)).ok());
++            }
++            if let Some(store) = self.store.take() {
++                remember(CertCloseStore(
++                    Some(store),
++                    if check_store {
++                        CERT_CLOSE_STORE_CHECK_FLAG
++                    } else {
++                        0
++                    },
++                ));
++            }
++        }
++        failure.map_or(Ok(()), Err)
++    }
++
++    /// Inspection keeps the exact failed reference and all dependencies for
++    /// terminal quarantine. It never retries a release whose failure leaves
++    /// ownership uncertain. The legacy Credentials path above stays unchanged.
++    fn close_checked(&mut self) -> Result<(), TlsError> {
++        let cleanup = |error: windows::core::Error| TlsError::Cleanup(error.code().0);
++        if let Some((key, spec)) = self.key {
++            // SAFETY: caller-owned key from the one completed synchronous
++            // acquisition. On failure retain it and its certificate/store.
++            unsafe {
++                if spec == CERT_NCRYPT_KEY_SPEC {
++                    NCryptFreeObject(NCRYPT_HANDLE(key.0))
++                } else {
++                    CryptReleaseContext(key.0, 0)
++                }
++            }
++            .map_err(cleanup)?;
++            self.key = None;
++        }
++        if !self.certificate.is_null() {
++            // SAFETY: sole selected context reference, after own key release.
++            unsafe { CertFreeCertificateContext(Some(self.certificate)) }
++                .ok()
++                .map_err(cleanup)?;
++            self.certificate = std::ptr::null_mut();
++        }
++        if let Some(store) = self.store.take() {
++            // SAFETY: chain and our certificate references already returned.
++            // CertCloseStore ALWAYS closes the handle, including FALSE with
++            // CHECK_FLAG, so consume this reference before the single call.
++            unsafe { CertCloseStore(Some(store), CERT_CLOSE_STORE_CHECK_FLAG) }.map_err(cleanup)?;
++        }
++        Ok(())
++    }
++}
++
++impl Drop for SelectedCertificate {
++    fn drop(&mut self) {
++        // Explicit callers observe close failures; unwind cleanup is fallback.
++        let _ = self.close(false);
++    }
++}
+diff --git a/crates/fc-windows/src/tls_frontdoor/certificate_query.rs b/crates/fc-windows/src/tls_frontdoor/certificate_query.rs
+new file mode 100644
+index 0000000..e2b1a29
+--- /dev/null
++++ b/crates/fc-windows/src/tls_frontdoor/certificate_query.rs
+@@ -0,0 +1,311 @@
++//! Explicit historical inspection, not an HTTPS listener/start permission.
++//! No native handle, certificate bytes or private-key metadata leaves this API.
++use super::CertificateThumbprint;
++
++/// A fact may be negative or unknown independently of all other facts. Even a
++/// set of Satisfied facts is NOT a production TLS readiness/authority token.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum CertificateCheck {
++    Satisfied,
++    Rejected,
++    Unverified,
++    NotChecked,
++}
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub struct CertificateFact {
++    pub check: CertificateCheck,
++    /// Sanitized native status only, never provider/container names or paths.
++    pub native_error: Option<i32>,
++}
++
++impl CertificateFact {
++    const fn new(check: CertificateCheck) -> Self {
++        Self {
++            check,
++            native_error: None,
++        }
++    }
++    #[cfg(any(windows, test))]
++    fn unknown(error: i32) -> Self {
++        Self {
++            check: CertificateCheck::Unverified,
++            native_error: Some(error),
++        }
++    }
++}
++
++/// These facts concern this Windows logon user's existing MY store and local
++/// cached trust/revocation data. They do not prove another client's trust,
++/// fresh online revocation, successful TLS, or the right to start listening.
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct CertificateQueryReport {
++    pub scope: CertificateQueryScope,
++    pub found: CertificateFact,
++    pub current_time: CertificateFact,
++    /// Silent existing-key acquisition with compare/no-healing flags; NOT a
++    /// proof that a future signature, handshake or provider operation succeeds.
++    pub private_key: CertificateFact,
++    /// Effective extension/property intersection, including documented
++    /// unrestricted usage, independently of legacy credential admission.
++    pub server_auth_eku: CertificateFact,
++    /// DNS SSL policy only; IP/IPv6 SAN matching remains Unverified.
++    pub server_name: CertificateFact,
++    pub ssl_chain_policy: CertificateFact,
++    /// Always cache-only, chain excluding root. Satisfied is not an online
++    /// freshness claim: it means the engine reported no trust/revocation
++    /// errors under those flags (the root is not checked). Missing/offline
++    /// cached revocation is Unverified, never permission to ignore it.
++    pub cached_revocation: CertificateFact,
++    pub chain_trust_errors: Option<u32>,
++    pub ssl_policy_error: Option<u32>,
++}
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum CertificateQueryScope {
++    /// Windows logon user MY; local trust and cache-only revocation excluding
++    /// root. Not online freshness, client trust, TLS readiness or permission.
++    CurrentUserMyCacheOnly,
++}
++
++impl Default for CertificateQueryReport {
++    fn default() -> Self {
++        let unchecked = CertificateFact::new(CertificateCheck::NotChecked);
++        Self {
++            scope: CertificateQueryScope::CurrentUserMyCacheOnly,
++            found: unchecked,
++            current_time: unchecked,
++            private_key: unchecked,
++            server_auth_eku: unchecked,
++            server_name: unchecked,
++            ssl_chain_policy: unchecked,
++            cached_revocation: unchecked,
++            chain_trust_errors: None,
++            ssl_policy_error: None,
++        }
++    }
++}
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum CertificateQueryError {
++    InvalidInput,
++    Busy,
++    Faulted,
++    Cancelled,
++    Native(i32),
++    /// A release API failed. Callers must not turn this into a successful
++    /// reusable query flight merely because the logical work finished.
++    Cleanup(i32),
++}
++
++#[derive(Clone, PartialEq, Eq)]
++pub struct CertificateQueryRequest {
++    thumbprint: CertificateThumbprint,
++    host: String,
++    dns_name: bool,
++}
++
++impl CertificateQueryRequest {
++    /// Canonical ASCII DNS/A-label or std canonical IP, without brackets,
++    /// scheme, port, trailing dot, whitespace, NUL or wildcard. No DNS lookup.
++    pub fn new(thumbprint: &str, host: &str) -> Result<Self, CertificateQueryError> {
++        let thumbprint = CertificateThumbprint::parse(thumbprint)
++            .map_err(|_| CertificateQueryError::InvalidInput)?;
++        if host.is_empty() || host.len() > 253 || !host.is_ascii() {
++            return Err(CertificateQueryError::InvalidInput);
++        }
++        let dns_name = if let Ok(address) = host.parse::<std::net::IpAddr>() {
++            if address.to_string() != host {
++                return Err(CertificateQueryError::InvalidInput);
++            }
++            false
++        } else {
++            let lower_alphanumeric = |b: u8| b.is_ascii_lowercase() || b.is_ascii_digit();
++            if host.bytes().all(|b| b.is_ascii_digit() || b == b'.')
++                || host.split('.').any(|label| {
++                    label.is_empty()
++                        || label.len() > 63
++                        || !lower_alphanumeric(label.as_bytes()[0])
++                        || !lower_alphanumeric(label.as_bytes()[label.len() - 1])
++                        || !label
++                            .bytes()
++                            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
++                })
++            {
++                return Err(CertificateQueryError::InvalidInput);
++            }
++            true
++        };
++        Ok(Self {
++            thumbprint,
++            host: host.to_owned(),
++            dns_name,
++        })
++    }
++
++    pub fn host(&self) -> &str {
++        &self.host
++    }
++}
++
++/// Run synchronously on the already-owned shared worker. The caller supplies
++/// exact authority/lifetime checks; no new thread, SSPI or listener is created.
++/// Cancellation is cooperative between native calls, not provider interruption.
++#[cfg(windows)]
++pub fn inspect_certificate(
++    request: &CertificateQueryRequest,
++    active: &dyn Fn() -> bool,
++) -> Result<CertificateQueryReport, CertificateQueryError> {
++    checkpoint(active)?;
++    native::inspect(request, active)
++}
++
++#[cfg(any(windows, test))]
++#[derive(Clone, Copy)]
++enum Usage {
++    Allowed,
++    Rejected,
++    Unverified,
++}
++
++#[cfg(any(windows, test))]
++#[derive(Clone, Copy)]
++struct ChainObservation {
++    trust_errors: u32,
++    /// Err = API BOOL false. Ok(error) = API BOOL true; error MUST be checked.
++    policy: Result<u32, i32>,
++}
++
++#[cfg(any(windows, test))]
++trait QueryDriver {
++    fn select(&mut self, thumbprint: CertificateThumbprint) -> Result<bool, i32>;
++    fn time_valid(&mut self) -> Result<bool, i32>;
++    fn usage(&mut self) -> Result<Usage, i32>;
++    fn private_key(&mut self) -> Result<(), i32>;
++    fn chain(&mut self, host: &str) -> Result<ChainObservation, i32>;
++    /// Always attempted, including cancellation/partial failure; all resources
++    /// must have actually returned before a successful report is delivered.
++    fn close(&mut self) -> Result<(), i32>;
++}
++
++#[cfg(any(windows, test))]
++fn checkpoint(active: &dyn Fn() -> bool) -> Result<(), CertificateQueryError> {
++    if std::panic::catch_unwind(std::panic::AssertUnwindSafe(active)).unwrap_or(false) {
++        Ok(())
++    } else {
++        Err(CertificateQueryError::Cancelled)
++    }
++}
++
++#[cfg(any(windows, test))]
++fn run_query(
++    driver: &mut impl QueryDriver,
++    request: &CertificateQueryRequest,
++    active: &dyn Fn() -> bool,
++) -> Result<CertificateQueryReport, CertificateQueryError> {
++    let result = (|| {
++        let mut report = CertificateQueryReport::default();
++        checkpoint(active)?;
++        let selected = driver.select(request.thumbprint);
++        checkpoint(active)?;
++        report.found = match selected {
++            Ok(true) => CertificateFact::new(CertificateCheck::Satisfied),
++            Ok(false) => {
++                report.found = CertificateFact::new(CertificateCheck::Rejected);
++                return Ok(report);
++            }
++            Err(error) => {
++                report.found = CertificateFact::unknown(error);
++                return Ok(report);
++            }
++        };
++        report.current_time = match driver.time_valid() {
++            Ok(true) => CertificateFact::new(CertificateCheck::Satisfied),
++            Ok(false) => CertificateFact::new(CertificateCheck::Rejected),
++            Err(error) => CertificateFact::unknown(error),
++        };
++        checkpoint(active)?;
++        report.server_auth_eku = match driver.usage() {
++            Ok(Usage::Allowed) => CertificateFact::new(CertificateCheck::Satisfied),
++            Ok(Usage::Rejected) => CertificateFact::new(CertificateCheck::Rejected),
++            Ok(Usage::Unverified) => CertificateFact::new(CertificateCheck::Unverified),
++            Err(error) => CertificateFact::unknown(error),
++        };
++        checkpoint(active)?;
++        report.private_key = match driver.private_key() {
++            Ok(()) => CertificateFact::new(CertificateCheck::Satisfied),
++            Err(error) => CertificateFact::unknown(error),
++        };
++        checkpoint(active)?;
++        match driver.chain(&request.host) {
++            Ok(observation) => apply_chain(&mut report, observation, request.dns_name),
++            Err(error) => {
++                report.ssl_chain_policy = CertificateFact::unknown(error);
++                report.server_name = CertificateFact::unknown(error);
++                report.cached_revocation = CertificateFact::unknown(error);
++            }
++        }
++        checkpoint(active)?;
++        Ok(report)
++    })();
++    // Cleanup errors dominate both success and cancellation. Never report a
++    // successful assessment while any release API has reported failure.
++    driver.close().map_err(CertificateQueryError::Cleanup)?;
++    checkpoint(active)?;
++    result
++}
++
++#[cfg(any(windows, test))]
++fn apply_chain(report: &mut CertificateQueryReport, chain: ChainObservation, dns_name: bool) {
++    const REVOKED: u32 = 0x4;
++    const UNKNOWN_REVOCATION: u32 = 0x40 | 0x0100_0000;
++    const CN_NO_MATCH: u32 = 0x800b_010f;
++    report.chain_trust_errors = Some(chain.trust_errors);
++    report.cached_revocation = CertificateFact::new(if chain.trust_errors & REVOKED != 0 {
++        CertificateCheck::Rejected
++    } else if chain.trust_errors != 0 {
++        CertificateCheck::Unverified
++    } else {
++        CertificateCheck::Satisfied
++    });
++    match chain.policy {
++        Err(error) => {
++            report.ssl_chain_policy = CertificateFact::unknown(error);
++            report.server_name = CertificateFact::unknown(error);
++        }
++        Ok(error) => {
++            report.ssl_policy_error = Some(error);
++            report.ssl_chain_policy = CertificateFact {
++                check: if error == 0 && chain.trust_errors == 0 {
++                    CertificateCheck::Satisfied
++                } else if chain.trust_errors & !UNKNOWN_REVOCATION == 0
++                    && matches!(error, 0 | 0x8009_2012 | 0x8009_2013 | 0x800b_010e)
++                {
++                    CertificateCheck::Unverified
++                } else {
++                    CertificateCheck::Rejected
++                },
++                native_error: (error != 0).then_some(error as i32),
++            };
++            report.server_name = CertificateFact {
++                check: if !dns_name {
++                    CertificateCheck::Unverified
++                } else if error == CN_NO_MATCH {
++                    CertificateCheck::Rejected
++                } else if error == 0 && chain.trust_errors == 0 {
++                    CertificateCheck::Satisfied
++                } else {
++                    CertificateCheck::Unverified
++                },
++                native_error: (dns_name && error == CN_NO_MATCH).then_some(error as i32),
++            };
++        }
++    }
++}
++
++#[cfg(any(windows, test))]
++mod flight;
++#[cfg(windows)]
++mod native;
++#[cfg(test)]
++mod tests;
+diff --git a/crates/fc-windows/src/tls_frontdoor/certificate_query/native.rs b/crates/fc-windows/src/tls_frontdoor/certificate_query/native.rs
+new file mode 100644
+index 0000000..406c9fb
+--- /dev/null
++++ b/crates/fc-windows/src/tls_frontdoor/certificate_query/native.rs
+@@ -0,0 +1,235 @@
++use super::{ChainObservation, QueryDriver, Usage};
++use crate::tls_frontdoor::{
++    certificate_selection::SelectedCertificate,
++    credentials::{server_auth_usage, ServerAuthUsage},
++    CertificateThumbprint, TlsError,
++};
++use windows::Win32::{Foundation::E_UNEXPECTED, Security::Cryptography::*};
++
++pub(super) struct NativeQuery {
++    selected: SelectedCertificate,
++    chain: *mut CERT_CHAIN_CONTEXT,
++    cleanup_failed: bool,
++}
++
++struct RetainedQuery {
++    _owner: std::mem::ManuallyDrop<Box<NativeQuery>>,
++}
++
++// SAFETY: this wrapper is created only AFTER every synchronous provider/chain/
++// release call has actually returned. It never exposes NativeQuery, never
++// invokes another native method, and its ManuallyDrop owner is never destroyed
++// or reused, including at worker exit. Moving the inert exact owner into the
++// one terminal process ledger is not permission to move/use NativeQuery on a
++// different thread. NativeQuery itself remains !Send/!Sync via its selection.
++unsafe impl Send for RetainedQuery {}
++
++static FLIGHT: super::flight::FlightLedger<RetainedQuery> = super::flight::FlightLedger::new();
++
++pub(super) fn inspect(
++    request: &super::CertificateQueryRequest,
++    active: &dyn Fn() -> bool,
++) -> Result<super::CertificateQueryReport, super::CertificateQueryError> {
++    let flight = FLIGHT.claim()?;
++    if let Err(error) = super::checkpoint(active) {
++        // No native owner exists yet.
++        flight.released()?;
++        return Err(error);
++    }
++    // Construction failure owns no native resources: store-open either returned
++    // a valid handle encapsulated below, or failed without one.
++    let mut owner = match NativeQuery::new() {
++        Ok(owner) => Box::new(owner),
++        Err(error) => {
++            flight.released()?;
++            return Err(error);
++        }
++    };
++    let attempt = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++        super::run_query(owner.as_mut(), request, active)
++    }));
++    let result = match attempt {
++        Ok(result) => result,
++        Err(_) => match owner.close() {
++            Ok(()) => Err(super::CertificateQueryError::Native(E_UNEXPECTED.0)),
++            Err(code) => Err(super::CertificateQueryError::Cleanup(code)),
++        },
++    };
++    if owner.cleanup_failed {
++        flight.retain(RetainedQuery {
++            _owner: std::mem::ManuallyDrop::new(owner),
++        });
++        return result;
++    }
++    // Successful explicit close discharged every owned reference. Drop contains
++    // no native debt, then and only then publish Idle.
++    drop(owner);
++    flight.released()?;
++    result
++}
++
++impl NativeQuery {
++    pub fn new() -> Result<Self, super::CertificateQueryError> {
++        Ok(Self {
++            selected: SelectedCertificate::open()
++                .map_err(|error| super::CertificateQueryError::Native(error.code().0))?,
++            chain: std::ptr::null_mut(),
++            cleanup_failed: false,
++        })
++    }
++
++    fn free_chain(&mut self) {
++        let chain = std::mem::replace(&mut self.chain, std::ptr::null_mut());
++        if !chain.is_null() {
++            // SAFETY: exactly this context was returned to this sole owner.
++            // The native API is void: return discharges our one reference,
++            // not a claim about unrelated references in the OS chain cache.
++            unsafe { CertFreeCertificateChain(chain) };
++        }
++    }
++}
++
++impl QueryDriver for NativeQuery {
++    fn select(&mut self, thumbprint: CertificateThumbprint) -> Result<bool, i32> {
++        self.selected
++            .find(thumbprint)
++            .map_err(|error| error.code().0)
++    }
++
++    fn time_valid(&mut self) -> Result<bool, i32> {
++        let certificate = self.selected.certificate();
++        if certificate.is_null() {
++            return Err(E_UNEXPECTED.0);
++        }
++        // SAFETY: live exact selected certificate; null time uses system time.
++        Ok(unsafe { CertVerifyTimeValidity(None, (*certificate).pCertInfo) } == 0)
++    }
++
++    fn usage(&mut self) -> Result<Usage, i32> {
++        match server_auth_usage(self.selected.certificate()) {
++            Ok(ServerAuthUsage::Explicit | ServerAuthUsage::Unrestricted) => Ok(Usage::Allowed),
++            Ok(ServerAuthUsage::Rejected) => Ok(Usage::Rejected),
++            Ok(ServerAuthUsage::Unverified) => Ok(Usage::Unverified),
++            Err(_) => Err(E_UNEXPECTED.0),
++        }
++    }
++
++    fn private_key(&mut self) -> Result<(), i32> {
++        self.selected
++            .acquire_private_key()
++            .map_err(|error| error.code().0)
++    }
++
++    fn chain(&mut self, host: &str) -> Result<ChainObservation, i32> {
++        if !self.chain.is_null() || self.selected.certificate().is_null() {
++            return Err(E_UNEXPECTED.0);
++        }
++        // No runtime-supplied OID, allocation or unconstrained string here.
++        let mut server_auth =
++            windows::core::PSTR(windows::core::s!("1.3.6.1.5.5.7.3.1").0.cast_mut());
++        let parameters = CERT_CHAIN_PARA {
++            // Use the documented base structure (cbSize + RequestedUsage),
++            // avoiding Windows 8 strong-sign extra fields on Windows 7.
++            cbSize: std::mem::offset_of!(CERT_CHAIN_PARA, RequestedIssuancePolicy) as u32,
++            RequestedUsage: CERT_USAGE_MATCH {
++                dwType: USAGE_MATCH_TYPE_AND,
++                Usage: CTL_USAGE {
++                    cUsageIdentifier: 1,
++                    rgpszUsageIdentifier: &mut server_auth,
++                },
++            },
++            ..Default::default()
++        };
++        let flags = CERT_CHAIN_CACHE_ONLY_URL_RETRIEVAL
++            | CERT_CHAIN_REVOCATION_CHECK_CACHE_ONLY
++            | CERT_CHAIN_REVOCATION_CHECK_CHAIN_EXCLUDE_ROOT
++            | CERT_CHAIN_DISABLE_AUTH_ROOT_AUTO_UPDATE;
++        // SAFETY: current-user default engine, selected live cert/store;
++        // synchronous borrowed OID/parameters, owned returned chain. Both URL
++        // and revocation retrieval are cache-only; no ignore/peer-trust flags.
++        let built = unsafe {
++            CertGetCertificateChain(
++                None,
++                self.selected.certificate(),
++                None,
++                self.selected.store(),
++                &parameters,
++                flags,
++                None,
++                &mut self.chain,
++            )
++        };
++        built.map_err(|error| error.code().0)?;
++        if self.chain.is_null() {
++            return Err(E_UNEXPECTED.0);
++        }
++        // SAFETY: successful chain API returned live context held until close.
++        let trust_errors = unsafe { (*self.chain).TrustStatus.dwErrorStatus };
++        let mut name = [0u16; 254];
++        // Request construction already enforced ASCII <=253 and no NUL.
++        for (target, byte) in name.iter_mut().zip(host.bytes()) {
++            *target = byte as u16;
++        }
++        let mut ssl = HTTPSPolicyCallbackData {
++            Anonymous: HTTPSPolicyCallbackData_0 {
++                cbSize: std::mem::size_of::<HTTPSPolicyCallbackData>() as u32,
++            },
++            dwAuthType: AUTHTYPE_SERVER,
++            fdwChecks: 0,
++            pwszServerName: windows::core::PWSTR(name.as_mut_ptr()),
++        };
++        let policy = CERT_CHAIN_POLICY_PARA {
++            cbSize: std::mem::size_of::<CERT_CHAIN_POLICY_PARA>() as u32,
++            dwFlags: CERT_CHAIN_POLICY_FLAGS(0),
++            pvExtraPolicyPara: (&mut ssl as *mut HTTPSPolicyCallbackData).cast(),
++        };
++        let mut status = CERT_CHAIN_POLICY_STATUS {
++            cbSize: std::mem::size_of::<CERT_CHAIN_POLICY_STATUS>() as u32,
++            ..Default::default()
++        };
++        // SAFETY: chain and bounded terminated server name remain live for this
++        // call; no ignored date/name/usage/trust/revocation errors.
++        let checked = unsafe {
++            CertVerifyCertificateChainPolicy(
++                CERT_CHAIN_POLICY_SSL,
++                self.chain,
++                &policy,
++                &mut status,
++            )
++        };
++        let policy = if checked.as_bool() {
++            // TRUE means the policy was evaluated, NOT that it passed.
++            Ok(status.dwError)
++        } else {
++            Err(windows::core::Error::from_win32().code().0)
++        };
++        Ok(ChainObservation {
++            trust_errors,
++            policy,
++        })
++    }
++
++    fn close(&mut self) -> Result<(), i32> {
++        if self.cleanup_failed {
++            return Err(E_UNEXPECTED.0);
++        }
++        // Chain retains certificate references; discharge it before selected
++        // key/certificate/store. Store close additionally checks outstanding
++        // context debt for this explicit diagnostic (not the legacy TLS path).
++        self.free_chain();
++        let result = self.selected.close(true).map_err(|error| match error {
++            TlsError::Cleanup(code) => code,
++            _ => E_UNEXPECTED.0,
++        });
++        self.cleanup_failed = result.is_err();
++        result
++    }
++}
++
++impl Drop for NativeQuery {
++    fn drop(&mut self) {
++        self.free_chain();
++        // SelectedCertificate's Drop is fallback; successful delivery always
++        // observed QueryDriver::close before reaching this destructor.
++    }
++}
+diff --git a/crates/fc-windows/src/tls_frontdoor/certificate_query/flight.rs b/crates/fc-windows/src/tls_frontdoor/certificate_query/flight.rs
+new file mode 100644
+index 0000000..6f79de6
+--- /dev/null
++++ b/crates/fc-windows/src/tls_frontdoor/certificate_query/flight.rs
+@@ -0,0 +1,194 @@
++//! One process-wide physical inspection, independent of logical cancellation.
++//! This is a metadata ledger, not a worker/resource pool. No native call runs
++//! while its short lock is held. There is intentionally no reset/retry API.
++use super::CertificateQueryError;
++use std::sync::Mutex;
++
++#[derive(Clone, Copy, PartialEq, Eq)]
++enum Phase {
++    Idle,
++    Active,
++    Faulted,
++}
++
++struct State<T> {
++    phase: Phase,
++    retained: Option<T>,
++}
++
++pub(super) struct FlightLedger<T> {
++    state: Mutex<State<T>>,
++}
++
++impl<T> FlightLedger<T> {
++    pub const fn new() -> Self {
++        Self {
++            state: Mutex::new(State {
++                phase: Phase::Idle,
++                retained: None,
++            }),
++        }
++    }
++
++    pub fn claim(&self) -> Result<Flight<'_, T>, CertificateQueryError> {
++        let mut state = match self.state.lock() {
++            Ok(state) => state,
++            Err(poisoned) => {
++                // Keep any retained owner; a poisoned ledger is never reset.
++                poisoned.into_inner().phase = Phase::Faulted;
++                return Err(CertificateQueryError::Faulted);
++            }
++        };
++        match state.phase {
++            Phase::Active => return Err(CertificateQueryError::Busy),
++            Phase::Faulted => return Err(CertificateQueryError::Faulted),
++            Phase::Idle => {}
++        }
++        if state.retained.is_some() {
++            state.phase = Phase::Faulted;
++            return Err(CertificateQueryError::Faulted);
++        }
++        state.phase = Phase::Active;
++        Ok(Flight {
++            ledger: self,
++            finished: false,
++        })
++    }
++}
++
++pub(super) struct Flight<'a, T> {
++    ledger: &'a FlightLedger<T>,
++    finished: bool,
++}
++
++impl<T> Flight<'_, T> {
++    /// Only after every native reference has actually been released.
++    pub fn released(mut self) -> Result<(), CertificateQueryError> {
++        let mut state = match self.ledger.state.lock() {
++            Ok(state) => state,
++            Err(poisoned) => {
++                poisoned.into_inner().phase = Phase::Faulted;
++                self.finished = true;
++                return Err(CertificateQueryError::Faulted);
++            }
++        };
++        if state.phase != Phase::Active || state.retained.is_some() {
++            state.phase = Phase::Faulted;
++            self.finished = true;
++            return Err(CertificateQueryError::Faulted);
++        }
++        state.phase = Phase::Idle;
++        self.finished = true;
++        Ok(())
++    }
++
++    pub fn retain(mut self, owner: T) {
++        let mut state = self.ledger.state.lock().unwrap_or_else(|p| p.into_inner());
++        state.phase = Phase::Faulted;
++        if state.retained.is_some() {
++            // The private, non-Clone Flight can only originate from an empty
++            // Active slot, so collision is unreachable through this API. If a
++            // future violation creates two physical owners, terminate without
++            // dropping/reusing either, rather than lose/replace the original.
++            std::process::abort();
++        }
++        state.retained = Some(owner);
++        self.finished = true;
++    }
++}
++
++impl<T> Drop for Flight<'_, T> {
++    fn drop(&mut self) {
++        if !self.finished {
++            self.ledger
++                .state
++                .lock()
++                .unwrap_or_else(|p| p.into_inner())
++                .phase = Phase::Faulted;
++        }
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use std::sync::{
++        atomic::{AtomicUsize, Ordering},
++        Arc,
++    };
++
++    struct ObservedOwner(Arc<AtomicUsize>);
++    impl Drop for ObservedOwner {
++        fn drop(&mut self) {
++            self.0.fetch_add(1, Ordering::SeqCst);
++        }
++    }
++
++    #[test]
++    fn certificate_query_flight_is_busy_until_explicit_physical_release() {
++        let ledger = FlightLedger::<ObservedOwner>::new();
++        let flight = ledger.claim().unwrap();
++        assert!(matches!(ledger.claim(), Err(CertificateQueryError::Busy)));
++        // Logical cancellation does not itself call released().
++        assert!(matches!(ledger.claim(), Err(CertificateQueryError::Busy)));
++        flight.released().unwrap();
++        ledger.claim().unwrap().released().unwrap();
++    }
++
++    #[test]
++    fn certificate_query_failed_owner_is_retained_and_fault_is_permanent() {
++        let drops = Arc::new(AtomicUsize::new(0));
++        let ledger = FlightLedger::new();
++        ledger
++            .claim()
++            .unwrap()
++            .retain(ObservedOwner(Arc::clone(&drops)));
++        assert_eq!(drops.load(Ordering::SeqCst), 0);
++        for _ in 0..3 {
++            assert!(matches!(
++                ledger.claim(),
++                Err(CertificateQueryError::Faulted)
++            ));
++        }
++        assert!(ledger.state.lock().unwrap().retained.is_some());
++        assert_eq!(drops.load(Ordering::SeqCst), 0);
++        // Production's retained type is ManuallyDrop and its ledger is static;
++        // this local model's owner is reclaimed only when the model ends.
++        drop(ledger);
++        assert_eq!(drops.load(Ordering::SeqCst), 1);
++    }
++
++    #[test]
++    fn certificate_query_poison_preserves_original_retained_owner_and_rejects_claim() {
++        let drops = Arc::new(AtomicUsize::new(0));
++        let ledger = FlightLedger::new();
++        ledger
++            .claim()
++            .unwrap()
++            .retain(ObservedOwner(Arc::clone(&drops)));
++        let _ = std::panic::catch_unwind(|| {
++            let _guard = ledger.state.lock().unwrap();
++            panic!("synthetic metadata poison");
++        });
++        assert!(matches!(
++            ledger.claim(),
++            Err(CertificateQueryError::Faulted)
++        ));
++        assert_eq!(drops.load(Ordering::SeqCst), 0);
++        let retained = match ledger.state.lock() {
++            Err(poisoned) => poisoned.into_inner().retained.is_some(),
++            Ok(_) => panic!("model must preserve poison"),
++        };
++        assert!(retained);
++    }
++
++    #[test]
++    fn certificate_query_unfinished_claim_cannot_silently_publish_idle() {
++        let ledger = FlightLedger::<ObservedOwner>::new();
++        drop(ledger.claim().unwrap());
++        assert!(matches!(
++            ledger.claim(),
++            Err(CertificateQueryError::Faulted)
++        ));
++    }
++}
+diff --git a/crates/fc-windows/src/tls_frontdoor/certificate_query/tests.rs b/crates/fc-windows/src/tls_frontdoor/certificate_query/tests.rs
+new file mode 100644
+index 0000000..72a7360
+--- /dev/null
++++ b/crates/fc-windows/src/tls_frontdoor/certificate_query/tests.rs
+@@ -0,0 +1,351 @@
++use super::*;
++use std::cell::Cell;
++
++const THUMBPRINT: &str = "0123456789abcdef0123456789abcdef01234567";
++
++struct Model {
++    trace: Vec<&'static str>,
++    selected: Result<bool, i32>,
++    time: Result<bool, i32>,
++    usage: Result<Usage, i32>,
++    key: Result<(), i32>,
++    chain: Result<ChainObservation, i32>,
++    cleanup: Result<(), i32>,
++}
++
++impl Default for Model {
++    fn default() -> Self {
++        Self {
++            trace: vec![],
++            selected: Ok(true),
++            time: Ok(true),
++            usage: Ok(Usage::Allowed),
++            key: Ok(()),
++            chain: Ok(ChainObservation {
++                trust_errors: 0,
++                policy: Ok(0),
++            }),
++            cleanup: Ok(()),
++        }
++    }
++}
++
++impl QueryDriver for Model {
++    fn select(&mut self, _: CertificateThumbprint) -> Result<bool, i32> {
++        self.trace.push("select");
++        self.selected
++    }
++    fn time_valid(&mut self) -> Result<bool, i32> {
++        self.trace.push("time");
++        self.time
++    }
++    fn usage(&mut self) -> Result<Usage, i32> {
++        self.trace.push("usage");
++        self.usage
++    }
++    fn private_key(&mut self) -> Result<(), i32> {
++        self.trace.push("key");
++        self.key
++    }
++    fn chain(&mut self, host: &str) -> Result<ChainObservation, i32> {
++        assert!(!host.contains('\0'));
++        self.trace.push("chain");
++        self.chain
++    }
++    fn close(&mut self) -> Result<(), i32> {
++        self.trace.push("close");
++        self.cleanup
++    }
++}
++
++fn request(host: &str) -> CertificateQueryRequest {
++    CertificateQueryRequest::new(THUMBPRINT, host).unwrap()
++}
++
++#[test]
++fn certificate_query_rejects_noncanonical_or_unbounded_input_before_native_work() {
++    for host in [
++        "",
++        "https://board",
++        "board:443",
++        "Board",
++        "board.",
++        "a..b",
++        "-a",
++        "a-",
++        "*.example",
++        "a/b",
++        "a@b",
++        "a b",
++        "a\0b",
++        "白板",
++        "[::1]",
++        "0:0:0:0:0:0:0:1",
++        "127.000.0.1",
++        "256.1.1.1",
++        "1.2.3.4.",
++        "a_b",
++        "fe80::1%1",
++    ] {
++        assert!(
++            matches!(
++                CertificateQueryRequest::new(THUMBPRINT, host),
++                Err(CertificateQueryError::InvalidInput)
++            ),
++            "{host:?}"
++        );
++    }
++    for host in [
++        "board",
++        "classroom.local",
++        "xn--fiqs8s.example",
++        "127.0.0.1",
++        "::1",
++        "2001:db8::1",
++    ] {
++        assert_eq!(request(host).host(), host);
++    }
++    for thumbprint in [
++        "",
++        "0123",
++        "0123456789abcdef0123456789abcdef0123456g",
++        " 0123456789abcdef0123456789abcdef01234567",
++    ] {
++        assert!(CertificateQueryRequest::new(thumbprint, "board").is_err());
++    }
++    assert!(CertificateQueryRequest::new(THUMBPRINT, &"a".repeat(64)).is_err());
++    assert!(CertificateQueryRequest::new(
++        THUMBPRINT,
++        &format!(
++            "{}.{}.{}.{}",
++            "a".repeat(63),
++            "b".repeat(63),
++            "c".repeat(63),
++            "d".repeat(62)
++        )
++    )
++    .is_err());
++    assert!(CertificateQueryRequest::new(&THUMBPRINT.to_uppercase(), "board").is_ok());
++}
++
++#[test]
++fn certificate_query_delivers_only_after_original_driver_cleanup_and_keeps_scope() {
++    let mut driver = Model::default();
++    let report = run_query(&mut driver, &request("board"), &|| true).unwrap();
++    assert_eq!(
++        driver.trace,
++        ["select", "time", "usage", "key", "chain", "close"]
++    );
++    assert_eq!(report.found.check, CertificateCheck::Satisfied);
++    assert_eq!(report.ssl_chain_policy.check, CertificateCheck::Satisfied);
++    assert_eq!(report.server_name.check, CertificateCheck::Satisfied);
++    assert_eq!(report.scope, CertificateQueryScope::CurrentUserMyCacheOnly);
++    // This is a deterministic pipeline model, not Windows/private-key/TLS proof.
++}
++
++#[test]
++fn certificate_query_missing_or_failed_lookup_never_inspects_another_certificate() {
++    for result in [Ok(false), Err(-123)] {
++        let mut driver = Model {
++            selected: result,
++            ..Model::default()
++        };
++        let report = run_query(&mut driver, &request("board"), &|| true).unwrap();
++        assert_eq!(driver.trace, ["select", "close"]);
++        assert_eq!(
++            report.found.check,
++            if result.is_ok() {
++                CertificateCheck::Rejected
++            } else {
++                CertificateCheck::Unverified
++            }
++        );
++        assert_eq!(report.private_key.check, CertificateCheck::NotChecked);
++        assert_eq!(report.server_name.check, CertificateCheck::NotChecked);
++    }
++}
++
++#[test]
++fn certificate_query_policy_true_with_error_is_not_policy_or_name_success() {
++    for error in [0x800b_010f, 0x800b_0109, 0x800b_0101] {
++        let mut driver = Model {
++            chain: Ok(ChainObservation {
++                trust_errors: 0,
++                policy: Ok(error),
++            }),
++            ..Model::default()
++        };
++        let report = run_query(&mut driver, &request("board"), &|| true).unwrap();
++        assert_eq!(report.ssl_policy_error, Some(error));
++        assert_eq!(report.ssl_chain_policy.check, CertificateCheck::Rejected);
++        assert_ne!(report.server_name.check, CertificateCheck::Satisfied);
++    }
++}
++
++#[test]
++fn certificate_query_api_failure_cannot_be_treated_like_zero_policy_status() {
++    let mut driver = Model {
++        chain: Ok(ChainObservation {
++            trust_errors: 0,
++            policy: Err(-321),
++        }),
++        ..Model::default()
++    };
++    let report = run_query(&mut driver, &request("board"), &|| true).unwrap();
++    assert_eq!(report.ssl_policy_error, None);
++    assert_eq!(report.ssl_chain_policy, CertificateFact::unknown(-321));
++    assert_eq!(report.server_name, CertificateFact::unknown(-321));
++}
++
++#[test]
++fn certificate_query_ip_and_ipv6_name_stay_unverified_even_with_zero_policy_error() {
++    for host in ["192.0.2.1", "2001:db8::1", "::1"] {
++        let report = run_query(&mut Model::default(), &request(host), &|| true).unwrap();
++        assert_eq!(report.server_name.check, CertificateCheck::Unverified);
++        assert_eq!(report.ssl_chain_policy.check, CertificateCheck::Satisfied);
++    }
++}
++
++#[test]
++fn certificate_query_cached_revocation_unknown_and_revoked_remain_distinct() {
++    for trust_errors in [0x40, 0x0100_0000, 0x0100_0040] {
++        let mut driver = Model {
++            chain: Ok(ChainObservation {
++                trust_errors,
++                policy: Ok(0x8009_2013),
++            }),
++            ..Model::default()
++        };
++        let report = run_query(&mut driver, &request("board"), &|| true).unwrap();
++        assert_eq!(report.cached_revocation.check, CertificateCheck::Unverified);
++        assert_eq!(report.ssl_chain_policy.check, CertificateCheck::Unverified);
++        assert_ne!(report.server_name.check, CertificateCheck::Satisfied);
++    }
++    let mut driver = Model {
++        chain: Ok(ChainObservation {
++            trust_errors: 0x0100_0044,
++            policy: Ok(0x800b_010c),
++        }),
++        ..Model::default()
++    };
++    let report = run_query(&mut driver, &request("board"), &|| true).unwrap();
++    assert_eq!(report.cached_revocation.check, CertificateCheck::Rejected);
++    assert_eq!(report.ssl_chain_policy.check, CertificateCheck::Rejected);
++    // A revocation-unknown policy error cannot mask the stronger revoked bit.
++    let mut driver = Model {
++        chain: Ok(ChainObservation {
++            trust_errors: 0x44,
++            policy: Ok(0x8009_2013),
++        }),
++        ..Model::default()
++    };
++    assert_eq!(
++        run_query(&mut driver, &request("board"), &|| true)
++            .unwrap()
++            .ssl_chain_policy
++            .check,
++        CertificateCheck::Rejected
++    );
++}
++
++#[test]
++fn certificate_query_incomplete_chain_never_promises_cached_revocation_success() {
++    let mut driver = Model {
++        chain: Ok(ChainObservation {
++            trust_errors: 0x10000,
++            policy: Ok(0x800b_010a),
++        }),
++        ..Model::default()
++    };
++    let report = run_query(&mut driver, &request("board"), &|| true).unwrap();
++    assert_eq!(report.cached_revocation.check, CertificateCheck::Unverified);
++    assert_eq!(report.ssl_chain_policy.check, CertificateCheck::Rejected);
++}
++
++#[test]
++fn certificate_query_independent_negative_facts_are_retained_without_skipping_cleanup() {
++    let mut driver = Model {
++        time: Ok(false),
++        usage: Ok(Usage::Rejected),
++        key: Err(-42),
++        chain: Err(-43),
++        ..Model::default()
++    };
++    let report = run_query(&mut driver, &request("board"), &|| true).unwrap();
++    assert_eq!(report.current_time.check, CertificateCheck::Rejected);
++    assert_eq!(report.server_auth_eku.check, CertificateCheck::Rejected);
++    assert_eq!(report.private_key, CertificateFact::unknown(-42));
++    assert_eq!(report.ssl_chain_policy, CertificateFact::unknown(-43));
++    assert_eq!(driver.trace.last(), Some(&"close"));
++    let mut driver = Model {
++        usage: Ok(Usage::Unverified),
++        ..Model::default()
++    };
++    assert_eq!(
++        run_query(&mut driver, &request("board"), &|| true)
++            .unwrap()
++            .server_auth_eku
++            .check,
++        CertificateCheck::Unverified
++    );
++}
++
++#[test]
++fn certificate_query_cancellation_at_each_checkpoint_closes_exact_original_driver() {
++    for cancelled_at in 1..=7 {
++        let calls = Cell::new(0);
++        let mut driver = Model::default();
++        let result = run_query(&mut driver, &request("board"), &|| {
++            calls.set(calls.get() + 1);
++            calls.get() < cancelled_at
++        });
++        assert_eq!(result, Err(CertificateQueryError::Cancelled));
++        assert_eq!(
++            driver
++                .trace
++                .iter()
++                .filter(|event| **event == "close")
++                .count(),
++            1
++        );
++        assert_eq!(driver.trace.last(), Some(&"close"));
++        if cancelled_at == 1 {
++            assert_eq!(driver.trace, ["close"]);
++        }
++    }
++}
++
++#[test]
++fn certificate_query_panicking_authority_is_cancelled_and_still_closes() {
++    let mut driver = Model::default();
++    assert_eq!(
++        run_query(&mut driver, &request("board"), &|| panic!(
++            "synthetic revoked authority"
++        )),
++        Err(CertificateQueryError::Cancelled)
++    );
++    assert_eq!(driver.trace, ["close"]);
++}
++
++#[test]
++fn certificate_query_release_failure_overrides_success_cancel_and_missing_certificate() {
++    for (selected, active) in [(Ok(true), true), (Ok(true), false), (Ok(false), true)] {
++        let mut driver = Model {
++            selected,
++            cleanup: Err(-99),
++            ..Model::default()
++        };
++        assert_eq!(
++            run_query(&mut driver, &request("board"), &|| active),
++            Err(CertificateQueryError::Cleanup(-99))
++        );
++        assert_eq!(
++            driver
++                .trace
++                .iter()
++                .filter(|event| **event == "close")
++                .count(),
++            1
++        );
++    }
++}

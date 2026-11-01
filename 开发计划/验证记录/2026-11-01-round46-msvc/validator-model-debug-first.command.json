@@ -1,0 +1,8 @@
+{
+  "status": "FAIL",
+  "scope": "Actual fresh local pure-model invocation with traceback capture, not CI/artifact evidence",
+  "sourceSha256": "d4fa3ff134a850902266d3857b4770a1f6afa86f042167371c56d257ff18df5b",
+  "exitCode": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"<stdin>\", line 4, in <module>\n  File \"/tmp/fc-round46-ci-evidence/verify-ci-artifact-first.py\", line 587, in self_test\n    test('baseline exact buildstd placement/no metadata fmt leakage',arguments)\n  File \"/tmp/fc-round46-ci-evidence/verify-ci-artifact-first.py\", line 541, in test\n    callback();checks.append(dict(name=name,status='PASS'))\n    ^^^^^^^^^^\n  File \"/tmp/fc-round46-ci-evidence/verify-ci-artifact-first.py\", line 583, in arguments\n    for kind in ['fmt','metadata']:need('-Z' not in required_commands(name)[kind],'MODEL_NO_UNSTABLE_METADATA')\n                                                    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\nKeyError: 'metadata'\n"
+}

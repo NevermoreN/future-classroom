@@ -1,0 +1,107 @@
+{
+  "status": "SOURCE_FROZEN_NOT_BUILT_NOT_RUN",
+  "base": "bcd51dacb5ba69a184546e5180569a8fd1b3ebad",
+  "branch": "codex/https-certificate-query",
+  "worktree": "/tmp/fc-round48-certificate-query-worktree",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10221,
+      "sha256": "2ac2e9b3cea4d6f6ef8aaa329398f93abca4b5ed3fa9707efde978010dde0174"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 8515,
+      "sha256": "9e937f565f2482ec663cf7c1f1a7605998118d9508a54fd6aac2bc4199a8f7f8"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_selection.rs",
+      "bytes": 7957,
+      "sha256": "9bbdba8dc571e4efb20ab919c2dc9608b0139c59b496cce7b541a603de6b8439"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query.rs",
+      "bytes": 11640,
+      "sha256": "0ff1cb290b171afae1a5f88dbd62153adaa82e80b88bab4437acaf2ba1a3fcb0"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query/native.rs",
+      "bytes": 9137,
+      "sha256": "88a1d2bb8eeebdb36d42da436357afaa6e8ab60f4098a8f1b38d6ea38d9e850d"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query/flight.rs",
+      "bytes": 6238,
+      "sha256": "2efa101d4cb2dffc01998e1232af7deea7cc9a766ada52126cfcea1d139666e4"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/certificate_query/tests.rs",
+      "bytes": 11067,
+      "sha256": "9bb1aced8d7ea605f0f58375ba546532ce36a731e3d29434357d3a2843c90bba"
+    }
+  ],
+  "patch": {
+    "path": "implementation-first.patch",
+    "bytes": 59367,
+    "sha256": "7a4c9ae1ab4546fad9ad99c7cb206b8f5be63feb56679261cc7d7b67584ac372"
+  },
+  "api": {
+    "module": "fc_windows::tls_frontdoor::certificate_query",
+    "request": "CertificateQueryRequest::new(thumbprint:&str, canonical_host:&str) -> Result<Self,CertificateQueryError>",
+    "inspect": "inspect_certificate(&CertificateQueryRequest,&dyn Fn()->bool) -> Result<CertificateQueryReport,CertificateQueryError> (Windows only)",
+    "resultFacts": [
+      "found",
+      "current_time",
+      "private_key (silent acquisition only, not signing proof)",
+      "server_auth_eku",
+      "server_name (DNS only; IP/IPv6 Unverified)",
+      "ssl_chain_policy",
+      "cached_revocation"
+    ],
+    "scope": "CurrentUserMyCacheOnly; no production-ready bool or start permit",
+    "errors": [
+      "InvalidInput",
+      "Busy",
+      "Faulted",
+      "Cancelled",
+      "Native(i32)",
+      "Cleanup(i32)"
+    ]
+  },
+  "resourceContract": {
+    "normal": "Original synchronous worker retains unique flight until chain/key/certificate/store release completed; no ledger lock around native calls",
+    "terminalFailure": "Checked key/certificate release failure keeps exact original owner/dependencies; CertCloseStore always closes its handle even on false. Native result is Cleanup; exact owner is moved after all calls return into single process-global ManuallyDrop quarantine; permanently Faulted and no reset",
+    "sendSafety": "Only private inert RetainedQuery is unsafe Send. NativeQuery remains !Send/!Sync; retained owner exposes no methods and never invokes native APIs/destruction again, including worker exit",
+    "poison": "Permanent Faulted while preserving retained owner",
+    "impossibleCollision": "Private nonClone Flight prevents construction; process aborts without dropping/replacing either owner if internal invariant is violated",
+    "limits": "Host <=253 ASCII + fixed254 UTF16 array; EKU <=8192B/128OID/256B OID; returned metadata fixed except bounded request host. CryptoAPI provider/chain allocations and call duration not claimed bounded by these DTO limits"
+  },
+  "tests": {
+    "sourceCount": 17,
+    "filter": "certificate_query_",
+    "execution": "NOT_RUN; parent coordinates Cargo and target execution",
+    "scope": "12 injected query pipeline models,4 real Mutex ledger models,1 Windows cfg EKU classification; no actual CryptoAPI/OS/private-key/TLS runtime evidence"
+  },
+  "performed": [
+    "rustfmt on seven owned files",
+    "git diff --check",
+    "python3 scripts/check-architecture.py:12 crates/33 edges",
+    "local windows0.62.2 signatures inspected",
+    "official Microsoft contracts reviewed"
+  ],
+  "notPerformed": [
+    "Cargo/rustc compilation",
+    "Windows query",
+    "SSPI",
+    "listener",
+    "CI",
+    "Git commit/push",
+    "system or trust configuration changes"
+  ],
+  "limitations": [
+    "DNS name fact requires successful SSL policy BOOL and dwError0 plus clean chain trust; otherwise Unknown/Rejected. IP/IPv6 SAN matching is never positively asserted.",
+    "Revocation is chain-excluding-root cache only. No fresh online revocation or other client trust proof.",
+    "CryptAcquireCertificatePrivateKey comparison may be skipped by Windows for an existing cached handle; successful silent acquisition is not signature capability proof.",
+    "No Win7/Win10/Win11 runtime compatibility or TLS production-start gate is established by this source freeze."
+  ]
+}

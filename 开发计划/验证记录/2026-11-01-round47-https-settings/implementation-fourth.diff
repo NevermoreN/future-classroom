@@ -1,0 +1,270 @@
+diff --git a/crates/fc-bootstrap/src/backend.rs b/crates/fc-bootstrap/src/backend.rs
+index bdb6070..b44ffe1 100644
+--- a/crates/fc-bootstrap/src/backend.rs
++++ b/crates/fc-bootstrap/src/backend.rs
+@@ -10,6 +10,7 @@ mod desktop_lesson;
+ pub use desktop_lesson::{DesktopLessonFlow, DesktopLessonGuard, DesktopLessonStamp};
+ #[cfg(test)]
+ mod execution_scope_tests;
++mod https_settings;
+ mod materials_web;
+ mod profile_content;
+ mod profiles;
+@@ -99,6 +100,7 @@ pub enum BackendError {
+     Autostart(fc_ports::autostart::AutostartRepositoryError),
+     Lesson(LessonRepositoryError),
+     Display(DisplayRepositoryError),
++    HttpsSettings(fc_ports::HttpsSettingsRepositoryError),
+     SubjectVisual(fc_ports::subject_visual::SubjectVisualRepositoryError),
+     Profile(fc_ports::ProfileRepositoryError),
+     ProfileContent(fc_ports::ProfileContentRepositoryError),
+@@ -156,6 +158,11 @@ impl From<LessonRepositoryError> for BackendError {
+         Self::Lesson(error)
+     }
+ }
++impl From<fc_ports::HttpsSettingsRepositoryError> for BackendError {
++    fn from(error: fc_ports::HttpsSettingsRepositoryError) -> Self {
++        Self::HttpsSettings(error)
++    }
++}
+ impl From<DisplayRepositoryError> for BackendError {
+     fn from(error: DisplayRepositoryError) -> Self {
+         Self::Display(error)
+diff --git a/crates/fc-bootstrap/src/backend/web.rs b/crates/fc-bootstrap/src/backend/web.rs
+index cc1ad5a..34489d2 100644
+--- a/crates/fc-bootstrap/src/backend/web.rs
++++ b/crates/fc-bootstrap/src/backend/web.rs
+@@ -161,12 +161,48 @@ impl State {
+ }
+ struct Inner {
+     state: Mutex<State>,
++    configuration_edit: AtomicBool,
+     ledger: Arc<Mutex<Ledger>>,
+     control: SessionControl,
+     authority: fc_runtime::authority::AuthorityReader<IdentityState>,
+     clock: Arc<dyn Clock + Send + Sync>,
+     monotonic: Arc<dyn MonotonicClock + Send + Sync>,
+ }
++// The last writer-held guard, not cancellation or UI return, releases the
++// configuration slot. No mutex is held across writer evaluation/COMMIT.
++struct ConfigurationLease {
++    inner: Arc<Inner>,
++    active: AtomicBool,
++}
++impl Drop for ConfigurationLease {
++    fn drop(&mut self) {
++        self.inner
++            .configuration_edit
++            .store(false, Ordering::Release);
++    }
++}
++pub(super) struct ConfigurationEdit {
++    lease: Arc<ConfigurationLease>,
++}
++impl ConfigurationEdit {
++    pub(super) fn guard(&self) -> fc_storage::business::HttpsConfigurationGuard {
++        let lease = self.lease.clone();
++        Arc::new(move || {
++            lease.active.load(Ordering::Acquire)
++                && lease.inner.configuration_edit.load(Ordering::Acquire)
++                && lease
++                    .inner
++                    .state
++                    .try_lock()
++                    .is_ok_and(|state| !state.enabled)
++        })
++    }
++}
++impl Drop for ConfigurationEdit {
++    fn drop(&mut self) {
++        self.lease.active.store(false, Ordering::Release);
++    }
++}
+ #[derive(Clone)]
+ pub struct WebService {
+     inner: Arc<Inner>,
+@@ -216,6 +252,7 @@ impl WebService {
+         Self {
+             inner: Arc::new(Inner {
+                 state: Mutex::new(State::default()),
++                configuration_edit: AtomicBool::new(false),
+                 ledger,
+                 control,
+                 authority,
+@@ -375,6 +412,40 @@ impl WebService {
+             current_class: identity.installation.as_ref().and_then(|i| i.current_class),
+         })
+     }
++    #[cfg(test)]
++    fn configuration_in_progress(&self) -> bool {
++        self.inner.configuration_edit.load(Ordering::Acquire)
++    }
++    /// Only trusted local settings composition can claim this slot. The
++    /// disabled check and Enable exclusion serialize under the same state lock.
++    pub(super) fn configuration_edit(&self, admin: SessionLease) -> WebResult<ConfigurationEdit> {
++        let snapshot = self.snapshot()?;
++        let state = self
++            .inner
++            .state
++            .try_lock()
++            .map_err(|_| WebServiceError::Busy)?;
++        let mut ledger = self
++            .inner
++            .ledger
++            .try_lock()
++            .map_err(|_| WebServiceError::Busy)?;
++        let generation = self.admin(&mut ledger, &snapshot.data, admin)?;
++        self.admin_current(&snapshot, &mut ledger, admin, generation)?;
++        if state.enabled {
++            return Err(WebServiceError::Busy);
++        }
++        self.inner
++            .configuration_edit
++            .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
++            .map_err(|_| WebServiceError::Busy)?;
++        Ok(ConfigurationEdit {
++            lease: Arc::new(ConfigurationLease {
++                inner: self.inner.clone(),
++                active: AtomicBool::new(true),
++            }),
++        })
++    }
+     /// Logical Web admission only. HTTP/TLS deployment separately owns actual
+     /// listening; this service never creates a URL reservation or opens a port.
+     pub fn set_enabled(&self, admin: SessionLease, enabled: bool) -> WebResult<()> {
+@@ -398,6 +469,9 @@ impl WebService {
+         )?;
+         let generation = self.admin(&mut ledger, &snapshot.data, admin)?;
+         self.admin_current(&snapshot, &mut ledger, admin, generation)?;
++        if enabled && self.inner.configuration_edit.load(Ordering::Acquire) {
++            return Err(WebServiceError::Busy);
++        }
+         state.enabled = enabled;
+         if !enabled {
+             state.clear_pairing();
+diff --git a/crates/fc-bootstrap/src/backend/web/tests.rs b/crates/fc-bootstrap/src/backend/web/tests.rs
+index 5af8038..889e30d 100644
+--- a/crates/fc-bootstrap/src/backend/web/tests.rs
++++ b/crates/fc-bootstrap/src/backend/web/tests.rs
+@@ -1076,3 +1076,6 @@ fn teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_ch
+         Err(WebServiceError::Denied)
+     ));
+ }
++
++#[path = "https_settings_tests.rs"]
++mod https_settings_tests;
+diff --git a/crates/fc-domain/src/lib.rs b/crates/fc-domain/src/lib.rs
+index b338d78..578587b 100644
+--- a/crates/fc-domain/src/lib.rs
++++ b/crates/fc-domain/src/lib.rs
+@@ -20,3 +20,5 @@ pub mod time;
+ pub mod voice;
+ 
+ pub mod subject_visual;
++
++pub mod https_settings;
+diff --git a/crates/fc-ports/src/lib.rs b/crates/fc-ports/src/lib.rs
+index 11c3c1a..1d15a6c 100644
+--- a/crates/fc-ports/src/lib.rs
++++ b/crates/fc-ports/src/lib.rs
+@@ -622,3 +622,6 @@ pub use subject_visual::*;
+ 
+ pub mod desktop_lesson;
+ pub use desktop_lesson::*;
++
++pub mod https_settings;
++pub use https_settings::*;
+diff --git a/crates/fc-storage/src/business/mod.rs b/crates/fc-storage/src/business/mod.rs
+index e0f66c3..513d9c6 100644
+--- a/crates/fc-storage/src/business/mod.rs
++++ b/crates/fc-storage/src/business/mod.rs
+@@ -13,6 +13,7 @@ mod desktop;
+ mod desktop_lesson;
+ mod display;
+ mod display_codec;
++mod https_settings;
+ mod lesson;
+ mod lesson_codec;
+ #[cfg(test)]
+@@ -68,6 +69,7 @@ pub(crate) fn validate_documents(
+     schedule::change_proof(d)?;
+     lesson::load(d)?;
+     display::load(d, identity)?;
++    https_settings::load(d, identity)?;
+     profiles::startup_check(d, identity)?;
+     desktop::read_watermark(d, identity)?;
+     materials::startup_check(d, identity)?;
+@@ -90,6 +92,8 @@ pub type AutostartExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
+ pub type CalendarExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
+ /// Bounded memory-only policy handoff fence for native driver transactions.
+ pub type VoiceDriverGuard = Arc<dyn Fn() -> bool + Send + Sync>;
++/// Exact logical-Web-disabled configuration permit; default denied.
++pub type HttpsConfigurationGuard = Arc<dyn Fn() -> bool + Send + Sync>;
+ /// A short memory-only native-flow capability. Never grants account authority.
+ /// False/panic cancels; no SQL, native waiting or new lease is allowed inside.
+ pub type DesktopLessonGuard = Arc<dyn Fn() -> bool + Send + Sync>;
+@@ -115,6 +119,7 @@ pub struct BusinessRepository<S> {
+     voice_timeout: Option<(std::time::Duration, Arc<dyn Fn() -> bool + Send + Sync>)>,
+     voice_driver_guard: VoiceDriverGuard,
+     initial_installation_identity: Option<[u8; 32]>,
++    https_configuration_guard: Option<HttpsConfigurationGuard>,
+ }
+ impl<S> Clone for BusinessRepository<S> {
+     fn clone(&self) -> Self {
+@@ -132,6 +137,7 @@ impl<S> Clone for BusinessRepository<S> {
+             voice_timeout: self.voice_timeout.clone(),
+             voice_driver_guard: self.voice_driver_guard.clone(),
+             initial_installation_identity: self.initial_installation_identity,
++            https_configuration_guard: self.https_configuration_guard.clone(),
+         }
+     }
+ }
+@@ -161,6 +167,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
+             voice_timeout: None,
+             voice_driver_guard: Arc::new(|| true),
+             initial_installation_identity: None,
++            https_configuration_guard: None,
+         }
+     }
+     /// Scoped native desktop capability. An unbound repository denies access;
+@@ -172,6 +179,15 @@ impl<S: Send + 'static> BusinessRepository<S> {
+         });
+         self
+     }
++    /// Trusted short metadata permit. Rebinding can only tighten; callbacks must
++    /// not wait on native resources, SQL or another execution queue.
++    pub fn with_https_configuration_guard(mut self, guard: HttpsConfigurationGuard) -> Self {
++        self.https_configuration_guard = Some(match self.https_configuration_guard.take() {
++            Some(previous) => Arc::new(move || previous() && guard()),
++            None => guard,
++        });
++        self
++    }
+     /// Authenticated operations fail closed until composition binds their exact lease.
+     pub fn with_session_guard(mut self, guard: SessionGuard) -> Self {
+         self.session = guard;
+diff --git a/crates/fc-storage/src/business/recovery.rs b/crates/fc-storage/src/business/recovery.rs
+index 957c52a..ab29a88 100644
+--- a/crates/fc-storage/src/business/recovery.rs
++++ b/crates/fc-storage/src/business/recovery.rs
+@@ -642,6 +642,8 @@ pub(crate) fn allowed(key: &str) -> bool {
+         ]
+         .contains(&key)
+ }
++// HTTPS settings live under business/security/https/v1: ordinary teaching
++// exports omit them and both recovery modes preserve the CURRENT target row.
+ pub(crate) fn protected(key: &str) -> bool {
+     key == IDENTITY
+         || key.starts_with("business/credential/")
+diff --git a/crates/fc-storage/src/lib.rs b/crates/fc-storage/src/lib.rs
+index be75987..62dff4f 100644
+--- a/crates/fc-storage/src/lib.rs
++++ b/crates/fc-storage/src/lib.rs
+@@ -36,6 +36,7 @@ pub enum StorageError {
+     DocumentTooLarge,
+     Schedule(fc_domain::schedule_document::ScheduleDocumentError),
+     Display(fc_domain::desktop::DisplayError),
++    HttpsSettings(fc_domain::https_settings::HttpsSettingsError),
+     SubjectVisual(fc_domain::subject_visual::SubjectVisualError),
+     Profile(fc_domain::profile::ProfileError),
+     ProfileContent(fc_domain::profile_content::ProfileContentError),

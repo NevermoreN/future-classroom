@@ -1,0 +1,2173 @@
+diff --git a/crates/fc-bootstrap/src/application.rs b/crates/fc-bootstrap/src/application.rs
+index a37a97c..ba8157c 100644
+--- a/crates/fc-bootstrap/src/application.rs
++++ b/crates/fc-bootstrap/src/application.rs
+@@ -81,6 +81,12 @@ mod public_lesson_editor;
+ pub fn public_desktop_probe() -> std::result::Result<(), String> {
+     public_desktop_probe::run()
+ }
++mod https_settings_controller;
++mod https_settings_probe;
++pub fn https_settings_probe(reference: Option<&str>) -> std::result::Result<(), String> {
++    https_settings_probe::run(reference)
++}
++mod https_settings_editor;
+ mod schedule_editor;
+ mod schedule_operations_probe;
+ mod voice_controller;
+@@ -195,6 +201,7 @@ enum Screen {
+     Lesson,
+     Voice,
+     Web,
++    HttpsSettings,
+     ExitDraft,
+     Repair,
+ }
+@@ -223,6 +230,7 @@ fn fatal(error: &Failure) -> bool {
+                 | BackendError::Lesson(fc_ports::LessonRepositoryError::Faulted)
+                 | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
+                 | BackendError::SubjectVisual(fc_ports::SubjectVisualRepositoryError::Faulted)
++                | BackendError::HttpsSettings(fc_ports::HttpsSettingsRepositoryError::Faulted)
+                 | BackendError::Profile(fc_ports::ProfileRepositoryError::Faulted)
+                 | BackendError::ProfileContent(fc_ports::ProfileContentRepositoryError::Faulted)
+                 | BackendError::Material(fc_ports::MaterialRepositoryError::Faulted)
+@@ -292,6 +300,8 @@ fn error_text(error: &Failure) -> String {
+         Failure::Web(WebServiceError::Busy) => "教师设备状态正在更新，请稍后刷新。".into(),
+         Failure::Web(_) => "教师设备操作未完成，请刷新核对当前状态。".into(),
+         Failure::Backend(e) => match e {
++            BackendError::HttpsSettings(fc_ports::HttpsSettingsRepositoryError::Domain(fc_domain::https_settings::HttpsSettingsError::ConfigurationUnavailable)) => "教师会话准入仍开启或另一配置任务未结束。请返回设备管理核对并明确停用后再保存。".into(),
++            BackendError::HttpsSettings(_) => "配置的权限或版本已变化，请保留草稿并核对原操作结果。".into(),
+             BackendError::SubjectVisual(_) => "科目配色或显示设置的权限、版本已变化，本次未确认保存。草稿保留，请核对后明确取消并重新加载。".into(),
+             BackendError::Voice(_) => "语音权限、任务或版本已变化，本次结果尚未确认，请刷新核对后再操作。".into(),
+             BackendError::Autostart(_) => "启动项的权限、版本或实际状态已变化，请重新读取、核对后再明确确认。".into(),
+@@ -483,6 +493,7 @@ enum Outcome {
+     MaterialLaunch(Box<material_flow::PreparedLaunch>),
+     MaterialCleaned,
+     LaunchCopies(material_flow::LaunchCopyReport),
++    Https(Box<https_settings_controller::Completion>),
+     WebOpened(WebService, web_editor::Loaded),
+     WebLoaded(web_editor::Loaded),
+     VoiceLoaded(
+@@ -584,6 +595,11 @@ enum Work {
+     Material(Box<material_flow::MaterialJob>),
+     CleanupMaterial(PathBuf, PathBuf),
+     Voice(VoiceService, SessionLease, voice_controller::Operation),
++    Https(
++        Arc<Mutex<Backend>>,
++        SessionLease,
++        https_settings_controller::Operation,
++    ),
+     OpenWeb(Arc<Mutex<Backend>>, SessionLease),
+     Web(
+         WebService,
+@@ -597,6 +613,7 @@ impl Task for Work {
+     type Output = Result<Outcome>;
+     fn allocation_bytes(&self) -> Option<usize> {
+         match self {
++            Self::Https(_, _, operation) => operation.allocation_bytes(),
+             Self::Http(job) => job.allocation_bytes(),
+             Self::HttpProbe(job) => job.allocation_bytes(),
+             #[cfg(test)]
+@@ -673,6 +690,9 @@ impl Task for Work {
+     fn run(self, context: &JobContext) -> Self::Output {
+         context.checkpoint().map_err(|_| Failure::Stopped)?;
+         match self {
++            Self::Https(backend, lease, operation) => {
++                https_settings_controller::run(backend, lease, operation, context)
++            }
+             Self::Http(job) => Ok(Outcome::Http(job.run(context))),
+             Self::HttpProbe(job) => job
+                 .run(context)
+@@ -1316,6 +1336,9 @@ struct App {
+     public_lesson_flow: Option<fc_bootstrap::backend::DesktopLessonFlow>,
+     web_service: Option<WebService>,
+     web_editor: Option<web_editor::Editor>,
++    https_editor: Option<https_settings_editor::Editor>,
++    https_pending: Option<https_settings_controller::Pending>,
++    https_unadmitted: Option<(Work, Instant)>,
+     voice_editor: Option<voice_editor::Editor>,
+     web_readiness: web_editor::Readiness,
+     next_web_refresh: Instant,
+@@ -1454,6 +1477,11 @@ impl App {
+                 return view;
+             }
+         }
++        if self.screen == Screen::HttpsSettings {
++            if let Some(view) = self.https_view(&status, self.pending.is_some() || self.stopping) {
++                return view;
++            }
++        }
+         if self.screen == Screen::Web {
+             if let Some(editor) = &self.web_editor {
+                 return editor.view(
+@@ -1794,6 +1822,11 @@ impl App {
+                     action(LOCK, "锁定"),
+                 ];
+             }
++            Screen::HttpsSettings => {
++                view.title = "本机 HTTPS 连接配置".into();
++                view.description = "正在读取配置；这里不会启动或启用教师连接。".into();
++                view.actions = vec![action(LOCK, "锁定工作台")];
++            }
+             Screen::Web => {
+                 view.title = "正在加载教师设备".into();
+                 view.description = web_editor::NOT_READY.into();
+@@ -1881,6 +1914,7 @@ impl App {
+         if self.backend.is_none() && self.screen == Screen::Starting {
+             return;
+         }
++        self.suspend_https();
+         self.leave_web();
+         self.lock_backup();
+         self.clear_profile_preview();
+@@ -1967,6 +2001,8 @@ impl App {
+             return;
+         }
+         self.stopping = true;
++        self.suspend_https();
++        self.https_unadmitted = None;
+         self.close_backup();
+         if let Some(ticket) = &self.content_maintenance {
+             ticket.cancel();
+@@ -2140,6 +2176,11 @@ impl App {
+                         }
+                     }
+                 }
++                if self.screen == Screen::HttpsSettings && self.pending.is_none() {
++                    if let Ok(data) = self.window.draft_nonsecret() {
++                        self.https_capture(data);
++                    }
++                }
+                 if self.screen == Screen::Web && self.pending.is_none() {
+                     if let (Some(editor), Ok(data)) =
+                         (&mut self.web_editor, self.window.draft_nonsecret())
+@@ -2264,6 +2305,9 @@ impl App {
+                 if self.screen == Screen::Backup && !self.stopping {
+                     return self.backup_event(action, data);
+                 }
++                if self.screen == Screen::HttpsSettings && !self.stopping {
++                    return self.https_event(action, data);
++                }
+                 if self.pending.is_some() || self.autostart_job.is_some() || self.stopping {
+                     return Ok(());
+                 }
+@@ -3119,6 +3163,9 @@ impl App {
+             .ok_or("教师设备页面已关闭")?
+             .handle(action, &data, &self.state, lease);
+         match command {
++            Ok(web_editor::Command::OpenHttpsSettings) => {
++                return self.open_https_settings();
++            }
+             Ok(web_editor::Command::Stay) => {
+                 self.status.clear();
+                 self.render()?;
+@@ -3782,6 +3829,7 @@ impl App {
+             self.render()?;
+         }
+         self.poll_voice_management()?;
++        self.poll_https_settings()?;
+         if self
+             .web_editor
+             .as_mut()
+@@ -4003,6 +4051,9 @@ impl App {
+             let completed_pending = self.pending.take();
+             let public_lesson = completed_pending.as_ref().is_some_and(|p| p.public_lesson);
+             let generation = completed_pending.map_or(self.generation, |p| p.generation);
++            if let Some(https) = self.https_pending.take() {
++                return self.https_completed(https, generation, outcome);
++            }
+             if generation != self.generation && public_lesson {
+                 self.render()?;
+                 return Ok(());
+@@ -4086,6 +4137,9 @@ impl App {
+                     self.screen = Screen::HomeworkEdit;
+                     self.status.clear();
+                 }
++                Ok(Outcome::Https(_)) => {
++                    self.status = "配置页面已变化，请重新读取核对。".into();
++                }
+                 Ok(Outcome::WebOpened(service, loaded)) => {
+                     if let Some(lease) = self.lease {
+                         self.web_editor = Some(web_editor::Editor::new(
+@@ -4766,6 +4820,9 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
+         public_lesson_flow: None,
+         web_service: None,
+         web_editor: None,
++        https_editor: None,
++        https_pending: None,
++        https_unadmitted: None,
+         voice_editor: None,
+         web_readiness: web_editor::Readiness::Unavailable,
+         next_web_refresh: Instant::now() + Duration::from_secs(1),
+diff --git a/crates/fc-bootstrap/src/main.rs b/crates/fc-bootstrap/src/main.rs
+index bd2945d..410b308 100644
+--- a/crates/fc-bootstrap/src/main.rs
++++ b/crates/fc-bootstrap/src/main.rs
+@@ -154,6 +154,27 @@ fn run() -> Result<(), String> {
+             #[cfg(not(windows))]
+             Err("native voice output query probe requires Windows".into())
+         }
++        [flag] if flag == "--https-settings-probe" => {
++            #[cfg(windows)]
++            {
++                application::https_settings_probe(None)
++            }
++            #[cfg(not(windows))]
++            Err("native HTTPS settings probe requires Windows".into())
++        }
++        [flag, option, reference]
++            if flag == "--https-settings-probe" && option == "--certificate-thumbprint" =>
++        {
++            #[cfg(windows)]
++            {
++                application::https_settings_probe(Some(reference))
++            }
++            #[cfg(not(windows))]
++            {
++                let _ = reference;
++                Err("native HTTPS settings probe requires Windows".into())
++            }
++        }
+         [flag] if flag == "--voice-settings-probe" => {
+             #[cfg(windows)]
+             {
+diff --git a/crates/fc-bootstrap/src/application/web_editor.rs b/crates/fc-bootstrap/src/application/web_editor.rs
+index f49de0c..3369ea4 100644
+--- a/crates/fc-bootstrap/src/application/web_editor.rs
++++ b/crates/fc-bootstrap/src/application/web_editor.rs
+@@ -18,6 +18,7 @@ const PREVIOUS_SCOPE: ActionId = ActionId(508);
+ const NEXT_SCOPE: ActionId = ActionId(509);
+ pub(super) const CONFIRM: ActionId = ActionId(510);
+ const CANCEL: ActionId = ActionId(511);
++pub(super) const HTTPS_SETTINGS: ActionId = ActionId(512);
+ const SCOPE_PAGE: usize = 8;
+ pub(super) const NOT_READY: &str = "教师连接服务尚未就绪，暂不能通过浏览器配对。";
+ 
+@@ -113,6 +114,7 @@ pub(super) fn run(
+     Ok(result)
+ }
+ pub(super) enum Command {
++    OpenHttpsSettings,
+     Stay,
+     Back,
+     Lock,
+@@ -282,6 +284,7 @@ impl Editor {
+             return Ok(Command::Stay);
+         }
+         match action {
++            HTTPS_SETTINGS => Ok(Command::OpenHttpsSettings),
+             REFRESH => Ok(Command::Run(Operation::Refresh)),
+             ENABLE | BEGIN if !self.readiness.ready() => Err(NOT_READY.into()),
+             ENABLE => Ok(Command::Run(Operation::Enable)),
+@@ -585,6 +588,15 @@ impl Editor {
+             action(PREVIOUS_SCOPE, "上一页任教范围", self.scope_page > 0),
+             action(NEXT_SCOPE, "下一页任教范围", more_scopes),
+         ];
++        if self.selected_request.is_none() {
++            // Keep the existing twelve-action native bound. Scope pagination
++            // has no target until a request is selected; configuration is a
++            // separate local page, never part of granting that request.
++            view.actions
++                .retain(|a| ![PREVIOUS_SCOPE, NEXT_SCOPE].contains(&a.id));
++            view.actions
++                .insert(0, action(HTTPS_SETTINGS, "配置本机HTTPS", true));
++        }
+         view
+     }
+ }
+diff --git a/crates/fc-bootstrap/src/application/web_editor/tests.rs b/crates/fc-bootstrap/src/application/web_editor/tests.rs
+index 9bef134..45e7d9d 100644
+--- a/crates/fc-bootstrap/src/application/web_editor/tests.rs
++++ b/crates/fc-bootstrap/src/application/web_editor/tests.rs
+@@ -452,3 +452,27 @@ fn native_teacher_device_page_uses_the_shared_worker_and_exact_confirmed_revocat
+     assert!(app.lease.is_none());
+     super::super::tests::drain(app);
+ }
++
++#[test]
++fn local_https_navigation_does_not_enable_unavailable_teacher_connections_or_expand_action_bound() {
++    let (state, lease) = fixture(TrustedOrigin::Local);
++    let mut e = Editor::new(
++        lease.principal_id(),
++        Readiness::Unavailable,
++        loaded(snapshot()),
++    );
++    let view = e.view(&state, "", false);
++    view.validate().unwrap();
++    assert!(view
++        .actions
++        .iter()
++        .any(|a| a.id == HTTPS_SETTINGS && a.enabled));
++    assert!(matches!(
++        e.handle(HTTPS_SETTINGS, &FormData::new(), &state, lease)
++            .unwrap(),
++        Command::OpenHttpsSettings
++    ));
++    for id in [ENABLE, BEGIN] {
++        assert!(!view.actions.iter().find(|a| a.id == id).unwrap().enabled);
++    }
++}
+diff --git a/crates/fc-bootstrap/src/application/https_settings_editor.rs b/crates/fc-bootstrap/src/application/https_settings_editor.rs
+new file mode 100644
+--- /dev/null
++++ b/crates/fc-bootstrap/src/application/https_settings_editor.rs
+@@ -0,0 +1,486 @@
++//! Bounded local draft and original-command reconciliation. This editor cannot
++//! authenticate, access SQLite, inspect a certificate or enable a listener.
++use super::*;
++use fc_bootstrap::backend::HttpsCertificateObservation;
++use fc_domain::https_settings::{HttpsCertificateRef, HttpsConfiguration, HttpsHost};
++use fc_ports::{HttpsSettingsRequest, HttpsSettingsState};
++use fc_windows::tls_frontdoor::certificate_query::{CertificateCheck, CertificateQueryReport};
++
++pub(super) const HOST: FieldId = FieldId(920);
++pub(super) const PORT: FieldId = FieldId(921);
++pub(super) const CERTIFICATE: FieldId = FieldId(922);
++pub(super) const SAVE_CONFIG: ActionId = ActionId(920);
++pub(super) const RELOAD: ActionId = ActionId(921);
++pub(super) const QUERY: ActionId = ActionId(922);
++pub(super) const CANCEL_DRAFT: ActionId = ActionId(923);
++pub(super) const CANCEL_WAIT: ActionId = ActionId(924);
++pub(super) const CONFIRM_DISCARD: ActionId = ActionId(925);
++pub(super) const KEEP: ActionId = ActionId(926);
++pub(super) const CLOSE: ActionId = ActionId(927);
++pub(super) const CHECK_CERTIFICATE: ActionId = ActionId(928);
++pub(super) const SAVED: &str = "配置已保存；教师连接尚未启用。证书引用尚未检查。";
++pub(super) const UNCONFIRMED: &str = "尚未确认本次保存结果。请查询原操作结果，不要重复保存。";
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(super) struct Owner {
++    pub(super) school: SchoolId,
++    pub(super) principal: PrincipalId,
++}
++#[derive(Clone, Default, PartialEq, Eq)]
++struct Draft {
++    host: String,
++    port: String,
++    certificate: String,
++}
++impl Draft {
++    fn from_state(state: &HttpsSettingsState) -> Self {
++        state
++            .settings
++            .configuration
++            .as_ref()
++            .map_or_else(Self::default, |c| Self {
++                host: c.host.as_str().into(),
++                port: c.port.to_string(),
++                certificate: c.certificate.to_hex(),
++            })
++    }
++    fn read(mut data: FormData) -> std::result::Result<Self, String> {
++        let draft = Self {
++            host: data.take(HOST).unwrap_or_default(),
++            port: data.take(PORT).unwrap_or_default(),
++            certificate: data.take(CERTIFICATE).unwrap_or_default(),
++        };
++        if !data.is_empty()
++            || draft.host.encode_utf16().count() > 253
++            || draft.port.encode_utf16().count() > 5
++            || draft.certificate.encode_utf16().count() > 40
++            || [&draft.host, &draft.port, &draft.certificate]
++                .iter()
++                .any(|v| v.contains('\0'))
++        {
++            return Err("表单内容不受支持，请重新打开配置页面。".into());
++        }
++        Ok(draft)
++    }
++    fn configuration(&self) -> std::result::Result<HttpsConfiguration, String> {
++        let host = HttpsHost::parse(&self.host)
++            .map_err(|_| "请填写有效域名或IP，不要包含网址前缀、端口或路径。")?;
++        if self.port.is_empty() || !self.port.bytes().all(|b| b.is_ascii_digit()) {
++            return Err("端口须为1至65535的整数。".into());
++        }
++        let port = self
++            .port
++            .parse::<u16>()
++            .ok()
++            .filter(|p| *p != 0)
++            .ok_or("端口须为1至65535的整数。")?;
++        let certificate = HttpsCertificateRef::parse(&self.certificate)
++            .map_err(|_| "证书引用须为40位十六进制字符，不要填写证书文件路径。")?;
++        HttpsConfiguration::new(host, port, certificate)
++            .map_err(|_| "请核对域名、端口和证书引用。".into())
++    }
++}
++struct Original {
++    request: HttpsSettingsRequest,
++    deadline: Instant,
++    accepted: bool,
++}
++#[derive(Clone, Copy)]
++enum Leave {
++    Reload,
++    Close,
++    CancelDraft,
++}
++pub(super) enum Command {
++    Stay,
++    Close,
++    Reload,
++    Save,
++    Query,
++    CheckCertificate,
++}
++pub(super) struct Editor {
++    owner: Owner,
++    base: Option<HttpsSettingsState>,
++    draft: Draft,
++    original: Option<Original>,
++    historical: Option<Option<HttpsSettingsState>>,
++    confirmation: Option<Leave>,
++    certificate_observation: Option<HttpsCertificateObservation>,
++}
++impl Editor {
++    pub(super) fn new(owner: Owner) -> Self {
++        Self {
++            owner,
++            base: None,
++            draft: Draft::default(),
++            original: None,
++            historical: None,
++            confirmation: None,
++            certificate_observation: None,
++        }
++    }
++    pub(super) fn owns(&self, owner: Owner) -> bool {
++        self.owner == owner
++    }
++    pub(super) fn loaded(&mut self, state: HttpsSettingsState) {
++        self.certificate_observation = None;
++        self.draft = Draft::from_state(&state);
++        self.base = Some(state);
++        self.original = None;
++        self.historical = None;
++        self.confirmation = None;
++    }
++    pub(super) fn capture(&mut self, data: FormData) -> std::result::Result<(), String> {
++        if data.is_empty() {
++            return Ok(());
++        }
++        let next = Draft::read(data)?;
++        if next != self.draft {
++            self.certificate_observation = None;
++            // Only an UNADMITTED request can be replaced after the draft changes.
++            if self.original.as_ref().is_some_and(|o| !o.accepted) {
++                self.original = None;
++            }
++            self.draft = next;
++        }
++        Ok(())
++    }
++    pub(super) fn dirty(&self) -> bool {
++        self.base
++            .as_ref()
++            .map_or(self.draft != Draft::default(), |s| {
++                self.draft != Draft::from_state(s)
++            })
++    }
++    pub(super) fn has_unknown(&self) -> bool {
++        self.original.as_ref().is_some_and(|o| o.accepted)
++    }
++    pub(super) fn prepare_save(
++        &mut self,
++        id: CommandId,
++        now: Instant,
++    ) -> std::result::Result<HttpsSettingsRequest, String> {
++        if self.has_unknown() {
++            return Err(UNCONFIRMED.into());
++        }
++        let base = self.base.as_ref().ok_or("请先读取当前配置。")?;
++        let config = self.draft.configuration()?;
++        if let Some(original) = &self.original {
++            if now >= original.deadline {
++                return Err("原保存操作已过处理期限，请明确重新读取后再确认。".into());
++            }
++            return Ok(original.request.clone());
++        }
++        let request = HttpsSettingsRequest {
++            command_id: id,
++            expected_revision: base.settings.revision,
++            expected_identity_revision: base.identity_revision,
++            configuration: Some(config),
++        };
++        self.original = Some(Original {
++            request: request.clone(),
++            deadline: now + Duration::from_secs(90),
++            accepted: false,
++        });
++        Ok(request)
++    }
++    pub(super) fn save_deadline(&self) -> Option<Instant> {
++        self.original.as_ref().map(|o| o.deadline)
++    }
++    pub(super) fn accepted(&mut self) {
++        self.certificate_observation = None;
++        if let Some(original) = &mut self.original {
++            original.accepted = true;
++        }
++    }
++    pub(super) fn query_request(&self) -> Option<HttpsSettingsRequest> {
++        self.original
++            .as_ref()
++            .filter(|o| o.accepted)
++            .map(|o| o.request.clone())
++    }
++    pub(super) fn queried(&mut self, result: Option<HttpsSettingsState>) {
++        self.historical = Some(result);
++    }
++    pub(super) fn suspended(&mut self) {
++        self.certificate_observation = None;
++        self.confirmation = None;
++    }
++    pub(super) fn certificate_state(&self) -> Option<HttpsSettingsState> {
++        self.base
++            .as_ref()
++            .filter(|s| s.settings.configuration.is_some() && !self.dirty() && !self.has_unknown())
++            .cloned()
++    }
++    pub(super) fn clear_certificate(&mut self) {
++        self.certificate_observation = None;
++    }
++    pub(super) fn certificate_observation(&self) -> Option<&HttpsCertificateObservation> {
++        self.certificate_observation.as_ref()
++    }
++    pub(super) fn certificate_loaded(&mut self, observation: HttpsCertificateObservation) {
++        self.certificate_observation = Some(observation);
++    }
++    pub(super) fn invalidate_certificate(
++        &mut self,
++        lease: SessionLease,
++        control: &SessionControl,
++    ) -> bool {
++        let stale = self.certificate_observation.as_ref().is_some_and(|o| {
++            self.base
++                .as_ref()
++                .is_none_or(|s| !o.is_current_for(s, lease, control))
++                || self.dirty()
++                || self.has_unknown()
++        });
++        if stale {
++            self.certificate_observation = None;
++        }
++        stale
++    }
++    pub(super) fn handle(
++        &mut self,
++        owner: Owner,
++        action: ActionId,
++        data: FormData,
++    ) -> std::result::Result<Command, String> {
++        if !self.owns(owner) {
++            if !data.is_empty() {
++                return Err("请先放弃暂存内容或返回。".into());
++            }
++            return match action {
++                CONFIRM_DISCARD => {
++                    *self = Self::new(owner);
++                    Ok(Command::Reload)
++                }
++                CLOSE => Ok(Command::Close),
++                _ => Err("请先确认是否放弃本机暂存内容。".into()),
++            };
++        }
++        if self.confirmation.is_some() {
++            if !data.is_empty() {
++                return Err("请只选择保留或放弃暂存内容。".into());
++            }
++            return match action {
++                KEEP => {
++                    self.confirmation = None;
++                    Ok(Command::Stay)
++                }
++                CONFIRM_DISCARD => match self.confirmation.take() {
++                    Some(Leave::Reload) => {
++                        self.original = None;
++                        self.historical = None;
++                        Ok(Command::Reload)
++                    }
++                    Some(Leave::Close) => {
++                        self.original = None;
++                        self.historical = None;
++                        self.draft = self
++                            .base
++                            .as_ref()
++                            .map_or_else(Draft::default, Draft::from_state);
++                        Ok(Command::Close)
++                    }
++                    Some(Leave::CancelDraft) => {
++                        self.original = None;
++                        self.historical = None;
++                        self.draft = self
++                            .base
++                            .as_ref()
++                            .map_or_else(Draft::default, Draft::from_state);
++                        Ok(Command::Stay)
++                    }
++                    None => Ok(Command::Stay),
++                },
++                _ => Err("请先选择保留或放弃暂存内容。".into()),
++            };
++        }
++        self.capture(data)?;
++        if matches!(action, CANCEL_DRAFT | CLOSE | RELOAD) {
++            self.certificate_observation = None;
++        }
++        match action {
++            SAVE_CONFIG if self.has_unknown() => Err(UNCONFIRMED.into()),
++            SAVE_CONFIG => {
++                self.draft.configuration()?;
++                if self.base.is_none() {
++                    return Err("请先读取当前配置。".into());
++                }
++                Ok(Command::Save)
++            }
++            CHECK_CERTIFICATE if self.certificate_state().is_some() => {
++                self.certificate_observation = None;
++                Ok(Command::CheckCertificate)
++            }
++            CHECK_CERTIFICATE => {
++                Err("请先保存并重新核对配置，完成原操作结果查询后再检查证书。".into())
++            }
++            QUERY if self.has_unknown() => Ok(Command::Query),
++            QUERY => Err("当前没有需要查询的原保存操作。".into()),
++            RELOAD | CLOSE | CANCEL_DRAFT if self.dirty() || self.original.is_some() => {
++                self.confirmation = Some(match action {
++                    RELOAD => Leave::Reload,
++                    CLOSE => Leave::Close,
++                    _ => Leave::CancelDraft,
++                });
++                Ok(Command::Stay)
++            }
++            RELOAD => Ok(Command::Reload),
++            CLOSE => Ok(Command::Close),
++            CANCEL_DRAFT => Ok(Command::Stay),
++            _ => Err("此页面不支持该操作。".into()),
++        }
++    }
++    pub(super) fn view(&self, owner: Owner, status: &str, busy: bool) -> View {
++        let action = |id, label: &str, enabled| Action {
++            id,
++            label: label.into(),
++            enabled,
++        };
++        let mut view = View {
++            title: "本机 HTTPS 连接配置".into(),
++            description: String::new(),
++            status: status.into(),
++            fields: vec![],
++            actions: vec![],
++            // Only this page permits Cancel while work runs. Its fields become
++            // read-only and all other ordinary actions are disabled below.
++            busy: false,
++            grid: None,
++        };
++        if !self.owns(owner) {
++            view.description = "本机还暂存着另一管理会话的编辑内容。此处不显示该内容。放弃暂存不会撤销已经保存的配置，也不能确认先前操作是否保存。".into();
++            view.actions = vec![
++                action(CONFIRM_DISCARD, "放弃暂存并读取当前配置", !busy),
++                action(CLOSE, "返回设备管理", !busy),
++                action(LOCK, "锁定工作台", true),
++            ];
++            return view;
++        }
++        if self.confirmation.is_some() {
++            view.description = "是否放弃本次暂存的编辑内容和原操作记录？这不会撤销已经保存的配置。如果先前结果未确认，放弃记录也不能证明没有保存。".into();
++            view.actions = vec![
++                action(KEEP, "保留暂存内容", true),
++                action(CONFIRM_DISCARD, "确认放弃", !busy),
++                action(LOCK, "锁定工作台", true),
++            ];
++            return view;
++        }
++        view.description = "这里只保存本机连接配置，不启动网络监听，也不启用教师连接。证书存储固定为当前程序用户的MY；填写引用不代表证书可用或其他设备已信任。修改前须在设备管理中明确停用教师会话准入。".into();
++        if let Some(base) = &self.base {
++            view.description.push_str(&format!(
++                "\n当前读取的配置版本：{}。",
++                base.settings.revision.get()
++            ));
++            if base.settings.configuration.is_none() {
++                view.description
++                    .push_str("本机尚未配置HTTPS，端口没有默认值。");
++            }
++        }
++        if self.has_unknown() {
++            view.description.push_str(&format!("\n{UNCONFIRMED}"));
++        }
++        if let Some(result) = &self.historical {
++            match result {
++                Some(result) => view.description.push_str(&format!("\n原操作的历史记录：已保存为版本{}。这不是重新读取的当前配置，也不表示教师连接已启用。", result.settings.revision.get())),
++                None => view.description.push_str("\n未查到原操作结果。"),
++            }
++        }
++        let field = |id, label: &str, value: &str, max_utf16| Field {
++            id,
++            label: label.into(),
++            kind: if busy {
++                FieldKind::ReadOnly
++            } else {
++                FieldKind::Text
++            },
++            value: value.into(),
++            max_utf16,
++        };
++        view.fields = vec![
++            field(
++                HOST,
++                "域名或IP（不含网址前缀、端口和路径）",
++                &self.draft.host,
++                253,
++            ),
++            field(PORT, "HTTPS端口（1至65535）", &self.draft.port, 5),
++            field(
++                CERTIFICATE,
++                "当前程序用户MY证书引用（40位十六进制）",
++                &self.draft.certificate,
++                40,
++            ),
++        ];
++        if self.certificate_observation.is_none() {
++            view.description
++                .push_str("\n尚无关联到本次配置的证书检查记录；可在保存并核对配置后明确检查。");
++        }
++        if let Some(observation) = &self.certificate_observation {
++            let date = observation.observed_at.date;
++            let time = observation.observed_at.second_of_day();
++            view.description.push_str(&format!("\n检查时间：{:04}-{:02}-{:02} {:02}:{:02}:{:02}。以下仅为这次只读检查的历史事实。仅使用本机现有缓存，不证明其他设备信任、在线撤销状态或教师连接可用。",date.year(),date.month(),date.day(),time/3600,time/60%60,time%60));
++            view.grid = Some(certificate_grid(&observation.report));
++        }
++        view.actions = vec![
++            action(
++                CHECK_CERTIFICATE,
++                "检查已保存的证书",
++                !busy && self.certificate_state().is_some(),
++            ),
++            action(
++                SAVE_CONFIG,
++                "保存配置",
++                !busy && self.base.is_some() && !self.has_unknown(),
++            ),
++            action(QUERY, "查询原操作结果", !busy && self.has_unknown()),
++            action(RELOAD, "重新读取当前配置", !busy),
++            action(CANCEL_DRAFT, "取消修改", !busy),
++            action(CLOSE, "返回设备管理", !busy),
++            action(CANCEL_WAIT, "取消等待", busy),
++            action(LOCK, "锁定工作台", true),
++        ];
++        view
++    }
++}
++#[cfg(test)]
++mod tests;
++
++fn certificate_grid(report: &CertificateQueryReport) -> Grid {
++    let fact = |label: &str, check: CertificateCheck| GridRow {
++        group: String::new(),
++        label: label.into(),
++        cells: vec![match check {
++            CertificateCheck::Satisfied => "检查时满足",
++            CertificateCheck::Rejected => "检查时不满足",
++            CertificateCheck::Unverified => "未验证",
++            CertificateCheck::NotChecked => "未检查",
++        }
++        .into()],
++        merged: false,
++    };
++    Grid {
++        columns: vec!["核对项目".into(), "本次观察（不表示可启用）".into()],
++        rows: vec![
++            fact("当前程序用户的证书存储中找到引用", report.found.check),
++            fact("本次检查时的证书有效期", report.current_time.check),
++            fact(
++                "现有私钥可静默取得（不代表后续签名成功）",
++                report.private_key.check,
++            ),
++            fact("服务器身份验证用途", report.server_auth_eku.check),
++            fact(
++                "填写的域名是否匹配（IP可能未验证）",
++                report.server_name.check,
++            ),
++            fact("本机SSL证书链策略", report.ssl_chain_policy.check),
++            fact(
++                "本机缓存的撤销信息（不含根证书）",
++                report.cached_revocation.check,
++            ),
++        ],
++        selected: None,
++        enabled: false,
++    }
++}
+diff --git a/crates/fc-bootstrap/src/application/https_settings_editor/tests.rs b/crates/fc-bootstrap/src/application/https_settings_editor/tests.rs
+new file mode 100644
+--- /dev/null
++++ b/crates/fc-bootstrap/src/application/https_settings_editor/tests.rs
+@@ -0,0 +1,262 @@
++use super::*;
++use fc_domain::https_settings::HttpsSettings;
++
++fn owner(id: u64) -> Owner {
++    Owner {
++        school: SchoolId::new(1).unwrap(),
++        principal: PrincipalId::new(id).unwrap(),
++    }
++}
++fn base(revision: u64) -> HttpsSettingsState {
++    HttpsSettingsState {
++        identity_revision: Revision::new(12),
++        settings: HttpsSettings {
++            revision: Revision::new(revision),
++            configuration: None,
++        },
++    }
++}
++fn configured(revision: u64) -> HttpsSettingsState {
++    let mut state = base(revision);
++    state.settings.configuration = Some(
++        HttpsConfiguration::new(
++            HttpsHost::parse("localhost").unwrap(),
++            8443,
++            HttpsCertificateRef::parse(&"ab".repeat(20)).unwrap(),
++        )
++        .unwrap(),
++    );
++    state
++}
++fn form(host: &str, port: &str) -> FormData {
++    let mut data = FormData::new();
++    data.insert(HOST, host.into()).unwrap();
++    data.insert(PORT, port.into()).unwrap();
++    data.insert(CERTIFICATE, "ab".repeat(20)).unwrap();
++    data
++}
++fn edit() -> Editor {
++    let mut e = Editor::new(owner(1));
++    e.loaded(base(0));
++    e
++}
++fn id(value: u64) -> CommandId {
++    CommandId::new(value).unwrap()
++}
++
++#[test]
++fn no_configuration_has_blank_port_and_no_fake_certificate_or_listener_readiness() {
++    let e = edit();
++    let view = e.view(owner(1), "", false);
++    view.validate().unwrap();
++    assert_eq!(view.fields.iter().find(|f| f.id == PORT).unwrap().value, "");
++    assert!(view.description.contains("不启动网络监听"));
++    assert!(
++        !view
++            .actions
++            .iter()
++            .find(|a| a.id == CHECK_CERTIFICATE)
++            .unwrap()
++            .enabled
++    );
++    assert!(view.grid.is_none());
++}
++#[test]
++fn parsers_refuse_url_zero_overflow_and_an_extra_actor_or_revision_field() {
++    for (host, port) in [
++        ("https://board.school", "8443"),
++        ("board.school", "0"),
++        ("board.school", "65536"),
++        ("board.school", "+443"),
++    ] {
++        let mut e = edit();
++        assert!(e.handle(owner(1), SAVE_CONFIG, form(host, port)).is_err());
++        assert!(e.original.is_none());
++    }
++    let mut data = form("board.school", "8443");
++    data.insert(FieldId(999), "lease/revision".into()).unwrap();
++    assert!(edit().capture(data).is_err());
++}
++#[test]
++fn save_captures_both_loaded_versions_before_admission_and_busy_keeps_id_and_deadline() {
++    let mut e = edit();
++    e.capture(form("Board.School", "8443")).unwrap();
++    let now = Instant::now();
++    let first = e.prepare_save(id(8), now).unwrap();
++    let until = e.save_deadline().unwrap();
++    assert_eq!(first.expected_revision, Revision::new(0));
++    assert_eq!(first.expected_identity_revision, Revision::new(12));
++    assert_eq!(
++        first.configuration.as_ref().unwrap().host.as_str(),
++        "board.school"
++    );
++    assert_eq!(
++        e.prepare_save(id(9), now + Duration::from_secs(1)).unwrap(),
++        first
++    );
++    assert_eq!(e.save_deadline(), Some(until));
++    assert!(e.query_request().is_none());
++    assert!(e.prepare_save(id(10), until).is_err());
++    assert_eq!(e.original.as_ref().unwrap().request, first);
++}
++#[test]
++fn accepted_write_never_replays_save_and_query_does_not_read_mutated_form_payload() {
++    let mut e = edit();
++    e.capture(form("localhost", "8443")).unwrap();
++    let original = e.prepare_save(id(11), Instant::now()).unwrap();
++    e.accepted();
++    e.capture(form("changed.school", "9443")).unwrap();
++    assert_eq!(e.query_request(), Some(original.clone()));
++    assert!(e.handle(owner(1), SAVE_CONFIG, FormData::new()).is_err());
++    assert!(e.prepare_save(id(12), Instant::now()).is_err());
++    assert_eq!(e.query_request(), Some(original));
++}
++#[test]
++fn query_none_preserves_draft_original_and_never_says_not_saved() {
++    let mut e = edit();
++    e.capture(form("localhost", "8443")).unwrap();
++    let original = e.prepare_save(id(13), Instant::now()).unwrap();
++    e.accepted();
++    let draft = e.draft.clone();
++    e.queried(None);
++    let view = e.view(owner(1), "", false);
++    assert!(view.description.contains("未查到原操作结果"));
++    assert!(!view.description.contains("未保存"));
++    assert!(e.draft == draft);
++    assert_eq!(e.query_request(), Some(original));
++    assert!(e.has_unknown());
++    assert!(
++        !view
++            .actions
++            .iter()
++            .find(|a| a.id == SAVE_CONFIG)
++            .unwrap()
++            .enabled
++    );
++    assert!(view.actions.iter().find(|a| a.id == QUERY).unwrap().enabled);
++}
++#[test]
++fn historical_receipt_does_not_become_current_cas_or_erase_draft() {
++    let mut e = edit();
++    e.capture(form("localhost", "8443")).unwrap();
++    let original = e.prepare_save(id(14), Instant::now()).unwrap();
++    e.accepted();
++    let historical = configured(17);
++    e.queried(Some(historical));
++    assert_eq!(e.base.as_ref().unwrap().settings.revision, Revision::new(0));
++    assert_eq!(e.query_request(), Some(original));
++    assert!(e
++        .view(owner(1), "", false)
++        .description
++        .contains("历史记录：已保存为版本17"));
++    assert!(e.certificate_state().is_none());
++}
++#[test]
++fn cancel_and_reload_require_explicit_risk_choice_and_cancel_never_constructs_write() {
++    let mut e = edit();
++    e.capture(form("localhost", "8443")).unwrap();
++    assert!(matches!(
++        e.handle(owner(1), CANCEL_DRAFT, FormData::new()).unwrap(),
++        Command::Stay
++    ));
++    assert!(e.original.is_none());
++    assert!(e.confirmation.is_some());
++    assert!(matches!(
++        e.handle(owner(1), KEEP, FormData::new()).unwrap(),
++        Command::Stay
++    ));
++    assert!(e.dirty());
++    let request = e.prepare_save(id(15), Instant::now()).unwrap();
++    e.accepted();
++    assert!(matches!(
++        e.handle(owner(1), RELOAD, FormData::new()).unwrap(),
++        Command::Stay
++    ));
++    assert_eq!(e.query_request(), Some(request));
++    assert!(matches!(
++        e.handle(owner(1), CONFIRM_DISCARD, FormData::new())
++            .unwrap(),
++        Command::Reload
++    ));
++    assert!(e.original.is_none());
++    assert_eq!(e.base.as_ref().unwrap().settings.revision, Revision::new(0));
++}
++#[test]
++fn another_owner_sees_no_draft_or_receipt_and_cannot_query_or_rebind_it() {
++    let mut e = edit();
++    e.capture(form("private-board.school", "8443")).unwrap();
++    let request = e.prepare_save(id(16), Instant::now()).unwrap();
++    e.accepted();
++    e.queried(Some(configured(7)));
++    let view = e.view(owner(2), "", false);
++    view.validate().unwrap();
++    assert!(view.fields.is_empty());
++    assert!(view.grid.is_none());
++    assert!(!view.description.contains("private-board"));
++    assert!(!view.description.contains("版本7"));
++    assert!(e.handle(owner(2), QUERY, FormData::new()).is_err());
++    assert_eq!(e.query_request(), Some(request));
++    assert!(matches!(
++        e.handle(owner(2), CONFIRM_DISCARD, FormData::new())
++            .unwrap(),
++        Command::Reload
++    ));
++    assert!(e.owns(owner(2)));
++    assert!(e.query_request().is_none());
++}
++#[test]
++fn locking_retains_original_capsule_without_permission_to_replay_it() {
++    let mut e = edit();
++    e.capture(form("localhost", "8443")).unwrap();
++    let r = e.prepare_save(id(17), Instant::now()).unwrap();
++    e.accepted();
++    e.suspended();
++    assert_eq!(e.query_request(), Some(r));
++    assert!(e.dirty());
++    assert!(e.prepare_save(id(18), Instant::now()).is_err());
++}
++#[test]
++fn certificate_inspection_is_explicit_saved_clean_only_and_never_a_readiness_action() {
++    let mut e = edit();
++    assert!(e.certificate_state().is_none());
++    e.loaded(configured(3));
++    assert!(matches!(
++        e.handle(owner(1), CHECK_CERTIFICATE, FormData::new())
++            .unwrap(),
++        Command::CheckCertificate
++    ));
++    e.capture(form("changed.school", "8443")).unwrap();
++    assert!(e.certificate_state().is_none());
++    assert!(e
++        .handle(owner(1), CHECK_CERTIFICATE, FormData::new())
++        .is_err());
++    let mut report = CertificateQueryReport::default();
++    report.found.check = CertificateCheck::Satisfied;
++    let grid = certificate_grid(&report);
++    grid.validate().unwrap();
++    assert_eq!(grid.rows.len(), 7);
++    assert_eq!(grid.rows[0].cells[0], "检查时满足");
++    assert_eq!(grid.rows[1].cells[0], "未检查");
++    assert!(grid.columns[1].contains("不表示可启用"));
++}
++
++#[test]
++fn pending_page_allows_only_cancel_wait_and_lock_with_readonly_fields() {
++    let e = edit();
++    let view = e.view(owner(1), "正在保存", true);
++    view.validate().unwrap();
++    assert!(!view.busy);
++    assert!(view.fields.iter().all(|f| f.kind == FieldKind::ReadOnly));
++    assert!(
++        view.actions
++            .iter()
++            .find(|a| a.id == CANCEL_WAIT)
++            .unwrap()
++            .enabled
++    );
++    assert!(view
++        .actions
++        .iter()
++        .filter(|a| a.enabled)
++        .all(|a| [CANCEL_WAIT, LOCK].contains(&a.id)));
++}
+diff --git a/crates/fc-bootstrap/src/application/https_settings_controller.rs b/crates/fc-bootstrap/src/application/https_settings_controller.rs
+new file mode 100644
+--- /dev/null
++++ b/crates/fc-bootstrap/src/application/https_settings_controller.rs
+@@ -0,0 +1,514 @@
++//! All HTTPS reads, saves and original-outcome queries use the existing workers.
++//! No native or SQL owner is returned to the window pump.
++use super::*;
++use fc_application::identity::SessionPurpose;
++use fc_ports::{HttpsSettingsRequest, HttpsSettingsState};
++use https_settings_editor as editor;
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(super) enum Kind {
++    Load,
++    Save,
++    Query,
++    Check,
++}
++#[derive(Clone, PartialEq, Eq)]
++pub(super) enum Operation {
++    Load,
++    Save(HttpsSettingsRequest),
++    Query(HttpsSettingsRequest),
++    Check(HttpsSettingsState),
++}
++impl Operation {
++    fn kind(&self) -> Kind {
++        match self {
++            Self::Load => Kind::Load,
++            Self::Save(_) => Kind::Save,
++            Self::Query(_) => Kind::Query,
++            Self::Check(_) => Kind::Check,
++        }
++    }
++    pub(super) fn allocation_bytes(&self) -> Option<usize> {
++        std::mem::size_of::<Self>()
++            .checked_add(match self {
++                Self::Save(r) | Self::Query(r) => {
++                    r.configuration.as_ref().map_or(0, |c| c.allocation_bytes())
++                }
++                Self::Check(s) => s
++                    .settings
++                    .configuration
++                    .as_ref()
++                    .map_or(0, |c| c.allocation_bytes()),
++                Self::Load => 0,
++            })?
++            .checked_add(1024)
++    }
++}
++pub(super) struct Pending {
++    kind: Kind,
++    lease: SessionLease,
++}
++pub(super) struct Completion {
++    lease: SessionLease,
++    publication: Revision,
++    value: Value,
++}
++enum Value {
++    Loaded(HttpsSettingsState),
++    Saved(HttpsSettingsState),
++    Queried(Option<HttpsSettingsState>),
++    Checked(Box<fc_bootstrap::backend::HttpsCertificateObservation>),
++}
++pub(super) fn run(
++    backend: Arc<Mutex<Backend>>,
++    lease: SessionLease,
++    operation: Operation,
++    context: &JobContext,
++) -> Result<Outcome> {
++    context.checkpoint().map_err(|_| Failure::Stopped)?;
++    let operation = match operation {
++        Operation::Check(expected) => {
++            let service = {
++                let mut owner = backend.lock().map_err(|_| Failure::Stopped)?;
++                context.checkpoint().map_err(|_| Failure::Stopped)?;
++                let scoped = owner.begin_execution_scope(Arc::new(context.execution_fence()));
++                scoped.https_certificate_service()?
++            };
++            // The Backend guard AND scope are both gone. No KDF/ledger/writer
++            // mutex is carried into this actual synchronous native query.
++            let observation = service
++                .with_execution_fence(Arc::new(context.execution_fence()))
++                .inspect_certificate(lease, expected)
++                .map_err(|error| match error {
++                    fc_bootstrap::backend::HttpsCertificateError::Backend(error) => {
++                        Failure::Backend(error)
++                    }
++                    _ => invalid("证书只读检查未完成，旧结果已失效；可核对配置后重新检查。"),
++                })?;
++            context.checkpoint().map_err(|_| Failure::Stopped)?;
++            return Ok(Outcome::Https(Box::new(Completion {
++                lease,
++                publication: observation.publication_revision,
++                value: Value::Checked(Box::new(observation)),
++            })));
++        }
++        other => other,
++    };
++    let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
++    context.checkpoint().map_err(|_| Failure::Stopped)?;
++    let control = backend.session_control();
++    let mut scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
++    let value = match operation {
++        Operation::Load => Value::Loaded(scoped.read_https_settings(lease)?),
++        Operation::Save(request) => Value::Saved(scoped.save_https_settings(lease, request)?),
++        Operation::Check(_) => return Err(invalid("检查请求已变化。")),
++        Operation::Query(request) => {
++            Value::Queried(scoped.query_https_settings_outcome(lease, request)?)
++        }
++    };
++    // Capture the actual publication AFTER a possible own COMMIT. The identity
++    // revision in a historical receipt is deliberately not a publication id.
++    let status = control
++        .health_gate()
++        .check_sensitive()
++        .map_err(|_| Failure::Stopped)?;
++    scoped.check_session(lease, SessionPurpose::Manage)?;
++    if scoped.role(lease)? != Role::GlobalAdmin {
++        return Err(invalid("配置管理权限已变化。"));
++    }
++    // A new publication cannot be adopted between checking the returned
++    // metadata and minting its UI handoff. Historical query results deliberately
++    // retain their original identity revision and are never used as current CAS.
++    if let Value::Loaded(state) | Value::Saved(state) = &value {
++        if scoped.state()?.revision != state.identity_revision {
++            return Err(Failure::Stopped);
++        }
++    }
++    context.checkpoint().map_err(|_| Failure::Stopped)?;
++    if control.health_gate().status() != status {
++        return Err(Failure::Stopped);
++    }
++    Ok(Outcome::Https(Box::new(Completion {
++        lease,
++        publication: status.revision,
++        value,
++    })))
++}
++
++impl App {
++    fn https_owner(&self) -> Option<editor::Owner> {
++        let lease = self.lease?;
++        if !self.https_allowed(lease) {
++            return None;
++        }
++        Some(editor::Owner {
++            school: self.state.installation.as_ref()?.school_id,
++            principal: lease.principal_id(),
++        })
++    }
++    fn https_allowed(&self, lease: SessionLease) -> bool {
++        lease.origin() == TrustedOrigin::Local
++            && self.current_global_owner() == Some(lease.principal_id())
++            && self.profiles_memory_gate()
++            && self
++                .state
++                .account(lease.principal_id())
++                .is_ok_and(|a| a.principal.enabled && !a.must_change_password)
++    }
++    pub(super) fn open_https_settings(&mut self) -> std::result::Result<(), String> {
++        if self.pending.is_some() || self.stopping {
++            return Ok(());
++        }
++        let Some(owner) = self.https_owner() else {
++            self.lock();
++            return self.render();
++        };
++        self.leave_web();
++        self.screen = Screen::HttpsSettings;
++        self.status.clear();
++        if self.https_editor.is_none() {
++            self.https_editor = Some(editor::Editor::new(owner));
++            self.submit_https(Operation::Load)?;
++        } else {
++            // Same-owner draft/capsule is retained; another owner sees only the
++            // explicit discard warning, never the previous form or receipt.
++            self.render()?;
++        }
++        Ok(())
++    }
++    pub(super) fn https_view(&self, status: &str, busy: bool) -> Option<View> {
++        let owner = self.https_owner()?;
++        self.https_editor
++            .as_ref()
++            .map(|e| e.view(owner, status, busy))
++    }
++    pub(super) fn https_capture(&mut self, data: FormData) {
++        let owner = self.https_owner();
++        if let Some(e) = &mut self.https_editor {
++            if owner.is_some_and(|o| e.owns(o)) {
++                if let Err(message) = e.capture(data) {
++                    self.status = message;
++                }
++            }
++        }
++    }
++    pub(super) fn suspend_https(&mut self) {
++        self.https_unadmitted = None;
++        if self.screen == Screen::HttpsSettings {
++            if self.pending.is_none() {
++                if let (Ok(data), Some(lease), Some(installation)) = (
++                    self.window.draft_nonsecret(),
++                    self.lease,
++                    self.state.installation.as_ref(),
++                ) {
++                    let owner = editor::Owner {
++                        school: installation.school_id,
++                        principal: lease.principal_id(),
++                    };
++                    // Negative-only retention while locking must not depend on
++                    // the authority still being healthy. It grants no action.
++                    if let Some(e) = &mut self.https_editor {
++                        if e.owns(owner) {
++                            let _ = e.capture(data);
++                        }
++                    }
++                }
++            }
++            if let Some(e) = &mut self.https_editor {
++                e.suspended();
++            }
++        }
++    }
++    fn submit_https(&mut self, operation: Operation) -> std::result::Result<(), String> {
++        if self.pending.is_some() || self.stopping {
++            return Ok(());
++        }
++        let Some(lease) = self.lease.filter(|l| self.https_allowed(*l)) else {
++            self.lock();
++            return self.render();
++        };
++        let Some(backend) = self.backend.clone() else {
++            return Ok(());
++        };
++        let kind = operation.kind();
++        // Save retry after an UNADMITTED Busy rejection retains the first
++        // absolute deadline. No accepted write is ever submitted a second time.
++        let deadline = if kind == Kind::Save {
++            self.https_editor
++                .as_ref()
++                .and_then(editor::Editor::save_deadline)
++                .ok_or("原保存记录不可用，请重新读取。")?
++        } else {
++            self.https_unadmitted
++                .as_ref()
++                .and_then(|(work, deadline)| match work {
++                    Work::Https(prior_backend, prior_lease, prior)
++                        if *prior_lease == lease
++                            && *prior == operation
++                            && Arc::ptr_eq(prior_backend, &backend) =>
++                    {
++                        Some(*deadline)
++                    }
++                    _ => None,
++                })
++                .unwrap_or_else(|| Instant::now() + Duration::from_secs(90))
++        };
++        let work = match self.https_unadmitted.take() {
++            Some((Work::Https(prior_backend, prior_lease, prior), prior_deadline))
++                if prior_lease == lease
++                    && prior == operation
++                    && prior_deadline == deadline
++                    && Arc::ptr_eq(&prior_backend, &backend) =>
++            {
++                Work::Https(prior_backend, prior_lease, prior)
++            }
++            _ => Work::Https(backend, lease, operation),
++        };
++        match self.pool.handle().try_submit(work, deadline) {
++            Ok(ticket) => {
++                if kind == Kind::Save {
++                    if let Some(e) = &mut self.https_editor {
++                        e.accepted();
++                    }
++                }
++                self.https_pending = Some(Pending { kind, lease });
++                self.pending = Some(super::Pending {
++                    ticket,
++                    generation: self.generation,
++                    self_revokes: false,
++                    public_lesson: false,
++                });
++                self.status = match kind {
++                    Kind::Save => "正在保存配置；取消等待不等于撤销保存。",
++                    Kind::Query => "正在只读查询原操作结果。",
++                    Kind::Load => "正在读取当前配置。",
++                    Kind::Check => "正在只读检查已保存的证书；这不会启用教师连接。",
++                }
++                .into();
++            }
++            Err(rejected) => {
++                // The rejected Work has never run. Keep the original request in
++                // the editor; dropping this metadata-only task releases no IO.
++                let rejection = rejected.kind;
++                let returned_ok = matches!(&rejected.task, Work::Https(_, returned_lease, returned) if *returned_lease == lease && returned.kind() == kind);
++                if !returned_ok {
++                    return Err("未提交的配置任务不匹配，请重新打开。".into());
++                }
++                if rejection == fc_runtime::worker::Rejection::Busy {
++                    self.https_unadmitted = Some((rejected.task, deadline));
++                }
++                self.status = match rejection {
++                    fc_runtime::worker::Rejection::Busy => {
++                        "后台繁忙，本次操作尚未提交。原保存记录和处理期限已保留。"
++                    }
++                    fc_runtime::worker::Rejection::Deadline => {
++                        "本次操作已过处理期限，尚未提交。请明确重新读取后再确认。"
++                    }
++                    fc_runtime::worker::Rejection::Stopped => "后台正在停止，本次操作尚未提交。",
++                    fc_runtime::worker::Rejection::Faulted => "后台状态异常，本次操作尚未提交。",
++                    fc_runtime::worker::Rejection::TooLarge => {
++                        "配置任务超过容量，本次操作尚未提交。"
++                    }
++                }
++                .into();
++            }
++        }
++        self.render()
++    }
++    /// Finite diagnostic admission helper. Only a returned Busy task is kept;
++    /// it has never executed. submit_https reuses that exact Work and deadline.
++    pub(super) fn retry_https_unadmitted(&mut self) -> std::result::Result<(), String> {
++        let operation = self
++            .https_unadmitted
++            .as_ref()
++            .and_then(|(work, _)| match work {
++                Work::Https(_, _, operation) => Some(operation.clone()),
++                _ => None,
++            });
++        if let Some(operation) = operation {
++            self.submit_https(operation)?;
++        }
++        Ok(())
++    }
++    pub(super) fn https_event(
++        &mut self,
++        action: ActionId,
++        data: FormData,
++    ) -> std::result::Result<(), String> {
++        let Some(owner) = self.https_owner() else {
++            self.lock();
++            return self.render();
++        };
++        if self.pending.is_some() {
++            if action == editor::CANCEL_WAIT {
++                if let Some(p) = &self.pending {
++                    p.ticket.cancel();
++                }
++                if let Some(e) = &mut self.https_editor {
++                    e.clear_certificate();
++                }
++                self.status = if self
++                    .https_pending
++                    .as_ref()
++                    .is_some_and(|p| p.kind == Kind::Save)
++                {
++                    editor::UNCONFIRMED
++                } else {
++                    "已取消等待；旧检查结果已失效。"
++                }
++                .into();
++                return self.render();
++            }
++            return Ok(());
++        }
++        let command = self
++            .https_editor
++            .as_mut()
++            .ok_or("配置页面已关闭。")?
++            .handle(owner, action, data);
++        match command {
++            Ok(editor::Command::Stay) => {
++                self.status.clear();
++            }
++            Ok(editor::Command::Close) => {
++                self.screen = Screen::Home;
++                self.status.clear();
++                return self.open_web_editor();
++            }
++            Ok(editor::Command::Reload) => {
++                return self.submit_https(Operation::Load);
++            }
++            Ok(editor::Command::Save) => {
++                let id = command_id().map_err(|e| error_text(&e))?;
++                let request = self
++                    .https_editor
++                    .as_mut()
++                    .ok_or("配置页面已关闭。")?
++                    .prepare_save(id, Instant::now());
++                match request {
++                    Ok(r) => return self.submit_https(Operation::Save(r)),
++                    Err(message) => self.status = message,
++                }
++            }
++            Ok(editor::Command::CheckCertificate) => {
++                if let Some(expected) = self
++                    .https_editor
++                    .as_ref()
++                    .and_then(editor::Editor::certificate_state)
++                {
++                    return self.submit_https(Operation::Check(expected));
++                }
++                self.status = "请先保存并核对当前配置。".into();
++            }
++            Ok(editor::Command::Query) => {
++                if let Some(request) = self
++                    .https_editor
++                    .as_ref()
++                    .and_then(editor::Editor::query_request)
++                {
++                    return self.submit_https(Operation::Query(request));
++                }
++                self.status = "当前没有可查询的原保存操作。".into();
++            }
++            Err(message) => self.status = message,
++        }
++        self.render()
++    }
++    pub(super) fn poll_https_settings(&mut self) -> std::result::Result<(), String> {
++        if self.screen != Screen::HttpsSettings {
++            return Ok(());
++        }
++        let changed = match (&mut self.https_editor, self.lease, self.control.as_ref()) {
++            (Some(e), Some(lease), Some(control)) => e.invalidate_certificate(lease, control),
++            (Some(e), _, _) => {
++                e.clear_certificate();
++                false
++            }
++            _ => false,
++        };
++        if changed {
++            self.render()?;
++        }
++        Ok(())
++    }
++    pub(super) fn https_completed(
++        &mut self,
++        pending: Pending,
++        generation: u64,
++        outcome: Result<Outcome>,
++    ) -> std::result::Result<(), String> {
++        let same_interval = generation == self.generation
++            && self.lease == Some(pending.lease)
++            && self.screen == Screen::HttpsSettings
++            && self.https_allowed(pending.lease);
++        match outcome {
++            Ok(Outcome::Https(done)) => {
++                let healthy = self.control.as_ref().is_some_and(|c| {
++                    let s = c.health_gate().status();
++                    s.health == fc_runtime::health::Health::Healthy
++                        && s.revision == done.publication
++                });
++                if same_interval && done.lease == pending.lease && healthy {
++                    let e = self.https_editor.as_mut().ok_or("配置页面已关闭。")?;
++                    match done.value {
++                        Value::Loaded(state) if pending.kind == Kind::Load => {
++                            e.loaded(state);
++                            self.status = "已读取当前配置；教师连接尚未启用。".into();
++                        }
++                        Value::Saved(state) if pending.kind == Kind::Save => {
++                            e.loaded(state);
++                            self.status = editor::SAVED.into();
++                        }
++                        Value::Queried(result) if pending.kind == Kind::Query => {
++                            e.queried(result);
++                            self.status = "已完成原操作结果查询；当前配置须另行读取。".into();
++                        }
++                        Value::Checked(observation) if pending.kind == Kind::Check => {
++                            let current = e.certificate_state().is_some_and(|s| {
++                                self.control.as_ref().is_some_and(|c| {
++                                    observation.is_current_for(&s, pending.lease, c)
++                                })
++                            });
++                            if current {
++                                e.certificate_loaded(*observation);
++                                self.status = "已完成一次只读检查；不表示教师连接可启用。".into();
++                            } else {
++                                e.clear_certificate();
++                                self.status = "配置或会话已变化，请重新检查。".into();
++                            }
++                        }
++                        _ => self.status = "本次结果不匹配，请重新核对。".into(),
++                    }
++                } else if self.screen == Screen::HttpsSettings {
++                    self.status = editor::UNCONFIRMED.into();
++                }
++            }
++            Err(error) => {
++                if fatal(&error) {
++                    if let Some(c) = &self.control {
++                        c.fault();
++                    }
++                    self.begin_shutdown();
++                }
++                if same_interval {
++                    self.status = match pending.kind {
++                        Kind::Save => format!("{} {}", error_text(&error), editor::UNCONFIRMED),
++                        Kind::Check => {
++                            "证书只读检查未完成，旧结果已失效；可核对配置后重新检查。".into()
++                        }
++                        _ => "读取未完成，请核对权限后再明确重试。".into(),
++                    };
++                }
++            }
++            _ => {
++                if same_interval {
++                    self.status = "本次结果不匹配，请重新核对。".into();
++                }
++            }
++        }
++        self.render()
++    }
++}
++
++#[cfg(test)]
++mod tests;
+diff --git a/crates/fc-bootstrap/src/application/https_settings_controller/tests.rs b/crates/fc-bootstrap/src/application/https_settings_controller/tests.rs
+new file mode 100644
+--- /dev/null
++++ b/crates/fc-bootstrap/src/application/https_settings_controller/tests.rs
+@@ -0,0 +1,188 @@
++use super::super::tests::{drain, fixture, wait_for, Scratch, SERIAL};
++use super::super::voice_management_probe::{submit, LOGIN_NAME, PASSWORD_VALUE};
++use super::*;
++use fc_runtime::worker::{JobError, Rejection};
++
++fn initialized() -> (Scratch, App) {
++    let (scratch, mut app) = fixture();
++    wait_for(&mut app, |a| a.pending.is_none());
++    let until = Instant::now() + Duration::from_secs(90);
++    app.next_content_maintenance = until;
++    app.next_voice_maintenance = until;
++    app.next_calendar_maintenance = until;
++    submit(
++        &mut app,
++        SAVE,
++        &[
++            (SCHOOL, "Synthetic HTTPS controller school"),
++            (LOGIN, LOGIN_NAME),
++            (NAME, "Synthetic HTTPS manager"),
++            (PASSWORD, PASSWORD_VALUE),
++            (CONFIRM, PASSWORD_VALUE),
++        ],
++        until,
++    )
++    .unwrap();
++    submit(&mut app, ACK, &[], until).unwrap();
++    if app.screen == Screen::Login {
++        super::super::voice_management_probe::login(&mut app, until).unwrap();
++    }
++    assert!(app.screen == Screen::Home);
++    (scratch, app)
++}
++fn request(base: &HttpsSettingsState) -> HttpsSettingsRequest {
++    use fc_domain::https_settings::*;
++    HttpsSettingsRequest {
++        command_id: CommandId::new(700).unwrap(),
++        expected_revision: base.settings.revision,
++        expected_identity_revision: base.identity_revision,
++        configuration: Some(
++            HttpsConfiguration::new(
++                HttpsHost::parse("localhost").unwrap(),
++                8443,
++                HttpsCertificateRef::parse(&"ab".repeat(20)).unwrap(),
++            )
++            .unwrap(),
++        ),
++    }
++}
++fn admit(app: &App, mut work: Work, deadline: Instant) -> JobTicket<Result<Outcome>> {
++    loop {
++        match app.pool.handle().try_submit(work, deadline) {
++            Ok(ticket) => return ticket,
++            Err(error) if error.kind == Rejection::Busy && Instant::now() < deadline => {
++                work = error.task;
++                std::thread::park_timeout(Duration::from_millis(1));
++            }
++            Err(error) => panic!("HTTPS test-only original task admission {:?}", error.kind),
++        }
++    }
++}
++#[test]
++fn accepted_cancellation_while_backend_busy_keeps_original_fence_and_cannot_write() {
++    let _serial = SERIAL.lock().unwrap();
++    let (_scratch, app) = initialized();
++    let lease = app.lease.unwrap();
++    let owner = app.backend.as_ref().unwrap().clone();
++    let guard = owner.lock().unwrap();
++    let before = guard.read_https_settings(lease).unwrap();
++    let original = request(&before);
++    let ticket = admit(
++        &app,
++        Work::Https(owner.clone(), lease, Operation::Save(original.clone())),
++        Instant::now() + Duration::from_secs(15),
++    );
++    let until = Instant::now() + Duration::from_secs(15);
++    while !app.pool.handle().try_stats().is_some_and(|s| s.running > 0) {
++        assert!(Instant::now() < until);
++        std::thread::park_timeout(Duration::from_millis(1));
++    }
++    ticket.cancel();
++    drop(guard);
++    while !ticket.is_finished() {
++        assert!(Instant::now() < until);
++        std::thread::park_timeout(Duration::from_millis(1));
++    }
++    assert!(matches!(ticket.wait(), Err(JobError::Cancelled)));
++    assert_eq!(
++        owner.lock().unwrap().read_https_settings(lease).unwrap(),
++        before
++    );
++    assert!(owner
++        .lock()
++        .unwrap()
++        .query_https_settings_outcome(lease, original)
++        .unwrap()
++        .is_none());
++    drain(app);
++}
++#[test]
++fn old_page_generation_cannot_deliver_positive_saved_state_or_erase_original_query() {
++    let _serial = SERIAL.lock().unwrap();
++    let (_scratch, mut app) = initialized();
++    app.open_https_settings().unwrap();
++    wait_for(&mut app, |a| a.pending.is_none());
++    let limit = Instant::now() + Duration::from_secs(15);
++    while app.https_unadmitted.is_some() {
++        assert!(Instant::now() < limit);
++        app.retry_https_unadmitted().unwrap();
++        wait_for(&mut app, |a| a.pending.is_none());
++    }
++    let lease = app.lease.unwrap();
++    let before = app
++        .backend
++        .as_ref()
++        .unwrap()
++        .lock()
++        .unwrap()
++        .read_https_settings(lease)
++        .unwrap();
++    let mut data = FormData::new();
++    data.insert(editor::HOST, "localhost".into()).unwrap();
++    data.insert(editor::PORT, "8443".into()).unwrap();
++    data.insert(editor::CERTIFICATE, "ab".repeat(20)).unwrap();
++    let e = app.https_editor.as_mut().unwrap();
++    e.capture(data).unwrap();
++    let original = e
++        .prepare_save(CommandId::new(701).unwrap(), Instant::now())
++        .unwrap();
++    e.accepted();
++    let mut fake_saved = before.clone();
++    fake_saved.settings.revision = Revision::new(77);
++    fake_saved.settings.configuration = original.configuration.clone();
++    let publication = app
++        .control
++        .as_ref()
++        .unwrap()
++        .health_gate()
++        .status()
++        .revision;
++    let stale_generation = app.generation.checked_add(1).unwrap();
++    app.https_completed(
++        Pending {
++            kind: Kind::Save,
++            lease,
++        },
++        stale_generation,
++        Ok(Outcome::Https(Box::new(Completion {
++            lease,
++            publication,
++            value: Value::Saved(fake_saved),
++        }))),
++    )
++    .unwrap();
++    assert_eq!(
++        app.https_editor.as_ref().unwrap().query_request(),
++        Some(original)
++    );
++    assert_eq!(
++        app.backend
++            .as_ref()
++            .unwrap()
++            .lock()
++            .unwrap()
++            .read_https_settings(lease)
++            .unwrap(),
++        before
++    );
++    assert!(app.https_editor.as_ref().unwrap().has_unknown());
++    drain(app);
++}
++#[test]
++fn native_same_pool_commit_cancel_relogin_explicit_query_and_certificate_facts_have_real_cleanup() {
++    let _serial = SERIAL.lock().unwrap();
++    super::super::https_settings_probe::run(None).unwrap();
++}
++#[test]
++fn typed_https_fault_is_fatal_but_cas_conflict_is_not() {
++    use fc_domain::https_settings::HttpsSettingsError;
++    use fc_ports::HttpsSettingsRepositoryError as E;
++    assert!(fatal(&Failure::Backend(BackendError::HttpsSettings(
++        E::Faulted
++    ))));
++    assert!(!fatal(&Failure::Backend(BackendError::HttpsSettings(
++        E::Domain(HttpsSettingsError::RevisionConflict {
++            current: Revision::new(3)
++        })
++    ))));
++}
+diff --git a/crates/fc-bootstrap/src/application/https_settings_probe.rs b/crates/fc-bootstrap/src/application/https_settings_probe.rs
+new file mode 100644
+--- /dev/null
++++ b/crates/fc-bootstrap/src/application/https_settings_probe.rs
+@@ -0,0 +1,389 @@
++//! Explicit hidden native controls against a protected synthetic deployment.
++//! Public certificate reference only; no listener, trust install or playback.
++use super::*;
++use fc_ports::HttpsSettingsState;
++use fc_windows::tls_frontdoor::certificate_query::{CertificateCheck, CertificateFact};
++use https_settings_editor as h;
++use voice_management_probe::{
++    checked, login, make_app, open, pump, require, stop_owned_app, submit as submit_native,
++    LOGIN_NAME, PASSWORD_VALUE,
++};
++type Check<T> = std::result::Result<T, String>;
++const ORDER: [&str; 22] = [
++    "setup-local-global-administrator",
++    "native-device-page-production-unavailable",
++    "native-open-https-config",
++    "unconfigured-no-default-port",
++    "invalid-port-rejected-no-write",
++    "cancel-draft-confirmed-no-write",
++    "native-save-localhost-reference",
++    "saved-config-no-listener",
++    "explicit-native-certificate-check",
++    "native-draft-retained-across-lock",
++    "native-relogin-preserves-draft",
++    "native-original-save-admitted",
++    "real-commit-delivery-cancelled",
++    "original-request-retained-after-cancel",
++    "lock-and-relogin-original-owner",
++    "native-explicit-original-outcome-query",
++    "historical-receipt-not-current-cas",
++    "explicit-risk-confirmed-current-reload",
++    "current-config-readback",
++    "device-page-remains-unavailable",
++    "actual-shared-worker-writer-shutdown",
++    "owned-deployment-cleanup",
++];
++fn submit(
++    app: &mut App,
++    action: ActionId,
++    overrides: &[(FieldId, &str)],
++    deadline: Instant,
++) -> Check<()> {
++    submit_native(app, action, overrides, deadline)?;
++    drain_unadmitted(app, deadline)
++}
++fn drain_unadmitted(app: &mut App, deadline: Instant) -> Check<()> {
++    // The only retryable object here is the SAME returned, never-run Busy Work.
++    // Its original absolute deadline is retained by the controller. No accepted
++    // save, query, native inspection or SQL operation is replayed by this loop.
++    while app.https_unadmitted.is_some() {
++        require(
++            Instant::now() < deadline,
++            "HTTPS finite unadmitted Busy wait",
++        )?;
++        std::thread::park_timeout(Duration::from_millis(1));
++        app.retry_https_unadmitted()?;
++        pump(app, deadline)?;
++    }
++    Ok(())
++}
++fn mark(step: &mut usize, name: &str) -> Check<()> {
++    require(ORDER.get(*step) == Some(&name), "HTTPS exact step order")?;
++    println!("HTTPS_SETTINGS_NATIVE_STEP index={} name={name}", *step);
++    *step += 1;
++    Ok(())
++}
++fn saved(app: &App) -> Check<HttpsSettingsState> {
++    checked(
++        app.backend
++            .as_ref()
++            .ok_or("HTTPS backend absent")?
++            .lock()
++            .map_err(|_| "HTTPS backend poisoned")?
++            .read_https_settings(app.lease.ok_or("HTTPS lease absent")?),
++        "HTTPS read-only persisted observer",
++    )
++}
++fn field(app: &App, id: FieldId) -> Option<String> {
++    app.view()
++        .fields
++        .into_iter()
++        .find(|f| f.id == id)
++        .map(|f| f.value)
++}
++fn settings(app: &mut App, deadline: Instant) -> Check<()> {
++    submit(app, TO_WEB, &[], deadline)?;
++    submit(app, web_editor::HTTPS_SETTINGS, &[], deadline)?;
++    require(app.screen == Screen::HttpsSettings, "HTTPS native page")
++}
++fn fact(value: CertificateFact) -> serde_json::Value {
++    serde_json::json!({"check":format!("{:?}",value.check),"nativeError":value.native_error})
++}
++fn workflow(
++    app: &mut App,
++    paths: &DataPaths,
++    reference: &str,
++    owned: bool,
++    step: &mut usize,
++    deadline: Instant,
++) -> Check<()> {
++    open(app, paths, deadline)?;
++    submit(
++        app,
++        SAVE,
++        &[
++            (SCHOOL, "Synthetic HTTPS settings school"),
++            (LOGIN, LOGIN_NAME),
++            (NAME, "Synthetic HTTPS administrator"),
++            (PASSWORD, PASSWORD_VALUE),
++            (CONFIRM, PASSWORD_VALUE),
++        ],
++        deadline,
++    )?;
++    require(app.screen == Screen::Code, "HTTPS native setup")?;
++    submit(app, ACK, &[], deadline)?;
++    if app.screen == Screen::Login {
++        login(app, deadline)?;
++    }
++    mark(step, "setup-local-global-administrator")?;
++    submit(app, TO_WEB, &[], deadline)?;
++    require(
++        app.view().description.contains(web_editor::NOT_READY)
++            && app
++                .view()
++                .actions
++                .iter()
++                .filter(|a| [web_editor::ENABLE, web_editor::BEGIN].contains(&a.id))
++                .all(|a| !a.enabled),
++        "production Web remains unavailable",
++    )?;
++    mark(step, "native-device-page-production-unavailable")?;
++    submit(app, web_editor::HTTPS_SETTINGS, &[], deadline)?;
++    mark(step, "native-open-https-config")?;
++    let initial = saved(app)?;
++    require(
++        initial.settings.configuration.is_none() && field(app, h::PORT).as_deref() == Some(""),
++        "no invented default port",
++    )?;
++    mark(step, "unconfigured-no-default-port")?;
++    submit(
++        app,
++        h::SAVE_CONFIG,
++        &[
++            (h::HOST, "localhost"),
++            (h::PORT, "0"),
++            (h::CERTIFICATE, reference),
++        ],
++        deadline,
++    )?;
++    require(saved(app)? == initial, "invalid port did not write")?;
++    mark(step, "invalid-port-rejected-no-write")?;
++    submit(app, h::CANCEL_DRAFT, &[], deadline)?;
++    submit(app, h::CONFIRM_DISCARD, &[], deadline)?;
++    require(
++        saved(app)? == initial && field(app, h::PORT).as_deref() == Some(""),
++        "cancel discarded only unsaved draft",
++    )?;
++    mark(step, "cancel-draft-confirmed-no-write")?;
++    submit(
++        app,
++        h::SAVE_CONFIG,
++        &[
++            (h::HOST, "localhost"),
++            (h::PORT, "8443"),
++            (h::CERTIFICATE, reference),
++        ],
++        deadline,
++    )?;
++    mark(step, "native-save-localhost-reference")?;
++    let first = saved(app)?;
++    require(
++        first.settings.configuration.as_ref().is_some_and(|c| {
++            c.host.as_str() == "localhost" && c.port == 8443 && c.certificate.to_hex() == reference
++        }) && app.status == h::SAVED,
++        "configuration stored only",
++    )?;
++    require(
++        matches!(app.web_readiness, web_editor::Readiness::Unavailable)
++            && app.web_service.is_none(),
++        "no listener or logical readiness",
++    )?;
++    mark(step, "saved-config-no-listener")?;
++    submit(app, h::CHECK_CERTIFICATE, &[], deadline)?;
++    let observation = app
++        .https_editor
++        .as_ref()
++        .and_then(h::Editor::certificate_observation)
++        .ok_or("HTTPS actual certificate observation absent")?;
++    require(
++        app.view().grid.as_ref().is_some_and(|g| g.rows.len() == 7),
++        "seven native rendered certificate facts",
++    )?;
++    if owned {
++        require(
++            [
++                observation.report.found.check,
++                observation.report.current_time.check,
++                observation.report.private_key.check,
++                observation.report.server_auth_eku.check,
++            ]
++            .iter()
++            .all(|v| *v == CertificateCheck::Satisfied),
++            "owned fixture four independent native facts",
++        )?;
++    }
++    let report = &observation.report;
++    println!(
++        "HTTPS_SETTINGS_CERTIFICATE_OBSERVATION {}",
++        serde_json::json!({"scope":"CurrentUserMyCacheOnly","publicationRevision":observation.publication_revision.get(),"identityRevision":observation.identity_revision.get(),"settingsRevision":observation.settings_revision.get(),"found":fact(report.found),"currentTime":fact(report.current_time),"privateKey":fact(report.private_key),"serverAuthEku":fact(report.server_auth_eku),"serverName":fact(report.server_name),"sslChainPolicy":fact(report.ssl_chain_policy),"cachedRevocation":fact(report.cached_revocation),"chainTrustErrors":report.chain_trust_errors,"sslPolicyError":report.ssl_policy_error,"readiness":"NOT_GRANTED"})
++    );
++    mark(step, "explicit-native-certificate-check")?;
++    // Actual native draft capture: request reload with changed form, then
++    // choose to KEEP the unsaved controls. Neither action saves or queries.
++    submit(app, h::RELOAD, &[(h::PORT, "8444")], deadline)?;
++    submit(app, h::KEEP, &[], deadline)?;
++    require(
++        app.https_editor
++            .as_ref()
++            .and_then(h::Editor::certificate_observation)
++            .is_none(),
++        "editing invalidates prior certificate facts",
++    )?;
++    submit(app, LOCK, &[], deadline)?;
++    require(
++        app.screen == Screen::Login
++            && app.lease.is_none()
++            && app
++                .view()
++                .fields
++                .iter()
++                .all(|f| ![h::HOST, h::PORT, h::CERTIFICATE].contains(&f.id)),
++        "locked page hides configuration draft",
++    )?;
++    mark(step, "native-draft-retained-across-lock")?;
++    login(app, deadline)?;
++    settings(app, deadline)?;
++    require(
++        field(app, h::PORT).as_deref() == Some("8444") && saved(app)? == first,
++        "same-owner unsaved draft retained",
++    )?;
++    mark(step, "native-relogin-preserves-draft")?;
++    let mut data = FormData::new();
++    for f in app.view().fields {
++        if f.kind != FieldKind::ReadOnly {
++            data.insert(f.id, f.value).map_err(|_| "HTTPS form")?;
++        }
++    }
++    app.window
++        .probe_submit(h::SAVE_CONFIG, data)
++        .map_err(|_| "HTTPS original native save admission")?;
++    for event in checked(app.window.take_events(), "HTTPS exact native save events")? {
++        app.event(event)?;
++    }
++    while app.https_unadmitted.is_some() {
++        require(
++            Instant::now() < deadline,
++            "HTTPS original unadmitted Busy wait",
++        )?;
++        std::thread::park_timeout(Duration::from_millis(1));
++        app.retry_https_unadmitted()?;
++    }
++    let original = app
++        .https_editor
++        .as_ref()
++        .and_then(h::Editor::query_request)
++        .ok_or("HTTPS original accepted request absent")?;
++    require(app.pending.is_some(), "HTTPS original shared worker ticket")?;
++    mark(step, "native-original-save-admitted")?;
++    while !app
++        .pending
++        .as_ref()
++        .ok_or("HTTPS original ticket lost")?
++        .ticket
++        .is_finished()
++    {
++        require(
++            Instant::now() < deadline,
++            "HTTPS original actual completion deadline",
++        )?;
++        std::thread::sleep(Duration::from_millis(1));
++    }
++    let committed = saved(app)?;
++    require(
++        committed
++            .settings
++            .configuration
++            .as_ref()
++            .is_some_and(|c| c.port == 8444),
++        "actual SQLite COMMIT before delivery cancellation",
++    )?;
++    app.window
++        .probe_submit(h::CANCEL_WAIT, FormData::new())
++        .map_err(|_| "HTTPS actual native cancel-wait action")?;
++    for event in checked(app.window.take_events(), "HTTPS cancel-wait native events")? {
++        app.event(event)?;
++    }
++    pump(app, deadline)?;
++    mark(step, "real-commit-delivery-cancelled")?;
++    require(
++        app.https_editor.as_ref().and_then(h::Editor::query_request) == Some(original.clone())
++            && app
++                .https_editor
++                .as_ref()
++                .is_some_and(h::Editor::has_unknown),
++        "original request survives suppressed delivery",
++    )?;
++    mark(step, "original-request-retained-after-cancel")?;
++    submit(app, LOCK, &[], deadline)?;
++    login(app, deadline)?;
++    settings(app, deadline)?;
++    require(
++        app.https_editor.as_ref().and_then(h::Editor::query_request) == Some(original),
++        "new valid same-owner lease queries original stable actor",
++    )?;
++    mark(step, "lock-and-relogin-original-owner")?;
++    submit(app, h::QUERY, &[], deadline)?;
++    mark(step, "native-explicit-original-outcome-query")?;
++    require(
++        app.view().description.contains("历史记录：已保存为版本")
++            && app
++                .https_editor
++                .as_ref()
++                .is_some_and(h::Editor::has_unknown)
++            && saved(app)? == committed,
++        "historical query neither rebases nor writes",
++    )?;
++    mark(step, "historical-receipt-not-current-cas")?;
++    submit(app, h::RELOAD, &[], deadline)?;
++    submit(app, h::CONFIRM_DISCARD, &[], deadline)?;
++    mark(step, "explicit-risk-confirmed-current-reload")?;
++    require(
++        saved(app)? == committed
++            && field(app, h::PORT).as_deref() == Some("8444")
++            && app.https_editor.as_ref().is_some_and(|e| !e.has_unknown()),
++        "fresh explicit current read",
++    )?;
++    mark(step, "current-config-readback")?;
++    submit(app, h::CLOSE, &[], deadline)?;
++    require(
++        app.screen == Screen::Web
++            && app.view().description.contains(web_editor::NOT_READY)
++            && app
++                .view()
++                .actions
++                .iter()
++                .filter(|a| [web_editor::ENABLE, web_editor::BEGIN].contains(&a.id))
++                .all(|a| !a.enabled),
++        "ordinary listener still gated",
++    )?;
++    mark(step, "device-page-remains-unavailable")?;
++    Ok(())
++}
++pub(super) fn run(reference: Option<&str>) -> Check<()> {
++    let started = Instant::now();
++    let deadline = started + Duration::from_secs(120);
++    let owned = reference.is_some();
++    let reference = fc_domain::https_settings::HttpsCertificateRef::parse(
++        reference.unwrap_or("0000000000000000000000000000000000000000"),
++    )
++    .map_err(|_| "HTTPS probe expects exact40hex public reference")?
++    .to_hex();
++    let mut nonce = [0; 16];
++    checked(SystemRandom.fill(&mut nonce), "HTTPS nonce")?;
++    let nonce: String = nonce.iter().map(|b| format!("{b:02x}")).collect();
++    let root = std::env::temp_dir().join(format!(
++        "FutureClassroom-Test-HttpsSettings-{}-{nonce}",
++        std::process::id()
++    ));
++    let paths = checked(
++        DataPaths::isolated_test(root.clone()),
++        "HTTPS owned deployment",
++    )?;
++    let deployment = checked(paths.prepare_for_current_user(), "HTTPS protected root")?;
++    checked(deployment.read_back(), "HTTPS ACL readback")?;
++    let instance = checked(InstanceGuard::acquire(paths.root()), "HTTPS instance")?;
++    let mut app = make_app(&paths, deadline)?;
++    let mut steps = 0;
++    let result = workflow(&mut app, &paths, &reference, owned, &mut steps, deadline);
++    stop_owned_app(app, deadline)?;
++    mark(&mut steps, "actual-shared-worker-writer-shutdown")?;
++    drop(instance);
++    drop(deployment);
++    checked(fs::remove_dir_all(&root), "HTTPS closed deployment cleanup")?;
++    require(!root.exists(), "HTTPS exact root gone")?;
++    result?;
++    mark(&mut steps, "owned-deployment-cleanup")?;
++    require(steps == ORDER.len(), "HTTPS all ordered steps")?;
++    println!("HTTPS_SETTINGS_NATIVE_PASS steps={steps} shared_workers=2 original_result_query=PASS listener=NOT_ENABLED certificate_scope=CurrentUserMyCacheOnly certificate_query_count=1 readiness=NOT_GRANTED physical_shutdown=PASS isolated_cleanup=PASS elapsed_ms={}",started.elapsed().as_millis());
++    Ok(())
++}

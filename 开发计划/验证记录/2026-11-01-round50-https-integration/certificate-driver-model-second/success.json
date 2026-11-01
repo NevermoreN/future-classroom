@@ -1,0 +1,49 @@
+{
+  "scope": "PURE MOCK; NO SSH/WINDOWS",
+  "calls": [
+    "tls-stop.ps1",
+    "tls-capture.ps1",
+    "download-verified-original",
+    "tls-cleanup.ps1"
+  ],
+  "report": {
+    "status": "PASS",
+    "ownedProcessCleanup": {
+      "status": "PASS",
+      "ownedProcessesRemaining": 0
+    },
+    "remoteRawEvidence": {
+      "tls.stdout": {
+        "bytes": 27,
+        "sha256": "42458cf1816a7946983ecb1f524c843b001dab6ad05cd7118353eab6579178e3"
+      }
+    },
+    "rawPreservation": {
+      "status": "PASS",
+      "directory": "/tmp/fc-round50-https-integration-evidence/certificate-driver-model-second/success-success-raw",
+      "files": {
+        "tls.stdout": {
+          "status": "PASS",
+          "remote": {
+            "bytes": 27,
+            "sha256": "42458cf1816a7946983ecb1f524c843b001dab6ad05cd7118353eab6579178e3"
+          },
+          "downloaded": {
+            "bytes": 27,
+            "sha256": "42458cf1816a7946983ecb1f524c843b001dab6ad05cd7118353eab6579178e3"
+          },
+          "artifact": "/tmp/fc-round50-https-integration-evidence/certificate-driver-model-second/success-success-raw/tls.stdout",
+          "base64": "U1lOVEhFVElDIExPQ0FMIE1PREVMIE9OTFkK"
+        }
+      }
+    },
+    "cleanupDetails": {
+      "status": "PASS",
+      "rootAbsent": true,
+      "certificatesRemoved": 1,
+      "cngKeyExists": false,
+      "myDigestRestored": true
+    },
+    "cleanup": "PASS"
+  }
+}

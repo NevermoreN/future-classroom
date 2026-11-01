@@ -1,0 +1,43 @@
+usage: verify-ci-artifact-first.py [-h] [--self-test] --report REPORT
+                                   [--source SOURCE]
+                                   [--baseline {Modern,Win7}] [--zip ZIP]
+                                   [--zip-bytes ZIP_BYTES]
+                                   [--zip-sha256 ZIP_SHA256] [--run-id RUN_ID]
+                                   [--job-id JOB_ID]
+                                   [--artifact-id ARTIFACT_ID]
+                                   [--run-metadata RUN_METADATA]
+                                   [--job-metadata JOB_METADATA]
+                                   [--artifact-metadata ARTIFACT_METADATA]
+                                   [--output-dir OUTPUT_DIR] [--repo REPO]
+                                   [--objdump OBJDUMP]
+
+R46 static original-artifact audit. No downloads, executable execution or CI
+dispatch. Examples (all output paths must be fresh and under this script's
+evidence directory): python3 verify-ci-artifact-first.py --self-test --report
+<fresh-model-report.json> python3 verify-ci-artifact-first.py --source <40hex>
+--baseline Modern --zip <original.zip> --zip-bytes <bytes> --zip-sha256
+<64hex> --run-id <id> --job-id <id> --artifact-id <id> --run-metadata
+<run.json> --job-metadata <jobs.json> --artifact-metadata <artifacts.json>
+--output-dir <fresh-directory> --report <fresh-report.json> The three metadata
+files are already-preserved official API responses (direct JSON or the
+connector structuredContent wrapper); this helper never retrieves a URL.
+Original CI failure always yields status FAIL, even if partial PE checks pass.
+
+options:
+  -h, --help            show this help message and exit
+  --self-test
+  --report REPORT
+  --source SOURCE
+  --baseline {Modern,Win7}
+  --zip ZIP
+  --zip-bytes ZIP_BYTES
+  --zip-sha256 ZIP_SHA256
+  --run-id RUN_ID
+  --job-id JOB_ID
+  --artifact-id ARTIFACT_ID
+  --run-metadata RUN_METADATA
+  --job-metadata JOB_METADATA
+  --artifact-metadata ARTIFACT_METADATA
+  --output-dir OUTPUT_DIR
+  --repo REPO
+  --objdump OBJDUMP
