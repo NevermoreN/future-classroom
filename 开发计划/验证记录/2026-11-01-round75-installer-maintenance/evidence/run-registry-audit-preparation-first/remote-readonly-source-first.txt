@@ -1,0 +1,27 @@
+$ErrorActionPreference='Stop'
+$ProgressPreference='SilentlyContinue'
+[Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false)
+$base=$null;$software=$null
+try {
+ if($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1){throw 'EXPECTED_DESKTOP51'}
+ $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::CurrentUser,[Microsoft.Win32.RegistryView]::Registry32)
+ $software=$base.OpenSubKey('Software',$false)
+ $names=@();$malformed=0
+ if($null -ne $software){
+  if($software.SubKeyCount -gt 8192){throw 'SOFTWARE_SINGLE_LEVEL_NAME_BOUND'}
+  foreach($name in $software.GetSubKeyNames()){
+   if(-not $name.StartsWith('FutureClassroom-Test-InstallerRunGuard-',[StringComparison]::Ordinal)){continue}
+   if($name -cmatch '^FutureClassroom-Test-InstallerRunGuard-([1-9][0-9]{0,9})-([0-9a-f]{32})$' -and [UInt64]::Parse($Matches[1]) -le 4294967295){
+    $names+= $name
+    if($names.Count -gt 256){throw 'CANONICAL_PREFIX_OUTPUT_BOUND'}
+   }else{$malformed+=1}
+  }
+ }
+ $names=@($names | Sort-Object -Unique)
+ $result=[ordered]@{status='PASS_READONLY_HKCU32_PREFIX_NAMES';hive='HKCU';view='Registry32';parent='Software';prefix='FutureClassroom-Test-InstallerRunGuard-';names=$names;count=$names.Count;noncanonicalPrefixCount=$malformed;powershell=[ordered]@{version=$PSVersionTable.PSVersion.ToString();edition=$PSVersionTable.PSEdition};valuesRead=$false;registryChanged=$false;childKeysOpened=0;scope='Single Software key immediate names only; no subtree or values. Existing keys are not attributed or removed.'}
+} finally {
+ if($null -ne $software){$software.Dispose();$software=$null}
+ if($null -ne $base){$base.Dispose();$base=$null}
+}
+$result['keyHandlesClosed']=$true
+$result | ConvertTo-Json -Depth 5 -Compress

@@ -1,0 +1,19 @@
+--- N2/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
++++ accidental-rustfmt-2024/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
+@@ -1125,10 +1125,12 @@
+         files(&mut proof, &base, &manifest, &sid)
+             .expect("actual file proof after closed manifest path preflight");
+         proof.check().unwrap();
+-        assert!(fs::OpenOptions::new()
+-            .write(true)
+-            .open(base.join("fc-bootstrap.exe"))
+-            .is_err());
++        assert!(
++            fs::OpenOptions::new()
++                .write(true)
++                .open(base.join("fc-bootstrap.exe"))
++                .is_err()
++        );
+         assert!(fs::rename(&base, base.with_file_name("unexpected-move")).is_err());
+         proof.release().unwrap();
+         // The exact preimage pins have really returned, allowing the installer

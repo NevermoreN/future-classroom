@@ -1,0 +1,70 @@
+--- build-export-first.py
++++ build-export-second.py
+@@ -29,6 +29,7 @@
+     need(fact(Path(ledger['guiFixture']['path']))==ledger['guiFixture'] and ledger['guiFixture']['sha256']==cli['observerSha256'],'SAME_ACTUAL_GUI_CLONE')
+     first=E/'root-build-context-probe-first.json';first_report=json.loads(first.read_bytes());firstdir=Path(first_report['directory'])
+     originals=[first,E/'root-build-context-probe-first.py',*[p for p in E.glob('context-probe-*-first.*.log')],*[p for p in firstdir.rglob('*') if p.is_file()]]
++    originals += [p for p in D.rglob('*') if p.is_file() and p.name not in {'build-export-second.py'}]
+     original_before={str(p):fact(p) for p in originals}
+     joint_path=E/'root-joint-source-freeze-second.json';joint=json.loads(joint_path.read_bytes())
+     def guards():
+@@ -36,7 +37,7 @@
+         for row in joint['sources']:
+             current=fact(W/row['path']);value=dict(path=row['path'],bytes=current['bytes'],sha256=current['sha256']);need(value==row,'FROZEN_SOURCE_GUARD');rows.append(value)
+         return rows
+-    before=guards();report=D/'build-export-first.json';need(not report.exists(),'EXCLUSIVE_NEW_BUILD_RECEIPT')
++    before=guards();report=D/'build-export-second.json';need(not report.exists(),'EXCLUSIVE_NEW_BUILD_RECEIPT')
+     value=dict(status='RUNNING',startedUtc=datetime.datetime.now(datetime.timezone.utc).isoformat(),originalPerCommandBudgetSeconds=20,originalOverallBudgetSeconds=120,sourceBefore=before,originalInputs=original_before,tools=[fact(R/n) for n in PINS],fourthChecker=fact(P),actualCli=fact(CLI),fixtureLedger=fact(LEDGER),commands=[],scope='Local test-only observer author/build/static exports only. Neither placeholder nor final MSI or any EXE/observer is executed. No Windows/production gate/Pending/main changes.')
+     child_env=os.environ.copy()
+     for key in ('LD_PRELOAD','LD_AUDIT','GIO_EXTRA_MODULES','GIO_MODULE_DIR'):child_env.pop(key,None)
+@@ -49,9 +50,9 @@
+         except subprocess.TimeoutExpired as error:out=error.stdout or b'';err=error.stderr or b'';timeout=True
+         row=dict(name=name,command=cmd,cwd=str(cwd),actualExit=code is not None,exitCode=code,timedOut=timeout,elapsedSeconds=time.monotonic()-started)
+         for key,data in (('stdout',out),('stderr',err)):
+-            path=binary if key=='stdout' and binary is not None else D/(name+'.'+key+'.log');write(path,data);row[key]=fact(path)
++            path=binary if key=='stdout' and binary is not None else D/(name+'-second.'+key+'.log');write(path,data);row[key]=fact(path)
+         value['commands'].append(row);save();need(code==0 and not timeout,'ACTUAL_EXIT0_'+name);return out
+-    directory=D/'authored-second';base=['python3','-B',str(P),'--observer-test-name',cli['selectedTests'][0],'--windows-report-root',cli['remoteRoot'],'--nonce',cli['nonce']]
++    directory=D/'authored-third';base=['python3','-B',str(P),'--observer-test-name',cli['selectedTests'][0],'--windows-report-root',cli['remoteRoot'],'--nonce',cli['nonce']]
+     bindings=['--observer-sha256',ledger['guiFixture']['sha256'],'--fixture-ledger',str(LEDGER),'--fixture-ledger-sha256',LEDGER_SHA]
+     save()
+     try:
+@@ -61,30 +62,30 @@
+         ET.register_namespace('',NS);placeholder=ET.tostring(tree,encoding='utf-8',xml_declaration=True)+b'\n';write(directory/'context-probe-placeholder.wxs',placeholder)
+         expected=ET.fromstring(placeholder);node=[n for n in expected.findall('.//{'+NS+'}CustomAction') if n.attrib['Id']=='FcAbortBeforeInitialize'][0];node.attrib.clear();node.attrib.update(Id='FcAbortBeforeInitialize',Error=ABORT)
+         need(ET.tostring(expected)==ET.tostring(ET.fromstring(original_wxs)),'ONLY_ABORT_AUTHOR_NODE_DIFFERENCE')
+-        write(D/'original-to-placeholder.diff',''.join(difflib.unified_diff(original_wxs.decode().splitlines(True),placeholder.decode().splitlines(True),fromfile='original-author.wxs',tofile='placeholder-build.wxs')).encode())
++        write(D/'original-to-placeholder-second.diff',''.join(difflib.unified_diff(original_wxs.decode().splitlines(True),placeholder.decode().splitlines(True),fromfile='original-author.wxs',tofile='placeholder-build.wxs')).encode())
+         value['authoringChange']=dict(original=fact(directory/'context-probe.wxs'),placeholder=fact(directory/'context-probe-placeholder.wxs'),onlyAbortAttributesChanged=True,intermediateExecution='NEVER_RUN')
+         run('02-build-placeholder',[str(T/'wrappers/wixl'),'-a','x86','-o','context-probe-placeholder.msi','context-probe-placeholder.wxs'],directory)
+         intermediate=directory/'context-probe-placeholder.msi';final=directory/'context-probe-final.msi';write(final,intermediate.read_bytes());value['intermediateMsi']=fact(intermediate)
+         info=str(T/'root/usr/bin/msiinfo');build=str(T/'root/usr/bin/msibuild')
+         def export_set(stem,msi):
+             raw=run(stem+'-tables',[info,'tables',str(msi)]);names=raw.decode('ascii').splitlines();need(1<=len(names)<=64 and len(names)==len(set(names)) and all(re.fullmatch('[A-Za-z_][A-Za-z_0-9]*',n) for n in names),'ACTUAL_COMPLETE_CLOSED_TABLE_NAMES')
+-            folder=D/(stem+'-exports');folder.mkdir();exports={}
++            folder=D/(stem+'-second-exports');folder.mkdir();exports={}
+             for name in names:
+                 if name in SYSTEM:continue
+                 data=run(stem+'-export-'+name,[info,'export',str(msi),name]);write(folder/(name+'.idt'),data);exports[name]=data
+             summary=run(stem+'-summary',[info,'suminfo',str(msi)])
+-            return dict(names=names,rawList=D/(stem+'-tables.stdout.log'),folder=folder,exports=exports,summarySha256=sha(summary))
+-        initial=export_set('03-placeholder',intermediate);ca=initial['exports']['CustomAction'];lines=ca.decode('ascii').splitlines();need(lines[:3]==['Action\tType\tSource\tTarget','s72\ti2\tS72\tS255','CustomAction\tAction'] or lines[:3]==['Action\tType\tSource\tTarget','s72\ti2\tS72\tL0','CustomAction\tAction'],'ACTUAL_CUSTOMACTION_IDT_SCHEMA')
+-        rows=[dict(zip(lines[0].split('\t'),line.split('\t'))) for line in lines[3:]];command=cli['actualListCommandLine'];need(cli['commandArgs'][-1]=='--list','ORIGINAL_LIST_CONTROL');wanted=subprocess.list2cmdline(cli['commandArgs'][:-1]);need(len(rows)==2 and sorted(rows,key=lambda r:r['Action'])==sorted([dict(Action='FcObserveParent',Type='2',Source='FcReadonlyObserver',Target=wanted),dict(Action='FcAbortBeforeInitialize',Type='2',Source='FcReadonlyObserver',Target=PLACEHOLDER)],key=lambda r:r['Action']),'EXACT_TWO_INTERMEDIATE_PLACEHOLDER_ACTIONS')
++            return dict(names=names,rawList=D/(stem+'-tables-second.stdout.log'),folder=folder,exports=exports,summarySha256=sha(summary))
++        initial=export_set('03-placeholder',intermediate);ca=initial['exports']['CustomAction'];lines=ca.decode('ascii').splitlines();need(lines[:3]==['Action\tType\tSource\tTarget\tExtendedType','s72\ti2\tS72\tS255\tI4','CustomAction\tAction'],'ACTUAL_WIXL_EMPTY_FIVE_COLUMN_CUSTOMACTION_SCHEMA')
++        rows=[dict(zip(lines[0].split('\t'),line.split('\t'))) for line in lines[3:]];command=cli['actualListCommandLine'];need(cli['commandArgs'][-1]=='--list','ORIGINAL_LIST_CONTROL');wanted=subprocess.list2cmdline(cli['commandArgs'][:-1]);need(rows==[],'ACTUAL_WIXL_UNSUPPORTED_BINARYKEY_EMITS_NO_CA_ROWS');value['intermediateCustomActionQualification']=dict(columns=lines[:3],rows=rows,wixlExit0NotSemanticCAApproval=True,warning='Pinned wixl emits SourceNULL warnings for both authored BinaryKey/ExeCommand nodes; complete final IDT creates the intended two real table rows.')
+         final_rows=[['FcObserveParent','2','FcReadonlyObserver',wanted],['FcAbortBeforeInitialize','19','',ABORT]]
+-        idt=('\r\n'.join(lines[:3]+['\t'.join(row) for row in final_rows])+'\r\n').encode('ascii');patch=D/'CustomAction-final.idt';write(patch,idt)
+-        run('04-replace-customaction',[build,str(final),'-q','DELETE FROM `CustomAction`','-i',str(patch)],directory)
++        headers=['Action\tType\tSource\tTarget','s72\ti2\tS72\tS255','CustomAction\tAction'];idt=('\r\n'.join(headers+['\t'.join(row) for row in final_rows])+'\r\n').encode('ascii');patch=D/'CustomAction-final-second.idt';write(patch,idt)
++        run('04-replace-customaction',[build,str(final),'-q','DROP TABLE `CustomAction`','-i',str(patch)],directory)
+         finished=export_set('05-final',final);need(set(initial['names'])==set(finished['names']),'UNCHANGED_COMPLETE_TABLE_SET')
+         changed=[name for name in initial['exports'] if initial['exports'][name]!=finished['exports'][name]];need(changed==['CustomAction'],'ONLY_CUSTOMACTION_EXPORT_DIFFERENCE')
+         extracted=directory/'extracted-observer.exe';run('06-extract-binary',[info,'extract',str(final),'Binary.FcReadonlyObserver'],directory,binary=extracted);need(fact(extracted)['sha256']==ledger['guiFixture']['sha256'] and extracted.read_bytes()==Path(ledger['guiFixture']['path']).read_bytes(),'FINAL_BINARY_EXACT_GUI_TEST_CLONE')
+         checked=run('07-fourth-checker',base+['check-exports','--exports',str(finished['folder']),'--tables-list',str(finished['rawList']),'--extracted-observer',str(extracted),*bindings],directory)
+         result=json.loads(checked);need(result['status']=='PASS_EXPORTED_PROBE_TOPOLOGY_ONLY','UNCHANGED_FOURTH_CHECKER_ACCEPTS_ACTUAL_FINAL')
+-        value.update(status='PASS_LOCAL_CONTEXT_TYPE19_IDT_BUILD_EXPORT_ONLY_NOT_WINDOWS',msi=fact(final),tableCheck=result,completeTableNames=finished['names'],allOrdinaryAndVirtualExports=[fact(p) for p in sorted(finished['folder'].iterdir())],exportDifference=dict(changedTables=changed,allOtherTableExportsByteIdentical=True,intermediateSummarySha256=initial['summarySha256'],finalSummarySha256=finished['summarySha256']),finalCustomAction=final_rows,importedIdt=fact(patch),extractedBinary=fact(extracted),firstFailurePreserved=dict(report=fact(first),reason='Original actual wixl0.103 rejected CustomAction Error property and SourceNULL. This second local author/build path stages an unexecuted Type2 placeholder then imports the complete exact Type2/Type19 table. No source or original checker/author changes.'),sourceAfter=guards())
++        value.update(status='PASS_LOCAL_CONTEXT_TYPE19_IDT_BUILD_EXPORT_ONLY_NOT_WINDOWS',msi=fact(final),tableCheck=result,completeTableNames=finished['names'],allOrdinaryAndVirtualExports=[fact(p) for p in sorted(finished['folder'].iterdir())],exportDifference=dict(changedTables=changed,allOtherTableExportsByteIdentical=True,originalFiveColumnEmptyCustomActionReplacedByExactFourColumnTwoRows=True,intermediateSummarySha256=initial['summarySha256'],finalSummarySha256=finished['summarySha256']),finalCustomAction=final_rows,importedIdt=fact(patch),extractedBinary=fact(extracted),firstFailurePreserved=dict(report=fact(first),reason='Original actual wixl0.103 rejected CustomAction Error property and SourceNULL. The separate first local second-attempt failure additionally preserved actual wixl SourceNULL/empty five-column CustomAction. This new attempt stages unexecuted authored Type2 placeholders, then drops the tool empty CustomAction schema and imports the complete intended four-column Type2/Type19 table. No source or original checker/author changes.'),sourceAfter=guards())
+         need(value['sourceAfter']==before and original_before=={str(p):fact(p) for p in originals},'FROZEN_SOURCE_AND_ALL_FIRST_ORIGINALS_UNCHANGED')
+         need(all(fact(R/n)['sha256']==digest for n,digest in PINS.items()) and sha(P.read_bytes())==CHECKER_SHA and sha(CLI.read_bytes())==CLI_SHA and sha(LEDGER.read_bytes())==LEDGER_SHA,'TOOLS_AND_AUTHOR_CLI_LEDGER_UNCHANGED')
+         value['originalsUnchanged']=True

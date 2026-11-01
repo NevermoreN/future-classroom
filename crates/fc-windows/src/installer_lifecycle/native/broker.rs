@@ -15,6 +15,8 @@ use windows::Win32::{
     },
 };
 
+#[cfg(test)]
+mod context_probe;
 mod effects;
 
 const FRAME: usize = 32;
@@ -84,6 +86,12 @@ impl Packet {
             Err(LifecycleError::Invalid)
         }
     }
+}
+
+fn engine_parent_sid_allowed(engine_sid: &[u8], user_sid: &[u8]) -> bool {
+    // Binary S-1-5-18, including the exact revision/count/authority/length.
+    const LOCAL_SYSTEM: [u8; 12] = [1, 1, 0, 0, 0, 0, 0, 5, 18, 0, 0, 0];
+    engine_sid == user_sid || engine_sid == LOCAL_SYSTEM
 }
 
 fn current(deadline: Instant) -> Result<()> {
@@ -559,7 +567,13 @@ impl Session {
         {
             return Err(LifecycleError::Invalid);
         }
-        if self.resources.token_sid(engine)? != self.resources.sid {
+        // The original OS msiexec parent may be the LocalSystem service even
+        // though this helper runs as the current user. This exception applies
+        // only to that pinned engine capability: resources.sid and all helper,
+        // pipe-peer and effect identities remain the current user's SID.
+        // A shared service PID/creation is not a transaction/session identity;
+        // the original guardian Join/End/exit proofs remain separate.
+        if !engine_parent_sid_allowed(&self.resources.token_sid(engine)?, &self.resources.sid) {
             return Err(LifecycleError::Invalid);
         }
         // Keep the actual OS engine image fixed, too. Serviced system binaries
@@ -619,10 +633,10 @@ pub(crate) fn run(role: EntryRole, deadline: Instant, resolved_target: Option<&s
 }
 
 fn begin(session: &mut Session, resolved_target: &str) -> Result<()> {
-    // Unsupported maintenance/foreign/preexisting state is rejected before
+    // Unsupported/damaged/foreign state is rejected before
     // spawning a broker or creating durable Pending, independent of MSI flags.
     effects::target(resolved_target)?;
-    effects::fresh(session)?;
+    effects::admit(session)?;
     session.engine(unsafe { GetCurrentProcess() })?;
     if session.resources.handles.len() + 2 > HANDLE_LIMIT {
         return Err(LifecycleError::Invalid);
@@ -718,18 +732,16 @@ fn server(session: &mut Session) -> Result<()> {
     session.authenticate_image(begin)?;
     let engine = session.engine(begin)?;
     let original_engine = process_identity(engine)?;
-    effects::fresh(session)?;
+    let admission = effects::admit(session)?;
     let identity = InstallIdentity::for_current_user()?;
-    let mut owner = LifecycleGate::try_begin_maintenance(
-        &identity,
-        MaintenanceOperation::Install,
-        session.deadline,
-    )?;
+    let mut owner =
+        LifecycleGate::try_begin_maintenance(&identity, admission.operation(), session.deadline)?;
     let result = (|| -> Result<()> {
         let pipe = session.server()?;
         let mut began = false;
         let mut guardian = None;
         let mut decision = None;
+        let mut effects_decision = None;
         let mut ended = false;
         for _ in 0..MAX_CONNECTIONS {
             session.accept(pipe)?;
@@ -738,9 +750,9 @@ fn server(session: &mut Session) -> Result<()> {
             let peer_id = process_identity(peer)?;
             match packet.kind {
                 BEGIN if !began && peer_id == process_identity(begin)? => {
-                    // Revalidate absence under the already-acquired exclusive
-                    // gate immediately before allowing first MSI mutation.
-                    effects::fresh(session)?;
+                    // Revalidate the same original preimage under the exclusive
+                    // gate. Its checked pins return before first MSI mutation.
+                    effects::revalidate(session, admission)?;
                     began = true;
                     session.send(pipe, Packet::new(ACK))?;
                 }
@@ -767,12 +779,16 @@ fn server(session: &mut Session) -> Result<()> {
                     }
                     owner.resources.add(duplicate, Role::Guardian);
                     owner.guardian = Some(peer_id);
-                    let committed = effects::staged(session)?;
+                    let observed = effects::staged(session, admission)?;
                     let mut response = Packet::new(DECISION);
                     response.transaction = packet.transaction;
-                    response.outcome = if committed { 1 } else { 2 };
+                    response.outcome = match observed.outcome() {
+                        SettledOutcome::Commit => 1,
+                        SettledOutcome::Rollback => 2,
+                    };
                     guardian = Some(peer_id);
                     decision = Some(response);
+                    effects_decision = Some(observed);
                     session.send(pipe, response)?;
                 }
                 ENDED if guardian == Some(peer_id) => {
@@ -820,12 +836,9 @@ fn server(session: &mut Session) -> Result<()> {
                 Err(e) => return Err(e),
             }
         }
-        let outcome = if decision.ok_or(LifecycleError::Unsettled)?.outcome == 1 {
-            SettledOutcome::Commit
-        } else {
-            SettledOutcome::Rollback
-        };
-        let mut proof = effects::reconcile(session, outcome)?;
+        let observed = effects_decision.ok_or(LifecycleError::Unsettled)?;
+        let outcome = observed.outcome();
+        let mut proof = effects::reconcile(session, observed)?;
         proof.check()?;
         // This receipt is constructed solely here, after actual native facts
         // and independently verified effects. There is no wire Settlement API.
@@ -854,6 +867,38 @@ fn server(session: &mut Session) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn engine_parent_sid_policy_accepts_only_same_user_or_exact_local_system() {
+        // S-1-5-21-1-2-3-1001: synthetic ordinary user, not a deployment fact.
+        let user = [
+            1, 5, 0, 0, 0, 0, 0, 5, 21, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 233, 3, 0, 0,
+        ];
+        let system = [1, 1, 0, 0, 0, 0, 0, 5, 18, 0, 0, 0];
+        assert!(engine_parent_sid_allowed(&user, &user));
+        assert!(engine_parent_sid_allowed(&system, &user));
+        let mut foreign_user = user;
+        foreign_user[24] = 234;
+        assert!(!engine_parent_sid_allowed(&foreign_user, &user));
+        for rid in [11, 19, 20] {
+            let mut other_well_known = system;
+            other_well_known[8] = rid;
+            assert!(!engine_parent_sid_allowed(&other_well_known, &user));
+        }
+        let administrators = [1, 2, 0, 0, 0, 0, 0, 5, 32, 0, 0, 0, 32, 2, 0, 0];
+        assert!(!engine_parent_sid_allowed(&administrators, &user));
+        for length in 0..system.len() {
+            assert!(!engine_parent_sid_allowed(&system[..length], &user));
+        }
+        let mut extended = system.to_vec();
+        extended.push(0);
+        assert!(!engine_parent_sid_allowed(&extended, &user));
+        for index in [0, 1, 7] {
+            let mut malformed = system;
+            malformed[index] ^= 1;
+            assert!(!engine_parent_sid_allowed(&malformed, &user));
+        }
+    }
+
     #[test]
     fn notification_has_no_transaction_or_settlement_fields() {
         for kind in [BEGIN, ROLLBACK_NOTICE, COMMIT_NOTICE] {

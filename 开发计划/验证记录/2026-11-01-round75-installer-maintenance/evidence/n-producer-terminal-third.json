@@ -1,0 +1,120 @@
+{
+  "status": "PASS_CONTROLLER_ACTUAL_EXIT0_REAPED",
+  "recordedUtc": "2026-11-01T13:42:01.589545+00:00",
+  "producerExecSession": 93445,
+  "actualToolTerminal": {
+    "chunkId": "082bdb",
+    "exitCode": 0,
+    "wallTimeSeconds": 1.527e-05,
+    "runningSessionReturned": false
+  },
+  "report": {
+    "path": "n-release-third.json",
+    "sha256": "c2097456ca15a57699c6e297f5f0cf772b42ef1397c368a51733405831fc6414"
+  },
+  "sourceFreeze": {
+    "path": "root-n3-codegen-source-freeze-first.json",
+    "sha256": "1b06ce58b408707b76108a367a0a81a1fbda6e20f068b22b3e5fbcaae9392700"
+  },
+  "jointFreeze": {
+    "path": "root-joint-source-freeze-fourth.json",
+    "sha256": "d5d22e44e81e8f15c9ffb956d89a81f56be29d4e63a02e2dba7a1ab4b47e9590"
+  },
+  "implementationFreezes": [
+    {
+      "path": "n3-engine-parent-implementation-first/freeze-first.json",
+      "sha256": "5645c8321594612414b05582e9bc6058688800c325aaa08aab66a71ffa5a463a"
+    },
+    {
+      "path": "n-implementation-freeze-second.json",
+      "sha256": "f0ff8e201c9005bae96407b03a48b0e23b337bdce24955cdc2264ac48ff07370"
+    },
+    {
+      "path": "b-implementation-fourth.json",
+      "sha256": "dcdf5968e4cd8a8858dcd96841bc1629ba65b67e6c10b785e722f0ae81519c57"
+    }
+  ],
+  "cargoMetadata": {
+    "path": "n-stable-release-tests-third.stdout.log",
+    "sha256": "5fb3bea83d065549e3ec6146642fbe7a7dcb7460aae4136a8515f1457a94cc55",
+    "bytes": 104549
+  },
+  "testCount": 22,
+  "normalExecutables": [
+    {
+      "target": "fc-installer-lifecycle",
+      "kind": [
+        "bin"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 699090,
+      "sha256": "d4ed48794cb2aa13cb2ba1e96842415295701097f9cde33b4ef023ae19e530af",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 2,
+      "independentObjdump": {
+        "command": [
+          "i686-w64-mingw32-objdump",
+          "-p",
+          "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "path": "n-normal-fc-installer-lifecycle-objdump-third.stdout.log",
+          "sha256": "f148cdb63f8efbc3965dea1abca2c9ff7cbb306edafe2af0c79bcba1af2a0ec0"
+        },
+        "stderr": {
+          "path": "n-normal-fc-installer-lifecycle-objdump-third.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "target": "fc-bootstrap",
+      "kind": [
+        "bin"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13352281,
+      "sha256": "a146684d5ea268e74926360c91fa0860cf3af44187f62292efb45fa42c8cbb08",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 2,
+      "independentObjdump": {
+        "command": [
+          "i686-w64-mingw32-objdump",
+          "-p",
+          "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-bootstrap.exe"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "path": "n-normal-fc-bootstrap-objdump-third.stdout.log",
+          "sha256": "1f6d81d07cc95b979621d5bc2d8610920829ad8c14655d875fae29084e7be280"
+        },
+        "stderr": {
+          "path": "n-normal-fc-bootstrap-objdump-third.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "scope": "Actual N3 engine-parent fix plus N2 effects/B4 eight frozen inputs. Strict nightly and stable GNU codegen/24PE only; no runtime implied."
+}

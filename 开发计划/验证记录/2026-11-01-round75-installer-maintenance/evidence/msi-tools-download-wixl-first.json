@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_EXACT_PUBLISHED_BYTES_AND_SHA256",
+  "package": "wixl",
+  "expectedBytes": 124984,
+  "expectedSha256": "e4b3b395c47ea87d8f74244dccdb242dd8ad80c3632bee101ffe85882cc66a2c",
+  "command": [
+    "curl",
+    "--disable",
+    "--fail",
+    "--location",
+    "--max-redirs",
+    "3",
+    "--proto",
+    "=https",
+    "--proto-redir",
+    "=https",
+    "--tlsv1.2",
+    "--connect-timeout",
+    "15",
+    "--max-time",
+    "120",
+    "--max-filesize",
+    "124984",
+    "--output",
+    "/tmp/fc-round75-installer-maintenance/tools/packages/wixl_0.103+repack-1build3_amd64.deb",
+    "https://mirrors.edge.kernel.org/ubuntu/pool/universe/m/msitools/wixl_0.103+repack-1build3_amd64.deb"
+  ],
+  "startedUtc": "2026-11-01T12:11:51.622085+00:00",
+  "deadlineSeconds": 120,
+  "connectionDeadlineSeconds": 15,
+  "candidateMsiProduced": false,
+  "windowsInvoked": false,
+  "controllerTimedOut": false,
+  "actualExit": true,
+  "parentReaped": true,
+  "pid": 1600,
+  "exitCode": 0,
+  "elapsedSeconds": 1.267254404956475,
+  "logs": [
+    {
+      "path": "msi-tools-download-wixl-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "msi-tools-download-wixl-first.stderr.log",
+      "bytes": 396,
+      "sha256": "c95c41b7ba3be800623f66a020a37487dcd2fadb61d610bdf47ce1c8c881bb47"
+    }
+  ],
+  "downloaded": {
+    "path": "/tmp/fc-round75-installer-maintenance/tools/packages/wixl_0.103+repack-1build3_amd64.deb",
+    "bytes": 124984,
+    "sha256": "e4b3b395c47ea87d8f74244dccdb242dd8ad80c3632bee101ffe85882cc66a2c"
+  }
+}

@@ -1,0 +1,35 @@
+--- run-quiet-observer-first.py
++++ run-quiet-observer-second.py
+@@ -76,13 +76,12 @@
+         while b:=f.read(1024*1024):h.update(b);size+=len(b)
+     return dict(path=str(p),bytes=size,sha256=h.hexdigest())
+ def remote(script,config):
+-    # Single-quoted PowerShell literal with doubled apostrophes; compressed
+-    # together with the script, avoiding a redundant config base64 expansion.
+     if script!=RUN:config={k:v for k,v in config.items() if k!='commandLine'}
+-    packed=json.dumps(config,separators=(',',':')).replace("'","''");source="$ErrorActionPreference='Stop';$c='"+packed+"'|ConvertFrom-Json;"+COMMON+script
+-    zipped=base64.b64encode(gzip.compress(source.encode(),mtime=0)).decode();decoder="$b=[Convert]::FromBase64String('"+zipped+"');$m=[IO.MemoryStream]::new();$m.Write($b,0,$b.Length);$m.Position=0;$g=[IO.Compression.GZipStream]::new($m,[IO.Compression.CompressionMode]::Decompress);$r=[IO.StreamReader]::new($g,[Text.Encoding]::UTF8);try{$s=$r.ReadToEnd()}finally{$r.Dispose();$g.Dispose();$m.Dispose()};& ([ScriptBlock]::Create($s))"
+-    encoded=base64.b64encode(decoder.encode('utf-16-le')).decode();need(len(encoded)<=7500,'SHORT_ENCODED_COMMAND')
+-    return ['ssh','-i',IDENTITY,'-o','BatchMode=yes','-o','ConnectTimeout=8',HOST,'powershell.exe','-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',encoded]
++    packed=json.dumps(config,separators=(',',':')).replace("'","''")
++    source=("$ErrorActionPreference='Stop';$c='"+packed+"'|ConvertFrom-Json;"+COMMON+script).encode('utf-8')
++    bootstrap="$ErrorActionPreference='Stop';[Console]::InputEncoding=[Text.UTF8Encoding]::new($false);[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);$s=[Console]::In.ReadToEnd();& ([ScriptBlock]::Create($s))"
++    encoded=base64.b64encode(bootstrap.encode('utf-16-le')).decode();need(len(encoded)<=1200,'SHORT_STDIN_BOOTSTRAP')
++    return dict(command=['ssh','-i',IDENTITY,'-o','BatchMode=yes','-o','ConnectTimeout=8',HOST,'powershell.exe','-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',encoded],input=source)
+ def registration_absent(row):need(row['status']=='ACTUAL_READONLY_CALLER_AND_MACHINE_CONTEXTS' and row['product']==PRODUCT and row['count']==0 and row['productState']==-1 and row['contexts']==7 and row['userSidArgument']=='' and row['otherUsers']==row['cache']=='NOT_QUERIED','LIMITED_ACTUAL_PRODUCT_ABSENCE')
+ def main():
+     controller_began=time.monotonic()
+@@ -104,9 +103,11 @@
+     began=controller_began;safe=False;created=False;passed=False;baseline=[];observer=None;context_raw=None;log_raw=None
+     def call(label,cmd,limit,cleanup=False):
+         available=120-(time.monotonic()-began)-(0 if cleanup else 20);need(available>0,'ORIGINAL_BUDGET_WITH_CLEANUP_RESERVE');t=time.monotonic();code=None;out=b'';err=b'';timed=False
+-        try:r=subprocess.run(cmd,capture_output=True,timeout=min(limit,available));code=r.returncode;out=r.stdout;err=r.stderr
++        command=cmd['command'] if isinstance(cmd,dict) else cmd;feed=cmd['input'] if isinstance(cmd,dict) else None
++        try:r=subprocess.run(command,input=feed,capture_output=True,timeout=min(limit,available));code=r.returncode;out=r.stdout;err=r.stderr
+         except subprocess.TimeoutExpired as error:out=error.stdout or b'';err=error.stderr or b'';timed=True
+-        step=dict(label=label,command=cmd,actualLocalParentReturned=not timed,exitCode=code,timedOut=timed,elapsedSeconds=time.monotonic()-t)
++        step=dict(label=label,command=command,actualLocalParentReturned=not timed,exitCode=code,timedOut=timed,elapsedSeconds=time.monotonic()-t)
++        if feed is not None:step['stdin']=dict(bytes=len(feed),sha256=sha(feed),base64=base64.b64encode(feed).decode())
+         for name,data in (('stdout',out),('stderr',err)):
+             file=report.with_name(report.stem+'-'+label+'.'+name+'.log')
+             with file.open('xb') as f:f.write(data)

@@ -1,0 +1,14 @@
+Action	Condition	Sequence
+s72	S255	i2
+InstallExecuteSequence	Action
+CostFinalize		1000
+FcBeginGate	1	1499
+FcCommitNotify	1	1502
+FcRollbackNotify	1	1501
+FindRelatedProducts		25
+InstallExecute		6500
+InstallFinalize		6600
+InstallInitialize		1500
+InstallValidate		1400
+LaunchConditions		100
+RemoveExistingProducts		6501

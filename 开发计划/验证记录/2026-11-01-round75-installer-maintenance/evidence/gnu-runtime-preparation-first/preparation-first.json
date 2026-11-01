@@ -1,0 +1,99 @@
+{
+  "status": "PREPARED_AST_AND_CORE_BYTE_COMPARISON_ONLY_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T12:14:52.667950+00:00",
+  "owner": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-first/.owner",
+    "bytes": 54,
+    "sha256": "39800c9ae0ffe76e2092d80570240f5379f1aa5761b1b7d0a44af830d95f27c8"
+  },
+  "implementations": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-first/run-gnu-win11-first.py",
+      "bytes": 16896,
+      "sha256": "0b59e9cf41a120dd0af648b060129e8912523c068acf57dfb974b247b320b536"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-first/parse-native-children-first.py",
+      "bytes": 3515,
+      "sha256": "8cf0e405f630c9168b438e5b3a45f0c139de037bc8b82137ae41cb72aaabfa4e"
+    }
+  ],
+  "implementationManifest": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-first/prepared-implementation-first.json",
+    "bytes": 612,
+    "sha256": "7f17e6b40e9e89363248eb9ec8fce634ceafe35de8eae5a336a0c36a513029dc"
+  },
+  "templates": [
+    {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round73-installer-broker/root-run-gnu-runtime-third.py",
+      "bytes": 6663,
+      "sha256": "9bba5e6ad480e2251c45bc427ef15029a30b2ac6e21678f7ae60b6d40d969be2"
+    },
+    {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round73-installer-broker/root-parse-native-children-first.py",
+      "bytes": 4505,
+      "sha256": "8dfd6c4731f25a4e981a985b7c85566889e6100e83f49180e70555a29ee69a62"
+    },
+    {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round67-ci/independent-runtime-first.py",
+      "bytes": 25653,
+      "sha256": "0317ffb1719737bd9dfa45ca7952c242df6ffff0baa6b1611d7b912277f9e0e5"
+    }
+  ],
+  "coreDiff": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-first/child-template-to-parameterized-first.diff",
+    "bytes": 3646,
+    "sha256": "efcc2c2cfe642c0b4caa162a4ce8d8238829efcb7c51dec315fea2bf61410347"
+  },
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-first/run-gnu-win11-first.py",
+    "--producer-report",
+    "<E/actual-successful-N2-producer.json>",
+    "--producer-report-sha256",
+    "<actual64hex>",
+    "--producer-terminal-report",
+    "<E/actual-reaped-producer-parent.json>",
+    "--producer-terminal-report-sha256",
+    "<actual64hex>",
+    "--freeze",
+    "<E/actual-N2-freeze.json>",
+    "--freeze-sha256",
+    "<actual64hex>",
+    "--joint-freeze",
+    "<E/actual-joint-freeze.json>",
+    "--joint-freeze-sha256",
+    "<actual64hex>",
+    "--source-git-base",
+    "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "--report",
+    "<E/fresh-gnu-win11-full.json>",
+    "--operation",
+    "<E/fresh-gnu-win11-operation.json>",
+    "--execute"
+  ],
+  "requiredActualInputs": {
+    "producer": "R73 ABI PASS_CODEGEN_NOT_RUNTIME, originalPerCommandBudgetSeconds900; three actual successful physical GNU commands; sourceBeforeAfter8;22testExecutables+2normalExecutables;freezeSha256 matches explicit N freeze.",
+    "parent": "Explicit SHA-pinned PASS_CONTROLLER_ACTUAL_EXIT0_REAPED; actualToolTerminal.exitCode0/runningSessionReturnedfalse; report path/SHA matches producer; sourceFreeze matches N freeze; cargoMetadata path/SHA matches original stable-release-tests stdout.",
+    "joint": "Explicit SHA-pinned PASS_FROZEN_SOURCE_NOT_RUNTIME; gitBaseOnly2dfb...;sourceGuardCount8/changedSourceCount7; sources exactly producer8; freezeReports includes actual N freeze and every listed report exact.",
+    "artifacts": "24 actual original PE32/i386/CUI3tests/GUI2normals, complete JSON associations and reopened pre/post identities. Actual GNU native harness name/SHA from successful producer, never old failed source or fixed GNU digest.",
+    "source": "Current pinned broker2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691 in actual8source guard; unarmed full run through unchanged original windows-probe."
+  },
+  "checks": {
+    "astParseOnly": true,
+    "childCoreByteIdentical": true,
+    "functionsOrModelsInvoked": false,
+    "WindowsCargoDownloadNetworkInvoked": false,
+    "runningProducerOutputsRead": false,
+    "sourceOrMainOrGUIOrR74Modified": false
+  },
+  "limits": [
+    "Root solely executes Windows after actual successful N2 producer parent and hashes are available. No boolean substitute for source-bound parent terminal report.",
+    "Missing or RUNNING originals yield WAIT/no runtime report; failed or mismatched originals reject before any upload.",
+    "Fixed original per-harness900/native1/system-host exit0/public20;22harness outer case totals dynamic, no fixed261/1554. Two exact child triples retain own1passed/(outerdeclared-1)filtered scopes and six removed normalized control/case indices; original raw unchanged, no childPID claim.",
+    "Lifecycle normal helper only GUI bytes pinned; full runner uploads22tests+app23 and never executes the helper normal. Separate helper test harness remains one of22.",
+    "sourceGitBase labels only the actual base. Candidate binds by producer/Nfreeze/joint SHA256 plus eight actual source bytes, never fabricated sourceSha/source commit.",
+    "No new MSI/CI/Win7/Win10 OS/ordinary31/campus acceptance. Source-dependent actual child stdout must satisfy same strict core; unexpected output fails closed."
+  ]
+}

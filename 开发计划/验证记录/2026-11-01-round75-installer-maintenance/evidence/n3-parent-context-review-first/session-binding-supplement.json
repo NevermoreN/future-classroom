@@ -1,0 +1,48 @@
+{
+  "status": "READ_ONLY_SESSION_BINDING_GAP_NOT_CLOSED",
+  "source": "Current N2 source remains unchanged; supplements review.json without replacing it.",
+  "officialFacts": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msibegintransactionw",
+      "fact": "System permits one open installer transaction at a time; ERROR_INSTALL_ALREADY_RUNNING for a second transaction."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/-msiexecute-mutex",
+      "fact": "_MSIExecute mutex applies while processing Execute/AdminExecute/AdvtExecute sequence tables, not a general per-owner lifetime token."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msijointransaction",
+      "fact": "Join validates current transaction user and common parent process tree and transfers ownership. Returned event observes transaction ownership changes; it does not attest a Type2 Begin process belonged to this transaction."
+    }
+  ],
+  "currentBinding": {
+    "begin": "server original parent is pinned/authenticated Begin; original BEGIN accepted only from that process object identity. Begin Type2 does not have MSIHANDLE.",
+    "guardian": "First accepted GUARDIAN matching same user/helper image and original engine parent sets arbitrary packet.transaction at native/broker.rs:747-780 before actual Join. Original guardian code later Join/End returns zero and exits.",
+    "event": "Only guardian receives changed-owner event from Join at lines687-700; session/broker has no earlier original transaction event or ID to compare. Closing that event after End is a cleanup action, not a transaction linkage proof.",
+    "engine": "Shared long-lived service PID+creation identifies an engine process instance, never a unique session or transaction."
+  },
+  "interleaving": {
+    "scope": "Constructible source-level risk scenario; not claimed Windows runtime reproduction.",
+    "steps": [
+      "A exact Begin creates original owner and returns, but A aborts before guardian; broker still waiting until original120s deadline.",
+      "A transaction ends/rolls back. System can now admit another transaction B; global one-open constraint does not prevent this sequential overlap with A broker lifetime.",
+      "A controlled unchanged same-family candidate B must run Begin unconditionally before mutation; existing gate/Pending then rejects it, so its guardian should not run. This is a useful closed-candidate guard, not proof about arbitrary other MSI packages.",
+      "If a different external package/legacy bypass embeds the same pinned helper image, invokes its guardian with a real B transaction and same user/service parent, current parent/image/user checks have no A transaction anchor to reject B solely because B is not A. Whether real engine launch/Join permits the complete scenario must be probed; do not claim it already succeeds.",
+      "Such a B peer could become owner.guardian for A broker, drive a decision/End on B and, where expected effects match, potentially release A Pending. Current code cannot make a strong general cross-session rejection claim from parentPID alone."
+    ]
+  },
+  "recommendation": {
+    "immediate": "Do not label two-SID allowlist a complete security fix. Keep original owner retention until the declared supported transaction binding model is explicitly accepted and verified.",
+    "controlledCandidate": "Within the explicitly controlled unchanged candidate scope, preserve mandatory Begin1499 condition1 for every supported action, per-user gate, exact source/helper/manifest, original Begin identity and no exported role that bypasses it. Prove A abort plus B same-candidate Begin rejects before own mutation and A Pending persists.",
+    "strongerBoundary": "If rejecting arbitrary external package reuse of the same helper is required, current Type2 EXE does not possess an authoritative original hInstall/transaction capability. Need an actual session bridge or original initiating transaction capability design; public MSI properties, random token/CLI bool, servicePID or global mutex cannot supply it. This is a separate native/API/product boundary change, not a two-line SID adjustment.",
+    "possibleHardening": "Joining before announcing GUARDIAN could prevent invalid transaction input from initiating server staging, but still would not prove it is A transaction. Do not present that ordering change as a solution to the missing Begin anchor."
+  },
+  "minimumExperiment": [
+    "Real embedded chainer argv order, own/parent process and optional thread token, original engine instance compared to Begin observer in the same fixture.",
+    "Same real transaction Join0/ownership event bounded wait semantics/EndRollback0/actual guardian exit plus original source-bound reports.",
+    "A transaction abort before guardian; preserve mock/original owner identity and deadline; then B begins as a distinct controlled candidate and is rejected without binding or releasing A owner.",
+    "Separate explicitly authorized hostile/reuse fixture if a general external-package rejection guarantee is desired; no production Pending/Run or school data and no premature actual product commit.",
+    "All event/process handles close once; unknown Join/End/identity/event/exit retains original owner, no replacement and no engine service death wait."
+  ],
+  "execution": "No source/Cargo/Windows/registry/Run mutation; only this new owned JSON written."
+}

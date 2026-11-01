@@ -1,0 +1,170 @@
+{
+  "status": "PASS_PREPARATION_ONLY_NOT_WINDOWS",
+  "windowsExecuted": false,
+  "msiExecuted": false,
+  "powershellSyntaxRuntime": "NOT_RUN",
+  "originalOverallSeconds": 120,
+  "sourceGuard": {
+    "freeze": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-joint-source-freeze-second.json",
+      "bytes": 2378,
+      "sha256": "d1ae35fabcf1694c1296a8f58fd7c4681c8c60aa17fe5bc3539be19ea6c0c48a"
+    },
+    "count": 8,
+    "sources": [
+      {
+        "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle.rs",
+        "bytes": 9802,
+        "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d",
+        "freezeMatch": true
+      },
+      {
+        "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+        "bytes": 39007,
+        "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691",
+        "freezeMatch": true
+      },
+      {
+        "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+        "bytes": 40703,
+        "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9",
+        "freezeMatch": true
+      },
+      {
+        "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+        "bytes": 10262,
+        "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5",
+        "freezeMatch": true
+      },
+      {
+        "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/package-msi-candidate.py",
+        "bytes": 55135,
+        "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e",
+        "freezeMatch": true
+      },
+      {
+        "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/check-msi-candidate.py",
+        "bytes": 33752,
+        "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf",
+        "freezeMatch": true
+      },
+      {
+        "path": "/tmp/fc-round75-installer-maintenance/worktree/packaging/MSI-CANDIDATE.md",
+        "bytes": 13778,
+        "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00",
+        "freezeMatch": true
+      },
+      {
+        "path": "/tmp/fc-round75-installer-maintenance/worktree/Cargo.lock",
+        "bytes": 21005,
+        "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+        "freezeMatch": true
+      }
+    ]
+  },
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/check-contracts.py"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.18812985299155116,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/pure-contract-first.stdout.log",
+        "bytes": 1562,
+        "sha256": "dfe1ecb774361f748e9a262e6616d8532c25b7c400a37b92b4a0440d816b5fc7"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/pure-contract-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pureContractCount": 36,
+      "pid": null,
+      "pidState": "Original actual Popen PID not retained in this preparation wrapper; terminal wait0 retained, not a Windows process."
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/run-registry-fixture-first.py",
+        "--report",
+        "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first.json"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/default-preparation-first.stdout.log",
+        "bytes": 1111,
+        "sha256": "bef411675342b0dd5bd65dbbb22ebcd2119fcc81b11909232117d7d46e2fbd0c"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/default-preparation-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pid": 1175
+    }
+  ],
+  "files": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/.owner",
+      "bytes": 70,
+      "sha256": "fa08b2e051b3961789cd680824b119aa9e2447639d34f2e431c2e3c89fd87777"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/README.md",
+      "bytes": 3046,
+      "sha256": "6d4796e19c2117ababa41fb552fad6c5d0c2f69220c7535971a384d8a0282e35"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/check-contracts.py",
+      "bytes": 4766,
+      "sha256": "d2a49a541fc7b2d64ac86840cf9c8165d3241556ee9188da51e18d1096706751"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/controller.ps1",
+      "bytes": 12503,
+      "sha256": "b538244ff4b0a2916510f6bb8c78500c6b05f6b3f3fa6df157cbf4a81b5a3a06"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/default-preparation-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/default-preparation-first.stdout.log",
+      "bytes": 1111,
+      "sha256": "bef411675342b0dd5bd65dbbb22ebcd2119fcc81b11909232117d7d46e2fbd0c"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/pure-contract-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/pure-contract-first.stdout.log",
+      "bytes": 1562,
+      "sha256": "dfe1ecb774361f748e9a262e6616d8532c25b7c400a37b92b4a0440d816b5fc7"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/run-registry-fixture-first.py",
+      "bytes": 13476,
+      "sha256": "b5839c6a1f1201000da09840a4423fd9f88045b2d7e275cbb303542beb70a060"
+    }
+  ],
+  "actualWindowsCommand": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/run-registry-fixture-first.py",
+    "--report",
+    "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first.json",
+    "--execute"
+  ],
+  "scope": "Exact existing independent registry-only MSI; no source/main/Cargo/Windows/MSI execution. Original first static FAIL and second static PASS preserved."
+}

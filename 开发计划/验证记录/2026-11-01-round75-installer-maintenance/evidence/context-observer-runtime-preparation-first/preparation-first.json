@@ -1,0 +1,118 @@
+{
+  "status": "PREPARED_AST_AND_LITERAL_TRANSPORT_CONTRACT_ONLY_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T13:00:56.175113+00:00",
+  "helper": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/run-quiet-observer-first.py",
+    "bytes": 22836,
+    "sha256": "d9dc5b3900d79ecb58e6c922defc5c6bb84329b99352b2b57f1ae70a21012733"
+  },
+  "owner": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/.owner",
+    "bytes": 67,
+    "sha256": "cdecde3c8bc3adae1cfaacefa5226ab5835f23e1e454fd189fa9f5d2355111a3"
+  },
+  "remoteSources": [
+    {
+      "phase": "CREATE",
+      "source": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/remote-create-first.txt",
+        "bytes": 2665,
+        "sha256": "5dad6b18caf41493649a2ca99c7c49cf27023d6fb1b24a7a6458644d1e66acf5"
+      },
+      "representativeEncodedCharacters": 6512,
+      "losslessStringGzipRoundtrip": true
+    },
+    {
+      "phase": "RUN",
+      "source": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/remote-run-first.txt",
+        "bytes": 3077,
+        "sha256": "def5fde8786993f1a56a7e82e64b63bb31892f352c72c284f68dbde1decdfcdd"
+      },
+      "representativeEncodedCharacters": 7272,
+      "losslessStringGzipRoundtrip": true
+    },
+    {
+      "phase": "AFTER",
+      "source": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/remote-after-first.txt",
+        "bytes": 2437,
+        "sha256": "7b3cfac86619ff50b34aa195a63ef8d59fcaac9f0c9ab35e8f2bbd749889255e"
+      },
+      "representativeEncodedCharacters": 6256,
+      "losslessStringGzipRoundtrip": true
+    },
+    {
+      "phase": "CAPTURE",
+      "source": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/remote-capture-first.txt",
+        "bytes": 2392,
+        "sha256": "c695f9a8a6be9663f75f11b20cf231ec5f67ea5a959090b8779b245edb67f2d4"
+      },
+      "representativeEncodedCharacters": 6032,
+      "losslessStringGzipRoundtrip": true
+    },
+    {
+      "phase": "CLEANUP",
+      "source": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/remote-cleanup-first.txt",
+        "bytes": 3363,
+        "sha256": "be52b60b83dcc7155fbe8ef272390c06ac330e72cef3728fa87338e54b3938f2"
+      },
+      "representativeEncodedCharacters": 7164,
+      "losslessStringGzipRoundtrip": true
+    }
+  ],
+  "sourceFacts": {
+    "finalMsiSha256": "0a1ec454c5ef4f2f760fced6a1cdcb5aaffaffacddee5e1ddeaa3d94cd1ebd43",
+    "staticReportSha256": "b4a009bb953ae829d5eb8c564017f2d5ecc0140e33b88a7d4b29c38f41b5ae0a",
+    "actualCliProofSha256": "f823b6e55eee0733b5d32ebeea2bdc2d9b3bfeda66186cdbd749c838a15a0875",
+    "fixtureLedgerSha256": "fa372949bb74b30b540d122af552ebf4c2006e88a6e771ddd7bef76c57ab8799",
+    "productCode": "{4BFAFA4A-6E0D-5FAB-90F7-4C9967F2ED46}",
+    "nonce": "ef0ad284079e4dfaaa5d6f8cd7b7732f",
+    "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-parent-observer-ef0ad284079e4dfaaa5d6f8cd7b7732f"
+  },
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/run-quiet-observer-first.py",
+    "--report",
+    "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-first.json",
+    "--execute"
+  ],
+  "scope": "Root-serial actual final static-approved test-only observer MSI /i /qn /norestart /L*v, expected1603 after observer success and Type19 intentional error beforeInitialize. No intermediate MSI, normal helper/product/gate/Pending/Run, UI/foreground, scheduled task or cache/registration deletion.",
+  "budgets": {
+    "overallSeconds": 120,
+    "admissionIncludedInTotal": true,
+    "cleanupReservedSeconds": 20,
+    "msiClientWaitSeconds": 35,
+    "afterProcessWaitSeconds": 8
+  },
+  "checks": {
+    "pythonAST": true,
+    "representativePureCommandStringRoundtrip": true,
+    "PowerShellAST": "NOT_RUN",
+    "COMAPI": "NOT_RUN",
+    "SSHWindowsMSICargoNetwork": "NOT_RUN",
+    "existingSourceOrMainOrHelpersModified": false
+  },
+  "acceptance": [
+    "Exact final MSI/CLI/fixture-ledger/static report source pins; eight source guards and24originalPE facts unchanged before/after.",
+    "Fresh same actual CLI nonce/root/marker with protected currentSID/SYSTEM/admin ACL; only final MSI uploaded and hash checked.",
+    "Quiet original client Process.WaitForExit yields actual1603; no .Kill/process termination function. Unknown live instance retains FAIL/root.",
+    "Actual original observer PID/creation/image/process SID and parent PID/creation/image/process SID from exact bounded context.json; GUI no-console fact; no production role inference.",
+    "Read-only new msiexec PID+StartTimeFiletime comparison against exact before baseline; original observer expectedPID/create absence or PIDreuse proof. Existing baseline engine never killed. No unproved independent OS observer exitcode claim.",
+    "Final context/log exact raw bytes are captured after process quiescence, preserved locally with SHA/base64; preliminary context identity hash must match final.",
+    "Actual verbose log must contain unique observer-success Return1 then Type19 Return3+exactABORT, no Initialize/effects-action start; no whole install success claim.",
+    "Limited COM ProductsEx(exactProductCode,emptySID,7) plus ProductState unknown before/after and cleanup recheck; current-caller per-user+machine only, other users/cache NOT_QUERIED. No repair/uninstall/registry deletion.",
+    "Cleanup rechecks same original process instances, registration absence, captured context/log SHA, final MSI SHA, exact root marker and closed4file membership. Delete only exact four files and nonrecursive owned root after all safety evidence; unknowns retain root."
+  ],
+  "limitations": [
+    "Requires root actual Windows invocation/parent terminal observation; preparation does not run observer/MSI or prove the new COM reflection shape.",
+    "Baseline-existing msiexec processes may remain; report does not claim all global Windows Installer service processes disappeared. Any newly observed still-live instance blocks deletion; no process owner is guessed from name alone.",
+    "If failure prevents process/product/capture proofs, root remains for explicit bounded owner review; no blind force cleanup of engine/cache/registration.",
+    "MSI Type2 engine action-success+process original-instance disappearance supports test-only return; actual sourceSID/parent topology is facts, not new production Begin/End/MSI acceptance.",
+    "Only AST and literal encoding/gzip calculations ran. No controller function, PowerShell, COM, SSH, Windows, MSI, Cargo or network invocation.",
+    "Initial pure preparation length calculation exceeded7500 with redundant configbase64 and overcomplete representative config; changed only in-memory transport encoding to escaped single-quoted JSON inside compressed script and drops unused commandLine outside RUN. No actual Windows command failed or was attempted."
+  ]
+}

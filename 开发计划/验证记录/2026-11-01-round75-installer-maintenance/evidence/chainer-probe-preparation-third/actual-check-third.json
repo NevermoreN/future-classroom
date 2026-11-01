@@ -1,0 +1,49 @@
+{
+  "status": "PASS_SAME_MSI_UNCHANGED_DIRECTORY_ROW_ORDER_CHECK_ONLY",
+  "argv": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-third/chainer-probe.py",
+    "check-exports",
+    "--spec",
+    "/tmp/fc-round75-installer-maintenance/chainer-probe-input-second-bd0f287d596c4a01bc2a120c3670afb8/spec.json",
+    "--spec-sha256",
+    "e538784cec3fbe15cb65abf79b57f691eaed8849870ee45de873b03c0033caca",
+    "--compile-receipt",
+    "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/compiler-receipt.json",
+    "--compile-receipt-sha256",
+    "99aca6cf9ee2b3d9189af1640983e126e6080b3e1ab07f9f5b5a333d8496d1f0",
+    "--tables-list",
+    "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-second/tables.stdout.log",
+    "--exports",
+    "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-second/exports",
+    "--extracted-probe",
+    "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-second/extracted-probe.exe",
+    "--msi",
+    "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-second/chainer-probe-final.msi",
+    "--msi-sha256",
+    "c177ead1cdabc396a1c92f7aeb62c93a65dd46b77128ad606b8a442cc27e3ec1",
+    "--summary",
+    "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-second/summary.stdout.log"
+  ],
+  "actualParentReturned": true,
+  "exitCode": 0,
+  "elapsedSeconds": 0.08439624798484147,
+  "checker": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-third/chainer-probe.py",
+    "bytes": 17185,
+    "sha256": "dd8021c058dccad66b902e929ec6d9a5d4b6e2127409867f69a9dfdb2e73d6b9"
+  },
+  "originalSecondChecker": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/chainer-probe.py",
+    "bytes": 17113,
+    "sha256": "b74b5410b13ec8d2c6a80d0eb3a3ca2cbac7e610452bab3b5da5834418d1eaf2"
+  },
+  "unchangedMsiAndOriginals": true,
+  "actualStaticReport": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-third/actual-check-third.stdout.log",
+    "bytes": 5600,
+    "sha256": "48190f7a53d214e15adaa1561907f5b9da86668383c35993f0c703fa3c083ba7"
+  },
+  "onlyChange": "Directory exact-two-row equality normalized by primary-key order; ordinary IDT duplicate PK rejection unchanged; every source/EXE/MSI/receipt/export byte unchanged; no new build or Windows."
+}

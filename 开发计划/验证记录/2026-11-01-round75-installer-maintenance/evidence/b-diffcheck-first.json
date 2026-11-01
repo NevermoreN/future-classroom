@@ -1,0 +1,26 @@
+{
+  "name": "b-diffcheck-first",
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    "scripts/package-msi-candidate.py",
+    "scripts/check-msi-candidate.py",
+    "packaging/MSI-CANDIDATE.md"
+  ],
+  "exitCode": 0,
+  "actualExit": true,
+  "elapsedSeconds": 0.009514271980151534,
+  "status": "PASS",
+  "stdout": {
+    "path": "b-diffcheck-first.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "b-diffcheck-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

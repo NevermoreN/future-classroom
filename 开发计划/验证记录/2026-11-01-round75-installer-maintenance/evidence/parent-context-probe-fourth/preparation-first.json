@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_PURE_CHECKER_PREPARATION_ONLY",
+  "createdUtc": "2026-11-01T12:43:38.405991+00:00",
+  "checks": {
+    "command": [
+      "python3",
+      "/tmp/fc-round75-installer-maintenance/evidence/parent-context-probe-fourth/check-context-probe.py"
+    ],
+    "actualExit": true,
+    "exitCode": 0,
+    "elapsedSeconds": 0.16772752604447305,
+    "tests": 7,
+    "stdout": {
+      "path": "pure-check-first.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "pure-check-first.stderr.log",
+      "sha256": "afe5ec90d37bef35867dbaf835ca7708def1f3f571f7617989e01d353fd9aefe"
+    }
+  },
+  "files": [
+    {
+      "path": "context-probe.py",
+      "bytes": 18965,
+      "sha256": "93c87fef4ca04524e47c77c96d200274d2ebb6a3e918977244fea4ecf6bde979"
+    },
+    {
+      "path": "check-context-probe.py",
+      "bytes": 12111,
+      "sha256": "b50a20e5cb43e55386145c52aa2142d915abf9ae466e78a1c0623c76957b8a15"
+    },
+    {
+      "path": "README.md",
+      "bytes": 11179,
+      "sha256": "72f4c6c21bbbb874664529ad69f1639478d6b6e8a66c34a22a0ff0a89827f75b"
+    },
+    {
+      "path": "third-to-fourth.diff",
+      "bytes": 22790,
+      "sha256": "4ab9e25697133a60c4a341551c2f8a1dd404d2f9d143053e06ac1e42d72e5069"
+    }
+  ],
+  "sourceGuard": {
+    "jointFreezePath": "/tmp/fc-round75-installer-maintenance/evidence/root-joint-source-freeze-second.json",
+    "jointFreezeSha256": "d1ae35fabcf1694c1296a8f58fd7c4681c8c60aa17fe5bc3539be19ea6c0c48a",
+    "eightBefore": [
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle.rs",
+        "bytes": 9802,
+        "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+        "bytes": 39007,
+        "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+        "bytes": 40703,
+        "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+        "bytes": 10262,
+        "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+      },
+      {
+        "path": "scripts/package-msi-candidate.py",
+        "bytes": 55135,
+        "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e"
+      },
+      {
+        "path": "scripts/check-msi-candidate.py",
+        "bytes": 33752,
+        "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf"
+      },
+      {
+        "path": "packaging/MSI-CANDIDATE.md",
+        "bytes": 13778,
+        "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00"
+      },
+      {
+        "path": "Cargo.lock",
+        "bytes": 21005,
+        "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+      }
+    ],
+    "eightAfter": [
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle.rs",
+        "bytes": 9802,
+        "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+        "bytes": 39007,
+        "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+        "bytes": 40703,
+        "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+        "bytes": 10262,
+        "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+      },
+      {
+        "path": "scripts/package-msi-candidate.py",
+        "bytes": 55135,
+        "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e"
+      },
+      {
+        "path": "scripts/check-msi-candidate.py",
+        "bytes": 33752,
+        "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf"
+      },
+      {
+        "path": "packaging/MSI-CANDIDATE.md",
+        "bytes": 13778,
+        "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00"
+      },
+      {
+        "path": "Cargo.lock",
+        "bytes": 21005,
+        "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+      }
+    ],
+    "allExact": true
+  },
+  "thirdOriginalByteIdentitiesUnchanged": true,
+  "observedPrecedent": {
+    "rawForceCodepage": {
+      "path": "../registry-keypath-fixture-preparation-second/actual-exports/_ForceCodepage.idt",
+      "sha256": "756e2010bef11d89ced632638fdcf69a7d00ccce12aa5643482bfe5a28d16777"
+    },
+    "actualAdminSequence": {
+      "path": "../registry-keypath-fixture-preparation-second/actual-exports/AdminExecuteSequence.idt",
+      "sha256": "70c4cead4ae9a2ce4f09637a962d277953c92e362de0a98b03ba34b8fc6b6293"
+    },
+    "scope": "Separate registry fixture export precedent only, not actual parent-context exports/runtime."
+  },
+  "notRun": [
+    "No authoring function/author CLI/WXS/PE clone/MSI generated",
+    "No build/Cargo/network/Windows/MSI invocation",
+    "No product source/gate/Pending/Run mutation"
+  ],
+  "productionPremises": "Actual trusted immediate-parent process image/creation/tokenSID/limited-query-sync capability and exact component keypath01 remain strict; both await actual evidence, not preemptive widening."
+}

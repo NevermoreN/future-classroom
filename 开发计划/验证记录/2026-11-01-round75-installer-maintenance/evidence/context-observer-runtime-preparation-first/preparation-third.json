@@ -1,0 +1,47 @@
+{
+  "status": "PREPARED_THIRD_REFLECTED_COM_COUNT_FIX_ONLY_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T13:06:37.356849+00:00",
+  "second": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/run-quiet-observer-second.py",
+    "bytes": 22774,
+    "sha256": "03a6766c92a06ae7c0edf158a4c18dcdda5652a566f757e71b49eb081abaa646"
+  },
+  "third": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/run-quiet-observer-third.py",
+    "bytes": 22920,
+    "sha256": "df476e99f536bffed1f62850220fe9897b783c0d88bda54d49d388f3e1a97bb1"
+  },
+  "minimalDiff": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/second-to-third-com-count.diff",
+    "bytes": 2564,
+    "sha256": "11be83959e6ca923887c745fc3d8ce167f1c0464a5b5ee5664f9ab52ba187208"
+  },
+  "actualRootReadonlyEvidence": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/root-context-com-readonly-second.json",
+    "bytes": 4574,
+    "sha256": "ada37a37c2d87037f7e08edd2521d9e13e1fd4d6ade473d3d099aab5da882f22"
+  },
+  "originalActualQuietFailure": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-first.json",
+    "bytes": 30629,
+    "sha256": "60f5aeb189b2555e2104f3ba6515bd2d217fec53417df574ad0cfb6b878884ec"
+  },
+  "actualRootFactQualification": "Parent root actual diagnostic: direct COM adapter Count=null; reflection Count=Int32 zero; ProductState=Int32 minus1. Separate sample Hashtable dotCount/bracketCount bothzero, so no dictionary collision was observed or claimed.",
+  "change": "Only COMMON Registration count getter replaced with actual validated COM InvokeMember(Count,GetProperty) and strict Int32/nonnegative guard. Original count0/ProductState minus1 absence gate unchanged; no bypass.",
+  "checks": {
+    "pythonAST": true,
+    "allFivePhaseStringsByteIdentical": true,
+    "allOtherConstantsByteIdentical": true,
+    "commonExactlyOneCountStatementReplacement": true,
+    "WindowsSSHCOMMSICargoNetworkOrControllerFunctionInvoked": false
+  },
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/run-quiet-observer-third.py",
+    "--report",
+    "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-second.json",
+    "--execute"
+  ],
+  "unchanged": "Original120 total/20cleanupreserve, UTF8stdin transport, final MSI/CLI/ledger/static pins, exactrootnonce/marker/ACL, source8/PE24 guards, no unknown kills/cache/registration delete. Original first/second helpers and first actualFAIL remain exact."
+}

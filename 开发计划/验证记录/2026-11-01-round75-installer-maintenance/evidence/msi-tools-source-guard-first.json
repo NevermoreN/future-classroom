@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_EIGHT_FROZEN_INPUTS_AND_EXACT_OWNED_TOOL_CLOSURE",
+  "atUtc": "2026-11-01T12:12:45.560575+00:00",
+  "sourceGitBase": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+  "sourceFreezeSha256": "0e3ee0df68cc6362c87860ec9f39bf37ca07f93fb050b29986a5950c7fd1f6a5",
+  "sourceBefore": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40719,
+      "sha256": "9b6490911936a425f929af67028f5ac77611f04084255964a394c77ad8bd80cc"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 55135,
+      "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 33752,
+      "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 13778,
+      "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40719,
+      "sha256": "9b6490911936a425f929af67028f5ac77611f04084255964a394c77ad8bd80cc"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 55135,
+      "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 33752,
+      "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 13778,
+      "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    }
+  ],
+  "sourceUnchanged": true,
+  "downloadedPackages": 7,
+  "packageBytes": 642534,
+  "exactElfTools": 4,
+  "resolvedLibraries": 23,
+  "actualReapedOuterChildren": 8,
+  "actualReapedDownloadCommands": 7,
+  "actualReapedPreparationCommands": 23,
+  "toolsOwner": "future-classroom-owned-r75-msi-tools/v1\n",
+  "internalSymlinksNotFollowedForRemoval": [
+    {
+      "path": "root/usr/share/doc/wixl/changelog.Debian.gz",
+      "target": "../libmsi-1.0-0/changelog.Debian.gz"
+    },
+    {
+      "path": "root/usr/share/doc/msitools/changelog.Debian.gz",
+      "target": "../libmsi-1.0-0/changelog.Debian.gz"
+    },
+    {
+      "path": "root/usr/lib/x86_64-linux-gnu/libmsi-1.0.so.0",
+      "target": "libmsi-1.0.so.0.0.0"
+    },
+    {
+      "path": "root/usr/lib/x86_64-linux-gnu/libgcab-1.0.so.0",
+      "target": "libgcab-1.0.so.0.3.0"
+    },
+    {
+      "path": "root/usr/lib/x86_64-linux-gnu/libgsf-1.so.114",
+      "target": "libgsf-1.so.114.0.51"
+    }
+  ],
+  "invocation": {
+    "environment": {
+      "LD_LIBRARY_PATH": "/tmp/fc-round75-installer-maintenance/tools/root/usr/lib/x86_64-linux-gnu"
+    },
+    "wixl": "/tmp/fc-round75-installer-maintenance/tools/wrappers/wixl",
+    "msibuild": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msibuild",
+    "msiinfo": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+    "msiextract": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiextract",
+    "msibuild_sha256": "87ee3aa0af25bb997646071a45e35ebae3e3ba5f26fe7b479df97aa31bd8a1eb",
+    "note": "Set LD_LIBRARY_PATH only for the packaging child; no global environment/cache change. This preparation never calls package-msi-candidate.py."
+  },
+  "wrapper": {
+    "path": "/tmp/fc-round75-installer-maintenance/tools/wrappers/wixl",
+    "bytes": 618,
+    "sha256": "2ac0b4eebef87eb93298a0de3667ec7ad0e829e94c6e1e52b93518d50a400c60"
+  },
+  "msibuildUsage": "EXPECTED_NO_ARGUMENT_USAGE_EXIT1_NOT_VERSION_PASS",
+  "wixlWrapperVersion": "ACTUAL_EXIT0_LOAD_PROOF_ONLY",
+  "actualMsiBuilt": false,
+  "windowsRun": false,
+  "cargoRun": false,
+  "mainWritten": false,
+  "globalInstallation": false,
+  "artifacts": [
+    {
+      "path": "msi-tools-input-first.json",
+      "bytes": 5094,
+      "sha256": "11c412dfa4f98a4617869da020f119cdf744becf21459c3b6f14f49cfc34e056"
+    },
+    {
+      "path": "msi-tools-controller-first.json",
+      "bytes": 37229,
+      "sha256": "7edd52ea53bbeea5f9cf23315a29a14b1e123d9d9d9e2762fa9f9b9d80845734"
+    },
+    {
+      "path": "msi-tools-preparation-first.json",
+      "bytes": 53717,
+      "sha256": "4d09e249e49591e251481c898e742164cee9a11041a5104f828bf9409292079a"
+    },
+    {
+      "path": "download-msi-tool-first.py",
+      "bytes": 3328,
+      "sha256": "d2a1a571e6c88662585f5b7846689e5af8c28ce737169a3d5e4530c20ef746c5"
+    },
+    {
+      "path": "prepare-msi-tools-local-first.py",
+      "bytes": 7397,
+      "sha256": "9622ab025cf125a7b04bbf2e389512833d1249363d300de29ec7b9ec6fb8db9a"
+    },
+    {
+      "path": "run-msi-tools-first.py",
+      "bytes": 4931,
+      "sha256": "790bfc180ce939f119871cbc682ae9ce4e8171032bac0866b134ac2afad75721"
+    }
+  ]
+}

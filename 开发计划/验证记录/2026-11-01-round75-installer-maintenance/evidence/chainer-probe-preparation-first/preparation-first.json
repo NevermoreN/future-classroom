@@ -1,0 +1,122 @@
+{
+  "status": "PREPARED_INDEPENDENT_CHAINER_SOURCE_AUTHOR_CHECK_ONLY",
+  "recordedUtc": "2026-11-01T13:24:54.386778+00:00",
+  "files": [
+    {
+      "path": ".owner",
+      "bytes": 62,
+      "sha256": "39d878fe1bf9633e90672a4f48b2d18615eb86884497963a120791376ae1f55b"
+    },
+    {
+      "path": "ChainerProbe.cs.in",
+      "bytes": 15247,
+      "sha256": "c5cdfbce05d44ba565655cc8fd84c248cdf28323bd8febd8d0892ce996f0e9a2"
+    },
+    {
+      "path": "chainer-probe.py",
+      "bytes": 15560,
+      "sha256": "bdfb77757de03449c58fd5b3e706423f3c324fa475b81a60efd1947e09c8cfa4"
+    },
+    {
+      "path": "check-contracts.py",
+      "bytes": 5933,
+      "sha256": "a5df15c0a2974601375b6be0e7d7e8681d7d804f5a17e78a1c860627d5f0d398"
+    },
+    {
+      "path": "README.md",
+      "bytes": 10809,
+      "sha256": "21e2676be5e51dc044926571f6392e172d09a04b93f2725ed1f0aa6c98b63ca0"
+    },
+    {
+      "path": "pure-contracts-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pure-contracts-first.stderr.log",
+      "bytes": 1070,
+      "sha256": "a036adff5e6335067eb996e5dca7a526703cba0d88325b21f4fa9f9e66a489b5"
+    },
+    {
+      "path": "pure-contracts-final.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pure-contracts-final.stderr.log",
+      "bytes": 1070,
+      "sha256": "a036adff5e6335067eb996e5dca7a526703cba0d88325b21f4fa9f9e66a489b5"
+    }
+  ],
+  "pureChecks": {
+    "status": "PASS",
+    "tests": 8,
+    "exitCode": 0,
+    "runtimeSeconds": 0.008,
+    "kind": "Python in-memory contract fixtures only; not C# compile/MSI build or Windows"
+  },
+  "sourceGuards": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "beforeSha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691",
+      "afterSha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691",
+      "unchanged": true
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "beforeSha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f",
+      "afterSha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f",
+      "unchanged": true
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "beforeSha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb",
+      "afterSha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb",
+      "unchanged": true
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "beforeSha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5",
+      "afterSha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5",
+      "unchanged": true
+    }
+  ],
+  "productionSourcesUnchanged": true,
+  "actualOperations": {
+    "operationalPrepare": "NOT_RUN_ROOT_MUST_SELECT_NONCE_ROOT_USER_OWNER",
+    "csharpCompile": "NOT_RUN",
+    "msiBuild": "NOT_RUN",
+    "windows": "NOT_RUN",
+    "cargo": "NOT_RUN",
+    "network": "NOT_RUN"
+  },
+  "interfaces": {
+    "sourceTemplate": "ChainerProbe.cs.in",
+    "prepare": "chainer-probe.py prepare --nonce --windows-report-root --owner-sid --output-dir",
+    "checker": "chainer-probe.py check-exports",
+    "compilerArgs": [
+      "cscAbs",
+      "/nologo",
+      "/target:winexe",
+      "/platform:x86",
+      "/optimize+",
+      "/warnaserror+",
+      "/out:exactExe",
+      "exactSourcePath/ChainerProbe.cs"
+    ],
+    "reportFiles": [
+      "pre-join.json",
+      "result.json"
+    ],
+    "reportBoundBytesEach": 8192,
+    "runtimeBudgetSeconds": 120,
+    "rollbackStateU32": 0,
+    "expectedArgv": [
+      "engineNonzeroU32",
+      "probe",
+      "compiledNonce",
+      "compiledRoot"
+    ]
+  },
+  "scope": "Independent .NET Framework x86 GUI test fixture only. Does not validate production Rust guardian/session identity/Begin binding, user permissions, Win7/Win10 OS or product lifecycle. Root sole Windows/controller execution; root formal /x finally if any fixture registration survives; no hand-deletion of cache/registration. Author/check tools never compile or run MSI."
+}

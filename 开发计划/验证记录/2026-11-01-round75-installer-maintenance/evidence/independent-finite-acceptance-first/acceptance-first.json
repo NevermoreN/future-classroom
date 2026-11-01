@@ -1,0 +1,1433 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_R75_FINITE_GNU22_WIN11_AND_INDEPENDENT_CHAINER_ROLLBACK_ONLY",
+  "recordedUtc": "2026-11-01T13:52:19.533401+00:00",
+  "scope": "Read-only independent finite source/artifact/original-result review. Current seven integrated sources plus Cargo.lock; GNU all22 harnesses on Win11; publicdesktop20; independent .NET chainer API rollback/held-exit facts and finite cleanup only. This reviewer ran no Cargo/tests/Windows/network or source edits.",
+  "sources": [
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+      "mainEqualsCandidate": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d",
+      "mainEqualsCandidate": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 41207,
+      "sha256": "9fc3247c353b4a20b689b0611e4ca7b08994a9ef09bf360936581522ca1fc091",
+      "mainEqualsCandidate": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5",
+      "mainEqualsCandidate": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9",
+      "mainEqualsCandidate": true
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 14564,
+      "sha256": "9efa5656201a962705536316cc374b4d47d37e74c8d5e981576ad655e79d0d17",
+      "mainEqualsCandidate": true
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 35469,
+      "sha256": "d23f912eecdb556352c8ebd97796ad1de2d86f1185e0c5feb2c29a11f53329d1",
+      "mainEqualsCandidate": true
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 58160,
+      "sha256": "d0fbb23a5dab2d3329e935110265609ea53674b31896102d1139e21cee193059",
+      "mainEqualsCandidate": true
+    }
+  ],
+  "artifactIdentities24": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+      "target": "fc_materials",
+      "bytes": 2352762,
+      "sha256": "f54d37c0120d0351a9734243d12fb7f1b90ab21715dff4856dd289e4929ed906",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+      "target": "fc_storage",
+      "bytes": 8423418,
+      "sha256": "e2dc9c1c89990f9ef4cd4f790277d2fc6667ecbe6f3e881e6be2f1e9d568d353",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+      "target": "fc_security",
+      "bytes": 1224276,
+      "sha256": "8d2e7fec2dd74115281ccf5e697a09e3537725f5325f2ac01e179eb21a523c7a",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+      "target": "fc_protocol",
+      "bytes": 1983421,
+      "sha256": "1a347063a3fd1bd9aa45f3c4684d546198d64d7ab90f453ee60e2c77967c1b69",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+      "target": "fc_presentation",
+      "bytes": 1853766,
+      "sha256": "148d0e8864c70541faa45b4aec6e193697a83b1fb7947d205cc0818acb1c3b12",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+      "target": "fc_application",
+      "bytes": 1280300,
+      "sha256": "a3797d9f602257850d6b34a43ae7dbd38de1f6c8ef9c041f7320f39b89aa0883",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+      "target": "fc_runtime",
+      "bytes": 1430273,
+      "sha256": "6f4fe37abd247922051a5772252d3429b591dfc5bd6c78b694b3f566910fd111",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+      "target": "fc_audio",
+      "bytes": 1246736,
+      "sha256": "4ea5f21318a599e062c75e47e596cdcae5102b342638508312383e6d813a22cc",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+      "target": "fc_ports",
+      "bytes": 1185286,
+      "sha256": "01520a7edae86495267712512ee5dcb672cbe06e65fc068cab578a9d51b0db42",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+      "target": "fc_domain",
+      "bytes": 2403377,
+      "sha256": "832ee926fbca1421567eb941a1e21bd8556739e2fcd427606532015768fe85fc",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-96edfabaffdd4929.exe",
+      "target": "voice_limits_storage",
+      "bytes": 5191010,
+      "sha256": "0422e7c1ccfd4cf14f6994099024c98410d0cb0242b1b2f847e8baec711d2137",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe",
+      "target": "fc_windows",
+      "bytes": 3990587,
+      "sha256": "48a8f7c20aba7452018aad13dcdcbee0a334fef9527b26d409cc088725d25e7e",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-d4a98b3cdf6100eb.exe",
+      "target": "autostart_coordinator",
+      "bytes": 5535002,
+      "sha256": "1fca398bbe98a98833057923958d382316412ffc52355def58fd07610679aac6",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-697f746362036af8.exe",
+      "target": "calendar_execution_fence",
+      "bytes": 5624935,
+      "sha256": "adfb45892eff0515722f7dd603e9d7074666ad8cce6d4c7702334f4cc4936b1d",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/voice_storage-6bb619ee5dee63b6.exe",
+      "target": "voice_storage",
+      "bytes": 5235253,
+      "sha256": "f0f52ee6eb2a01eaee00fb1717519a2294034e28a07fb4ee6acce3ee130842a2",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/schedule_operations-9b4d7e2443bcde3a.exe",
+      "target": "schedule_operations",
+      "bytes": 5785432,
+      "sha256": "132874280afaccfd83d034ad61caf105973d68c2b4ed8310ac5442101e0a0abe",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_installer_lifecycle-cab6782a752605cb.exe",
+      "target": "fc-installer-lifecycle",
+      "bytes": 1296754,
+      "sha256": "2eaa79acaa48eed4e276568086f356af8da3ed983d371e8d13e90879ad3f14f8",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/business_storage-1758945f26dd4d24.exe",
+      "target": "business_storage",
+      "bytes": 6196953,
+      "sha256": "b3c93e11eb40c9e89218270d2d6a4e8cf9c1d97b17304c40a30a774aa9a7c78b",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/examples/verify_web_assets-8500932ea48ba2d2.exe",
+      "target": "verify_web_assets",
+      "bytes": 1097081,
+      "sha256": "518ad6d58fa634a6914a9b88505bfd0c5f03b9835844f1cc0052937520735b39",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/runtime_storage-c482f8ab0ffd29bd.exe",
+      "target": "runtime_storage",
+      "bytes": 4991709,
+      "sha256": "c6264e450412a423fab69ea028a45ec4de7607ae0cc81c3253797d921a32c9bb",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-6cc266b4a69e4fd2.exe",
+      "target": "fc-bootstrap",
+      "bytes": 12846574,
+      "sha256": "342e44c669f74987c923e98d086c2f4d5393c6ce1328c4ba8c1e125df92e5c15",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-8fd20aa1db135542.exe",
+      "target": "fc_bootstrap",
+      "bytes": 13095198,
+      "sha256": "e67ae094257d569afe5f91547a0d0c71b5e9d96e6b7722b36d6cb17667fd0466",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "target": "fc-installer-lifecycle",
+      "bytes": 699090,
+      "sha256": "d4ed48794cb2aa13cb2ba1e96842415295701097f9cde33b4ef023ae19e530af",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 2
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "target": "fc-bootstrap",
+      "bytes": 13352281,
+      "sha256": "a146684d5ea268e74926360c91fa0860cf3af44187f62292efb45fa42c8cbb08",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 2
+    }
+  ],
+  "harnesses22": [
+    {
+      "name": "fc_materials-f1a7d58c131e95d5.exe",
+      "binarySha256": "f54d37c0120d0351a9734243d12fb7f1b90ab21715dff4856dd289e4929ed906",
+      "declared": 39,
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+      "binarySha256": "e2dc9c1c89990f9ef4cd4f790277d2fc6667ecbe6f3e881e6be2f1e9d568d353",
+      "declared": 208,
+      "passed": 208,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_security-2889fa9301b88e80.exe",
+      "binarySha256": "8d2e7fec2dd74115281ccf5e697a09e3537725f5325f2ac01e179eb21a523c7a",
+      "declared": 19,
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_protocol-4316bb63b92dda4d.exe",
+      "binarySha256": "1a347063a3fd1bd9aa45f3c4684d546198d64d7ab90f453ee60e2c77967c1b69",
+      "declared": 82,
+      "passed": 82,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_presentation-b847dfa3b68d1237.exe",
+      "binarySha256": "148d0e8864c70541faa45b4aec6e193697a83b1fb7947d205cc0818acb1c3b12",
+      "declared": 58,
+      "passed": 58,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_application-fb16268b5eff3acf.exe",
+      "binarySha256": "a3797d9f602257850d6b34a43ae7dbd38de1f6c8ef9c041f7320f39b89aa0883",
+      "declared": 25,
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_runtime-a09be73363edd23a.exe",
+      "binarySha256": "6f4fe37abd247922051a5772252d3429b591dfc5bd6c78b694b3f566910fd111",
+      "declared": 33,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_audio-e1b4eabc9ef1420f.exe",
+      "binarySha256": "4ea5f21318a599e062c75e47e596cdcae5102b342638508312383e6d813a22cc",
+      "declared": 22,
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_ports-15b1ad689f79c490.exe",
+      "binarySha256": "01520a7edae86495267712512ee5dcb672cbe06e65fc068cab578a9d51b0db42",
+      "declared": 8,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_domain-367747e306a1dd0e.exe",
+      "binarySha256": "832ee926fbca1421567eb941a1e21bd8556739e2fcd427606532015768fe85fc",
+      "declared": 149,
+      "passed": 149,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "voice_limits_storage-96edfabaffdd4929.exe",
+      "binarySha256": "0422e7c1ccfd4cf14f6994099024c98410d0cb0242b1b2f847e8baec711d2137",
+      "declared": 4,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_windows-ac67b5f1df5ec8b2.exe",
+      "binarySha256": "48a8f7c20aba7452018aad13dcdcbee0a334fef9527b26d409cc088725d25e7e",
+      "declared": 267,
+      "passed": 267,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "autostart_coordinator-d4a98b3cdf6100eb.exe",
+      "binarySha256": "1fca398bbe98a98833057923958d382316412ffc52355def58fd07610679aac6",
+      "declared": 13,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "calendar_execution_fence-697f746362036af8.exe",
+      "binarySha256": "adfb45892eff0515722f7dd603e9d7074666ad8cce6d4c7702334f4cc4936b1d",
+      "declared": 4,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "voice_storage-6bb619ee5dee63b6.exe",
+      "binarySha256": "f0f52ee6eb2a01eaee00fb1717519a2294034e28a07fb4ee6acce3ee130842a2",
+      "declared": 6,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "schedule_operations-9b4d7e2443bcde3a.exe",
+      "binarySha256": "132874280afaccfd83d034ad61caf105973d68c2b4ed8310ac5442101e0a0abe",
+      "declared": 5,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_installer_lifecycle-cab6782a752605cb.exe",
+      "binarySha256": "2eaa79acaa48eed4e276568086f356af8da3ed983d371e8d13e90879ad3f14f8",
+      "declared": 1,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "business_storage-1758945f26dd4d24.exe",
+      "binarySha256": "b3c93e11eb40c9e89218270d2d6a4e8cf9c1d97b17304c40a30a774aa9a7c78b",
+      "declared": 43,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "verify_web_assets-8500932ea48ba2d2.exe",
+      "binarySha256": "518ad6d58fa634a6914a9b88505bfd0c5f03b9835844f1cc0052937520735b39",
+      "declared": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "runtime_storage-c482f8ab0ffd29bd.exe",
+      "binarySha256": "c6264e450412a423fab69ea028a45ec4de7607ae0cc81c3253797d921a32c9bb",
+      "declared": 3,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_bootstrap-6cc266b4a69e4fd2.exe",
+      "binarySha256": "342e44c669f74987c923e98d086c2f4d5393c6ce1328c4ba8c1e125df92e5c15",
+      "declared": 223,
+      "passed": 223,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "name": "fc_bootstrap-8fd20aa1db135542.exe",
+      "binarySha256": "e67ae094257d569afe5f91547a0d0c71b5e9d96e6b7722b36d6cb17667fd0466",
+      "declared": 348,
+      "passed": 348,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    }
+  ],
+  "counts": {
+    "passed": 1560,
+    "failed": 0,
+    "ignored": 0,
+    "filteredOut": 0,
+    "nativeOuterCases": 267,
+    "policyCaseOccurrences": 1,
+    "publicDesktopSteps": 20,
+    "producedPE": 24,
+    "testPE": 22,
+    "normalPE": 2,
+    "uploadedPE": 23
+  },
+  "childScopeQualification": "Two fixed pipe fixture child stdout summaries bound to original indices and source cases, excluded from outer1560 counts; no independent child PID/creation evidence invented.",
+  "chainer": {
+    "scope": "Independent compiled .NET Framework x86 WinExe, not normal Rust helper",
+    "ownRawSidHex": "01050000000000051500000067f039e8ca6e546fa21f8475e9030000",
+    "ownDecodedSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+    "parentRawSidHex": "010100000000000512000000",
+    "parentDecodedSid": "S-1-5-18",
+    "argv": [
+      "2",
+      "probe",
+      "bd0f287d596c4a01bc2a120c3670afb8",
+      "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-probe-bd0f287d596c4a01bc2a120c3670afb8"
+    ],
+    "helperIdentity": {
+      "status": "OK",
+      "pid": 32048,
+      "creationFiletime": 134380144455399773,
+      "image": "C:\\Windows\\Installer\\MSIED2.tmp",
+      "tokenUserSidHex": "01050000000000051500000067f039e8ca6e546fa21f8475e9030000"
+    },
+    "parentIdentity": {
+      "status": "OK",
+      "pid": 23944,
+      "creationFiletime": 134380144452978885,
+      "image": "C:\\Windows\\System32\\msiexec.exe",
+      "tokenUserSidHex": "010100000000000512000000"
+    },
+    "helperActualExitCode": 0,
+    "helperWaitResult": 0,
+    "clientActualExitCode": 0,
+    "joinReturn": 0,
+    "endRollbackReturn": 0,
+    "eventCloseCount": 1,
+    "checkedCloseCount": 13,
+    "formalXNeeded": false,
+    "originalInstancesGone": true,
+    "rootRemoved": true,
+    "cacheReadOnly": {
+      "readOnly": true,
+      "status": "PASS_EXACT_LOG_AND_ORIGINAL_IMAGE_CACHE_ABSENT",
+      "cacheDeletion": false,
+      "items": [
+        {
+          "path": "C:\\Windows\\Installer\\33a50e64.msi",
+          "status": "ABSENT"
+        },
+        {
+          "path": "C:\\Windows\\Installer\\MSIEE2.tmp",
+          "status": "ABSENT"
+        },
+        {
+          "path": "C:\\Windows\\Installer\\MSIED2.tmp",
+          "status": "ABSENT"
+        }
+      ]
+    },
+    "sharedService": "SCM-bound service retained, never a per-transaction session or owned worker"
+  },
+  "notRun": {
+    "normalRustInstallerHelper": "NOT_RUN_PINNED_ONLY",
+    "actualProductMSIHealthyReapplyUninstallRollback": "NOT_RUN",
+    "Win7OS": "NOT_RUN",
+    "Win10OS": "NOT_RUN",
+    "SeewoHardware": "NOT_RUN",
+    "standardUserPerUserNoElevationAcceptance": "NOT_RUN"
+  },
+  "finalWindowsReadonly": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/windows-readonly-final-first.json",
+    "bytes": 16732,
+    "sha256": "6ba3863c8fbba801ef9a3e3252f07c878a4725bdd828ab60e64d13a739acc156"
+  },
+  "originalEvidenceIdentities": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-joint-source-freeze-fourth.json",
+      "bytes": 2008,
+      "sha256": "d5d22e44e81e8f15c9ffb956d89a81f56be29d4e63a02e2dba7a1ab4b47e9590"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-n3-codegen-source-freeze-first.json",
+      "bytes": 1531,
+      "sha256": "1b06ce58b408707b76108a367a0a81a1fbda6e20f068b22b3e5fbcaae9392700"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n-release-third.json",
+      "bytes": 27199,
+      "sha256": "c2097456ca15a57699c6e297f5f0cf772b42ef1397c368a51733405831fc6414"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n-producer-terminal-third.json",
+      "bytes": 4416,
+      "sha256": "b3375911924b609b9b71af0a76f8fc214f544364faf6b97ca6ec4fc0b9f6f01c"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n-stable-release-tests-third.stdout.log",
+      "bytes": 104549,
+      "sha256": "5fb3bea83d065549e3ec6146642fbe7a7dcb7460aae4136a8515f1457a94cc55"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n-stable-release-bins-third.stdout.log",
+      "bytes": 86022,
+      "sha256": "969e85ce064622914a11b20c5089162eaf9ed5ef0ff427d31f507a715abd1307"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/freeze-first.json",
+      "bytes": 10191,
+      "sha256": "5645c8321594612414b05582e9bc6058688800c325aaa08aab66a71ffa5a463a"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n-implementation-freeze-second.json",
+      "bytes": 7881,
+      "sha256": "f0ff8e201c9005bae96407b03a48b0e23b337bdce24955cdc2264ac48ff07370"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b-implementation-fourth.json",
+      "bytes": 7630,
+      "sha256": "dcdf5968e4cd8a8858dcd96841bc1629ba65b67e6c10b785e722f0ae81519c57"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-main-integrated-source-first.json",
+      "bytes": 2118,
+      "sha256": "08ab66475b5c3220fba6a193aef65131473f9bfe4a4a2fbca870a73126ffaabe"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-windows-gnu-full-second.operation.json",
+      "bytes": 62562,
+      "sha256": "7a1d17ece28593f170eadd0eb2c11e0b9540cf3c21138f52112150dd354d304d"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-windows-gnu-full-second.json",
+      "bytes": 224836,
+      "sha256": "5e4796300f1d77a49ddb2dc9d3bcb79dc95ba51ca19e217bbc8f402ec3be3562"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-chainer-second.json",
+      "bytes": 521016,
+      "sha256": "1ab2706af9acc8a8cdcb1fc8bbf3d32e9e211b3b001d61864c5334c092180955"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-chainer-second-pre-join.json",
+      "bytes": 760,
+      "sha256": "0089fde5b1d23f0b701f02543baed2e4857de27f02566dfe54f1bf5376c5ca27"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-chainer-second-result.json",
+      "bytes": 1667,
+      "sha256": "13454fb34def5a3e14f0dc5954f4f09d23ef747baa2b21d3160d343c8b4fae93"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-chainer-second-install.log",
+      "bytes": 128380,
+      "sha256": "30f50e03d1dea2f27f31254d8912b1cd0a615015e34043de68627ca6234a6f4f"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-chainer-second-cache-readonly.json",
+      "bytes": 6540,
+      "sha256": "7d189095f9f23ae70686e53a3513e7a5935fbd568832cc2a558093d4a09f37be"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-third.json",
+      "bytes": 134890,
+      "sha256": "cd44ef72b57a354209a72f190e4e027c25f19f256a50e9b044785f8a90c06cd8"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-interpretation-first.json",
+      "bytes": 664,
+      "sha256": "c7a7a3ec19a35b5da4dcd58d5ddd39be216db11c601ba2fdee8f75519366699d"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-third/actual-check-third.json",
+      "bytes": 2430,
+      "sha256": "e33c1eb307fd5c5b3050c1f005c44b313c64c514635acf6a7ed048ffaa2a86d4"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/windows-readonly-final-first.json",
+      "bytes": 16732,
+      "sha256": "6ba3863c8fbba801ef9a3e3252f07c878a4725bdd828ab60e64d13a739acc156"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-chainer-failed-first-cache-readonly.json",
+      "bytes": 6396,
+      "sha256": "010e894c9651102ae0592200d93bd088ed73375dc0e0cb55b07f22bb2fbafc3f"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-engine-cache-readonly-first.json",
+      "bytes": 6054,
+      "sha256": "c3983fae8711795717d77ca3f14dd9dce67cdda684050897035a0430b3795999"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-chainer-failed-first-recovery-cleanup.json",
+      "bytes": 10836,
+      "sha256": "aaa6432d8a2204f002b58c2e47fabba5e440feece2328c952d813f7c8283dc8a"
+    }
+  ],
+  "retainedFailures": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n-typecheck-first.json",
+      "bytes": 3788,
+      "sha256": "85371045f89c47efc6b081ccc0c2a680d9ee39869cc3349a2246ad9101c1078e",
+      "originalStatus": "FAIL",
+      "qualification": "Original failure retained separately; no rewrite or upgrade to PASS"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n-release-first.json",
+      "bytes": 4434,
+      "sha256": "2afa0708ec66cb9ebb036c255fe1cd5fc1b9255e9eb14da03246518abe90283f",
+      "originalStatus": "FAIL",
+      "qualification": "Original failure retained separately; no rewrite or upgrade to PASS"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-chainer-first.json",
+      "bytes": 272904,
+      "sha256": "acc0b183ee38ba92d3b5081010990452ada668366f6ead5337b04d42d716204e",
+      "originalStatus": "FAIL_OR_UNKNOWN_INDEPENDENT_CHAINER_EVIDENCE",
+      "qualification": "Original failure retained separately; no rewrite or upgrade to PASS"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-second/build-operation.json",
+      "bytes": 41692,
+      "sha256": "58e14a06b2e6048242ce15f28150880bef9ee093d8413d227bc07dab2213af1b",
+      "originalStatus": "FAIL_LOCAL_CHAINER_BUILD",
+      "qualification": "Original failure retained separately; no rewrite or upgrade to PASS"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-final-audit-preflight-first.json",
+      "bytes": 485,
+      "sha256": "8cfcac5257a1b0999a74fa0231e24b2eaf88432b689b1cdba0b5c619855bc532",
+      "originalStatus": "FAIL_LOCAL_DEFAULT_BASELINE_MISSING_BEFORE_SSH",
+      "qualification": "Original failure retained separately; no rewrite or upgrade to PASS"
+    }
+  ],
+  "checks": [
+    {
+      "check": "exact 4 native + 3 B + Cargo.lock freeze8",
+      "status": "PASS"
+    },
+    {
+      "check": "main/candidate frozen bytes Cargo.lock",
+      "status": "PASS"
+    },
+    {
+      "check": "main/candidate frozen bytes crates/fc-windows/src/installer_lifecycle.rs",
+      "status": "PASS"
+    },
+    {
+      "check": "main/candidate frozen bytes crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "status": "PASS"
+    },
+    {
+      "check": "main/candidate frozen bytes crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "status": "PASS"
+    },
+    {
+      "check": "main/candidate frozen bytes crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "status": "PASS"
+    },
+    {
+      "check": "main/candidate frozen bytes packaging/MSI-CANDIDATE.md",
+      "status": "PASS"
+    },
+    {
+      "check": "main/candidate frozen bytes scripts/check-msi-candidate.py",
+      "status": "PASS"
+    },
+    {
+      "check": "main/candidate frozen bytes scripts/package-msi-candidate.py",
+      "status": "PASS"
+    },
+    {
+      "check": "main integration exact seven source records",
+      "status": "PASS"
+    },
+    {
+      "check": "producer/runtime exact before-after eight inputs",
+      "status": "PASS"
+    },
+    {
+      "check": "actual strict nightly + stable test no-run + normal bins exits0",
+      "status": "PASS"
+    },
+    {
+      "check": "original codegen log n-nightly-workspace-strict-clippy-third.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "check": "original codegen log n-nightly-workspace-strict-clippy-third.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "check": "original codegen log n-stable-release-tests-third.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "check": "original codegen log n-stable-release-tests-third.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "check": "original codegen log n-stable-release-bins-third.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "check": "original codegen log n-stable-release-bins-third.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "check": "producer actual original parent terminal and report binding",
+      "status": "PASS"
+    },
+    {
+      "check": "original source/metadata freeze identity root-n3-codegen-source-freeze-first.json",
+      "status": "PASS"
+    },
+    {
+      "check": "original source/metadata freeze identity root-joint-source-freeze-fourth.json",
+      "status": "PASS"
+    },
+    {
+      "check": "original source/metadata freeze identity n3-engine-parent-implementation-first/freeze-first.json",
+      "status": "PASS"
+    },
+    {
+      "check": "original source/metadata freeze identity n-implementation-freeze-second.json",
+      "status": "PASS"
+    },
+    {
+      "check": "original source/metadata freeze identity b-implementation-fourth.json",
+      "status": "PASS"
+    },
+    {
+      "check": "original source/metadata freeze identity n-stable-release-tests-third.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "check": "24 actual artifacts =22 test CUI+2 normal GUI",
+      "status": "PASS"
+    },
+    {
+      "check": "runtime artifact ledger exact producer; normal Rust helper not executed",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_materials",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_storage",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_security",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_protocol",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_presentation",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_application",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_runtime",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_audio",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_ports",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_domain",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile voice_limits_storage",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_windows",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile autostart_coordinator",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile calendar_execution_fence",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile voice_storage",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile schedule_operations",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc-installer-lifecycle",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile business_storage",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile verify_web_assets",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile runtime_storage",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc-bootstrap",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc_bootstrap",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc-installer-lifecycle",
+      "status": "PASS"
+    },
+    {
+      "check": "actual PE bytes/profile fc-bootstrap",
+      "status": "PASS"
+    },
+    {
+      "check": "24 original Cargo JSON artifact associations",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_materials",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_storage",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_security",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_protocol",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_presentation",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_application",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_runtime",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_audio",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_ports",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_domain",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact voice_limits_storage",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_windows",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact autostart_coordinator",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact calendar_execution_fence",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact voice_storage",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact schedule_operations",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc-installer-lifecycle",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact business_storage",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact verify_web_assets",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact runtime_storage",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc-bootstrap",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc_bootstrap",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc-installer-lifecycle",
+      "status": "PASS"
+    },
+    {
+      "check": "Cargo original line exact fc-bootstrap",
+      "status": "PASS"
+    },
+    {
+      "check": "actual Windows operation terminal0 and remote cleanup",
+      "status": "PASS"
+    },
+    {
+      "check": "actual Windows raw report identity binding",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_materials-f1a7d58c131e95d5.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_storage-3ccf7e5bedbf5d94.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_security-2889fa9301b88e80.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_protocol-4316bb63b92dda4d.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_presentation-b847dfa3b68d1237.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_application-fb16268b5eff3acf.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_runtime-a09be73363edd23a.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_audio-e1b4eabc9ef1420f.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_ports-15b1ad689f79c490.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_domain-367747e306a1dd0e.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count voice_limits_storage-96edfabaffdd4929.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "source-bound preserved child stdout scope fc_windows-ac67b5f1df5ec8b2.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "source-bound preserved child stdout scope fc_windows-ac67b5f1df5ec8b2.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_windows-ac67b5f1df5ec8b2.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count autostart_coordinator-d4a98b3cdf6100eb.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count calendar_execution_fence-697f746362036af8.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count voice_storage-6bb619ee5dee63b6.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count schedule_operations-9b4d7e2443bcde3a.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_installer_lifecycle-cab6782a752605cb.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count business_storage-1758945f26dd4d24.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count verify_web_assets-8500932ea48ba2d2.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count runtime_storage-c482f8ab0ffd29bd.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_bootstrap-6cc266b4a69e4fd2.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "independent outer case/summary count fc_bootstrap-8fd20aa1db135542.exe",
+      "status": "PASS"
+    },
+    {
+      "check": "22 whole harnesses1560/0/0/0 and new exact engine policy case once",
+      "status": "PASS"
+    },
+    {
+      "check": "23 uploads exclude normal helper; actual public desktop20",
+      "status": "PASS"
+    },
+    {
+      "check": "real independent chainer finite success and root removal",
+      "status": "PASS"
+    },
+    {
+      "check": "original downloaded chainer bytes quiet-chainer-second-pre-join.json",
+      "status": "PASS"
+    },
+    {
+      "check": "original downloaded chainer bytes quiet-chainer-second-result.json",
+      "status": "PASS"
+    },
+    {
+      "check": "original downloaded chainer bytes quiet-chainer-second-install.log",
+      "status": "PASS"
+    },
+    {
+      "check": "original raw C# JSON equals parsed root facts",
+      "status": "PASS"
+    },
+    {
+      "check": "real engine supplied txn-first exact x86 argv",
+      "status": "PASS"
+    },
+    {
+      "check": "actual Join0 EndRollback0 thirteen checked controls with event closed once",
+      "status": "PASS"
+    },
+    {
+      "check": "raw user/LocalSystem SID facts decoded; no GUI console",
+      "status": "PASS"
+    },
+    {
+      "check": "original source-bound helper held process actual exit0 wait0 checked close; no kill",
+      "status": "PASS"
+    },
+    {
+      "check": "actual client exit0 separate from shared LocalSystem parent23944",
+      "status": "PASS"
+    },
+    {
+      "check": "caller/machine product related and ownedHKCU32 absence",
+      "status": "PASS"
+    },
+    {
+      "check": "caller/machine product related and ownedHKCU32 absence",
+      "status": "PASS"
+    },
+    {
+      "check": "caller/machine product related and ownedHKCU32 absence",
+      "status": "PASS"
+    },
+    {
+      "check": "rollback cleaned without formal/x; original instances gone; shared SCM service retained",
+      "status": "PASS"
+    },
+    {
+      "check": "three exact derived Windows Installer cache paths independently readonly absent",
+      "status": "PASS"
+    },
+    {
+      "check": "final Windows readonly PASS no test residues Run/auth preserved sshdRunning key metadata0600",
+      "status": "PASS"
+    },
+    {
+      "check": "prior four registry/observer and two failed-chainer cache paths readonly absent; original failed root recovered without stopping service",
+      "status": "PASS"
+    }
+  ],
+  "limitations": "Independent API success does not stand in for Rust product guardian/Begin binding, product MSI maintenance or broader operating-system acceptance. No arbitrary external MSI/TRANSFORMS claim is introduced. Shared service liveness is expected, not test residue. Existing historical HostClippy/CI failures retain their original qualifications.",
+  "priorCacheAndRecovery": {
+    "firstFailedChainerCacheReadonly": {
+      "readOnly": true,
+      "status": "PASS_EXACT_LOG_DERIVED_CACHE_ABSENT",
+      "cacheDeletion": false,
+      "items": [
+        {
+          "path": "C:\\Windows\\Installer\\339bb9d7.msi",
+          "status": "ABSENT"
+        },
+        {
+          "path": "C:\\Windows\\Installer\\MSIBA26.tmp",
+          "status": "ABSENT"
+        }
+      ]
+    },
+    "earlierRegistryObserverCacheReadonly": {
+      "allAbsent": true,
+      "status": "READONLY_EXACT_ENGINE_TEMP_AND_CACHE_EXISTENCE",
+      "files": [
+        {
+          "exists": false,
+          "path": "C:\\Windows\\Installer\\337c1fb1.msi"
+        },
+        {
+          "exists": false,
+          "path": "C:\\Windows\\Installer\\337c1fb5.msi"
+        },
+        {
+          "exists": false,
+          "path": "C:\\Windows\\Installer\\337c1fb9.msi"
+        },
+        {
+          "exists": false,
+          "path": "C:\\Windows\\Installer\\MSI5D46.tmp"
+        }
+      ]
+    },
+    "firstFailedRootRecovery": {
+      "nonce": "bd0f287d596c4a01bc2a120c3670afb8",
+      "registration": {
+        "contexts": 7,
+        "productState": -1,
+        "relatedCount": 0,
+        "product": "{9C946503-A749-528D-BA4E-0C68136A6794}",
+        "sidArgument": "",
+        "count": 0,
+        "otherUsers": "NOT_QUERIED",
+        "status": "ACTUAL_CALLER_PERUSER_AND_MACHINE",
+        "upgrade": "{5618393C-3107-5352-9D97-BBE74EB4B112}"
+      },
+      "directoryCount": 1,
+      "serviceStopped": false,
+      "fileCount": 3,
+      "absent": true,
+      "helperQualification": "NOT_EXECUTED_ENGINE_EXPLICIT_SKIP_NO_API_SUCCESS",
+      "retainedOperatingSystemMsiService": 31060,
+      "status": "PASS_OWNED_FAILED_FIXTURE_ROOT_REMOVED"
+    },
+    "qualification": "Original first empty-feature failure stays failed/no-helper/no-API success; later cleanup recovery does not upgrade it. Exact paths only, no cache removal by reviewer."
+  }
+}

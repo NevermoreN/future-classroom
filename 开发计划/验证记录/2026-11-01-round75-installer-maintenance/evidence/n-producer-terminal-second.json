@@ -1,0 +1,72 @@
+{
+  "status": "PASS_CONTROLLER_ACTUAL_EXIT0_REAPED",
+  "recordedUtc": "2026-11-01T12:24:12.514931+00:00",
+  "producerExecSession": 98074,
+  "actualToolTerminal": {
+    "chunkId": "a87f1c",
+    "exitCode": 0,
+    "wallTimeSeconds": 1.2521e-05,
+    "runningSessionReturned": false
+  },
+  "report": {
+    "path": "n-release-second.json",
+    "sha256": "2884f0831e4ce5bcd4ac2dedfe6412000ed3e17a5f81c41ad6fc110d60d10c74"
+  },
+  "sourceFreeze": {
+    "path": "n-implementation-freeze-second.json",
+    "sha256": "f0ff8e201c9005bae96407b03a48b0e23b337bdce24955cdc2264ac48ff07370",
+    "fourSourceCurrentShaMatch": true
+  },
+  "jointFreeze": {
+    "path": "root-joint-source-freeze-second.json",
+    "sha256": "d1ae35fabcf1694c1296a8f58fd7c4681c8c60aa17fe5bc3539be19ea6c0c48a",
+    "eightSourceBeforeAfterAndCurrentExact": true
+  },
+  "implementationFreezes": [
+    {
+      "path": "n-implementation-freeze-second.json",
+      "sha256": "f0ff8e201c9005bae96407b03a48b0e23b337bdce24955cdc2264ac48ff07370"
+    },
+    {
+      "path": "b-implementation-freeze-first.json",
+      "sha256": "4fa8055e03067b7fcb8c736dcb8077f8c110b45602ff5357a5f2ad7df711351d"
+    }
+  ],
+  "cargoMetadata": {
+    "path": "n-stable-release-tests-second.stdout.log",
+    "sha256": "f5a92d2ac50395caca700d2bdf8a48b2ffdca3b8b62658cab11629e317508562",
+    "bytes": 104652
+  },
+  "scope": "Only frozen R75 N2 native implementation and GNU all-target strict/type/codegen/PE producer handoff. No target EXE/Windows/MSI/context-probe runtime. Root exclusively owns Windows checks/GUI fixture clone/quiet MSI and cleanup.",
+  "tests": {
+    "count": 22,
+    "allProfileTest": true,
+    "allPe32I386": true,
+    "allConsoleSubsystem": 3,
+    "newHelperHarnessSha256": "e61d993d490efc2309e04aaad3e28f3ae1f9c138586608472ad700eb7d8af5fa",
+    "fcWindowsHarnessSha256": "5cc0c4273b04fe9a2a332b81d9c19eb340c1659691a662bab5d1ee6a11c99e73"
+  },
+  "normalExecutables": [
+    {
+      "target": "fc-installer-lifecycle",
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 699090,
+      "sha256": "8e82da6f54973f74bdd6d6dbc8625d9ae1b37c55b58765c72c6376f0cf64b989",
+      "peSubsystem": 2
+    },
+    {
+      "target": "fc-bootstrap",
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13352281,
+      "sha256": "18638958e906c3464fd99421116adabb2d66d134e76a74750d228be5a457505d",
+      "peSubsystem": 2
+    }
+  ],
+  "observer": {
+    "exactTest": "installer_lifecycle::native::broker::context_probe::engine_parent_context_observer",
+    "mode": "NOT_RUN. Unarmed fullsuite case returns without observing engine. Armed case accepts closed --skip carrier only after owned-root no-reparse/marker/ACL proof and create-new context.json. Actual root CLI proof required for GUI2 fixture clone.",
+    "errorCodeQualification": "JSON win32Code is decoded from HRESULT Win32 facility, not an independently captured GetLastError. Typed Native HRESULT can originate from a local native guard; no sole API-cause attribution is implied.",
+    "normalUnsupportedMain": "NOT_RUN"
+  },
+  "controls": "No Cargo or Windows process from this agent remains running. Source unchanged after N2 and jointsecond freeze. Root will pin normal helper SHA/GUI only; fullrunner uploads22 tests+normal app, not a false normalhelper test execution."
+}

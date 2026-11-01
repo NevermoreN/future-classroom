@@ -1,5 +1,5 @@
 //! Installation coordination shared by application startup and repair. The
-//! native broker module implements the first fresh-install MSI candidate slice;
+//! native broker implements fresh install and healthy same-manifest maintenance;
 //! its target runtime/installer acceptance remains separate from compilation.
 //! Pending is durable negative state, never liveness. Only the broker's actual
 //! authenticated guardian, native return and verified effects can settle it.
@@ -62,6 +62,9 @@ pub enum MaintenanceOperation {
     Repair,
     Upgrade,
     Uninstall,
+    /// A verified healthy installation may be reapplied or removed by the
+    /// original transaction. Its final action is not asserted before effects.
+    SameManifest,
 }
 impl MaintenanceOperation {
     fn tag(self) -> u8 {
@@ -70,6 +73,7 @@ impl MaintenanceOperation {
             Self::Repair => 2,
             Self::Upgrade => 3,
             Self::Uninstall => 4,
+            Self::SameManifest => 5,
         }
     }
 }

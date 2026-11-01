@@ -1,0 +1,315 @@
+{
+  "status": "FAIL_QUIET_OBSERVER_OR_EVIDENCE",
+  "startedUtc": "2026-11-01T13:03:51.391068+00:00",
+  "originalOverallBudgetSeconds": 120,
+  "cleanupReservedSeconds": 20,
+  "originalClientWaitSeconds": 35,
+  "expectedExitCode": 1603,
+  "finalMsi": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-third/context-probe-final.msi",
+    "bytes": 4030464,
+    "sha256": "0a1ec454c5ef4f2f760fced6a1cdcb5aaffaffacddee5e1ddeaa3d94cd1ebd43"
+  },
+  "fixtureLedger": {
+    "path": "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96/fixture-ledger.json",
+    "bytes": 9039,
+    "sha256": "fa372949bb74b30b540d122af552ebf4c2006e88a6e771ddd7bef76c57ab8799"
+  },
+  "cliProof": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-first.json",
+    "bytes": 28320,
+    "sha256": "f823b6e55eee0733b5d32ebeea2bdc2d9b3bfeda66186cdbd749c838a15a0875"
+  },
+  "sourceGitBase": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+  "candidateSourceProducerSha256": "2884f0831e4ce5bcd4ac2dedfe6412000ed3e17a5f81c41ad6fc110d60d10c74",
+  "candidateSourceFreezeSha256": "f0ff8e201c9005bae96407b03a48b0e23b337bdce24955cdc2264ac48ff07370",
+  "inputIdentities": {
+    "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/build-export-second.json": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/build-export-second.json",
+      "bytes": 151717,
+      "sha256": "b4a009bb953ae829d5eb8c564017f2d5ecc0140e33b88a7d4b29c38f41b5ae0a"
+    },
+    "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-third/context-probe-final.msi": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-third/context-probe-final.msi",
+      "bytes": 4030464,
+      "sha256": "0a1ec454c5ef4f2f760fced6a1cdcb5aaffaffacddee5e1ddeaa3d94cd1ebd43"
+    },
+    "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-first.json": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-first.json",
+      "bytes": 28320,
+      "sha256": "f823b6e55eee0733b5d32ebeea2bdc2d9b3bfeda66186cdbd749c838a15a0875"
+    },
+    "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96/fixture-ledger.json": {
+      "path": "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96/fixture-ledger.json",
+      "bytes": 9039,
+      "sha256": "fa372949bb74b30b540d122af552ebf4c2006e88a6e771ddd7bef76c57ab8799"
+    },
+    "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle.rs": {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker.rs": {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs": {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+    },
+    "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs": {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    "/tmp/fc-round75-installer-maintenance/worktree/scripts/package-msi-candidate.py": {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/package-msi-candidate.py",
+      "bytes": 55135,
+      "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e"
+    },
+    "/tmp/fc-round75-installer-maintenance/worktree/scripts/check-msi-candidate.py": {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/check-msi-candidate.py",
+      "bytes": 33752,
+      "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf"
+    },
+    "/tmp/fc-round75-installer-maintenance/worktree/packaging/MSI-CANDIDATE.md": {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/packaging/MSI-CANDIDATE.md",
+      "bytes": 13778,
+      "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00"
+    },
+    "/tmp/fc-round75-installer-maintenance/worktree/Cargo.lock": {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+      "bytes": 1185286,
+      "sha256": "01520a7edae86495267712512ee5dcb672cbe06e65fc068cab578a9d51b0db42"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+      "bytes": 1224276,
+      "sha256": "8d2e7fec2dd74115281ccf5e697a09e3537725f5325f2ac01e179eb21a523c7a"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+      "bytes": 1853766,
+      "sha256": "148d0e8864c70541faa45b4aec6e193697a83b1fb7947d205cc0818acb1c3b12"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+      "bytes": 1246736,
+      "sha256": "4ea5f21318a599e062c75e47e596cdcae5102b342638508312383e6d813a22cc"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+      "bytes": 1280300,
+      "sha256": "a3797d9f602257850d6b34a43ae7dbd38de1f6c8ef9c041f7320f39b89aa0883"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+      "bytes": 1983421,
+      "sha256": "1a347063a3fd1bd9aa45f3c4684d546198d64d7ab90f453ee60e2c77967c1b69"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+      "bytes": 2352762,
+      "sha256": "f54d37c0120d0351a9734243d12fb7f1b90ab21715dff4856dd289e4929ed906"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+      "bytes": 2403377,
+      "sha256": "832ee926fbca1421567eb941a1e21bd8556739e2fcd427606532015768fe85fc"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+      "bytes": 1430273,
+      "sha256": "6f4fe37abd247922051a5772252d3429b591dfc5bd6c78b694b3f566910fd111"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe",
+      "bytes": 3988775,
+      "sha256": "5cc0c4273b04fe9a2a332b81d9c19eb340c1659691a662bab5d1ee6a11c99e73"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/runtime_storage-c482f8ab0ffd29bd.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/runtime_storage-c482f8ab0ffd29bd.exe",
+      "bytes": 4991709,
+      "sha256": "a0d2dc706f3cf347200c82001d4d94a3c73f82984e18ab10470f0e2ac451df77"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/voice_storage-6bb619ee5dee63b6.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/voice_storage-6bb619ee5dee63b6.exe",
+      "bytes": 5235253,
+      "sha256": "269bbcd4a019963efafde86421151a800972b0426d84b887f3aeb520f6460b1a"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-697f746362036af8.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-697f746362036af8.exe",
+      "bytes": 5624935,
+      "sha256": "2e912e86379fce30b5a36d5706b938856bc11b4c5b11f8c2364ef27efa6e66d6"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_installer_lifecycle-cab6782a752605cb.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_installer_lifecycle-cab6782a752605cb.exe",
+      "bytes": 1296754,
+      "sha256": "e61d993d490efc2309e04aaad3e28f3ae1f9c138586608472ad700eb7d8af5fa"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-d4a98b3cdf6100eb.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-d4a98b3cdf6100eb.exe",
+      "bytes": 5535002,
+      "sha256": "5f843f0bf0c81b8d45587b743a21e648cff3a72dfd0d29aabb546e42b5451c19"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/examples/verify_web_assets-8500932ea48ba2d2.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/examples/verify_web_assets-8500932ea48ba2d2.exe",
+      "bytes": 1097081,
+      "sha256": "5e7d406d3dc7a15bbe52d825a791b89d55fd65c50047a044a58421951a547ad4"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+      "bytes": 8423418,
+      "sha256": "e2dc9c1c89990f9ef4cd4f790277d2fc6667ecbe6f3e881e6be2f1e9d568d353"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/schedule_operations-9b4d7e2443bcde3a.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/schedule_operations-9b4d7e2443bcde3a.exe",
+      "bytes": 5785432,
+      "sha256": "470be2d43270982b26e40a65712c5db68b89c14fcf32bab48347b0d05f760b03"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/business_storage-1758945f26dd4d24.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/business_storage-1758945f26dd4d24.exe",
+      "bytes": 6196953,
+      "sha256": "a7fefb7b309eeb062c4b1dc1a8dffd967f21a07c18e287e8405da635d2a628d6"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-96edfabaffdd4929.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-96edfabaffdd4929.exe",
+      "bytes": 5191010,
+      "sha256": "a9d959cf49bb8fe3f28a5bdcf885986f279d60918b4d844e8d501d420c9ce979"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-6cc266b4a69e4fd2.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-6cc266b4a69e4fd2.exe",
+      "bytes": 12846574,
+      "sha256": "5c71ab4b9a282d6460b3da418c9dfc075db8c20cd4155eca7b388f0efbf389ba"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-8fd20aa1db135542.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-8fd20aa1db135542.exe",
+      "bytes": 13095198,
+      "sha256": "38e3404a6241bb2c43efe2b4f0ec622ea3400564801248f619bd90214caf39d6"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 699090,
+      "sha256": "8e82da6f54973f74bdd6d6dbc8625d9ae1b37c55b58765c72c6376f0cf64b989"
+    },
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-bootstrap.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13352281,
+      "sha256": "18638958e906c3464fd99421116adabb2d66d134e76a74750d228be5a457505d"
+    }
+  },
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-parent-observer-ef0ad284079e4dfaaa5d6f8cd7b7732f",
+  "nonce": "ef0ad284079e4dfaaa5d6f8cd7b7732f",
+  "marker": "future-classroom-owned-r75-parent-observer/v1\n",
+  "msiArguments": [
+    "/i",
+    "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-parent-observer-ef0ad284079e4dfaaa5d6f8cd7b7732f\\context-probe.msi",
+    "/qn",
+    "/norestart",
+    "/L*v",
+    "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-parent-observer-ef0ad284079e4dfaaa5d6f8cd7b7732f\\msiexec.log"
+  ],
+  "operations": [
+    {
+      "label": "01-create-before",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJABzAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzACkAKQA="
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 1,
+      "timedOut": false,
+      "elapsedSeconds": 0.5527407829649746,
+      "stdin": {
+        "bytes": 3063,
+        "sha256": "dc43c6408654d2ff7f963984ca59ce7564920a0a321414c22637f0ff376a23c2",
+        "base64": "JEVycm9yQWN0aW9uUHJlZmVyZW5jZT0nU3RvcCc7JGM9J3sicm9vdCI6IkM6XFxVc2Vyc1xcRWxpb3JcXEFwcERhdGFcXExvY2FsXFxUZW1wXFxGdXR1cmVDbGFzc3Jvb20tcjc1LXBhcmVudC1vYnNlcnZlci1lZjBhZDI4NDA3OWU0ZGZhYWE1ZDZmOGNkN2I3NzMyZiIsIm5vbmNlIjoiZWYwYWQyODQwNzllNGRmYWFhNWQ2ZjhjZDdiNzczMmYiLCJtYXJrZXIiOiJmdXR1cmUtY2xhc3Nyb29tLW93bmVkLXI3NS1wYXJlbnQtb2JzZXJ2ZXIvdjFcbiIsInNoYSI6IjBhMWVjNDU0YzVlZjRmMmY3NjBmY2VkNmExY2RjYjVhYWZmYWZmYWNkZGVlNWUxZGRlYWEzZDk0Y2QxZWJkNDMiLCJwcm9kdWN0IjoiezRCRkFGQTRBLTZFMEQtNUZBQi05MEY3LTRDOTk2N0YyRUQ0Nn0ifSd8Q29udmVydEZyb20tSnNvbjskRXJyb3JBY3Rpb25QcmVmZXJlbmNlPSdTdG9wJztbQ29uc29sZV06Ok91dHB1dEVuY29kaW5nPVtUZXh0LlVURjhFbmNvZGluZ106Om5ldygkZmFsc2UpCmZ1bmN0aW9uIEZhY3RzIHsgJGE9QCgpO2ZvcmVhY2goJHAgaW4gW0RpYWdub3N0aWNzLlByb2Nlc3NdOjpHZXRQcm9jZXNzZXNCeU5hbWUoJ21zaWV4ZWMnKSl7dHJ5eyRhKz1Ae3BpZD0kcC5JZDtjcmVhdGlvbkZpbGV0aW1lPVtzdHJpbmddJHAuU3RhcnRUaW1lLlRvVW5pdmVyc2FsVGltZSgpLlRvRmlsZVRpbWVVdGMoKX19ZmluYWxseXskcC5EaXNwb3NlKCl9fTtyZXR1cm4gLCRhIH0KZnVuY3Rpb24gUmVnaXN0cmF0aW9uIHsgJGk9JG51bGw7JHg9JG51bGw7dHJ5eyRpPU5ldy1PYmplY3QgLUNvbU9iamVjdCBXaW5kb3dzSW5zdGFsbGVyLkluc3RhbGxlcjskeD0kaS5HZXRUeXBlKCkuSW52b2tlTWVtYmVyKCdQcm9kdWN0c0V4JyxbUmVmbGVjdGlvbi5CaW5kaW5nRmxhZ3NdOjpHZXRQcm9wZXJ0eSwkbnVsbCwkaSxAKCRjLnByb2R1Y3QsJycsNykpOyRuPSR4LkNvdW50OyRzPSRpLkdldFR5cGUoKS5JbnZva2VNZW1iZXIoJ1Byb2R1Y3RTdGF0ZScsW1JlZmxlY3Rpb24uQmluZGluZ0ZsYWdzXTo6R2V0UHJvcGVydHksJG51bGwsJGksQCgkYy5wcm9kdWN0KSk7cmV0dXJuIEB7c3RhdHVzPSdBQ1RVQUxfUkVBRE9OTFlfQ0FMTEVSX0FORF9NQUNISU5FX0NPTlRFWFRTJztwcm9kdWN0PSRjLnByb2R1Y3Q7Y291bnQ9JG47cHJvZHVjdFN0YXRlPSRzO2NvbnRleHRzPTc7dXNlclNpZEFyZ3VtZW50PScnO290aGVyVXNlcnM9J05PVF9RVUVSSUVEJztjYWNoZT0nTk9UX1FVRVJJRUQnfX1maW5hbGx5e2lmKCRudWxsLW5lJHgpe1t2b2lkXVtSdW50aW1lLkludGVyb3BTZXJ2aWNlcy5NYXJzaGFsXTo6RmluYWxSZWxlYXNlQ29tT2JqZWN0KCR4KX07aWYoJG51bGwtbmUkaSl7W3ZvaWRdW1J1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLk1hcnNoYWxdOjpGaW5hbFJlbGVhc2VDb21PYmplY3QoJGkpfX0gfQpmdW5jdGlvbiBDaGVja1Jvb3QgeyBpZigkYy5yb290IC1jbmUgKEpvaW4tUGF0aCAoW0lPLlBhdGhdOjpHZXRGdWxsUGF0aCgkZW52OlRFTVApKSAoJ0Z1dHVyZUNsYXNzcm9vbS1yNzUtcGFyZW50LW9ic2VydmVyLScrJGMubm9uY2UpKSl7dGhyb3cgJ1JPT1RfUEFUSF9NSVNNQVRDSCd9O2lmKChbSU8uRmlsZV06OlJlYWRBbGxUZXh0KChKb2luLVBhdGggJGMucm9vdCAnLm93bmVyJykpKSAtY25lICRjLm1hcmtlcil7dGhyb3cgJ09XTkVSX01JU01BVENIJ307aWYoKFtJTy5GaWxlXTo6R2V0QXR0cmlidXRlcygkYy5yb290KS1iYW5kW0lPLkZpbGVBdHRyaWJ1dGVzXTo6UmVwYXJzZVBvaW50KS1uZSAwKXt0aHJvdyAnUk9PVF9SRVBBUlNFJ30gfQppZigkUFNWZXJzaW9uVGFibGUuUFNWZXJzaW9uLk1ham9yLW5lIDUgLW9yICRQU1ZlcnNpb25UYWJsZS5QU1ZlcnNpb24uTWlub3ItbmUgMSl7dGhyb3cgJ0VYUEVDVEVEX0RFU0tUT1A1MSd9CmlmKCRjLnJvb3QgLWNuZSAoSm9pbi1QYXRoIChbSU8uUGF0aF06OkdldEZ1bGxQYXRoKCRlbnY6VEVNUCkpICgnRnV0dXJlQ2xhc3Nyb29tLXI3NS1wYXJlbnQtb2JzZXJ2ZXItJyskYy5ub25jZSkpIC1vciAoVGVzdC1QYXRoIC1MaXRlcmFsUGF0aCAkYy5yb290KSl7dGhyb3cgJ0ZSRVNIX0VYQUNUX1JPT1RfUkVRVUlSRUQnfQokYmVmb3JlPVJlZ2lzdHJhdGlvbjtpZigkYmVmb3JlLmNvdW50LW5lIDAgLW9yICRiZWZvcmUucHJvZHVjdFN0YXRlLW5lIC0xKXt0aHJvdyAnQkVGT1JFX1BST0RVQ1RfTk9UX0FCU0VOVCd9CiRiYXNlbGluZT1GYWN0cwpbSU8uRGlyZWN0b3J5XTo6Q3JlYXRlRGlyZWN0b3J5KCRjLnJvb3QpfE91dC1OdWxsOyRhY2w9W1NlY3VyaXR5LkFjY2Vzc0NvbnRyb2wuRGlyZWN0b3J5U2VjdXJpdHldOjpuZXcoKTskYWNsLlNldEFjY2Vzc1J1bGVQcm90ZWN0aW9uKCR0cnVlLCRmYWxzZSkKJGlkPVtTZWN1cml0eS5QcmluY2lwYWwuV2luZG93c0lkZW50aXR5XTo6R2V0Q3VycmVudCgpO3RyeXskc2lkPSRpZC5Vc2VyfWZpbmFsbHl7JGlkLkRpc3Bvc2UoKX0KZm9yZWFjaCgkcyBpbiBAKCRzaWQsW1NlY3VyaXR5LlByaW5jaXBhbC5TZWN1cml0eUlkZW50aWZpZXJdOjpuZXcoJ1MtMS01LTE4JyksW1NlY3VyaXR5LlByaW5jaXBhbC5TZWN1cml0eUlkZW50aWZpZXJdOjpuZXcoJ1MtMS01LTMyLTU0NCcpKSl7JGFjbC5BZGRBY2Nlc3NSdWxlKFtTZWN1cml0eS5BY2Nlc3NDb250cm9sLkZpbGVTeXN0ZW1BY2Nlc3NSdWxlXTo6bmV3KCRzLCdGdWxsQ29udHJvbCcsJ0NvbnRhaW5lckluaGVyaXQsT2JqZWN0SW5oZXJpdCcsJ05vbmUnLCdBbGxvdycpKX0KW0lPLkRpcmVjdG9yeV06OlNldEFjY2Vzc0NvbnRyb2woJGMucm9vdCwkYWNsKTtbSU8uRmlsZV06OldyaXRlQWxsQnl0ZXMoKEpvaW4tUGF0aCAkYy5yb290ICcub3duZXInKSxbVGV4dC5FbmNvZGluZ106OkFTQ0lJLkdldEJ5dGVzKCRjLm1hcmtlcikpCkB7c3RhdHVzPSdDUkVBVEVEX0JFRk9SRV9BQlNFTlQnO3Jvb3Q9JGMucm9vdDtub25jZT0kYy5ub25jZTttYXJrZXI9JGMubWFya2VyO2JlZm9yZVByb2R1Y3Q9JGJlZm9yZTttc2lleGVjQmFzZWxpbmU9JGJhc2VsaW5lO3Bvd2Vyc2hlbGw9JFBTVmVyc2lvblRhYmxlLlBTVmVyc2lvbi5Ub1N0cmluZygpfXxDb252ZXJ0VG8tSnNvbiAtRGVwdGggOCAtQ29tcHJlc3MK"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-first-01-create-before.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-first-01-create-before.stderr.log",
+        "bytes": 1197,
+        "sha256": "bbe3ed96dbdc91ea488d9c2514b1151eb6550354375afd13edcca70dad26e6f4",
+        "base64": "IzwgQ0xJWE1MDQo8T2JqcyBWZXJzaW9uPSIxLjEuMC4xIiB4bWxucz0iaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS9wb3dlcnNoZWxsLzIwMDQvMDQiPjxPYmogUz0icHJvZ3Jlc3MiIFJlZklkPSIwIj48VE4gUmVmSWQ9IjAiPjxUPlN5c3RlbS5NYW5hZ2VtZW50LkF1dG9tYXRpb24uUFNDdXN0b21PYmplY3Q8L1Q+PFQ+U3lzdGVtLk9iamVjdDwvVD48L1ROPjxNUz48STY0IE49IlNvdXJjZUlkIj4xPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48T2JqIFM9InByb2dyZXNzIiBSZWZJZD0iMSI+PFROUmVmIFJlZklkPSIwIiAvPjxNUz48STY0IE49IlNvdXJjZUlkIj4xPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48UyBTPSJFcnJvciI+QkVGT1JFX1BST0RVQ1RfTk9UX0FCU0VOVF94MDAwRF9feDAwMEFfPC9TPjxTIFM9IkVycm9yIj7miYDlnKjkvY3nva4g6KGMOjcg5a2X56ymOiA3Nl94MDAwRF9feDAwMEFfPC9TPjxTIFM9IkVycm9yIj4rIC4uLiAgMCAtb3IgJGJlZm9yZS5wcm9kdWN0U3RhdGUtbmUgLTEpe3Rocm93ICdCRUZPUkVfUFJPRFVDVF9OT1RfQUJTRU5UJ31feDAwMERfX3gwMDBBXzwvUz48UyBTPSJFcnJvciI+KyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5feDAwMERfX3gwMDBBXzwvUz48UyBTPSJFcnJvciI+ICAgICsgQ2F0ZWdvcnlJbmZvICAgICAgICAgIDogT3BlcmF0aW9uU3RvcHBlZDogKEJFRk9SRV9QUk9EVUNUX05PVF9BQlNFTlQ6U3RyaW5nKSBbXSwgUnVudGltZUV4Y2VwdGlvbl94MDAwRF9feDAwMEFfPC9TPjxTIFM9IkVycm9yIj4gICAgKyBGdWxseVF1YWxpZmllZEVycm9ySWQgOiBCRUZPUkVfUFJPRFVDVF9OT1RfQUJTRU5UX3gwMDBEX194MDAwQV88L1M+PFMgUz0iRXJyb3IiPiBfeDAwMERfX3gwMDBBXzwvUz48L09ianM+"
+      }
+    },
+    {
+      "label": "99-owned-cleanup",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJABzAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzACkAKQA="
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.44222550792619586,
+      "stdin": {
+        "bytes": 3840,
+        "sha256": "0a3425435cc687e8062a17a5d416282299a15d19eee715ecd8f9b058c6e220c8",
+        "base64": "JEVycm9yQWN0aW9uUHJlZmVyZW5jZT0nU3RvcCc7JGM9J3sicm9vdCI6IkM6XFxVc2Vyc1xcRWxpb3JcXEFwcERhdGFcXExvY2FsXFxUZW1wXFxGdXR1cmVDbGFzc3Jvb20tcjc1LXBhcmVudC1vYnNlcnZlci1lZjBhZDI4NDA3OWU0ZGZhYWE1ZDZmOGNkN2I3NzMyZiIsIm5vbmNlIjoiZWYwYWQyODQwNzllNGRmYWFhNWQ2ZjhjZDdiNzczMmYiLCJtYXJrZXIiOiJmdXR1cmUtY2xhc3Nyb29tLW93bmVkLXI3NS1wYXJlbnQtb2JzZXJ2ZXIvdjFcbiIsInNoYSI6IjBhMWVjNDU0YzVlZjRmMmY3NjBmY2VkNmExY2RjYjVhYWZmYWZmYWNkZGVlNWUxZGRlYWEzZDk0Y2QxZWJkNDMiLCJwcm9kdWN0IjoiezRCRkFGQTRBLTZFMEQtNUZBQi05MEY3LTRDOTk2N0YyRUQ0Nn0iLCJiYXNlbGluZSI6W10sIm9ic2VydmVyIjpudWxsLCJzYWZlVG9EZWxldGUiOmZhbHNlLCJjb250ZXh0U2hhIjoiIiwibG9nU2hhIjoiIn0nfENvbnZlcnRGcm9tLUpzb247JEVycm9yQWN0aW9uUHJlZmVyZW5jZT0nU3RvcCc7W0NvbnNvbGVdOjpPdXRwdXRFbmNvZGluZz1bVGV4dC5VVEY4RW5jb2RpbmddOjpuZXcoJGZhbHNlKQpmdW5jdGlvbiBGYWN0cyB7ICRhPUAoKTtmb3JlYWNoKCRwIGluIFtEaWFnbm9zdGljcy5Qcm9jZXNzXTo6R2V0UHJvY2Vzc2VzQnlOYW1lKCdtc2lleGVjJykpe3RyeXskYSs9QHtwaWQ9JHAuSWQ7Y3JlYXRpb25GaWxldGltZT1bc3RyaW5nXSRwLlN0YXJ0VGltZS5Ub1VuaXZlcnNhbFRpbWUoKS5Ub0ZpbGVUaW1lVXRjKCl9fWZpbmFsbHl7JHAuRGlzcG9zZSgpfX07cmV0dXJuICwkYSB9CmZ1bmN0aW9uIFJlZ2lzdHJhdGlvbiB7ICRpPSRudWxsOyR4PSRudWxsO3RyeXskaT1OZXctT2JqZWN0IC1Db21PYmplY3QgV2luZG93c0luc3RhbGxlci5JbnN0YWxsZXI7JHg9JGkuR2V0VHlwZSgpLkludm9rZU1lbWJlcignUHJvZHVjdHNFeCcsW1JlZmxlY3Rpb24uQmluZGluZ0ZsYWdzXTo6R2V0UHJvcGVydHksJG51bGwsJGksQCgkYy5wcm9kdWN0LCcnLDcpKTskbj0keC5Db3VudDskcz0kaS5HZXRUeXBlKCkuSW52b2tlTWVtYmVyKCdQcm9kdWN0U3RhdGUnLFtSZWZsZWN0aW9uLkJpbmRpbmdGbGFnc106OkdldFByb3BlcnR5LCRudWxsLCRpLEAoJGMucHJvZHVjdCkpO3JldHVybiBAe3N0YXR1cz0nQUNUVUFMX1JFQURPTkxZX0NBTExFUl9BTkRfTUFDSElORV9DT05URVhUUyc7cHJvZHVjdD0kYy5wcm9kdWN0O2NvdW50PSRuO3Byb2R1Y3RTdGF0ZT0kcztjb250ZXh0cz03O3VzZXJTaWRBcmd1bWVudD0nJztvdGhlclVzZXJzPSdOT1RfUVVFUklFRCc7Y2FjaGU9J05PVF9RVUVSSUVEJ319ZmluYWxseXtpZigkbnVsbC1uZSR4KXtbdm9pZF1bUnVudGltZS5JbnRlcm9wU2VydmljZXMuTWFyc2hhbF06OkZpbmFsUmVsZWFzZUNvbU9iamVjdCgkeCl9O2lmKCRudWxsLW5lJGkpe1t2b2lkXVtSdW50aW1lLkludGVyb3BTZXJ2aWNlcy5NYXJzaGFsXTo6RmluYWxSZWxlYXNlQ29tT2JqZWN0KCRpKX19IH0KZnVuY3Rpb24gQ2hlY2tSb290IHsgaWYoJGMucm9vdCAtY25lIChKb2luLVBhdGggKFtJTy5QYXRoXTo6R2V0RnVsbFBhdGgoJGVudjpURU1QKSkgKCdGdXR1cmVDbGFzc3Jvb20tcjc1LXBhcmVudC1vYnNlcnZlci0nKyRjLm5vbmNlKSkpe3Rocm93ICdST09UX1BBVEhfTUlTTUFUQ0gnfTtpZigoW0lPLkZpbGVdOjpSZWFkQWxsVGV4dCgoSm9pbi1QYXRoICRjLnJvb3QgJy5vd25lcicpKSkgLWNuZSAkYy5tYXJrZXIpe3Rocm93ICdPV05FUl9NSVNNQVRDSCd9O2lmKChbSU8uRmlsZV06OkdldEF0dHJpYnV0ZXMoJGMucm9vdCktYmFuZFtJTy5GaWxlQXR0cmlidXRlc106OlJlcGFyc2VQb2ludCktbmUgMCl7dGhyb3cgJ1JPT1RfUkVQQVJTRSd9IH0KaWYoLW5vdCBbSU8uRGlyZWN0b3J5XTo6RXhpc3RzKCRjLnJvb3QpKXtAe3N0YXR1cz0nQUJTRU5UJztub25jZT0kYy5ub25jZX18Q29udmVydFRvLUpzb24gLUNvbXByZXNzO2V4aXQgMH07Q2hlY2tSb290CmlmKCRjLnNhZmVUb0RlbGV0ZS1uZSAkdHJ1ZSl7dGhyb3cgJ1VOS05PV05fTElWRV9PUl9SRUdJU1RSQVRJT05fUkVUQUlOX1JPT1RfTk9fREVMRVRFJ30KJG5ldz1AKCk7Zm9yZWFjaCgkeCBpbiAoRmFjdHMpKXtpZigtbm90IEAoJGMuYmFzZWxpbmV8V2hlcmUtT2JqZWN0eyRfLnBpZC1lcSAkeC5waWQgLWFuZCAkXy5jcmVhdGlvbkZpbGV0aW1lLWNlcSAkeC5jcmVhdGlvbkZpbGV0aW1lfSkuQ291bnQpeyRuZXcrPSR4fX07aWYoJG5ldy5Db3VudC1uZSAwKXt0aHJvdyAnTkVXX01TSV9JTlNUQU5DRV9SRUNIRUNLX1JFVEFJTl9ST09UJ30KaWYoJG51bGwtbmUkYy5vYnNlcnZlcil7JHA9JG51bGw7dHJ5eyRwPVtEaWFnbm9zdGljcy5Qcm9jZXNzXTo6R2V0UHJvY2Vzc0J5SWQoW2ludF0kYy5vYnNlcnZlci5waWQpO2lmKChbc3RyaW5nXSRwLlN0YXJ0VGltZS5Ub1VuaXZlcnNhbFRpbWUoKS5Ub0ZpbGVUaW1lVXRjKCkpLWNlcSRjLm9ic2VydmVyLmNyZWF0aW9uRmlsZXRpbWUpe3Rocm93ICdPQlNFUlZFUl9TVElMTF9MSVZFJ319Y2F0Y2ggW0FyZ3VtZW50RXhjZXB0aW9uXXt9ZmluYWxseXtpZigkbnVsbC1uZSRwKXskcC5EaXNwb3NlKCl9fX0KJGE9UmVnaXN0cmF0aW9uO2lmKCRhLmNvdW50LW5lIDAgLW9yICRhLnByb2R1Y3RTdGF0ZS1uZSAtMSl7dGhyb3cgJ1JFR0lTVFJBVElPTl9VTktOT1dOX1JFVEFJTl9ST09UJ30KaWYoKEdldC1GaWxlSGFzaCAtTGl0ZXJhbFBhdGggKEpvaW4tUGF0aCAkYy5yb290ICdjb250ZXh0Lmpzb24nKSAtQWxnb3JpdGhtIFNIQTI1NikuSGFzaC5Ub0xvd2VySW52YXJpYW50KCktY25lJGMuY29udGV4dFNoYSAtb3IgKEdldC1GaWxlSGFzaCAtTGl0ZXJhbFBhdGggKEpvaW4tUGF0aCAkYy5yb290ICdtc2lleGVjLmxvZycpIC1BbGdvcml0aG0gU0hBMjU2KS5IYXNoLlRvTG93ZXJJbnZhcmlhbnQoKS1jbmUkYy5sb2dTaGEpe3Rocm93ICdDQVBUVVJFRF9PUklHSU5BTF9DSEFOR0VEX1JFVEFJTl9ST09UJ30KJGFsbG93ZWQ9QCgnLm93bmVyJywnY29udGV4dC1wcm9iZS5tc2knLCdtc2lleGVjLmxvZycsJ2NvbnRleHQuanNvbicpO2ZvcmVhY2goJGZpbGUgaW4gW0lPLkRpcmVjdG9yeV06OkdldEZpbGVTeXN0ZW1FbnRyaWVzKCRjLnJvb3QpKXtpZihbSU8uUGF0aF06OkdldEZpbGVOYW1lKCRmaWxlKS1jbm90aW4kYWxsb3dlZCAtb3IgKFtJTy5GaWxlXTo6R2V0QXR0cmlidXRlcygkZmlsZSktYmFuZFtJTy5GaWxlQXR0cmlidXRlc106OlJlcGFyc2VQb2ludCktbmUgMCl7dGhyb3cgJ1VORVhQRUNURURfTUVNQkVSX1JFVEFJTl9ST09UJ319CiRtc2k9Sm9pbi1QYXRoICRjLnJvb3QgJ2NvbnRleHQtcHJvYmUubXNpJztpZihbSU8uRmlsZV06OkV4aXN0cygkbXNpKSAtYW5kIChHZXQtRmlsZUhhc2ggLUxpdGVyYWxQYXRoICRtc2kgLUFsZ29yaXRobSBTSEEyNTYpLkhhc2guVG9Mb3dlckludmFyaWFudCgpLWNuZSRjLnNoYSl7dGhyb3cgJ1VQTE9BREVEX01TSV9JREVOVElUWV9VTktOT1dOX1JFVEFJTl9ST09UJ30KZm9yZWFjaCgkbmFtZSBpbiBAKCdjb250ZXh0Lmpzb24nLCdtc2lleGVjLmxvZycsJ2NvbnRleHQtcHJvYmUubXNpJywnLm93bmVyJykpeyRmaWxlPUpvaW4tUGF0aCAkYy5yb290ICRuYW1lO2lmKFtJTy5GaWxlXTo6RXhpc3RzKCRmaWxlKSl7W0lPLkZpbGVdOjpEZWxldGUoJGZpbGUpfX07W0lPLkRpcmVjdG9yeV06OkRlbGV0ZSgkYy5yb290LCRmYWxzZSkKQHtzdGF0dXM9J1JFTU9WRUQnO3Jvb3Q9JGMucm9vdDtub25jZT0kYy5ub25jZTttYXJrZXI9JGMubWFya2VyO2Fic2VudD0oLW5vdCBbSU8uRGlyZWN0b3J5XTo6RXhpc3RzKCRjLnJvb3QpKTtyZWdpc3RyYXRpb25SZWNoZWNrPSRhfXxDb252ZXJ0VG8tSnNvbiAtRGVwdGggOCAtQ29tcHJlc3MK"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-first-99-owned-cleanup.stdout.log",
+        "bytes": 64,
+        "sha256": "8872878c73ab441af8998abcaece63d30296a5787435fc04c9f56a44a8be4f6c",
+        "base64": "eyJub25jZSI6ImVmMGFkMjg0MDc5ZTRkZmFhYTVkNmY4Y2Q3Yjc3MzJmIiwic3RhdHVzIjoiQUJTRU5UIn0NCg=="
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-first-99-owned-cleanup.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae",
+        "base64": "IzwgQ0xJWE1MDQo8T2JqcyBWZXJzaW9uPSIxLjEuMC4xIiB4bWxucz0iaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS9wb3dlcnNoZWxsLzIwMDQvMDQiPjxPYmogUz0icHJvZ3Jlc3MiIFJlZklkPSIwIj48VE4gUmVmSWQ9IjAiPjxUPlN5c3RlbS5NYW5hZ2VtZW50LkF1dG9tYXRpb24uUFNDdXN0b21PYmplY3Q8L1Q+PFQ+U3lzdGVtLk9iamVjdDwvVD48L1ROPjxNUz48STY0IE49IlNvdXJjZUlkIj4xPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48L09ianM+"
+      }
+    }
+  ],
+  "cleanup": "PASS",
+  "scope": "Owned test-only final observer MSI quiet Type2 then intentional Type19 abort before Initialize. Not product installer/gate/Pending/Run or production authorization. Exact source/Binary provenance already static verified. No cache/registration removal or unknown process kill.",
+  "error": {
+    "kind": "AssertionError",
+    "code": "ACTUAL_TRANSPORT_EXIT0_01-create-before"
+  },
+  "cleanupActual": {
+    "nonce": "ef0ad284079e4dfaaa5d6f8cd7b7732f",
+    "status": "ABSENT"
+  },
+  "elapsedSeconds": 1.432371431030333,
+  "completedUtc": "2026-11-01T13:03:52.395285+00:00",
+  "actualControllerReturned": true,
+  "qualification": "MSI engine verbose action-success evidence and original observer instance disappearance support this test-only run; no raw independent observer process exit-code API capture is invented. Reported parent/SID topology remains observed facts, never production auth/Begin/End acceptance. Product absence limited to caller per-user contexts plus machine; other users/cache not queried or deleted."
+}

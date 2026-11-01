@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_GUI_TEST_FIXTURE_LEDGER_PURE_CHECKS_PASS_NOT_CREATED_OR_EXECUTED",
+  "atUtc": "2026-11-01T12:07:10.009440+00:00",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/parent-context-probe-second/check-context-probe.py"
+  ],
+  "exitCode": 0,
+  "actualExit": true,
+  "elapsedSeconds": 0.10014630295336246,
+  "pureTests": 4,
+  "ast": "PASS",
+  "originalProbeFirstAllRecordedBytesUnchanged": true,
+  "bThreeFrozenSourcesUnchanged": true,
+  "actualGuiCloneCreated": false,
+  "observerExecuted": false,
+  "actualCliProofProduced": false,
+  "msiBuilt": false,
+  "windowsRun": false,
+  "cargoRun": false,
+  "mainWritten": false,
+  "normalOrTestOriginalsChanged": false,
+  "scope": "Only a new E preparation directory, in-memory synthetic structural positive/negative checks. Root has approved a future isolated test-fixture path; no real PE clone or runtime acceptance exists from this preparation. Original22 CUI and2 normalGUI identities remain separate.",
+  "files": [
+    {
+      "path": ".owner",
+      "bytes": 63,
+      "sha256": "da1753e4e2f05d13f3ff15212821d51eb4824fe53d04e956326401f0aa7ec66d"
+    },
+    {
+      "path": "README.md",
+      "bytes": 6696,
+      "sha256": "f05902bda42e73d81805ba00370f189eaafe25686113ec6b37bb78b7f82b61ce"
+    },
+    {
+      "path": "check-context-probe.py",
+      "bytes": 6671,
+      "sha256": "205b31767bac2e507346e65060359059d40673b6939a4f8bb4045f6a6d8dfa69"
+    },
+    {
+      "path": "context-probe.py",
+      "bytes": 14394,
+      "sha256": "018193efc95d20532ce3939d9dbddc682a552d25c7dc926a2ead59e1c5f7906e"
+    },
+    {
+      "path": "first-to-second.diff",
+      "bytes": 18278,
+      "sha256": "abfea41f63b8d7f6079420bbeba951c74caf0ab096c708930410a6a8456ed9c8"
+    },
+    {
+      "path": "pure-check-first.stderr.log",
+      "bytes": 648,
+      "sha256": "52416ee639a4e4fe6e38b408a18c95e41764a5db993671f97dc9650f472431ab"
+    },
+    {
+      "path": "pure-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "stdout": {
+    "path": "pure-check-first.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "pure-check-first.stderr.log",
+    "bytes": 648,
+    "sha256": "52416ee639a4e4fe6e38b408a18c95e41764a5db993671f97dc9650f472431ab"
+  }
+}

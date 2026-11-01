@@ -1,0 +1,220 @@
+--- parent-context-probe-first/context-probe.py
++++ parent-context-probe-second/context-probe.py
+@@ -35,6 +35,60 @@
+ def read(path, limit=32 * 1024 * 1024):
+     need(stat.S_ISREG(path.lstat().st_mode) and 0 <= path.stat().st_size <= limit, 'bounded regular input required')
+     return path.read_bytes()
++
++
++def pe_offset(data, subsystem):
++    need(len(data) >= 64 and data[:2] == b'MZ', 'actual PE bytes required')
++    offset = struct.unpack_from('<I', data, 60)[0]
++    need(offset + 120 <= len(data) and data[offset:offset + 4] == b'PE\0\0'
++         and struct.unpack_from('<H', data, offset + 4)[0] == 0x14c
++         and struct.unpack_from('<H', data, offset + 20)[0] >= 96
++         and struct.unpack_from('<H', data, offset + 24)[0] == 0x10b
++         and struct.unpack_from('<H', data, offset + 92)[0] == subsystem, 'x86 PE32 test fixture subsystem differs')
++    return offset
++
++
++def validate_fixture(source, fixture, ledger):
++    """Verify an independently made test-only clone; never create/patch one."""
++    need(ledger['status'] == 'PASS_EXACT_CUI3_TO_GUI2_TEST_FIXTURE_CLONE'
++         and ledger['profileTest'] is True and ledger['normalProduct'] is False, 'test-fixture ledger required')
++    need(len(source) == ledger['sourceCui']['bytes'] == ledger['guiFixture']['bytes'] == len(fixture)
++         and sha(source) == ledger['sourceCui']['sha256']
++         and sha(fixture) == ledger['guiFixture']['sha256'], 'source/clone identity differs')
++    cargo = ledger['cargoArtifact']
++    need(cargo['package'] == 'fc-windows' and cargo['target'] == 'fc_windows' and cargo['role'] == 'tests'
++         and cargo['cargo_profile_test'] is True and cargo['sha256'] == sha(source), 'original fc_windows test provenance required')
++    need(re.fullmatch(r'[0-9a-f]{40}', ledger['sourceGitSha']), 'actual source Git SHA required')
++    offset = pe_offset(source, 3)
++    need(pe_offset(fixture, 2) == offset, 'clone PE layout changed')
++    fields = ledger['changedFields']
++    need([field['name'] for field in fields] in [['Subsystem'], ['Subsystem', 'CheckSum']], 'only explicit Subsystem and optional CheckSum fields allowed')
++    patched = bytearray(source)
++    for field in fields:
++        expected_offset, width = (offset + 92, 2) if field['name'] == 'Subsystem' else (offset + 88, 4)
++        need(set(field) == {'name', 'offset', 'beforeHex', 'afterHex'} and field['offset'] == expected_offset,
++             'patch field schema/offset differs')
++        before = source[expected_offset:expected_offset + width]
++        after = fixture[expected_offset:expected_offset + width]
++        need(field['beforeHex'] == before.hex() and field['afterHex'] == after.hex()
++             and before != after, 'patch field byte identities differ')
++        if field['name'] == 'Subsystem':
++            need(before == b'\x03\0' and after == b'\x02\0', 'only CUI3 to GUI2 conversion allowed')
++        patched[expected_offset:expected_offset + width] = after
++    need(bytes(patched) == fixture, 'code/entry/imports/other PE bytes changed')
++    return {'sourceCuiSha256': sha(source), 'guiFixtureSha256': sha(fixture),
++            'profileTest': True, 'normalProduct': False, 'changedFields': fields}
++
++
++def fixture_from_args(args):
++    raw = read(args.fixture_ledger, 1024 * 1024)
++    need(sha(raw) == args.fixture_ledger_sha256, 'explicit fixture ledger SHA differs')
++    ledger = json.loads(raw)
++    source = read(Path(ledger['sourceCui']['path']))
++    fixture = read(Path(ledger['guiFixture']['path']))
++    proof = validate_fixture(source, fixture, ledger)
++    need(args.observer_sha256 == proof['guiFixtureSha256'], 'observer SHA must identify GUI test fixture')
++    return fixture, proof
+ 
+ 
+ def arguments(test, root, nonce):
+@@ -113,6 +167,8 @@
+     emit = sub.add_parser('author')
+     emit.add_argument('--observer-exe', type=Path, required=True)
+     emit.add_argument('--observer-sha256', required=True)
++    emit.add_argument('--fixture-ledger', type=Path, required=True)
++    emit.add_argument('--fixture-ledger-sha256', required=True)
+     emit.add_argument('--actual-cli-proof', type=Path, required=True)
+     emit.add_argument('--cli-proof-sha256', required=True)
+     emit.add_argument('--output-dir', type=Path, required=True)
+@@ -121,22 +177,21 @@
+     check.add_argument('--tables-list', type=Path, required=True, help='Original complete msiinfo tables stdout')
+     check.add_argument('--extracted-observer', type=Path, required=True)
+     check.add_argument('--observer-sha256', required=True)
++    check.add_argument('--fixture-ledger', type=Path, required=True)
++    check.add_argument('--fixture-ledger-sha256', required=True)
+     args = parser.parse_args()
+     argv = arguments(args.observer_test_name, args.windows_report_root, args.nonce)
+     command = subprocess.list2cmdline(argv)
+     if args.mode == 'describe':
+         print(json.dumps({'status': 'PREPARED_ONLY_NO_OBSERVER_OR_MSI', 'argv': argv,
+                           'commandLine': command, 'requiredCliParseArgs': argv + ['--list'],
+-                          'requiredMarker': 'future-classroom-owned-r75-parent-observer/v1\\n',
++                          'requiredMarker': 'future-classroom-owned-r75-parent-observer/v1\n',
++                          'requiredFixture': 'ROOT_APPROVED_GUI2_TEST_CLONE; NOT_CREATED_OR_CHECKED_BY_DESCRIBE',
+                           'observerRuntime': 'NOT_RUN', 'msiProduced': False}))
+     elif args.mode == 'author':
+         observer = read(args.observer_exe)
+-        need(sha(observer) == args.observer_sha256, 'actual test harness SHA mismatch')
+-        need(len(observer) >= 64 and observer[:2] == b'MZ', 'observer PE required')
+-        offset = struct.unpack_from('<I', observer, 60)[0]
+-        need(offset + 94 <= len(observer) and observer[offset:offset + 4] == b'PE\0\0'
+-             and struct.unpack_from('<H', observer, offset + 4)[0] == 0x14c
+-             and struct.unpack_from('<H', observer, offset + 92)[0] == 3, 'x86 CUI test harness required')
++        fixture, fixture_proof = fixture_from_args(args)
++        need(observer == fixture, 'Binary must be the exact GUI2 test fixture')
+         raw = read(args.actual_cli_proof, 1024 * 1024)
+         need(sha(raw) == args.cli_proof_sha256, 'CLI proof SHA mismatch')
+         proof = json.loads(raw)
+@@ -149,7 +204,9 @@
+         (args.output_dir / '.owner').write_text('future-classroom-owned-r75-parent-observer-authoring/v1\n')
+         (args.output_dir / 'observer-harness.exe').write_bytes(observer)
+         (args.output_dir / 'context-probe.wxs').write_bytes(authoring(args.observer_test_name, args.windows_report_root, args.nonce))
+-        print(json.dumps({'status': 'AUTHORING_ONLY_MSI_NOT_BUILT', 'observerSha256': sha(observer), 'observerRuntime': 'NOT_RUN'}))
++        (args.output_dir / 'fixture-ledger.json').write_bytes(read(args.fixture_ledger, 1024 * 1024))
++        print(json.dumps({'status': 'AUTHORING_ONLY_MSI_NOT_BUILT', 'observerSha256': sha(observer),
++                          'fixture': fixture_proof, 'observerRuntime': 'NOT_RUN'}))
+     else:
+         tables = {p.stem: idt(read(p, 1024 * 1024), p.stem) for p in args.exports.glob('*.idt')}
+         listed = read(args.tables_list, 64 * 1024).decode('utf-8').splitlines()
+@@ -160,7 +217,8 @@
+              and properties['UpgradeCode'].strip('{}').upper() == str(uuid.uuid5(NAMESPACE, args.nonce + ':family')).upper()
+              and properties['MSIRESTARTMANAGERCONTROL'] == 'DisableShutdown', 'isolated probe product identity/RM policy differs')
+         extracted = read(args.extracted_observer)
+-        need(sha(extracted) == args.observer_sha256, 'actual Binary stream differs from original test harness')
++        fixture, _ = fixture_from_args(args)
++        need(extracted == fixture, 'actual Binary stream differs from exact GUI2 test fixture')
+         print(json.dumps(verify(tables, command)))
+ 
+ 
+--- parent-context-probe-first/check-context-probe.py
++++ parent-context-probe-second/check-context-probe.py
+@@ -3,6 +3,7 @@
+ from pathlib import Path
+ import copy
+ import runpy
++import struct
+ import unittest
+ import xml.etree.ElementTree as ET
+ 
+@@ -25,6 +26,46 @@
+ 
+ 
+ class Contracts(unittest.TestCase):
++    def test_exact_gui_fixture_ledger_preserves_all_other_bytes(self):
++        # In-memory structural vectors only: no executable clone is produced.
++        original = bytearray(512)
++        original[:2] = b'MZ'
++        struct.pack_into('<I', original, 60, 128)
++        original[128:132] = b'PE\0\0'
++        struct.pack_into('<H', original, 132, 0x14c)
++        struct.pack_into('<H', original, 148, 224)
++        struct.pack_into('<H', original, 152, 0x10b)
++        struct.pack_into('<H', original, 220, 3)
++        clone = bytearray(original)
++        struct.pack_into('<H', clone, 220, 2)
++        ledger = {'status': 'PASS_EXACT_CUI3_TO_GUI2_TEST_FIXTURE_CLONE', 'profileTest': True, 'normalProduct': False,
++                  'sourceGitSha': 'a' * 40,
++                  'sourceCui': {'path': 'MODEL_ONLY_NOT_CREATED.exe', 'bytes': len(original), 'sha256': M['sha'](original)},
++                  'guiFixture': {'path': 'MODEL_ONLY_NOT_CREATED_GUI.exe', 'bytes': len(clone), 'sha256': M['sha'](clone)},
++                  'cargoArtifact': {'package': 'fc-windows', 'target': 'fc_windows', 'role': 'tests',
++                                    'cargo_profile_test': True, 'sha256': M['sha'](original)},
++                  'changedFields': [{'name': 'Subsystem', 'offset': 220, 'beforeHex': '0300', 'afterHex': '0200'}]}
++        self.assertFalse(M['validate_fixture'](original, clone, ledger)['normalProduct'])
++        for change in ('code', 'entry', 'profile', 'normal', 'offset', 'extra-field'):
++            modified, metadata = bytearray(clone), copy.deepcopy(ledger)
++            if change == 'code': modified[400] = 1
++            if change == 'entry': modified[168] = 1
++            if change == 'profile': metadata['cargoArtifact']['cargo_profile_test'] = False
++            if change == 'normal': metadata['normalProduct'] = True
++            if change == 'offset': metadata['changedFields'][0]['offset'] += 1
++            if change == 'extra-field': metadata['changedFields'].append({'name': 'EntryPoint', 'offset': 168, 'beforeHex': '00', 'afterHex': '01'})
++            metadata['guiFixture']['sha256'] = M['sha'](modified)
++            with self.subTest(change=change), self.assertRaises(ValueError):
++                M['validate_fixture'](original, modified, metadata)
++        modified = bytearray(clone)
++        struct.pack_into('<I', modified, 216, 0x1234)
++        metadata = copy.deepcopy(ledger)
++        metadata['guiFixture']['sha256'] = M['sha'](modified)
++        with self.assertRaises(ValueError):
++            M['validate_fixture'](original, modified, metadata)
++        metadata['changedFields'].append({'name': 'CheckSum', 'offset': 216, 'beforeHex': '00000000', 'afterHex': '34120000'})
++        M['validate_fixture'](original, modified, metadata)
++
+     def test_encoder_has_no_production_gate_or_payload(self):
+         root = ET.fromstring(M['authoring'](TEST, REPORT, NONCE))
+         ns = {'w': M['NS']}
+--- parent-context-probe-first/README.md
++++ parent-context-probe-second/README.md
+@@ -1,8 +1,8 @@
+-# R75 quiet MSI parent-context observer: preparation only
++# R75 quiet MSI parent-context observer v2: GUI test-fixture ledger
+ 
+-No observer test implementation, observer EXE or actual MSI has been produced by this preparation. Normal helper arguments, products and build targets remain unchanged. N/root must separately authorize and implement a future cfg(test)-only exact observer test in the existing fc_windows test harness.
++Root approved a dedicated GUI2 test-fixture clone to avoid a CUI console flash. At this preparation point root has not generated that clone or executed it. This tool never creates/patches a PE or builds/runs an MSI. N has supplied the cfg(test)-only observer source with exact test name `installer_lifecycle::native::broker::context_probe::engine_parent_context_observer`; actual compilation/runtime remains separate. The original 22 CUI test artifacts, two GUI normal products, normal helper arguments and build targets remain unchanged. All first-version files are retained unchanged in sibling `parent-context-probe-first`.
+ 
+-`context-probe.py ... describe` encodes the proposed argv. The full future test name is supplied explicitly; the example name in `check-context-probe.py` is deliberately a nonexistent model. The only metadata carrier is a closed `--skip` token, not an inherited environment variable:
++`context-probe.py ... describe` encodes the proposed argv. The full actual test name is supplied explicitly; the example name in `check-context-probe.py` remains a nonexistent pure-model name. The only metadata carrier is a closed `--skip` token, not an inherited environment variable:
+ 
+ ```text
+ --exact <actual-full-test-name> --test-threads=1 --nocapture --skip
+@@ -13,10 +13,25 @@
+ 
+ Before authoring, root must prove the actual same-SHA test harness accepts the exact argv plus `--list`, exits0 and lists only the intended test. The CLI-proof JSON has status `ACTUAL_HARNESS_CLI_PARSE_PASS_NOT_OBSERVER_RUNTIME`, `observerSha256`, `actualExit:true`, `exitCode:0`, `commandArgs:[...exact argv...,"--list"]`, and `selectedTests:["<actual full name>"]`; original actual command/raw output must be retained separately. `--list` proves parser/filter behavior only, not observer execution or engine identity. Rust documents repeated `--skip` and exact filters; no actual parser claim is made here.
+ 
+-The `author` subcommand requires that explicit proof SHA and an actual x86 CUI test harness SHA. It only writes a fresh authoring directory containing those test EXE bytes and WXS; it never runs wixl, msiexec or any process. No synthetic executable is accepted as compiler provenance. Root separately verifies the harness's original Cargo test-artifact ledger/source identity, using its unique Windows slot and exact reviewed MSI tools.
++The `author` and `check-exports` subcommands require `--fixture-ledger` and `--fixture-ledger-sha256`. Their closed validator reads the original x86 CUI3 fc_windows test artifact and the separately created x86 GUI2 fixture, checks both complete identities, and reconstructs the fixture from only the declared header fields. No code, entry point, imports, section layout or other bytes may differ. Subsystem changes exactly little-endian `0300` to `0200` at PE offset+92. If checksum is changed, it must be separately declared as exactly four bytes at PE offset+88 with both original/new hex strings; undeclared changes fail. The fixture remains `profileTest:true`, `normalProduct:false`, and original Cargo role tests/target fc_windows. It must never pass normal-helper admission or become a CI product. Root separately retains the actual original Cargo ledger/source binding. The actual --list CLI proof must bind the GUI clone SHA, not the CUI original SHA. Authoring only writes a fresh directory with the verified GUI test fixture and WXS; it does not construct MSI or execute a process.
+ 
+ The WXS defines one observer Binary/Type2 at1499, after costing/InstallValidate; unconditional Type19 abort1500; InstallInitialize1501. The isolated nonce-derived test Product/Upgrade IDs have no File/Component/Registry/Run/chainer effects. The deliberate abort is the expected failure (normally1603), not an installed-product success. After genuine compilation, export tables via original msiinfo; `check-exports` requires `--tables-list` with the complete original table listing and one IDT per non-system table, then checks exact Type2/19 rows, ordering/conditions, isolated product identity, empty side-effect tables and extracted Binary SHA. Unknown nonempty effects tables fail inspection. No actual MSI was built or table-exported by this preparation.
+ 
+ Root executes quiet first, preserving exact source/PE/MSI/argv/raw report identities. Before/after snapshots must show production target/markers/Run/gate/Pending and test Product/context registrations unchanged. Fully reap owned msiexec and observer processes before removing owned temporary artifacts. Other UI levels, elevation contexts and Win7/10/11 require separate actual evidence. If observed parent and helper SID differ, retain the original failure and redesign authentication from actual evidence; do not relax sameSID speculatively. An observer PASS does not prove production broker/guardian success.
+ 
+ Official references: [Type19 abort](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-type-19), [Type2](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-type-2), [custom-action sequencing](https://learn.microsoft.com/en-us/windows/win32/msi/sequencing-custom-actions), [Rust harness CLI](https://doc.rust-lang.org/rustc/tests/index.html).
++
++Required fixture ledger schema (root creates it after the actual clone, never from these model values):
++
++```json
++{
++  "status": "PASS_EXACT_CUI3_TO_GUI2_TEST_FIXTURE_CLONE",
++  "profileTest": true, "normalProduct": false, "sourceGitSha": "<40hex actual source commit>",
++  "sourceCui": {"path": "<local retained original CUI exe>", "bytes": 1, "sha256": "<actual SHA>"},
++  "guiFixture": {"path": "<local separate GUI test clone>", "bytes": 1, "sha256": "<actual SHA>"},
++  "cargoArtifact": {"package": "fc-windows", "target": "fc_windows", "role": "tests", "cargo_profile_test": true, "sha256": "<original CUI SHA>"},
++  "changedFields": [{"name": "Subsystem", "offset": 0, "beforeHex": "0300", "afterHex": "0200"}]
++}
++```
++
++The bytes/offset above are placeholders, not actual identities. Optional CheckSum is the second changedFields row with exactly name/offset/beforeHex/afterHex. The helper checks explicit ledger SHA plus full source/clone hashes and all bytes, so the placeholder values cannot be accepted. `describe` now returns the marker with a real LF character, matching N's exact marker bytes; the prior display used a literal backslash-n. This correction does not write or authorize a marker. N's observer writes bounded create-new `context.json` (8192-byte maximum) only after independently checking the marked, non-reparse owned root.

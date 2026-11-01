@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="{9C946503-A749-528D-BA4E-0C68136A6794}" UpgradeCode="{5618393C-3107-5352-9D97-BBE74EB4B112}" Name="FutureClassroom independent rollback chainer probe" Language="1033" Version="0.0.1" Manufacturer="FutureClassroom test-only">
+    <Package Id="{2CC40653-379A-5652-B186-9062B85B1026}" InstallerVersion="500" InstallScope="perUser" Compressed="yes" />
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+    <Condition Message="Independent chainer fixture is per-user only.">NOT ALLUSERS</Condition>
+    <Condition Message="Independent chainer fixture cannot close applications.">MSIRESTARTMANAGERCONTROL = "DisableShutdown"</Condition>
+    <Binary Id="FcIndependentChainer" SourceFile="chainer-probe.exe" />
+    <Directory Id="TARGETDIR" Name="SourceDir" />
+    <Feature Id="ProbeFeature" Title="Rollback-only chainer; no installed payload" Level="1" />
+  </Product>
+</Wix>

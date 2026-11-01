@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-second/archive-evidence-second.py", line 363, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-second/archive-evidence-second.py", line 312, in main
+    if Path(row['path']).suffix.lower() not in CERT_SUFFIXES:scan(source_data,'source:'+row['path'])
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-second/archive-evidence-second.py", line 309, in scan
+    walk(value,'')
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-second/archive-evidence-second.py", line 303, in walk
+    elif isinstance(value,(dict,list)):walk(value,trail+'/'+str(key))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-second/archive-evidence-second.py", line 308, in walk
+    else:walk(value,trail+'/'+str(index))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-second/archive-evidence-second.py", line 300, in walk
+    stats['decodedRawPayloads']+=1;scan(decoded,label+'::'+trail+'/'+key,depth+1)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-second/archive-evidence-second.py", line 278, in scan
+    except (AssertionError,UnicodeError):raise AssertionError('unrecognized or invalid retained evidence encoding '+label) from None
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: unrecognized or invalid retained evidence encoding source:evidence/root-registry-recovery-readonly-first.json::/files/5/base64

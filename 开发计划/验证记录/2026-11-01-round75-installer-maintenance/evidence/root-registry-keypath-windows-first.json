@@ -1,0 +1,262 @@
+{
+  "status": "FAIL_RETAIN_ORIGINALS_AND_RESIDUAL_FACTS",
+  "nonce": "ae966fa5484f4235b154b7b874ff728f",
+  "productCode": "{60E68721-62F0-5656-B5BE-144E6B889AB6}",
+  "inputs": {
+    "fixture.msi": {
+      "path": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+      "bytes": 10240,
+      "sha256": "d3c6d5e4937d5dd673e9835a7fbc8d5c7d03af8b0527e1a12d565da1a0e4e248"
+    },
+    "fixture-spec.json": {
+      "path": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture-spec.json",
+      "bytes": 598,
+      "sha256": "a41186d39d1ed187bfdbe99b0d94cb2e4eefc6fc36866257bddaaff34edd643f"
+    },
+    "query-registry-x86.ps1": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-fixture-preparation-first/query-registry-x86.ps1",
+      "bytes": 8445,
+      "sha256": "0d52ab605178fb80e52aba9ff6ae8d4329daf6f57049f458dafdd43c29c75af4"
+    }
+  },
+  "controller": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/controller.ps1",
+    "bytes": 12503,
+    "sha256": "b538244ff4b0a2916510f6bb8c78500c6b05f6b3f3fa6df157cbf4a81b5a3a06"
+  },
+  "operations": [
+    {
+      "label": "01-create",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        "JABiAD0AWwBDAG8AbgB2AGUAcgB0AF0AOgA6AEYAcgBvAG0AQgBhAHMAZQA2ADQAUwB0AHIAaQBuAGcAKAAnAEgANABzAEkAQQBBAEEAQQBBAEEAQQBDAEEANQAxAFUAYgBXAC8AYQBTAEIARAArAHoAcQAvAHcAQgAwAHUAMgBkAGQAZwBDAEcAbgBwAHQAawBLAFYAUwBZADEAcgBuAGcAdQBHAHcAUQB4AEsAaQBVADIAVABzAEkAUwB5AHgAZAA5AEgAdQBPAHQAUgBKACsAZQA4ADMAeQA0AHUANQB1ADkANgBMAGQAQgA4AFEAMwBwADIAWgBaADUANwBaAGUAVwBaADAAbgAzAFAARwArADYAawBrAGoARQA0ADQATABJAEUARABUAGMARQAxAEkAcwBrADIAUgB1AC8AQgBZADEAUwB3AEgASAA2ADcAdgBCAHkAWABjAGwATgBLAG4ANgBZAHMASQAvAFQASgBEAFcARgByAGoAeABkAHIAUwBLAFUAVwB3AHoAZgBwADMATQBUAEQARAB5AGUAagBxAFMAKwBUAFgASQBEAFYASQAwAHQAVABuADAAUQB6ADQAQQBMAFIANAAyAFMAUgBnADEATQBmAG4AVgBHAHkAWgBsAHkAegBLAFcAaABkAHoAYwBhAHYAZgAvAEUAawA5AE8AagBaAHQAdAA3AGsAaQByAE8AdABaAHYAaAAzAEUAOQArAEwALwBjAEgAagB3AEkAOQArAGkAYwBlAFQAYgB0AHYAWQA5AGYAVABVAGYAZABpAHoATwBUAEYAQgAzAG8AcQBZADgAdwBWAGsASgBMAG0AaQBwAGkAcAA2AEEAUwA3AFIATQB1AFMAcwArAEoAdwBJAGUASAA5AHgAdABCAGwAUQBYAFoAVwBMAFQAbgBjADkAagA0AEwAMwBRAFQASABNAHgALwBGADkAWgAxADcANAA3AFgARAB3ADEASgBxAHYAZgA2ADEARwByAHoATQB5AGkAbQA5AGEAOQArAHUATQBqAEEAZABwAGEAMQA3AGMAdgB4AHUAdABWADAAVgBBAHQAbQBSAHgATwA2AHkAUwB6AHEAdwBLADEAbwB6AE0ANgBhAHkAVgAzAFYAMwBsADEANwBlAGgAdQBMADgATABYADkAUABpADQAOABzAGkAYQByADkAawBuAFcANAArADkAOQBwAFYAKwBIAG8AagAwADIASgBHAGsANwB1AHcAbABkAEoAbgBpAFgASABkADkATQB1AHcAbABYAGcAZgBPADYAUABaAHQAegBLAGcATABkAGUAdwByAE8AOQBIAHIAbwBxAG8AZgBTAFUAWQA3AGUAbgBjAHYAVwBLAEUAMgBwAE4ARQByAGoAVAB6AEkAUgBnADcANgBnAHQAcgB3AFEASwBIAFoAWgA2AHIAawA2AGsARABmAGIAbQBNAC8AZABIAEUAcwBqAFQAVABHAEoAYQB5ADUATwBEAGwAaQBSAEMAYwBJAFEANwAvAHUAVwB0AHoAZQBDAEoAQwA4AHMAcAArAGgAbQBxAEQASQBiAGIAeABrADUANAA2AGwARwBIAG4AcgBRAFkAMgBMAFEAWQBoAEQAegBuAHMAYQB5AEsAQgBKADMAdABnAFQAZQBmADEAOAAwAC8ASAA0AC8AZwB4AHgATgA5AHcANgBrAGQAZgBqAFYAMQBEAHoAOQB3AC8AMAB4AGsAUQBqAHUASgBnAHYAQQBxAFQAQQBrAHcATQA3AFcAMQBYAEoATQBlAHYAegBIAHIAVABpAFkAcwBlAGQAaQBDAGgAKwBFAHUARwBUAEwATwBIAGoASwBlAGcAcABHAE4AVABKAGoAVwBkAG8AQgBBAEMAZwBTADgAaABFADAASwBCADcANgBWAGkANABtADEAZgBZAHQATQBXAHAAUQBTAGgAMgBZAHUARQBaAHAAcABLAFAAOABRAE0AWgB3AE0AUwBtAGMASQBtADQAUQBJAG0AKwBHAGoAUwBxAHQAbgAzAFEAOAArAFAANAB2AEgAMABjAGUAcABQACsAdABQAEkAVgA5AEwANQBEAC8ANgBaAHQAVwBzAG8AaAAvAG8AYQB2AFQAdwBPAGkAWQBUADYAUgBoAFgANQBIAGMAZgBFAEQAcgBFAFQARABUADEASgA4AHoAOQBPAFMAUQBSAHAAeQBZAG0AcwBuAEgANgBhAGcAdABnAFgAeABGAGwAKwB4AGoAdgBaAGUAeQByAFEAaQBVAEEAZQAvAEsAWgBsAEQAaABQAE8ASgBPAHcAbgAxAE4AUQBsAEwANgBGADUAbgBLACsARwBMAGcAagBTAHIAcABFAG4AcQBPAEsAVQBiAEoATABjAHUAUwBVADAAWQAxAHMAUgBaAEUAQQBsAFcAZwA0AFYAZQBTAFgASAA0AFoAYQBtADUAZAB3AEkANABJADAAbABRAC8AbwBwAHkAawBWAG8AaABHAHEAZgBUAEEAWABXAC8ARAB1AHcAMAA5AFUAQgBiAFUAbQBBAEkAeAA2AEYAcgBXAGwARQBkAHQAdgB1ADIAdQAwAFAAaAB2AFcALwBBAHQAOQAxADcATwA3AEYAQgBRAG8AZABGAGEARwBLADcAbQBmAFoAdQBXAGoAegA0AFIAOQBlAFQAUABVADQAcQBnAFIAcQA1ACsAeAA4AHgATgBWAEYAMAAxAEIAagBjAEgAUQAxAG0AawBhAHQAbQA0AEMAdQBBAE0ARwBhAGgAMgA0AGMAVAArAGcAUQBNAGcAcgA0ADEAOAA5AHoAdABrAFUAbQBQAHoAYQA1ADcAcwBRAFIARgBMAHYAYwBWAEcAegB4ADkAWgBmAHUAUwBYAE4AcQBQADIANgBBAG0AdQBaADUATwBuAFcAdQBHAFEANwBiAFkAbQByADEATwBrAGUALwBFAGMAdQBnAEYAZwA2AEsAbwB6AFkAYwBVAHEARABwAEYAbQBsAEIAZgBSADIAdABFAHEANABDAEYARQB1AHIAZwBSAFAANwBwAGkAOQArAFgASABIADkAeQBBAHMAQwB0AGUATQArAFYANgBoADYARQAwAGUANQBTAFAAZwB6ADQATQBqAHAAUwAyAGMAUABhAE8AcQBMAFoAcQB1AHAATAA1AHgAcgBvAEUAOQB5AFoAZQAyAFcAaABDAFoANQBqAG4AQgBMAEwARgBaAHMAbQBBAEEAVABhAC8ALwAwAEoAbQBRAGkAUwArAEUAYQAzAHQAVAB2ADQAMwBZADEAZQByAGcAegBwAEsAdgB6ADMAbgA0ADUAdQBLAGMAdABzAFQAdQB0AHAAcABqAHQARgA1AE4AbQBlADYAegBZAGMAQwB5AGgAOABUAHYAWgAwAGsAKwAyAFUAUQBZAEEAQQBBAD0APQAnACkAOwAkAG0APQBbAEkATwAuAE0AZQBtAG8AcgB5AFMAdAByAGUAYQBtAF0AOgA6AG4AZQB3ACgAKQA7ACQAbQAuAFcAcgBpAHQAZQAoACQAYgAsADAALAAkAGIALgBMAGUAbgBnAHQAaAApADsAJABtAC4AUABvAHMAaQB0AGkAbwBuAD0AMAA7ACQAZwA9AFsASQBPAC4AQwBvAG0AcAByAGUAcwBzAGkAbwBuAC4ARwBaAGkAcABTAHQAcgBlAGEAbQBdADoAOgBuAGUAdwAoACQAbQAsAFsASQBPAC4AQwBvAG0AcAByAGUAcwBzAGkAbwBuAC4AQwBvAG0AcAByAGUAcwBzAGkAbwBuAE0AbwBkAGUAXQA6ADoARABlAGMAbwBtAHAAcgBlAHMAcwApADsAJAByAD0AWwBJAE8ALgBTAHQAcgBlAGEAbQBSAGUAYQBkAGUAcgBdADoAOgBuAGUAdwAoACQAZwAsAFsAVABlAHgAdAAuAEUAbgBjAG8AZABpAG4AZwBdADoAOgBVAFQARgA4ACkAOwB0AHIAeQB7ACQAcwA9ACQAcgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQB9AGYAaQBuAGEAbABsAHkAewAkAHIALgBEAGkAcwBwAG8AcwBlACgAKQA7ACQAZwAuAEQAaQBzAHAAbwBzAGUAKAApADsAJABtAC4ARABpAHMAcABvAHMAZQAoACkAfQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzACkAKQA="
+      ],
+      "actualExit": true,
+      "timedOut": false,
+      "exitCode": 0,
+      "pid": 2909,
+      "elapsedSeconds": 0.6157435090281069,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-01-create.stdout.log",
+        "bytes": 184,
+        "sha256": "9635103fd5817e6019abb93cedd44414f4727a3f00e67e2f5a741f325430c17f"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-01-create.stderr.log",
+        "bytes": 596,
+        "sha256": "be2a813c5e264e6e4b05c9816b17dc6eb039a1cc247767c8927d259fa5541e12"
+      }
+    },
+    {
+      "label": "02-upload-0",
+      "command": [
+        "scp",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f/fixture.msi"
+      ],
+      "actualExit": true,
+      "timedOut": false,
+      "exitCode": 0,
+      "pid": 2973,
+      "elapsedSeconds": 0.2653238889761269,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-02-upload-0.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-02-upload-0.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "02-upload-1",
+      "command": [
+        "scp",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture-spec.json",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f/fixture-spec.json"
+      ],
+      "actualExit": true,
+      "timedOut": false,
+      "exitCode": 0,
+      "pid": 2978,
+      "elapsedSeconds": 0.2673425991088152,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-02-upload-1.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-02-upload-1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "02-upload-2",
+      "command": [
+        "scp",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-fixture-preparation-first/query-registry-x86.ps1",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f/query-registry-x86.ps1"
+      ],
+      "actualExit": true,
+      "timedOut": false,
+      "exitCode": 0,
+      "pid": 2998,
+      "elapsedSeconds": 0.26466653193347156,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-02-upload-2.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-02-upload-2.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "02-upload-3",
+      "command": [
+        "scp",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/controller.ps1",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f/controller.ps1"
+      ],
+      "actualExit": true,
+      "timedOut": false,
+      "exitCode": 0,
+      "pid": 3013,
+      "elapsedSeconds": 0.2652130338829011,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-02-upload-3.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-02-upload-3.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "03-original120s-run",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        "JABiAD0AWwBDAG8AbgB2AGUAcgB0AF0AOgA6AEYAcgBvAG0AQgBhAHMAZQA2ADQAUwB0AHIAaQBuAGcAKAAnAEgANABzAEkAQQBBAEEAQQBBAEEAQQBDAEEAMwAyAFQAVQBaAE8AYQBNAEIARABIADMAKwA5AFQAOABPAEMAVQA4AHcARgBIAHIATgA3ADAAZQB1AE8ARABwADgAQgBCAEoAYQBoAEUARAArAGgAMABPAGgARABqAEUAUQB5AEUAQwBUAGwARgAyAG4ANwAzAEoAdABlAHoAZgBlAHMAVABXAGYAYQAvACsALwArAHgAVwBYAG8AVwA1ADQAegBQAGsAQwBDAHMAVwBuAEYAOAB3AEIAeABYAEMARQAvADEAVQBMAEIAYQBmAC8AZwA2AFoAMQBYAEQASwBQADcAMgArAFgAUAB3AEsAdQBwAFgAWQBWAFcASQA3AFUAbgAxAE0AZwBYADQAYgBBAFIAWgBnAFoASABRAEkARwA3AEYAWQBBAHYAdABUADkAZgBrAGIAZQArAFEAMABnAGIAMwBIADgAagBoAHQAcgBjAEsAZAA1AGcAMwBzAGoAdABNAE0ANABvAEgAZgA4AE8AQgBuAHgAYQBNAGEAMABhAEYAdABZAGwAbQB5AE4ATgAvAGwASwBSADYAVgA1AHIAOQBIAHkATABuADcASwB6AHAAVgByAFMAeQA1AHQAQgBhAGYARgA5AFkANABSAGMAWQByAEMAYQBtAC8AdQB1AGgAaAA2AFoAZgAzADIAaQB1AEoASgBKAGIAZwBRADAAYwBMAEUATABCAEYAWgByADYAbwBoAFAAbQBRAG0AWgBzAHoAcwByAEgAdABNAEYAMwA0AC8AZQBjAGoAaQAvAGUASgBSAHYAZABEADkAMgBDAGsAWABWAFgAbwA4AGoAZQBkAFUAbgBrAGQAWgBIAGQAMgBwAGwARABUADQAaQAyAGEAQgAwADkAbgBqAGUATwBQAFkAeAAzAEwAWQBMAE8AZgBSAEUALwB0ADEASwAzAG8AVgBuADAAaQBDAEkAcgBNAGYAZABQAHUAMAB1AHkAQgBVADAAYwBnAFEANgBWADkANgBjAHMATgBDACsAZwAyAHcAcABVADcAcQBvADAAQQBrAE4AVQBIAFUAVQA2ADIAawAyAFEANwBKAEgATwB6AFQAeQBCAHgAeABFAG8AawB4AHoAQQA5AFIAZwA0ADgAZABBAHYAZgBEAE0AdQBMAEIATQA0ADcAcwBlADQAZQBQAGsASQBuAEsAUQBFAG4AVAB0AE8AaQBOAHUANABKAFQAaABsADEAVQBZAHkAdABvADMAawBnAHEAbABqAFgAUQBDAE0AUwBVAEEAOABBAHEAQQAvADkAbwB2ADEATQBDAG4AagBZAFYAdwA4ADUAbgA1AHgAYgBFAEcAeABiAFgAMABuAEgAcwBXAGwATwA0ADQANwBOAEEAWgB3AGQAbwA2ADcAaABQAGkATABYAFEAbABLAHQAMABzAEsAVQBNAFkAdwBPAFMAYgBLAGIAdwBSAEkAVQBtAHoAeQBZAEcARQBUADgARwB4ADEATQBaAHkATgBYAEgASQBtADIAZgBQADkATQBRAG4AZABPADUAZAA2AFoAcQBZAFkASwBvADkAbQBpAGoAMQBLAHEASgBxAFQAMABxAEEAbgA3ADUAUwBOAEYASQBkAEwAbABuAE0AdgAzADUAZAAyAEwAVABVAGsAYwA3AFkAawBLAEkANQBqAHYANQB0AE4ARAB1AHYAcABWAE8ALwAzAGYANwA3AFAAWAB3ADMAZgA4AEIAcABXAFAAZgBUAHEAcQBjAGQASQBaAGEAeABTAGsAVwBzADkATgBPAEMATQBDAFUAMQBIAHIAQgBLAGMAVQBZAHIANQBvAEcANQBNAC8AVQBhAHUAMABxADIAOABSAGMATQBtAEYARAArAGwAVABhADQAWgBTAHkASQB3AFQAKwBtAGYAcwBsAG8AegBaAHYAUwBGAGMAUwBMAHkAVQBnAHUAZgBaAHEAUABKAFgAWAArAGcAZABBAFAASQBsAHUAeQBNAHUAVgB1AGQAVQBrADcAUwBTAHQAegAyAE4AUQBQAEoAVgBaAEoATwAvAHoAegBDAFAARgBVAFYAMQArAFcAYQBCAHcAQgB1AGcAdQBYAFMAMgBuAHkAWAB2AGYAUgBmAE4AeAAvAGUASABIAHkAMgBmADYAcwByADEAZABQAFkASwBNADQAcgByADcASABCAE4AQgBYAGsAaABCAFgAZgAyADkAdgAzAFcARABPAHMAdABwAFoALwBDAGQANgB2AHAAUABEAHcAeAAwAGcASgBhAGgAVgBLADYAbABOAEsAcQBOAHAAMwBuADEAQgBLAEcAaQB5AFoAOQBvADMASwBwADkAZgBFAEQAVwA2AEoATgBGAHIATwBRAG0AaABGAEwAcAB3AEgAQwArAHYAbQBOADgAbwBwAE4AMgArADIAQQB3AEEAQQAnACkAOwAkAG0APQBbAEkATwAuAE0AZQBtAG8AcgB5AFMAdAByAGUAYQBtAF0AOgA6AG4AZQB3ACgAKQA7ACQAbQAuAFcAcgBpAHQAZQAoACQAYgAsADAALAAkAGIALgBMAGUAbgBnAHQAaAApADsAJABtAC4AUABvAHMAaQB0AGkAbwBuAD0AMAA7ACQAZwA9AFsASQBPAC4AQwBvAG0AcAByAGUAcwBzAGkAbwBuAC4ARwBaAGkAcABTAHQAcgBlAGEAbQBdADoAOgBuAGUAdwAoACQAbQAsAFsASQBPAC4AQwBvAG0AcAByAGUAcwBzAGkAbwBuAC4AQwBvAG0AcAByAGUAcwBzAGkAbwBuAE0AbwBkAGUAXQA6ADoARABlAGMAbwBtAHAAcgBlAHMAcwApADsAJAByAD0AWwBJAE8ALgBTAHQAcgBlAGEAbQBSAGUAYQBkAGUAcgBdADoAOgBuAGUAdwAoACQAZwAsAFsAVABlAHgAdAAuAEUAbgBjAG8AZABpAG4AZwBdADoAOgBVAFQARgA4ACkAOwB0AHIAeQB7ACQAcwA9ACQAcgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQB9AGYAaQBuAGEAbABsAHkAewAkAHIALgBEAGkAcwBwAG8AcwBlACgAKQA7ACQAZwAuAEQAaQBzAHAAbwBzAGUAKAApADsAJABtAC4ARABpAHMAcABvAHMAZQAoACkAfQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzACkAKQA="
+      ],
+      "actualExit": true,
+      "timedOut": false,
+      "exitCode": 1,
+      "pid": 3018,
+      "elapsedSeconds": 1.7175698480568826,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-03-original120s-run.stdout.log",
+        "bytes": 1310,
+        "sha256": "e715a53c0cf2eec566a0a23c3182a2ed3e509b5eb379db551a8540acf4cca8f6"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-03-original120s-run.stderr.log",
+        "bytes": 596,
+        "sha256": "be2a813c5e264e6e4b05c9816b17dc6eb039a1cc247767c8927d259fa5541e12"
+      }
+    },
+    {
+      "label": "04-snapshot",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        "JABiAD0AWwBDAG8AbgB2AGUAcgB0AF0AOgA6AEYAcgBvAG0AQgBhAHMAZQA2ADQAUwB0AHIAaQBuAGcAKAAnAEgANABzAEkAQQBBAEEAQQBBAEEAQQBDAEEAMwAyAFQAWABaAE8AaQBPAEIAUwBHADcALwB0AFgAYwBHAEUATgA3AFEAVwBXAE8AbgBiAFgAOQBuAFIANQA0AFEAZgBRAHUAQgBJAFYAbwBoAEsAbQB0AHEAWgBpAGoARQAwAHcARQBDAHEAawBCAGQAbQBkAC8AegA3AEIAYQBYAGYAdgA5AGcAcQBTADgANQA3AHoAUABvAGQAegA2AE4AaABTAEMAagBrAGgAaQBvAGwAOABMAGUAbQBKAFMAcABvAFQATwBqAFoARABKAFEAcgB6ADkAZgB0AE0ANQBLAFgAZwA5AEsAOQB2ADMAMQBZAGYAcQB2AGgAUQBkAGsANwBFAGsAZQBYAHYAWQAwAEEAcgBhADMAVgBJAEsAVgBFAEcAcABMAFgAcQBiAGEASAB6AHgAegAzADQAMgBEAGwAaABYAHQATAB1AEsAegBzADkAZAB0AGIAaABqAHMAcABTAFYANABmADQAdwBHAG4AdgAzADIAUABQAHgANgBtAFEAaABwAFYAVAA0ADgAbQB3ADkATgB2AC8ASwBGAG4AKwBxAFIAeAAwAC8AMQBhAEoARgBKAFYAaAAyAHQASABhAG4AawBGADcALwBtAE4AdQBoADMALwBDADEAZgBwAHAAWQBQADUAOAA3AFoARAB4ADkAeAB2AE4AbgBVAFIAegB0ADIAQQA5AGwANgBwAFEAeQBSAGEAdAA3AGUAaABDAHAAZABJAFIAUgA0AHAAcwBpAGsAdgA2AFAAUABxAE0AbQBmAFMANgB1AEIANgBHAEwAMwAwAHYARgBXAHoAVABGAEMAUgB5AGQAawAwAGMATABaAHIASQBxAFoAMgBEAHkAeQArAEUAMQAyAFEAVABUAGEAdgBBAGQAZgBwAG8AVgB4AFAAbwB2AHEAUgBvAFgAMgB0AGQAdwBBAC8AUgBsAEUAUgAyAFAARABpACsANwBhADcAeABGAHAAUQBvAEEAZwAzAEoAWABpADYASABjAEgAQQBGAHoAVgBhAFIAYgBKAGYAagBDAFAAUgBKAGYAbABaADQAdQBIAHMAaQB1AGcAYQBlAEQAWgBJAFkAbgBvAGMAZwBpAHgATQBBAE4AeQBQAGcAbwByADYAZgArAGcATwBVADIAZwBQAGcAZQBsADkAUgArAHYANABWAHUASABFAEcARwBtADgAVQBNADYALwAwAE0AbgBBADUANQBJAEYAbQByAEUAdgBOAEIAYgBGAHIAWAB3AEYARQBiAE0AVQBXAEQARQBCAC8ANQBLAGUAYgBmAHAAeQBoAFAAawBxAG4AaQBaACsAZQBhADUAQgB1AGEAOQA5AEYAUQA1AFIANQBJADkAUwBRAEUAWQBDAFQAQwBqAFUAeAA4ACsAZQA3AEQARwBSAGUARQA2AGMAZwBRAHoAQQArAHgANgAzAGYARQBMAEEANABEAFoATABWADMARwBGAGcAYgB6AGMASQBUAG8AWQBlAHEAOQBoAGgALwAzAEsATwBRACsALwBaADQAKwBBAEQAUgBkAE0ARwB1AC8AcgA3ADYASAB2AGQAagArADQAeABLAEkANwBaAFYAdgB0ADcAYgBEAGwAYgBWAEcAMgAvAG0AdgBQAFoAdQA3AEUANgBRADcAVABuAEoAZABvAHYAeQBqAGIAZgBoADEANwBsAHoAeQBmAFYAYQBUAE0AZQBtADkAMwB1AFAANQA5AHoAYQBJAGQAZwBMAFUAcQBSAHYAMwBhAEsAOABVAEsAdwAzAEYAcABqAGwAUgBnAGQAMABwAE4AQwBLAE0ATQBrAEkAbABkAFMAYwBFADUAbAByAHkAZwBIADUAbwBOAGUAcQBVAGMAOQBUAGMAdABoAG4ATAA3AGgATQBqAEcAcwBKAFYATgBVAFkAdgA0ADcAcgBUAEMAcwBDAFgAOABYAGsAcQBrAGsATQA4AEsAMwB5AGYARABwAHUAZAB0AHIAZABUADAAbwBsAHEASwBpADAAcwBzAHYAVwBEAEsAYwBxADgAZQB1AFkAUgBHADkAVQB0AHIAcABQADQAOAB3AHcAVwAzAEcAZgBjAGwAbQBLAHcAQwBEADEAWABKAHAAQgB6ADkAMABMAGYAUABuAHcANQBlAGIAZwB5ACsATwB0ADcAeQBzAGYAVgBwAEIAeQAzAG4AbgB0AFEATABLAHMAVwBJAFgAMgB2AEwAZABiAGoALwBQAGgAbQBYAFgAaABmADUAYgA2AEgARwB0AGgAYQBmAGYAUgBxADIAZwBhAEkAKwBhACsAbwBJAFoAYgAvAGYAZQBaADUAeQB6AGsAbQBxAG0AWQA5AG4ARwA4AFQAMwB3AFEARwB1AG0AagBaAGEAVABFAE4AcQBSAEIAMgBlAHIAdQBmADMAdwBDADcAZABnAEcAdwBhACsAQQB3AEEAQQAnACkAOwAkAG0APQBbAEkATwAuAE0AZQBtAG8AcgB5AFMAdAByAGUAYQBtAF0AOgA6AG4AZQB3ACgAKQA7ACQAbQAuAFcAcgBpAHQAZQAoACQAYgAsADAALAAkAGIALgBMAGUAbgBnAHQAaAApADsAJABtAC4AUABvAHMAaQB0AGkAbwBuAD0AMAA7ACQAZwA9AFsASQBPAC4AQwBvAG0AcAByAGUAcwBzAGkAbwBuAC4ARwBaAGkAcABTAHQAcgBlAGEAbQBdADoAOgBuAGUAdwAoACQAbQAsAFsASQBPAC4AQwBvAG0AcAByAGUAcwBzAGkAbwBuAC4AQwBvAG0AcAByAGUAcwBzAGkAbwBuAE0AbwBkAGUAXQA6ADoARABlAGMAbwBtAHAAcgBlAHMAcwApADsAJAByAD0AWwBJAE8ALgBTAHQAcgBlAGEAbQBSAGUAYQBkAGUAcgBdADoAOgBuAGUAdwAoACQAZwAsAFsAVABlAHgAdAAuAEUAbgBjAG8AZABpAG4AZwBdADoAOgBVAFQARgA4ACkAOwB0AHIAeQB7ACQAcwA9ACQAcgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQB9AGYAaQBuAGEAbABsAHkAewAkAHIALgBEAGkAcwBwAG8AcwBlACgAKQA7ACQAZwAuAEQAaQBzAHAAbwBzAGUAKAApADsAJABtAC4ARABpAHMAcABvAHMAZQAoACkAfQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzACkAKQA="
+      ],
+      "actualExit": true,
+      "timedOut": false,
+      "exitCode": 1,
+      "pid": 3022,
+      "elapsedSeconds": 0.8703649281524122,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-04-snapshot.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-first-04-snapshot.stderr.log",
+        "bytes": 1569,
+        "sha256": "6708916f4842c9a805d16220867f5e1e66f66d4e7ac019ac053613747400fba5"
+      }
+    }
+  ],
+  "cleanup": "NOT_RUN",
+  "originalOverallSeconds": 120,
+  "retentionReserveSeconds": 20,
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f",
+  "nativeSshExitCode": 1,
+  "failureType": "AssertionError",
+  "failureCode": "TRANSPORT_FAILURE_04-snapshot",
+  "remoteResidualState": "UNKNOWN_RETAINED",
+  "overallElapsedSeconds": 4.280375476926565
+}

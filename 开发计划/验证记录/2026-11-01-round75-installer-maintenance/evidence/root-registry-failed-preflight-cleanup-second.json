@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "actualExit": true,
+  "exitCode": 0,
+  "command": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBFAG4AYwBvAGQAaQBuAGcAXQA6ADoAVQBUAEYAOAA7AFsAQwBvAG4AcwBvAGwAZQBdADoAOgBPAHUAdABwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAkAHMAPQBbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKAAkAHMAKQApADsA"
+  ],
+  "stdinScript": "$c=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('eyJyb290IjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1yNzUtcmVnaXN0cnkta2V5cGF0aC1hZTk2NmZhNTQ4NGY0MjM1YjE1NGI3Yjg3NGZmNzI4ZiIsImZpbGVzIjpbeyJwYXRoIjoiLm93bmVyIiwiYnl0ZXMiOjQ3LCJzaGEyNTYiOiJhYTVmMWExMmY0OWQxYThlZWJlMmE1YTQzZTdkYWM2ZWVjMDM5YWE0MDQ0YmEyOTMyZmE2MzZmZGZlZTA1ZTI3In0seyJwYXRoIjoiQmVmb3JlLmpzb24iLCJieXRlcyI6Mjc5Niwic2hhMjU2IjoiNmE4M2UxMDZjNGI1MWFhZjcwNzg5MGE4MGM2N2QyYWU1ZDliOGRiNTA2Y2IxZDEzN2VmNzIxMDg3YjE2ZTc3ZiJ9LHsicGF0aCI6ImNvbnRyb2xsZXIucHMxIiwiYnl0ZXMiOjEyNTU4LCJzaGEyNTYiOiI0MTMyZDc0NDBmNzE3NDJlMTI4ZmVhMjQyZDU0OTU1OGNkNDUwYTZjNzhlZGQ1NTNhYzVhODk1ZDRjNjBmOTE0In0seyJwYXRoIjoiY29udHJvbGxlci1yZXBvcnQuanNvbiIsImJ5dGVzIjoxNzU3LCJzaGEyNTYiOiIzNmNkOWI2YWUyYjkwMTdmMzdhMTkzZTBkZmJiN2NmOGFjNjNlOWJiYWI3YWYwNDMyMzNmMmY2ZWQxMmNkMmYwIn0seyJwYXRoIjoiZml4dHVyZS5tc2kiLCJieXRlcyI6MTAyNDAsInNoYTI1NiI6ImQzYzZkNWU0OTM3ZDVkZDY3M2U5ODM1YTdmYmM4ZDVjN2QwM2FmOGIwNTI3ZTFhMTJkNTY1ZGExYTBlNGUyNDgifSx7InBhdGgiOiJmaXh0dXJlLXNwZWMuanNvbiIsImJ5dGVzIjo1OTgsInNoYTI1NiI6ImE0MTE4NmQzOWQxZWQxODdiZmRiZTk5YjBkOTRjYjJlNGVlZmM2ZmMzNjg2NjI1N2JkZGFhZmYzNGVkZDY0M2YifSx7InBhdGgiOiJxdWVyeS1CZWZvcmUuc3RkZXJyLmxvZyIsImJ5dGVzIjowLCJzaGEyNTYiOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0seyJwYXRoIjoicXVlcnktQmVmb3JlLnN0ZG91dC5sb2ciLCJieXRlcyI6MCwic2hhMjU2IjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9LHsicGF0aCI6InF1ZXJ5LXJlZ2lzdHJ5LXg4Ni5wczEiLCJieXRlcyI6ODQ4NCwic2hhMjU2IjoiOTIwY2MxYmZiNTY5MTNlZmM0ZTczMjY4Y2I4ZTQ1YWM1MDUzYjQwNGMyNWRkMWRiOGU4ZWQyMmFhNWEzZDFkNCJ9XX0='))|ConvertFrom-Json;$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';$root=$c.root\nif([IO.File]::ReadAllText((Join-Path $root '.owner')) -cne \"future-classroom-owned-r75-registry-keypath/v1`n\"){throw 'OWNER'}\nif([IO.Path]::GetFileName($root) -cne 'FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f'){throw 'ROOT'}\n$actual=@(Get-ChildItem -LiteralPath $root -Recurse -Force);$regular=@($actual|Where-Object{-not $_.PSIsContainer});if($regular.Count -ne $c.files.Count){throw 'MEMBER_COUNT'}\nforeach($x in $actual){if($x.Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'REPARSE'};if($x.PSIsContainer -and $x.FullName -cne (Join-Path $root 'query-temp-Before')){throw 'UNKNOWN_DIRECTORY'}}\nforeach($x in $regular){$name=$x.FullName.Substring($root.Length+1).Replace('\\','/');$expect=@($c.files|Where-Object{$_.path -ceq $name});if($expect.Count -ne 1 -or $x.Length -ne $expect[0].bytes -or (Get-FileHash -LiteralPath $x.FullName -Algorithm SHA256).Hash.ToLowerInvariant() -cne $expect[0].sha256){throw 'CHANGED_BYTES'}}\n$report=[IO.File]::ReadAllText((Join-Path $root 'controller-report.json'))|ConvertFrom-Json\nif(-not $report.identityVerified -or $report.installAttempted -or $report.commands.Count -ne 1 -or $report.commands[0].name -cne 'query-Before' -or -not $report.commands[0].actualExit -or -not $report.commands[0].pipesComplete -or $report.commands[0].timedOut){throw 'NO_INSTALL_AND_OWNER_NOT_PROVEN'}\n$active=@(Get-CimInstance Win32_Process|Where-Object{$_.ProcessId -ne $PID -and $_.CommandLine -and $_.CommandLine.IndexOf($root,[StringComparison]::OrdinalIgnoreCase) -ge 0});if($active.Count){throw 'ACTIVE'}\nRemove-Item -LiteralPath $root -Recurse -Force\nif(Test-Path -LiteralPath $root){throw 'ROOT_REMAINS'}\n@{status='REMOVED_OWNED_FAILED_READONLY_PREFLIGHT_ROOT';root=$root;files=$regular.Count;msiEverExecuted=$false;activeOwnedBefore=0;absent=$true}|ConvertTo-Json -Compress",
+  "readonlySourceSha256": "916ff9c6c61d759c4efe085c6adf7ca060718dbf6b9b3af50a9f085899563a3c",
+  "scope": "Cleanup only after original bytes retained and code/report prove no MSI installation was attempted. Does not amend original FAIL or run uninstall for a product never installed.",
+  "stdout": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-failed-preflight-cleanup-second.stdout.log",
+    "bytes": 248,
+    "sha256": "22d9a165d15daf6fd9d30080e0b8c3a6eb0d5e6fa7bbd75abd8936bb98126c8a"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-failed-preflight-cleanup-second.stderr.log",
+    "bytes": 843,
+    "sha256": "4c9460241ea057dbc822500407cefab72b9f28160f7c9544fb9741883ad2f339"
+  },
+  "actual": {
+    "msiEverExecuted": false,
+    "files": 9,
+    "absent": true,
+    "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f",
+    "activeOwnedBefore": 0,
+    "status": "REMOVED_OWNED_FAILED_READONLY_PREFLIGHT_ROOT"
+  }
+}

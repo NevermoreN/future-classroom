@@ -1,0 +1,148 @@
+{
+  "status": "PASS_PURE_PE_SELFTEST_ACTUAL_EXIT0",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/gui-fixture-preparation-first/clone-cui-test-gui-first.py",
+    "--self-test"
+  ],
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 0.04738302901387215,
+  "helper": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-fixture-preparation-first/clone-cui-test-gui-first.py",
+    "bytes": 14069,
+    "sha256": "d5252415a9ea7d40e146128b29978dd9171f07604e462ab85bfdbd64c826bc1b"
+  },
+  "stdout": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-fixture-preparation-first/pure-pe-first.stdout.log",
+    "bytes": 2126,
+    "sha256": "bbcd12373593cb1ce9fca8d16cdb1f1b5d7c783c3b4704f05a0b2b9d472eab0e"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-fixture-preparation-first/pure-pe-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "actualResult": {
+    "status": "PASS_PURE_IN_MEMORY_PE_FORMAT_TESTS_ONLY",
+    "positiveCases": [
+      "valid_unsigned_i386_CUI_to_GUI",
+      "all_other_code_import_entry_bytes_identical",
+      "nonzero_checksum_preserved_not_recomputed"
+    ],
+    "negativeCases": [
+      {
+        "name": "short_dos",
+        "reason": "FINITE_PE_BYTES"
+      },
+      {
+        "name": "wrong_dos",
+        "reason": "DOS_SIGNATURE"
+      },
+      {
+        "name": "pe_header_overflow",
+        "reason": "PE_OFFSET_BOUNDS"
+      },
+      {
+        "name": "pe_inside_dos",
+        "reason": "PE_OFFSET_BOUNDS"
+      },
+      {
+        "name": "bad_pe_signature",
+        "reason": "PE_SIGNATURE"
+      },
+      {
+        "name": "wrong_machine",
+        "reason": "I386_ONLY"
+      },
+      {
+        "name": "zero_sections",
+        "reason": "SECTION_COUNT"
+      },
+      {
+        "name": "too_many_sections",
+        "reason": "SECTION_COUNT"
+      },
+      {
+        "name": "dll",
+        "reason": "EXECUTABLE_NOT_DLL"
+      },
+      {
+        "name": "not_executable",
+        "reason": "EXECUTABLE_NOT_DLL"
+      },
+      {
+        "name": "optional_header_short",
+        "reason": "OPTIONAL_HEADER_BOUNDS"
+      },
+      {
+        "name": "optional_header_overflow",
+        "reason": "OPTIONAL_HEADER_BOUNDS"
+      },
+      {
+        "name": "pe32plus",
+        "reason": "PE32_ONLY"
+      },
+      {
+        "name": "directories_missing_security_slot",
+        "reason": "DATA_DIRECTORY_BOUNDS"
+      },
+      {
+        "name": "directories_overflow",
+        "reason": "DATA_DIRECTORY_BOUNDS"
+      },
+      {
+        "name": "signed_cert_offset",
+        "reason": "UNSIGNED_CERTIFICATE_TABLE_EMPTY"
+      },
+      {
+        "name": "signed_cert_size",
+        "reason": "UNSIGNED_CERTIFICATE_TABLE_EMPTY"
+      },
+      {
+        "name": "force_integrity",
+        "reason": "FORCE_INTEGRITY_FORBIDDEN"
+      },
+      {
+        "name": "already_GUI",
+        "reason": "EXACT_EXPECTED_SUBSYSTEM"
+      },
+      {
+        "name": "other_subsystem",
+        "reason": "EXACT_EXPECTED_SUBSYSTEM"
+      },
+      {
+        "name": "section_table_outside_headers",
+        "reason": "SECTION_TABLE_AND_HEADERS_BOUNDS"
+      },
+      {
+        "name": "zero_entry",
+        "reason": "NONZERO_IMAGE_ENTRY_POINT"
+      },
+      {
+        "name": "entry_outside_sections",
+        "reason": "ENTRY_IN_ONE_EXECUTABLE_SECTION"
+      },
+      {
+        "name": "nonexecutable_entry_section",
+        "reason": "ENTRY_IN_ONE_EXECUTABLE_SECTION"
+      },
+      {
+        "name": "raw_section_overlaps_headers",
+        "reason": "SECTION_RAW_BOUNDS"
+      },
+      {
+        "name": "raw_section_outside_file",
+        "reason": "SECTION_RAW_BOUNDS"
+      }
+    ],
+    "actualExeWritten": false,
+    "WindowsOrCargoExecuted": false,
+    "scope": "Synthetic in-memory file-format checks only. No PE loader, GUI/null-stdio, CLI, producer provenance or actual artifact acceptance."
+  },
+  "positiveCount": 3,
+  "negativeCount": 26,
+  "artifactReadOrWritten": false,
+  "WindowsCargoMSINetworkInvoked": false
+}

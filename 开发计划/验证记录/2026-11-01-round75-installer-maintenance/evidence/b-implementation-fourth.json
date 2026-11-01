@@ -1,0 +1,199 @@
+{
+  "status": "PASS_B4_SOURCE_AND_LOCAL_TABLE_FRAGMENT_NOT_PRODUCT_MSI",
+  "sourceGitBase": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+  "sources": [
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 58160,
+      "sha256": "d0fbb23a5dab2d3329e935110265609ea53674b31896102d1139e21cee193059"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 35469,
+      "sha256": "d23f912eecdb556352c8ebd97796ad1de2d86f1185e0c5feb2c29a11f53329d1"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 14564,
+      "sha256": "9efa5656201a962705536316cc374b4d47d37e74c8d5e981576ad655e79d0d17"
+    }
+  ],
+  "sourceCount": 3,
+  "preimage": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/b3-source-before-b4-first/manifest-first.json",
+    "bytes": 570,
+    "sha256": "7f66102db2d9459980e261b0f39ab1a0556332afc058fc88d46c550f58c355b7"
+  },
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/worktree/scripts/check-msi-candidate.py"
+      ],
+      "pid": 8819,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 4.121829340001568,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-1.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-1.stderr.log",
+        "bytes": 3842,
+        "sha256": "2c5a9e7ac58f54d58a8cf879ebc46d336008dc9e2947755f3af398dd3addb275"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/worktree/scripts/check-architecture.py"
+      ],
+      "pid": 8838,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.11430130107328296,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-2.stdout.log",
+        "bytes": 71,
+        "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-2.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/fc-round75-installer-maintenance/worktree",
+        "diff",
+        "--check"
+      ],
+      "pid": 8848,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 1.2665114849805832,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-3.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-3.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "pureTestCount": 25,
+  "pythonAST": "PASS",
+  "unchangedContractFunctions": [
+    "verify_msi_contract",
+    "verify_transaction_sequence",
+    "idt_rows",
+    "run_tool",
+    "parse_lifecycle_image",
+    "lifecycle_image",
+    "lifecycle_capabilities"
+  ],
+  "foreignFrozenInputCount": 5,
+  "foreignFrozenInputs": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    }
+  ],
+  "actualToolFragment": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/fragment-second.json",
+    "bytes": 10185,
+    "sha256": "1534c83abfdcd4c6a81d163edd172d2aecfeb3fed380786440debd04871d343e"
+  },
+  "scope": "Warning-free unexecuted WXS subset + exact explicit lifecycle tables. Text Binary fragment only; no same-source N2 MSVC normal products or complete product MSI built/validated. No Cargo/Windows/main/Git operations.",
+  "windowsExecuted": false,
+  "cargoExecuted": false,
+  "productMSIValidated": false,
+  "normalHelperProvenance": "NOT_BUILT_THIS_ROUND",
+  "retainedFirstFailures": true,
+  "files": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/.owner",
+      "bytes": 46,
+      "sha256": "3f0822fe0d38c1f2945538eca7cf778a8438632fc5d864cb210db50c2d34e5cf"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-1.stderr.log",
+      "bytes": 3842,
+      "sha256": "2c5a9e7ac58f54d58a8cf879ebc46d336008dc9e2947755f3af398dd3addb275"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-2.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-2.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-3.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/check-3.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/packaging__MSI-CANDIDATE.md.diff",
+      "bytes": 1409,
+      "sha256": "fd2aa6eb16934e825ac7f6c42199ba333907eaeac221e10d5dc8d500456186de"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/scripts__check-msi-candidate.py.diff",
+      "bytes": 3213,
+      "sha256": "511cdd62e20c684ecc44c685c1fcb4e832ad0e420310815c729a394c83012327"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-verification-first/scripts__package-msi-candidate.py.diff",
+      "bytes": 6747,
+      "sha256": "e2386ca25b78e6c60e6ee875647af288913451ef30002204e30db68b90a25d53"
+    }
+  ]
+}

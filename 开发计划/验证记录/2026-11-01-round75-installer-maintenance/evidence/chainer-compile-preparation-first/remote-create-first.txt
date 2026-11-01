@@ -1,0 +1,5 @@
+if($PSVersionTable.PSVersion.Major-ne 5 -or $PSVersionTable.PSVersion.Minor-ne 1){throw 'EXPECTED_DESKTOP51'};$sid=Identity;if($sid.Value-cne$c.sid){throw 'EXPECTED_USER_SID_MISMATCH'}
+$r=Join-Path ([IO.Path]::GetFullPath($env:TEMP)) ('FutureClassroom-r75-chainer-build-'+$c.nonce);if(Test-Path -LiteralPath $r){throw 'ROOT_NOT_FRESH'}
+[IO.Directory]::CreateDirectory($r)|Out-Null;DirAcl $r $sid;$tmp=Join-Path $r 'compile-temp';[IO.Directory]::CreateDirectory($tmp)|Out-Null;DirAcl $tmp $sid
+$owner=Join-Path $r '.owner';[IO.File]::WriteAllBytes($owner,[Text.Encoding]::ASCII.GetBytes($c.marker));FileOwner $owner $sid
+@{status='CREATED';root=$r;nonce=$c.nonce;marker=$c.marker;actualOwnerSid=$sid.Value;protectedDacl=$true;allowedSids=@($sid.Value,'S-1-5-18');powershell=$PSVersionTable.PSVersion.ToString()}|ConvertTo-Json -Depth 6 -Compress

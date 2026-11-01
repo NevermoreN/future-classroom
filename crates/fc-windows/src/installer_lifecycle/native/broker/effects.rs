@@ -5,7 +5,68 @@
 use super::*;
 
 const MARKERS: &str = r"Software\FutureClassroom\Installer\Components";
+const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
 const PIN_GROUPS: usize = 6; // + session + original Maintenance = original 8 slots
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum Admission {
+    Fresh,
+    SameManifest,
+}
+impl Admission {
+    pub(super) fn operation(self) -> MaintenanceOperation {
+        match self {
+            Self::Fresh => MaintenanceOperation::Install,
+            Self::SameManifest => MaintenanceOperation::SameManifest,
+        }
+    }
+    fn preimage(self) -> ExpectedState {
+        match self {
+            Self::Fresh => ExpectedState::Absent,
+            Self::SameManifest => ExpectedState::Present,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ExpectedState {
+    Present,
+    Absent,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Observation {
+    Present,
+    Absent,
+    Other,
+}
+/// Only this module constructs decisions from native observations. Neither
+/// notification packets nor public installer properties can choose this state.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) struct Decision {
+    outcome: SettledOutcome,
+    expected: ExpectedState,
+}
+impl Decision {
+    fn observed(admission: Admission, observed: Observation) -> Self {
+        let expected = match (admission, observed) {
+            (_, Observation::Present) => Some(ExpectedState::Present),
+            (Admission::SameManifest, Observation::Absent) => Some(ExpectedState::Absent),
+            _ => None,
+        };
+        match expected {
+            Some(expected) => Self {
+                outcome: SettledOutcome::Commit,
+                expected,
+            },
+            None => Self {
+                outcome: SettledOutcome::Rollback,
+                expected: admission.preimage(),
+            },
+        }
+    }
+    pub(super) fn outcome(self) -> SettledOutcome {
+        self.outcome
+    }
+}
 
 fn local() -> Result<PathBuf> {
     Ok(InstallIdentity::for_current_user()?.local)
@@ -89,6 +150,151 @@ fn known_product_absence(result: u32) -> bool {
     // access/configuration/argument errors are never converted to absence.
     result == ERROR_NO_MORE_ITEMS.0 || result == ERROR_UNKNOWN_PRODUCT.0
 }
+fn exact_product_code(buffer: &[u16; 39], product: &str) -> bool {
+    buffer[38] == 0
+        && String::from_utf16(&buffer[..38])
+            .is_ok_and(|s| s.eq_ignore_ascii_case(&format!("{{{product}}}")))
+}
+fn exact_user_sid(text: &str, sid: &[u8]) -> bool {
+    // Compare the returned text with the already-copied native TOKEN_USER SID.
+    // No LocalAlloc capability or unbounded SID-derived allocation is needed.
+    if sid.len() < 8 || sid[0] != 1 || sid[1] > 15 || sid.len() != 8 + usize::from(sid[1]) * 4 {
+        return false;
+    }
+    let mut fields = text.split('-');
+    if fields.next() != Some("S") || fields.next() != Some("1") {
+        return false;
+    }
+    let Some(authority) = fields.next() else {
+        return false;
+    };
+    let authority = if let Some(hex) = authority.strip_prefix("0x") {
+        if hex.is_empty() || hex.len() > 12 || !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
+            return false;
+        }
+        u64::from_str_radix(hex, 16).ok()
+    } else if !authority.is_empty() && authority.bytes().all(|b| b.is_ascii_digit()) {
+        authority.parse::<u64>().ok()
+    } else {
+        None
+    };
+    let expected = sid[2..8].iter().fold(0u64, |a, &b| (a << 8) | u64::from(b));
+    if authority != Some(expected) {
+        return false;
+    }
+    for bytes in sid[8..].as_chunks::<4>().0 {
+        let Some(field) = fields.next() else {
+            return false;
+        };
+        if field.is_empty()
+            || !field.bytes().all(|b| b.is_ascii_digit())
+            || field.parse::<u32>().ok() != Some(u32::from_le_bytes(*bytes))
+        {
+            return false;
+        }
+    }
+    fields.next().is_none()
+}
+fn same_registration(manifest: &Manifest, sid: &[u8]) -> Result<()> {
+    let code = HSTRING::from(format!("{{{}}}", manifest.product));
+    let mut found = [0u16; 39];
+    let mut context = MSIINSTALLCONTEXT_NONE;
+    let mut user = [0u16; 256];
+    let mut n = user.len() as u32;
+    let result = unsafe {
+        MsiEnumProductsExW(
+            &code,
+            None,
+            MSIINSTALLCONTEXT_ALL.0 as u32,
+            0,
+            Some(&mut found),
+            Some(&mut context),
+            Some(windows::core::PWSTR(user.as_mut_ptr())),
+            Some(&mut n),
+        )
+    };
+    if result != ERROR_SUCCESS.0
+        || context != MSIINSTALLCONTEXT_USERUNMANAGED
+        || !exact_product_code(&found, &manifest.product)
+        || n == 0
+        || n as usize >= user.len()
+        || user[n as usize] != 0
+        || !String::from_utf16(&user[..n as usize]).is_ok_and(|text| exact_user_sid(&text, sid))
+    {
+        return Err(LifecycleError::Unsettled);
+    }
+    // A second instance in managed/machine context is not a healthy per-user
+    // preimage. Only the documented end of this successful enumeration is OK.
+    let next = unsafe {
+        MsiEnumProductsExW(
+            &code,
+            None,
+            MSIINSTALLCONTEXT_ALL.0 as u32,
+            1,
+            None,
+            None,
+            None,
+            None,
+        )
+    };
+    if next != ERROR_NO_MORE_ITEMS.0 {
+        return Err(LifecycleError::Unsettled);
+    }
+    let upgrade = HSTRING::from(format!("{{{INSTALL_FAMILY}}}"));
+    let first = unsafe {
+        MsiEnumRelatedProductsW(&upgrade, None, 0, windows::core::PWSTR(found.as_mut_ptr()))
+    };
+    if first != ERROR_SUCCESS.0 || !exact_product_code(&found, &manifest.product) {
+        return Err(LifecycleError::Unsettled);
+    }
+    let next = unsafe {
+        MsiEnumRelatedProductsW(&upgrade, None, 1, windows::core::PWSTR(found.as_mut_ptr()))
+    };
+    if next != ERROR_NO_MORE_ITEMS.0
+        || product(manifest, "VersionString")?.as_deref() != Some(manifest.version.as_str())
+    {
+        return Err(LifecycleError::Unsettled);
+    }
+    component_registration(manifest)
+}
+fn run_absent_at(path: &str) -> Result<()> {
+    let mut owner = Resources::empty()?;
+    let name = HSTRING::from(path);
+    let mut key = HKEY::default();
+    let result = unsafe {
+        RegOpenKeyExW(
+            HKEY_CURRENT_USER,
+            &name,
+            Some(0),
+            KEY_QUERY_VALUE | KEY_WOW64_32KEY,
+            &mut key,
+        )
+    };
+    if result == ERROR_FILE_NOT_FOUND {
+        owner.release()?;
+        return Ok(());
+    }
+    result.ok()?;
+    owner.add(HANDLE(key.0), Role::Registry);
+    let mut kind = REG_VALUE_TYPE::default();
+    let mut bytes = 0;
+    let result = unsafe {
+        RegQueryValueExW(
+            key,
+            windows::core::w!("FutureClassroom"),
+            None,
+            Some(&mut kind),
+            None,
+            Some(&mut bytes),
+        )
+    };
+    owner.release()?;
+    match result {
+        ERROR_FILE_NOT_FOUND => Ok(()),
+        ERROR_SUCCESS | ERROR_MORE_DATA => Err(LifecycleError::Unsettled),
+        error => Err(windows::core::Error::from_hresult(error.to_hresult()).into()),
+    }
+}
 fn exact_component_key_path(actual: &str, component: &str) -> bool {
     // Microsoft documents numeric HKCU root 01 for a 32-bit registry keypath,
     // and root+20 for a 64-bit registry keypath. Approved components have exact
@@ -104,6 +310,7 @@ fn absent(path: &Path) -> Result<()> {
     }
 }
 fn marker_absent() -> Result<()> {
+    let mut owner = Resources::empty()?;
     let name = HSTRING::from(MARKERS);
     let mut key = HKEY::default();
     let result = unsafe {
@@ -116,16 +323,16 @@ fn marker_absent() -> Result<()> {
         )
     };
     if result == ERROR_FILE_NOT_FOUND {
+        owner.release()?;
         return Ok(());
     }
     if result == ERROR_SUCCESS {
-        let mut owner = Resources::empty()?;
         owner.add(HANDLE(key.0), Role::Registry);
         owner.release()?;
     }
     Err(LifecycleError::Unsettled)
 }
-pub(super) fn fresh(session: &mut Session) -> Result<()> {
+fn fresh(session: &mut Session) -> Result<()> {
     current(session.deadline)?;
     no_product(&session.manifest)?;
     let local = local()?;
@@ -152,6 +359,31 @@ pub(super) fn fresh(session: &mut Session) -> Result<()> {
     }
     absent(&local.join("Programs").join("FutureClassroom"))?;
     marker_absent()?;
+    current(session.deadline)
+}
+
+pub(super) fn admit(session: &mut Session) -> Result<Admission> {
+    current(session.deadline)?;
+    let admission = if product(&session.manifest, "VersionString")?.is_some() {
+        Admission::SameManifest
+    } else {
+        Admission::Fresh
+    };
+    revalidate(session, admission)?;
+    Ok(admission)
+}
+pub(super) fn revalidate(session: &mut Session, admission: Admission) -> Result<()> {
+    current(session.deadline)?;
+    run_absent_at(RUN_KEY)?;
+    match admission {
+        Admission::Fresh => fresh(session)?,
+        Admission::SameManifest => {
+            let mut proof = present(session)?;
+            // These preimage pins must return before Begin ACK: the original
+            // installer needs write/delete access for both reapply and remove.
+            proof.release()?;
+        }
+    }
     current(session.deadline)
 }
 
@@ -486,7 +718,18 @@ fn component_registration(manifest: &Manifest) -> Result<()> {
     }
     Ok(())
 }
-pub(super) fn staged(session: &mut Session) -> Result<bool> {
+fn present(session: &Session) -> Result<Proof> {
+    let mut proof = Proof::new(session.deadline);
+    let base = root()?;
+    same_registration(&session.manifest, &session.resources.sid)?;
+    files(&mut proof, &base, &session.manifest, &session.resources.sid)?;
+    markers(&mut proof, &session.manifest)?;
+    proof.check()?;
+    Ok(proof)
+}
+pub(super) fn staged(session: &mut Session, admission: Admission) -> Result<Decision> {
+    current(session.deadline)?;
+    run_absent_at(RUN_KEY)?;
     let mut proof = Proof::new(session.deadline);
     let base = root()?;
     let observed = files(&mut proof, &base, &session.manifest, &session.resources.sid)
@@ -495,28 +738,27 @@ pub(super) fn staged(session: &mut Session) -> Result<bool> {
     // Cleanup failure is fatal, never a reason to authorize End or replacement.
     proof.release()?;
     current(session.deadline)?;
-    Ok(observed.is_ok())
+    let observed = if observed.is_ok() {
+        Observation::Present
+    } else if absent(&base).and_then(|()| marker_absent()).is_ok() {
+        Observation::Absent
+    } else {
+        Observation::Other
+    };
+    current(session.deadline)?;
+    Ok(Decision::observed(admission, observed))
 }
-pub(super) fn reconcile(session: &mut Session, outcome: SettledOutcome) -> Result<Proof> {
-    let mut proof = Proof::new(session.deadline);
-    let base = root()?;
-    match outcome {
-        SettledOutcome::Commit => {
-            if product(&session.manifest, "VersionString")?.as_deref()
-                != Some(session.manifest.version.as_str())
-            {
-                return Err(LifecycleError::Unsettled);
-            }
-            component_registration(&session.manifest)?;
-            files(&mut proof, &base, &session.manifest, &session.resources.sid)?;
-            markers(&mut proof, &session.manifest)?;
-        }
-        SettledOutcome::Rollback => {
-            no_product(&session.manifest)?;
-            absent(&base)?;
-            marker_absent()?;
-        }
+pub(super) fn reconcile(session: &mut Session, decision: Decision) -> Result<Proof> {
+    current(session.deadline)?;
+    run_absent_at(RUN_KEY)?;
+    if decision.expected == ExpectedState::Present {
+        return present(session);
     }
+    let proof = Proof::new(session.deadline);
+    let base = root()?;
+    no_product(&session.manifest)?;
+    absent(&base)?;
+    marker_absent()?;
     proof.check()?;
     Ok(proof)
 }
@@ -526,6 +768,235 @@ mod tests {
     use super::super::super::super::broker::manifest::Entry;
     use super::*;
     use std::{fs, os::windows::io::AsRawHandle};
+
+    #[test]
+    fn maintenance_decision_preserves_original_preimage_and_pending_tags() {
+        for (operation, tag) in [
+            (MaintenanceOperation::Install, 1),
+            (MaintenanceOperation::Repair, 2),
+            (MaintenanceOperation::Upgrade, 3),
+            (MaintenanceOperation::Uninstall, 4),
+            (MaintenanceOperation::SameManifest, 5),
+        ] {
+            assert_eq!(operation.tag(), tag);
+        }
+        assert_eq!(Admission::Fresh.operation(), MaintenanceOperation::Install);
+        assert_eq!(
+            Admission::SameManifest.operation(),
+            MaintenanceOperation::SameManifest
+        );
+        for (admission, observation, outcome, expected) in [
+            (
+                Admission::Fresh,
+                Observation::Present,
+                SettledOutcome::Commit,
+                ExpectedState::Present,
+            ),
+            (
+                Admission::Fresh,
+                Observation::Absent,
+                SettledOutcome::Rollback,
+                ExpectedState::Absent,
+            ),
+            (
+                Admission::Fresh,
+                Observation::Other,
+                SettledOutcome::Rollback,
+                ExpectedState::Absent,
+            ),
+            (
+                Admission::SameManifest,
+                Observation::Present,
+                SettledOutcome::Commit,
+                ExpectedState::Present,
+            ),
+            (
+                Admission::SameManifest,
+                Observation::Absent,
+                SettledOutcome::Commit,
+                ExpectedState::Absent,
+            ),
+            (
+                Admission::SameManifest,
+                Observation::Other,
+                SettledOutcome::Rollback,
+                ExpectedState::Present,
+            ),
+        ] {
+            let decision = Decision::observed(admission, observation);
+            assert_eq!(decision.outcome(), outcome);
+            assert_eq!(decision.expected, expected);
+        }
+    }
+
+    #[test]
+    fn registered_product_and_user_sid_must_match_exact_native_identity() {
+        let product = "12345678-1234-1234-1234-123456789ABC";
+        let mut code = [0u16; 39];
+        for (to, from) in code.iter_mut().zip(format!("{{{product}}}").encode_utf16()) {
+            *to = from;
+        }
+        assert!(exact_product_code(&code, product));
+        assert!(!exact_product_code(
+            &code,
+            "12345678-1234-1234-1234-123456789ABD"
+        ));
+        code[38] = 1;
+        assert!(!exact_product_code(&code, product));
+        // Independent binary SID fixture S-1-5-21-42, as TOKEN_USER copies it.
+        let sid = [1, 2, 0, 0, 0, 0, 0, 5, 21, 0, 0, 0, 42, 0, 0, 0];
+        assert!(exact_user_sid("S-1-5-21-42", &sid));
+        for other in [
+            "S-1-5-21-43",
+            "S-1-5-21",
+            "S-1-5-21-42-0",
+            "S-1-5-21-4294967296",
+            "S-1-5-21-+42",
+            "S-2-5-21-42",
+            "S-1-6-21-42",
+            "S-1-281474976710661-21-42",
+        ] {
+            assert!(!exact_user_sid(other, &sid), "{other}");
+        }
+        assert!(!exact_user_sid("S-1-5-21-42", &sid[..15]));
+    }
+
+    struct RegistryFixture {
+        owner: Resources,
+        path: Option<String>,
+        key: HKEY,
+    }
+    impl RegistryFixture {
+        fn new() -> Self {
+            use fc_ports::RandomSource;
+            let mut nonce = [0; 16];
+            crate::SystemRandom.fill(&mut nonce).unwrap();
+            let tail: String = nonce.iter().map(|b| format!("{b:02x}")).collect();
+            let path = format!(
+                r"Software\FutureClassroom-Test-InstallerRunGuard-{}-{tail}",
+                std::process::id()
+            );
+            let mut fixture = Self {
+                owner: Resources::empty().unwrap(),
+                path: None,
+                key: HKEY::default(),
+            };
+            let mut disposition = REG_CREATE_KEY_DISPOSITION::default();
+            unsafe {
+                RegCreateKeyExW(
+                    HKEY_CURRENT_USER,
+                    &HSTRING::from(&path),
+                    None,
+                    None,
+                    REG_OPTION_NON_VOLATILE,
+                    KEY_QUERY_VALUE | KEY_SET_VALUE | KEY_WOW64_32KEY,
+                    None,
+                    &mut fixture.key,
+                    Some(&mut disposition),
+                )
+                .ok()
+                .unwrap();
+            }
+            fixture.owner.add(HANDLE(fixture.key.0), Role::Registry);
+            assert_eq!(
+                disposition, REG_CREATED_NEW_KEY,
+                "never use/delete a preexisting fixture key"
+            );
+            fixture.path = Some(path);
+            fixture
+        }
+        fn read(&self) -> (REG_VALUE_TYPE, Vec<u8>) {
+            let mut kind = REG_VALUE_TYPE::default();
+            let mut bytes = [0u8; 1024];
+            let mut n = bytes.len() as u32;
+            unsafe {
+                RegQueryValueExW(
+                    self.key,
+                    windows::core::w!("FutureClassroom"),
+                    None,
+                    Some(&mut kind),
+                    Some(bytes.as_mut_ptr()),
+                    Some(&mut n),
+                )
+                .ok()
+                .unwrap();
+            }
+            assert!(n as usize <= bytes.len());
+            (kind, bytes[..n as usize].to_vec())
+        }
+    }
+    impl Drop for RegistryFixture {
+        fn drop(&mut self) {
+            self.owner
+                .release()
+                .expect("return owned test registry capability");
+            if let Some(path) = &self.path {
+                assert!(path.starts_with(r"Software\FutureClassroom-Test-InstallerRunGuard-"));
+                unsafe {
+                    RegDeleteKeyExW(
+                        HKEY_CURRENT_USER,
+                        &HSTRING::from(path),
+                        KEY_WOW64_32KEY.0,
+                        None,
+                    )
+                    .ok()
+                    .expect("delete only newly created owned test registry key");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn actual_run_absence_guard_never_changes_any_present_value() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let fixture = RegistryFixture::new();
+        let path = fixture.path.as_ref().unwrap().clone();
+        assert!(run_absent_at(&path).is_ok());
+        let plausible: Vec<u8> = format!(
+            "\"{}\" --autostart\0",
+            root().unwrap().join("fc-bootstrap.exe").display()
+        )
+        .encode_utf16()
+        .flat_map(u16::to_le_bytes)
+        .collect();
+        for (kind, bytes) in [
+            (REG_SZ, plausible),
+            (REG_SZ, Vec::new()),
+            (REG_EXPAND_SZ, vec![b'X', 0, 0, 0]),
+            (REG_DWORD, vec![1, 0, 0, 0]),
+            (REG_BINARY, vec![0x7f; 256]),
+            (REG_NONE, vec![0]),
+        ] {
+            unsafe {
+                RegSetValueExW(
+                    fixture.key,
+                    windows::core::w!("FutureClassroom"),
+                    None,
+                    kind,
+                    Some(&bytes),
+                )
+                .ok()
+                .unwrap();
+            }
+            let before = fixture.read();
+            assert_eq!(run_absent_at(&path), Err(LifecycleError::Unsettled));
+            assert_eq!(
+                fixture.read(),
+                before,
+                "guard is read-only even for plausible owned commands"
+            );
+            unsafe {
+                RegDeleteValueW(fixture.key, windows::core::w!("FutureClassroom"))
+                    .ok()
+                    .unwrap();
+            }
+            assert!(run_absent_at(&path).is_ok());
+        }
+        drop(fixture);
+        assert!(run_absent_at(&path).is_ok());
+    }
 
     #[test]
     fn enum_absence_and_x86_registry_component_paths_are_exact() {
@@ -660,6 +1131,14 @@ mod tests {
             .is_err());
         assert!(fs::rename(&base, base.with_file_name("unexpected-move")).is_err());
         proof.release().unwrap();
+        // The exact preimage pins have really returned, allowing the installer
+        // to rename/remove or replace files after Begin ACK.
+        let moved = base.with_file_name("returned-pins-move");
+        fs::rename(&base, &moved).unwrap();
+        fs::rename(&moved, &base).unwrap();
+        let main = base.join("fc-bootstrap.exe");
+        let original = fs::read(&main).unwrap();
+        fs::write(&main, &original).unwrap();
         fs::write(base.join("unlisted.txt"), b"must reject").unwrap();
         let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));
         assert!(files(&mut proof, &base, &manifest, &sid).is_err());

@@ -1,0 +1,55 @@
+{
+  "status": "PREPARED_NOT_RUN",
+  "ast": "PASS",
+  "script": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-second/archive-evidence-second.py",
+    "bytes": 27901,
+    "sha256": "0558efb73bc7eaab8e4e7aa647ee5b896a85f9e85d26510151b00993e694a81a"
+  },
+  "firstScriptSha256": "3161df4c7d6b77c724b3cbf006ba47bac8a0fb585aff6ecd15698a181343cfa4",
+  "pureCases": 9,
+  "inventory": {
+    "path": "encoding-inventory-first.json",
+    "sha256": "3fd0d4d8dd495994379b86ee27df6ffbe3cb8cc2fda863d51f8a3d7f53ca147c",
+    "unknown": 0,
+    "cp936ClixmlFiles": 46,
+    "membershipStable": true,
+    "snapshotExcludesOwnSubsequentReports": true
+  },
+  "sourceRoot": "/tmp/fc-round75-installer-maintenance",
+  "destination": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round75-installer-maintenance",
+  "scope": "Only strict UTF8-failing actual PowerShell CP936 CLIXML added. Same source/producer/freeze/target24/input/DEST rules, raw bytes unchanged. First helper/reports/partial destination untouched. No archive/Windows/Cargo/main write.",
+  "exactReportedFailureIdentityVerified": true,
+  "files": [
+    {
+      "path": ".owner",
+      "bytes": 57,
+      "sha256": "6429e1e29d1e41efed49bb4ea82ea516c97334c34480046da4284ab22746f1b4"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 1610,
+      "sha256": "f01145819696bb1bbf3414bf0024c2a5265132a52e48aa5d0b32466a91ab9035"
+    },
+    {
+      "path": "archive-evidence-second.py",
+      "bytes": 27901,
+      "sha256": "0558efb73bc7eaab8e4e7aa647ee5b896a85f9e85d26510151b00993e694a81a"
+    },
+    {
+      "path": "encoding-inventory-first.json",
+      "bytes": 384630,
+      "sha256": "3fd0d4d8dd495994379b86ee27df6ffbe3cb8cc2fda863d51f8a3d7f53ca147c"
+    },
+    {
+      "path": "first-to-second.diff",
+      "bytes": 7151,
+      "sha256": "7f9227a7bcd58140a16fc5c6797c6d41cd6864644605f4abab9fe8065114f64c"
+    },
+    {
+      "path": "pure-decoder-checks-first.json",
+      "bytes": 737,
+      "sha256": "0d9b784ca3d8e44b3db0850a911eb8441ca4edd0d8bf113e70cf0e0fdb7ea5ac"
+    }
+  ]
+}

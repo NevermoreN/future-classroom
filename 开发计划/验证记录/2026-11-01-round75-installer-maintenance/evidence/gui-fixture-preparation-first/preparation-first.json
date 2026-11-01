@@ -1,0 +1,88 @@
+{
+  "status": "PREPARED_AST_PLUS_ACTUAL_PURE_PE_TESTS_ONLY",
+  "recordedUtc": "2026-11-01T12:11:39.066444+00:00",
+  "helper": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-fixture-preparation-first/clone-cui-test-gui-first.py",
+    "bytes": 14069,
+    "sha256": "d5252415a9ea7d40e146128b29978dd9171f07604e462ab85bfdbd64c826bc1b"
+  },
+  "pureTests": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-fixture-preparation-first/pure-pe-first.json",
+    "bytes": 4121,
+    "sha256": "87b9ee450a8c2fc57661090ab2f156990ec5c198b5394d0813678f5f8d426912"
+  },
+  "owner": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-fixture-preparation-first/.owner",
+    "bytes": 54,
+    "sha256": "2901722bfecd0f0d84fbf532c689af50cf43235feb85a4b78e59d1b39c7249fb"
+  },
+  "contract": {
+    "changedFields": [
+      {
+        "name": "Subsystem",
+        "offset": "PE+92",
+        "beforeHex": "0300",
+        "afterHex": "0200"
+      }
+    ],
+    "checksum": "original value retained exactly; not recomputed; no CheckSum changedFields item",
+    "normalProduct": false,
+    "profileTest": true
+  },
+  "requiredActualRootInputs": [
+    "sourceGitBase40hex (base only, not candidate commit)",
+    "actual N producer/freezefile paths inside R75 root and two explicit SHA256",
+    "original fc_windows lib profile.test=true CUI path/bytes/SHA from actual producer",
+    "original N producer schema PASS_CODEGEN_NOT_RUNTIME/sourceUnchanged/beforeAfter/freezeSha256 with22CUI+2GUI originals",
+    "fresh ROOT/gui-test-fixture-<32lowerhex> directory; helper refuses existing directories"
+  ],
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/gui-fixture-preparation-first/clone-cui-test-gui-first.py",
+    "--source-git-base",
+    "<base40hex>",
+    "--candidate-source-producer",
+    "<R75 actual N producer>",
+    "--candidate-source-producer-sha256",
+    "<64hex>",
+    "--candidate-source-freeze",
+    "<R75 actual freeze>",
+    "--candidate-source-freeze-sha256",
+    "<64hex>",
+    "--source-cui",
+    "<R75 actual fc_windows harness.exe>",
+    "--source-cui-bytes",
+    "<actual bytes>",
+    "--source-cui-sha256",
+    "<64hex>",
+    "--output-dir",
+    "/tmp/fc-round75-installer-maintenance/gui-test-fixture-<32lowerhex>",
+    "--execute"
+  ],
+  "schemaBasis": {
+    "archivedProducer": {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round73-installer-broker/n-release-third.json",
+      "bytes": 28911,
+      "sha256": "858d3c62e4d3c4e6739a5763a77e26ccf368038a22d4ef150f5d284a080b5b07"
+    },
+    "backendValidator": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/parent-context-probe-third/context-probe.py",
+      "bytes": 14935,
+      "sha256": "3cf5ccac216abe54a653c851a6b150b7caf0871ba9141ee11e1e96d1d7b5ea94"
+    },
+    "backendQualification": "Read-only validate_fixture schema review and backend message; no backend function or probe invocation."
+  },
+  "officialReferences": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/debug/pe-format",
+      "fields": "PE32/i386; Windows Subsystem2/3; FORCE_INTEGRITY0x80; CertificateTable security directory"
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/io/struct.Stdout.html",
+      "qualification": "Null stdio in detached Windows GUI process is documented, but actual cloned CLI behavior remains NOT_RUN."
+    }
+  ],
+  "networkQualification": "Despite the task no-network restriction, preparation mistakenly used web read-only open/find on precisely these two official reference pages. No artifact/network tool execution beyond those documentation reads occurred; parent was informed immediately. Pure tests and helper execution contain no network.",
+  "scope": "No actual EXE created/read for preparation. In-memory synthetic PE buffers only. No Cargo/Windows/MSI/main changes. Root separately verifies producer command/Cargo metadata provenance and must run actual GUI/null-stdio CLI test. Original22CUI/2normalGUI remain untouched. Unknown actual producer schema fails closed, never treated as compatible by inference."
+}

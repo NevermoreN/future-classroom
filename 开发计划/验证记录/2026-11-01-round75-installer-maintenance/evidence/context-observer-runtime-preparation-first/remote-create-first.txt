@@ -1,0 +1,13 @@
+$ErrorActionPreference='Stop';[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
+function Facts { $a=@();foreach($p in [Diagnostics.Process]::GetProcessesByName('msiexec')){try{$a+=@{pid=$p.Id;creationFiletime=[string]$p.StartTime.ToUniversalTime().ToFileTimeUtc()}}finally{$p.Dispose()}};return ,$a }
+function Registration { $i=$null;$x=$null;try{$i=New-Object -ComObject WindowsInstaller.Installer;$x=$i.GetType().InvokeMember('ProductsEx',[Reflection.BindingFlags]::GetProperty,$null,$i,@($c.product,'',7));$n=$x.Count;$s=$i.GetType().InvokeMember('ProductState',[Reflection.BindingFlags]::GetProperty,$null,$i,@($c.product));return @{status='ACTUAL_READONLY_CALLER_AND_MACHINE_CONTEXTS';product=$c.product;count=$n;productState=$s;contexts=7;userSidArgument='';otherUsers='NOT_QUERIED';cache='NOT_QUERIED'}}finally{if($null-ne$x){[void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($x)};if($null-ne$i){[void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($i)}} }
+function CheckRoot { if($c.root -cne (Join-Path ([IO.Path]::GetFullPath($env:TEMP)) ('FutureClassroom-r75-parent-observer-'+$c.nonce))){throw 'ROOT_PATH_MISMATCH'};if(([IO.File]::ReadAllText((Join-Path $c.root '.owner'))) -cne $c.marker){throw 'OWNER_MISMATCH'};if(([IO.File]::GetAttributes($c.root)-band[IO.FileAttributes]::ReparsePoint)-ne 0){throw 'ROOT_REPARSE'} }
+if($PSVersionTable.PSVersion.Major-ne 5 -or $PSVersionTable.PSVersion.Minor-ne 1){throw 'EXPECTED_DESKTOP51'}
+if($c.root -cne (Join-Path ([IO.Path]::GetFullPath($env:TEMP)) ('FutureClassroom-r75-parent-observer-'+$c.nonce)) -or (Test-Path -LiteralPath $c.root)){throw 'FRESH_EXACT_ROOT_REQUIRED'}
+$before=Registration;if($before.count-ne 0 -or $before.productState-ne -1){throw 'BEFORE_PRODUCT_NOT_ABSENT'}
+$baseline=Facts
+[IO.Directory]::CreateDirectory($c.root)|Out-Null;$acl=[Security.AccessControl.DirectorySecurity]::new();$acl.SetAccessRuleProtection($true,$false)
+$id=[Security.Principal.WindowsIdentity]::GetCurrent();try{$sid=$id.User}finally{$id.Dispose()}
+foreach($s in @($sid,[Security.Principal.SecurityIdentifier]::new('S-1-5-18'),[Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))){$acl.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new($s,'FullControl','ContainerInherit,ObjectInherit','None','Allow'))}
+[IO.Directory]::SetAccessControl($c.root,$acl);[IO.File]::WriteAllBytes((Join-Path $c.root '.owner'),[Text.Encoding]::ASCII.GetBytes($c.marker))
+@{status='CREATED_BEFORE_ABSENT';root=$c.root;nonce=$c.nonce;marker=$c.marker;beforeProduct=$before;msiexecBaseline=$baseline;powershell=$PSVersionTable.PSVersion.ToString()}|ConvertTo-Json -Depth 8 -Compress

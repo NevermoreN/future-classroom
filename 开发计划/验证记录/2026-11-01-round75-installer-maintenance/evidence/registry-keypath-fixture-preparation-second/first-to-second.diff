@@ -1,0 +1,94 @@
+--- registry-keypath-fixture-preparation-first/registry-fixture.py
++++ registry-keypath-fixture-preparation-second/registry-fixture.py
+@@ -84,6 +84,13 @@
+     return rows
+ 
+ 
++def force_codepage(raw):
++    # libmsi v0.103 exports this virtual metadata with two empty lines and
++    # a final NUL. It is not an ordinary effects table/three-header IDT.
++    need(raw == b'\r\n\r\n0\t_ForceCodepage\r\n\0', 'exact neutral string-pool metadata required')
++    return {'stringPoolCodepage': 0, 'kind': 'VIRTUAL_METADATA_NEUTRAL_ASCII', 'rawSha256': sha(raw)}
++
++
+ def verify(tables, nonce, summary):
+     value = spec(nonce)
+     required = {'Property', 'Directory', 'Component', 'Registry', 'Feature', 'FeatureComponents', 'LaunchCondition', 'InstallExecuteSequence'}
+@@ -130,9 +137,13 @@
+     for name in ('InstallUISequence', 'AdminUISequence', 'AdminExecuteSequence', 'AdvtExecuteSequence'):
+         for row in tables.get(name, []):
+             allowed = STANDARD | {'ExecuteAction': 1300, 'AdminInitialize': 1500, 'AdminFinalize': 6600}
++            if name == 'AdminExecuteSequence':
++                allowed['InstallAdminPackage'] = 3900  # Exact wixl 0.103 default, no custom action.
+             need(set(row) == {'Action', 'Condition', 'Sequence'} and row['Action'] in allowed
+                  and row['Sequence'] == str(allowed[row['Action']])
+                  and row['Condition'] in ('', 'NOT Installed'), 'unknown or changed auxiliary action')
++            if row['Action'] == 'InstallAdminPackage':
++                need(row['Condition'] == '', 'exact standard administrative action condition required')
+     return {'status': 'PASS_STATIC_REGISTRY_ONLY_FIXTURE_TABLES', 'registryKeypathRuntime': 'NOT_RUN',
+             'productionGuardChanged': False, 'spec': value}
+ 
+@@ -164,9 +175,15 @@
+     else:
+         listed = read(args.tables_list, 65536).decode('utf-8').splitlines()
+         need(len(set(listed)) == len(listed) and all(re.fullmatch('[A-Za-z_][A-Za-z_0-9]*', name) for name in listed), 'complete actual table listing required')
+-        tables = {path.stem: idt(read(path), path.stem) for path in args.exports.glob('*.idt')}
+-        need(set(tables) == set(listed) - SYSTEM, 'every non-system actual table must be exported')
+-        print(json.dumps(verify(tables, args.nonce, read(args.summary, 65536))))
++        originals = {path.stem: read(path) for path in args.exports.glob('*.idt')}
++        need('_ForceCodepage' in listed and '_ForceCodepage' in originals, 'actual virtual codepage export required')
++        codepage = force_codepage(originals['_ForceCodepage'])
++        need(all(raw.isascii() for raw in originals.values()), 'neutral fixture tables must be entirely ASCII')
++        tables = {name: idt(raw, name) for name, raw in originals.items() if name != '_ForceCodepage'}
++        need(set(tables) == set(listed) - SYSTEM - {'_ForceCodepage'}, 'every non-system actual table must be exported')
++        result = verify(tables, args.nonce, read(args.summary, 65536))
++        result['virtualMetadata'] = codepage
++        print(json.dumps(result))
+ 
+ 
+ if __name__ == '__main__':
+--- registry-keypath-fixture-preparation-first/check-registry-fixture.py
++++ registry-keypath-fixture-preparation-second/check-registry-fixture.py
+@@ -81,6 +81,21 @@
+         for nonce in ('', 'a' * 31, 'A' * 32, '../' + 'a' * 32):
+             with self.assertRaises(ValueError): M['spec'](nonce)
+ 
++    def test_virtual_codepage_is_exact_and_not_an_effects_table_exception(self):
++        raw = b'\r\n\r\n0\t_ForceCodepage\r\n\0'
++        self.assertEqual(M['force_codepage'](raw)['stringPoolCodepage'], 0)
++        for altered in (raw[:-1], raw + b'payload', raw.replace(b'0\t', b'1252\t'), raw.replace(b'\r\n', b'\n')):
++            with self.assertRaises(ValueError): M['force_codepage'](altered)
++        tables = model()
++        tables['AdminExecuteSequence'] = [{'Action': 'InstallAdminPackage', 'Condition': '', 'Sequence': '3900'}]
++        M['verify'](tables, NONCE, SUMMARY)
++        for change in ('condition', 'sequence', 'wrong-table'):
++            altered = copy.deepcopy(tables)
++            if change == 'condition': altered['AdminExecuteSequence'][0]['Condition'] = 'NOT Installed'
++            if change == 'sequence': altered['AdminExecuteSequence'][0]['Sequence'] = '3901'
++            if change == 'wrong-table': altered['InstallUISequence'] = altered.pop('AdminExecuteSequence')
++            with self.subTest(change=change), self.assertRaises(ValueError): M['verify'](altered, NONCE, SUMMARY)
++
+ 
+ if __name__ == '__main__':
+     unittest.main(verbosity=2)
+--- registry-keypath-fixture-preparation-first/README.md
++++ registry-keypath-fixture-preparation-second/README.md
+@@ -1,6 +1,6 @@
+-# Registry keypath fixture — preparation only
++# Registry keypath fixture — second static checker
+ 
+-No operational nonce has been supplied, no MSI has been built, and no Windows install/query/uninstall has run. Only Python AST/CLI and in-memory table/authoring contracts are checked. The PowerShell5.1 child is prepared source and has not been parsed or executed by PowerShell here. Production N/B frozen files are unchanged; `01`/`21` matching is not modified or guessed.
++Root has built the original independent nonce fixture locally; its first static check failed because the table catalog included virtual _ForceCodepage metadata. This second tool does not rebuild or modify that MSI. It runs only read-only exports and static checks of the actual original artifact; no Windows install/query/uninstall has run. The PowerShell5.1 child is prepared source and has not been parsed or executed by PowerShell here. Production N/B frozen files are unchanged; `01`/`21` matching is not modified or guessed.
+ 
+ The fixture is independent of all production products: an explicit 32-lowercase-hex nonce derives separate Product/Upgrade/Component GUIDs under a fixture-only UUID namespace. Its sole effect is HKCU32 `Software\FutureClassroom-Test-RegistryKeyPath-<nonce>`, DWORD `OwnedMarker=1`, one component with registry KeyPath/Attributes4. It is per-user x86 MSI500, with one feature, no installed files, no CA/Binary/Run/service/environment/upgrade handoff, no production helper and no gate/Pending. Ordinary MSI `/x` remains available even if a production helper would retain Pending.
+ 
+@@ -24,3 +24,9 @@
+ Proposed finite root-controller budget is one original 120-second origin for this small fixture lifecycle: each query child at most10s, each engine command at most45s with reserved formal cleanup time, no deadline renewal. Root may choose a stricter explicit schedule before execution; no budget or actual runtime is claimed here. Parent timeouts apply to the original owned process handles and retain failure evidence. A single x86 query only proves the observed OS/account/context; Win7/10/11 and standard/elevated routes remain separate.
+ 
+ Microsoft documents numeric registry roots and a 64-bit OS distinction, while this test deliberately retains the actual returned string instead of resolving that wording by assumption: [MsiGetComponentPathExW](https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msigetcomponentpathexw). Product context and unknown-product codes are recorded independently: [MsiGetProductInfoExW](https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msigetproductinfoexw). The last authored registry value can be removed by normal component uninstall without a destructive remove-key wildcard: [Registry table](https://learn.microsoft.com/en-us/windows/win32/msi/registry-table).
++
++Second correction is based on actual exports and upstream implementation, not a pure-model promotion. Original MSI SHA is d3c6d5e4937d5dd673e9835a7fbc8d5c7d03af8b0527e1a12d565da1a0e4e248. Root first result/tool remain immutable. Actual `_ForceCodepage` export bytes are exactly two CRLF empty lines, `0\t_ForceCodepage\r\n` and terminal NUL. The v0.103 exporter writes that terminator and obtains the database string-table codepage. This is virtual metadata, not an effects table. The second checker requires this exact neutral0 representation and every actual exported table entirely ASCII. It does not skip arbitrary underscore tables or accept unknown nonempty effects. An additional read-only `_SummaryInformation` export reports PropertyId1=1252; this is summary codepage, distinct from StringPool neutral0. No string-pool1252 claim is made and the MSI is not imported/converted/rebuilt.
++
++Actual wixl0.103 AdminExecuteSequence includes standard InstallAdminPackage at3900 with empty condition. The second checker admits exactly that row only in AdminExecuteSequence. The ordinary install/remove execute actions, eight core tables, all other conditions, no CA/Binary/File/Run/Upgrade rules and unknown-nonempty rejection remain unchanged. Every other actual nonempty table matched the first intended contract.
++
++Sources: [v0.103 libmsi export routine, lines1202–1264](https://raw.githubusercontent.com/GNOME/msitools/v0.103/libmsi/libmsi-database.c), [v0.103 wixl builder default administrative sequence and summary codepage](https://raw.githubusercontent.com/GNOME/msitools/v0.103/tools/wixl/builder.vala), [Microsoft neutral ASCII database](https://learn.microsoft.com/en-us/windows/win32/msi/creating-a-database-with-a-neutral-code-page). The copied original IDTs plus new exact metadata export are under actual-exports; raw read-only command stdout/stderr and actual exits are retained separately.

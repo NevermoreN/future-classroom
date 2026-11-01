@@ -1,0 +1,9 @@
+$ErrorActionPreference='Stop';$r=Join-Path ([IO.Path]::GetFullPath($env:TEMP)) ('FutureClassroom-r75-parent-observer-'+$c.nonce)
+if(-not [IO.Directory]::Exists($r)){@{status='ABSENT';root=$r;nonce=$c.nonce}|ConvertTo-Json -Compress;exit 0}
+if(([IO.File]::GetAttributes($r) -band [IO.FileAttributes]::ReparsePoint) -ne 0){throw 'CLEANUP_ROOT_REPARSE'}
+$owner=Join-Path $r '.owner';$file=Join-Path $r 'observer-harness.exe'
+if(([IO.File]::ReadAllText($owner)) -cne $c.marker){throw 'CLEANUP_OWNER_MISMATCH'}
+$members=@([IO.Directory]::GetFileSystemEntries($r));foreach($m in $members){if($m -cne $owner -and $m -cne $file){throw 'UNEXPECTED_ROOT_MEMBER'};if(([IO.File]::GetAttributes($m) -band [IO.FileAttributes]::ReparsePoint) -ne 0){throw 'CLEANUP_MEMBER_REPARSE'}}
+if([IO.File]::Exists($file)){if((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant() -ne $c.sha){throw 'CLEANUP_FIXTURE_IDENTITY_UNKNOWN'};[IO.File]::Delete($file)}
+[IO.File]::Delete($owner);[IO.Directory]::Delete($r,$false)
+@{status='REMOVED';root=$r;marker=$c.marker;nonce=$c.nonce;absent=(-not [IO.Directory]::Exists($r))}|ConvertTo-Json -Compress

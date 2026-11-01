@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_FROZEN_RUNTIME_NOT_RUN",
+  "createdUtc": "2026-11-01T12:08:59.457220+00:00",
+  "baseCommit": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+  "sourceCount": 4,
+  "source": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d",
+      "before": {
+        "path": "crates/fc-windows/src/installer_lifecycle.rs",
+        "bytes": 9592,
+        "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691",
+      "before": {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+        "bytes": 38816,
+        "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40719,
+      "sha256": "9b6490911936a425f929af67028f5ac77611f04084255964a394c77ad8bd80cc",
+      "before": {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+        "bytes": 24471,
+        "sha256": "8eccbed8b0c916aed63103d1e98f89db948b0578648289ca317f1841fe82dff4"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5",
+      "before": null
+    }
+  ],
+  "minimalDiff": {
+    "path": "n-implementation-minimal-first.diff",
+    "sha256": "c09dcc3dc9997267d511308dc7895dd1350226bcec0b2cc0f70a0999e2ab6194",
+    "bytes": 37172
+  },
+  "bFreeze": {
+    "path": "b-implementation-freeze-first.json",
+    "sha256": "4fa8055e03067b7fcb8c736dcb8077f8c110b45602ff5357a5f2ad7df711351d",
+    "threeSourceActualBytesChecked": true
+  },
+  "checks": {
+    "typecheckSecond": {
+      "path": "n-typecheck-second.json",
+      "sha256": "ba0df7c123729783543bec7fc51ce9bf8c0fd3ef514822e0e663e26a0a27daa0",
+      "status": "PASS_TYPECHECK_NOT_RUNTIME",
+      "note": "After check only a test fixture command literal and a comment were corrected; next fixed-nightly full strict check uses this final freeze."
+    },
+    "typecheckFirst": "Original compile101 + four actual sources preserved. Incorrect begin/server admission binding repaired without changing authority.",
+    "rustfmt": "1.97.1 edition2021 exit0",
+    "architecture": "12 crates / 33 first-party edges PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "contract": {
+    "admission": "Begin client rejects unsupported before spawn. Server independently admits Fresh/healthy SameManifest, creates original Install/tag1 or neutral SameManifest/tag5 owner, then revalidates same admission under original gate and checked-releases all preimage proof pins before ACK.",
+    "healthy": "Current-user all-context ProductCode enumeration exactly one USERUNMANAGED/current actual token SID; only related ProductCode is own; exact version/component keypath/closed payload files/installer markers. Unknown/damaged/context/foreign related reject.",
+    "run": "Only read-only x86 HKCU Run FutureClassroom query; absence required; any present type/bytes (including exact-looking app --autostart command) reject. No production Run write/create/delete.",
+    "decisions": "Internal-only Decision actual observations: complete staged Present -> Commit/Present; healthy complete physical absence -> Commit/Absent; otherwise Rollback/original FreshAbsent or HealthyPresent. Final registration/files/markers/Run proof after original Join/End0 + guardian exit0, before original owner release. No wire caller effects bool or property action classification.",
+    "retention": "Original owner/Pending/deadline/Join/End/exit/checked control closes unchanged; timeout, unknown cleanup or unknown final state do not release or allow replacement.",
+    "sameBudgets": "120s original deadline, 32B packet, 12 connections, 64 handles/group, 8 process owners, 6 proof groups, original manifest/payload/Pending bounds unchanged.",
+    "unsupported": "Damaged repair, major upgrade and Run cleanup remain unsupported. Controlled untransformed candidate scope, not arbitrary external effective-MSI/transform claims."
+  },
+  "tests": {
+    "newCases": [
+      "maintenance_decision_preserves_original_preimage_and_pending_tags",
+      "registered_product_and_user_sid_must_match_exact_native_identity",
+      "actual_run_absence_guard_never_changes_any_present_value",
+      "engine_parent_context_observer",
+      "observer_carrier_has_no_path_alias_or_normal_role"
+    ],
+    "existingMeaningfulExtension": "Actual closed-file effect test now proves returned preimage pins allow real rename and rewrite, retaining original changed/extra/hardlink negatives.",
+    "runtimeStatus": "NOT_RUN: all new Windows-only actual fixture cases need root Windows runtime. Ordinary fullsuite unarmed context observer returns without probing; it is not an engine-context pass."
+  },
+  "observer": {
+    "source": "native/broker/context_probe.rs; only #[cfg(test)] module in assigned broker.rs",
+    "exactTest": "installer_lifecycle::native::broker::context_probe::engine_parent_context_observer",
+    "args": [
+      "--exact",
+      "<exactTest>",
+      "--test-threads=1",
+      "--nocapture",
+      "--skip",
+      "fc-owned-parent-observer-v1:<32lowerhex>:<absoluteOwnedRoot>"
+    ],
+    "rootLeaf": "FutureClassroom-r75-parent-observer-<nonce>",
+    "marker": "future-classroom-owned-r75-parent-observer/v1\\n actual LF bytes",
+    "output": "create-new context.json, <=8192 UTF8 bytes; native owner-checked, no-reparse pinned directory chain; current/parent original process identity/creation/image, token SID hex, optional thread token typed HRESULT/Win32 facts, console presence. Actual process exit0 separately required to prove checked closes.",
+    "prohibited": "No production parser/bin/DLL/Session/gate/Pending/MSI/registry/process/UI mutation. Only owned create-new report; normal fullsuite unarmed no probe.",
+    "hiddenFixture": "Root separately prepares a GUI2 test-harness copy with exact single PE Subsystem3-to2 diff/provenance; preserves original22 CUI tests+2normal GUI; actual same-clone-SHA --list parser proof required before quiet MSI. Not prepared/executed by N."
+  },
+  "sourceOwnership": "Only original three authorized native sources plus root-authorized fourth cfg(test) context_probe.rs. B three source bytes remain firstfreeze. Main/Git/Windows untouched.",
+  "runtimeAcceptanceRemaining": [
+    "Root full native + full22 actual Windows tests",
+    "Actual quiet engine parent/SID context on exact same GUI fixture clone",
+    "Real untransformed fresh -> healthy reapply -> formal uninstall + proved guardian rollback, with exact owned prechecks/cleanup",
+    "Win7/Win10/Win11 independent actual runtime; compile is not runtime"
+  ]
+}

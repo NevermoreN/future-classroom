@@ -1,0 +1,92 @@
+{
+  "status": "ACTUAL_LOCAL_BUILD_EXPORT_CHECK_PASS_NOT_WINDOWS",
+  "recordedUtc": "2026-11-01T12:52:04.811386+00:00",
+  "firstAttempt": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/build-export-first.json",
+    "bytes": 49450,
+    "sha256": "0cdda0f3bd22ecddf1193b970206c8d6c453bdcc5b3ebc65cb1264d0aff0cc2c"
+  },
+  "successfulSecondAttempt": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/build-export-second.json",
+    "bytes": 151717,
+    "sha256": "b4a009bb953ae829d5eb8c564017f2d5ecc0140e33b88a7d4b29c38f41b5ae0a"
+  },
+  "helpers": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/build-export-first.py",
+      "bytes": 12922,
+      "sha256": "6035b61edc9daff94611d1ca4586f1922b809104b3e454d81368063067b34719"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/build-export-second.py",
+      "bytes": 13359,
+      "sha256": "cc5bd240efb4d4d1de50ddbd47dedeabc5078167b888336f7416fb8269d3f774"
+    }
+  ],
+  "helperDiff": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/build-first-to-second.diff",
+    "bytes": 11666,
+    "sha256": "b02e80f683ad309e3504b8cd42f05be3928b262557468f113c92015be62866f4"
+  },
+  "rootOriginalFailure": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/root-build-context-probe-first.json",
+    "bytes": 4962,
+    "sha256": "18af70d024c288915817b872db6ea7a614e9a0b87ea9b75a3adb720f1f70064c"
+  },
+  "originalFourthAuthorChecker": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/parent-context-probe-fourth/context-probe.py",
+    "bytes": 18965,
+    "sha256": "93c87fef4ca04524e47c77c96d200274d2ebb6a3e918977244fea4ecf6bde979"
+  },
+  "rootOriginalCLI": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-first.json",
+    "bytes": 28320,
+    "sha256": "f823b6e55eee0733b5d32ebeea2bdc2d9b3bfeda66186cdbd749c838a15a0875"
+  },
+  "jointSourceFreeze": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/root-joint-source-freeze-second.json",
+    "bytes": 2378,
+    "sha256": "d1ae35fabcf1694c1296a8f58fd7c4681c8c60aa17fe5bc3539be19ea6c0c48a"
+  },
+  "finalMsi": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-third/context-probe-final.msi",
+    "bytes": 4030464,
+    "sha256": "0a1ec454c5ef4f2f760fced6a1cdcb5aaffaffacddee5e1ddeaa3d94cd1ebd43"
+  },
+  "intermediateMsi": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-third/context-probe-placeholder.msi",
+    "bytes": 4029952,
+    "sha256": "71d372355d4a8353bba137a9b134c8c173f265386da279dc24e4052336f854cd"
+  },
+  "extractedBinary": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-third/extracted-observer.exe",
+    "bytes": 3988775,
+    "sha256": "5ae22a321c0c8fc564da8567d341ca93946219330d61f31291997a422a579b39"
+  },
+  "finalIdt": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/CustomAction-final-second.idt",
+    "bytes": 498,
+    "sha256": "f382bd8f8d6cb514ac32b640b9b676d426d81fd9cd28f1fb0778677b274674ac"
+  },
+  "scope": "Actual Linux host local MSI author/build/static data manipulation and export verification only; intermediate/final MSI or EXE/observer never executed. No Windows/network/MSI install/main/source mutation.",
+  "actualTerminal": {
+    "exitCode": 0,
+    "parentReaped": true,
+    "toolSession": 22010,
+    "elapsedSeconds": 1.2360515610780567,
+    "commands": 73
+  },
+  "originalBudgets": {
+    "eachCommandSeconds": 20,
+    "overallSeconds": 120
+  },
+  "rootCauseQualifications": [
+    "Root first original actual wixl failure reported unsupported CustomAction Error property and SourceNULL. It remains untouched.",
+    "New build first attempt preserved separate actual failure: wixl0.103 exit0 emitted SourceNULL warnings for BOTH BinaryKey/ExeCommand actions, resulting in empty five-column CustomAction including ExtendedType; local schema guard rejected this intermediate instead of approving it. This is a separate tool limitation observation, not an executed MSI failure.",
+    "Successful new attempt leaves original fourth author unchanged and preserves intended original WXS, builds only a clearly unexecuted placeholder WXS, copies intermediate MSI, then fixed msibuild drops the empty CustomAction table and imports exact intended four-column/two-row Type2 observer + Type19 abort.",
+    "All actual ordinary/virtual exports except CustomAction compare byte-for-byte equal before/after; complete table-name set unchanged. _ForceCodepage actual exact raw export retained. _SummaryInformation represented separately by actual msiinfo suminfo before/after and hashes.",
+    "Final extracted Binary is the exact GUI clone5ae22...; unchanged fourth checker93c87... physically returned0/PASS_EXPORTED_PROBE_TOPOLOGY_ONLY against all actual non-system exports, complete original tables list and embedded Binary.",
+    "Eight frozen source guards and all first originals/previous failed new-attempt files/GUI ledger/proof/tools remained exact. No new candidate source SHA/commit is claimed."
+  ],
+  "nextStep": "Root separately reviews actual final MSI/complete exported sequence and explicit immutable Binary before any authorized Windows observer MSI. This static receipt does not run the observer or prove actual MSI parent/End0/install behavior."
+}

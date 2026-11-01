@@ -1,0 +1,23 @@
+--- B3/packaging/MSI-CANDIDATE.md
++++ B4/packaging/MSI-CANDIDATE.md
+@@ -158,8 +158,18 @@
+ tool paths and records their actual hashes, version outputs and command logs.
+ The explicit `msibuild` SHA is required and is bound to the reviewed
+ 0.103+repack-1build3 tool package (upstream msibuild has no `--version` option).
+-Its reviewed importer authors the
+-unsupported-in-wixl `MsiEmbeddedChainer` table, which is then exported and checked.
++Its reviewed importer authors the exact `CustomAction`,
++`InstallExecuteSequence` and unsupported-in-wixl `MsiEmbeddedChainer` tables.
++The unexecuted wixl compiler subset omits lifecycle CustomAction declarations
++and their sequence references because wixl 0.103 emits an empty five-column
++CustomAction table for BinaryKey/ExeCommand. Compiler warnings and stderr still
++fail the build. The importer replaces that empty schema with exactly four
++columns and three fixed rows; it preserves the compiler's standard execution
++rows and adds only the three constant-condition lifecycle hooks. Intermediate
++MSI bytes are never an accepted candidate or executed. Final exports must pass
++the unchanged exact role/type/source/target/sequence checks, and the embedded
++normal helper and payload must independently match their admitted bytes.
++A local table-format fragment is not a complete product MSI or runtime PASS.
+ 
+ ```sh
+ python3 scripts/package-msi-candidate.py \

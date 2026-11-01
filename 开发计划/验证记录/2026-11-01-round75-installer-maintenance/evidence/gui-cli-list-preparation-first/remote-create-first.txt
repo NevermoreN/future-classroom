@@ -1,0 +1,12 @@
+$ErrorActionPreference='Stop';$r=Join-Path ([IO.Path]::GetFullPath($env:TEMP)) ('FutureClassroom-r75-parent-observer-'+$c.nonce)
+if($r.Length -gt 240 -or (Test-Path -LiteralPath $r)){throw 'ROOT_PREFLIGHT_NOT_FRESH'}
+[IO.Directory]::CreateDirectory($r)|Out-Null
+$acl=New-Object Security.AccessControl.DirectorySecurity
+$acl.SetAccessRuleProtection($true,$false)
+$sid=[Security.Principal.WindowsIdentity]::GetCurrent().User
+foreach($s in @($sid,[Security.Principal.SecurityIdentifier]::new('S-1-5-18'),[Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))){
+ $rule=[Security.AccessControl.FileSystemAccessRule]::new($s,'FullControl','ContainerInherit,ObjectInherit','None','Allow');$acl.AddAccessRule($rule)
+}
+[IO.Directory]::SetAccessControl($r,$acl)
+[IO.File]::WriteAllBytes((Join-Path $r '.owner'),[Text.Encoding]::ASCII.GetBytes($c.marker))
+@{status='CREATED';root=$r;marker=$c.marker;nonce=$c.nonce}|ConvertTo-Json -Compress

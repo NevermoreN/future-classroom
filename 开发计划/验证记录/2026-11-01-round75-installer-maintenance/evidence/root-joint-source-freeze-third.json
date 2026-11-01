@@ -1,0 +1,51 @@
+{
+  "status": "FROZEN_N2_RUST_PLUS_B4_PACKAGING_NOT_RECODEGEN_OR_PRODUCT_MSI",
+  "recordedUtc": "2026-11-01T13:19:11.887269+00:00",
+  "sourceGitBase": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+  "sources": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 58160,
+      "sha256": "d0fbb23a5dab2d3329e935110265609ea53674b31896102d1139e21cee193059"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 35469,
+      "sha256": "d23f912eecdb556352c8ebd97796ad1de2d86f1185e0c5feb2c29a11f53329d1"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 14564,
+      "sha256": "9efa5656201a962705536316cc374b4d47d37e74c8d5e981576ad655e79d0d17"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    }
+  ],
+  "N2JointOriginalSha256": "d1ae35fabcf1694c1296a8f58fd7c4681c8c60aa17fe5bc3539be19ea6c0c48a",
+  "B4FreezeSha256": "dcdf5968e4cd8a8858dcd96841bc1629ba65b67e6c10b785e722f0ae81519c57",
+  "scope": "N2 four Rust sources plus Cargo.lock are exactly unchanged compiled/tested bytes. Three B4 packaging files changed after N2 probes terminal; pure and actual tool fragment only. Previous producer does not claim B4 package runtime. No normal MSI, same-source MSVC, true guardian transaction runtime acceptance.",
+  "sourceCount": 8
+}

@@ -1,0 +1,55 @@
+--- /tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-first/run-gnu-win11-first.py
++++ /tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/run-gnu-win11-second.py
+@@ -6,11 +6,11 @@
+ from pathlib import Path, PurePosixPath
+ import argparse, ast, datetime, hashlib, json, re, runpy, stat, struct, subprocess, sys, time
+ sys.dont_write_bytecode=True
+-ROOT=Path('/tmp/fc-round75-installer-maintenance');W=ROOT/'worktree';E=ROOT/'evidence';D=E/'gnu-runtime-preparation-first'
++ROOT=Path('/tmp/fc-round75-installer-maintenance');W=ROOT/'worktree';E=ROOT/'evidence';D=E/'gnu-runtime-preparation-second'
+ PARSER=Path('/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round67-ci/independent-runtime-first.py')
+ PARSER_SHA='0317ffb1719737bd9dfa45ca7952c242df6ffff0baa6b1611d7b912277f9e0e5'
+ PROBE=W/'scripts/windows-probe.py';PROBE_SHA='f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14'
+-BROKER='crates/fc-windows/src/installer_lifecycle/native/broker.rs';BROKER_SHA='2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691'
++BROKER='crates/fc-windows/src/installer_lifecycle/native/broker.rs';BROKER_SHA='9fc3247c353b4a20b689b0611e4ca7b08994a9ef09bf360936581522ca1fc091'
+ BASE='2dfb2e7e07ace64c61abf66c9a423aa815de7110'
+ SCOPE='R75 actual frozen GNU22 tests/app self/native1/system/public20 on authorized Win11 build26300/WOW64 only. Both normal GUI products pinned; lifecycle helper normal NOT_RUN. No observer armed/report, MSI execution, CI, other OS, ordinary31 or campus acceptance. Git base alone is not candidate source identity.'
+ class Waiting(Exception):pass
+@@ -50,7 +50,7 @@
+     for name in ('producer-report','producer-terminal-report','freeze','joint-freeze'):p.add_argument('--'+name,type=Path,required=True);p.add_argument('--'+name+'-sha256',required=True)
+     p.add_argument('--source-git-base',required=True);p.add_argument('--report',type=Path,required=True);p.add_argument('--operation',type=Path,required=True);p.add_argument('--execute',action='store_true');a=p.parse_args()
+     try:
+-        need((ROOT/'.owner').read_bytes()==b'future-classroom-owned-r75-installer-maintenance/v1\n' and (D/'.owner').read_bytes()==b'future-classroom-owned-r75-gnu-runtime-preparation/v1\n','EXACT_OWNERS')
++        need((ROOT/'.owner').read_bytes()==b'future-classroom-owned-r75-installer-maintenance/v1\n' and (D/'.owner').read_bytes()==b'future-classroom-owned-r75-gnu-runtime-preparation-second/v1\n','EXACT_OWNERS')
+         need(a.source_git_base==BASE,'EXACT_BASE_ONLY_NOT_CANDIDATE_SOURCE_COMMIT')
+         for name in ('producer_report','producer_terminal_report','freeze','joint_freeze'):need(re.fullmatch('[0-9a-f]{64}',getattr(a,name+'_sha256')),'EXPLICIT_ACTUAL_ORIGINAL_SHA256')
+         # All four required originals terminal and pinned before opening any
+@@ -63,9 +63,13 @@
+         need(exact(terminal['report'])==fact(a.producer_report) and terminal['sourceFreeze']['sha256']==a.freeze_sha256 and exact(terminal['sourceFreeze'])==fact(a.freeze),'TERMINAL_BOUND_TO_EXACT_PRODUCER_AND_FREEZE')
+         need(producer['status']=='PASS_CODEGEN_NOT_RUNTIME' and producer['originalPerCommandBudgetSeconds']==900 and producer['sourceUnchanged'] is True and producer['sourceBefore']==producer['sourceAfter'] and producer['freezeSha256']==a.freeze_sha256,'ORIGINAL_CODEGEN_SUCCESS_SAME_BUDGET_AND_FREEZE')
+         source_rows={r['path']:r for r in producer['sourceBefore']};need(len(source_rows)==len(producer['sourceBefore'])==8 and 'Cargo.lock' in source_rows,'EXACT_EIGHT_PRODUCER_GUARDS')
+-        need(joint['status']=='PASS_FROZEN_SOURCE_NOT_RUNTIME' and joint['gitBaseOnly']==BASE and joint['sourceGuardCount']==8 and joint['changedSourceCount']==7,'FINITE_JOINT_EIGHT_GUARDS_BASE_ONLY')
+-        joint_rows={r['path']:r for r in joint['sources']};need(source_rows==joint_rows,'EXACT_PRODUCER_JOINT_GUARD_SET')
+-        need(any(r['path']==Path(a.freeze).name and r['sha256']==a.freeze_sha256 for r in joint['freezeReports']),'JOINT_BINDS_EXACT_N_FREEZE')
++        need(joint['status']=='FROZEN_N3_ENGINE_PARENT_PLUS_N2_EFFECTS_AND_B4_NOT_RECODEGEN','EXACT_N3_JOINT_SCHEMA_NOT_RUNTIME_PASS')
++        joint_rows={r['path']:r for r in joint['sources']};need(len(joint_rows)==len(joint['sources'])==8 and source_rows==joint_rows,'EXACT_PRODUCER_JOINT_GUARD_SET')
++        freeze_rows={r['path']:r for r in freeze['source']};need(len(freeze_rows)==len(freeze['source'])==8 and freeze_rows==source_rows,'EXACT_EIGHT_CODEGEN_FREEZE_GUARDS')
++        # F binds J; J records implementation freezes, not F (no circular hash).
++        need(freeze['jointSha256']==a.joint_freeze_sha256 and producer['jointFreeze']=={'path':Path(a.joint_freeze).name,'sha256':a.joint_freeze_sha256},'CODEGEN_FREEZE_AND_PRODUCER_BIND_ACTUAL_JOINT')
++        need(terminal['jointFreeze']['sha256']==a.joint_freeze_sha256 and exact(terminal['jointFreeze'])==fact(a.joint_freeze),'TERMINAL_BINDS_ACTUAL_JOINT')
++        need(producer['implementationFreezes']==terminal['implementationFreezes']==joint['freezeReports'],'EXACT_IMPLEMENTATION_FREEZE_REFERENCES')
+         for row in joint['freezeReports']:
+             f=exact(row);inputs[f['path']]=f
+         for row in freeze['source']:
+@@ -103,10 +107,10 @@
+                 associations.append(dict(command=name,line=index,lineSha256=sha(line),path=path))
+             need(seen==set(listed),'COMPLETE_CARGO22_AND_TWO_NORMAL_SET')
+         native=[r for r in tests if r['target']=='fc_windows' and r['kind']==['lib'] and '/crates/fc-windows#' in r['packageId']];need(len(native)==1,'ONE_ACTUAL_NATIVE_LIBTEST_IDENTITY');native=native[0]
+-        child_parser=D/'parse-native-children-first.py';manifest=read(D/'prepared-implementation-first.json')
++        child_parser=D/'parse-native-children-second.py';manifest=read(D/'prepared-implementation-second.json')
+         for row in manifest['implementations']:f=exact(row);inputs[f['path']]=f
+         need({r['path'] for r in manifest['implementations']}=={str(Path(__file__).resolve()),str(child_parser)},'EXACT_PREPARED_RUNNER_AND_CHILD_PARSER')
+-        inputs[str(D/'prepared-implementation-first.json')]=fact(D/'prepared-implementation-first.json')
++        inputs[str(D/'prepared-implementation-second.json')]=fact(D/'prepared-implementation-second.json')
+         need(PARSER.is_file() and not PARSER.is_symlink() and sha(PARSER.read_bytes())==PARSER_SHA,'ORIGINAL_R67_STRICT_PARSER')
+         f=fact(PROBE);need(f['sha256']==PROBE_SHA,'UNCHANGED_WINDOWS_PROBE_SOURCE');inputs[str(PROBE)]=f
+         stdout=a.operation.with_suffix('.stdout.log');stderr=a.operation.with_suffix('.stderr.log')

@@ -1,0 +1,123 @@
+{
+  "status": "PREPARED_AST_AND_PURE_STRING_CONTRACT_ONLY_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T12:43:34.509430+00:00",
+  "helper": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-preparation-first/run-gui-list-first.py",
+    "bytes": 14158,
+    "sha256": "234fc6557eaf2a2839efc90ceb9d447e2eeaeebced45787d9f41bbeea6c11c34"
+  },
+  "owner": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-preparation-first/.owner",
+    "bytes": 55,
+    "sha256": "7c11a2e2acec2fa719d0d356b222790ec3da2e0a956126d3021a1477a4f5c2f8"
+  },
+  "remoteScripts": [
+    {
+      "phase": "CREATE",
+      "source": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-preparation-first/remote-create-first.txt",
+        "bytes": 937,
+        "sha256": "796db26a635fdcae3929ba151e86c5772239786eefbe88303fb3df429cff497a"
+      },
+      "typicalEncodedCommandCharacters": 3996,
+      "losslessGzipStringRoundtrip": true
+    },
+    {
+      "phase": "RUN",
+      "source": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-preparation-first/remote-run-first.txt",
+        "bytes": 1888,
+        "sha256": "9d8ff29dec45678094d436c42ba721cb3d5b1890f9b4115e0786b2cae8f094d9"
+      },
+      "typicalEncodedCommandCharacters": 6428,
+      "losslessGzipStringRoundtrip": true
+    },
+    {
+      "phase": "CLEANUP",
+      "source": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-preparation-first/remote-cleanup-first.txt",
+        "bytes": 1141,
+        "sha256": "b2c48ebb367b198cabbe29159403306fefc501fcce993cf698addffd3bd341cf"
+      },
+      "typicalEncodedCommandCharacters": 4112,
+      "losslessGzipStringRoundtrip": true
+    }
+  ],
+  "actualFixtureLedger": {
+    "path": "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96/fixture-ledger.json",
+    "sha256": "fa372949bb74b30b540d122af552ebf4c2006e88a6e771ddd7bef76c57ab8799"
+  },
+  "actualFixtureSha256": "5ae22a321c0c8fc564da8567d341ca93946219330d61f31291997a422a579b39",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-preparation-first/run-gui-list-first.py",
+    "--report",
+    "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-first.json",
+    "--execute"
+  ],
+  "checks": {
+    "pythonAstParse": true,
+    "pureEncodedStringAndGzipRoundtrip": true,
+    "actualPSAST": "NOT_RUN",
+    "SSHWindowsCargoMSINetwork": "NOT_RUN",
+    "actualExeOpenedOrRunByPreparation": false,
+    "existingHelpersAndSourceAndMainChanged": false
+  },
+  "contract": {
+    "observerSixArguments": [
+      "--exact",
+      "installer_lifecycle::native::broker::context_probe::engine_parent_context_observer",
+      "--test-threads=1",
+      "--nocapture",
+      "--skip",
+      "fc-owned-parent-observer-v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-parent-observer-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "extraListControl": "--list",
+    "expectedNonemptyLines": [
+      "installer_lifecycle::native::broker::context_probe::engine_parent_context_observer: test",
+      "1 test, 0 benchmarks"
+    ],
+    "requiredExit": 0,
+    "observerFunctionExecution": "NOT_RUN",
+    "actualSixArgumentRequestParser": "NOT_RUN",
+    "successStatus": "ACTUAL_HARNESS_CLI_PARSE_PASS_NOT_OBSERVER_RUNTIME",
+    "requiredThirdprobeFields": [
+      "observerSha256",
+      "actualExit",
+      "exitCode",
+      "commandArgs",
+      "selectedTests"
+    ],
+    "nativeCapture": "Exact redirected .NET Process StandardOutput/StandardError BaseStream bytes in memory; only the pinned clone is started with --list.",
+    "cleanup": "Finally exact root nonce/name/marker and closed membership plus fixture SHA; only exact fixture/.owner deleted and nonrecursive root removed. Unknown/partial uploaded file identity retained for root owner review, never unbounded delete.",
+    "remoteRoot": "Fresh TEMP/FutureClassroom-r75-parent-observer-<nonce>, protected ACL currentuser/SYSTEM/admin; marker exact Nobserver bytes. Removed after list; future MSI controller must freshly recreate same exact args-bound root if reusing this proof.",
+    "budgets": {
+      "overallSeconds": 120,
+      "nativeListSeconds": 20,
+      "ownedKillWaitSeconds": 5,
+      "pipeCompletionSeconds": 5
+    }
+  },
+  "nextStepReview": {
+    "authorChecker": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/parent-context-probe-third/context-probe.py",
+      "bytes": 14935,
+      "sha256": "3cf5ccac216abe54a653c851a6b150b7caf0871ba9141ee11e1e96d1d7b5ea94"
+    },
+    "current": "author demands exact ledger/clone and actual CLI proof with matching6+list args; exported type2/type19 observer1499/abort1500/Initialize1501 and complete table exports are separately checked.",
+    "gap": "verify() does not close the entire InstallExecuteSequence standard action set; an extra built-in registration action moved before abort is not explicitly rejected. Reported to backend/root; no B changes made. Actual author defaults are not alleged to contain this mutation.",
+    "requiredBeforeMSI": [
+      "First root actual list report success/cleanup and nativeexit0 with exactlyone selected test. GUI redirected stdout must be actually observed; empty capture fails.",
+      "Use actual observer root/nonce/test from CLIproof for authoring, exact same clone/ledger. Recreate owned root and secure marker for any separate observer action after list cleanup.",
+      "Before any root MSI trigger, inspect actual built MSI exports, embedded Binary exact SHA and closed full standard sequence/effects; topology/actual engine parent observation remains NOT_RUN until separately authorized root test."
+    ]
+  },
+  "qualifications": [
+    "Only AST/source contract and lossless string compression computations ran; no helper/controller model, SSH, Windows or MSI.",
+    "Six intended observer args plus seventh --list do not run request() or observer; no PID/SID/parent or install success claims.",
+    "All raw SSH/SCP and native pipe captures retained in report/side logs after explicit root execution; success requires physical .NET Process wait, root removal and unchanged local clone.",
+    "Timeout failure does not prove remote exit; local SSH child is reaped by subprocess.run but root must separately observe parent terminal and narrowly review any retained owned root/process.",
+    "Source Git base2df and candidate producer/freeze identities remain distinct via actual fixture ledger; no source commit invented."
+  ]
+}

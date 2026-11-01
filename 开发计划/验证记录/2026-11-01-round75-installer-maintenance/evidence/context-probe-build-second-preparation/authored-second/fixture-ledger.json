@@ -1,0 +1,203 @@
+{
+  "status": "PASS_EXACT_CUI3_TO_GUI2_TEST_FIXTURE_CLONE",
+  "recordedUtc": "2026-11-01T12:26:07.639471+00:00",
+  "sourceGitBase": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+  "candidateSourceProducerSha256": "2884f0831e4ce5bcd4ac2dedfe6412000ed3e17a5f81c41ad6fc110d60d10c74",
+  "candidateSourceFreezeSha256": "f0ff8e201c9005bae96407b03a48b0e23b337bdce24955cdc2264ac48ff07370",
+  "sourceCui": {
+    "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe",
+    "bytes": 3988775,
+    "sha256": "5cc0c4273b04fe9a2a332b81d9c19eb340c1659691a662bab5d1ee6a11c99e73"
+  },
+  "guiFixture": {
+    "path": "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96/fc_windows_gui_test_fixture.exe",
+    "bytes": 3988775,
+    "sha256": "5ae22a321c0c8fc564da8567d341ca93946219330d61f31291997a422a579b39"
+  },
+  "cargoArtifact": {
+    "package": "fc-windows",
+    "target": "fc_windows",
+    "role": "tests",
+    "cargo_profile_test": true,
+    "sha256": "5cc0c4273b04fe9a2a332b81d9c19eb340c1659691a662bab5d1ee6a11c99e73"
+  },
+  "changedFields": [
+    {
+      "name": "Subsystem",
+      "offset": 220,
+      "beforeHex": "0300",
+      "afterHex": "0200"
+    }
+  ],
+  "normalProduct": false,
+  "profileTest": true,
+  "checksum": {
+    "offset": 216,
+    "originalValue": 4001074,
+    "fixtureValue": 4001074,
+    "recomputed": false
+  },
+  "allOtherBytesIdentical": true,
+  "original24ArtifactsUnchanged": true,
+  "originalArtifactIdentities": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+      "bytes": 1185286,
+      "sha256": "01520a7edae86495267712512ee5dcb672cbe06e65fc068cab578a9d51b0db42"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+      "bytes": 1224276,
+      "sha256": "8d2e7fec2dd74115281ccf5e697a09e3537725f5325f2ac01e179eb21a523c7a"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+      "bytes": 1853766,
+      "sha256": "148d0e8864c70541faa45b4aec6e193697a83b1fb7947d205cc0818acb1c3b12"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+      "bytes": 1246736,
+      "sha256": "4ea5f21318a599e062c75e47e596cdcae5102b342638508312383e6d813a22cc"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+      "bytes": 1280300,
+      "sha256": "a3797d9f602257850d6b34a43ae7dbd38de1f6c8ef9c041f7320f39b89aa0883"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+      "bytes": 1983421,
+      "sha256": "1a347063a3fd1bd9aa45f3c4684d546198d64d7ab90f453ee60e2c77967c1b69"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+      "bytes": 2352762,
+      "sha256": "f54d37c0120d0351a9734243d12fb7f1b90ab21715dff4856dd289e4929ed906"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+      "bytes": 2403377,
+      "sha256": "832ee926fbca1421567eb941a1e21bd8556739e2fcd427606532015768fe85fc"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+      "bytes": 1430273,
+      "sha256": "6f4fe37abd247922051a5772252d3429b591dfc5bd6c78b694b3f566910fd111"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe",
+      "bytes": 3988775,
+      "sha256": "5cc0c4273b04fe9a2a332b81d9c19eb340c1659691a662bab5d1ee6a11c99e73"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/runtime_storage-c482f8ab0ffd29bd.exe",
+      "bytes": 4991709,
+      "sha256": "a0d2dc706f3cf347200c82001d4d94a3c73f82984e18ab10470f0e2ac451df77"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/voice_storage-6bb619ee5dee63b6.exe",
+      "bytes": 5235253,
+      "sha256": "269bbcd4a019963efafde86421151a800972b0426d84b887f3aeb520f6460b1a"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-697f746362036af8.exe",
+      "bytes": 5624935,
+      "sha256": "2e912e86379fce30b5a36d5706b938856bc11b4c5b11f8c2364ef27efa6e66d6"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_installer_lifecycle-cab6782a752605cb.exe",
+      "bytes": 1296754,
+      "sha256": "e61d993d490efc2309e04aaad3e28f3ae1f9c138586608472ad700eb7d8af5fa"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-d4a98b3cdf6100eb.exe",
+      "bytes": 5535002,
+      "sha256": "5f843f0bf0c81b8d45587b743a21e648cff3a72dfd0d29aabb546e42b5451c19"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/examples/verify_web_assets-8500932ea48ba2d2.exe",
+      "bytes": 1097081,
+      "sha256": "5e7d406d3dc7a15bbe52d825a791b89d55fd65c50047a044a58421951a547ad4"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+      "bytes": 8423418,
+      "sha256": "e2dc9c1c89990f9ef4cd4f790277d2fc6667ecbe6f3e881e6be2f1e9d568d353"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/schedule_operations-9b4d7e2443bcde3a.exe",
+      "bytes": 5785432,
+      "sha256": "470be2d43270982b26e40a65712c5db68b89c14fcf32bab48347b0d05f760b03"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/business_storage-1758945f26dd4d24.exe",
+      "bytes": 6196953,
+      "sha256": "a7fefb7b309eeb062c4b1dc1a8dffd967f21a07c18e287e8405da635d2a628d6"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-96edfabaffdd4929.exe",
+      "bytes": 5191010,
+      "sha256": "a9d959cf49bb8fe3f28a5bdcf885986f279d60918b4d844e8d501d420c9ce979"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-6cc266b4a69e4fd2.exe",
+      "bytes": 12846574,
+      "sha256": "5c71ab4b9a282d6460b3da418c9dfc075db8c20cd4155eca7b388f0efbf389ba"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-8fd20aa1db135542.exe",
+      "bytes": 13095198,
+      "sha256": "38e3404a6241bb2c43efe2b4f0ec622ea3400564801248f619bd90214caf39d6"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 699090,
+      "sha256": "8e82da6f54973f74bdd6d6dbc8625d9ae1b37c55b58765c72c6376f0cf64b989"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13352281,
+      "sha256": "18638958e906c3464fd99421116adabb2d66d134e76a74750d228be5a457505d"
+    }
+  ],
+  "producer": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/n-release-second.json",
+    "bytes": 27046,
+    "sha256": "2884f0831e4ce5bcd4ac2dedfe6412000ed3e17a5f81c41ad6fc110d60d10c74"
+  },
+  "sourceFreeze": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/n-implementation-freeze-second.json",
+    "bytes": 7881,
+    "sha256": "f0ff8e201c9005bae96407b03a48b0e23b337bdce24955cdc2264ac48ff07370"
+  },
+  "originalPe": {
+    "peOffset": 128,
+    "optionalHeaderOffset": 152,
+    "subsystemOffset": 220,
+    "checksumOffset": 216,
+    "checksum": 4001074,
+    "entryPointRva": 5088,
+    "machine": 332,
+    "optionalMagic": 267,
+    "subsystem": 3,
+    "sectionCount": 9,
+    "certificateTableEmpty": true,
+    "forceIntegrity": false
+  },
+  "fixturePe": {
+    "peOffset": 128,
+    "optionalHeaderOffset": 152,
+    "subsystemOffset": 220,
+    "checksumOffset": 216,
+    "checksum": 4001074,
+    "entryPointRva": 5088,
+    "machine": 332,
+    "optionalMagic": 267,
+    "subsystem": 2,
+    "sectionCount": 9,
+    "certificateTableEmpty": true,
+    "forceIntegrity": false
+  },
+  "scope": "Test-only cloned fc_windows libtest image, not a normal product or rebuilt/signed image. Only Subsystem field changed. Checksum deliberately retains its original value; no checksum verification claim. Windows GUI/null-stdio/CLI behavior requires separate root actual execution. Candidate producer/freezefile bind uncommitted bytes; sourceGitBase is only a base, not an actual candidate source commit."
+}

@@ -1,0 +1,41 @@
+{
+  "status": "PASS_PURE_DECODER_ONLY_NOT_ARCHIVE",
+  "cases": [
+    {
+      "name": "cp936-positive",
+      "result": "PASS"
+    },
+    {
+      "name": "utf8-clixml-not-fallback",
+      "result": "PASS"
+    },
+    {
+      "name": "utf16-positive",
+      "result": "PASS"
+    },
+    {
+      "name": "unknown-nonxml",
+      "result": "PASS_REJECTED"
+    },
+    {
+      "name": "malformed-xml",
+      "result": "PASS_REJECTED"
+    },
+    {
+      "name": "wrong-namespace",
+      "result": "PASS_REJECTED"
+    },
+    {
+      "name": "invalid-cp936",
+      "result": "PASS_REJECTED"
+    },
+    {
+      "name": "no-header-newline",
+      "result": "PASS_REJECTED"
+    },
+    {
+      "name": "dtd",
+      "result": "PASS_REJECTED"
+    }
+  ]
+}

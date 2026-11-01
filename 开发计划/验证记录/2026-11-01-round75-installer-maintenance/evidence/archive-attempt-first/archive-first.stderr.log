@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-first/archive-evidence-first.py", line 340, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-first/archive-evidence-first.py", line 290, in main
+    if Path(row['path']).suffix.lower() not in CERT_SUFFIXES:scan(source_data,'source:'+row['path'])
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-first/archive-evidence-first.py", line 260, in scan
+    need(bool(views),'unrecognized retained evidence encoding '+label)
+  File "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-first/archive-evidence-first.py", line 45, in need
+    if not v:raise AssertionError(m)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: unrecognized retained evidence encoding source:evidence/gui-cli-list-first-01-create-owned-root.stderr.log

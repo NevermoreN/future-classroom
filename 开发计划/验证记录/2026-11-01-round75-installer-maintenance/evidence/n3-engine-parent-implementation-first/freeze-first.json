@@ -1,0 +1,242 @@
+{
+  "status": "PASS_SOURCE_FORMAT_ARCHITECTURE_ONLY_NOT_COMPILED",
+  "sourceGitBase": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+  "sourceCount": 1,
+  "source": {
+    "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+    "bytes": 41207,
+    "sha256": "9fc3247c353b4a20b689b0611e4ca7b08994a9ef09bf360936581522ca1fc091"
+  },
+  "before": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/broker-before.rs",
+    "bytes": 39007,
+    "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+  },
+  "after": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/broker-after.rs",
+    "bytes": 41207,
+    "sha256": "9fc3247c353b4a20b689b0611e4ca7b08994a9ef09bf360936581522ca1fc091"
+  },
+  "preimageReceipt": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/root-n2-preserved-before-n3-first.json",
+    "bytes": 12089,
+    "sha256": "2d451efb690f74e88ec0372f8f7861f9b75bb6a401b3c51ba670684a0cbd8c83"
+  },
+  "actualType2Evidence": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-second-context.json",
+    "bytes": 835,
+    "sha256": "e75d94df8b03f893f9294fd7408227838972603f1c23ec6b8b0f97536e90f648"
+  },
+  "onlyPredicateEngineGateAndPolicyTestChanged": true,
+  "checks": [
+    {
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "--check",
+        "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker.rs"
+      ],
+      "pid": 17419,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.11466882401145995,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-1.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/worktree/scripts/check-architecture.py"
+      ],
+      "pid": 17428,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.16479802108369768,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-2.stdout.log",
+        "bytes": 71,
+        "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-2.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/fc-round75-installer-maintenance/worktree",
+        "diff",
+        "--check"
+      ],
+      "pid": 17438,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.06865567015483975,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-3.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-3.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "otherInputCount": 7,
+  "otherInputsUnchanged": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/package-msi-candidate.py",
+      "bytes": 58160,
+      "sha256": "d0fbb23a5dab2d3329e935110265609ea53674b31896102d1139e21cee193059"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/check-msi-candidate.py",
+      "bytes": 35469,
+      "sha256": "d23f912eecdb556352c8ebd97796ad1de2d86f1185e0c5feb2c29a11f53329d1"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/packaging/MSI-CANDIDATE.md",
+      "bytes": 14564,
+      "sha256": "9efa5656201a962705536316cc374b4d47d37e74c8d5e981576ad655e79d0d17"
+    }
+  ],
+  "policyTests": {
+    "name": "installer_lifecycle::native::broker::tests::engine_parent_sid_policy_accepts_only_same_user_or_exact_local_system",
+    "status": "SOURCE_ADDED_NOT_RUN",
+    "cases": [
+      "same synthetic ordinary user accepted",
+      "exact binary LocalSystem accepted",
+      "foreign ordinary user rejected",
+      "AuthenticatedUsers/LocalService/NetworkService rejected",
+      "Builtin Administrators rejected",
+      "every truncated LocalSystem prefix rejected",
+      "extended LocalSystem rejected",
+      "wrong revision/count/identifier authority rejected"
+    ]
+  },
+  "boundaries": [
+    "resources.sid remains current user",
+    "Session require_user rejects SYSTEM helper as before",
+    "pipe peer/effect SID checks unchanged",
+    "original parent PID/creation/live/canonical OS msiexec image checks unchanged",
+    "guardian original Join/End/exit proof unchanged",
+    "shared service parent identity is not transaction/session binding",
+    "no engine-service death wait added"
+  ],
+  "cargoExecuted": false,
+  "windowsExecuted": false,
+  "compiled": false,
+  "scope": "Single narrow engine-parent SID policy correction. Existing actual Type2 showed current-user helper and LocalSystem OS engine parent. No claim of actual guardian context/Join or complete product lifecycle acceptance.",
+  "files": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/.owner",
+      "bytes": 62,
+      "sha256": "c5562538000c02db29e1e247cbfcacc890486f71ad939fade0c773484fba3b7b"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/broker-after.rs",
+      "bytes": 41207,
+      "sha256": "9fc3247c353b4a20b689b0611e4ca7b08994a9ef09bf360936581522ca1fc091"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/broker-before.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-2.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-2.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-3.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/check-3.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/context_probe.rs.incidental-format.diff",
+      "bytes": 2154,
+      "sha256": "2931a2a14e739f7e8da3288d8e5a8bea86b6a543b23c12890d1d9ccb0ea2f722"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/effects.rs.incidental-format.diff",
+      "bytes": 877,
+      "sha256": "fac147f4fc90dbef2ed316bc67fa6e4b40640d3a2ff405ccda10191fc7f4b6a8"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/format-correction-first.json",
+      "bytes": 484,
+      "sha256": "3996ae2ccd2c9efcc04678471f1a500bdeb6a23105ca6a22d2ed9163cf80545b"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/n2-to-n3.diff",
+      "bytes": 3120,
+      "sha256": "fdfbafe3bf8d770101f0b1b253e6b0f78679e5bce715dc612fc599c0aef45df1"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n3-engine-parent-implementation-first/preimage-first.json",
+      "bytes": 203,
+      "sha256": "70bfaea93208a542ca506bb89f7fdd82180ee5eb31b72ef6aa25d258bbbd5c49"
+    }
+  ]
+}

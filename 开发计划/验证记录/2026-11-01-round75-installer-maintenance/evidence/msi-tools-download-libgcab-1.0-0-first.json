@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_EXACT_PUBLISHED_BYTES_AND_SHA256",
+  "package": "libgcab-1.0-0",
+  "expectedBytes": 28026,
+  "expectedSha256": "b2ad7b79882a6c15192b88b039eac9ee29c94cd24197baa1caa8acb1169008fa",
+  "command": [
+    "curl",
+    "--disable",
+    "--fail",
+    "--location",
+    "--max-redirs",
+    "3",
+    "--proto",
+    "=https",
+    "--proto-redir",
+    "=https",
+    "--tlsv1.2",
+    "--connect-timeout",
+    "15",
+    "--max-time",
+    "120",
+    "--max-filesize",
+    "28026",
+    "--output",
+    "/tmp/fc-round75-installer-maintenance/tools/packages/libgcab-1.0-0_1.6-1build2_amd64.deb",
+    "https://mirrors.edge.kernel.org/ubuntu/pool/universe/g/gcab/libgcab-1.0-0_1.6-1build2_amd64.deb"
+  ],
+  "startedUtc": "2026-11-01T12:11:58.490815+00:00",
+  "deadlineSeconds": 120,
+  "connectionDeadlineSeconds": 15,
+  "candidateMsiProduced": false,
+  "windowsInvoked": false,
+  "controllerTimedOut": false,
+  "actualExit": true,
+  "parentReaped": true,
+  "pid": 1673,
+  "exitCode": 0,
+  "elapsedSeconds": 0.8758678468875587,
+  "logs": [
+    {
+      "path": "msi-tools-download-libgcab-1.0-0-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "msi-tools-download-libgcab-1.0-0-first.stderr.log",
+      "bytes": 317,
+      "sha256": "6c633deeb985fcd36537c41f1a74c26a168a78cc996083eef8d113860ab277d3"
+    }
+  ],
+  "downloaded": {
+    "path": "/tmp/fc-round75-installer-maintenance/tools/packages/libgcab-1.0-0_1.6-1build2_amd64.deb",
+    "bytes": 28026,
+    "sha256": "b2ad7b79882a6c15192b88b039eac9ee29c94cd24197baa1caa8acb1169008fa"
+  }
+}

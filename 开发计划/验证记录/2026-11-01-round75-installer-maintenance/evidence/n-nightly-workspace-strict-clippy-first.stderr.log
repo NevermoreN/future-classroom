@@ -1,0 +1,104 @@
+   Compiling version_check v0.9.5
+    Checking cfg-if v1.0.5
+    Checking typenum v1.20.1
+    Checking fc-domain v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-domain)
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+    Checking subtle v2.6.1
+    Checking cpufeatures v0.2.17
+   Compiling serde_core v1.0.228
+    Checking windows-link v0.2.1
+    Checking memchr v2.8.3
+   Compiling rustversion v1.0.23
+   Compiling serde v1.0.228
+   Compiling generic-array v0.14.7
+   Compiling serde_json v1.0.145
+   Compiling zerocopy v0.8.63
+   Compiling ahash v0.8.12
+    Checking windows-strings v0.5.1
+    Checking windows-result v0.4.1
+   Compiling shlex v2.0.1
+    Checking ryu v1.0.23
+   Compiling find-msvc-tools v0.1.15
+    Checking itoa v1.0.18
+   Compiling cc v1.10.0
+   Compiling syn v2.0.119
+    Checking zeroize v1.8.2
+   Compiling crc32fast v1.5.3
+   Compiling pkg-config v0.3.34
+    Checking smallvec v1.16.4
+    Checking crypto-common v0.1.7
+    Checking block-buffer v0.10.4
+    Checking digest v0.10.7
+    Checking once_cell v1.21.4
+   Compiling vcpkg v0.2.15
+    Checking sha2 v0.10.9
+    Checking inout v0.1.4
+   Compiling encoding_rs v0.8.42
+    Checking simd-adler32 v0.3.10
+    Checking adler2 v2.0.1
+    Checking fc-ports v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-ports)
+    Checking miniz_oxide v0.9.1
+    Checking cipher v0.4.4
+    Checking windows-threading v0.2.1
+    Checking core_detect v1.0.0
+    Checking simdutf8 v0.1.5
+    Checking scopeguard v1.2.0
+    Checking zlib-rs v0.6.8
+   Compiling multiversion_no_op v1.0.0
+    Checking aes v0.8.4
+    Checking hmac v0.12.1
+    Checking rustc-hash v2.1.3
+    Checking bitflags v2.13.2
+    Checking fallible-iterator v0.3.0
+    Checking fallible-streaming-iterator v0.1.9
+    Checking log v0.4.34
+    Checking pbkdf2 v0.12.2
+    Checking fc-runtime v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-runtime)
+    Checking fc-presentation v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-presentation)
+   Compiling libsqlite3-sys v0.30.1
+   Compiling fc-bootstrap v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap)
+    Checking flate2 v1.1.10
+    Checking fc-security v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-security)
+    Checking fc-application v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-application)
+    Checking fc-audio v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-audio)
+    Checking pdf-syntax v0.6.1
+    Checking quick-xml v0.42.0
+   Compiling serde_derive v1.0.228
+   Compiling windows-interface v0.59.3
+   Compiling windows-implement v0.60.2
+    Checking fc-materials v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-materials)
+    Checking hashbrown v0.14.5
+    Checking windows-core v0.62.2
+    Checking hashlink v0.9.1
+    Checking windows-collections v0.3.2
+    Checking windows-numerics v0.3.1
+    Checking windows-future v0.3.2
+    Checking windows v0.62.2
+    Checking fc-protocol v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-protocol)
+    Checking rusqlite v0.32.1
+    Checking fc-storage v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-storage)
+    Checking fc-windows v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows)
+error: using `chunks_exact` with a constant chunk size
+   --> crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs:185:27
+    |
+185 |     for bytes in sid[8..].chunks_exact(4) {
+    |                           ^^^^^^^^^^^^^^^ help: consider using `as_chunks` instead: `as_chunks::<4>().0`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#chunks_exact_to_as_chunks
+    = note: `-D clippy::chunks-exact-to-as-chunks` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::chunks_exact_to_as_chunks)]`
+
+error: could not compile `fc-windows` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-windows` (lib test) due to 1 previous error
+warning: unused dependency `fc-ports`
+  --> crates/fc-materials/Cargo.toml:11:1
+   |
+11 | fc-ports.workspace = true
+   | ^^^^^^^^
+   |
+   = note: `cargo::unused_dependencies` is set to `warn` by default
+help: consider removing the dependency on `fc-ports`
+warning: `fc-materials` (manifest) generated 1 warning

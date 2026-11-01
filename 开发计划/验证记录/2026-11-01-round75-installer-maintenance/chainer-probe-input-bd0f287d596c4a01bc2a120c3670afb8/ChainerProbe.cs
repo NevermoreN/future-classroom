@@ -1,0 +1,155 @@
+// Independent test-only .NET Framework x86 WinExe. No production dependency.
+// Concrete constants are generated and source-hashed before root compiles it.
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using System.Text;
+
+internal static class ChainerProbe {
+    const string Nonce = "bd0f287d596c4a01bc2a120c3670afb8";
+    const string Root = @"C:\Users\Elior\AppData\Local\Temp\FutureClassroom-r75-chainer-probe-bd0f287d596c4a01bc2a120c3670afb8";
+    const string ExpectedOwner = "S-1-5-21-3896111207-1867804362-1971593122-1001";
+    const string Marker = "future-classroom-owned-r75-chainer-probe/v1\n";
+    const uint QuerySync = 0x00101000, ReadAttributes = 0x80;
+    const uint OpenExisting = 3, BackupOpenReparse = 0x02200000;
+    static readonly IntPtr Invalid = new IntPtr(-1);
+    static readonly List<IntPtr> Pins = new List<IntPtr>();
+    static readonly List<string> Closes = new List<string>();
+    static readonly Stopwatch Clock = Stopwatch.StartNew();
+    static bool CloseFailed;
+    [DllImport("kernel32.dll", SetLastError=true)] static extern IntPtr OpenProcess(uint access, bool inherit, uint pid);
+    [DllImport("kernel32.dll")] static extern IntPtr GetCurrentProcess();
+    [DllImport("kernel32.dll")] static extern uint GetCurrentProcessId();
+    [DllImport("kernel32.dll", SetLastError=true)] static extern uint GetProcessId(IntPtr process);
+    [DllImport("kernel32.dll", SetLastError=true)] static extern bool GetProcessTimes(IntPtr p, out long c, out long e, out long k, out long u);
+    [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern bool QueryFullProcessImageName(IntPtr p, uint flags, StringBuilder name, ref uint size);
+    [DllImport("kernel32.dll", SetLastError=true)] static extern bool CloseHandle(IntPtr h);
+    [DllImport("kernel32.dll", SetLastError=true)] static extern uint WaitForSingleObject(IntPtr h, uint ms);
+    [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern IntPtr CreateFile(string path, uint access, uint share, IntPtr sa, uint disposition, uint flags, IntPtr template);
+    // Win32 FILETIME is two DWORDs (alignment4), not an aligned C# Int64.
+    [StructLayout(LayoutKind.Sequential, Pack=4)] struct Info { public uint Attributes; public long Creation, Access, Write; public uint Volume, SizeHigh, SizeLow, Links, IndexHigh, IndexLow; }
+    [DllImport("kernel32.dll", SetLastError=true)] static extern bool GetFileInformationByHandle(IntPtr h, out Info info);
+    [DllImport("kernel32.dll", SetLastError=true)] static extern bool ReadFile(IntPtr h, byte[] data, uint size, out uint read, IntPtr overlapped);
+    [DllImport("kernel32.dll", SetLastError=true)] static extern IntPtr CreateToolhelp32Snapshot(uint flags, uint pid);
+    [StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)] struct ProcessEntry { public uint Size, Usage, Pid; public UIntPtr Heap; public uint Module, Threads, ParentPid; public int Priority; public uint Flags; [MarshalAs(UnmanagedType.ByValTStr,SizeConst=260)] public string Exe; }
+    [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern bool Process32First(IntPtr snapshot, ref ProcessEntry entry);
+    [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern bool Process32Next(IntPtr snapshot, ref ProcessEntry entry);
+    [DllImport("advapi32.dll", SetLastError=true)] static extern bool OpenProcessToken(IntPtr process, uint access, out IntPtr token);
+    [DllImport("advapi32.dll", SetLastError=true)] static extern bool OpenThreadToken(IntPtr thread, uint access, bool openAsSelf, out IntPtr token);
+    [DllImport("kernel32.dll")] static extern IntPtr GetCurrentThread();
+    [DllImport("advapi32.dll", SetLastError=true)] static extern bool GetTokenInformation(IntPtr token, int kind, IntPtr buffer, uint size, out uint needed);
+    [DllImport("advapi32.dll")] static extern bool IsValidSid(IntPtr sid);
+    [DllImport("advapi32.dll")] static extern uint GetLengthSid(IntPtr sid);
+    [DllImport("kernel32.dll")] static extern IntPtr GetConsoleWindow();
+    [DllImport("msi.dll", ExactSpelling=true)] static extern uint MsiJoinTransaction(uint transaction, uint attributes, out IntPtr changed);
+    [DllImport("msi.dll", ExactSpelling=true)] static extern uint MsiEndTransaction(uint state);
+
+    static string Q(string s) {
+        StringBuilder b = new StringBuilder("\"");
+        foreach(char c in s) { if(c=='\\' || c=='"') b.Append('\\').Append(c); else if(c<32) b.Append("\\u").Append(((int)c).ToString("x4")); else b.Append(c); }
+        return b.Append('"').ToString();
+    }
+    static string Error(Exception e) { Win32Exception w=e as Win32Exception; return "{\"status\":\"ERROR\",\"exception\":"+Q(e.GetType().Name)+",\"hresult\":"+e.HResult+",\"nativeError\":"+(w==null?"null":w.NativeErrorCode.ToString())+"}"; }
+    static void Require(bool ok, string stage) { if(!ok) throw new InvalidOperationException(stage); }
+    static void Native(bool ok) { if(!ok) throw new Win32Exception(Marshal.GetLastWin32Error()); }
+    static void Budget() { if(Clock.ElapsedMilliseconds>=120000) throw new TimeoutException("original120s"); }
+    static IntPtr Pin(IntPtr h) { if(h==IntPtr.Zero || h==Invalid) throw new Win32Exception(Marshal.GetLastWin32Error()); Require(Pins.Count<32,"handle bound"); Pins.Add(h); return h; }
+    static void CloseOnce(IntPtr h, string role) {
+        // Remove BEFORE attempting: unknown CloseHandle failure is never retried.
+        Require(Pins.Remove(h),"close original capability once");
+        bool ok=CloseHandle(h); int error=ok?0:Marshal.GetLastWin32Error();
+        if(!ok) CloseFailed=true;
+        Closes.Add("{\"role\":"+Q(role)+",\"ok\":"+(ok?"true":"false")+",\"win32\":"+error+"}");
+    }
+    static long Creation(IntPtr h) { long c,e,k,u; Native(GetProcessTimes(h,out c,out e,out k,out u)); return c; }
+    static string Sid(IntPtr token) {
+        uint needed; GetTokenInformation(token,1,IntPtr.Zero,0,out needed);
+        Require(needed>=IntPtr.Size && needed<=4096,"token bound");
+        IntPtr buffer=Marshal.AllocHGlobal((int)needed);
+        try { Native(GetTokenInformation(token,1,buffer,needed,out needed)); IntPtr sid=Marshal.ReadIntPtr(buffer); Require(IsValidSid(sid),"SID valid"); uint n=GetLengthSid(sid); Require(n>=8 && n<=68,"SID bound"); byte[] bytes=new byte[n]; Marshal.Copy(sid,bytes,0,(int)n); return BitConverter.ToString(bytes).Replace("-","").ToLowerInvariant(); }
+        finally { Marshal.FreeHGlobal(buffer); }
+    }
+    static string ProcessFact(IntPtr h) {
+        Budget(); uint pid=GetProcessId(h); Require(pid!=0,"process id"); long created=Creation(h);
+        StringBuilder image=new StringBuilder(1024); uint size=1024; Native(QueryFullProcessImageName(h,0,image,ref size)); Require(size>0 && size<1024,"image bound");
+        IntPtr token; Native(OpenProcessToken(h,8,out token)); Pin(token); string sid;
+        try { sid=Sid(token); } finally { CloseOnce(token,"process-token"); }
+        return "{\"status\":\"OK\",\"pid\":"+pid+",\"creationFiletime\":"+created+",\"image\":"+Q(image.ToString())+",\"tokenUserSidHex\":"+Q(sid)+"}";
+    }
+    static string ThreadFact() {
+        IntPtr token; if(!OpenThreadToken(GetCurrentThread(),8,true,out token)) { int error=Marshal.GetLastWin32Error(); return "{\"status\":"+Q(error==1008?"ABSENT":"ERROR")+",\"win32\":"+error+"}"; }
+        Pin(token); try { return "{\"status\":\"OK\",\"tokenUserSidHex\":"+Q(Sid(token))+"}"; } finally { CloseOnce(token,"thread-token"); }
+    }
+    static uint ParentId() {
+        IntPtr snapshot=Pin(CreateToolhelp32Snapshot(2,0));
+        try { ProcessEntry e=new ProcessEntry(); e.Size=(uint)Marshal.SizeOf(typeof(ProcessEntry)); Native(Process32First(snapshot,ref e));
+            for(int i=0;i<8192;i++) { Budget(); if(e.Pid==GetCurrentProcessId()) return e.ParentPid; if(!Process32Next(snapshot,ref e)) { int error=Marshal.GetLastWin32Error(); if(error==18) break; throw new Win32Exception(error); } }
+            throw new InvalidOperationException("original parent not found");
+        } finally { CloseOnce(snapshot,"process-snapshot"); }
+    }
+    static void OpenReportRoot() {
+        Require(Root.Length<=240 && Path.GetFullPath(Root)==Root && Path.GetFileName(Root)=="FutureClassroom-r75-chainer-probe-"+Nonce,"fixed root");
+        string current=Path.GetPathRoot(Root); string[] pieces=Root.Substring(current.Length).Split('\\'); Require(pieces.Length<=16,"ancestor bound");
+        List<string> paths=new List<string>(); paths.Add(current); foreach(string piece in pieces) { Require(piece.Length>0 && piece!="." && piece!=".." && !piece.EndsWith(".") && !piece.EndsWith(" "),"path component"); current=Path.Combine(current,piece); paths.Add(current); }
+        foreach(string path in paths) { Budget(); IntPtr h=Pin(CreateFile(path,ReadAttributes,3,IntPtr.Zero,OpenExisting,BackupOpenReparse,IntPtr.Zero)); Info info; Native(GetFileInformationByHandle(h,out info)); Require((info.Attributes&0x410)==0x10,"directory no reparse"); }
+        DirectorySecurity security=Directory.GetAccessControl(Root,AccessControlSections.Owner|AccessControlSections.Access);
+        Require(security.GetOwner(typeof(SecurityIdentifier)).Value==ExpectedOwner,"exact compiled owner");
+        const FileSystemRights writes=FileSystemRights.WriteData|FileSystemRights.AppendData|FileSystemRights.WriteExtendedAttributes|FileSystemRights.WriteAttributes|FileSystemRights.Delete|FileSystemRights.DeleteSubdirectoriesAndFiles|FileSystemRights.ChangePermissions|FileSystemRights.TakeOwnership;
+        foreach(FileSystemAccessRule rule in security.GetAccessRules(true,true,typeof(SecurityIdentifier))) {
+            string sid=rule.IdentityReference.Value;
+            Require(rule.AccessControlType!=AccessControlType.Allow || (rule.FileSystemRights&writes)==0 || sid==ExpectedOwner || sid=="S-1-5-18","foreign writer");
+        }
+        IntPtr marker=Pin(CreateFile(Path.Combine(Root,".owner"),0x80000000,1,IntPtr.Zero,OpenExisting,0x00200000,IntPtr.Zero));
+        Info m; Native(GetFileInformationByHandle(marker,out m)); Require((m.Attributes&0x410)==0 && m.Links==1 && m.SizeHigh==0 && m.SizeLow==Encoding.ASCII.GetByteCount(Marker),"marker identity");
+        byte[] data=new byte[m.SizeLow]; uint read; Native(ReadFile(marker,data,(uint)data.Length,out read,IntPtr.Zero)); Require(read==data.Length && Encoding.ASCII.GetString(data)==Marker,"exact marker");
+        foreach(string name in new string[]{"pre-join.json","pre-join.tmp","result.json","result.tmp"}) Require(!File.Exists(Path.Combine(Root,name)),"create-new reports only");
+    }
+    static void Publish(string name, string data) {
+        Require(name=="pre-join" || name=="result","closed report name");
+        byte[] bytes=new UTF8Encoding(false,true).GetBytes(data+"\n"); Require(bytes.Length<=8192,"report bound");
+        using(FileStream stream=new FileStream(Path.Combine(Root,name+".tmp"),FileMode.CreateNew,FileAccess.Write,FileShare.Read,4096,FileOptions.WriteThrough)) { stream.Write(bytes,0,bytes.Length); stream.Flush(true); }
+        File.Move(Path.Combine(Root,name+".tmp"),Path.Combine(Root,name+".json"));
+    }
+    static int Main(string[] args) {
+        bool rootReady=false, complete=false; string stage="root", failure="null", own="null", parent="null", thread="null";
+        string argv="[]"; uint transaction=0; uint? join=null, end=null; bool eventReturned=false; int exit=1603;
+        try {
+            OpenReportRoot(); rootReady=true; stage="argv"; Require(args.Length<=8,"bounded original arguments");
+            foreach(string arg in args) Require(arg.Length<=240 && arg.IndexOf('\0')<0,"argv bound");
+            argv="["+String.Join(",",Array.ConvertAll<string,string>(args,Q))+"]";
+            Require(args.Length==4,"exact four arguments");
+            Require(args[0].Length>0 && args[0].Length<=10 && Array.TrueForAll(args[0].ToCharArray(),delegate(char c){return c>='0'&&c<='9';}) && UInt32.TryParse(args[0],out transaction) && transaction!=0,"engine nonzero uint32 transaction");
+            Require(args[1]=="probe" && args[2]==Nonce && args[3]==Root,"compiled role/nonce/root");
+            stage="identity"; own=ProcessFact(GetCurrentProcess()); thread=ThreadFact();
+            uint parentId=ParentId(); IntPtr h=Pin(OpenProcess(QuerySync,false,parentId));
+            Require(Creation(h)<Creation(GetCurrentProcess()) && WaitForSingleObject(h,0)==258,"original live parent predates child"); parent=ProcessFact(h);
+            CloseOnce(h,"original-parent");
+            stage="pre-join"; Require(!CloseFailed,"pre-join checked handles");
+            Publish("pre-join","{\"schemaVersion\":1,\"scope\":\"PRE_JOIN_IDENTITY_ONLY_NOT_TRANSACTION_SUCCESS\",\"nonce\":"+Q(Nonce)+",\"argv\":"+argv+",\"pointerBytes\":"+IntPtr.Size+",\"own\":"+own+",\"parent\":"+parent+",\"optionalThreadToken\":"+thread+",\"consoleWindowPresent\":"+(GetConsoleWindow()!=IntPtr.Zero?"true":"false")+",\"elapsedMs\":"+Clock.ElapsedMilliseconds+"}");
+            stage="join"; Budget(); IntPtr changed=IntPtr.Zero; join=MsiJoinTransaction(transaction,0,out changed);
+            eventReturned=changed!=IntPtr.Zero && changed!=Invalid; if(eventReturned) Pin(changed);
+            // Only Join success authorizes ending this exact current transaction.
+            // No Commit, MsiBeginTransaction, transaction enumeration or retry.
+            if(join.Value==0) { stage="end-rollback"; end=MsiEndTransaction(0); }
+            if(eventReturned) CloseOnce(changed,"returned-change-owner-event");
+            Budget(); complete=join.Value==0 && end.HasValue && end.Value==0 && eventReturned && !CloseFailed;
+            stage=complete?"rollback-returned":"native-failure"; exit=complete?0:1603;
+        } catch(Exception e) { failure=Error(e); }
+        finally {
+            // Checked once, including exceptions. Unknown close is retained until
+            // this process exits; never ask GC/finalizers or replacement to retry.
+            for(int i=Pins.Count-1;i>=0;i--) { IntPtr h=Pins[i]; CloseOnce(h,"fixture-control"); }
+            if(CloseFailed) { complete=false; exit=1603; }
+            if(rootReady) {
+                try { Publish("result","{\"schemaVersion\":1,\"scope\":\"INDEPENDENT_CHAINER_API_FIXTURE_NOT_RUST_PRODUCT_ACCEPTANCE\",\"status\":"+Q(complete?"JOIN_END_ROLLBACK_RETURNED":"FAILED_OR_UNKNOWN")+",\"stage\":"+Q(stage)+",\"nonce\":"+Q(Nonce)+",\"pointerBytes\":"+IntPtr.Size+",\"argv\":"+argv+",\"transaction\":"+transaction+",\"own\":"+own+",\"parent\":"+parent+",\"optionalThreadToken\":"+thread+",\"consoleWindowPresent\":"+(GetConsoleWindow()!=IntPtr.Zero?"true":"false")+",\"joinReturn\":"+(join.HasValue?join.Value.ToString():"null")+",\"endRollbackReturn\":"+(end.HasValue?end.Value.ToString():"null")+",\"changeOwnerEventReturned\":"+(eventReturned?"true":"false")+",\"checkedClose\":["+String.Join(",",Closes.ToArray())+"],\"failure\":"+failure+",\"elapsedMs\":"+Clock.ElapsedMilliseconds+",\"releaseProof\":\"REQUIRES_ACTUAL_PROBE_PROCESS_EXIT0_AND_MSI_TERMINAL_AND_FIXTURE_ABSENCE\"}"); }
+                catch { exit=1603; }
+            }
+        }
+        return exit;
+    }
+}

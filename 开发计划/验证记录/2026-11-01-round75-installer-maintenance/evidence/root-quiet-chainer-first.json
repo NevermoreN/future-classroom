@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/run-quiet-chainer-first.py",
+    "--spec",
+    "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8/spec.json",
+    "--spec-sha256",
+    "da135548b895d0647e001f4e75b7107b4ec08c40832c8dbc37841b638fa115a0",
+    "--msi",
+    "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+    "--msi-sha256",
+    "8b3bbf3c45e14751268a2963c80ef2c13b48688d84052f3e04ffebaca8670590",
+    "--static-report",
+    "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/07-static-check.stdout.log",
+    "--static-report-sha256",
+    "5f54286d23b4f890d097e92be3806dece34c5282aedfcdace1e02d6a955a8c8b",
+    "--report",
+    "/tmp/fc-round75-installer-maintenance/evidence/quiet-chainer-first.json",
+    "--execute"
+  ],
+  "actualParentReturned": true,
+  "exitCode": 1,
+  "elapsedSeconds": 3.3207347108982503,
+  "logs": {
+    "stdout": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-quiet-chainer-first.stdout.log",
+      "bytes": 288,
+      "sha256": "4685ff48caab9aa6cb3ffa46d7a1f6b383e559942250ac1bbcbc8fd06755b208"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-quiet-chainer-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

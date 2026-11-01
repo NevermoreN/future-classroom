@@ -1,0 +1,261 @@
+--- third/context-probe.py
++++ fourth/context-probe.py
+@@ -21,6 +21,29 @@
+ ALLOWED = {'Binary', 'CustomAction', 'InstallExecuteSequence', 'InstallUISequence', 'AdminExecuteSequence',
+            'AdminUISequence', 'AdvtExecuteSequence', 'Property', 'Directory', 'Feature', 'Media', 'LaunchCondition', 'Error'}
+ SYSTEM_TABLES = {'_Tables', '_Columns', '_Validation', '_SummaryInformation'}
++INSTALL_STANDARD = {
++    'LaunchConditions': 100, 'ValidateProductID': 700, 'CostInitialize': 800, 'FileCost': 900,
++    'CostFinalize': 1000, 'InstallValidate': 1400, 'InstallInitialize': 1501,
++    'AllocateRegistrySpace': 1550, 'ProcessComponents': 1600, 'UnpublishComponents': 1700,
++    'UnpublishFeatures': 1800, 'RemoveRegistryValues': 2600, 'RemoveFiles': 3500,
++    'RemoveFolders': 3600, 'CreateFolders': 3700, 'InstallFiles': 4000, 'WriteRegistryValues': 5000,
++    'RegisterUser': 6000, 'RegisterProduct': 6100, 'PublishComponents': 6200,
++    'PublishFeatures': 6300, 'PublishProduct': 6400, 'InstallExecute': 6500, 'InstallFinalize': 6600,
++}
++# Only fixed standard rows, not a blanket administrative/auxiliary exception.
++# These are the original wixl defaults preserved from the independent registry
++# fixture. They do not authorize auxiliary execution or add a custom action.
++AUXILIARY_STANDARD = {
++    'InstallUISequence': {'LaunchConditions': 100, 'ValidateProductID': 700, 'CostInitialize': 800,
++                          'FileCost': 900, 'CostFinalize': 1000, 'ExecuteAction': 1300},
++    'AdminUISequence': {'CostInitialize': 800, 'FileCost': 900, 'CostFinalize': 1000, 'ExecuteAction': 1300},
++    'AdminExecuteSequence': {'CostInitialize': 800, 'FileCost': 900, 'CostFinalize': 1000,
++                             'InstallValidate': 1400, 'InstallInitialize': 1500,
++                             'InstallAdminPackage': 3900, 'InstallFiles': 4000, 'InstallFinalize': 6600},
++    'AdvtExecuteSequence': {'CostInitialize': 800, 'CostFinalize': 1000, 'InstallValidate': 1400,
++                            'InstallInitialize': 1500, 'PublishFeatures': 6300,
++                            'PublishProduct': 6400, 'InstallFinalize': 6600},
++}
+ 
+ 
+ def need(value, message):
+@@ -101,6 +124,7 @@
+     need(re.fullmatch(r'installer_lifecycle::(?:[a-z_][a-z_0-9]*::)+[a-z_][a-z_0-9]*', test), 'exact future cfg(test) name required')
+     need(re.fullmatch(r'[0-9a-f]{32}', nonce), 'nonce must be 32 lowercase hexadecimal characters')
+     path = PureWindowsPath(root)
++    need(root.isascii(), 'neutral-zero observer fixture requires an ASCII report path')
+     need(path.is_absolute() and re.fullmatch(r'[A-Za-z]:', path.drive) and '\\' in root
+          and path.name == 'FutureClassroom-r75-parent-observer-' + nonce and len(root.encode('utf-16-le')) <= 480, 'fixed owned Windows report root required')
+     need(root == str(path) and not any(c in root for c in '\x00\r\n\t"[]*?<>|/')
+@@ -136,13 +160,33 @@
+ 
+ def idt(raw, name):
+     need(len(raw) <= 1024 * 1024, 'IDT too large')
+-    lines = raw.decode('utf-8').splitlines()
++    need(raw.isascii() and b'\0' not in raw, 'ordinary neutral IDT must be ASCII without NUL')
++    lines = raw.decode('ascii').splitlines()
+     need(len(lines) >= 3 and lines[2].split('\t')[0] == name, 'IDT table header')
+     columns = lines[0].split('\t')
+-    need(len(set(columns)) == len(columns) and len(lines[1].split('\t')) == len(columns), 'IDT columns')
++    keys = lines[2].split('\t')[1:]
++    need(keys and len(set(keys)) == len(keys) and set(keys) <= set(columns)
++         and len(set(columns)) == len(columns) and len(lines[1].split('\t')) == len(columns), 'IDT columns/keys')
+     rows = [dict(zip(columns, line.split('\t'))) for line in lines[3:]]
+     need(all(len(line.split('\t')) == len(columns) for line in lines[3:]), 'IDT row width')
++    need(len({tuple(row[key] for key in keys) for row in rows}) == len(rows), 'duplicate IDT primary key')
+     return rows
++
++
++def force_codepage(raw):
++    # Exact actual libmsi virtual string-pool export, not an effects-table IDT.
++    need(raw == b'\r\n\r\n0\t_ForceCodepage\r\n\0', 'exact neutral-zero virtual metadata required')
++    return {'stringPoolCodepage': 0, 'kind': 'VIRTUAL_METADATA_NEUTRAL_ASCII', 'rawSha256': sha(raw)}
++
++
++def exported_tables(originals, listed):
++    need(len(listed) == len(set(listed)) and all(re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*', name) for name in listed), 'actual complete table listing required')
++    need('_ForceCodepage' in listed and '_ForceCodepage' in originals, 'actual virtual codepage export required')
++    codepage = force_codepage(originals['_ForceCodepage'])
++    need(all(raw.isascii() for raw in originals.values()), 'neutral observer IDTs must be entirely ASCII')
++    tables = {name: idt(raw, name) for name, raw in originals.items() if name != '_ForceCodepage'}
++    need(set(tables) == set(listed) - SYSTEM_TABLES - {'_ForceCodepage'}, 'all non-system actual tables must be exported')
++    return tables, codepage
+ 
+ 
+ def verify(tables, command):
+@@ -154,12 +198,27 @@
+                 {'Action': 'FcAbortBeforeInitialize', 'Type': '19', 'Source': '', 'Target': ABORT}]
+     need(sorted(tables['CustomAction'], key=lambda r: r['Action']) == sorted(expected, key=lambda r: r['Action']), 'exact Type2/19 actions required')
+     rows = tables['InstallExecuteSequence']
++    need(all(set(r) == {'Action', 'Condition', 'Sequence'} for r in rows), 'exact execute row schema required')
+     need(len({r['Action'] for r in rows}) == len(rows), 'duplicate execute action')
+     actions = {r['Action']: (r['Condition'], int(r['Sequence'])) for r in rows}
+     need(actions.get('FcObserveParent') == ('1', 1499) and actions.get('FcAbortBeforeInitialize') == ('1', 1500)
+          and actions.get('InstallInitialize') == ('', 1501), 'observer/abort/Initialize order differs')
+-    need(0 < actions['CostFinalize'][1] < actions['InstallValidate'][1] < 1499, 'directory costing/validation not before observer')
+-    need(all(r['Action'] not in {'FcObserveParent', 'FcAbortBeforeInitialize'} for r in tables.get('InstallUISequence', [])), 'observer must not run in UI sequence')
++    need({'CostFinalize', 'InstallValidate'} <= actions.keys()
++         and 0 < actions['CostFinalize'][1] < actions['InstallValidate'][1] < 1499, 'directory costing/validation not before observer')
++    for row in rows:
++        if row['Action'] in {'FcObserveParent', 'FcAbortBeforeInitialize'}:
++            continue  # Their exact condition/order was checked above.
++        action = row['Action']
++        condition = 'NOT Installed' if action == 'AllocateRegistrySpace' else ''
++        need(action in INSTALL_STANDARD and row['Sequence'] == str(INSTALL_STANDARD[action])
++             and row['Condition'] == condition, 'unknown/reordered/conditional execute action')
++    for name, allowed in AUXILIARY_STANDARD.items():
++        auxiliary = tables.get(name, [])
++        need(all(set(r) == {'Action', 'Condition', 'Sequence'} for r in auxiliary)
++             and len({r['Action'] for r in auxiliary}) == len(auxiliary), 'auxiliary row schema/duplicate')
++        for row in auxiliary:
++            need(row['Action'] in allowed and row['Condition'] == ''
++                 and row['Sequence'] == str(allowed[row['Action']]), 'unknown/reordered/conditional auxiliary action')
+     return {'status': 'PASS_EXPORTED_PROBE_TOPOLOGY_ONLY', 'observerRuntime': 'NOT_RUN', 'installation': 'EXPECTED_ABORT_NOT_INSTALL_SUCCESS'}
+ 
+ 
+@@ -214,10 +273,9 @@
+         print(json.dumps({'status': 'AUTHORING_ONLY_MSI_NOT_BUILT', 'observerSha256': sha(observer),
+                           'fixture': fixture_proof, 'observerRuntime': 'NOT_RUN'}))
+     else:
+-        tables = {p.stem: idt(read(p, 1024 * 1024), p.stem) for p in args.exports.glob('*.idt')}
+-        listed = read(args.tables_list, 64 * 1024).decode('utf-8').splitlines()
+-        need(len(listed) == len(set(listed)) and all(re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*', name) for name in listed), 'actual complete table listing required')
+-        need(set(tables) == set(listed) - SYSTEM_TABLES, 'all non-system actual tables must be exported')
++        originals = {p.stem: read(p, 1024 * 1024) for p in args.exports.glob('*.idt')}
++        listed = read(args.tables_list, 64 * 1024).decode('ascii').splitlines()
++        tables, codepage = exported_tables(originals, listed)
+         properties = {r['Property']: r['Value'] for r in tables['Property']}
+         need(properties['ProductCode'].strip('{}').upper() == str(uuid.uuid5(NAMESPACE, args.nonce + ':product')).upper()
+              and properties['UpgradeCode'].strip('{}').upper() == str(uuid.uuid5(NAMESPACE, args.nonce + ':family')).upper()
+@@ -225,7 +283,9 @@
+         extracted = read(args.extracted_observer)
+         fixture, _ = fixture_from_args(args)
+         need(extracted == fixture, 'actual Binary stream differs from exact GUI2 test fixture')
+-        print(json.dumps(verify(tables, command)))
++        result = verify(tables, command)
++        result['virtualMetadata'] = codepage
++        print(json.dumps(result))
+ 
+ 
+ if __name__ == '__main__':
+--- third/check-context-probe.py
++++ fourth/check-context-probe.py
+@@ -70,17 +70,88 @@
+         metadata['changedFields'].append({'name': 'CheckSum', 'offset': 216, 'beforeHex': '00000000', 'afterHex': '34120000'})
+         M['validate_fixture'](original, modified, metadata)
+ 
+-    def test_encoder_has_no_production_gate_or_payload(self):
+-        root = ET.fromstring(M['authoring'](TEST, REPORT, NONCE))
+-        ns = {'w': M['NS']}
+-        nodes = list(root.iter())
+-        self.assertFalse({'File', 'Component', 'RegistryValue', 'CreateFolder', 'MsiEmbeddedChainer'} & {p.tag.split('}')[-1] for p in nodes})
+-        actions = root.findall('w:Product/w:CustomAction', ns)
+-        self.assertEqual([p.get('Id') for p in actions], ['FcObserveParent', 'FcAbortBeforeInitialize'])
+-        self.assertEqual(actions[1].get('Error'), M['ABORT'])
+-        self.assertNotIn('Pending', ET.tostring(root).decode())
++    def test_exact_topology_model_has_no_production_gate_or_payload(self):
++        # Only in-memory IDT models here; no authoring function is invoked.
+         command, tables = model()
+         self.assertEqual(M['verify'](tables, command)['observerRuntime'], 'NOT_RUN')
++        self.assertFalse(M['FORBIDDEN'] & tables.keys())
++
++    def test_virtual_codepage_is_not_an_ordinary_or_effects_table(self):
++        raw = b'\r\n\r\n0\t_ForceCodepage\r\n\0'
++        self.assertEqual(M['force_codepage'](raw)['stringPoolCodepage'], 0)
++        for altered in (raw[:-1], raw + b'payload', raw.replace(b'0\t', b'1252\t'),
++                        raw.replace(b'\r\n', b'\n'), b'\r\n\r\n0\t_ForceCodepage\r\n\0\0',
++                        b'Codepage\nI2\n_ForceCodepage\tCodepage\n0\n'):
++            with self.subTest(raw=altered), self.assertRaises(ValueError):
++                M['force_codepage'](altered)
++        with self.assertRaises(ValueError):
++            M['idt'](raw, '_ForceCodepage')
++        command, tables = model()
++        tables['_ForceCodepage'] = [{'Action': 'WriteRegistryValues'}]
++        with self.assertRaises(ValueError):
++            M['verify'](tables, command)
++
++    def test_ascii_idt_keys_and_actual_export_membership_are_closed(self):
++        raw = b'Property\tValue\ns72\tl0\nProperty\tProperty\nX\t1\n'
++        codepage = b'\r\n\r\n0\t_ForceCodepage\r\n\0'
++        originals = {'Property': raw, '_ForceCodepage': codepage}
++        tables, metadata = M['exported_tables'](originals, ['Property', '_ForceCodepage'])
++        self.assertEqual(tables, {'Property': [{'Property': 'X', 'Value': '1'}]})
++        self.assertEqual(metadata['stringPoolCodepage'], 0)
++        for bad in (raw + b'X\t2\n', raw + b'Y\t1\textra\n', raw.replace(b'X\t1', b'X\t\0'),
++                    raw.replace(b'X\t1', 'X\t\u4e2d'.encode('utf-8'))):
++            with self.subTest(raw=bad), self.assertRaises(ValueError):
++                M['exported_tables']({'Property': bad, '_ForceCodepage': codepage}, ['Property', '_ForceCodepage'])
++        for changed, listed in [
++            ({'Property': raw}, ['Property', '_ForceCodepage']),
++            (originals, ['Property']),
++            (originals, ['Property', '_ForceCodepage', 'Property']),
++            (originals, ['Property', '_ForceCodepage', 'File']),
++            (dict(originals, Extra=raw.replace(b'Property', b'Extra')), ['Property', '_ForceCodepage']),
++        ]:
++            with self.subTest(listed=listed), self.assertRaises(ValueError):
++                M['exported_tables'](changed, listed)
++        with self.assertRaises(ValueError):
++            M['arguments'](TEST, REPORT.replace('Owned Space', '\u4e2d'), NONCE)
++
++    def test_auxiliary_admin_exception_is_exact_and_never_custom_execution(self):
++        command, tables = model()
++        admin = {'Action': 'InstallAdminPackage', 'Condition': '', 'Sequence': '3900'}
++        tables['AdminExecuteSequence'] = [admin]
++        M['verify'](tables, command)
++        for change in ('condition', 'sequence', 'main', 'ui', 'admin-ui', 'advt',
++                       'unknown-admin', 'duplicate', 'observer-admin', 'abort-admin', 'extra-column'):
++            changed = copy.deepcopy(tables)
++            if change == 'condition': changed['AdminExecuteSequence'][0]['Condition'] = 'NOT Installed'
++            if change == 'sequence': changed['AdminExecuteSequence'][0]['Sequence'] = '3901'
++            if change == 'main': changed['InstallExecuteSequence'].extend(changed.pop('AdminExecuteSequence'))
++            if change == 'ui': changed['InstallUISequence'] = changed.pop('AdminExecuteSequence')
++            if change == 'admin-ui': changed['AdminUISequence'] = changed.pop('AdminExecuteSequence')
++            if change == 'advt': changed['AdvtExecuteSequence'] = changed.pop('AdminExecuteSequence')
++            if change == 'unknown-admin': changed['AdminExecuteSequence'][0]['Action'] = 'ArbitraryAdminAction'
++            if change == 'duplicate': changed['AdminExecuteSequence'].append(dict(admin))
++            if change == 'observer-admin': changed['AdminExecuteSequence'][0]['Action'] = 'FcObserveParent'
++            if change == 'abort-admin': changed['AdminExecuteSequence'][0]['Action'] = 'FcAbortBeforeInitialize'
++            if change == 'extra-column': changed['AdminExecuteSequence'][0]['Extra'] = 'ignored'
++            with self.subTest(change=change), self.assertRaises(ValueError):
++                M['verify'](changed, command)
++        for table in M['AUXILIARY_STANDARD']:
++            for action, sequence in M['AUXILIARY_STANDARD'][table].items():
++                accepted = copy.deepcopy(tables)
++                accepted[table] = [{'Action': action, 'Condition': '', 'Sequence': str(sequence)}]
++                M['verify'](accepted, command)
++                for field, value in [('Condition', 'NOT Installed'), ('Sequence', str(sequence + 1))]:
++                    rejected = copy.deepcopy(accepted)
++                    rejected[table][0][field] = value
++                    with self.subTest(table=table, action=action, field=field), self.assertRaises(ValueError):
++                        M['verify'](rejected, command)
++        for action, condition, sequence in [('CostFinalize', '', '999'), ('InstallAdminPackage', '', '3900'),
++                                             ('ArbitraryAction', '', '1498')]:
++            rejected = copy.deepcopy(tables)
++            rejected['InstallExecuteSequence'] = [r for r in rejected['InstallExecuteSequence'] if r['Action'] != action]
++            rejected['InstallExecuteSequence'].append({'Action': action, 'Condition': condition, 'Sequence': sequence})
++            with self.subTest(action=action), self.assertRaises(ValueError):
++                M['verify'](rejected, command)
+ 
+     def test_closed_argv_rejects_aliases_and_formatted_paths(self):
+         for root in ('\\\\server\\share\\' + REPORT.split('\\')[-1], REPORT + '\\', REPORT.replace('Owned Space', '[TARGETDIR]'),
+--- third/README.md
++++ fourth/README.md
+@@ -1,6 +1,6 @@
+-# R75 quiet MSI parent-context observer v3: base plus candidate source bindings
++# R75 parent-context observer checker v4: exact neutral metadata and standard sequence rows
+ 
+-Root approved a dedicated GUI2 test-fixture clone to avoid a CUI console flash. At this preparation point root has not generated that clone or executed it. This tool never creates/patches a PE or builds/runs an MSI. N has supplied the cfg(test)-only observer source with exact test name `installer_lifecycle::native::broker::context_probe::engine_parent_context_observer`; actual compilation/runtime remains separate. The original 22 CUI test artifacts, two GUI normal products, normal helper arguments and build targets remain unchanged. All first/second-version files are retained unchanged in sibling preparation directories.
++Root approved a dedicated GUI2 test-fixture clone to avoid a CUI console flash. This preparation does not create a clone, author/build an MSI, execute a fixture, or make a claim about separate root operations. This tool never creates/patches a PE or builds/runs an MSI. N has supplied the cfg(test)-only observer source with exact test name `installer_lifecycle::native::broker::context_probe::engine_parent_context_observer`; actual root-produced compilation/CLI/runtime evidence remains separate from these pure checker contracts. The original 22 CUI test artifacts, two GUI normal products, normal helper arguments and build targets remain unchanged. All first/second-version files are retained unchanged in sibling preparation directories.
+ 
+ `context-probe.py ... describe` encodes the proposed argv. The full actual test name is supplied explicitly; the example name in `check-context-probe.py` remains a nonexistent pure-model name. The only metadata carrier is a closed `--skip` token, not an inherited environment variable:
+ 
+@@ -40,3 +40,18 @@
+ The bytes/offset above are placeholders, not actual identities. Optional CheckSum is the second changedFields row with exactly name/offset/beforeHex/afterHex. The helper checks explicit ledger SHA plus full source/clone hashes and all bytes, so the placeholder values cannot be accepted. `describe` now returns the marker with a real LF character, matching N's exact marker bytes; the prior display used a literal backslash-n. This correction does not write or authorize a marker. N's observer writes bounded create-new `context.json` (8192-byte maximum) only after independently checking the marked, non-reparse owned root.
+ 
+ Version3 source-label correction: the first R75 observer can come from uncommitted candidate sources (Git base plus the frozen changes), so sourceGitBase is only the 40hex baseline, not a claim that this commit contains the compiled candidate. The distinct 64hex candidateSourceProducerSha256 and candidateSourceFreezeSha256 bind those original reports. The validator checks these field formats and carries them through; root separately reopens the actual producer, freeze and complete input list to prove the original test artifact belongs to that exact candidate. No fabricated sourceGitSha field is accepted. Pure-model hexadecimal values in the tests are placeholders, not real producer/freezes or actual source identities. Full source/clone bytes, Cargo test-artifact SHA and header-only clone checks are unchanged.
++
++
++Version4 is a new independent directory; all third-version files remain byte-identical. It corrects two bounded checker interfaces observed in the separate registry-only fixture, without changing the frozen candidate sources:
++
++- `_ForceCodepage` must be present in the actual table list and its separate export. Only the exact bytes `\r\n\r\n0\t_ForceCodepage\r\n\0` are accepted. It is virtual neutral string-pool metadata, not an ordinary three-header IDT and not an effects-table allowlist entry. Ordinary IDTs must be ASCII with no NUL, valid unique primary keys, complete actual membership, and finite size. The neutral-zero observer fixture therefore requires an ASCII report path; this is a fixture encoding boundary, not a product Unicode restriction.
++- Standard execution rows have exact action/condition/sequence values. The Type2 observer remains unconditional1499, Type19 remains unconditional1500, and normal InstallInitialize remains1501. Auxiliary UI/Admin/Advt rows each have a separate finite standard-action map, blank conditions and canonical fixed sequence strings. The administrative exception is only `AdminExecuteSequence / InstallAdminPackage / empty condition / 3900`; it cannot migrate into the normal/UI/advt sequence or authorize an arbitrary administrative action. Duplicate rows, custom observer/abort rows in auxiliary tables, reordering and conditional variants fail.
++
++These administrative rows are checked as exporter metadata only. Root's authorized execution route remains quiet normal `/i` with the deliberate Type19 abort before normal initialization. This preparation does not authorize `/a`, advertisement, full UI, or claim that arbitrary modes are side-effect free. The forbidden File/Component/Registry/Run/chainer and other effects-table constraints remain in force; unknown nonempty tables fail. Original GUI-clone bytes/Cargo-test-role/candidate-producer/freeze/SHA/actual-CLI-proof checks are preserved.
++
++The pure tests use byte dictionaries and in-memory PE structural models only. They do not invoke `authoring`, the author/check-export CLI, any subprocess, network, Cargo, Windows, or actual executable/MSI. They test both a narrowly accepted metadata model and its malformed alternatives; they are not actual MSI export/runtime evidence.
++
++Two production premises remain unchanged and await actual independent OS/API evidence:
++
++1. `native/broker.rs::Session::engine` requires the actual pinned immediate parent to be the trusted Windows msiexec image, opened only with limited-query/synchronize, and its real process TOKEN_USER SID to equal the helper SID. Same image/packet/public property does not substitute for this. Observer success means facts were recorded, not that this production premise is true. Standard-user/elevation contexts remain separate; access-denied is recorded, not solved by adding privileges or weakening SID checks.
++2. `effects.rs::exact_component_key_path` still accepts only the original exact `01:\Software\FutureClassroom\Installer\Components\<GUID>` value keypath. The literal01 versus21 return format on the actual x86 process/OS/32-bit registry component is not pre-decided here. Root's separate nonce-owned registry-only MSI must obtain the actual MsiGetComponentPathEx return and formally uninstall; no prefix widening or product Commit is implied by this checker preparation.

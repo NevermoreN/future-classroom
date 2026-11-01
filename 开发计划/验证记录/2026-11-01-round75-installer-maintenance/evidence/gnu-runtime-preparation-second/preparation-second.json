@@ -1,0 +1,212 @@
+{
+  "status": "PASS_AST_CONTRACTS_AND_ACTUAL_COMPLETED_PRODUCER_DRYRUN_ONLY_NOT_RUNTIME",
+  "windowsExecuted": false,
+  "cargoExecuted": false,
+  "sourceChanged": false,
+  "sourceGuardCount": 8,
+  "sources": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 41207,
+      "sha256": "9fc3247c353b4a20b689b0611e4ca7b08994a9ef09bf360936581522ca1fc091"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/packaging/MSI-CANDIDATE.md",
+      "bytes": 14564,
+      "sha256": "9efa5656201a962705536316cc374b4d47d37e74c8d5e981576ad655e79d0d17"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/check-msi-candidate.py",
+      "bytes": 35469,
+      "sha256": "d23f912eecdb556352c8ebd97796ad1de2d86f1185e0c5feb2c29a11f53329d1"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/package-msi-candidate.py",
+      "bytes": 58160,
+      "sha256": "d0fbb23a5dab2d3329e935110265609ea53674b31896102d1139e21cee193059"
+    }
+  ],
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/check-contracts-second.py"
+      ],
+      "pid": 21187,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.16444958792999387,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/contracts-second.stdout.log",
+        "bytes": 777,
+        "sha256": "9c90dadafc78523dead97d5ef40de68f1d3e6247c207fade2b67ac1c95a0dad2"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/contracts-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "contractCount": 15,
+  "dryrunTerminal": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/actual-dryrun-second.terminal.json",
+    "bytes": 1382,
+    "sha256": "09dc83932491a4623eb02decbe041adf89f4c720743324cbc1d6be8940269c46"
+  },
+  "dryrunOutput": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/actual-dryrun-second.stdout.log",
+    "bytes": 1458,
+    "sha256": "06006eb3fb806c0255d341db4567e651af6363ee48eb723b1b03dd449eb6a578"
+  },
+  "actualInputs": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n-release-third.json",
+      "bytes": 27199,
+      "sha256": "c2097456ca15a57699c6e297f5f0cf772b42ef1397c368a51733405831fc6414"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/n-producer-terminal-third.json",
+      "bytes": 4416,
+      "sha256": "b3375911924b609b9b71af0a76f8fc214f544364faf6b97ca6ec4fc0b9f6f01c"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-n3-codegen-source-freeze-first.json",
+      "bytes": 1531,
+      "sha256": "1b06ce58b408707b76108a367a0a81a1fbda6e20f068b22b3e5fbcaae9392700"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-joint-source-freeze-fourth.json",
+      "bytes": 2008,
+      "sha256": "d5d22e44e81e8f15c9ffb956d89a81f56be29d4e63a02e2dba7a1ab4b47e9590"
+    }
+  ],
+  "files": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/.owner",
+      "bytes": 61,
+      "sha256": "d27e267c1f69c9b918e5dbb64330b1ac952b68f57bfeddabaac38ccdb1812bc4"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/README.md",
+      "bytes": 2721,
+      "sha256": "9a88fb44eb15617893a5aa43d6c0482407d346722c52814b23874a248472563c"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/actual-dryrun-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/actual-dryrun-second.stdout.log",
+      "bytes": 1458,
+      "sha256": "06006eb3fb806c0255d341db4567e651af6363ee48eb723b1b03dd449eb6a578"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/actual-dryrun-second.terminal.json",
+      "bytes": 1382,
+      "sha256": "09dc83932491a4623eb02decbe041adf89f4c720743324cbc1d6be8940269c46"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/check-contracts-second.py",
+      "bytes": 4411,
+      "sha256": "6a80794775f35be762a56ef8a55005f8567cf2fe4ef718046bf52ce5a8b66d44"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/command-second.json",
+      "bytes": 2626,
+      "sha256": "2d321d49b701bb301f0dca754ec10dde0d9fa4015109d5ea40b606b991a6af54"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/contracts-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/contracts-second.stdout.log",
+      "bytes": 777,
+      "sha256": "9c90dadafc78523dead97d5ef40de68f1d3e6247c207fade2b67ac1c95a0dad2"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/nonterminal-model.json",
+      "bytes": 21,
+      "sha256": "67c6a581a978ab1f27ba6bb3fb93c52dc991d8c9c8795c2d54ffeb70e75d7130"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/parse-native-children-second.py",
+      "bytes": 3515,
+      "sha256": "958235c3cec106acf0822f7a67144ce2caf946f9174cec11a9bb71d3ce905e18"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/parse-native-children-second.py.diff",
+      "bytes": 1172,
+      "sha256": "89639690413d3a9e43a7a8014ed3c3aef9f97398a7a7124571dd52abf3d28dd1"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/prepared-implementation-second.json",
+      "bytes": 573,
+      "sha256": "997142934925063af1f75d6e3d1e18586cdbf9234a315b6441c775425885a9bf"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/run-gnu-win11-second.py",
+      "bytes": 17507,
+      "sha256": "4953328d2c60b585052f658001fb7597ed10871e51603b8b3631e9135c5bc70d"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/run-gnu-win11-second.py.diff",
+      "bytes": 6693,
+      "sha256": "2f10eb2ce7c2b46c17f56aca1c91238555bcf672260842397f2f84af270c8f2e"
+    }
+  ],
+  "actualWindowsCommand": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/run-gnu-win11-second.py",
+    "--producer-report",
+    "/tmp/fc-round75-installer-maintenance/evidence/n-release-third.json",
+    "--producer-report-sha256",
+    "c2097456ca15a57699c6e297f5f0cf772b42ef1397c368a51733405831fc6414",
+    "--producer-terminal-report",
+    "/tmp/fc-round75-installer-maintenance/evidence/n-producer-terminal-third.json",
+    "--producer-terminal-report-sha256",
+    "b3375911924b609b9b71af0a76f8fc214f544364faf6b97ca6ec4fc0b9f6f01c",
+    "--freeze",
+    "/tmp/fc-round75-installer-maintenance/evidence/root-n3-codegen-source-freeze-first.json",
+    "--freeze-sha256",
+    "1b06ce58b408707b76108a367a0a81a1fbda6e20f068b22b3e5fbcaae9392700",
+    "--joint-freeze",
+    "/tmp/fc-round75-installer-maintenance/evidence/root-joint-source-freeze-fourth.json",
+    "--joint-freeze-sha256",
+    "d5d22e44e81e8f15c9ffb956d89a81f56be29d4e63a02e2dba7a1ab4b47e9590",
+    "--source-git-base",
+    "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "--report",
+    "/tmp/fc-round75-installer-maintenance/evidence/root-windows-gnu-full-second.json",
+    "--operation",
+    "/tmp/fc-round75-installer-maintenance/evidence/root-windows-gnu-full-second.operation.json",
+    "--execute"
+  ],
+  "scope": "Prepared GNU22 actual-source/artifact identity admission. Normal helper pinned NOT_RUN. Historical raw parser vectors and one synthetic RUNNING-WAIT model are not new runtime evidence."
+}

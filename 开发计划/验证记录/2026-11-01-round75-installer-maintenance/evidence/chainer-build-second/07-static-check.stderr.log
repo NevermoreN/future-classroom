@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/chainer-probe.py", line 166, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/chainer-probe.py", line 162, in main
+    result=verify(tables,v)
+           ^^^^^^^^^^^^^^^^
+  File "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/chainer-probe.py", line 117, in verify
+    need(tables['Directory']==[{'Directory':'TARGETDIR','Directory_Parent':'','DefaultDir':'SourceDir'},{'Directory':'LocalAppDataFolder','Directory_Parent':'TARGETDIR','DefaultDir':'.'}],'exact registry component directory only')
+  File "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/chainer-probe.py", line 30, in need
+    if not v: raise ValueError(m)
+              ^^^^^^^^^^^^^^^^^^^
+ValueError: exact registry component directory only

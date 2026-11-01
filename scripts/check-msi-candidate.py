@@ -245,6 +245,28 @@ class Inputs(unittest.TestCase):
 
 
 class AuthoredContract(unittest.TestCase):
+    def test_explicit_lifecycle_import_preserves_final_contract(self):
+        summary, tables, version, payloads = compiled_contract_model()
+        before = M["verify_msi_contract"](summary, tables, version, payloads)
+        standard = [row for row in M["idt_rows"](tables["InstallExecuteSequence"], "InstallExecuteSequence")
+                    if row["Action"] not in M["LIFECYCLE_ACTIONS"]]
+        intermediate = export_table("InstallExecuteSequence", ["Action", "Condition", "Sequence"],
+                                    [[row[key] for key in ("Action", "Condition", "Sequence")] for row in standard])
+        imported = M["lifecycle_execute_sequence_idt"](intermediate)
+        self.assertEqual(M["idt_rows"](imported, "InstallExecuteSequence")[:len(standard)], standard)
+        tables["InstallExecuteSequence"] = imported
+        tables["CustomAction"] = M["lifecycle_custom_action_idt"]()
+        self.assertEqual(M["verify_msi_contract"](summary, tables, version, payloads), before)
+        with self.assertRaises(ValueError):
+            M["lifecycle_execute_sequence_idt"](imported)
+        bad = intermediate.replace(b"CostFinalize\t\t1000", b"CostFinalize\t\t1499")
+        with self.assertRaises(ValueError):
+            M["lifecycle_execute_sequence_idt"](bad)
+        empty = b"Action\tType\tSource\tTarget\tExtendedType\ns72\ti2\tS72\tS255\tI4\nCustomAction\tAction\n"
+        tables["CustomAction"] = empty
+        with self.assertRaises(ValueError):
+            M["verify_msi_contract"](summary, tables, version, payloads)
+
     def test_resolved_fixed_file_fact_has_no_quoted_trailing_slash(self):
         directory = "C:\\Owned Classroom\\FutureClassroom\\"
         target = M["LIFECYCLE_ACTIONS"]["FcBeginGate"][1]
@@ -427,6 +449,46 @@ class AuthoredContract(unittest.TestCase):
             with self.subTest(data=data), self.assertRaises(ValueError):
                 M["verify_transaction_sequence"](data)
 
+    def test_maintenance_cannot_skip_hooks_or_supply_operation_authority(self):
+        summary, tables, version, payloads = compiled_contract_model()
+        # Each hook must run on fresh, cached maintenance and removal routes.
+        # These are table/encoder negatives, not simulated MSI executions.
+        for hook in ("FcBeginGate", "FcRollbackNotify", "FcCommitNotify"):
+            for condition in ("NOT Installed", "Installed", 'REMOVE = "ALL"', "REINSTALL", "PUBLIC_MAINTENANCE_ACK"):
+                changed = dict(tables)
+                old = (hook + "\t1\t").encode()
+                self.assertIn(old, changed["InstallExecuteSequence"])
+                changed["InstallExecuteSequence"] = changed["InstallExecuteSequence"].replace(old, (hook + "\t" + condition + "\t").encode())
+                with self.subTest(hook=hook, condition=condition), self.assertRaises(ValueError):
+                    M["verify_msi_contract"](summary, changed, version, payloads)
+        for old, new in [(b'begin "[FcInstallDir]fc-bootstrap.exe"', b'begin repair "[FcInstallDir]fc-bootstrap.exe"'),
+                         (b'begin "[FcInstallDir]fc-bootstrap.exe"', b'begin "[TARGETDIR]fc-bootstrap.exe"'),
+                         (b'\trollback\n', b'\trollback effects_reconciled=true\n'),
+                         (b'\tcommit\n', b'\tcommit uninstall=true\n')]:
+            changed = dict(tables)
+            self.assertIn(old, changed["CustomAction"])
+            changed["CustomAction"] = changed["CustomAction"].replace(old, new)
+            with self.subTest(target=new), self.assertRaises(ValueError):
+                M["verify_msi_contract"](summary, changed, version, payloads)
+        changed = dict(tables)
+        changed["Property"] += b"FC_MAINTENANCE_APPROVED\t1\n"
+        with self.assertRaises(ValueError):
+            M["verify_msi_contract"](summary, changed, version, payloads)
+
+    def test_inspected_candidate_capabilities_do_not_claim_runtime_acceptance(self):
+        summary, tables, version, payloads = compiled_contract_model()
+        inspected = M["verify_msi_contract"](summary, tables, version, payloads)
+        capabilities = inspected["lifecycle_capabilities"]
+        self.assertEqual(inspected["status"], "PASS")  # Table inspection only.
+        self.assertEqual(capabilities["runtime_validation"], "NOT_RUN")
+        self.assertEqual(capabilities["candidate_paths"], ["fresh_install", "healthy_same_manifest_version_reapplication", "formal_uninstall", "known_rollback"])
+        self.assertEqual(capabilities["unsupported"], ["damaged_repair", "different_manifest_or_version", "major_upgrade", "run_cleanup"])
+        self.assertIn("ABSENT_ONLY", capabilities["run_policy"])
+        self.assertIn("NOT_REMOVE_INSTALLED_OR_CLI_AUTHORITY", capabilities["admission"])
+        # No caller can turn a returned description into later packaging claims.
+        capabilities["runtime_validation"] = "PASS"
+        self.assertEqual(M["lifecycle_capabilities"]()["runtime_validation"], "NOT_RUN")
+
     def test_component_identity_survives_payload_reordering_and_version_change(self):
         self.assertEqual(M["component_code"]("web/index.html"), M["component_code"]("WEB/INDEX.HTML"))
         self.assertNotEqual(M["component_code"]("web/index.html"), M["component_code"]("LICENSE"))
@@ -457,8 +519,11 @@ class AuthoredContract(unittest.TestCase):
         self.assertNotIn(b"Schedule=", raw)
         self.assertEqual(root.find("w:Product/w:InstallExecuteSequence/w:RemoveExistingProducts", ns).attrib, {"After": "InstallExecute"})
         self.assertEqual([node.get("Id") for node in root.findall("w:Product/w:Binary", ns)], ["FcLifecycleHelper"])
-        self.assertEqual({node.get("Id"): node.get("ExeCommand") for node in root.findall("w:Product/w:CustomAction", ns)},
-                         {"FcBeginGate": 'begin "[FcInstallDir]fc-bootstrap.exe"', "FcRollbackNotify": "rollback", "FcCommitNotify": "commit"})
+        self.assertEqual(root.findall("w:Product/w:CustomAction", ns), [])
+        self.assertEqual(root.findall("w:Product/w:InstallExecuteSequence/w:Custom", ns), [])
+        self.assertEqual(M["idt_rows"](M["lifecycle_custom_action_idt"](), "CustomAction"), [
+            {"Action": name, "Type": str(kind), "Source": M["HELPER_BINARY"], "Target": target}
+            for name, (kind, target, _) in M["LIFECYCLE_ACTIONS"].items()])
         directories = {node.get("Id"): node for node in root.findall(".//w:Directory", ns)}
         self.assertEqual(directories["FcInstallDir"].get("Name"), "FutureClassroom")
         self.assertIn(directories["FcInstallDir"], list(directories["UserPrograms"]))

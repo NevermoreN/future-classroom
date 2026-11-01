@@ -1,0 +1,45 @@
+--- B3/scripts/check-msi-candidate.py
++++ B4/scripts/check-msi-candidate.py
+@@ -245,6 +245,28 @@
+ 
+ 
+ class AuthoredContract(unittest.TestCase):
++    def test_explicit_lifecycle_import_preserves_final_contract(self):
++        summary, tables, version, payloads = compiled_contract_model()
++        before = M["verify_msi_contract"](summary, tables, version, payloads)
++        standard = [row for row in M["idt_rows"](tables["InstallExecuteSequence"], "InstallExecuteSequence")
++                    if row["Action"] not in M["LIFECYCLE_ACTIONS"]]
++        intermediate = export_table("InstallExecuteSequence", ["Action", "Condition", "Sequence"],
++                                    [[row[key] for key in ("Action", "Condition", "Sequence")] for row in standard])
++        imported = M["lifecycle_execute_sequence_idt"](intermediate)
++        self.assertEqual(M["idt_rows"](imported, "InstallExecuteSequence")[:len(standard)], standard)
++        tables["InstallExecuteSequence"] = imported
++        tables["CustomAction"] = M["lifecycle_custom_action_idt"]()
++        self.assertEqual(M["verify_msi_contract"](summary, tables, version, payloads), before)
++        with self.assertRaises(ValueError):
++            M["lifecycle_execute_sequence_idt"](imported)
++        bad = intermediate.replace(b"CostFinalize\t\t1000", b"CostFinalize\t\t1499")
++        with self.assertRaises(ValueError):
++            M["lifecycle_execute_sequence_idt"](bad)
++        empty = b"Action\tType\tSource\tTarget\tExtendedType\ns72\ti2\tS72\tS255\tI4\nCustomAction\tAction\n"
++        tables["CustomAction"] = empty
++        with self.assertRaises(ValueError):
++            M["verify_msi_contract"](summary, tables, version, payloads)
++
+     def test_resolved_fixed_file_fact_has_no_quoted_trailing_slash(self):
+         directory = "C:\\Owned Classroom\\FutureClassroom\\"
+         target = M["LIFECYCLE_ACTIONS"]["FcBeginGate"][1]
+@@ -497,8 +519,11 @@
+         self.assertNotIn(b"Schedule=", raw)
+         self.assertEqual(root.find("w:Product/w:InstallExecuteSequence/w:RemoveExistingProducts", ns).attrib, {"After": "InstallExecute"})
+         self.assertEqual([node.get("Id") for node in root.findall("w:Product/w:Binary", ns)], ["FcLifecycleHelper"])
+-        self.assertEqual({node.get("Id"): node.get("ExeCommand") for node in root.findall("w:Product/w:CustomAction", ns)},
+-                         {"FcBeginGate": 'begin "[FcInstallDir]fc-bootstrap.exe"', "FcRollbackNotify": "rollback", "FcCommitNotify": "commit"})
++        self.assertEqual(root.findall("w:Product/w:CustomAction", ns), [])
++        self.assertEqual(root.findall("w:Product/w:InstallExecuteSequence/w:Custom", ns), [])
++        self.assertEqual(M["idt_rows"](M["lifecycle_custom_action_idt"](), "CustomAction"), [
++            {"Action": name, "Type": str(kind), "Source": M["HELPER_BINARY"], "Target": target}
++            for name, (kind, target, _) in M["LIFECYCLE_ACTIONS"].items()])
+         directories = {node.get("Id"): node for node in root.findall(".//w:Directory", ns)}
+         self.assertEqual(directories["FcInstallDir"].get("Name"), "FutureClassroom")
+         self.assertIn(directories["FcInstallDir"], list(directories["UserPrograms"]))

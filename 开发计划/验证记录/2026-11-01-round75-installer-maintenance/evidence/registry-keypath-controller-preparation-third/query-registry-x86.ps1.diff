@@ -1,0 +1,34 @@
+--- /tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-second/query-registry-x86.ps1
++++ /tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-third/query-registry-x86.ps1
+@@ -54,6 +54,18 @@
+     [DllImport("msi.dll", CharSet=CharSet.Unicode, ExactSpelling=true)]
+     public static extern uint MsiGetProductInfoExW(string product, string sid, uint context,
+         string property, StringBuilder value, ref uint capacity);
++    // PowerShell-to-managed string binding is not the native NULL boundary.
++    // The managed wrapper chooses the literal NULL required for MACHINE (4).
++    public static int ComponentPath(string product, string component, string sid,
++        uint context, StringBuilder path, ref uint capacity) {
++        return MsiGetComponentPathExW(product, component, context == 4 ? null : sid,
++            context, path, ref capacity);
++    }
++    public static uint ProductInfo(string product, string sid, uint context,
++        string property, StringBuilder value, ref uint capacity) {
++        return MsiGetProductInfoExW(product, context == 4 ? null : sid,
++            context, property, value, ref capacity);
++    }
+     [DllImport("msi.dll", CharSet=CharSet.Unicode, ExactSpelling=true)]
+     public static extern uint MsiEnumRelatedProductsW(string family, uint reserved, uint index,
+         StringBuilder product);
+@@ -70,10 +82,10 @@
+         $sid = if ($context -eq 4) { $null } else { $currentSid }
+         $path = New-Object Text.StringBuilder 4096
+         [uint32]$pathCapacity = 4096
+-        $state = [R75RegistryKeypathQuery]::MsiGetComponentPathExW($spec.productCode, $spec.componentCode, $sid, $context, $path, [ref]$pathCapacity)
++        $state = [R75RegistryKeypathQuery]::ComponentPath($spec.productCode, $spec.componentCode, $sid, $context, $path, [ref]$pathCapacity)
+         $version = New-Object Text.StringBuilder 4096
+         [uint32]$versionCapacity = 4096
+-        $code = [R75RegistryKeypathQuery]::MsiGetProductInfoExW($spec.productCode, $sid, $context, 'VersionString', $version, [ref]$versionCapacity)
++        $code = [R75RegistryKeypathQuery]::ProductInfo($spec.productCode, $sid, $context, 'VersionString', $version, [ref]$versionCapacity)
+         $raw = $path.ToString()
+         $report.queries += [ordered]@{ context=$context; componentState=$state; componentPath=$raw;
+             componentPathUtf16Hex=([BitConverter]::ToString([Text.Encoding]::Unicode.GetBytes($raw))).Replace('-','');

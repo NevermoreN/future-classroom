@@ -1,0 +1,894 @@
+{
+  "status": "FAIL_LOCAL_FIXTURE_BUILD_OR_TABLES",
+  "scope": "Independent synthetic registry-only metadata fixture. No Windows/MSI install, production gate/Run or normal product action.",
+  "nonce": "ae966fa5484f4235b154b7b874ff728f",
+  "directory": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+  "sourceBefore": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 55135,
+      "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 33752,
+      "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 13778,
+      "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    }
+  ],
+  "startedUtc": "2026-11-01T12:31:50.357225+00:00",
+  "commands": [
+    {
+      "name": "author",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-fixture-preparation-first/registry-fixture.py",
+        "--nonce",
+        "ae966fa5484f4235b154b7b874ff728f",
+        "author",
+        "--output-dir",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.06718598399311304,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-author-first.stdout.log",
+        "bytes": 624,
+        "sha256": "4a61c9387f71ceb1d4fddeb8e834ba18ca3b2a70a6a15e492574be9be59a4288"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-author-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "build",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/wrappers/wixl",
+        "-a",
+        "x86",
+        "-o",
+        "fixture.msi",
+        "fixture.wxs"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.19474622095003724,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-build-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-build-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "tables",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "tables",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005445773946121335,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-tables-first.stdout.log",
+        "bytes": 402,
+        "sha256": "8f0a9337f8a8277a362d5d41c81ade3b54fb4739b44e52531f6327c73eb8bbc6"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-tables-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "summary",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "suminfo",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004220973001793027,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-summary-first.stdout.log",
+        "bytes": 490,
+        "sha256": "caa0512ceb0161d317bb22e9d03962158a193c8f66e8e35792abbe5da20deca7"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-summary-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-AdminUISequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "AdminUISequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005623901030048728,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-AdminUISequence-first.stdout.log",
+        "bytes": 141,
+        "sha256": "566f9c9710b1f128f4ff183d756546e5a78a7ac3ee66f8c3836876e0d2fe52e8"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-AdminUISequence-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Media",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Media"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0061340429820120335,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Media-first.stdout.log",
+        "bytes": 97,
+        "sha256": "758fecf78bf246c2f555f0d2323b7564854bb419d8cf9f403fd356e759f287bc"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Media-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Error",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Error"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004699663026258349,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Error-first.stdout.log",
+        "bytes": 35,
+        "sha256": "5e2d23423ce8d0ddd97885c69b67b6d208a6604a18551bfa0f5dd68b36ff7f67"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Error-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-ServiceInstall",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "ServiceInstall"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.00645001488737762,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-ServiceInstall-first.stdout.log",
+        "bytes": 237,
+        "sha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-ServiceInstall-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-AppSearch",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "AppSearch"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004842620110139251,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-AppSearch-first.stdout.log",
+        "bytes": 61,
+        "sha256": "440f3a84ea50cc08e880a610578ec22dd5cbca6e2bea6bd2c59b8fabeb36628f"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-AppSearch-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Property",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Property"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005241435021162033,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Property-first.stdout.log",
+        "bytes": 327,
+        "sha256": "5ab6ac346551273a232348e30dd15b85677fcdeb1d4421abbbe333c30f2e2881"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Property-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Upgrade",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Upgrade"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0054176130797713995,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Upgrade-first.stdout.log",
+        "bytes": 170,
+        "sha256": "15c8dada7914dbfbd1aaa781c290689a5ad16c7adbf8cbe11f42547792b0eca4"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Upgrade-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Shortcut",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Shortcut"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0054146230686455965,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Shortcut-first.stdout.log",
+        "bytes": 269,
+        "sha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Shortcut-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-InstallExecuteSequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "InstallExecuteSequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004628540016710758,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-InstallExecuteSequence-first.stdout.log",
+        "bytes": 438,
+        "sha256": "0626b686d8ba5273e427e3404026a6fa24bcc845ddea5da8561e0f789897c924"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-InstallExecuteSequence-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Registry",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Registry"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005155052058398724,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Registry-first.stdout.log",
+        "bytes": 211,
+        "sha256": "a782b3d2be03f877adb30b2e2534c0a9ec47d2ef2d965f2697d9acc9c0a359c9"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Registry-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-AdvtExecuteSequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "AdvtExecuteSequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004729484906420112,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-AdvtExecuteSequence-first.stdout.log",
+        "bytes": 225,
+        "sha256": "c1986ae62815d6be46e6f3e314c0a803dac5bb01633af74a5f67f8dfc37b679d"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-AdvtExecuteSequence-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-ActionText",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "ActionText"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004604538902640343,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-ActionText-first.stdout.log",
+        "bytes": 63,
+        "sha256": "08aff05632a6967c81c3af4c3ac120a0cff73275d34478cfd3c964a558962874"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-ActionText-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-FeatureComponents",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "FeatureComponents"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0045706480741500854,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-FeatureComponents-first.stdout.log",
+        "bytes": 100,
+        "sha256": "7f6978aa1680ac43004767f5ba8cbd8e4b46a6049951428805fd6bc397cdd64d"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-FeatureComponents-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-File",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "File"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004943273961544037,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-File-first.stdout.log",
+        "bytes": 114,
+        "sha256": "4f1937086fda8b92caed35986d5fc5f8cc57ddbb8c5f8d67a1fc7eabde52ffdd"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-File-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Directory",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Directory"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005223555024713278,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Directory-first.stdout.log",
+        "bytes": 128,
+        "sha256": "610c16251708d21eb12701310a9f525839d03b5d1193cad75a6645f7cfeb0daf"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Directory-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-IniFile",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "IniFile"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005173973040655255,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-IniFile-first.stdout.log",
+        "bytes": 119,
+        "sha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-IniFile-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-RemoveFile",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "RemoveFile"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004869269905611873,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-RemoveFile-first.stdout.log",
+        "bytes": 94,
+        "sha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-RemoveFile-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-RemoveIniFile",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "RemoveIniFile"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004734675167128444,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-RemoveIniFile-first.stdout.log",
+        "bytes": 137,
+        "sha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-RemoveIniFile-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-LaunchCondition",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "LaunchCondition"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004693432943895459,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-LaunchCondition-first.stdout.log",
+        "bytes": 214,
+        "sha256": "44db612b6b7a27d73af85f83b842af2bb59df167cde16c06266b02bed4a5865f"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-LaunchCondition-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Signature",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Signature"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.00497717410326004,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Signature-first.stdout.log",
+        "bytes": 140,
+        "sha256": "6e67486347b1205abb48db183d8ace73c4514504aad2cd4507a5c3658b04db18"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Signature-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-InstallUISequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "InstallUISequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.00468091294169426,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-InstallUISequence-first.stdout.log",
+        "bytes": 190,
+        "sha256": "6addaff4c25d625c879c9c4d26da415fcf5e6c01fe27a507af48656f50c31b92"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-InstallUISequence-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Component",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Component"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005195874022319913,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Component-first.stdout.log",
+        "bytes": 200,
+        "sha256": "b30c6665c83d9974767a41e6662ade6213d0073925ff05cd6cb0a4906788de00"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Component-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-ServiceControl",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "ServiceControl"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0067645590752363205,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-ServiceControl-first.stdout.log",
+        "bytes": 109,
+        "sha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-ServiceControl-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Feature",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Feature"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005203544162213802,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Feature-first.stdout.log",
+        "bytes": 174,
+        "sha256": "25ee9b2ee130b5e09ee1851d5ec7bddf023f73a709fded26b948e9cbabe68dde"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Feature-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Binary",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Binary"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004565298091620207,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Binary-first.stdout.log",
+        "bytes": 32,
+        "sha256": "72350f3075baa2b388d483caf1bf3583074e89105bd7bdfdce515d155d8e77e0"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Binary-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-CustomAction",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "CustomAction"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0059494448360055685,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-CustomAction-first.stdout.log",
+        "bytes": 81,
+        "sha256": "4ed7932415204180493560560cadee5180a86d44c63401db088c9f287bfab344"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-CustomAction-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-RegLocator",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "RegLocator"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.00517639284953475,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-RegLocator-first.stdout.log",
+        "bytes": 75,
+        "sha256": "2176ed2976acf3a3c96198c5d568ab76827d026312af71c1011139c5ba2a6e9e"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-RegLocator-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-MsiFileHash",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "MsiFileHash"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006095511140301824,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-MsiFileHash-first.stdout.log",
+        "bytes": 94,
+        "sha256": "3a52ed674d8151ebd1b2bd99f12797abd0e6dd6dd3ecd78ca9a74737d8d8e5ef"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-MsiFileHash-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-Icon",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "Icon"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005297797964885831,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Icon-first.stdout.log",
+        "bytes": 30,
+        "sha256": "a411636ecdd7c866a6b8c46387d24cf8471c47743fa51e2eebb018a3af5cc30c"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-Icon-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-AdminExecuteSequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "AdminExecuteSequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005182883003726602,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-AdminExecuteSequence-first.stdout.log",
+        "bytes": 243,
+        "sha256": "70c4cead4ae9a2ce4f09637a962d277953c92e362de0a98b03ba34b8fc6b6293"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-AdminExecuteSequence-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "export-CreateFolder",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+        "CreateFolder"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006603162037208676,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-CreateFolder-first.stdout.log",
+        "bytes": 68,
+        "sha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-export-CreateFolder-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "check",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-fixture-preparation-first/registry-fixture.py",
+        "--nonce",
+        "ae966fa5484f4235b154b7b874ff728f",
+        "check-exports",
+        "--exports",
+        "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/exports",
+        "--tables-list",
+        "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-tables-first.stdout.log",
+        "--summary",
+        "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-summary-first.stdout.log"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f",
+      "actualExit": true,
+      "exitCode": 1,
+      "elapsedSeconds": 0.062069183913990855,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-check-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/registry-fixture-check-first.stderr.log",
+        "bytes": 648,
+        "sha256": "14ca0ac1a0ebd91b67363bcafb3ff044e51ac606d6844a3ad4e7d28a7dde8dfe"
+      }
+    }
+  ],
+  "errorKind": "AssertionError",
+  "errorCode": "('check', 1)",
+  "elapsedSeconds": 0.5472320611588657
+}

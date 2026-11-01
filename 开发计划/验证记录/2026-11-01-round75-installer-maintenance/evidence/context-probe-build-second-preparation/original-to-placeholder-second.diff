@@ -1,0 +1,11 @@
+--- original-author.wxs
++++ placeholder-build.wxs
+@@ -6,7 +6,7 @@
+     <Condition Message="Readonly context probe is per-user only.">NOT ALLUSERS</Condition>
+     <Binary Id="FcReadonlyObserver" SourceFile="observer-harness.exe" />
+     <CustomAction Id="FcObserveParent" BinaryKey="FcReadonlyObserver" ExeCommand="--exact installer_lifecycle::native::broker::context_probe::engine_parent_context_observer --test-threads=1 --nocapture --skip fc-owned-parent-observer-v1:ef0ad284079e4dfaaa5d6f8cd7b7732f:C:\Users\Elior\AppData\Local\Temp\FutureClassroom-r75-parent-observer-ef0ad284079e4dfaaa5d6f8cd7b7732f" Return="check" Impersonate="yes" />
+-    <CustomAction Id="FcAbortBeforeInitialize" Error="Owned readonly context probe intentionally stops before InstallInitialize." />
++    <CustomAction Id="FcAbortBeforeInitialize" BinaryKey="FcReadonlyObserver" ExeCommand="--fc-r75-unexecuted-type19-placeholder" Return="check" Impersonate="yes" />
+     <InstallExecuteSequence>
+       <Custom Action="FcObserveParent" Sequence="1499">1</Custom>
+       <Custom Action="FcAbortBeforeInitialize" Sequence="1500">1</Custom>

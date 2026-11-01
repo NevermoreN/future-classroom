@@ -43,8 +43,11 @@ Standard component removal of these installer markers is not Run-value cleanup.
 
 No Run value, service, scheduled task, firewall rule, certificate/trust store,
 HTTP binding or listener is created or deleted. No application-data cleanup or
-wildcard file deletion is authored. Removing installed program files does not
-constitute complete product uninstall: ownership-aware cleanup remains pending.
+wildcard file deletion is authored. Uninstall success requires independent
+absence of the fixed program tree, installer markers and product/component
+registration; deleting program files alone is insufficient. The separate
+installer coordination gate is not school data or an MSI payload, and its safe
+retirement is not claimed by this slice.
 
 ## Lifecycle candidate boundary
 
@@ -67,12 +70,42 @@ override enabling automatic Restart Manager shutdown. `InstallValidate` can
 still detect occupied files; it does not replace the native gate. Full-UI,
 basic-UI and quiet execution remain separate runtime checks.
 
-Only fresh per-user installation and its known rollback are implemented in this
-slice. Pre-existing product/target state, repair, upgrade, uninstall and unknown
-delegation must be refused before mutation. They remain required follow-up work.
-No application startup, Run write/delete, school database or credential change
-is part of this candidate. In particular, ordinary registry removal must not be
-used as an ownership-safe Run cleanup substitute.
+This slice implements candidate paths for fresh per-user installation, healthy
+same-manifest/version reapplication, formal MSI uninstall and known rollback.
+These are implementation claims; actual MSI acceptance remains **NOT_RUN**.
+The scope is the controlled, same-source original candidate without transforms.
+Offline closed-table inspection is not runtime authentication of arbitrary
+effective transformed sessions or control over unrelated external MSI packages.
+
+| Path | Admission and required final effect | Runtime evidence |
+| --- | --- | --- |
+| Fresh install | Product/family, fixed target and markers absent; final exact manifest present | NOT_RUN |
+| Healthy same-version reapplication | One healthy same-manifest current-user installation; final exact manifest present | NOT_RUN |
+| Formal uninstall | Same healthy baseline; final product/family, fixed target and markers absent | NOT_RUN |
+| Known rollback | Actual transaction rollback; fresh absence or original healthy manifest restored | NOT_RUN |
+| Damaged repair, different manifest/version or major upgrade | Unsupported; reject before product mutation | NOT_VALIDATED |
+| Run cleanup | Not implemented; no Run removal authored | NOT_VALIDATED |
+
+Admission is based on actual product/context/related registrations, version,
+component keypaths, bounded exact payload hashes/membership and marker state.
+It is checked again under the original exclusive owner. The internal
+`SameManifest` Pending label is neutral: `Installed`, `REMOVE`, `REINSTALL`,
+command-line intent and advisory notices do not grant an action. A full staged
+manifest permits the expected-present path; complete target/marker absence from
+a healthy admitted baseline permits expected-absent. Partial or unknown effects
+require rollback and verification against the admitted baseline. Final product
+registration is independently checked after the actual transaction ends and
+the original guardian returns; it is not inferred from staged registration
+visibility. File-proof handles must actually return before MSI needs delete
+access. The original 120-second deadline and resource/worker budgets do not grow.
+
+An intact installation being reapplied is not evidence of repairing missing or
+corrupt files. A damaged or foreign preimage is refused rather than silently
+adopted. The fixed project HKCU Run value must be absent: any existing value,
+including an apparently matching command or a different value type, is refused
+without changing it. No application startup, Run write/delete, school database
+or credential change is part of this candidate. Ordinary marker removal is not
+an ownership-safe Run cleanup substitute.
 
 The exact Binary table contains one separately compiled normal
 `fc-installer-lifecycle` image. The packager first binds it and the ordinary
@@ -90,21 +123,30 @@ Only three exact CustomAction rows are admitted: synchronous immediate begin
 deferred commit notification (1538). Notifications are advisory. Successful
 Join/End, an ACK or pipe EOF alone cannot release Pending: the broker also needs
 the original guardian's actual return and independently reconciled closed
-payload/registration effects or the original absent rollback baseline. Failure,
+payload/registration effects or the admitted fresh/healthy rollback baseline. Failure,
 unknown effects or cleanup retains negative state. No ignore/async or
 NoImpersonate variant is admitted.
 
 `RemoveExistingProducts` follows `InstallExecute` and precedes
-`InstallFinalize`. Fresh-only admission currently prevents a supported major
-upgrade from reaching that action; its transactional location is not evidence
+`InstallFinalize`. Native admission still refuses different-version/related
+products before this candidate mutates files; its transactional location is not evidence
 of implemented upgrade handoff or rollback. ProductCode remains deterministic
 per version, and the existing family/component identities stay stable.
 
-Actual fresh-install/rollback, active-app refusal, process return and residual
-cleanup must still be demonstrated on an owned Windows fixture. Real
-Win7/Win10/Win11, classroom hardware, repair/upgrade/uninstall, strict Run cleanup,
+Actual fresh-install, healthy reapplication, formal uninstall, known rollback,
+active-app refusal, process return and residual cleanup must still be
+demonstrated on an owned Windows fixture. Only genuine MSI removal counts;
+manual cache/registration deletion, skipped hooks or transforms cannot create
+an uninstall PASS. Existing MSI File/Directory authoring is retained: installer-
+created directories not explicitly listed in CreateFolder are documented to be
+removed when empty; actual nested-root absence is still measured. No speculative
+CreateFolder/RemoveFile or wildcard cleanup is added. Real
+Win7/Win10/Win11, classroom hardware, damaged repair/upgrade, strict Run cleanup,
 standard-user handover, reboot/power-loss, signing and full ICE/release acceptance
 remain separate and unvalidated. `DisableShutdown` alone is not a process guard.
+The current parent-process SID/context assumption also needs a separate
+test-only observer before invoking production Begin. An observer's success does
+not prove broker/guardian success, and must not create production Pending.
 
 ## Build and inspect
 
@@ -116,8 +158,18 @@ for the single packaging subprocess. The script accepts only explicit absolute
 tool paths and records their actual hashes, version outputs and command logs.
 The explicit `msibuild` SHA is required and is bound to the reviewed
 0.103+repack-1build3 tool package (upstream msibuild has no `--version` option).
-Its reviewed importer authors the
-unsupported-in-wixl `MsiEmbeddedChainer` table, which is then exported and checked.
+Its reviewed importer authors the exact `CustomAction`,
+`InstallExecuteSequence` and unsupported-in-wixl `MsiEmbeddedChainer` tables.
+The unexecuted wixl compiler subset omits lifecycle CustomAction declarations
+and their sequence references because wixl 0.103 emits an empty five-column
+CustomAction table for BinaryKey/ExeCommand. Compiler warnings and stderr still
+fail the build. The importer replaces that empty schema with exactly four
+columns and three fixed rows; it preserves the compiler's standard execution
+rows and adds only the three constant-condition lifecycle hooks. Intermediate
+MSI bytes are never an accepted candidate or executed. Final exports must pass
+the unchanged exact role/type/source/target/sequence checks, and the embedded
+normal helper and payload must independently match their admitted bytes.
+A local table-format fragment is not a complete product MSI or runtime PASS.
 
 ```sh
 python3 scripts/package-msi-candidate.py \
@@ -159,6 +211,8 @@ Sources: [GNOME v0.103 implementation](https://github.com/GNOME/msitools/tree/v0
 [installation context](https://learn.microsoft.com/en-us/windows/win32/msi/installation-context),
 [directory costing](https://learn.microsoft.com/en-us/windows/win32/msi/using-a-directory-property-in-a-path),
 [client/server custom-action sequencing](https://learn.microsoft.com/en-us/windows/win32/msi/sequencing-custom-actions),
-[Restart Manager property](https://learn.microsoft.com/en-us/windows/win32/msi/msirestartmanagercontrol).
+[Restart Manager property](https://learn.microsoft.com/en-us/windows/win32/msi/msirestartmanagercontrol),
+[installer-created directory removal](https://learn.microsoft.com/en-us/windows/win32/msi/createfolder-table),
+[Type2 command-line context](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-type-2).
 Tool licenses and dependencies must be recorded separately from the application's
 notices; extracting a build tool does not make it an installed application payload.

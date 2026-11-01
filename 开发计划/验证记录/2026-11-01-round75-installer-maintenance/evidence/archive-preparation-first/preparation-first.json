@@ -1,0 +1,128 @@
+{
+  "status": "PREPARED_NOT_RUN",
+  "sourceRoot": "/tmp/fc-round75-installer-maintenance",
+  "destination": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round75-installer-maintenance",
+  "rootOwnerVerified": true,
+  "evidenceOwnerVerified": true,
+  "script": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-first/archive-evidence-first.py",
+    "bytes": 26261,
+    "sha256": "3161df4c7d6b77c724b3cbf006ba47bac8a0fb585aff6ecd15698a181343cfa4"
+  },
+  "references": [
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round73-installer-broker/archive-preparation-first/archive-evidence-second.py",
+      "sha256": "c29f93178ddca078a0335234ea6c38e001b98027f7d76a6e68e118ddbba1740b"
+    },
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round74-ci/archive-controller-preparation-first/archive-evidence-second.py",
+      "sha256": "241286bb5ad4da8a425d194e2023b2f694a409eddc3e5fee93dc3e795871b4fc"
+    }
+  ],
+  "ast": "PASS",
+  "pureClassificationChecks": [
+    {
+      "name": "MZ",
+      "result": "PASS"
+    },
+    {
+      "name": "CFBF",
+      "result": "PASS"
+    },
+    {
+      "name": "ZIP",
+      "result": "PASS"
+    },
+    {
+      "name": "ELF",
+      "result": "PASS"
+    },
+    {
+      "name": "AR",
+      "result": "PASS"
+    },
+    {
+      "name": "text",
+      "result": "PASS"
+    },
+    {
+      "name": "suffix-.msi",
+      "result": "PASS"
+    },
+    {
+      "name": "suffix-.exe",
+      "result": "PASS"
+    },
+    {
+      "name": "suffix-.dll",
+      "result": "PASS"
+    },
+    {
+      "name": "suffix-.pdb",
+      "result": "PASS"
+    },
+    {
+      "name": "suffix-.zip",
+      "result": "PASS"
+    },
+    {
+      "name": "suffix-.deb",
+      "result": "PASS"
+    },
+    {
+      "name": "disguised-magic",
+      "result": "PASS"
+    },
+    {
+      "name": "source-retained",
+      "result": "PASS"
+    },
+    {
+      "name": "public-authorization-not-private",
+      "result": "PASS"
+    }
+  ],
+  "scope": "Preparation and in-memory classification only. No archive/payload scan/Windows/Cargo/network/main write. Exact source/producer/freeze/joint/acceptance/audit inputs remain root-supplied after final freeze; no candidate source commit invented.",
+  "prunedInfrastructureSubtrees": [
+    "target",
+    "tools",
+    "worktree"
+  ],
+  "binaryGuard": "Suffix plus actual MZ/CFBF/ZIP/ELF/AR compression magic exclusion, no binary copied. Private key suffix rejected before contents read.",
+  "explicitTargetScope": "Only 24 PE paths from exact terminal successful producer read/hash under target at future actual execution. No target/tools/worktree recursion.",
+  "layout": "Whole owned root relative layout, including evidence/ and external fixture/input/export/source backup roots.",
+  "toolPackages": "Entire tools subtree pruned; exact original tool package provenance remains retained in evidence reports.",
+  "knownLimits": [
+    "No archive execution or final acceptance proof yet.",
+    "Credential scanner is inherited and fail-closed; any actual finding must be adjudicated precisely without rewriting originals.",
+    "All raw FAIL/RUNNING observations remain unchanged; final acceptance is a separate hash-bound terminal gate."
+  ],
+  "files": [
+    {
+      "path": ".owner",
+      "bytes": 50,
+      "sha256": "866295d468cb1f7be538f5014335c4b20b5cb59b547623cf7679fdf5fd4e87f7"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 3034,
+      "sha256": "040176fdcfbad48c9c86e6e6466d39067e5d093c756d87fbf5b67b0d320d64b9"
+    },
+    {
+      "path": "archive-evidence-first.py",
+      "bytes": 26261,
+      "sha256": "3161df4c7d6b77c724b3cbf006ba47bac8a0fb585aff6ecd15698a181343cfa4"
+    },
+    {
+      "path": "archive-first-vs-r73.diff",
+      "bytes": 20437,
+      "sha256": "2a7db9d57eb7928a71e80df0a428281de9cc7f43cc6d503cff3c7d7941be7a1d"
+    },
+    {
+      "path": "pure-first-qualification.json",
+      "bytes": 316,
+      "sha256": "1bb06dfbe24fc070b52bdf5476e34032138b3c842884128ec11873ed5d0bc882"
+    }
+  ],
+  "qualification": "One initial pure classification check failed due to template SOURCE suffix; corrected before delivery, qualification retained. No archive/main/payload or runtime execution in that attempt."
+}

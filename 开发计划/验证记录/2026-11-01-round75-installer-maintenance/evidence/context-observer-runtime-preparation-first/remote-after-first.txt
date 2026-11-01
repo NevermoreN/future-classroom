@@ -1,0 +1,12 @@
+$ErrorActionPreference='Stop';[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
+function Facts { $a=@();foreach($p in [Diagnostics.Process]::GetProcessesByName('msiexec')){try{$a+=@{pid=$p.Id;creationFiletime=[string]$p.StartTime.ToUniversalTime().ToFileTimeUtc()}}finally{$p.Dispose()}};return ,$a }
+function Registration { $i=$null;$x=$null;try{$i=New-Object -ComObject WindowsInstaller.Installer;$x=$i.GetType().InvokeMember('ProductsEx',[Reflection.BindingFlags]::GetProperty,$null,$i,@($c.product,'',7));$n=$x.Count;$s=$i.GetType().InvokeMember('ProductState',[Reflection.BindingFlags]::GetProperty,$null,$i,@($c.product));return @{status='ACTUAL_READONLY_CALLER_AND_MACHINE_CONTEXTS';product=$c.product;count=$n;productState=$s;contexts=7;userSidArgument='';otherUsers='NOT_QUERIED';cache='NOT_QUERIED'}}finally{if($null-ne$x){[void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($x)};if($null-ne$i){[void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($i)}} }
+function CheckRoot { if($c.root -cne (Join-Path ([IO.Path]::GetFullPath($env:TEMP)) ('FutureClassroom-r75-parent-observer-'+$c.nonce))){throw 'ROOT_PATH_MISMATCH'};if(([IO.File]::ReadAllText((Join-Path $c.root '.owner'))) -cne $c.marker){throw 'OWNER_MISMATCH'};if(([IO.File]::GetAttributes($c.root)-band[IO.FileAttributes]::ReparsePoint)-ne 0){throw 'ROOT_REPARSE'} }
+CheckRoot
+$state='UNKNOWN';$live=@();$limit=[DateTime]::UtcNow.AddSeconds(8)
+do{$live=@();foreach($x in (Facts)){if(-not @($c.baseline|Where-Object{$_.pid-eq $x.pid -and $_.creationFiletime-ceq $x.creationFiletime}).Count){$live+=$x}}
+ $state='ABSENT';if($null-ne$c.observer){$p=$null;try{$p=[Diagnostics.Process]::GetProcessById([int]$c.observer.pid);$actual=[string]$p.StartTime.ToUniversalTime().ToFileTimeUtc();$state=if($actual-ceq $c.observer.creationFiletime){'ORIGINAL_STILL_LIVE'}else{'PID_REUSED_ORIGINAL_GONE'}}catch [ArgumentException]{$state='ABSENT'}finally{if($null-ne$p){$p.Dispose()}}}
+ if($live.Count-eq 0 -and $state-ne 'ORIGINAL_STILL_LIVE'){break};[Threading.Thread]::Sleep(100)
+}while([DateTime]::UtcNow-lt$limit)
+$registration=Registration
+@{status='ACTUAL_READONLY_AFTER';root=$c.root;nonce=$c.nonce;newMsiexec=$live;newMsiexecCount=$live.Count;observerOriginalInstance=$state;afterProduct=$registration;processesQuiescent=($live.Count-eq 0 -and $state-ne 'ORIGINAL_STILL_LIVE');baselineExistingNeverKilled=$true}|ConvertTo-Json -Depth 8 -Compress

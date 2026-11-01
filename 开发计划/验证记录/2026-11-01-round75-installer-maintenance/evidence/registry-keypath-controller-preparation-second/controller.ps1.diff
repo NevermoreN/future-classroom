@@ -1,0 +1,22 @@
+--- /tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-first/controller.ps1
++++ /tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-second/controller.ps1
+@@ -14,7 +14,7 @@
+ $expected=@{
+  'fixture.msi'='d3c6d5e4937d5dd673e9835a7fbc8d5c7d03af8b0527e1a12d565da1a0e4e248'
+  'fixture-spec.json'='a41186d39d1ed187bfdbe99b0d94cb2e4eefc6fc36866257bddaaff34edd643f'
+- 'query-registry-x86.ps1'='0d52ab605178fb80e52aba9ff6ae8d4329daf6f57049f458dafdd43c29c75af4'
++ 'query-registry-x86.ps1'='920cc1bfb56913efc4e73268cb8e45ac5053b404c25dd1db8e8ed22aa5a3d1d4'
+ }
+ function Digest([string]$file) { return (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant() }
+ function Require([bool]$condition,[string]$code) { if(-not $condition){throw $code} }
+@@ -71,7 +71,9 @@
+   }
+  }
+  Walk $Root
+- Require ($files.Count -le 128 -and (($files|Measure-Object bytes -Sum).Sum -le 67108864)) 'TREE_BOUND'
++ [int64]$totalBytes=0
++ foreach($row in $files){$totalBytes += [int64]$row['bytes']}
++ Require ($files.Count -le 128 -and $totalBytes -le 67108864) 'TREE_BOUND'
+  return @($files.ToArray())
+ }
+ function No-ActiveOwnedProcess {

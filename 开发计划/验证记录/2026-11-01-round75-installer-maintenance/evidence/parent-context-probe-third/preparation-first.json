@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_BASE_PLUS_CANDIDATE_BINDINGS_PURE_CHECKS_PASS_NOT_CREATED_OR_EXECUTED",
+  "atUtc": "2026-11-01T12:09:01.207055+00:00",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/parent-context-probe-third/check-context-probe.py"
+  ],
+  "exitCode": 0,
+  "actualExit": true,
+  "elapsedSeconds": 0.136124384123832,
+  "pureTests": 4,
+  "ast": "PASS",
+  "secondAllRecordedBytesUnchanged": true,
+  "bThreeFrozenSourcesUnchanged": true,
+  "actualGuiCloneCreated": false,
+  "observerExecuted": false,
+  "actualCliProofProduced": false,
+  "msiBuilt": false,
+  "windowsRun": false,
+  "cargoRun": false,
+  "mainWritten": false,
+  "normalOrTestOriginalsChanged": false,
+  "scope": "Minimal field-label correction: sourceGitBase is only baseline; actual producer/freeze SHA bindings remain separate and root must reopen actual reports/input lists. All pure-model SHA values are placeholders, not actual candidate evidence.",
+  "files": [
+    {
+      "path": ".owner",
+      "bytes": 63,
+      "sha256": "99f2d4ae795182f82057a446e4963de6f70931a379003d76143e2e091d893ebf"
+    },
+    {
+      "path": "README.md",
+      "bytes": 7690,
+      "sha256": "a3266b4edba58a9acc2f282439ff8ad1bd36a8e7a5ca8f2857f350240ddc4b52"
+    },
+    {
+      "path": "check-context-probe.py",
+      "bytes": 7124,
+      "sha256": "586b9ab710218da5f3139ff262eaf076d858dd5cd525867f21c0587293ad5707"
+    },
+    {
+      "path": "context-probe.py",
+      "bytes": 14935,
+      "sha256": "3cf5ccac216abe54a653c851a6b150b7caf0871ba9141ee11e1e96d1d7b5ea94"
+    },
+    {
+      "path": "pure-check-first.stderr.log",
+      "bytes": 648,
+      "sha256": "9cb2601369b4a93ea2249eef261dadf841fa2f57838e8287d88d6ffc92466ee2"
+    },
+    {
+      "path": "pure-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "second-to-third.diff",
+      "bytes": 8220,
+      "sha256": "256e1347cb41098d4d190e2c019364ca5b016b7ba6763e85e46c8a34b34f558d"
+    }
+  ],
+  "stdout": {
+    "path": "pure-check-first.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "pure-check-first.stderr.log",
+    "bytes": 648,
+    "sha256": "9cb2601369b4a93ea2249eef261dadf841fa2f57838e8287d88d6ffc92466ee2"
+  }
+}

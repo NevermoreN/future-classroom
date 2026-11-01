@@ -1,0 +1,1019 @@
+--- before/crates/fc-windows/src/installer_lifecycle.rs
++++ after/crates/fc-windows/src/installer_lifecycle.rs
+@@ -1,5 +1,5 @@
+ //! Installation coordination shared by application startup and repair. The
+-//! native broker module implements the first fresh-install MSI candidate slice;
++//! native broker implements fresh install and healthy same-manifest maintenance;
+ //! its target runtime/installer acceptance remains separate from compilation.
+ //! Pending is durable negative state, never liveness. Only the broker's actual
+ //! authenticated guardian, native return and verified effects can settle it.
+@@ -62,6 +62,9 @@
+     Repair,
+     Upgrade,
+     Uninstall,
++    /// A verified healthy installation may be reapplied or removed by the
++    /// original transaction. Its final action is not asserted before effects.
++    SameManifest,
+ }
+ impl MaintenanceOperation {
+     fn tag(self) -> u8 {
+@@ -70,6 +73,7 @@
+             Self::Repair => 2,
+             Self::Upgrade => 3,
+             Self::Uninstall => 4,
++            Self::SameManifest => 5,
+         }
+     }
+ }
+--- before/crates/fc-windows/src/installer_lifecycle/native/broker.rs
++++ after/crates/fc-windows/src/installer_lifecycle/native/broker.rs
+@@ -15,6 +15,8 @@
+     },
+ };
+ 
++#[cfg(test)]
++mod context_probe;
+ mod effects;
+ 
+ const FRAME: usize = 32;
+@@ -619,10 +621,10 @@
+ }
+ 
+ fn begin(session: &mut Session, resolved_target: &str) -> Result<()> {
+-    // Unsupported maintenance/foreign/preexisting state is rejected before
++    // Unsupported/damaged/foreign state is rejected before
+     // spawning a broker or creating durable Pending, independent of MSI flags.
+     effects::target(resolved_target)?;
+-    effects::fresh(session)?;
++    effects::admit(session)?;
+     session.engine(unsafe { GetCurrentProcess() })?;
+     if session.resources.handles.len() + 2 > HANDLE_LIMIT {
+         return Err(LifecycleError::Invalid);
+@@ -718,18 +720,16 @@
+     session.authenticate_image(begin)?;
+     let engine = session.engine(begin)?;
+     let original_engine = process_identity(engine)?;
+-    effects::fresh(session)?;
++    let admission = effects::admit(session)?;
+     let identity = InstallIdentity::for_current_user()?;
+-    let mut owner = LifecycleGate::try_begin_maintenance(
+-        &identity,
+-        MaintenanceOperation::Install,
+-        session.deadline,
+-    )?;
++    let mut owner =
++        LifecycleGate::try_begin_maintenance(&identity, admission.operation(), session.deadline)?;
+     let result = (|| -> Result<()> {
+         let pipe = session.server()?;
+         let mut began = false;
+         let mut guardian = None;
+         let mut decision = None;
++        let mut effects_decision = None;
+         let mut ended = false;
+         for _ in 0..MAX_CONNECTIONS {
+             session.accept(pipe)?;
+@@ -738,9 +738,9 @@
+             let peer_id = process_identity(peer)?;
+             match packet.kind {
+                 BEGIN if !began && peer_id == process_identity(begin)? => {
+-                    // Revalidate absence under the already-acquired exclusive
+-                    // gate immediately before allowing first MSI mutation.
+-                    effects::fresh(session)?;
++                    // Revalidate the same original preimage under the exclusive
++                    // gate. Its checked pins return before first MSI mutation.
++                    effects::revalidate(session, admission)?;
+                     began = true;
+                     session.send(pipe, Packet::new(ACK))?;
+                 }
+@@ -767,12 +767,16 @@
+                     }
+                     owner.resources.add(duplicate, Role::Guardian);
+                     owner.guardian = Some(peer_id);
+-                    let committed = effects::staged(session)?;
++                    let observed = effects::staged(session, admission)?;
+                     let mut response = Packet::new(DECISION);
+                     response.transaction = packet.transaction;
+-                    response.outcome = if committed { 1 } else { 2 };
++                    response.outcome = match observed.outcome() {
++                        SettledOutcome::Commit => 1,
++                        SettledOutcome::Rollback => 2,
++                    };
+                     guardian = Some(peer_id);
+                     decision = Some(response);
++                    effects_decision = Some(observed);
+                     session.send(pipe, response)?;
+                 }
+                 ENDED if guardian == Some(peer_id) => {
+@@ -820,12 +824,9 @@
+                 Err(e) => return Err(e),
+             }
+         }
+-        let outcome = if decision.ok_or(LifecycleError::Unsettled)?.outcome == 1 {
+-            SettledOutcome::Commit
+-        } else {
+-            SettledOutcome::Rollback
+-        };
+-        let mut proof = effects::reconcile(session, outcome)?;
++        let observed = effects_decision.ok_or(LifecycleError::Unsettled)?;
++        let outcome = observed.outcome();
++        let mut proof = effects::reconcile(session, observed)?;
+         proof.check()?;
+         // This receipt is constructed solely here, after actual native facts
+         // and independently verified effects. There is no wire Settlement API.
+--- before/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
++++ after/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
+@@ -5,7 +5,68 @@
+ use super::*;
+ 
+ const MARKERS: &str = r"Software\FutureClassroom\Installer\Components";
++const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
+ const PIN_GROUPS: usize = 6; // + session + original Maintenance = original 8 slots
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(super) enum Admission {
++    Fresh,
++    SameManifest,
++}
++impl Admission {
++    pub(super) fn operation(self) -> MaintenanceOperation {
++        match self {
++            Self::Fresh => MaintenanceOperation::Install,
++            Self::SameManifest => MaintenanceOperation::SameManifest,
++        }
++    }
++    fn preimage(self) -> ExpectedState {
++        match self {
++            Self::Fresh => ExpectedState::Absent,
++            Self::SameManifest => ExpectedState::Present,
++        }
++    }
++}
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++enum ExpectedState {
++    Present,
++    Absent,
++}
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++enum Observation {
++    Present,
++    Absent,
++    Other,
++}
++/// Only this module constructs decisions from native observations. Neither
++/// notification packets nor public installer properties can choose this state.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(super) struct Decision {
++    outcome: SettledOutcome,
++    expected: ExpectedState,
++}
++impl Decision {
++    fn observed(admission: Admission, observed: Observation) -> Self {
++        let expected = match (admission, observed) {
++            (_, Observation::Present) => Some(ExpectedState::Present),
++            (Admission::SameManifest, Observation::Absent) => Some(ExpectedState::Absent),
++            _ => None,
++        };
++        match expected {
++            Some(expected) => Self {
++                outcome: SettledOutcome::Commit,
++                expected,
++            },
++            None => Self {
++                outcome: SettledOutcome::Rollback,
++                expected: admission.preimage(),
++            },
++        }
++    }
++    pub(super) fn outcome(self) -> SettledOutcome {
++        self.outcome
++    }
++}
+ 
+ fn local() -> Result<PathBuf> {
+     Ok(InstallIdentity::for_current_user()?.local)
+@@ -89,6 +150,151 @@
+     // access/configuration/argument errors are never converted to absence.
+     result == ERROR_NO_MORE_ITEMS.0 || result == ERROR_UNKNOWN_PRODUCT.0
+ }
++fn exact_product_code(buffer: &[u16; 39], product: &str) -> bool {
++    buffer[38] == 0
++        && String::from_utf16(&buffer[..38])
++            .is_ok_and(|s| s.eq_ignore_ascii_case(&format!("{{{product}}}")))
++}
++fn exact_user_sid(text: &str, sid: &[u8]) -> bool {
++    // Compare the returned text with the already-copied native TOKEN_USER SID.
++    // No LocalAlloc capability or unbounded SID-derived allocation is needed.
++    if sid.len() < 8 || sid[0] != 1 || sid[1] > 15 || sid.len() != 8 + usize::from(sid[1]) * 4 {
++        return false;
++    }
++    let mut fields = text.split('-');
++    if fields.next() != Some("S") || fields.next() != Some("1") {
++        return false;
++    }
++    let Some(authority) = fields.next() else {
++        return false;
++    };
++    let authority = if let Some(hex) = authority.strip_prefix("0x") {
++        if hex.is_empty() || hex.len() > 12 || !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
++            return false;
++        }
++        u64::from_str_radix(hex, 16).ok()
++    } else if !authority.is_empty() && authority.bytes().all(|b| b.is_ascii_digit()) {
++        authority.parse::<u64>().ok()
++    } else {
++        None
++    };
++    let expected = sid[2..8].iter().fold(0u64, |a, &b| (a << 8) | u64::from(b));
++    if authority != Some(expected) {
++        return false;
++    }
++    for bytes in sid[8..].chunks_exact(4) {
++        let Some(field) = fields.next() else {
++            return false;
++        };
++        if field.is_empty()
++            || !field.bytes().all(|b| b.is_ascii_digit())
++            || field.parse::<u32>().ok() != Some(u32::from_le_bytes(bytes.try_into().unwrap()))
++        {
++            return false;
++        }
++    }
++    fields.next().is_none()
++}
++fn same_registration(manifest: &Manifest, sid: &[u8]) -> Result<()> {
++    let code = HSTRING::from(format!("{{{}}}", manifest.product));
++    let mut found = [0u16; 39];
++    let mut context = MSIINSTALLCONTEXT_NONE;
++    let mut user = [0u16; 256];
++    let mut n = user.len() as u32;
++    let result = unsafe {
++        MsiEnumProductsExW(
++            &code,
++            None,
++            MSIINSTALLCONTEXT_ALL.0 as u32,
++            0,
++            Some(&mut found),
++            Some(&mut context),
++            Some(windows::core::PWSTR(user.as_mut_ptr())),
++            Some(&mut n),
++        )
++    };
++    if result != ERROR_SUCCESS.0
++        || context != MSIINSTALLCONTEXT_USERUNMANAGED
++        || !exact_product_code(&found, &manifest.product)
++        || n == 0
++        || n as usize >= user.len()
++        || user[n as usize] != 0
++        || !String::from_utf16(&user[..n as usize]).is_ok_and(|text| exact_user_sid(&text, sid))
++    {
++        return Err(LifecycleError::Unsettled);
++    }
++    // A second instance in managed/machine context is not a healthy per-user
++    // preimage. Only the documented end of this successful enumeration is OK.
++    let next = unsafe {
++        MsiEnumProductsExW(
++            &code,
++            None,
++            MSIINSTALLCONTEXT_ALL.0 as u32,
++            1,
++            None,
++            None,
++            None,
++            None,
++        )
++    };
++    if next != ERROR_NO_MORE_ITEMS.0 {
++        return Err(LifecycleError::Unsettled);
++    }
++    let upgrade = HSTRING::from(format!("{{{INSTALL_FAMILY}}}"));
++    let first = unsafe {
++        MsiEnumRelatedProductsW(&upgrade, None, 0, windows::core::PWSTR(found.as_mut_ptr()))
++    };
++    if first != ERROR_SUCCESS.0 || !exact_product_code(&found, &manifest.product) {
++        return Err(LifecycleError::Unsettled);
++    }
++    let next = unsafe {
++        MsiEnumRelatedProductsW(&upgrade, None, 1, windows::core::PWSTR(found.as_mut_ptr()))
++    };
++    if next != ERROR_NO_MORE_ITEMS.0
++        || product(manifest, "VersionString")?.as_deref() != Some(manifest.version.as_str())
++    {
++        return Err(LifecycleError::Unsettled);
++    }
++    component_registration(manifest)
++}
++fn run_absent_at(path: &str) -> Result<()> {
++    let mut owner = Resources::empty()?;
++    let name = HSTRING::from(path);
++    let mut key = HKEY::default();
++    let result = unsafe {
++        RegOpenKeyExW(
++            HKEY_CURRENT_USER,
++            &name,
++            Some(0),
++            KEY_QUERY_VALUE | KEY_WOW64_32KEY,
++            &mut key,
++        )
++    };
++    if result == ERROR_FILE_NOT_FOUND {
++        owner.release()?;
++        return Ok(());
++    }
++    result.ok()?;
++    owner.add(HANDLE(key.0), Role::Registry);
++    let mut kind = REG_VALUE_TYPE::default();
++    let mut bytes = 0;
++    let result = unsafe {
++        RegQueryValueExW(
++            key,
++            windows::core::w!("FutureClassroom"),
++            None,
++            Some(&mut kind),
++            None,
++            Some(&mut bytes),
++        )
++    };
++    owner.release()?;
++    match result {
++        ERROR_FILE_NOT_FOUND => Ok(()),
++        ERROR_SUCCESS | ERROR_MORE_DATA => Err(LifecycleError::Unsettled),
++        error => Err(windows::core::Error::from_hresult(error.to_hresult()).into()),
++    }
++}
+ fn exact_component_key_path(actual: &str, component: &str) -> bool {
+     // Microsoft documents numeric HKCU root 01 for a 32-bit registry keypath,
+     // and root+20 for a 64-bit registry keypath. Approved components have exact
+@@ -104,6 +310,7 @@
+     }
+ }
+ fn marker_absent() -> Result<()> {
++    let mut owner = Resources::empty()?;
+     let name = HSTRING::from(MARKERS);
+     let mut key = HKEY::default();
+     let result = unsafe {
+@@ -116,16 +323,16 @@
+         )
+     };
+     if result == ERROR_FILE_NOT_FOUND {
++        owner.release()?;
+         return Ok(());
+     }
+     if result == ERROR_SUCCESS {
+-        let mut owner = Resources::empty()?;
+         owner.add(HANDLE(key.0), Role::Registry);
+         owner.release()?;
+     }
+     Err(LifecycleError::Unsettled)
+ }
+-pub(super) fn fresh(session: &mut Session) -> Result<()> {
++fn fresh(session: &mut Session) -> Result<()> {
+     current(session.deadline)?;
+     no_product(&session.manifest)?;
+     let local = local()?;
+@@ -152,6 +359,31 @@
+     }
+     absent(&local.join("Programs").join("FutureClassroom"))?;
+     marker_absent()?;
++    current(session.deadline)
++}
++
++pub(super) fn admit(session: &mut Session) -> Result<Admission> {
++    current(session.deadline)?;
++    let admission = if product(&session.manifest, "VersionString")?.is_some() {
++        Admission::SameManifest
++    } else {
++        Admission::Fresh
++    };
++    revalidate(session, admission)?;
++    Ok(admission)
++}
++pub(super) fn revalidate(session: &mut Session, admission: Admission) -> Result<()> {
++    current(session.deadline)?;
++    run_absent_at(RUN_KEY)?;
++    match admission {
++        Admission::Fresh => fresh(session)?,
++        Admission::SameManifest => {
++            let mut proof = present(session)?;
++            // These preimage pins must return before Begin ACK: the original
++            // installer needs write/delete access for both reapply and remove.
++            proof.release()?;
++        }
++    }
+     current(session.deadline)
+ }
+ 
+@@ -486,7 +718,18 @@
+     }
+     Ok(())
+ }
+-pub(super) fn staged(session: &mut Session) -> Result<bool> {
++fn present(session: &Session) -> Result<Proof> {
++    let mut proof = Proof::new(session.deadline);
++    let base = root()?;
++    same_registration(&session.manifest, &session.resources.sid)?;
++    files(&mut proof, &base, &session.manifest, &session.resources.sid)?;
++    markers(&mut proof, &session.manifest)?;
++    proof.check()?;
++    Ok(proof)
++}
++pub(super) fn staged(session: &mut Session, admission: Admission) -> Result<Decision> {
++    current(session.deadline)?;
++    run_absent_at(RUN_KEY)?;
+     let mut proof = Proof::new(session.deadline);
+     let base = root()?;
+     let observed = files(&mut proof, &base, &session.manifest, &session.resources.sid)
+@@ -495,28 +738,27 @@
+     // Cleanup failure is fatal, never a reason to authorize End or replacement.
+     proof.release()?;
+     current(session.deadline)?;
+-    Ok(observed.is_ok())
+-}
+-pub(super) fn reconcile(session: &mut Session, outcome: SettledOutcome) -> Result<Proof> {
+-    let mut proof = Proof::new(session.deadline);
++    let observed = if observed.is_ok() {
++        Observation::Present
++    } else if absent(&base).and_then(|()| marker_absent()).is_ok() {
++        Observation::Absent
++    } else {
++        Observation::Other
++    };
++    current(session.deadline)?;
++    Ok(Decision::observed(admission, observed))
++}
++pub(super) fn reconcile(session: &mut Session, decision: Decision) -> Result<Proof> {
++    current(session.deadline)?;
++    run_absent_at(RUN_KEY)?;
++    if decision.expected == ExpectedState::Present {
++        return present(session);
++    }
++    let proof = Proof::new(session.deadline);
+     let base = root()?;
+-    match outcome {
+-        SettledOutcome::Commit => {
+-            if product(&session.manifest, "VersionString")?.as_deref()
+-                != Some(session.manifest.version.as_str())
+-            {
+-                return Err(LifecycleError::Unsettled);
+-            }
+-            component_registration(&session.manifest)?;
+-            files(&mut proof, &base, &session.manifest, &session.resources.sid)?;
+-            markers(&mut proof, &session.manifest)?;
+-        }
+-        SettledOutcome::Rollback => {
+-            no_product(&session.manifest)?;
+-            absent(&base)?;
+-            marker_absent()?;
+-        }
+-    }
++    no_product(&session.manifest)?;
++    absent(&base)?;
++    marker_absent()?;
+     proof.check()?;
+     Ok(proof)
+ }
+@@ -526,6 +768,235 @@
+     use super::super::super::super::broker::manifest::Entry;
+     use super::*;
+     use std::{fs, os::windows::io::AsRawHandle};
++
++    #[test]
++    fn maintenance_decision_preserves_original_preimage_and_pending_tags() {
++        for (operation, tag) in [
++            (MaintenanceOperation::Install, 1),
++            (MaintenanceOperation::Repair, 2),
++            (MaintenanceOperation::Upgrade, 3),
++            (MaintenanceOperation::Uninstall, 4),
++            (MaintenanceOperation::SameManifest, 5),
++        ] {
++            assert_eq!(operation.tag(), tag);
++        }
++        assert_eq!(Admission::Fresh.operation(), MaintenanceOperation::Install);
++        assert_eq!(
++            Admission::SameManifest.operation(),
++            MaintenanceOperation::SameManifest
++        );
++        for (admission, observation, outcome, expected) in [
++            (
++                Admission::Fresh,
++                Observation::Present,
++                SettledOutcome::Commit,
++                ExpectedState::Present,
++            ),
++            (
++                Admission::Fresh,
++                Observation::Absent,
++                SettledOutcome::Rollback,
++                ExpectedState::Absent,
++            ),
++            (
++                Admission::Fresh,
++                Observation::Other,
++                SettledOutcome::Rollback,
++                ExpectedState::Absent,
++            ),
++            (
++                Admission::SameManifest,
++                Observation::Present,
++                SettledOutcome::Commit,
++                ExpectedState::Present,
++            ),
++            (
++                Admission::SameManifest,
++                Observation::Absent,
++                SettledOutcome::Commit,
++                ExpectedState::Absent,
++            ),
++            (
++                Admission::SameManifest,
++                Observation::Other,
++                SettledOutcome::Rollback,
++                ExpectedState::Present,
++            ),
++        ] {
++            let decision = Decision::observed(admission, observation);
++            assert_eq!(decision.outcome(), outcome);
++            assert_eq!(decision.expected, expected);
++        }
++    }
++
++    #[test]
++    fn registered_product_and_user_sid_must_match_exact_native_identity() {
++        let product = "12345678-1234-1234-1234-123456789ABC";
++        let mut code = [0u16; 39];
++        for (to, from) in code.iter_mut().zip(format!("{{{product}}}").encode_utf16()) {
++            *to = from;
++        }
++        assert!(exact_product_code(&code, product));
++        assert!(!exact_product_code(
++            &code,
++            "12345678-1234-1234-1234-123456789ABD"
++        ));
++        code[38] = 1;
++        assert!(!exact_product_code(&code, product));
++        // Independent binary SID fixture S-1-5-21-42, as TOKEN_USER copies it.
++        let sid = [1, 2, 0, 0, 0, 0, 0, 5, 21, 0, 0, 0, 42, 0, 0, 0];
++        assert!(exact_user_sid("S-1-5-21-42", &sid));
++        for other in [
++            "S-1-5-21-43",
++            "S-1-5-21",
++            "S-1-5-21-42-0",
++            "S-1-5-21-4294967296",
++            "S-1-5-21-+42",
++            "S-2-5-21-42",
++            "S-1-6-21-42",
++            "S-1-281474976710661-21-42",
++        ] {
++            assert!(!exact_user_sid(other, &sid), "{other}");
++        }
++        assert!(!exact_user_sid("S-1-5-21-42", &sid[..15]));
++    }
++
++    struct RegistryFixture {
++        owner: Resources,
++        path: Option<String>,
++        key: HKEY,
++    }
++    impl RegistryFixture {
++        fn new() -> Self {
++            use fc_ports::RandomSource;
++            let mut nonce = [0; 16];
++            crate::SystemRandom.fill(&mut nonce).unwrap();
++            let tail: String = nonce.iter().map(|b| format!("{b:02x}")).collect();
++            let path = format!(
++                r"Software\FutureClassroom-Test-InstallerRunGuard-{}-{tail}",
++                std::process::id()
++            );
++            let mut fixture = Self {
++                owner: Resources::empty().unwrap(),
++                path: None,
++                key: HKEY::default(),
++            };
++            let mut disposition = REG_CREATE_KEY_DISPOSITION::default();
++            unsafe {
++                RegCreateKeyExW(
++                    HKEY_CURRENT_USER,
++                    &HSTRING::from(&path),
++                    None,
++                    None,
++                    REG_OPTION_NON_VOLATILE,
++                    KEY_QUERY_VALUE | KEY_SET_VALUE | KEY_WOW64_32KEY,
++                    None,
++                    &mut fixture.key,
++                    Some(&mut disposition),
++                )
++                .ok()
++                .unwrap();
++            }
++            fixture.owner.add(HANDLE(fixture.key.0), Role::Registry);
++            assert_eq!(
++                disposition, REG_CREATED_NEW_KEY,
++                "never use/delete a preexisting fixture key"
++            );
++            fixture.path = Some(path);
++            fixture
++        }
++        fn read(&self) -> (REG_VALUE_TYPE, Vec<u8>) {
++            let mut kind = REG_VALUE_TYPE::default();
++            let mut bytes = [0u8; 1024];
++            let mut n = bytes.len() as u32;
++            unsafe {
++                RegQueryValueExW(
++                    self.key,
++                    windows::core::w!("FutureClassroom"),
++                    None,
++                    Some(&mut kind),
++                    Some(bytes.as_mut_ptr()),
++                    Some(&mut n),
++                )
++                .ok()
++                .unwrap();
++            }
++            assert!(n as usize <= bytes.len());
++            (kind, bytes[..n as usize].to_vec())
++        }
++    }
++    impl Drop for RegistryFixture {
++        fn drop(&mut self) {
++            self.owner
++                .release()
++                .expect("return owned test registry capability");
++            if let Some(path) = &self.path {
++                assert!(path.starts_with(r"Software\FutureClassroom-Test-InstallerRunGuard-"));
++                unsafe {
++                    RegDeleteKeyExW(
++                        HKEY_CURRENT_USER,
++                        &HSTRING::from(path),
++                        KEY_WOW64_32KEY.0,
++                        None,
++                    )
++                    .ok()
++                    .expect("delete only newly created owned test registry key");
++                }
++            }
++        }
++    }
++
++    #[test]
++    fn actual_run_absence_guard_never_changes_any_present_value() {
++        let _serial = crate::NATIVE_TEST_SERIAL
++            .lock()
++            .unwrap_or_else(|p| p.into_inner());
++        let fixture = RegistryFixture::new();
++        let path = fixture.path.as_ref().unwrap().clone();
++        assert!(run_absent_at(&path).is_ok());
++        let plausible: Vec<u8> = format!(
++            "\"{}\" --autostart\0",
++            root().unwrap().join("fc-bootstrap.exe").display()
++        )
++        .encode_utf16()
++        .flat_map(u16::to_le_bytes)
++        .collect();
++        for (kind, bytes) in [
++            (REG_SZ, plausible),
++            (REG_SZ, Vec::new()),
++            (REG_EXPAND_SZ, vec![b'X', 0, 0, 0]),
++            (REG_DWORD, vec![1, 0, 0, 0]),
++            (REG_BINARY, vec![0x7f; 256]),
++            (REG_NONE, vec![0]),
++        ] {
++            unsafe {
++                RegSetValueExW(
++                    fixture.key,
++                    windows::core::w!("FutureClassroom"),
++                    None,
++                    kind,
++                    Some(&bytes),
++                )
++                .ok()
++                .unwrap();
++            }
++            let before = fixture.read();
++            assert_eq!(run_absent_at(&path), Err(LifecycleError::Unsettled));
++            assert_eq!(
++                fixture.read(),
++                before,
++                "guard is read-only even for plausible owned commands"
++            );
++            unsafe {
++                RegDeleteValueW(fixture.key, windows::core::w!("FutureClassroom"))
++                    .ok()
++                    .unwrap();
++            }
++            assert!(run_absent_at(&path).is_ok());
++        }
++        drop(fixture);
++        assert!(run_absent_at(&path).is_ok());
++    }
+ 
+     #[test]
+     fn enum_absence_and_x86_registry_component_paths_are_exact() {
+@@ -660,6 +1131,14 @@
+             .is_err());
+         assert!(fs::rename(&base, base.with_file_name("unexpected-move")).is_err());
+         proof.release().unwrap();
++        // The exact preimage pins have really returned, allowing the installer
++        // to rename/remove or replace files after Begin ACK.
++        let moved = base.with_file_name("returned-pins-move");
++        fs::rename(&base, &moved).unwrap();
++        fs::rename(&moved, &base).unwrap();
++        let main = base.join("fc-bootstrap.exe");
++        let original = fs::read(&main).unwrap();
++        fs::write(&main, &original).unwrap();
+         fs::write(base.join("unlisted.txt"), b"must reject").unwrap();
+         let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));
+         assert!(files(&mut proof, &base, &manifest, &sid).is_err());
+--- /dev/null
++++ after/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs
+@@ -0,0 +1,292 @@
++//! Test-harness-only observer. No normal entrypoint, Session, lifecycle gate,
++//! Pending, MSI mutation, registry mutation, process launcher or UI mutation.
++use super::*;
++use std::path::Component;
++
++const NAME: &str =
++    "installer_lifecycle::native::broker::context_probe::engine_parent_context_observer";
++const TOKEN: &str = "fc-owned-parent-observer-v1:";
++const MARKER: &[u8] = b"future-classroom-owned-r75-parent-observer/v1\n";
++
++struct Request {
++    nonce: String,
++    root: PathBuf,
++}
++fn request(args: &[String]) -> Result<Option<Request>> {
++    let armed = args.iter().any(|a| a.starts_with(TOKEN));
++    if !armed {
++        return Ok(None);
++    }
++    if args.len() != 6
++        || args[0] != "--exact"
++        || args[1] != NAME
++        || args[2] != "--test-threads=1"
++        || args[3] != "--nocapture"
++        || args[4] != "--skip"
++    {
++        return Err(LifecycleError::Invalid);
++    }
++    let (nonce, root) = args[5]
++        .strip_prefix(TOKEN)
++        .and_then(|s| s.split_once(':'))
++        .ok_or(LifecycleError::Invalid)?;
++    let raw = root.as_bytes();
++    if nonce.len() != 32
++        || !nonce
++            .bytes()
++            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
++        || raw.len() < 3
++        || !raw[0].is_ascii_alphabetic()
++        || &raw[1..3] != b":\\"
++        || root[2..].contains([':', '\0', '/', '"', '%', '[', ']'])
++        || root.encode_utf16().count() > 240
++        || root[3..]
++            .split('\\')
++            .any(|s| s.is_empty() || matches!(s, "." | "..") || s.ends_with([' ', '.']))
++    {
++        return Err(LifecycleError::Invalid);
++    }
++    let root = PathBuf::from(root);
++    if root.components().count() > 16
++        || root.file_name().and_then(|s| s.to_str())
++            != Some(format!("FutureClassroom-r75-parent-observer-{nonce}").as_str())
++    {
++        return Err(LifecycleError::Invalid);
++    }
++    Ok(Some(Request {
++        nonce: nonce.to_owned(),
++        root,
++    }))
++}
++fn quote(text: &str) -> String {
++    let mut out = String::from("\"");
++    for c in text.chars() {
++        match c {
++            '"' => out.push_str("\\\""),
++            '\\' => out.push_str("\\\\"),
++            c if c.is_control() => out.push_str(&format!("\\u{:04x}", c as u32)),
++            c => out.push(c),
++        }
++    }
++    out.push('"');
++    out
++}
++fn failure(error: LifecycleError) -> String {
++    match error {
++        LifecycleError::Native(hr) => {
++            let win32 = if hr.0 as u32 & 0xffff0000 == 0x80070000 {
++                (hr.0 as u32 & 0xffff).to_string()
++            } else {
++                String::from("null")
++            };
++            format!(
++                "{{\"status\":\"ERROR\",\"kind\":\"Native\",\"hresult\":{},\"win32Code\":{win32}}}",
++                hr.0
++            )
++        }
++        error => format!(
++            "{{\"status\":\"ERROR\",\"kind\":{}}}",
++            quote(&format!("{error:?}"))
++        ),
++    }
++}
++fn sid_fact(result: Result<Vec<u8>>) -> String {
++    match result {
++        Ok(sid) => {
++            let hex: String = sid.iter().map(|b| format!("{b:02x}")).collect();
++            format!("{{\"status\":\"OK\",\"tokenUserSidHex\":{}}}", quote(&hex))
++        }
++        Err(error) => failure(error),
++    }
++}
++fn identity_fact(process: HANDLE) -> String {
++    match process_identity(process) {
++        Ok(id) => format!(
++            "{{\"status\":\"OK\",\"processId\":{},\"creationFiletime\":{}}}",
++            id.process_id, id.creation_filetime
++        ),
++        Err(error) => failure(error),
++    }
++}
++fn image_fact(process: HANDLE) -> String {
++    match image_path(process) {
++        Ok(path) => format!(
++            "{{\"status\":\"OK\",\"image\":{}}}",
++            quote(&path.to_string_lossy())
++        ),
++        Err(error) => failure(error),
++    }
++}
++fn parent_id(owner: &mut Resources, deadline: Instant) -> Result<u32> {
++    let id = unsafe { GetCurrentProcessId() };
++    let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)? };
++    owner.add(snapshot, Role::Control);
++    let mut row = PROCESSENTRY32W {
++        dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32,
++        ..Default::default()
++    };
++    let mut next = unsafe { Process32FirstW(snapshot, &mut row) };
++    let mut result = Err(LifecycleError::Invalid);
++    for _ in 0..8192 {
++        current(deadline)?;
++        match next {
++            Ok(()) if row.th32ProcessID == id => {
++                result = Ok(row.th32ParentProcessID);
++                break;
++            }
++            Ok(()) => next = unsafe { Process32NextW(snapshot, &mut row) },
++            Err(error) => {
++                result = Err(error.into());
++                break;
++            }
++        }
++    }
++    owner.close_handle(snapshot)?;
++    result
++}
++fn thread_sid(owner: &mut Resources) -> String {
++    let mut token = HANDLE::default();
++    match unsafe { OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, true, &mut token) } {
++        Ok(()) => {
++            owner.add(token, Role::Token);
++            sid_fact(Resources::sid_from_token(token).map_err(Into::into))
++        }
++        Err(error) if error.code() == ERROR_NO_TOKEN.to_hresult() => {
++            format!("{{\"status\":\"ABSENT\",\"hresult\":{}}}", error.code().0)
++        }
++        Err(error) => failure(error.into()),
++    }
++}
++fn observe(request: Request) -> Result<()> {
++    let deadline = Instant::now() + Duration::from_secs(10);
++    let mut owner = Resources::empty()?;
++    let own = unsafe { GetCurrentProcess() };
++    let sid = owner.token_sid(own)?;
++    // Pin every native path component before accepting the owned marker. No
++    // reparse/parent alias can redirect the report outside this exact new root.
++    let mut path = PathBuf::new();
++    for component in request.root.components() {
++        path.push(component.as_os_str());
++        if matches!(component, Component::Prefix(_)) {
++            continue;
++        }
++        let h = owner.open_file(
++            &path,
++            FILE_READ_ATTRIBUTES.0 | READ_CONTROL.0,
++            FILE_SHARE_READ | FILE_SHARE_WRITE,
++            OPEN_EXISTING,
++            true,
++            false,
++        )?;
++        owner.add(h, Role::Parent);
++        verify_info(h, true)?;
++        if path == request.root {
++            verify_acl(h, &sid, false)?;
++        }
++    }
++    let marker = owner.open_file(
++        &request.root.join(".owner"),
++        GENERIC_READ.0,
++        FILE_SHARE_READ,
++        OPEN_EXISTING,
++        false,
++        false,
++    )?;
++    owner.add(marker, Role::Parent);
++    verify_info(marker, false)?;
++    let mut size = 0;
++    unsafe {
++        GetFileSizeEx(marker, &mut size)?;
++    }
++    if size != MARKER.len() as i64 {
++        return Err(LifecycleError::Invalid);
++    }
++    let mut bytes = [0; MARKER.len()];
++    owner.read_at(marker, 0, &mut bytes)?;
++    if bytes != MARKER {
++        return Err(LifecycleError::Invalid);
++    }
++    current(deadline)?;
++    let own_identity = identity_fact(own);
++    let own_image = image_fact(own);
++    let own_sid = sid_fact(Ok(sid));
++    let thread_sid = thread_sid(&mut owner);
++    let parent = match parent_id(&mut owner, deadline) {
++        Ok(pid) => match owner.process(pid, Role::Engine) {
++            Ok(process) => format!("{{\"status\":\"OPENED_LIMITED_QUERY_SYNC\",\"snapshotParentId\":{pid},\"identity\":{},\"image\":{},\"processToken\":{}}}",
++                identity_fact(process), image_fact(process), sid_fact(owner.token_sid(process).map_err(Into::into))),
++            Err(error) => format!("{{\"snapshotParentId\":{pid},\"open\":{}}}", failure(error)),
++        },
++        Err(error) => failure(error),
++    };
++    let console = unsafe { windows::Win32::System::Console::GetConsoleWindow() };
++    let json = format!("{{\"schemaVersion\":1,\"scope\":\"READ_ONLY_TEST_FACTS_NOT_INSTALLER_ACCEPTANCE\",\"nonce\":{},\"ownIdentity\":{own_identity},\"ownImage\":{own_image},\"ownProcessToken\":{own_sid},\"optionalThreadToken\":{thread_sid},\"parent\":{parent},\"consoleWindowPresent\":{},\"releaseProof\":\"REQUIRES_ACTUAL_TEST_PROCESS_EXIT0\"}}\n",
++        quote(&request.nonce), !console.0.is_null());
++    if json.len() > 8192 {
++        return Err(LifecycleError::Invalid);
++    }
++    current(deadline)?;
++    let output = owner.open_file(
++        &request.root.join("context.json"),
++        GENERIC_WRITE.0 | READ_CONTROL.0,
++        FILE_SHARE_READ,
++        CREATE_NEW,
++        false,
++        false,
++    )?;
++    owner.add(output, Role::Control);
++    verify_info(output, false)?;
++    let mut n = 0;
++    unsafe {
++        WriteFile(output, Some(json.as_bytes()), Some(&mut n), None)?;
++        FlushFileBuffers(output)?;
++    }
++    if n as usize != json.len() {
++        return Err(LifecycleError::Unsettled);
++    }
++    owner.release()?;
++    current(deadline)?;
++    // No identity/SID/path dump is sent to inherited stdout. Root verifies the
++    // exact bounded create-new JSON plus actual same-SHA harness exit status.
++    Ok(())
++}
++
++#[test]
++fn engine_parent_context_observer() {
++    let args: Vec<_> = std::env::args().skip(1).collect();
++    if let Some(request) = request(&args).expect("closed test-only observer args") {
++        observe(request).expect("owned read-only engine parent context observation");
++    }
++}
++
++#[test]
++fn observer_carrier_has_no_path_alias_or_normal_role() {
++    assert!(request(&["begin".into()]).unwrap().is_none());
++    let nonce = "0123456789abcdef0123456789abcdef";
++    let root = format!(r"C:\test\FutureClassroom-r75-parent-observer-{nonce}");
++    let args = vec![
++        "--exact".into(),
++        NAME.into(),
++        "--test-threads=1".into(),
++        "--nocapture".into(),
++        "--skip".into(),
++        format!("{TOKEN}{nonce}:{root}"),
++    ];
++    assert!(request(&args).unwrap().is_some());
++    for bad in [
++        root.replace("C:\\", "\\\\server\\"),
++        root.replace("\\test\\", "\\test\\..\\"),
++        root.replace("\\test\\", "\\test/"),
++        format!("{root}\\"),
++        format!("{root}:ads"),
++        format!("{root}."),
++        root.replace(nonce, "other"),
++    ] {
++        let mut bad_args = args.clone();
++        bad_args[5] = format!("{TOKEN}{nonce}:{bad}");
++        assert!(request(&bad_args).is_err());
++    }
++    let mut repeated = args.clone();
++    repeated.extend(["--skip".into(), args[5].clone()]);
++    assert!(request(&repeated).is_err());
++}

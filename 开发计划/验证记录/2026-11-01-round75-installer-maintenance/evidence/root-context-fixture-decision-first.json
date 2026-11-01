@@ -1,0 +1,19 @@
+{
+  "status": "ROOT_APPROVED_TEST_FIXTURE_PREPARATION_ONLY",
+  "recordedUtc": "2026-11-01T12:04:45.657533+00:00",
+  "requirement": "Respect existing user work: no full UI, foreground changes or possible CUI console flash in the MSI context probe.",
+  "decision": "After actual N frozen codegen, create an independent GUI2 copy of the original fc_windows test PE with exact original/copy identities and closed PE-header diff. Original full22 CUI and normal2 GUI products remain unchanged. Root must run exact GUI-copy --list/--skip CLI checks before packing this copy as a Type2 test-only Binary. No fixture binary exists or has been executed yet.",
+  "qualification": "This is a separate profile.test=true test fixture, never a normal product or CI test-subsystem replacement. Entry/code/imports and all bytes outside the explicitly recorded Subsystem field (and any separately justified checksum field) must remain equal.",
+  "references": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-type-2",
+      "supports": "Type2 launches an EXE from an embedded Binary temporary stream and accepts an EXE command line; this page alone supplies no no-console guarantee."
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/io/struct.Stdout.html",
+      "supports": "Official Rust documents detached-console null stdout handles as successful no-op writes. This does not replace actual observer/CLI/runtime checks."
+    }
+  ],
+  "actualWindowsOrMsi": "NOT_RUN",
+  "normalSourceChangedByDecision": false
+}

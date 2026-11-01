@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-fixture-preparation-first/registry-fixture.py", line 173, in <module>
+    main()
+  File "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-fixture-preparation-first/registry-fixture.py", line 168, in main
+    need(set(tables) == set(listed) - SYSTEM, 'every non-system actual table must be exported')
+  File "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-fixture-preparation-first/registry-fixture.py", line 28, in need
+    raise ValueError(message)
+ValueError: every non-system actual table must be exported

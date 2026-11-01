@@ -1,0 +1,19 @@
+Action	Condition	Sequence
+s72	S255	I2
+InstallExecuteSequence	Action
+CostInitialize		800
+FileCost		900
+CostFinalize		1000
+LaunchConditions		100
+ValidateProductID		700
+InstallValidate		1400
+FcObserveParent	1	1499
+FcAbortBeforeInitialize	1	1500
+InstallInitialize		1501
+ProcessComponents		1600
+UnpublishFeatures		1800
+RegisterUser		6000
+RegisterProduct		6100
+PublishFeatures		6300
+PublishProduct		6400
+InstallFinalize		6600

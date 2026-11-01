@@ -1,0 +1,7 @@
+{
+  "status": "PREPARED_PROCESS_ONLY_POLICY_FIX_NOT_WINDOWS",
+  "reason": "R73 actual evidence established downloaded PS file execution can be blocked by policy. Wrapper invokes controller.ps1 from disk, so add process-only ExecutionPolicy Bypass like its existing dedicated query child. No Set-ExecutionPolicy or user/machine policy change. All other bytes identical; first wrapper remains unexecuted/original.",
+  "firstSha256": "b5839c6a1f1201000da09840a4423fd9f88045b2d7e275cbb303542beb70a060",
+  "secondSha256": "992ac0908f805f7e15eacd84340e65da09916dc451601f10498c17703a416f45",
+  "controllerSha256": "b538244ff4b0a2916510f6bb8c78500c6b05f6b3f3fa6df157cbf4a81b5a3a06"
+}

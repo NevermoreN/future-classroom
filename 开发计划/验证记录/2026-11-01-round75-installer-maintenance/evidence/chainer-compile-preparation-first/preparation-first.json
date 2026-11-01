@@ -1,0 +1,112 @@
+{
+  "status": "PREPARED_AST_ONLY_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T13:28:13.967953+00:00",
+  "helper": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-compile-preparation-first/compile-csharp-first.py",
+    "bytes": 21976,
+    "sha256": "22f6d0941ee3ff1940fa8222ca2c2390433e93946d3ad5b01f33ee497dab3291"
+  },
+  "owner": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-compile-preparation-first/.owner",
+    "bytes": 58,
+    "sha256": "317fc3c6deb89d0436b7f2c28f2afd0b41ccae3addd6a546b8bb7a6da5afb6cf"
+  },
+  "sourceInput": {
+    "path": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.cs",
+    "bytes": 15395,
+    "sha256": "cb23dc2461108e84f5b72660be1cf83ec5731f51eb402cecc7083f4f106f8798"
+  },
+  "sourceSpecObservedOnly": {
+    "path": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8/spec.json",
+    "bytes": 1171,
+    "sha256": "da135548b895d0647e001f4e75b7107b4ec08c40832c8dbc37841b638fa115a0"
+  },
+  "remoteScripts": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-compile-preparation-first/remote-common-first.txt",
+      "bytes": 2447,
+      "sha256": "b291b259b6f065d1b8cdba021c78a4f8348d1b66ef58100dbe0d1abaaa37107c"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-compile-preparation-first/remote-create-first.txt",
+      "bytes": 845,
+      "sha256": "ba9627b0c21967b9ce18c5b10a02a22efc823b1b7d192ff217ce031e4334b833"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-compile-preparation-first/remote-compile-first.txt",
+      "bytes": 3458,
+      "sha256": "a9c5a87d8dfac66f2b76de95839890ef0e2dd4c13df81048af6b6b733fcf3dbb"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-compile-preparation-first/remote-collect-first.txt",
+      "bytes": 1275,
+      "sha256": "1c89f95009f6874305a0d78d3a2650b583d3eefe12f8e94a4639b1cdb1d6d19e"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-compile-preparation-first/remote-cleanup-first.txt",
+      "bytes": 1608,
+      "sha256": "2bc728cf845fce6e239290afc81f341375884d5dd9e63bbc8ce27d689ca9b7aa"
+    }
+  ],
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/chainer-compile-preparation-first/compile-csharp-first.py",
+    "--cs-source",
+    "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.cs",
+    "--cs-source-sha256",
+    "cb23dc2461108e84f5b72660be1cf83ec5731f51eb402cecc7083f4f106f8798",
+    "--nonce",
+    "bd0f287d596c4a01bc2a120c3670afb8",
+    "--expected-owner-sid",
+    "S-1-5-21-3896111207-1867804362-1971593122-1001",
+    "--local-output",
+    "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8",
+    "--execute"
+  ],
+  "explicitInputs": "Controller accepts only explicit C# path/SHA, nonce, expected current userSID and fresh local output directory. No guessed incomplete spec fields. Root provided actual concrete source/spec; source file and spec only read, never changed.",
+  "receiptABI": {
+    "status": "PASS_CSC_ACTUAL_EXIT0",
+    "actualExit": true,
+    "exitCode": 0,
+    "sourceBeforeAfter": "exact {bytes,sha256} == native spec.source",
+    "sourceUnchanged": true,
+    "exe": "exact {bytes,sha256}",
+    "nonce": "explicit actual",
+    "commandArgs": [
+      "actual cscAbs",
+      "/nologo",
+      "/target:winexe",
+      "/platform:x86",
+      "/optimize+",
+      "/warnaserror+",
+      "/out:<actualremoteexe>",
+      "<actualremoteRoot>\\ChainerProbe.cs"
+    ],
+    "compilerSha256": "actual system compiler before==after hash",
+    "additional": "compilerVersion/path/bytes, original process PID/creation/physicalexit, original20s and childTMP/TEMP fields"
+  },
+  "constraints": [
+    "Windows TEMP FutureClassroom-r75-chainer-build-<nonce> is independent of runtimeRoot. Preflight fresh, currentSID must equal explicit expected; root and compile-temp owner explicitly set currentSID with protected user/SYSTEM-only DACL, never builtin-admin allowlist.",
+    "Fixed WINDIR/Microsoft.NET/Framework/v4.0.30319/csc.exe with8argv; CreateNoWindow, TMP/TEMP only child owned compile-temp. No normal source/bin/DLL/project or production.NET dependency.",
+    "120s total includes preflight and reserves20s cleanup; compiler20s plus bounded own-process kill/wait/pipe cleanup on negative timeout. Timeout can never PASS. No unknown-process kill.",
+    "Only download original source, EXE(if present), receipt/stdout/stderr viaSCP after physical original csc exit; exact remote manifest bytes/SHA match every downloaded file. Preserves remote original receipt bytes; root no premature cleanup before acknowledgment.",
+    "Local parser requires actual i386 EXE(notDLL),PE32,GUI2, unique raw mapped COR20 header, ILONLY and32BITREQUIRED. Generated WinExe never executed.",
+    "Cleanup checks original csc PID/creation gone, exact manifest file/directory membership/hashes, marker/currentuser-onlyDACL, acknowledged original source/receipt/log/exe download. Deletes only known own files/nonrecursive dirs; unknowns retained FAIL for root review.",
+    "compiler-temp compiled caches are identity-listed and bounded128files/32MiB, private suffixkey/pfx/p12 denied before reading. No global cache deletion.",
+    "Runtime chainer-probe root explicitly untouched. No MSI/registry/productRoot/gate/Run/foreground/task/globalpolicy action, no network performed by preparation."
+  ],
+  "checks": {
+    "pythonAST": true,
+    "onlyBootstrapLiteralEncoded": true,
+    "actualCSAndSpecReadOnly": true,
+    "PowerShellCscSSHWindowsCargoNetwork": "NOT_RUN",
+    "generatedWinExe": "NOT_CREATED_OR_EXECUTED",
+    "runtimeRoot": "NOT_TOUCHED"
+  },
+  "limitations": [
+    "Root alone triggers actual Windows. PowerShell syntax/CSC behavior/NTFS ownerAndDACL are not runtime-proven by this preparation.",
+    "Actual receipt source/exe facts must fit native checker8arg ABI; compile-only proof is not chainer Join/End or MSI/runtime acceptance.",
+    "Unknown compiler liveness/upload partial/source mutation/manifest mismatch/download failure never permits blind cleanup; exact named root may remain for root limited owner review."
+  ]
+}

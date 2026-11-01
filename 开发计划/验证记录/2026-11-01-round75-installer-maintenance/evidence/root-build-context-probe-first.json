@@ -1,0 +1,122 @@
+{
+  "status": "FAIL_LOCAL_CONTEXT_OBSERVER_BUILD_OR_TABLES",
+  "scope": "Independent GUI test-only Type2 observer then intentional Type19 abort before Initialize; local build/static only, no Windows/production MSI/Pending.",
+  "nonce": "ef0ad284079e4dfaaa5d6f8cd7b7732f",
+  "directory": "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f",
+  "sourceBefore": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 55135,
+      "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 33752,
+      "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 13778,
+      "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    }
+  ],
+  "commands": [
+    {
+      "name": "author",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/evidence/parent-context-probe-fourth/context-probe.py",
+        "--observer-test-name",
+        "installer_lifecycle::native::broker::context_probe::engine_parent_context_observer",
+        "--windows-report-root",
+        "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-parent-observer-ef0ad284079e4dfaaa5d6f8cd7b7732f",
+        "--nonce",
+        "ef0ad284079e4dfaaa5d6f8cd7b7732f",
+        "author",
+        "--observer-exe",
+        "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96/fc_windows_gui_test_fixture.exe",
+        "--observer-sha256",
+        "5ae22a321c0c8fc564da8567d341ca93946219330d61f31291997a422a579b39",
+        "--fixture-ledger",
+        "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96/fixture-ledger.json",
+        "--fixture-ledger-sha256",
+        "fa372949bb74b30b540d122af552ebf4c2006e88a6e771ddd7bef76c57ab8799",
+        "--actual-cli-proof",
+        "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-first.json",
+        "--cli-proof-sha256",
+        "f823b6e55eee0733b5d32ebeea2bdc2d9b3bfeda66186cdbd749c838a15a0875",
+        "--output-dir",
+        "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.13996881200000644,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-author-first.stdout.log",
+        "bytes": 751,
+        "sha256": "e32d18a3e1c0f5e94723b9412c6de2c4d639722a620b2d19cf5b388abb21a88b"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-author-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "build",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/wrappers/wixl",
+        "-a",
+        "x86",
+        "-o",
+        "context-probe.msi",
+        "context-probe.wxs"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f",
+      "actualExit": true,
+      "exitCode": 1,
+      "elapsedSeconds": 0.13613180886022747,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-first.stderr.log",
+        "bytes": 290,
+        "sha256": "48693958601e742dac7dce514606a1385809cbad7c9426ccbd5938b5875a81dc"
+      }
+    }
+  ],
+  "startedUtc": "2026-11-01T12:45:57.609557+00:00",
+  "errorKind": "AssertionError",
+  "errorCode": "('build', 1)",
+  "elapsedSeconds": 0.2785464490298182
+}

@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="4BFAFA4A-6E0D-5FAB-90F7-4C9967F2ED46" UpgradeCode="1095315F-98C5-5B6E-81E0-25A167CE5A60" Name="FutureClassroom readonly context probe" Language="1033" Version="0.0.1" Manufacturer="FutureClassroom test-only">
+    <Package InstallerVersion="500" InstallScope="perUser" Compressed="yes" />
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+    <Condition Message="Readonly context probe is per-user only.">NOT ALLUSERS</Condition>
+    <Binary Id="FcReadonlyObserver" SourceFile="observer-harness.exe" />
+    <CustomAction Id="FcObserveParent" BinaryKey="FcReadonlyObserver" ExeCommand="--exact installer_lifecycle::native::broker::context_probe::engine_parent_context_observer --test-threads=1 --nocapture --skip fc-owned-parent-observer-v1:ef0ad284079e4dfaaa5d6f8cd7b7732f:C:\Users\Elior\AppData\Local\Temp\FutureClassroom-r75-parent-observer-ef0ad284079e4dfaaa5d6f8cd7b7732f" Return="check" Impersonate="yes" />
+    <CustomAction Id="FcAbortBeforeInitialize" BinaryKey="FcReadonlyObserver" ExeCommand="--fc-r75-unexecuted-type19-placeholder" Return="check" Impersonate="yes" />
+    <InstallExecuteSequence>
+      <Custom Action="FcObserveParent" Sequence="1499">1</Custom>
+      <Custom Action="FcAbortBeforeInitialize" Sequence="1500">1</Custom>
+      <InstallInitialize Sequence="1501" />
+    </InstallExecuteSequence>
+    <Directory Id="TARGETDIR" Name="SourceDir" />
+    <Feature Id="ObserverFeature" Title="Readonly observer; no installed payload" Level="1" />
+  </Product>
+</Wix>

@@ -1,0 +1,131 @@
+{
+  "status": "PREPARED_SECOND_AST_ONLY_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T13:02:00.428527+00:00",
+  "firstHelper": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/run-quiet-observer-first.py",
+    "bytes": 22836,
+    "sha256": "d9dc5b3900d79ecb58e6c922defc5c6bb84329b99352b2b57f1ae70a21012733"
+  },
+  "secondHelper": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/run-quiet-observer-second.py",
+    "bytes": 22774,
+    "sha256": "03a6766c92a06ae7c0edf158a4c18dcdda5652a566f757e71b49eb081abaa646"
+  },
+  "firstPreparation": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/preparation-first.json",
+    "bytes": 7221,
+    "sha256": "a45d95a97106f6ec9fbafaa291d4097953e6ece89ffa4cae6eed57dec1c33976"
+  },
+  "minimalDiff": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/first-to-second-stdin-transport.diff",
+    "bytes": 3899,
+    "sha256": "960cfb5d0dc2f10c43baa8e182602a2bb907ca4299972489b77793ffd3ec944e"
+  },
+  "transport": {
+    "kind": "SHORT_ENCODED_COMMAND_UTF8_STDIN_IN_MEMORY_SCRIPTBLOCK",
+    "bootstrapEncodedCharacters": 548,
+    "noUploadedScript": true,
+    "noExecutionPolicyChange": true,
+    "stdinCapturedAsExactBytesShaAndBase64": true
+  },
+  "remoteApplicationSourcesUnchanged": {
+    "commonAndFivePhasesByteIdentical": true,
+    "sourceFiles": [
+      {
+        "phase": "CREATE",
+        "source": {
+          "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/remote-create-first.txt",
+          "bytes": 2665,
+          "sha256": "5dad6b18caf41493649a2ca99c7c49cf27023d6fb1b24a7a6458644d1e66acf5"
+        },
+        "representativeEncodedCharacters": 6512,
+        "losslessStringGzipRoundtrip": true
+      },
+      {
+        "phase": "RUN",
+        "source": {
+          "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/remote-run-first.txt",
+          "bytes": 3077,
+          "sha256": "def5fde8786993f1a56a7e82e64b63bb31892f352c72c284f68dbde1decdfcdd"
+        },
+        "representativeEncodedCharacters": 7272,
+        "losslessStringGzipRoundtrip": true
+      },
+      {
+        "phase": "AFTER",
+        "source": {
+          "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/remote-after-first.txt",
+          "bytes": 2437,
+          "sha256": "7b3cfac86619ff50b34aa195a63ef8d59fcaac9f0c9ab35e8f2bbd749889255e"
+        },
+        "representativeEncodedCharacters": 6256,
+        "losslessStringGzipRoundtrip": true
+      },
+      {
+        "phase": "CAPTURE",
+        "source": {
+          "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/remote-capture-first.txt",
+          "bytes": 2392,
+          "sha256": "c695f9a8a6be9663f75f11b20cf231ec5f67ea5a959090b8779b245edb67f2d4"
+        },
+        "representativeEncodedCharacters": 6032,
+        "losslessStringGzipRoundtrip": true
+      },
+      {
+        "phase": "CLEANUP",
+        "source": {
+          "path": "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/remote-cleanup-first.txt",
+          "bytes": 3363,
+          "sha256": "be52b60b83dcc7155fbe8ef272390c06ac330e72cef3728fa87338e54b3938f2"
+        },
+        "representativeEncodedCharacters": 7164,
+        "losslessStringGzipRoundtrip": true
+      }
+    ]
+  },
+  "actualRootCommand": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/context-observer-runtime-preparation-first/run-quiet-observer-second.py",
+    "--report",
+    "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-first.json",
+    "--execute"
+  ],
+  "originalBudgets": {
+    "overallSeconds": 120,
+    "admissionIncludedInTotal": true,
+    "cleanupReservedSeconds": 20,
+    "msiClientWaitSeconds": 35,
+    "afterProcessWaitSeconds": 8
+  },
+  "pinsAndAcceptance": [
+    "Exact final MSI/CLI/fixture-ledger/static report source pins; eight source guards and24originalPE facts unchanged before/after.",
+    "Fresh same actual CLI nonce/root/marker with protected currentSID/SYSTEM/admin ACL; only final MSI uploaded and hash checked.",
+    "Quiet original client Process.WaitForExit yields actual1603; no .Kill/process termination function. Unknown live instance retains FAIL/root.",
+    "Actual original observer PID/creation/image/process SID and parent PID/creation/image/process SID from exact bounded context.json; GUI no-console fact; no production role inference.",
+    "Read-only new msiexec PID+StartTimeFiletime comparison against exact before baseline; original observer expectedPID/create absence or PIDreuse proof. Existing baseline engine never killed. No unproved independent OS observer exitcode claim.",
+    "Final context/log exact raw bytes are captured after process quiescence, preserved locally with SHA/base64; preliminary context identity hash must match final.",
+    "Actual verbose log must contain unique observer-success Return1 then Type19 Return3+exactABORT, no Initialize/effects-action start; no whole install success claim.",
+    "Limited COM ProductsEx(exactProductCode,emptySID,7) plus ProductState unknown before/after and cleanup recheck; current-caller per-user+machine only, other users/cache NOT_QUERIED. No repair/uninstall/registry deletion.",
+    "Cleanup rechecks same original process instances, registration absence, captured context/log SHA, final MSI SHA, exact root marker and closed4file membership. Delete only exact four files and nonrecursive owned root after all safety evidence; unknowns retain root."
+  ],
+  "limitations": [
+    "Requires root actual Windows invocation/parent terminal observation; preparation does not run observer/MSI or prove the new COM reflection shape.",
+    "Baseline-existing msiexec processes may remain; report does not claim all global Windows Installer service processes disappeared. Any newly observed still-live instance blocks deletion; no process owner is guessed from name alone.",
+    "If failure prevents process/product/capture proofs, root remains for explicit bounded owner review; no blind force cleanup of engine/cache/registration.",
+    "MSI Type2 engine action-success+process original-instance disappearance supports test-only return; actual sourceSID/parent topology is facts, not new production Begin/End/MSI acceptance.",
+    "Only AST and literal encoding/gzip calculations ran. No controller function, PowerShell, COM, SSH, Windows, MSI, Cargo or network invocation.",
+    "Initial pure preparation length calculation exceeded7500 with redundant configbase64 and overcomplete representative config; changed only in-memory transport encoding to escaped single-quoted JSON inside compressed script and drops unused commandLine outside RUN. No actual Windows command failed or was attempted.",
+    "First prepared gzip/full-EncodedCommand transport source remains unchanged and was never run. Root supplied actual guard-limit failure in a separate GUI-list cleanup case, motivating transport-only second variant.",
+    "COM ProductsEx uses BSTR empty current-user SID with contexts7, distinct from native PInvoke MACHINEcontext requiring NULL. This exact COM reflection API shape remains NOT_RUN until root actual execution; failure before MSI rejects.",
+    "Second uses no Measure-Object, Add-Type, downloaded PS1 invocation, Machine/User policy change, cache/registration cleanup, unknown process kill or budget extension."
+  ],
+  "checks": {
+    "pythonAST": true,
+    "phaseStringByteComparison": true,
+    "bootstrapLiteralEncodingOnly": true,
+    "noHelperFunctionsInvoked": true,
+    "PowerShellCOMSSHWindowsMSICargoNetwork": "NOT_RUN",
+    "firstFilesAndExistingInputsUnchanged": true
+  }
+}

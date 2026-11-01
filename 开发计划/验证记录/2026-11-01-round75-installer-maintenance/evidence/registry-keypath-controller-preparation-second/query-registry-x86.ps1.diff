@@ -1,0 +1,11 @@
+--- /tmp/fc-round75-installer-maintenance/evidence/registry-keypath-fixture-preparation-first/query-registry-x86.ps1
++++ /tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-second/query-registry-x86.ps1
+@@ -79,7 +79,7 @@
+             componentPathUtf16Hex=([BitConverter]::ToString([Text.Encoding]::Unicode.GetBytes($raw))).Replace('-','');
+             pathCapacity=4096; pathReturnedLength=$pathCapacity; productVersionCode=$code;
+             productVersion=$version.ToString(); versionCapacity=4096; versionReturnedLength=$versionCapacity }
+-        if ($pathCapacity -ge 4096 -or $versionCapacity -ge 4096 -or $state -eq -3 -or $code -eq 234) { throw 'BOUNDED_QUERY_OVERFLOW' }
++        if ($state -eq -3 -or $code -eq 234 -or ($state -eq 3 -and $pathCapacity -ge 4096) -or ($code -eq 0 -and $versionCapacity -ge 4096)) { throw 'BOUNDED_QUERY_OVERFLOW' }
+     }
+     for ([uint32]$index=0; $index -lt 2; $index++) {
+         $product = New-Object Text.StringBuilder 39

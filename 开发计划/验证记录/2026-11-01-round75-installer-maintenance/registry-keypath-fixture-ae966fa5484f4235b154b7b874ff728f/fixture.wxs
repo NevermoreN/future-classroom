@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="{60E68721-62F0-5656-B5BE-144E6B889AB6}" UpgradeCode="{2F1A5409-91AB-5072-8E50-2D452EABB9B2}" Name="FutureClassroom registry keypath fixture" Manufacturer="FutureClassroom test-only" Version="0.0.1" Language="1033" Codepage="1252">
+    <Package InstallerVersion="500" InstallScope="perUser" Compressed="yes" />
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+    <Condition Message="Registry fixture is per-user only.">NOT ALLUSERS</Condition>
+    <Condition Message="Registry fixture cannot automatically close applications.">MSIRESTARTMANAGERCONTROL = "DisableShutdown"</Condition>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder">
+        <Component Id="RegistryProbe" Guid="{A910E6F2-4809-5B5A-B317-C921DA5A86E8}" Win64="no">
+          <RegistryValue Id="RegistryMarker" Root="HKCU" Key="Software\FutureClassroom-Test-RegistryKeyPath-ae966fa5484f4235b154b7b874ff728f" Name="OwnedMarker" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Feature Id="RegistryFeature" Title="Registry-only fixture" Level="1">
+      <ComponentRef Id="RegistryProbe" />
+    </Feature>
+  </Product>
+</Wix>

@@ -1,0 +1,57 @@
+{
+  "status": "ROOT_RECORDED_R75_FINITE_PROBES_CLOSED_PRODUCTION_INSTALLER_IN_DEVELOPMENT",
+  "recordedUtc": "2026-11-01T13:17:09.346815+00:00",
+  "evidence": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-third.json",
+      "bytes": 134890,
+      "sha256": "cd44ef72b57a354209a72f190e4e027c25f19f256a50e9b044785f8a90c06cd8",
+      "status": "PASS_MEASURED_FORMAL_UNINSTALL_AND_CLEANUP"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-interpretation-first.json",
+      "bytes": 664,
+      "sha256": "c7a7a3ec19a35b5da4dcd58d5ddd39be216db11c601ba2fdee8f75519366699d",
+      "status": "PASS_ACTUAL_WIN11_X86_HKCU_REGISTRY_KEYPATH_01_FORMAT"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-second.json",
+      "bytes": 149090,
+      "sha256": "213cd4c4beddc46a4bd08978a7b4951c721e9de5ce9338d1a78cc18c7429db6b",
+      "status": "PASS_R75_READONLY_CONTEXT_MSI_EXPECTED_ABORT_ONLY"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-second-context.json",
+      "bytes": 835,
+      "sha256": "e75d94df8b03f893f9294fd7408227838972603f1c23ec6b8b0f97536e90f648",
+      "status": "READ_ONLY_TEST_FACTS_NOT_INSTALLER_ACCEPTANCE"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/windows-readonly-post-probes-first.json",
+      "bytes": 16775,
+      "sha256": "00d0ef03ca927f7add78c443aca7be945cd8bdb45e675709e5cd30bd65b06b99",
+      "status": "PASS"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-engine-cache-readonly-first.json",
+      "bytes": 6054,
+      "sha256": "c3983fae8711795717d77ca3f14dd9dce67cdda684050897035a0430b3795999",
+      "status": "PASS_EXACT_OBSERVED_ENGINE_FILES_ABSENT"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/b-implementation-fourth.json",
+      "bytes": 7630,
+      "sha256": "dcdf5968e4cd8a8858dcd96841bc1629ba65b67e6c10b785e722f0ae81519c57",
+      "status": "PASS_B4_SOURCE_AND_LOCAL_TABLE_FRAGMENT_NOT_PRODUCT_MSI"
+    }
+  ],
+  "conclusion": {
+    "registryFixture": "Actual independent registry-only i/query/x fully passed, expected x86 HKCU01 verified; original two read-only preflight failures captured and cleaned. No production component matcher weakening.",
+    "type2Observer": "Actual own user token, parent shared System32 msiexec LocalSystem. Intentional abort before Initialize, actual client1603, observerActionReturn1, exact source GUI clone, no console, registration absent and cleanup PASS. Original COM-count preflight fail preserved.",
+    "productionImpact": "Current N2 exact sameSID engine check rejects real Type2. No production runtime acceptance; need distinct helper-user versus trusted engine capabilities and separate actual guardian Join/End experiment. Long-lived parent service is not transaction identity.",
+    "B4": "Three packaging sources changed after all N2 probes terminal; original B3 source backed up. Local table authoring fragment and25 pure pass only, normal product MSI NOT_RUN.",
+    "windowsResidue": "Post-probe readonly inventory PASS; exact3 cache MSI plus1 temporary observer image absent; Run/SSH auth unchanged, persistent key mode0600 metadata only."
+  },
+  "goal": "Full existing development goal remains active; no complete/pause/redefinition.",
+  "mainGit": "3abc693b4a99943bdcf551e1cf575620ae794366 synced; R74 roots removed; R75 not integrated yet."
+}

@@ -1,0 +1,11 @@
+--- /tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-first/parse-native-children-first.py
++++ /tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/parse-native-children-second.py
+@@ -8,7 +8,7 @@
+ def sha(data):return hashlib.sha256(data).hexdigest()
+ def native_harness(item,native_row,broker_guard):
+     assert sha(TEMPLATE.read_bytes())=='0317ffb1719737bd9dfa45ca7952c242df6ffff0baa6b1611d7b912277f9e0e5'
+-    assert broker_guard['path']=='crates/fc-windows/src/installer_lifecycle/native/broker.rs' and broker_guard['sha256']=='2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691'
++    assert broker_guard['path']=='crates/fc-windows/src/installer_lifecycle/native/broker.rs' and broker_guard['sha256']=='9fc3247c353b4a20b689b0611e4ca7b08994a9ef09bf360936581522ca1fc091'
+     assert native_row['target']=='fc_windows' and native_row['kind']==['lib'] and native_row['profile']['test'] is True and '/crates/fc-windows#' in native_row['packageId']
+     assert item['name']==Path(native_row['path']).name and item['binarySha256']==native_row['sha256']
+     old=runpy.run_path(str(TEMPLATE));lines=item['output']

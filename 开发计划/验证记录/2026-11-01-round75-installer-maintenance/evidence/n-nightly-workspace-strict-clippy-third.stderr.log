@@ -1,0 +1,12 @@
+    Checking fc-windows v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows)
+    Checking fc-bootstrap v0.1.0 (/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap)
+warning: unused dependency `fc-ports`
+  --> crates/fc-materials/Cargo.toml:11:1
+   |
+11 | fc-ports.workspace = true
+   | ^^^^^^^^
+   |
+   = note: `cargo::unused_dependencies` is set to `warn` by default
+help: consider removing the dependency on `fc-ports`
+warning: `fc-materials` (manifest) generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.96s

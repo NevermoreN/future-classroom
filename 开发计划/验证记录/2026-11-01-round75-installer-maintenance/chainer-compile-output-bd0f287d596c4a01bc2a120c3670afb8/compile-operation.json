@@ -1,0 +1,529 @@
+{
+  "status": "PASS_R75_CSC_GUI32_COMPILE_DOWNLOAD_ONLY",
+  "startedUtc": "2026-11-01T13:32:21.384588+00:00",
+  "source": {
+    "path": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.cs",
+    "bytes": 15395,
+    "sha256": "cb23dc2461108e84f5b72660be1cf83ec5731f51eb402cecc7083f4f106f8798"
+  },
+  "nonce": "bd0f287d596c4a01bc2a120c3670afb8",
+  "expectedOwnerSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+  "overallBudgetSeconds": 120,
+  "cleanupReserveSeconds": 20,
+  "originalCompileBudgetSeconds": 20,
+  "operations": [
+    {
+      "label": "01-create",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJABzAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzACkAKQA="
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.5178132441360503,
+      "stdin": {
+        "bytes": 3603,
+        "sha256": "1aabafe4d266dfefb0e4a6c5966b5f0d8fff3515752732ccd1839003f1599acc",
+        "base64": "JGM9J3sibm9uY2UiOiJiZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOCIsInNpZCI6IlMtMS01LTIxLTM4OTYxMTEyMDctMTg2NzgwNDM2Mi0xOTcxNTkzMTIyLTEwMDEiLCJtYXJrZXIiOiJmdXR1cmUtY2xhc3Nyb29tLW93bmVkLXI3NS1jaGFpbmVyLWJ1aWxkL3YxfGJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4XG4iLCJzb3VyY2VTaGEiOiJjYjIzZGMyNDYxMTA4ZTg0ZjViNzI2NjBiZTFjZjgzZWM1NzMxZjUxZWI0MDJjZWNjNzA4M2Y0ZjEwNmY4Nzk4Iiwic291cmNlQnl0ZXMiOjE1Mzk1fSd8Q29udmVydEZyb20tSnNvbjskRXJyb3JBY3Rpb25QcmVmZXJlbmNlPSdTdG9wJztbQ29uc29sZV06Ok91dHB1dEVuY29kaW5nPVtUZXh0LlVURjhFbmNvZGluZ106Om5ldygkZmFsc2UpCmZ1bmN0aW9uIElkZW50aXR5IHsgJGk9W1NlY3VyaXR5LlByaW5jaXBhbC5XaW5kb3dzSWRlbnRpdHldOjpHZXRDdXJyZW50KCk7dHJ5e3JldHVybiAkaS5Vc2VyfWZpbmFsbHl7JGkuRGlzcG9zZSgpfSB9CmZ1bmN0aW9uIERpckFjbCgkcCwkc2lkKXskYT1bU2VjdXJpdHkuQWNjZXNzQ29udHJvbC5EaXJlY3RvcnlTZWN1cml0eV06Om5ldygpOyRhLlNldE93bmVyKCRzaWQpOyRhLlNldEFjY2Vzc1J1bGVQcm90ZWN0aW9uKCR0cnVlLCRmYWxzZSk7Zm9yZWFjaCgkcyBpbiBAKCRzaWQsW1NlY3VyaXR5LlByaW5jaXBhbC5TZWN1cml0eUlkZW50aWZpZXJdOjpuZXcoJ1MtMS01LTE4JykpKXskYS5BZGRBY2Nlc3NSdWxlKFtTZWN1cml0eS5BY2Nlc3NDb250cm9sLkZpbGVTeXN0ZW1BY2Nlc3NSdWxlXTo6bmV3KCRzLCdGdWxsQ29udHJvbCcsJ0NvbnRhaW5lckluaGVyaXQsT2JqZWN0SW5oZXJpdCcsJ05vbmUnLCdBbGxvdycpKX07W0lPLkRpcmVjdG9yeV06OlNldEFjY2Vzc0NvbnRyb2woJHAsJGEpfQpmdW5jdGlvbiBGaWxlT3duZXIoJHAsJHNpZCl7JGE9W1NlY3VyaXR5LkFjY2Vzc0NvbnRyb2wuRmlsZVNlY3VyaXR5XTo6bmV3KCk7JGEuU2V0T3duZXIoJHNpZCk7JGEuU2V0QWNjZXNzUnVsZVByb3RlY3Rpb24oJHRydWUsJGZhbHNlKTtmb3JlYWNoKCRzIGluIEAoJHNpZCxbU2VjdXJpdHkuUHJpbmNpcGFsLlNlY3VyaXR5SWRlbnRpZmllcl06Om5ldygnUy0xLTUtMTgnKSkpeyRhLkFkZEFjY2Vzc1J1bGUoW1NlY3VyaXR5LkFjY2Vzc0NvbnRyb2wuRmlsZVN5c3RlbUFjY2Vzc1J1bGVdOjpuZXcoJHMsJ0Z1bGxDb250cm9sJywnQWxsb3cnKSl9O1tJTy5GaWxlXTo6U2V0QWNjZXNzQ29udHJvbCgkcCwkYSl9CmZ1bmN0aW9uIEZhY3QoJHApe2lmKChbSU8uRmlsZV06OkdldEF0dHJpYnV0ZXMoJHApLWJhbmRbSU8uRmlsZUF0dHJpYnV0ZXNdOjpSZXBhcnNlUG9pbnQpLW5lIDApe3Rocm93ICdSRVBBUlNFX0ZJTEUnfTtyZXR1cm4gQHtieXRlcz1bSW50NjRdKFtJTy5GaWxlSW5mb106Om5ldygkcCkuTGVuZ3RoKTtzaGEyNTY9KEdldC1GaWxlSGFzaCAtTGl0ZXJhbFBhdGggJHAgLUFsZ29yaXRobSBTSEEyNTYpLkhhc2guVG9Mb3dlckludmFyaWFudCgpfSB9CmZ1bmN0aW9uIFJvb3RDaGVjayB7ICRzaWQ9SWRlbnRpdHk7aWYoJHNpZC5WYWx1ZS1jbmUkYy5zaWQpe3Rocm93ICdDVVJSRU5UX1VTRVJfU0lEX01JU01BVENIJ307aWYoJGMucm9vdC1jbmUoSm9pbi1QYXRoIChbSU8uUGF0aF06OkdldEZ1bGxQYXRoKCRlbnY6VEVNUCkpICgnRnV0dXJlQ2xhc3Nyb29tLXI3NS1jaGFpbmVyLWJ1aWxkLScrJGMubm9uY2UpKSl7dGhyb3cgJ1JPT1RfUEFUSF9NSVNNQVRDSCd9O2lmKChbSU8uRmlsZV06OkdldEF0dHJpYnV0ZXMoJGMucm9vdCktYmFuZFtJTy5GaWxlQXR0cmlidXRlc106OlJlcGFyc2VQb2ludCktbmUgMCl7dGhyb3cgJ1JPT1RfUkVQQVJTRSd9OyRhPVtJTy5EaXJlY3RvcnldOjpHZXRBY2Nlc3NDb250cm9sKCRjLnJvb3QpO2lmKCRhLkdldE93bmVyKFtTZWN1cml0eS5QcmluY2lwYWwuU2VjdXJpdHlJZGVudGlmaWVyXSkuVmFsdWUtY25lJGMuc2lkIC1vciAtbm90ICRhLkFyZUFjY2Vzc1J1bGVzUHJvdGVjdGVkKXt0aHJvdyAnT1dORVJfT1JfUFJPVEVDVEVEX0RBQ0xfTUlTTUFUQ0gnfTskcnVsZXM9QCgkYS5HZXRBY2Nlc3NSdWxlcygkdHJ1ZSwkdHJ1ZSxbU2VjdXJpdHkuUHJpbmNpcGFsLlNlY3VyaXR5SWRlbnRpZmllcl0pKTtpZigkcnVsZXMuQ291bnQtbmUgMiAtb3IgQCgkcnVsZXN8V2hlcmUtT2JqZWN0eyRfLklkZW50aXR5UmVmZXJlbmNlLlZhbHVlLW5vdGluQCgkYy5zaWQsJ1MtMS01LTE4JykgLW9yICRfLkFjY2Vzc0NvbnRyb2xUeXBlLW5lICdBbGxvdycgLW9yICRfLkZpbGVTeXN0ZW1SaWdodHMtbmVbU2VjdXJpdHkuQWNjZXNzQ29udHJvbC5GaWxlU3lzdGVtUmlnaHRzXTo6RnVsbENvbnRyb2x9KS5Db3VudC1uZSAwKXt0aHJvdyAnUk9PVF9VU0VSX1NZU1RFTV9PTkxZX0RBQ0wnfTtpZihbSU8uRmlsZV06OlJlYWRBbGxUZXh0KChKb2luLVBhdGggJGMucm9vdCAnLm93bmVyJykpLWNuZSRjLm1hcmtlcil7dGhyb3cgJ1JPT1RfTUFSS0VSX01JU01BVENIJ30gfQpmdW5jdGlvbiBQcm9jZXNzR29uZSgkcCl7JHg9JG51bGw7dHJ5eyR4PVtEaWFnbm9zdGljcy5Qcm9jZXNzXTo6R2V0UHJvY2Vzc0J5SWQoW2ludF0kcC5waWQpO3JldHVybiAoKFtzdHJpbmddJHguU3RhcnRUaW1lLlRvVW5pdmVyc2FsVGltZSgpLlRvRmlsZVRpbWVVdGMoKSktY25lJHAuY3JlYXRpb25GaWxldGltZSl9Y2F0Y2ggW0FyZ3VtZW50RXhjZXB0aW9uXXtyZXR1cm4gJHRydWV9ZmluYWxseXtpZigkbnVsbC1uZSR4KXskeC5EaXNwb3NlKCl9fSB9CmlmKCRQU1ZlcnNpb25UYWJsZS5QU1ZlcnNpb24uTWFqb3ItbmUgNSAtb3IgJFBTVmVyc2lvblRhYmxlLlBTVmVyc2lvbi5NaW5vci1uZSAxKXt0aHJvdyAnRVhQRUNURURfREVTS1RPUDUxJ307JHNpZD1JZGVudGl0eTtpZigkc2lkLlZhbHVlLWNuZSRjLnNpZCl7dGhyb3cgJ0VYUEVDVEVEX1VTRVJfU0lEX01JU01BVENIJ30KJHI9Sm9pbi1QYXRoIChbSU8uUGF0aF06OkdldEZ1bGxQYXRoKCRlbnY6VEVNUCkpICgnRnV0dXJlQ2xhc3Nyb29tLXI3NS1jaGFpbmVyLWJ1aWxkLScrJGMubm9uY2UpO2lmKFRlc3QtUGF0aCAtTGl0ZXJhbFBhdGggJHIpe3Rocm93ICdST09UX05PVF9GUkVTSCd9CltJTy5EaXJlY3RvcnldOjpDcmVhdGVEaXJlY3RvcnkoJHIpfE91dC1OdWxsO0RpckFjbCAkciAkc2lkOyR0bXA9Sm9pbi1QYXRoICRyICdjb21waWxlLXRlbXAnO1tJTy5EaXJlY3RvcnldOjpDcmVhdGVEaXJlY3RvcnkoJHRtcCl8T3V0LU51bGw7RGlyQWNsICR0bXAgJHNpZAokb3duZXI9Sm9pbi1QYXRoICRyICcub3duZXInO1tJTy5GaWxlXTo6V3JpdGVBbGxCeXRlcygkb3duZXIsW1RleHQuRW5jb2RpbmddOjpBU0NJSS5HZXRCeXRlcygkYy5tYXJrZXIpKTtGaWxlT3duZXIgJG93bmVyICRzaWQKQHtzdGF0dXM9J0NSRUFURUQnO3Jvb3Q9JHI7bm9uY2U9JGMubm9uY2U7bWFya2VyPSRjLm1hcmtlcjthY3R1YWxPd25lclNpZD0kc2lkLlZhbHVlO3Byb3RlY3RlZERhY2w9JHRydWU7YWxsb3dlZFNpZHM9QCgkc2lkLlZhbHVlLCdTLTEtNS0xOCcpO3Bvd2Vyc2hlbGw9JFBTVmVyc2lvblRhYmxlLlBTVmVyc2lvbi5Ub1N0cmluZygpfXxDb252ZXJ0VG8tSnNvbiAtRGVwdGggNiAtQ29tcHJlc3MK"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/01-create.stdout.log",
+        "bytes": 464,
+        "sha256": "689142ed3882d5afdb1df5940aa29c8cd4107cd37c2f3bed20ab7317a5da4a5f",
+        "base64": "eyJwb3dlcnNoZWxsIjoiNS4xLjI2MTAwLjk3MTEiLCJub25jZSI6ImJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4IiwiYWN0dWFsT3duZXJTaWQiOiJTLTEtNS0yMS0zODk2MTExMjA3LTE4Njc4MDQzNjItMTk3MTU5MzEyMi0xMDAxIiwicHJvdGVjdGVkRGFjbCI6dHJ1ZSwiYWxsb3dlZFNpZHMiOlsiUy0xLTUtMjEtMzg5NjExMTIwNy0xODY3ODA0MzYyLTE5NzE1OTMxMjItMTAwMSIsIlMtMS01LTE4Il0sInN0YXR1cyI6IkNSRUFURUQiLCJyb290IjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1yNzUtY2hhaW5lci1idWlsZC1iZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOCIsIm1hcmtlciI6ImZ1dHVyZS1jbGFzc3Jvb20tb3duZWQtcjc1LWNoYWluZXItYnVpbGQvdjF8YmQwZjI4N2Q1OTZjNGEwMWJjMmExMjBjMzY3MGFmYjhcbiJ9DQo="
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/01-create.stderr.log",
+        "bytes": 618,
+        "sha256": "57aa5ca00c305862c0dcde30c4865943b5e6bc6218de1e727fd9ce4a76614423",
+        "base64": "IzwgQ0xJWE1MDQo8T2JqcyBWZXJzaW9uPSIxLjEuMC4xIiB4bWxucz0iaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS9wb3dlcnNoZWxsLzIwMDQvMDQiPjxPYmogUz0icHJvZ3Jlc3MiIFJlZklkPSIwIj48VE4gUmVmSWQ9IjAiPjxUPlN5c3RlbS5NYW5hZ2VtZW50LkF1dG9tYXRpb24uUFNDdXN0b21PYmplY3Q8L1Q+PFQ+U3lzdGVtLk9iamVjdDwvVD48L1ROPjxNUz48STY0IE49IlNvdXJjZUlkIj4xPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48T2JqIFM9InByb2dyZXNzIiBSZWZJZD0iMSI+PFROUmVmIFJlZklkPSIwIiAvPjxNUz48STY0IE49IlNvdXJjZUlkIj4xPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48L09ianM+"
+      }
+    },
+    {
+      "label": "02-upload-source",
+      "command": [
+        "scp",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.cs",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.cs"
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.22115617501549423,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/02-upload-source.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/02-upload-source.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "label": "03-compile-only",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJABzAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzACkAKQA="
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.8815274729859084,
+      "stdin": {
+        "bytes": 6662,
+        "sha256": "7de7f3aae0903b384de188183b1d459f193620537a727bd76204426c10e9aa73",
+        "base64": "JGM9J3sibm9uY2UiOiJiZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOCIsInNpZCI6IlMtMS01LTIxLTM4OTYxMTEyMDctMTg2NzgwNDM2Mi0xOTcxNTkzMTIyLTEwMDEiLCJtYXJrZXIiOiJmdXR1cmUtY2xhc3Nyb29tLW93bmVkLXI3NS1jaGFpbmVyLWJ1aWxkL3YxfGJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4XG4iLCJzb3VyY2VTaGEiOiJjYjIzZGMyNDYxMTA4ZTg0ZjViNzI2NjBiZTFjZjgzZWM1NzMxZjUxZWI0MDJjZWNjNzA4M2Y0ZjEwNmY4Nzk4Iiwic291cmNlQnl0ZXMiOjE1Mzk1LCJyb290IjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1yNzUtY2hhaW5lci1idWlsZC1iZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOCIsImFyZ3VtZW50cyI6Ii9ub2xvZ28gL3RhcmdldDp3aW5leGUgL3BsYXRmb3JtOng4NiAvb3B0aW1pemUrIC93YXJuYXNlcnJvcisgL291dDpDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLXI3NS1jaGFpbmVyLWJ1aWxkLWJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4XFxDaGFpbmVyUHJvYmUuZXhlIEM6XFxVc2Vyc1xcRWxpb3JcXEFwcERhdGFcXExvY2FsXFxUZW1wXFxGdXR1cmVDbGFzc3Jvb20tcjc1LWNoYWluZXItYnVpbGQtYmQwZjI4N2Q1OTZjNGEwMWJjMmExMjBjMzY3MGFmYjhcXENoYWluZXJQcm9iZS5jcyJ9J3xDb252ZXJ0RnJvbS1Kc29uOyRFcnJvckFjdGlvblByZWZlcmVuY2U9J1N0b3AnO1tDb25zb2xlXTo6T3V0cHV0RW5jb2Rpbmc9W1RleHQuVVRGOEVuY29kaW5nXTo6bmV3KCRmYWxzZSkKZnVuY3Rpb24gSWRlbnRpdHkgeyAkaT1bU2VjdXJpdHkuUHJpbmNpcGFsLldpbmRvd3NJZGVudGl0eV06OkdldEN1cnJlbnQoKTt0cnl7cmV0dXJuICRpLlVzZXJ9ZmluYWxseXskaS5EaXNwb3NlKCl9IH0KZnVuY3Rpb24gRGlyQWNsKCRwLCRzaWQpeyRhPVtTZWN1cml0eS5BY2Nlc3NDb250cm9sLkRpcmVjdG9yeVNlY3VyaXR5XTo6bmV3KCk7JGEuU2V0T3duZXIoJHNpZCk7JGEuU2V0QWNjZXNzUnVsZVByb3RlY3Rpb24oJHRydWUsJGZhbHNlKTtmb3JlYWNoKCRzIGluIEAoJHNpZCxbU2VjdXJpdHkuUHJpbmNpcGFsLlNlY3VyaXR5SWRlbnRpZmllcl06Om5ldygnUy0xLTUtMTgnKSkpeyRhLkFkZEFjY2Vzc1J1bGUoW1NlY3VyaXR5LkFjY2Vzc0NvbnRyb2wuRmlsZVN5c3RlbUFjY2Vzc1J1bGVdOjpuZXcoJHMsJ0Z1bGxDb250cm9sJywnQ29udGFpbmVySW5oZXJpdCxPYmplY3RJbmhlcml0JywnTm9uZScsJ0FsbG93JykpfTtbSU8uRGlyZWN0b3J5XTo6U2V0QWNjZXNzQ29udHJvbCgkcCwkYSl9CmZ1bmN0aW9uIEZpbGVPd25lcigkcCwkc2lkKXskYT1bU2VjdXJpdHkuQWNjZXNzQ29udHJvbC5GaWxlU2VjdXJpdHldOjpuZXcoKTskYS5TZXRPd25lcigkc2lkKTskYS5TZXRBY2Nlc3NSdWxlUHJvdGVjdGlvbigkdHJ1ZSwkZmFsc2UpO2ZvcmVhY2goJHMgaW4gQCgkc2lkLFtTZWN1cml0eS5QcmluY2lwYWwuU2VjdXJpdHlJZGVudGlmaWVyXTo6bmV3KCdTLTEtNS0xOCcpKSl7JGEuQWRkQWNjZXNzUnVsZShbU2VjdXJpdHkuQWNjZXNzQ29udHJvbC5GaWxlU3lzdGVtQWNjZXNzUnVsZV06Om5ldygkcywnRnVsbENvbnRyb2wnLCdBbGxvdycpKX07W0lPLkZpbGVdOjpTZXRBY2Nlc3NDb250cm9sKCRwLCRhKX0KZnVuY3Rpb24gRmFjdCgkcCl7aWYoKFtJTy5GaWxlXTo6R2V0QXR0cmlidXRlcygkcCktYmFuZFtJTy5GaWxlQXR0cmlidXRlc106OlJlcGFyc2VQb2ludCktbmUgMCl7dGhyb3cgJ1JFUEFSU0VfRklMRSd9O3JldHVybiBAe2J5dGVzPVtJbnQ2NF0oW0lPLkZpbGVJbmZvXTo6bmV3KCRwKS5MZW5ndGgpO3NoYTI1Nj0oR2V0LUZpbGVIYXNoIC1MaXRlcmFsUGF0aCAkcCAtQWxnb3JpdGhtIFNIQTI1NikuSGFzaC5Ub0xvd2VySW52YXJpYW50KCl9IH0KZnVuY3Rpb24gUm9vdENoZWNrIHsgJHNpZD1JZGVudGl0eTtpZigkc2lkLlZhbHVlLWNuZSRjLnNpZCl7dGhyb3cgJ0NVUlJFTlRfVVNFUl9TSURfTUlTTUFUQ0gnfTtpZigkYy5yb290LWNuZShKb2luLVBhdGggKFtJTy5QYXRoXTo6R2V0RnVsbFBhdGgoJGVudjpURU1QKSkgKCdGdXR1cmVDbGFzc3Jvb20tcjc1LWNoYWluZXItYnVpbGQtJyskYy5ub25jZSkpKXt0aHJvdyAnUk9PVF9QQVRIX01JU01BVENIJ307aWYoKFtJTy5GaWxlXTo6R2V0QXR0cmlidXRlcygkYy5yb290KS1iYW5kW0lPLkZpbGVBdHRyaWJ1dGVzXTo6UmVwYXJzZVBvaW50KS1uZSAwKXt0aHJvdyAnUk9PVF9SRVBBUlNFJ307JGE9W0lPLkRpcmVjdG9yeV06OkdldEFjY2Vzc0NvbnRyb2woJGMucm9vdCk7aWYoJGEuR2V0T3duZXIoW1NlY3VyaXR5LlByaW5jaXBhbC5TZWN1cml0eUlkZW50aWZpZXJdKS5WYWx1ZS1jbmUkYy5zaWQgLW9yIC1ub3QgJGEuQXJlQWNjZXNzUnVsZXNQcm90ZWN0ZWQpe3Rocm93ICdPV05FUl9PUl9QUk9URUNURURfREFDTF9NSVNNQVRDSCd9OyRydWxlcz1AKCRhLkdldEFjY2Vzc1J1bGVzKCR0cnVlLCR0cnVlLFtTZWN1cml0eS5QcmluY2lwYWwuU2VjdXJpdHlJZGVudGlmaWVyXSkpO2lmKCRydWxlcy5Db3VudC1uZSAyIC1vciBAKCRydWxlc3xXaGVyZS1PYmplY3R7JF8uSWRlbnRpdHlSZWZlcmVuY2UuVmFsdWUtbm90aW5AKCRjLnNpZCwnUy0xLTUtMTgnKSAtb3IgJF8uQWNjZXNzQ29udHJvbFR5cGUtbmUgJ0FsbG93JyAtb3IgJF8uRmlsZVN5c3RlbVJpZ2h0cy1uZVtTZWN1cml0eS5BY2Nlc3NDb250cm9sLkZpbGVTeXN0ZW1SaWdodHNdOjpGdWxsQ29udHJvbH0pLkNvdW50LW5lIDApe3Rocm93ICdST09UX1VTRVJfU1lTVEVNX09OTFlfREFDTCd9O2lmKFtJTy5GaWxlXTo6UmVhZEFsbFRleHQoKEpvaW4tUGF0aCAkYy5yb290ICcub3duZXInKSktY25lJGMubWFya2VyKXt0aHJvdyAnUk9PVF9NQVJLRVJfTUlTTUFUQ0gnfSB9CmZ1bmN0aW9uIFByb2Nlc3NHb25lKCRwKXskeD0kbnVsbDt0cnl7JHg9W0RpYWdub3N0aWNzLlByb2Nlc3NdOjpHZXRQcm9jZXNzQnlJZChbaW50XSRwLnBpZCk7cmV0dXJuICgoW3N0cmluZ10keC5TdGFydFRpbWUuVG9Vbml2ZXJzYWxUaW1lKCkuVG9GaWxlVGltZVV0YygpKS1jbmUkcC5jcmVhdGlvbkZpbGV0aW1lKX1jYXRjaCBbQXJndW1lbnRFeGNlcHRpb25de3JldHVybiAkdHJ1ZX1maW5hbGx5e2lmKCRudWxsLW5lJHgpeyR4LkRpc3Bvc2UoKX19IH0KUm9vdENoZWNrOyRzaWQ9SWRlbnRpdHk7JGNzPUpvaW4tUGF0aCAkYy5yb290ICdDaGFpbmVyUHJvYmUuY3MnOyRleGU9Sm9pbi1QYXRoICRjLnJvb3QgJ0NoYWluZXJQcm9iZS5leGUnOyR0ZW1wPUpvaW4tUGF0aCAkYy5yb290ICdjb21waWxlLXRlbXAnCiRiZWZvcmU9RmFjdCAkY3M7aWYoJGJlZm9yZS5zaGEyNTYtY25lJGMuc291cmNlU2hhIC1vciAkYmVmb3JlLmJ5dGVzLW5lJGMuc291cmNlQnl0ZXMpe3Rocm93ICdVUExPQURFRF9TT1VSQ0VfSURFTlRJVFlfTUlTTUFUQ0gnfTtGaWxlT3duZXIgJGNzICRzaWQKJGNvbXBpbGVyPVtJTy5QYXRoXTo6R2V0RnVsbFBhdGgoKEpvaW4tUGF0aCAkZW52OldJTkRJUiAnTWljcm9zb2Z0Lk5FVFxGcmFtZXdvcmtcdjQuMC4zMDMxOVxjc2MuZXhlJykpOyRjb21waWxlckZhY3Q9RmFjdCAkY29tcGlsZXI7JHZlcnNpb249W0RpYWdub3N0aWNzLkZpbGVWZXJzaW9uSW5mb106OkdldFZlcnNpb25JbmZvKCRjb21waWxlcikuRmlsZVZlcnNpb24KJGNvbXBpbGVyQXJncz1AKCRjb21waWxlciwnL25vbG9nbycsJy90YXJnZXQ6d2luZXhlJywnL3BsYXRmb3JtOng4NicsJy9vcHRpbWl6ZSsnLCcvd2FybmFzZXJyb3IrJywoJy9vdXQ6JyskZXhlKSwkY3MpCiRwPVtEaWFnbm9zdGljcy5Qcm9jZXNzXTo6bmV3KCk7JHAuU3RhcnRJbmZvLkZpbGVOYW1lPSRjb21waWxlcjskcC5TdGFydEluZm8uQXJndW1lbnRzPSRjLmFyZ3VtZW50czskcC5TdGFydEluZm8uV29ya2luZ0RpcmVjdG9yeT0kYy5yb290OyRwLlN0YXJ0SW5mby5Vc2VTaGVsbEV4ZWN1dGU9JGZhbHNlOyRwLlN0YXJ0SW5mby5DcmVhdGVOb1dpbmRvdz0kdHJ1ZTskcC5TdGFydEluZm8uUmVkaXJlY3RTdGFuZGFyZElucHV0PSR0cnVlOyRwLlN0YXJ0SW5mby5SZWRpcmVjdFN0YW5kYXJkT3V0cHV0PSR0cnVlOyRwLlN0YXJ0SW5mby5SZWRpcmVjdFN0YW5kYXJkRXJyb3I9JHRydWU7JHAuU3RhcnRJbmZvLkVudmlyb25tZW50VmFyaWFibGVzWydUTVAnXT0kdGVtcDskcC5TdGFydEluZm8uRW52aXJvbm1lbnRWYXJpYWJsZXNbJ1RFTVAnXT0kdGVtcAokbz1bSU8uTWVtb3J5U3RyZWFtXTo6bmV3KCk7JGU9W0lPLk1lbW9yeVN0cmVhbV06Om5ldygpOyR0aW1lZD0kZmFsc2U7JHBoeXNpY2FsPSRmYWxzZTskY29kZT0kbnVsbDskcHJvYz0kbnVsbDskd2F0Y2g9W0RpYWdub3N0aWNzLlN0b3B3YXRjaF06OlN0YXJ0TmV3KCkKdHJ5e2lmKC1ub3QgJHAuU3RhcnQoKSl7dGhyb3cgJ0NTQ19TVEFSVF9GQUxTRSd9OyRwcm9jPUB7cGlkPSRwLklkO2NyZWF0aW9uRmlsZXRpbWU9W3N0cmluZ10kcC5TdGFydFRpbWUuVG9Vbml2ZXJzYWxUaW1lKCkuVG9GaWxlVGltZVV0YygpfTskcC5TdGFuZGFyZElucHV0LkNsb3NlKCk7JG90PSRwLlN0YW5kYXJkT3V0cHV0LkJhc2VTdHJlYW0uQ29weVRvQXN5bmMoJG8pOyRldD0kcC5TdGFuZGFyZEVycm9yLkJhc2VTdHJlYW0uQ29weVRvQXN5bmMoJGUpCiBpZigtbm90ICRwLldhaXRGb3JFeGl0KDIwMDAwKSl7JHRpbWVkPSR0cnVlOyRwLktpbGwoKTtpZigtbm90ICRwLldhaXRGb3JFeGl0KDUwMDApKXt0aHJvdyAnT1JJR0lOQUxfQ1NDX0VYSVRfVU5LTk9XTid9fTskcGh5c2ljYWw9JHAuSGFzRXhpdGVkOyRjb2RlPSRwLkV4aXRDb2RlCiBpZigtbm90IFtUaHJlYWRpbmcuVGFza3MuVGFza106OldhaXRBbGwoW1RocmVhZGluZy5UYXNrcy5UYXNrW11dQCgkb3QsJGV0KSw1MDAwKSl7dGhyb3cgJ0NTQ19QSVBFX0NPTVBMRVRJT05fVU5LTk9XTid9O2lmKCRvLkxlbmd0aC1ndCAxMDQ4NTc2IC1vciAkZS5MZW5ndGgtZ3QgMTA0ODU3Nil7dGhyb3cgJ0NPTVBJTEVSX0xPR19CT1VORCd9CiAkc3Rkb3V0PUpvaW4tUGF0aCAkYy5yb290ICdjb21waWxlci5zdGRvdXQubG9nJzskc3RkZXJyPUpvaW4tUGF0aCAkYy5yb290ICdjb21waWxlci5zdGRlcnIubG9nJztbSU8uRmlsZV06OldyaXRlQWxsQnl0ZXMoJHN0ZG91dCwkby5Ub0FycmF5KCkpO1tJTy5GaWxlXTo6V3JpdGVBbGxCeXRlcygkc3RkZXJyLCRlLlRvQXJyYXkoKSk7RmlsZU93bmVyICRzdGRvdXQgJHNpZDtGaWxlT3duZXIgJHN0ZGVyciAkc2lkCn1maW5hbGx5eyR3YXRjaC5TdG9wKCk7JHAuRGlzcG9zZSgpOyRvLkRpc3Bvc2UoKTskZS5EaXNwb3NlKCl9CiRhZnRlcj1GYWN0ICRjczskc2FtZT0oJGJlZm9yZS5ieXRlcy1lcSRhZnRlci5ieXRlcyAtYW5kICRiZWZvcmUuc2hhMjU2LWNlcSRhZnRlci5zaGEyNTYpOyRvdXRwdXQ9JG51bGw7aWYoW0lPLkZpbGVdOjpFeGlzdHMoJGV4ZSkpe0ZpbGVPd25lciAkZXhlICRzaWQ7JG91dHB1dD1GYWN0ICRleGV9CiRhZ2Fpbj1GYWN0ICRjb21waWxlcjtpZigkYWdhaW4uc2hhMjU2LWNuZSRjb21waWxlckZhY3Quc2hhMjU2IC1vciAkYWdhaW4uYnl0ZXMtbmUkY29tcGlsZXJGYWN0LmJ5dGVzKXt0aHJvdyAnU1lTVEVNX0NPTVBJTEVSX0NIQU5HRUQnfQokcmVjZWlwdD1Ae3N0YXR1cz0kKGlmKCRwaHlzaWNhbCAtYW5kICRjb2RlLWVxIDAgLWFuZCAtbm90ICR0aW1lZCAtYW5kICRzYW1lIC1hbmQgJG51bGwtbmUkb3V0cHV0IC1hbmQgJHdhdGNoLkVsYXBzZWQuVG90YWxTZWNvbmRzLWxlIDIwKXsnUEFTU19DU0NfQUNUVUFMX0VYSVQwJ31lbHNleydGQUlMX0NTQ19PUl9TT1VSQ0UnfSk7YWN0dWFsRXhpdD0kcGh5c2ljYWw7ZXhpdENvZGU9JGNvZGU7dGltZWRPdXQ9JHRpbWVkO2VsYXBzZWRTZWNvbmRzPSR3YXRjaC5FbGFwc2VkLlRvdGFsU2Vjb25kcztvcmlnaW5hbENvbXBpbGVCdWRnZXRTZWNvbmRzPTIwO3NvdXJjZUJlZm9yZT0kYmVmb3JlO3NvdXJjZUFmdGVyPSRhZnRlcjtzb3VyY2VVbmNoYW5nZWQ9JHNhbWU7ZXhlPSRvdXRwdXQ7bm9uY2U9JGMubm9uY2U7Y29tbWFuZEFyZ3M9JGNvbXBpbGVyQXJncztjb21waWxlclBhdGg9JGNvbXBpbGVyO2NvbXBpbGVyU2hhMjU2PSRjb21waWxlckZhY3Quc2hhMjU2O2NvbXBpbGVyQnl0ZXM9JGNvbXBpbGVyRmFjdC5ieXRlcztjb21waWxlclZlcnNpb249JHZlcnNpb247b3JpZ2luYWxDb21waWxlclByb2Nlc3M9JHByb2M7ZXhwZWN0ZWRPd25lclNpZD0kYy5zaWQ7d2luZG93c1NvdXJjZVBhdGg9JGNzO3dpbmRvd3NFeGVQYXRoPSRleGU7Y2hpbGRUbXA9JHRlbXA7Y2hpbGRUZW1wPSR0ZW1wO2dlbmVyYXRlZEV4ZUV4ZWN1dGVkPSRmYWxzZX0KJHJlY2VpcHRGaWxlPUpvaW4tUGF0aCAkYy5yb290ICdjb21waWxlci1yZWNlaXB0Lmpzb24nO1tJTy5GaWxlXTo6V3JpdGVBbGxUZXh0KCRyZWNlaXB0RmlsZSwoJHJlY2VpcHR8Q29udmVydFRvLUpzb24gLURlcHRoIDggLUNvbXByZXNzKSxbVGV4dC5VVEY4RW5jb2RpbmddOjpuZXcoJGZhbHNlKSk7RmlsZU93bmVyICRyZWNlaXB0RmlsZSAkc2lkCkB7c3RhdHVzPSdDT01QSUxFUl9SRUNFSVBUX1dSSVRURU4nO3JlY2VpcHQ9JHJlY2VpcHQ7cmVjZWlwdEZpbGU9KEZhY3QgJHJlY2VpcHRGaWxlKX18Q29udmVydFRvLUpzb24gLURlcHRoIDEwIC1Db21wcmVzcwo="
+      },
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/03-compile-only.stdout.log",
+        "bytes": 2061,
+        "sha256": "456e692eca94d9c404be80b88715433a4b391a86c284f32e7d5e01c52599863b",
+        "base64": "eyJzdGF0dXMiOiJDT01QSUxFUl9SRUNFSVBUX1dSSVRURU4iLCJyZWNlaXB0RmlsZSI6eyJieXRlcyI6MTkwNiwic2hhMjU2IjoiOTlhY2E2Y2Y5ZWUyYjNkOTE4OWFmMTY0MDk4M2UxMjZlNjA4MGIzZTFhYjA3ZjlmNWI1YTMzM2Q4NDk2ZDFmMCJ9LCJyZWNlaXB0Ijp7Im9yaWdpbmFsQ29tcGlsZUJ1ZGdldFNlY29uZHMiOjIwLCJ0aW1lZE91dCI6ZmFsc2UsImNvbXBpbGVyQnl0ZXMiOjIxNTQzODQsImNvbXBpbGVyU2hhMjU2IjoiOWUxMjU3Y2E4NzI4MmNhZWJjZTRhMDQ4OTRhNTFjNTk0YTA0NTNiMjg3Y2QxOTljMGM4ZThiYjNiMGQ2YTE5ZiIsImVsYXBzZWRTZWNvbmRzIjowLjIwNTU5MjgsImdlbmVyYXRlZEV4ZUV4ZWN1dGVkIjpmYWxzZSwid2luZG93c0V4ZVBhdGgiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLXI3NS1jaGFpbmVyLWJ1aWxkLWJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4XFxDaGFpbmVyUHJvYmUuZXhlIiwic291cmNlQWZ0ZXIiOnsiYnl0ZXMiOjE1Mzk1LCJzaGEyNTYiOiJjYjIzZGMyNDYxMTA4ZTg0ZjViNzI2NjBiZTFjZjgzZWM1NzMxZjUxZWI0MDJjZWNjNzA4M2Y0ZjEwNmY4Nzk4In0sInNvdXJjZVVuY2hhbmdlZCI6dHJ1ZSwiY29tbWFuZEFyZ3MiOlsiQzpcXFdpbmRvd3NcXE1pY3Jvc29mdC5ORVRcXEZyYW1ld29ya1xcdjQuMC4zMDMxOVxcY3NjLmV4ZSIsIi9ub2xvZ28iLCIvdGFyZ2V0OndpbmV4ZSIsIi9wbGF0Zm9ybTp4ODYiLCIvb3B0aW1pemUrIiwiL3dhcm5hc2Vycm9yKyIsIi9vdXQ6QzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1yNzUtY2hhaW5lci1idWlsZC1iZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOFxcQ2hhaW5lclByb2JlLmV4ZSIsIkM6XFxVc2Vyc1xcRWxpb3JcXEFwcERhdGFcXExvY2FsXFxUZW1wXFxGdXR1cmVDbGFzc3Jvb20tcjc1LWNoYWluZXItYnVpbGQtYmQwZjI4N2Q1OTZjNGEwMWJjMmExMjBjMzY3MGFmYjhcXENoYWluZXJQcm9iZS5jcyJdLCJjb21waWxlclZlcnNpb24iOiIxNC44LjEwMDAxLjAgYnVpbHQgYnk6IDVmMjk2ZGYwYzAwMDAwNSIsIm5vbmNlIjoiYmQwZjI4N2Q1OTZjNGEwMWJjMmExMjBjMzY3MGFmYjgiLCJjaGlsZFRtcCI6IkM6XFxVc2Vyc1xcRWxpb3JcXEFwcERhdGFcXExvY2FsXFxUZW1wXFxGdXR1cmVDbGFzc3Jvb20tcjc1LWNoYWluZXItYnVpbGQtYmQwZjI4N2Q1OTZjNGEwMWJjMmExMjBjMzY3MGFmYjhcXGNvbXBpbGUtdGVtcCIsInNvdXJjZUJlZm9yZSI6eyJieXRlcyI6MTUzOTUsInNoYTI1NiI6ImNiMjNkYzI0NjExMDhlODRmNWI3MjY2MGJlMWNmODNlYzU3MzFmNTFlYjQwMmNlY2M3MDgzZjRmMTA2Zjg3OTgifSwiZXhwZWN0ZWRPd25lclNpZCI6IlMtMS01LTIxLTM4OTYxMTEyMDctMTg2NzgwNDM2Mi0xOTcxNTkzMTIyLTEwMDEiLCJhY3R1YWxFeGl0Ijp0cnVlLCJvcmlnaW5hbENvbXBpbGVyUHJvY2VzcyI6eyJjcmVhdGlvbkZpbGV0aW1lIjoiMTM0MzgwMTM1NDI2NjI1MzI4IiwicGlkIjoxNDc1Nn0sIndpbmRvd3NTb3VyY2VQYXRoIjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1yNzUtY2hhaW5lci1idWlsZC1iZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOFxcQ2hhaW5lclByb2JlLmNzIiwic3RhdHVzIjoiUEFTU19DU0NfQUNUVUFMX0VYSVQwIiwiY2hpbGRUZW1wIjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1yNzUtY2hhaW5lci1idWlsZC1iZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOFxcY29tcGlsZS10ZW1wIiwiZXhpdENvZGUiOjAsImV4ZSI6eyJieXRlcyI6MTg0MzIsInNoYTI1NiI6IjM5YWY2Y2U3ODQ2ZjcyNjhiZDc0Y2ZhNzM1MGY1NmI1ZmM3ZjVkNGYxMjNkMGFkNGJhZTZmOWIzNGUxMzI5NTIifSwiY29tcGlsZXJQYXRoIjoiQzpcXFdpbmRvd3NcXE1pY3Jvc29mdC5ORVRcXEZyYW1ld29ya1xcdjQuMC4zMDMxOVxcY3NjLmV4ZSJ9fQ0K"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/03-compile-only.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0",
+        "base64": "IzwgQ0xJWE1MDQo8T2JqcyBWZXJzaW9uPSIxLjEuMC4xIiB4bWxucz0iaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS9wb3dlcnNoZWxsLzIwMDQvMDQiPjxPYmogUz0icHJvZ3Jlc3MiIFJlZklkPSIwIj48VE4gUmVmSWQ9IjAiPjxUPlN5c3RlbS5NYW5hZ2VtZW50LkF1dG9tYXRpb24uUFNDdXN0b21PYmplY3Q8L1Q+PFQ+U3lzdGVtLk9iamVjdDwvVD48L1ROPjxNUz48STY0IE49IlNvdXJjZUlkIj4xPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48T2JqIFM9InByb2dyZXNzIiBSZWZJZD0iMSI+PFROUmVmIFJlZklkPSIwIiAvPjxNUz48STY0IE49IlNvdXJjZUlkIj4yPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48L09ianM+"
+      }
+    },
+    {
+      "label": "04-snapshot",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJABzAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzACkAKQA="
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.5575572731904685,
+      "stdin": {
+        "bytes": 4543,
+        "sha256": "95dfe781df70909b0adcb2242c21e80a79709368bb33eec149cf9ffefe212de2",
+        "base64": "JGM9J3sibm9uY2UiOiJiZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOCIsInNpZCI6IlMtMS01LTIxLTM4OTYxMTEyMDctMTg2NzgwNDM2Mi0xOTcxNTkzMTIyLTEwMDEiLCJtYXJrZXIiOiJmdXR1cmUtY2xhc3Nyb29tLW93bmVkLXI3NS1jaGFpbmVyLWJ1aWxkL3YxfGJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4XG4iLCJzb3VyY2VTaGEiOiJjYjIzZGMyNDYxMTA4ZTg0ZjViNzI2NjBiZTFjZjgzZWM1NzMxZjUxZWI0MDJjZWNjNzA4M2Y0ZjEwNmY4Nzk4Iiwic291cmNlQnl0ZXMiOjE1Mzk1LCJyb290IjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1yNzUtY2hhaW5lci1idWlsZC1iZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOCIsImFyZ3VtZW50cyI6Ii9ub2xvZ28gL3RhcmdldDp3aW5leGUgL3BsYXRmb3JtOng4NiAvb3B0aW1pemUrIC93YXJuYXNlcnJvcisgL291dDpDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLXI3NS1jaGFpbmVyLWJ1aWxkLWJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4XFxDaGFpbmVyUHJvYmUuZXhlIEM6XFxVc2Vyc1xcRWxpb3JcXEFwcERhdGFcXExvY2FsXFxUZW1wXFxGdXR1cmVDbGFzc3Jvb20tcjc1LWNoYWluZXItYnVpbGQtYmQwZjI4N2Q1OTZjNGEwMWJjMmExMjBjMzY3MGFmYjhcXENoYWluZXJQcm9iZS5jcyIsInByb2Nlc3MiOnsiY3JlYXRpb25GaWxldGltZSI6IjEzNDM4MDEzNTQyNjYyNTMyOCIsInBpZCI6MTQ3NTZ9fSd8Q29udmVydEZyb20tSnNvbjskRXJyb3JBY3Rpb25QcmVmZXJlbmNlPSdTdG9wJztbQ29uc29sZV06Ok91dHB1dEVuY29kaW5nPVtUZXh0LlVURjhFbmNvZGluZ106Om5ldygkZmFsc2UpCmZ1bmN0aW9uIElkZW50aXR5IHsgJGk9W1NlY3VyaXR5LlByaW5jaXBhbC5XaW5kb3dzSWRlbnRpdHldOjpHZXRDdXJyZW50KCk7dHJ5e3JldHVybiAkaS5Vc2VyfWZpbmFsbHl7JGkuRGlzcG9zZSgpfSB9CmZ1bmN0aW9uIERpckFjbCgkcCwkc2lkKXskYT1bU2VjdXJpdHkuQWNjZXNzQ29udHJvbC5EaXJlY3RvcnlTZWN1cml0eV06Om5ldygpOyRhLlNldE93bmVyKCRzaWQpOyRhLlNldEFjY2Vzc1J1bGVQcm90ZWN0aW9uKCR0cnVlLCRmYWxzZSk7Zm9yZWFjaCgkcyBpbiBAKCRzaWQsW1NlY3VyaXR5LlByaW5jaXBhbC5TZWN1cml0eUlkZW50aWZpZXJdOjpuZXcoJ1MtMS01LTE4JykpKXskYS5BZGRBY2Nlc3NSdWxlKFtTZWN1cml0eS5BY2Nlc3NDb250cm9sLkZpbGVTeXN0ZW1BY2Nlc3NSdWxlXTo6bmV3KCRzLCdGdWxsQ29udHJvbCcsJ0NvbnRhaW5lckluaGVyaXQsT2JqZWN0SW5oZXJpdCcsJ05vbmUnLCdBbGxvdycpKX07W0lPLkRpcmVjdG9yeV06OlNldEFjY2Vzc0NvbnRyb2woJHAsJGEpfQpmdW5jdGlvbiBGaWxlT3duZXIoJHAsJHNpZCl7JGE9W1NlY3VyaXR5LkFjY2Vzc0NvbnRyb2wuRmlsZVNlY3VyaXR5XTo6bmV3KCk7JGEuU2V0T3duZXIoJHNpZCk7JGEuU2V0QWNjZXNzUnVsZVByb3RlY3Rpb24oJHRydWUsJGZhbHNlKTtmb3JlYWNoKCRzIGluIEAoJHNpZCxbU2VjdXJpdHkuUHJpbmNpcGFsLlNlY3VyaXR5SWRlbnRpZmllcl06Om5ldygnUy0xLTUtMTgnKSkpeyRhLkFkZEFjY2Vzc1J1bGUoW1NlY3VyaXR5LkFjY2Vzc0NvbnRyb2wuRmlsZVN5c3RlbUFjY2Vzc1J1bGVdOjpuZXcoJHMsJ0Z1bGxDb250cm9sJywnQWxsb3cnKSl9O1tJTy5GaWxlXTo6U2V0QWNjZXNzQ29udHJvbCgkcCwkYSl9CmZ1bmN0aW9uIEZhY3QoJHApe2lmKChbSU8uRmlsZV06OkdldEF0dHJpYnV0ZXMoJHApLWJhbmRbSU8uRmlsZUF0dHJpYnV0ZXNdOjpSZXBhcnNlUG9pbnQpLW5lIDApe3Rocm93ICdSRVBBUlNFX0ZJTEUnfTtyZXR1cm4gQHtieXRlcz1bSW50NjRdKFtJTy5GaWxlSW5mb106Om5ldygkcCkuTGVuZ3RoKTtzaGEyNTY9KEdldC1GaWxlSGFzaCAtTGl0ZXJhbFBhdGggJHAgLUFsZ29yaXRobSBTSEEyNTYpLkhhc2guVG9Mb3dlckludmFyaWFudCgpfSB9CmZ1bmN0aW9uIFJvb3RDaGVjayB7ICRzaWQ9SWRlbnRpdHk7aWYoJHNpZC5WYWx1ZS1jbmUkYy5zaWQpe3Rocm93ICdDVVJSRU5UX1VTRVJfU0lEX01JU01BVENIJ307aWYoJGMucm9vdC1jbmUoSm9pbi1QYXRoIChbSU8uUGF0aF06OkdldEZ1bGxQYXRoKCRlbnY6VEVNUCkpICgnRnV0dXJlQ2xhc3Nyb29tLXI3NS1jaGFpbmVyLWJ1aWxkLScrJGMubm9uY2UpKSl7dGhyb3cgJ1JPT1RfUEFUSF9NSVNNQVRDSCd9O2lmKChbSU8uRmlsZV06OkdldEF0dHJpYnV0ZXMoJGMucm9vdCktYmFuZFtJTy5GaWxlQXR0cmlidXRlc106OlJlcGFyc2VQb2ludCktbmUgMCl7dGhyb3cgJ1JPT1RfUkVQQVJTRSd9OyRhPVtJTy5EaXJlY3RvcnldOjpHZXRBY2Nlc3NDb250cm9sKCRjLnJvb3QpO2lmKCRhLkdldE93bmVyKFtTZWN1cml0eS5QcmluY2lwYWwuU2VjdXJpdHlJZGVudGlmaWVyXSkuVmFsdWUtY25lJGMuc2lkIC1vciAtbm90ICRhLkFyZUFjY2Vzc1J1bGVzUHJvdGVjdGVkKXt0aHJvdyAnT1dORVJfT1JfUFJPVEVDVEVEX0RBQ0xfTUlTTUFUQ0gnfTskcnVsZXM9QCgkYS5HZXRBY2Nlc3NSdWxlcygkdHJ1ZSwkdHJ1ZSxbU2VjdXJpdHkuUHJpbmNpcGFsLlNlY3VyaXR5SWRlbnRpZmllcl0pKTtpZigkcnVsZXMuQ291bnQtbmUgMiAtb3IgQCgkcnVsZXN8V2hlcmUtT2JqZWN0eyRfLklkZW50aXR5UmVmZXJlbmNlLlZhbHVlLW5vdGluQCgkYy5zaWQsJ1MtMS01LTE4JykgLW9yICRfLkFjY2Vzc0NvbnRyb2xUeXBlLW5lICdBbGxvdycgLW9yICRfLkZpbGVTeXN0ZW1SaWdodHMtbmVbU2VjdXJpdHkuQWNjZXNzQ29udHJvbC5GaWxlU3lzdGVtUmlnaHRzXTo6RnVsbENvbnRyb2x9KS5Db3VudC1uZSAwKXt0aHJvdyAnUk9PVF9VU0VSX1NZU1RFTV9PTkxZX0RBQ0wnfTtpZihbSU8uRmlsZV06OlJlYWRBbGxUZXh0KChKb2luLVBhdGggJGMucm9vdCAnLm93bmVyJykpLWNuZSRjLm1hcmtlcil7dGhyb3cgJ1JPT1RfTUFSS0VSX01JU01BVENIJ30gfQpmdW5jdGlvbiBQcm9jZXNzR29uZSgkcCl7JHg9JG51bGw7dHJ5eyR4PVtEaWFnbm9zdGljcy5Qcm9jZXNzXTo6R2V0UHJvY2Vzc0J5SWQoW2ludF0kcC5waWQpO3JldHVybiAoKFtzdHJpbmddJHguU3RhcnRUaW1lLlRvVW5pdmVyc2FsVGltZSgpLlRvRmlsZVRpbWVVdGMoKSktY25lJHAuY3JlYXRpb25GaWxldGltZSl9Y2F0Y2ggW0FyZ3VtZW50RXhjZXB0aW9uXXtyZXR1cm4gJHRydWV9ZmluYWxseXtpZigkbnVsbC1uZSR4KXskeC5EaXNwb3NlKCl9fSB9ClJvb3RDaGVjaztpZigtbm90IChQcm9jZXNzR29uZSAkYy5wcm9jZXNzKSl7dGhyb3cgJ09SSUdJTkFMX0NTQ19TVElMTF9MSVZFJ30KJGZpbGVzPUAoKTskZGlycz1AKCk7JHF1ZXVlPVtDb2xsZWN0aW9ucy5HZW5lcmljLlF1ZXVlW3N0cmluZ11dOjpuZXcoKTskcXVldWUuRW5xdWV1ZSgkYy5yb290KTskdG90YWw9W0ludDY0XTAKd2hpbGUoJHF1ZXVlLkNvdW50LWd0IDApeyRkaXI9JHF1ZXVlLkRlcXVldWUoKTtmb3JlYWNoKCRwIGluIFtJTy5EaXJlY3RvcnldOjpHZXRGaWxlU3lzdGVtRW50cmllcygkZGlyKSl7aWYoKFtJTy5GaWxlXTo6R2V0QXR0cmlidXRlcygkcCktYmFuZFtJTy5GaWxlQXR0cmlidXRlc106OlJlcGFyc2VQb2ludCktbmUgMCl7dGhyb3cgJ1NOQVBTSE9UX1JFUEFSU0UnfTskcmVsPSRwLlN1YnN0cmluZygkYy5yb290Lkxlbmd0aCsxKS5SZXBsYWNlKCdcJywnLycpO2lmKCRyZWwtbWF0Y2ggJyg/aSlcLihrZXl8cGZ4fHAxMikkJyl7dGhyb3cgJ1BSSVZBVEVfU1VGRklYX05PVF9SRUFEJ307aWYoKFtJTy5GaWxlXTo6R2V0QXR0cmlidXRlcygkcCktYmFuZFtJTy5GaWxlQXR0cmlidXRlc106OkRpcmVjdG9yeSktbmUgMCl7aWYoJHJlbC1uZSAnY29tcGlsZS10ZW1wJyAtYW5kIC1ub3QgJHJlbC5TdGFydHNXaXRoKCdjb21waWxlLXRlbXAvJykpe3Rocm93ICdVTkVYUEVDVEVEX0RJUkVDVE9SWSd9OyRkaXJzKz0kcmVsOyRxdWV1ZS5FbnF1ZXVlKCRwKX1lbHNle2lmKCRyZWwtbm90aW5AKCcub3duZXInLCdDaGFpbmVyUHJvYmUuY3MnLCdDaGFpbmVyUHJvYmUuZXhlJywnY29tcGlsZXIuc3Rkb3V0LmxvZycsJ2NvbXBpbGVyLnN0ZGVyci5sb2cnLCdjb21waWxlci1yZWNlaXB0Lmpzb24nKSAtYW5kIC1ub3QgJHJlbC5TdGFydHNXaXRoKCdjb21waWxlLXRlbXAvJykpe3Rocm93ICdVTkVYUEVDVEVEX1JPT1RfRklMRSd9OyRmPUZhY3QgJHA7JHRvdGFsKz1bSW50NjRdJGYuYnl0ZXM7aWYoJHRvdGFsLWd0IDMzNTU0NDMyIC1vciAkZmlsZXMuQ291bnQtZ2UgMTI4KXt0aHJvdyAnU05BUFNIT1RfQk9VTkQnfTskZmlsZXMrPUB7cGF0aD0kcmVsO2J5dGVzPSRmLmJ5dGVzO3NoYTI1Nj0kZi5zaGEyNTZ9fX19CkB7c3RhdHVzPSdBQ1RVQUxfQ1NDX0VYSVRFRF9TTkFQU0hPVCc7cm9vdD0kYy5yb290O25vbmNlPSRjLm5vbmNlO2NvbXBpbGVyT3JpZ2luYWxHb25lPSR0cnVlO2ZpbGVzPSRmaWxlcztkaXJlY3Rvcmllcz0kZGlyczt0b3RhbEJ5dGVzPSR0b3RhbH18Q29udmVydFRvLUpzb24gLURlcHRoIDggLUNvbXByZXNzCg=="
+      },
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/04-snapshot.stdout.log",
+        "bytes": 984,
+        "sha256": "b56f682cf4853bdf368f23289d6fadfca41595e1732deaaedd37f6f78fb5703b",
+        "base64": "eyJjb21waWxlck9yaWdpbmFsR29uZSI6dHJ1ZSwiZmlsZXMiOlt7InBhdGgiOiIub3duZXIiLCJzaGEyNTYiOiI1ODNlYTgxYmM5ZjAwNmFmM2MwM2E5NGUzYWI0ZGUxZTg0YTFkMzY4MjhhNzkyZGM0ZWE2ZWJiYThkN2YyZjRmIiwiYnl0ZXMiOjc3fSx7InBhdGgiOiJDaGFpbmVyUHJvYmUuY3MiLCJzaGEyNTYiOiJjYjIzZGMyNDYxMTA4ZTg0ZjViNzI2NjBiZTFjZjgzZWM1NzMxZjUxZWI0MDJjZWNjNzA4M2Y0ZjEwNmY4Nzk4IiwiYnl0ZXMiOjE1Mzk1fSx7InBhdGgiOiJDaGFpbmVyUHJvYmUuZXhlIiwic2hhMjU2IjoiMzlhZjZjZTc4NDZmNzI2OGJkNzRjZmE3MzUwZjU2YjVmYzdmNWQ0ZjEyM2QwYWQ0YmFlNmY5YjM0ZTEzMjk1MiIsImJ5dGVzIjoxODQzMn0seyJwYXRoIjoiY29tcGlsZXItcmVjZWlwdC5qc29uIiwic2hhMjU2IjoiOTlhY2E2Y2Y5ZWUyYjNkOTE4OWFmMTY0MDk4M2UxMjZlNjA4MGIzZTFhYjA3ZjlmNWI1YTMzM2Q4NDk2ZDFmMCIsImJ5dGVzIjoxOTA2fSx7InBhdGgiOiJjb21waWxlci5zdGRlcnIubG9nIiwic2hhMjU2IjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImJ5dGVzIjowfSx7InBhdGgiOiJjb21waWxlci5zdGRvdXQubG9nIiwic2hhMjU2IjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImJ5dGVzIjowfV0sInRvdGFsQnl0ZXMiOjM1ODEwLCJyb290IjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1yNzUtY2hhaW5lci1idWlsZC1iZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOCIsIm5vbmNlIjoiYmQwZjI4N2Q1OTZjNGEwMWJjMmExMjBjMzY3MGFmYjgiLCJzdGF0dXMiOiJBQ1RVQUxfQ1NDX0VYSVRFRF9TTkFQU0hPVCIsImRpcmVjdG9yaWVzIjpbImNvbXBpbGUtdGVtcCJdfQ0K"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/04-snapshot.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0",
+        "base64": "IzwgQ0xJWE1MDQo8T2JqcyBWZXJzaW9uPSIxLjEuMC4xIiB4bWxucz0iaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS9wb3dlcnNoZWxsLzIwMDQvMDQiPjxPYmogUz0icHJvZ3Jlc3MiIFJlZklkPSIwIj48VE4gUmVmSWQ9IjAiPjxUPlN5c3RlbS5NYW5hZ2VtZW50LkF1dG9tYXRpb24uUFNDdXN0b21PYmplY3Q8L1Q+PFQ+U3lzdGVtLk9iamVjdDwvVD48L1ROPjxNUz48STY0IE49IlNvdXJjZUlkIj4xPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48T2JqIFM9InByb2dyZXNzIiBSZWZJZD0iMSI+PFROUmVmIFJlZklkPSIwIiAvPjxNUz48STY0IE49IlNvdXJjZUlkIj4yPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48L09ianM+"
+      }
+    },
+    {
+      "label": "05-download-1",
+      "command": [
+        "scp",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.cs",
+        "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.cs"
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.22329172189347446,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/05-download-1.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/05-download-1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "label": "05-download-2",
+      "command": [
+        "scp",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.exe",
+        "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.exe"
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.23508679610677063,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/05-download-2.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/05-download-2.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "label": "05-download-3",
+      "command": [
+        "scp",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8/compiler-receipt.json",
+        "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/compiler-receipt.json"
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.2327148481272161,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/05-download-3.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/05-download-3.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "label": "05-download-4",
+      "command": [
+        "scp",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8/compiler.stderr.log",
+        "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/compiler.stderr.log"
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.23167927702888846,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/05-download-4.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/05-download-4.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "label": "05-download-5",
+      "command": [
+        "scp",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8/compiler.stdout.log",
+        "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/compiler.stdout.log"
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.22907103900797665,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/05-download-5.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/05-download-5.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "label": "99-cleanup",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJABzAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzACkAKQA="
+      ],
+      "actualLocalParentReturned": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.5740323290228844,
+      "stdin": {
+        "bytes": 5642,
+        "sha256": "7f58231daf0e2204e55ba4830621a8a11c0545e8505b89e022a1c5612ce0852c",
+        "base64": "JGM9J3sibm9uY2UiOiJiZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOCIsInNpZCI6IlMtMS01LTIxLTM4OTYxMTEyMDctMTg2NzgwNDM2Mi0xOTcxNTkzMTIyLTEwMDEiLCJtYXJrZXIiOiJmdXR1cmUtY2xhc3Nyb29tLW93bmVkLXI3NS1jaGFpbmVyLWJ1aWxkL3YxfGJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4XG4iLCJzb3VyY2VTaGEiOiJjYjIzZGMyNDYxMTA4ZTg0ZjViNzI2NjBiZTFjZjgzZWM1NzMxZjUxZWI0MDJjZWNjNzA4M2Y0ZjEwNmY4Nzk4Iiwic291cmNlQnl0ZXMiOjE1Mzk1LCJyb290IjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1yNzUtY2hhaW5lci1idWlsZC1iZDBmMjg3ZDU5NmM0YTAxYmMyYTEyMGMzNjcwYWZiOCIsImFyZ3VtZW50cyI6Ii9ub2xvZ28gL3RhcmdldDp3aW5leGUgL3BsYXRmb3JtOng4NiAvb3B0aW1pemUrIC93YXJuYXNlcnJvcisgL291dDpDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLXI3NS1jaGFpbmVyLWJ1aWxkLWJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4XFxDaGFpbmVyUHJvYmUuZXhlIEM6XFxVc2Vyc1xcRWxpb3JcXEFwcERhdGFcXExvY2FsXFxUZW1wXFxGdXR1cmVDbGFzc3Jvb20tcjc1LWNoYWluZXItYnVpbGQtYmQwZjI4N2Q1OTZjNGEwMWJjMmExMjBjMzY3MGFmYjhcXENoYWluZXJQcm9iZS5jcyIsInByb2Nlc3MiOnsiY3JlYXRpb25GaWxldGltZSI6IjEzNDM4MDEzNTQyNjYyNTMyOCIsInBpZCI6MTQ3NTZ9LCJkb3dubG9hZHNBY2tub3dsZWRnZWQiOnRydWUsImZpbGVzIjpbeyJwYXRoIjoiLm93bmVyIiwic2hhMjU2IjoiNTgzZWE4MWJjOWYwMDZhZjNjMDNhOTRlM2FiNGRlMWU4NGExZDM2ODI4YTc5MmRjNGVhNmViYmE4ZDdmMmY0ZiIsImJ5dGVzIjo3N30seyJwYXRoIjoiQ2hhaW5lclByb2JlLmNzIiwic2hhMjU2IjoiY2IyM2RjMjQ2MTEwOGU4NGY1YjcyNjYwYmUxY2Y4M2VjNTczMWY1MWViNDAyY2VjYzcwODNmNGYxMDZmODc5OCIsImJ5dGVzIjoxNTM5NX0seyJwYXRoIjoiQ2hhaW5lclByb2JlLmV4ZSIsInNoYTI1NiI6IjM5YWY2Y2U3ODQ2ZjcyNjhiZDc0Y2ZhNzM1MGY1NmI1ZmM3ZjVkNGYxMjNkMGFkNGJhZTZmOWIzNGUxMzI5NTIiLCJieXRlcyI6MTg0MzJ9LHsicGF0aCI6ImNvbXBpbGVyLXJlY2VpcHQuanNvbiIsInNoYTI1NiI6Ijk5YWNhNmNmOWVlMmIzZDkxODlhZjE2NDA5ODNlMTI2ZTYwODBiM2UxYWIwN2Y5ZjViNWEzMzNkODQ5NmQxZjAiLCJieXRlcyI6MTkwNn0seyJwYXRoIjoiY29tcGlsZXIuc3RkZXJyLmxvZyIsInNoYTI1NiI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJieXRlcyI6MH0seyJwYXRoIjoiY29tcGlsZXIuc3Rkb3V0LmxvZyIsInNoYTI1NiI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJieXRlcyI6MH1dLCJkaXJlY3RvcmllcyI6WyJjb21waWxlLXRlbXAiXX0nfENvbnZlcnRGcm9tLUpzb247JEVycm9yQWN0aW9uUHJlZmVyZW5jZT0nU3RvcCc7W0NvbnNvbGVdOjpPdXRwdXRFbmNvZGluZz1bVGV4dC5VVEY4RW5jb2RpbmddOjpuZXcoJGZhbHNlKQpmdW5jdGlvbiBJZGVudGl0eSB7ICRpPVtTZWN1cml0eS5QcmluY2lwYWwuV2luZG93c0lkZW50aXR5XTo6R2V0Q3VycmVudCgpO3RyeXtyZXR1cm4gJGkuVXNlcn1maW5hbGx5eyRpLkRpc3Bvc2UoKX0gfQpmdW5jdGlvbiBEaXJBY2woJHAsJHNpZCl7JGE9W1NlY3VyaXR5LkFjY2Vzc0NvbnRyb2wuRGlyZWN0b3J5U2VjdXJpdHldOjpuZXcoKTskYS5TZXRPd25lcigkc2lkKTskYS5TZXRBY2Nlc3NSdWxlUHJvdGVjdGlvbigkdHJ1ZSwkZmFsc2UpO2ZvcmVhY2goJHMgaW4gQCgkc2lkLFtTZWN1cml0eS5QcmluY2lwYWwuU2VjdXJpdHlJZGVudGlmaWVyXTo6bmV3KCdTLTEtNS0xOCcpKSl7JGEuQWRkQWNjZXNzUnVsZShbU2VjdXJpdHkuQWNjZXNzQ29udHJvbC5GaWxlU3lzdGVtQWNjZXNzUnVsZV06Om5ldygkcywnRnVsbENvbnRyb2wnLCdDb250YWluZXJJbmhlcml0LE9iamVjdEluaGVyaXQnLCdOb25lJywnQWxsb3cnKSl9O1tJTy5EaXJlY3RvcnldOjpTZXRBY2Nlc3NDb250cm9sKCRwLCRhKX0KZnVuY3Rpb24gRmlsZU93bmVyKCRwLCRzaWQpeyRhPVtTZWN1cml0eS5BY2Nlc3NDb250cm9sLkZpbGVTZWN1cml0eV06Om5ldygpOyRhLlNldE93bmVyKCRzaWQpOyRhLlNldEFjY2Vzc1J1bGVQcm90ZWN0aW9uKCR0cnVlLCRmYWxzZSk7Zm9yZWFjaCgkcyBpbiBAKCRzaWQsW1NlY3VyaXR5LlByaW5jaXBhbC5TZWN1cml0eUlkZW50aWZpZXJdOjpuZXcoJ1MtMS01LTE4JykpKXskYS5BZGRBY2Nlc3NSdWxlKFtTZWN1cml0eS5BY2Nlc3NDb250cm9sLkZpbGVTeXN0ZW1BY2Nlc3NSdWxlXTo6bmV3KCRzLCdGdWxsQ29udHJvbCcsJ0FsbG93JykpfTtbSU8uRmlsZV06OlNldEFjY2Vzc0NvbnRyb2woJHAsJGEpfQpmdW5jdGlvbiBGYWN0KCRwKXtpZigoW0lPLkZpbGVdOjpHZXRBdHRyaWJ1dGVzKCRwKS1iYW5kW0lPLkZpbGVBdHRyaWJ1dGVzXTo6UmVwYXJzZVBvaW50KS1uZSAwKXt0aHJvdyAnUkVQQVJTRV9GSUxFJ307cmV0dXJuIEB7Ynl0ZXM9W0ludDY0XShbSU8uRmlsZUluZm9dOjpuZXcoJHApLkxlbmd0aCk7c2hhMjU2PShHZXQtRmlsZUhhc2ggLUxpdGVyYWxQYXRoICRwIC1BbGdvcml0aG0gU0hBMjU2KS5IYXNoLlRvTG93ZXJJbnZhcmlhbnQoKX0gfQpmdW5jdGlvbiBSb290Q2hlY2sgeyAkc2lkPUlkZW50aXR5O2lmKCRzaWQuVmFsdWUtY25lJGMuc2lkKXt0aHJvdyAnQ1VSUkVOVF9VU0VSX1NJRF9NSVNNQVRDSCd9O2lmKCRjLnJvb3QtY25lKEpvaW4tUGF0aCAoW0lPLlBhdGhdOjpHZXRGdWxsUGF0aCgkZW52OlRFTVApKSAoJ0Z1dHVyZUNsYXNzcm9vbS1yNzUtY2hhaW5lci1idWlsZC0nKyRjLm5vbmNlKSkpe3Rocm93ICdST09UX1BBVEhfTUlTTUFUQ0gnfTtpZigoW0lPLkZpbGVdOjpHZXRBdHRyaWJ1dGVzKCRjLnJvb3QpLWJhbmRbSU8uRmlsZUF0dHJpYnV0ZXNdOjpSZXBhcnNlUG9pbnQpLW5lIDApe3Rocm93ICdST09UX1JFUEFSU0UnfTskYT1bSU8uRGlyZWN0b3J5XTo6R2V0QWNjZXNzQ29udHJvbCgkYy5yb290KTtpZigkYS5HZXRPd25lcihbU2VjdXJpdHkuUHJpbmNpcGFsLlNlY3VyaXR5SWRlbnRpZmllcl0pLlZhbHVlLWNuZSRjLnNpZCAtb3IgLW5vdCAkYS5BcmVBY2Nlc3NSdWxlc1Byb3RlY3RlZCl7dGhyb3cgJ09XTkVSX09SX1BST1RFQ1RFRF9EQUNMX01JU01BVENIJ307JHJ1bGVzPUAoJGEuR2V0QWNjZXNzUnVsZXMoJHRydWUsJHRydWUsW1NlY3VyaXR5LlByaW5jaXBhbC5TZWN1cml0eUlkZW50aWZpZXJdKSk7aWYoJHJ1bGVzLkNvdW50LW5lIDIgLW9yIEAoJHJ1bGVzfFdoZXJlLU9iamVjdHskXy5JZGVudGl0eVJlZmVyZW5jZS5WYWx1ZS1ub3RpbkAoJGMuc2lkLCdTLTEtNS0xOCcpIC1vciAkXy5BY2Nlc3NDb250cm9sVHlwZS1uZSAnQWxsb3cnIC1vciAkXy5GaWxlU3lzdGVtUmlnaHRzLW5lW1NlY3VyaXR5LkFjY2Vzc0NvbnRyb2wuRmlsZVN5c3RlbVJpZ2h0c106OkZ1bGxDb250cm9sfSkuQ291bnQtbmUgMCl7dGhyb3cgJ1JPT1RfVVNFUl9TWVNURU1fT05MWV9EQUNMJ307aWYoW0lPLkZpbGVdOjpSZWFkQWxsVGV4dCgoSm9pbi1QYXRoICRjLnJvb3QgJy5vd25lcicpKS1jbmUkYy5tYXJrZXIpe3Rocm93ICdST09UX01BUktFUl9NSVNNQVRDSCd9IH0KZnVuY3Rpb24gUHJvY2Vzc0dvbmUoJHApeyR4PSRudWxsO3RyeXskeD1bRGlhZ25vc3RpY3MuUHJvY2Vzc106OkdldFByb2Nlc3NCeUlkKFtpbnRdJHAucGlkKTtyZXR1cm4gKChbc3RyaW5nXSR4LlN0YXJ0VGltZS5Ub1VuaXZlcnNhbFRpbWUoKS5Ub0ZpbGVUaW1lVXRjKCkpLWNuZSRwLmNyZWF0aW9uRmlsZXRpbWUpfWNhdGNoIFtBcmd1bWVudEV4Y2VwdGlvbl17cmV0dXJuICR0cnVlfWZpbmFsbHl7aWYoJG51bGwtbmUkeCl7JHguRGlzcG9zZSgpfX0gfQppZigtbm90IFtJTy5EaXJlY3RvcnldOjpFeGlzdHMoJGMucm9vdCkpe0B7c3RhdHVzPSdBQlNFTlQnO25vbmNlPSRjLm5vbmNlfXxDb252ZXJ0VG8tSnNvbiAtQ29tcHJlc3M7ZXhpdCAwfTtSb290Q2hlY2sKaWYoJGMuZG93bmxvYWRzQWNrbm93bGVkZ2VkLW5lICR0cnVlIC1vciAtbm90IChQcm9jZXNzR29uZSAkYy5wcm9jZXNzKSl7dGhyb3cgJ1VOS05PV05fT1JJR0lOQUxfUFJPQ0VTU19PUl9ET1dOTE9BRFNfUkVUQUlOX1JPT1QnfQoka25vd249QHt9O2ZvcmVhY2goJGYgaW4gJGMuZmlsZXMpeyRrbm93blskZi5wYXRoXT0kZn07JHNlZW49QCgpOyRkaXJzPUAoKTskcXVldWU9W0NvbGxlY3Rpb25zLkdlbmVyaWMuUXVldWVbc3RyaW5nXV06Om5ldygpOyRxdWV1ZS5FbnF1ZXVlKCRjLnJvb3QpCndoaWxlKCRxdWV1ZS5Db3VudC1ndCAwKXskZGlyPSRxdWV1ZS5EZXF1ZXVlKCk7Zm9yZWFjaCgkcCBpbiBbSU8uRGlyZWN0b3J5XTo6R2V0RmlsZVN5c3RlbUVudHJpZXMoJGRpcikpe2lmKChbSU8uRmlsZV06OkdldEF0dHJpYnV0ZXMoJHApLWJhbmRbSU8uRmlsZUF0dHJpYnV0ZXNdOjpSZXBhcnNlUG9pbnQpLW5lIDApe3Rocm93ICdDTEVBTlVQX1JFUEFSU0UnfTskcmVsPSRwLlN1YnN0cmluZygkYy5yb290Lkxlbmd0aCsxKS5SZXBsYWNlKCdcJywnLycpO2lmKChbSU8uRmlsZV06OkdldEF0dHJpYnV0ZXMoJHApLWJhbmRbSU8uRmlsZUF0dHJpYnV0ZXNdOjpEaXJlY3RvcnkpLW5lIDApe2lmKCRyZWwtbm90aW4kYy5kaXJlY3Rvcmllcyl7dGhyb3cgJ1VOS05PV05fRElSRUNUT1JZJ307JGRpcnMrPSRyZWw7JHF1ZXVlLkVucXVldWUoJHApfWVsc2V7aWYoLW5vdCAka25vd24uQ29udGFpbnNLZXkoJHJlbCkpe3Rocm93ICdVTktOT1dOX0ZJTEUnfTskZj1GYWN0ICRwO2lmKCRmLmJ5dGVzLW5lJGtub3duWyRyZWxdLmJ5dGVzIC1vciAkZi5zaGEyNTYtY25lJGtub3duWyRyZWxdLnNoYTI1Nil7dGhyb3cgJ0ZJTEVfQ0hBTkdFRF9SRVRBSU5fUk9PVCd9OyRzZWVuKz0kcmVsfX19CmlmKCRzZWVuLkNvdW50LW5lJGtub3duLkNvdW50IC1vciAkZGlycy5Db3VudC1uZSRjLmRpcmVjdG9yaWVzLkNvdW50KXt0aHJvdyAnTUVNQkVSU0hJUF9DSEFOR0VEX1JFVEFJTl9ST09UJ30KZm9yZWFjaCgkZiBpbiAkYy5maWxlcyl7W0lPLkZpbGVdOjpEZWxldGUoKEpvaW4tUGF0aCAkYy5yb290ICgkZi5wYXRoLlJlcGxhY2UoJy8nLCdcJykpKSl9O2ZvcmVhY2goJGRpciBpbiBAKCRkaXJzfFNvcnQtT2JqZWN0IExlbmd0aCAtRGVzY2VuZGluZykpe1tJTy5EaXJlY3RvcnldOjpEZWxldGUoKEpvaW4tUGF0aCAkYy5yb290ICgkZGlyLlJlcGxhY2UoJy8nLCdcJykpKSwkZmFsc2UpfTtbSU8uRGlyZWN0b3J5XTo6RGVsZXRlKCRjLnJvb3QsJGZhbHNlKQpAe3N0YXR1cz0nUkVNT1ZFRCc7bm9uY2U9JGMubm9uY2U7cm9vdD0kYy5yb290O2ZpbGVzPSRzZWVuLkNvdW50O2RpcmVjdG9yaWVzPSRkaXJzLkNvdW50O2Fic2VudD0oLW5vdCBbSU8uRGlyZWN0b3J5XTo6RXhpc3RzKCRjLnJvb3QpKTtvcmlnaW5hbENzY1JlYXBlZD0kdHJ1ZTtkb3dubG9hZEFja25vd2xlZGdtZW50UmVxdWlyZWQ9JHRydWV9fENvbnZlcnRUby1Kc29uIC1Db21wcmVzcwo="
+      },
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/99-cleanup.stdout.log",
+        "bytes": 284,
+        "sha256": "d18abdf0da91314212b311cd0cd9da8dad08b19853d91c4cb16bfd9f2e3ec7d1",
+        "base64": "eyJub25jZSI6ImJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4IiwiZmlsZXMiOjYsImRvd25sb2FkQWNrbm93bGVkZ21lbnRSZXF1aXJlZCI6dHJ1ZSwiYWJzZW50Ijp0cnVlLCJvcmlnaW5hbENzY1JlYXBlZCI6dHJ1ZSwic3RhdHVzIjoiUkVNT1ZFRCIsInJvb3QiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLXI3NS1jaGFpbmVyLWJ1aWxkLWJkMGYyODdkNTk2YzRhMDFiYzJhMTIwYzM2NzBhZmI4IiwiZGlyZWN0b3JpZXMiOjF9DQo="
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/99-cleanup.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0",
+        "base64": "IzwgQ0xJWE1MDQo8T2JqcyBWZXJzaW9uPSIxLjEuMC4xIiB4bWxucz0iaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS9wb3dlcnNoZWxsLzIwMDQvMDQiPjxPYmogUz0icHJvZ3Jlc3MiIFJlZklkPSIwIj48VE4gUmVmSWQ9IjAiPjxUPlN5c3RlbS5NYW5hZ2VtZW50LkF1dG9tYXRpb24uUFNDdXN0b21PYmplY3Q8L1Q+PFQ+U3lzdGVtLk9iamVjdDwvVD48L1ROPjxNUz48STY0IE49IlNvdXJjZUlkIj4xPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48T2JqIFM9InByb2dyZXNzIiBSZWZJZD0iMSI+PFROUmVmIFJlZklkPSIwIiAvPjxNUz48STY0IE49IlNvdXJjZUlkIj4yPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48L09ianM+"
+      }
+    }
+  ],
+  "cleanup": "PASS",
+  "generatedExeExecuted": false,
+  "scope": "Fixed-framework csc compile-only test fixture. Exact original source/exe/receipt/log downloads before deletion; no WinExe/MSI/registry/product/gate/Run/foreground/policy action.",
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8",
+  "createFacts": {
+    "powershell": "5.1.26100.9711",
+    "nonce": "bd0f287d596c4a01bc2a120c3670afb8",
+    "actualOwnerSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+    "protectedDacl": true,
+    "allowedSids": [
+      "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "S-1-5-18"
+    ],
+    "status": "CREATED",
+    "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8",
+    "marker": "future-classroom-owned-r75-chainer-build/v1|bd0f287d596c4a01bc2a120c3670afb8\n"
+  },
+  "compiler": {
+    "status": "COMPILER_RECEIPT_WRITTEN",
+    "receiptFile": {
+      "bytes": 1906,
+      "sha256": "99aca6cf9ee2b3d9189af1640983e126e6080b3e1ab07f9f5b5a333d8496d1f0"
+    },
+    "receipt": {
+      "originalCompileBudgetSeconds": 20,
+      "timedOut": false,
+      "compilerBytes": 2154384,
+      "compilerSha256": "9e1257ca87282caebce4a04894a51c594a0453b287cd199c0c8e8bb3b0d6a19f",
+      "elapsedSeconds": 0.2055928,
+      "generatedExeExecuted": false,
+      "windowsExePath": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8\\ChainerProbe.exe",
+      "sourceAfter": {
+        "bytes": 15395,
+        "sha256": "cb23dc2461108e84f5b72660be1cf83ec5731f51eb402cecc7083f4f106f8798"
+      },
+      "sourceUnchanged": true,
+      "commandArgs": [
+        "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe",
+        "/nologo",
+        "/target:winexe",
+        "/platform:x86",
+        "/optimize+",
+        "/warnaserror+",
+        "/out:C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8\\ChainerProbe.exe",
+        "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8\\ChainerProbe.cs"
+      ],
+      "compilerVersion": "14.8.10001.0 built by: 5f296df0c000005",
+      "nonce": "bd0f287d596c4a01bc2a120c3670afb8",
+      "childTmp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8\\compile-temp",
+      "sourceBefore": {
+        "bytes": 15395,
+        "sha256": "cb23dc2461108e84f5b72660be1cf83ec5731f51eb402cecc7083f4f106f8798"
+      },
+      "expectedOwnerSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "actualExit": true,
+      "originalCompilerProcess": {
+        "creationFiletime": "134380135426625328",
+        "pid": 14756
+      },
+      "windowsSourcePath": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8\\ChainerProbe.cs",
+      "status": "PASS_CSC_ACTUAL_EXIT0",
+      "childTemp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8\\compile-temp",
+      "exitCode": 0,
+      "exe": {
+        "bytes": 18432,
+        "sha256": "39af6ce7846f7268bd74cfa7350f56b5fc7f5d4f123d0ad4bae6f9b34e132952"
+      },
+      "compilerPath": "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe"
+    }
+  },
+  "snapshot": {
+    "compilerOriginalGone": true,
+    "files": [
+      {
+        "path": ".owner",
+        "sha256": "583ea81bc9f006af3c03a94e3ab4de1e84a1d36828a792dc4ea6ebba8d7f2f4f",
+        "bytes": 77
+      },
+      {
+        "path": "ChainerProbe.cs",
+        "sha256": "cb23dc2461108e84f5b72660be1cf83ec5731f51eb402cecc7083f4f106f8798",
+        "bytes": 15395
+      },
+      {
+        "path": "ChainerProbe.exe",
+        "sha256": "39af6ce7846f7268bd74cfa7350f56b5fc7f5d4f123d0ad4bae6f9b34e132952",
+        "bytes": 18432
+      },
+      {
+        "path": "compiler-receipt.json",
+        "sha256": "99aca6cf9ee2b3d9189af1640983e126e6080b3e1ab07f9f5b5a333d8496d1f0",
+        "bytes": 1906
+      },
+      {
+        "path": "compiler.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "compiler.stdout.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    ],
+    "totalBytes": 35810,
+    "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8",
+    "nonce": "bd0f287d596c4a01bc2a120c3670afb8",
+    "status": "ACTUAL_CSC_EXITED_SNAPSHOT",
+    "directories": [
+      "compile-temp"
+    ]
+  },
+  "downloadedOriginals": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.cs",
+      "bytes": 15395,
+      "sha256": "cb23dc2461108e84f5b72660be1cf83ec5731f51eb402cecc7083f4f106f8798"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.exe",
+      "bytes": 18432,
+      "sha256": "39af6ce7846f7268bd74cfa7350f56b5fc7f5d4f123d0ad4bae6f9b34e132952"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/compiler-receipt.json",
+      "bytes": 1906,
+      "sha256": "99aca6cf9ee2b3d9189af1640983e126e6080b3e1ab07f9f5b5a333d8496d1f0"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/compiler.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/compiler.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "actualPe": {
+    "machine": "0x014c",
+    "optionalMagic": "0x010b",
+    "subsystem": 2,
+    "clrRva": 8200,
+    "clrFileOffset": 520,
+    "clrFlags": 3,
+    "ilOnly": true,
+    "bit32Required": true,
+    "generatedExeExecuted": false
+  },
+  "compilerReceipt": {
+    "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/compiler-receipt.json",
+    "bytes": 1906,
+    "sha256": "99aca6cf9ee2b3d9189af1640983e126e6080b3e1ab07f9f5b5a333d8496d1f0"
+  },
+  "compiledExe": {
+    "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/ChainerProbe.exe",
+    "bytes": 18432,
+    "sha256": "39af6ce7846f7268bd74cfa7350f56b5fc7f5d4f123d0ad4bae6f9b34e132952"
+  },
+  "cleanupActual": {
+    "nonce": "bd0f287d596c4a01bc2a120c3670afb8",
+    "files": 6,
+    "downloadAcknowledgmentRequired": true,
+    "absent": true,
+    "originalCscReaped": true,
+    "status": "REMOVED",
+    "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-build-bd0f287d596c4a01bc2a120c3670afb8",
+    "directories": 1
+  },
+  "elapsedSeconds": 3.921442296123132,
+  "completedUtc": "2026-11-01T13:32:25.300922+00:00",
+  "actualControllerReturned": true
+}

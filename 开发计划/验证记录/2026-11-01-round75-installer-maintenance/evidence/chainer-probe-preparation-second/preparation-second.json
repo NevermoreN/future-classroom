@@ -1,0 +1,84 @@
+{
+  "status": "PREPARED_SECOND_EXACT_REGISTRY_COMPONENT_ONLY_NOT_BUILT_NOT_WINDOWS",
+  "recordedUtc": "2026-11-01T13:42:47.868951+00:00",
+  "files": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/.owner",
+      "bytes": 63,
+      "sha256": "66b6b1e5ac461db10e55c112094ff516b43f51117fc958327e5ad8ba0297bcc7"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/ChainerProbe.cs.in",
+      "bytes": 15247,
+      "sha256": "c5cdfbce05d44ba565655cc8fd84c248cdf28323bd8febd8d0892ce996f0e9a2"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/README.md",
+      "bytes": 3471,
+      "sha256": "3ede1ecfcae744d1d081960a63f89b91aa13bff04121d6b7a828b16f494624c1"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/chainer-probe.py",
+      "bytes": 17113,
+      "sha256": "b74b5410b13ec8d2c6a80d0eb3a3ca2cbac7e610452bab3b5da5834418d1eaf2"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/chainer-probe.py.first-to-second.diff",
+      "bytes": 9214,
+      "sha256": "7f828577ae83e0ef6ece559656128c54703cfee2213241acaa3e10f89cb9ebe8"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/check-contracts.py",
+      "bytes": 7035,
+      "sha256": "675fc6140c1c96475f07ab0f0b7a54af1828311443229c30cd0f05040439d514"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/check-contracts.py.first-to-second.diff",
+      "bytes": 3703,
+      "sha256": "424b72f4d558fd1e350213baea9724150972d82534f162a3008cd839f53ca059"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/pure-contracts-second.stderr.log",
+      "bytes": 1070,
+      "sha256": "c3f32a460dbb3be5b71c5d2c2cdbdd469feef7c8f390c56a90d10fdd91315dd8"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/pure-contracts-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "pureContracts": {
+    "exitCode": 0,
+    "tests": 8,
+    "runtimeSeconds": 0.009
+  },
+  "templateSameBytes": true,
+  "sameCompiledConstantsSource": {
+    "bytes": 15395,
+    "sha256": "cb23dc2461108e84f5b72660be1cf83ec5731f51eb402cecc7083f4f106f8798",
+    "equalsOriginalSource": true
+  },
+  "fixtureSpecInMemoryOnly": {
+    "schemaVersion": 1,
+    "scope": "INDEPENDENT_ROLLBACK_ONLY_API_FIXTURE_NOT_PRODUCT",
+    "nonce": "bd0f287d596c4a01bc2a120c3670afb8",
+    "windowsReportRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-probe-bd0f287d596c4a01bc2a120c3670afb8",
+    "expectedOwnerSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+    "requiredMarker": "future-classroom-owned-r75-chainer-probe/v1\n",
+    "productCode": "{9C946503-A749-528D-BA4E-0C68136A6794}",
+    "upgradeCode": "{5618393C-3107-5352-9D97-BBE74EB4B112}",
+    "packageCode": "{C0DEFFE3-9144-52EA-B012-B281F713FAF6}",
+    "componentCode": "{F224C35A-564D-56C4-B75E-EEE1277B1614}",
+    "registryKey": "Software\\FutureClassroom-Test-ChainerProbe-bd0f287d596c4a01bc2a120c3670afb8",
+    "registryValue": "OwnedMarker",
+    "registryData": 1,
+    "registryView": "Registry32",
+    "commandLine": "probe bd0f287d596c4a01bc2a120c3670afb8 C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-chainer-probe-bd0f287d596c4a01bc2a120c3670afb8",
+    "runtimeBudgetSeconds": 120
+  },
+  "operationalPrepare": "NOT_RUN",
+  "build": "NOT_RUN",
+  "windows": "NOT_RUN",
+  "scope": "Only new second prep files; original first/source/EXE untouched; no Rust/Cargo/network changes. Exact current-user HKCU32 nonce marker plus formal registry-component removal/rollback; root validates absence before reuse."
+}

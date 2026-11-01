@@ -1,0 +1,29 @@
+--- N2/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs
++++ accidental-rustfmt-2024/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs
+@@ -213,15 +213,22 @@
+     let thread_sid = thread_sid(&mut owner);
+     let parent = match parent_id(&mut owner, deadline) {
+         Ok(pid) => match owner.process(pid, Role::Engine) {
+-            Ok(process) => format!("{{\"status\":\"OPENED_LIMITED_QUERY_SYNC\",\"snapshotParentId\":{pid},\"identity\":{},\"image\":{},\"processToken\":{}}}",
+-                identity_fact(process), image_fact(process), sid_fact(owner.token_sid(process).map_err(Into::into))),
++            Ok(process) => format!(
++                "{{\"status\":\"OPENED_LIMITED_QUERY_SYNC\",\"snapshotParentId\":{pid},\"identity\":{},\"image\":{},\"processToken\":{}}}",
++                identity_fact(process),
++                image_fact(process),
++                sid_fact(owner.token_sid(process).map_err(Into::into))
++            ),
+             Err(error) => format!("{{\"snapshotParentId\":{pid},\"open\":{}}}", failure(error)),
+         },
+         Err(error) => failure(error),
+     };
+     let console = unsafe { windows::Win32::System::Console::GetConsoleWindow() };
+-    let json = format!("{{\"schemaVersion\":1,\"scope\":\"READ_ONLY_TEST_FACTS_NOT_INSTALLER_ACCEPTANCE\",\"nonce\":{},\"ownIdentity\":{own_identity},\"ownImage\":{own_image},\"ownProcessToken\":{own_sid},\"optionalThreadToken\":{thread_sid},\"parent\":{parent},\"consoleWindowPresent\":{},\"releaseProof\":\"REQUIRES_ACTUAL_TEST_PROCESS_EXIT0\"}}\n",
+-        quote(&request.nonce), !console.0.is_null());
++    let json = format!(
++        "{{\"schemaVersion\":1,\"scope\":\"READ_ONLY_TEST_FACTS_NOT_INSTALLER_ACCEPTANCE\",\"nonce\":{},\"ownIdentity\":{own_identity},\"ownImage\":{own_image},\"ownProcessToken\":{own_sid},\"optionalThreadToken\":{thread_sid},\"parent\":{parent},\"consoleWindowPresent\":{},\"releaseProof\":\"REQUIRES_ACTUAL_TEST_PROCESS_EXIT0\"}}\n",
++        quote(&request.nonce),
++        !console.0.is_null()
++    );
+     if json.len() > 8192 {
+         return Err(LifecycleError::Invalid);
+     }

@@ -1,0 +1,11 @@
+--- /tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-second/chainer-probe.py
++++ /tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-third/chainer-probe.py
+@@ -114,7 +114,7 @@
+     need(all(not rows for n,rows in tables.items() if n not in ALLOWED|SYSTEM),'unknown nonempty table')
+     props={'UpgradeCode':v['upgradeCode'],'MSIRESTARTMANAGERCONTROL':'DisableShutdown','Manufacturer':'FutureClassroom test-only','ProductLanguage':'1033','ProductCode':v['productCode'],'ProductName':NAME,'ProductVersion':'0.0.1'}
+     need(sorted(tables['Property'],key=lambda r:r['Property'])==sorted([{'Property':k,'Value':val} for k,val in props.items()],key=lambda r:r['Property']),'exact fixture product/RM properties')
+-    need(tables['Directory']==[{'Directory':'TARGETDIR','Directory_Parent':'','DefaultDir':'SourceDir'},{'Directory':'LocalAppDataFolder','Directory_Parent':'TARGETDIR','DefaultDir':'.'}],'exact registry component directory only')
++    need(sorted(tables['Directory'],key=lambda r:r['Directory'])==sorted([{'Directory':'TARGETDIR','Directory_Parent':'','DefaultDir':'SourceDir'},{'Directory':'LocalAppDataFolder','Directory_Parent':'TARGETDIR','DefaultDir':'.'}],key=lambda r:r['Directory']),'exact registry component directory only')
+     need(tables['Component']==[{'Component':'ChainerRegistryProbe','ComponentId':v['componentCode'],'Directory_':'LocalAppDataFolder','Attributes':'4','Condition':'','KeyPath':'ChainerRegistryMarker'}],'exact HKCU32 RegistryKeyPath4 component')
+     need(tables['Registry']==[{'Registry':'ChainerRegistryMarker','Root':'1','Key':v['registryKey'],'Name':v['registryValue'],'Value':'#1','Component_':'ChainerRegistryProbe'}],'only exact owned nonce registry marker')
+     need(tables['Feature']==[{'Feature':'ProbeFeature','Feature_Parent':'','Title':'Rollback-only chainer; owned HKCU marker','Description':'','Display':'2','Level':'1','Directory_':'','Attributes':'0'}],'exact attached marker Feature')

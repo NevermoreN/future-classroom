@@ -1,0 +1,1049 @@
+{
+  "status": "FAIL_LOCAL_SECOND_BUILD_OR_EXPORTS",
+  "startedUtc": "2026-11-01T12:50:00.239507+00:00",
+  "originalPerCommandBudgetSeconds": 20,
+  "originalOverallBudgetSeconds": 120,
+  "sourceBefore": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 55135,
+      "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 33752,
+      "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 13778,
+      "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    }
+  ],
+  "originalInputs": {
+    "/tmp/fc-round75-installer-maintenance/evidence/root-build-context-probe-first.json": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-build-context-probe-first.json",
+      "bytes": 4962,
+      "sha256": "18af70d024c288915817b872db6ea7a614e9a0b87ea9b75a3adb720f1f70064c"
+    },
+    "/tmp/fc-round75-installer-maintenance/evidence/root-build-context-probe-first.py": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-build-context-probe-first.py",
+      "bytes": 4830,
+      "sha256": "acfca0f1dd32f092b41edbafec1a4d1c356a81f330bc8f87bbc048ccea92b240"
+    },
+    "/tmp/fc-round75-installer-maintenance/evidence/context-probe-author-first.stdout.log": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-author-first.stdout.log",
+      "bytes": 751,
+      "sha256": "e32d18a3e1c0f5e94723b9412c6de2c4d639722a620b2d19cf5b388abb21a88b"
+    },
+    "/tmp/fc-round75-installer-maintenance/evidence/context-probe-author-first.stderr.log": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-author-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-first.stdout.log": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-first.stderr.log": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-first.stderr.log",
+      "bytes": 290,
+      "sha256": "48693958601e742dac7dce514606a1385809cbad7c9426ccbd5938b5875a81dc"
+    },
+    "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f/.owner": {
+      "path": "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f/.owner",
+      "bytes": 56,
+      "sha256": "be7d8c9d610e81992422dc5fe5d2ccce644a9bc271053eed8aa60a0a81939b38"
+    },
+    "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f/observer-harness.exe": {
+      "path": "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f/observer-harness.exe",
+      "bytes": 3988775,
+      "sha256": "5ae22a321c0c8fc564da8567d341ca93946219330d61f31291997a422a579b39"
+    },
+    "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f/context-probe.wxs": {
+      "path": "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f/context-probe.wxs",
+      "bytes": 1583,
+      "sha256": "c146772f1c768b477f9e6945476bc1ce3fc414a4cc8dd79508d3943c025c28b9"
+    },
+    "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f/fixture-ledger.json": {
+      "path": "/tmp/fc-round75-installer-maintenance/parent-context-fixture-ef0ad284079e4dfaaa5d6f8cd7b7732f/fixture-ledger.json",
+      "bytes": 9039,
+      "sha256": "fa372949bb74b30b540d122af552ebf4c2006e88a6e771ddd7bef76c57ab8799"
+    }
+  },
+  "tools": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msibuild",
+      "bytes": 22912,
+      "sha256": "87ee3aa0af25bb997646071a45e35ebae3e3ba5f26fe7b479df97aa31bd8a1eb"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+      "bytes": 23376,
+      "sha256": "50b25845c863756975a8523fe1b370c4bf5dd1812a2a0229cf22139aa4b5ea81"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/wixl",
+      "bytes": 399744,
+      "sha256": "37fdfb01fb2e3fc752890f1e3eca4a161b5f41e251faa279ded0a9f907d73097"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/wrappers/wixl",
+      "bytes": 618,
+      "sha256": "2ac0b4eebef87eb93298a0de3667ec7ad0e829e94c6e1e52b93518d50a400c60"
+    }
+  ],
+  "fourthChecker": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/parent-context-probe-fourth/context-probe.py",
+    "bytes": 18965,
+    "sha256": "93c87fef4ca04524e47c77c96d200274d2ebb6a3e918977244fea4ecf6bde979"
+  },
+  "actualCli": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-first.json",
+    "bytes": 28320,
+    "sha256": "f823b6e55eee0733b5d32ebeea2bdc2d9b3bfeda66186cdbd749c838a15a0875"
+  },
+  "fixtureLedger": {
+    "path": "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96/fixture-ledger.json",
+    "bytes": 9039,
+    "sha256": "fa372949bb74b30b540d122af552ebf4c2006e88a6e771ddd7bef76c57ab8799"
+  },
+  "commands": [
+    {
+      "name": "01-author",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/evidence/parent-context-probe-fourth/context-probe.py",
+        "--observer-test-name",
+        "installer_lifecycle::native::broker::context_probe::engine_parent_context_observer",
+        "--windows-report-root",
+        "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-parent-observer-ef0ad284079e4dfaaa5d6f8cd7b7732f",
+        "--nonce",
+        "ef0ad284079e4dfaaa5d6f8cd7b7732f",
+        "author",
+        "--observer-exe",
+        "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96/fc_windows_gui_test_fixture.exe",
+        "--observer-sha256",
+        "5ae22a321c0c8fc564da8567d341ca93946219330d61f31291997a422a579b39",
+        "--fixture-ledger",
+        "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96/fixture-ledger.json",
+        "--fixture-ledger-sha256",
+        "fa372949bb74b30b540d122af552ebf4c2006e88a6e771ddd7bef76c57ab8799",
+        "--actual-cli-proof",
+        "/tmp/fc-round75-installer-maintenance/evidence/gui-cli-list-first.json",
+        "--cli-proof-sha256",
+        "f823b6e55eee0733b5d32ebeea2bdc2d9b3bfeda66186cdbd749c838a15a0875",
+        "--output-dir",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.09296390716917813,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/01-author.stdout.log",
+        "bytes": 751,
+        "sha256": "e32d18a3e1c0f5e94723b9412c6de2c4d639722a620b2d19cf5b388abb21a88b"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/01-author.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "02-build-placeholder",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/wrappers/wixl",
+        "-a",
+        "x86",
+        "-o",
+        "context-probe-placeholder.msi",
+        "context-probe-placeholder.wxs"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.04231546702794731,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/02-build-placeholder.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/02-build-placeholder.stderr.log",
+        "bytes": 226,
+        "sha256": "b11de8eae5cd329365312a5dc082497f2fdcf3ad770e0b669a243fbb28b1d5cd"
+      }
+    },
+    {
+      "name": "03-placeholder-tables",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "tables",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004389616195112467,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-tables.stdout.log",
+        "bytes": 402,
+        "sha256": "8f0a9337f8a8277a362d5d41c81ade3b54fb4739b44e52531f6327c73eb8bbc6"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-tables.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-_ForceCodepage",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "_ForceCodepage"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004163976991549134,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-_ForceCodepage.stdout.log",
+        "bytes": 23,
+        "sha256": "756e2010bef11d89ced632638fdcf69a7d00ccce12aa5643482bfe5a28d16777"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-_ForceCodepage.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-AdminUISequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "AdminUISequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004453107947483659,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-AdminUISequence.stdout.log",
+        "bytes": 141,
+        "sha256": "566f9c9710b1f128f4ff183d756546e5a78a7ac3ee66f8c3836876e0d2fe52e8"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-AdminUISequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Media",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Media"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.005339193856343627,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Media.stdout.log",
+        "bytes": 97,
+        "sha256": "758fecf78bf246c2f555f0d2323b7564854bb419d8cf9f403fd356e759f287bc"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Media.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Error",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Error"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004739570198580623,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Error.stdout.log",
+        "bytes": 35,
+        "sha256": "5e2d23423ce8d0ddd97885c69b67b6d208a6604a18551bfa0f5dd68b36ff7f67"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Error.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-ServiceInstall",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "ServiceInstall"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004548941971734166,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-ServiceInstall.stdout.log",
+        "bytes": 237,
+        "sha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-ServiceInstall.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-AppSearch",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "AppSearch"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.005297522060573101,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-AppSearch.stdout.log",
+        "bytes": 61,
+        "sha256": "440f3a84ea50cc08e880a610578ec22dd5cbca6e2bea6bd2c59b8fabeb36628f"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-AppSearch.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Property",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Property"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004700759192928672,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Property.stdout.log",
+        "bytes": 325,
+        "sha256": "0d51584677749412ad555f256282a2b57fa69ada151ae403b5e33c3164efaf71"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Property.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Upgrade",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Upgrade"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.0044627978932112455,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Upgrade.stdout.log",
+        "bytes": 170,
+        "sha256": "15c8dada7914dbfbd1aaa781c290689a5ad16c7adbf8cbe11f42547792b0eca4"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Upgrade.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Shortcut",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Shortcut"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.005768130999058485,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Shortcut.stdout.log",
+        "bytes": 269,
+        "sha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Shortcut.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-InstallExecuteSequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "InstallExecuteSequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004808112978935242,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-InstallExecuteSequence.stdout.log",
+        "bytes": 439,
+        "sha256": "e91ac6bf7c2cd69758d429f648a108128d95fd74bd83467111119a57417638a5"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-InstallExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Registry",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Registry"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004894857062026858,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Registry.stdout.log",
+        "bytes": 85,
+        "sha256": "82c0d5f16d087652fd8e8bd2cf1931e00528e3e5ba925f666b2d2dc95280e807"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Registry.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-AdvtExecuteSequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "AdvtExecuteSequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004613304976373911,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-AdvtExecuteSequence.stdout.log",
+        "bytes": 225,
+        "sha256": "c1986ae62815d6be46e6f3e314c0a803dac5bb01633af74a5f67f8dfc37b679d"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-AdvtExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-ActionText",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "ActionText"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004750740015879273,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-ActionText.stdout.log",
+        "bytes": 63,
+        "sha256": "08aff05632a6967c81c3af4c3ac120a0cff73275d34478cfd3c964a558962874"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-ActionText.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-FeatureComponents",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "FeatureComponents"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.0049409279599785805,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-FeatureComponents.stdout.log",
+        "bytes": 69,
+        "sha256": "4039cc1cb6fe292f50372332986868367665be2424322637bd9a2340e94ba553"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-FeatureComponents.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-File",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "File"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.005275571020320058,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-File.stdout.log",
+        "bytes": 114,
+        "sha256": "4f1937086fda8b92caed35986d5fc5f8cc57ddbb8c5f8d67a1fc7eabde52ffdd"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-File.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Directory",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Directory"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004979399964213371,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Directory.stdout.log",
+        "bytes": 96,
+        "sha256": "0384fffc2f0269a98579e6f0baec2a444ed39d63166477741333edab0c483ae3"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Directory.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-IniFile",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "IniFile"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004853524966165423,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-IniFile.stdout.log",
+        "bytes": 119,
+        "sha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-IniFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-RemoveFile",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "RemoveFile"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.00665967701934278,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-RemoveFile.stdout.log",
+        "bytes": 94,
+        "sha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-RemoveFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-RemoveIniFile",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "RemoveIniFile"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004885826027020812,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-RemoveIniFile.stdout.log",
+        "bytes": 137,
+        "sha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-RemoveIniFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-LaunchCondition",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "LaunchCondition"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004903106950223446,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-LaunchCondition.stdout.log",
+        "bytes": 116,
+        "sha256": "4b2ce8b15ab3ef67c03edbec5b26c88236f3c159c852766b8d7d4c7d16322ee5"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-LaunchCondition.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Signature",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Signature"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004866395145654678,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Signature.stdout.log",
+        "bytes": 140,
+        "sha256": "6e67486347b1205abb48db183d8ace73c4514504aad2cd4507a5c3658b04db18"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Signature.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-InstallUISequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "InstallUISequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.005001610144972801,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-InstallUISequence.stdout.log",
+        "bytes": 190,
+        "sha256": "6addaff4c25d625c879c9c4d26da415fcf5e6c01fe27a507af48656f50c31b92"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-InstallUISequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Component",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Component"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.0048578649293631315,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Component.stdout.log",
+        "bytes": 109,
+        "sha256": "97b4c7656f2e5a9950e16a7acf71e6f4facd048a4ea324df4d5c6bb6282ae733"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Component.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-ServiceControl",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "ServiceControl"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.005005951039493084,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-ServiceControl.stdout.log",
+        "bytes": 109,
+        "sha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-ServiceControl.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Feature",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Feature"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004964929074048996,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Feature.stdout.log",
+        "bytes": 192,
+        "sha256": "deea519ff039cd0df9138bbdd8787711c4013a5ea47296ae90b7a8e19de700f4"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Feature.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Binary",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Binary"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.007472299970686436,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Binary.stdout.log",
+        "bytes": 78,
+        "sha256": "a04a9f7c77a6d4db955ed69a943ab203da9d45bb3257d9c5267acfac93576796"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Binary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-CustomAction",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "CustomAction"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.006010400829836726,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-CustomAction.stdout.log",
+        "bytes": 81,
+        "sha256": "4ed7932415204180493560560cadee5180a86d44c63401db088c9f287bfab344"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-CustomAction.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-RegLocator",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "RegLocator"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.0065343319438397884,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-RegLocator.stdout.log",
+        "bytes": 75,
+        "sha256": "2176ed2976acf3a3c96198c5d568ab76827d026312af71c1011139c5ba2a6e9e"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-RegLocator.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-MsiFileHash",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "MsiFileHash"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.005579003831371665,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-MsiFileHash.stdout.log",
+        "bytes": 94,
+        "sha256": "3a52ed674d8151ebd1b2bd99f12797abd0e6dd6dd3ecd78ca9a74737d8d8e5ef"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-MsiFileHash.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-Icon",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "Icon"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004763610893860459,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Icon.stdout.log",
+        "bytes": 30,
+        "sha256": "a411636ecdd7c866a6b8c46387d24cf8471c47743fa51e2eebb018a3af5cc30c"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-Icon.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-AdminExecuteSequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "AdminExecuteSequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.00453520193696022,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-AdminExecuteSequence.stdout.log",
+        "bytes": 243,
+        "sha256": "70c4cead4ae9a2ce4f09637a962d277953c92e362de0a98b03ba34b8fc6b6293"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-AdminExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-export-CreateFolder",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+        "CreateFolder"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.004632544936612248,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-CreateFolder.stdout.log",
+        "bytes": 68,
+        "sha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-export-CreateFolder.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-placeholder-summary",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "suminfo",
+        "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation",
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.005848624045029283,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-summary.stdout.log",
+        "bytes": 486,
+        "sha256": "d600a77970bb569be57b6a8f3719b23bdb01553358c4b3c9e21c945a26ac3770"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/03-placeholder-summary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "scope": "Local test-only observer author/build/static exports only. Neither placeholder nor final MSI or any EXE/observer is executed. No Windows/production gate/Pending/main changes.",
+  "authoringChange": {
+    "original": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe.wxs",
+      "bytes": 1583,
+      "sha256": "c146772f1c768b477f9e6945476bc1ce3fc414a4cc8dd79508d3943c025c28b9"
+    },
+    "placeholder": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.wxs",
+      "bytes": 1616,
+      "sha256": "1e4319d651f51affef74f1044d433eb103f51936e8d5521c019471404f9731c1"
+    },
+    "onlyAbortAttributesChanged": true,
+    "intermediateExecution": "NEVER_RUN"
+  },
+  "intermediateMsi": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/context-probe-build-second-preparation/authored-second/context-probe-placeholder.msi",
+    "bytes": 4029952,
+    "sha256": "4bd2912d68398afe69e8de25b7669d7430978f0b4bc643975f1c30724f6965e6"
+  },
+  "error": {
+    "kind": "AssertionError",
+    "code": "ACTUAL_CUSTOMACTION_IDT_SCHEMA"
+  },
+  "elapsedSeconds": 0.38325107702985406,
+  "completedUtc": "2026-11-01T12:50:00.624148+00:00"
+}

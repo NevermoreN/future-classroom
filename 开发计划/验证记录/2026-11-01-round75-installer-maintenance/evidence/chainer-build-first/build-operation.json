@@ -1,0 +1,1126 @@
+{
+  "status": "PASS_LOCAL_INDEPENDENT_CHAINER_BUILD_STATIC_ONLY",
+  "commands": [
+    {
+      "name": "01-wixl",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/wrappers/wixl",
+        "-a",
+        "x86",
+        "-o",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/intermediate.msi",
+        "probe.wxs"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.15568842203356326,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/01-wixl.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/01-wixl.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "02-import-chainer",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msibuild",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "-i",
+        "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8/MsiEmbeddedChainer.idt"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006744036916643381,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/02-import-chainer.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/02-import-chainer.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-tables",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "tables",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004906781017780304,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/tables.stdout.log",
+        "bytes": 421,
+        "sha256": "55afec075529ab10a2044d555ef89ed29ac9d707021a12cc4986fb36642867cd"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/03-tables.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-_ForceCodepage",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "_ForceCodepage"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.00478138611651957,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/_ForceCodepage.idt",
+        "bytes": 23,
+        "sha256": "756e2010bef11d89ced632638fdcf69a7d00ccce12aa5643482bfe5a28d16777"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-_ForceCodepage.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-AdminUISequence",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "AdminUISequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004699491895735264,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/AdminUISequence.idt",
+        "bytes": 141,
+        "sha256": "566f9c9710b1f128f4ff183d756546e5a78a7ac3ee66f8c3836876e0d2fe52e8"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-AdminUISequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Media",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Media"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004593688063323498,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Media.idt",
+        "bytes": 97,
+        "sha256": "758fecf78bf246c2f555f0d2323b7564854bb419d8cf9f403fd356e759f287bc"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Media.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Error",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Error"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0044482918456196785,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Error.idt",
+        "bytes": 35,
+        "sha256": "5e2d23423ce8d0ddd97885c69b67b6d208a6604a18551bfa0f5dd68b36ff7f67"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Error.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-ServiceInstall",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "ServiceInstall"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004522054921835661,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/ServiceInstall.idt",
+        "bytes": 237,
+        "sha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-ServiceInstall.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-AppSearch",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "AppSearch"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004578667925670743,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/AppSearch.idt",
+        "bytes": 61,
+        "sha256": "440f3a84ea50cc08e880a610578ec22dd5cbca6e2bea6bd2c59b8fabeb36628f"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-AppSearch.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Property",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Property"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005364289972931147,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Property.idt",
+        "bytes": 337,
+        "sha256": "757d5f4e1da47d227f08a95c2c4725ae713e79262f3c0498423d9fcfdef1d946"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Property.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Upgrade",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Upgrade"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005102219991385937,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Upgrade.idt",
+        "bytes": 170,
+        "sha256": "15c8dada7914dbfbd1aaa781c290689a5ad16c7adbf8cbe11f42547792b0eca4"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Upgrade.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Shortcut",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Shortcut"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004831617930904031,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Shortcut.idt",
+        "bytes": 269,
+        "sha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Shortcut.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-InstallExecuteSequence",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "InstallExecuteSequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004672670969739556,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/InstallExecuteSequence.idt",
+        "bytes": 383,
+        "sha256": "301d09fbd31573e0261cc0a0bfee0390ef3e1218f4aec90efce8cfb338b9049c"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-InstallExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Registry",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Registry"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004480833886191249,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Registry.idt",
+        "bytes": 85,
+        "sha256": "82c0d5f16d087652fd8e8bd2cf1931e00528e3e5ba925f666b2d2dc95280e807"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Registry.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-AdvtExecuteSequence",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "AdvtExecuteSequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005425391951575875,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/AdvtExecuteSequence.idt",
+        "bytes": 225,
+        "sha256": "c1986ae62815d6be46e6f3e314c0a803dac5bb01633af74a5f67f8dfc37b679d"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-AdvtExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-ActionText",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "ActionText"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004767895909026265,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/ActionText.idt",
+        "bytes": 63,
+        "sha256": "08aff05632a6967c81c3af4c3ac120a0cff73275d34478cfd3c964a558962874"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-ActionText.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-FeatureComponents",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "FeatureComponents"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005065748002380133,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/FeatureComponents.idt",
+        "bytes": 69,
+        "sha256": "4039cc1cb6fe292f50372332986868367665be2424322637bd9a2340e94ba553"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-FeatureComponents.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-File",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "File"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004979934077709913,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/File.idt",
+        "bytes": 114,
+        "sha256": "4f1937086fda8b92caed35986d5fc5f8cc57ddbb8c5f8d67a1fc7eabde52ffdd"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-File.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Directory",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Directory"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0049066811334341764,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Directory.idt",
+        "bytes": 96,
+        "sha256": "0384fffc2f0269a98579e6f0baec2a444ed39d63166477741333edab0c483ae3"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Directory.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-IniFile",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "IniFile"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004951613023877144,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/IniFile.idt",
+        "bytes": 119,
+        "sha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-IniFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-RemoveFile",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "RemoveFile"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005515815922990441,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/RemoveFile.idt",
+        "bytes": 94,
+        "sha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-RemoveFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-RemoveIniFile",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "RemoveIniFile"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.00583088886924088,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/RemoveIniFile.idt",
+        "bytes": 137,
+        "sha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-RemoveIniFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-LaunchCondition",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "LaunchCondition"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0044737327843904495,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/LaunchCondition.idt",
+        "bytes": 222,
+        "sha256": "3050d6547d2fb7924f0bde40012d128840da6b21775de5ede3ac3e57bfc44866"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-LaunchCondition.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Signature",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Signature"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0049839739222079515,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Signature.idt",
+        "bytes": 140,
+        "sha256": "6e67486347b1205abb48db183d8ace73c4514504aad2cd4507a5c3658b04db18"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Signature.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-InstallUISequence",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "InstallUISequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005663781892508268,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/InstallUISequence.idt",
+        "bytes": 190,
+        "sha256": "6addaff4c25d625c879c9c4d26da415fcf5e6c01fe27a507af48656f50c31b92"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-InstallUISequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Component",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Component"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005023566074669361,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Component.idt",
+        "bytes": 109,
+        "sha256": "97b4c7656f2e5a9950e16a7acf71e6f4facd048a4ea324df4d5c6bb6282ae733"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Component.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-ServiceControl",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "ServiceControl"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004753285087645054,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/ServiceControl.idt",
+        "bytes": 109,
+        "sha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-ServiceControl.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Feature",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Feature"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0048310779966413975,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Feature.idt",
+        "bytes": 193,
+        "sha256": "6bf12d2220c742e7368e3dc660c1bcc15df3944276080d1cf2fe995226fc90fc"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Feature.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Binary",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Binary"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006190533982589841,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Binary.idt",
+        "bytes": 82,
+        "sha256": "971331c1ce428c259ea36bd7baf7dbe79ad36968b134d64bc7ee6207b29fe443"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Binary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-CustomAction",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "CustomAction"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0044916130136698484,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/CustomAction.idt",
+        "bytes": 81,
+        "sha256": "4ed7932415204180493560560cadee5180a86d44c63401db088c9f287bfab344"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-CustomAction.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-RegLocator",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "RegLocator"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004802086856216192,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/RegLocator.idt",
+        "bytes": 75,
+        "sha256": "2176ed2976acf3a3c96198c5d568ab76827d026312af71c1011139c5ba2a6e9e"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-RegLocator.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-MsiFileHash",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "MsiFileHash"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0052882160525768995,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/MsiFileHash.idt",
+        "bytes": 94,
+        "sha256": "3a52ed674d8151ebd1b2bd99f12797abd0e6dd6dd3ecd78ca9a74737d8d8e5ef"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-MsiFileHash.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-Icon",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Icon"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005025516031309962,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/Icon.idt",
+        "bytes": 30,
+        "sha256": "a411636ecdd7c866a6b8c46387d24cf8471c47743fa51e2eebb018a3af5cc30c"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-Icon.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-AdminExecuteSequence",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "AdminExecuteSequence"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005561797879636288,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/AdminExecuteSequence.idt",
+        "bytes": 243,
+        "sha256": "70c4cead4ae9a2ce4f09637a962d277953c92e362de0a98b03ba34b8fc6b6293"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-AdminExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-CreateFolder",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "CreateFolder"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0055822888389229774,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/CreateFolder.idt",
+        "bytes": 68,
+        "sha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-CreateFolder.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-export-MsiEmbeddedChainer",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "MsiEmbeddedChainer"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005101779010146856,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports/MsiEmbeddedChainer.idt",
+        "bytes": 352,
+        "sha256": "8464654f83063117b0bb29da898c2e1dc2e58b5877c31937a21297ebfb847263"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/04-export-MsiEmbeddedChainer.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "05-summary",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "suminfo",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004688302055001259,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/summary.stdout.log",
+        "bytes": 510,
+        "sha256": "b402a44d6fa3f162a8cb0f50dc93cca5bdc8424d036f760e926ff130e0100899"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/05-summary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "06-binary",
+      "args": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "Binary.FcIndependentChainer"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.004120649071410298,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/extracted-probe.exe",
+        "bytes": 18432,
+        "sha256": "39af6ce7846f7268bd74cfa7350f56b5fc7f5d4f123d0ad4bae6f9b34e132952"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/06-binary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "07-static-check",
+      "args": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-probe-preparation-first/chainer-probe.py",
+        "check-exports",
+        "--spec",
+        "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8/spec.json",
+        "--spec-sha256",
+        "da135548b895d0647e001f4e75b7107b4ec08c40832c8dbc37841b638fa115a0",
+        "--compile-receipt",
+        "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/compiler-receipt.json",
+        "--compile-receipt-sha256",
+        "99aca6cf9ee2b3d9189af1640983e126e6080b3e1ab07f9f5b5a333d8496d1f0",
+        "--tables-list",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/tables.stdout.log",
+        "--exports",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/exports",
+        "--extracted-probe",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/extracted-probe.exe",
+        "--msi",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+        "--msi-sha256",
+        "8b3bbf3c45e14751268a2963c80ef2c13b48688d84052f3e04ffebaca8670590",
+        "--summary",
+        "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/summary.stdout.log"
+      ],
+      "cwd": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8",
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.06163933593779802,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/07-static-check.stdout.log",
+        "bytes": 5315,
+        "sha256": "5f54286d23b4f890d097e92be3806dece34c5282aedfcdace1e02d6a955a8c8b"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/07-static-check.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "scope": "Independent C# fixture static local build only, not product or Windows execution",
+  "overallSeconds": 120,
+  "tools": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msibuild",
+      "bytes": 22912,
+      "sha256": "87ee3aa0af25bb997646071a45e35ebae3e3ba5f26fe7b479df97aa31bd8a1eb"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+      "bytes": 23376,
+      "sha256": "50b25845c863756975a8523fe1b370c4bf5dd1812a2a0229cf22139aa4b5ea81"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/wixl",
+      "bytes": 399744,
+      "sha256": "37fdfb01fb2e3fc752890f1e3eca4a161b5f41e251faa279ded0a9f907d73097"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/wrappers/wixl",
+      "bytes": 618,
+      "sha256": "2ac0b4eebef87eb93298a0de3667ec7ad0e829e94c6e1e52b93518d50a400c60"
+    }
+  ],
+  "intermediate": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/intermediate.msi",
+    "bytes": 28160,
+    "sha256": "8a89e177ee69e7d7d6d10f7dab4bf21290aa6dcf7bd346287c1d082a6c34d41e"
+  },
+  "finalMsi": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-build-first/chainer-probe-final.msi",
+    "bytes": 28672,
+    "sha256": "8b3bbf3c45e14751268a2963c80ef2c13b48688d84052f3e04ffebaca8670590"
+  },
+  "tableCheck": {
+    "status": "PASS_EXACT_STATIC_CHAINER_FIXTURE_ONLY",
+    "runtime": "NOT_RUN",
+    "productGuardian": "NOT_RUN",
+    "finalMsi": {
+      "bytes": 28672,
+      "sha256": "8b3bbf3c45e14751268a2963c80ef2c13b48688d84052f3e04ffebaca8670590"
+    },
+    "probe": {
+      "bytes": 18432,
+      "sha256": "39af6ce7846f7268bd74cfa7350f56b5fc7f5d4f123d0ad4bae6f9b34e132952",
+      "pe": {
+        "machine": "I386",
+        "optionalHeader": "PE32",
+        "subsystem": 2,
+        "clrFlags": 3
+      }
+    },
+    "specSha256": "da135548b895d0647e001f4e75b7107b4ec08c40832c8dbc37841b638fa115a0",
+    "compileReceiptSha256": "99aca6cf9ee2b3d9189af1640983e126e6080b3e1ab07f9f5b5a333d8496d1f0",
+    "tableListingSha256": "55afec075529ab10a2044d555ef89ed29ac9d707021a12cc4986fb36642867cd",
+    "exportIdentities": {
+      "_ForceCodepage": {
+        "bytes": 23,
+        "sha256": "756e2010bef11d89ced632638fdcf69a7d00ccce12aa5643482bfe5a28d16777"
+      },
+      "AdminUISequence": {
+        "bytes": 141,
+        "sha256": "566f9c9710b1f128f4ff183d756546e5a78a7ac3ee66f8c3836876e0d2fe52e8"
+      },
+      "Media": {
+        "bytes": 97,
+        "sha256": "758fecf78bf246c2f555f0d2323b7564854bb419d8cf9f403fd356e759f287bc"
+      },
+      "Error": {
+        "bytes": 35,
+        "sha256": "5e2d23423ce8d0ddd97885c69b67b6d208a6604a18551bfa0f5dd68b36ff7f67"
+      },
+      "ServiceInstall": {
+        "bytes": 237,
+        "sha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39"
+      },
+      "AppSearch": {
+        "bytes": 61,
+        "sha256": "440f3a84ea50cc08e880a610578ec22dd5cbca6e2bea6bd2c59b8fabeb36628f"
+      },
+      "Property": {
+        "bytes": 337,
+        "sha256": "757d5f4e1da47d227f08a95c2c4725ae713e79262f3c0498423d9fcfdef1d946"
+      },
+      "Upgrade": {
+        "bytes": 170,
+        "sha256": "15c8dada7914dbfbd1aaa781c290689a5ad16c7adbf8cbe11f42547792b0eca4"
+      },
+      "Shortcut": {
+        "bytes": 269,
+        "sha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5"
+      },
+      "InstallExecuteSequence": {
+        "bytes": 383,
+        "sha256": "301d09fbd31573e0261cc0a0bfee0390ef3e1218f4aec90efce8cfb338b9049c"
+      },
+      "Registry": {
+        "bytes": 85,
+        "sha256": "82c0d5f16d087652fd8e8bd2cf1931e00528e3e5ba925f666b2d2dc95280e807"
+      },
+      "AdvtExecuteSequence": {
+        "bytes": 225,
+        "sha256": "c1986ae62815d6be46e6f3e314c0a803dac5bb01633af74a5f67f8dfc37b679d"
+      },
+      "ActionText": {
+        "bytes": 63,
+        "sha256": "08aff05632a6967c81c3af4c3ac120a0cff73275d34478cfd3c964a558962874"
+      },
+      "FeatureComponents": {
+        "bytes": 69,
+        "sha256": "4039cc1cb6fe292f50372332986868367665be2424322637bd9a2340e94ba553"
+      },
+      "File": {
+        "bytes": 114,
+        "sha256": "4f1937086fda8b92caed35986d5fc5f8cc57ddbb8c5f8d67a1fc7eabde52ffdd"
+      },
+      "Directory": {
+        "bytes": 96,
+        "sha256": "0384fffc2f0269a98579e6f0baec2a444ed39d63166477741333edab0c483ae3"
+      },
+      "IniFile": {
+        "bytes": 119,
+        "sha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0"
+      },
+      "RemoveFile": {
+        "bytes": 94,
+        "sha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052"
+      },
+      "RemoveIniFile": {
+        "bytes": 137,
+        "sha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06"
+      },
+      "LaunchCondition": {
+        "bytes": 222,
+        "sha256": "3050d6547d2fb7924f0bde40012d128840da6b21775de5ede3ac3e57bfc44866"
+      },
+      "Signature": {
+        "bytes": 140,
+        "sha256": "6e67486347b1205abb48db183d8ace73c4514504aad2cd4507a5c3658b04db18"
+      },
+      "InstallUISequence": {
+        "bytes": 190,
+        "sha256": "6addaff4c25d625c879c9c4d26da415fcf5e6c01fe27a507af48656f50c31b92"
+      },
+      "Component": {
+        "bytes": 109,
+        "sha256": "97b4c7656f2e5a9950e16a7acf71e6f4facd048a4ea324df4d5c6bb6282ae733"
+      },
+      "ServiceControl": {
+        "bytes": 109,
+        "sha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8"
+      },
+      "Feature": {
+        "bytes": 193,
+        "sha256": "6bf12d2220c742e7368e3dc660c1bcc15df3944276080d1cf2fe995226fc90fc"
+      },
+      "Binary": {
+        "bytes": 82,
+        "sha256": "971331c1ce428c259ea36bd7baf7dbe79ad36968b134d64bc7ee6207b29fe443"
+      },
+      "CustomAction": {
+        "bytes": 81,
+        "sha256": "4ed7932415204180493560560cadee5180a86d44c63401db088c9f287bfab344"
+      },
+      "RegLocator": {
+        "bytes": 75,
+        "sha256": "2176ed2976acf3a3c96198c5d568ab76827d026312af71c1011139c5ba2a6e9e"
+      },
+      "MsiFileHash": {
+        "bytes": 94,
+        "sha256": "3a52ed674d8151ebd1b2bd99f12797abd0e6dd6dd3ecd78ca9a74737d8d8e5ef"
+      },
+      "Icon": {
+        "bytes": 30,
+        "sha256": "a411636ecdd7c866a6b8c46387d24cf8471c47743fa51e2eebb018a3af5cc30c"
+      },
+      "AdminExecuteSequence": {
+        "bytes": 243,
+        "sha256": "70c4cead4ae9a2ce4f09637a962d277953c92e362de0a98b03ba34b8fc6b6293"
+      },
+      "CreateFolder": {
+        "bytes": 68,
+        "sha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e"
+      },
+      "MsiEmbeddedChainer": {
+        "bytes": 352,
+        "sha256": "8464654f83063117b0bb29da898c2e1dc2e58b5877c31937a21297ebfb847263"
+      }
+    },
+    "summarySha256": "b402a44d6fa3f162a8cb0f50dc93cca5bdc8424d036f760e926ff130e0100899",
+    "scope": "Static only; root separately binds exact msibuild/export/extraction command receipts to this same MSI SHA. No execution performed."
+  },
+  "compilerReceipt": {
+    "path": "/tmp/fc-round75-installer-maintenance/chainer-compile-output-bd0f287d596c4a01bc2a120c3670afb8/compiler-receipt.json",
+    "bytes": 1906,
+    "sha256": "99aca6cf9ee2b3d9189af1640983e126e6080b3e1ab07f9f5b5a333d8496d1f0"
+  },
+  "spec": {
+    "path": "/tmp/fc-round75-installer-maintenance/chainer-probe-input-bd0f287d596c4a01bc2a120c3670afb8/spec.json",
+    "bytes": 1171,
+    "sha256": "da135548b895d0647e001f4e75b7107b4ec08c40832c8dbc37841b638fa115a0"
+  },
+  "elapsedSeconds": 0.471881952136755,
+  "actualControllerReturned": true
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_PURE_CONTRACT_NOT_OBSERVER_RUNTIME",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/parent-context-probe-first/check-context-probe.py"
+  ],
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 0.10713106114417315,
+  "observerExeProduced": false,
+  "msiProduced": false,
+  "windowsRun": false,
+  "files": [
+    {
+      "path": ".owner",
+      "bytes": 63,
+      "sha256": "0fad40bc18db9ed7918f410688c2d30faf567e37b5a4375674177cf5a08eca44"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4258,
+      "sha256": "f9a113336f2a36c1d9ccb5cfec0be39942ca6859ce949b99c25858785e72ed69"
+    },
+    {
+      "path": "check-context-probe.py",
+      "bytes": 3795,
+      "sha256": "627298fdda25e8cf97280ccd487160fa27a8a1d3d2572b898c677e84b333522c"
+    },
+    {
+      "path": "context-probe.py",
+      "bytes": 9473,
+      "sha256": "c51155cf5d424e488dda7133b87b326979f184bfd8b29cb8a44f1f2919a36a79"
+    },
+    {
+      "path": "pure-check-first.stderr.log",
+      "bytes": 508,
+      "sha256": "facdd0c3a940c8a23de177120e45543fd0a9336e415925ea58169f93a19ad6c4"
+    },
+    {
+      "path": "pure-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "stdout": {
+    "path": "pure-check-first.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "pure-check-first.stderr.log",
+    "bytes": 508,
+    "sha256": "facdd0c3a940c8a23de177120e45543fd0a9336e415925ea58169f93a19ad6c4"
+  }
+}

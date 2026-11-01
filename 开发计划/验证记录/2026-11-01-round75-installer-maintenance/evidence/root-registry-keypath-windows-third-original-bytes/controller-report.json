@@ -1,0 +1,72 @@
+{
+    "status":  "PASS_MEASURED_AND_FORMALLY_REMOVED",
+    "nonce":  "ae966fa5484f4235b154b7b874ff728f",
+    "root":  "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f",
+    "runtimePid":  14036,
+    "originalBudgetSeconds":  120,
+    "availableMilliseconds":  98311,
+    "identityVerified":  true,
+    "beforeAbsent":  true,
+    "installAttempted":  true,
+    "afterAbsent":  true,
+    "measurementPassed":  true,
+    "commands":  [
+                     {
+                         "name":  "query-Before",
+                         "file":  "C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe",
+                         "arguments":  "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\\query-registry-x86.ps1\" -Phase Before -SpecPath \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\\fixture-spec.json\" -ExpectedSpecSha256 a41186d39d1ed187bfdbe99b0d94cb2e4eefc6fc36866257bddaaff34edd643f -OutputRoot \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\"",
+                         "pid":  9660,
+                         "actualExit":  true,
+                         "pipesComplete":  true,
+                         "timedOut":  false,
+                         "exitCode":  0,
+                         "creationFileTimeUtc":  134380117616839523
+                     },
+                     {
+                         "name":  "install",
+                         "file":  "C:\\Windows\\System32\\msiexec.exe",
+                         "arguments":  "/i \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\\fixture.msi\" /qn /norestart /L*v \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\\install.log\"",
+                         "pid":  29876,
+                         "actualExit":  true,
+                         "pipesComplete":  true,
+                         "timedOut":  false,
+                         "exitCode":  0,
+                         "creationFileTimeUtc":  134380117627542726
+                     },
+                     {
+                         "name":  "query-Installed",
+                         "file":  "C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe",
+                         "arguments":  "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\\query-registry-x86.ps1\" -Phase Installed -SpecPath \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\\fixture-spec.json\" -ExpectedSpecSha256 a41186d39d1ed187bfdbe99b0d94cb2e4eefc6fc36866257bddaaff34edd643f -OutputRoot \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\"",
+                         "pid":  1172,
+                         "actualExit":  true,
+                         "pipesComplete":  true,
+                         "timedOut":  false,
+                         "exitCode":  0,
+                         "creationFileTimeUtc":  134380117629395716
+                     },
+                     {
+                         "name":  "uninstall",
+                         "file":  "C:\\Windows\\System32\\msiexec.exe",
+                         "arguments":  "/x {60E68721-62F0-5656-B5BE-144E6B889AB6} /qn /norestart /L*v \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\\uninstall.log\"",
+                         "pid":  3960,
+                         "actualExit":  true,
+                         "pipesComplete":  true,
+                         "timedOut":  false,
+                         "exitCode":  0,
+                         "creationFileTimeUtc":  134380117637233669
+                     },
+                     {
+                         "name":  "query-After",
+                         "file":  "C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe",
+                         "arguments":  "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\\query-registry-x86.ps1\" -Phase After -SpecPath \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\\fixture-spec.json\" -ExpectedSpecSha256 a41186d39d1ed187bfdbe99b0d94cb2e4eefc6fc36866257bddaaff34edd643f -OutputRoot \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r75-registry-keypath-ae966fa5484f4235b154b7b874ff728f\"",
+                         "pid":  4280,
+                         "actualExit":  true,
+                         "pipesComplete":  true,
+                         "timedOut":  false,
+                         "exitCode":  0,
+                         "creationFileTimeUtc":  134380117638634306
+                     }
+                 ],
+    "elapsedMilliseconds":  2979,
+    "cleanupSafe":  true
+}

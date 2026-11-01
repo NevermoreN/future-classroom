@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "status": "B_THREE_SOURCE_FROZEN_PURE_CHECKS_PASS_ACTUAL_MSI_NOT_RUN",
+  "atUtc": "2026-11-01T11:59:41.589963+00:00",
+  "baseCommit": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+  "ownedSource": [
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 55135,
+      "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e",
+      "before": {
+        "bytes": 54045,
+        "sha256": "e1a6fbac4d49f7c3644620a37cd4f951cec042be021f2fb759e4d6a6b62d591a"
+      }
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 33752,
+      "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf",
+      "before": {
+        "bytes": 30725,
+        "sha256": "b14f40537c70606ad1c566c806b1e5902b8a1b30dfff6f27fd04eaa6469b670b"
+      }
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 13778,
+      "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00",
+      "before": {
+        "bytes": 10471,
+        "sha256": "e6e3e2140cf46c11a4b4bccef8af40b3522ae17717f4e7453bdf31bf04b7fa79"
+      }
+    }
+  ],
+  "sourceCount": 3,
+  "pureTests": 24,
+  "checks": [
+    {
+      "path": "b-msi-contract-first.json",
+      "sha256": "82966787935288db5d82e135f494b643e58651131c70ba1b86feab16a7301b3d",
+      "exitCode": 0,
+      "elapsedSeconds": 4.05103241186589
+    },
+    {
+      "path": "b-diffcheck-first.json",
+      "sha256": "67afe311235f71790aae08e92c5808453b3445a32731454a240637277936d496",
+      "exitCode": 0,
+      "elapsedSeconds": 0.009514271980151534
+    }
+  ],
+  "ast": "PASS_TWO_OWNED_PYTHON_FILES_AND_PROBE_HELPERS",
+  "probePreparation": {
+    "path": "parent-context-probe-first/preparation-second.json",
+    "sha256": "ffd80c7845f91bc4589285b53df66add59d689ae1e3dfb2f8524f91d8a481c67",
+    "tests": 3,
+    "status": "PASS_PURE_CONTRACT_ONLY_OBSERVER_NOT_IMPLEMENTED_MSI_NOT_BUILT"
+  },
+  "diff": {
+    "path": "b-implementation-minimal-first.diff",
+    "sha256": "cc3dac0ce60e64bbb55e4ad2bd657988f160c27d4a5270d090b15db8174a3e37"
+  },
+  "preservedContract": [
+    "Begin1499 afterCostFinalize/InstallValidate beforeInitialize; all3CAcondition1",
+    "same2normalGUI binaries; no newproductDLL/bin/CLI/overlayversion",
+    "closed File/Directory/Registry tables unchanged; no speculative cleanup tables",
+    "actual native facts authority; no Installed/REMOVE/REINSTALL/CLIbool authority",
+    "report descriptions explicitly NOT_RUN even when static table check PASS"
+  ],
+  "notRun": [
+    "Cargo",
+    "Windows",
+    "actualMSIbuild/install/reapply/uninstall/rollback",
+    "actualobserverimplementation/EXE/libtestCLI/MSIcontext"
+  ],
+  "mainWritten": false,
+  "gitCommitOrPush": false
+}

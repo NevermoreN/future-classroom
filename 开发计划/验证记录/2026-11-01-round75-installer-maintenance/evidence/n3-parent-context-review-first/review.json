@@ -1,0 +1,120 @@
+{
+  "status": "READ_ONLY_DESIGN_NOT_IMPLEMENTED_OR_RUNTIME_PASS",
+  "recordedUtc": "2026-11-01T13:11:40.148601+00:00",
+  "sourceFacts": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    }
+  ],
+  "evidenceFacts": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-second.json",
+      "bytes": 149090,
+      "sha256": "213cd4c4beddc46a4bd08978a7b4951c721e9de5ce9338d1a78cc18c7429db6b"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/quiet-observer-second-context.json",
+      "bytes": 835,
+      "sha256": "e75d94df8b03f893f9294fd7408227838972603f1c23ec6b8b0f97536e90f648"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-windows-third.json",
+      "bytes": 134890,
+      "sha256": "cd44ef72b57a354209a72f190e4e027c25f19f256a50e9b044785f8a90c06cd8"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-registry-keypath-interpretation-first.json",
+      "bytes": 664,
+      "sha256": "c7a7a3ec19a35b5da4dcd58d5ddd39be216db11c601ba2fdee8f75519366699d"
+    }
+  ],
+  "confirmed": [
+    {
+      "finding": "CURRENT_ENGINE_USER_EQUALITY_REJECTS_ACTUAL_TYPE2",
+      "source": "native/broker.rs:564",
+      "facts": "Observed helper process token is elior; immediate original parent is preexisting System32/msiexec.exe with LocalSystem token, not initiating client process. Production has not been run through this admission."
+    },
+    {
+      "finding": "ENGINE_DEATH_IS_NOT_CURRENT_SETTLEMENT_REQUIREMENT",
+      "sources": [
+        "native/broker.rs:122",
+        "native/broker.rs:752",
+        "native/broker.rs:821",
+        "native.rs:442",
+        "native.rs:461"
+      ],
+      "facts": "Engine is checked live and later its handle is closed. The actually waited process is the original authenticated guardian and its exit code must be zero. A baseline shared MSI service process must not be required to exit."
+    },
+    {
+      "finding": "REGISTRY_01_CONFIRMED_IN_LIMITED_FIXTURE",
+      "facts": "Independent x86 per-user fixture reports prefix01 and formal uninstall/absence cleanup; keep exact product matcher unchanged. This does not prove product MSI admission/maintenance."
+    }
+  ],
+  "proposedModel": {
+    "helperUser": "Session.resources.sid remains actual current helper process TOKEN_USER, require_user unchanged. Begin, broker, Guardian, advisory notices and named-pipe impersonated peer all remain exactly this user and pinned helper image SHA. LocalSystem must never be accepted as a helper merely because its parent is trusted.",
+    "engineCapability": "Separate private EngineCapability from user identity: exact opened original process handle, PID+creation FILETIME, image constrained to OS WindowsDirectory/System32 or SysWOW64 msiexec.exe and pinned nonreparse OS image, parent-before-child creation, still live; classify token as CurrentUser or exact well-known LocalSystem only. Reject arbitrary other SID, LocalService and NetworkService. Never overwrite resources.sid with engine SID and never select KnownFolder/Run from engine identity.",
+    "binding": "Begin pins its own engine; broker authenticates original Begin parent instance (same helper SHA/user) and independently derives/pins the same engine process instance; original BEGIN acknowledgment only to that Begin PID+creation. Guardian remains original authenticated pipe peer instance, matching helper user/image and exact pinned engine parent instance. Original Guardian handle is duplicated into the original owner ledger before any decision. Notices remain advisory.",
+    "transaction": "Packet transaction ID is correlation only. Real Guardian code must successfully call MsiJoinTransaction with engine-supplied argv then MsiEndTransaction; original ENDED must match stored ID/decision and original guardian identity, then original Guardian exit0 and independently reconciled effects, checked closes and original Pending/gate release. No fake effects receipt, caller flag or PID packet becomes authority.",
+    "limits": "An exact long-lived SYSTEM msiexec parent is not a unique MSI session. Even this composite protocol does not independently prove an external EXE Begin knows the later transaction ID; current scope relies on the controlled unchanged candidate wiring and the pinned helper code plus real MSI Join validation. Do not claim arbitrary external packages/TRANSFORMS are authenticated. If a stronger Begin-to-hInstall identity guarantee is demanded, current Type2 API lacks that handle and this two-SID change alone cannot provide it.",
+    "retention": "Keep original 120-second deadline, 12 connections, fixed handle/owner bounds, sticky failure and unknown-owner retention. Engine death before settlement is negative, but engine remaining live after guardian return is normal. Do not kill/wait for service process, initiate client process or unrelated engine processes."
+  },
+  "requiredBeforeProductMutation": {
+    "probe": "Independent real MsiEmbeddedChainer experiment is required; Type2 observation cannot be extrapolated to its process/token/parent/argv or successful Join.",
+    "observations": [
+      "Exact engine-added argv order and bounded nonzero transaction handle field",
+      "Own process TOKEN_USER and optional thread token, exact image and PID+creation",
+      "Immediate parent image/TOKEN_USER/PID+creation; compare to Type2 original engine when both roles exist in one fixture",
+      "Real MsiJoinTransaction return plus changed-owner event ownership/checked close",
+      "Real MsiEndTransaction(ROLLBACK) return, original probe process exit, MSI terminal exit and exact fixture registration/owned-root absence"
+    ],
+    "fixture": "Use an independently source-bound test-only GUI executable embedded in a minimal unrelated nonce ProductCode/UpgradeCode MSI with no production Begin, lifecycle gate, Pending, files, Run or school data. Explicit rollback-only Join/End is a real transaction operation and needs root to execute its bounded fixture, not a read-only Type19 claim. Root preflights absence and preserves complete logs. Test-only code/entry design must be explicitly authorized before adding any binary/route.",
+    "harnessConstraint": "Existing libtest observer cannot simply be reused as MsiEmbeddedChainer Binary: engine prepends transaction handle before its command. Current observer requires exactly six args and the ordinary libtest parser sees that added positional argument before observer. Do not infer successful selection from prior Type2 --exact/--skip proof; either prove a supported harness mapping first or prepare an independently reviewed test-only fixture with explicit argv parsing. No normal production CLI bypass.",
+    "branching": "If guardian remains current user and same actual engine, private engine-classification change is narrowly viable. If guardian is SYSTEM, its parent differs, Join fails or per-user access is denied, preserve that failure and design from those facts; do not widen pipe DACL/user SID, impersonate a guessed user, add service-token privileges or accept arbitrary ancestor chains."
+  },
+  "implementationBoundary": {
+    "likely": [
+      "native/broker.rs: private EngineCapability/classification and explicit original instance comparisons",
+      "native/broker.rs cfg(test): exact SID cases, wrong/changed engine identity and retained failure tests"
+    ],
+    "unchanged": [
+      "native.rs require_user and file/pipe security primitives",
+      "installer_lifecycle owner/Pending/Settlement protocol",
+      "effects.rs user registration/keypath/Run-absent proof",
+      "all normal CLI grammar and budgets"
+    ],
+    "possibleTestOnlyFourth": "context_probe.rs may host further bounded observer helpers only after root selects an executable/argv strategy; no source edit authorized by this review."
+  },
+  "windows7Apis": [
+    "OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION|SYNCHRONIZE)",
+    "GetProcessTimes/GetProcessId/WaitForSingleObject",
+    "CreateToolhelp32Snapshot Process32FirstW/NextW",
+    "QueryFullProcessImageNameW",
+    "OpenProcessToken(TOKEN_QUERY)/GetTokenInformation(TokenUser)/CreateWellKnownSid(WinLocalSystemSid)",
+    "GetNamedPipeClientProcessId/GetNamedPipeServerProcessId/ImpersonateNamedPipeClient/RevertToSelf",
+    "MsiJoinTransaction/MsiEndTransaction (Windows Installer4.5+, present on Windows7 MSI5)"
+  ],
+  "officialSources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msijointransaction",
+    "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msiendtransaction",
+    "https://learn.microsoft.com/en-us/windows/win32/msi/msiembeddedchainer-table"
+  ],
+  "apiLimits": "Official Join validates same transaction user and shared parent in process tree, and transfers ownership; End only current owner. Embedded chainer gets transaction handle before authored command and must Join/End or installation rolls back. None of these docs says its parent process token equals the helper user; actual runtime evidence remains required.",
+  "execution": "No source/Cargo/Windows/Run/process/Git modifications. Only this new owned review directory written."
+}

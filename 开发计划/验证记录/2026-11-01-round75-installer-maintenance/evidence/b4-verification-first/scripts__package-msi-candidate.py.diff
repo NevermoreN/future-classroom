@@ -1,0 +1,87 @@
+--- B3/scripts/package-msi-candidate.py
++++ B4/scripts/package-msi-candidate.py
+@@ -394,8 +394,31 @@
+             "FcLifecycleGuardian\tNOT (ACTION = \"ADVERTISE\")\tguardian\t" + HELPER_BINARY + "\t2\r\n").encode("ascii")
+ 
+ 
++def lifecycle_custom_action_idt() -> bytes:
++    lines = ["Action\tType\tSource\tTarget", "s72\ti2\tS72\tS255", "CustomAction\tAction"]
++    for name, (kind, target, _) in LIFECYCLE_ACTIONS.items():
++        lines.append("\t".join((name, str(kind), HELPER_BINARY, target)))
++    return ("\r\n".join(lines) + "\r\n").encode("ascii")
++
++
++def lifecycle_execute_sequence_idt(intermediate: bytes) -> bytes:
++    """Preserve compiler standard rows and add only the three fixed hooks."""
++    rows = idt_rows(intermediate, "InstallExecuteSequence")
++    if any(set(row) != {"Action", "Condition", "Sequence"} for row in rows):
++        raise ValueError("Unexpected intermediate execution schema")
++    if any(row["Action"] in LIFECYCLE_ACTIONS for row in rows):
++        raise ValueError("Intermediate compiler output already contains lifecycle hooks")
++    lines = ["Action\tCondition\tSequence", "s72\tS255\ti2", "InstallExecuteSequence\tAction"]
++    for row in rows:
++        lines.append("\t".join(row[name] for name in ("Action", "Condition", "Sequence")))
++    lines.extend("\t".join((name, "1", str(spec[2]))) for name, spec in LIFECYCLE_ACTIONS.items())
++    raw = ("\r\n".join(lines) + "\r\n").encode("ascii")
++    verify_transaction_sequence(raw)
++    return raw
++
++
+ def authoring(version: str, names: list[str]) -> bytes:
+-    """All names have already passed the closed payload namespace admission."""
++    """Unexecuted compiler subset; final lifecycle tables require explicit import."""
+     ET.register_namespace("", WIX_NS)
+     def element(parent, name, **attrs):
+         return ET.SubElement(parent, "{" + WIX_NS + "}" + name, attrs)
+@@ -408,12 +431,9 @@
+     element(sequence, "InstallExecute", Sequence="6500")
+     element(sequence, "RemoveExistingProducts", After="InstallExecute")
+     element(product, "Binary", Id=HELPER_BINARY, SourceFile="lifecycle/fc-installer-lifecycle.exe")
+-    for action, (kind, role, number) in LIFECYCLE_ACTIONS.items():
+-        attrs = dict(Id=action, BinaryKey=HELPER_BINARY, ExeCommand=role, Return="check", Impersonate="yes")
+-        if kind in (1282, 1538):
+-            attrs["Execute"] = "rollback" if kind == 1282 else "commit"
+-        element(product, "CustomAction", **attrs)
+-        element(sequence, "Custom", Action=action, Sequence=str(number)).text = "1"
++    # wixl 0.103 cannot populate BinaryKey/ExeCommand CustomAction rows.
++    # This unexecuted compiler subset omits both declarations and references;
++    # exact final lifecycle tables are imported and read back below.
+     element(product, "Property", Id="MSIRESTARTMANAGERCONTROL", Value="DisableShutdown")
+     element(product, "Condition", Message="This candidate supports only the current user installation context.").text = "NOT ALLUSERS"
+     element(product, "Condition", Message="Windows 7 or later is required; actual OS compatibility remains unvalidated.").text = "Installed OR VersionNT >= 601"
+@@ -747,8 +767,24 @@
+         (output / "candidate.wxs").write_bytes(authored)
+         report["authoring"] = {"path": "candidate.wxs", "sha256": digest(authored), "product_code": product_code(manifest["version"]), "upgrade_code": UPGRADE_CODE}
+         run_tool(output, "wixl-build", [str(tools["wixl"]), "-a", "x86", "-o", "candidate.msi", "candidate.wxs"], report["commands"])
++        intermediate_actions = run_tool(output, "intermediate-CustomAction", [str(tools["msiinfo"]), "export", "candidate.msi", "CustomAction"], report["commands"])
++        if (intermediate_actions.decode("ascii", "strict").splitlines()[:3] !=
++                ["Action\tType\tSource\tTarget\tExtendedType", "s72\ti2\tS72\tS255\tI4", "CustomAction\tAction"]
++                or idt_rows(intermediate_actions, "CustomAction")):
++            raise ValueError("Expected the pinned compiler's empty intermediate CustomAction table")
++        intermediate_sequence = run_tool(output, "intermediate-InstallExecuteSequence", [str(tools["msiinfo"]), "export", "candidate.msi", "InstallExecuteSequence"], report["commands"])
++        (output / "CustomAction.idt").write_bytes(lifecycle_custom_action_idt())
++        (output / "InstallExecuteSequence.idt").write_bytes(lifecycle_execute_sequence_idt(intermediate_sequence))
+         (output / "MsiEmbeddedChainer.idt").write_bytes(chainer_idt())
+-        run_tool(output, "chainer-import", [str(tools["msibuild"]), "candidate.msi", "-i", "MsiEmbeddedChainer.idt"], report["commands"])
++        # DELETE leaves ExtendedType behind; replace the empty compiler schema.
++        run_tool(output, "lifecycle-import", [str(tools["msibuild"]), "candidate.msi",
++                 "-q", "DROP TABLE `CustomAction`", "-q", "DROP TABLE `InstallExecuteSequence`",
++                 "-i", "CustomAction.idt", "-i", "InstallExecuteSequence.idt", "-i", "MsiEmbeddedChainer.idt"], report["commands"])
++        report["lifecycle_table_authoring"] = {
++            "intermediate": "UNEXECUTED_COMPILER_SUBSET_NOT_FINAL_CANDIDATE",
++            "custom_action_import": "EXACT_FOUR_COLUMNS_THREE_FIXED_ROWS",
++            "execution_import": "ORIGINAL_STANDARD_ROWS_PLUS_THREE_FIXED_CONDITION1_HOOKS",
++            "final_validation": "REQUIRES_UNCHANGED_EXPORTED_CONTRACT_AND_BINARY_PAYLOAD_READBACK"}
+         msi = PROBE["bounded_regular_file"](output / "candidate.msi", MAX_INSTALLED)
+         report["msi"] = {"path": "candidate.msi", "size": len(msi), "sha256": digest(msi)}
+         summary = run_tool(output, "msi-summary", [str(tools["msiinfo"]), "suminfo", "candidate.msi"], report["commands"])
+@@ -759,6 +795,9 @@
+         for table in sorted(set(tables) & (REQUIRED_TABLES | FORBIDDEN_TABLES)):
+             data = run_tool(output, "table-" + table, [str(tools["msiinfo"]), "export", "candidate.msi", table], report["commands"])
+             exports[table] = data
++        expected_sequence = idt_rows((output / "InstallExecuteSequence.idt").read_bytes(), "InstallExecuteSequence")
++        if sorted(idt_rows(exports["InstallExecuteSequence"], "InstallExecuteSequence"), key=lambda row: row["Action"]) != sorted(expected_sequence, key=lambda row: row["Action"]):
++            raise ValueError("Imported execution table changed the compiler standard rows or fixed hooks")
+         report["msi_contract"] = verify_msi_contract(summary, exports, manifest["version"], payloads)
+         embedded = run_tool(output, "lifecycle-binary-extract", [str(tools["msiinfo"]), "extract", "candidate.msi", "Binary." + HELPER_BINARY], report["commands"])
+         if embedded != image:

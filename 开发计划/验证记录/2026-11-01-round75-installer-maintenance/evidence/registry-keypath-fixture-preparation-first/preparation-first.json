@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_CLI_AST_PURE_TABLE_CONTRACTS_PASS_MSI_AND_WINDOWS_NOT_RUN",
+  "atUtc": "2026-11-01T12:28:03.524842+00:00",
+  "checks": [
+    {
+      "name": "pure-tables",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-fixture-preparation-first/check-registry-fixture.py"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.11119730514474213,
+      "stdout": {
+        "path": "pure-tables-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "pure-tables-first.stderr.log",
+        "bytes": 698,
+        "sha256": "6e0833070f6098779b9a2e3b2125c408d8acefb8cb780c8a64ea69c8390eee25"
+      }
+    },
+    {
+      "name": "cli-help",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round75-installer-maintenance/evidence/registry-keypath-fixture-preparation-first/registry-fixture.py",
+        "--help"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.05672750389203429,
+      "stdout": {
+        "path": "cli-help-first.stdout.log",
+        "bytes": 325,
+        "sha256": "4bafbabb7bca3e319b00d2252573da66dc94a9f32807032894b928608edb7696"
+      },
+      "stderr": {
+        "path": "cli-help-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "pureTests": 4,
+  "pythonAst": "PASS",
+  "powershellSyntaxRuntime": "NOT_RUN_NO_POWERSHELL_INVOCATION",
+  "operationalNonceSupplied": false,
+  "actualMsiBuilt": false,
+  "windowsRun": false,
+  "cargoRun": false,
+  "normalProductOrBinAdded": false,
+  "productionGuardChanged": false,
+  "sourceGuard": {
+    "path": "root-joint-source-freeze-second.json",
+    "sha256": "d1ae35fabcf1694c1296a8f58fd7c4681c8c60aa17fe5bc3539be19ea6c0c48a",
+    "inputsUnchanged": 8
+  },
+  "mainWritten": false,
+  "scope": "Preparation only in new owned E directory. In-memory nonce/table vectors are pure models and not actual MSI, registry, installer or keypath observations. Actual raw 01/21 result remains unmeasured.",
+  "files": [
+    {
+      "path": ".owner",
+      "bytes": 67,
+      "sha256": "e3304ae96cb88fcbe4fa6d9bd68fecd2d3dd684f5e2b73bda30fd6a42e9a325c"
+    },
+    {
+      "path": "README.md",
+      "bytes": 6476,
+      "sha256": "ed081a3baa67f8341e3066716e23baa6b4296690a446b48f96547e8961be4552"
+    },
+    {
+      "path": "check-registry-fixture.py",
+      "bytes": 6086,
+      "sha256": "53333efea759029718ebfc4bd99d72cdd6bc7b14772d6e3203fac2d021699537"
+    },
+    {
+      "path": "cli-help-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cli-help-first.stdout.log",
+      "bytes": 325,
+      "sha256": "4bafbabb7bca3e319b00d2252573da66dc94a9f32807032894b928608edb7696"
+    },
+    {
+      "path": "pure-tables-first.stderr.log",
+      "bytes": 698,
+      "sha256": "6e0833070f6098779b9a2e3b2125c408d8acefb8cb780c8a64ea69c8390eee25"
+    },
+    {
+      "path": "pure-tables-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "query-registry-x86.ps1",
+      "bytes": 8445,
+      "sha256": "0d52ab605178fb80e52aba9ff6ae8d4329daf6f57049f458dafdd43c29c75af4"
+    },
+    {
+      "path": "registry-fixture.py",
+      "bytes": 10671,
+      "sha256": "8c8591573ac399f75782871c4594012c39e45ef7336a2882fe4f9e7d5f8ebce0"
+    }
+  ]
+}

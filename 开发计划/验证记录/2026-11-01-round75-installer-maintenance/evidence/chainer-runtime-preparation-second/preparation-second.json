@@ -1,0 +1,110 @@
+{
+  "status": "PREPARED_SECOND_RUNTIME_CONTROLLER_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T13:46:01.288859+00:00",
+  "controller": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/run-quiet-chainer-second.py",
+    "bytes": 33994,
+    "sha256": "7cba89b49e70ae32f3f9bcad4854905ddfa8d2508f354e2e40ee508a92f3ddfb"
+  },
+  "files": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/.owner",
+      "bytes": 65,
+      "sha256": "7a9ff69cb2a70cac825ac3cb5f315a8b89d41ae7ee86bfa1ff611db796cf3639"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/README.md",
+      "bytes": 4598,
+      "sha256": "ee80d5c2f5c38fec6c2ddc65eae913701a1aa06244dca16f58b9170f6f13cec0"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/check-contracts.py",
+      "bytes": 5329,
+      "sha256": "cc4d17dea7fbc16a3f0bf8206ddb5472dd5684dd4f4ad220abed4b5fd86bd069"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/dry-run-second.stderr.log",
+      "bytes": 502,
+      "sha256": "00da2ce9153fa9cc48c332c48135dd1192a27abf74b64912723e9c7cea78219e"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/dry-run-second.stdout.log",
+      "bytes": 382,
+      "sha256": "16269aeaeb47f06eb483bc755202871801f5b2f508194fd548c3bdf0f3700128"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/dry-run-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/dry-run-third.stdout.log",
+      "bytes": 382,
+      "sha256": "16269aeaeb47f06eb483bc755202871801f5b2f508194fd548c3bdf0f3700128"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/pure-contracts-final.stderr.log",
+      "bytes": 1350,
+      "sha256": "f77585f42ac1ea255a6b207da1175778ee86396344341d07630448c03b1428d4"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/pure-contracts-final.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/pure-contracts-second.stderr.log",
+      "bytes": 1350,
+      "sha256": "58d0a9b3f1662c6fd22e1826ae77f6c3d49acffa854662c62b1f625e5d148e39"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/pure-contracts-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/pure-contracts-third.stderr.log",
+      "bytes": 848,
+      "sha256": "bcdc76e0a378c4f42140c5ba022f231ff0fc588c3501b28020a8c52e7f33d69b"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/pure-contracts-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/run-quiet-chainer-second.py",
+      "bytes": 33994,
+      "sha256": "7cba89b49e70ae32f3f9bcad4854905ddfa8d2508f354e2e40ee508a92f3ddfb"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-second/runtime-first-to-second.diff",
+      "bytes": 24406,
+      "sha256": "ed67c1131dda805221a886f77dbcf1d22b794bde31297a1211358a694899b1a9"
+    }
+  ],
+  "checks": {
+    "syntax": "PASS_AST",
+    "pureContracts": "5 PASS in pure-contracts-third.stderr.log; -Werror; no transports",
+    "actualLocalInputDryRun": "PASS_EXIT0_PREPARED_NO_EXECUTE; -Werror; original second spec/MSI + root third static checked",
+    "initialWarningPreserved": "pure-contracts-final/dry-run-second retained Python invalid-escape SyntaxWarning; guard changed only to raw string with same path value; third clean checks retained separately."
+  },
+  "explicitInputs": {
+    "specSha256": "e538784cec3fbe15cb65abf79b57f691eaed8849870ee45de873b03c0033caca",
+    "msiSha256": "c177ead1cdabc396a1c92f7aeb62c93a65dd46b77128ad606b8a442cc27e3ec1",
+    "staticReportSha256": "48190f7a53d214e15adaa1561907f5b9da86668383c35993f0c703fa3c083ba7"
+  },
+  "firstController": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/run-quiet-chainer-first.py",
+    "bytes": 29377,
+    "sha256": "c009500aa23ab8ca118b5210ab3401ffd46af79623af4eaf966dbd31d079b17d"
+  },
+  "firstControllerUnchanged": true,
+  "newPolicy": [
+    "Exact HKCU32 nonce registry key read-only absence before/after + standard formal /x when product or marker remains. No direct registry deletion.",
+    "Current SCM msiserver running PID+creation/OS image/StartName LocalSystem/targeted GetOwnerSid S-1-5-18 and PID/state recheck can exempt new service from test quiescence. Never waits/kills service.",
+    "New nonbaseline non-SCM msiexec is UNCLASSIFIED, never inferred test-owned or killed. Original test client/helper must still be gone.",
+    "One120s/20reserve, raw JSON/logs, held helper exit qualification/UNKNOWN, negative exact-helper-only kill and marker-last snapshot cleanup unchanged."
+  ],
+  "scope": "Preparation only. No Windows/network/Rust/Cargo/source edits. Current independent C# fixture not production guardian/session/Win7/Win10 acceptance. Root will execute only after active fullWindows operation terminal."
+}

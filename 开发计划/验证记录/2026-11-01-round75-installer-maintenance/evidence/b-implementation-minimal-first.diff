@@ -1,0 +1,209 @@
+--- a/scripts/package-msi-candidate.py
++++ b/scripts/package-msi-candidate.py
+@@ -48,7 +48,8 @@
+ MANIFEST_KEYS = {"schema_version", "product", "version", "artifact_name", "artifact_type", "status", "target", "target_role", "toolchain", "sha256", "frontend", "features", "gates", "files", "pe_audit"}
+ LIMITATIONS = [
+     "P5-03 prerequisites P5-01/P5-02/P5-06 and formal release acceptance remain unmet.",
+-    "Only fresh installation and its known rollback are implemented by this candidate; repair/upgrade/uninstall must refuse before mutation and are NOT_VALIDATED.",
++    "Candidate paths are fresh installation, healthy same-manifest/version reapplication, formal uninstall and known rollback; all actual MSI paths remain NOT_VALIDATED.",
++    "Damaged repair, different-manifest/version maintenance, major upgrade and unknown preimages must refuse before mutation; healthy reapplication is not damaged repair.",
+     "Real gate/broker/engine-guardian wiring is candidate code; actual original process, effects and cleanup evidence is required before claiming lifecycle success.",
+     "Exact-value/ownership-checked HKCU Run uninstall cleanup is NOT_IMPLEMENTED; no Run-value removal is authored.",
+     "Standard-user ProgramData initialization/ACL, deployment-account handover and DPAPI lifecycle require separate validation.",
+@@ -56,6 +57,19 @@
+     "The package does not enable production TLS/listeners or grant certificate readiness.",
+     "Source ZIP hashes and static PE inspection do not independently prove compiler provenance or OS compatibility.",
+ ]
++
++
++def lifecycle_capabilities() -> dict:
++    """Describe the candidate contract; package inspection grants no runtime PASS."""
++    return {
++        "scope": "CONTROLLED_SAME_SOURCE_UNTRANSFORMED_PER_USER_CANDIDATE",
++        "candidate_paths": ["fresh_install", "healthy_same_manifest_version_reapplication", "formal_uninstall", "known_rollback"],
++        "runtime_validation": "NOT_RUN",
++        "admission": "NATIVE_FRESH_OR_HEALTHY_SAME_MANIFEST_FACTS; NOT_REMOVE_INSTALLED_OR_CLI_AUTHORITY",
++        "settlement": "ORIGINAL_JOIN_END_AND_GUARDIAN_EXIT_PLUS_INDEPENDENT_EXPECTED_EFFECTS",
++        "run_policy": "FIXED_PROJECT_VALUE_ABSENT_ONLY; NO_WRITE_OR_DELETE",
++        "unsupported": ["damaged_repair", "different_manifest_or_version", "major_upgrade", "run_cleanup"],
++    }
+ 
+ 
+ def digest(data: bytes) -> str:
+@@ -624,6 +638,7 @@
+         if {"ForceReboot", "ScheduleReboot", "StartServices", "StopServices", "DeleteServices", "CreateShortcuts", "RemoveShortcuts", "WriteRegistryValues"} & sequence.keys() - ({"WriteRegistryValues"} if name == "InstallExecuteSequence" else set()):
+             raise ValueError("Unexpected MSI lifecycle/system action")
+     return {"status": "PASS", "template": fields["Template"], "installer_version": 500, "source_flags": 10,
++            "lifecycle_capabilities": lifecycle_capabilities(),
+             "payload_files": len(payloads), "registry_scope": "Exact installer-only HKCU component markers; no Run cleanup", "transaction_sequence": transaction}
+ 
+ 
+@@ -689,6 +704,7 @@
+     report = {"schema_version": 1, "status": "FAIL", "candidate_status": "NOT_VALIDATED", "scope": "MSI_CANDIDATE_BUILD_AND_STATIC_TABLE_INSPECTION_ONLY", "readiness": "NOT_GRANTED", "installation": "NOT_RUN", "target": TARGET,
+               "source_zip": {"path": str(source), "size": len(raw), "sha256": digest(raw)}, "source_manifest": manifest,
+               "script_sha256": digest(Path(__file__).read_bytes()), "commands": [], "limitations": LIMITATIONS,
++              "lifecycle_capabilities": lifecycle_capabilities(),
+               "normal_helper_provenance": helper_provenance,
+               "installation_scope": "per-user; fixed LocalAppData/Programs/FutureClassroom; business data remains original protected ProgramData",
+               "tools": {name: {"path": str(path), "sha256": digest(path.read_bytes())} for name, path in tools.items()}}
+--- a/scripts/check-msi-candidate.py
++++ b/scripts/check-msi-candidate.py
+@@ -427,6 +427,46 @@
+             with self.subTest(data=data), self.assertRaises(ValueError):
+                 M["verify_transaction_sequence"](data)
+ 
++    def test_maintenance_cannot_skip_hooks_or_supply_operation_authority(self):
++        summary, tables, version, payloads = compiled_contract_model()
++        # Each hook must run on fresh, cached maintenance and removal routes.
++        # These are table/encoder negatives, not simulated MSI executions.
++        for hook in ("FcBeginGate", "FcRollbackNotify", "FcCommitNotify"):
++            for condition in ("NOT Installed", "Installed", 'REMOVE = "ALL"', "REINSTALL", "PUBLIC_MAINTENANCE_ACK"):
++                changed = dict(tables)
++                old = (hook + "\t1\t").encode()
++                self.assertIn(old, changed["InstallExecuteSequence"])
++                changed["InstallExecuteSequence"] = changed["InstallExecuteSequence"].replace(old, (hook + "\t" + condition + "\t").encode())
++                with self.subTest(hook=hook, condition=condition), self.assertRaises(ValueError):
++                    M["verify_msi_contract"](summary, changed, version, payloads)
++        for old, new in [(b'begin "[FcInstallDir]fc-bootstrap.exe"', b'begin repair "[FcInstallDir]fc-bootstrap.exe"'),
++                         (b'begin "[FcInstallDir]fc-bootstrap.exe"', b'begin "[TARGETDIR]fc-bootstrap.exe"'),
++                         (b'\trollback\n', b'\trollback effects_reconciled=true\n'),
++                         (b'\tcommit\n', b'\tcommit uninstall=true\n')]:
++            changed = dict(tables)
++            self.assertIn(old, changed["CustomAction"])
++            changed["CustomAction"] = changed["CustomAction"].replace(old, new)
++            with self.subTest(target=new), self.assertRaises(ValueError):
++                M["verify_msi_contract"](summary, changed, version, payloads)
++        changed = dict(tables)
++        changed["Property"] += b"FC_MAINTENANCE_APPROVED\t1\n"
++        with self.assertRaises(ValueError):
++            M["verify_msi_contract"](summary, changed, version, payloads)
++
++    def test_inspected_candidate_capabilities_do_not_claim_runtime_acceptance(self):
++        summary, tables, version, payloads = compiled_contract_model()
++        inspected = M["verify_msi_contract"](summary, tables, version, payloads)
++        capabilities = inspected["lifecycle_capabilities"]
++        self.assertEqual(inspected["status"], "PASS")  # Table inspection only.
++        self.assertEqual(capabilities["runtime_validation"], "NOT_RUN")
++        self.assertEqual(capabilities["candidate_paths"], ["fresh_install", "healthy_same_manifest_version_reapplication", "formal_uninstall", "known_rollback"])
++        self.assertEqual(capabilities["unsupported"], ["damaged_repair", "different_manifest_or_version", "major_upgrade", "run_cleanup"])
++        self.assertIn("ABSENT_ONLY", capabilities["run_policy"])
++        self.assertIn("NOT_REMOVE_INSTALLED_OR_CLI_AUTHORITY", capabilities["admission"])
++        # No caller can turn a returned description into later packaging claims.
++        capabilities["runtime_validation"] = "PASS"
++        self.assertEqual(M["lifecycle_capabilities"]()["runtime_validation"], "NOT_RUN")
++
+     def test_component_identity_survives_payload_reordering_and_version_change(self):
+         self.assertEqual(M["component_code"]("web/index.html"), M["component_code"]("WEB/INDEX.HTML"))
+         self.assertNotEqual(M["component_code"]("web/index.html"), M["component_code"]("LICENSE"))
+--- a/packaging/MSI-CANDIDATE.md
++++ b/packaging/MSI-CANDIDATE.md
+@@ -43,8 +43,11 @@
+ 
+ No Run value, service, scheduled task, firewall rule, certificate/trust store,
+ HTTP binding or listener is created or deleted. No application-data cleanup or
+-wildcard file deletion is authored. Removing installed program files does not
+-constitute complete product uninstall: ownership-aware cleanup remains pending.
++wildcard file deletion is authored. Uninstall success requires independent
++absence of the fixed program tree, installer markers and product/component
++registration; deleting program files alone is insufficient. The separate
++installer coordination gate is not school data or an MSI payload, and its safe
++retirement is not claimed by this slice.
+ 
+ ## Lifecycle candidate boundary
+ 
+@@ -67,12 +70,42 @@
+ still detect occupied files; it does not replace the native gate. Full-UI,
+ basic-UI and quiet execution remain separate runtime checks.
+ 
+-Only fresh per-user installation and its known rollback are implemented in this
+-slice. Pre-existing product/target state, repair, upgrade, uninstall and unknown
+-delegation must be refused before mutation. They remain required follow-up work.
+-No application startup, Run write/delete, school database or credential change
+-is part of this candidate. In particular, ordinary registry removal must not be
+-used as an ownership-safe Run cleanup substitute.
++This slice implements candidate paths for fresh per-user installation, healthy
++same-manifest/version reapplication, formal MSI uninstall and known rollback.
++These are implementation claims; actual MSI acceptance remains **NOT_RUN**.
++The scope is the controlled, same-source original candidate without transforms.
++Offline closed-table inspection is not runtime authentication of arbitrary
++effective transformed sessions or control over unrelated external MSI packages.
++
++| Path | Admission and required final effect | Runtime evidence |
++| --- | --- | --- |
++| Fresh install | Product/family, fixed target and markers absent; final exact manifest present | NOT_RUN |
++| Healthy same-version reapplication | One healthy same-manifest current-user installation; final exact manifest present | NOT_RUN |
++| Formal uninstall | Same healthy baseline; final product/family, fixed target and markers absent | NOT_RUN |
++| Known rollback | Actual transaction rollback; fresh absence or original healthy manifest restored | NOT_RUN |
++| Damaged repair, different manifest/version or major upgrade | Unsupported; reject before product mutation | NOT_VALIDATED |
++| Run cleanup | Not implemented; no Run removal authored | NOT_VALIDATED |
++
++Admission is based on actual product/context/related registrations, version,
++component keypaths, bounded exact payload hashes/membership and marker state.
++It is checked again under the original exclusive owner. The internal
++`SameManifest` Pending label is neutral: `Installed`, `REMOVE`, `REINSTALL`,
++command-line intent and advisory notices do not grant an action. A full staged
++manifest permits the expected-present path; complete target/marker absence from
++a healthy admitted baseline permits expected-absent. Partial or unknown effects
++require rollback and verification against the admitted baseline. Final product
++registration is independently checked after the actual transaction ends and
++the original guardian returns; it is not inferred from staged registration
++visibility. File-proof handles must actually return before MSI needs delete
++access. The original 120-second deadline and resource/worker budgets do not grow.
++
++An intact installation being reapplied is not evidence of repairing missing or
++corrupt files. A damaged or foreign preimage is refused rather than silently
++adopted. The fixed project HKCU Run value must be absent: any existing value,
++including an apparently matching command or a different value type, is refused
++without changing it. No application startup, Run write/delete, school database
++or credential change is part of this candidate. Ordinary marker removal is not
++an ownership-safe Run cleanup substitute.
+ 
+ The exact Binary table contains one separately compiled normal
+ `fc-installer-lifecycle` image. The packager first binds it and the ordinary
+@@ -90,21 +123,30 @@
+ deferred commit notification (1538). Notifications are advisory. Successful
+ Join/End, an ACK or pipe EOF alone cannot release Pending: the broker also needs
+ the original guardian's actual return and independently reconciled closed
+-payload/registration effects or the original absent rollback baseline. Failure,
++payload/registration effects or the admitted fresh/healthy rollback baseline. Failure,
+ unknown effects or cleanup retains negative state. No ignore/async or
+ NoImpersonate variant is admitted.
+ 
+ `RemoveExistingProducts` follows `InstallExecute` and precedes
+-`InstallFinalize`. Fresh-only admission currently prevents a supported major
+-upgrade from reaching that action; its transactional location is not evidence
++`InstallFinalize`. Native admission still refuses different-version/related
++products before this candidate mutates files; its transactional location is not evidence
+ of implemented upgrade handoff or rollback. ProductCode remains deterministic
+ per version, and the existing family/component identities stay stable.
+ 
+-Actual fresh-install/rollback, active-app refusal, process return and residual
+-cleanup must still be demonstrated on an owned Windows fixture. Real
+-Win7/Win10/Win11, classroom hardware, repair/upgrade/uninstall, strict Run cleanup,
++Actual fresh-install, healthy reapplication, formal uninstall, known rollback,
++active-app refusal, process return and residual cleanup must still be
++demonstrated on an owned Windows fixture. Only genuine MSI removal counts;
++manual cache/registration deletion, skipped hooks or transforms cannot create
++an uninstall PASS. Existing MSI File/Directory authoring is retained: installer-
++created directories not explicitly listed in CreateFolder are documented to be
++removed when empty; actual nested-root absence is still measured. No speculative
++CreateFolder/RemoveFile or wildcard cleanup is added. Real
++Win7/Win10/Win11, classroom hardware, damaged repair/upgrade, strict Run cleanup,
+ standard-user handover, reboot/power-loss, signing and full ICE/release acceptance
+ remain separate and unvalidated. `DisableShutdown` alone is not a process guard.
++The current parent-process SID/context assumption also needs a separate
++test-only observer before invoking production Begin. An observer's success does
++not prove broker/guardian success, and must not create production Pending.
+ 
+ ## Build and inspect
+ 
+@@ -159,6 +201,8 @@
+ [installation context](https://learn.microsoft.com/en-us/windows/win32/msi/installation-context),
+ [directory costing](https://learn.microsoft.com/en-us/windows/win32/msi/using-a-directory-property-in-a-path),
+ [client/server custom-action sequencing](https://learn.microsoft.com/en-us/windows/win32/msi/sequencing-custom-actions),
+-[Restart Manager property](https://learn.microsoft.com/en-us/windows/win32/msi/msirestartmanagercontrol).
++[Restart Manager property](https://learn.microsoft.com/en-us/windows/win32/msi/msirestartmanagercontrol),
++[installer-created directory removal](https://learn.microsoft.com/en-us/windows/win32/msi/createfolder-table),
++[Type2 command-line context](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-type-2).
+ Tool licenses and dependencies must be recorded separately from the application's
+ notices; extracting a build tool does not make it an installed application payload.

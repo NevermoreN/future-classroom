@@ -1,0 +1,57 @@
+{
+  "status": "PASS_INDEPENDENT_R75_EXACT_BYTES_AND_BINARY_OMISSION_REPLAY_ONLY",
+  "scope": "R75 finite independent byte replay and exact MSI omission check only. No source/archive/Windows/Cargo/network changes; only this external exclusive report written.",
+  "indexSha256": "3443b22a311885849dac99cd620820203cba796ff87d23df2dc55314d6a31880",
+  "verificationReceiptSha256": "db52073b89d75633c452ec6e87f62e5d63b40c64e36f11e75a0b9dddc2a29412",
+  "sourceRoot": "/tmp/fc-round75-installer-maintenance",
+  "archiveRoot": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round75-installer-maintenance",
+  "counts": {
+    "originalFiles": 1517,
+    "originalBytes": 16508897,
+    "storedBytes": 11107374,
+    "gzipFiles": 2,
+    "wholeRetainedBinaryFindings": 0,
+    "explicitBase64BinaryFindings": 0,
+    "namedBase64DecodedViews": 140,
+    "jsonContainers": 514,
+    "cp936ClixmlViews": 49,
+    "utf16Views": 18,
+    "archiveFilesIncludingIndex": 1518,
+    "excludedUnprunedIdentities": 56,
+    "explicitFinalTargetPeIdentities": 24,
+    "exactOriginalContainerOmissions": 3,
+    "strictTypedSemanticDerivatives": 3
+  },
+  "allOriginalStoredAndExcludedIdentityChecks": "PASS",
+  "completeUnprunedSourceAndExactArchiveMembership": "PASS",
+  "binaryPayloadCheck": {
+    "status": "PASS_NO_RETAINED_WHOLE_FILE_OR_EXPLICIT_BASE64_BINARY_MAGIC",
+    "scope": "All retained files replayed after optional gzip decompression; all inherited declared base64/encodedCommand fields and nested JSON string streams inspected. Ordinary text labels are not classified as code. Excluded three raw MSI containers remain original outside Git; exact semantic derivatives omit only the fixed reviewed MSI leaf.",
+    "namedBase64DecodedViews": 140
+  },
+  "semanticDerivativeGate": {
+    "status": "PASS_EXACT_THREE_TYPED_STRICT_JSON",
+    "manifestSha256": "ca9fd25bfad0d523501f6e4d9f322a8834808f3a0ecd5f0a2a96ff23987f25ab",
+    "validatorSha256": "2d6089cbefdda47ad44ead20ed4fb452c8f86387ecaaf51b9fc564d1f442b0c8",
+    "boolNumericTypesPreserved": true,
+    "duplicateKeysAndNonfiniteNumbersRejected": true
+  },
+  "originalCredentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "scope": "Existing actual third archive scan remains separately receipt-hash-bound; no new credential scan claimed."
+  },
+  "prunedInfrastructure": [
+    "target",
+    "tools",
+    "worktree"
+  ],
+  "preservedReplayThirdFalsePositive": {
+    "path": "/tmp/fc-round75-archive-controller/independent-byte-replay-third.json",
+    "sha256": "0036988a6683b695697ab384eba097d92a0efcf71421151c6b6630e7789eeb99",
+    "status": "FAIL",
+    "qualification": "Independent checker applied binary magic to ordinary JSON strings and rejected a pure-test label. Fourth correction limits classification to whole files and explicitly decoded base64 streams. Original archive bytes unchanged."
+  },
+  "originalArchiveFirstAndSecondFailures": "Retained unchanged in archive; partial directories retained outside Git under owned controller.",
+  "completedAtUtc": "2026-11-01T14:07:35.435163+00:00",
+  "elapsedSeconds": 1.457659759093076
+}

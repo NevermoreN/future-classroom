@@ -1,0 +1,33 @@
+{
+  "status": "FAIL_READONLY_FACT_CAPTURE",
+  "actualExit": true,
+  "exitCode": 1,
+  "command": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe",
+    "-NoLogo",
+    "-NoProfile",
+    "-NonInteractive",
+    "-EncodedCommand",
+    "JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJABzAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzACkAKQA="
+  ],
+  "stdinSource": "$ErrorActionPreference='Stop';$c='{\"product\":\"{4BFAFA4A-6E0D-5FAB-90F7-4C9967F2ED46}\"}'|ConvertFrom-Json;$ErrorActionPreference='Stop';[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\nfunction Facts { $a=@();foreach($p in [Diagnostics.Process]::GetProcessesByName('msiexec')){try{$a+=@{pid=$p.Id;creationFiletime=[string]$p.StartTime.ToUniversalTime().ToFileTimeUtc()}}finally{$p.Dispose()}};return ,$a }\nfunction Registration { $i=$null;$x=$null;try{$i=New-Object -ComObject WindowsInstaller.Installer;$x=$i.GetType().InvokeMember('ProductsEx',[Reflection.BindingFlags]::GetProperty,$null,$i,@($c.product,'',7));$n=$x.Count;$s=$i.GetType().InvokeMember('ProductState',[Reflection.BindingFlags]::GetProperty,$null,$i,@($c.product));return @{status='ACTUAL_READONLY_CALLER_AND_MACHINE_CONTEXTS';product=$c.product;count=$n;productState=$s;contexts=7;userSidArgument='';otherUsers='NOT_QUERIED';cache='NOT_QUERIED'}}finally{if($null-ne$x){[void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($x)};if($null-ne$i){[void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($i)}} }\nfunction CheckRoot { if($c.root -cne (Join-Path ([IO.Path]::GetFullPath($env:TEMP)) ('FutureClassroom-r75-parent-observer-'+$c.nonce))){throw 'ROOT_PATH_MISMATCH'};if(([IO.File]::ReadAllText((Join-Path $c.root '.owner'))) -cne $c.marker){throw 'OWNER_MISMATCH'};if(([IO.File]::GetAttributes($c.root)-band[IO.FileAttributes]::ReparsePoint)-ne 0){throw 'ROOT_REPARSE'} }\n$i=$null;$x=$null;try{$i=New-Object -ComObject WindowsInstaller.Installer;$x=$i.GetType().InvokeMember('ProductsEx',[Reflection.BindingFlags]::GetProperty,$null,$i,@($c.product,'',7));$direct=$x.Count;$ref=$x.GetType().InvokeMember('Count',[Reflection.BindingFlags]::GetProperty,$null,$x,@());$state=$i.GetType().InvokeMember('ProductState',[Reflection.BindingFlags]::GetProperty,$null,$i,@($c.product));@{status='READONLY_EXACT_TEST_PRODUCT_COM_FACTS';product=$c.product;directCount=$direct;reflectionCount=$ref;productState=$state;collectionType=$x.GetType().FullName;directCountType=$direct.GetType().FullName;reflectionCountType=$ref.GetType().FullName;productStateType=$state.GetType().FullName}|ConvertTo-Json -Compress}finally{if($null-ne$x){[void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($x)};if($null-ne$i){[void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($i)}}",
+  "helperSha256": "03a6766c92a06ae7c0edf158a4c18dcdda5652a566f757e71b49eb081abaa646",
+  "stdout": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/root-context-com-readonly-first.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/root-context-com-readonly-first.stderr.log",
+    "bytes": 976,
+    "sha256": "43506d2d22436ab61d7626314fd0b08b581ba088881f256dd33533a5eb1b3e88"
+  }
+}

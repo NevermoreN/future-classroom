@@ -1,0 +1,36 @@
+--- first/check-contracts.py
++++ second/check-contracts.py
+@@ -14,8 +14,11 @@
+ def tables():
+     v=spec()
+     return {'Property':[{'Property':k,'Value':value} for k,value in {'UpgradeCode':v['upgradeCode'],'MSIRESTARTMANAGERCONTROL':'DisableShutdown','Manufacturer':'FutureClassroom test-only','ProductLanguage':'1033','ProductCode':v['productCode'],'ProductName':M['NAME'],'ProductVersion':'0.0.1'}.items()],
+-    'Directory':[{'Directory':'TARGETDIR','Directory_Parent':'','DefaultDir':'SourceDir'}],
+-    'Feature':[{'Feature':'ProbeFeature','Feature_Parent':'','Title':'Rollback-only chainer; no installed payload','Description':'','Display':'2','Level':'1','Directory_':'','Attributes':'0'}],
++    'Directory':[{'Directory':'TARGETDIR','Directory_Parent':'','DefaultDir':'SourceDir'},{'Directory':'LocalAppDataFolder','Directory_Parent':'TARGETDIR','DefaultDir':'.'}],
++    'Component':[{'Component':'ChainerRegistryProbe','ComponentId':v['componentCode'],'Directory_':'LocalAppDataFolder','Attributes':'4','Condition':'','KeyPath':'ChainerRegistryMarker'}],
++    'Registry':[{'Registry':'ChainerRegistryMarker','Root':'1','Key':v['registryKey'],'Name':v['registryValue'],'Value':'#1','Component_':'ChainerRegistryProbe'}],
++    'FeatureComponents':[{'Feature_':'ProbeFeature','Component_':'ChainerRegistryProbe'}],
++    'Feature':[{'Feature':'ProbeFeature','Feature_Parent':'','Title':'Rollback-only chainer; owned HKCU marker','Description':'','Display':'2','Level':'1','Directory_':'','Attributes':'0'}],
+     'Binary':[{'Name':'FcIndependentChainer','Data':'Binary.FcIndependentChainer'}],
+     'MsiEmbeddedChainer':[{'MsiEmbeddedChainer':'FcIndependentChainer','Condition':M['CONDITION'],'CommandLine':v['commandLine'],'Source':'FcIndependentChainer','Type':'2'}],
+     'LaunchCondition':[{'Condition':'NOT ALLUSERS','Description':'Independent chainer fixture is per-user only.'},{'Condition':'MSIRESTARTMANAGERCONTROL = "DisableShutdown"','Description':'Independent chainer fixture cannot close applications.'}],
+@@ -31,7 +34,8 @@
+     def test_authoring_has_only_binary_and_no_payload_or_begin_gate(self):
+         tree=ET.fromstring(M['authoring'](spec()));tags={n.tag.split('}')[-1] for n in tree.iter()}
+         self.assertFalse(tags & (M['FORBIDDEN']|{'MsiEmbeddedChainer'}))
+-        self.assertIn('Binary',tags)
++        self.assertIn('Binary',tags);self.assertIn('ComponentRef',tags)
++        reg=tree.find('.//{'+M['NS']+'}RegistryValue');self.assertEqual(reg.get('Key'),spec()['registryKey']);self.assertEqual(reg.get('KeyPath'),'yes')
+         row=M['idt'](M['chainer_idt'](spec()),'MsiEmbeddedChainer')[0]
+         self.assertEqual(row,tables()['MsiEmbeddedChainer'][0]);self.assertIn('REMOVE = "ALL"',row['Condition'])
+     def test_fixed_compile_parameters_do_not_equal_helper_own_sid(self):
+@@ -50,6 +54,9 @@
+         for name in M['FORBIDDEN']|{'ForeignEffects'}:
+             t=tables();t[name]=[{'Untrusted':'1'}]
+             with self.subTest(table=name),self.assertRaises(ValueError):M['verify'](t,spec())
++        for table,field,value in [('Component','Attributes','260'),('Registry','Root','2'),('Registry','Key','Software\\Microsoft\\Windows\\CurrentVersion\\Run'),('Registry','Value','#2'),('FeatureComponents','Component_','Foreign')]:
++            t=tables();t[table][0][field]=value
++            with self.subTest(table=table,field=field),self.assertRaises(ValueError):M['verify'](t,spec())
+         for field,value in [('Type','18'),('Condition','1'),('CommandLine','commit'),('Source','Foreign')]:
+             t=tables();t['MsiEmbeddedChainer'][0][field]=value
+             with self.subTest(field=field),self.assertRaises(ValueError):M['verify'](t,spec())

@@ -1,0 +1,17 @@
+$ErrorActionPreference='Stop';$r=$c.root;$file=Join-Path $r 'observer-harness.exe';$owner=Join-Path $r '.owner'
+if(([IO.File]::ReadAllText($owner)) -cne $c.marker){throw 'OWNER_MISMATCH'}
+if(([IO.File]::GetAttributes($r) -band [IO.FileAttributes]::ReparsePoint) -ne 0){throw 'ROOT_REPARSE'}
+if((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant() -ne $c.sha){throw 'FIXTURE_SHA_MISMATCH'}
+if([IO.File]::Exists((Join-Path $r 'context.json'))){throw 'UNEXPECTED_OBSERVER_REPORT'}
+$p=New-Object Diagnostics.Process;$p.StartInfo.FileName=$file;$p.StartInfo.Arguments=$c.commandLine;$p.StartInfo.WorkingDirectory=$r
+$p.StartInfo.UseShellExecute=$false;$p.StartInfo.CreateNoWindow=$true;$p.StartInfo.RedirectStandardInput=$true;$p.StartInfo.RedirectStandardOutput=$true;$p.StartInfo.RedirectStandardError=$true
+$o=New-Object IO.MemoryStream;$e=New-Object IO.MemoryStream
+try{
+ if(-not $p.Start()){throw 'PROCESS_START_FALSE'};$pidFact=$p.Id;$p.StandardInput.Close()
+ $ot=$p.StandardOutput.BaseStream.CopyToAsync($o);$et=$p.StandardError.BaseStream.CopyToAsync($e)
+ if(-not $p.WaitForExit(20000)){$p.Kill();if(-not $p.WaitForExit(5000)){throw 'OWNED_PROCESS_EXIT_UNKNOWN'};throw 'ORIGINAL_LIST20S_TIMEOUT'}
+ if(-not [Threading.Tasks.Task]::WaitAll([Threading.Tasks.Task[]]@($ot,$et),5000)){throw 'PIPE_COMPLETION_TIMEOUT'}
+ if($o.Length -gt 65536 -or $e.Length -gt 65536){throw 'CAPTURE_BOUND'}
+ $answer=@{status='ACTUAL_LIST_PROCESS_RETURNED';pid=$pidFact;exitCode=$p.ExitCode;actualExit=$p.HasExited;stdoutBase64=[Convert]::ToBase64String($o.ToArray());stderrBase64=[Convert]::ToBase64String($e.ToArray());contextReportAbsent=(-not [IO.File]::Exists((Join-Path $r 'context.json')));fixtureSha256=(Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant();nonce=$c.nonce}
+}finally{$o.Dispose();$e.Dispose();$p.Dispose()}
+$answer|ConvertTo-Json -Compress

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="{9C946503-A749-528D-BA4E-0C68136A6794}" UpgradeCode="{5618393C-3107-5352-9D97-BBE74EB4B112}" Name="FutureClassroom independent rollback chainer probe" Language="1033" Version="0.0.1" Manufacturer="FutureClassroom test-only">
+    <Package Id="{C0DEFFE3-9144-52EA-B012-B281F713FAF6}" InstallerVersion="500" InstallScope="perUser" Compressed="yes" />
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+    <Condition Message="Independent chainer fixture is per-user only.">NOT ALLUSERS</Condition>
+    <Condition Message="Independent chainer fixture cannot close applications.">MSIRESTARTMANAGERCONTROL = "DisableShutdown"</Condition>
+    <Binary Id="FcIndependentChainer" SourceFile="chainer-probe.exe" />
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder">
+        <Component Id="ChainerRegistryProbe" Guid="{F224C35A-564D-56C4-B75E-EEE1277B1614}" Win64="no">
+          <RegistryValue Id="ChainerRegistryMarker" Root="HKCU" Key="Software\FutureClassroom-Test-ChainerProbe-bd0f287d596c4a01bc2a120c3670afb8" Name="OwnedMarker" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Feature Id="ProbeFeature" Title="Rollback-only chainer; owned HKCU marker" Level="1">
+      <ComponentRef Id="ChainerRegistryProbe" />
+    </Feature>
+  </Product>
+</Wix>

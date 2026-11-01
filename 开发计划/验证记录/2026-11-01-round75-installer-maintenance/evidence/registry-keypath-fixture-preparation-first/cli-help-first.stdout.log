@@ -1,0 +1,11 @@
+usage: registry-fixture.py [-h] --nonce NONCE
+                           {describe,author,check-exports} ...
+
+Author/check an isolated registry-only MSI fixture; never build/install it.
+
+positional arguments:
+  {describe,author,check-exports}
+
+options:
+  -h, --help            show this help message and exit
+  --nonce NONCE

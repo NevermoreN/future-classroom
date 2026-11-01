@@ -1,0 +1,285 @@
+{
+  "sourceBefore": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/package-msi-candidate.py",
+      "bytes": 58160,
+      "sha256": "d0fbb23a5dab2d3329e935110265609ea53674b31896102d1139e21cee193059"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/check-msi-candidate.py",
+      "bytes": 35469,
+      "sha256": "d23f912eecdb556352c8ebd97796ad1de2d86f1185e0c5feb2c29a11f53329d1"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/packaging/MSI-CANDIDATE.md",
+      "bytes": 14564,
+      "sha256": "9efa5656201a962705536316cc374b4d47d37e74c8d5e981576ad655e79d0d17"
+    }
+  ],
+  "status": "PASS_ACTUAL_LOCAL_IMPORT_EXPORT_FRAGMENT_NOT_PRODUCT",
+  "scope": "ACTUAL_LOCAL_FORMAT_FRAGMENT_ONLY_NOT_PRODUCT_NOT_WINDOWS",
+  "commands": [
+    {
+      "label": "01-compile",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/wrappers/wixl",
+        "-a",
+        "x86",
+        "-o",
+        "fragment.msi",
+        "fragment.wxs"
+      ],
+      "pid": 8659,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.06415394297800958,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/01-compile.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/01-compile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "02-copy-msi",
+      "command": [
+        "/bin/cp",
+        "--no-clobber",
+        "fragment.msi",
+        "fragment-intermediate.msi"
+      ],
+      "pid": 8661,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.0038642280269414186,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/02-copy-msi.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/02-copy-msi.stderr.log",
+        "bytes": 101,
+        "sha256": "ca3854b0525946316dac9e00b3439ac2c5a34c0165ecebd739544ad919c9390a"
+      }
+    },
+    {
+      "label": "03-before-ca",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "fragment.msi",
+        "CustomAction"
+      ],
+      "pid": 8662,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.008306581061333418,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/03-before-ca.stdout.log",
+        "bytes": 81,
+        "sha256": "4ed7932415204180493560560cadee5180a86d44c63401db088c9f287bfab344"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/03-before-ca.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "04-before-sequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "fragment.msi",
+        "InstallExecuteSequence"
+      ],
+      "pid": 8663,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.007899404969066381,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/04-before-sequence.stdout.log",
+        "bytes": 582,
+        "sha256": "0593351f59c99d9e79942db774b7310414f44c248ee97001622f570d0f07892f"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/04-before-sequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-import",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msibuild",
+        "fragment.msi",
+        "-q",
+        "DROP TABLE `CustomAction`",
+        "-q",
+        "DROP TABLE `InstallExecuteSequence`",
+        "-i",
+        "CustomAction.idt",
+        "-i",
+        "InstallExecuteSequence.idt",
+        "-i",
+        "MsiEmbeddedChainer.idt"
+      ],
+      "pid": 8664,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.016329990001395345,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/05-import.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/05-import.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "06-final-ca",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "fragment.msi",
+        "CustomAction"
+      ],
+      "pid": 8665,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.010176686802878976,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/06-final-ca.stdout.log",
+        "bytes": 233,
+        "sha256": "7ff39d78e8945ae0861c70183cb60e9995f8db61fa52336a09edad41745933c2"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/06-final-ca.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "07-final-sequence",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "fragment.msi",
+        "InstallExecuteSequence"
+      ],
+      "pid": 8666,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.008132664021104574,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/07-final-sequence.stdout.log",
+        "bytes": 650,
+        "sha256": "034c996576eb91901f8e3abf2fa1381bedb673fa9a411a25d2fdf674d8b83e6c"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/07-final-sequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "08-final-chainer",
+      "command": [
+        "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+        "export",
+        "fragment.msi",
+        "MsiEmbeddedChainer"
+      ],
+      "pid": 8667,
+      "actualExit": true,
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 0.00806157081387937,
+      "stdout": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/08-final-chainer.stdout.log",
+        "bytes": 192,
+        "sha256": "2246dc8e9d18588dfc5c5dd19ffad4521eda43d63f5e5bd72bee7adeac1d62ca"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/08-final-chainer.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "tools": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/wrappers/wixl",
+      "bytes": 618,
+      "sha256": "2ac0b4eebef87eb93298a0de3667ec7ad0e829e94c6e1e52b93518d50a400c60"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msibuild",
+      "bytes": 22912,
+      "sha256": "87ee3aa0af25bb997646071a45e35ebae3e3ba5f26fe7b479df97aa31bd8a1eb"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+      "bytes": 23376,
+      "sha256": "50b25845c863756975a8523fe1b370c4bf5dd1812a2a0229cf22139aa4b5ea81"
+    }
+  ],
+  "overallSeconds": 120,
+  "perCommandSeconds": 20,
+  "author": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/fragment.wxs",
+    "bytes": 2488,
+    "sha256": "280f9aeb07dafc8a41238a8deb4f36a0080081abef2c0cbd5f0f94ea37ab307f"
+  },
+  "fixtureNamespace": "676d06664f914ce3977332a590e46288",
+  "sourceAfter": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/package-msi-candidate.py",
+      "bytes": 58160,
+      "sha256": "d0fbb23a5dab2d3329e935110265609ea53674b31896102d1139e21cee193059"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/scripts/check-msi-candidate.py",
+      "bytes": 35469,
+      "sha256": "d23f912eecdb556352c8ebd97796ad1de2d86f1185e0c5feb2c29a11f53329d1"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/worktree/packaging/MSI-CANDIDATE.md",
+      "bytes": 14564,
+      "sha256": "9efa5656201a962705536316cc374b4d47d37e74c8d5e981576ad655e79d0d17"
+    }
+  ],
+  "finalTablesExact": true,
+  "originalStandardSequenceRowsPreserved": true,
+  "originalCompilerWarningsRejected": true,
+  "normalHelperProvenance": "NOT_PRESENT_TEXT_SENTINEL_NOT_AN_EXECUTABLE",
+  "windowsExecuted": false,
+  "msiExecuted": false,
+  "productMSIValidated": false,
+  "finalMSI": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/fragment.msi",
+    "bytes": 12800,
+    "sha256": "86b99e26b5f8e1d5d22798abbc6e1f3e0497a48fb8d625aef0406586e55ee934"
+  },
+  "intermediateMSI": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/b4-tool-fragment-second/fragment-intermediate.msi",
+    "bytes": 12288,
+    "sha256": "be03ea252328f759c8e33903a33df0dac4f755f80a2b1376549ea9e956620177"
+  },
+  "elapsedSeconds": 0.13821056112647057
+}

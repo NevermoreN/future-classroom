@@ -1,0 +1,49 @@
+{
+  "status": "PREPARED_NOT_RUN",
+  "ast": "PASS",
+  "script": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/archive-preparation-third/archive-evidence-third.py",
+    "bytes": 34105,
+    "sha256": "2d6089cbefdda47ad44ead20ed4fb452c8f86387ecaaf51b9fc564d1f442b0c8"
+  },
+  "secondScriptSha256": "0558efb73bc7eaab8e4e7aa647ee5b896a85f9e85d26510151b00993e694a81a",
+  "manifest": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/binary-container-derived-first/allowlist-first.json",
+    "sha256": "ca9fd25bfad0d523501f6e4d9f322a8834808f3a0ecd5f0a2a96ff23987f25ab",
+    "actualReadOnlySemanticValidation": "PASS_EXACT_THREE"
+  },
+  "contractCases": 20,
+  "files": [
+    {
+      "path": ".owner",
+      "bytes": 56,
+      "sha256": "af19d476884ddd753382d9109e08c2c8d6a209007e1d45459c7ac7af53f5f349"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 1674,
+      "sha256": "0d3e52a021132474befd9d930e2decefbc7105b7c4e56c7063f02d4fe8cdd11e"
+    },
+    {
+      "path": "archive-evidence-third.py",
+      "bytes": 34105,
+      "sha256": "2d6089cbefdda47ad44ead20ed4fb452c8f86387ecaaf51b9fc564d1f442b0c8"
+    },
+    {
+      "path": "container-contract-checks-first.json",
+      "bytes": 2806,
+      "sha256": "780af31a8ec0ccf99f55d0fb8e7c6b360e89a999699aa2401f78aa8bd26baa88"
+    },
+    {
+      "path": "embedded-binary-inventory-first.json",
+      "bytes": 1676,
+      "sha256": "2b71efb5f65bf2f36328503e1e85c6d63e821bb3031e675d0b59c269be04a582"
+    },
+    {
+      "path": "second-to-third.diff",
+      "bytes": 16414,
+      "sha256": "eb80da86497519af7156dd0988bd5528cd5bf8a5e77675bf5168328066ff9a2a"
+    }
+  ],
+  "scope": "New exact three-container original identity exclusion plus root-reviewed semantic derivative gate only. Original bytes/FAILs remain unchanged. No archive executed."
+}

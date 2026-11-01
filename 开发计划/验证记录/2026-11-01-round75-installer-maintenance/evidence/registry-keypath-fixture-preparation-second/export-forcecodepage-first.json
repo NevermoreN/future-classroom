@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_READONLY_EXPORT",
+  "command": [
+    "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+    "export",
+    "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+    "_ForceCodepage"
+  ],
+  "pid": 26043,
+  "actualExit": true,
+  "parentReaped": true,
+  "exitCode": 0,
+  "deadlineSeconds": 60,
+  "elapsedSeconds": 0.007954156957566738,
+  "msiOriginal": {
+    "path": "/tmp/fc-round75-installer-maintenance/registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f/fixture.msi",
+    "bytes": 10240,
+    "sha256": "d3c6d5e4937d5dd673e9835a7fbc8d5c7d03af8b0527e1a12d565da1a0e4e248"
+  },
+  "msiinfo": {
+    "name": "msiinfo",
+    "path": "/tmp/fc-round75-installer-maintenance/tools/root/usr/bin/msiinfo",
+    "bytes": 23376,
+    "sha256": "50b25845c863756975a8523fe1b370c4bf5dd1812a2a0229cf22139aa4b5ea81",
+    "exactR60BinaryMatch": true,
+    "versionCheck": {
+      "kind": "ACTUAL_VERSION_EXIT0",
+      "stdoutSha256": "800355227b76826fac964bf4dfa464bac08a221935f22c6bf90f635df05100e3"
+    }
+  },
+  "logs": [
+    {
+      "path": "export-forcecodepage-first.stdout.log",
+      "bytes": 23,
+      "sha256": "756e2010bef11d89ced632638fdcf69a7d00ccce12aa5643482bfe5a28d16777"
+    },
+    {
+      "path": "export-forcecodepage-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

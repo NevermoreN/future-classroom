@@ -1,0 +1,89 @@
+{
+  "status": "PASS_LOCAL_CONTAINER_CONTRACT_ONLY_NOT_ARCHIVE",
+  "cases": [
+    {
+      "name": "actual-exact-three-root-derived-containers",
+      "result": "PASS",
+      "count": 3
+    },
+    {
+      "name": "reject-status-mutation-root-registry-recovery-readonly-first.json",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-pointer-root-registry-recovery-readonly-first.json",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-decoded-hash-root-registry-recovery-readonly-first.json",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-original-hash-root-registry-recovery-readonly-first.json",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-extra-omission-root-registry-recovery-readonly-first.json",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-status-mutation-root-registry-recovery-readonly-first.stdout.log",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-pointer-root-registry-recovery-readonly-first.stdout.log",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-decoded-hash-root-registry-recovery-readonly-first.stdout.log",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-original-hash-root-registry-recovery-readonly-first.stdout.log",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-extra-omission-root-registry-recovery-readonly-first.stdout.log",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-status-mutation-root-registry-recovery-readonly-second.json",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-pointer-root-registry-recovery-readonly-second.json",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-decoded-hash-root-registry-recovery-readonly-second.json",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-original-hash-root-registry-recovery-readonly-second.json",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-extra-omission-root-registry-recovery-readonly-second.json",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-json-bool-int-conflation",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-duplicate-key",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-nonfinite",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-manifest-hash-mismatch",
+      "result": "PASS"
+    }
+  ],
+  "manifestSha256": "ca9fd25bfad0d523501f6e4d9f322a8834808f3a0ecd5f0a2a96ff23987f25ab",
+  "qualification": "First pure-check harness passed an internally augmented receipt row to the intentionally closed raw allowlist validator and was rejected. Harness corrected to strip its two internal provenance fields; actual manifest validation passed both times. No archive execution.",
+  "scope": "Read original JSON/derived fixtures and in-memory pure mutations only; no archive/main/DEST changes, no binary payload output."
+}

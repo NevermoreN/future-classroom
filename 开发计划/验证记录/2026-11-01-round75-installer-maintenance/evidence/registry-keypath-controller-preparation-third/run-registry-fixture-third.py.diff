@@ -1,0 +1,29 @@
+--- /tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-second/run-registry-fixture-second.py
++++ /tmp/fc-round75-installer-maintenance/evidence/registry-keypath-controller-preparation-third/run-registry-fixture-third.py
+@@ -7,7 +7,7 @@
+ sys.dont_write_bytecode = True
+ ROOT = Path('/tmp/fc-round75-installer-maintenance')
+ E = ROOT / 'evidence'
+-D = E / 'registry-keypath-controller-preparation-second'
++D = E / 'registry-keypath-controller-preparation-third'
+ AUTHOR = ROOT / 'registry-keypath-fixture-ae966fa5484f4235b154b7b874ff728f'
+ NONCE = 'ae966fa5484f4235b154b7b874ff728f'
+ PRODUCT = '{60E68721-62F0-5656-B5BE-144E6B889AB6}'
+@@ -17,7 +17,7 @@
+ INPUTS = {
+  'fixture.msi': (AUTHOR / 'fixture.msi', 'd3c6d5e4937d5dd673e9835a7fbc8d5c7d03af8b0527e1a12d565da1a0e4e248'),
+  'fixture-spec.json': (AUTHOR / 'fixture-spec.json', 'a41186d39d1ed187bfdbe99b0d94cb2e4eefc6fc36866257bddaaff34edd643f'),
+- 'query-registry-x86.ps1': (D / 'query-registry-x86.ps1', '920cc1bfb56913efc4e73268cb8e45ac5053b404c25dd1db8e8ed22aa5a3d1d4'),
++ 'query-registry-x86.ps1': (D / 'query-registry-x86.ps1', '796600b302d869a4f9058f2c9444496ca54fdd60637f06144a4063f299fc6bca'),
+ }
+ STATIC = E / 'registry-keypath-fixture-preparation-second/actual-check-second.json'
+ STATIC_SHA = 'c5769adf0fd3cddf8505f144cf896a84cc4e643564c780257e1d975b664d661d'
+@@ -86,7 +86,7 @@
+     return ['ssh','-i',IDENTITY,'-o','BatchMode=yes','-o','ConnectTimeout=8',HOST,'powershell.exe','-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',encoded]
+ def verify_sources():
+     need((ROOT/'.owner').read_bytes()==b'future-classroom-owned-r75-installer-maintenance/v1\n','ROOT_OWNER')
+-    need((D/'.owner').read_bytes()==b'future-classroom-owned-r75-registry-keypath-controller-preparation-second/v1\n','PREP_OWNER')
++    need((D/'.owner').read_bytes()==b'future-classroom-owned-r75-registry-keypath-controller-preparation-third/v1\n','PREP_OWNER')
+     need(fact(STATIC)['sha256']==STATIC_SHA,'ORIGINAL_STATIC_PASS_IDENTITY')
+     for path,expected in INPUTS.values(): need(fact(path)['sha256']==expected,'ORIGINAL_INPUT_SHA')
+     return {name:fact(path) for name,(path,_) in INPUTS.items()}

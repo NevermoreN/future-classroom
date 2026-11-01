@@ -1,0 +1,69 @@
+--- first/chainer-probe.py
++++ second/chainer-probe.py
+@@ -16,8 +16,8 @@
+ MARKER='future-classroom-owned-r75-chainer-probe/v1\n'
+ CONDITION='NOT (REMOVE = "ALL") AND NOT (ACTION = "ADVERTISE")'
+ NAME='FutureClassroom independent rollback chainer probe'
+-FORBIDDEN={'File','Component','FeatureComponents','Registry','RemoveRegistry','RemoveFile','CreateFolder','ServiceInstall','ServiceControl','Shortcut','Environment','IniFile','RemoveIniFile','LockPermissions','MsiLockPermissionsEx','Upgrade','CustomAction'}
+-ALLOWED={'Property','Directory','Feature','Media','LaunchCondition','Error','Binary','MsiEmbeddedChainer','InstallExecuteSequence','InstallUISequence','AdminExecuteSequence','AdminUISequence','AdvtExecuteSequence'}
++FORBIDDEN={'File','RemoveRegistry','RemoveFile','CreateFolder','ServiceInstall','ServiceControl','Shortcut','Environment','IniFile','RemoveIniFile','LockPermissions','MsiLockPermissionsEx','Upgrade','CustomAction'}
++ALLOWED={'Component','Registry','FeatureComponents','Property','Directory','Feature','Media','LaunchCondition','Error','Binary','MsiEmbeddedChainer','InstallExecuteSequence','InstallUISequence','AdminExecuteSequence','AdminUISequence','AdvtExecuteSequence'}
+ SYSTEM={'_Tables','_Columns','_Validation','_SummaryInformation'}
+ EXECUTE={'LaunchConditions':100,'ValidateProductID':700,'CostInitialize':800,'FileCost':900,'CostFinalize':1000,'InstallValidate':1400,'InstallInitialize':1500,'AllocateRegistrySpace':1550,'ProcessComponents':1600,'UnpublishComponents':1700,'UnpublishFeatures':1800,'RemoveRegistryValues':2600,'RemoveFiles':3500,'RemoveFolders':3600,'CreateFolders':3700,'InstallFiles':4000,'WriteRegistryValues':5000,'RegisterUser':6000,'RegisterProduct':6100,'PublishComponents':6200,'PublishFeatures':6300,'PublishProduct':6400,'InstallExecute':6500,'InstallFinalize':6600}
+ AUX={
+@@ -46,7 +46,7 @@
+     aliases={'CON','PRN','AUX','NUL'}|{'COM'+str(i) for i in range(1,10)}|{'LPT'+str(i) for i in range(1,10)}
+     need(':' not in root[2:] and not any(c in root for c in '\x00\r\n\t"[]*?<>|/%') and all(x not in ('.','..') and not x.endswith((' ','.')) and x.split('.')[0].upper() not in aliases for x in p.parts[1:]),'path aliases/MSI format forbidden')
+     command=subprocess.list2cmdline(['probe',nonce,root]);need(len(command)<=255,'chainer CommandLine field bound')
+-    return {'schemaVersion':1,'scope':'INDEPENDENT_ROLLBACK_ONLY_API_FIXTURE_NOT_PRODUCT','nonce':nonce,'windowsReportRoot':root,'expectedOwnerSid':owner,'requiredMarker':MARKER,'productCode':'{'+str(uuid.uuid5(NAMESPACE,nonce+':product')).upper()+'}','upgradeCode':'{'+str(uuid.uuid5(NAMESPACE,nonce+':family')).upper()+'}','packageCode':'{'+str(uuid.uuid5(NAMESPACE,nonce+':package')).upper()+'}','commandLine':command,'runtimeBudgetSeconds':120}
++    return {'schemaVersion':1,'scope':'INDEPENDENT_ROLLBACK_ONLY_API_FIXTURE_NOT_PRODUCT','nonce':nonce,'windowsReportRoot':root,'expectedOwnerSid':owner,'requiredMarker':MARKER,'productCode':'{'+str(uuid.uuid5(NAMESPACE,nonce+':product')).upper()+'}','upgradeCode':'{'+str(uuid.uuid5(NAMESPACE,nonce+':family')).upper()+'}','packageCode':'{'+str(uuid.uuid5(NAMESPACE,nonce+':package-registry-second')).upper()+'}','componentCode':'{'+str(uuid.uuid5(NAMESPACE,nonce+':component-registry-second')).upper()+'}','registryKey':'Software\\FutureClassroom-Test-ChainerProbe-'+nonce,'registryValue':'OwnedMarker','registryData':1,'registryView':'Registry32','commandLine':command,'runtimeBudgetSeconds':120}
+ 
+ def source(spec,template):
+     need(set(re.findall(r'@@[A-Z_]+@@',template))=={'@@NONCE@@','@@ROOT@@','@@OWNER_SID@@'},'exact template slots')
+@@ -62,8 +62,12 @@
+     add(p,'Condition',Message='Independent chainer fixture is per-user only.').text='NOT ALLUSERS'
+     add(p,'Condition',Message='Independent chainer fixture cannot close applications.').text='MSIRESTARTMANAGERCONTROL = "DisableShutdown"'
+     add(p,'Binary',Id='FcIndependentChainer',SourceFile='chainer-probe.exe')
+-    add(p,'Directory',Id='TARGETDIR',Name='SourceDir')
+-    add(p,'Feature',Id='ProbeFeature',Title='Rollback-only chainer; no installed payload',Level='1')
++    target=add(p,'Directory',Id='TARGETDIR',Name='SourceDir')
++    local=add(target,'Directory',Id='LocalAppDataFolder')
++    component=add(local,'Component',Id='ChainerRegistryProbe',Guid=v['componentCode'],Win64='no')
++    add(component,'RegistryValue',Id='ChainerRegistryMarker',Root='HKCU',Key=v['registryKey'],Name=v['registryValue'],Type='integer',Value='1',KeyPath='yes')
++    feature=add(p,'Feature',Id='ProbeFeature',Title='Rollback-only chainer; owned HKCU marker',Level='1')
++    add(feature,'ComponentRef',Id='ChainerRegistryProbe')
+     ET.indent(wix)
+     return ET.tostring(wix,encoding='utf-8',xml_declaration=True)+b'\n'
+ 
+@@ -105,13 +109,16 @@
+     return pe(exe)
+ 
+ def verify(tables,v):
+-    need({'Property','Directory','Feature','LaunchCondition','Binary','MsiEmbeddedChainer','InstallExecuteSequence'}<=tables.keys(),'required actual tables')
+-    need(all(not tables.get(n) for n in FORBIDDEN),'no File/Component/Registry/Upgrade/CA or other forbidden effects')
++    need({'Component','Registry','FeatureComponents','Property','Directory','Feature','LaunchCondition','Binary','MsiEmbeddedChainer','InstallExecuteSequence'}<=tables.keys(),'required actual tables')
++    need(all(not tables.get(n) for n in FORBIDDEN),'no File/Upgrade/CA or other forbidden effects')
+     need(all(not rows for n,rows in tables.items() if n not in ALLOWED|SYSTEM),'unknown nonempty table')
+     props={'UpgradeCode':v['upgradeCode'],'MSIRESTARTMANAGERCONTROL':'DisableShutdown','Manufacturer':'FutureClassroom test-only','ProductLanguage':'1033','ProductCode':v['productCode'],'ProductName':NAME,'ProductVersion':'0.0.1'}
+     need(sorted(tables['Property'],key=lambda r:r['Property'])==sorted([{'Property':k,'Value':val} for k,val in props.items()],key=lambda r:r['Property']),'exact fixture product/RM properties')
+-    need(tables['Directory']==[{'Directory':'TARGETDIR','Directory_Parent':'','DefaultDir':'SourceDir'}],'no target install directories')
+-    need(tables['Feature']==[{'Feature':'ProbeFeature','Feature_Parent':'','Title':'Rollback-only chainer; no installed payload','Description':'','Display':'2','Level':'1','Directory_':'','Attributes':'0'}],'exact empty Feature')
++    need(tables['Directory']==[{'Directory':'TARGETDIR','Directory_Parent':'','DefaultDir':'SourceDir'},{'Directory':'LocalAppDataFolder','Directory_Parent':'TARGETDIR','DefaultDir':'.'}],'exact registry component directory only')
++    need(tables['Component']==[{'Component':'ChainerRegistryProbe','ComponentId':v['componentCode'],'Directory_':'LocalAppDataFolder','Attributes':'4','Condition':'','KeyPath':'ChainerRegistryMarker'}],'exact HKCU32 RegistryKeyPath4 component')
++    need(tables['Registry']==[{'Registry':'ChainerRegistryMarker','Root':'1','Key':v['registryKey'],'Name':v['registryValue'],'Value':'#1','Component_':'ChainerRegistryProbe'}],'only exact owned nonce registry marker')
++    need(tables['Feature']==[{'Feature':'ProbeFeature','Feature_Parent':'','Title':'Rollback-only chainer; owned HKCU marker','Description':'','Display':'2','Level':'1','Directory_':'','Attributes':'0'}],'exact attached marker Feature')
++    need(tables['FeatureComponents']==[{'Feature_':'ProbeFeature','Component_':'ChainerRegistryProbe'}],'marker attached to actual Feature')
+     need(tables['Binary']==[{'Name':'FcIndependentChainer','Data':'Binary.FcIndependentChainer'}],'one exact Binary')
+     need(not tables.get('Media') and not tables.get('Error'),'no external cabinet/media or custom error rows')
+     need(tables['MsiEmbeddedChainer']==[{'MsiEmbeddedChainer':'FcIndependentChainer','Condition':CONDITION,'CommandLine':v['commandLine'],'Source':'FcIndependentChainer','Type':'2'}],'exact sole rollback chainer/command, x cleanup must not rerun it')
+@@ -123,8 +130,8 @@
+             condition='NOT Installed' if table=='InstallExecuteSequence' and r['Action']=='AllocateRegistrySpace' else ''
+             need(r['Action'] in allowed and r['Sequence']==str(allowed[r['Action']]) and r['Condition']==condition,'no unknown/reordered/conditional actions')
+     actions={r['Action'] for r in tables['InstallExecuteSequence']}
+-    need({'LaunchConditions','CostFinalize','InstallValidate','InstallInitialize','ProcessComponents','RegisterProduct','PublishProduct','InstallFinalize'}<=actions,'normal registration/rollback sequence must exist')
+-    return {'status':'PASS_EXACT_STATIC_CHAINER_FIXTURE_ONLY','runtime':'NOT_RUN','productGuardian':'NOT_RUN'}
++    need({'LaunchConditions','CostFinalize','InstallValidate','InstallInitialize','ProcessComponents','RemoveRegistryValues','WriteRegistryValues','RegisterProduct','PublishProduct','InstallFinalize'}<=actions,'normal registry install/removal and registration/rollback sequence must exist')
++    return {'status':'PASS_EXACT_STATIC_CHAINER_FIXTURE_ONLY','runtime':'NOT_RUN','productGuardian':'NOT_RUN','registryFixture':{k:v[k] for k in ['componentCode','registryKey','registryValue','registryData','registryView']}}
+ 
+ def main():
+     p=argparse.ArgumentParser(description=__doc__);sub=p.add_subparsers(dest='mode',required=True)

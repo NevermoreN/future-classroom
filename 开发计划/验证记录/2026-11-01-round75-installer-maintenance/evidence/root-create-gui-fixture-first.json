@@ -1,0 +1,44 @@
+{
+  "status": "PASS_LOCAL_GUI_FIXTURE_CREATION_ONLY",
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 0.34410848491825163,
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/gui-fixture-preparation-first/clone-cui-test-gui-first.py",
+    "--source-git-base",
+    "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "--candidate-source-producer",
+    "/tmp/fc-round75-installer-maintenance/evidence/n-release-second.json",
+    "--candidate-source-producer-sha256",
+    "2884f0831e4ce5bcd4ac2dedfe6412000ed3e17a5f81c41ad6fc110d60d10c74",
+    "--candidate-source-freeze",
+    "/tmp/fc-round75-installer-maintenance/evidence/n-implementation-freeze-second.json",
+    "--candidate-source-freeze-sha256",
+    "f0ff8e201c9005bae96407b03a48b0e23b337bdce24955cdc2264ac48ff07370",
+    "--source-cui",
+    "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe",
+    "--source-cui-bytes",
+    "3988775",
+    "--source-cui-sha256",
+    "5cc0c4273b04fe9a2a332b81d9c19eb340c1659691a662bab5d1ee6a11c99e73",
+    "--output-dir",
+    "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96",
+    "--execute"
+  ],
+  "outputDirectory": "/tmp/fc-round75-installer-maintenance/gui-test-fixture-f8bd373d36224240a4aeb4ae49b76f96",
+  "streams": {
+    "stdout": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-create-gui-fixture-first.stdout.log",
+      "bytes": 548,
+      "sha256": "5bd331e5db1f17fc88890f453ca4550a16f61dfec5b1f7d9db685456013e2843"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/root-create-gui-fixture-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "scope": "Local test-fixture clone only; no Windows, normal product mutation or MSI runtime acceptance."
+}

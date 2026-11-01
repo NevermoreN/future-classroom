@@ -1,0 +1,71 @@
+{
+  "status": "PREPARED_AST_ONLY_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T12:22:41.576995+00:00",
+  "helper": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/run-registry-audit-preparation-first/audit-run-guard-first.py",
+    "bytes": 9663,
+    "sha256": "843778b58dc53829ab40f0f97d22a2b4aa85c4c0169cf5f1ed89859a9e991b89"
+  },
+  "owner": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/run-registry-audit-preparation-first/.owner",
+    "bytes": 61,
+    "sha256": "845c1936ec085397401c53ec2f6194a13d13d3c491c0f10cf7618888d7f0000e"
+  },
+  "remoteSource": {
+    "path": "/tmp/fc-round75-installer-maintenance/evidence/run-registry-audit-preparation-first/remote-readonly-source-first.txt",
+    "bytes": 1774,
+    "sha256": "fa68512102b61bbfb45bd0d49e860e1d01b5bc55169f3a7cf55e8709e6eb1e96"
+  },
+  "remoteEncodedCommandCharacters": 4732,
+  "preparationChecks": {
+    "pythonAstParse": true,
+    "remoteLiteralOnlyReviewed": true,
+    "noRegistryValueMethodsOrMutations": true,
+    "twoRegistryKeyDisposeFinally": true,
+    "PowerShellExecuted": false,
+    "SSHExecuted": false,
+    "networkCargoWindowsMSIExecuted": false
+  },
+  "beforeCommand": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/run-registry-audit-preparation-first/audit-run-guard-first.py",
+    "--label",
+    "before",
+    "--report",
+    "/tmp/fc-round75-installer-maintenance/evidence/run-guard-before-first.json",
+    "--execute"
+  ],
+  "afterCommand": [
+    "python3",
+    "-B",
+    "/tmp/fc-round75-installer-maintenance/evidence/run-registry-audit-preparation-first/audit-run-guard-first.py",
+    "--label",
+    "after1",
+    "--before-report",
+    "/tmp/fc-round75-installer-maintenance/evidence/run-guard-before-first.json",
+    "--before-report-sha256",
+    "<actual-before64hex>",
+    "--report",
+    "/tmp/fc-round75-installer-maintenance/evidence/run-guard-after1-first.json",
+    "--execute"
+  ],
+  "requiredActualInputs": "Root sole Windows owner invokes before/after serially. Explicit actual before-report SHA binds comparison. Each report/stdout/stderr path must be new and inside R75 evidence; no existing original can be overwritten.",
+  "scope": "HKCU32 Software parent only; .NET RegistryKey immediate child-name enumeration filters exact prefix and canonical decimal nonzero DWORD PID/lowercase32hexnonce. No child subkey opened, unknown value read, Run access, registry mutation, script upload, remote directory/task creation or EXE/MSI/browser launch beyond authorized PowerShell SSH transport. Existing same-prefix names never deleted or attributed to this round.",
+  "bounds": {
+    "originalSSHWallBudgetSeconds": 35,
+    "connectTimeoutSeconds": 8,
+    "softwareImmediateNameCountMax": 8192,
+    "canonicalOutputNameCountMax": 256,
+    "rawStdoutAndStderrEachMaxBytes": 131072
+  },
+  "qualifications": [
+    "Windows registry API name enumeration is inherently performed at its Software parent single level; only matching names are retained/output, never unrelated names or any values. This is not an HKCU subtree scan.",
+    "Noncanonical same-prefix names are represented only by their count, never opened or printed.",
+    "Matching before names are preexisting and not marked owned; after newDelta must be empty to pass comparison. Missing before names are reported separately without deleting or attributing them.",
+    "PowerShell5.1 actual syntax/runtime/registry/cleanup result remains NOT_RUN in preparation; failures preserve original raw and never auto-retry or delete.",
+    "35s timeout records unknown remote completion, actualExitfalse/FAIL; no second SSH or enlarged budget. subprocess.run kills/reaps direct local SSH child only.",
+    "The identity path is transport-only; no private key metadata/content/hash read.",
+    "Local proof/raw report creation occurs only on explicit --execute; no remote key/dir/task is created."
+  ]
+}

@@ -1,0 +1,13 @@
+Prepared N3 GNU runtime controller only; no Windows execution in this preparation.
+
+The already-passed first controller is preserved. The native-child parser differs only in the pinned broker source SHA; the same two child scopes and dynamic parent summary are retained. Exactly22 harnesses,24 compiled PE identities,23 uploads, original900 seconds/test, native1, system-host and public20 remain unchanged. The second normal helper is pinned but NOT_RUN, and no MSI or observer arming occurs.
+
+F is root-n3-codegen-source-freeze-first.json and binds the exact joint J by jointSha256. J retains the three original implementation freeze references, not F, to avoid a circular hash. Producer.freezeSha256 and the reaped parent terminal bind F separately. Producer.jointFreeze and terminal.jointFreeze bind actual J; all eight source rows and every implementation freeze are independently rehashed.
+
+The producer has now actually terminated successfully. The preparation dryrun reads its actual PASS and reaped terminal, validates all24 actual artifacts and Cargo metadata, and prints PREPARED_GNU_RUNTIME_ONLY_NOT_EXECUTED; it creates no Windows report/operation. The pure RUNNING model returns Waiting and is explicitly not a producer fact. Historical native output replay proves parser behavior only; it is not new-source runtime acceptance.
+
+Root alone may execute command-second.json execute after its current sole Windows operation has ended. All hashes in that command are the actual immutable completed N3 originals. No source/main/Cargo, Windows or network operation is performed here.
+
+```sh
+python3 -B /tmp/fc-round75-installer-maintenance/evidence/gnu-runtime-preparation-second/run-gnu-win11-second.py --producer-report /tmp/fc-round75-installer-maintenance/evidence/n-release-third.json --producer-report-sha256 c2097456ca15a57699c6e297f5f0cf772b42ef1397c368a51733405831fc6414 --producer-terminal-report /tmp/fc-round75-installer-maintenance/evidence/n-producer-terminal-third.json --producer-terminal-report-sha256 b3375911924b609b9b71af0a76f8fc214f544364faf6b97ca6ec4fc0b9f6f01c --freeze /tmp/fc-round75-installer-maintenance/evidence/root-n3-codegen-source-freeze-first.json --freeze-sha256 1b06ce58b408707b76108a367a0a81a1fbda6e20f068b22b3e5fbcaae9392700 --joint-freeze /tmp/fc-round75-installer-maintenance/evidence/root-joint-source-freeze-fourth.json --joint-freeze-sha256 d5d22e44e81e8f15c9ffb956d89a81f56be29d4e63a02e2dba7a1ab4b47e9590 --source-git-base 2dfb2e7e07ace64c61abf66c9a423aa815de7110 --report /tmp/fc-round75-installer-maintenance/evidence/root-windows-gnu-full-second.json --operation /tmp/fc-round75-installer-maintenance/evidence/root-windows-gnu-full-second.operation.json --execute
+```

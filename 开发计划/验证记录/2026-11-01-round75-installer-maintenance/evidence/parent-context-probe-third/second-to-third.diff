@@ -1,0 +1,85 @@
+--- parent-context-probe-second/context-probe.py
++++ parent-context-probe-third/context-probe.py
+@@ -58,7 +58,10 @@
+     cargo = ledger['cargoArtifact']
+     need(cargo['package'] == 'fc-windows' and cargo['target'] == 'fc_windows' and cargo['role'] == 'tests'
+          and cargo['cargo_profile_test'] is True and cargo['sha256'] == sha(source), 'original fc_windows test provenance required')
+-    need(re.fullmatch(r'[0-9a-f]{40}', ledger['sourceGitSha']), 'actual source Git SHA required')
++    need('sourceGitSha' not in ledger, 'ambiguous sourceGitSha label rejected')
++    need(re.fullmatch(r'[0-9a-f]{40}', ledger['sourceGitBase']), 'Git base SHA required; not the uncommitted candidate identity')
++    need(all(re.fullmatch(r'[0-9a-f]{64}', ledger[name]) for name in
++             ('candidateSourceProducerSha256', 'candidateSourceFreezeSha256')), 'candidate producer and freeze SHA256 bindings required')
+     offset = pe_offset(source, 3)
+     need(pe_offset(fixture, 2) == offset, 'clone PE layout changed')
+     fields = ledger['changedFields']
+@@ -77,7 +80,10 @@
+         patched[expected_offset:expected_offset + width] = after
+     need(bytes(patched) == fixture, 'code/entry/imports/other PE bytes changed')
+     return {'sourceCuiSha256': sha(source), 'guiFixtureSha256': sha(fixture),
+-            'profileTest': True, 'normalProduct': False, 'changedFields': fields}
++            'profileTest': True, 'normalProduct': False, 'changedFields': fields,
++            'sourceGitBase': ledger['sourceGitBase'],
++            'candidateSourceProducerSha256': ledger['candidateSourceProducerSha256'],
++            'candidateSourceFreezeSha256': ledger['candidateSourceFreezeSha256']}
+ 
+ 
+ def fixture_from_args(args):
+--- parent-context-probe-second/check-context-probe.py
++++ parent-context-probe-third/check-context-probe.py
+@@ -39,14 +39,15 @@
+         clone = bytearray(original)
+         struct.pack_into('<H', clone, 220, 2)
+         ledger = {'status': 'PASS_EXACT_CUI3_TO_GUI2_TEST_FIXTURE_CLONE', 'profileTest': True, 'normalProduct': False,
+-                  'sourceGitSha': 'a' * 40,
++                  'sourceGitBase': 'a' * 40, 'candidateSourceProducerSha256': 'b' * 64,
++                  'candidateSourceFreezeSha256': 'c' * 64,
+                   'sourceCui': {'path': 'MODEL_ONLY_NOT_CREATED.exe', 'bytes': len(original), 'sha256': M['sha'](original)},
+                   'guiFixture': {'path': 'MODEL_ONLY_NOT_CREATED_GUI.exe', 'bytes': len(clone), 'sha256': M['sha'](clone)},
+                   'cargoArtifact': {'package': 'fc-windows', 'target': 'fc_windows', 'role': 'tests',
+                                     'cargo_profile_test': True, 'sha256': M['sha'](original)},
+                   'changedFields': [{'name': 'Subsystem', 'offset': 220, 'beforeHex': '0300', 'afterHex': '0200'}]}
+         self.assertFalse(M['validate_fixture'](original, clone, ledger)['normalProduct'])
+-        for change in ('code', 'entry', 'profile', 'normal', 'offset', 'extra-field'):
++        for change in ('code', 'entry', 'profile', 'normal', 'offset', 'extra-field', 'legacy-source-label', 'short-producer', 'short-freeze'):
+             modified, metadata = bytearray(clone), copy.deepcopy(ledger)
+             if change == 'code': modified[400] = 1
+             if change == 'entry': modified[168] = 1
+@@ -54,6 +55,9 @@
+             if change == 'normal': metadata['normalProduct'] = True
+             if change == 'offset': metadata['changedFields'][0]['offset'] += 1
+             if change == 'extra-field': metadata['changedFields'].append({'name': 'EntryPoint', 'offset': 168, 'beforeHex': '00', 'afterHex': '01'})
++            if change == 'legacy-source-label': metadata['sourceGitSha'] = metadata.pop('sourceGitBase')
++            if change == 'short-producer': metadata['candidateSourceProducerSha256'] = 'b' * 40
++            if change == 'short-freeze': metadata['candidateSourceFreezeSha256'] = 'c' * 40
+             metadata['guiFixture']['sha256'] = M['sha'](modified)
+             with self.subTest(change=change), self.assertRaises(ValueError):
+                 M['validate_fixture'](original, modified, metadata)
+--- parent-context-probe-second/README.md
++++ parent-context-probe-third/README.md
+@@ -1,6 +1,6 @@
+-# R75 quiet MSI parent-context observer v2: GUI test-fixture ledger
++# R75 quiet MSI parent-context observer v3: base plus candidate source bindings
+ 
+-Root approved a dedicated GUI2 test-fixture clone to avoid a CUI console flash. At this preparation point root has not generated that clone or executed it. This tool never creates/patches a PE or builds/runs an MSI. N has supplied the cfg(test)-only observer source with exact test name `installer_lifecycle::native::broker::context_probe::engine_parent_context_observer`; actual compilation/runtime remains separate. The original 22 CUI test artifacts, two GUI normal products, normal helper arguments and build targets remain unchanged. All first-version files are retained unchanged in sibling `parent-context-probe-first`.
++Root approved a dedicated GUI2 test-fixture clone to avoid a CUI console flash. At this preparation point root has not generated that clone or executed it. This tool never creates/patches a PE or builds/runs an MSI. N has supplied the cfg(test)-only observer source with exact test name `installer_lifecycle::native::broker::context_probe::engine_parent_context_observer`; actual compilation/runtime remains separate. The original 22 CUI test artifacts, two GUI normal products, normal helper arguments and build targets remain unchanged. All first/second-version files are retained unchanged in sibling preparation directories.
+ 
+ `context-probe.py ... describe` encodes the proposed argv. The full actual test name is supplied explicitly; the example name in `check-context-probe.py` remains a nonexistent pure-model name. The only metadata carrier is a closed `--skip` token, not an inherited environment variable:
+ 
+@@ -26,7 +26,10 @@
+ ```json
+ {
+   "status": "PASS_EXACT_CUI3_TO_GUI2_TEST_FIXTURE_CLONE",
+-  "profileTest": true, "normalProduct": false, "sourceGitSha": "<40hex actual source commit>",
++  "profileTest": true, "normalProduct": false,
++  "sourceGitBase": "<40hex Git base only>",
++  "candidateSourceProducerSha256": "<64hex actual candidate producer report SHA>",
++  "candidateSourceFreezeSha256": "<64hex actual candidate source freeze SHA>",
+   "sourceCui": {"path": "<local retained original CUI exe>", "bytes": 1, "sha256": "<actual SHA>"},
+   "guiFixture": {"path": "<local separate GUI test clone>", "bytes": 1, "sha256": "<actual SHA>"},
+   "cargoArtifact": {"package": "fc-windows", "target": "fc_windows", "role": "tests", "cargo_profile_test": true, "sha256": "<original CUI SHA>"},
+@@ -35,3 +38,5 @@
+ ```
+ 
+ The bytes/offset above are placeholders, not actual identities. Optional CheckSum is the second changedFields row with exactly name/offset/beforeHex/afterHex. The helper checks explicit ledger SHA plus full source/clone hashes and all bytes, so the placeholder values cannot be accepted. `describe` now returns the marker with a real LF character, matching N's exact marker bytes; the prior display used a literal backslash-n. This correction does not write or authorize a marker. N's observer writes bounded create-new `context.json` (8192-byte maximum) only after independently checking the marked, non-reparse owned root.
++
++Version3 source-label correction: the first R75 observer can come from uncommitted candidate sources (Git base plus the frozen changes), so sourceGitBase is only the 40hex baseline, not a claim that this commit contains the compiled candidate. The distinct 64hex candidateSourceProducerSha256 and candidateSourceFreezeSha256 bind those original reports. The validator checks these field formats and carries them through; root separately reopens the actual producer, freeze and complete input list to prove the original test artifact belongs to that exact candidate. No fabricated sourceGitSha field is accepted. Pure-model hexadecimal values in the tests are placeholders, not real producer/freezes or actual source identities. Full source/clone bytes, Cargo test-artifact SHA and header-only clone checks are unchanged.

@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="4413DE2D-268A-414C-90D5-9A242BF33BD2" Name="FutureClassroom test table fragment 676d06664f914ce3977332a590e46288" Language="1033" Codepage="1252" Version="0.0.1" Manufacturer="FutureClassroom" UpgradeCode="C4A7C0E7-1186-4283-99AA-01FD97702C1B">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perUser" />
+    <Media Id="1" Cabinet="payload.cab" EmbedCab="yes" />
+    <MajorUpgrade AllowDowngrades="no" AllowSameVersionUpgrades="no" DowngradeErrorMessage="A newer FutureClassroom candidate is installed." />
+    <InstallExecuteSequence>
+      <InstallExecute Sequence="6500" />
+      <RemoveExistingProducts After="InstallExecute" />
+    </InstallExecuteSequence>
+    <Binary Id="FcLifecycleHelper" SourceFile="NOT-AN-EXECUTABLE.txt" />
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+    <Condition Message="This candidate supports only the current user installation context.">NOT ALLUSERS</Condition>
+    <Condition Message="Windows 7 or later is required; actual OS compatibility remains unvalidated.">Installed OR VersionNT &gt;= 601</Condition>
+    <Condition Message="Rollback must remain enabled for this lifecycle candidate.">NOT RollbackDisabled AND NOT DISABLEROLLBACK</Condition>
+    <Condition Message="Automatic application shutdown is not allowed by this lifecycle candidate.">MSIRESTARTMANAGERCONTROL = "DisableShutdown"</Condition>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder">
+        <Directory Id="UserPrograms" Name="Programs">
+          <Directory Id="FcInstallDir" Name="FutureClassroom-Test-TableFragment-676d06664f914ce3977332a590e46288">
+            <Component Id="Cc693279643b8cd5d248172d9" Guid="6DFFB0E8-E2C3-42F7-B7DA-26EFE3881398" Win64="no">
+              <File Id="Fc693279643b8cd5d248172d9" Source="payload/LICENSE" Name="LICENSE" KeyPath="no" DiskId="1" />
+              <RegistryValue Id="Rc693279643b8cd5d248172d9" Root="HKCU" Key="Software\FutureClassroom-Test-TableFragment-676d06664f914ce3977332a590e46288" Name="BF8ECC92-DF5E-5031-AF8F-B122A05E64E6" Type="integer" Value="1" KeyPath="yes" />
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+    <Feature Id="Main" Title="FutureClassroom candidate" Level="1">
+      <ComponentRef Id="Cc693279643b8cd5d248172d9" />
+    </Feature>
+  </Product>
+</Wix>

@@ -1,0 +1,763 @@
+{
+  "status": "PASS_CODEGEN_NOT_RUNTIME",
+  "scope": "Fixed nightly strictClippy, stable1.97.1 target release code generation and PE inspection only. No Windows/target-EXE execution, CI dispatch, network or main mutation. Cargo may run its ordinary host build scripts.",
+  "originalPerCommandBudgetSeconds": 900,
+  "sourceBefore": [
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 13778,
+      "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 33752,
+      "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 55135,
+      "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e"
+    }
+  ],
+  "freezeSha256": "f0ff8e201c9005bae96407b03a48b0e23b337bdce24955cdc2264ac48ff07370",
+  "startedUtc": "2026-11-01T12:14:21.134738+00:00",
+  "steps": [
+    {
+      "name": "nightly-workspace-strict-clippy",
+      "command": [
+        "rustup",
+        "run",
+        "nightly-2026-10-29",
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round75-installer-maintenance/target",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "status": "PASS",
+      "pid": 2941,
+      "timedOut": false,
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 18.480970091186464,
+      "stdout": {
+        "path": "n-nightly-workspace-strict-clippy-second.stdout.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "path": "n-nightly-workspace-strict-clippy-second.stderr.log",
+        "sha256": "da1922246e49046b79c3bed7e7b4bd4b664e21c8a64889c9668446554b9dc102",
+        "bytes": 584
+      }
+    },
+    {
+      "name": "stable-release-tests",
+      "command": [
+        "rustup",
+        "run",
+        "1.97.1",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round75-installer-maintenance/target",
+        "--release",
+        "--workspace",
+        "--all-targets",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "status": "PASS",
+      "pid": 3112,
+      "timedOut": false,
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 548.0367974168621,
+      "stdout": {
+        "path": "n-stable-release-tests-second.stdout.log",
+        "sha256": "f5a92d2ac50395caca700d2bdf8a48b2ffdca3b8b62658cab11629e317508562",
+        "bytes": 104652
+      },
+      "stderr": {
+        "path": "n-stable-release-tests-second.stderr.log",
+        "sha256": "50d5b1db23a338459bc9374e295dace84a9b1b8dea51ae3766ac4a0c2d5efe68",
+        "bytes": 3449
+      }
+    },
+    {
+      "name": "stable-release-bins",
+      "command": [
+        "rustup",
+        "run",
+        "1.97.1",
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round75-installer-maintenance/target",
+        "--release",
+        "-p",
+        "fc-bootstrap",
+        "--bins",
+        "--message-format=json"
+      ],
+      "status": "PASS",
+      "pid": 12987,
+      "timedOut": false,
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 0.5164227481000125,
+      "stdout": {
+        "path": "n-stable-release-bins-second.stdout.log",
+        "sha256": "f33d537c138d8890509afc1511c2853951cad2609754f02568dc15519e1a455b",
+        "bytes": 86022
+      },
+      "stderr": {
+        "path": "n-stable-release-bins-second.stderr.log",
+        "sha256": "8ccb246cfebe27f6575dfb59054f36f933b11f90996645020581c927a9e4ece4",
+        "bytes": 62
+      }
+    }
+  ],
+  "jointFreeze": {
+    "path": "root-joint-source-freeze-second.json",
+    "sha256": "d1ae35fabcf1694c1296a8f58fd7c4681c8c60aa17fe5bc3539be19ea6c0c48a"
+  },
+  "implementationFreezes": [
+    {
+      "path": "n-implementation-freeze-second.json",
+      "sha256": "f0ff8e201c9005bae96407b03a48b0e23b337bdce24955cdc2264ac48ff07370"
+    },
+    {
+      "path": "b-implementation-freeze-first.json",
+      "sha256": "4fa8055e03067b7fcb8c736dcb8077f8c110b45602ff5357a5f2ad7df711351d"
+    }
+  ],
+  "jointEightEqualsProducerBefore": true,
+  "sourceAfter": [
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9802,
+      "sha256": "a31864d872a2a67c88c3bc1c66388ebde06ba2f4e52e31a9d29fabf4c92c1c6d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 39007,
+      "sha256": "2812383941139a17169559a902df34724c6cf2deadcd2aaf9961493c31c12691"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/context_probe.rs",
+      "bytes": 10262,
+      "sha256": "b331601e22f5145e61dbff2bbcb2af0d17ba72156bf4a7af5da4519a35dba8a5"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 40703,
+      "sha256": "b2558c8e55fef5f4c6045b26c472b35b291ca73bb778406f428d9be6d8eeece9"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 13778,
+      "sha256": "85625b7881bb86589357c6a1bfecb38d01aeeb7c3239f17af06e1fd49e045e00"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 33752,
+      "sha256": "1538efd9a23c8a542e0e407ca4fe60bf39271c40081f96b38fe30784d6e070cf"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 55135,
+      "sha256": "d488b3d897d7f18dd34422c6a796591ae489390ae43b70b76c923dfc1ffa039e"
+    }
+  ],
+  "elapsedSeconds": 568.5109390551224,
+  "sourceUnchanged": true,
+  "testHarnessCount": 22,
+  "testExecutables": [
+    {
+      "target": "fc_ports",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-ports#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-ports/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+      "bytes": 1185286,
+      "sha256": "01520a7edae86495267712512ee5dcb672cbe06e65fc068cab578a9d51b0db42",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_security",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-security#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-security/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+      "bytes": 1224276,
+      "sha256": "8d2e7fec2dd74115281ccf5e697a09e3537725f5325f2ac01e179eb21a523c7a",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_presentation",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-presentation#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-presentation/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+      "bytes": 1853766,
+      "sha256": "148d0e8864c70541faa45b4aec6e193697a83b1fb7947d205cc0818acb1c3b12",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_audio",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-audio#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-audio/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+      "bytes": 1246736,
+      "sha256": "4ea5f21318a599e062c75e47e596cdcae5102b342638508312383e6d813a22cc",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_application",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-application#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-application/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+      "bytes": 1280300,
+      "sha256": "a3797d9f602257850d6b34a43ae7dbd38de1f6c8ef9c041f7320f39b89aa0883",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_protocol",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-protocol#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-protocol/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+      "bytes": 1983421,
+      "sha256": "1a347063a3fd1bd9aa45f3c4684d546198d64d7ab90f453ee60e2c77967c1b69",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_materials",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-materials#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-materials/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+      "bytes": 2352762,
+      "sha256": "f54d37c0120d0351a9734243d12fb7f1b90ab21715dff4856dd289e4929ed906",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_domain",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-domain#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-domain/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+      "bytes": 2403377,
+      "sha256": "832ee926fbca1421567eb941a1e21bd8556739e2fcd427606532015768fe85fc",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_runtime",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-runtime#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-runtime/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+      "bytes": 1430273,
+      "sha256": "6f4fe37abd247922051a5772252d3429b591dfc5bd6c78b694b3f566910fd111",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_windows",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-windows/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe",
+      "bytes": 3988775,
+      "sha256": "5cc0c4273b04fe9a2a332b81d9c19eb340c1659691a662bab5d1ee6a11c99e73",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "runtime_storage",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/runtime_storage-c482f8ab0ffd29bd.exe",
+      "bytes": 4991709,
+      "sha256": "a0d2dc706f3cf347200c82001d4d94a3c73f82984e18ab10470f0e2ac451df77",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "voice_storage",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/voice_storage-6bb619ee5dee63b6.exe",
+      "bytes": 5235253,
+      "sha256": "269bbcd4a019963efafde86421151a800972b0426d84b887f3aeb520f6460b1a",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "calendar_execution_fence",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-697f746362036af8.exe",
+      "bytes": 5624935,
+      "sha256": "2e912e86379fce30b5a36d5706b938856bc11b4c5b11f8c2364ef27efa6e66d6",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc-installer-lifecycle",
+      "kind": [
+        "bin"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_installer_lifecycle-cab6782a752605cb.exe",
+      "bytes": 1296754,
+      "sha256": "e61d993d490efc2309e04aaad3e28f3ae1f9c138586608472ad700eb7d8af5fa",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "autostart_coordinator",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-d4a98b3cdf6100eb.exe",
+      "bytes": 5535002,
+      "sha256": "5f843f0bf0c81b8d45587b743a21e648cff3a72dfd0d29aabb546e42b5451c19",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "verify_web_assets",
+      "kind": [
+        "example"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/examples/verify_web_assets-8500932ea48ba2d2.exe",
+      "bytes": 1097081,
+      "sha256": "5e7d406d3dc7a15bbe52d825a791b89d55fd65c50047a044a58421951a547ad4",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_storage",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-storage#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-storage/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+      "bytes": 8423418,
+      "sha256": "e2dc9c1c89990f9ef4cd4f790277d2fc6667ecbe6f3e881e6be2f1e9d568d353",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "schedule_operations",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/schedule_operations-9b4d7e2443bcde3a.exe",
+      "bytes": 5785432,
+      "sha256": "470be2d43270982b26e40a65712c5db68b89c14fcf32bab48347b0d05f760b03",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "business_storage",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/business_storage-1758945f26dd4d24.exe",
+      "bytes": 6196953,
+      "sha256": "a7fefb7b309eeb062c4b1dc1a8dffd967f21a07c18e287e8405da635d2a628d6",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "voice_limits_storage",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-96edfabaffdd4929.exe",
+      "bytes": 5191010,
+      "sha256": "a9d959cf49bb8fe3f28a5bdcf885986f279d60918b4d844e8d501d420c9ce979",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc-bootstrap",
+      "kind": [
+        "bin"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-6cc266b4a69e4fd2.exe",
+      "bytes": 12846574,
+      "sha256": "5c71ab4b9a282d6460b3da418c9dfc075db8c20cd4155eca7b388f0efbf389ba",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    },
+    {
+      "target": "fc_bootstrap",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-8fd20aa1db135542.exe",
+      "bytes": 13095198,
+      "sha256": "38e3404a6241bb2c43efe2b4f0ec622ea3400564801248f619bd90214caf39d6",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 3
+    }
+  ],
+  "normalExecutableCount": 2,
+  "normalExecutables": [
+    {
+      "target": "fc-installer-lifecycle",
+      "kind": [
+        "bin"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 699090,
+      "sha256": "8e82da6f54973f74bdd6d6dbc8625d9ae1b37c55b58765c72c6376f0cf64b989",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 2,
+      "independentObjdump": {
+        "command": [
+          "i686-w64-mingw32-objdump",
+          "-p",
+          "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "path": "n-normal-fc-installer-lifecycle-objdump-second.stdout.log",
+          "sha256": "a54541232a48d3ca5f57d864795a259edc609d75bbfddf0cbe2836cfff0fe052"
+        },
+        "stderr": {
+          "path": "n-normal-fc-installer-lifecycle-objdump-second.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "target": "fc-bootstrap",
+      "kind": [
+        "bin"
+      ],
+      "packageId": "path+file:///tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap#0.1.0",
+      "manifestPath": "/tmp/fc-round75-installer-maintenance/worktree/crates/fc-bootstrap/Cargo.toml",
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "path": "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13352281,
+      "sha256": "18638958e906c3464fd99421116adabb2d66d134e76a74750d228be5a457505d",
+      "peMachine": 332,
+      "peOptionalMagic": 267,
+      "peSubsystem": 2,
+      "independentObjdump": {
+        "command": [
+          "i686-w64-mingw32-objdump",
+          "-p",
+          "/tmp/fc-round75-installer-maintenance/target/i686-pc-windows-gnu/release/fc-bootstrap.exe"
+        ],
+        "exitCode": 0,
+        "stdout": {
+          "path": "n-normal-fc-bootstrap-objdump-second.stdout.log",
+          "sha256": "91be9bfdbb99c254e5b439647f829ac30fddbd2dcac929e6a4c3e235c0301fe9"
+        },
+        "stderr": {
+          "path": "n-normal-fc-bootstrap-objdump-second.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ]
+}

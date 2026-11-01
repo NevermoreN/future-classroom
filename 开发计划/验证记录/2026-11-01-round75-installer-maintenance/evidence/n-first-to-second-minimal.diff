@@ -1,0 +1,18 @@
+--- N1/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
++++ N2/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
+@@ -182,13 +182,13 @@
+     if authority != Some(expected) {
+         return false;
+     }
+-    for bytes in sid[8..].chunks_exact(4) {
++    for bytes in sid[8..].as_chunks::<4>().0 {
+         let Some(field) = fields.next() else {
+             return false;
+         };
+         if field.is_empty()
+             || !field.bytes().all(|b| b.is_ascii_digit())
+-            || field.parse::<u32>().ok() != Some(u32::from_le_bytes(bytes.try_into().unwrap()))
++            || field.parse::<u32>().ok() != Some(u32::from_le_bytes(*bytes))
+         {
+             return false;
+         }

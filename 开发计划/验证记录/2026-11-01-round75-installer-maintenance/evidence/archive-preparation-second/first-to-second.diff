@@ -1,0 +1,92 @@
+--- archive-preparation-first/archive-evidence-first.py
++++ archive-preparation-second/archive-evidence-second.py
+@@ -15,11 +15,12 @@
+ import sys
+ import ssl
+ import subprocess
++import xml.etree.ElementTree as ET
+ 
+ SOURCE=Path('/tmp/fc-round75-installer-maintenance')
+ DEST=Path('/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round75-installer-maintenance')
+ RECEIPT='evidence/archive-verification-first.json'
+-CONTROLLER=SOURCE/'evidence/archive-preparation-first'
++CONTROLLER=SOURCE/'evidence/archive-preparation-second'
+ PRUNED={'worktree','target','tools'}
+ CACHE_PARTS={'__pycache__','node_modules','.npm-cache','.cache'}
+ EXCLUDED_SUFFIXES={'.exe','.zip','.pdb','.dll','.lib','.rlib','.rmeta','.pyc','.db','.sqlite','.sqlite3','.cache','.obj','.o','.a','.so','.dylib','.wasm','.7z','.tar','.msi','.deb','.cab','.msm','.msp','.gz','.xz','.bz2','.bin','.class','.pyz','.nupkg'}
+@@ -88,6 +89,30 @@
+  return p,data,as_json(data)
+ 
+ 
++def credential_text_views(data):
++ views=[]
++ try:views.append(('utf8',data.decode('utf-8-sig')))
++ except UnicodeError:
++  # A strictly bounded Windows PowerShell transport exception: only an actual
++  # CLIXML envelope, strict CP936 roundtrip and validated PowerShell Objs XML.
++  if data.startswith(b'#< CLIXML'):
++   text=data.decode('cp936',errors='strict')
++   need(text.encode('cp936',errors='strict')==data,'CP936 CLIXML exact roundtrip')
++   match=re.match(r'\A#< CLIXML\r?\n',text)
++   need(match is not None,'CP936 CLIXML exact header')
++   xml=text[match.end():]
++   need('<!DOCTYPE' not in xml and '<!ENTITY' not in xml,'CP936 CLIXML DTD/entity forbidden')
++   try:document=ET.fromstring(xml)
++   except ET.ParseError:raise AssertionError('CP936 CLIXML malformed XML') from None
++   need(document.tag=='{http://schemas.microsoft.com/powershell/2004/04}Objs','CP936 CLIXML known PowerShell Objs namespace')
++   views.append(('cp936-clixml',text))
++ if data.startswith((b'\xff\xfe',b'\xfe\xff')) or (len(data)>4 and data.count(b'\0')>len(data)//8):
++  for encoding in ('utf-16-le','utf-16-be'):
++   try:views.append((encoding,data.decode(encoding).lstrip('\ufeff')))
++   except UnicodeError:pass
++ need(bool(views),'unrecognized retained evidence encoding')
++ return views
++
+ def public_certificate_der(data):
+     # Exactly one public certificate block, never a bundle, key or surrounding
+     # text. Decode strictly, reject trailing/noncanonical DER, then parse X.509.
+@@ -158,7 +183,7 @@
+  need(args.root_controllers_terminal,'root must confirm every original controller terminal and source membership frozen')
+  owner=SOURCE/'.owner';owner_bytes=owner.read_bytes();need(owner_bytes==b'future-classroom-owned-r75-installer-maintenance/v1\n','exact R75 root owner marker')
+  need((SOURCE/'evidence/.owner').read_bytes()==b'future-classroom-owned-r75-installer-maintenance-evidence/v1\n','exact R75 evidence owner')
+- need(Path(__file__).resolve().parent==CONTROLLER and (CONTROLLER/'.owner').read_bytes()==b'future-classroom-owned-r75-archive-preparation/v1\n','exact new archive controller owner/location')
++ need(Path(__file__).resolve().parent==CONTROLLER and (CONTROLLER/'.owner').read_bytes()==b'future-classroom-owned-r75-archive-preparation-second/v1\n','exact new archive controller owner/location')
+  need(DEST==Path('/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round75-installer-maintenance'),'exact R75 destination')
+  need(SOURCE.is_dir() and not SOURCE.is_symlink() and not DEST.exists(),'fresh archive required')
+  need(not (SOURCE/RECEIPT).exists(),'fresh receipt required')
+@@ -246,18 +271,15 @@
+  # Credential scan checks UTF8 plus actual UTF16 views, parsed nested JSON raw
+  # encodings and gzip decompressed originals. It reports names/kinds only, never
+  # matched credential contents. Excluded executable/ZIP payloads are not scanned.
+- findings=[];stats={'sourceFiles':0,'storedFiles':0,'gzipFiles':0,'utf16Views':0,'decodedRawPayloads':0,'jsonContainers':0,'textViews':0,'decodedJsonStringViews':0}
++ findings=[];stats={'sourceFiles':0,'storedFiles':0,'gzipFiles':0,'utf16Views':0,'decodedRawPayloads':0,'jsonContainers':0,'textViews':0,'decodedJsonStringViews':0,'cp936ClixmlViews':0};decoder_provenance=[]
+  def scan(data,label,depth=0):
+   need(depth<=12,'credential decoder depth bound '+label)
+-  views=[]
+-  try:views.append(('utf8',data.decode('utf-8-sig')))
+-  except UnicodeError:pass
+-  if data.startswith((b'\xff\xfe',b'\xfe\xff')) or (len(data)>4 and data.count(b'\0')>len(data)//8):
+-   for encoding in ('utf-16-le','utf-16-be'):
+-    try:
+-     views.append((encoding,data.decode(encoding).lstrip('\ufeff')));stats['utf16Views']+=1
+-    except UnicodeError:pass
+-  need(bool(views),'unrecognized retained evidence encoding '+label)
++  try:views=credential_text_views(data)
++  except (AssertionError,UnicodeError):raise AssertionError('unrecognized or invalid retained evidence encoding '+label) from None
++  stats['utf16Views']+=sum(encoding.startswith('utf-16-') for encoding,_ in views)
++  if any(encoding=='cp936-clixml' for encoding,_ in views):
++   stats['cp936ClixmlViews']+=1
++   decoder_provenance.append({'path':label,'bytes':len(data),'sha256':sha(data),'encoding':'cp936','strictRoundtrip':True,'validatedXmlRoot':'PowerShell/2004/04 Objs','scope':'Only UTF8-failing actual CLIXML; original bytes preserved.'})
+   for encoding,text in views:
+    stats['textViews']+=1
+    for kind,pattern in PATTERNS.items():
+@@ -303,7 +325,8 @@
+   'verifiedOriginalFilesBeforeThisReceipt':original_count,'verifiedOriginalBytesBeforeThisReceipt':original_bytes,'storedBytesBeforeThisReceipt':stored_bytes,
+   'verified':verified,'excludedCompiledPayloads':omitted,'explicitFinalProducerTargetPeIdentities':current_payloads,'prunedInfrastructureSubtrees':sorted(PRUNED),
+   'credentialScan':{'status':'PASS_NO_MATCHES','statistics':stats,'patterns':list(PATTERNS),'findings':[],
+-   'coverage':'Every retained original and stored counterpart; actual UTF16 views, nested JSON base64/encodedCommand raw streams, all decoded JSON string values, and decompressed gzip. Excluded binary/ZIP bytes have exact identity only, are not committed and are not text-scanned.'},
++   'decoderProvenance':decoder_provenance,
++   'coverage':'Strict CP936 only for UTF8-failing actual CLIXML with roundtrip and parsed PowerShell Objs namespace; every retained original and stored counterpart; actual UTF16 views, nested JSON base64/encodedCommand raw streams, all decoded JSON string values, and decompressed gzip. Excluded binary/ZIP bytes have exact identity only, are not committed and are not text-scanned.'},
+   'finalReceiptBinding':'This receipt itself is copied byte-for-byte after its independent checks and added to the final archive index; its own identity and the final index identity are printed by the helper after final checks to avoid a circular self-hash.',
+   'runtimeEvidence':{'path':args.acceptance_report,'sha256':sha(acceptance_path.read_bytes()),'status':runtime['status']},
+   'windowsFinalAudit':{'path':args.readonly_audit,'sha256':sha(final_path.read_bytes()),'status':final['status']},

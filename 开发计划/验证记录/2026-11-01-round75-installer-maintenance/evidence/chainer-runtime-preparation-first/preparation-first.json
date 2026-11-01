@@ -1,0 +1,97 @@
+{
+  "status": "PREPARED_ROOT_ONLY_QUIET_CHAINER_CONTROLLER_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T13:36:47.214510+00:00",
+  "files": [
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/.owner",
+      "bytes": 64,
+      "sha256": "1219d4e45e6f93ac443af6ab5573e3a1e803438659a264e471a31b17d931b7e8"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/README.md",
+      "bytes": 6013,
+      "sha256": "a7e228e138f6fe9eee12b9a8b98b4436fcb0e2248a9d7860da0139d26afe3954"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/check-contracts.py",
+      "bytes": 3560,
+      "sha256": "7c37a8056f33d321fdb5d3347597cd053c0d4090aeb03502815f03bcf5b9f14a"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/dry-run-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/dry-run-first.stdout.log",
+      "bytes": 382,
+      "sha256": "f29148d4d8761a2a99dbf8b955be04da1f9102b32d35ae278fea7eb29782b196"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/pure-contracts-final.stderr.log",
+      "bytes": 552,
+      "sha256": "109c55df49bbfd4782d0ba4a24601459a0957df831b2b82cbdc70b298f101c38"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/pure-contracts-final.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/pure-contracts-first.stderr.log",
+      "bytes": 5938,
+      "sha256": "5b09990feccb767211e7eb61c14b62b1954b3ba7506570e2004bba83938fdeee"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/pure-contracts-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/pure-contracts-second.stderr.log",
+      "bytes": 552,
+      "sha256": "109c55df49bbfd4782d0ba4a24601459a0957df831b2b82cbdc70b298f101c38"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/pure-contracts-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round75-installer-maintenance/evidence/chainer-runtime-preparation-first/run-quiet-chainer-first.py",
+      "bytes": 29377,
+      "sha256": "c009500aa23ab8ca118b5210ab3401ffd46af79623af4eaf966dbd31d079b17d"
+    }
+  ],
+  "checks": {
+    "pythonSyntax": "PASS_AST_ONLY",
+    "pureContracts": {
+      "actualExitCode": 0,
+      "tests": 3,
+      "logs": [
+        "pure-contracts-final.stdout.log",
+        "pure-contracts-final.stderr.log"
+      ],
+      "firstFailure": "Preserved pure-contracts-first.*: test wrongly assumed json.dumps emits literal Unicode; semantic decoded JSON transport test corrected. No runtime implementation was changed to mask it."
+    },
+    "actualLocalInputDryRun": {
+      "actualExitCode": 0,
+      "log": "dry-run-first.stdout.log",
+      "writesWindows": false,
+      "createsReport": false
+    }
+  },
+  "explicitInputs": {
+    "specSha256": "da135548b895d0647e001f4e75b7107b4ec08c40832c8dbc37841b638fa115a0",
+    "msiSha256": "8b3bbf3c45e14751268a2963c80ef2c13b48688d84052f3e04ffebaca8670590",
+    "staticReportSha256": "5f54286d23b4f890d097e92be3806dece34c5282aedfcdace1e02d6a955a8c8b"
+  },
+  "budget": {
+    "overallSeconds": 120,
+    "cleanupReserveSeconds": 20,
+    "renewal": false
+  },
+  "execution": "No Windows/network/Cargo/Rust/MSI execution; current MSI/static source merely read and SHA checked. B authorized Rust edits are outside this independent C# experiment and not asserted unchanged.",
+  "helperExitQualification": "Actual held process object, exact creation/image/compiledSHA and GetExitCodeProcess0 plus checked CloseHandle required for API-only PASS. Missing handle remains UNKNOWN. Original raw logs and bounded chainer lines retained for separate independent explicit exit proof; JSON releaseProof and disappearance never synthesize exit0.",
+  "cleanup": "try/finally exact ProductCode formal /x when needed; COM ProductsEx caller+machine contexts7 and RelatedProducts Count before/after; exact marked root/user owner+SYSTEM-only ACL; rehashed complete-member deletion only after raw original download ack, original helper/client gone and no new msiexec versus baseline; marker deleted last. No service/client kill, hand-registration/cache deletion or arbitrary external MSI/transform test."
+}
