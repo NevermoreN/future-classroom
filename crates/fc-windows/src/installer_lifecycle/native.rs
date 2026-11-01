@@ -185,6 +185,7 @@ enum Role {
     Gate,
     Pending,
     Guardian,
+    GuardianThread,
     Token,
     Hash,
     Algorithm,
@@ -540,6 +541,13 @@ impl Resources {
         &mut self,
         child: &std::process::Child,
     ) -> Result<GuardianIdentity> {
+        let identity = self.watch_guardian_handle(HANDLE(child.as_raw_handle()))?;
+        if identity.process_id != child.id() {
+            return Err(LifecycleError::Invalid);
+        }
+        Ok(identity)
+    }
+    pub(super) fn watch_guardian_handle(&mut self, original: HANDLE) -> Result<GuardianIdentity> {
         if self.handles.len() >= HANDLE_LIMIT {
             return Err(LifecycleError::Invalid);
         }
@@ -547,7 +555,7 @@ impl Resources {
         unsafe {
             DuplicateHandle(
                 GetCurrentProcess(),
-                HANDLE(child.as_raw_handle()),
+                original,
                 GetCurrentProcess(),
                 &mut process,
                 0,
@@ -568,7 +576,7 @@ impl Resources {
             GetProcessTimes(process, &mut created, &mut exited, &mut kernel, &mut user)?;
         }
         let process_id = unsafe { GetProcessId(process) };
-        if process_id == 0 || process_id != child.id() {
+        if process_id == 0 {
             return Err(LifecycleError::Invalid);
         }
         Ok(GuardianIdentity {
@@ -576,6 +584,44 @@ impl Resources {
             creation_filetime: (u64::from(created.dwHighDateTime) << 32)
                 | u64::from(created.dwLowDateTime),
         })
+    }
+    pub(super) fn watch_guardian_thread(&mut self, original: HANDLE) -> Result<()> {
+        self.check_live()?;
+        if self.handles.len() >= HANDLE_LIMIT
+            || self.handles.iter().any(|x| x.role == Role::GuardianThread)
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        let mut thread = HANDLE::default();
+        unsafe {
+            DuplicateHandle(
+                GetCurrentProcess(),
+                original,
+                GetCurrentProcess(),
+                &mut thread,
+                0,
+                false,
+                DUPLICATE_SAME_ACCESS,
+            )?;
+        }
+        self.add(thread, Role::GuardianThread);
+        let process = self.handle(Role::Guardian)?;
+        if unsafe { GetProcessIdOfThread(thread) } != unsafe { GetProcessId(process) }
+            || unsafe { WaitForSingleObject(thread, 0) } != WAIT_TIMEOUT
+        {
+            return Err(LifecycleError::Unsettled);
+        }
+        let mut created = FILETIME::default();
+        let mut exited = FILETIME::default();
+        let mut kernel = FILETIME::default();
+        let mut user = FILETIME::default();
+        unsafe {
+            GetThreadTimes(thread, &mut created, &mut exited, &mut kernel, &mut user)?;
+        }
+        if created.dwHighDateTime == 0 && created.dwLowDateTime == 0 {
+            return Err(LifecycleError::Invalid);
+        }
+        Ok(())
     }
     pub(super) fn guardian_returned(&self) -> Result<()> {
         let process = self.handle(Role::Guardian)?;
@@ -592,6 +638,18 @@ impl Resources {
         }
         if code != 0 {
             return Err(LifecycleError::Unsettled);
+        }
+        if let Some(thread) = self.handles.iter().find(|h| h.role == Role::GuardianThread) {
+            if unsafe { WaitForSingleObject(thread.handle, 0) } != WAIT_OBJECT_0 {
+                return Err(LifecycleError::GuardianRunning);
+            }
+            let mut code = u32::MAX;
+            unsafe {
+                GetExitCodeThread(thread.handle, &mut code)?;
+            }
+            if code != 0 {
+                return Err(LifecycleError::Unsettled);
+            }
         }
         Ok(())
     }

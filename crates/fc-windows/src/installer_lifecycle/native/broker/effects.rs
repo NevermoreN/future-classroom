@@ -788,6 +788,12 @@ pub(super) fn staged(session: &mut Session, admission: &Admitted) -> Result<Deci
     current(session.deadline)?;
     Ok(Decision::observed(admission.kind, observed))
 }
+pub(super) fn failed_install(admission: &Admitted) -> Decision {
+    Decision {
+        outcome: SettledOutcome::Rollback,
+        expected: admission.kind.preimage(),
+    }
+}
 pub(super) fn reconcile(
     session: &mut Session,
     admission: &Admitted,

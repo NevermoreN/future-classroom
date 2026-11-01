@@ -16,6 +16,7 @@ pub(super) enum Role {
     Broker,
     Guardian(u32),
     Supervisor(u32),
+    OwnedGuardian,
 }
 
 fn role(args: &[String]) -> Result<Role> {
@@ -29,6 +30,7 @@ fn role(args: &[String]) -> Result<Role> {
             Ok(Role::Begin)
         }
         [one] if one == "broker" => Ok(Role::Broker),
+        [one] if one == "owned-guardian" => Ok(Role::OwnedGuardian),
         [transaction, command] if command == "guardian" || command == "supervisor" => {
             if transaction.is_empty()
                 || transaction.len() > 10
@@ -76,6 +78,7 @@ mod tests {
             role(&args(&["123", "supervisor"])),
             Ok(Role::Supervisor(123))
         );
+        assert_eq!(role(&args(&["owned-guardian"])), Ok(Role::OwnedGuardian));
         for words in [
             vec!["guardian", "123"],
             vec!["0", "guardian"],
@@ -91,6 +94,8 @@ mod tests {
             vec!["repair"],
             vec!["upgrade"],
             vec!["uninstall"],
+            vec!["owned-guardian", "C:\\arbitrary.msi"],
+            vec!["owned-guardian", "--hash", "123"],
         ] {
             assert_eq!(role(&args(&words)), Err(LifecycleError::Invalid));
         }

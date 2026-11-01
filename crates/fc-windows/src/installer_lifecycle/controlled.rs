@@ -67,6 +67,32 @@ impl MaintenanceDraft {
         self.guardian = Some(guardian);
         Ok(guardian)
     }
+    /// Native launch adapter only: the borrowed capability is its original
+    /// CreateProcess return. Register the launched child before deadline or
+    /// peer authentication can fail; this grants no Begin or Run permission.
+    pub(super) fn watch_native_guardian(
+        &mut self,
+        process: windows::Win32::Foundation::HANDLE,
+        original_thread: windows::Win32::Foundation::HANDLE,
+        thread_id: u32,
+    ) -> Result<GuardianIdentity> {
+        if self.watch_attempted || self.arming_attempted {
+            return Err(LifecycleError::Invalid);
+        }
+        // The child already exists. Expiry/partial capture must retain this
+        // same gate even when no READY has ever been sent to that child.
+        self.watch_attempted = true;
+        let resources = self.resources.as_mut().ok_or(LifecycleError::Invalid)?;
+        let guardian = resources.watch_guardian_handle(process)?;
+        if unsafe { windows::Win32::System::Threading::GetThreadId(original_thread) } != thread_id {
+            return Err(LifecycleError::Invalid);
+        }
+        resources.watch_guardian_thread(original_thread)?;
+        resources.guardian_running()?;
+        self.guardian = Some(guardian);
+        self.current()?;
+        Ok(guardian)
+    }
     /// Only native code can construct a non-test observation. It must be the
     /// original watched G's actual Begin return, before any Run permit exists.
     pub(crate) fn observe_begin(&mut self, receipt: native::BeginObservation) -> Result<()> {

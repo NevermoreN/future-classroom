@@ -18,6 +18,8 @@ use windows::Win32::{
 
 #[cfg(test)]
 mod context_probe;
+#[allow(dead_code)] // Fixed Setup entry/inner guard are not released by this slice.
+pub(crate) mod controlled_owner;
 mod effects;
 mod retirement;
 mod supervisor;
@@ -353,6 +355,7 @@ struct Session {
     pipe_name: HSTRING,
     deadline: Instant,
     peer_images: Vec<(HANDLE, HANDLE)>,
+    sealed_package_sha: Option<[u8; 32]>,
 }
 impl Session {
     fn new(deadline: Instant) -> Result<Self> {
@@ -406,6 +409,21 @@ impl Session {
         let mut raw = vec![0; n];
         resources.read_at(h, size - 20 - n as i64, &mut raw)?;
         let manifest = manifest::parse(&raw)?;
+        let sealed_package_sha = if size - 20 - n as i64 >= 48 {
+            let mut seal = [0; 48];
+            resources.read_at(h, size - 20 - n as i64 - 48, &mut seal)?;
+            let package = controlled_owner::package_seal(seal)?;
+            if package.is_some() && size - 20 - n as i64 >= 96 {
+                let mut prior = [0; 16];
+                resources.read_at(h, size - 20 - n as i64 - 96, &mut prior)?;
+                if &prior == controlled_owner::PACKAGE_SEAL_MAGIC {
+                    return Err(LifecycleError::Invalid);
+                }
+            }
+            package
+        } else {
+            None
+        };
         let image_sha = resources.digest(h, 64 * 1024 * 1024, deadline)?;
         let sid_hex: String = resources.sid.iter().map(|b| format!("{b:02X}")).collect();
         let pipe_name = HSTRING::from(format!(
@@ -420,6 +438,7 @@ impl Session {
             pipe_name,
             deadline,
             peer_images: Vec::new(),
+            sealed_package_sha,
         })
     }
     fn authenticate_image(&mut self, process: HANDLE) -> Result<(GuardianIdentity, HANDLE)> {
@@ -715,6 +734,7 @@ pub(crate) fn run(role: EntryRole, deadline: Instant, resolved_target: Option<&s
         EntryRole::Broker => server(&mut session),
         EntryRole::Guardian(transaction) => guardian(&mut session, transaction),
         EntryRole::Supervisor(transaction) => supervisor::run(&mut session, transaction),
+        EntryRole::OwnedGuardian => controlled_owner::guardian(&mut session),
     };
     if result.is_err() && matches!(role, EntryRole::Broker | EntryRole::Supervisor(_)) {
         // A supervisor failure retains only its own native capabilities until
@@ -1074,6 +1094,7 @@ mod tests {
             pipe_name: HSTRING::from(name),
             deadline,
             peer_images: Vec::new(),
+            sealed_package_sha: None,
         }
     }
     fn fixture_name() -> String {
