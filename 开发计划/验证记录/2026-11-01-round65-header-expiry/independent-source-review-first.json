@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_READ_ONLY_FROZEN_SOURCE_REVIEW_NO_CONCRETE_NEW_BUG_FOUND",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T06:11:23.851884+00:00",
+  "manifestSha256": "4fb7c4d38ad99e66da3f5949fe590af7c055eb01365c905f5e4bc1c6af2c08a3",
+  "baseSource": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "beforeSha256": "02ae7eb6886bd1e415bcf5aba04cae12116195c5c509554ddde0c2b2a4073915",
+      "afterSha256": "42feacea1410c3968734c9bc39d9c09c7c647095afeb29a9dba18800a335491f",
+      "beforeMatchesExactBaseGitBlob": true,
+      "worktreeMatchesFrozenSnapshot": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "beforeSha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe",
+      "afterSha256": "e6a4938e8c096ac509a03e75345b847cedda795aa7cb2ef1d6524a2efdc964fd",
+      "beforeMatchesExactBaseGitBlob": true,
+      "worktreeMatchesFrozenSnapshot": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "beforeSha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f",
+      "afterSha256": "a7cbaf2a17af2f01280871f9b46c404430e1ef63e79293b18a476ce8452dd80b",
+      "beforeMatchesExactBaseGitBlob": true,
+      "worktreeMatchesFrozenSnapshot": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "beforeSha256": "47829d0fe74dd2a64af48fbb710bdee4b4af62131936e74a5ea3850cd5ddbb04",
+      "afterSha256": "48fcff62625fdda506d6a4d6039b67190fea951e3b991bb3f880fb640274a783",
+      "beforeMatchesExactBaseGitBlob": true,
+      "worktreeMatchesFrozenSnapshot": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "beforeSha256": "8406246c2bf96f4545e411670e83c120f7b12f017c7ada182b4090dda37f5cb3",
+      "afterSha256": "a90522e846547705c8b6e64b4a7c5b0fce0f80f4d8b6119ca0e016f869339178",
+      "beforeMatchesExactBaseGitBlob": true,
+      "worktreeMatchesFrozenSnapshot": true
+    }
+  ],
+  "scope": "Only read exact frozen five-file TLS deadline slice, source before/after, relevant unchanged ownership/caller code and recorded format/diff evidence. No source edit, Cargo, Windows, SSH, CI or network execution. No R63/main/R64 source or evidence mutation.",
+  "findings": [
+    {
+      "subject": "one original bare-post interval",
+      "locations": [
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs:169",
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs:183"
+      ],
+      "fact": "Production post wrapper captures Instant::now before socket/OVERLAPPED preparation. checked_add(BUDGET) derives one deadline; only private native-module test clock injection accepts an alternate origin. There is no remote/DTO/application-auth clock parameter or external caller of the injection helper."
+    },
+    {
+      "subject": "pre-native expired preparation",
+      "locations": [
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs:221"
+      ],
+      "fact": "After actual socket preparation but before AcceptEx, an already-due close alarm closes only the exact unsubmitted socket and returns an error. No serial/post/submission/completion charge is invented. A failing close follows existing sticky descriptor retention instead of overwriting/replacing it."
+    },
+    {
+      "subject": "native success or pending versus immediate failure",
+      "locations": [
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs:242",
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs:250"
+      ],
+      "fact": "Immediate non-PENDING error closes only the unsubmitted socket. Native success/PENDING first records the original serial, Pending deadline, submissions and accept_posts, then evaluates late return and cancels. Cancellation sets Closing, retains exact OVERLAPPED/debt and still requires the actual original IOCP packet. No return-time+5s renewal or uncharged successful post exists."
+    },
+    {
+      "subject": "borrow boundaries",
+      "fact": "The first mutable bare-slot borrow last uses preparation memory before any whole-owner close call; later blocks explicitly reborrow the same slot. Native post uses pinned original operation/address memory. No new pointer lifetime, native buffer movement or unsafe Send/Sync is introduced. This is source reasoning, not a typecheck result."
+    },
+    {
+      "subject": "negative fixed-owner servicing",
+      "locations": [
+        "crates/fc-windows/src/tls_frontdoor/native.rs:1155"
+      ],
+      "fact": "service_deadlines only scans the one bare owner plus four slots and invokes existing expiry/close operations. It does not dequeue native completion, poll SSPI, return Frame, publish a new positive Head, issue token, submit retirement or rearm. Bare Pending becomes Closing once; business slots become Closed; subsequent sweeps skip the same negative work."
+    },
+    {
+      "subject": "IOCP/frame physical ownership",
+      "locations": [
+        "crates/fc-windows/src/tls_frontdoor/native.rs:930",
+        "crates/fc-windows/src/tls_frontdoor/native.rs:1111",
+        "crates/fc-windows/src/tls_frontdoor/native.rs:436"
+      ],
+      "fact": "New sweeps precede each bounded dequeue, surround frame deliveries and precede retire stages. Existing close_slot leaves pending IO and worker-owned Frame charged. Successful queued packets after cancellation still must be dequeued against original pointer/key; exact complete/retire fences remain. A close/service error can fail the caller but is not interpreted as physical debt discharge."
+    },
+    {
+      "subject": "no early or repeated positive re-admission",
+      "locations": [
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs:397",
+        "crates/fc-windows/src/tls_frontdoor/native/stream.rs:934"
+      ],
+      "fact": "Only existing complete_bare_accept replenishes its single owner after an actual packet; a canceled pending operation cannot repost. Existing business rearm still requires original token, Closed/socket-invalid/no pending, exact Frame/retired and delivered Closed+Retired events. service_deadlines does not call rearm or reset any deadline."
+    },
+    {
+      "subject": "caller record restoration/error path",
+      "locations": [
+        "crates/fc-bootstrap/src/web_transfer/network.rs:1477",
+        "crates/fc-bootstrap/src/web_transfer/network.rs:1489",
+        "crates/fc-bootstrap/src/web_transfer/network.rs:1492"
+      ],
+      "fact": "The added service after tick_work executes inside the existing Result closure while the record is temporarily taken. self.records[index]=Some(record) occurs before result? propagates any service/maybe_cleanup failure. Other new service calls run before a record is taken or before events are delivered, so they cannot lose that detached record. Existing event and shutdown fault handling remains authoritative."
+    },
+    {
+      "subject": "permissions and request budget",
+      "locations": [
+        "crates/fc-windows/src/tls_frontdoor/native/stream.rs:335",
+        "crates/fc-bootstrap/src/web_transfer/network.rs:1466"
+      ],
+      "fact": "Public TlsHttpHost service_deadlines is negative-only and has no application command/permission input. It cannot admit body, construct session, authorize response or bypass original request token/generation/version/fence checks. Existing Head establishes one120s request interval; new sweeps do not change it or rebase it. Header close reserve25ms and hard5e9ns are unchanged."
+    },
+    {
+      "subject": "finite stage work",
+      "fact": "Normal active native poll has at most20 service calls; normal Core poll adds at most41 from existing event16/record8/retirement8 bounds. Each scans at most five logical owners. This is a finite user-mode visit bound, not an OS syscall/scheduling/wire-time upper bound. Stopping suppresses positive/expiry work while original drain continues."
+    },
+    {
+      "subject": "new test evidence level",
+      "fact": "Five added tests call the actual private post helper, actual Winsock/IOCP/dequeue path and existing fake record Driver/mailbox. The pre-expiry test checks unchanged post/completion counts; late-native test checks charged Closing debt and exactly one later packet; direct poll_io test checks due socket close without invented retirement; caller test preserves original Head/admission interval. Controlled origins/clock passages are openly synthetic. No new test was executed by reviewer."
+    }
+  ],
+  "newTestNames": [
+    "real_bare_post_charges_preparation_against_one_captured_origin",
+    "real_bare_expired_preparation_closes_socket_without_posting_io",
+    "real_bare_late_native_return_retains_charged_io_until_original_packet",
+    "real_iocp_batch_services_due_receive_before_another_top_level_poll",
+    "caller_deadline_service_keeps_original_head_request_budget_and_admission"
+  ],
+  "issues": [],
+  "recordedExistingChecks": {
+    "format": "Author-recorded scoped rustfmt exit0 and exact raw-log hashes independently matched",
+    "diffCheck": "Author-recorded git diff --check exit0 and exact raw-log hashes independently matched",
+    "typecheck": "NOT_RUN_BY_REVIEWER",
+    "windows": "NOT_RUN_BY_REVIEWER"
+  },
+  "necessaryVerificationWithinExistingScope": [
+    "Root typecheck/strict lint and actual execution of new5 plus existing IOCP/Frame/retirement/error ownership regressions; source inspection cannot substitute for compiler/native execution.",
+    "Retain unchanged finite real Schannel incomplete-head4+raw1 client timing/negative fixtures for any new strict5e9ns sample claim. An injected clock/fake Driver is not ESTABLISHED age or cryptographic timing evidence.",
+    "Keep existing continuous capacity, response/auth/body/upload/download and error cleanup checks when integrating; service-only tests do not qualify full production networking."
+  ],
+  "limits": [
+    "This slice starts the candidate budget before AcceptEx preparation; it does not reconstruct TCP ESTABLISHED time for backlog connections.",
+    "Fixed scans do not prove hard real-time behavior under arbitrary scheduling, suspend, blocking native calls or network delivery.",
+    "Prior +577us failing sample remains a failure; no prior source/runtime result is relabeled by this review.",
+    "No production listener enablement, new pool/thread, MSI/startup change, Win7/Win10/Win11 compatibility or Seewo acceptance inferred."
+  ],
+  "reviewComplete": true
+}

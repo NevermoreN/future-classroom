@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "INDEPENDENT_REVIEW_SCOPE_CORRECTION",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T05:32:45.185682+00:00",
+  "priorReport": "independent-review-first.json",
+  "priorReportSha256": "b858bb84dcc873ddfb73aef618a2217a331877cd5eec18a9cb1c31e9996963ab",
+  "sourceBasis": "Original frozen four-file candidate; no source edit or new execution.",
+  "correction": {
+    "issueId": "R63-REVIEW-01",
+    "disposition": "WITHDRAWN_AS_DEMONSTRATED_D11_USER_SAFETY_BUG",
+    "reason": "The original issue applied R60 internal blueprint cleanup wording to every final control handle as if it were a separate user requirement. D11 P5-03/Q13 requires safe actual maintenance, data preservation and qualified upgrade/uninstall; it does not require an unending negative marker after all maintenance producers have physically returned merely because the last control-handle close reported failure. The prior report is retained unchanged for evidence; this correction supersedes its P1 user-risk conclusion.",
+    "stillTrueSourceObservation": "SetDisposition and Pending close precede Parent/Gate closes. A failed close retains raw handles and faults the process; delete-pending may complete when the process exits. This describes control lifetime only after the required settlement/physical-producer fence, not an unknown installer transaction automatically treated as settled."
+  },
+  "reviewedRequirements": [
+    {
+      "path": "开发计划/04-开发阶段与任务步骤.md",
+      "line": 121,
+      "meaning": "P5-03 clean-system ZIP/MSI, upgrade/recovery/uninstall, Q13 and no system configuration leftovers."
+    },
+    {
+      "path": "开发计划/05-测试验收与发布清理.md",
+      "line": 130,
+      "meaning": "Q13 compatibility, actual platform/Seewo, install/login/startup/upgrade/backup/uninstall evidence."
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "line": 23,
+      "meaning": "Candidate does not promise resistance to package/transform modification by same user or administrator."
+    }
+  ],
+  "executableSafetyBoundary": {
+    "beforeNegativeDelete": [
+      "Original operation/deadline and Pending inode/ACL/readback still verified under the retained exclusive original gate and directory pins.",
+      "Trusted Join0/End0 plus effects reconciliation, original guardian process object signaled with exit0; no mere receipt, timeout, missing PID or unknown rollback may substitute.",
+      "All non-control native resources/producer capabilities physically returned with checked closes. In this narrow core these are Guardian/Token handles; external broker future integration must account for its own IPC, workers, callbacks and descendants before effects_reconciled.",
+      "Any pre-settlement failure, live guardian or failing ancillary close keeps Pending and original physical gate."
+    ],
+    "afterNegativeDelete": [
+      "Only coordination Pending/Parent/Gate control handles may remain. Keep handle-based deletion and original parent/gate pins; do not replace with final DeleteFileW on an unpinned path.",
+      "Any failed native close is sticky in the current process, retains the remaining original handle capabilities and never returns Released or opens a replacement owner.",
+      "If that original process later physically exits, OS return of its original gate becomes the final kernel fence. A later startup must actually acquire the same validated physical share gate and observe no Pending before continuing. There are no unreturned maintenance producers at that point."
+    ],
+    "originalImplementationAssessment": "Original clear_pending already closes every non-Parent/Gate/Pending role before deleting Pending; after the settlement/actual-exit checks, remaining native roles are control-only. No path-CAS or infinite sentinel protocol is required for the clarified user invariant.",
+    "claimLimit": "This is source/control-flow reasoning, not actual Windows close-failure/runtime proof or complete MSI-owner integration."
+  },
+  "unchangedFindings": [
+    {
+      "issueId": "R63-REVIEW-02",
+      "disposition": "REMAINS_CONCRETE_ACL_MASK_DEFECT",
+      "detail": "Reject untrusted effective FILE_DELETE_CHILD grants on LocalAppData parent; pinning alone ends at process death."
+    },
+    {
+      "issueId": "R63-REVIEW-03",
+      "disposition": "REMAINS_CONCRETE_TEST_FAILURE_CLEANUP_DEFECT",
+      "detail": "RAII exact hardlink-alias cleanup must precede Fixture drop on assertion unwind."
+    }
+  ],
+  "reviewerExecution": {
+    "cargo": false,
+    "windows": false,
+    "ci": false,
+    "network": false,
+    "sourceEdited": false
+  }
+}

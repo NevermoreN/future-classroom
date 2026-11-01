@@ -1366,6 +1366,7 @@ impl<E: HttpExecutor> Core<E> {
     }
     fn retire_records(&mut self) -> Result<(), String> {
         for index in 0..MAX_REQUESTS {
+            self.host.service_deadlines()?;
             let Some(record) = self.records[index].as_ref() else {
                 continue;
             };
@@ -1468,9 +1469,11 @@ impl<E: HttpExecutor> Core<E> {
             return Err("bounded TLS event budget".into());
         }
         for event in events {
+            self.host.service_deadlines()?;
             self.event(event)?;
         }
         for index in 0..MAX_REQUESTS {
+            self.host.service_deadlines()?;
             let Some(mut record) = self.records[index].take() else {
                 continue;
             };
@@ -1484,6 +1487,7 @@ impl<E: HttpExecutor> Core<E> {
                 }
                 // At most one task submission OR completion per record/poll.
                 self.tick_work(&mut record)?;
+                self.host.service_deadlines()?;
                 self.maybe_cleanup(&mut record)
             })();
             self.records[index] = Some(record);
@@ -1493,6 +1497,7 @@ impl<E: HttpExecutor> Core<E> {
             self.report.native_drained = self.host.poll_shutdown()?;
         }
         self.retire_records()?;
+        self.host.service_deadlines()?;
         self.refresh_report();
         Ok(self.report)
     }

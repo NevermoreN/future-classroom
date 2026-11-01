@@ -1,0 +1,43 @@
+{
+  "status": "ACTIVE_COMPILATION_AND_VALIDATION_PENDING",
+  "recordedUtc": "2026-11-01T06:27:22.581339+00:00",
+  "mainBase": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "mainSource": "8 R63 files match implementation-freeze-seventh.json 63ac3e537fecaa89ffd8d11ce08ec144dd4e231ada95bc1fde776753b4c13af2; R65 changes remain isolated",
+  "r63ReleaseCompile": {
+    "sessionId": 45368,
+    "record": "release-workspace-test-compile-seventh.json",
+    "budgetSeconds": 900,
+    "command": "cargo test --release --locked --workspace --all-targets --target i686-pc-windows-gnu --no-run --message-format=json"
+  },
+  "r63DebugFull": {
+    "sessionId": 98667,
+    "terminal": "FAIL 900s bootstrap lib timeout; cleanup PASS; six complete harnesses 640 passed including windows236/new17; original failure retained",
+    "result": "windows-integrated-seventh-second.json"
+  },
+  "r64Closed": {
+    "modernRun": 41277364907,
+    "win7Run": 41277413277,
+    "result": "both actual SUCCESS; each21 harnesses1494PASS pluspublic20/visual22 on Win11; allcleanupPASS",
+    "archive": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round64-ci",
+    "archiveIndexSha256": "f6d9a33ba73488bc4399175d583d6d8633fca9b5388a75a1aeab08bb264d8749"
+  },
+  "r65": {
+    "root": "/tmp/fc-round65-header-expiry",
+    "branch": "codex/header-expiry",
+    "base": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+    "freezeSha256": "4fb7c4d38ad99e66da3f5949fe590af7c055eb01365c905f5e4bc1c6af2c08a3",
+    "review": "no concrete source bug; independent-source-review-first.json",
+    "check": "offline allworkspace GNU check PASS; no input changes",
+    "testCompileAgent": "/root/voice_management_editor",
+    "testCompileSession": 88167,
+    "scope": "224 test declarations only; actual Windows not run"
+  },
+  "nextActions": [
+    "Poll SAME active compile handles, never restart from stale state alone",
+    "After R63 release compile success, build same normal product with --release, same freeze7; create fresh correctly named release runtime operation; dedicated public may accompany21 tests/system-host, visual/repair must be separate",
+    "R63 same-source debug FAIL remains; do not reuse failed debug operation path or report full21PASS",
+    "After successful affected source validation archive R63 original evidence, append exact actual progress, scan credentials, stage only intended8 source/docs/archives, commit and ordinary push existing NevermoreN/future-classroom",
+    "Write exact committed Git blob proof then clean only completed owned roots/worktree/branches; retain main caches, intentionalZIPs, WindowsSSH and external test private key",
+    "R65 native test compile and actual Windows remain independent pending; never label strict actualTCP5s or physicalWin7/Win10 complete"
+  ]
+}

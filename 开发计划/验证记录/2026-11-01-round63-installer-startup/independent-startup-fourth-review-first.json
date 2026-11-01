@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "status": "READ_ONLY_STARTUP_FOURTH_SOURCE_REVIEW_NO_NEW_SAFETY_BUG_FOUND",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T05:55:27.644666+00:00",
+  "manifest": "implementation-freeze-fourth.json",
+  "manifestSha256": "d9d86a4e40d5d6ddd9d387e82bb5772b67e35a4cbe602a8e027b9b23ad12a9e8",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "snapshotSha256": "06b95dcd8827256beea7652b6e2dc651d479d0b8d32790baf46792fdc4de50c0",
+      "snapshotMatchesManifest": true,
+      "worktreeSha256": "bf2429588f8f79e35295335702bc757738a80e74ff2e227b5a2d1195d2f41843",
+      "worktreeMatchesSnapshot": false
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "snapshotSha256": "f2f892aff89a8b7e2f3edb313ed926760a22b7b442fa690feaee9015ba827a59",
+      "snapshotMatchesManifest": true,
+      "worktreeSha256": "5d21ab12b6acc03f942de3dff6c61b9abfb7fe8a1f6bcb50afed92f267e2b22e",
+      "worktreeMatchesSnapshot": false
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "snapshotSha256": "db54f17a05f91b2c30d2587d90525b935fc371e8f68cfd004abb300174db2b8b",
+      "snapshotMatchesManifest": true,
+      "worktreeSha256": "db54f17a05f91b2c30d2587d90525b935fc371e8f68cfd004abb300174db2b8b",
+      "worktreeMatchesSnapshot": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "snapshotSha256": "7b2c995d421d1524747cf5b76de622dbd19d8bb89d3ff0e30e778d5e79224082",
+      "snapshotMatchesManifest": true,
+      "worktreeSha256": "7b2c995d421d1524747cf5b76de622dbd19d8bb89d3ff0e30e778d5e79224082",
+      "worktreeMatchesSnapshot": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/installation_startup.rs",
+      "snapshotSha256": "88560eebf08a58a490b33b11bcbaa2ef85ab29a934006d820e2f07828b44309f",
+      "snapshotMatchesManifest": true,
+      "worktreeSha256": "88560eebf08a58a490b33b11bcbaa2ef85ab29a934006d820e2f07828b44309f",
+      "worktreeMatchesSnapshot": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "snapshotSha256": "b17ca9391cf7eb267113a156d3a0793fdfb96fe7c30cd34e677dab8e7ead0f4c",
+      "snapshotMatchesManifest": true,
+      "worktreeSha256": "b17ca9391cf7eb267113a156d3a0793fdfb96fe7c30cd34e677dab8e7ead0f4c",
+      "worktreeMatchesSnapshot": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "snapshotSha256": "a83fe4b049eb084823de5652c6105eee7717f797aef15236d96cfa8461a581ea",
+      "snapshotMatchesManifest": true,
+      "worktreeSha256": "a83fe4b049eb084823de5652c6105eee7717f797aef15236d96cfa8461a581ea",
+      "worktreeMatchesSnapshot": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+      "snapshotSha256": "f45dfb54e545d3b75e853db9da7f166bad06dfee249cb7efc120c8a5844d6f1b",
+      "snapshotMatchesManifest": true,
+      "worktreeSha256": "f45dfb54e545d3b75e853db9da7f166bad06dfee249cb7efc120c8a5844d6f1b",
+      "worktreeMatchesSnapshot": true
+    }
+  ],
+  "scope": "Fourth immutable snapshot plus current worktree comparison. No source edits, Cargo, Windows, CI or network execution. Source conclusions only, not test/build/runtime PASS.",
+  "facts": [
+    {
+      "topic": "real entry dispatch",
+      "locations": [
+        "crates/fc-bootstrap/src/main.rs:121",
+        "crates/fc-bootstrap/src/main.rs:335",
+        "crates/fc-bootstrap/src/main.rs:346"
+      ],
+      "finding": "Actual --repair calls reinitialize_application::run; no-argument manual and --autostart call application::run(false/true). Both run functions now invoke installation_startup::run before any DataPaths::program_data lookup."
+    },
+    {
+      "topic": "common wrapper",
+      "locations": [
+        "crates/fc-bootstrap/src/installation_startup.rs:5",
+        "crates/fc-windows/src/installer_lifecycle.rs:145"
+      ],
+      "finding": "Trusted current-user identity is discovered, physical shared gate acquired and Pending absence checked before body. Body signature Result<(),E> permits only unit success; no success value can directly carry live owners out. This is a trusted composition contract, not a proof against arbitrary external state captured by a malicious body."
+    },
+    {
+      "topic": "body Err/unwind retention",
+      "locations": [
+        "crates/fc-windows/src/installer_lifecycle.rs:149",
+        "crates/fc-windows/src/installer_lifecycle.rs:175",
+        "crates/fc-windows/src/installer_lifecycle/native.rs:557"
+      ],
+      "finding": "Original acquired lease immediately enters a unique armed ManuallyDrop guard. Body Err leaves guard armed; panic unwind also traverses guard. Guard takes original exactly once and calls retain_until_exit, moving the same raw capabilities into the preclaimed bounded ledger without native Close/reopen/new ownership. Sticky FAULTED and claim retention refuse replacement operations until actual process exit."
+    },
+    {
+      "topic": "body success and close failure",
+      "locations": [
+        "crates/fc-windows/src/installer_lifecycle.rs:155",
+        "crates/fc-windows/src/installer_lifecycle/native.rs:511",
+        "crates/fc-windows/src/installer_lifecycle/native.rs:576"
+      ],
+      "finding": "Only Ok(()) disarms/takes the original lease for checked try_release. A close error sets sticky failed state; the ordinary lease destructor then retains remaining original handles in the same ledger. No success result or new replacement owner is manufactured."
+    },
+    {
+      "topic": "normal application physical return",
+      "locations": [
+        "crates/fc-bootstrap/src/application.rs:1362",
+        "crates/fc-bootstrap/src/application.rs:4396",
+        "crates/fc-bootstrap/src/application.rs:4738"
+      ],
+      "finding": "Wrapper encloses existing full run_at lifetime, including data preparation, InstanceGuard, host and App. Existing shutdown_complete requires stopping, writer/backup fence, finished pool/shell, closed physical audio and no terminate_required. Native-host failure/incomplete shutdown terminates the actual process; normal path requests pool stop, checks completion and joins, then all inner locals drop before unit body return. Existing inherited destructor/native-adapter behavior was not newly qualified by this review."
+    },
+    {
+      "topic": "application repair physical return",
+      "locations": [
+        "crates/fc-bootstrap/src/reinitialize_application.rs:418",
+        "crates/fc-bootstrap/src/reinitialize_application.rs:504",
+        "crates/fc-bootstrap/src/reinitialize_application.rs:544"
+      ],
+      "finding": "Production repair wrapper encloses run_at_with and its actual coordinator/worker shutdown. Host ending early is not sufficient: it continues polling until exit_ready. A final body error retains the startup gate via the helper; successful body return follows the existing joined/physical-worker path."
+    },
+    {
+      "topic": "repair handoff race",
+      "locations": [
+        "crates/fc-bootstrap/src/application.rs:4402",
+        "crates/fc-bootstrap/src/application.rs:4411"
+      ],
+      "finding": "A production --repair child is spawned only after run_at_inner returns and its data/instance owners leave scope. Parent startup lease remains during spawn; child independently acquires the same shared startup gate before its data lookup. If maintenance wins a genuine gap after parent release but before child acquisition, child fails before data access. There is no implicit maintenance ownership transfer or unguarded child storage path."
+    },
+    {
+      "topic": "probe isolation",
+      "locations": [
+        "crates/fc-bootstrap/src/application.rs:4403",
+        "crates/fc-bootstrap/src/application.rs:4862",
+        "crates/fc-bootstrap/src/application.rs:4872",
+        "crates/fc-bootstrap/src/reinitialize_application.rs:427"
+      ],
+      "finding": "Existing isolated application probe still calls run_at(paths,true,true), and repair diagnostics use run_at_with directly. They do not call installation_startup wrapper or claim production gate. The !probe condition short-circuits the production DataPaths lookup used only to authorize repair handoff. Gate-specific tests use private test leaf identities."
+    },
+    {
+      "topic": "D11 concurrency invariant",
+      "finding": "Shared leases allow cooperative startup readers; maintenance exclusive share0 cannot overlap any live original shared gate. Existing data-root InstanceGuard remains additional normal-instance protection. Startup helper adds no login/identity challenge to public desktop functions. MSI hooks/broker, installed baseline upgrade and complete P5-03/Q13 remain outside this slice."
+    },
+    {
+      "topic": "new test source",
+      "locations": [
+        "crates/fc-windows/src/installer_lifecycle/tests.rs:210",
+        "crates/fc-windows/src/installer_lifecycle/tests.rs:529"
+      ],
+      "finding": "Four new helper scenarios in source exercise body not entered under maintenance, shared ownership during success body, body error retention while child stays alive, and caught-panic retention while original child stays alive. Retained Child objects are waited before fixtures are cleaned; exact child selection still matches actual module path. Total17 test functions is source inventory only, not execution evidence."
+    }
+  ],
+  "issues": [],
+  "documentationObservation": {
+    "snapshotIssue": "Immutable fourth installer_lifecycle.rs:1 still said application entry was not wired.",
+    "currentWorktreeResolution": "Already corrected by root to application startup/repair shared coordination with MSI actions not yet wired. Current worktree differs from snapshot only by that module doc and lib.rs module ordering; no helper or body logic changed.",
+    "requiresFurtherFix": false
+  },
+  "priorReviewBoundary": "The independent-review-scope-clarification-first.json correction still applies: after known settlement and every actual producer/ancillary resource return, final coordination-control close failure is sticky/no Released in-process; original process actual death and same validated kernel gate acquisition may end control ownership. No infinite-sentinel or unpinned path-CAS requirement is introduced.",
+  "necessaryVerificationForClaims": [
+    {
+      "scope": "this source increment",
+      "checks": "Root unified format/typecheck/strict lint and actual execution of the17 exact lifecycle tests with source hash binding; inspect count so helper child selection cannot silently become zero tests. Fourth runtime status remains NOT_RUN in this independent report."
+    },
+    {
+      "scope": "application integration evidence",
+      "checks": "Existing isolated application/repair probes should retain their private roots and cleanup behavior after the wrapper addition. Actual production manual/autostart/repair behavior and MSI/broker linkage need their separately scoped runtime evidence before full owner/upgrade claims; this is not a new prerequisite for source review completion."
+    }
+  ],
+  "reviewerExecution": {
+    "sourceEdited": false,
+    "cargo": false,
+    "windows": false,
+    "ci": false,
+    "network": false
+  },
+  "reviewComplete": true
+}

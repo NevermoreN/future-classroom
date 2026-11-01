@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "status": "FROZEN_SECOND_SOURCE_CANDIDATE_NOT_COMPILED_OR_RUN",
+  "recordedUtc": "2026-11-01T05:34:34.945541+00:00",
+  "worktree": "/tmp/fc-round63-installer-owner/worktree",
+  "head": "5ef37e5c5c035a8559508138eec0845cf28918a4",
+  "firstFreezeSha256": "d6d0b3644317c06b9cfb3363bb2244a302fda6e177ecc3c6ce4a395de1be0554",
+  "firstEvidencePreserved": true,
+  "firstCompiledButNotRuntime": "Root receipt windows-test-compile-first.json; first executable separately retained by root. This second version was applied only after actual first Cargo completion.",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "first": {
+        "bytes": 907,
+        "sha256": "06b95dcd8827256beea7652b6e2dc651d479d0b8d32790baf46792fdc4de50c0"
+      },
+      "second": {
+        "bytes": 907,
+        "sha256": "06b95dcd8827256beea7652b6e2dc651d479d0b8d32790baf46792fdc4de50c0"
+      },
+      "changed": false
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "first": {
+        "bytes": 7427,
+        "sha256": "633d834531c6e11e731b7732749514a1bd6a999bfba11f0cfba0741b4fcca5ce"
+      },
+      "second": {
+        "bytes": 7673,
+        "sha256": "d8d246263da7ca9e5ab73bc665688ff494bbb49ada7adea5bd5549b855e76618"
+      },
+      "changed": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "first": {
+        "bytes": 29878,
+        "sha256": "afc2dead2d69389921fdf0c76772198b007edc05c10f2b5084bf1309342d46cd"
+      },
+      "second": {
+        "bytes": 32630,
+        "sha256": "66a62bcee543a33892961ca4e23efd7eaab57352252fe7c0d0590bcb826b1fff"
+      },
+      "changed": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "first": {
+        "bytes": 13734,
+        "sha256": "3b5667b830ed2fdc1f07e9f3a245607de1b4933d691f5c6dcdf9409afeaab374"
+      },
+      "second": {
+        "bytes": 18003,
+        "sha256": "4e586f16cd7f095bea7e04c59574f5598758407f4fbdd018be095e5e41e03e75"
+      },
+      "changed": true
+    }
+  ],
+  "patch": {
+    "path": "implementation-first-to-second.patch",
+    "bytes": 13859,
+    "sha256": "70a2447d2c1a3a47619a70e932e31630f10bbed3cf551724e9151ed97f245ea4"
+  },
+  "checks": [
+    {
+      "name": "rustfmt",
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2024",
+        "--check",
+        "crates/fc-windows/src/installer_lifecycle.rs",
+        "crates/fc-windows/src/installer_lifecycle/native.rs",
+        "crates/fc-windows/src/installer_lifecycle/tests.rs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "architecture",
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 71,
+      "stdoutSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "diffcheck",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "reviewDisposition": [
+    {
+      "issue": "R63-REVIEW-01",
+      "resolution": "Scope corrected by root to user invariants: do not turn research stronger-than-D11 rules into user release gates. Preserve same-handle deletion and pins. Exact End/effects plus original guardian actual exit0 and all producer handle closes precede negative commitpoint; only terminal Pending/Parent/Gate controls remain. Any control close refusal is sticky and never Released. Actual original process death returns these same kernel controls; a later cooperative entrant may succeed only after actual same-gate acquisition and Pending absence. Unknown End, unreconciled effects, live guardian or producer cleanup refusal never reaches deletion.",
+      "source": "clear_pending explicit producers_returned one-way phase; original deadline rechecked after producer close before disposition; no path DeleteFileW/close-reopen CAS."
+    },
+    {
+      "issue": "R63-REVIEW-02",
+      "resolution": "Added FILE_DELETE_CHILD to effective untrusted parent permission rejection. Isolated private root receives an actual Everyone DELETE_CHILD ACE and is evaluated as the parent. Real LocalAppData ACL is never changed."
+    },
+    {
+      "issue": "R63-REVIEW-03",
+      "resolution": "Exact owned alias has RAII guard immediately after hardlink creation, before assertions. Fixture cleanup errors while already unwinding report and preserve original failure rather than panic twice. Normal cleanup errors still fail test."
+    }
+  ],
+  "tests": {
+    "count": 12,
+    "names": [
+      "native_child",
+      "physical_shared_child_blocks_maintenance_until_actual_return",
+      "physical_maintenance_blocks_child_and_owner_loss_keeps_pending",
+      "receipt_before_actual_guardian_exit_cannot_clear_pending",
+      "malformed_or_torn_pending_is_negative_not_dead_owner_recovery",
+      "original_expiry_never_renews_or_clears_negative_state",
+      "close_failure_retains_physical_owner_in_child_without_replacement",
+      "coordination_rejects_gate_hardlink_alias_before_pending_or_school_data",
+      "existing_broad_gate_dacl_is_rejected_without_repair_or_pending",
+      "isolated_parent_delete_child_grant_is_rejected",
+      "producer_close_failure_remains_negative_after_original_process_exit",
+      "settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate"
+    ],
+    "filter": "installer_lifecycle::tests::",
+    "execution": "NOT_RUN",
+    "additionalTests": [
+      "isolated_parent_delete_child_grant_is_rejected",
+      "producer_close_failure_remains_negative_after_original_process_exit",
+      "settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate"
+    ],
+    "faultPhases": [
+      "guardian producer close: Pending not delete-pending, original process actual return still blocked",
+      "pending control close after End/effects/guardian exit0/producers return: no Released, sticky while alive, actual process death returns same gate",
+      "parent control close after known settlement: same terminal-control boundary",
+      "gate control close after known settlement: same terminal-control boundary"
+    ],
+    "scope": "Controlled role-specific close refusal, not an observed OS CloseHandle failure. Actual Windows execution pending."
+  },
+  "unchanged": [
+    "No public path/command/SID mutation API; same UpgradeCode family",
+    "No raw path deletion or generic recovery; no startup/MSI integration",
+    "No producer/end/effects permission relaxation",
+    "No original deadline renewal",
+    "No Cargo/Cargo.lock/features/dependency changes",
+    "No Cargo/Windows/SSH/CI/install executed by editor"
+  ],
+  "remaining": [
+    "Root compile/typecheck, both strict Clippy and actual native tests",
+    "Broker must authenticate actual helper/transaction and reconcile effects; Settlement remains trusted internal input",
+    "Normal/autostart/app-repair and MSI gate integration pending",
+    "Win7/Win10/Win11 and full product lifecycle separate acceptance"
+  ]
+}

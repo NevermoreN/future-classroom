@@ -1,0 +1,55 @@
+{
+  "status": "PASS_COMMAND",
+  "command": [
+    "python3",
+    "-B",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round64-ci-evidence/modern-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round65-header-expiry/evidence/compile-test-second.stdout.log",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--report",
+    "/tmp/fc-round65-header-expiry/evidence/windows-native-second.json"
+  ],
+  "sourceFreezeSha256": "9453cc51b82c0ccc9f8bbb1ab17ee4bfd4ce66c2ce0070234899d5ac26d9c4a5",
+  "scriptSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "metadataSha256": "25bc3224cdb477c722aae5e967a81eeb72e12d3821562d391418a54ab4fdf646",
+  "testExecutable": {
+    "path": "/tmp/fc-round65-header-expiry/target/i686-pc-windows-gnu/debug/deps/fc_windows-5eb9da103eda8228.exe",
+    "sha256": "893f333fc562f7bff7ec0fe4cf740047877ac6973349c2f732adf9d9052705e5"
+  },
+  "baselineScaffoldNormal": {
+    "sourceSha": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+    "path": "/tmp/fc-round64-ci-evidence/modern-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe",
+    "sha256": "74188cbfd799446c9d3b3332a46fddb689dcce362db216a287d0e1110fded1f1"
+  },
+  "scope": "Only the newly compiled R65 fc_windows test harness is candidate validation. The R64 modern normal EXE is an explicitly separate baseline diagnostic scaffold, NOT an R65 product. Actual Win11/WOW64 only, no physical TCP 5s or Win7/Win10 certification.",
+  "exitCode": 0,
+  "elapsedSeconds": 36.43882267992012,
+  "resultStatus": "PASS",
+  "cleanup": "PASS",
+  "sourceUnchanged": true,
+  "stdout": {
+    "bytes": 130,
+    "sha256": "26c95b76effb3f1d1803eb0220774f4585b6443f4d4a082074f783d50ed0a281"
+  },
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "counts": [
+    224,
+    0,
+    0,
+    0,
+    0
+  ]
+}

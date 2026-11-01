@@ -167,6 +167,19 @@ impl Owner {
         Ok(())
     }
     pub(super) fn post_bare_accept(&mut self) -> Result<(), String> {
+        self.post_bare_accept_with_clock(Instant::now(), Instant::now)
+    }
+    /// One captured origin covers preparation and the actual native post.
+    /// Production always supplies the monotonic clock above; a private test
+    /// clock can cross the boundary around real native IO without long sleeps.
+    pub(super) fn post_bare_accept_with_clock(
+        &mut self,
+        began_at: Instant,
+        mut now: impl FnMut() -> Instant,
+    ) -> Result<(), String> {
+        let deadline = began_at
+            .checked_add(BUDGET)
+            .ok_or("bare accept original deadline overflow")?;
         if self.stopping
             || OWNER_FAULTED.load(Ordering::Acquire)
             || !self.http_mode
@@ -190,7 +203,7 @@ impl Owner {
         let accept = bare.accept.ok_or("bare AcceptEx unavailable")?;
         // SAFETY: previous IOCP packet actually returned and the old descriptor
         // was transferred/closed; only now may this pinned operation be reused.
-        let success = unsafe {
+        unsafe {
             *bare.memory.operation.get() = OVERLAPPED::default();
             *bare.memory.addresses.get() = [0; 64];
             bare.socket = WSASocketW(
@@ -202,6 +215,17 @@ impl Owner {
                 WSA_FLAG_OVERLAPPED,
             )
             .map_err(|e| format!("bare accept socket: {e}"))?;
+        }
+        // A slow preparation must not issue an already-expired positive post.
+        // There is no IOCP debt yet, so only the exact new socket is closed.
+        if now() >= header_close_alarm(deadline) {
+            self.close_bare_socket()?;
+            return Err("bare accept preparation consumed original deadline".into());
+        }
+        // SAFETY: the same unused pinned operation/socket remains exclusively
+        // owned. Native post latency consumes the already-captured interval.
+        let success = unsafe {
+            let bare = self.resources.accept.as_mut().unwrap();
             let mut received = 0;
             accept(
                 listener,
@@ -220,14 +244,17 @@ impl Owner {
             self.close_bare_socket()?;
             return Err(failure);
         }
-        // Preserve the old capture position AFTER successful/IO_PENDING post.
-        // This has no claim to an exact TCP establishment timestamp.
-        let deadline = Instant::now() + BUDGET;
+        // A successful/PENDING call owes a real IOCP packet even if the call
+        // returned too late. Publish that exact debt BEFORE negative cleanup;
+        // never return an uncharged operation or mint another five seconds.
         let bare = self.resources.accept.as_mut().unwrap();
         bare.serial = serial;
         bare.state = AcceptState::Pending { serial, deadline };
         self.report.submissions += 1;
         self.report.accept_posts += 1;
+        if now() >= header_close_alarm(deadline) {
+            self.cancel_bare_accept(true)?;
+        }
         Ok(())
     }
     pub(super) fn complete_bare_accept(

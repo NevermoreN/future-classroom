@@ -1,0 +1,47 @@
+--- first/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
++++ second/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
+@@ -2028,6 +2028,7 @@
+     // dequeued by this fixture. Only the remaining interval is injected.
+     let bare = f.host.owner.resources.accept.as_mut().unwrap();
+     let serial = bare.serial;
++    let original_operation = bare.memory.operation.get();
+     let hard = Instant::now() + HEADER_CLOSE_RESERVE;
+     bare.state = super::super::accept::AcceptState::Pending {
+         serial,
+@@ -2035,13 +2036,29 @@
+     };
+     let before = f.host.acceptance_snapshot();
+     let until = Instant::now() + Duration::from_secs(3);
+-    while f.host.owner.report.accept_expired_discards == 0 {
+-        // Deliberately use actual completion handling without the poll's
+-        // earlier alarm cancellation: late success must recheck on its own.
+-        f.host.owner.poll_io().unwrap();
+-        assert!(Instant::now() < until);
+-        std::thread::sleep(Duration::from_millis(1));
+-    }
++    let (mut bytes, mut key, mut operation) = (0, 0, ptr::null_mut());
++    // Bypass poll_io's early alarm service, but keep its real packet validation
++    // and completion dispatch: the late success must reject on its own.
++    // SAFETY: the fixture owns this IOCP and the original pinned bare operation.
++    // That allocation is not reused before its exact packet is dispatched below.
++    unsafe {
++        GetQueuedCompletionStatus(
++            f.host.owner.resources.port,
++            &mut bytes,
++            &mut key,
++            &mut operation,
++            3000,
++        )
++    }
++    .unwrap();
++    assert!(Instant::now() < until, "original bare IOCP return");
++    assert_eq!(key, 1);
++    assert_eq!(operation, original_operation);
++    let bare = f.host.owner.resources.accept.as_ref().unwrap();
++    assert!(bare.pending());
++    assert_eq!(bare.serial, serial);
++    f.host.owner.complete_bare_accept(key, true).unwrap();
++    assert_eq!(f.host.owner.report.accept_expired_discards, 1);
+     let snapshot = f.host.close_snapshot();
+     let record = snapshot.accept.unwrap();
+     assert_eq!(record.serial, serial);

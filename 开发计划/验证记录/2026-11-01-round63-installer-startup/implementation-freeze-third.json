@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "status": "FROZEN_THIRD_SOURCE_NOT_COMPILED_OR_RUN",
+  "recordedUtc": "2026-11-01T05:40:55.496080+00:00",
+  "secondFreezeSha256": "1b5ee170b58b8f3aaf6c006f4a1655d653723408318271e09e47adc824cc8fa5",
+  "worktree": "/tmp/fc-round63-installer-owner/worktree",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "second": {
+        "bytes": 907,
+        "sha256": "06b95dcd8827256beea7652b6e2dc651d479d0b8d32790baf46792fdc4de50c0"
+      },
+      "third": {
+        "bytes": 907,
+        "sha256": "06b95dcd8827256beea7652b6e2dc651d479d0b8d32790baf46792fdc4de50c0"
+      },
+      "changed": false
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "second": {
+        "bytes": 7673,
+        "sha256": "d8d246263da7ca9e5ab73bc665688ff494bbb49ada7adea5bd5549b855e76618"
+      },
+      "third": {
+        "bytes": 7673,
+        "sha256": "d8d246263da7ca9e5ab73bc665688ff494bbb49ada7adea5bd5549b855e76618"
+      },
+      "changed": false
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "second": {
+        "bytes": 32630,
+        "sha256": "66a62bcee543a33892961ca4e23efd7eaab57352252fe7c0d0590bcb826b1fff"
+      },
+      "third": {
+        "bytes": 35228,
+        "sha256": "aba2aac145976dca30814f895647bab63180559a9911b9b100787fcecb2bc920"
+      },
+      "changed": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "second": {
+        "bytes": 18003,
+        "sha256": "4e586f16cd7f095bea7e04c59574f5598758407f4fbdd018be095e5e41e03e75"
+      },
+      "third": {
+        "bytes": 18187,
+        "sha256": "0cdb5ad9ecc6085d7f38da7aa4f856692494d075fde59ade297ae1d70151dd51"
+      },
+      "changed": true
+    }
+  ],
+  "patch": {
+    "path": "implementation-second-to-third.patch",
+    "bytes": 5138,
+    "sha256": "de79c98b3ffd7b4978612e4ee0cbcf7b16827052672dae5ea14b567ff3402532"
+  },
+  "checks": [
+    {
+      "name": "rustfmt",
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2024",
+        "--check",
+        "crates/fc-windows/src/installer_lifecycle.rs",
+        "crates/fc-windows/src/installer_lifecycle/native.rs",
+        "crates/fc-windows/src/installer_lifecycle/tests.rs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "architecture",
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 71,
+      "stdoutSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "diffcheck",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "actualFailurePreserved": {
+    "originals": [
+      {
+        "path": "windows-native-second-first.json",
+        "bytes": 10177,
+        "sha256": "ac9bf71d229f1d435fab69a6636579a5cb2c69c9532a07a6e2aff1750a48c96c"
+      },
+      {
+        "path": "windows-parent-acl-diagnostic-first.stdout",
+        "bytes": 285,
+        "sha256": "4e0a6314269499b9c5642e8aaa368757e9d78007c7238d87ba2e25adb58627ad"
+      }
+    ],
+    "statement": "Root actual second GNU compiled; Win11 reported helper1 pass and11 failures. First Fixture acquireStartup had Native HRESULT0; later native-serial mutex Poison errors are cascading failures, not independently diagnosed defects. Root actual LocalAppData owner BUILTIN Administrators differs from token SID; native DACL contained only SYSTEM/Administrators/currentSID Full inherited grants. Original bytes/reports left unchanged."
+  },
+  "fix": {
+    "scope": "Only native owner predicate and one dedicated test; all deadlines, shared/exclusive handles, Pending/control settlement and existing assertions unchanged.",
+    "parent": "exact=false accepts currentSID, SYSTEM or BUILTIN Administrators owner. Existing valid-DACL and untrusted effective dangerous grant checks (including DELETE_CHILD) remain mandatory. Never modifies actual parent owner or ACL.",
+    "private": "exact=true Root/Gate/Pending owner remains exactly currentSID, with original protected closed two-ACE DACL; SYSTEM/Administrators/unknown owner still refused.",
+    "classification": "EqualSid false is a predicate mismatch, not a reliable LastError-producing failure. New predicate explicitly emits E_ACCESSDENIED; no HRESULT0 inequality is propagated."
+  },
+  "tests": {
+    "count": 13,
+    "new": "os_parent_owner_trust_does_not_relax_exact_private_owner",
+    "names": [
+      "native_child",
+      "physical_shared_child_blocks_maintenance_until_actual_return",
+      "physical_maintenance_blocks_child_and_owner_loss_keeps_pending",
+      "receipt_before_actual_guardian_exit_cannot_clear_pending",
+      "malformed_or_torn_pending_is_negative_not_dead_owner_recovery",
+      "original_expiry_never_renews_or_clears_negative_state",
+      "close_failure_retains_physical_owner_in_child_without_replacement",
+      "coordination_rejects_gate_hardlink_alias_before_pending_or_school_data",
+      "existing_broad_gate_dacl_is_rejected_without_repair_or_pending",
+      "isolated_parent_delete_child_grant_is_rejected",
+      "producer_close_failure_remains_negative_after_original_process_exit",
+      "settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate",
+      "os_parent_owner_trust_does_not_relax_exact_private_owner"
+    ],
+    "scope": "Actual OS SID constructors/current token, memory-only owner trust checks; original real-filesystem/cross-process tests retained. No actual Windows execution by editor.",
+    "filter": "installer_lifecycle::tests::"
+  },
+  "pending": [
+    "Root unified GNU compile/strict checks",
+    "Win11 actual dedicated tests and cleanup",
+    "Startup/MSI integration and formal lifecycle acceptance remain pending"
+  ]
+}

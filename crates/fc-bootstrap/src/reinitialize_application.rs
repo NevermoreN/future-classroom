@@ -416,8 +416,11 @@ impl RepairHarness {
 }
 
 pub fn run() -> Result<()> {
-    let paths = DataPaths::program_data().map_err(|_| "无法定位本机未来教室目录。".to_string())?;
-    run_at_with(paths, false, |_, _| Ok(()))
+    crate::installation_startup::run(|| {
+        let paths =
+            DataPaths::program_data().map_err(|_| "无法定位本机未来教室目录。".to_string())?;
+        run_at_with(paths, false, |_, _| Ok(()))
+    })
 }
 /// Root's isolated diagnostics supply a driver for the actual hidden native
 /// window. The same startup proof, real workers and final coordinator are used.

@@ -1,0 +1,34 @@
+
+thread 'installer_lifecycle::tests::close_failure_retains_physical_owner_in_child_without_replacement' (37132) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:38:69:
+called `Result::unwrap()` on an `Err` value: Native(HRESULT(0x00000000))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'installer_lifecycle::tests::coordination_rejects_gate_hardlink_alias_before_pending_or_school_data' (36068) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:423:52:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }
+
+thread 'installer_lifecycle::tests::existing_broad_gate_dacl_is_rejected_without_repair_or_pending' (32232) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:442:52:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }
+
+thread 'installer_lifecycle::tests::isolated_parent_delete_child_grant_is_rejected' (24932) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:459:52:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }
+
+thread 'installer_lifecycle::tests::malformed_or_torn_pending_is_negative_not_dead_owner_recovery' (39180) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:376:52:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }
+
+thread 'installer_lifecycle::tests::original_expiry_never_renews_or_clears_negative_state' (11896) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:398:52:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }
+
+thread 'installer_lifecycle::tests::physical_maintenance_blocks_child_and_owner_loss_keeps_pending' (40228) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:302:52:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }
+
+thread 'installer_lifecycle::tests::physical_shared_child_blocks_maintenance_until_actual_return' (38572) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:277:52:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }
+
+thread 'installer_lifecycle::tests::producer_close_failure_remains_negative_after_original_process_exit' (15508) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:468:52:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }
+
+thread 'installer_lifecycle::tests::receipt_before_actual_guardian_exit_cannot_clear_pending' (22656) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:327:52:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }
+
+thread 'installer_lifecycle::tests::settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate' (40472) panicked at crates/fc-windows/src/installer_lifecycle/tests.rs:481:52:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }

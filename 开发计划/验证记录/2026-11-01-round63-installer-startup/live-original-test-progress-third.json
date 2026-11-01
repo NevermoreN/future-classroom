@@ -1,0 +1,18 @@
+{
+  "status": "OBSERVATION_ONLY_LIVE_ORIGINAL_TEST",
+  "bytes": 48814,
+  "tailLines": [
+    "test recovery_workflow::windows::tests::abort_without_restore_capability_waits_for_the_real_worker_and_keeps_original_data ... ok",
+    "test recovery_workflow::windows::tests::cancelling_cold_restore_keeps_real_worker_and_source_pin_until_it_exits ... ok",
+    "test recovery_workflow::windows::tests::lost_confirmation_notification_remains_claimable_and_commits_after_real_drain ... ok",
+    "test recovery_workflow::windows::tests::migration_tests::changed_target_revision_cannot_rebless_old_mapping_but_fresh_review_can_be_retired ... ok",
+    "test recovery_workflow::windows::tests::migration_tests::closing_during_real_mapping_worker_prevents_late_publication_and_slot_reentry ... ok",
+    "test recovery_workflow::windows::tests::migration_tests::foreign_workflow_cannot_take_mapping_capability_or_release_its_owner_slot ... ok",
+    "test recovery_workflow::windows::tests::panicked_coordinator_never_publishes_a_shutdown_completion ... ok",
+    "test reinitialization::tests::blocked_worker_cannot_be_replaced_by_a_cancelled_ticket_or_a_reset_permit ... ok",
+    "test reinitialization::tests::claimed_repair_startup_rejects_future_open_and_a_second_claim ... ok",
+    "test reinitialization::tests::deployment_and_sequence_mismatch_close_owners_but_never_mint_a_permit ... ok",
+    "test recovery_workflow::windows::tests::migration_tests::migration_bundle_drop_only_retires_exact_source_and_blocks_reentry_until_worker_cleanup ... ok",
+    ""
+  ]
+}

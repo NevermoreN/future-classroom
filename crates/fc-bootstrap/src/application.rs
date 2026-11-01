@@ -4394,8 +4394,10 @@ impl App {
 
 /// Manual launch opens management; --autostart remains locked and hidden.
 pub fn run(autostart: bool) -> std::result::Result<(), String> {
-    let paths = DataPaths::program_data().map_err(|_| "无法定位本机数据目录".to_owned())?;
-    run_at(paths, autostart, false)
+    crate::installation_startup::run(|| {
+        let paths = DataPaths::program_data().map_err(|_| "无法定位本机数据目录".to_owned())?;
+        run_at(paths, autostart, false)
+    })
 }
 fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result<(), String> {
     let can_launch_production_repair = !probe

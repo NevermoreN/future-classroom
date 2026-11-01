@@ -1,0 +1,45 @@
+{
+  "status": "PASS_COMMAND",
+  "args": [
+    "python3",
+    "-B",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round64-ci-evidence/modern-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round64-ci-evidence/modern-artifact-original/test-metadata.jsonl",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--report",
+    "/tmp/fc-round64-ci-evidence/modern-msvc-runtime-first.json"
+  ],
+  "scriptSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "sourceSha": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "inputNormalSha256": "74188cbfd799446c9d3b3332a46fddb689dcce362db216a287d0e1110fded1f1",
+  "metadataSha256": "84a7445b9d09b6a3ab1d35a4cdc6a2b89e32d61b1784fdd1689c8d1d271f2cb6",
+  "scope": "Actual serial Win11 WOW64 execution only; Win7 candidate does not establish Win7 OS compatibility. Exact prior R41/R42 per-test900s,native1s,threads2 and hidden/read-only system/host checks retained.",
+  "exitCode": 0,
+  "actualExit": true,
+  "pid": 18861,
+  "elapsedSeconds": 151.02234795992263,
+  "scriptUnchanged": true,
+  "resultStatus": "PASS",
+  "cleanup": "PASS",
+  "stdout": {
+    "path": "/tmp/fc-round64-ci-evidence/modern-msvc-runtime-first.stdout.log",
+    "bytes": 947,
+    "sha256": "649433bd4b1dd4b458c550849673fb56887adedc246d6e86ef1ab3409b34a0d7"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round64-ci-evidence/modern-msvc-runtime-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

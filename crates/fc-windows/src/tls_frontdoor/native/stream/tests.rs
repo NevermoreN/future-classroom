@@ -2028,6 +2028,7 @@ fn real_iocp_queued_accept_after_negative_alarm_is_rejected_without_new_hard_dea
     // dequeued by this fixture. Only the remaining interval is injected.
     let bare = f.host.owner.resources.accept.as_mut().unwrap();
     let serial = bare.serial;
+    let original_operation = bare.memory.operation.get();
     let hard = Instant::now() + HEADER_CLOSE_RESERVE;
     bare.state = super::super::accept::AcceptState::Pending {
         serial,
@@ -2035,13 +2036,29 @@ fn real_iocp_queued_accept_after_negative_alarm_is_rejected_without_new_hard_dea
     };
     let before = f.host.acceptance_snapshot();
     let until = Instant::now() + Duration::from_secs(3);
-    while f.host.owner.report.accept_expired_discards == 0 {
-        // Deliberately use actual completion handling without the poll's
-        // earlier alarm cancellation: late success must recheck on its own.
-        f.host.owner.poll_io().unwrap();
-        assert!(Instant::now() < until);
-        std::thread::sleep(Duration::from_millis(1));
+    let (mut bytes, mut key, mut operation) = (0, 0, ptr::null_mut());
+    // Bypass poll_io's early alarm service, but keep its real packet validation
+    // and completion dispatch: the late success must reject on its own.
+    // SAFETY: the fixture owns this IOCP and the original pinned bare operation.
+    // That allocation is not reused before its exact packet is dispatched below.
+    unsafe {
+        GetQueuedCompletionStatus(
+            f.host.owner.resources.port,
+            &mut bytes,
+            &mut key,
+            &mut operation,
+            3000,
+        )
     }
+    .unwrap();
+    assert!(Instant::now() < until, "original bare IOCP return");
+    assert_eq!(key, 1);
+    assert_eq!(operation, original_operation);
+    let bare = f.host.owner.resources.accept.as_ref().unwrap();
+    assert!(bare.pending());
+    assert_eq!(bare.serial, serial);
+    f.host.owner.complete_bare_accept(key, true).unwrap();
+    assert_eq!(f.host.owner.report.accept_expired_discards, 1);
     let snapshot = f.host.close_snapshot();
     let record = snapshot.accept.unwrap();
     assert_eq!(record.serial, serial);
@@ -2060,5 +2077,167 @@ fn real_iocp_queued_accept_after_negative_alarm_is_rejected_without_new_hard_dea
     assert!(after.native_pending <= 5 && after.owned_sockets <= 6);
     let mut client = f.client.try_clone().unwrap();
     rejected_client(&mut f, &mut client);
+    f.stop();
+}
+
+// Stop/release only this fixture's original bare operation without rearming.
+// The queued real connection may be rejected; no business Frame was admitted.
+fn release_fixture_bare_for_post_test(f: &mut Fixture) {
+    f.host.owner.stopping = true;
+    f.host.owner.close_bare_accept().unwrap();
+    let until = Instant::now() + Duration::from_secs(3);
+    while f.host.owner.resources.accept.as_ref().unwrap().pending() {
+        f.host.owner.poll_io().unwrap();
+        assert!(Instant::now() < until, "original bare IOCP return");
+        std::thread::yield_now();
+    }
+    assert!(f.host.owner.bare_released());
+    f.host.owner.stopping = false;
+}
+
+#[test]
+fn real_bare_post_charges_preparation_against_one_captured_origin() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    release_fixture_bare_for_post_test(&mut f);
+    // A controlled earlier origin represents preparation time. AcceptEx is
+    // real; this is not a measured ESTABLISHED epoch or real five-second wait.
+    let began_at = Instant::now() - Duration::from_secs(1);
+    let posts = f.host.owner.report.accept_posts;
+    f.host
+        .owner
+        .post_bare_accept_with_clock(began_at, Instant::now)
+        .unwrap();
+    let bare = f.host.owner.resources.accept.as_ref().unwrap();
+    assert_eq!(bare.deadline(), Some(began_at + BUDGET));
+    assert!(bare.pending() && bare.socket != INVALID_SOCKET);
+    assert_eq!(f.host.owner.report.accept_posts, posts + 1);
+    f.stop();
+}
+
+#[test]
+fn real_bare_expired_preparation_closes_socket_without_posting_io() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    release_fixture_bare_for_post_test(&mut f);
+    let posts = f.host.owner.report.accept_posts;
+    let completions = f.host.owner.report.accept_completions;
+    let began_at = Instant::now() - BUDGET;
+    let result = f
+        .host
+        .owner
+        .post_bare_accept_with_clock(began_at, Instant::now);
+    assert_eq!(
+        result.unwrap_err(),
+        "bare accept preparation consumed original deadline"
+    );
+    assert!(f.host.owner.bare_released());
+    assert_eq!(f.host.owner.report.accept_posts, posts);
+    assert_eq!(f.host.owner.report.accept_completions, completions);
+    f.stop();
+}
+
+#[test]
+fn real_bare_late_native_return_retains_charged_io_until_original_packet() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    release_fixture_bare_for_post_test(&mut f);
+    let began_at = Instant::now();
+    let mut before_native = true;
+    let completions = f.host.owner.report.accept_completions;
+    // Inject only the passage of monotonic time across a REAL AcceptEx call.
+    // No fake IOCP packet or claimed five-second wire observation is supplied.
+    f.host
+        .owner
+        .post_bare_accept_with_clock(began_at, || {
+            if std::mem::take(&mut before_native) {
+                began_at
+            } else {
+                began_at + BUDGET
+            }
+        })
+        .unwrap();
+    let bare = f.host.owner.resources.accept.as_ref().unwrap();
+    assert_eq!(bare.deadline(), Some(began_at + BUDGET));
+    assert!(matches!(
+        bare.state,
+        super::super::accept::AcceptState::Closing { expired: true, .. }
+    ));
+    assert!(bare.pending() && bare.socket == INVALID_SOCKET);
+    assert_eq!(f.host.owner.report.accept_completions, completions);
+    assert!(f.host.owner.post_bare_accept().is_err());
+    f.stop();
+    assert_eq!(f.host.owner.report.accept_completions, completions + 1);
+}
+
+#[test]
+fn real_iocp_batch_services_due_receive_before_another_top_level_poll() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let token = incomplete_header_receive(&mut f);
+    let hard = Instant::now() + HEADER_CLOSE_RESERVE;
+    f.host.owner.resources.slots[token.slot()]
+        .stream
+        .as_mut()
+        .unwrap()
+        .deadline = hard;
+    // Old poll_io did no deadline sweep: even an empty completion batch left
+    // this socket live until an outer poll. Exercise this actual stage directly.
+    f.host.owner.poll_io().unwrap();
+    let slot = &f.host.owner.resources.slots[token.slot()];
+    assert!(slot.phase == Phase::Closed && slot.socket == INVALID_SOCKET);
+    assert!(
+        !slot.retired,
+        "IOCP service cannot fabricate SSPI retirement"
+    );
+    let closed = f.host.close_snapshot().headers[token.slot()].unwrap();
+    assert_eq!(closed.hard_deadline, hard);
+    assert!(closed.socket_returned_at.is_some());
+    assert!(closed.retirement_confirmed_at.is_none());
+    assert!(f.host.rearm(token).is_err());
+    f.revoked_retirement(token);
+    f.stop();
+}
+
+#[test]
+fn caller_deadline_service_keeps_original_head_request_budget_and_admission() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let mut wire = vec![b'H'];
+    wire.extend(record(&post(3)));
+    f.input(&wire);
+    let (token, admitted_at) = f.head();
+    let request_deadline = admitted_at + REQUEST_BUDGET;
+    let bare = f.host.owner.resources.accept.as_mut().unwrap();
+    bare.state = super::super::accept::AcceptState::Pending {
+        serial: bare.serial,
+        deadline: Instant::now() - Duration::from_nanos(1),
+    };
+    // A new negative boundary services the due bare operation, while a valid
+    // queued Head retains its one original120s interval and no native work
+    // completion or replacement owner is invented by this API.
+    let completions = f.host.owner.report.accept_completions;
+    f.host.service_deadlines().unwrap();
+    assert_eq!(f.host.owner.report.accept_completions, completions);
+    assert!(f.host.owner.resources.accept.as_ref().unwrap().pending());
+    let slot = &f.host.owner.resources.slots[token.slot()];
+    assert!(slot.phase == Phase::Http && slot.socket != INVALID_SOCKET);
+    assert_eq!(slot.stream.as_ref().unwrap().deadline, request_deadline);
+    f.host.admit_body(token, 3, request_deadline).unwrap();
+    assert_eq!(
+        f.host.owner.resources.slots[token.slot()]
+            .stream
+            .as_ref()
+            .unwrap()
+            .deadline,
+        request_deadline
+    );
+    f.input(&record(b"abc"));
+    let (body_token, sequence, offset, bytes, eof) = f.body();
+    assert_eq!(
+        (body_token, offset, bytes.as_slice(), eof),
+        (token, 0, b"abc".as_slice(), true)
+    );
+    f.host.ack_body(token, sequence, 3).unwrap();
     f.stop();
 }

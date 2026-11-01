@@ -1,0 +1,22 @@
+{
+  "status": "READ_ONLY_OBSERVATION_NOT_TEST_COMPLETION",
+  "scriptSha256": "be6f9dc7570f0a76b90496c0bc95c6aecd3d6a8396ad300b5c51cd2f18ba0a33",
+  "original": {
+    "status": "OBSERVATION_ONLY_LIVE_ORIGINAL_TEST",
+    "bytes": 26580,
+    "tailLines": [
+      "test backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding ... ok",
+      "test backend::voice::tests::exact_original_voice_session_guards_cancel_disable_and_terminal_retry_are_real ... ok",
+      "test backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf ... ok",
+      "test backend::voice::tests::voice_timeout_invalidates_runtime_and_late_submit_cannot_commit_or_reopen_admission ... ok",
+      "test backend::voice::upload_authorization_tests::upload_checkpoint_checks_original_deadline_even_after_a_coherent_successful_authorization ... ok",
+      "test backend::voice::upload_authorization_tests::upload_checkpoints_bound_publication_wait_and_leave_runtime_and_reservation_unchanged ... ok",
+      "test backend::voice::upload_authorization_tests::upload_checkpoints_wait_for_short_unrelated_publication_in_the_same_exact_epoch ... ok",
+      "test backend::voice::upload_authorization_tests::upload_publication_wait_never_adopts_a_replacement_lease_or_runtime_epoch ... ok",
+      "test backend::voice::upload_authorization_tests::upload_wait_rechecks_the_actual_new_class_binding_after_publication_without_sql_replay ... ok",
+      "test backend::voice::web_device::tests::actual_original_deadline_does_not_retire_a_blocked_query_or_admit_its_late_fact ... ok",
+      "test backend::voice::web_device::tests::both_ttl_clocks_expire_exactly_and_cache_hits_never_renew_completion ... ok",
+      ""
+    ]
+  }
+}

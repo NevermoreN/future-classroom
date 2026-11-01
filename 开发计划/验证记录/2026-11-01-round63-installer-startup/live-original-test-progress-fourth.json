@@ -1,0 +1,18 @@
+{
+  "status": "OBSERVATION_ONLY_LIVE_ORIGINAL_TEST",
+  "bytes": 61270,
+  "tailLines": [
+    "test voice_runtime::tests::ordinary_listener_callback_drain_does_not_fault_or_start_new_jobs_on_unregistered_listener ... ok",
+    "test voice_runtime::tests::retained_driver_never_gets_a_replacement_and_shutdown_waits_for_actual_release ... ok",
+    "test voice_runtime::tests::service_waker_is_weak_and_empty_shutdown_needs_no_audio_device ... ok",
+    "test voice_runtime::tests::wake_during_native_finish_is_pending_until_the_old_physical_thread_exits ... ok",
+    "test voice_runtime::tests::writer_resume_and_finish_never_hold_the_supervisor_ui_lock ... ok",
+    "test voice_runtime::tls_exit_tests::audio_reaper_waits_for_windows_tls_exit_without_joining_the_live_thread ... ok",
+    "test voice_runtime::native::policy_tests::two_contiguous_committed_policies_use_one_bounded_old_domain_handoff ... ok",
+    "test web_application::material_files::download_stream_tests::current_job_cancel_during_real_hash_keeps_the_same_file_pin_until_worker_cleanup ... ok",
+    "test web_application::material_files::download_stream_tests::expired_or_foreign_download_lifetime_cannot_open_or_rebind_the_original_pin ... ok",
+    "test web_application::material_files::download_stream_tests::network_download_preserves_original_deadline_across_distinct_worker_tickets ... ok",
+    "test web_application::material_files::stream_tests::material_stream_abort_real_readonly_delete_failure_retries_without_releasing_original_owner ... ok",
+    ""
+  ]
+}

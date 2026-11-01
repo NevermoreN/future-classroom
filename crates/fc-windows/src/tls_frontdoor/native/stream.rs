@@ -329,6 +329,12 @@ impl TlsHttpHost {
     pub fn app_owned_bytes(&self) -> usize {
         self.owner.app_owned_bytes() + size_of::<Self>() - size_of::<Owner>()
     }
+    /// Service only already-due native deadlines between bounded caller work.
+    /// Closing remains negative: the original IOCP/Frame debts and exact token
+    /// are retained until later poll/shutdown observes their physical returns.
+    pub fn service_deadlines(&mut self) -> Result<(), String> {
+        self.owner.service_deadlines()
+    }
     pub fn poll(&mut self) -> Result<Vec<TlsHttpEvent>, String> {
         self.owner.poll()?;
         Ok(self.owner.take_http_events())

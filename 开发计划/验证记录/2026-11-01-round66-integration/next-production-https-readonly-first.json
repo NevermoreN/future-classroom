@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-11-01T06:57:27.992714+00:00",
+  "scope": "Read-only production HTTPS enable/disable integration audit. No build, execution, SSH, listener, trust/firewall/HTTP.sys change, or source/document mutation. Evidence report only.",
+  "conclusion": "The next real product slice is a configuration-bound physical HTTPS lifecycle owner, integrated with the ordinary shared executor and management UI. Replacing Readiness::Unavailable alone is incorrect. Current saved configuration, certificate-history inspection, transport, and business dispatcher do not compose into an ordinary long-lived service.",
+  "requirements": [
+    {
+      "path": "开发计划/04-开发阶段与任务步骤.md",
+      "line": 97,
+      "claim": "P6-01: actual low-privilege HTTPS host, scope binding, settings start/stop and no listener after disable; P6-11 at107 owns bounded IOCP/request generations and actual cancellation drain; P6-05 at101 requires real business/browser integration."
+    },
+    {
+      "path": "开发计划/模块/06-局域网与React管理端.md",
+      "line": 16,
+      "claim": "Default listener off; explicit local administrator enable; designated network scope; disable revokes sessions and temporary uploads while preserving local content/functions."
+    },
+    {
+      "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+      "line": 9,
+      "claim": "One HTTP execution domain, at most one SSPI worker, existing two business workers; UI and Writer never wait for native joins. No extra business pool."
+    },
+    {
+      "path": "开发计划/模块/06-局域网与React管理端.md",
+      "line": 128,
+      "claim": "Normal Web close retains local functionality; original five-second stop/drain budget, fail closed with retained owner on timeout; Q09/Q11/Q25 idle/upload/late completion/repeated generations."
+    }
+  ],
+  "actualCallChain": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "line": 4829,
+      "claim": "create_app assigns web_readiness=Readiness::Unavailable. App has WebService/editor but no ordinary NetCoordinator/Hub/native HTTP owner."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "line": 3110,
+      "claim": "open_web_editor submits OpenWeb to existing shared worker for management data; web_event around3150 submits Work::Web, not transport start."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "line": 25,
+      "claim": "Readiness has only Unavailable in production; SyntheticFixture is cfg(test). Enable/Begin are rejected at74 and289 and their UI actions disabled at561/566."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "line": 79,
+      "claim": "Operation::Enable only calls WebService::set_enabled(admin,true); Disable at88 only calls false. Management description at401 explicitly says this is internal admission, not working HTTPS."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "line": 449,
+      "claim": "set_enabled explicitly documents logical admission only. false clears pairing/devices and revokes Web leases; no port is opened/closed."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "line": 60,
+      "claim": "save_https_settings obtains logical configuration_edit permit then repository CAS/journal. This operation intentionally has no listener side effect."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "line": 491,
+      "claim": "Only the isolated explicit fixture composes pool, StaticAssets, host, actual origin, synthetic WebApplication, UploadHubOwner, DownloadHubOwner and NetCoordinator. Its new pool and finite45s lifecycle cannot be copied into ordinary enable."
+    }
+  ],
+  "implementationGaps": [
+    {
+      "id": "physical-start",
+      "facts": [
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "line": 249,
+          "claim": "TlsHttpHost::open accepts diagnostic marker and thumbprint only; validates marker and starts original native Owner."
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "line": 290,
+          "claim": "start_with_worker waits for actual credential worker readiness; bind at332 uses IPv4 127.0.0.1 and port0. Saved host/port are never consumed."
+        },
+        {
+          "path": "crates/fc-domain/src/https_settings.rs",
+          "line": 102,
+          "claim": "Persisted configuration contains host/port/certificate, not enabled persistence, source subnet allowlist or bind-interface policy. origin() at132 does not prove address reachability/name support."
+        }
+      ],
+      "required": "Add a typed configured endpoint/start API that reuses this exact native owner and accepts no diagnostic marker bypass. Establish explicit supported IPv4/IPv6/local-interface and permitted-peer-network policy before a LAN constructor; current accept is AF_INET and has no peer-network admission check. A URL host/DNS name is not an interface or source allowlist. Never silently replace unsupported host with loopback or wildcard. Real credential acquisition and successful exact bind/listen, plus fresh configuration/authority validation, must precede enabling pairing."
+    },
+    {
+      "id": "ordinary-owner",
+      "facts": [
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+          "line": 330,
+          "claim": "Core owns exact TlsHttpHost, existing HttpExecutor, weak Backend/App, fixed8records, Hub handles and immutable static assets."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+          "line": 343,
+          "claim": "Premature Drop retains one bounded thread-local exact Core; this is a fail-closed fallback, not an ordinary lifecycle owner or join protocol."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/http_executor.rs",
+          "line": 1,
+          "claim": "SharedHttpExecutor already adapts Work::Http to original shared two-worker pool without creating any pool/thread."
+        }
+      ],
+      "required": "Create one product HTTP-domain owner with bounded Start/Stop/control metadata and read-only status. Construct/poll/drop the non-Send native host and Net on that same domain; do not construct in an arbitrary shared Work worker and transfer to UI, or block UI in native credential startup. Keep Backend/App/Hub owners alive until actual work completion. Track Disabled/Starting/Running/Stopping/Faulted and monotonically fresh native generation; do not use a boolean readiness or cached certificate facts as physical evidence."
+    },
+    {
+      "id": "disable-live-drain",
+      "facts": [
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+          "line": 1335,
+          "claim": "Successful MaterialReady response sets cleanup_done while retaining original staged upload in Hub; normal response completion deliberately does not cancel it."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+          "line": 1504,
+          "claim": "request_stop cancels current records and requests original host stop; native physical drain and worker actual completion remain separate."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+          "line": 389,
+          "claim": "drain_after_join explicitly requires actual entire shared-pool join; download equivalent at350 has the same ownership boundary."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+          "line": 605,
+          "claim": "reap_expired is already worker-only bounded negative cleanup, but descriptor counts are not final physical retirement proof and this is not a complete ordinary-domain shutdown API."
+        }
+      ],
+      "required": "Add bounded domain close admission/cancel-all and worker-scoped negative drain with an exact domain/generation fence: wait for every previously admitted Hub task to actually finish, clean retained MaterialReady and suppressed Begin replies, return pins/file handles/permits/quarantine, then acknowledge domain quiescence. Reuse UploadTask/DownloadTask cleanup_request after actual original done, plus an explicit finite Hub sweep/retirement acknowledgement for retained entries without Net records. Keep the shared two workers and Writer available throughout; never call whole-pool join to disable Web. A Net idle report or Hub counts alone cannot replace that fence."
+    },
+    {
+      "id": "stop-before-writer-and-restore",
+      "facts": [
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 1980,
+          "claim": "begin_shutdown currently stops desktop/audio/shell then schedule_shutdown. suspend_https only suspends settings editor/check work, not any listener."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 2023,
+          "claim": "schedule_shutdown currently waits for Audio physical close but has no network-domain condition before Work::Shutdown."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 4006,
+          "claim": "Writer Closed currently triggers shared-pool request_stop. Network cleanup must finish before this ordering point."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/backup_controller.rs",
+          "line": 640,
+          "claim": "Restore transfers the actual shared pool to its coordinator; it must first own a completed Web quiescence fence, not transfer away workers still needed by Net/Hub."
+        }
+      ],
+      "required": "Integrate explicit disable, process shutdown, recovery/reset/restore and health fault. First stop/revoke Web admission, then stop native accepts/cancel exact tasks, drain original HTTP/SSPI/IOCP/Frame/Hub owners using the still-live two workers/Writer, and only then let existing final coordinator close/join the original pool/Writer. Deadline failure retains exact owners and forbids replacement, with controlled process failure instead of reporting Disabled. Navigation/local lock close pairing as currently implemented; do not invent a requirement that every page exit/desktop hide kills an already enabled service. A pending uncommitted enable must still lose authority on cancellation/local-lease invalidation."
+    },
+    {
+      "id": "configuration-interlock",
+      "facts": [
+        {
+          "path": "crates/fc-bootstrap/src/backend/web.rs",
+          "line": 419,
+          "claim": "configuration_edit currently refuses logical enabled or another edit, not a physical Starting/Stopping generation."
+        }
+      ],
+      "required": "Extend the existing configuration/start interlock so an exact saved configuration cannot be edited while Starting/Running/Stopping still owns native resources. Reserve startup under fresh LocalGlobalAdmin exact lease/settings+identity/publication, recheck before logical activation; if authority/config changes or stop arrives after bind, drain the bound owner and do not enable pairing. No cached certificate observation is a start permit. No auto-enable on ordinary process launch: the existing enabled flag is process-local/default false."
+    }
+  ],
+  "nonOverlappingAssignment": [
+    {
+      "domain": "A fc-windows configured transport and safe physical lifecycle",
+      "owned": [
+        "crates/fc-windows/src/tls_frontdoor/mod.rs",
+        "crates/fc-windows/src/tls_frontdoor/native.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+        "corresponding private transport tests/new lifecycle module"
+      ],
+      "contract": "Typed non-diagnostic endpoint and trusted peer policy, original owner/SSPI/slots retained, successful readiness only after actual credential/bind/listen; bounded thread-affine lifecycle control/actual retirement. Keep diagnostic constructor backward compatible. No trust/firewall/HTTP.sys configuration or new business workers."
+    },
+    {
+      "domain": "B bootstrap Net/Work/backend composition and live domain drain",
+      "owned": [
+        "crates/fc-bootstrap/src/web_transfer/network.rs",
+        "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+        "crates/fc-bootstrap/src/web_transfer/downloads.rs",
+        "crates/fc-bootstrap/src/web_transfer/upload_work.rs",
+        "crates/fc-bootstrap/src/web_transfer/download_work.rs",
+        "crates/fc-bootstrap/src/web_transfer.rs",
+        "crates/fc-bootstrap/src/backend/web.rs",
+        "crates/fc-bootstrap/src/backend/https_settings.rs",
+        "new bootstrap HTTPS runtime/controller and focused tests"
+      ],
+      "contract": "Original SharedHttpExecutor/Work::Http, bounded domain state/control and generation, real saved settings+WebApplication+manifest resources, activation/configuration fence and worker-negative live drain without joining shared pool. Publish small physical status to UI. Agree Start reservation, activated generation, stop completion and resource-quiescence types before A/C edit."
+    },
+    {
+      "domain": "C ordinary UI/readiness/application lifecycle and integration tests",
+      "owned": [
+        "crates/fc-bootstrap/src/application.rs",
+        "crates/fc-bootstrap/src/application/web_editor.rs",
+        "crates/fc-bootstrap/src/application/backup_controller.rs",
+        "new dedicated ordinary HTTPS lifecycle probe/tests; optional main.rs explicit probe and dedicated runner only after contract"
+      ],
+      "contract": "This domain alone edits application.rs and Work/Outcome/App composition; B supplies child module APIs and requests exact edits. Replace permanent NotReady with current physical lifecycle status, enable only actual successful generation, Begin only Running+authorized, render stopping/fault honestly. Wire shutdown/restore gates and shared executor references; no duplicated runtime, no whole-pool stop for Disable. Preserve public desktop policy and old isolated probe contracts."
+    }
+  ],
+  "minimumDeliveryAndVerification": [
+    "Deliver one real normal-program chain: explicit authenticated Enable of saved host/port/ref -> protected immutable static manifest load in original worker -> exact native credentials/bind/listen -> fresh activation -> actual authorized pairing/session and a real authenticated GET/POST via existing business dispatcher; failure leaves no pairing authority.",
+    "Disable while idle, pending auth/KDF, JSON, binary Begin/write/finish, successful MaterialReady awaiting Append, pinned download and queued response: revoke promptly, return actual native and stage owners, retain local UI/writer/two workers, then safely re-enable with a new generation. Old job/token/response cannot leak into the new domain.",
+    "Shutdown/restore/reset and health fault must prove ordering before Writer close/pool transfer; cancel during start or suppressed Begin reply requires actual original completion followed by fresh negative cleanup. Include failed cleanup/timeout no replacement and no false Disabled.",
+    "Failure paths: missing/wrong ref/private key/provider error/occupied port/unsupported address or network policy/asset mismatch/config CAS or lease revocation during start. Never change trust, firewall or HTTP.sys merely to make tests pass. Owned test certificate and high port can verify ordinary owner safely without enabling a real school deployment.",
+    "Actual driver/resource counters and original handles/thread returns distinguish native stopped, Net record retired, Hub physically clean, and shared pool still operational. Require meaningful real IOCP/native plus existing shared-worker/SQLite integration; pure state tests alone are insufficient.",
+    "Campus reachability/source-range/TLS trust and Win7/Win10/Win11/visible Seewo/full resource and long-run evidence stay separately recorded; an initial normal composition slice does not close all P0/P6-11/Q09/Q25 or constitute released production deployment."
+  ],
+  "deadlineAndAdoptionBoundary": {
+    "sources": [
+      "AGENTS.md:7",
+      "开发计划/05-测试验收与发布清理.md:330-336",
+      "开发计划/08-Rust所有权与FFI生命周期.md:70,82,104",
+      "开发计划/14-P0独立TCP接纳候选ADR.md:3"
+    ],
+    "originalContracts": "Keep original post-derived header5s and25ms negative reserve; no accepted_at rebasing. Valid complete Head alone establishes unique admitted_at+120s, subsequent auth/stage/chunks/response only tighten. R65 service_deadlines runs during bounded event/record progress; not a five-second delay for local buttons. Keep original five-second native shutdown budget, and explicit bounded business cleanup under the original shutdown envelope.",
+    "historicalEvidence": "Original R13 strict peer-close sample FAIL and later finite results remain exactly as recorded. AGENTS/05 clarify original D11 is a five-second initial header budget with P0 campus calibration, not an unconditional nanosecond guarantee across all OS scheduling/network conditions. Old FAIL is not a perpetual veto of implementing ordinary enable/disable.",
+    "requiredDecision": "Existing ADR still labels Schannel transport diagnostic/candidate and unadopted; actual next implementation must explicitly define the configured production transport contract, trusted bind/source policy and its acceptance scope. Do not silently rename marker-loopback mode as production, assert every P0 concern solved, or use partial certificate checks as readiness. This is an implementation/adoption boundary, not a new user permission request."
+  },
+  "observedFileBindings": [
+    {
+      "path": "AGENTS.md",
+      "bytes": 1958,
+      "sha256": "a091517b97ed29732ba313b337275ff7ad041ebb253502e63a5be50d522d07fd"
+    },
+    {
+      "path": "开发计划/05-测试验收与发布清理.md",
+      "bytes": 41406,
+      "sha256": "5d1f56ac2a95ef99243dfc9cde3afbef41adb3310a82abee8237688855704092"
+    },
+    {
+      "path": "开发计划/04-开发阶段与任务步骤.md",
+      "bytes": 27561,
+      "sha256": "5038eb9f75a71e33e091dd5142cd1cf2e406f44bdb04c4b72f0b889094efcf78"
+    },
+    {
+      "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+      "bytes": 21375,
+      "sha256": "1e54134d1c85c80c9445026dce06f58fd2f18ef2f845eeb7998614bd0408b9e7"
+    },
+    {
+      "path": "开发计划/14-P0独立TCP接纳候选ADR.md",
+      "bytes": 19707,
+      "sha256": "ea73ea6fcf8b01f7efb2afbe7e6cf976f0283fac81a512b0387e656065870f4d"
+    },
+    {
+      "path": "开发计划/模块/06-局域网与React管理端.md",
+      "bytes": 20104,
+      "sha256": "2f0cadef2b7f29b100917d11b9cbfc81246955213d71ca2cd5c331634e3c53bb"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 260404,
+      "sha256": "a83fe4b049eb084823de5652c6105eee7717f797aef15236d96cfa8461a581ea"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 22828,
+      "sha256": "c7ef558c7ee0923beeb90eda6e6d18c29bd2e56d24f50a0c10d482eb1f356cda"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_executor.rs",
+      "bytes": 7720,
+      "sha256": "cabc00e64879a24bc0e7c5f4d6b5cf12358210d242017462d3e8a6b0e03b0610"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_controller.rs",
+      "bytes": 33494,
+      "sha256": "259282c9509bc780b550de6dd3f1aafa869fe3f35c8f6ddc6b14baa971a51cfc"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 29624,
+      "sha256": "7f2eb911219bfe0f93a383ad0aced42b897168453f43d7d80f062004aa72dad0"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 44377,
+      "sha256": "495383fe8e6fae4669155f7375792a426e60f2edbcfa9225f24affeda1d6250f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "bytes": 3830,
+      "sha256": "1cbc13e65a5c15ca98f9b43336d605ca3c7f6d86da2dc8c2c19f786268ff8492"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_certificate.rs",
+      "bytes": 11340,
+      "sha256": "800e0994b9d80f9d93ab0fb8e855351731e4200c6ea73604e245d5504b6a4cc2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 59397,
+      "sha256": "42feacea1410c3968734c9bc39d9c09c7c647095afeb29a9dba18800a335491f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "bytes": 35986,
+      "sha256": "83a5e40e206489681662ea411813cf942c8f195fa41dfbf1673bc88bf94d76ad"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/downloads.rs",
+      "bytes": 17961,
+      "sha256": "85c3a9433544dae418a29a023596127882cded7fe37644e310c47dff7f603313"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/upload_work.rs",
+      "bytes": 11545,
+      "sha256": "be2c9f514cf854409b597c930f3d31b3a521cfefbf68f3c1b00eb73fead738d8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/download_work.rs",
+      "bytes": 4830,
+      "sha256": "fe5bc307065b4aed115c83026c848d91cda9c9386a36863411d9987f83477ca8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_assets/loader.rs",
+      "bytes": 5175,
+      "sha256": "640bc4637badf3d6fb2735be72db75c9e24f43808e15713bd2153c6ed097c575"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 61439,
+      "sha256": "e6a4938e8c096ac509a03e75345b847cedda795aa7cb2ef1d6524a2efdc964fd"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 40331,
+      "sha256": "48fcff62625fdda506d6a4d6039b67190fea951e3b991bb3f880fb640274a783"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 16364,
+      "sha256": "a7cbaf2a17af2f01280871f9b46c404430e1ef63e79293b18a476ce8452dd80b"
+    },
+    {
+      "path": "crates/fc-domain/src/https_settings.rs",
+      "bytes": 6192,
+      "sha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96"
+    },
+    {
+      "path": "crates/fc-ports/src/http.rs",
+      "bytes": 13327,
+      "sha256": "059fa91aa0217c43610914268e9305e32ef6b4eb93929004512bd4083d9b8b32"
+    }
+  ],
+  "notPerformed": [
+    "No source or documentation writes",
+    "No compiler/test/runtime/remote/network command",
+    "No listener start or system configuration change",
+    "No reading credentials or private/control capabilities",
+    "No R66 runtime result inferred or restated from in-progress parent work"
+  ]
+}

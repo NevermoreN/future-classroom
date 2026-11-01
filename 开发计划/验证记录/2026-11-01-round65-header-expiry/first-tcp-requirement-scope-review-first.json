@@ -1,0 +1,415 @@
+{
+  "schemaVersion": 1,
+  "status": "READ_ONLY_REQUIREMENT_PROVENANCE_AUDIT_NO_ACCEPTANCE_CHANGE",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T06:39:24.884766+00:00",
+  "repositoryHeadAudited": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "scope": "只读当前正式文档、最早可恢复D11 Git blob、R09/R13/R17/R32/R41引入历史和原始诊断qualification。未改源码/计划/阈值/FAIL/监听状态；未Windows/Cargo/网络。只创建此审计JSON与SHA。",
+  "mainConclusion": "最早可恢复D11正式文字要求头部5秒初始预算、P0按校园实际网络校准，以及超时取消/保留原物理所有权；它没有规定从服务器实际TCP建立到对端每次观察断开必须零容差<=5_000_000_000ns，更没有规定backlog/任意OS调度/休眠无例外的硬实时保证。后两种更强口径来自R09以后的工程裁决、诊断和研究扩展，不能靠后来反复写“原门槛”证明其为原始用户承诺。当前文档确实承载这些后加门槛，本审计不自动删改它们或启用生产。",
+  "threeInterpretations": [
+    {
+      "number": 1,
+      "description": "原始逻辑截止触发并执行有限负向取消/关闭；实际IOCP/SSPI仍占原owner直到归还",
+      "provenance": "原aa52 D11支持的工程合同，最接近08:60/64/66及模块06:128。",
+      "precision": "5秒明确为初值并允许P0校园校准；原文没有定义精确TCP epoch、对端观察终点或可接受调度尾差。不能把取消成功当物理完成。有限固定资源/故障保留是原要求，不是放宽成只设变量却不实际取消。"
+    },
+    {
+      "number": 2,
+      "description": "从真实服务器TCP建立到对端观测断开，每次严格<=5_000_000_000ns",
+      "provenance": "未在原aa52 D11中找到。R09新增首头严格5秒；R13引入connect返回→EOF/RST的纳秒诊断；R17研究将真实服务器TCP起点称为requirementUnchanged，R32继续引用。",
+      "precision": "R13测量起点实际是客户端connect返回，并未测得服务器内核建立瞬间；R41改为connect调用前的有限保守客户端样本，仍非每例真实kernel epoch证明。请求头解析完成时间、发起关闭时间、内核返回和对端观测断开是四种不同证据，不能互换。"
+    },
+    {
+      "number": 3,
+      "description": "backlog、任意OS调度/暂停/休眠/拥塞下无例外的物理硬实时五秒",
+      "provenance": "原aa52 D11未找到这种普适量化。R13 ADR已说不能把普通调度实测当硬实时；R17/R41将无法证明该能力列为限制，而非提供原始用户选择。",
+      "precision": "有限测试无法推出任意环境普适上界；“本实现尚无此证明”也不是所有Windows架构数学不可能的证明。不得把一个未被原要求承诺的普适能力不证明，自动追加成无限阻塞全部产品工作的门槛。"
+    }
+  ],
+  "evidence": [
+    {
+      "revision": "aa52e0c48a5210525460dd0dd6aaaa19bec86d3c",
+      "path": "开发计划/未来教室项目完整开发计划.md",
+      "blobSha256": "027a2bcbc76056901aa6d43d2dd9a11475181cc8dd76babc6d65295c0960a452",
+      "lines": [
+        {
+          "line": 5,
+          "text": "版本：1.18 / 详细设计 D11，日期：2026-10-30（北京时间）。此文件是唯一总计划。已按 Rust 重新拆解实现层；教师 Web 保持 TypeScript/React，产品需求与18个业务模块保持，新增12项Rust实施任务并重排依赖。当前仅保留计划与设计资料，程序实现、构建及运行验收均待开展，详见[Rust开发与验证计划](07-Rust开发与验证计划.md)。"
+        }
+      ],
+      "classification": "最早可恢复Git D11总计划为1.18/详细设计D11；不是从当前进展自引用反推原始需求。"
+    },
+    {
+      "revision": "aa52e0c48a5210525460dd0dd6aaaa19bec86d3c",
+      "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+      "blobSha256": "36a4109904828c5e77d9ad0d1e98e526410c92ee5573f29200cbb3181cd43a92",
+      "lines": [
+        {
+          "line": 60,
+          "text": "首版选HTTP.sys API v2队列+OVERLAPPED/IOCP模型，1个HTTP执行域管理全部请求。初始最多8个in-flight请求、2个头接收槽、2个上传体流槽；头部16KiB、普通JSON64KiB；上传上限仍按图片/资料/语音各自策略。请求体/响应分块64KiB，不把50MiB原件读入Vec。截止初值为头部5秒/上传120秒，P0按校园实际网络校准，超时通过取消协议而非释放指针强行结束。"
+        },
+        {
+          "line": 64,
+          "text": "关闭状态：RUNNING→QUIESCING→CANCELING→DRAINING→CLOSED。先撤URL group的新接纳并关闭HTTP接纳闸门/配对，调用HttpShutdownRequestQueue取消尚在接收的请求；按活跃RequestId调用HttpCancelHttpRequest取消传输，不对请求队列句柄泛化使用CancelIoEx。继续处理IOCP直至所有接收/体/发送in-flight完成，才释放槽和关闭队列/IOCP。取消调用成功不等于原操作已完成；旧generation完成只结算原槽，不进入新监听周期。[队列停止](https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpshutdownrequestqueue)、[按请求取消](https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpcancelhttprequest)"
+        },
+        {
+          "line": 66,
+          "text": "关闭初始等待预算5秒，由关闭协调器管理，不在UI/Writer join；未排空进入FAULTED并保留原生持有槽直至受控结束本进程，不能早Drop或继续新建监听替代旧句柄。正常禁用Web只停HTTP及其会话/任务，桌面本地功能保持；全局FAULTED才使用全进程规则。"
+        }
+      ],
+      "classification": "原始正式工程合同：头5秒/上传120秒是初值，P0校园校准；超时取消，完成前保留资源；5秒排空是另一个独立预算。"
+    },
+    {
+      "revision": "HEAD",
+      "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+      "blobSha256": "1e54134d1c85c80c9445026dce06f58fd2f18ef2f845eeb7998614bd0408b9e7",
+      "lines": [
+        {
+          "line": 70,
+          "text": "首版选HTTP.sys API v2队列+OVERLAPPED/IOCP模型，1个HTTP执行域管理全部请求。初始最多8个in-flight请求、2个头接收槽、2个上传体流槽；头部16KiB、普通JSON64KiB；上传上限仍按图片/资料/语音各自策略。请求体/响应分块64KiB，不把50MiB原件读入Vec。截止初值为头部5秒/上传120秒，P0按校园实际网络校准，超时通过取消协议而非释放指针强行结束。"
+        },
+        {
+          "line": 74,
+          "text": "关闭状态：RUNNING→QUIESCING→CANCELING→DRAINING→CLOSED。先撤URL group的新接纳并关闭HTTP接纳闸门/配对，调用HttpShutdownRequestQueue取消尚在接收的请求；按活跃RequestId调用HttpCancelHttpRequest取消传输，不对请求队列句柄泛化使用CancelIoEx。继续处理IOCP直至所有接收/体/发送in-flight完成，才释放槽和关闭队列/IOCP。取消调用成功不等于原操作已完成；旧generation完成只结算原槽，不进入新监听周期。[队列停止](https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpshutdownrequestqueue)、[按请求取消](https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpcancelhttprequest)"
+        },
+        {
+          "line": 76,
+          "text": "关闭初始等待预算5秒，由关闭协调器管理，不在UI/Writer join；未排空进入FAULTED并保留原生持有槽直至受控结束本进程，不能早Drop或继续新建监听替代旧句柄。正常禁用Web只停HTTP及其会话/任务，桌面本地功能保持；全局FAULTED才使用全进程规则。"
+        }
+      ],
+      "classification": "原始可校准初值与取消/排空合同在当前已提交文档仍保留。"
+    },
+    {
+      "revision": "aa52e0c48a5210525460dd0dd6aaaa19bec86d3c",
+      "path": "开发计划/模块/06-局域网与React管理端.md",
+      "blobSha256": "722c554639ea901f810b390ff95b62b1361be44b3077c7104804ba2a0c0eaa24",
+      "lines": [
+        {
+          "line": 128,
+          "text": "P6-11先实现HTTP.sys API v2 + OVERLAPPED/IOCP适配，P6-01再集成宿主。单HTTP执行域，最多8个in-flight、2个头槽/2个体上传槽；头16KiB/JSON64KiB/流块64KiB，截止初值5秒/120秒。对齐固定IoSlot拥有OVERLAPPED/请求及响应内存，完成前不移动/释放；立即完成与IOCP完成只结算一次。禁用先停止HTTP接纳/配对，再HttpShutdownRequestQueue及逐RequestId HttpCancelHttpRequest，继续drain所有完成，最后释放槽/队列/IOCP；不能把取消成功当完成，不泛化对请求队列使用CancelIoEx。正常关闭Web保留本地功能；5秒排空预算超时进入故障受控退出，UI/Writer不join。Q09/Q11/Q25覆盖空闲/上传中禁用、迟到完成及反复启停。"
+        }
+      ],
+      "classification": "原始模块合同同样写截止初值5秒/120秒，并要求取消不能当完成；未写TCP建立或对端纳秒上界。"
+    },
+    {
+      "revision": "aa52e0c48a5210525460dd0dd6aaaa19bec86d3c",
+      "path": "开发计划/04-开发阶段与任务步骤.md",
+      "blobSha256": "a81e0fa5d451d85f927ee50889b2b1e174a12ad2bc5c3e85772b260b8cb6c1a0",
+      "lines": [
+        {
+          "line": 20,
+          "text": "| P0-05 | P0-01、P0-02 | fc-bootstrap / fc-windows / 目标探针 | HTTP.sys证书绑定/低权限运行、校园可达；React最小静态页在教师浏览器加载 | HTTPS无跳过校验；页面无外部依赖；配置可清理 |"
+        },
+        {
+          "line": 22,
+          "text": "| P0-07 | P0-03、P0-05、P0-06、P0-08、P0-09 | fc-bootstrap / fc-windows / 目标探针 | 冻结可用工具链、网络接口、窗口方案、TLS、数据耐久和测试工具 | 每个风险明确证据/失败动作/阻止哪项发布；更新估算 |"
+        },
+        {
+          "line": 103,
+          "text": "| P6-11 | P0-05、P1-08、P1-09、P1-10 | fc-windows / fc-runtime | fc-windows HTTP.sys重叠IO/IOCP、对齐固定槽、in-flight清单、请求取消/完成排空与启停代次 | Q09/Q11/Q25；取消不早Drop，空闲等待可关闭，旧完成不进入新监听周期 |"
+        }
+      ],
+      "classification": "P0-05/P0-07与P6-11原任务要求可信HTTPS/实际校园/风险证据及物理IOCP归还；没有每例物理5e9ns或任意调度硬实时文字。"
+    },
+    {
+      "revision": "aa52e0c48a5210525460dd0dd6aaaa19bec86d3c",
+      "path": "开发计划/05-测试验收与发布清理.md",
+      "blobSha256": "59ecf49ca0034f36378d98f69cec7b52171614c4139c04c61f0ad45ccc8430b2",
+      "lines": [
+        {
+          "line": 103,
+          "text": "## 10. Q09/Q10：局域网与Web"
+        },
+        {
+          "line": 105,
+          "text": "Q09测试真实校园路由、防火墙/TLS证书/主机名、禁用监听、URL路径越界、限流、未认证连接、教师/设备权限、上传句柄、幂等/修订、后台和HTTP状态区别。校外VPN存在才测，缺条件明确标不具备。"
+        }
+      ],
+      "classification": "原始Q09实际网络/TLS/限流/权限验收；没有每例物理五秒的测量起终点或零容差条款。"
+    },
+    {
+      "revision": "2c98edb8f018d55b73ee2c4692b07ea748d8fc64",
+      "path": "开发计划/06-整体Review与风险登记.md",
+      "blobSha256": "bf113592dc56a413217c127787797018a1f3148c66e5c607e96c7645e6ac8983",
+      "lines": [
+        {
+          "line": 218,
+          "text": "## 第九轮P0平台发现：HTTP.sys首连接头截止"
+        },
+        {
+          "line": 220,
+          "text": "Win11真实loopback第一次测试中，8项有界正文/响应/并发/拒凭证/断开用例已通过，但未完整首请求头在7000ms观察窗没有按应用5秒配置关闭；原始失败见实施记录。微软[HTTP_TIMEOUT_LIMIT_INFO Remarks](https://learn.microsoft.com/en-us/windows/win32/api/http/ns-http-http_timeout_limit_info)明确：首请求头解析前无法归属URL group/request queue，首连接的HeaderWait/IdleConnection使用driver默认2分钟；改自身server session亦不能覆盖。不得把group配置值5秒当作首请求5秒实测或改全局driver配置影响其他HTTP应用。"
+        },
+        {
+          "line": 222,
+          "text": "RR-04/P0-05增加强制裁决门槛：首请求严格5秒、内核未归属连接总量与Q12资源预算需独立验证/ADR选择可受控方案。当前8应用槽与queue8只约束已归属请求及自有分配，不证明全部内核连接有界。group QoS connection-limit API已识别但尚未配置/实测。传输取消/完成排空闭环可单独记录PASS，整体HTTP专项为PARTIAL，P6-11及完整产品继续NOT_RUN。正常生产监听保持关闭，无全局HTTP/证书/防火墙变更。"
+        }
+      ],
+      "classification": "R09工程风险复核新增“首请求严格5秒”强制裁决。它发现group5秒未覆盖首头/driver默认2分钟的实际适用性缺口；这是后增裁决，不是原aa52文本。"
+    },
+    {
+      "revision": "af56a6b29676a79471879656b019d3142ee414d8",
+      "path": "开发计划/14-P0独立TCP接纳候选ADR.md",
+      "blobSha256": "ea1dff0f503c270ad599293218748ae3d65cf289963d661ea66b0f9c8f3e4536",
+      "lines": [
+        {
+          "line": 9,
+          "text": "本轮实现隔离`fc-windows::tcp_frontdoor`：只在127.0.0.1临时端口创建自身Winsock listener，4个固定Pin<Box<Slot>>，AcceptEx的接收长度0，单IOCP、无新增worker。每次发布记录单调绝对期限，不以收到字节或dequeue完成事件续期；诊断只读取有限明文头，不接业务/凭据/TLS。容量满立即关闭自己的listener，有限单批次域不伪装为可持续接纳服务。"
+        },
+        {
+          "line": 13,
+          "text": "每个OVERLAPPED/accepted socket/16KiB头缓冲属于固定slot，只有观察到对应IOCP完成后才结算。关闭先停listener/取消接纳，再排空；CancelIoEx或closesocket返回不当作完成。5秒排空失败保留原预分配owner、IOCP与Winsock所有权，并置进程级FAULTED禁止replacement；不为排空失败分配第二批槽或强行释放被内核引用的内存。"
+        },
+        {
+          "line": 15,
+          "text": "`fixed_owner_bytes`只量化Rust内联结构与4块固定slot内存，不包含诊断Vec、内核TCB/backlog/socket缓冲、Schannel或SSPI缓存。既不把listen backlog参数当实际内核队列长度证明，也不把SO_CONNECT_TIME秒级读数当精确TCP建立时刻。AcceptEx零接收长度有助于在连接接受后立即归属owner，但不能推断监听前/排队/调度各阶段全部已受控。"
+        },
+        {
+          "line": 21,
+          "text": "精确纳秒观察以客户端connect_timeout返回为起点、逐poll观察EOF或RST。8个样本为：5000577000、5000505900、5000457500、5000411200、1200854500、5000019800、1222017900、4999886800纳秒。**5/8超出5000000000纳秒，最大超577000纳秒（577微秒），严格5秒观察FAIL。** 先前毫秒截断不能作为<=5秒证据；7秒只用于收集失败，不是扩大通过门槛。客户端connect返回也不等于服务端内核TCP建立时刻，TLS/SYN/backlog/休眠和拥塞未测。"
+        },
+        {
+          "line": 23,
+          "text": "SO_CONNECT_TIME实际读到1秒，配合人为延迟dequeue1.2秒，说明从应用收完成的时刻才开始5秒会漏算。官方文档未提供足以重建精确建立时刻的舍入误差保证，不能擅自用“秒数+1”证明原期限。"
+        },
+        {
+          "line": 27,
+          "text": "保留自有接纳域作为后续Schannel组合的候选；本轮不把明文端口或4连接有限批次改名为正常HTTPS。后续须分别解决：持续接纳与未归属backlog、从真正TCP建立起计时的语义、提前关闭预留量与暂停/拥塞模型、SSPI同步调用超时后的有限owner保留、真实TLS1.2/证书信任及三系统证据、应用内/OS共享资源各账边界。普通用户态调度的实测关闭延迟不能靠整数截断消失，也不能未经变更要求就等同硬实时保证。"
+        }
+      ],
+      "classification": "R13新增精确纳秒客户端connect返回→EOF/RST的零容差诊断，并保留577us超限FAIL；明确客户端观测不等于服务器ESTABLISHED，普通调度观察不能等同硬实时保证。"
+    },
+    {
+      "revision": "af56a6b29676a79471879656b019d3142ee414d8",
+      "path": "crates/fc-windows/src/tcp_frontdoor/mod.rs",
+      "blobSha256": "5b7e4c6161de82a7071c595d706676e56a42f99f9dfa1ec13150d61f8269da0f",
+      "lines": [
+        {
+          "line": 12,
+          "text": "pub const FIRST_HEADER_BUDGET: Duration = Duration::from_secs(5);"
+        },
+        {
+          "line": 23,
+          "text": "        Self(now + FIRST_HEADER_BUDGET)"
+        },
+        {
+          "line": 80,
+          "text": "        assert!(deadline.expired(start + FIRST_HEADER_BUDGET));"
+        }
+      ],
+      "classification": "R13逻辑Deadline为固定post+5秒，状态测试拒绝相等截止；不等于对端可见关闭上界。"
+    },
+    {
+      "revision": "af56a6b29676a79471879656b019d3142ee414d8",
+      "path": "crates/fc-windows/src/tcp_frontdoor/native.rs",
+      "blobSha256": "46482bcdf75080c401cd006cc43960ab24e95f6db472b9f3f71ceabf7ed27cf3",
+      "lines": [
+        {
+          "line": 435,
+          "text": "/// A finite five-second admission batch is diagnostic evidence, not proof of"
+        },
+        {
+          "line": 436,
+          "text": "/// a persistent TLS listener, hard kernel resource bounds or scheduler deadlines."
+        },
+        {
+          "line": 447,
+          "text": "                let client = TcpStream::connect_timeout(&address, Duration::from_secs(1))"
+        },
+        {
+          "line": 449,
+          "text": "                let connected = Instant::now();"
+        },
+        {
+          "line": 476,
+          "text": "                        Ok(0) => *closed = Some(connected.elapsed().as_nanos()),"
+        },
+        {
+          "line": 485,
+          "text": "                            *closed = Some(connected.elapsed().as_nanos());"
+        },
+        {
+          "line": 547,
+          "text": "    fn native_finite_admission_deadline_and_drain() {"
+        },
+        {
+          "line": 550,
+          "text": "        println!(\"TCP_FRONTDOOR_CANDIDATE_PASS {report:?} TLS_NOT_RUN hard_kernel_bound_UNPROVEN full_TCP_to_header_5s_UNPROVEN\");"
+        },
+        {
+          "line": 551,
+          "text": "        assert!(report.cleanup_complete);"
+        },
+        {
+          "line": 552,
+          "text": "        assert_eq!(report.accept_submissions, report.accept_completions);"
+        }
+      ],
+      "classification": "原Rust探针的起点是connect_timeout返回后Instant；测试只核对有限生命周期和提交完成账，打印full_TCP_to_header_5s_UNPROVEN；纳秒FAIL由外层证据qualification保留。"
+    },
+    {
+      "revision": "b75af3269b6687ec711686cabbc421ae1e87f89d",
+      "path": "开发计划/验证记录/2026-10-31-round17-p0-platform-review.json",
+      "blobSha256": "a1fdfebd82c3919028e9d0ec7ff218832047cc302eeb0ae74633f33fd124a22f",
+      "lines": [
+        {
+          "line": 19,
+          "text": "    \"productionAdoption\": \"NO; normal HTTPS listener must remain disabled pending existing P0 gates\","
+        },
+        {
+          "line": 20,
+          "text": "    \"requirementUnchanged\": \"Strict first-header deadline remains5,000,000,000ns from real server TCP establishment, not application accept/dequeue/handshake dispatch. Upload120s and shutdown-drain5s are separate budgets.\","
+        },
+        {
+          "line": 22,
+          "text": "    \"noHardRealtimeProof\": \"No documented worst-case scheduler, Winsock close, SSPI-call return or peer-observation bound found in the inspected APIs. This is a limit of available contracts and this candidate, not a proof that every conceivable Windows platform architecture is mathematically impossible.\""
+        },
+        {
+          "line": 467,
+          "text": "    \"Load, delayed dequeue, fixed-worker stall, power sleep/resume and process suspension each reported separately. A pass under one bounded scenario does not prove universal real-time.\","
+        }
+      ],
+      "classification": "R17只读研究decision.requirementUnchanged首次明确写真实服务器TCP建立起5e9ns；该“unchanged”是研究断言，不能充当更早D11出处。同一研究明确无通用最坏界证明，有限场景不证明universal real-time。"
+    },
+    {
+      "revision": "9d42f7cc75c7d2545caa18366d4a6d047aedaa99",
+      "path": "开发计划/14-P0独立TCP接纳候选ADR.md",
+      "blobSha256": "42db70471bedc2abb65812bc86ec0a680ce6b582e0444158fdf15d740c57bc8c",
+      "lines": [
+        {
+          "line": 74,
+          "text": "总计划1.44 / D11，沿用P0-05、P6-11及Q09/Q25。本切片仅修正隔离`TlsHttpHost`候选的期限阶段：头解析器返回完整合法Head后，在发布事件前以唯一`admitted_at`再次检查旧header绝对期限；完成时刻必须严格早于该期限，相等或更晚即关闭，不能发布Head或开启请求阶段。检查通过立即进入`admitted_at + 120秒`的原请求绝对期限，不能继续用旧post+5秒误杀已经完整解析、但尚待业务worker准入的请求。此处时间点只是合法头完成，不表示鉴权、计费stage或正文准入已经成功。"
+        },
+        {
+          "line": 76,
+          "text": "`admit_body`仍要求精确完整token、当前阶段/正文长度及原事件消费状态；提交的绝对期限必须仍有效且不晚于当前期限，只能保持或收紧。worker排队/返回时刻、显式admit、收到块/ACK或发送响应均不能重新起算120秒或恢复较早收紧前的期限；原上传等更短期限及业务权限检查保持。未准入请求到期后，原owner清除尚未交付的Head/正文事件，先逻辑关闭；IOCP完成、SSPI实际调用返回、原Frame归还和Retired交付条件继续满足后才允许原槽新serial。取消、socket关闭或过期信号均不能提前释放槽或使旧完成进入新请求。"
+        },
+        {
+          "line": 78,
+          "text": "新增回归合同为两项纯状态边界与四项真实IOCP/假记录Driver场景：严格小于/等于/超过旧header期限、唯一Head起点与admit只收紧/拒绝续期；完整Head后待准入、错误token/长度/期限拒绝及复用重置；真实等待原post+5秒截止后再加50毫秒而仍按原Head+120秒准入/ACK；未取出的queued Head到期清除；假解密在途过期后不发布晚Head、不在实际归还前rearm。仅一项真实等待旧五秒窗口，其余五项的时间边界有明确注入，不把注入等同实际等待120秒。所有真实IOCP场景仍使用fake记录保护，不证明Schannel加密、服务器精确ESTABLISHED时刻或严格首TCP五秒；具体编译、执行、原始输出与清理结果待[实施记录](10-实施进度与验证记录.md)独立补证，本节不写通过结论。"
+        },
+        {
+          "line": 80,
+          "text": "AcceptEx原post+5秒起点不变，未新增AcceptSlot/接纳池或SSPI线程，未解决持续接纳backlog、真正TCP建立时刻、调度/休眠/关断误差及内核/SSP资源上界。严格首TCP到完整header仍为`5_000_000_000ns`，第十三轮5/8超限的FAIL完整保留；Win7/Win10实机、持续生产TLS与校园部署仍待验收。普通生产listener继续关闭，不借请求阶段修复采纳候选或放宽原需求。"
+        }
+      ],
+      "classification": "R32将更强口径写为“严格首TCP到完整header仍为5_000_000_000ns”，同时修正合法Head完成后的独立120秒预算。这是后续工程合同/进展，不证明原始用户选择。"
+    },
+    {
+      "revision": "bcd51dacb5ba69a184546e5180569a8fd1b3ebad",
+      "path": "开发计划/14-P0独立TCP接纳候选ADR.md",
+      "blobSha256": "b1d199b43570a6d81de22c84fd9f945250583bff653ad51d9e4699b2b080f81d",
+      "lines": [
+        {
+          "line": 84,
+          "text": "保留原 `post + 5秒` hard deadline，在它之前25毫秒进入负向关闭；不把期限改成接纳后重新5秒。裸AcceptEx和未完成首Head都在该alarm拒绝迟到成功；完整Head后的原120秒请求期限不变。abortive close必须检查SO_LINGER设置和closesocket，失败保留原描述符并永久闭锁新准入，仅原shutdown可继续。四个业务槽、四份Frame、五份原生IO、六个socket及原两个业务worker保持。"
+        },
+        {
+          "line": 88,
+          "text": "最终整合源码的普通GNU程序 `b1f25364f488d6e8ffdb45ef53d5e99ff7fa717e3a226dd9ddf75d48bf7dee6f` 在授权Win11完成四个真实TLS不完整Head（第四个持续滴流）及实际退休重投后的一个裸TCP样本。五个客户端从各自本地connect调用前至对端关闭的观测分别为4775304997、4977312447、4978421422、4978384471、4912755215纳秒，均低于原5000000000纳秒；本地close发生在观测之后。它们是经自有SSH转发的有限保守样本，不证明服务器内核ESTABLISHED精确起点、客户端与槽的一一对应、任意调度下硬上界、backlog或内核/SSP资源上界。原第十三轮FAIL保留，生产listener仍关闭；本轮完整源码、原始失败和最终运行证据见[实施记录](10-实施进度与验证记录.md)R41补证。"
+        }
+      ],
+      "classification": "R41加入25ms提前负向close及有限5样本小于5e9ns；原件仍明确有限SSH转发观察不证明ESTABLISHED/任意调度硬上界。"
+    }
+  ],
+  "chronology": [
+    {
+      "commit": "aa52e0c48a5210525460dd0dd6aaaa19bec86d3c",
+      "date": "2026-10-30T06:12:48+08:00",
+      "event": "最早可恢复D11/总计划1.18，5秒为可校准初值。"
+    },
+    {
+      "commit": "2c98edb8f018d55b73ee2c4692b07ea748d8fc64",
+      "date": "2026-10-30T18:15:27+08:00",
+      "event": "R09实际HTTP.sys首头7秒未关闭，风险登记新增首请求严格5秒裁决。"
+    },
+    {
+      "commit": "af56a6b29676a79471879656b019d3142ee414d8",
+      "date": "2026-10-30T23:18:32+08:00",
+      "event": "R13独立TCP候选和精确纳秒零容差客户端观察；5/8超限。"
+    },
+    {
+      "commit": "b75af3269b6687ec711686cabbc421ae1e87f89d",
+      "date": "2026-10-31T03:47:38+08:00",
+      "event": "R17只读研究明确要求真实TCP建立epoch，并记录无硬实时证明；该说法无原始D11逐字出处。"
+    },
+    {
+      "commit": "9d42f7cc75c7d2545caa18366d4a6d047aedaa99",
+      "date": "2026-10-31T23:33:43+08:00",
+      "event": "合法Head完成切换120秒；ADR追加5_000_000_000ns仍为原门槛的表述。"
+    },
+    {
+      "commit": "bcd51dacb5ba69a184546e5180569a8fd1b3ebad",
+      "date": "2026-11-01T07:17:11+08:00",
+      "event": "提前25ms负向关闭和有限5个客户端PASS样本，仍不宣称普适硬上界。"
+    }
+  ],
+  "historicalFailurePreserved": {
+    "r13ReceiptSha256": "66b01bcc0ddc34318589842a0933f8949723993b19d7dd9d6bd76e16cc54a8ad",
+    "exactDiagnostic": {
+      "status": "FAIL",
+      "thresholdNanoseconds": 5000000000,
+      "observedNanoseconds": [
+        5000577000,
+        5000505900,
+        5000457500,
+        5000411200,
+        1200854500,
+        5000019800,
+        1222017900,
+        4999886800
+      ],
+      "exceededCount": 5,
+      "maxOvershootNanoseconds": 577000,
+      "measurementOrigin": "each client connect_timeout return; poll read EOF or connection reset/aborted/broken-pipe; same process monotonic clock",
+      "measurementLimits": [
+        "client connect return is an observation, not server kernel TCP establishment instant",
+        "ordinary scheduler/poll latency remains in observed duration; threshold not widened",
+        "7s loop is a failure observation window, not a passing deadline",
+        "two complete/rejected headers close earlier; remaining6 close on deadline",
+        "does not cover TLS, SYN/backlog before admission, persistent rearming, sleep or saturated scheduling"
+      ]
+    },
+    "qualification": "5000577000ns样本真实超过诊断5e9ns，5/8超限及577000ns事实永远保留；不能四舍五入为PASS。保留历史FAIL不等于任何后续不同源码永远不能通过其明确定义的验收，也不自动证明原D11要求普适物理零容差。",
+    "simpleObservedImpact": "这条实验超限发生于零字节/滴流/不完整头诊断；直接观察为连接/槽比该5秒测量线多占最多0.000577秒。它不是已证明的越权或错误业务提交。恶意并发、持槽可用性和校园正常慢客户端影响仍须按真实容量/场景测量。"
+  },
+  "originalRequirementEvidenceStillNeeded": [
+    "明确记录现实现可观测的原始计时起点、一次绝对截止及滴流/队列延迟不续期；截止后不再发布合法Head/业务准入，真实发起负向取消关闭。",
+    "真实覆盖空闲/不完整TLS与HTTP首头、滴流、完整头、超长头、队列延迟、容量占满与恢复；记录服务端发起关闭、socket返回、IOCP/Frame/Retired归还和客户端可见关闭的独立时间，不能把逻辑失效冒充物理归还。",
+    "到期关闭继续持有原物理slot/许可，取消或系统调用未返回时不早Drop、不创建替代owner；实际关闭失败故障闭锁。",
+    "按原P0校园实际网络校准并报告观测分布/最坏样本和适用负载条件；不能只配置5秒却让首连接实际落入driver默认2分钟，或不披露未归属连接适用范围与资源账。",
+    "真实TLS、受权业务、持续容量、校园可达和三系统/设备既有验收分别完成；本审计不将这些缺口标PASS。"
+  ],
+  "userDecision": {
+    "availableConversationEvidence": "父任务说明原用户仅问“什么东西超过了五秒/那会造成什么实际影响”，没有明确选择放宽或普适严格。仓库提交作者名不等于用户逐条批准；本次没有取得完整早期用户对话或更早D11附件。",
+    "evidenceOfUserApprovedRelaxation": "NONE_IN_AUDITED_MATERIAL",
+    "evidenceOfUserExplicitUniversalHardRealtimeChoice": "NONE_IN_AUDITED_MATERIAL",
+    "neededToContinueExistingRepairs": false,
+    "explanation": "无需先要求用户批准“放宽五秒”才可继续5秒预算内的提前负向关闭、阶段检查和真实所有权修复；这没有改阈值。原D11已经授权P0网络校准。单纯纠正内部研究条款的来源，不应被描述成用户违反自己的硬实时承诺。",
+    "whenConcreteUserChoiceWouldMatter": "若准备把每例真实TCP到对端<=5秒零容差/任意调度硬实时作为新产品承诺，或选择一个与当前明确工程验收不同的起点/容差/部署条件，应先给用户具体可审阅的行为和成本取舍；不能从中性提问推定同意任一选项。该问题不阻止不依赖该选择的开发和测试。",
+    "reviewableTradeoffs": [
+      {
+        "choice": "沿原D11工程预算验收",
+        "behavior": "仍以5秒为初始绝对预算，超时拒绝继续处理并尽快负向关闭；保留实际资源直到归还，报告实测关闭延迟与可部署条件。尚未在本审计中选择新的容差数字或更换计时起点。",
+        "productEffect": "保护课堂主流程和有限资源，正常校园慢请求的拒绝策略由实际校准决定；不承诺暂停/休眠时对端每纳秒硬实时。"
+      },
+      {
+        "choice": "新增每例物理硬上界承诺",
+        "behavior": "须先明确真实TCP起点、对端观察终点、负载/休眠/网络适用条件与证明方法；有限PASS不能当普适保证。",
+        "productEffect": "现候选缺少这种证明，保持未完成；可能需要更强平台/部署约束或架构成本。不能只靠加线程/反复轮询/把样本整数截断宣称达成。"
+      }
+    ]
+  },
+  "noAutomaticAcceptanceActions": [
+    "不修改任何5秒阈值、25ms预留或测试判定。",
+    "不删除或重命名R13失败为成功。",
+    "不因原始需求没有普适硬实时时序文字而自动启用生产listener、采纳候选或宣称P0完成。",
+    "把current progress引用与原始需求证据分开；继续保留所有实际失败和未验证能力。"
+  ],
+  "limitations": [
+    "只能证明本仓库当前可达Git历史中的来源。最早可恢复D11为aa52/1.18；未取得更早用户原件，不能断言任何未保存口头选择不存在。",
+    "未重新浏览微软文档或验证当前API事实；R09/R17平台事实按已归档研究原件作历史来源使用。",
+    "本审计不是新的网络基准、形式化WCET证明、生产准入许可或用户需求变更。"
+  ],
+  "reviewComplete": true
+}

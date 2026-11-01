@@ -930,6 +930,7 @@ impl Owner {
             return Ok(());
         }
         for _ in 0..(CONNECTION_SLOTS + usize::from(self.http_mode)) {
+            self.service_deadlines()?;
             let (mut bytes, mut key, mut operation) = (0, 0, ptr::null_mut());
             // SAFETY: IOCP and all operation allocations remain owned and pinned.
             let result = unsafe {
@@ -1106,22 +1107,16 @@ impl Owner {
                 }
             }
         }
-        Ok(())
+        self.service_deadlines()
     }
     fn poll(&mut self) -> Result<(), String> {
         if OWNER_FAULTED.load(Ordering::Acquire) && !self.stopping {
             return Err("TLS native cleanup fault; only original shutdown may continue".into());
         }
-        if self.http_mode && !self.stopping {
-            self.expire_bare_accept(Instant::now())?;
-            for index in 0..CONNECTION_SLOTS {
-                if self.resources.slots[index].phase != Phase::Closed && self.expired(index) {
-                    self.close_slot(index, true)?;
-                }
-            }
-        }
+        self.service_deadlines()?;
         self.poll_io()?;
         for _ in 0..CONNECTION_SLOTS {
+            self.service_deadlines()?;
             let frame = match self.resources.worker.as_mut() {
                 Some(worker) => worker
                     .poll()
@@ -1143,13 +1138,31 @@ impl Owner {
                         self.report.late_sspi_completions += 1;
                     }
                     self.complete_frame(frame)?;
+                    self.service_deadlines()?;
                 }
                 None => break,
             }
         }
         if !self.stopping {
             for index in 0..CONNECTION_SLOTS {
+                self.service_deadlines()?;
                 self.retire_closed_slot(index)?;
+            }
+        }
+        self.service_deadlines()
+    }
+    /// Fixed-size negative work only. This does not drain IOCP/SSPI, publish
+    /// application events, allocate owners, or change any original deadline.
+    fn service_deadlines(&mut self) -> Result<(), String> {
+        if OWNER_FAULTED.load(Ordering::Acquire) && !self.stopping {
+            return Err("TLS native cleanup fault; only original shutdown may continue".into());
+        }
+        if self.http_mode && !self.stopping {
+            self.expire_bare_accept(Instant::now())?;
+            for index in 0..CONNECTION_SLOTS {
+                if self.resources.slots[index].phase != Phase::Closed && self.expired(index) {
+                    self.close_slot(index, true)?;
+                }
             }
         }
         Ok(())

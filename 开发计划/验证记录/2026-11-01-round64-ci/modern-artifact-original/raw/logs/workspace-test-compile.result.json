@@ -1,0 +1,26 @@
+{
+  "name": "workspace-test-compile",
+  "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+  "arguments": [
+    "test",
+    "-vv",
+    "--workspace",
+    "--all-targets",
+    "--release",
+    "--locked",
+    "--target",
+    "i686-pc-windows-msvc",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "started_utc": "2026-11-01T05:34:19.5512317Z",
+  "duration_seconds": 899.5719637,
+  "exit_code": 0,
+  "parent_exited": true,
+  "timed_out_or_pipe_stalled": false,
+  "log_truncated": false,
+  "log_limit_bytes_per_stream": 16777216,
+  "stdout": "logs/workspace-test-compile.stdout.log",
+  "stderr": "logs/workspace-test-compile.stderr.log",
+  "passed": true
+}

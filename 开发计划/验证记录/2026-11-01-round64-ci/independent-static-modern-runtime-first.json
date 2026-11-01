@@ -1,0 +1,972 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_INDEPENDENT_STATIC_AND_MODERN_RUNTIME_ORIGINAL_REVIEW",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T06:01:06.402334+00:00",
+  "scope": "Read-only local original-artifact, exact Git source and runtime-receipt review. Reviewer did not run network, Windows, executable, Cargo, CI or source mutation. Only this receipt and digest are written.",
+  "sourceSha": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "ciHelperGitBlobSha256": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886",
+  "runtimeProbeGitBlobSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "producerSourceContracts": {
+    "strictPhaseAllowlist": true,
+    "phaseBaselineValidation": true,
+    "onlyBeforeProductUsesProductFlags": true,
+    "originalEnvironmentRestoredInFinally": true,
+    "testCompileBudget2400": true,
+    "productBudget1200": true,
+    "clippyBudget1500": true,
+    "buildJobsTwo": true,
+    "streamLimit16MiB": true,
+    "payloadLimit256MiB": true
+  },
+  "staticBaselines": [
+    {
+      "baseline": "modern",
+      "runId": 41277364907,
+      "jobId": 124762161570,
+      "artifactId": 13072361860,
+      "officialRunJobConclusion": "success",
+      "sourceSha": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+      "zipBytes": 43086506,
+      "zipSha256": "e7542890a76d6fe6f7f534301e20c2173d4f0ffdd4f623becf287a1c7236ba05",
+      "zipMembers": 223,
+      "ledgerRows": 222,
+      "allZipBytesMatchExpandedOriginals": true,
+      "allProducerLedgerEntriesMatchZip": true,
+      "existingStaticAuditSha256": "36aea1f2dc50c68d9da76e48c76636a69aa95576f1e78bde99750e07739d8916",
+      "existingStaticAuditCheckCount": 398,
+      "ciHelperExactGitBlobAndCheckoutTransformBound": true,
+      "crtPhases": [
+        {
+          "phase": "before-vs",
+          "rustflags": "-C target-feature=+crt-static",
+          "encodedAbsent": true,
+          "rawSha256": "dd474024dd355423bac97d2b9393a3949c2f2fca1bafa124f8b383cf5e212203"
+        },
+        {
+          "phase": "after-vs",
+          "rustflags": "-C target-feature=+crt-static",
+          "encodedAbsent": true,
+          "rawSha256": "48d388b0526a3fe341a41ffa7565f21f86e8dfd43d1117a4301936769447163e"
+        },
+        {
+          "phase": "before-cargo",
+          "rustflags": "-C target-feature=+crt-static",
+          "encodedAbsent": true,
+          "rawSha256": "82275d03dfef55736dbff319e08b7e23bd8daa9a83a7f6f6aa71a391b4747af3"
+        },
+        {
+          "phase": "before-product",
+          "rustflags": "-C target-feature=+crt-static",
+          "encodedAbsent": true,
+          "rawSha256": "60766b9a5474a3fb01b650708ed9d2c30ff79c28d71d807c365880fa4500ca91"
+        },
+        {
+          "phase": "after-product",
+          "rustflags": "-C target-feature=+crt-static",
+          "encodedAbsent": true,
+          "rawSha256": "4f8e7cfd896922a14f1385030a0bafc4c95ec6fff649de5a04427f9368a8de89"
+        }
+      ],
+      "commands": [
+        {
+          "name": "workspace-test-compile",
+          "budgetSeconds": 2400,
+          "durationSeconds": 899.5719637,
+          "exitCode": 0,
+          "physicalParentExit": true,
+          "passed": true,
+          "rawSha256": "acc941d450794b9eb4ceab5e2b4c6f29c516dbeaf7ae4ee02ccc0f0ac6251cb6"
+        },
+        {
+          "name": "product-compile",
+          "budgetSeconds": 1200,
+          "durationSeconds": 1.7870026,
+          "exitCode": 0,
+          "physicalParentExit": true,
+          "passed": true,
+          "rawSha256": "44a825154fd95d50c34511eefb343a3cafcf96590916f6921a4c57693880b521"
+        },
+        {
+          "name": "clippy",
+          "budgetSeconds": 1500,
+          "durationSeconds": 70.0087418,
+          "exitCode": 0,
+          "physicalParentExit": true,
+          "passed": true,
+          "rawSha256": "e884f678fd64f0ec151f2175dfe56fa7124e1b46721cf39012d2aa09db248415"
+        }
+      ],
+      "headers": [
+        {
+          "relativePath": "tests/fc-windows/fc_windows-cd50618b48fb17d8.exe",
+          "role": "tests",
+          "sha256": "0e9bf6ec70cb530103c3509370a79656fcb69abc6e2b26041fcd08721b177004",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/calendar_execution_fence-90c781596b821bb1.exe",
+          "role": "tests",
+          "sha256": "4cc4beca3cc0b4ee31e0ac9d2f19d3e8aceb02fcc2634730504572dbbdcad7ab",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/verify_web_assets-875fd155fb56602c.exe",
+          "role": "tests",
+          "sha256": "607947e5c101cb0b2c2d8176dbd96176b8b341647aac2ec9ad6433257278d4e0",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/voice_storage-2f35be146f47b683.exe",
+          "role": "tests",
+          "sha256": "57cf5336b5b22c1bcf0f0209bdac7a8d50fe9a3dacd0ee0cd903cb21f84aa1ca",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/fc_bootstrap-f2a1cc65f02b0804.exe",
+          "role": "tests",
+          "sha256": "629a5b017ed874f5df77a551686e0796264ab914abc9256e9fa44332be343798",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/autostart_coordinator-4d8ffe50e568cd1d.exe",
+          "role": "tests",
+          "sha256": "61796a0be75d5cd2e95064a80ed56ca1b7763ea25183ec64ab5bd5e63b2e8e11",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/runtime_storage-be315465b9650302.exe",
+          "role": "tests",
+          "sha256": "9e953995299b1eccc224ec605c7047eb61198d4d01233182858f76261573da63",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/business_storage-d7acb8a02f6a164c.exe",
+          "role": "tests",
+          "sha256": "2dae9a88acc2ee9e7ac8357d3e21f1c6d0f83266707afbfdff469b0643709f80",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/voice_limits_storage-fa38bda5134dfcda.exe",
+          "role": "tests",
+          "sha256": "72104f1dcb515dfaa7ba8c82144256c8ab1c094e277e9b5a81347b27dd09dc45",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/schedule_operations-75016802763f2d21.exe",
+          "role": "tests",
+          "sha256": "1ae5cd35065e7ddf9816be7ea589dd0f7b63fcfe0477cc2dbc19c24dff9b16e4",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-materials/fc_materials-2e428b959a090e75.exe",
+          "role": "tests",
+          "sha256": "02e42aed0a3027b07aa0742009292e36a84d20b61f4ce65f57357fc5408db73e",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-security/fc_security-897ee1bbd038f1a8.exe",
+          "role": "tests",
+          "sha256": "43cece98f0f0a533baacd9eba4113219718607579b22dbe2abd96e399895089d",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/fc_bootstrap-1904026c21c0adea.exe",
+          "role": "tests",
+          "sha256": "626e4f6ed0a237ff5ae1ab6589fa6317e94805fb08370bfd08bbc15480c7f57e",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-presentation/fc_presentation-0ebca4673ff953f0.exe",
+          "role": "tests",
+          "sha256": "8e25d8df8d50e8b28f1847a6d234e366185dbd0ed3e73de59dcca6ddff68a6cc",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-storage/fc_storage-e351e410d252c84e.exe",
+          "role": "tests",
+          "sha256": "38d200b4e103589e352e5aaf5ca3220e432498e7ec933fcc570b3cff64650336",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-runtime/fc_runtime-beae710b833bf51a.exe",
+          "role": "tests",
+          "sha256": "88873bbfa27aa58497da641d72df4a37250320cf0237ff75d9e37a6965a8177c",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-audio/fc_audio-3b8d060b615f92df.exe",
+          "role": "tests",
+          "sha256": "2ced564bd712afa83e893e427ca1a2051813272cf148d0970b3f35bed79c9d76",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-protocol/fc_protocol-a7cf91af1d25db3b.exe",
+          "role": "tests",
+          "sha256": "837c548ff38a3fbb133027f6f7714243b3e3c538801f7be6390d3f00b70c7506",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-ports/fc_ports-2a65d64830b4e099.exe",
+          "role": "tests",
+          "sha256": "234a10c9c134753795f82c707cb8acaea6515c318d2ed3b8913c37e069e46e2a",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-application/fc_application-452d4d2887413f93.exe",
+          "role": "tests",
+          "sha256": "11eee73b740c6d0192828d6dee77463b3af2cee4f256beadc7a81277aceb52b5",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "tests/fc-domain/fc_domain-7c20761d03caf301.exe",
+          "role": "tests",
+          "sha256": "52f780a49493413eb7e4026741a8367ac80c9a78cd0c98cf3118a3ff58ea0aa1",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        },
+        {
+          "relativePath": "product/fc-bootstrap/fc-bootstrap.exe",
+          "role": "product",
+          "sha256": "74188cbfd799446c9d3b3332a46fddb689dcce362db216a287d0e1110fded1f1",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 2,
+          "subsystemVersion": [
+            6,
+            0
+          ]
+        }
+      ],
+      "productRustcLog": {
+        "matchingActualBinCommands": 0,
+        "win7GuiNoConsoleConflict": "NOT_APPLICABLE; product may be Fresh"
+      },
+      "originalCleanup": "OWNED_BUILD_ROOTS_REMOVED",
+      "runtimeClaim": "CI_COMPILE_ONLY; no Win7/10/11 execution by CI"
+    },
+    {
+      "baseline": "win7",
+      "runId": 41277413277,
+      "jobId": 124762295905,
+      "artifactId": 13072282543,
+      "officialRunJobConclusion": "success",
+      "sourceSha": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+      "zipBytes": 43828778,
+      "zipSha256": "486b96e0b916b1ec51a944205101d55e90fffd1684db756ec75c814e3f22071d",
+      "zipMembers": 232,
+      "ledgerRows": 231,
+      "allZipBytesMatchExpandedOriginals": true,
+      "allProducerLedgerEntriesMatchZip": true,
+      "existingStaticAuditSha256": "1c762c6b983ef7abd6e70b7f1e4c2da6410a7a0d7866898e0e13417363ccc16c",
+      "existingStaticAuditCheckCount": 416,
+      "ciHelperExactGitBlobAndCheckoutTransformBound": true,
+      "crtPhases": [
+        {
+          "phase": "before-vs",
+          "rustflags": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01",
+          "encodedAbsent": true,
+          "rawSha256": "a7a16f342ec2cd0526c3245dbd609326e0d0f5a11a9b62e8b2411f342e68f64c"
+        },
+        {
+          "phase": "after-vs",
+          "rustflags": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01",
+          "encodedAbsent": true,
+          "rawSha256": "745cab7d3166205eac27d63eb4ad0abfcd38712f2c9506f0c89ec76661ea24f3"
+        },
+        {
+          "phase": "before-cargo",
+          "rustflags": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01",
+          "encodedAbsent": true,
+          "rawSha256": "becc46bb342c7fba3c9d08b8ddd573816e40f18d6ec9cf07ec93e1589e6de671"
+        },
+        {
+          "phase": "before-product",
+          "rustflags": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:WINDOWS,6.01",
+          "encodedAbsent": true,
+          "rawSha256": "c852264ad252496dccc3553cbd67a77389310356bcb9ece369f838d03354756e"
+        },
+        {
+          "phase": "after-product",
+          "rustflags": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01",
+          "encodedAbsent": true,
+          "rawSha256": "2b67ee8b9f07ab82e26f3793aaec081d206ef892827384014ed41e41cc77d674"
+        }
+      ],
+      "commands": [
+        {
+          "name": "workspace-test-compile",
+          "budgetSeconds": 2400,
+          "durationSeconds": 827.3737294,
+          "exitCode": 0,
+          "physicalParentExit": true,
+          "passed": true,
+          "rawSha256": "e9f4ac9744caa1d552f2d58b5b8d086152255e16e0d1fa04bbe91b2da2be887b"
+        },
+        {
+          "name": "product-compile",
+          "budgetSeconds": 1200,
+          "durationSeconds": 252.6738302,
+          "exitCode": 0,
+          "physicalParentExit": true,
+          "passed": true,
+          "rawSha256": "99bb338caa3103dc868e77146c050aab8cdfe401d0a4c9c4626e399fc5211ce0"
+        },
+        {
+          "name": "clippy",
+          "budgetSeconds": 1500,
+          "durationSeconds": 68.646038,
+          "exitCode": 0,
+          "physicalParentExit": true,
+          "passed": true,
+          "rawSha256": "71f2bae0258819b81c45500932fdc58e439e73a97e4a5d800b6e599135b7fda2"
+        }
+      ],
+      "headers": [
+        {
+          "relativePath": "tests/fc-materials/fc_materials-27e90f6481865594.exe",
+          "role": "tests",
+          "sha256": "f7f99a391db25cc3181fe3947762642a348a1901cb8d6a27f1bbb4dfe04eb3f8",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/business_storage-9ab94b602a63138a.exe",
+          "role": "tests",
+          "sha256": "f9d5a355dab52bcf75e81b7563154028185224cb63a617026db2807f6875f0b4",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/schedule_operations-a07e2c7c41633cad.exe",
+          "role": "tests",
+          "sha256": "0cfbae81a3188a59f7a33a0bdad8f38247503d6dcefe7973eb02acf6f2e42dc9",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/fc_bootstrap-91b9195dc595ae6a.exe",
+          "role": "tests",
+          "sha256": "8e62945c0349b50a6a0c1ad7ac0735021c5520d807b70fb509b3f14dbb26e9f7",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/autostart_coordinator-66a4d714f5577a8a.exe",
+          "role": "tests",
+          "sha256": "67028cfa1882767725909b3504fe06940165f4db224fc1dd25c4da02ef264eae",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/fc_bootstrap-6b3baf5e1e32f754.exe",
+          "role": "tests",
+          "sha256": "594eba8897d440ca9f66311cca9cb2699a8c3d1082f9447c43a81d60770dbaaf",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/verify_web_assets-7ac500a422c06d1a.exe",
+          "role": "tests",
+          "sha256": "465e717e4a8e31d0d1ccd64fb1719b3f62d245f14fd028ce8467f6b2685c428f",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/runtime_storage-bf961cb76f115c90.exe",
+          "role": "tests",
+          "sha256": "66b3f2d6bbab985bf2d7ae4c8ec36d19a34eaaf661a2a4894ceddd490307c5f1",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/calendar_execution_fence-21b0f4c4743fb589.exe",
+          "role": "tests",
+          "sha256": "edf1c1d0e6a7a546fb9d6a899060fb58bf23afbe64ff0b1ccf0e93b73ff0dbe6",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/voice_storage-785dd80176e1848e.exe",
+          "role": "tests",
+          "sha256": "169b064717521f187f53ed03c6d66dd103a07f3a558083a1c7999f1ae244a75c",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-bootstrap/voice_limits_storage-abed18096ae314db.exe",
+          "role": "tests",
+          "sha256": "2bc3de23ee96ddb9d8473f8941208961690f0599784b1233a35ef1a08c6a487d",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-security/fc_security-3bf217f9b927aa4c.exe",
+          "role": "tests",
+          "sha256": "ec0aca8e9686d3c5b230b1eae3ac10c4fac79a97e9dbe7af432734dc1ce142d6",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-windows/fc_windows-188127b3800ef746.exe",
+          "role": "tests",
+          "sha256": "1a798ebf0b17c44af1edd8c4025817fa82771435bb0a504beee4bda44110b996",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-runtime/fc_runtime-93d068d0c2da548f.exe",
+          "role": "tests",
+          "sha256": "71a5c1022ca5e067e4fec8022db5002d847ef2ffdc71316b93a654c9f654c2b6",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-audio/fc_audio-ccd283b0aa061f9d.exe",
+          "role": "tests",
+          "sha256": "644dcc517391c49367bd33a5703d8d77c949482bf3edbabad2201e71f249f3c5",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-protocol/fc_protocol-46c0f0d76d445238.exe",
+          "role": "tests",
+          "sha256": "b6e6544a2192458207afb5deccf9671cf6028e02aea92edc2bedd0b3df8045ac",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-presentation/fc_presentation-ebc9347ec035f379.exe",
+          "role": "tests",
+          "sha256": "aa3ab1eed2db35073ea53d178fb7f0e735b03978cd828faa509b412ceb08dc0d",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-storage/fc_storage-f6972f806e9d4523.exe",
+          "role": "tests",
+          "sha256": "82523509bace7a990d11a9f202ab4580a67678afc3aec016a1353e839ee4e497",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-application/fc_application-9e82411b268941a8.exe",
+          "role": "tests",
+          "sha256": "ffae212309cb2ba854affefc1df30d68868a1465f03fefcdc3158e7cdc014595",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-ports/fc_ports-7edd2d56c0c9c5d7.exe",
+          "role": "tests",
+          "sha256": "74d1e20e4d6f05cfca660afd9f22bf7ac49dc223bb46e27d3afb34eb246aaba5",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "tests/fc-domain/fc_domain-858bf456d034c981.exe",
+          "role": "tests",
+          "sha256": "5c465dc6dc63cb968ae4592448e06a29ddcbcaa946059f55159b0a6eca92a1d7",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 3,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        },
+        {
+          "relativePath": "product/fc-bootstrap/fc-bootstrap.exe",
+          "role": "product",
+          "sha256": "6cdbe140ae9868aa70e76b6b9b549156612acca287d7acd6326e00a416b2e727",
+          "machine": "0x014c",
+          "optionalMagic": "0x010b",
+          "subsystem": 2,
+          "subsystemVersion": [
+            6,
+            1
+          ]
+        }
+      ],
+      "productRustcLog": {
+        "matchingActualBinCommands": 1,
+        "win7GuiNoConsoleConflict": true
+      },
+      "originalCleanup": "OWNED_BUILD_ROOTS_REMOVED",
+      "runtimeClaim": "CI_COMPILE_ONLY; no Win7/10/11 execution by CI"
+    }
+  ],
+  "modernRuntime": {
+    "reportSha256": "080f00808bab01fb0588d9a0e8f3d717fec1c4e1bd3316464185f7272cfbe55d",
+    "commandReceiptSha256": "c4baa6ddf44126dc7bada6ea912582037ae09c1feed4c129626f6dae49ebdb70",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "status": "PASS",
+    "cleanup": "PASS",
+    "harnesses": 21,
+    "passed": 1494,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 0,
+    "perHarnessTimeoutSeconds": 900,
+    "reportedOriginalTestThreads": 2,
+    "nativeSeconds": 1,
+    "commandExitCode": 0,
+    "commandActualExit": true,
+    "elapsedSeconds": 151.02234795992263,
+    "allUploadedBinaryHashesMatchArtifactProducer": true,
+    "summaries": [
+      {
+        "name": "fc_windows-cd50618b48fb17d8.exe",
+        "binarySha256": "0e9bf6ec70cb530103c3509370a79656fcb69abc6e2b26041fcd08721b177004",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 219 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 25.34s"
+      },
+      {
+        "name": "calendar_execution_fence-90c781596b821bb1.exe",
+        "binarySha256": "4cc4beca3cc0b4ee31e0ac9d2f19d3e8aceb02fcc2634730504572dbbdcad7ab",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.68s"
+      },
+      {
+        "name": "verify_web_assets-875fd155fb56602c.exe",
+        "binarySha256": "607947e5c101cb0b2c2d8176dbd96176b8b341647aac2ec9ad6433257278d4e0",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      },
+      {
+        "name": "voice_storage-2f35be146f47b683.exe",
+        "binarySha256": "57cf5336b5b22c1bcf0f0209bdac7a8d50fe9a3dacd0ee0cd903cb21f84aa1ca",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.70s"
+      },
+      {
+        "name": "fc_bootstrap-f2a1cc65f02b0804.exe",
+        "binarySha256": "629a5b017ed874f5df77a551686e0796264ab914abc9256e9fa44332be343798",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 218 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.22s"
+      },
+      {
+        "name": "autostart_coordinator-4d8ffe50e568cd1d.exe",
+        "binarySha256": "61796a0be75d5cd2e95064a80ed56ca1b7763ea25183ec64ab5bd5e63b2e8e11",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.13s"
+      },
+      {
+        "name": "runtime_storage-be315465b9650302.exe",
+        "binarySha256": "9e953995299b1eccc224ec605c7047eb61198d4d01233182858f76261573da63",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s"
+      },
+      {
+        "name": "business_storage-d7acb8a02f6a164c.exe",
+        "binarySha256": "2dae9a88acc2ee9e7ac8357d3e21f1c6d0f83266707afbfdff469b0643709f80",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.45s"
+      },
+      {
+        "name": "voice_limits_storage-fa38bda5134dfcda.exe",
+        "binarySha256": "72104f1dcb515dfaa7ba8c82144256c8ab1c094e277e9b5a81347b27dd09dc45",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s"
+      },
+      {
+        "name": "schedule_operations-75016802763f2d21.exe",
+        "binarySha256": "1ae5cd35065e7ddf9816be7ea589dd0f7b63fcfe0477cc2dbc19c24dff9b16e4",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.22s"
+      },
+      {
+        "name": "fc_materials-2e428b959a090e75.exe",
+        "binarySha256": "02e42aed0a3027b07aa0742009292e36a84d20b61f4ce65f57357fc5408db73e",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s"
+      },
+      {
+        "name": "fc_security-897ee1bbd038f1a8.exe",
+        "binarySha256": "43cece98f0f0a533baacd9eba4113219718607579b22dbe2abd96e399895089d",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s"
+      },
+      {
+        "name": "fc_bootstrap-1904026c21c0adea.exe",
+        "binarySha256": "626e4f6ed0a237ff5ae1ab6589fa6317e94805fb08370bfd08bbc15480c7f57e",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 339 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 65.65s"
+      },
+      {
+        "name": "fc_presentation-0ebca4673ff953f0.exe",
+        "binarySha256": "8e25d8df8d50e8b28f1847a6d234e366185dbd0ed3e73de59dcca6ddff68a6cc",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+      },
+      {
+        "name": "fc_storage-e351e410d252c84e.exe",
+        "binarySha256": "38d200b4e103589e352e5aaf5ca3220e432498e7ec933fcc570b3cff64650336",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 206 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.62s"
+      },
+      {
+        "name": "fc_runtime-beae710b833bf51a.exe",
+        "binarySha256": "88873bbfa27aa58497da641d72df4a37250320cf0237ff75d9e37a6965a8177c",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s"
+      },
+      {
+        "name": "fc_audio-3b8d060b615f92df.exe",
+        "binarySha256": "2ced564bd712afa83e893e427ca1a2051813272cf148d0970b3f35bed79c9d76",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      },
+      {
+        "name": "fc_protocol-a7cf91af1d25db3b.exe",
+        "binarySha256": "837c548ff38a3fbb133027f6f7714243b3e3c538801f7be6390d3f00b70c7506",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 82 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+      },
+      {
+        "name": "fc_ports-2a65d64830b4e099.exe",
+        "binarySha256": "234a10c9c134753795f82c707cb8acaea6515c318d2ed3b8913c37e069e46e2a",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      },
+      {
+        "name": "fc_application-452d4d2887413f93.exe",
+        "binarySha256": "11eee73b740c6d0192828d6dee77463b3af2cee4f256beadc7a81277aceb52b5",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      },
+      {
+        "name": "fc_domain-7c20761d03caf301.exe",
+        "binarySha256": "52f780a49493413eb7e4026741a8367ac80c9a78cd0c98cf3118a3ff58ea0aa1",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "summary": "test result: ok. 148 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      }
+    ],
+    "flows": [
+      {
+        "flow": "public",
+        "status": "PASS",
+        "steps": 20,
+        "stepNames": [
+          "setup-administrator-fixture",
+          "create-bound-class-and-subjects",
+          "seed-current-lesson",
+          "management-lock-removes-session",
+          "hidden-desktop-rendered",
+          "native-public-button-without-session",
+          "public-catalog-only",
+          "cancel-without-change",
+          "new-native-public-entry",
+          "unassigned-review-without-write",
+          "local-account-lock-keeps-public-flow",
+          "explicit-public-change-closes",
+          "changed-desktop-rendered",
+          "old-scene-entry-rejected",
+          "new-native-restore-entry",
+          "explicit-public-restore-closes",
+          "restored-desktop-rendered",
+          "public-close-hides-chooser",
+          "physical-shared-workers-shutdown",
+          "isolated-deployment-cleanup"
+        ],
+        "cleanup": "PASS",
+        "exeSha256": "74188cbfd799446c9d3b3332a46fddb689dcce362db216a287d0e1110fded1f1",
+        "reportSha256": "768d840cfd025f1839568afacd7c19d33215a2c8dd0e69a683af572d23467e33",
+        "scope": "Synthetic protected deployment, actual hidden desktop button/native business choices/shared workers/SQLite public lesson change and restore with no account session, cancellation/old scene rejection/physical shutdown; independent process reopen NOT_EXERCISED, visible desktop/OS foreground/Seewo and three-system acceptance NOT_RUN"
+      },
+      {
+        "flow": "visual",
+        "status": "PASS",
+        "steps": 22,
+        "stepNames": [
+          "setup-global-admin",
+          "create-subject",
+          "open-joint-display",
+          "loaded-original-rgb",
+          "invalid-rgb-no-write",
+          "native-joint-draft-preview",
+          "lock-keeps-partial-draft",
+          "relogin-restores-draft",
+          "cancel-review-no-write",
+          "cancel-reloads-both",
+          "native-joint-save",
+          "readback-both-saved",
+          "native-palette-draft",
+          "rename-subject-preserves-color",
+          "stale-palette-save-rejected",
+          "cancel-reload-after-conflict",
+          "first-app-physical-shutdown",
+          "second-app-real-reopen",
+          "relogin-reopened-deployment",
+          "reopened-joint-state",
+          "second-app-physical-shutdown",
+          "isolated-deployment-cleanup"
+        ],
+        "cleanup": "PASS",
+        "exeSha256": "74188cbfd799446c9d3b3332a46fddb689dcce362db216a287d0e1110fded1f1",
+        "reportSha256": "97503e0f8375b958f7df3310c14a26759914e8e4628dfc1f20b7785adc5b894e",
+        "scope": "Synthetic protected deployment, actual hidden native controls/original shared workers/SQLite joint palette-display save, cancel, lock/nonsecret draft, stale palette rejection, rename colour preservation and independent app reopen; real synthetic hidden D2D only, visible colour dialog/foreground/Seewo and three-system acceptance NOT_RUN"
+      }
+    ]
+  },
+  "win7CandidateRuntime": "NOT_REVIEWED_IN_THIS_RECEIPT; root serial runtime separate and not inferred from static success",
+  "limitations": [
+    "Both successful CI runs establish compilation/static payload checks only.",
+    "Modern runtime is actual authorized Win11 WOW64 and hidden native public/visual flows; no Win7/Win10 OS or visible Seewo acceptance inferred.",
+    "Win7 candidate PE32 subsystem6.1 and rebuilt std/test do not establish actual Win7 APIs/SDK/CRT/runtime compatibility.",
+    "No complete MSI owner, production installer/login/reboot/upgrade/uninstall or three-system qualification inferred.",
+    "Exact CI source predates later R63 owner/startup candidates; this evidence does not validate those later revisions."
+  ],
+  "issues": []
+}

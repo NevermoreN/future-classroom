@@ -1,0 +1,23 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "-p",
+    "fc-windows",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "cwd": "/tmp/fc-round65-header-expiry/worktree",
+  "originalPid": 16536,
+  "startedUtc": "2026-11-01T06:26:06.065651+00:00",
+  "budgetSeconds": 900,
+  "environmentOverrides": {
+    "CARGO_TARGET_DIR": "/tmp/fc-round65-header-expiry/target",
+    "CARGO_BUILD_JOBS": "2"
+  },
+  "runnerSha256": "d336405937d848de91b1d143d2d46149df7a1bb584989257cf0b4653e87357a0"
+}

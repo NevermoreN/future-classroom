@@ -1,0 +1,19 @@
+{
+  "status": "STARTED_NOT_VALIDATED",
+  "utc": "2026-11-01T05:34:07.5446982Z",
+  "expected_source_sha": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "dispatch_source_sha": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "workflow_sha": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "target": "i686-win7-windows-msvc",
+  "toolchain": "nightly-2026-10-29-x86_64-pc-windows-msvc",
+  "rustflags": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01",
+  "product_rustflags": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:WINDOWS,6.01",
+  "rustflags_scope": "Workspace test/clippy default; product-compile uses product_rustflags only and restores the original flags.",
+  "baseline": "Win7",
+  "role": "win7-msvc-candidate-compilation-only",
+  "tests": "COMPILE_ONLY_NO_RUN",
+  "windows7": "NOT_RUN",
+  "windows10": "NOT_RUN",
+  "windows11": "NOT_RUN",
+  "seewo_device": "NOT_RUN"
+}

@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "-p",
+    "fc-bootstrap",
+    "--bin",
+    "fc-bootstrap",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--message-format=json"
+  ],
+  "cwd": "/tmp/fc-round63-installer-owner/worktree",
+  "sourceFreezeSha256": "cde114207fff867d6441ba4e49856b1f8310f011d0f00b262bee73f1976c03ad",
+  "originalBudgetSeconds": 900,
+  "startedUtc": "2026-11-01T06:51:58.802266+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 0.5673823631368577,
+  "stdoutBytes": 83662,
+  "stdoutSha256": "e066571fcf048136472d9b61458a79fe226e2539da84fb9e876320fa69ec27de",
+  "stderrBytes": 62,
+  "stderrSha256": "a40c1884a95654da1e9ce0b9042cc3b906a7c879f74bfc6527def185ef03cdb2",
+  "sourceUnchanged": true
+}

@@ -1,0 +1,552 @@
+{
+  "scope": "Static #[test] function declarations in fc-windows/src; not actual harness --list or execution",
+  "count": 224,
+  "pattern": "#\\[test\\]\\s*(?:#\\[[^\\n]+\\]\\s*)*fn\\s+(\\w+)",
+  "files": [
+    {
+      "path": "audio/capability/tests.rs",
+      "bytes": 1675,
+      "sha256": "1be92d2249b90f0ed2682a6addd7901e7ffe8afffd2e424c061cc3dbf26eac73",
+      "count": 3,
+      "names": [
+        "query_uses_only_mapper_query_and_exact_playback_pcm",
+        "query_distinguishes_unsupported_format_from_unavailable_output",
+        "query_preserves_real_driver_and_resource_failures"
+      ]
+    },
+    {
+      "path": "audio/device.rs",
+      "bytes": 17554,
+      "sha256": "2493638ceb2f5f7ea5921f40d753d95650355528b255b331a66ab0ba7b5c382f",
+      "count": 1,
+      "names": [
+        "endpoint_changes_ignore_capture_other_roles_and_unrelated_usb"
+      ]
+    },
+    {
+      "path": "audio/tests.rs",
+      "bytes": 11081,
+      "sha256": "f53505d3b96c3b9a38a93fe4dd78a318ca91a5d6909214e0adb1fa7482db07e2",
+      "count": 8,
+      "names": [
+        "not_run_device_classification_does_not_hide_unexpected_driver_errors",
+        "deferred_start_has_no_native_submission_and_resumes_same_source_once",
+        "deferral_after_prepare_preserves_ready_block_order_and_never_counts_done_early",
+        "stream_reuses_three_fixed_addresses_and_releases_before_natural_completion",
+        "reset_done_releases_without_counting_natural_and_stale_stop_cannot_cancel",
+        "late_return_and_stillplaying_keep_allocations_and_admission_closed",
+        "failed_reset_even_when_all_buffers_return_releases_safely_but_forbids_reopening",
+        "revoked_authority_and_failed_write_use_cleanup_without_a_natural_event"
+      ]
+    },
+    {
+      "path": "calendar_download.rs",
+      "bytes": 16941,
+      "sha256": "9815d5c2af1a59a3c0ea587eafd09769a88ffbbe973337816adbc9156ca76410",
+      "count": 3,
+      "names": [
+        "validators_are_bounded_ascii_and_never_header_injection",
+        "response_bounds_and_status_do_not_accept_redirect_or_uncached_304",
+        "cancellation_panics_fail_closed_and_busy_never_releases_physical_owner"
+      ]
+    },
+    {
+      "path": "com_task/tests.rs",
+      "bytes": 10090,
+      "sha256": "0af7b676ba1b65ac2c38cc5de155a597677a99142d6f2e87538444e67a1278c8",
+      "count": 8,
+      "names": [
+        "task_memory_real_system_ole32_allocate_free_and_null",
+        "task_memory_missing_export_rejects_before_any_task_allocation",
+        "task_memory_allocator_module_and_capability_remain_process_pinned",
+        "task_memory_real_wow64_path_uses_the_matching_system_directory",
+        "task_memory_path_check_rejects_wrong_folder_prefix_and_module",
+        "task_memory_system_path_uses_windows_unicode_case_rules",
+        "task_memory_current_device_mapping_binds_exact_mapped_image_not_loader_spelling",
+        "task_memory_device_mapping_metadata_is_bounded_and_fail_closed"
+      ]
+    },
+    {
+      "path": "desktop/card_body_tests.rs",
+      "bytes": 18721,
+      "sha256": "06a71bfec683c25cb3192c1ceda63db0080ef654b583c17641fa3406428fe917",
+      "count": 4,
+      "names": [
+        "shared_body_materials_actual_compositor_one_page_with_gaps_rows_note_and_full_more_target",
+        "shared_body_homework_labels_and_text_use_actual_width_full_utf16_and_page_line_coverage",
+        "shared_body_course_unverified_subtitle_reserves_real_header_and_complete_capsule_padding",
+        "shared_body_text_over_fifty_pages_and_full_sixty_four_homework_rows_keep_existing_bounds"
+      ]
+    },
+    {
+      "path": "desktop/content_tests.rs",
+      "bytes": 13108,
+      "sha256": "061e629d992db8fa57c907e6c0f20ff28a0efbcb3b38d715b2354ac857440992",
+      "count": 4,
+      "names": [
+        "premultiplied_blend_scales_without_touching_padding_or_double_alpha",
+        "scoped_requests_reject_owner_revision_and_tree_aliases",
+        "actual_hidden_two_text_nodes_page_only_the_exact_scoped_node",
+        "actual_hidden_image_waits_for_verified_frame_pages_by_metadata_and_retains_physical_owner"
+      ]
+    },
+    {
+      "path": "desktop/public_inputs_tests.rs",
+      "bytes": 4499,
+      "sha256": "4617d71ac4ee1910bdc2bb3daef16ac4a5aa335692c59e885539832e83b3d1bc",
+      "count": 2,
+      "names": [
+        "passive_facts_have_no_flat_input_or_queued_page_route_but_lesson_control_does",
+        "passive_overflow_is_explicit_capacity_error_after_complete_measurement"
+      ]
+    },
+    {
+      "path": "desktop/tree.rs",
+      "bytes": 72080,
+      "sha256": "1b78d293546f3cf289a3d6ead8c9e21c11c3b85db3b25be6f817164f63087c1c",
+      "count": 10,
+      "names": [
+        "empty_transparent_model_group_remains_selectable_metadata_without_a_surface",
+        "resident_and_preview_renderers_share_class_registration_until_last_owner",
+        "true_subtree_group_has_single_alpha_in_overlap_and_no_leaf_hwnds",
+        "native_tree_page_is_bound_to_exact_node_when_component_kind_repeats",
+        "native_clock_tick_changes_only_owned_patch_without_remeasuring_tree",
+        "combined_root_cache_and_simultaneous_scratch_are_rejected_at_original_budget",
+        "native_homework_title_and_body_share_one_leaf_and_real_pages",
+        "passive_tree_facts_never_aggregate_input_or_route_paging",
+        "material_visible_rows_and_row_gap_are_actual_native_pagination_constraints",
+        "four_k_recess_partitions_native_background_holes_and_combines_alpha_once"
+      ]
+    },
+    {
+      "path": "desktop.rs",
+      "bytes": 122219,
+      "sha256": "7766d77c5d9c99cf30f64fa8f3ef99f888210d6c08c81ab274fbd07f75759667",
+      "count": 8,
+      "names": [
+        "real_com_dib_text_pages_and_three_clocks_remain_offscreen",
+        "stale_gate_generation_revision_expired_date_and_alpha_zero_never_draw",
+        "native_readonly_buttons_turn_local_pages_then_request_bounded_homework_batches",
+        "one_hundred_real_scene_rebuilds_release_handles_and_denied_ticks_do_zero_work",
+        "full_1080p_and_4k_recess_regions_preserve_alpha_with_bounded_dibs",
+        "filename_hit_rectangles_bind_source_and_resource_versions_and_reject_stale_actions",
+        "long_filename_pages_preserve_extension_and_only_visible_text_accepts_input",
+        "lesson_control_uses_only_its_button_and_cancels_old_scene_input"
+      ]
+    },
+    {
+      "path": "host.rs",
+      "bytes": 27286,
+      "sha256": "a5d36c298a7ab7bfbaa8f8874880ee5ad305beae8d4afc44e08815cf2f14932a",
+      "count": 2,
+      "names": [
+        "hidden_top_level_routes_events_and_control_stops_without_queue",
+        "foreground_dispatch_revokes_external_before_main_pump_but_not_own_chooser"
+      ]
+    },
+    {
+      "path": "http/lifecycle.rs",
+      "bytes": 8016,
+      "sha256": "4276583752383129f79a6e91c420fc73058595648a5d7c50cc25b86fbe11dc28",
+      "count": 6,
+      "names": [
+        "sync_success_and_pending_keep_ownership_until_one_completion",
+        "cancellation_ack_never_releases_the_original_io",
+        "closing_generation_cannot_publish_into_new_cycle_or_reuse_slot_early",
+        "both_accepted_return_codes_wait_but_inline_failure_withdraws_without_packet",
+        "original_completion_before_cancel_ack_also_retains_the_slot",
+        "fixed_eight_slots_bound_all_admission"
+      ]
+    },
+    {
+      "path": "http/native.rs",
+      "bytes": 56782,
+      "sha256": "e1461aa0eddd1b8f3fbbf6cedd90e4f5f747b1b6a94d6a035a098f94f86c93f4",
+      "count": 6,
+      "names": [
+        "invalid_function_requires_exact_synchronously_confirmed_disconnection",
+        "rejected_body_and_rejected_cancel_vacate_only_their_own_records",
+        "captured_completion_hresult_is_decoded_without_thread_last_error",
+        "fixed_header_is_aligned_and_pointer_tables_cannot_escape_allocation",
+        "raw_target_and_ssl_pointer_are_range_checked_before_use",
+        "native_slack_does_not_expand_wire_header_budget"
+      ]
+    },
+    {
+      "path": "materials/chooser/backup_destination_tests.rs",
+      "bytes": 8497,
+      "sha256": "8d88f2213f6780aa7d453c15519ed71098f3c3c5df303b4a9f18c31261262d66",
+      "count": 7,
+      "names": [
+        "cng_sha256_matches_known_vector_and_copy_uses_actual_bytes",
+        "copy_cancellation_and_late_cancel_delete_only_the_owned_inode",
+        "existing_and_racing_destinations_are_never_overwritten",
+        "source_pin_denies_mutation_and_bad_hash_or_tail_has_no_published_output",
+        "destination_reparse_directory_is_rejected_before_any_copy",
+        "diagnostic_destinations_require_the_isolated_marker_and_safe_backup_name",
+        "destination_constructor_rejects_undisplayable_complete_paths_before_io"
+      ]
+    },
+    {
+      "path": "materials/chooser/validation.rs",
+      "bytes": 7307,
+      "sha256": "55ee9a03818c84075855022e3f17bd2e2adf44f190c5baa5347d8903f7b331ad",
+      "count": 4,
+      "names": [
+        "complete_display_paths_preserve_chinese_and_emoji_but_reject_bidi_and_controls",
+        "backup_names_reject_devices_ads_navigation_and_wrong_extensions",
+        "short_writes_hash_exactly_the_written_bytes",
+        "cancellation_lengths_truncation_and_trailing_bytes_are_rejected"
+      ]
+    },
+    {
+      "path": "materials/files.rs",
+      "bytes": 34678,
+      "sha256": "35773416bdb8ffed37b49a4436db3b52531c3c020ebb340e3239bdbd12d71c51",
+      "count": 2,
+      "names": [
+        "private_file_publish_cancel_mapping_and_exclusive_cleanup",
+        "native_file_capabilities_reject_aliases_and_oversized_enumeration"
+      ]
+    },
+    {
+      "path": "materials/image_admission_tests.rs",
+      "bytes": 9835,
+      "sha256": "de890369e02798faa6d8fc4d0aa2947f85140af897f24b1426faf6907d2c05d2",
+      "count": 4,
+      "names": [
+        "waiting_validation_cancels_without_decoder_or_early_owner_release",
+        "admission_original_deadline_and_post_acquire_cancel_precede_wic",
+        "legal_validation_waits_for_physical_owner_then_full_wic_completes",
+        "raster_same_gate_cancel_charges_no_pixels_and_retry_decodes_after_release"
+      ]
+    },
+    {
+      "path": "materials/raster_tests.rs",
+      "bytes": 9800,
+      "sha256": "6748da1b9eda908d267130748fa22ab33ae7eef301a7a48d0fd460c2bef6f3c2",
+      "count": 5,
+      "names": [
+        "containment_handles_extreme_aspects_without_overflow_crop_or_enlargement",
+        "physical_frame_keeps_budget_after_cache_clear_until_final_arc_drops",
+        "concurrent_reservations_cannot_oversubscribe_or_return_each_others_bytes",
+        "real_wic_decodes_same_pinned_bmp_after_hash_eof_and_keeps_node_identity",
+        "verification_metadata_and_cancellation_fail_without_leaking_decode_reservations"
+      ]
+    },
+    {
+      "path": "materials/shell.rs",
+      "bytes": 39020,
+      "sha256": "544593201e8dcea50273686cb8c67b98500d6b4310fac4c1c999fe38d26b6f6e",
+      "count": 7,
+      "names": [
+        "sta_queue_results_and_shutdown_stay_bounded_and_private_association_is_removed",
+        "stale_scope_expiry_and_memory_guard_cancel_before_any_native_open",
+        "recheck_panic_faults_gate_and_production_owner_cannot_open_from_noninteractive_session",
+        "lazy_sta_retires_and_restarts_without_losing_a_queued_request",
+        "logical_finish_and_rust_packet_do_not_hide_a_held_tls_destructor",
+        "native_reap_keeps_unconsumed_results_and_blocks_replacement_until_consumed",
+        "outer_thread_panic_is_sticky_and_stops_new_admission_after_reap"
+      ]
+    },
+    {
+      "path": "startup.rs",
+      "bytes": 4998,
+      "sha256": "2acedef923e5d4a6a5269ef082f7a230928fa9f11a8b9c5f69c6b671614a3903",
+      "count": 4,
+      "names": [
+        "startup_message_preserves_chinese_and_supplementary_characters",
+        "startup_message_does_not_hide_text_after_embedded_nul",
+        "startup_message_exact_bound_is_preserved_and_overflow_is_marked",
+        "startup_message_truncation_never_exposes_a_partial_surrogate_pair"
+      ]
+    },
+    {
+      "path": "system/autorun_tests.rs",
+      "bytes": 11794,
+      "sha256": "e1d9443f560dfc8fda6f8e8c4c6319d9037c7184fc7343ed2f3fa8a24ce5bb70",
+      "count": 15,
+      "names": [
+        "quoted_absolute_command_and_isolated_registry_roundtrip",
+        "generated_scope_can_open_new_worker_without_moving_a_registry_handle",
+        "production_scope_cleanup_is_refused",
+        "native_wrong_type_and_oversize_values_are_opaque_and_preserved",
+        "registry_decoder_rejects_exact_untrusted_string_bytes_without_normalizing",
+        "moved_executable_requires_reviewed_exact_preimage",
+        "cancellation_before_write_preserves_observed_value",
+        "cancellation_after_write_reports_actual_state_without_rollback",
+        "external_change_before_compare_is_not_overwritten",
+        "external_change_after_write_reports_mismatch_without_compensating_write",
+        "command_validation_rejects_ambiguous_and_overlength_targets",
+        "access_denial_has_specific_failure_without_leaking_os_error_text",
+        "unavailable_preimage_never_requests_a_write_guard",
+        "explicit_scratch_cleanup_is_idempotent_after_workers_return",
+        "applying_fixed_project_value_preserves_other_values_in_the_same_key"
+      ]
+    },
+    {
+      "path": "system/clock.rs",
+      "bytes": 1922,
+      "sha256": "5c8210c364c2b5a588168be4c88e377ee90b7f568d66127b4fd80be46814b9ca",
+      "count": 1,
+      "names": [
+        "native_current_clock_provides_valid_civil_and_monotonic_times"
+      ]
+    },
+    {
+      "path": "system/crypto.rs",
+      "bytes": 5248,
+      "sha256": "90506fa8133b7d6701f34618e5286a61a33bbbce8bb6b1edc99c7766ba771038",
+      "count": 1,
+      "names": [
+        "current_user_dpapi_roundtrip_tamper_and_bounds"
+      ]
+    },
+    {
+      "path": "system/mod.rs",
+      "bytes": 2775,
+      "sha256": "975cfa67604d69c3cf06640c1026d0390ce88befcf505599a2a0585b44cdf14b",
+      "count": 1,
+      "names": [
+        "native_thread_cpu_clock_is_monotonic"
+      ]
+    },
+    {
+      "path": "system/paths.rs",
+      "bytes": 23275,
+      "sha256": "15a43c6e75caf7de62c1bdc6e136f631470088b1907e3c33a5f76bccafdf434e",
+      "count": 1,
+      "names": [
+        "isolated_deployment_acl_and_cross_handle_exclusion"
+      ]
+    },
+    {
+      "path": "tcp_frontdoor/mod.rs",
+      "bytes": 3090,
+      "sha256": "5b7e4c6161de82a7071c595d706676e56a42f99f9dfa1ec13150d61f8269da0f",
+      "count": 2,
+      "names": [
+        "bytes_do_not_renew_absolute_deadline",
+        "split_terminator_and_exact_bound_are_checked"
+      ]
+    },
+    {
+      "path": "tcp_frontdoor/native.rs",
+      "bytes": 22123,
+      "sha256": "46482bcdf75080c401cd006cc43960ab24e95f6db472b9f3f71ceabf7ed27cf3",
+      "count": 1,
+      "names": [
+        "native_finite_admission_deadline_and_drain"
+      ]
+    },
+    {
+      "path": "tls_frontdoor/certificate_query/flight.rs",
+      "bytes": 6238,
+      "sha256": "2efa101d4cb2dffc01998e1232af7deea7cc9a766ada52126cfcea1d139666e4",
+      "count": 4,
+      "names": [
+        "certificate_query_flight_is_busy_until_explicit_physical_release",
+        "certificate_query_failed_owner_is_retained_and_fault_is_permanent",
+        "certificate_query_poison_preserves_original_retained_owner_and_rejects_claim",
+        "certificate_query_unfinished_claim_cannot_silently_publish_idle"
+      ]
+    },
+    {
+      "path": "tls_frontdoor/certificate_query/tests.rs",
+      "bytes": 11067,
+      "sha256": "9bb1aced8d7ea605f0f58375ba546532ce36a731e3d29434357d3a2843c90bba",
+      "count": 12,
+      "names": [
+        "certificate_query_rejects_noncanonical_or_unbounded_input_before_native_work",
+        "certificate_query_delivers_only_after_original_driver_cleanup_and_keeps_scope",
+        "certificate_query_missing_or_failed_lookup_never_inspects_another_certificate",
+        "certificate_query_policy_true_with_error_is_not_policy_or_name_success",
+        "certificate_query_api_failure_cannot_be_treated_like_zero_policy_status",
+        "certificate_query_ip_and_ipv6_name_stay_unverified_even_with_zero_policy_error",
+        "certificate_query_cached_revocation_unknown_and_revoked_remain_distinct",
+        "certificate_query_incomplete_chain_never_promises_cached_revocation_success",
+        "certificate_query_independent_negative_facts_are_retained_without_skipping_cleanup",
+        "certificate_query_cancellation_at_each_checkpoint_closes_exact_original_driver",
+        "certificate_query_panicking_authority_is_cancelled_and_still_closes",
+        "certificate_query_release_failure_overrides_success_cancel_and_missing_certificate"
+      ]
+    },
+    {
+      "path": "tls_frontdoor/credentials.rs",
+      "bytes": 8515,
+      "sha256": "acc08d0566f68f6e3b2e8aac04ac6eb307f4218a1a049377fc7d955cfa196f09",
+      "count": 1,
+      "names": [
+        "certificate_query_empty_eku_preserves_unrestricted_empty_and_unknown_distinction"
+      ]
+    },
+    {
+      "path": "tls_frontdoor/http_date/tests.rs",
+      "bytes": 8630,
+      "sha256": "1863fade872c52f70be42821ea8b1f888d38274dc03ad49f523bc1ac671181d4",
+      "count": 7,
+      "names": [
+        "imf_fixdate_is_fixed_english_utc_with_verified_weekday_and_leap_days",
+        "invalid_windows_utc_structures_are_rejected_without_fabricating_a_date",
+        "all_native_response_status_classes_get_one_date_in_the_frozen_head",
+        "caller_date_is_rejected_case_insensitively_instead_of_preserved_or_duplicated",
+        "head_date_uses_the_same_validation_and_budget_without_cl_or_logical_body",
+        "generated_date_counts_towards_the_original_header_byte_and_field_limits",
+        "native_get_system_time_produces_one_valid_utc_date_without_local_clock_conversion"
+      ]
+    },
+    {
+      "path": "tls_frontdoor/mod.rs",
+      "bytes": 10221,
+      "sha256": "2ac2e9b3cea4d6f6ef8aaa329398f93abca4b5ed3fa9707efde978010dde0174",
+      "count": 2,
+      "names": [
+        "diagnostic_marker_cannot_inject_http_or_control_output",
+        "certificate_identity_is_exact_ascii_hex_without_aliases"
+      ]
+    },
+    {
+      "path": "tls_frontdoor/native/stream/tests.rs",
+      "bytes": 86068,
+      "sha256": "a90522e846547705c8b6e64b4a7c5b0fce0f80f4d8b6119ca0e016f869339178",
+      "count": 37,
+      "names": [
+        "real_iocp_fake_records_keep_head_tail_and_pause_until_exact_body_ack_then_send_all_records",
+        "real_iocp_fake_records_zero_body_extra_pipeline_and_early_eof_never_become_ready",
+        "real_iocp_fake_records_deadline_is_absolute_and_closed_event_precedes_retirement_reuse",
+        "header_completion_transfers_one_absolute_budget_and_admission_only_tightens_it",
+        "a_head_completed_at_or_after_the_original_header_deadline_never_starts_a_request",
+        "real_iocp_complete_head_ends_header_budget_before_body_admission_and_keeps_one_start",
+        "real_iocp_wait_past_original_post_header_deadline_then_admit_without_renewing_request",
+        "real_iocp_unadmitted_request_expiry_discards_a_queued_head_and_cannot_be_renewed",
+        "real_iocp_late_decrypt_cannot_publish_a_head_or_release_its_slot_before_actual_return",
+        "real_iocp_response_fence_rejects_false_or_panicking_guard_before_response_admission",
+        "real_iocp_response_fence_rechecks_after_sspi_before_first_and_next_record_send",
+        "real_iocp_response_fence_rejects_next_chunk_after_physical_header_ack",
+        "real_iocp_response_fence_allows_complete_response_and_does_not_gate_close_notify",
+        "real_iocp_head_errors_send_only_date_headers_and_wait_for_actual_header_ack",
+        "real_iocp_head_marker_clears_on_exact_slot_reuse_so_get_keeps_its_body",
+        "real_iocp_head_does_not_bypass_a_revoked_response_fence",
+        "ready_business_slots_have_no_native_operation_or_active_header_clock",
+        "real_iocp_bare_handoff_near_original_post_deadline_never_gets_handoff_plus_five",
+        "real_iocp_expired_queued_accept_is_discarded_before_any_business_handoff",
+        "real_iocp_idle_bare_cancel_keeps_debt_until_packet_then_reposts_same_memory",
+        "real_iocp_four_busy_business_requests_reject_excess_without_touching_old_requests",
+        "real_iocp_stop_after_actual_success_packet_does_not_handoff_or_repost",
+        "real_iocp_accept_cannot_steal_held_frame_or_unconsumed_retired_business_slots",
+        "real_iocp_expired_idle_post_snapshot_counts_request_and_actual_return_separately",
+        "bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child",
+        "header_negative_alarm_is_distinct_from_hard_deadline_and_never_shortens_request_stage",
+        "real_iocp_early_header_close_reports_socket_return_without_discharge_of_receive_debt",
+        "real_iocp_bare_alarm_preserves_original_deadline_and_requires_actual_packet_before_repost",
+        "real_iocp_header_alarm_keeps_a_held_decrypt_frame_and_suppresses_its_late_head",
+        "real_iocp_first_header_reserve_keeps_original_five_second_wire_sample_strict",
+        "abortive_option_failure_preserves_original_socket_and_faults_replacement_in_child",
+        "real_iocp_queued_accept_after_negative_alarm_is_rejected_without_new_hard_deadline",
+        "real_bare_post_charges_preparation_against_one_captured_origin",
+        "real_bare_expired_preparation_closes_socket_without_posting_io",
+        "real_bare_late_native_return_retains_charged_io_until_original_packet",
+        "real_iocp_batch_services_due_receive_before_another_top_level_poll",
+        "caller_deadline_service_keeps_original_head_request_budget_and_admission"
+      ]
+    },
+    {
+      "path": "tls_frontdoor/native/tests.rs",
+      "bytes": 15822,
+      "sha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197",
+      "count": 3,
+      "names": [
+        "native_socket_close_keeps_held_frame_until_real_late_completion_and_reap",
+        "response_and_shutdown_io_finish_before_exact_retirement_can_release_slot",
+        "held_driver_drain_timeout_retains_native_owner_in_independent_process"
+      ]
+    },
+    {
+      "path": "tls_frontdoor/schannel.rs",
+      "bytes": 30063,
+      "sha256": "800c898e9b7d11eb9823dca075d6ebe2e8bc99dee0f6606d2ace334f9a3a9936",
+      "count": 5,
+      "names": [
+        "native_ranges_and_extra_never_accept_outside_or_nonprogressing_buffers",
+        "decrypted_record_keeps_extra_when_trailer_views_the_original_remainder",
+        "exact_empty_context_retirement_cannot_be_forged_and_wipes_connection_data",
+        "error_cleanup_preserves_exact_owner_until_retire_ack",
+        "shutdown_returns_only_bounded_owned_token_and_explicit_completion_status"
+      ]
+    },
+    {
+      "path": "tls_frontdoor/worker/tests.rs",
+      "bytes": 29379,
+      "sha256": "e4586ba49a6e308528c1a9c5f1b35e7f7ba204c866f13e218ab2e2faea8bf7fa",
+      "count": 13,
+      "names": [
+        "initialization_is_owned_nonblocking_and_stop_cannot_destroy_held_factory",
+        "readiness_must_be_collected_and_initialization_failure_keeps_its_error",
+        "four_linear_permits_survive_stop_until_real_call_and_collection",
+        "stale_generation_and_serial_cannot_rebind_an_existing_slot",
+        "native_driver_is_constructed_on_worker_and_need_not_implement_send",
+        "panic_returns_linear_frame_and_requires_actual_reap",
+        "dropping_live_owner_quarantines_every_capability_until_physical_exit",
+        "native_reap_keeps_uncollected_results_and_the_single_admission_lease",
+        "rust_packet_completion_does_not_reap_a_held_windows_tls_destructor",
+        "checked_close_error_blocks_replacement_in_an_independent_process",
+        "shutdown_and_retire_require_exact_live_token_and_retire_collection_before_reuse",
+        "held_real_retire_call_never_releases_permit_before_result_is_collected",
+        "queued_exact_retire_on_stop_returns_stopped_without_retiring_or_releasing_owner"
+      ]
+    },
+    {
+      "path": "workbench/color_picker.rs",
+      "bytes": 2584,
+      "sha256": "adc8bc74563437c2bb332beb678b3ced880926644b26ab40700e402582e95568",
+      "count": 1,
+      "names": [
+        "opaque_rgb_colorref_roundtrip_has_no_alpha_or_byte_order_swap"
+      ]
+    },
+    {
+      "path": "workbench/empty_action_tests.rs",
+      "bytes": 8599,
+      "sha256": "36da326c232e39367fdd9cffd8db28855a576a58bb8f380c64314c7f61f1fd9e",
+      "count": 3,
+      "names": [
+        "empty_action_preserves_native_drafts_confirmation_and_prior_forms",
+        "empty_action_registration_is_immutable_and_disjoint_from_lock",
+        "empty_action_rejects_nonempty_disabled_busy_missing_and_spoofed_commands"
+      ]
+    },
+    {
+      "path": "workbench/preview.rs",
+      "bytes": 28564,
+      "sha256": "d8d025b073f5800eda344b4615b22e74e550b4675500135ffe651da67f40dc7b",
+      "count": 3,
+      "names": [
+        "native_layout_preview_opaque_checker_select_drag_reorder_and_hidden_capture_is_untouched",
+        "native_layout_preview_replacement_busy_clip_scope_and_lock_reject_stale_gestures",
+        "native_layout_preview_strict_capacity_generations_and_owned_child_cleanup"
+      ]
+    },
+    {
+      "path": "workbench.rs",
+      "bytes": 103584,
+      "sha256": "ce110ee14e557f8af2041dda163e3ad356ee64f16098e83bae07257dd53c9d9f",
+      "count": 13,
+      "names": [
+        "hidden_multiline_edit_preserves_10000_astral_scalars_without_truncation",
+        "registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields",
+        "lock_requires_registration_enabled_current_view_and_exact_native_binding",
+        "hidden_probe_edit_preserves_half_date_through_empty_lock_and_refuses_secret_or_busy_fields",
+        "hidden_native_form_preserves_drafts_masks_and_consumes_password_without_activation",
+        "busy_and_disabled_actions_refuse_commands_and_close_wipes_revealed_secret",
+        "hidden_events_are_bounded_and_invalid_native_text_is_never_truncated_into_a_form",
+        "repeated_hidden_render_and_submit_do_not_accumulate_native_resources",
+        "isolated_probe_submission_uses_real_controls_and_refuses_invalid_forms_before_changes",
+        "native_timetable_grid_and_combo_use_bounded_stable_selections",
+        "native_numeric_time_mask_preserves_punctuation_segment_edits_and_partial_drafts",
+        "repeated_grid_paint_and_dynamic_choice_mask_rebuilds_release_native_resources",
+        "foreground_policy_accepts_only_observed_own_process_and_rejects_unknown_or_external"
+      ]
+    }
+  ],
+  "actualTestExecution": "NOT_RUN"
+}

@@ -1,0 +1,20 @@
+{
+  "status": "PASS_COMPILE_ONLY",
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "-p",
+    "fc-windows",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "sourceFreezeSha256": "2d16ea408f8d224df8d7e557231ed2b094e6450d13ac4e8cffd145e09f233136",
+  "scope": "Third frozen candidate GNU Windows compile only",
+  "exitCode": 0,
+  "elapsedSeconds": 4.62993772001937,
+  "stdoutSha256": "e22eaabcafa946e8d33028784e65f626357bf37ec78d527e7dd17f093498067f",
+  "stderrSha256": "41fa930264c82cf4a12e23d0ea92f6fde78287f4fb1b51bb193e1e71f77d0f7c"
+}

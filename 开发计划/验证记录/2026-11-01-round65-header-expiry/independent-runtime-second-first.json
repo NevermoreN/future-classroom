@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_INDEPENDENT_R65_SECOND_ADAPTER_RUNTIME_REVIEW",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T06:46:44.458870+00:00",
+  "scope": "Only read local terminal R65 second source/compile/runtime originals and current exact test EXE. Reviewer did not edit source, run Cargo, Windows, SSH, CI or network. Writes only this receipt and digest under active R65 evidence; no R63/R64 archive writes.",
+  "secondFreezeSha256": "9453cc51b82c0ccc9f8bbb1ab17ee4bfd4ce66c2ce0070234899d5ac26d9c4a5",
+  "firstFreezeSha256": "4fb7c4d38ad99e66da3f5949fe590af7c055eb01365c905f5e4bc1c6af2c08a3",
+  "productionFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "sha256": "42feacea1410c3968734c9bc39d9c09c7c647095afeb29a9dba18800a335491f",
+      "sameAsFirstProduction": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "sha256": "e6a4938e8c096ac509a03e75345b847cedda795aa7cb2ef1d6524a2efdc964fd",
+      "sameAsFirstProduction": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "sha256": "a7cbaf2a17af2f01280871f9b46c404430e1ef63e79293b18a476ce8452dd80b",
+      "sameAsFirstProduction": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "sha256": "48fcff62625fdda506d6a4d6039b67190fea951e3b991bb3f880fb640274a783",
+      "sameAsFirstProduction": true
+    }
+  ],
+  "testOnlyRepair": {
+    "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+    "beforeSha256": "a90522e846547705c8b6e64b4a7c5b0fce0f80f4d8b6119ca0e016f869339178",
+    "afterSha256": "5c7a68b887f572ee511ce9db2be017e7d97c727d22c9f4e3e97ef4d92fef74d1",
+    "patchSha256": "ed754e6dbfd6ea6cc6ad7aa7df4419c0de8239774d33f8173bcf1e7ca8b9bd53",
+    "changedTest": "real_iocp_queued_accept_after_negative_alarm_is_rejected_without_new_hard_deadline",
+    "reviewedMechanism": "Existing test wanted a queued successful AcceptEx packet handled before an earlier alarm service, while new poll_io intentionally expires first. Second test directly dequeues a real IOCP completion with unchanged3s budget, asserts GetQueuedCompletionStatus success, original OVERLAPPED pointer, key1, original pending serial and dispatches that same real packet once through unchanged complete_bare_accept. It does not fabricate a packet or relax expiry.",
+    "originalOrderingDeadlineResourceAssertionsSuffixByteIdentical": true,
+    "retainedAssertions": [
+      "same serial/hard deadline/alarm+25ms",
+      "completion_returned_at<=negative close began",
+      "socket close began>=negative close began and returned>=close began",
+      "no transfer/handshake, same four Ready slots",
+      "exactly one new post, pending<=5/sockets<=6",
+      "actual client rejection then physical fixture stop"
+    ],
+    "addedAssertion": "accept_expired_discards exactly1",
+    "interpretation": "Repairs the old fixture precondition to isolate late-completion rejection independently of new early-expiry stage. No production code/clock/budget/auth logic changes since first freeze."
+  },
+  "compile": {
+    "receiptSha256": "167bdfa63e76558513109789343864fb52bbaed192794bc099367ce4fe8d9a9d",
+    "status": "PASS_ADAPTER_TEST_COMPILE_LINK_ONLY",
+    "actualExit": true,
+    "exitCode": 0,
+    "originalBudgetSeconds": 900,
+    "elapsedSeconds": 5.832733903080225,
+    "profile": "debug opt0",
+    "inputCount": 432,
+    "canonicalBeforeAndAfterEqual": true,
+    "all432CurrentInputHashesMatchCapturedTable": true,
+    "rawStreamsHashesMatch": true,
+    "scope": "fc-windows adapter tests compile/link only. Bootstrap changed caller network.rs and an R65 normal product are NOT compiled/validated by this isolated command."
+  },
+  "binaryIdentity": {
+    "path": "/tmp/fc-round65-header-expiry/target/i686-pc-windows-gnu/debug/deps/fc_windows-5eb9da103eda8228.exe",
+    "bytes": 91027939,
+    "sha256": "893f333fc562f7bff7ec0fe4cf740047877ac6973349c2f732adf9d9052705e5",
+    "matchesCompileAndCurrentBytesAndActualUpload": true,
+    "peMachine": "0x014c",
+    "peMagic": "0x010b",
+    "peSubsystem": 3
+  },
+  "actualRuntime": {
+    "operationReceiptSha256": "93607e378685054546b5036ea92a20eabee741c6a29f3686aaf41e44cd49d461",
+    "reportSha256": "43fc414ff9579500dd6630aa9d3a0e791c90f4ef8e0ac907a7e9ac7c71f4fd61",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "status": "PASS",
+    "cleanup": "PASS",
+    "controllerStatus": "PASS_COMMAND",
+    "controllerExitCode": 0,
+    "controllerElapsedSeconds": 36.43882267992012,
+    "rawControllerLogsHashesAndSizesMatch": true,
+    "harnessCount": 1,
+    "passed": 224,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 0,
+    "perHarnessBudgetSeconds": 900,
+    "originalSummary": "test result: ok. 224 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 26.75s",
+    "fiveNewExactOkLines": [
+      "test tls_frontdoor::native::stream::tests::real_bare_post_charges_preparation_against_one_captured_origin ... ok",
+      "test tls_frontdoor::native::stream::tests::real_bare_expired_preparation_closes_socket_without_posting_io ... ok",
+      "test tls_frontdoor::native::stream::tests::real_bare_late_native_return_retains_charged_io_until_original_packet ... ok",
+      "test tls_frontdoor::native::stream::tests::real_iocp_batch_services_due_receive_before_another_top_level_poll ... ok",
+      "test tls_frontdoor::native::stream::tests::caller_deadline_service_keeps_original_head_request_budget_and_admission ... ok"
+    ],
+    "fixedTestExactOkLine": "test tls_frontdoor::native::stream::tests::real_iocp_queued_accept_after_negative_alarm_is_rejected_without_new_hard_deadline ... ok",
+    "same224TestNamesAsFirstAttempt": true
+  },
+  "normalScaffoldBoundary": {
+    "sourceSha": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+    "sha256": "74188cbfd799446c9d3b3332a46fddb689dcce362db216a287d0e1110fded1f1",
+    "purpose": "Previously built R64/0f2 baseline normal EXE used only to satisfy unchanged windows-probe self-check/native scaffold. Its hash matches actual upload.",
+    "notClaimed": [
+      "R65 new normal product built or run",
+      "R65 fc-bootstrap network.rs caller executed",
+      "R63 owner/startup code covered by this isolated R65 suite",
+      "new real Schannel strict5s/ESTABLISHED timing evidence"
+    ]
+  },
+  "originalFailurePreserved": {
+    "receiptSha256": "d6692dc4f6ae6506d6a1273ebf60ec6a73b3b41c8b67b57b1a9879c081692802",
+    "controllerReceiptSha256": "e023838c3d5002db4145deff0696ffc652659fc1bd2c7525b208531b0d6a0e2e",
+    "status": "FAIL_COMMAND/FAIL",
+    "cleanup": "PASS",
+    "originalSummary": "test result: FAILED. 200 passed; 24 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.90s",
+    "failedTestCount": 24,
+    "independentInitialOrderingAssertionFailures": 1,
+    "followingPoisonErrorLines": 23,
+    "originalAssertion": "record.completion_returned_at.unwrap() <= record.began_at",
+    "classification": "Original first failure is real and retained. New early poll_io expiry changed the old fixture assumption; later23 SERIAL lock poison failures are recorded cascading failures, not silently relabeled independent fixes. Second retains identical224 test inventory and all original ordering assertions."
+  },
+  "limits": [
+    "Actual authorized Win11 WOW64 GNU test run only; no Win7/Win10/visibleSeewo qualification.",
+    "Real Winsock/IOCP/mailbox with fake record Driver and injected clock/origin scenarios; not real cryptography, precise TCP ESTABLISHED epoch or universal peer-visible strict5s bound.",
+    "Production four-file source remains first frozen candidate; this second pass does not itself provide full workspace/normal product/new caller or production listener integration validation.",
+    "Original first failures/preflight schema refusal remain separate immutable evidence.",
+    "P0 requirement-scope audit changes no threshold or listener acceptance by itself."
+  ],
+  "issues": [],
+  "reviewComplete": true
+}

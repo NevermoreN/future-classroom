@@ -1,0 +1,352 @@
+--- first/crates/fc-windows/src/installer_lifecycle.rs
++++ second/crates/fc-windows/src/installer_lifecycle.rs
+@@ -206,13 +206,16 @@
+     /// The same owner only; never stale-record recovery. Even a late successful
+     /// receipt cannot renew the original deadline. Exact readback precedes
+     /// handle-based deletion, and the exclusive gate is the last file closed.
++    /// After known End/effects and all producers actually return, only control
++    /// handles remain. A control-close error is sticky/no Released; actual
++    /// process death returns the same kernel gate, not an unknown producer.
+     pub fn try_release(&mut self) -> Result<()> {
+         self.current()?;
+         if !self.settled {
+             return Err(LifecycleError::Unsettled);
+         }
+         self.resources.guardian_returned()?;
+-        self.resources.clear_pending()?;
++        self.resources.clear_pending(self.deadline)?;
+         self.resources.release()
+     }
+     pub fn is_released(&self) -> bool {
+--- first/crates/fc-windows/src/installer_lifecycle/native.rs
++++ second/crates/fc-windows/src/installer_lifecycle/native.rs
+@@ -62,8 +62,11 @@
+     pending: Vec<u8>,
+     pending_identity: Option<(u32, u64)>,
+     failed: bool,
++    producers_returned: bool,
+     #[cfg(test)]
+     fail_close: bool,
++    #[cfg(test)]
++    fail_close_role: Option<Role>,
+     _thread: PhantomData<Rc<()>>,
+ }
+ fn denied() -> Error {
+@@ -101,8 +104,11 @@
+             pending: Vec::new(),
+             pending_identity: None,
+             failed: false,
++            producers_returned: false,
+             #[cfg(test)]
+             fail_close: false,
++            #[cfg(test)]
++            fail_close_role: None,
+             _thread: PhantomData,
+         };
+         if FAULTED.load(Ordering::Acquire) {
+@@ -440,7 +446,10 @@
+         }
+         Ok(())
+     }
+-    pub(super) fn clear_pending(&mut self) -> Result<()> {
++    pub(super) fn clear_pending(&mut self, deadline: Instant) -> Result<()> {
++        if self.producers_returned {
++            return Err(LifecycleError::Unsettled);
++        }
+         self.verify_pending()?;
+         // Release every non-gate/non-pending native resource before positive
+         // deletion. A failing close keeps Pending + gate and faults this owner.
+@@ -452,6 +461,14 @@
+                 self.close(i)?;
+             }
+         }
++        // Negative commitpoint: exact End/effects and original guardian exit
++        // were checked by MaintenanceOwner; every producer handle above has
++        // now actually returned. Only original Pending/Parent/Gate controls
++        // remain. Keep pins and delete THIS inode, never a reopened path.
++        self.producers_returned = true;
++        if Instant::now() >= deadline {
++            return Err(LifecycleError::Expired);
++        }
+         let index = self
+             .handles
+             .iter()
+@@ -476,7 +493,7 @@
+     }
+     fn close(&mut self, index: usize) -> Result<()> {
+         #[cfg(test)]
+-        if self.fail_close {
++        if self.fail_close || self.fail_close_role == Some(self.handles[index].role) {
+             self.failed = true;
+             FAULTED.store(true, Ordering::Release);
+             return Err(LifecycleError::Faulted);
+@@ -513,6 +530,20 @@
+     #[cfg(test)]
+     pub(super) fn inject_close_failure(&mut self) {
+         self.fail_close = true;
++    }
++    #[cfg(test)]
++    pub(super) fn inject_close_failure_at(&mut self, role: &str) {
++        self.fail_close_role = Some(match role {
++            "guardian" => Role::Guardian,
++            "pending" => Role::Pending,
++            "parent" => Role::Parent,
++            "gate" => Role::Gate,
++            _ => panic!("fixed test close role"),
++        });
++    }
++    #[cfg(test)]
++    pub(super) fn producers_returned(&self) -> bool {
++        self.producers_returned
+     }
+     #[cfg(test)]
+     pub(super) fn root(&self) -> &Path {
+@@ -708,6 +739,7 @@
+                 | WRITE_OWNER.0
+                 | FILE_WRITE_DATA.0
+                 | FILE_APPEND_DATA.0
++                | FILE_DELETE_CHILD.0
+                 | FILE_WRITE_EA.0
+                 | FILE_WRITE_ATTRIBUTES.0;
+             for index in 0..u32::from((*acl).AceCount) {
+@@ -845,3 +877,38 @@
+     }
+     Ok(())
+ }
++
++#[cfg(test)]
++pub(super) fn isolated_delete_child_acl_is_rejected(path: &Path) -> Result<bool> {
++    let mut resources = Resources::empty()?;
++    resources.sid = resources.token_sid(unsafe { GetCurrentProcess() })?;
++    let handle = resources.open_file(
++        path,
++        WRITE_DAC.0 | READ_CONTROL.0,
++        FILE_SHARE_READ | FILE_SHARE_WRITE,
++        OPEN_EXISTING,
++        true,
++        false,
++    )?;
++    resources.add(handle, Role::Parent);
++    with_security(&resources.sid, true, |attributes| unsafe {
++        let descriptor = PSECURITY_DESCRIPTOR((*attributes).lpSecurityDescriptor);
++        let mut present = windows::core::BOOL::default();
++        let mut defaulted = windows::core::BOOL::default();
++        let mut acl = std::ptr::null_mut();
++        GetSecurityDescriptorDacl(descriptor, &mut present, &mut acl, &mut defaulted)?;
++        let mut world = [0u64; 16];
++        let mut len = std::mem::size_of_val(&world) as u32;
++        let world = PSID(world.as_mut_ptr().cast());
++        CreateWellKnownSid(WinWorldSid, None, Some(world), &mut len)?;
++        AddAccessAllowedAceEx(acl, ACL_REVISION, ACE_FLAGS(0), FILE_DELETE_CHILD.0, world)?;
++        SetKernelObjectSecurity(
++            handle,
++            DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
++            descriptor,
++        )
++    })?;
++    let rejected = verify_acl(handle, &resources.sid, false).is_err();
++    resources.release()?;
++    Ok(rejected)
++}
+--- first/crates/fc-windows/src/installer_lifecycle/tests.rs
++++ second/crates/fc-windows/src/installer_lifecycle/tests.rs
+@@ -41,20 +41,7 @@
+         Self { identity, root }
+     }
+     fn child(&self, mode: &str) -> OriginalChild {
+-        let child = Command::new(std::env::current_exe().unwrap())
+-            .args(["--exact", CHILD, "--nocapture", "--test-threads=1"])
+-            .env(ENV_LEAF, self.identity.leaf.as_ref().unwrap())
+-            .env(ENV_MODE, mode)
+-            .stdin(Stdio::piped())
+-            .stdout(Stdio::null())
+-            .stderr(Stdio::inherit())
+-            .creation_flags(0x0800_0000)
+-            .spawn()
+-            .unwrap();
+-        OriginalChild {
+-            child,
+-            returned: false,
+-        }
++        spawn_child(&self.identity, mode)
+     }
+     fn maintenance(&self) -> MaintenanceOwner {
+         LifecycleGate::try_begin_maintenance(
+@@ -65,23 +52,66 @@
+         .unwrap()
+     }
+ }
+-impl Drop for Fixture {
+-    fn drop(&mut self) {
+-        // Private random leaf only, never production. No recursive deletion or
+-        // path adopted from caller input. Unknown content is preserved/fails.
++impl Fixture {
++    fn cleanup(&self) -> std::io::Result<()> {
++        // Exact private test namespace only. No recursive deletion; if cleanup
++        // cannot complete while unwinding, preserve the original test failure.
+         for leaf in ["ready", "pending.v1", "gate.lock"] {
+             let path = self.root.join(leaf);
+             match std::fs::symlink_metadata(&path) {
+                 Ok(meta) => {
+-                    assert!(meta.is_file() && !meta.file_type().is_symlink());
+-                    std::fs::remove_file(path).expect("owned test file cleanup");
++                    if !meta.is_file() || meta.file_type().is_symlink() {
++                        return Err(std::io::Error::other("unexpected owned test file type"));
++                    }
++                    std::fs::remove_file(path)?;
+                 }
+                 Err(e) if e.kind() == std::io::ErrorKind::NotFound => (),
+-                Err(e) => panic!("test metadata cleanup: {e}"),
++                Err(e) => return Err(e),
+             }
+         }
+         std::fs::remove_dir(&self.root)
+-            .expect("exact empty owned root cleanup after native owners returned");
++    }
++}
++impl Drop for Fixture {
++    fn drop(&mut self) {
++        if let Err(error) = self.cleanup() {
++            if std::thread::panicking() {
++                eprintln!(
++                    "owned fixture cleanup failed; retained {:?}: {error}",
++                    self.root
++                );
++            } else {
++                panic!("exact owned fixture cleanup failed: {error}");
++            }
++        }
++    }
++}
++struct OwnedAlias(PathBuf);
++impl Drop for OwnedAlias {
++    fn drop(&mut self) {
++        if let Err(error) = std::fs::remove_file(&self.0) {
++            if std::thread::panicking() {
++                eprintln!("owned alias cleanup failed: {error}");
++            } else {
++                panic!("owned alias cleanup failed: {error}");
++            }
++        }
++    }
++}
++fn spawn_child(identity: &InstallIdentity, mode: &str) -> OriginalChild {
++    let child = Command::new(std::env::current_exe().unwrap())
++        .args(["--exact", CHILD, "--nocapture", "--test-threads=1"])
++        .env(ENV_LEAF, identity.leaf.as_ref().unwrap())
++        .env(ENV_MODE, mode)
++        .stdin(Stdio::piped())
++        .stdout(Stdio::null())
++        .stderr(Stdio::inherit())
++        .creation_flags(0x0800_0000)
++        .spawn()
++        .unwrap();
++    OriginalChild {
++        child,
++        returned: false,
+     }
+ }
+ struct OriginalChild {
+@@ -200,6 +230,43 @@
+             ));
+             // The process will exit with original native handles retained.
+             // No parent cleanup starts before actual child process return.
++        }
++        mode if mode.starts_with("maintenance-fault-") => {
++            let role = &mode["maintenance-fault-".len()..];
++            assert!(["guardian", "pending", "parent", "gate"].contains(&role));
++            let mut owner = LifecycleGate::try_begin_maintenance(
++                &identity,
++                MaintenanceOperation::Repair,
++                Instant::now() + Duration::from_secs(20),
++            )
++            .unwrap();
++            let mut guardian = spawn_child(&identity, "guardian");
++            guardian.ready(&root);
++            let original = owner.watch_guardian(&guardian.child).unwrap();
++            guardian.close_and_wait();
++            owner
++                .record_settlement(Settlement {
++                    operation_id: owner.operation_id(),
++                    guardian: original,
++                    outcome: SettledOutcome::Commit,
++                    join_return: 0,
++                    end_return: 0,
++                    effects_reconciled: true,
++                })
++                .unwrap();
++            owner.resources.inject_close_failure_at(role);
++            assert_eq!(owner.try_release(), Err(LifecycleError::Faulted));
++            assert_eq!(owner.resources.producers_returned(), role != "guardian");
++            assert!(!owner.is_released());
++            assert!(matches!(
++                LifecycleGate::acquire_startup(&identity),
++                Err(LifecycleError::Faulted)
++            ));
++            drop(owner);
++            assert!(native::retained_count() > 0);
++            // No Released receipt. Only this actual process exit returns the
++            // remaining original kernel controls. All producer cases differ:
++            // a failed producer close leaves Pending not delete-pending.
+         }
+         _ => panic!("unknown fixed child role"),
+     }
+@@ -357,6 +424,7 @@
+     let fixture = Fixture::new();
+     let alias = fixture.root.join("gate-alias");
+     std::fs::hard_link(fixture.root.join("gate.lock"), &alias).unwrap();
++    let _owned_alias = OwnedAlias(alias);
+     assert!(LifecycleGate::acquire_startup(&fixture.identity).is_err());
+     assert!(
+         LifecycleGate::try_begin_maintenance(
+@@ -367,7 +435,6 @@
+         .is_err()
+     );
+     assert!(!fixture.root.join("pending.v1").exists());
+-    std::fs::remove_file(alias).unwrap();
+ }
+ 
+ #[test]
+@@ -386,3 +453,42 @@
+     );
+     assert!(!fixture.root.join("pending.v1").exists());
+ }
++
++#[test]
++fn isolated_parent_delete_child_grant_is_rejected() {
++    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
++    let fixture = Fixture::new();
++    assert!(native::isolated_delete_child_acl_is_rejected(&fixture.root).unwrap());
++    // This modifies only the fresh private test root, never real LocalAppData.
++    assert!(!fixture.root.join("pending.v1").exists());
++}
++
++#[test]
++fn producer_close_failure_remains_negative_after_original_process_exit() {
++    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
++    let fixture = Fixture::new();
++    let mut child = fixture.child("maintenance-fault-guardian");
++    child.close_and_wait();
++    assert!(fixture.root.join("pending.v1").exists());
++    assert!(matches!(
++        LifecycleGate::acquire_startup(&fixture.identity),
++        Err(LifecycleError::Pending)
++    ));
++}
++
++#[test]
++fn settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate() {
++    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
++    for role in ["pending", "parent", "gate"] {
++        let fixture = Fixture::new();
++        let mut child = fixture.child(&format!("maintenance-fault-{role}"));
++        child.close_and_wait();
++        // Child first proved exact settlement, actual guardian exit0 and checked
++        // return of all producers. It stayed FAULTED/not Released while alive.
++        // Only actual original process death returned the SAME kernel gate and
++        // terminal Pending controls; this is not permission after unknown End.
++        let mut lease = LifecycleGate::acquire_startup(&fixture.identity).unwrap();
++        lease.try_release().unwrap();
++        assert!(!fixture.root.join("pending.v1").exists());
++    }
++}

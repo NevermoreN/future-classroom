@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "status": "FIFTH_ORIGINAL_RECEIPTS_INDEPENDENTLY_MATCHED_TARGETED_WIN11_PASS_CLIPPY_FAIL",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T05:56:20.836730+00:00",
+  "scope": "Read-only verification of root-collected fifth snapshot/original receipts. Reviewer did not run Cargo, Windows, SSH, CI or network and did not edit source. Fourth source review remains separately frozen.",
+  "sourceFreezeSha256": "2c566151fd1a422239dc3669049bbeaed10fe0352bc06cb3f3b4c980ab886058",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "sha256": "bf2429588f8f79e35295335702bc757738a80e74ff2e227b5a2d1195d2f41843",
+      "snapshotMatchesManifest": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "sha256": "5d21ab12b6acc03f942de3dff6c61b9abfb7fe8a1f6bcb50afed92f267e2b22e",
+      "snapshotMatchesManifest": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "sha256": "db54f17a05f91b2c30d2587d90525b935fc371e8f68cfd004abb300174db2b8b",
+      "snapshotMatchesManifest": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "sha256": "7b2c995d421d1524747cf5b76de622dbd19d8bb89d3ff0e30e778d5e79224082",
+      "snapshotMatchesManifest": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/installation_startup.rs",
+      "sha256": "88560eebf08a58a490b33b11bcbaa2ef85ab29a934006d820e2f07828b44309f",
+      "snapshotMatchesManifest": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "sha256": "b17ca9391cf7eb267113a156d3a0793fdfb96fe7c30cd34e677dab8e7ead0f4c",
+      "snapshotMatchesManifest": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "sha256": "a83fe4b049eb084823de5652c6105eee7717f797aef15236d96cfa8461a581ea",
+      "snapshotMatchesManifest": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+      "sha256": "f45dfb54e545d3b75e853db9da7f166bad06dfee249cb7efc120c8a5844d6f1b",
+      "snapshotMatchesManifest": true
+    }
+  ],
+  "changesFromFourth": {
+    "paths": [
+      "crates/fc-windows/src/lib.rs",
+      "crates/fc-windows/src/installer_lifecycle.rs"
+    ],
+    "reviewedDiff": "lib.rs only host/installer module order; installer_lifecycle.rs only corrected two-line module doc. Function/helper/bootstrap body logic unchanged."
+  },
+  "runtimeEvidence": {
+    "receiptSha256": "2905417de942de7df32c7ff088aa25781b3eb77a159a2360f202d090f5eda46e",
+    "exeSha256": "f24c1f74a051b37581826d86e5fe817603050d560eae4c14f045dcdffdfdbd70",
+    "localExecutableMatchesReceiptAtReviewTime": true,
+    "command": "installer_lifecycle::tests:: --test-threads=1 --nocapture",
+    "testsPassed": 17,
+    "testsFailed": 0,
+    "testsFiltered": 219,
+    "exactPassedNames": [
+      "installer_lifecycle::tests::close_failure_retains_physical_owner_in_child_without_replacement",
+      "installer_lifecycle::tests::common_startup_helper_does_not_enter_body_under_maintenance",
+      "installer_lifecycle::tests::common_startup_helper_holds_during_success_body_until_checked_return",
+      "installer_lifecycle::tests::common_startup_helper_retains_after_caught_panic_until_actual_process_exit",
+      "installer_lifecycle::tests::common_startup_helper_retains_after_error_until_actual_process_exit",
+      "installer_lifecycle::tests::coordination_rejects_gate_hardlink_alias_before_pending_or_school_data",
+      "installer_lifecycle::tests::existing_broad_gate_dacl_is_rejected_without_repair_or_pending",
+      "installer_lifecycle::tests::isolated_parent_delete_child_grant_is_rejected",
+      "installer_lifecycle::tests::malformed_or_torn_pending_is_negative_not_dead_owner_recovery",
+      "installer_lifecycle::tests::native_child",
+      "installer_lifecycle::tests::original_expiry_never_renews_or_clears_negative_state",
+      "installer_lifecycle::tests::os_parent_owner_trust_does_not_relax_exact_private_owner",
+      "installer_lifecycle::tests::physical_maintenance_blocks_child_and_owner_loss_keeps_pending",
+      "installer_lifecycle::tests::physical_shared_child_blocks_maintenance_until_actual_return",
+      "installer_lifecycle::tests::producer_close_failure_remains_negative_after_original_process_exit",
+      "installer_lifecycle::tests::receipt_before_actual_guardian_exit_cannot_clear_pending",
+      "installer_lifecycle::tests::settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate"
+    ],
+    "physicalExit": true,
+    "pid": 11524,
+    "creationFileTime": 134379860755466781,
+    "exitCode": 0,
+    "elapsedMillis": 602,
+    "originalBudgetMillis": 120000,
+    "originals": [
+      {
+        "path": "windows-fifth-original-first/native.json",
+        "bytes": 230,
+        "sha256": "0426662d8ee9caecda70095885dc070062ff137f3c0a62807eb836bc4348a9b5",
+        "matchesCollectedBase64": true
+      },
+      {
+        "path": "windows-fifth-original-first/native.stdout.log",
+        "bytes": 1830,
+        "sha256": "c3a72d31374bff9719c993ee12fbb6af21ae795e991b732ad2424f9e6318df3f",
+        "matchesCollectedBase64": true
+      },
+      {
+        "path": "windows-fifth-original-first/native.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "matchesCollectedBase64": true
+      }
+    ],
+    "nativeJsonMatchesExecuteReceipt": true,
+    "phaseInputHashesMatch": true,
+    "newPrivateRootsReported": [],
+    "collectorPrivateRootsReported": []
+  },
+  "cleanup": {
+    "receiptSha256": "f60667ba7fceceabccc441529a1bb870dff8e104f8bd41a5e123fb89cef0a32c",
+    "rawStdoutHashAndJsonMatch": true,
+    "status": "PASS_EXACT_TRANSPORT_CLEANUP",
+    "directoryAbsent": true,
+    "originalObservedExitCode": 0,
+    "privateTestRoots": [],
+    "sshd": "Running"
+  },
+  "localValidation": {
+    "testCompile": "PASS exit0 for fc-windows GNU test executable; log hashes matched",
+    "format": "PASS, raw hashes matched",
+    "architecture": "PASS, raw hashes matched",
+    "strictWorkspaceGnuClippy": {
+      "status": "FAIL",
+      "exitCode": 101,
+      "elapsedSeconds": 60.43085302319378,
+      "sourceUnchanged": true,
+      "rawLogHashesMatch": true,
+      "specificError": "installer_lifecycle/native.rs:479 DeleteFile: true.into() is useless_conversion to bool; -D warnings denies it. Same error fails lib and lib test.",
+      "suggestedFix": "DeleteFile: true; requires a new source freeze and applicable revalidation, no source edit done by reviewer."
+    }
+  },
+  "limits": [
+    "Authorized Win11 WOW64 execution of targeted GNU-built fc-windows tests only.",
+    "No production application startup/manual/autostart/repair runtime, complete MSI broker/guardian integration, real login/reboot/upgrade/uninstall proof.",
+    "No Win7/Win10 or visible Seewo qualification inferred.",
+    "Injected close-refusal scenarios prove the modeled retention paths; not an observed OS CloseHandle failure."
+  ],
+  "reviewComplete": true
+}

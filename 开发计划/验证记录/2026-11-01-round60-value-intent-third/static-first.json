@@ -1,0 +1,115 @@
+{
+  "status": "PASS_ACTUAL_LOCAL_BUILD_AND_STATIC_ONLY_NATIVE_WINDOWS_NOT_RUN",
+  "scope": "Actual gcc and objdump;18 source-text invariants are not native concurrency tests.",
+  "source": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/registry-value-intent.c",
+    "bytes": 29176,
+    "sha256": "230255b0e1877d39bedf5cabf20cd0c7eeb9274c05c07b65d40bbbcc5bd950f2"
+  },
+  "executable": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/registry-value-intent.exe",
+    "bytes": 37598,
+    "sha256": "42082ab87cf9825bd4d370b31c3834b2e18910e64fc763970bf6704de251b515"
+  },
+  "runner": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/run-windows-probe.ps1",
+    "bytes": 9649,
+    "sha256": "b9851d1ce96297375d62a0c8d959123471c4a1436d7cf120973ec8e1c035d7f5"
+  },
+  "producer": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/compile-second.json",
+    "bytes": 1741,
+    "sha256": "461e50a4996b55718238024049ab21d074cddc6035dcd6e4e57671e9914d4e46"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-objdump",
+        "-p",
+        "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/registry-value-intent.exe"
+      ],
+      "cwd": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third",
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/objdump.stdout.log",
+        "bytes": 18429,
+        "sha256": "ab4048c0db6e504f10bf3611e4df683e4eada49682235bdefa7d5047f8bd0d7f"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/objdump.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-objdump",
+        "--version"
+      ],
+      "cwd": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third",
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/objdump-version.stdout.log",
+        "bytes": 289,
+        "sha256": "ddbfd9b9ba42894a45a45fc085e4a33a51f9326c99053f5cbd047dfcb53cee56"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/objdump-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "i686-w64-mingw32-gcc",
+        "--version"
+      ],
+      "cwd": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third",
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/compiler-version.stdout.log",
+        "bytes": 238,
+        "sha256": "1e8c1e3b498f9edce82b842bf299a805696cc9d0c6da16b65fe3ee6ba867f3e9"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/compiler-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "pe": {
+    "machine": "PE32 x86",
+    "subsystem": 3,
+    "imports": [
+      "ADVAPI32.dll",
+      "KERNEL32.dll",
+      "ktmw32.dll"
+    ]
+  },
+  "sourceTextChecks": {
+    "no_tx_target_read_in_candidate": true,
+    "candidate_stages_fixed_expected": true,
+    "write_then_independent_reader": true,
+    "reader_has_no_transaction_access": true,
+    "reader_ordinary_read_and_typed_exact_compare": true,
+    "read_mismatch_forces_rollback": true,
+    "reader_block_never_falls_back": true,
+    "binary_and_distinct_initial_cases": true,
+    "no_intent_red_control": true,
+    "cancel_before_and_after_delete": true,
+    "original_deadline_inherited_not_reminted": true,
+    "no_zero_timeout_infinite_transaction": true,
+    "late_native_commit_never_positive": true,
+    "actual_process_creation_identity": true,
+    "physical_job_zero_before_cleanup": true,
+    "exact_leaf_realnew_nonce_sid": true,
+    "no_real_run_or_other_state": true,
+    "runner_exact_pin_and_original_90sec": true
+  },
+  "PowerShellParser": "NOT_RUN_NO_LOCAL_PWSH",
+  "windows": "NOT_RUN"
+}

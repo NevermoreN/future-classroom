@@ -1,0 +1,121 @@
+{
+  "status": "FROZEN_TEST_FIX_ONLY_FORMAT_DIFF_PASS_NOT_COMPILED_OR_EXECUTED",
+  "createdUtc": "2026-11-01T06:37:23.820721+00:00",
+  "base": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "worktree": "/tmp/fc-round65-header-expiry/worktree",
+  "onlyModifiedSinceFirstFreeze": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+  "before": {
+    "path": "/tmp/fc-round65-header-expiry/evidence/source-before-second/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+    "bytes": 86068,
+    "sha256": "a90522e846547705c8b6e64b4a7c5b0fce0f80f4d8b6119ca0e016f869339178"
+  },
+  "after": {
+    "path": "/tmp/fc-round65-header-expiry/evidence/source-after-second/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+    "bytes": 86763,
+    "sha256": "5c7a68b887f572ee511ce9db2be017e7d97c727d22c9f4e3e97ef4d92fef74d1"
+  },
+  "patch": {
+    "path": "/tmp/fc-round65-header-expiry/evidence/patch-second.diff",
+    "bytes": 2168,
+    "sha256": "ed754e6dbfd6ea6cc6ad7aa7df4419c0de8239774d33f8173bcf1e7ca8b9bd53"
+  },
+  "firstFreeze": {
+    "path": "/tmp/fc-round65-header-expiry/evidence/implementation-freeze-first.json",
+    "bytes": 11210,
+    "sha256": "4fb7c4d38ad99e66da3f5949fe590af7c055eb01365c905f5e4bc1c6af2c08a3"
+  },
+  "originalActualFailure": {
+    "path": "/tmp/fc-round65-header-expiry/evidence/windows-native-first.json",
+    "bytes": 44527,
+    "sha256": "d6692dc4f6ae6506d6a1273ebf60ec6a73b3b41c8b67b57b1a9879c081692802"
+  },
+  "productionFilesUnchangedFromFirstFreeze": [
+    {
+      "path": "/tmp/fc-round65-header-expiry/worktree/crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 59397,
+      "sha256": "42feacea1410c3968734c9bc39d9c09c7c647095afeb29a9dba18800a335491f"
+    },
+    {
+      "path": "/tmp/fc-round65-header-expiry/worktree/crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 61439,
+      "sha256": "e6a4938e8c096ac509a03e75345b847cedda795aa7cb2ef1d6524a2efdc964fd"
+    },
+    {
+      "path": "/tmp/fc-round65-header-expiry/worktree/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 16364,
+      "sha256": "a7cbaf2a17af2f01280871f9b46c404430e1ef63e79293b18a476ce8452dd80b"
+    },
+    {
+      "path": "/tmp/fc-round65-header-expiry/worktree/crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 40331,
+      "sha256": "48fcff62625fdda506d6a4d6039b67190fea951e3b991bb3f880fb640274a783"
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "rustfmt",
+        "+1.97.1",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "--check",
+        "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs"
+      ],
+      "cwd": "/tmp/fc-round65-header-expiry/worktree",
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/fmt-check-second.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/fmt-check-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "/tmp/fc-round65-header-expiry/worktree",
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/diff-check-second.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/diff-check-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "rootCause": "Test premise required dispatch of an already queued successful bare AcceptEx completion without earlier alarm processing. New poll_io correctly services deadlines before dequeue, so invoking it canceled first and recorded the later completion after close began. The first assertion failed, and subsequent SERIAL lock poison failures are not independent runtime causes.",
+  "change": "Replace only that test polling loop with one real GetQueuedCompletionStatus bounded to the original fixed3s, requiring success, original OVERLAPPED pointer, key1, original pending serial. Dispatch that exact packet once via complete_bare_accept; explicitly require one expired discard. All original close ordering, hard deadline, re-post count, resource bounds and client rejection assertions stay.",
+  "notChanged": [
+    "Production expiry/alarm/owner/cancel/drain logic",
+    "5_000_000_000ns header hard budget and existing25ms reserve",
+    "Other tests and SERIAL poison behavior",
+    "First immutable source snapshots/patch and actual failure raw files"
+  ],
+  "scope": "Genuine Windows IOCP with existing fake record Driver and injected already-due alarm; not new real TLS, kernel ESTABLISHED/backlog or strict5s evidence.",
+  "pending": [
+    "Root fresh compile/strict lint",
+    "Root serialized actual Windows suite and original bounded TLS probes"
+  ],
+  "notRun": [
+    "Cargo/build/tests",
+    "Windows/SSH/network",
+    "CI",
+    "Git commit/push",
+    "main source changes"
+  ]
+}

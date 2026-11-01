@@ -1,0 +1,84 @@
+{
+  "status": "PASS_TARGETED_NATIVE_COMMAND",
+  "scope": "Fifth frozen GNU candidate, seventeen targeted real Rust tests on actual authorized Win11 WOW64; no product startup/MSI/Win7/Win10 claim",
+  "sourceFreezeSha256": "2c566151fd1a422239dc3669049bbeaed10fe0352bc06cb3f3b4c980ab886058",
+  "exe": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/debug/deps/fc_windows-5eb9da103eda8228.exe",
+  "exeBytes": 91610217,
+  "exeSha256": "f24c1f74a051b37581826d86e5fe817603050d560eae4c14f045dcdffdfdbd70",
+  "nonce": "9a2f0fe5dce4409889fbbeda9be41700",
+  "phases": [
+    {
+      "name": "prepare",
+      "elapsedSeconds": 0.47608060389757156,
+      "inputSha256": "30041586d8783c6d1dfcf4f9f5731df7cb5b18724f3ffc161923d2e2303fde91",
+      "result": {
+        "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomR63-9a2f0fe5dce4409889fbbeda9be41700",
+        "localAppData": "C:\\Users\\Elior\\AppData\\Local",
+        "sshd": "Running",
+        "existingTestRoots": []
+      }
+    },
+    {
+      "name": "execute",
+      "elapsedSeconds": 1.187385689932853,
+      "inputSha256": "e2bcf272407c78f023f2eaa1318a8b714ae332dc20d8d94ad4f7fc934112e868",
+      "result": {
+        "status": "PASS_TARGETED_RUST_COMMAND",
+        "physicalExit": true,
+        "originalBudgetMillis": 120000,
+        "pid": 11524,
+        "creationFileTime": 134379860755466781,
+        "exitCode": 0,
+        "elapsedMillis": 602
+      }
+    },
+    {
+      "name": "collect",
+      "elapsedSeconds": 0.513416649075225,
+      "inputSha256": "c6b3f25184b05958067e82d3846d495d5ad4add20366eeab6c767744bf0a74a7",
+      "result": {
+        "testRoots": [],
+        "files": [
+          {
+            "sha256": "0426662d8ee9caecda70095885dc070062ff137f3c0a62807eb836bc4348a9b5",
+            "name": "native.json",
+            "bytes": 230,
+            "base64": "ew0KICAgICJzdGF0dXMiOiAgIlBBU1NfVEFSR0VURURfUlVTVF9DT01NQU5EIiwNCiAgICAicGh5c2ljYWxFeGl0IjogIHRydWUsDQogICAgIm9yaWdpbmFsQnVkZ2V0TWlsbGlzIjogIDEyMDAwMCwNCiAgICAicGlkIjogIDExNTI0LA0KICAgICJjcmVhdGlvbkZpbGVUaW1lIjogIDEzNDM3OTg2MDc1NTQ2Njc4MSwNCiAgICAiZXhpdENvZGUiOiAgMCwNCiAgICAiZWxhcHNlZE1pbGxpcyI6ICA2MDINCn0="
+          },
+          {
+            "sha256": "c3a72d31374bff9719c993ee12fbb6af21ae795e991b732ad2424f9e6318df3f",
+            "name": "native.stdout.log",
+            "bytes": 1830,
+            "base64": "CnJ1bm5pbmcgMTcgdGVzdHMKdGVzdCBpbnN0YWxsZXJfbGlmZWN5Y2xlOjp0ZXN0czo6Y2xvc2VfZmFpbHVyZV9yZXRhaW5zX3BoeXNpY2FsX293bmVyX2luX2NoaWxkX3dpdGhvdXRfcmVwbGFjZW1lbnQgLi4uIG9rCnRlc3QgaW5zdGFsbGVyX2xpZmVjeWNsZTo6dGVzdHM6OmNvbW1vbl9zdGFydHVwX2hlbHBlcl9kb2VzX25vdF9lbnRlcl9ib2R5X3VuZGVyX21haW50ZW5hbmNlIC4uLiBvawp0ZXN0IGluc3RhbGxlcl9saWZlY3ljbGU6OnRlc3RzOjpjb21tb25fc3RhcnR1cF9oZWxwZXJfaG9sZHNfZHVyaW5nX3N1Y2Nlc3NfYm9keV91bnRpbF9jaGVja2VkX3JldHVybiAuLi4gb2sKdGVzdCBpbnN0YWxsZXJfbGlmZWN5Y2xlOjp0ZXN0czo6Y29tbW9uX3N0YXJ0dXBfaGVscGVyX3JldGFpbnNfYWZ0ZXJfY2F1Z2h0X3BhbmljX3VudGlsX2FjdHVhbF9wcm9jZXNzX2V4aXQgLi4uIG9rCnRlc3QgaW5zdGFsbGVyX2xpZmVjeWNsZTo6dGVzdHM6OmNvbW1vbl9zdGFydHVwX2hlbHBlcl9yZXRhaW5zX2FmdGVyX2Vycm9yX3VudGlsX2FjdHVhbF9wcm9jZXNzX2V4aXQgLi4uIG9rCnRlc3QgaW5zdGFsbGVyX2xpZmVjeWNsZTo6dGVzdHM6OmNvb3JkaW5hdGlvbl9yZWplY3RzX2dhdGVfaGFyZGxpbmtfYWxpYXNfYmVmb3JlX3BlbmRpbmdfb3Jfc2Nob29sX2RhdGEgLi4uIG9rCnRlc3QgaW5zdGFsbGVyX2xpZmVjeWNsZTo6dGVzdHM6OmV4aXN0aW5nX2Jyb2FkX2dhdGVfZGFjbF9pc19yZWplY3RlZF93aXRob3V0X3JlcGFpcl9vcl9wZW5kaW5nIC4uLiBvawp0ZXN0IGluc3RhbGxlcl9saWZlY3ljbGU6OnRlc3RzOjppc29sYXRlZF9wYXJlbnRfZGVsZXRlX2NoaWxkX2dyYW50X2lzX3JlamVjdGVkIC4uLiBvawp0ZXN0IGluc3RhbGxlcl9saWZlY3ljbGU6OnRlc3RzOjptYWxmb3JtZWRfb3JfdG9ybl9wZW5kaW5nX2lzX25lZ2F0aXZlX25vdF9kZWFkX293bmVyX3JlY292ZXJ5IC4uLiBvawp0ZXN0IGluc3RhbGxlcl9saWZlY3ljbGU6OnRlc3RzOjpuYXRpdmVfY2hpbGQgLi4uIG9rCnRlc3QgaW5zdGFsbGVyX2xpZmVjeWNsZTo6dGVzdHM6Om9yaWdpbmFsX2V4cGlyeV9uZXZlcl9yZW5ld3Nfb3JfY2xlYXJzX25lZ2F0aXZlX3N0YXRlIC4uLiBvawp0ZXN0IGluc3RhbGxlcl9saWZlY3ljbGU6OnRlc3RzOjpvc19wYXJlbnRfb3duZXJfdHJ1c3RfZG9lc19ub3RfcmVsYXhfZXhhY3RfcHJpdmF0ZV9vd25lciAuLi4gb2sKdGVzdCBpbnN0YWxsZXJfbGlmZWN5Y2xlOjp0ZXN0czo6cGh5c2ljYWxfbWFpbnRlbmFuY2VfYmxvY2tzX2NoaWxkX2FuZF9vd25lcl9sb3NzX2tlZXBzX3BlbmRpbmcgLi4uIG9rCnRlc3QgaW5zdGFsbGVyX2xpZmVjeWNsZTo6dGVzdHM6OnBoeXNpY2FsX3NoYXJlZF9jaGlsZF9ibG9ja3NfbWFpbnRlbmFuY2VfdW50aWxfYWN0dWFsX3JldHVybiAuLi4gb2sKdGVzdCBpbnN0YWxsZXJfbGlmZWN5Y2xlOjp0ZXN0czo6cHJvZHVjZXJfY2xvc2VfZmFpbHVyZV9yZW1haW5zX25lZ2F0aXZlX2FmdGVyX29yaWdpbmFsX3Byb2Nlc3NfZXhpdCAuLi4gb2sKdGVzdCBpbnN0YWxsZXJfbGlmZWN5Y2xlOjp0ZXN0czo6cmVjZWlwdF9iZWZvcmVfYWN0dWFsX2d1YXJkaWFuX2V4aXRfY2Fubm90X2NsZWFyX3BlbmRpbmcgLi4uIG9rCnRlc3QgaW5zdGFsbGVyX2xpZmVjeWNsZTo6dGVzdHM6OnNldHRsZWRfY29udHJvbF9jbG9zZV9mYWlsdXJlX25ldmVyX3JlbGVhc2VzX2J1dF9hY3R1YWxfZXhpdF9yZXR1cm5zX3NhbWVfZ2F0ZSAuLi4gb2sKCnRlc3QgcmVzdWx0OiBvay4gMTcgcGFzc2VkOyAwIGZhaWxlZDsgMCBpZ25vcmVkOyAwIG1lYXN1cmVkOyAyMTkgZmlsdGVyZWQgb3V0OyBmaW5pc2hlZCBpbiAwLjQ1cwoK"
+          },
+          {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "name": "native.stderr.log",
+            "bytes": 0,
+            "base64": ""
+          }
+        ]
+      }
+    }
+  ],
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomR63-9a2f0fe5dce4409889fbbeda9be41700",
+  "uploadElapsedSeconds": 1.1172928200103343,
+  "originals": [
+    {
+      "sha256": "0426662d8ee9caecda70095885dc070062ff137f3c0a62807eb836bc4348a9b5",
+      "name": "native.json",
+      "bytes": 230
+    },
+    {
+      "sha256": "c3a72d31374bff9719c993ee12fbb6af21ae795e991b732ad2424f9e6318df3f",
+      "name": "native.stdout.log",
+      "bytes": 1830
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "native.stderr.log",
+      "bytes": 0
+    }
+  ],
+  "newPrivateTestRoots": []
+}

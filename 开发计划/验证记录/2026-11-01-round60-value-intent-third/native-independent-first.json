@@ -1,0 +1,438 @@
+{
+  "status": "CONFIRMED_D_REJECTED_INACTIVE_TRANSACTION_AND_PRESERVED_REPLACEMENT_ORIGINAL72_UNCHANGED",
+  "scope": "Only original Win11/WOW64 eight-case synthetic execution; no new Windows run/source mutation and no general CAS proof.",
+  "inputs": [
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/windows-original-first/native-first.json",
+      "bytes": 249486,
+      "sha256": "d2411e42b154a758df7247ab6df54be000ad1dd7a61e7bea8d5cc2db17519aee"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/windows-original-first/native-first.stdout.log",
+      "bytes": 72848,
+      "sha256": "e997d8b6e01f373682309faabec4a935265cb33192f57ccd39fb1a3845ce3fe8"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/windows-original-first/native-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/source-final/registry-value-intent.c",
+      "bytes": 29176,
+      "sha256": "230255b0e1877d39bedf5cabf20cd0c7eeb9274c05c07b65d40bbbcc5bd950f2"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/source-final/registry-value-intent.exe",
+      "bytes": 37598,
+      "sha256": "42082ab87cf9825bd4d370b31c3834b2e18910e64fc763970bf6704de251b515"
+    }
+  ],
+  "originalWholeResult": {
+    "nativeExitCode": 72,
+    "runnerStatus": "FAIL_OR_INCONCLUSIVE_NATIVE_OBSERVATIONS_RETAINED",
+    "originalPhysicalExit": true,
+    "pid": 976,
+    "creationFileTime": 134379848283161784,
+    "allCases": "ABCDEFGH",
+    "actualJobZero": 10,
+    "cleanup": "OBSERVED_NATIVE_EXACT_LEAF_ABSENT",
+    "elapsedMillis": 3535,
+    "cases": [
+      {
+        "case": "A",
+        "originalCasePid": 38104,
+        "classification": "NO_COMPETITOR_EXTERNAL_COMMITTED_READ_PROGRESS_OBSERVED",
+        "finalKind": [
+          {
+            "line": 117,
+            "pid": 38104,
+            "sequence": 34,
+            "tickMillis": 836838000,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 1
+          }
+        ],
+        "nativeChildExit": [
+          {
+            "line": 124,
+            "pid": 38104,
+            "sequence": 41,
+            "tickMillis": 836838000,
+            "name": "owned_child_exit",
+            "code": 0,
+            "detail": 65
+          }
+        ]
+      },
+      {
+        "case": "B",
+        "originalCasePid": 40724,
+        "classification": "INITIAL_NONMATCH_PRESERVED_BY_ROLLBACK",
+        "finalKind": [
+          {
+            "line": 188,
+            "pid": 40724,
+            "sequence": 33,
+            "tickMillis": 836838031,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 3
+          }
+        ],
+        "nativeChildExit": [
+          {
+            "line": 195,
+            "pid": 40724,
+            "sequence": 40,
+            "tickMillis": 836838031,
+            "name": "owned_child_exit",
+            "code": 0,
+            "detail": 66
+          }
+        ]
+      },
+      {
+        "case": "C",
+        "originalCasePid": 30580,
+        "classification": "INITIAL_NONMATCH_PRESERVED_BY_ROLLBACK",
+        "finalKind": [
+          {
+            "line": 259,
+            "pid": 30580,
+            "sequence": 33,
+            "tickMillis": 836838062,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 4
+          }
+        ],
+        "nativeChildExit": [
+          {
+            "line": 266,
+            "pid": 30580,
+            "sequence": 40,
+            "tickMillis": 836838062,
+            "name": "owned_child_exit",
+            "code": 0,
+            "detail": 67
+          }
+        ]
+      },
+      {
+        "case": "D",
+        "originalCasePid": 10500,
+        "classification": "FAIL_OR_INCONCLUSIVE_NATIVE_RESULT_NO_CAS_QUALIFICATION",
+        "finalKind": [
+          {
+            "line": 354,
+            "pid": 10500,
+            "sequence": 44,
+            "tickMillis": 836838125,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 3
+          }
+        ],
+        "nativeChildExit": [
+          {
+            "line": 361,
+            "pid": 10500,
+            "sequence": 51,
+            "tickMillis": 836838125,
+            "name": "owned_child_exit",
+            "code": 31,
+            "detail": 68
+          }
+        ]
+      },
+      {
+        "case": "E",
+        "originalCasePid": 29872,
+        "classification": "BASELINE_NO_VALUE_INTENT_LOST_DISTINCT_REPLACEMENT",
+        "finalKind": [
+          {
+            "line": 448,
+            "pid": 29872,
+            "sequence": 42,
+            "tickMillis": 836838171,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 1
+          }
+        ],
+        "nativeChildExit": [
+          {
+            "line": 455,
+            "pid": 29872,
+            "sequence": 49,
+            "tickMillis": 836838171,
+            "name": "owned_child_exit",
+            "code": 0,
+            "detail": 69
+          }
+        ]
+      },
+      {
+        "case": "F",
+        "originalCasePid": 26944,
+        "classification": "CANCEL_OR_ORIGINAL_TIMEOUT_PRESERVED_ORIGINAL",
+        "finalKind": [
+          {
+            "line": 519,
+            "pid": 26944,
+            "sequence": 33,
+            "tickMillis": 836838203,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 2
+          }
+        ],
+        "nativeChildExit": [
+          {
+            "line": 526,
+            "pid": 26944,
+            "sequence": 40,
+            "tickMillis": 836838203,
+            "name": "owned_child_exit",
+            "code": 0,
+            "detail": 70
+          }
+        ]
+      },
+      {
+        "case": "G",
+        "originalCasePid": 12772,
+        "classification": "CANCEL_OR_ORIGINAL_TIMEOUT_PRESERVED_ORIGINAL",
+        "finalKind": [
+          {
+            "line": 565,
+            "pid": 12772,
+            "sequence": 23,
+            "tickMillis": 836841234,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 2
+          }
+        ],
+        "nativeChildExit": [
+          {
+            "line": 572,
+            "pid": 12772,
+            "sequence": 30,
+            "tickMillis": 836841234,
+            "name": "owned_child_exit",
+            "code": 0,
+            "detail": 71
+          }
+        ]
+      },
+      {
+        "case": "H",
+        "originalCasePid": 11248,
+        "classification": "CANCEL_OR_ORIGINAL_TIMEOUT_PRESERVED_ORIGINAL",
+        "finalKind": [
+          {
+            "line": 638,
+            "pid": 11248,
+            "sequence": 35,
+            "tickMillis": 836841281,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 2
+          }
+        ],
+        "nativeChildExit": [
+          {
+            "line": 645,
+            "pid": 11248,
+            "sequence": 42,
+            "tickMillis": 836841281,
+            "name": "owned_child_exit",
+            "code": 0,
+            "detail": 72
+          }
+        ]
+      }
+    ]
+  },
+  "D": {
+    "casePid": 10500,
+    "independentReaderPid": 23804,
+    "ordinaryWriterPid": 30240,
+    "causalRawEvents": [
+      {
+        "line": 295,
+        "pid": 10500,
+        "sequence": 13,
+        "tickMillis": 836838109,
+        "name": "tx_stage_expected_return",
+        "code": 0,
+        "detail": 0
+      },
+      {
+        "line": 311,
+        "pid": 23804,
+        "sequence": 11,
+        "tickMillis": 836838109,
+        "name": "ordinary_committed_read_return",
+        "code": 0,
+        "detail": 38
+      },
+      {
+        "line": 314,
+        "pid": 23804,
+        "sequence": 14,
+        "tickMillis": 836838109,
+        "name": "ordinary_committed_compare_kind",
+        "code": 0,
+        "detail": 2
+      },
+      {
+        "line": 317,
+        "pid": 10500,
+        "sequence": 20,
+        "tickMillis": 836838109,
+        "name": "reader_actual_exit_BEFORE_decision",
+        "code": 0,
+        "detail": 0
+      },
+      {
+        "line": 333,
+        "pid": 30240,
+        "sequence": 11,
+        "tickMillis": 836838125,
+        "name": "ordinary_set_return",
+        "code": 0,
+        "detail": 0
+      },
+      {
+        "line": 334,
+        "pid": 30240,
+        "sequence": 12,
+        "tickMillis": 836838125,
+        "name": "writer_close_case",
+        "code": 0,
+        "detail": 0
+      },
+      {
+        "line": 337,
+        "pid": 10500,
+        "sequence": 27,
+        "tickMillis": 836838125,
+        "name": "ordinary_actual_exit_BEFORE_target_delete",
+        "code": 0,
+        "detail": 0
+      },
+      {
+        "line": 339,
+        "pid": 10500,
+        "sequence": 29,
+        "tickMillis": 836838125,
+        "name": "tx_delete_target_return",
+        "code": 6701,
+        "detail": 0
+      },
+      {
+        "line": 340,
+        "pid": 10500,
+        "sequence": 30,
+        "tickMillis": 836838125,
+        "name": "final_original_tx_rollback",
+        "code": 0,
+        "detail": 0
+      },
+      {
+        "line": 341,
+        "pid": 10500,
+        "sequence": 31,
+        "tickMillis": 836838125,
+        "name": "native_transaction_outcome",
+        "code": 0,
+        "detail": 3
+      },
+      {
+        "line": 351,
+        "pid": 10500,
+        "sequence": 41,
+        "tickMillis": 836838125,
+        "name": "final_query_target",
+        "code": 0,
+        "detail": 44
+      },
+      {
+        "line": 354,
+        "pid": 10500,
+        "sequence": 44,
+        "tickMillis": 836838125,
+        "name": "final_target_kind",
+        "code": 0,
+        "detail": 3
+      }
+    ],
+    "actualDeleteError": {
+      "decimal": 6701,
+      "hex": "0x1a2d",
+      "symbol": "ERROR_TRANSACTION_NOT_ACTIVE",
+      "notObservedError6800": true
+    },
+    "rollbackReturn": 0,
+    "actualTransactionOutcome": {
+      "code": 0,
+      "value": 3,
+      "sdkMeaning": "TransactionOutcomeAborted"
+    },
+    "commitAttempted": false,
+    "final": {
+      "type": 1,
+      "bytes": 44,
+      "hex": "730079006e007400680065007400690063002d007200650070006c006100630065006d0065006e0074000000",
+      "decodedSynthetic": "synthetic-replacement"
+    },
+    "interpretation": "Ordinary replacement completed and original writer exit0 was observed before deletion. The requested delete was rejected because that transaction was inactive, then rollback succeeded and the exact replacement remained. This is an observed non-destructive refusal in the race, unlike the prior child-intent lost update. It does not directly identify the internal phase or why the transaction became inactive."
+  },
+  "whyOriginalFixtureFailed": {
+    "sourceProof": [
+      {
+        "line": 256,
+        "text": " status(\"tx_delete_target_begin\");e=RegDeleteValueW(parent,L\"FutureClassroom\");event(\"tx_delete_target_return\",e,0);if(e){known=FALSE;goto done;}"
+      },
+      {
+        "line": 279,
+        "text": " if(!known||!resource_ok||!finished){status(\"FAIL_OR_INCONCLUSIVE_NATIVE_RESULT_NO_CAS_QUALIFICATION\");return 31;}"
+      },
+      {
+        "line": 286,
+        "text": "  if(kind==3){status(writer_blocked?\"WRITER_COMPLETED_AFTER_OWN_TRANSACTION_REPLACEMENT_RETAINED\":\"DISTINCT_REPLACEMENT_RETAINED_NATIVE_TX_OUTCOME_RECORDED\");return 0;}"
+      }
+    ],
+    "finding": "Line256 treats every nonzero RegDeleteValueW return as known=false; line279 then returns31 before reaching the later replacement-retained classification. The native supervisor records child31 and returns whole72. Those original failures are retained, not relabeled PASS."
+  },
+  "primaryErrorContract": {
+    "url": "https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--6000-8199-",
+    "6701": "Operation requested in a transaction that is no longer active.",
+    "6800": "A name is reserved for use by another transaction; this error was not the observed delete return.",
+    "authorityLimit": "Neither error name alone proves that a specific ordinary writer caused invalidation or supplies universal lock/serialization guarantees."
+  },
+  "nextCandidateDecision": {
+    "continueScratchOnly": true,
+    "productionQualified": false,
+    "reason": "A made real external-read progress; B/C saw committed nonmatches and retained original type/bytes; D refused deletion and retained replacement; E red control lost replacement. This supports a narrower next falsification fixture, not adoption.",
+    "conditionalConflictResult": "In a new independent fixture, separate NativeFailure from ObservedRaceConflict. Only with recorded original writer success/exit, preimage comparison, no own COMMIT, confirmed aborted/rollback result, exact retained replacement and physically returned owners may 6701/6704/6800 be described as the observed non-destructive race result. Preserve original native code; never map every6701 to Conflict or mutation=false after unknown COMMIT.",
+    "requiredNextCases": [
+      "Preopened ordinary KEY_SET_VALUE handle in a real waiting process before target intent; exact original HANDLE/creation/deadline retained.",
+      "Writer release immediately before value-intent write, after intent but before external read, after external compare before delete, after staged delete before commit, and after closing transacted HKEY before commit.",
+      "Distinct REG_SZ and distinct REG_BINARY writers; initial incompatible type preservation remains.",
+      "Same-value write and real A->B->A sequence; raw write statuses and actual writer exit distinguish observed mutations from merely equal final bytes.",
+      "Cancel before/after stage and original deadline; if prior stage was not reached it is NOT_EXERCISED.",
+      "A real rollback-failure/unknown-path fixture can use a restricted duplicate transaction HANDLE lacking rollback rights while retaining original privileged owner for negative cleanup. Record access-denied raw failure and classify operation Unknown; later coordinator rollback must not retroactively turn that Unknown into positive success."
+    ]
+  },
+  "limitations": [
+    "No claim observed error was6800; actual6701 preserved.",
+    "No new fixture/code/build was performed by this read-only report.",
+    "No retest or whole72-to-PASS change.",
+    "Source-runner instrumentation e5b8... is parent-owned; this audit binds actual native EXE42082... and original wire rather than inventing the runner source hash."
+  ]
+}

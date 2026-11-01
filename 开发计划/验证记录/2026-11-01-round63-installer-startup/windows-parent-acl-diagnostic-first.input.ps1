@@ -1,0 +1,1 @@
+$ErrorActionPreference='Stop';$p=[Environment]::GetFolderPath('LocalApplicationData');$a=Get-Acl -LiteralPath $p;@{path=$p;currentSid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value;owner=$a.Owner;ownerSid=$a.GetOwner([Security.Principal.SecurityIdentifier]).Value;sddl=$a.Sddl}|ConvertTo-Json -Compress

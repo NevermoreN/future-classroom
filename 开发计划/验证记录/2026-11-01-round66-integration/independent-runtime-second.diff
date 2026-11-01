@@ -1,0 +1,31 @@
+--- independent-runtime-first.py
++++ independent-runtime-second.py
+@@ -223,7 +223,18 @@
+     progress=[json.loads(x.split(' ',1)[1]) for x in lines if x.startswith('TLS_BUSINESS_PROGRESS ')]
+     require(passes==d['nativeReports'] and (not passes or passes==[d['native']]) and progress==d['nativeProgress'],'TLS_ORIGINAL_NATIVE_COPIES')
+     for p in passes:
+-        require(p['sharedWorkers']==2 and p['workerJoin'] is True and p['physicalNativeDrain'] is True and p['setupCleanup'] is True and all(p[k]==0 for k in ('hubPending','downloadHubPending','quarantined','approvals')),'TLS_PHYSICAL_WORKER_NATIVE_HUB_CLEANUP')
++        require(p['sharedWorkers']==2 and p['workerJoin'] is True and p['physicalNativeDrain'] is True and p['setupCleanup'] is True and all(type(p[k]) is int and p[k]==0 for k in ('hubPending','downloadHubPending','quarantined')),'TLS_PHYSICAL_WORKER_NATIVE_HUB_CLEANUP')
++        # approvals is completed approval results, not a pending-owner count.
++        # The authorized business fixture completes exactly one; header-only
++        # never submits a complete request and must complete none.
++        expected_approvals = 0 if d.get('headerDeadlineOnly') is True else 1
++        require(type(p['approvals']) is int and p['approvals']==expected_approvals,'TLS_COMPLETED_APPROVAL_COUNT_FOR_EXACT_MODE')
++    if passes:
++        debug=[x for x in lines if x.startswith('TLS_BUSINESS_REPORT ')]
++        require(len(debug)==1 and all(re.search(pattern,debug[0]) for pattern in (r'\bactive_records: 0,',r'\bpending_jobs: 0,',r'\bcleanup_pending: 0,',r'\bretained_cleanup: 0,',r'\bnative_drained: true,')),'TLS_ORIGINAL_DEBUG_PHYSICAL_DRAIN')
++        require(bool(progress),'TLS_FINAL_PROGRESS_REQUIRED')
++        final=progress[-1]
++        require(all(type(final['acceptance'][k]) is int and final['acceptance'][k]==0 for k in ('bound_slots','native_pending','owned_sockets')) and final['pendingJobs']==final['jsonBodyRecords']==0 and final['requests']==[],'TLS_FINAL_PROGRESS_NO_NATIVE_OR_REQUEST_OWNER')
+     if d['status']=='PASS':require(len(passes)==1,'PASS_REQUIRES_ACTUAL_NATIVE_FOOTER')
+     require(d['clientEventsSha256']==sha(json.dumps(d['events'],sort_keys=True,separators=(',',':')).encode()),'CLIENT_EVENTS_IDENTITY')
+     if d['cleanup']=='PASS':
+@@ -282,7 +293,7 @@
+ 
+ def main():
+     parser=argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument('--report',type=Path,default=E/'independent-runtime-first.json')
++    parser.add_argument('--report',type=Path,default=E/'independent-runtime-second.json')
+     args=parser.parse_args()
+     require(args.report.parent.resolve()==E.resolve() and not args.report.exists(),'EXCLUSIVE_R66_REPORT_REQUIRED')
+     missing=[n for n in REQUIRED if not (E/n).is_file()]

@@ -1,0 +1,69 @@
+{
+  "status": "READ_ONLY_DESIGN_IMPLEMENTATION_NEXT_NOT_RUNTIME_PASS",
+  "base": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "strictThresholdNs": 5000000000,
+  "alreadyImplemented": "R41 has25ms header/bare negative-close reserve and five finite conservative TLS/raw samples. Repeating the reserve change is not a new fix. R13 old TCP diagnostic still expired atpost+5 and recorded max+577us.",
+  "confirmedGaps": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "finding": "post_bare_accept mints deadline after successful/PENDING native AcceptEx; time consumed preparing/posting is not charged.",
+      "fix": "Capture one original start before preparation, reject before actual AcceptEx if original alarm consumed; after actual post charge IO debt before checking lateness and requesting original cancel/close."
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "finding": "Owner poll sweeps expiry only atentry; work later in bounded IOCP/Frame batches may leave another due socket until next top-level poll.",
+      "fix": "One negative-only fixed4+1 service method at every bounded IOCP/Frame/retire boundary."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "finding": "Core processes returned native events and per-request worker delivery without interposed native deadline service.",
+      "fix": "Call same fixed owner service between each event/record and after worker delivery; propagate failures, never lose taken record."
+    }
+  ],
+  "outOfScope": [
+    "No accept+5 epoch rebasing",
+    "No listener rotation/SO_REUSEADDR",
+    "No SO_CONNECT_TIME seconds+1 rounding assumption",
+    "No new thread/pool/socket/Frame/request slot",
+    "No narrowing of original120s admitted request lifetime",
+    "No main/CI/installer/docs changes",
+    "No kernel ESTABLISHED timestamp or arbitrary OS hard-real-time proof"
+  ],
+  "ownedSourceBefore": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 15030,
+      "sha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 60788,
+      "sha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 39983,
+      "sha256": "47829d0fe74dd2a64af48fbb710bdee4b4af62131936e74a5ea3850cd5ddbb04"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 79649,
+      "sha256": "8406246c2bf96f4545e411670e83c120f7b12f017c7ada182b4090dda37f5cb3"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 59177,
+      "sha256": "02ae7eb6886bd1e415bcf5aba04cae12116195c5c509554ddde0c2b2a4073915"
+    }
+  ],
+  "originalEvidence": [
+    {
+      "path": "开发计划/验证记录/2026-10-30-tcp-frontdoor-round13.json",
+      "scope": "Original5/8 strict samples over5e9, max5000577000ns; retainsFAIL."
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third.json",
+      "scope": "Finite fourTLS+one raw conservative pre-local-connect samples PASS; strictP0 remainsNOT_VALIDATED."
+    }
+  ]
+}

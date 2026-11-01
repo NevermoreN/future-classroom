@@ -1,0 +1,76 @@
+{
+  "status": "PASS_TWO_DEDICATED_HIDDEN_FLOWS",
+  "normal": {
+    "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13152455,
+    "sha256": "0cd43e1660aed5c833d6aa11112ab3a87d6a7c717d2dd356f42ef0feca0bb417"
+  },
+  "sourceFreezeSha256": "cde114207fff867d6441ba4e49856b1f8310f011d0f00b262bee73f1976c03ad",
+  "scriptSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "operations": [
+    {
+      "kind": "visual",
+      "status": "PASS",
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--native-seconds",
+        "1",
+        "--subject-visuals",
+        "--report",
+        "/tmp/fc-round66-integration/evidence/windows-release-visual-first.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 8.286367052933201,
+      "resultStatus": "PASS",
+      "cleanup": "PASS",
+      "stdout": {
+        "bytes": 93,
+        "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "kind": "repair",
+      "status": "PASS",
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--native-seconds",
+        "1",
+        "--reinitialization",
+        "--report",
+        "/tmp/fc-round66-integration/evidence/windows-release-repair-first.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 18.445198223227635,
+      "resultStatus": "PASS",
+      "cleanup": "PASS",
+      "stdout": {
+        "bytes": 93,
+        "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ]
+}

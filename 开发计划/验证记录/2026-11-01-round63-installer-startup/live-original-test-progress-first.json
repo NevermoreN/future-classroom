@@ -1,0 +1,23 @@
+{
+  "sshPid": 2896,
+  "log": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-RustProbe-4ecbda02b44947f59f5768fc055773a9\\test-6.log",
+  "observation": {
+    "status": "OBSERVATION_ONLY_LIVE_ORIGINAL_TEST",
+    "bytes": 21462,
+    "tailLines": [
+      "test backend::voice::management::tests::management_requires_global_admin_and_completed_initial_password_change ... ok",
+      "test backend::voice::management::tests::management_revalidates_original_lease_health_and_runtime_after_the_writer_read ... ok",
+      "test backend::voice::management::tests::reviewed_change_rejects_identity_only_or_runtime_only_changes_with_unchanged_voice_revision ... ok",
+      "test backend::voice::management::tests::reviewed_enable_does_not_adopt_a_later_stop_after_its_commit ... ok",
+      "test backend::voice::management::tests::reviewed_writer_guard_rejects_identity_or_runtime_changed_after_disable_cas_before_enqueue ... ok",
+      "test backend::voice::management::tests::reviewed_writer_rechecks_exact_epoch_during_evaluation_and_immediately_before_commit ... ok",
+      "test backend::voice::native_participation::tests::only_one_native_domain_can_participate_and_registration_has_no_business_effects ... ok",
+      "test backend::voice::native_participation::tests::participation_never_blocks_atomic_independent_stop_or_extends_old_policy_authority ... ok",
+      "test backend::voice::native_participation::tests::terminal_database_jobs_do_not_authorize_helper_resume_while_a_domain_still_participates ... ok",
+      "test backend::voice::policy_handoff::tests::an_abandoned_post_commit_owner_never_publishes_committed_or_reopens_admission ... ok",
+      "test backend::voice::policy_handoff::tests::bounded_receipt_merges_contiguous_policy_epochs_but_never_an_independent_stop_gap ... ok",
+      ""
+    ]
+  },
+  "inputSha256": "be6f9dc7570f0a76b90496c0bc95c6aecd3d6a8396ad300b5c51cd2f18ba0a33"
+}

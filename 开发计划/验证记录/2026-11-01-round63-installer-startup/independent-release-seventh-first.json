@@ -1,0 +1,751 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_INDEPENDENT_SEVENTH_RELEASE_WIN11_FULL_AND_HIDDEN_FLOWS_REVIEW",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T06:42:59.928453+00:00",
+  "scope": "Read-only local terminal seventh release original receipts, actual artifact bytes and PE headers, frozen source identity and raw logs. No source/plan edits, Cargo, Windows, SSH, network or CI by reviewer. No listener/acceptance policy change.",
+  "sourceFreezeSha256": "63ac3e537fecaa89ffd8d11ce08ec144dd4e231ada95bc1fde776753b4c13af2",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "sha256": "bf2429588f8f79e35295335702bc757738a80e74ff2e227b5a2d1195d2f41843",
+      "worktreeAndMainMatchFrozen": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "sha256": "5d21ab12b6acc03f942de3dff6c61b9abfb7fe8a1f6bcb50afed92f267e2b22e",
+      "worktreeAndMainMatchFrozen": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "sha256": "2fd1cfdb5ce742b70575ebf4548dbebd5b91fa3f4ad63bd6b8ead1ee41251c99",
+      "worktreeAndMainMatchFrozen": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "sha256": "7b2c995d421d1524747cf5b76de622dbd19d8bb89d3ff0e30e778d5e79224082",
+      "worktreeAndMainMatchFrozen": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/installation_startup.rs",
+      "sha256": "88560eebf08a58a490b33b11bcbaa2ef85ab29a934006d820e2f07828b44309f",
+      "worktreeAndMainMatchFrozen": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "sha256": "b17ca9391cf7eb267113a156d3a0793fdfb96fe7c30cd34e677dab8e7ead0f4c",
+      "worktreeAndMainMatchFrozen": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "sha256": "a83fe4b049eb084823de5652c6105eee7717f797aef15236d96cfa8461a581ea",
+      "worktreeAndMainMatchFrozen": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+      "sha256": "f45dfb54e545d3b75e853db9da7f166bad06dfee249cb7efc120c8a5844d6f1b",
+      "worktreeAndMainMatchFrozen": true
+    }
+  ],
+  "binarySnapshot": {
+    "checkedBeforeAnyR65Reuse": true,
+    "count": 22,
+    "totalBytes": 105100520,
+    "allCurrentLocalBytesMatchOperation": true,
+    "allUploadedHashesMatchCurrentLocalAndOperation": true,
+    "files": [
+      {
+        "name": "fc-bootstrap.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "bytes": 13149487,
+        "sha256": "dc68907ed2b554cf37d7cb7a60feee49b130a9a571eb9722a000ed6d6d5fbb49",
+        "role": "product",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 2,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_ports-15b1ad689f79c490.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+        "bytes": 1184869,
+        "sha256": "15b1d9b157c40e8c5dddb5ec8aea8b0488ea598b67158b9fcffba2ffd4d84633",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_audio-e1b4eabc9ef1420f.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+        "bytes": 1246736,
+        "sha256": "3751abcb524a12f3569b0f18ebfb2996ad9c617d08592901112e94eddc9a53dd",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_presentation-b847dfa3b68d1237.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+        "bytes": 1853377,
+        "sha256": "0d60dcf0c41a3788db2168e66925099169da0ed363d83a99b9037dcca61c291f",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_security-2889fa9301b88e80.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+        "bytes": 1224276,
+        "sha256": "06203489e3bfc2e42d1f6e92f21945fbf042aec6429767242e9a57a85999023b",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_protocol-4316bb63b92dda4d.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+        "bytes": 1984046,
+        "sha256": "734b7b33219d27dd66e794a122940fddbb901896d7e2558dd62601a04d38139e",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_runtime-a09be73363edd23a.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+        "bytes": 1430273,
+        "sha256": "d6b88f004311c13bdb7a357d05e12c3fbc4336122f0a9845bab707cbff6afd8a",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_materials-f1a7d58c131e95d5.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+        "bytes": 2352875,
+        "sha256": "6e8a2cdf4958842139db30578fe121486f3ccb3b124dd9ef8966b6916fb11996",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_application-fb16268b5eff3acf.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+        "bytes": 1280300,
+        "sha256": "7c896c704e693a32613a5ccbc0fe8b6a20d97ccfad71085c1d30c5b71a8aa76f",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_domain-367747e306a1dd0e.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+        "bytes": 2386099,
+        "sha256": "0ee777ccc982a96e9574f837adc7f990bb29aa23546a0438111419715f9a141e",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_windows-e3f8369176e1b545.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_windows-e3f8369176e1b545.exe",
+        "bytes": 3641726,
+        "sha256": "dbb158f2e930859742f848a5edc59a82ef3d024310e5220a4bb7b321ea607b83",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "runtime_storage-0e708d04bae2889e.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/runtime_storage-0e708d04bae2889e.exe",
+        "bytes": 4984525,
+        "sha256": "264167b743e6c8d49d0e6750ac786ac188e5825db29ceaab1a92376563178d44",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "voice_limits_storage-f0677ddaab0e1941.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-f0677ddaab0e1941.exe",
+        "bytes": 5183579,
+        "sha256": "49bd7393b24ee24db108c1cad009e9e5d343dc077c6d54c74748b42deaa72e48",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "autostart_coordinator-74ff40b715302c3c.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-74ff40b715302c3c.exe",
+        "bytes": 5526465,
+        "sha256": "4349d7500f90dc91a2265c7629b2aa6384d802a4ad2f9fac668bb7c8163f4653",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "schedule_operations-48fa032341d76709.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/schedule_operations-48fa032341d76709.exe",
+        "bytes": 5777164,
+        "sha256": "9493126edcd27626f2b8cb5ec2e4430421b150531918f7ce03dd522016660add",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "business_storage-576d09efbb6083a0.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/business_storage-576d09efbb6083a0.exe",
+        "bytes": 6189170,
+        "sha256": "da915db9b8d7c2745f8970b44226f99dd65443d2c8e9e9bbef190df675db9b35",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "verify_web_assets-d1cacbf262e9f4f4.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/examples/verify_web_assets-d1cacbf262e9f4f4.exe",
+        "bytes": 1097057,
+        "sha256": "94255cd82f9081a06ad73251c1641844c8a076ec3c7614c904f742c3919f25cf",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+        "bytes": 8386971,
+        "sha256": "517cb07b3b92656790c898d95df5db17ef2e98b16e9fe9606bcf1f5235170998",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "calendar_execution_fence-c79d3cfb3961109e.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-c79d3cfb3961109e.exe",
+        "bytes": 5616157,
+        "sha256": "02dba8540d8741b2c2a96443d577552b395ee15819e65954cf65b190dd11ada8",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "voice_storage-05cf611acb952b21.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/voice_storage-05cf611acb952b21.exe",
+        "bytes": 5227841,
+        "sha256": "92ec54dd57c592cc7cbf446c5d7343c9267e1c432d9940430a4575aeaea20897",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_bootstrap-d2b8e39fd0668fa3.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-d2b8e39fd0668fa3.exe",
+        "bytes": 12406298,
+        "sha256": "81da84c9a73fb46cae8c62aa9e079c2fc66f610cc503e35c25588ed6b43b3b6c",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "fc_bootstrap-2d073072bc663873.exe",
+        "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-2d073072bc663873.exe",
+        "bytes": 12971229,
+        "sha256": "4a4453231a12000a78b8a5a42cc0254695c25cd7b6ffbb9a5927e5e706f7bb6e",
+        "role": "tests",
+        "peMachine": "0x014c",
+        "peMagic": "0x010b",
+        "peSubsystem": 3,
+        "peSubsystemVersion": [
+          4,
+          0
+        ]
+      }
+    ]
+  },
+  "releaseValidation": [
+    {
+      "record": "release-workspace-test-compile-seventh.json",
+      "sha256": "92c2017c8da824900cdb0a2d093bb09e15acf1aec9117aeeaf989a9c7ff4430e",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--workspace",
+        "--all-targets",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 672.2367344670929,
+      "originalBudgetSeconds": 900,
+      "rawLogsMatchHashesAndSizes": true
+    },
+    {
+      "record": "release-product-build-seventh.json",
+      "sha256": "80329ebe3575da0b0bbb47a3a5484a0309390fe081ed85f5af016e20546c5faf",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-bootstrap",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--message-format=json"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 0.5677567201200873,
+      "originalBudgetSeconds": 900,
+      "rawLogsMatchHashesAndSizes": true
+    },
+    {
+      "record": "release-strict-clippy-seventh.json",
+      "sha256": "114f61adf8ce2a2cc50bcb0869caa6034c82b8b243dff0a755486481965d8d11",
+      "command": [
+        "cargo",
+        "clippy",
+        "--release",
+        "--locked",
+        "--workspace",
+        "--all-targets",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSeconds": 98.41036592191085,
+      "originalBudgetSeconds": 900,
+      "rawLogsMatchHashesAndSizes": true
+    }
+  ],
+  "actualRuntime": {
+    "operationReceiptSha256": "3556e84333abbc806f08398e9e60f3c2b09a208339a50da7139022a51f21047e",
+    "reportSha256": "5684620550ca7eef24f84eac1ffdbce8f6ffe0ad4e352f7b8555ec350244d543",
+    "metadataSha256": "3508c4e534fc4ba65fb9f172d2a6ad930e21a998897cb0dd9838a0d8b520cea9",
+    "probeScriptSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+    "sourceUnchanged": true,
+    "scriptUnchanged": true,
+    "controllerStatus": "PASS_COMMAND",
+    "controllerExitCode": 0,
+    "controllerElapsedSeconds": 152.42254653503187,
+    "status": "PASS",
+    "cleanup": "PASS",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "harnesses": 21,
+    "passed": 1511,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 0,
+    "perHarnessOriginalBudgetSeconds": 900,
+    "testThreads": 2,
+    "nativeSeconds": 1,
+    "normalSha256": "dc68907ed2b554cf37d7cb7a60feee49b130a9a571eb9722a000ed6d6d5fbb49",
+    "fcWindowsPassed": 236,
+    "installerLifecycleOkLines": [
+      "test installer_lifecycle::tests::close_failure_retains_physical_owner_in_child_without_replacement ... ok",
+      "test installer_lifecycle::tests::common_startup_helper_does_not_enter_body_under_maintenance ... ok",
+      "test installer_lifecycle::tests::common_startup_helper_holds_during_success_body_until_checked_return ... ok",
+      "test installer_lifecycle::tests::common_startup_helper_retains_after_caught_panic_until_actual_process_exit ... ok",
+      "test installer_lifecycle::tests::common_startup_helper_retains_after_error_until_actual_process_exit ... ok",
+      "test installer_lifecycle::tests::coordination_rejects_gate_hardlink_alias_before_pending_or_school_data ... ok",
+      "test installer_lifecycle::tests::existing_broad_gate_dacl_is_rejected_without_repair_or_pending ... ok",
+      "test installer_lifecycle::tests::isolated_parent_delete_child_grant_is_rejected ... ok",
+      "test installer_lifecycle::tests::native_child ... ok",
+      "test installer_lifecycle::tests::malformed_or_torn_pending_is_negative_not_dead_owner_recovery ... ok",
+      "test installer_lifecycle::tests::original_expiry_never_renews_or_clears_negative_state ... ok",
+      "test installer_lifecycle::tests::os_parent_owner_trust_does_not_relax_exact_private_owner ... ok",
+      "test installer_lifecycle::tests::physical_maintenance_blocks_child_and_owner_loss_keeps_pending ... ok",
+      "test installer_lifecycle::tests::physical_shared_child_blocks_maintenance_until_actual_return ... ok",
+      "test installer_lifecycle::tests::producer_close_failure_remains_negative_after_original_process_exit ... ok",
+      "test installer_lifecycle::tests::receipt_before_actual_guardian_exit_cannot_clear_pending ... ok",
+      "test installer_lifecycle::tests::settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate ... ok"
+    ],
+    "harnessSummaries": [
+      {
+        "name": "fc_ports-15b1ad689f79c490.exe",
+        "binarySha256": "15b1d9b157c40e8c5dddb5ec8aea8b0488ea598b67158b9fcffba2ffd4d84633",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      },
+      {
+        "name": "fc_audio-e1b4eabc9ef1420f.exe",
+        "binarySha256": "3751abcb524a12f3569b0f18ebfb2996ad9c617d08592901112e94eddc9a53dd",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      },
+      {
+        "name": "fc_presentation-b847dfa3b68d1237.exe",
+        "binarySha256": "0d60dcf0c41a3788db2168e66925099169da0ed363d83a99b9037dcca61c291f",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+      },
+      {
+        "name": "fc_security-2889fa9301b88e80.exe",
+        "binarySha256": "06203489e3bfc2e42d1f6e92f21945fbf042aec6429767242e9a57a85999023b",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s"
+      },
+      {
+        "name": "fc_protocol-4316bb63b92dda4d.exe",
+        "binarySha256": "734b7b33219d27dd66e794a122940fddbb901896d7e2558dd62601a04d38139e",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 82 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+      },
+      {
+        "name": "fc_runtime-a09be73363edd23a.exe",
+        "binarySha256": "d6b88f004311c13bdb7a357d05e12c3fbc4336122f0a9845bab707cbff6afd8a",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s"
+      },
+      {
+        "name": "fc_materials-f1a7d58c131e95d5.exe",
+        "binarySha256": "6e8a2cdf4958842139db30578fe121486f3ccb3b124dd9ef8966b6916fb11996",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s"
+      },
+      {
+        "name": "fc_application-fb16268b5eff3acf.exe",
+        "binarySha256": "7c896c704e693a32613a5ccbc0fe8b6a20d97ccfad71085c1d30c5b71a8aa76f",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      },
+      {
+        "name": "fc_domain-367747e306a1dd0e.exe",
+        "binarySha256": "0ee777ccc982a96e9574f837adc7f990bb29aa23546a0438111419715f9a141e",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 148 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      },
+      {
+        "name": "fc_windows-e3f8369176e1b545.exe",
+        "binarySha256": "dbb158f2e930859742f848a5edc59a82ef3d024310e5220a4bb7b321ea607b83",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 236 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 25.75s"
+      },
+      {
+        "name": "runtime_storage-0e708d04bae2889e.exe",
+        "binarySha256": "264167b743e6c8d49d0e6750ac786ac188e5825db29ceaab1a92376563178d44",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s"
+      },
+      {
+        "name": "voice_limits_storage-f0677ddaab0e1941.exe",
+        "binarySha256": "49bd7393b24ee24db108c1cad009e9e5d343dc077c6d54c74748b42deaa72e48",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s"
+      },
+      {
+        "name": "autostart_coordinator-74ff40b715302c3c.exe",
+        "binarySha256": "4349d7500f90dc91a2265c7629b2aa6384d802a4ad2f9fac668bb7c8163f4653",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.13s"
+      },
+      {
+        "name": "schedule_operations-48fa032341d76709.exe",
+        "binarySha256": "9493126edcd27626f2b8cb5ec2e4430421b150531918f7ce03dd522016660add",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.21s"
+      },
+      {
+        "name": "business_storage-576d09efbb6083a0.exe",
+        "binarySha256": "da915db9b8d7c2745f8970b44226f99dd65443d2c8e9e9bbef190df675db9b35",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.52s"
+      },
+      {
+        "name": "verify_web_assets-d1cacbf262e9f4f4.exe",
+        "binarySha256": "94255cd82f9081a06ad73251c1641844c8a076ec3c7614c904f742c3919f25cf",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      },
+      {
+        "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+        "binarySha256": "517cb07b3b92656790c898d95df5db17ef2e98b16e9fe9606bcf1f5235170998",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 206 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.46s"
+      },
+      {
+        "name": "calendar_execution_fence-c79d3cfb3961109e.exe",
+        "binarySha256": "02dba8540d8741b2c2a96443d577552b395ee15819e65954cf65b190dd11ada8",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.76s"
+      },
+      {
+        "name": "voice_storage-05cf611acb952b21.exe",
+        "binarySha256": "92ec54dd57c592cc7cbf446c5d7343c9267e1c432d9940430a4575aeaea20897",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.72s"
+      },
+      {
+        "name": "fc_bootstrap-d2b8e39fd0668fa3.exe",
+        "binarySha256": "81da84c9a73fb46cae8c62aa9e079c2fc66f610cc503e35c25588ed6b43b3b6c",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 218 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.18s"
+      },
+      {
+        "name": "fc_bootstrap-2d073072bc663873.exe",
+        "binarySha256": "4a4453231a12000a78b8a5a42cc0254695c25cd7b6ffbb9a5927e5e706f7bb6e",
+        "exitCode": 0,
+        "timeoutSeconds": 900,
+        "originalSummary": "test result: ok. 339 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 64.82s"
+      }
+    ],
+    "controllerRawLogHashesAndSizesMatch": true
+  },
+  "hiddenFlows": {
+    "extraFlowControllerSha256": "2a94c1e6a4b3b10b417012458b2fff2579e04264322898663c63304a97a22a8a",
+    "status": "PASS_PUBLIC_VISUAL_REINITIALIZATION",
+    "flows": [
+      {
+        "steps": 20,
+        "rawIndexedStepNamesMatch": true,
+        "stepNames": [
+          "setup-administrator-fixture",
+          "create-bound-class-and-subjects",
+          "seed-current-lesson",
+          "management-lock-removes-session",
+          "hidden-desktop-rendered",
+          "native-public-button-without-session",
+          "public-catalog-only",
+          "cancel-without-change",
+          "new-native-public-entry",
+          "unassigned-review-without-write",
+          "local-account-lock-keeps-public-flow",
+          "explicit-public-change-closes",
+          "changed-desktop-rendered",
+          "old-scene-entry-rejected",
+          "new-native-restore-entry",
+          "explicit-public-restore-closes",
+          "restored-desktop-rendered",
+          "public-close-hides-chooser",
+          "physical-shared-workers-shutdown",
+          "isolated-deployment-cleanup"
+        ],
+        "originalPassMarker": "PUBLIC_DESKTOP_NATIVE_PASS steps=20 shared_workers=2 public_session=NONE database_reopen=NOT_EXERCISED change_restore=PASS old_scene=REJECTED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=2447",
+        "scope": "Synthetic protected deployment, actual hidden desktop button/native business choices/shared workers/SQLite public lesson change and restore with no account session, cancellation/old scene rejection/physical shutdown; independent process reopen NOT_EXERCISED, visible desktop/OS foreground/Seewo and three-system acceptance NOT_RUN",
+        "kind": "public",
+        "status": "PASS",
+        "cleanup": "PASS",
+        "normalSha256": "dc68907ed2b554cf37d7cb7a60feee49b130a9a571eb9722a000ed6d6d5fbb49",
+        "reportSha256": "5684620550ca7eef24f84eac1ffdbce8f6ffe0ad4e352f7b8555ec350244d543"
+      },
+      {
+        "steps": 22,
+        "rawIndexedStepNamesMatch": true,
+        "stepNames": [
+          "setup-global-admin",
+          "create-subject",
+          "open-joint-display",
+          "loaded-original-rgb",
+          "invalid-rgb-no-write",
+          "native-joint-draft-preview",
+          "lock-keeps-partial-draft",
+          "relogin-restores-draft",
+          "cancel-review-no-write",
+          "cancel-reloads-both",
+          "native-joint-save",
+          "readback-both-saved",
+          "native-palette-draft",
+          "rename-subject-preserves-color",
+          "stale-palette-save-rejected",
+          "cancel-reload-after-conflict",
+          "first-app-physical-shutdown",
+          "second-app-real-reopen",
+          "relogin-reopened-deployment",
+          "reopened-joint-state",
+          "second-app-physical-shutdown",
+          "isolated-deployment-cleanup"
+        ],
+        "originalPassMarker": "SUBJECT_VISUAL_NATIVE_PASS steps=22 shared_workers=2 real_sqlite_reopen=PASS joint_save=PASS stale_rejected=PASS synthetic_d2d=PASS colour_dialog=NOT_OPENED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=846",
+        "scope": "Synthetic protected deployment, actual hidden native controls/original shared workers/SQLite joint palette-display save, cancel, lock/nonsecret draft, stale palette rejection, rename colour preservation and independent app reopen; real synthetic hidden D2D only, visible colour dialog/foreground/Seewo and three-system acceptance NOT_RUN",
+        "kind": "visual",
+        "reportSha256": "9cdf7dc9da2ce1c43363a1de446552ca291f91ddc64ce894b7bdf34a96790ea8",
+        "status": "PASS",
+        "cleanup": "PASS",
+        "normalSha256": "dc68907ed2b554cf37d7cb7a60feee49b130a9a571eb9722a000ed6d6d5fbb49",
+        "controllerExitCode": 0,
+        "controllerElapsedSeconds": 8.141146736918017,
+        "rawControllerLogsMatch": true,
+        "platform": {
+          "caption": "Microsoft Windows 11 专业版",
+          "osArchitecture": "64-bit",
+          "build": "26300",
+          "version": "10.0.26300"
+        }
+      },
+      {
+        "childProcesses": 3,
+        "originalPassMarker": "reinitialization_native=PASS child_processes=3 cancel_exact_preservation=PASS default_and_partial_confirmation_denied=PASS full_reset=PASS new_dpapi=PASS new_installation=PASS native_setup=PASS old_account_absent=PASS old_backup_direct_restore_denied=PASS external_saved_copy=UNCHANGED foreground=UNTOUCHED real_run=UNTOUCHED isolated_cleanup=PASS",
+        "scope": "Synthetic hidden native controls, cancel exact bytes, explicit full reset, new process DPAPI and school/admin initialization, old backup installation rejection; foreground and real Run untouched; hardware power loss NOT_RUN",
+        "kind": "repair",
+        "reportSha256": "b6a45fb6f9f0c86d45a83bae85aa7c3c78fada5cc218344e8e6001c6c613616d",
+        "status": "PASS",
+        "cleanup": "PASS",
+        "normalSha256": "dc68907ed2b554cf37d7cb7a60feee49b130a9a571eb9722a000ed6d6d5fbb49",
+        "controllerExitCode": 0,
+        "controllerElapsedSeconds": 17.780918232165277,
+        "rawControllerLogsMatch": true,
+        "platform": {
+          "caption": "Microsoft Windows 11 专业版",
+          "osArchitecture": "64-bit",
+          "build": "26300",
+          "version": "10.0.26300"
+        }
+      }
+    ]
+  },
+  "preservedDebugFailure": {
+    "qualificationSha256": "c6900ad712216821dba8554f84b8572ad7475f8806e61f4628d6523bfc8a487f",
+    "originalOperationSha256": "5139258ff4f523c4f5da6a5db580ee56c90f45c74c1707b92e141625cfa6c05b",
+    "status": "FAIL_TIMEOUT_SAME_SOURCE_DEBUG",
+    "meaning": "Original debug seventh attempt completed only6 harnesses/640 passes, then original900s bootstrap harness timeout. Live66858B prefix was a pre-terminal UTF16 snapshot; retained timeout output is a64KiB bounded tail, not full final raw. Release success does not overwrite/debug-relabel that failure.",
+    "profileDifference": "Same frozen source, release optimization and distinct exact executable hashes. Original per-command/per-harness900s budget retained; no KDF/rules/source shortcut or expanded timeout claimed."
+  },
+  "limits": [
+    "Actual authorized Win11 WOW64 run of GNU release candidate, not Win7/Win10 or formal MSVC acceptance.",
+    "17 native lifecycle tests qualify their synthetic private same-SID gates/owners; production manual/autostart/repair namespace behavior and complete MSI broker/hooks/Join-End authentication are not thereby fully qualified.",
+    "Public20/visual22/repair are hidden synthetic protected deployment flows, not visible Seewo/PPT/touch/DPI or real logon/reboot/installation evidence.",
+    "R64 different-source1494 results are not mixed into this seventh-source1511 count.",
+    "P0 first-TCP scope audit itself changes no threshold, deletes no historical failure and permits no production listener.",
+    "Only the currently frozen R63 increment is qualified here; later R65 source/binary modifications require their own binding and appropriate validation."
+  ],
+  "issues": [],
+  "reviewComplete": true
+}

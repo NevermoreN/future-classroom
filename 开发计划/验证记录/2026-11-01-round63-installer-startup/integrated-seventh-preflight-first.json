@@ -1,0 +1,7 @@
+{
+  "status": "FAIL_PREFLIGHT_BEFORE_REMOTE_CALL",
+  "operation": "run-integrated-seventh.py",
+  "exitCode": 1,
+  "reason": "Default cargo test --workspace produced 20 harnesses, not CI all-targets 21; helper rejected before creating operation report or any Remote/SSH",
+  "action": "Run same seventh source with explicit --all-targets including example harness, retaining original20 compile PASS; no production change or altered test budget"
+}

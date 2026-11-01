@@ -1,0 +1,154 @@
+{
+  "status": "PASS_COMMAND",
+  "command": [
+    "python3",
+    "-B",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round63-installer-owner/evidence/release-workspace-test-compile-seventh.stdout.log",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--public-desktop",
+    "--report",
+    "/tmp/fc-round63-installer-owner/evidence/windows-release-seventh-first.json"
+  ],
+  "sourceFreezeSha256": "63ac3e537fecaa89ffd8d11ce08ec144dd4e231ada95bc1fde776753b4c13af2",
+  "scriptSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "metadataSha256": "3508c4e534fc4ba65fb9f172d2a6ad930e21a998897cb0dd9838a0d8b520cea9",
+  "normal": {
+    "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13149487,
+    "sha256": "dc68907ed2b554cf37d7cb7a60feee49b130a9a571eb9722a000ed6d6d5fbb49"
+  },
+  "tests": [
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+      "bytes": 1184869,
+      "sha256": "15b1d9b157c40e8c5dddb5ec8aea8b0488ea598b67158b9fcffba2ffd4d84633"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+      "bytes": 1246736,
+      "sha256": "3751abcb524a12f3569b0f18ebfb2996ad9c617d08592901112e94eddc9a53dd"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+      "bytes": 1853377,
+      "sha256": "0d60dcf0c41a3788db2168e66925099169da0ed363d83a99b9037dcca61c291f"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+      "bytes": 1224276,
+      "sha256": "06203489e3bfc2e42d1f6e92f21945fbf042aec6429767242e9a57a85999023b"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+      "bytes": 1984046,
+      "sha256": "734b7b33219d27dd66e794a122940fddbb901896d7e2558dd62601a04d38139e"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+      "bytes": 1430273,
+      "sha256": "d6b88f004311c13bdb7a357d05e12c3fbc4336122f0a9845bab707cbff6afd8a"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+      "bytes": 2352875,
+      "sha256": "6e8a2cdf4958842139db30578fe121486f3ccb3b124dd9ef8966b6916fb11996"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+      "bytes": 1280300,
+      "sha256": "7c896c704e693a32613a5ccbc0fe8b6a20d97ccfad71085c1d30c5b71a8aa76f"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+      "bytes": 2386099,
+      "sha256": "0ee777ccc982a96e9574f837adc7f990bb29aa23546a0438111419715f9a141e"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_windows-e3f8369176e1b545.exe",
+      "bytes": 3641726,
+      "sha256": "dbb158f2e930859742f848a5edc59a82ef3d024310e5220a4bb7b321ea607b83"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/runtime_storage-0e708d04bae2889e.exe",
+      "bytes": 4984525,
+      "sha256": "264167b743e6c8d49d0e6750ac786ac188e5825db29ceaab1a92376563178d44"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-f0677ddaab0e1941.exe",
+      "bytes": 5183579,
+      "sha256": "49bd7393b24ee24db108c1cad009e9e5d343dc077c6d54c74748b42deaa72e48"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-74ff40b715302c3c.exe",
+      "bytes": 5526465,
+      "sha256": "4349d7500f90dc91a2265c7629b2aa6384d802a4ad2f9fac668bb7c8163f4653"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/schedule_operations-48fa032341d76709.exe",
+      "bytes": 5777164,
+      "sha256": "9493126edcd27626f2b8cb5ec2e4430421b150531918f7ce03dd522016660add"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/business_storage-576d09efbb6083a0.exe",
+      "bytes": 6189170,
+      "sha256": "da915db9b8d7c2745f8970b44226f99dd65443d2c8e9e9bbef190df675db9b35"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/examples/verify_web_assets-d1cacbf262e9f4f4.exe",
+      "bytes": 1097057,
+      "sha256": "94255cd82f9081a06ad73251c1641844c8a076ec3c7614c904f742c3919f25cf"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+      "bytes": 8386971,
+      "sha256": "517cb07b3b92656790c898d95df5db17ef2e98b16e9fe9606bcf1f5235170998"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-c79d3cfb3961109e.exe",
+      "bytes": 5616157,
+      "sha256": "02dba8540d8741b2c2a96443d577552b395ee15819e65954cf65b190dd11ada8"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/voice_storage-05cf611acb952b21.exe",
+      "bytes": 5227841,
+      "sha256": "92ec54dd57c592cc7cbf446c5d7343c9267e1c432d9940430a4575aeaea20897"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-d2b8e39fd0668fa3.exe",
+      "bytes": 12406298,
+      "sha256": "81da84c9a73fb46cae8c62aa9e079c2fc66f610cc503e35c25588ed6b43b3b6c"
+    },
+    {
+      "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-2d073072bc663873.exe",
+      "bytes": 12971229,
+      "sha256": "4a4453231a12000a78b8a5a42cc0254695c25cd7b6ffbb9a5927e5e706f7bb6e"
+    }
+  ],
+  "scope": "Actual Win11/WOW64 release-profile GNU 21 harnesses and dedicated hidden public probe; visual and repair are separate operations; no actual production namespace, Win7/10 or MSI/broker claim",
+  "exitCode": 0,
+  "elapsedSeconds": 152.42254653503187,
+  "scriptUnchanged": true,
+  "sourceUnchanged": true,
+  "resultStatus": "PASS",
+  "cleanup": "PASS",
+  "stdout": {
+    "bytes": 947,
+    "sha256": "e179e643884aea68999279117e29d443389605a047b23e57afd6f154461c1248"
+  },
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

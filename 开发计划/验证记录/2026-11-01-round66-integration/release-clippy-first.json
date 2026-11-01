@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "command": [
+    "cargo",
+    "clippy",
+    "--release",
+    "--locked",
+    "--workspace",
+    "--all-targets",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "/tmp/fc-round63-installer-owner/worktree",
+  "sourceFreezeSha256": "cde114207fff867d6441ba4e49856b1f8310f011d0f00b262bee73f1976c03ad",
+  "originalBudgetSeconds": 900,
+  "startedUtc": "2026-11-01T06:52:07.788565+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 20.15308423503302,
+  "stdoutBytes": 0,
+  "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrBytes": 251,
+  "stderrSha256": "4f2d649692d48202603b07fbb635e7eceab9e47af5e89a80f808124f945c2d0a",
+  "sourceUnchanged": true
+}

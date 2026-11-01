@@ -8,6 +8,8 @@ mod calendar_download_probe;
 #[cfg(windows)]
 mod credential_probe;
 #[cfg(windows)]
+mod installation_startup;
+#[cfg(windows)]
 mod material_helper;
 #[cfg(windows)]
 mod reinitialize_application;

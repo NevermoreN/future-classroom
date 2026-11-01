@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "status": "FOURTH_SOURCE_FROZEN_COMPILER_RUNTIME_PENDING_LIB_FMT_ORDER_NOTE",
+  "recordedUtc": "2026-11-01T05:53:40.664514+00:00",
+  "head": "5ef37e5c5c035a8559508138eec0845cf28918a4",
+  "worktree": "/tmp/fc-round63-installer-owner/worktree",
+  "thirdFreezeSha256": "2d16ea408f8d224df8d7e557231ed2b094e6450d13ac4e8cffd145e09f233136",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "before": {
+        "present": true,
+        "bytes": 907,
+        "sha256": "06b95dcd8827256beea7652b6e2dc651d479d0b8d32790baf46792fdc4de50c0"
+      },
+      "after": {
+        "bytes": 907,
+        "sha256": "06b95dcd8827256beea7652b6e2dc651d479d0b8d32790baf46792fdc4de50c0"
+      },
+      "changed": false
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "before": {
+        "present": true,
+        "bytes": 7673,
+        "sha256": "d8d246263da7ca9e5ab73bc665688ff494bbb49ada7adea5bd5549b855e76618"
+      },
+      "after": {
+        "bytes": 9511,
+        "sha256": "f2f892aff89a8b7e2f3edb313ed926760a22b7b442fa690feaee9015ba827a59"
+      },
+      "changed": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "before": {
+        "present": true,
+        "bytes": 35228,
+        "sha256": "aba2aac145976dca30814f895647bab63180559a9911b9b100787fcecb2bc920"
+      },
+      "after": {
+        "bytes": 35371,
+        "sha256": "db54f17a05f91b2c30d2587d90525b935fc371e8f68cfd004abb300174db2b8b"
+      },
+      "changed": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "before": {
+        "present": true,
+        "bytes": 18187,
+        "sha256": "0cdb5ad9ecc6085d7f38da7aa4f856692494d075fde59ade297ae1d70151dd51"
+      },
+      "after": {
+        "bytes": 22174,
+        "sha256": "7b2c995d421d1524747cf5b76de622dbd19d8bb89d3ff0e30e778d5e79224082"
+      },
+      "changed": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/installation_startup.rs",
+      "before": {
+        "present": false
+      },
+      "after": {
+        "bytes": 850,
+        "sha256": "88560eebf08a58a490b33b11bcbaa2ef85ab29a934006d820e2f07828b44309f"
+      },
+      "changed": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "before": {
+        "present": true,
+        "bytes": 21191,
+        "sha256": "22fde2cbcbfd12d188c4c1bf1b4b6744226933869bf87f126e8775b4cb7cef63"
+      },
+      "after": {
+        "bytes": 21233,
+        "sha256": "b17ca9391cf7eb267113a156d3a0793fdfb96fe7c30cd34e677dab8e7ead0f4c"
+      },
+      "changed": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "before": {
+        "present": true,
+        "bytes": 260347,
+        "sha256": "9924f860568ef6adf521411caa01a5331674b6deccdfc027963b7b9fe4794671"
+      },
+      "after": {
+        "bytes": 260404,
+        "sha256": "a83fe4b049eb084823de5652c6105eee7717f797aef15236d96cfa8461a581ea"
+      },
+      "changed": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+      "before": {
+        "present": true,
+        "bytes": 23662,
+        "sha256": "dcadeffda5381ec202f077aec780048e48e16ad9ea2ab2be7ae384496f9ec5f0"
+      },
+      "after": {
+        "bytes": 23731,
+        "sha256": "f45dfb54e545d3b75e853db9da7f166bad06dfee249cb7efc120c8a5844d6f1b"
+      },
+      "changed": true
+    }
+  ],
+  "patch": {
+    "path": "implementation-fourth.patch",
+    "bytes": 12784,
+    "sha256": "56acb4de6eec70a8af5bcc8e4dee468252f6557face021cba4532f8b73ffde7a"
+  },
+  "checks": [
+    {
+      "name": "all-eight-format-check",
+      "exitCode": 1,
+      "qualification": "Unchanged first/second/third lib.rs module-order only: host before installer_lifecycle. Source kept frozen at root instruction; no false PASS.",
+      "stdoutSha256": "00512154171829e721821ca15b0a34e0a6d857f98747aae3bbe514b8ddc3085d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rustfmt-scoped",
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "--check",
+        "crates/fc-windows/src/installer_lifecycle.rs",
+        "crates/fc-windows/src/installer_lifecycle/native.rs",
+        "crates/fc-windows/src/installer_lifecycle/tests.rs",
+        "crates/fc-bootstrap/src/installation_startup.rs",
+        "crates/fc-bootstrap/src/main.rs",
+        "crates/fc-bootstrap/src/application.rs",
+        "crates/fc-bootstrap/src/reinitialize_application.rs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "architecture",
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 71,
+      "stdoutSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "diffcheck",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tracked-scope",
+      "paths": [
+        "crates/fc-bootstrap/src/application.rs",
+        "crates/fc-bootstrap/src/main.rs",
+        "crates/fc-bootstrap/src/reinitialize_application.rs",
+        "crates/fc-windows/src/lib.rs"
+      ],
+      "passed": true
+    }
+  ],
+  "newApi": {
+    "signature": "pub fn with_startup_lease<E>(&InstallIdentity, impl FnOnce()->std::result::Result<(),E>) -> installer_lifecycle::Result<std::result::Result<(),E>>",
+    "unitOnly": "Only Ok(()) leaves success path; no success payload returning a live owner. Trusted body must actually join/reap producers first.",
+    "holding": "Original actual StartupLease is immediately inside ManuallyDrop plus unique armed StartupHold. Body Err or panic-unwind transfers its original native capabilities to the same fixed retention slot, without native Close/new claim. Sticky prevents replacement until actual process exit.",
+    "success": "Unit success disarms/takes original exactly once then checked try_release; close failure retains via original ledger and never reports Released."
+  },
+  "bootstrap": {
+    "privateModule": "cfgWindows installation_startup.rs; only safe calls, bootstrap forbid unsafe preserved.",
+    "realEntrypoints": [
+      "application::run(false) manual",
+      "application::run(true) autostart",
+      "reinitialize_application::run() repair"
+    ],
+    "order": "Common gate is acquired before DataPaths::program_data lookup; then encloses original run/full physical shutdown/join.",
+    "isolatedProbes": "Existing run_at/run_at_with remain isolated and do not claim production coordination root.",
+    "repairHandoff": "Original successful physical inner shutdown may spawn --repair; both shared gates cooperate. Maintenance winner makes repair fail before data access. No unguarded storage code introduced.",
+    "ux": "Plain maintenance/startup messages, no account/login permission added to desktop buttons."
+  },
+  "tests": {
+    "count": 17,
+    "names": [
+      "native_child",
+      "physical_shared_child_blocks_maintenance_until_actual_return",
+      "physical_maintenance_blocks_child_and_owner_loss_keeps_pending",
+      "receipt_before_actual_guardian_exit_cannot_clear_pending",
+      "malformed_or_torn_pending_is_negative_not_dead_owner_recovery",
+      "original_expiry_never_renews_or_clears_negative_state",
+      "close_failure_retains_physical_owner_in_child_without_replacement",
+      "coordination_rejects_gate_hardlink_alias_before_pending_or_school_data",
+      "existing_broad_gate_dacl_is_rejected_without_repair_or_pending",
+      "isolated_parent_delete_child_grant_is_rejected",
+      "producer_close_failure_remains_negative_after_original_process_exit",
+      "settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate",
+      "os_parent_owner_trust_does_not_relax_exact_private_owner",
+      "common_startup_helper_does_not_enter_body_under_maintenance",
+      "common_startup_helper_holds_during_success_body_until_checked_return",
+      "common_startup_helper_retains_after_error_until_actual_process_exit",
+      "common_startup_helper_retains_after_caught_panic_until_actual_process_exit"
+    ],
+    "newTests": [
+      "common_startup_helper_does_not_enter_body_under_maintenance",
+      "common_startup_helper_holds_during_success_body_until_checked_return",
+      "common_startup_helper_retains_after_error_until_actual_process_exit",
+      "common_startup_helper_retains_after_caught_panic_until_actual_process_exit"
+    ],
+    "filter": "installer_lifecycle::tests::",
+    "execution": "NOT_RUN_FOURTH",
+    "scope": "Actual private Win32 roots and original children in source. Exclusive maintenance denies common body/synthetic-data creation. Success body holds shared gate; after body error or caught panic, child deliberately stays alive and parent maintenance remains Busy until actual child exit."
+  },
+  "preserved": "All first/second/third source and runtime originals remain unchanged. Third valid Windows runtime result does not validate fourth source.",
+  "formatterCorrection": "Initial edition2024 direct rustfmt traversed bootstrap children; formatting-only unintended changes restored exact HEAD and scoped edits reapplied. Final tracked scope verified. Current edition2021 skip_children modified-seven fmt PASS. Unchanged lib module-order note remains frozen for root unified formatting; actual failure raw retained.",
+  "notExecuted": [
+    "Cargo/typecheck",
+    "Clippy",
+    "Windows/SSH",
+    "MSI/install",
+    "CI"
+  ],
+  "remaining": [
+    "Root unified fmt, build, strict lint and actual helper runtime tests",
+    "MSI broker/package hooks and Run ownership remain unimplemented",
+    "Win7/Win10/visible Seewo/logon/reboot separate acceptance"
+  ],
+  "dependenciesChanged": false
+}

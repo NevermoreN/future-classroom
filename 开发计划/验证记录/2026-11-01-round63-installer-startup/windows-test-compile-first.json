@@ -1,0 +1,20 @@
+{
+  "status": "PASS_COMPILE_ONLY",
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "-p",
+    "fc-windows",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "scope": "Actual GNU Windows test compilation only, isolated R63 worktree/target; no Windows execution",
+  "startedUtc": "2026-11-01T05:27:03.205058+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 73.44723906787112,
+  "stdoutSha256": "3ec431003bfad03e4495d04dc23c3e33860561c52081abed3c3f2a2261714738",
+  "stderrSha256": "2b7e51670bcc198bb71ee06b157ffa1309975247a9fe8be6b5d735d8332fadea"
+}

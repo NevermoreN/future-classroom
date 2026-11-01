@@ -16,6 +16,8 @@ pub use native::{probe, program_data, InstanceGuard, NativeProbeReport, SystemRa
 #[cfg(windows)]
 pub mod host;
 #[cfg(windows)]
+pub mod installer_lifecycle;
+#[cfg(windows)]
 pub mod system;
 #[cfg(windows)]
 pub mod workbench;

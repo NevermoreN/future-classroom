@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "status": "FROZEN_SOURCE_CANDIDATE_NOT_COMPILED_OR_RUN",
+  "createdUtc": "2026-11-01T05:25:08.593146+00:00",
+  "worktree": "/tmp/fc-round63-installer-owner/worktree",
+  "head": "5ef37e5c5c035a8559508138eec0845cf28918a4",
+  "branch": "codex/installer-owner",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "before": {
+        "present": true,
+        "bytes": 862,
+        "sha256": "696c61b1aa08a56ed15e64412230c14b18e6ac1ac91aebd08a492d2e8cfb2677"
+      },
+      "after": {
+        "bytes": 907,
+        "sha256": "06b95dcd8827256beea7652b6e2dc651d479d0b8d32790baf46792fdc4de50c0"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "before": {
+        "present": false
+      },
+      "after": {
+        "bytes": 7427,
+        "sha256": "633d834531c6e11e731b7732749514a1bd6a999bfba11f0cfba0741b4fcca5ce"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "before": {
+        "present": false
+      },
+      "after": {
+        "bytes": 29878,
+        "sha256": "afc2dead2d69389921fdf0c76772198b007edc05c10f2b5084bf1309342d46cd"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "before": {
+        "present": false
+      },
+      "after": {
+        "bytes": 13734,
+        "sha256": "3b5667b830ed2fdc1f07e9f3a245607de1b4933d691f5c6dcdf9409afeaab374"
+      }
+    }
+  ],
+  "patch": {
+    "path": "implementation-first.patch",
+    "bytes": 53070,
+    "sha256": "6c998b559607f599e1b9d3aec5a1b3bf32c5776ae11d5b596e4287143d06ec90"
+  },
+  "checks": [
+    {
+      "name": "rustfmt",
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2024",
+        "--check",
+        "crates/fc-windows/src/installer_lifecycle.rs",
+        "crates/fc-windows/src/installer_lifecycle/native.rs",
+        "crates/fc-windows/src/installer_lifecycle/tests.rs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "architecture",
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 71,
+      "stdoutSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "diffcheck",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "tests": {
+    "count": 9,
+    "names": [
+      "native_child",
+      "physical_shared_child_blocks_maintenance_until_actual_return",
+      "physical_maintenance_blocks_child_and_owner_loss_keeps_pending",
+      "receipt_before_actual_guardian_exit_cannot_clear_pending",
+      "malformed_or_torn_pending_is_negative_not_dead_owner_recovery",
+      "original_expiry_never_renews_or_clears_negative_state",
+      "close_failure_retains_physical_owner_in_child_without_replacement",
+      "coordination_rejects_gate_hardlink_alias_before_pending_or_school_data",
+      "existing_broad_gate_dacl_is_rejected_without_repair_or_pending"
+    ],
+    "windowsFilter": "installer_lifecycle::tests::",
+    "nativeChildEntry": "installer_lifecycle::tests::native_child",
+    "executed": false,
+    "scope": "Actual Win32 and retained-original-child cross-process tests in source only. Close-fault injection is a controlled refusal test in an independent child, not an observed OS CloseHandle failure."
+  },
+  "api": {
+    "discovery": "InstallIdentity::for_current_user() -> Result<InstallIdentity>; opaque current SID plus OS-resolved LocalAppData, fixed upgrade family. No caller path/SID/property.",
+    "startup": "LifecycleGate::acquire_startup(&identity) -> Result<StartupLease>; shared read gate, Pending absence under same retained gate. Explicit try_release(&mut self), no positive Drop receipt.",
+    "maintenance": "LifecycleGate::try_begin_maintenance(&identity, MaintenanceOperation, original_deadline:Instant) -> Result<MaintenanceOwner>; exclusive same physical gate; original UUID and Pending inode create-new/write/Flush/readback.",
+    "physicalGuardian": "MaintenanceOwner::watch_guardian(&Child) -> GuardianIdentity; duplicate original process object, exact current-user token, PID/FILETIME. No arbitrary command/path launch.",
+    "settle": "record_settlement(Settlement) requires original OperationId+guardian identity, Join/End0, broker effects_reconciled and original process signaled with exit0. try_release rechecks original deadline, Pending inode/bytes and actual guardian return; explicit handle-based deletion and checked closes."
+  },
+  "resources": {
+    "nativeHandlesPerOwnerMax": 64,
+    "processOwnerClaimsMax": 8,
+    "retention": "Fixed process-global ledger per original claim. Close failure retains remaining raw handle capabilities, sticky rejects all new operations; no native reuse/retry, no unsafe Send/Sync. Process exit final recovery.",
+    "pathsUtf16Max": 1023,
+    "ancestorCountMax": 48,
+    "pendingMaxBytes": 4096,
+    "nativeBufferBytes": 4096,
+    "threadsPoolsServicesAdded": 0,
+    "dependenciesFeaturesChanged": false
+  },
+  "security": {
+    "root": "LocalAppData/FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5; outside Programs and school data.",
+    "path": "Fixed local drive only; all ancestors open reparse-self and reject reparse; retained no-DELETE directory pins; regular files one hardlink only. No generic temporary/user path public API.",
+    "acl": "LocalAppData exact token owner and valid DACL without effective untrusted write/delete/owner/ACL grants; no mutation/repair. Own root/gate/Pending exact protected two allow ACEs current SID+SYSTEM and exact current SID owner; handle-based queries. Service tokens refused.",
+    "negative": "Any Pending presence blocks; malformed/torn/unknown/no guardian/owner dead/deadline expired never implies liveness or release. Drop never deletes Pending. Missing Pending after an owner has claimed it cannot pass exact inode/bytes verification.",
+    "testCleanup": "Test-only random namespace injection and exact known file removal after actual child reap; no recursive production deletion."
+  },
+  "boundaries": [
+    "Not wired into normal/autostart/repair or MSI/broker; no claim current product protected.",
+    "Settlement is trusted broker input, not an authenticated IPC receipt. Broker must still bind actual installed helper image/hash/engine transaction, reconcile exact effects and handle rollback skipped errors before setting effects_reconciled. No complete MSI lifecycle approval here.",
+    "No stale Pending recovery, automatic timeout cleanup, Run mutation, school-data access, application start, registry/services/firewall/trust changes.",
+    "No universal power-failure guarantee from FlushFileBuffers; real reboot/fault cases pending.",
+    "No Cargo/Windows/SSH/CI/install performed. Win7/Win10/Win11 runtime qualification separate; root owns unified build and tests."
+  ],
+  "primarySources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew",
+    "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers",
+    "https://learn.microsoft.com/en-us/windows/win32/api/aclapi/nf-aclapi-getsecurityinfo"
+  ],
+  "unchangedNotRequested": [
+    "Cargo.toml",
+    "Cargo.lock",
+    "bootstrap",
+    "packaging",
+    "plans",
+    "main worktree"
+  ]
+}

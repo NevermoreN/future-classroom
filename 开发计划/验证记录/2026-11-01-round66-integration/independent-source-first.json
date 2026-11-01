@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_INDEPENDENT_COMBINED_SOURCE_REVIEW_ONLY_NO_CONCRETE_NEW_BUG_FOUND",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T06:52:07.534117+00:00",
+  "freezeSha256": "cde114207fff867d6441ba4e49856b1f8310f011d0f00b262bee73f1976c03ad",
+  "baseSource": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "parentFreezes": {
+    "r63SourceFreezeSha256": "63ac3e537fecaa89ffd8d11ce08ec144dd4e231ada95bc1fde776753b4c13af2",
+    "r65SourceFreezeSha256": "9453cc51b82c0ccc9f8bbb1ab17ee4bfd4ce66c2ce0070234899d5ac26d9c4a5"
+  },
+  "scope": "Read-only integrated13 source and all813 frozen audit entries on main and actual compile worktree. Does not execute Cargo, Windows, SSH, network or runtime and does not infer results from ongoing compilation. Writes only this report/digest in active R66 evidence; no R63/R64/R65 archive or target writes.",
+  "identity": {
+    "integratedFiles": [
+      {
+        "path": "crates/fc-bootstrap/src/application.rs",
+        "bytes": 260404,
+        "sha256": "a83fe4b049eb084823de5652c6105eee7717f797aef15236d96cfa8461a581ea"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/installation_startup.rs",
+        "bytes": 850,
+        "sha256": "88560eebf08a58a490b33b11bcbaa2ef85ab29a934006d820e2f07828b44309f"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/main.rs",
+        "bytes": 21233,
+        "sha256": "b17ca9391cf7eb267113a156d3a0793fdfb96fe7c30cd34e677dab8e7ead0f4c"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+        "bytes": 23731,
+        "sha256": "f45dfb54e545d3b75e853db9da7f166bad06dfee249cb7efc120c8a5844d6f1b"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+        "bytes": 59397,
+        "sha256": "42feacea1410c3968734c9bc39d9c09c7c647095afeb29a9dba18800a335491f"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle.rs",
+        "bytes": 9506,
+        "sha256": "5d21ab12b6acc03f942de3dff6c61b9abfb7fe8a1f6bcb50afed92f267e2b22e"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+        "bytes": 35343,
+        "sha256": "2fd1cfdb5ce742b70575ebf4548dbebd5b91fa3f4ad63bd6b8ead1ee41251c99"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+        "bytes": 22174,
+        "sha256": "7b2c995d421d1524747cf5b76de622dbd19d8bb89d3ff0e30e778d5e79224082"
+      },
+      {
+        "path": "crates/fc-windows/src/lib.rs",
+        "bytes": 907,
+        "sha256": "bf2429588f8f79e35295335702bc757738a80e74ff2e227b5a2d1195d2f41843"
+      },
+      {
+        "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+        "bytes": 61439,
+        "sha256": "e6a4938e8c096ac509a03e75345b847cedda795aa7cb2ef1d6524a2efdc964fd"
+      },
+      {
+        "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+        "bytes": 16364,
+        "sha256": "a7cbaf2a17af2f01280871f9b46c404430e1ef63e79293b18a476ce8452dd80b"
+      },
+      {
+        "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+        "bytes": 40331,
+        "sha256": "48fcff62625fdda506d6a4d6039b67190fea951e3b991bb3f880fb640274a783"
+      },
+      {
+        "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+        "bytes": 86763,
+        "sha256": "5c7a68b887f572ee511ce9db2be017e7d97c727d22c9f4e3e97ef4d92fef74d1"
+      }
+    ],
+    "exactParentUnionWithoutAdditionalMergeLogic": true,
+    "trackedChangedSourceFiles": 9,
+    "newSourceFiles": 4,
+    "all813UniqueRows": true,
+    "mainAndActualCompileWorktreeBytesAndShaChecks": 1626,
+    "missingOrMismatched": 0,
+    "inputScopeQualificationSha256": "9e73383b5ca3caded0ff34d2750d5d01ad8842f568d69cc65a3b9d03444be589",
+    "currentCrateRustCargoConfigurationRows": 436,
+    "historicalEvidenceSnapshotRowsNotCompilerInputs": 377,
+    "interpretation": "813 is the frozen recursive audit domain, not a statement that rustc compiled813 files. Current source/config domain has436 entries;377 historical snapshots are byte-identity evidence only."
+  },
+  "unchangedRelevantBoundaries": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/desktop_lesson.rs",
+      "sha256": "b5f820866b5edef66d890c6ff1c5aacafe6eb995e00d568279a136be0c3d57e2",
+      "matchesBaseAndMain": true
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "sha256": "7766d77c5d9c99cf30f64fa8f3ef99f888210d6c08c81ab274fbd07f75759667",
+      "matchesBaseAndMain": true
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "sha256": "1b78d293546f3cf289a3d6ead8c9e21c11c3b85db3b25be6f817164f63087c1c",
+      "matchesBaseAndMain": true
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/public_inputs_tests.rs",
+      "sha256": "4617d71ac4ee1910bdc2bb3daef16ac4a5aa335692c59e885539832e83b3d1bc",
+      "matchesBaseAndMain": true
+    },
+    {
+      "path": "Cargo.toml",
+      "sha256": "95d5c4a52c154ef80ae54a42dc228e081bb3956a0ede5e4260b967d723fd7de7",
+      "matchesBaseAndMain": true
+    },
+    {
+      "path": "Cargo.lock",
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+      "matchesBaseAndMain": true
+    },
+    {
+      "path": ".cargo/config.toml",
+      "sha256": "c9f891471ee47afd946b8ee0142233c51fa5d85b79c9474301285aa044f4a83d",
+      "matchesBaseAndMain": true
+    },
+    {
+      "path": "rust-toolchain.toml",
+      "sha256": "559f488c181e0e9e77cf17c29de663977f036ec7ff2e2060585714bf53c52d62",
+      "matchesBaseAndMain": true
+    }
+  ],
+  "findings": [
+    {
+      "topic": "integration interaction",
+      "finding": "The13 changed files are exactly the reviewed R63 seventh8-source ownership/startup increment plus R65 second5-source deadline increment, with byte-identical parent implementations. Their changed-file sets are disjoint, so no conflict-resolution branch or extra merged control flow was introduced."
+    },
+    {
+      "topic": "startup before school data",
+      "locations": [
+        "crates/fc-bootstrap/src/installation_startup.rs:5",
+        "crates/fc-bootstrap/src/application.rs:4396",
+        "crates/fc-bootstrap/src/reinitialize_application.rs:418"
+      ],
+      "finding": "Actual manual/no-argument and --autostart use application::run; actual --repair uses reinitialize_application::run. Each enters the same shared startup-gate helper before DataPaths::program_data and before school-root/runtime preparation. Per-user SID is internal gate namespace binding, not a new public desktop account/password challenge."
+    },
+    {
+      "topic": "physical lease and failures",
+      "locations": [
+        "crates/fc-windows/src/installer_lifecycle.rs:145",
+        "crates/fc-windows/src/installer_lifecycle/native.rs:557"
+      ],
+      "finding": "Only unit-success body returns go through checked original-lease release. Body Err or unwind transfers the same raw handles to the existing bounded ledger, keeps original claim and sticky fault, and prevents replacement until actual process exit. Existing normal/repair physical shutdown paths remain inside the lease. A new network error cannot become an early successful startup-lease release."
+    },
+    {
+      "topic": "network negative service boundary",
+      "locations": [
+        "crates/fc-windows/src/tls_frontdoor/native.rs:1155",
+        "crates/fc-windows/src/tls_frontdoor/native/stream.rs:335",
+        "crates/fc-bootstrap/src/web_transfer/network.rs:1465"
+      ],
+      "finding": "Bare-post origin is captured before preparation; real successful/PENDING submission is charged before late cancellation. service_deadlines only closes already-due original owners over the fixed bare+4 slots. It does not drain IOCP/SSPI, invent Frame return, issue new token, authorize body or rearm. Core caller adds finite stage checks and restores a taken Record before propagating an error. Existing NetCoordinator retained-core Drop remains in place."
+    },
+    {
+      "topic": "combined resource retirement",
+      "finding": "Startup lifecycle retention and TLS native retention are separate private owners/ledgers; neither path treats logical cancel or a deadline sweep as physical completion. Existing original IOCP/Frame/Retired/worker shutdown fences and exact business rearm conditions remain unchanged. Maintenance exclusive share0 remains blocked by a still-live original shared startup lease."
+    },
+    {
+      "topic": "public change and restore account-free",
+      "locations": [
+        "crates/fc-bootstrap/src/application.rs:2132",
+        "crates/fc-bootstrap/src/application.rs:3222",
+        "crates/fc-bootstrap/src/application.rs:3251",
+        "crates/fc-bootstrap/src/backend/desktop_lesson.rs:265"
+      ],
+      "finding": "Desktop lesson entry and public form routing still precede authenticated navigation. Public actions use the scene-bound DesktopLessonFlow guard and LoadPublicLesson/ChangePublicLesson worker variants, not a local management account lease. The guard checks scene/generation/liveness/current lesson and transactional freshness, preserving public temporary change/restore without adding login, password or identity verification to those buttons. Settings/teacher Web permission paths are not relaxed by the new gate or expiry helper."
+    },
+    {
+      "topic": "passive facts remain passive",
+      "locations": [
+        "crates/fc-windows/src/desktop.rs:1324",
+        "crates/fc-windows/src/desktop.rs:1338",
+        "crates/fc-windows/src/desktop/tree.rs:212"
+      ],
+      "finding": "Flat and tree renderers retain read_only_classroom suppression for Clock/Date/Schedule/DateCountdown/Recess, with no hit-target or page/action route. Only explicit LessonControl is excepted and receives its dedicated button hit rectangle. Core desktop renderer and backend public-flow source match base0f2 exactly. Existing passive input tests remain source evidence, not new runtime execution by this review."
+    },
+    {
+      "topic": "probe isolation and launch handoff",
+      "finding": "Isolated run_at/run_at_with diagnostics still bypass the production namespace intentionally. Production normal-to-repair handoff occurs after actual inner owners return; child independently acquires the same shared gate. If maintenance wins a genuine gap, child refuses before school data access. New network deadline helper has no arbitrary command/path/account server or production-listener enablement."
+    },
+    {
+      "topic": "unchanged contracts",
+      "finding": "No crate/dependency/toolchain/Cargo configuration change, header5e9ns threshold,25ms close reserve, Head+120s interval, public-control authorization or teacher/settings permission change is introduced by this integration. Original late-control-close scope clarification and first-TCP requirement-source audit remain applicable; this source review itself changes no acceptance gate."
+    }
+  ],
+  "issues": [],
+  "runtimeQualification": "NOT_RUN_BY_REVIEWER; R63 and isolated R65 successful runs qualify their parent bytes only. R66 requires its own source-bound joint compile/runtime receipts; ongoing release build is not consumed as a final result here.",
+  "appropriateNextEvidenceWithinAuthorizedScope": [
+    "Root joint compile/lint and actual same-source harness execution, binding new combined executables and original budgets.",
+    "Existing hidden public20/visual22/repair and relevant finite real TLS/caller regression records should retain their source/binary scope; neither old R64 normal scaffold nor parent-alone runs substitute for joint caller runtime."
+  ],
+  "limits": [
+    "Does not establish production startup/manual/autostart/repair on actual deployed data, full MSI owner/broker/hooks or authenticated transaction IPC.",
+    "Does not establish Win7/Win10, visible Seewo/PPT/touch/DPI, real logon/reboot/upgrade/uninstall or long-run acceptance.",
+    "Does not turn an injected fake-driver clock or finite timing sample into TCP ESTABLISHED/peer-visible universal hard real-time proof.",
+    "All earlier debug timeout, first R65 assertion/poison failures and scope qualifications remain immutable historical evidence."
+  ],
+  "reviewComplete": true
+}

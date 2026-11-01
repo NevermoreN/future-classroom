@@ -1,0 +1,75 @@
+{
+  "status": "PASS",
+  "createdUtc": "2026-11-01T06:56:33.333168+00:00",
+  "sourceFreezeSha256": "cde114207fff867d6441ba4e49856b1f8310f011d0f00b262bee73f1976c03ad",
+  "normal": {
+    "path": "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13152455,
+    "sha256": "0cd43e1660aed5c833d6aa11112ab3a87d6a7c717d2dd356f42ef0feca0bb417"
+  },
+  "scriptSha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208",
+  "webBundleSha256": "5e280a84e726f0366db3e0ea1bd704158e26ac1b3fdb4e542f397b48fc1706c0",
+  "operations": [
+    {
+      "kind": "business-continuous-browser",
+      "status": "PASS",
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-tls-business-probe.py",
+        "--exe",
+        "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--web-bundle",
+        "/mnt/data/FutureClassroom-0.1.0-voice-capability-dev.zip",
+        "--report",
+        "/tmp/fc-round66-integration/evidence/windows-release-business-continuous-browser-first.json",
+        "--continuous-accept",
+        "--browser",
+        "--voice-capabilities"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 67.96008726395667,
+      "resultStatus": "PASS",
+      "cleanup": "PASS",
+      "sourceUnchanged": true,
+      "stdout": {
+        "bytes": 288,
+        "sha256": "6af0944081beec3310acee8769da232f063ba7193066b732a201f4ea37a8f004"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "kind": "header-deadline",
+      "status": "PASS",
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-tls-business-probe.py",
+        "--exe",
+        "/tmp/fc-round63-installer-owner/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--web-bundle",
+        "/mnt/data/FutureClassroom-0.1.0-voice-capability-dev.zip",
+        "--report",
+        "/tmp/fc-round66-integration/evidence/windows-release-header-deadline-first.json",
+        "--header-deadline-only"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 57.96039809891954,
+      "resultStatus": "PASS",
+      "cleanup": "PASS",
+      "sourceUnchanged": true,
+      "stdout": {
+        "bytes": 276,
+        "sha256": "151dc74e8b557dd3f73e4510f6afd37de76c834081dadb7dd558d304735a4698"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "scope": "Finite synthetic loopback TLS only; browser isolated; header samples retain original numeric 5e9ns threshold. No production listener, physical audio or arbitrary OS hard realtime claim."
+}

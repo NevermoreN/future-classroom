@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "command": [
+    "cargo",
+    "test",
+    "--release",
+    "--locked",
+    "--workspace",
+    "--all-targets",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "cwd": "/tmp/fc-round63-installer-owner/worktree",
+  "sourceFreezeSha256": "63ac3e537fecaa89ffd8d11ce08ec144dd4e231ada95bc1fde776753b4c13af2",
+  "originalBudgetSeconds": 900,
+  "startedUtc": "2026-11-01T06:20:07.736993+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 672.2367344670929,
+  "stdoutBytes": 100778,
+  "stdoutSha256": "3508c4e534fc4ba65fb9f172d2a6ad930e21a998897cb0dd9838a0d8b520cea9",
+  "stderrBytes": 3378,
+  "stderrSha256": "9f964c8631b5048a751c4034cb991634fbc802032e44fdb7f7a1a3c33dd7c23d",
+  "sourceUnchanged": true
+}

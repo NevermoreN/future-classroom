@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_REVIEW_WITH_CONCRETE_ISSUES_NOT_RUNTIME_VALIDATION",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T05:28:56.971175+00:00",
+  "freezeSha256": "d6d0b3644317c06b9cfb3363bb2244a302fda6e177ecc3c6ce4a395de1be0554",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "sha256": "06b95dcd8827256beea7652b6e2dc651d479d0b8d32790baf46792fdc4de50c0",
+      "matchesFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "sha256": "633d834531c6e11e731b7732749514a1bd6a999bfba11f0cfba0741b4fcca5ce",
+      "matchesFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "sha256": "afc2dead2d69389921fdf0c76772198b007edc05c10f2b5084bf1309342d46cd",
+      "matchesFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "sha256": "3b5667b830ed2fdc1f07e9f3a245607de1b4933d691f5c6dcdf9409afeaab374",
+      "matchesFreeze": true
+    }
+  ],
+  "scope": "Read-only source/design review. No source edit, Cargo, Windows, CI or network performed. Creates only this independent report and SHA sidecar in outer evidence. Core module only; no startup/MSI integration or full owner claim.",
+  "facts": [
+    {
+      "subject": "identity and namespace",
+      "fact": "Production identity has private fields, OS KnownFolder LocalAppData, process token SID, fixed family/root leaf; service SIDs refused. Native path rejects nonfixed drives, nonabsolute path, reparse points, trailing aliases and length overflow; ancestors retained without DELETE sharing."
+    },
+    {
+      "subject": "physical ownership",
+      "fact": "Startup read/share-read gate and maintenance read-write/share0 use same fixed physical gate. Any Pending presence or inaccessible marker refuses, without stale-record recovery. Gate and regular Pending verify one hardlink, owner and exact protected current-SID+SYSTEM DACL."
+    },
+    {
+      "subject": "Pending",
+      "fact": "Create-new same original handle, <=4096 bytes, nonce/family/operation/SID, checked write count, FlushFileBuffers and exact inode/ACL/size/readback. Drop does not explicitly clear Pending."
+    },
+    {
+      "subject": "guardian and settlement",
+      "fact": "DuplicateHandle pins retained Child process object. Actual process token SID, child PID and creation FILETIME bound; original handle must be signaled with exit0. Trusted Settlement checks operation/guardian/Join0/End0/effects; it is explicitly not authenticated IPC."
+    },
+    {
+      "subject": "deadline and bounded ownership",
+      "fact": "Original Instant deadline is retained, checked at entry and after Pending creation; no renewal. Fixed 8-claim x64-handle retention ledger, sticky process FAULTED, no replacement handles or new pool/thread in production source."
+    },
+    {
+      "subject": "child selection",
+      "fact": "Exact child selector installer_lifecycle::tests::native_child matches public module path. Child uses current test executable, --exact and --test-threads=1, original retained Child and bounded polling. Only that child test runs in child; it does not recursively execute parent scenarios. Prefix length31 plus32hex agrees with asserted leaf length63. No Windows tests were run by reviewer."
+    }
+  ],
+  "issues": [
+    {
+      "id": "R63-REVIEW-01",
+      "priority": "P1",
+      "title": "Late cleanup/close failure can lose durable negative state after process exit",
+      "locations": [
+        {
+          "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+          "line": 464
+        },
+        {
+          "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+          "line": 472
+        },
+        {
+          "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+          "line": 500
+        },
+        {
+          "path": "crates/fc-windows/src/installer_lifecycle.rs",
+          "line": 213
+        }
+      ],
+      "sourceFacts": "clear_pending marks the original Pending delete-pending and closes it before release closes Parent and Gate handles. If Pending close or any later Parent/Gate close fails, the process is faulted and raw capabilities retained, but Pending is either already absent or remains delete-pending and is deleted when OS closes it at process exit. No durable fallback negative record is written.",
+      "consequence": "In the stated late-close-failure scenario, a subsequent process can recreate/open the gate and observe Pending absent after the failed owner exits. Process-local FAULTED/ledger do not survive that exit, violating the design requirement that cleanup error/owner loss remains blocked across restart.",
+      "validationStatus": "STATIC_CONTROL_FLOW; no actual CloseHandle failure observed. Existing fail_close test injects failure only into StartupLease before cleanup, so does not exercise this maintenance deletion/late-close path.",
+      "suggestedResolution": "Keep a durable negative indication through all failure-prone release stages, including deletion-disposition/late-close errors; exercise role-specific Pending/Parent/Gate close refusal in isolated maintenance children and then restart another process to assert it remains blocked."
+    },
+    {
+      "id": "R63-REVIEW-02",
+      "priority": "P1",
+      "title": "LocalAppData ACL acceptance omits FILE_DELETE_CHILD",
+      "locations": [
+        {
+          "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+          "line": 704
+        },
+        {
+          "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+          "line": 729
+        }
+      ],
+      "sourceFacts": "The non-exact LocalAppData dangerous access mask includes DELETE/WRITE_DAC/WRITE_OWNER and several write bits, but not FILE_DELETE_CHILD (0x40). An otherwise valid allow ACE for an untrusted ordinary SID granting only that directory right passes the mask test.",
+      "consequence": "Ancestor pins prevent rename while live; after owner death, parent DELETE_CHILD can authorize removal/rename of the fixed coordination child despite that child having a protected DACL. Renaming the whole root into another same-volume writable parent can move Pending away, allowing fresh empty root creation and loss of durable negative state.",
+      "validationStatus": "SOURCE_MASK_DEFECT; permission/rename counterexample has not been run on Windows.",
+      "suggestedResolution": "Include FILE_DELETE_CHILD in rejected untrusted effective parent grants, and verify with an isolated test directory/allow ACE. Do not modify actual LocalAppData ACL to test."
+    },
+    {
+      "id": "R63-REVIEW-03",
+      "priority": "P2",
+      "title": "Hardlink rejection test can abort during unwind and leave its namespace",
+      "locations": [
+        {
+          "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+          "line": 359
+        },
+        {
+          "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+          "line": 370
+        },
+        {
+          "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+          "line": 72
+        },
+        {
+          "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+          "line": 83
+        }
+      ],
+      "sourceFacts": "gate-alias is removed only after all rejection assertions. If an assertion fails first, Fixture::drop removes only ready/pending.v1/gate.lock, then remove_dir(...).expect fails because gate-alias remains. This panics while already unwinding.",
+      "consequence": "The test executable can abort rather than report the original failed assertion, and the random owned namespace/alias remains, contrary to required test cleanup.",
+      "validationStatus": "STATIC_FAILURE_PATH; normal successful path cleanup is correct.",
+      "suggestedResolution": "Give the exact owned alias a cleanup guard created immediately after hard_link, so it is removed before Fixture drops on every path. Preserve original failure without a second panic during unwinding."
+    }
+  ],
+  "notIssuesOrClaims": [
+    "No source-proven child filter mismatch was found; zero-test execution remains something the root runner should observe in its actual output, not a finding asserted here.",
+    "Process SID is used rather than a thread impersonation token; no impersonating integration exists in this slice, so no demonstrated impersonation exploit is claimed.",
+    "No actual linker, executable, cross-process gate, reboot, MSI, Win7/Win10/Win11 runtime or Seewo result is inferred from this source review."
+  ],
+  "reviewComplete": true
+}

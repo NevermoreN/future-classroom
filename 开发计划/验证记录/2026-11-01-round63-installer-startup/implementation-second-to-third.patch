@@ -1,0 +1,130 @@
+--- second/crates/fc-windows/src/installer_lifecycle/native.rs
++++ third/crates/fc-windows/src/installer_lifecycle/native.rs
+@@ -688,6 +688,32 @@
+     };
+     operation(&attributes)
+ }
++// SID equality is a predicate, not a fallible Win32 operation: EqualSid
++// false need not set LastError. Never propagate its binding error (HRESULT 0)
++// as a native failure. The system-known parent shares the same trusted owner
++// boundary as its DACL grants; our own namespace remains current-SID only.
++unsafe fn verify_owner(
++    owner: PSID,
++    user: PSID,
++    system: PSID,
++    admin: PSID,
++    exact: bool,
++) -> WinResult<()> {
++    // SAFETY: callers retain actual OS descriptor and validated SID buffers.
++    unsafe {
++        if owner.0.is_null() || !IsValidSid(owner).as_bool() {
++            return Err(denied());
++        }
++        if EqualSid(owner, user).is_ok()
++            || (!exact && (EqualSid(owner, system).is_ok() || EqualSid(owner, admin).is_ok()))
++        {
++            Ok(())
++        } else {
++            Err(denied())
++        }
++    }
++}
++
+ fn verify_acl(handle: HANDLE, sid: &[u8], exact: bool) -> WinResult<()> {
+     let mut storage = [0u64; 512];
+     let mut len = 0;
+@@ -712,7 +738,18 @@
+     let user = PSID(sid.as_ptr().cast_mut().cast());
+     unsafe {
+         GetSecurityDescriptorOwner(sd, &mut owner, &mut defaulted)?;
+-        EqualSid(owner, user)?;
++        let mut system = [0u64; 16];
++        let system = system_sid(&mut system)?;
++        let mut admins = [0u64; 16];
++        let mut admin_len = std::mem::size_of_val(&admins) as u32;
++        let admin = PSID(admins.as_mut_ptr().cast());
++        CreateWellKnownSid(
++            WinBuiltinAdministratorsSid,
++            None,
++            Some(admin),
++            &mut admin_len,
++        )?;
++        verify_owner(owner, user, system, admin, exact)?;
+         GetSecurityDescriptorDacl(sd, &mut present, &mut acl, &mut defaulted)?;
+         if !present.as_bool() || acl.is_null() || !IsValidAcl(acl).as_bool() {
+             return Err(denied());
+@@ -721,17 +758,6 @@
+             // Parent is the OS-resolved LocalAppData, not ours to repair. It
+             // may inherit read ACEs, but must not give another ordinary SID
+             // write/delete/ACL-owner rights to the fixed coordination child.
+-            let mut system = [0u64; 16];
+-            let system = system_sid(&mut system)?;
+-            let mut admins = [0u64; 16];
+-            let mut admin_len = std::mem::size_of_val(&admins) as u32;
+-            let admin = PSID(admins.as_mut_ptr().cast());
+-            CreateWellKnownSid(
+-                WinBuiltinAdministratorsSid,
+-                None,
+-                Some(admin),
+-                &mut admin_len,
+-            )?;
+             let dangerous = GENERIC_ALL.0
+                 | GENERIC_WRITE.0
+                 | DELETE.0
+@@ -912,3 +938,44 @@
+     resources.release()?;
+     Ok(rejected)
+ }
++
++#[cfg(test)]
++pub(super) fn owner_boundary_for_test() -> Result<()> {
++    let mut resources = Resources::empty()?;
++    resources.sid = resources.token_sid(unsafe { GetCurrentProcess() })?;
++    let user = PSID(resources.sid.as_ptr().cast_mut().cast());
++    let mut system = [0u64; 16];
++    let system = system_sid(&mut system)?;
++    let mut admin_storage = [0u64; 16];
++    let mut admin_len = std::mem::size_of_val(&admin_storage) as u32;
++    let admin = PSID(admin_storage.as_mut_ptr().cast());
++    let mut world_storage = [0u64; 16];
++    let mut world_len = std::mem::size_of_val(&world_storage) as u32;
++    let world = PSID(world_storage.as_mut_ptr().cast());
++    unsafe {
++        CreateWellKnownSid(
++            WinBuiltinAdministratorsSid,
++            None,
++            Some(admin),
++            &mut admin_len,
++        )?;
++        CreateWellKnownSid(WinWorldSid, None, Some(world), &mut world_len)?;
++        // Valid parent owners, including the actual Win11 LocalAppData case.
++        for owner in [user, system, admin] {
++            verify_owner(owner, user, system, admin, false)?;
++        }
++        verify_owner(user, user, system, admin, true)?;
++        // Root/Gate/Pending do not inherit the broader parent-owner allowance.
++        for owner in [system, admin, world] {
++            for exact in [false, true] {
++                if !exact && (EqualSid(owner, system).is_ok() || EqualSid(owner, admin).is_ok()) {
++                    continue;
++                }
++                let error = verify_owner(owner, user, system, admin, exact)
++                    .expect_err("nonmatching owner must refuse");
++                assert_eq!(error.code(), E_ACCESSDENIED, "inequality never HRESULT 0");
++            }
++        }
++    }
++    resources.release()
++}
+--- second/crates/fc-windows/src/installer_lifecycle/tests.rs
++++ third/crates/fc-windows/src/installer_lifecycle/tests.rs
+@@ -492,3 +492,9 @@
+         assert!(!fixture.root.join("pending.v1").exists());
+     }
+ }
++
++#[test]
++fn os_parent_owner_trust_does_not_relax_exact_private_owner() {
++    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
++    native::owner_boundary_for_test().unwrap();
++}

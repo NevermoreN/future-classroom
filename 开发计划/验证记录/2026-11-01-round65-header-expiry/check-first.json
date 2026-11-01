@@ -1,0 +1,41 @@
+{
+  "status": "PASS_CARGO_CHECK_ONLY",
+  "command": [
+    "cargo",
+    "check",
+    "--locked",
+    "--offline",
+    "--workspace",
+    "--all-targets",
+    "--target",
+    "i686-pc-windows-gnu"
+  ],
+  "cwd": "/tmp/fc-round65-header-expiry/worktree",
+  "targetDirectory": "/tmp/fc-round65-header-expiry/target",
+  "originalPid": 6899,
+  "actualExit": true,
+  "exitCode": 0,
+  "timedOut": false,
+  "budgetSeconds": 900,
+  "elapsedSeconds": 86.28362076822668,
+  "startedUtc": "2026-11-01T06:12:30.559701+00:00",
+  "finishedUtc": "2026-11-01T06:13:56.909056+00:00",
+  "sourceBeforeCanonicalSha256": "88cbb6efcb6754a3dfaac769356748763d7a4297705fdfb9829d923b647a8477",
+  "sourceAfterCanonicalSha256": "88cbb6efcb6754a3dfaac769356748763d7a4297705fdfb9829d923b647a8477",
+  "inputCount": 432,
+  "changedInputs": [],
+  "freezeSha256": "4fb7c4d38ad99e66da3f5949fe590af7c055eb01365c905f5e4bc1c6af2c08a3",
+  "streams": {
+    "stdout": {
+      "path": "/tmp/fc-round65-header-expiry/evidence/check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round65-header-expiry/evidence/check-first.stderr.log",
+      "bytes": 3363,
+      "sha256": "abb1da318d4d3678b9fdb2cfc09cec6c87ae66ae0641bff5aa4b9987bfdd82b6"
+    }
+  },
+  "scope": "One offline type/borrow check; no tests/Clippy/Windows/CI/network/runtime/strict5s acceptance. Separate owned target only."
+}

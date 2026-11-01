@@ -1,0 +1,77 @@
+{
+  "status": "PASS_ADAPTER_TEST_COMPILE_LINK_ONLY",
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "-p",
+    "fc-windows",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "cwd": "/tmp/fc-round65-header-expiry/worktree",
+  "targetDirectory": "/tmp/fc-round65-header-expiry/target",
+  "originalPid": 25428,
+  "actualExit": true,
+  "exitCode": 0,
+  "timedOut": false,
+  "elapsedSeconds": 5.832733903080225,
+  "budgetSeconds": 900,
+  "startedUtc": "2026-11-01T06:39:01.869070+00:00",
+  "finishedUtc": "2026-11-01T06:39:07.893745+00:00",
+  "sourceBeforeCanonicalSha256": "0268a3d794b5021539fdd7914119b4e5c171c4e7a83b923e3a66cc656a8229c4",
+  "sourceAfterCanonicalSha256": "0268a3d794b5021539fdd7914119b4e5c171c4e7a83b923e3a66cc656a8229c4",
+  "inputCount": 432,
+  "changedInputs": [],
+  "freezeSha256": "9453cc51b82c0ccc9f8bbb1ab17ee4bfd4ce66c2ce0070234899d5ac26d9c4a5",
+  "artifacts": [
+    {
+      "path": "/tmp/fc-round65-header-expiry/target/i686-pc-windows-gnu/debug/deps/fc_windows-5eb9da103eda8228.exe",
+      "bytes": 91027939,
+      "sha256": "893f333fc562f7bff7ec0fe4cf740047877ac6973349c2f732adf9d9052705e5",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_windows",
+        "src_path": "/tmp/fc-round65-header-expiry/worktree/crates/fc-windows/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "filenames": [
+        "/tmp/fc-round65-header-expiry/target/i686-pc-windows-gnu/debug/deps/fc_windows-5eb9da103eda8228.exe"
+      ],
+      "packageId": "path+file:///tmp/fc-round65-header-expiry/worktree/crates/fc-windows#0.1.0"
+    }
+  ],
+  "compilerMessageCount": 0,
+  "parseErrorLines": [],
+  "streams": {
+    "stdout": {
+      "path": "/tmp/fc-round65-header-expiry/evidence/compile-test-second.stdout.log",
+      "bytes": 39334,
+      "sha256": "25bc3224cdb477c722aae5e967a81eeb72e12d3821562d391418a54ab4fdf646"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round65-header-expiry/evidence/compile-test-second.stderr.log",
+      "bytes": 163,
+      "sha256": "c385678a11d5b66a62205f7570e940572b133de42b29f1890cb9c6ff2a3f05fc"
+    }
+  },
+  "scope": "One offline fc-windows test build/link. EXE never executed; no all-workspace normal product, profile/RUSTFLAGS change, test runtime, Clippy, Windows, CI, network, strict5s acceptance."
+}

@@ -1,0 +1,28 @@
+{
+  "status": "PASS_COMPLETED_OWNED_ROOTS_REMOVED",
+  "roots": [
+    {
+      "path": "/tmp/fc-round62-ci-evidence",
+      "ordinaryFiles": 241,
+      "logicalBytes": 25595695,
+      "archiveCommitted": true
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility",
+      "ordinaryFiles": 732,
+      "logicalBytes": 11215894,
+      "archiveCommitted": true
+    }
+  ],
+  "retained": [
+    "main target/debug and global caches",
+    "persistent Windows SSH service/public authorization/private key",
+    "R63 active worktree/target",
+    "R60 registry second source context and third active experiment",
+    "R64 active CI evidence and helper copies",
+    "three intentional /mnt/data development ZIPs"
+  ],
+  "sourceCommit": "e529db0e5c9462a4e60de2f90a7673ebf0e4cd22",
+  "finalCommit": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "scope": "Logical byte count only; no claim of exact physical disk blocks freed. No Windows operation here."
+}

@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_READ_ONLY_NEXT_MSVC_HELPER_COMPARISON_AND_COUNT_PREFLIGHT",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T07:00:34.188614+00:00",
+  "scope": "Read-only local prepared R67 scripts versus archived R64 helpers plus current main CI bytes and path counts. No helper execution, network/POST/download, Windows, Cargo, source/plan/target mutation. Writes only this report/digest under active R66 evidence; does not write R67 or archived R63/R64/R65 evidence.",
+  "helpers": [
+    {
+      "name": "dispatch-ci-once.py",
+      "previousArchivePath": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round64-ci/dispatch-ci-once.py",
+      "preparedReadOnlyPath": "/tmp/fc-round67-ci-evidence/dispatch-ci-once.py",
+      "bytes": 5179,
+      "previousSha256": "0d889a943d2f7a80a827c3580308d7b17999ba97b90d9a347b8b030bc1cb710a",
+      "preparedSha256": "5b66fae4a41b61f44dbcdf1f55d35122630c940703839b8fc60e1a60aece18a5",
+      "byteIdentical": false,
+      "exactlyExpectedRootRoundReplacement": true,
+      "syntaxAstParse": "PASS_WITHOUT_EXECUTION",
+      "changedLines": [
+        "-base=Path('/tmp/fc-round64-ci-evidence');path=base/('FutureClassroom-round64-'+workflow_file.removesuffix('.yml')+'-dispatch.json')",
+        "+base=Path('/tmp/fc-round67-ci-evidence');path=base/('FutureClassroom-round67-'+workflow_file.removesuffix('.yml')+'-dispatch.json')"
+      ]
+    },
+    {
+      "name": "download-original.py",
+      "previousArchivePath": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round64-ci/download-original.py",
+      "preparedReadOnlyPath": "/tmp/fc-round67-ci-evidence/download-original.py",
+      "bytes": 3943,
+      "previousSha256": "c56583ef058095ec6916ad5b7898ed092b37bd125ea0ebd0539300a3f37ae602",
+      "preparedSha256": "c56583ef058095ec6916ad5b7898ed092b37bd125ea0ebd0539300a3f37ae602",
+      "byteIdentical": true,
+      "exactlyExpectedRootRoundReplacement": true,
+      "syntaxAstParse": "PASS_WITHOUT_EXECUTION",
+      "changedLines": []
+    },
+    {
+      "name": "verify-ci-artifact-first.py",
+      "previousArchivePath": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round64-ci/verify-ci-artifact-first.py",
+      "preparedReadOnlyPath": "/tmp/fc-round67-ci-evidence/verify-ci-artifact-first.py",
+      "bytes": 66125,
+      "previousSha256": "c136efb0ecb5dc1dbffadadae31b933c43ac3d298c308921dd7c8e409fc75527",
+      "preparedSha256": "c136efb0ecb5dc1dbffadadae31b933c43ac3d298c308921dd7c8e409fc75527",
+      "byteIdentical": true,
+      "exactlyExpectedRootRoundReplacement": true,
+      "syntaxAstParse": "PASS_WITHOUT_EXECUTION",
+      "changedLines": []
+    }
+  ],
+  "ciSourcePin": {
+    "path": "scripts/windows-msvc-ci.ps1",
+    "currentBytes": 52976,
+    "currentSha256": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886",
+    "verifierPin": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886",
+    "exactBytesMatchPin": true,
+    "bothWorkflowsAndCiHaveNoDiff": true,
+    "producerPathLimit": 20000,
+    "auditorPathLimit": 20000,
+    "otherCapsUnchanged": "Auditor/download are byte-identical to R64; producer unchanged. Per-file64MiB, source-hash256MiB, metadata16MiB and existing artifact/payload limits retained."
+  },
+  "dispatchBehaviorKept": {
+    "scope": "Only source review; no GET/POST or credential lookup executed.",
+    "preserved": [
+      "Required exact source SHA equals local HEAD and remote main; clean source tree required before execution.",
+      "Workflow identity/state and selected baseline fixed, prior exact-source dispatch run list must be empty before one POST.",
+      "Each API call persisted to new round-specific report; accepted but unresolved/ambiguous dispatch instructs observation rather than repost.",
+      "Existing request response/socket/poll limits and exact run/source/workflow binding unchanged."
+    ],
+    "whenToUse": "After this batch is actually committed/synchronized, root supplies the new exact source SHA. Current pre-commit source is not dispatched by this review."
+  },
+  "downloadAndAuditorBehaviorKept": {
+    "download": "Same R64 exact bytes/SHA/CRC download with bounded size/time, credential not forwarded to approved signed redirect hosts; script root is relative to its own R67 file location. No download performed.",
+    "auditor": "Byte-identical c136efb0ecb5dc1dbffadadae31b933c43ac3d298c308921dd7c8e409fc75527 source-bound original-artifact/GUI-CUI/CRT phase reviewer. No audit/model execution performed."
+  },
+  "inventorySnapshot": {
+    "trackedIndexPaths": 12347,
+    "untrackedNotIgnoredPaths": 600,
+    "physicalArchiveFilesIncludingIgnoredLogs": 12679,
+    "unionCurrentCommitCandidates": 13264,
+    "currentR66EvidenceFiles": 95,
+    "conservativeProjectionIncludingAllCurrentR66EvidenceAndReviewDigestAndArchiveIndex": 13362,
+    "limit": 20000,
+    "projectedHeadroom": 6638,
+    "belowLimit": true,
+    "method": "Union of git ls-files, untracked --exclude-standard, and all physical files under main 开发计划/验证记录 (including ignored raw logs that may be force-added). Then add every currently present R66 evidence file plus3 review/digest/archive-index rows without subtracting exclusions.",
+    "qualification": "This is a current upper estimate, not the identity/count of a future commit. Additional evidence may still be created. Final exact committed tree must be observed after commit using the unchanged producer/auditor guards; no limit increase is needed or made here.",
+    "noCompiledInputClaim": "Inventory paths include historical evidence; path count is not rustc compilation-input count."
+  },
+  "issues": [],
+  "notClaimed": [
+    "No R67 CI dispatched, succeeded or artifact downloaded.",
+    "No claim about currently running R66 header-deadline terminal result.",
+    "No new source/runtime/platform/MSI acceptance or listener enablement."
+  ],
+  "reviewComplete": true
+}

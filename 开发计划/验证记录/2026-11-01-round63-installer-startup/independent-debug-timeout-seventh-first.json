@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 1,
+  "status": "INDEPENDENT_QUALIFICATION_DEBUG_RUNTIME_TIMEOUT_NOT_FULL_SUITE_PASS",
+  "reviewer": "ci_phase_review",
+  "recordedUtc": "2026-11-01T06:24:10.073807+00:00",
+  "scope": "Read-only local R63 seventh frozen source identity, terminal debug runtime report/controller, bounded original live observations and preceding validation receipts. Reviewer did not run source changes, Cargo, Windows, SSH, CI or network. Release-profile work is deliberately not read or inferred.",
+  "sourceFreezeSha256": "63ac3e537fecaa89ffd8d11ce08ec144dd4e231ada95bc1fde776753b4c13af2",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "sha256": "bf2429588f8f79e35295335702bc757738a80e74ff2e227b5a2d1195d2f41843",
+      "worktreeAndMainMatchFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "sha256": "5d21ab12b6acc03f942de3dff6c61b9abfb7fe8a1f6bcb50afed92f267e2b22e",
+      "worktreeAndMainMatchFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "sha256": "2fd1cfdb5ce742b70575ebf4548dbebd5b91fa3f4ad63bd6b8ead1ee41251c99",
+      "worktreeAndMainMatchFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "sha256": "7b2c995d421d1524747cf5b76de622dbd19d8bb89d3ff0e30e778d5e79224082",
+      "worktreeAndMainMatchFreeze": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/installation_startup.rs",
+      "sha256": "88560eebf08a58a490b33b11bcbaa2ef85ab29a934006d820e2f07828b44309f",
+      "worktreeAndMainMatchFreeze": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "sha256": "b17ca9391cf7eb267113a156d3a0793fdfb96fe7c30cd34e677dab8e7ead0f4c",
+      "worktreeAndMainMatchFreeze": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "sha256": "a83fe4b049eb084823de5652c6105eee7717f797aef15236d96cfa8461a581ea",
+      "worktreeAndMainMatchFreeze": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+      "sha256": "f45dfb54e545d3b75e853db9da7f166bad06dfee249cb7efc120c8a5844d6f1b",
+      "worktreeAndMainMatchFreeze": true
+    }
+  ],
+  "terminal": {
+    "operationReportSha256": "5139258ff4f523c4f5da6a5db580ee56c90f45c74c1707b92e141625cfa6c05b",
+    "runtimeReportSha256": "666913f6e2158f3aee86383b93d464423b65eab310f4ddbff61a4b095df2f9ca",
+    "controllerStatus": "FAIL_COMMAND",
+    "controllerExitCode": 1,
+    "controllerElapsedSeconds": 1038.8157568739261,
+    "runtimeStatus": "FAIL",
+    "cleanup": "PASS",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "error": "remote test timed out: fc_bootstrap-d71040d76fb4e2e8.exe (900s); inspect timedOutTest",
+    "rawControllerStdoutSha256": "bfe2fb1f6b5abc28ae392028cbb594a1f4cb805e0a254219050f1c0975ee2bc2",
+    "rawControllerStderrSha256": "dd8feadd44f91d076dc7b606750a50fc63c0565467011b40c73df40f21aed6fc",
+    "rawControllerLogHashesAndSizesMatch": true,
+    "all22UploadedHashesMatchBoundOperationInputs": true
+  },
+  "completedHarnesses": {
+    "count": 6,
+    "passed": 640,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 0,
+    "rows": [
+      {
+        "name": "fc_security-9c7f88663f75f873.exe",
+        "binarySha256": "d5b9314efd51e008181e4606cfc5c9dadb3b2ab73973730495294ddf9d8144e8",
+        "exitCode": 0,
+        "summary": "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.62s"
+      },
+      {
+        "name": "fc_materials-2221de66f2e97130.exe",
+        "binarySha256": "9c3d7b49f3836ede139dab70bab37fa4722399a3c68cecd68b05a842fb33af6a",
+        "exitCode": 0,
+        "summary": "test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.65s"
+      },
+      {
+        "name": "fc_storage-aaa73ac6ae3d50c0.exe",
+        "binarySha256": "58c2d47303c633d09f19df46d6fa07d5c75ee573ce272859521b1082668f19b8",
+        "exitCode": 0,
+        "summary": "test result: ok. 206 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.25s"
+      },
+      {
+        "name": "fc_windows-6c97d8b2aac6d037.exe",
+        "binarySha256": "21b268e548dc040e971731cff14b61682d0935182b12bbf1f641987ab291dca8",
+        "exitCode": 0,
+        "summary": "test result: ok. 236 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 27.08s"
+      },
+      {
+        "name": "fc_presentation-bf0074726aa5b441.exe",
+        "binarySha256": "bc8228923b8a7f414fa30258f70132fa68a614d6e5e99f648edf7a5dc8ad4568",
+        "exitCode": 0,
+        "summary": "test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s"
+      },
+      {
+        "name": "fc_protocol-186900fcb7bfa5db.exe",
+        "binarySha256": "ef59a6fce2e02dcc4d33a56d7c705aac8b234912a3d1c7d8f54aa109644d1cda",
+        "exitCode": 0,
+        "summary": "test result: ok. 82 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.60s"
+      }
+    ],
+    "fcWindowsCompletePassedCount": 236,
+    "installerLifecycleExactOkLines": [
+      "test installer_lifecycle::tests::close_failure_retains_physical_owner_in_child_without_replacement ... ok",
+      "test installer_lifecycle::tests::common_startup_helper_does_not_enter_body_under_maintenance ... ok",
+      "test installer_lifecycle::tests::common_startup_helper_holds_during_success_body_until_checked_return ... ok",
+      "test installer_lifecycle::tests::common_startup_helper_retains_after_caught_panic_until_actual_process_exit ... ok",
+      "test installer_lifecycle::tests::common_startup_helper_retains_after_error_until_actual_process_exit ... ok",
+      "test installer_lifecycle::tests::coordination_rejects_gate_hardlink_alias_before_pending_or_school_data ... ok",
+      "test installer_lifecycle::tests::existing_broad_gate_dacl_is_rejected_without_repair_or_pending ... ok",
+      "test installer_lifecycle::tests::isolated_parent_delete_child_grant_is_rejected ... ok",
+      "test installer_lifecycle::tests::native_child ... ok",
+      "test installer_lifecycle::tests::malformed_or_torn_pending_is_negative_not_dead_owner_recovery ... ok",
+      "test installer_lifecycle::tests::original_expiry_never_renews_or_clears_negative_state ... ok",
+      "test installer_lifecycle::tests::os_parent_owner_trust_does_not_relax_exact_private_owner ... ok",
+      "test installer_lifecycle::tests::physical_maintenance_blocks_child_and_owner_loss_keeps_pending ... ok",
+      "test installer_lifecycle::tests::physical_shared_child_blocks_maintenance_until_actual_return ... ok",
+      "test installer_lifecycle::tests::producer_close_failure_remains_negative_after_original_process_exit ... ok",
+      "test installer_lifecycle::tests::receipt_before_actual_guardian_exit_cannot_clear_pending ... ok",
+      "test installer_lifecycle::tests::settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate ... ok"
+    ]
+  },
+  "timedOutHarness": {
+    "name": "fc_bootstrap-d71040d76fb4e2e8.exe",
+    "profile": "debug",
+    "binarySha256": "3cfeacb700e33890f5d1e86d6c3c70675ed8bb981d1d0f9c0a284e87a5de87fa",
+    "localExactBinaryHashMatches": true,
+    "originalBudgetSeconds": 900,
+    "terminalHarnessSummary": "NOT_OBSERVED",
+    "exitCode": "NOT_A_SUCCESSFUL_TERMINAL_TEST_RESULT; controller times out and owned process cleanup follows",
+    "retainedReportTail": {
+      "partialOutputTruncated": true,
+      "rawReadLimitBytes": 65536,
+      "storedUtf8Bytes": 32768,
+      "storedUtf8Sha256": "3b0100db256b9c4eac3c626096d1d259448d6144aa84dcbfc7b217dee8ccd114",
+      "beginsMidLine": true,
+      "logMissing": false,
+      "completeFinalRawLog": false
+    },
+    "liveOriginalPrefix": {
+      "metadataSha256": "77629dd99ebdf38c1bb0ff604dbfc77b21b1393cdb848950334f3fa0da0396f8",
+      "rawFileSha256": "fe1a8f5639dadcfc4ee5c3eb4caf956e06dfd88e867702ab72ee308d64e6eefc",
+      "rawBytes": 66858,
+      "encoding": "UTF-16LE with BOM, original Tee-Object bytes",
+      "snapshotUtc": "2026-11-01T06:21:00.6084627Z",
+      "completedOkLinesWithinSnapshot": 266,
+      "terminalHarnessSummary": "NONE",
+      "completeFinalRawLog": false
+    }
+  },
+  "liveObservations": {
+    "identityReceiptSha256": "8144d80d35c209f1cf6fee12f6c8af530927a353ba1be9977449266ecaed56eb",
+    "observationUtc": "2026-11-01T06:20:26.9342491Z",
+    "pid": 14420,
+    "creationFileTime": 134379867696310212,
+    "cpuSeconds": 1286.875,
+    "elapsedSeconds": 857.2961955,
+    "threads": 7,
+    "queryScope": "Stored input verifies exact owned probe marker and executable path before collecting current PID/creation/CPU; observation only, not successful process return.",
+    "progress": [
+      {
+        "file": "live-original-test-progress-first.json",
+        "sha256": "e45a0cd7a098d932af9c9ab77a6adecf773c7080aa196484694f6f6a50a555e2",
+        "status": "OBSERVATION_ONLY_LIVE_ORIGINAL_TEST",
+        "observedBytes": 21462,
+        "lastObservedLine": "test backend::voice::policy_handoff::tests::bounded_receipt_merges_contiguous_policy_epochs_but_never_an_independent_stop_gap ... ok"
+      },
+      {
+        "file": "live-original-test-progress-second.json",
+        "sha256": "6be4904630f03b0c6e131f8b79aab95e1b88508287017a444336a53ba61ea9b2",
+        "status": "OBSERVATION_ONLY_LIVE_ORIGINAL_TEST",
+        "observedBytes": 26580,
+        "lastObservedLine": "test backend::voice::web_device::tests::both_ttl_clocks_expire_exactly_and_cache_hits_never_renew_completion ... ok"
+      },
+      {
+        "file": "live-original-test-progress-third.json",
+        "sha256": "da66c79873012a83734b2e8a7f8b7ca4893eec21e27b0b1e651407a05dfe4c72",
+        "status": "OBSERVATION_ONLY_LIVE_ORIGINAL_TEST",
+        "observedBytes": 48814,
+        "lastObservedLine": "test recovery_workflow::windows::tests::migration_tests::migration_bundle_drop_only_retires_exact_source_and_blocks_reentry_until_worker_cleanup ... ok"
+      },
+      {
+        "file": "live-original-test-progress-fourth.json",
+        "sha256": "d58fef3e3c27896261edb63cd60f561288abea0234294bfeb62ed5011eeb1e67",
+        "status": "OBSERVATION_ONLY_LIVE_ORIGINAL_TEST",
+        "observedBytes": 61270,
+        "lastObservedLine": "test web_application::material_files::stream_tests::material_stream_abort_real_readonly_delete_failure_retries_without_releasing_original_owner ... ok"
+      }
+    ],
+    "interpretation": "Increasing original log byte counts and accumulated CPU show active test/CPU progress in observed intervals. They do not prove every later test will pass, exclude every stall, identify the dominant cost, or complete the original900s acceptance."
+  },
+  "failureClassification": {
+    "confirmed": "Actual debug-profile full-run attempt exceeded its original900s per-harness budget and ended FAIL.",
+    "observedAssertionOrHarnessFailedMarker": false,
+    "assertionSearchScope": "Only six complete results, bounded retained timeout tail and saved live prefix. No test ... FAILED or test result: FAILED marker in the saved bootstrap fragments. Synthetic caught panic diagnostics are not treated as harness failures.",
+    "notEstablished": [
+      "No new source assertion defect or product safety defect is demonstrated by the recorded timeout alone.",
+      "A pure debug-performance explanation has not been isolated; CPU/progress observations support that possibility, not a proof.",
+      "The remaining15 scheduled harnesses were not all completed: the7th timed out and subsequent14 were not executed by this operation.",
+      "Neither21 full harnesses nor a1500-test/full target pass is established.",
+      "Release-profile success is not inferred and must be a separately identified same-source operation at unchanged budgets."
+    ]
+  },
+  "priorValidation": [
+    {
+      "file": "fmt-seventh.json",
+      "sha256": "58d9f7eb2f5e17da6a98bedc5e87883991760b1778b46e20487f272c52c4ab2e",
+      "status": "PASS",
+      "exitCode": 0,
+      "validationLevel": "Format/lint/compile/build only, not full runtime"
+    },
+    {
+      "file": "strict-clippy-seventh.json",
+      "sha256": "5477fa051ea8fee1194fb344c371fb81d6774134d306666217c4b4e68d8d2b64",
+      "status": "PASS",
+      "exitCode": 0,
+      "validationLevel": "Format/lint/compile/build only, not full runtime"
+    },
+    {
+      "file": "windows-workspace-all-targets-test-compile-seventh.json",
+      "sha256": "6203bffb9b1897937058a3e8b1ce1d17553fca8673c6513fae2d49be7a619ec9",
+      "status": "PASS",
+      "exitCode": 0,
+      "validationLevel": "Format/lint/compile/build only, not full runtime"
+    },
+    {
+      "file": "windows-product-build-seventh.json",
+      "sha256": "a181960108b37cd8b1c7af72a2fe12f085f9c53418f66eff6929d7a9ac8f98f3",
+      "status": "PASS",
+      "exitCode": 0,
+      "validationLevel": "Format/lint/compile/build only, not full runtime"
+    }
+  ],
+  "preservedEarlierRefusals": [
+    {
+      "file": "integrated-seventh-preflight-first.json",
+      "sha256": "e31741b3a56271978b8ccd0b2279f39c96a331071f89cf30f5fe318d68fb3612",
+      "status": "FAIL_PREFLIGHT_BEFORE_REMOTE_CALL",
+      "scope": "20vs21 harness inventory assertion before remote setup; not a product runtime result."
+    },
+    {
+      "file": "windows-integrated-seventh-operation-first.json",
+      "sha256": "e95be35ee1983e776d617f86b7237f66f5780367454efbbeaa2dd3f6922a8ca9",
+      "status": "FAIL_COMMAND",
+      "exitCode": 2,
+      "scope": "Dedicated probe CLI combination rejected by argparse before remote creation; original failure evidence retained."
+    }
+  ],
+  "excludedEvidence": [
+    "R64 different-source1494 passes are not mixed with this seventh-source debug timeout.",
+    "R63 release build or later runtime records are pending separate audit; not read as terminal here.",
+    "Win7/Win10/visibleSeewo/MSI owner/actual installation/runtime acceptance not inferred."
+  ],
+  "reviewComplete": true
+}

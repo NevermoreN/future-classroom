@@ -1,0 +1,67 @@
+{
+  "status": "VERIFIER_EXPECTATION_CORRECTED_ORIGINAL_FAILURE_RETAINED",
+  "recordedUtc": "2026-11-01T07:00:11.397565+00:00",
+  "firstHelper": {
+    "path": "/tmp/fc-round66-integration/evidence/independent-runtime-first.py",
+    "bytes": 26263,
+    "sha256": "9d2b7e2f34ef1fbbc226f915f5ba08e7a231e484e7806ab509cf9a9e4a2321d4"
+  },
+  "firstReport": {
+    "path": "/tmp/fc-round66-integration/evidence/independent-runtime-first.json",
+    "bytes": 791906,
+    "sha256": "637663fcb30857ab4a763f1ec0246656bf00a07841ffca0e37d9ed6dd7b8f81f"
+  },
+  "secondHelper": {
+    "path": "/tmp/fc-round66-integration/evidence/independent-runtime-second.py",
+    "bytes": 27399,
+    "sha256": "a3e4ad889d66f6a508375639da9f801ee9132e9859e320d5c42c4663caf348e1"
+  },
+  "patch": {
+    "path": "/tmp/fc-round66-integration/evidence/independent-runtime-second.diff",
+    "bytes": 2768,
+    "sha256": "a27698029024713066c2714a2fc5b189c180feba73718dfa7238a854467f8c12"
+  },
+  "originalFailure": "businessBrowser ValueError TLS_PHYSICAL_WORKER_NATIVE_HUB_CLEANUP; five other sections CHECKED. No product or actual Windows result changed.",
+  "rootCause": "First verifier incorrectly required cumulative completed approvals==0 in business mode. Native increments approvals only after receiving Completion::Approved(n); actual raw business count1 is expected, while header-only count0 is expected. This is not a pending resource counter.",
+  "sourceEvidence": [
+    {
+      "file": {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/http_business_probe.rs",
+        "bytes": 29624,
+        "sha256": "7f2eb911219bfe0f93a383ad0aced42b897168453f43d7d80f062004aa72dad0"
+      },
+      "lines": [
+        579,
+        603,
+        647,
+        653,
+        665,
+        683,
+        720
+      ],
+      "meaning": "completed-count increment, separate original approval ticket cancel/actual-finished wait, pool physical join and final cumulative count"
+    },
+    {
+      "file": {
+        "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-tls-business-probe.py",
+        "bytes": 162254,
+        "sha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208"
+      },
+      "lines": [
+        175,
+        186,
+        661,
+        668
+      ],
+      "meaning": "business validator approvals>=1; header-only approvals0"
+    }
+  ],
+  "secondContract": [
+    "Only three actual pending Hub/quarantine counters must equal0; preserve exact2workers/physicaljoin/nativeDrain/setupCleanup.",
+    "Require exact int completed approvals1 for this business flow and0 for header-only.",
+    "Additionally inspect original sole TLS_BUSINESS_REPORT active_records/pending_jobs/cleanup_pending/retained_cleanup0 and native_drainedtrue.",
+    "Additionally inspect final original progress bound sockets/native IO/owned sockets/pendingJobs/jsonBodyRecords/requests all empty.",
+    "No actual test/status/log/source/time-budget/5e9 threshold changes; header verdict remains independent."
+  ],
+  "validation": "Second helper AST parsed. Exact original receipts will be read once by new helper; result belongs to independent-runtime-second.json, never replaces first."
+}

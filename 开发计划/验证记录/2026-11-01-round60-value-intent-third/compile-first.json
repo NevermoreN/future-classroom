@@ -1,0 +1,47 @@
+{
+  "status": "PASS_LOCAL_CROSS_COMPILE_ONLY",
+  "argv": [
+    "/usr/bin/i686-w64-mingw32-gcc",
+    "-std=c11",
+    "-Os",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-ffreestanding",
+    "-fno-builtin",
+    "-nostdlib",
+    "-mconsole",
+    "-Wl,--entry,_entry",
+    "-o",
+    "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/registry-value-intent.exe",
+    "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/registry-value-intent.c",
+    "-ladvapi32",
+    "-lktmw32",
+    "-lkernel32",
+    "-lgcc"
+  ],
+  "cwd": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third",
+  "actualExit": true,
+  "exitCode": 0,
+  "source": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/registry-value-intent.c",
+    "bytes": 29079,
+    "sha256": "e2a3b7c2781865bbf188f9bc1214a71faf1853f309bc362c5aed0a7f6de7506f"
+  },
+  "stdout": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/compile-first.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/compile-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "windows": "NOT_RUN",
+  "executable": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-third/registry-value-intent.exe",
+    "bytes": 37598,
+    "sha256": "a7e8be8325f60e66ec83660093fcc56053939ce690a5c18c02f7f39467f007d8"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "status": "FAIL_COMMAND",
+  "command": [
+    "python3",
+    "-B",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round64-ci-evidence/modern-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round65-header-expiry/evidence/compile-test-first.stdout.log",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--report",
+    "/tmp/fc-round65-header-expiry/evidence/windows-native-first.json"
+  ],
+  "sourceFreezeSha256": "4fb7c4d38ad99e66da3f5949fe590af7c055eb01365c905f5e4bc1c6af2c08a3",
+  "scriptSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "metadataSha256": "13eddc2cdef077e5c631d3ddb997127b1ad7cb45e4097106353b7b4e44b9273d",
+  "testExecutable": {
+    "path": "/tmp/fc-round65-header-expiry/target/i686-pc-windows-gnu/debug/deps/fc_windows-5eb9da103eda8228.exe",
+    "sha256": "28cc1c65b2da0cace8203a9da0bd5805e4f8259fb47016d49d31753c76a5f3fd"
+  },
+  "baselineScaffoldNormal": {
+    "sourceSha": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+    "path": "/tmp/fc-round64-ci-evidence/modern-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe",
+    "sha256": "74188cbfd799446c9d3b3332a46fddb689dcce362db216a287d0e1110fded1f1"
+  },
+  "scope": "Only the newly compiled R65 fc_windows test harness is candidate validation. The R64 modern normal EXE is an explicitly separate baseline diagnostic scaffold, NOT an R65 product. Actual Win11/WOW64 only, no physical TCP 5s or Win7/Win10 certification.",
+  "exitCode": 1,
+  "elapsedSeconds": 22.747009014012292,
+  "resultStatus": "FAIL",
+  "cleanup": "PASS",
+  "sourceUnchanged": true,
+  "stdout": {
+    "bytes": 51,
+    "sha256": "e3b64d97a61bd039eee547cbb088ef546f49e8368826442ef69c0f3cc4229fca"
+  },
+  "stderr": {
+    "bytes": 369,
+    "sha256": "514d40491242942d33105443251c076c2e0ff8dbf5dfc14d9f0626a87192dd56"
+  }
+}

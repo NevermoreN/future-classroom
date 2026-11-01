@@ -1,0 +1,38 @@
+{
+  "status": "PASS_EXACT_TRANSPORT_CLEANUP",
+  "elapsedSeconds": 0.6419934791047126,
+  "stdoutSha256": "e3dc84d82531b8024ebb7b99380d82281ef1c058b76e1d2ce3b6dd7e82eed241",
+  "original": {
+    "scope": "Original evidence collected locally; only this exact copied EXE/logs/owner removed",
+    "sshd": "Running",
+    "deletedFiles": {
+      "value": [
+        {
+          "name": "fc_windows-5eb9da103eda8228.exe",
+          "sha256": "d566c718d4dc721230080dfbc56c37a264083a2e0d3a4fe0417147fcc4bd3780"
+        },
+        {
+          "name": ".owner",
+          "sha256": "69de295273ce644d754218d1f073500b60e6a9e560f59cf487be5666c1688b96"
+        },
+        {
+          "name": "native.json",
+          "sha256": "2705e1c76fdd782acff5012e8ac171f0a8eaa90dd13d342041778d1a63253510"
+        },
+        {
+          "name": "native.stdout.log",
+          "sha256": "9de64877eb794d31db731066819183b4ef6e377505b10e0d493b9d167f7ec400"
+        },
+        {
+          "name": "native.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "Count": 5
+    },
+    "privateTestRoots": [],
+    "originalObservedExitCode": 0,
+    "directoryAbsent": true,
+    "status": "PASS_EXACT_TRANSPORT_CLEANUP"
+  }
+}

@@ -1,0 +1,11 @@
+Diff in /tmp/fc-round63-installer-owner/worktree/crates/fc-windows/src/installer_lifecycle/native.rs:475:
+             .position(|h| h.role == Role::Pending)
+             .ok_or(LifecycleError::Invalid)?;
+         let handle = self.handles[index].handle;
+[31m-        let deletion = FILE_DISPOSITION_INFO {
+(B[m[31m-            DeleteFile: true,
+(B[m[31m-        };
+(B[m[32m+        let deletion = FILE_DISPOSITION_INFO { DeleteFile: true };
+(B[m         unsafe {
+             SetFileInformationByHandle(
+                 handle,

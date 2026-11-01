@@ -1,0 +1,346 @@
+--- before-fourth/crates/fc-windows/src/installer_lifecycle.rs
++++ fourth/crates/fc-windows/src/installer_lifecycle.rs
+@@ -3,7 +3,7 @@
+ //! The trusted broker must separately authenticate transaction receipts and verify
+ //! the original payload state; this module does not perform/approve MSI actions.
+ use std::{path::PathBuf, time::Instant};
+-use windows::{Win32::Foundation::ERROR_SHARING_VIOLATION, core::HRESULT};
++use windows::{core::HRESULT, Win32::Foundation::ERROR_SHARING_VIOLATION};
+ 
+ mod native;
+ #[cfg(test)]
+@@ -132,6 +132,55 @@
+             watch_attempted: false,
+             settled: false,
+         })
++    }
++}
++
++/// Common composition boundary for normal/manual, logon and application-repair
++/// entry. Only unit success proves the caller has actually returned all physical
++/// owners. A body error or unwind retains the ORIGINAL lease in the existing
++/// bounded native ledger until process exit; logical return is never release.
++///
++/// No `Ok(T)` can transfer a live owner out through this boundary. The trusted
++/// caller still must join workers/native resources before returning `Ok(())`.
++pub fn with_startup_lease<E>(
++    identity: &InstallIdentity,
++    body: impl FnOnce() -> std::result::Result<(), E>,
++) -> Result<std::result::Result<(), E>> {
++    let lease = LifecycleGate::acquire_startup(identity)?;
++    let mut hold = StartupHold {
++        lease: std::mem::ManuallyDrop::new(lease),
++        armed: true,
++    };
++    match body() {
++        Ok(()) => {
++            let mut lease = hold.take();
++            lease.try_release()?;
++            Ok(Ok(()))
++        }
++        Err(error) => Ok(Err(error)), // armed guard retains, does not close
++    }
++}
++struct StartupHold {
++    lease: std::mem::ManuallyDrop<StartupLease>,
++    armed: bool,
++}
++impl StartupHold {
++    fn take(&mut self) -> StartupLease {
++        assert!(self.armed);
++        self.armed = false;
++        // SAFETY: this unique guard owns the initialized lease; armed is cleared
++        // before exactly one move. Its Drop cannot take or close it a second time.
++        unsafe { std::mem::ManuallyDrop::take(&mut self.lease) }
++    }
++}
++impl Drop for StartupHold {
++    fn drop(&mut self) {
++        if self.armed {
++            let mut lease = self.take();
++            lease.resources.retain_until_exit();
++            // The ordinary destructor now owns no native handle. Original claim
++            // and raw capabilities remain in the fixed process-retention ledger.
++        }
+     }
+ }
+ 
+--- before-fourth/crates/fc-windows/src/installer_lifecycle/native.rs
++++ fourth/crates/fc-windows/src/installer_lifecycle/native.rs
+@@ -5,11 +5,12 @@
+     path::{Component, Path},
+     rc::Rc,
+     sync::{
++        atomic::{AtomicBool, AtomicU8, Ordering},
+         Mutex,
+-        atomic::{AtomicBool, AtomicU8, Ordering},
+     },
+ };
+ use windows::{
++    core::{Error, Result as WinResult, HSTRING},
+     Win32::{
+         Foundation::*,
+         Security::*,
+@@ -17,7 +18,6 @@
+         System::{Threading::*, WindowsProgramming::DRIVE_FIXED},
+         UI::Shell::*,
+     },
+-    core::{Error, HSTRING, Result as WinResult},
+ };
+ 
+ const HANDLE_LIMIT: usize = 64;
+@@ -553,11 +553,9 @@
+         self.slot.is_none() && self.handles.is_empty()
+     }
+ }
+-impl Drop for Resources {
+-    fn drop(&mut self) {
+-        if self.release().is_ok() {
+-            return;
+-        }
++impl Resources {
++    pub(super) fn retain_until_exit(&mut self) {
++        self.failed = true;
+         FAULTED.store(true, Ordering::Release);
+         let Some(slot) = self.slot.take() else {
+             return;
+@@ -572,7 +570,14 @@
+             target.count += 1;
+         }
+         self.handles.clear(); // raw capabilities now belong to fixed ledger
+-        // Original claim bit deliberately remains set forever.
++                              // Original claim bit deliberately remains set forever.
++    }
++}
++impl Drop for Resources {
++    fn drop(&mut self) {
++        if self.release().is_err() {
++            self.retain_until_exit();
++        }
+     }
+ }
+ 
+--- before-fourth/crates/fc-windows/src/installer_lifecycle/tests.rs
++++ fourth/crates/fc-windows/src/installer_lifecycle/tests.rs
+@@ -205,6 +205,36 @@
+         }
+         "guardian" => {
+             ready(&root);
++            wait_stdin();
++        }
++        "helper-success" => {
++            let result = with_startup_lease::<()>(&identity, || {
++                ready(&root);
++                wait_stdin();
++                Ok(())
++            });
++            assert!(matches!(result, Ok(Ok(()))));
++            assert_eq!(native::retained_count(), 0);
++        }
++        "helper-error" => {
++            let result = with_startup_lease(&identity, || Err::<(), _>("synthetic body error"));
++            assert!(matches!(result, Ok(Err("synthetic body error"))));
++            assert!(native::retained_count() > 0);
++            ready(&root); // body already returned, process deliberately alive
++            wait_stdin();
++        }
++        "helper-panic" => {
++            // Only this isolated child changes its panic hook. The real unwind
++            // must traverse StartupHold and retain the original native lease.
++            let old_hook = std::panic::take_hook();
++            std::panic::set_hook(Box::new(|_| {}));
++            let result = std::panic::catch_unwind(|| {
++                with_startup_lease::<()>(&identity, || panic!("synthetic startup panic"))
++            });
++            std::panic::set_hook(old_hook);
++            assert!(result.is_err());
++            assert!(native::retained_count() > 0);
++            ready(&root); // caught unwind is not physical process return
+             wait_stdin();
+         }
+         "maintenance-loss" => {
+@@ -426,14 +456,12 @@
+     std::fs::hard_link(fixture.root.join("gate.lock"), &alias).unwrap();
+     let _owned_alias = OwnedAlias(alias);
+     assert!(LifecycleGate::acquire_startup(&fixture.identity).is_err());
+-    assert!(
+-        LifecycleGate::try_begin_maintenance(
+-            &fixture.identity,
+-            MaintenanceOperation::Install,
+-            Instant::now() + Duration::from_secs(20)
+-        )
+-        .is_err()
+-    );
++    assert!(LifecycleGate::try_begin_maintenance(
++        &fixture.identity,
++        MaintenanceOperation::Install,
++        Instant::now() + Duration::from_secs(20)
++    )
++    .is_err());
+     assert!(!fixture.root.join("pending.v1").exists());
+ }
+ 
+@@ -443,14 +471,12 @@
+     let fixture = Fixture::new();
+     native::make_unprotected_for_test(&fixture.root.join("gate.lock")).unwrap();
+     assert!(LifecycleGate::acquire_startup(&fixture.identity).is_err());
+-    assert!(
+-        LifecycleGate::try_begin_maintenance(
+-            &fixture.identity,
+-            MaintenanceOperation::Install,
+-            Instant::now() + Duration::from_secs(20),
+-        )
+-        .is_err()
+-    );
++    assert!(LifecycleGate::try_begin_maintenance(
++        &fixture.identity,
++        MaintenanceOperation::Install,
++        Instant::now() + Duration::from_secs(20),
++    )
++    .is_err());
+     assert!(!fixture.root.join("pending.v1").exists());
+ }
+ 
+@@ -498,3 +524,82 @@
+     let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
+     native::owner_boundary_for_test().unwrap();
+ }
++
++#[test]
++fn common_startup_helper_does_not_enter_body_under_maintenance() {
++    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
++    let fixture = Fixture::new();
++    let _maintenance = fixture.maintenance();
++    let entered = std::cell::Cell::new(false);
++    let result = with_startup_lease(&fixture.identity, || {
++        entered.set(true);
++        std::fs::create_dir(fixture.root.join("simulated-data"))
++    });
++    // Remove only this exact private synthetic directory if the regression
++    // unexpectedly entered the body; preserve the actual admission failure.
++    let wrong_entry = entered.get();
++    let created = fixture.root.join("simulated-data").exists();
++    if created {
++        std::fs::remove_dir(fixture.root.join("simulated-data")).unwrap();
++    }
++    assert!(!wrong_entry);
++    assert!(!created);
++    assert!(matches!(result, Err(LifecycleError::Busy)));
++}
++
++#[test]
++fn common_startup_helper_holds_during_success_body_until_checked_return() {
++    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
++    let fixture = Fixture::new();
++    let mut child = fixture.child("helper-success");
++    child.ready(&fixture.root);
++    assert!(matches!(
++        LifecycleGate::try_begin_maintenance(
++            &fixture.identity,
++            MaintenanceOperation::Upgrade,
++            Instant::now() + Duration::from_secs(20),
++        ),
++        Err(LifecycleError::Busy)
++    ));
++    child.close_and_wait();
++    let owner = fixture.maintenance();
++    drop(owner);
++}
++
++#[test]
++fn common_startup_helper_retains_after_error_until_actual_process_exit() {
++    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
++    let fixture = Fixture::new();
++    let mut child = fixture.child("helper-error");
++    child.ready(&fixture.root);
++    assert!(matches!(
++        LifecycleGate::try_begin_maintenance(
++            &fixture.identity,
++            MaintenanceOperation::Repair,
++            Instant::now() + Duration::from_secs(20),
++        ),
++        Err(LifecycleError::Busy)
++    ));
++    child.close_and_wait();
++    let owner = fixture.maintenance();
++    drop(owner);
++}
++
++#[test]
++fn common_startup_helper_retains_after_caught_panic_until_actual_process_exit() {
++    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
++    let fixture = Fixture::new();
++    let mut child = fixture.child("helper-panic");
++    child.ready(&fixture.root);
++    assert!(matches!(
++        LifecycleGate::try_begin_maintenance(
++            &fixture.identity,
++            MaintenanceOperation::Uninstall,
++            Instant::now() + Duration::from_secs(20),
++        ),
++        Err(LifecycleError::Busy)
++    ));
++    child.close_and_wait();
++    let owner = fixture.maintenance();
++    drop(owner);
++}
+--- /dev/null
++++ fourth/crates/fc-bootstrap/src/installation_startup.rs
+@@ -0,0 +1,15 @@
++//! Common real startup boundary. Isolated probes call their run_at variants
++//! directly; they never acquire the production installation namespace here.
++use fc_windows::installer_lifecycle::{self, InstallIdentity, LifecycleError};
++
++pub(crate) fn run(body: impl FnOnce() -> Result<(), String>) -> Result<(), String> {
++    let identity = InstallIdentity::for_current_user().map_err(error_text)?;
++    installer_lifecycle::with_startup_lease(&identity, body).map_err(error_text)?
++}
++fn error_text(error: LifecycleError) -> String {
++    match error {
++        LifecycleError::Busy => "未来教室正在安装或维护，暂时无法启动。".into(),
++        LifecycleError::Pending => "上次安装或维护尚未确认完成，暂时无法启动。".into(),
++        _ => "无法安全确认安装状态，请关闭程序后再检查。".into(),
++    }
++}
+--- before-fourth/crates/fc-bootstrap/src/main.rs
++++ fourth/crates/fc-bootstrap/src/main.rs
+@@ -7,6 +7,8 @@
+ mod calendar_download_probe;
+ #[cfg(windows)]
+ mod credential_probe;
++#[cfg(windows)]
++mod installation_startup;
+ #[cfg(windows)]
+ mod material_helper;
+ #[cfg(windows)]
+--- before-fourth/crates/fc-bootstrap/src/application.rs
++++ fourth/crates/fc-bootstrap/src/application.rs
+@@ -4394,8 +4394,10 @@
+ 
+ /// Manual launch opens management; --autostart remains locked and hidden.
+ pub fn run(autostart: bool) -> std::result::Result<(), String> {
+-    let paths = DataPaths::program_data().map_err(|_| "无法定位本机数据目录".to_owned())?;
+-    run_at(paths, autostart, false)
++    crate::installation_startup::run(|| {
++        let paths = DataPaths::program_data().map_err(|_| "无法定位本机数据目录".to_owned())?;
++        run_at(paths, autostart, false)
++    })
+ }
+ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result<(), String> {
+     let can_launch_production_repair = !probe
+--- before-fourth/crates/fc-bootstrap/src/reinitialize_application.rs
++++ fourth/crates/fc-bootstrap/src/reinitialize_application.rs
+@@ -416,8 +416,11 @@
+ }
+ 
+ pub fn run() -> Result<()> {
+-    let paths = DataPaths::program_data().map_err(|_| "无法定位本机未来教室目录。".to_string())?;
+-    run_at_with(paths, false, |_, _| Ok(()))
++    crate::installation_startup::run(|| {
++        let paths =
++            DataPaths::program_data().map_err(|_| "无法定位本机未来教室目录。".to_string())?;
++        run_at_with(paths, false, |_, _| Ok(()))
++    })
+ }
+ /// Root's isolated diagnostics supply a driver for the actual hidden native
+ /// window. The same startup proof, real workers and final coordinator are used.

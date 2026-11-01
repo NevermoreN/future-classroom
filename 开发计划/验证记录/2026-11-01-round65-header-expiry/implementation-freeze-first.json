@@ -1,0 +1,236 @@
+{
+  "status": "FROZEN_SOURCE_SCOPED_FORMAT_DIFF_PASS_COMPILE_AND_RUNTIME_NOT_RUN",
+  "base": "0f2bec38c9bd0442ae269225b13c3a6ce3aec0db",
+  "branch": "codex/header-expiry",
+  "worktree": "/tmp/fc-round65-header-expiry/worktree",
+  "source": [
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "before": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/source-before/crates/fc-bootstrap/src/web_transfer/network.rs",
+        "bytes": 59177,
+        "sha256": "02ae7eb6886bd1e415bcf5aba04cae12116195c5c509554ddde0c2b2a4073915"
+      },
+      "after": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/source-after/crates/fc-bootstrap/src/web_transfer/network.rs",
+        "bytes": 59397,
+        "sha256": "42feacea1410c3968734c9bc39d9c09c7c647095afeb29a9dba18800a335491f"
+      },
+      "worktreeMatchesSnapshot": true
+    },
+    {
+      "relativePath": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "before": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/source-before/crates/fc-windows/src/tls_frontdoor/native.rs",
+        "bytes": 60788,
+        "sha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe"
+      },
+      "after": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/source-after/crates/fc-windows/src/tls_frontdoor/native.rs",
+        "bytes": 61439,
+        "sha256": "e6a4938e8c096ac509a03e75345b847cedda795aa7cb2ef1d6524a2efdc964fd"
+      },
+      "worktreeMatchesSnapshot": true
+    },
+    {
+      "relativePath": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "before": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/source-before/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+        "bytes": 15030,
+        "sha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f"
+      },
+      "after": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/source-after/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+        "bytes": 16364,
+        "sha256": "a7cbaf2a17af2f01280871f9b46c404430e1ef63e79293b18a476ce8452dd80b"
+      },
+      "worktreeMatchesSnapshot": true
+    },
+    {
+      "relativePath": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "before": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/source-before/crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+        "bytes": 39983,
+        "sha256": "47829d0fe74dd2a64af48fbb710bdee4b4af62131936e74a5ea3850cd5ddbb04"
+      },
+      "after": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/source-after/crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+        "bytes": 40331,
+        "sha256": "48fcff62625fdda506d6a4d6039b67190fea951e3b991bb3f880fb640274a783"
+      },
+      "worktreeMatchesSnapshot": true
+    },
+    {
+      "relativePath": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "before": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/source-before/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+        "bytes": 79649,
+        "sha256": "8406246c2bf96f4545e411670e83c120f7b12f017c7ada182b4090dda37f5cb3"
+      },
+      "after": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/source-after/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+        "bytes": 86068,
+        "sha256": "a90522e846547705c8b6e64b4a7c5b0fce0f80f4d8b6119ca0e016f869339178"
+      },
+      "worktreeMatchesSnapshot": true
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "rustfmt",
+        "+1.97.1",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "--check",
+        "crates/fc-bootstrap/src/web_transfer/network.rs",
+        "crates/fc-windows/src/tls_frontdoor/native.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs"
+      ],
+      "cwd": "/tmp/fc-round65-header-expiry/worktree",
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/fmt-check-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/fmt-check-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "/tmp/fc-round65-header-expiry/worktree",
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/diff-check-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/diff-check-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "cwd": "/tmp/fc-round65-header-expiry/worktree",
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/status-first.stdout.log",
+        "bytes": 274,
+        "sha256": "53cf2184b0a4a534d16a90e276d43a0304325fb02cb2d7f00e2490d64a68072b"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/status-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--",
+        "crates/fc-bootstrap/src/web_transfer/network.rs",
+        "crates/fc-windows/src/tls_frontdoor/native.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs"
+      ],
+      "cwd": "/tmp/fc-round65-header-expiry/worktree",
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/diff-first.stdout.log",
+        "bytes": 16019,
+        "sha256": "32b61215ab196da85ee35f38f5d5cb26c93e53447478aef60587d32cc12b70dd"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round65-header-expiry/evidence/diff-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "design": {
+    "path": "/tmp/fc-round65-header-expiry/evidence/design-readonly-first.json",
+    "bytes": 3350,
+    "sha256": "c7ea03c28e9f8cb2c17a230e4d432d8e9842be6f3bc1b675695cbd6e83ffd0e9"
+  },
+  "implemented": [
+    "Bare post captures origin before socket/OVERLAPPED preparation. If alarm consumed before AcceptEx, closes only unsubmitted proposed socket and returns error, with no invented IOCP debt. Native success/PENDING always charges serial/state/submission before late negative cancellation; no +5 after native return.",
+    "Private production post clock always uses Instant::now; test injected origin/clock is private to native owner tests and never remote input. No new syscall clock service/thread/pool.",
+    "One service_deadlines operation performs only existing negative expiry against fixed bare+4 business owners. Original pending IOCP/Frame ledger, physical retirement and sticky failure rules remain; it neither drains nor rearms.",
+    "Native sweep boundaries: poll entry; before each of at most5 IOCP packet dequeues, after IOCP batch; before/after each of at most4 Frame deliveries; before each of4 native retirement submissions and final boundary.",
+    "Network sweep boundaries: before each of at most16 native event deliveries, before each of8 records, after each worker delivery, before each of8 record retire/rearm checks, final. Record is restored before propagating a failure inside its processing closure. No auth/lease/version/body admission relaxation."
+  ],
+  "boundedWork": {
+    "perServiceOwnerChecks": 5,
+    "nativePollMaxServiceCalls": 20,
+    "networkAdditionalMaxServiceCalls": 41,
+    "combinedMaxOwnerChecks": 305,
+    "interpretation": "Finite count, not an elapsed-time/OS-native-call worst-case bound. Subsequent checks skip Closed/Closing owners; no repeated pending debt discharge or unbounded allocation."
+  },
+  "newTests": {
+    "count": 5,
+    "names": [
+      "real_bare_post_charges_preparation_against_one_captured_origin",
+      "real_bare_expired_preparation_closes_socket_without_posting_io",
+      "real_bare_late_native_return_retains_charged_io_until_original_packet",
+      "real_iocp_batch_services_due_receive_before_another_top_level_poll",
+      "caller_deadline_service_keeps_original_head_request_budget_and_admission"
+    ],
+    "scope": "Actual Winsock/IOCP and actual SSPI worker mailbox with existing fake record Driver; controlled monotonic time inputs where stated. Not real cryptography, ESTABLISHED timestamp or a claimed new strict5s run.",
+    "counterexampleBasis": "Before change, a budget origin minted after native call could not charge preparation/post latency; late pending native return must still be charged/closed. Before change, direct poll_io did no expiry scan, leaving a due receive live until another top-level poll.",
+    "execution": "NOT_RUN_ROOT_WILL_BUILD_AND_RUN"
+  },
+  "semanticsKept": [
+    "HEADER_CLOSE_RESERVE remains25ms",
+    "Hard header budget remains5_000_000_000ns, never accept-observed+5",
+    "Complete valid Head still establishes the same original120s request interval; body admission only tightens it",
+    "4 business slots/1 bare owner/4 Frame/5native IO/6sockets and original shared2 business workers unchanged",
+    "Cancel/close is not IOCP/SSPI release; original Close/Retired evidence remains",
+    "No production listener enablement or new API/auth permission",
+    "No main/installer/CI/docs modification"
+  ],
+  "notSolved": [
+    "A backlog connection may already be ESTABLISHED before a fresh bare post; this is not reconstructed or hidden.",
+    "No documented exact TCP age from SO_CONNECT_TIME seconds.",
+    "Arbitrary Windows scheduling/suspend/native call/network delivery cannot be made a hard-real-time guarantee by these bounded user-mode checks.",
+    "Original R13 +577us FAIL remains; R41 finite passing samples remain separate."
+  ],
+  "pendingValidation": [
+    "Root full compile/strictClippy/host and actual Windows tests for5new+existing ownership regressions",
+    "Real finite Schannel incomplete-head4+raw1 strict5e9 samples, original timing validator/client budget/negative fixtures unchanged",
+    "Continuous capacity/body/upload/download/auth/business/browser regression at original budgets",
+    "MSVC/Win7/10/visible/production gates remain independent"
+  ],
+  "notRun": [
+    "Cargo/compile",
+    "Windows/SSH/network client",
+    "CI",
+    "product listeners",
+    "main source changes",
+    "commit/push"
+  ]
+}
