@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_ONLY_NO_CI_ARTIFACT_OR_WINDOWS_VALIDATION",
+  "recordedUtc": "2026-11-01T08:55:26.739175+00:00",
+  "sourceSha": "8bc1c9812df765865a54988a23ff3973d04884fc",
+  "baselines": {
+    "modern": {
+      "runId": 41290550848,
+      "workflow": ".github/workflows/windows-msvc.yml",
+      "staticAuditSuffix": "first"
+    },
+    "win7": {
+      "runId": 41290587954,
+      "workflow": ".github/workflows/windows-win7-msvc.yml",
+      "staticAuditSuffix": "first"
+    }
+  },
+  "helpers": [
+    {
+      "path": "prepare-ci-inputs-first.py",
+      "bytes": 11108,
+      "sha256": "03cded9509546f0e455b4c83612c643a334f66e7e4b6add668fac54ab4fe75c3"
+    },
+    {
+      "path": "run-windows-runtime-selected-first.py",
+      "bytes": 2657,
+      "sha256": "f0ade2af8f36ea1dc62c0a47a52f791676804fbc6674a173f4b5a7ed12f90f67"
+    },
+    {
+      "path": "run-public-visual-selected-first.py",
+      "bytes": 3806,
+      "sha256": "ecf297c6be01afcd75f393a9c99b133e2a663f36e3de8234686bb103fb86c611"
+    },
+    {
+      "path": "prepare-ci-inputs-model-first.py",
+      "bytes": 5898,
+      "sha256": "6dcd9e1fc9683bb77f1234efa79579dfd52b028e1408bb9cb6c204aff15d2893"
+    }
+  ],
+  "pinnedLocalSources": [
+    {
+      "path": "scripts/windows-probe.py",
+      "sourceSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+      "currentExact": true
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "sourceSha256": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886",
+      "currentExact": true
+    },
+    {
+      "path": "scripts/audit-pe.py",
+      "sourceSha256": "6e3669be5cbf697d87502ba4f3c632f33020659ad4117dcea5f616e0d182c5cb",
+      "currentExact": true
+    }
+  ],
+  "templateAdaptations": [
+    "R67 evidence root becomes this owned R69 root; old temporary R67/R68 roots are never accessed.",
+    "Source54397 becomes exact8bc1c9812df765865a54988a23ff3973d04884fc. Source-bound controller bytes are independently compared with Git show; read-only Git only.",
+    "Modern and Win7 run IDs use their actual single R69 dispatch originals. Job ID, artifact ID, run attempt, ZIP bytes and SHA come from terminal API originals, not R67 constants.",
+    "Both fresh static audits use first suffix. R67 Win7 second suffix and historical premature-failure qualification are R67 facts, never required or fabricated for R69.",
+    "Normal product/test SHA and remapped test metadata are read from new actual static report and rehashed, including all22 PE files; no old normal executable SHA is inherited.",
+    "Runtime aggregate counts are not copied from R67 1516 or R68 1542; later independent audit must parse unique per-harness running, actual case lines and unique summaries.",
+    "Shared Win11 build26300/WOW64 scope remains separate from Win7-target build and actual Win7/10 OS evidence. Public20/visual22 remain source-pinned contracts.",
+    "Toolchain, buildstd placement, crt-static and GUI/CUI subsystem contracts, 20000 source-path/byte caps,21 test producers and22 PE checks stay enforced by unchanged original auditor.",
+    "Copied auditor --self-test refers to R61 original fixture directories not copied here; it was not invoked. New pure21 gate checks are preparation models only."
+  ],
+  "actualDefaultInvocations": [
+    {
+      "baseline": "modern",
+      "status": "WAIT",
+      "reasonCode": "MISSING_modern-run-final-first.json",
+      "exitCode": 3,
+      "reportCreated": false,
+      "zipAccessed": false
+    },
+    {
+      "baseline": "win7",
+      "status": "WAIT",
+      "reasonCode": "MISSING_win7-run-final-first.json",
+      "exitCode": 3,
+      "reportCreated": false,
+      "zipAccessed": false
+    }
+  ],
+  "gatePolicy": "Original downloader JSON PASS plus root original controller terminal exit0 are both mandatory before stat/hash/open of original ZIP. Missing or RUNNING means WAIT with no audit report. Root supplies download-operation path if naming differs.",
+  "pureGateModels": {
+    "path": "prepare-ci-inputs-model-first.json",
+    "sha256": "dd947502562e533c7fbfbe7ff0b16cbb402b1b08467621c9da7bd9e684a276d8",
+    "status": "PASS_PURE_GATE_MODELS_ONLY_NO_ARTIFACT",
+    "checkCount": 21,
+    "caseLabelQualification": "The first model label stale command baseline mutates command token index5 (the run-id option name); it proves malformed command option rejection. Exact baseline-value binding is enforced by the same production gate loop but not independently established by that mislabeled model."
+  },
+  "invocationExamples": [
+    "python3 -B /tmp/fc-round69-ci-evidence/prepare-ci-inputs-first.py --baseline modern",
+    "python3 -B /tmp/fc-round69-ci-evidence/prepare-ci-inputs-first.py --baseline win7 --execute-static",
+    "python3 -B /tmp/fc-round69-ci-evidence/prepare-ci-inputs-first.py --baseline modern --mode runtime-inputs"
+  ],
+  "scope": "Preparation only. No network, POST, download, ZIP inspection, actual static artifact audit, Windows/SSH, Cargo, Git mutation or main file change. Root will explicitly run each terminal artifact audit and Windows controllers serially; no runtime PASS is claimed."
+}

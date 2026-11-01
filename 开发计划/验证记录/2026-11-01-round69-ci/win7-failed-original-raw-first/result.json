@@ -1,0 +1,973 @@
+{
+  "status": "FAILED_OR_INCOMPLETE",
+  "source_sha": "8bc1c9812df765865a54988a23ff3973d04884fc",
+  "input_manifest_sha256": "4529fc9dd1c5ef7d90ca4029fb4953f280a967e692429f7bb0f32707a2c758d8",
+  "toolchain": "nightly-2026-10-29-x86_64-pc-windows-msvc",
+  "target": "i686-win7-windows-msvc",
+  "baseline": "Win7",
+  "rustflags": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01",
+  "product_rustflags": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:WINDOWS,6.01",
+  "rustflags_scope": "Workspace test/clippy default; product-compile uses product_rustflags only and restores the original flags.",
+  "dispatch_source_sha": "8bc1c9812df765865a54988a23ff3973d04884fc",
+  "input_schema": "future-classroom.ci-input-domains/v1",
+  "git_tree_manifest_sha256": "a7454a321924c4bb4b4b1126b028fd0276777723faf326b137744bbc59a11f1f",
+  "input_domains_manifest_sha256": "9efd499a6e38ee3a7c3613a1d14fcc01add4b6fbb6a857e09875081b1bb66d01",
+  "input_domain_summary": {
+    "manifest": "input-domains.json",
+    "tracked_file_count": 15091,
+    "sha256_file_count": 595,
+    "sha256_checkout_bytes_hashed": 21896835,
+    "historical_file_count": 14496,
+    "historical_git_blob_bytes": 1241452461,
+    "historical_checkout_metadata_bytes": 1249142857,
+    "historical_content_sha256": "NOT_READ_BY_INPUT_HASHER"
+  },
+  "commands": [
+    {
+      "name": "source-sha",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "started_utc": "2026-11-01T08:51:48.4266044Z",
+      "duration_seconds": 0.0690994,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-sha.stdout.log",
+      "stderr": "logs/source-sha.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-clean-before",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "status",
+        "--porcelain",
+        "--untracked-files=all"
+      ],
+      "started_utc": "2026-11-01T08:51:48.6339176Z",
+      "duration_seconds": 0.2819563,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-clean-before.stdout.log",
+      "stderr": "logs/source-clean-before.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-input-paths",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "ls-files",
+        "-z"
+      ],
+      "started_utc": "2026-11-01T08:51:48.9198819Z",
+      "duration_seconds": 2.9365361,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-input-paths.stdout.log",
+      "stderr": "logs/source-input-paths.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-git-tree-before",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "ls-tree",
+        "-r",
+        "-z",
+        "-l",
+        "--full-tree",
+        "HEAD"
+      ],
+      "started_utc": "2026-11-01T08:51:51.9054548Z",
+      "duration_seconds": 4.7070923,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-git-tree-before.stdout.log",
+      "stderr": "logs/source-git-tree-before.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-git-tree-id-before",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "started_utc": "2026-11-01T08:51:57.1434737Z",
+      "duration_seconds": 0.0628236,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-git-tree-id-before.stdout.log",
+      "stderr": "logs/source-git-tree-id-before.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "rustup-version",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+      "arguments": [
+        "--version"
+      ],
+      "started_utc": "2026-11-01T08:52:00.4118476Z",
+      "duration_seconds": 17.1619704,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/rustup-version.stdout.log",
+      "stderr": "logs/rustup-version.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "install-fixed-rust",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+      "arguments": [
+        "toolchain",
+        "install",
+        "nightly-2026-10-29-x86_64-pc-windows-msvc",
+        "--profile",
+        "minimal",
+        "--component",
+        "clippy",
+        "--component",
+        "rustfmt",
+        "--component",
+        "rust-src"
+      ],
+      "started_utc": "2026-11-01T08:52:17.5847717Z",
+      "duration_seconds": 2.1157028,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/install-fixed-rust.stdout.log",
+      "stderr": "logs/install-fixed-rust.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "rust-version",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+      "arguments": [
+        "run",
+        "nightly-2026-10-29-x86_64-pc-windows-msvc",
+        "rustc",
+        "-vV"
+      ],
+      "started_utc": "2026-11-01T08:52:19.7028650Z",
+      "duration_seconds": 0.0755127,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/rust-version.stdout.log",
+      "stderr": "logs/rust-version.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "cargo-version",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "--version",
+        "--verbose"
+      ],
+      "started_utc": "2026-11-01T08:52:19.7803416Z",
+      "duration_seconds": 0.6405425,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/cargo-version.stdout.log",
+      "stderr": "logs/cargo-version.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "rust-src-components",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+      "arguments": [
+        "component",
+        "list",
+        "--installed",
+        "--toolchain",
+        "nightly-2026-10-29-x86_64-pc-windows-msvc"
+      ],
+      "started_utc": "2026-11-01T08:52:20.4239797Z",
+      "duration_seconds": 0.090819,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/rust-src-components.stdout.log",
+      "stderr": "logs/rust-src-components.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "rust-sysroot",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+      "arguments": [
+        "run",
+        "nightly-2026-10-29-x86_64-pc-windows-msvc",
+        "rustc",
+        "--print",
+        "sysroot"
+      ],
+      "started_utc": "2026-11-01T08:52:20.5165852Z",
+      "duration_seconds": 0.0608369,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/rust-sysroot.stdout.log",
+      "stderr": "logs/rust-sysroot.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "rust-target-cfg",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+      "arguments": [
+        "run",
+        "nightly-2026-10-29-x86_64-pc-windows-msvc",
+        "rustc",
+        "--target",
+        "i686-win7-windows-msvc",
+        "-C",
+        "target-feature=+crt-static",
+        "--print",
+        "cfg"
+      ],
+      "started_utc": "2026-11-01T08:52:20.5960140Z",
+      "duration_seconds": 0.0602542,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/rust-target-cfg.stdout.log",
+      "stderr": "logs/rust-target-cfg.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "visual-studio",
+      "executable": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe",
+      "arguments": [
+        "-latest",
+        "-version",
+        "[17.0,18.0)",
+        "-products",
+        "*",
+        "-requires",
+        "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+        "-format",
+        "json"
+      ],
+      "started_utc": "2026-11-01T08:52:20.6584600Z",
+      "duration_seconds": 0.4664799,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/visual-studio.stdout.log",
+      "stderr": "logs/visual-studio.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "cl-version-probe",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\cl.exe",
+      "arguments": [
+        "/nologo",
+        "/Bv",
+        "/MT",
+        "/c",
+        "/FoD:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\scratch\\compiler-version.obj",
+        "/D_WIN32_WINNT=0x0601",
+        "/DWINVER=0x0601",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\scratch\\compiler-version.c"
+      ],
+      "started_utc": "2026-11-01T08:52:30.5249148Z",
+      "duration_seconds": 4.2944039,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/cl-version-probe.stdout.log",
+      "stderr": "logs/cl-version-probe.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "cargo-metadata",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "metadata",
+        "--locked",
+        "--format-version",
+        "1",
+        "--no-deps"
+      ],
+      "started_utc": "2026-11-01T08:52:34.9391188Z",
+      "duration_seconds": 0.1145749,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/cargo-metadata.stdout.log",
+      "stderr": "logs/cargo-metadata.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "fmt",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "started_utc": "2026-11-01T08:52:35.0632422Z",
+      "duration_seconds": 3.4322594,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/fmt.stdout.log",
+      "stderr": "logs/fmt.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "architecture",
+      "executable": "C:\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python.exe",
+      "arguments": [
+        "scripts/check-architecture.py"
+      ],
+      "started_utc": "2026-11-01T08:52:38.4977056Z",
+      "duration_seconds": 1.0626899,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/architecture.stdout.log",
+      "stderr": "logs/architecture.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "workspace-test-compile",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "-Z",
+        "build-std",
+        "test",
+        "-vv",
+        "--workspace",
+        "--all-targets",
+        "--release",
+        "--locked",
+        "--target",
+        "i686-win7-windows-msvc",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "started_utc": "2026-11-01T08:52:39.5680230Z",
+      "duration_seconds": 618.9796563,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/workspace-test-compile.stdout.log",
+      "stderr": "logs/workspace-test-compile.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "product-compile",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "-Z",
+        "build-std",
+        "rustc",
+        "-vv",
+        "--release",
+        "--locked",
+        "--target",
+        "i686-win7-windows-msvc",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-bootstrap",
+        "--message-format=json"
+      ],
+      "started_utc": "2026-11-01T09:02:58.5582829Z",
+      "duration_seconds": 192.5939589,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/product-compile.stdout.log",
+      "stderr": "logs/product-compile.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "clippy",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "clippy",
+        "-Z",
+        "build-std",
+        "-vv",
+        "--workspace",
+        "--all-targets",
+        "--release",
+        "--locked",
+        "--target",
+        "i686-win7-windows-msvc",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "started_utc": "2026-11-01T09:06:11.1572690Z",
+      "duration_seconds": 44.7486266,
+      "exit_code": 101,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/clippy.stdout.log",
+      "stderr": "logs/clippy.stderr.log",
+      "passed": false
+    },
+    {
+      "name": "pe-imports-0",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-materials\\fc_materials-27e90f6481865594.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.2331521Z",
+      "duration_seconds": 0.078893,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-0.stdout.log",
+      "stderr": "logs/pe-imports-0.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-1",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-bootstrap\\fc_bootstrap-91b9195dc595ae6a.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.3144639Z",
+      "duration_seconds": 0.0600645,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-1.stdout.log",
+      "stderr": "logs/pe-imports-1.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-2",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-bootstrap\\runtime_storage-bf961cb76f115c90.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.3762365Z",
+      "duration_seconds": 0.0610551,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-2.stdout.log",
+      "stderr": "logs/pe-imports-2.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-3",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-bootstrap\\verify_web_assets-7ac500a422c06d1a.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.4391389Z",
+      "duration_seconds": 0.0608002,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-3.stdout.log",
+      "stderr": "logs/pe-imports-3.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-4",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-bootstrap\\voice_limits_storage-abed18096ae314db.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.5015740Z",
+      "duration_seconds": 0.0608275,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-4.stdout.log",
+      "stderr": "logs/pe-imports-4.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-5",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-bootstrap\\business_storage-9ab94b602a63138a.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.5639891Z",
+      "duration_seconds": 0.0607961,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-5.stdout.log",
+      "stderr": "logs/pe-imports-5.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-6",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-bootstrap\\schedule_operations-a07e2c7c41633cad.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.6268462Z",
+      "duration_seconds": 0.0604618,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-6.stdout.log",
+      "stderr": "logs/pe-imports-6.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-7",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-bootstrap\\calendar_execution_fence-21b0f4c4743fb589.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.6890660Z",
+      "duration_seconds": 0.060744,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-7.stdout.log",
+      "stderr": "logs/pe-imports-7.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-8",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-bootstrap\\fc_bootstrap-6b3baf5e1e32f754.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.7515163Z",
+      "duration_seconds": 0.0608785,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-8.stdout.log",
+      "stderr": "logs/pe-imports-8.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-9",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-bootstrap\\voice_storage-785dd80176e1848e.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.8140967Z",
+      "duration_seconds": 0.0608853,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-9.stdout.log",
+      "stderr": "logs/pe-imports-9.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-10",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-bootstrap\\autostart_coordinator-66a4d714f5577a8a.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.8764158Z",
+      "duration_seconds": 0.060948,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-10.stdout.log",
+      "stderr": "logs/pe-imports-10.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-11",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-security\\fc_security-3bf217f9b927aa4c.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:56.9392113Z",
+      "duration_seconds": 0.0605451,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-11.stdout.log",
+      "stderr": "logs/pe-imports-11.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-12",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-windows\\fc_windows-188127b3800ef746.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:57.0013754Z",
+      "duration_seconds": 0.0610244,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-12.stdout.log",
+      "stderr": "logs/pe-imports-12.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-13",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-presentation\\fc_presentation-ebc9347ec035f379.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:57.0638435Z",
+      "duration_seconds": 0.0611903,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-13.stdout.log",
+      "stderr": "logs/pe-imports-13.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-14",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-protocol\\fc_protocol-46c0f0d76d445238.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:57.1267736Z",
+      "duration_seconds": 0.0606751,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-14.stdout.log",
+      "stderr": "logs/pe-imports-14.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-15",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-audio\\fc_audio-ccd283b0aa061f9d.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:57.1890109Z",
+      "duration_seconds": 0.0610092,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-15.stdout.log",
+      "stderr": "logs/pe-imports-15.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-16",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-storage\\fc_storage-f6972f806e9d4523.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:57.2514330Z",
+      "duration_seconds": 0.0610643,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-16.stdout.log",
+      "stderr": "logs/pe-imports-16.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-17",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-ports\\fc_ports-7edd2d56c0c9c5d7.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:57.3139339Z",
+      "duration_seconds": 0.0610827,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-17.stdout.log",
+      "stderr": "logs/pe-imports-17.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-18",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-runtime\\fc_runtime-93d068d0c2da548f.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:57.3764041Z",
+      "duration_seconds": 0.0612607,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-18.stdout.log",
+      "stderr": "logs/pe-imports-18.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-19",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-application\\fc_application-9e82411b268941a8.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:57.4389557Z",
+      "duration_seconds": 0.0614931,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-19.stdout.log",
+      "stderr": "logs/pe-imports-19.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-20",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\tests\\fc-domain\\fc_domain-858bf456d034c981.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:57.5017565Z",
+      "duration_seconds": 0.0612486,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-20.stdout.log",
+      "stderr": "logs/pe-imports-20.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "pe-imports-21",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\dumpbin.exe",
+      "arguments": [
+        "/DEPENDENTS",
+        "D:\\a\\_temp\\future-classroom-win7-msvc-41290587954-1\\artifact\\product\\fc-bootstrap\\fc-bootstrap.exe"
+      ],
+      "started_utc": "2026-11-01T09:06:57.5643329Z",
+      "duration_seconds": 0.0612458,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/pe-imports-21.stdout.log",
+      "stderr": "logs/pe-imports-21.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-sha-after",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "started_utc": "2026-11-01T09:06:57.6314234Z",
+      "duration_seconds": 0.0566183,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-sha-after.stdout.log",
+      "stderr": "logs/source-sha-after.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-input-paths-after",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "ls-files",
+        "-z"
+      ],
+      "started_utc": "2026-11-01T09:06:57.6895949Z",
+      "duration_seconds": 2.9478003,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-input-paths-after.stdout.log",
+      "stderr": "logs/source-input-paths-after.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-git-tree-after",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "ls-tree",
+        "-r",
+        "-z",
+        "-l",
+        "--full-tree",
+        "HEAD"
+      ],
+      "started_utc": "2026-11-01T09:07:00.6693650Z",
+      "duration_seconds": 4.7031892,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-git-tree-after.stdout.log",
+      "stderr": "logs/source-git-tree-after.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-git-tree-id-after",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "started_utc": "2026-11-01T09:07:05.6662614Z",
+      "duration_seconds": 0.0659976,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-git-tree-id-after.stdout.log",
+      "stderr": "logs/source-git-tree-id-after.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-clean-after",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "status",
+        "--porcelain",
+        "--untracked-files=all"
+      ],
+      "started_utc": "2026-11-01T09:07:07.5174841Z",
+      "duration_seconds": 0.0901496,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-clean-after.stdout.log",
+      "stderr": "logs/source-clean-after.stderr.log",
+      "passed": true
+    }
+  ],
+  "executable_count": 22,
+  "windows7": "NOT_RUN",
+  "windows10": "NOT_RUN",
+  "windows11": "NOT_RUN",
+  "seewo_device": "NOT_RUN",
+  "purpose": "Win7 MSVC candidate COMPILE_ONLY with rebuilt std/test and PE32 subsystem6.1; not Win7 API, SDK/CRT compatibility or runtime certification.",
+  "later_test_arguments": [
+    "--test-threads=2"
+  ],
+  "test_working_directories": "Package paths in executables.json; choose an isolated controlled root.",
+  "no_toolchain_payloads": true,
+  "no_environment_dump": true,
+  "limitations": [
+    "Static CRT does not prove OS API compatibility.",
+    "Already terminated/cancelled hosted jobs may prevent always-upload.",
+    "Doctests are not compiled into the collected no-run harness executables.",
+    "Actual Windows 7/10/11 and classroom-device runs require separate evidence."
+  ]
+}

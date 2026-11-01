@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_PURE_GATE_MODELS_ONLY_NO_ARTIFACT",
+  "recordedUtc": "2026-11-01T08:54:44.318942+00:00",
+  "helper": {
+    "path": "prepare-ci-inputs-first.py",
+    "bytes": 11108,
+    "sha256": "03cded9509546f0e455b4c83612c643a334f66e7e4b6add668fac54ab4fe75c3"
+  },
+  "checkCount": 21,
+  "checks": [
+    "modern synthetic complete gate permits one exact ZIP fact only after terminal receipt",
+    "win7 synthetic complete gate permits one exact ZIP fact only after terminal receipt",
+    "queued run blocks all ZIP access",
+    "running job blocks all ZIP access",
+    "wrong run blocks all ZIP access",
+    "stale source blocks all ZIP access",
+    "failed CI blocks all ZIP access",
+    "wrong workflow blocks all ZIP access",
+    "duplicate artifact blocks all ZIP access",
+    "expired artifact blocks all ZIP access",
+    "wrong artifact source blocks all ZIP access",
+    "malformed digest blocks all ZIP access",
+    "running download blocks all ZIP access",
+    "failed download blocks all ZIP access",
+    "short downloaded bytes blocks all ZIP access",
+    "wrong download digest blocks all ZIP access",
+    "missing parent receipt blocks all ZIP access",
+    "parent still running blocks all ZIP access",
+    "parent exit failure blocks all ZIP access",
+    "parent not actually exited blocks all ZIP access",
+    "stale command baseline blocks all ZIP access"
+  ],
+  "scope": "Synthetic in-memory I/O only. No actual ZIP read, API request, download, static artifact audit, Windows, SSH, Cargo, Git mutation or product execution. Missing original terminal inputs are WAIT, not a product FAIL or PASS."
+}

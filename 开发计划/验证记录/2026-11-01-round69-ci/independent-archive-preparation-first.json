@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_NOT_FINAL_AUDIT_OR_ARCHIVE_EXECUTED",
+  "recordedUtc": "2026-11-01T09:27:20.427436+00:00",
+  "sourceSha": "8bc1c9812df765865a54988a23ff3973d04884fc",
+  "helpers": [
+    {
+      "path": "independent-runtime-first.py",
+      "bytes": 20229,
+      "sha256": "189505cbe156140f516e52e7ea11f48c31cf860fa5dc6d474ecdaa1aede57fe6",
+      "syntax": "PASS"
+    },
+    {
+      "path": "archive-evidence-first.py",
+      "bytes": 14531,
+      "sha256": "5739be9ec8de02ecbad4fda6e60ed81779560264585a478cd36d79d39d367733",
+      "syntax": "PASS"
+    },
+    {
+      "path": "archive-source-scan-first.py",
+      "bytes": 2002,
+      "sha256": "eff3c9961e3d76a00d5b7f1a8267a3d1ab88d59d16011bfcc9eb02088deab333",
+      "syntax": "PASS"
+    }
+  ],
+  "finalAcceptance": {
+    "helper": "independent-runtime-first.py",
+    "command": [
+      "python3",
+      "-B",
+      "/tmp/fc-round69-ci-evidence/independent-runtime-first.py"
+    ],
+    "report": "independent-runtime-first.json",
+    "expectedStatus": "PASS_R69_MODERN_WIN11_REGRESSION_WITH_WIN7_CI_FAILURE_RETAINED",
+    "scope": "Only actual modern CI/Win11 regression accepted; original Win7 candidate CI failure and NOT_RUN stay explicit. Missing or running originals yield WAIT with no report. Root must actually trigger the helper."
+  },
+  "archive": {
+    "helper": "archive-evidence-first.py",
+    "commandTemplate": "python3 -B /tmp/fc-round69-ci-evidence/archive-evidence-first.py --expected-runtime-sha256 <root-confirmed-actual-final-report-sha256>",
+    "destination": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round69-ci",
+    "gates": [
+      "fresh destination and source receipt",
+      "exact owned-root marker",
+      "terminal final readonly audit SHA a0c79bdcc98ace31e160c31c5eeba42852babcc14d17ec5a54e5e05cd8044886",
+      "root-confirmed actual acceptance report SHA/status/source",
+      "separate modern PASS and original Win7 CI failure/NOT_RUN scope"
+    ],
+    "byteProof": "All retained source and actual stored bytes independently reopened and compared; known derived objdump only losslessly gzip with original/stored size+SHA; final full membership recheck. Compiled/ZIP/database/cache exclusions keep exact source identities.",
+    "credentialCoverage": "Retained source and stored/gzip-decoded bytes, actualUTF16, JSON base64/encodedCommand raw payloads and all decoded JSON string values; strong API token/privatekey/authorization/signedURL/session/CSRF/password/pairing fields. Only path/kind/view findings; never matched values.",
+    "originalFailures": "Win7 failed CI ZIP identity, exact210 nonbinary originals, actual Clippy101 original logs/command/result and official terminal failure are retained. No false static PASS or Win7 EXE execution approval. No original report rewrite."
+  },
+  "preparationSourceScan": {
+    "path": "archive-source-scan-first.json",
+    "sha256": "e7d1dd1be0c7127a98a9f40a3599f39a843a5f5a4a55d62279684a1b2f08fe0c",
+    "status": "PASS_SOURCE_SCAN_ONLY_NOT_ARCHIVE",
+    "retainedFilesBeforeScanReceipt": 504,
+    "findings": 0,
+    "qualification": "Source-only preparation scan before its own receipt/preparation/final acceptance; full root archive independently scans every actual retained/stored file including all new final records."
+  },
+  "template": "Main archived R67 strict per-case/summary/flow/producer parser and exact archive framework; no access to removed R67/R68 temporary roots.",
+  "noOperations": [
+    "No final independent acceptance execution",
+    "No archive copy to main",
+    "No Windows/SSH/network/Cargo",
+    "No original R69 result mutation",
+    "No Git/main mutation"
+  ],
+  "evidenceWriting": "Preparer stops writing after this record. Root may trigger actual acceptance, then archive only after all root evidence additions are terminal; no evidence files may change during archive snapshot/verification."
+}

@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round69-ci-evidence/archive-evidence-first.py",
+    "--expected-runtime-sha256",
+    "d82046f66b0ec7fb8d8dd307aac4f3bcbc5bf5aecdf390c9ffb5f9231f89cb2c"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 52.33566092606634,
+  "originalBudgetSeconds": 900,
+  "scope": "Complete original archival controller stdout/stderr outside frozen R69 evidence directory.",
+  "stdout": {
+    "path": "/tmp/fc-round69-archive-controller/operation-first.stdout.log",
+    "bytes": 440,
+    "sha256": "8539099a6c70c4d465ba434d50ba02a2387a205b04ff115f088c42947a740d88"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round69-archive-controller/operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
