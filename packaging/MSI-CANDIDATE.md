@@ -90,14 +90,16 @@ Admission is based on actual product/context/related registrations, version,
 component keypaths, bounded exact payload hashes/membership and marker state.
 It is checked again under the original exclusive owner. The internal
 `SameManifest` Pending label is neutral: `Installed`, `REMOVE`, `REINSTALL`,
-command-line intent and advisory notices do not grant an action. A full staged
+command-line intent do not grant an action. A full staged
 manifest permits the expected-present path; complete target/marker absence from
 a healthy admitted baseline permits expected-absent. Partial or unknown effects
 require rollback and verification against the admitted baseline. Final product
-registration is independently checked after the actual transaction ends and
-the original guardian returns; it is not inferred from staged registration
-visibility. File-proof handles must actually return before MSI needs delete
-access. The original 120-second deadline and resource/worker budgets do not grow.
+registration and effects are independently reconciled by the broker after the
+actual transaction ends and the original guardian child exits, before the broker
+releases its owner and exits. Staged registration visibility alone is not proof.
+The supervisor then waits for the original broker to exit 0 and completes image
+retirement before its own return. File-proof handles must actually return before
+MSI needs delete access. The original 120-second deadline and resource/worker budgets do not grow.
 
 An intact installation being reapplied is not evidence of repairing missing or
 corrupt files. A damaged or foreign preimage is refused rather than silently
@@ -112,20 +114,28 @@ The exact Binary table contains one separately compiled normal
 application to one accepted same-source CI result, original non-test Cargo
 messages and source/byte ledgers. It appends a bounded immutable payload/effects
 manifest to that original helper PE, preserving the normal PE prefix byte for
-byte. The embedded guardian receives the engine transaction ID followed by the
-fixed `guardian` argument; it is not a broker-created imitation of an engine
-child. The native implementation authenticates actual peer/process capabilities
-and reads the manifest from its pinned image. A caller cannot send an
-`effects_reconciled` boolean as proof.
+byte. The engine-launched embedded chainer receives the engine transaction ID
+followed by the fixed `supervisor` argument. That supervisor starts the same
+normal helper image as its internal guardian child and forwards the original
+transaction. It must retain the original child process handle through actual
+Join/End and checked process return; the supervisor's own original return also
+requires verification. The native implementation authenticates actual
+peer/process capabilities and reads the manifest from its pinned image. A caller
+cannot send an `effects_reconciled` boolean as proof.
 
-Only three exact CustomAction rows are admitted: synchronous immediate begin
-(type 2), impersonated deferred rollback notification (1282), and impersonated
-deferred commit notification (1538). Notifications are advisory. Successful
-Join/End, an ACK or pipe EOF alone cannot release Pending: the broker also needs
-the original guardian's actual return and independently reconciled closed
-payload/registration effects or the admitted fresh/healthy rollback baseline. Failure,
-unknown effects or cleanup retains negative state. No ignore/async or
-NoImpersonate variant is admitted.
+Only one exact CustomAction row is admitted: synchronous immediate
+`FcBeginGate` (type 2), at sequence 1499. The former rollback/commit notification
+actions and their sequence rows are absent and rejected by inspection. Successful
+Join/End, an ACK or pipe EOF alone cannot release Pending: the original guardian
+child must exit and the broker must independently reconcile closed
+payload/registration effects or the admitted fresh/healthy rollback baseline.
+Unknown guardian return, effects or checked-close state before settlement retains
+the original Pending. After the broker has settled and exited 0, a later image
+retirement or close failure is a cleanup failure of an already settled product;
+it cannot claim that the old Pending remains or fabricate a rollback.
+No ignore/async or NoImpersonate variant is admitted. The standalone supervisor/child rollback fixture establishes
+only its measured API/process behavior; it does not validate this product wiring.
+The newly packaged topology still requires actual product MSI acceptance.
 
 `RemoveExistingProducts` follows `InstallExecute` and precedes
 `InstallFinalize`. Native admission still refuses different-version/related
@@ -187,9 +197,9 @@ The unexecuted wixl compiler subset omits lifecycle CustomAction declarations
 and their sequence references because wixl 0.103 emits an empty five-column
 CustomAction table for BinaryKey/ExeCommand. Compiler warnings and stderr still
 fail the build. The importer replaces that empty schema with exactly four
-columns and three fixed rows; it preserves the compiler's standard execution
-rows and adds only the three constant-condition lifecycle hooks. Intermediate
-MSI bytes are never an accepted candidate or executed. Final exports must pass
+columns and one fixed synchronous begin row; it preserves the compiler's standard
+execution rows and adds only the constant-condition begin hook at sequence 1499.
+Intermediate MSI bytes are never an accepted candidate or executed. Final exports must pass
 the unchanged exact role/type/source/target/sequence checks, and the embedded
 normal helper and payload must independently match their admitted bytes.
 A local table-format fragment is not a complete product MSI or runtime PASS.
@@ -224,7 +234,7 @@ review; never delete school data, persistent SSH authorization or unrelated file
 Before any release, independently examine summary architecture/installer version,
 Property, Directory, Component, File, Upgrade, LaunchCondition, both sequences,
 the exact installer-only Registry marker set, the single helper Binary stream,
-the exact three CustomAction rows and one embedded chainer. Extra roles, binary
+the exact synchronous begin CustomAction row and one supervisor embedded chainer. Extra roles, binary
 streams, bypass conditions and altered sequencing fail inspection.
 RemoveRegistry/service/shortcut/environment/ACL side effects remain forbidden.
 The initial candidate does not perform Windows Installer ICE validation. The

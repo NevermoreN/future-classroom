@@ -1,0 +1,77 @@
+{
+  "actualExit": true,
+  "exitCode": 0,
+  "reaped": true,
+  "elapsedSeconds": 0.6528019600082189,
+  "command": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe",
+    "-NoLogo",
+    "-NoProfile",
+    "-NonInteractive",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-EncodedCommand",
+    "WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+  ],
+  "stdin": {
+    "bytes": 10467,
+    "sha256": "eb2779285872a335702db3d0bc6ca8971f732ce256958db3a3a097294eafc210"
+  },
+  "stdout": {
+    "path": "/tmp/fc-round77-installer-cleanup/root-supervisor-fixture-cleanup-first.stdout.log",
+    "bytes": 668,
+    "sha256": "7bb68e644b07884419bc87816b7cc96aaa783753b5c779a4dce814ec2d96a020"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round77-installer-cleanup/root-supervisor-fixture-cleanup-first.stderr.log",
+    "bytes": 618,
+    "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0"
+  },
+  "actual": {
+    "productCount": 0,
+    "productState": -1,
+    "relatedCount": 0,
+    "filesRemoved": 29,
+    "cacheOriginalPaths": [
+      {
+        "mutations": false,
+        "path": "C:\\Windows\\Installer\\34346c5b.msi",
+        "knownAbsent": true
+      },
+      {
+        "mutations": false,
+        "path": "C:\\Windows\\Installer\\34346c5f.msi",
+        "knownAbsent": true
+      },
+      {
+        "mutations": false,
+        "path": "C:\\Windows\\Installer\\MSI6C9A.tmp",
+        "knownAbsent": true
+      }
+    ],
+    "markerKnownAbsent": true,
+    "cacheManualDelete": false,
+    "rootKnownAbsent": true,
+    "registryMutation": false,
+    "status": "PASS_SUPERVISOR_FIXTURE_ABSENT_EXACT_SCRATCH_REMOVED",
+    "ancestorReadOnly": [
+      {
+        "valueCount": null,
+        "knownAbsent": true,
+        "key": "Software\\FutureClassroomTest",
+        "subKeyCount": null,
+        "mutations": false
+      }
+    ],
+    "serviceKill": false
+  },
+  "status": "PASS"
+}

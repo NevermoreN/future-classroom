@@ -122,11 +122,11 @@ def compiled_contract_model():
     add("LaunchCondition", "Condition Description", [["NOT WIX_DOWNGRADE_DETECTED", "A newer FutureClassroom candidate is installed."], ["NOT ALLUSERS", "This candidate supports only the current user installation context."], ["Installed OR VersionNT >= 601", "Windows 7 or later is required; actual OS compatibility remains unvalidated."],
         ["NOT RollbackDisabled AND NOT DISABLEROLLBACK", "Rollback must remain enabled for this lifecycle candidate."],
         ['MSIRESTARTMANAGERCONTROL = "DisableShutdown"', "Automatic application shutdown is not allowed by this lifecycle candidate."]])
-    add("InstallExecuteSequence", "Action Condition Sequence", [["FindRelatedProducts", "", "25"], ["LaunchConditions", "", "100"], ["CostFinalize", "", "1000"], ["InstallValidate", "", "1400"], ["FcBeginGate", "1", "1499"], ["InstallInitialize", "", "1500"], ["FcRollbackNotify", "1", "1501"], ["FcCommitNotify", "1", "1502"], ["InstallExecute", "", "6500"], ["RemoveExistingProducts", "", "6501"], ["InstallFinalize", "", "6600"]])
+    add("InstallExecuteSequence", "Action Condition Sequence", [["FindRelatedProducts", "", "25"], ["LaunchConditions", "", "100"], ["CostFinalize", "", "1000"], ["InstallValidate", "", "1400"], ["FcBeginGate", "1", "1499"], ["InstallInitialize", "", "1500"], ["InstallExecute", "", "6500"], ["RemoveExistingProducts", "", "6501"], ["InstallFinalize", "", "6600"]])
     add("InstallUISequence", "Action Condition Sequence", [["FindRelatedProducts", "", "25"], ["LaunchConditions", "", "100"]])
     add("Binary", "Name Data", [["FcLifecycleHelper", "Binary.FcLifecycleHelper"]])
-    add("CustomAction", "Action Type Source Target", [["FcBeginGate", "2", "FcLifecycleHelper", 'begin "[FcInstallDir]fc-bootstrap.exe"'], ["FcRollbackNotify", "1282", "FcLifecycleHelper", "rollback"], ["FcCommitNotify", "1538", "FcLifecycleHelper", "commit"]])
-    add("MsiEmbeddedChainer", "MsiEmbeddedChainer Condition CommandLine Source Type", [["FcLifecycleGuardian", 'NOT (ACTION = "ADVERTISE")', "guardian", "FcLifecycleHelper", "2"]])
+    add("CustomAction", "Action Type Source Target", [["FcBeginGate", "2", "FcLifecycleHelper", 'begin "[FcInstallDir]fc-bootstrap.exe"']])
+    add("MsiEmbeddedChainer", "MsiEmbeddedChainer Condition CommandLine Source Type", [["FcLifecycleGuardian", 'NOT (ACTION = "ADVERTISE")', "supervisor", "FcLifecycleHelper", "2"]])
     return b"Template: Intel;1033\nVersion: 500 (1f4)\nSource: 10 (a)\n", tables, version, {path: data}
 
 
@@ -430,11 +430,13 @@ class AuthoredContract(unittest.TestCase):
         summary, tables, version, payloads = compiled_contract_model()
         changes = [
             ("CustomAction", b"FcBeginGate\t2", b"FcBeginGate\t2050"),
+            ("CustomAction", b"FcBeginGate\t2", b"FcBeginGate\t1026"),
+            ("CustomAction", b"FcBeginGate\t2", b"FcBeginGate\t130"),
             ("CustomAction", b'\tbegin "[FcInstallDir]fc-bootstrap.exe"\n', b"\tbegin arbitrary-path\n"),
-            ("CustomAction", b"FcRollbackNotify\t1282", b"FcRollbackNotify\t1026"),
-            ("CustomAction", b"FcCommitNotify\t1538", b"FcCommitNotify\t66"),
             ("Binary", b"Binary.FcLifecycleHelper", b"Binary.Foreign"),
-            ("MsiEmbeddedChainer", b"\tguardian\t", b"\tbegin\t"),
+            ("MsiEmbeddedChainer", b"\tsupervisor\t", b"\tguardian\t"),
+            ("MsiEmbeddedChainer", b"\tsupervisor\t", b"\tbegin\t"),
+            ("MsiEmbeddedChainer", b"\tsupervisor\t", b"\tsupervisor effects_reconciled=true\t"),
         ]
         for table, before, after in changes:
             changed = dict(tables)
@@ -446,6 +448,18 @@ class AuthoredContract(unittest.TestCase):
         changed["Binary"] += b"Foreign\tBinary.Foreign\n"
         with self.assertRaises(ValueError):
             M["verify_msi_contract"](summary, changed, version, payloads)
+
+        # Removed advisory notifications must not survive as CA or orphan sequence rows.
+        for name, kind, role, sequence in (("FcRollbackNotify", 1282, "rollback", 1501), ("FcCommitNotify", 1538, "commit", 1502)):
+            for table, extra in (("CustomAction", f"{name}\t{kind}\tFcLifecycleHelper\t{role}\n"),
+                                 ("InstallExecuteSequence", f"{name}\t1\t{sequence}\n")):
+                changed = dict(tables)
+                changed[table] += extra.encode()
+                with self.subTest(removed=name, table=table), self.assertRaises(ValueError):
+                    M["verify_msi_contract"](summary, changed, version, payloads)
+            standard = export_table("InstallExecuteSequence", ["Action", "Condition", "Sequence"], [[name, "1", str(sequence)]])
+            with self.subTest(removed=name, import_sequence=True), self.assertRaises(ValueError):
+                M["lifecycle_execute_sequence_idt"](standard)
 
     def test_actual_table_contract_rejects_wrong_compiled_semantics(self):
         summary, tables, version, payloads = compiled_contract_model()
@@ -467,7 +481,7 @@ class AuthoredContract(unittest.TestCase):
             ("Upgrade", b"\t0.1.0\t\t1\t", b"\t0.2.0\t\t1\t"),
             ("Upgrade", b"\t2\t\tWIX_DOWNGRADE", b"\t514\t\tWIX_DOWNGRADE"),
             ("LaunchCondition", b"NOT WIX_DOWNGRADE_DETECTED", b"1"),
-            ("InstallExecuteSequence", b"\t1501\n", b"\t1401\n"),
+            ("InstallExecuteSequence", b"FcBeginGate\t1\t1499\n", b"FcBeginGate\t1\t1401\n"),
         ]
         for name, old, new in mutations:
             with self.subTest(table=name, old=old):
@@ -498,8 +512,12 @@ class AuthoredContract(unittest.TestCase):
     def test_actual_export_requires_removal_inside_transaction(self):
         def export(initialize=1500, remove=6501, finalize=6600):
             return ("Action\tCondition\tSequence\ns72\tS255\tI2\nInstallExecuteSequence\tAction\n"
-                    f"CostFinalize\t\t1000\nInstallValidate\t\t1400\nFcBeginGate\t1\t1499\nInstallInitialize\t\t{initialize}\nFcRollbackNotify\t1\t1501\nFcCommitNotify\t1\t1502\nInstallExecute\t\t6500\nRemoveExistingProducts\t\t{remove}\nInstallFinalize\t\t{finalize}\n").encode()
+                    f"CostFinalize\t\t1000\nInstallValidate\t\t1400\nFcBeginGate\t1\t1499\nInstallInitialize\t\t{initialize}\nInstallExecute\t\t6500\nRemoveExistingProducts\t\t{remove}\nInstallFinalize\t\t{finalize}\n").encode()
         self.assertEqual(M["verify_transaction_sequence"](export())["RemoveExistingProducts"], 6501)
+        for action in ("InstallFiles", "RemoveFiles", "WriteRegistryValues", "RemoveRegistryValues", "RegisterProduct", "PublishProduct"):
+            for sequence in (1498, 1499, 1500):
+                with self.subTest(action=action, sequence=sequence), self.assertRaises(ValueError):
+                    M["verify_transaction_sequence"](export() + f"{action}\t\t{sequence}\n".encode())
         for data in (export(remove=1401), export(remove=1500), export(remove=6500), export(remove=6600), export(remove=6700),
                      export().replace(b"RemoveExistingProducts", b"Missing"),
                      export() + b"RemoveExistingProducts\t\t6502\n",
@@ -509,9 +527,9 @@ class AuthoredContract(unittest.TestCase):
 
     def test_maintenance_cannot_skip_hooks_or_supply_operation_authority(self):
         summary, tables, version, payloads = compiled_contract_model()
-        # Each hook must run on fresh, cached maintenance and removal routes.
+        # The synchronous begin must run on fresh, cached maintenance and removal routes.
         # These are table/encoder negatives, not simulated MSI executions.
-        for hook in ("FcBeginGate", "FcRollbackNotify", "FcCommitNotify"):
+        for hook in ("FcBeginGate",):
             for condition in ("NOT Installed", "Installed", 'REMOVE = "ALL"', "REINSTALL", "PUBLIC_MAINTENANCE_ACK"):
                 changed = dict(tables)
                 old = (hook + "\t1\t").encode()
@@ -520,9 +538,7 @@ class AuthoredContract(unittest.TestCase):
                 with self.subTest(hook=hook, condition=condition), self.assertRaises(ValueError):
                     M["verify_msi_contract"](summary, changed, version, payloads)
         for old, new in [(b'begin "[FcInstallDir]fc-bootstrap.exe"', b'begin repair "[FcInstallDir]fc-bootstrap.exe"'),
-                         (b'begin "[FcInstallDir]fc-bootstrap.exe"', b'begin "[TARGETDIR]fc-bootstrap.exe"'),
-                         (b'\trollback\n', b'\trollback effects_reconciled=true\n'),
-                         (b'\tcommit\n', b'\tcommit uninstall=true\n')]:
+                         (b'begin "[FcInstallDir]fc-bootstrap.exe"', b'begin "[TARGETDIR]fc-bootstrap.exe"')]:
             changed = dict(tables)
             self.assertIn(old, changed["CustomAction"])
             changed["CustomAction"] = changed["CustomAction"].replace(old, new)

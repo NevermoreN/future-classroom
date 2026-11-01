@@ -1,0 +1,1276 @@
+{
+  "status": "EVIDENCE_COLLECTED_AWAIT_ROOT_REVIEW",
+  "scope": "Independent .NET x86 registry-only MSI fixture on current authorized Win11; no product helper or school data run.",
+  "sourceInputs": [
+    {
+      "path": "/tmp/fc-round77-installer-cleanup/async-fixture-program-first/Program.cs",
+      "bytes": 15670,
+      "sha256": "d9730f47e761ebfbd72921c5faab72cb314e34eb31ad609649ec6808f0be631f"
+    },
+    {
+      "path": "/tmp/fc-round77-installer-cleanup/async-fixture-authoring-first/New-AsyncChainerFixture.ps1",
+      "bytes": 15459,
+      "sha256": "82266a2dcc9d791e72476d3cdd3c0b470e912deacfc0a3907a332ec713f5d5c8"
+    },
+    {
+      "path": "/tmp/fc-round77-installer-cleanup/async-fixture-harness-second/Driver.ps1",
+      "bytes": 27670,
+      "sha256": "6c7b2dbb371caf8a05252f7c3eac1d1994987a48adae2a437d7b08fa8c7377a4"
+    },
+    {
+      "path": "/tmp/fc-round77-installer-cleanup/observer-source-first/ProcessObserver.cs",
+      "bytes": 15250,
+      "sha256": "ae5ad0205854e0f2e731394e6f72a0f2481818da1efabf88abeccd716a256b31"
+    }
+  ],
+  "config": {
+    "schemaVersion": 1,
+    "sourceGit": "8931fabc0520ac659f9c019f9790e4d4f81ff9a7",
+    "nonce": "16565f82046c4f1baf012f24b5318d07",
+    "expectedUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+    "productCode": "{3A397562-1F63-4227-9D93-9027F6300114}",
+    "upgradeCode": "{55A03B51-2478-4417-8B52-E6F17824C2D3}",
+    "componentId": "{947D3276-C844-467D-84E1-7B58F6B510F5}",
+    "registryKey": "Software\\FutureClassroomTest\\Round77-16565f82046c4f1baf012f24b5318d07",
+    "rootName": "FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07",
+    "wholeSeconds": 120,
+    "clientMaximumSeconds": 30,
+    "asyncSeconds": 10,
+    "readySeconds": 2,
+    "sources": [
+      {
+        "path": "Program.cs",
+        "bytes": 15670,
+        "sha256": "d9730f47e761ebfbd72921c5faab72cb314e34eb31ad609649ec6808f0be631f"
+      },
+      {
+        "path": "New-AsyncChainerFixture.ps1",
+        "bytes": 15459,
+        "sha256": "82266a2dcc9d791e72476d3cdd3c0b470e912deacfc0a3907a332ec713f5d5c8"
+      },
+      {
+        "path": "Driver.ps1",
+        "bytes": 27670,
+        "sha256": "6c7b2dbb371caf8a05252f7c3eac1d1994987a48adae2a437d7b08fa8c7377a4"
+      },
+      {
+        "path": "ProcessObserver.cs",
+        "bytes": 15250,
+        "sha256": "ae5ad0205854e0f2e731394e6f72a0f2481818da1efabf88abeccd716a256b31"
+      }
+    ]
+  },
+  "remote": {
+    "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07",
+    "nonce": "16565f82046c4f1baf012f24b5318d07",
+    "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+    "configSha": "d9206a72a2f88bb78c9e960f8f83da5f671d718f0f8e39393c5bc1ac82aea9dc",
+    "manifestSha": "84942d097f830d33c36aff4e17526a22055ec240855bc870ffff0cc60944ffd5"
+  },
+  "operations": [
+    {
+      "name": "01-new-protected-root",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        "WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "pid": 32639,
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "elapsedSeconds": 0.7212064689956605,
+      "stdout": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/01-new-protected-root.stdout.log",
+        "bytes": 390,
+        "sha256": "4bab829856d1e2fedc9a19717e849bd1b0d07c5b53ddbcc673b10ff504e325f0"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/01-new-protected-root.stderr.log",
+        "bytes": 843,
+        "sha256": "4c9460241ea057dbc822500407cefab72b9f28160f7c9544fb9741883ad2f339"
+      },
+      "stdin": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/01-new-protected-root.stdin.log",
+        "bytes": 4459,
+        "sha256": "1e07deef28f737190e458f627d64ff07fe2c354d838bce0207927f3caeac8e28"
+      }
+    },
+    {
+      "name": "02-upload-frozen-source-config",
+      "command": [
+        "scp",
+        "-q",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/upload/Driver.ps1",
+        "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/upload/New-AsyncChainerFixture.ps1",
+        "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/upload/ProcessObserver.cs",
+        "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/upload/Program.cs",
+        "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/upload/config.json",
+        "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/upload/inputs.json",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07/"
+      ],
+      "pid": 32640,
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "elapsedSeconds": 0.26505321403965354,
+      "stdout": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/02-upload-frozen-source-config.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/02-upload-frozen-source-config.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-original-fixture-driver",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        "WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "pid": 32647,
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "elapsedSeconds": 12.262003855081275,
+      "stdout": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/03-original-fixture-driver.stdout.log",
+        "bytes": 19227,
+        "sha256": "26c0b6830be626b7db05cae30d499e9019bf5245d4c3532b789f49ae77c1f65a"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/03-original-fixture-driver.stderr.log",
+        "bytes": 843,
+        "sha256": "e6884f811be9d847142b7346c3a11bd1f336c2e82e4edafd0337215d462592ea"
+      },
+      "stdin": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/03-original-fixture-driver.stdin.log",
+        "bytes": 2683,
+        "sha256": "90c73995f8b64e3d5d6b8337a64b5d6aad84776b4e260d343f1d322fba3d33f4"
+      }
+    },
+    {
+      "name": "90-post-parent-inventory",
+      "command": [
+        "ssh",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212",
+        "powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        "WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "pid": 32721,
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "elapsedSeconds": 0.5643735539633781,
+      "stdout": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/90-post-parent-inventory.stdout.log",
+        "bytes": 2599,
+        "sha256": "3936af1b18126b0544fba1786ce8c5839734046f8cf8b85b3903a410fe90a903"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/90-post-parent-inventory.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0"
+      },
+      "stdin": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/90-post-parent-inventory.stdin.log",
+        "bytes": 2560,
+        "sha256": "3c8d01fd05dbd9b9974194704b3b00b1c35f1bcc3e6081eb0028f34b5f63f376"
+      }
+    },
+    {
+      "name": "91-download-all-originals",
+      "command": [
+        "scp",
+        "-q",
+        "-r",
+        "-i",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "elior@192.168.10.212:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07",
+        "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/download/"
+      ],
+      "pid": 32725,
+      "actualExit": true,
+      "exitCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "elapsedSeconds": 0.2931598508730531,
+      "stdout": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/91-download-all-originals.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round77-installer-cleanup/async-fixture-runtime-first/91-download-all-originals.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "scratchCleanup": "NOT_PERFORMED_ROOT_REVIEWS_ORIGINALS_FIRST",
+  "beforeCreate": {
+    "nonce": "16565f82046c4f1baf012f24b5318d07",
+    "status": "CREATED_NEW_PROTECTED_NONCE_FIXTURE_ROOT",
+    "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07",
+    "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+    "os": {
+      "Caption": "Microsoft Windows 11 \u4e13\u4e1a\u7248",
+      "Version": "10.0.26300",
+      "BuildNumber": "26300",
+      "OSArchitecture": "64-bit"
+    }
+  },
+  "driverActualExit": 0,
+  "driverResult": {
+    "status": "PASS_NEGATIVE_EVIDENCE_CAPTURED_ACTUAL_RESULTS_NOT_ORDER_SUPPORT",
+    "sourceGit": "8931fabc0520ac659f9c019f9790e4d4f81ff9a7",
+    "scope": "Independent synthetic registry-only MSI AsyncWait ordering; not Rust product validation",
+    "wholeSeconds": 120,
+    "clientMaximumSeconds": 30,
+    "asyncSeconds": 10,
+    "readySeconds": 2,
+    "nativeProductBudgetChanged": false,
+    "errors": [],
+    "classification": "PROBE_REJECTED",
+    "operations": [
+      {
+        "name": "factory-build-exact-check",
+        "elapsedMilliseconds": 791,
+        "actualReturn": true
+      }
+    ],
+    "acks": [
+      {
+        "originalFact": {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI6D93.tmp",
+          "Sha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "UNKNOWN",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "UNKNOWN",
+          "Pid": 8852,
+          "ParentPid": 25292,
+          "CreationFiletime": 134380227927399262,
+          "ParentCreationFiletime": 0,
+          "ParentImage": null,
+          "ParentSid": null,
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 0,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI6D93.tmp",
+            "ready",
+            "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07",
+            "16565f82046c4f1baf012f24b5318d07"
+          ]
+        },
+        "identitySha256": "b79812a20fbc04597b7b2b5389773154b93d54a224916e501b3c0f5237e310ac",
+        "creationFiletime": 134380227927399262,
+        "ackSha256": "b79812a20fbc04597b7b2b5389773154b93d54a224916e501b3c0f5237e310ac",
+        "pid": 8852,
+        "role": "ready",
+        "originalIdentityBytes": 330
+      },
+      {
+        "originalFact": {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI6D92.tmp",
+          "Sha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "UNKNOWN",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "UNKNOWN",
+          "Pid": 3408,
+          "ParentPid": 25292,
+          "CreationFiletime": 134380227927429873,
+          "ParentCreationFiletime": 0,
+          "ParentImage": null,
+          "ParentSid": null,
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 1603,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI6D92.tmp",
+            "async",
+            "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07",
+            "16565f82046c4f1baf012f24b5318d07"
+          ]
+        },
+        "identitySha256": "b61be4141d19700aa2d56b633bf6b5c2e1b2bece8b7e1b8c9ff57c19d34277c3",
+        "creationFiletime": 134380227927429873,
+        "ackSha256": "b61be4141d19700aa2d56b633bf6b5c2e1b2bece8b7e1b8c9ff57c19d34277c3",
+        "pid": 3408,
+        "role": "async",
+        "originalIdentityBytes": 330
+      }
+    ],
+    "mutations": [
+      "owned fixture files",
+      "nonce fixture MSI install/necessary formal uninstall"
+    ],
+    "sharedServiceKill": false,
+    "manualRegistryOrCacheDelete": false,
+    "configSha256": "d9206a72a2f88bb78c9e960f8f83da5f671d718f0f8e39393c5bc1ac82aea9dc",
+    "manifestSha256": "84942d097f830d33c36aff4e17526a22055ec240855bc870ffff0cc60944ffd5",
+    "nonce": "16565f82046c4f1baf012f24b5318d07",
+    "compile": {
+      "exitCode": 0,
+      "actualExit": true,
+      "compilerSha256": "9e1257ca87282caebce4a04894a51c594a0453b287cd199c0c8e8bb3b0d6a19f",
+      "arguments": [
+        "/nologo",
+        "/target:winexe",
+        "/platform:x86",
+        "/optimize+",
+        "/warnaserror+",
+        "/out:C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\\helper.exe",
+        "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\\Program.cs"
+      ],
+      "elapsedMilliseconds": 173,
+      "image": "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe"
+    },
+    "compiledHelper": {
+      "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\\helper.exe",
+      "sha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+      "subsystem": "GUI_REQUIRED_BY_FACTORY_AND_ROOT",
+      "bytes": 18432,
+      "platform": "x86"
+    },
+    "before": {
+      "markerValue": null,
+      "registration": {
+        "Products": [],
+        "Related": [],
+        "ProductState": -1,
+        "ComponentState": -1,
+        "ComponentPath": "",
+        "KnownAbsent": true,
+        "OwnSingleRegistration": false
+      },
+      "ownMarkerExact": false,
+      "markerKind": null,
+      "knownAbsent": true,
+      "subKeyCount": 0,
+      "registryKey": "Software\\FutureClassroomTest\\Round77-16565f82046c4f1baf012f24b5318d07",
+      "registry32KnownAbsent": true,
+      "markerNames": []
+    },
+    "factory": {
+      "status": "PASS_ACTUAL_COM_BUILT_AND_EXACT_READBACK_FIXTURE_ONLY_NOT_INSTALLED",
+      "scope": "Independent registry-only Type130/Ready/embedded-chainer timing fixture; not product MSI",
+      "installation": "NOT_RUN",
+      "normalProduct": "NOT_RUN",
+      "factoryWrites": "Only new MSI database in existing owned root",
+      "tables": {
+        "Property": [
+          {
+            "Property": "ProductCode",
+            "Value": "{3A397562-1F63-4227-9D93-9027F6300114}"
+          },
+          {
+            "Property": "UpgradeCode",
+            "Value": "{55A03B51-2478-4417-8B52-E6F17824C2D3}"
+          },
+          {
+            "Property": "ProductName",
+            "Value": "FutureClassroom R77 AsyncChainer 16565f82046c4f1baf012f24b5318d07"
+          },
+          {
+            "Property": "ProductVersion",
+            "Value": "1.0.0"
+          },
+          {
+            "Property": "ProductLanguage",
+            "Value": "1033"
+          },
+          {
+            "Property": "Manufacturer",
+            "Value": "FutureClassroom-Test"
+          },
+          {
+            "Property": "MSIINSTALLPERUSER",
+            "Value": "1"
+          },
+          {
+            "Property": "MSIRESTARTMANAGERCONTROL",
+            "Value": "DisableShutdown"
+          },
+          {
+            "Property": "REBOOT",
+            "Value": "ReallySuppress"
+          }
+        ],
+        "Directory": [
+          {
+            "Directory": "TARGETDIR",
+            "Directory_Parent": "",
+            "DefaultDir": "SourceDir"
+          }
+        ],
+        "Component": [
+          {
+            "Component": "FixtureComponent",
+            "ComponentId": "{947D3276-C844-467D-84E1-7B58F6B510F5}",
+            "Directory_": "TARGETDIR",
+            "Attributes": "4",
+            "Condition": "",
+            "KeyPath": "FixtureMarker"
+          }
+        ],
+        "Feature": [
+          {
+            "Feature": "FixtureFeature",
+            "Feature_Parent": "",
+            "Title": "R77 synthetic registry fixture",
+            "Description": "",
+            "Display": "0",
+            "Level": "1",
+            "Directory_": "",
+            "Attributes": "0"
+          }
+        ],
+        "FeatureComponents": [
+          {
+            "Feature_": "FixtureFeature",
+            "Component_": "FixtureComponent"
+          }
+        ],
+        "Registry": [
+          {
+            "Registry": "FixtureMarker",
+            "Root": "1",
+            "Key": "Software\\FutureClassroomTest\\Round77-16565f82046c4f1baf012f24b5318d07",
+            "Name": "Marker",
+            "Value": "#1",
+            "Component_": "FixtureComponent"
+          }
+        ],
+        "InstallExecuteSequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "FileCost",
+            "Condition": "",
+            "Sequence": "900"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "InstallValidate",
+            "Condition": "",
+            "Sequence": "1400"
+          },
+          {
+            "Action": "AsyncBegin",
+            "Condition": "NOT Installed",
+            "Sequence": "1498"
+          },
+          {
+            "Action": "Ready",
+            "Condition": "NOT Installed",
+            "Sequence": "1499"
+          },
+          {
+            "Action": "InstallInitialize",
+            "Condition": "",
+            "Sequence": "1500"
+          },
+          {
+            "Action": "ProcessComponents",
+            "Condition": "",
+            "Sequence": "1600"
+          },
+          {
+            "Action": "UnpublishFeatures",
+            "Condition": "",
+            "Sequence": "1800"
+          },
+          {
+            "Action": "RemoveRegistryValues",
+            "Condition": "",
+            "Sequence": "2600"
+          },
+          {
+            "Action": "WriteRegistryValues",
+            "Condition": "",
+            "Sequence": "5000"
+          },
+          {
+            "Action": "RegisterUser",
+            "Condition": "",
+            "Sequence": "6000"
+          },
+          {
+            "Action": "RegisterProduct",
+            "Condition": "",
+            "Sequence": "6100"
+          },
+          {
+            "Action": "PublishFeatures",
+            "Condition": "",
+            "Sequence": "6300"
+          },
+          {
+            "Action": "PublishProduct",
+            "Condition": "",
+            "Sequence": "6400"
+          },
+          {
+            "Action": "InstallExecute",
+            "Condition": "",
+            "Sequence": "6500"
+          },
+          {
+            "Action": "InstallFinalize",
+            "Condition": "",
+            "Sequence": "6600"
+          }
+        ],
+        "CustomAction": [
+          {
+            "Action": "AsyncBegin",
+            "Type": "130",
+            "Source": "AsyncFixture",
+            "Target": "async \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\" 16565f82046c4f1baf012f24b5318d07"
+          },
+          {
+            "Action": "Ready",
+            "Type": "2",
+            "Source": "AsyncFixture",
+            "Target": "ready \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\" 16565f82046c4f1baf012f24b5318d07"
+          }
+        ],
+        "MsiEmbeddedChainer": [
+          {
+            "MsiEmbeddedChainer": "FixtureGuardian",
+            "Condition": "NOT Installed",
+            "CommandLine": "guardian \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\" 16565f82046c4f1baf012f24b5318d07",
+            "Source": "AsyncFixture",
+            "Type": "2"
+          }
+        ],
+        "Binary": [
+          {
+            "sha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+            "Name": "AsyncFixture",
+            "bytes": 18432
+          }
+        ]
+      },
+      "factorySource": {
+        "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\\New-AsyncChainerFixture.ps1",
+        "sha256": "82266a2dcc9d791e72476d3cdd3c0b470e912deacfc0a3907a332ec713f5d5c8",
+        "bytes": 15459
+      },
+      "repositoryBase": "8931fabc0520ac659f9c019f9790e4d4f81ff9a7",
+      "fixtureSourceCommitted": false,
+      "columnMetadata": [
+        {
+          "Table": "Property",
+          "Number": "1",
+          "Name": "Property",
+          "Type": "11592"
+        },
+        {
+          "Table": "Property",
+          "Number": "2",
+          "Name": "Value",
+          "Type": "3840"
+        },
+        {
+          "Table": "Directory",
+          "Number": "1",
+          "Name": "Directory",
+          "Type": "11592"
+        },
+        {
+          "Table": "Directory",
+          "Number": "2",
+          "Name": "Directory_Parent",
+          "Type": "7496"
+        },
+        {
+          "Table": "Directory",
+          "Number": "3",
+          "Name": "DefaultDir",
+          "Type": "4095"
+        },
+        {
+          "Table": "Component",
+          "Number": "1",
+          "Name": "Component",
+          "Type": "11592"
+        },
+        {
+          "Table": "Component",
+          "Number": "2",
+          "Name": "ComponentId",
+          "Type": "7462"
+        },
+        {
+          "Table": "Component",
+          "Number": "3",
+          "Name": "Directory_",
+          "Type": "3400"
+        },
+        {
+          "Table": "Component",
+          "Number": "4",
+          "Name": "Attributes",
+          "Type": "1282"
+        },
+        {
+          "Table": "Component",
+          "Number": "5",
+          "Name": "Condition",
+          "Type": "7679"
+        },
+        {
+          "Table": "Component",
+          "Number": "6",
+          "Name": "KeyPath",
+          "Type": "7496"
+        },
+        {
+          "Table": "Feature",
+          "Number": "1",
+          "Name": "Feature",
+          "Type": "11558"
+        },
+        {
+          "Table": "Feature",
+          "Number": "2",
+          "Name": "Feature_Parent",
+          "Type": "7462"
+        },
+        {
+          "Table": "Feature",
+          "Number": "3",
+          "Name": "Title",
+          "Type": "8000"
+        },
+        {
+          "Table": "Feature",
+          "Number": "4",
+          "Name": "Description",
+          "Type": "8191"
+        },
+        {
+          "Table": "Feature",
+          "Number": "5",
+          "Name": "Display",
+          "Type": "5378"
+        },
+        {
+          "Table": "Feature",
+          "Number": "6",
+          "Name": "Level",
+          "Type": "1282"
+        },
+        {
+          "Table": "Feature",
+          "Number": "7",
+          "Name": "Directory_",
+          "Type": "7496"
+        },
+        {
+          "Table": "Feature",
+          "Number": "8",
+          "Name": "Attributes",
+          "Type": "1282"
+        },
+        {
+          "Table": "FeatureComponents",
+          "Number": "1",
+          "Name": "Feature_",
+          "Type": "11558"
+        },
+        {
+          "Table": "FeatureComponents",
+          "Number": "2",
+          "Name": "Component_",
+          "Type": "11592"
+        },
+        {
+          "Table": "Registry",
+          "Number": "1",
+          "Name": "Registry",
+          "Type": "11592"
+        },
+        {
+          "Table": "Registry",
+          "Number": "2",
+          "Name": "Root",
+          "Type": "1282"
+        },
+        {
+          "Table": "Registry",
+          "Number": "3",
+          "Name": "Key",
+          "Type": "4095"
+        },
+        {
+          "Table": "Registry",
+          "Number": "4",
+          "Name": "Name",
+          "Type": "8191"
+        },
+        {
+          "Table": "Registry",
+          "Number": "5",
+          "Name": "Value",
+          "Type": "7936"
+        },
+        {
+          "Table": "Registry",
+          "Number": "6",
+          "Name": "Component_",
+          "Type": "3400"
+        },
+        {
+          "Table": "InstallExecuteSequence",
+          "Number": "1",
+          "Name": "Action",
+          "Type": "11592"
+        },
+        {
+          "Table": "InstallExecuteSequence",
+          "Number": "2",
+          "Name": "Condition",
+          "Type": "7679"
+        },
+        {
+          "Table": "InstallExecuteSequence",
+          "Number": "3",
+          "Name": "Sequence",
+          "Type": "5378"
+        },
+        {
+          "Table": "CustomAction",
+          "Number": "1",
+          "Name": "Action",
+          "Type": "11592"
+        },
+        {
+          "Table": "CustomAction",
+          "Number": "2",
+          "Name": "Type",
+          "Type": "1282"
+        },
+        {
+          "Table": "CustomAction",
+          "Number": "3",
+          "Name": "Source",
+          "Type": "7496"
+        },
+        {
+          "Table": "CustomAction",
+          "Number": "4",
+          "Name": "Target",
+          "Type": "7679"
+        },
+        {
+          "Table": "Binary",
+          "Number": "1",
+          "Name": "Name",
+          "Type": "11592"
+        },
+        {
+          "Table": "Binary",
+          "Number": "2",
+          "Name": "Data",
+          "Type": "2304"
+        },
+        {
+          "Table": "MsiEmbeddedChainer",
+          "Number": "1",
+          "Name": "MsiEmbeddedChainer",
+          "Type": "11592"
+        },
+        {
+          "Table": "MsiEmbeddedChainer",
+          "Number": "2",
+          "Name": "Condition",
+          "Type": "7679"
+        },
+        {
+          "Table": "MsiEmbeddedChainer",
+          "Number": "3",
+          "Name": "CommandLine",
+          "Type": "7679"
+        },
+        {
+          "Table": "MsiEmbeddedChainer",
+          "Number": "4",
+          "Name": "Source",
+          "Type": "3400"
+        },
+        {
+          "Table": "MsiEmbeddedChainer",
+          "Number": "5",
+          "Name": "Type",
+          "Type": "1282"
+        }
+      ],
+      "summary": {
+        "1": 1252,
+        "2": "R77 synthetic async/chainer timing",
+        "3": "Registry-only independent fixture",
+        "4": "FutureClassroom-Test",
+        "7": "Intel;1033",
+        "9": "{0803A844-F3CB-4E82-8AD9-C58DA55D484E}",
+        "14": 500,
+        "15": 8,
+        "18": "R77 COM fixture factory",
+        "19": 2
+      },
+      "helper": {
+        "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\\helper.exe",
+        "sha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+        "bytes": 18432
+      },
+      "msi": {
+        "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\\fixture.msi",
+        "sha256": "3fbe2ed94151600e803a97eb87657f3b9cba5ecae4e065d602aa6b6d02e24622",
+        "bytes": 40960
+      },
+      "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07",
+      "nonce": "16565f82046c4f1baf012f24b5318d07",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "productCode": "{3A397562-1F63-4227-9D93-9027F6300114}",
+      "upgradeCode": "{55A03B51-2478-4417-8B52-E6F17824C2D3}",
+      "componentId": "{947D3276-C844-467D-84E1-7B58F6B510F5}",
+      "marker": {
+        "key": "Software\\FutureClassroomTest\\Round77-16565f82046c4f1baf012f24b5318d07",
+        "view": "HKCU32",
+        "value": 1,
+        "name": "Marker"
+      }
+    },
+    "client": {
+      "Pid": 30912,
+      "CreationFiletime": 134380227925814887,
+      "Image": "C:\\Windows\\System32\\msiexec.exe",
+      "Arguments": "/i \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\\fixture.msi\" /qn /norestart REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown /L*vx \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07\\install-msi.log\"",
+      "ActualWait": 0,
+      "ActualExitCode": 1603,
+      "ThreadCloseSuccess": true,
+      "ProcessCloseAttempted": true,
+      "ProcessCloseSuccess": true,
+      "LastError": 0
+    },
+    "observer": {
+      "Scope": "ORIGINAL_HELD_PROCESS_FACTS_NOT_PRODUCT_SETTLEMENT",
+      "WmiStarted": true,
+      "MissesPossible": true,
+      "Closed": true,
+      "Errors": [],
+      "Processes": [
+        {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI6D93.tmp",
+          "Sha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "UNKNOWN",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "UNKNOWN",
+          "Pid": 8852,
+          "ParentPid": 25292,
+          "CreationFiletime": 134380227927399262,
+          "ParentCreationFiletime": 0,
+          "ParentImage": null,
+          "ParentSid": null,
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 0,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI6D93.tmp",
+            "ready",
+            "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07",
+            "16565f82046c4f1baf012f24b5318d07"
+          ]
+        },
+        {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI6D92.tmp",
+          "Sha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "UNKNOWN",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "UNKNOWN",
+          "Pid": 3408,
+          "ParentPid": 25292,
+          "CreationFiletime": 134380227927429873,
+          "ParentCreationFiletime": 0,
+          "ParentImage": null,
+          "ParentSid": null,
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 1603,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI6D92.tmp",
+            "async",
+            "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r77-async-chainer-16565f82046c4f1baf012f24b5318d07",
+            "16565f82046c4f1baf012f24b5318d07"
+          ]
+        }
+      ]
+    },
+    "capturedPhysicalReturned": true,
+    "after": {
+      "markerValue": null,
+      "registration": {
+        "Products": [],
+        "Related": [],
+        "ProductState": -1,
+        "ComponentState": -1,
+        "ComponentPath": "",
+        "KnownAbsent": true,
+        "OwnSingleRegistration": false
+      },
+      "ownMarkerExact": false,
+      "markerKind": null,
+      "knownAbsent": true,
+      "subKeyCount": 0,
+      "registryKey": "Software\\FutureClassroomTest\\Round77-16565f82046c4f1baf012f24b5318d07",
+      "registry32KnownAbsent": true,
+      "markerNames": []
+    },
+    "finallyBeforeCleanup": {
+      "markerValue": null,
+      "registration": {
+        "Products": [],
+        "Related": [],
+        "ProductState": -1,
+        "ComponentState": -1,
+        "ComponentPath": "",
+        "KnownAbsent": true,
+        "OwnSingleRegistration": false
+      },
+      "ownMarkerExact": false,
+      "markerKind": null,
+      "knownAbsent": true,
+      "subKeyCount": 0,
+      "registryKey": "Software\\FutureClassroomTest\\Round77-16565f82046c4f1baf012f24b5318d07",
+      "registry32KnownAbsent": true,
+      "markerNames": []
+    },
+    "finalAbsence": {
+      "markerValue": null,
+      "registration": {
+        "Products": [],
+        "Related": [],
+        "ProductState": -1,
+        "ComponentState": -1,
+        "ComponentPath": "",
+        "KnownAbsent": true,
+        "OwnSingleRegistration": false
+      },
+      "ownMarkerExact": false,
+      "markerKind": null,
+      "knownAbsent": true,
+      "subKeyCount": 0,
+      "registryKey": "Software\\FutureClassroomTest\\Round77-16565f82046c4f1baf012f24b5318d07",
+      "registry32KnownAbsent": true,
+      "markerNames": []
+    },
+    "stages": {
+      "async-identity": {
+        "path": "async-identity.json",
+        "sha256": "b61be4141d19700aa2d56b633bf6b5c2e1b2bece8b7e1b8c9ff57c19d34277c3",
+        "actual": {
+          "schemaVersion": 1,
+          "role": "async",
+          "nonce": "16565f82046c4f1baf012f24b5318d07",
+          "pid": 3408,
+          "creationFiletime": 134380227927429873,
+          "imagePath": "C:\\Windows\\Installer\\MSI6D92.tmp",
+          "imageSha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+          "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "pointerBytes": 4
+        },
+        "bytes": 330
+      },
+      "ready-identity": {
+        "path": "ready-identity.json",
+        "sha256": "b79812a20fbc04597b7b2b5389773154b93d54a224916e501b3c0f5237e310ac",
+        "actual": {
+          "schemaVersion": 1,
+          "role": "ready",
+          "nonce": "16565f82046c4f1baf012f24b5318d07",
+          "pid": 8852,
+          "creationFiletime": 134380227927399262,
+          "imagePath": "C:\\Windows\\Installer\\MSI6D93.tmp",
+          "imageSha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+          "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "pointerBytes": 4
+        },
+        "bytes": 330
+      },
+      "START": {
+        "path": "START.json",
+        "sha256": "d83578b4446ac78204b7e1ef8afe9efb57b025a779237dd97fddef0b3356a0bd",
+        "actual": {
+          "schemaVersion": 1,
+          "role": "async",
+          "nonce": "16565f82046c4f1baf012f24b5318d07",
+          "pid": 3408,
+          "creationFiletime": 134380227927429873,
+          "imagePath": "C:\\Windows\\Installer\\MSI6D92.tmp",
+          "imageSha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+          "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "pointerBytes": 4,
+          "startedTimestamp": 8748030850986,
+          "deadlineTimestamp": 8748130850986,
+          "stopwatchFrequency": 10000000
+        },
+        "bytes": 427
+      },
+      "READY": {
+        "path": "READY.json",
+        "sha256": "4530f5e1d0a9f5f6365a74bf2641811f091478f5c6dc175ab969ebb88aeea417",
+        "actual": {
+          "schemaVersion": 1,
+          "role": "ready",
+          "nonce": "16565f82046c4f1baf012f24b5318d07",
+          "pid": 8852,
+          "creationFiletime": 134380227927399262,
+          "imagePath": "C:\\Windows\\Installer\\MSI6D93.tmp",
+          "imageSha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+          "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "pointerBytes": 4,
+          "status": "READY"
+        },
+        "bytes": 347
+      },
+      "FAIL-async": {
+        "path": "FAIL-async.json",
+        "sha256": "ac7206b42eb7bc743cd711d8702722a1129f398bf416be4744a8fd668c717c9a",
+        "actual": {
+          "schemaVersion": 1,
+          "role": "async",
+          "nonce": "16565f82046c4f1baf012f24b5318d07",
+          "pid": 3408,
+          "creationFiletime": 134380227927429873,
+          "imagePath": "C:\\Windows\\Installer\\MSI6D92.tmp",
+          "imageSha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+          "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "pointerBytes": 4,
+          "status": "FAIL",
+          "reason": "ORIGINAL_PROCESS_BUDGET",
+          "hresult": -2146233083,
+          "elapsedMilliseconds": 10006
+        },
+        "bytes": 431
+      }
+    },
+    "clientIntegerPolicy": "Actual MSI client integer retained; intentional EndRollback may produce nonzero client. No ActionReturn or JSON flag substitutes for actual OS exit.",
+    "missingStages": [
+      "CHAINER_ENTER",
+      "JOIN_RETURN",
+      "END_ENTER",
+      "END_RETURN",
+      "CHANGE_EVENT_CLOSED",
+      "GUARDIAN_EXIT_OBSERVED",
+      "ASYNC_DONE"
+    ],
+    "rejection": "Complete source-bound success chain not observed. Inspect original API integers, missing stages and actual async exit; no unsupported causal guess.",
+    "elapsedWholeMilliseconds": 11714,
+    "originalBudgetExceeded": false
+  },
+  "remoteInventory": {
+    "directories": [
+      "compiler-temp"
+    ],
+    "files": [
+      {
+        "path": ".async-original-captured",
+        "sha256": "b61be4141d19700aa2d56b633bf6b5c2e1b2bece8b7e1b8c9ff57c19d34277c3",
+        "bytes": 330
+      },
+      {
+        "path": ".owner",
+        "sha256": "7886c16cd6cf30c3542ac6e16330f65069c10c5698bd7268a4caf1cc2b616790",
+        "bytes": 52
+      },
+      {
+        "path": ".ready-original-captured",
+        "sha256": "b79812a20fbc04597b7b2b5389773154b93d54a224916e501b3c0f5237e310ac",
+        "bytes": 330
+      },
+      {
+        "path": "async-identity.json",
+        "sha256": "b61be4141d19700aa2d56b633bf6b5c2e1b2bece8b7e1b8c9ff57c19d34277c3",
+        "bytes": 330
+      },
+      {
+        "path": "config.json",
+        "sha256": "d9206a72a2f88bb78c9e960f8f83da5f671d718f0f8e39393c5bc1ac82aea9dc",
+        "bytes": 1279
+      },
+      {
+        "path": "csc.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "csc.stdout.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "driver-result.json",
+        "sha256": "7a869d19ddb31035b99e897591bab8dc1bbcfdfab3e58d39ae41cf3f0acdba47",
+        "bytes": 19225
+      },
+      {
+        "path": "Driver.ps1",
+        "sha256": "6c7b2dbb371caf8a05252f7c3eac1d1994987a48adae2a437d7b08fa8c7377a4",
+        "bytes": 27670
+      },
+      {
+        "path": "factory.stdout.log",
+        "sha256": "1b14e89580d608de8bc0edebb8c0a153820596628adbccb006c5e5d580ea29ec",
+        "bytes": 7998
+      },
+      {
+        "path": "FAIL-async.json",
+        "sha256": "ac7206b42eb7bc743cd711d8702722a1129f398bf416be4744a8fd668c717c9a",
+        "bytes": 431
+      },
+      {
+        "path": "fixture.msi",
+        "sha256": "3fbe2ed94151600e803a97eb87657f3b9cba5ecae4e065d602aa6b6d02e24622",
+        "bytes": 40960
+      },
+      {
+        "path": "helper.exe",
+        "sha256": "448b1ccadec2e5776919c8e7ec07426d72de02069bcc075d4e1e639a44cedc26",
+        "bytes": 18432
+      },
+      {
+        "path": "inputs.json",
+        "sha256": "84942d097f830d33c36aff4e17526a22055ec240855bc870ffff0cc60944ffd5",
+        "bytes": 775
+      },
+      {
+        "path": "install-msi.log",
+        "sha256": "4d763598c542f07411f790c7a64b27819701313987fe23a195bcac7409524479",
+        "bytes": 95828
+      },
+      {
+        "path": "New-AsyncChainerFixture.ps1",
+        "sha256": "82266a2dcc9d791e72476d3cdd3c0b470e912deacfc0a3907a332ec713f5d5c8",
+        "bytes": 15459
+      },
+      {
+        "path": "observer-original.jsonl",
+        "sha256": "8288918558b73be53a07731f5a2f756d0ba55ebe424247d129fe1aeb7d077e13",
+        "bytes": 1150694
+      },
+      {
+        "path": "ProcessObserver.cs",
+        "sha256": "ae5ad0205854e0f2e731394e6f72a0f2481818da1efabf88abeccd716a256b31",
+        "bytes": 15250
+      },
+      {
+        "path": "Program.cs",
+        "sha256": "d9730f47e761ebfbd72921c5faab72cb314e34eb31ad609649ec6808f0be631f",
+        "bytes": 15670
+      },
+      {
+        "path": "ready-identity.json",
+        "sha256": "b79812a20fbc04597b7b2b5389773154b93d54a224916e501b3c0f5237e310ac",
+        "bytes": 330
+      },
+      {
+        "path": "READY.json",
+        "sha256": "4530f5e1d0a9f5f6365a74bf2641811f091478f5c6dc175ab969ebb88aeea417",
+        "bytes": 347
+      },
+      {
+        "path": "START.json",
+        "sha256": "d83578b4446ac78204b7e1ef8afe9efb57b025a779237dd97fddef0b3356a0bd",
+        "bytes": 427
+      }
+    ]
+  },
+  "downloadVerified": true,
+  "sourceUnchanged": true,
+  "elapsedSeconds": 14.135315526043996
+}

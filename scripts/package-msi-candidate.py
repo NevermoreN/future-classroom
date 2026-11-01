@@ -38,9 +38,8 @@ REQUIRED_TABLES = {"Property", "Directory", "Component", "File", "Feature", "Fea
 HELPER_BINARY = "FcLifecycleHelper"
 LIFECYCLE_ACTIONS = {
     "FcBeginGate": (2, 'begin "[FcInstallDir]fc-bootstrap.exe"', 1499),
-    "FcRollbackNotify": (1282, "rollback", 1501),
-    "FcCommitNotify": (1538, "commit", 1502),
 }
+REMOVED_LIFECYCLE_ACTIONS = {"FcRollbackNotify", "FcCommitNotify"}
 LIFECYCLE_MAGIC = b"FCLM73\0\0"
 LIFECYCLE_FOOTER = b"FCLIFE73-END-v1\0"
 LIFECYCLE_REQUIRED = {"fc-bootstrap.exe", "LICENSE", "PROBE-README.txt", "THIRD-PARTY-NOTICES.txt", "manifest.json",
@@ -51,7 +50,7 @@ LIMITATIONS = [
     "P5-03 prerequisites P5-01/P5-02/P5-06 and formal release acceptance remain unmet.",
     "Candidate paths are fresh installation, healthy same-manifest/version reapplication, formal uninstall and known rollback; all actual MSI paths remain NOT_VALIDATED.",
     "Damaged repair, different-manifest/version maintenance, major upgrade and unknown preimages must refuse before mutation; healthy reapplication is not damaged repair.",
-    "Real gate/broker/engine-guardian wiring is candidate code; actual original process, effects and cleanup evidence is required before claiming lifecycle success.",
+    "Real gate/broker/engine-supervisor/original-guardian-child wiring is candidate code; actual original process, effects and cleanup evidence is required before claiming lifecycle success.",
     "Exact-value/ownership-checked HKCU Run uninstall cleanup is NOT_IMPLEMENTED; no Run-value removal is authored.",
     "Standard-user ProgramData initialization/ACL, deployment-account handover and DPAPI lifecycle require separate validation.",
     "Actual install/repair/upgrade/downgrade/uninstall Q13 on Win7/Win10/Win11 and Seewo are NOT_RUN.",
@@ -459,7 +458,7 @@ def admit_normal_helper(args, payloads: dict[str, bytes], version: str) -> tuple
 def chainer_idt() -> bytes:
     return ("MsiEmbeddedChainer\tCondition\tCommandLine\tSource\tType\r\n"
             "s72\tS255\tS255\ts72\ti2\r\nMsiEmbeddedChainer\tMsiEmbeddedChainer\r\n"
-            "FcLifecycleGuardian\tNOT (ACTION = \"ADVERTISE\")\tguardian\t" + HELPER_BINARY + "\t2\r\n").encode("ascii")
+            "FcLifecycleGuardian\tNOT (ACTION = \"ADVERTISE\")\tsupervisor\t" + HELPER_BINARY + "\t2\r\n").encode("ascii")
 
 
 def lifecycle_custom_action_idt() -> bytes:
@@ -470,11 +469,11 @@ def lifecycle_custom_action_idt() -> bytes:
 
 
 def lifecycle_execute_sequence_idt(intermediate: bytes) -> bytes:
-    """Preserve compiler standard rows and add only the three fixed hooks."""
+    """Preserve compiler standard rows and add only the fixed synchronous begin."""
     rows = idt_rows(intermediate, "InstallExecuteSequence")
     if any(set(row) != {"Action", "Condition", "Sequence"} for row in rows):
         raise ValueError("Unexpected intermediate execution schema")
-    if any(row["Action"] in LIFECYCLE_ACTIONS for row in rows):
+    if any(row["Action"] in LIFECYCLE_ACTIONS.keys() | REMOVED_LIFECYCLE_ACTIONS for row in rows):
         raise ValueError("Intermediate compiler output already contains lifecycle hooks")
     lines = ["Action\tCondition\tSequence", "s72\tS255\ti2", "InstallExecuteSequence\tAction"]
     for row in rows:
@@ -596,15 +595,17 @@ def verify_transaction_sequence(raw: bytes) -> dict[str, int]:
         raise ValueError("Invalid InstallExecuteSequence schema")
     actions = {row["Action"]: integer(row["Sequence"]) for row in rows}
     required = {"CostFinalize", "InstallValidate", "InstallInitialize", "InstallExecute", "RemoveExistingProducts", "InstallFinalize"} | LIFECYCLE_ACTIONS.keys()
-    if not required <= actions.keys() or not (actions["CostFinalize"] < actions["InstallValidate"] < actions["FcBeginGate"] < actions["InstallInitialize"] < actions["FcRollbackNotify"] < actions["FcCommitNotify"] < actions["InstallExecute"] < actions["RemoveExistingProducts"] < actions["InstallFinalize"]):
+    if REMOVED_LIFECYCLE_ACTIONS & actions.keys():
+        raise ValueError("Removed lifecycle notifications cannot remain in the execution sequence")
+    if not required <= actions.keys() or not (actions["CostFinalize"] < actions["InstallValidate"] < actions["FcBeginGate"] < actions["InstallInitialize"] < actions["InstallExecute"] < actions["RemoveExistingProducts"] < actions["InstallFinalize"]):
         raise ValueError("Lifecycle gate must execute before mutation; removal must follow InstallExecute and precede InstallFinalize")
     if any(actions[name] != spec[2] for name, spec in LIFECYCLE_ACTIONS.items()):
         raise ValueError("Lifecycle hook sequence differs from the exact reviewed topology")
     for row in rows:
         if row["Action"] in LIFECYCLE_ACTIONS and row["Condition"] != "1":
             raise ValueError("Lifecycle hooks cannot depend on caller-controlled bypass properties")
-        if row["Action"] in {"InstallFiles", "RemoveFiles", "WriteRegistryValues", "RemoveRegistryValues", "RegisterProduct", "PublishProduct"} and integer(row["Sequence"]) <= actions["FcCommitNotify"]:
-            raise ValueError("An installer mutation precedes lifecycle acquisition/rollback scheduling")
+        if row["Action"] in {"InstallFiles", "RemoveFiles", "WriteRegistryValues", "RemoveRegistryValues", "RegisterProduct", "PublishProduct"} and integer(row["Sequence"]) <= actions["InstallInitialize"]:
+            raise ValueError("An installer mutation precedes the initialized lifecycle transaction")
     return {name: actions[name] for name in sorted(required)}
 
 
@@ -641,8 +642,8 @@ def verify_msi_contract(summary: bytes, tables: dict[str, bytes], version: str, 
         raise ValueError("Lifecycle CustomAction type/source/role must match the exact allowlist")
     if rows("MsiEmbeddedChainer", ["MsiEmbeddedChainer", "Condition", "CommandLine", "Source", "Type"]) != [
             {"MsiEmbeddedChainer": "FcLifecycleGuardian", "Condition": 'NOT (ACTION = "ADVERTISE")',
-             "CommandLine": "guardian", "Source": HELPER_BINARY, "Type": "2"}]:
-        raise ValueError("Only the exact engine-launched lifecycle guardian is allowed")
+             "CommandLine": "supervisor", "Source": HELPER_BINARY, "Type": "2"}]:
+        raise ValueError("Only the exact engine-launched lifecycle supervisor is allowed")
 
     properties = {row["Property"]: row["Value"] for row in rows("Property", ["Property", "Value"])}
     expected_properties = {"Manufacturer": "FutureClassroom", "ProductLanguage": "1033", "ProductName": "FutureClassroom MSI candidate",

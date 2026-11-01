@@ -1,7 +1,6 @@
-//! Closed MSI helper entrypoints. Notifications are advisory, never authority to
-//! end a transaction or clear Pending. The server derives its decision from its
-//! pinned own-image manifest and actual effects, then requires the original
-//! authenticated guardian's real Join/End and physical exit.
+//! Closed MSI helper roles. The tracked supervisor owns the original child
+//! capability; only the actual guardian Join/End/exit and reconciled effects
+//! permit settlement. Image retirement follows the original broker exit.
 use super::{native, LifecycleError, Result};
 use std::time::{Duration, Instant};
 
@@ -16,8 +15,7 @@ pub(super) enum Role {
     Begin,
     Broker,
     Guardian(u32),
-    RollbackNotice,
-    CommitNotice,
+    Supervisor(u32),
 }
 
 fn role(args: &[String]) -> Result<Role> {
@@ -31,9 +29,7 @@ fn role(args: &[String]) -> Result<Role> {
             Ok(Role::Begin)
         }
         [one] if one == "broker" => Ok(Role::Broker),
-        [one] if one == "rollback" => Ok(Role::RollbackNotice),
-        [one] if one == "commit" => Ok(Role::CommitNotice),
-        [transaction, guardian] if guardian == "guardian" => {
+        [transaction, command] if command == "guardian" || command == "supervisor" => {
             if transaction.is_empty()
                 || transaction.len() > 10
                 || !transaction.bytes().all(|b| b.is_ascii_digit())
@@ -41,7 +37,11 @@ fn role(args: &[String]) -> Result<Role> {
                 return Err(LifecycleError::Invalid);
             }
             match transaction.parse::<u32>() {
-                Ok(value) if value != 0 => Ok(Role::Guardian(value)),
+                Ok(value) if value != 0 => Ok(if command == "supervisor" {
+                    Role::Supervisor(value)
+                } else {
+                    Role::Guardian(value)
+                }),
                 _ => Err(LifecycleError::Invalid),
             }
         }
@@ -53,7 +53,8 @@ fn role(args: &[String]) -> Result<Role> {
 /// compared only to the OS-resolved fixed installation destination; it cannot
 /// select a path. No PID, SID, result, operation nonce or effects flag is admitted.
 /// The engine puts its transaction handle BEFORE the
-/// literal `guardian` command. The helper reads only its own pinned image.
+/// literal `supervisor` command; its internally launched child uses `guardian`.
+/// The helper reads only its own pinned image.
 pub fn run_helper(args: &[String]) -> Result<()> {
     let role = role(args)?; // malformed/unsupported commands cannot create state
     let deadline = Instant::now() + BROKER_BUDGET;
@@ -71,6 +72,10 @@ mod tests {
     #[test]
     fn role_grammar_has_no_external_authority_fields() {
         assert_eq!(role(&args(&["123", "guardian"])), Ok(Role::Guardian(123)));
+        assert_eq!(
+            role(&args(&["123", "supervisor"])),
+            Ok(Role::Supervisor(123))
+        );
         for words in [
             vec!["guardian", "123"],
             vec!["0", "guardian"],
@@ -78,6 +83,11 @@ mod tests {
             vec!["4294967296", "guardian"],
             vec!["begin", "--pid", "1"],
             vec!["commit", "--effects-reconciled"],
+            vec!["rollback"],
+            vec!["commit"],
+            vec!["supervisor", "123"],
+            vec!["0", "supervisor"],
+            vec!["123", "supervisor", "--pid", "1"],
             vec!["repair"],
             vec!["upgrade"],
             vec!["uninstall"],

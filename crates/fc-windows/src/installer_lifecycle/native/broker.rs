@@ -1,6 +1,7 @@
 //! The local pipe transports facts only. Same SID/image is necessary but not
-//! sufficient: Begin is the original server parent; Guardian must have the same
-//! still-live original engine parent, then MSI itself validates Join ownership.
+//! sufficient: Begin is the original server parent; the supervisor pins the same
+//! engine and its guardian must have that exact supervisor parent. MSI itself
+//! validates actual child Join ownership; only the original exit settles it.
 use super::super::broker::{
     manifest::{self, Manifest},
     Role as EntryRole,
@@ -18,16 +19,19 @@ use windows::Win32::{
 #[cfg(test)]
 mod context_probe;
 mod effects;
+mod retirement;
+mod supervisor;
 
 const FRAME: usize = 32;
 const BEGIN: u8 = 1;
 const GUARDIAN: u8 = 2;
 const ENDED: u8 = 3;
-const ROLLBACK_NOTICE: u8 = 4;
-const COMMIT_NOTICE: u8 = 5;
+const SUPERVISOR: u8 = 4;
 const ACK: u8 = 128;
 const DECISION: u8 = 129;
 const FINISHED: u8 = 130;
+const RELEASED: u8 = 131;
+const RECEIVED: u8 = 132;
 const MAX_CONNECTIONS: usize = 12;
 
 #[derive(Clone, Copy, Debug)]
@@ -70,10 +74,12 @@ impl Packet {
             end: u32::from_le_bytes(b[16..20].try_into().unwrap()),
         };
         let good = match p.kind {
-            BEGIN | ROLLBACK_NOTICE | COMMIT_NOTICE | ACK | FINISHED => {
+            BEGIN | ACK | FINISHED | RELEASED | RECEIVED => {
                 p.outcome == 0 && p.transaction == 0 && p.join == 0 && p.end == 0
             }
-            GUARDIAN => p.outcome == 0 && p.transaction != 0 && p.join == 0 && p.end == 0,
+            GUARDIAN | SUPERVISOR => {
+                p.outcome == 0 && p.transaction != 0 && p.join == 0 && p.end == 0
+            }
             ENDED => matches!(p.outcome, 1 | 2) && p.transaction != 0,
             DECISION => {
                 matches!(p.outcome, 1 | 2) && p.transaction != 0 && p.join == 0 && p.end == 0
@@ -129,6 +135,44 @@ fn live(process: HANDLE) -> Result<()> {
     match unsafe { WaitForSingleObject(process, 0) } {
         WAIT_TIMEOUT => Ok(()),
         _ => Err(LifecycleError::Unsettled),
+    }
+}
+fn duplicate_process(resources: &mut Resources, process: HANDLE, role: Role) -> Result<HANDLE> {
+    if resources.handles.len() >= HANDLE_LIMIT {
+        return Err(LifecycleError::Invalid);
+    }
+    let mut duplicate = HANDLE::default();
+    unsafe {
+        DuplicateHandle(
+            GetCurrentProcess(),
+            process,
+            GetCurrentProcess(),
+            &mut duplicate,
+            0,
+            false,
+            DUPLICATE_SAME_ACCESS,
+        )?;
+    }
+    Ok(resources.add(duplicate, role))
+}
+fn returned_zero(process: HANDLE, deadline: Instant) -> Result<()> {
+    loop {
+        current(deadline)?;
+        match unsafe { WaitForSingleObject(process, 0) } {
+            WAIT_OBJECT_0 => {
+                let mut code = u32::MAX;
+                unsafe {
+                    GetExitCodeProcess(process, &mut code)?;
+                }
+                return if code == 0 {
+                    Ok(())
+                } else {
+                    Err(LifecycleError::Unsettled)
+                };
+            }
+            WAIT_TIMEOUT => pause(deadline)?,
+            _ => return Err(LifecycleError::Unsettled),
+        }
     }
 }
 fn image_path(process: HANDLE) -> Result<PathBuf> {
@@ -294,6 +338,7 @@ struct Session {
     image_sha: [u8; 32],
     pipe_name: HSTRING,
     deadline: Instant,
+    peer_images: Vec<(HANDLE, HANDLE)>,
 }
 impl Session {
     fn new(deadline: Instant) -> Result<Self> {
@@ -360,9 +405,10 @@ impl Session {
             image_sha,
             pipe_name,
             deadline,
+            peer_images: Vec::new(),
         })
     }
-    fn authenticate_image(&mut self, process: HANDLE) -> Result<GuardianIdentity> {
+    fn authenticate_image(&mut self, process: HANDLE) -> Result<(GuardianIdentity, HANDLE)> {
         live(process)?;
         let sid = self.resources.token_sid(process)?;
         if sid != self.resources.sid {
@@ -394,8 +440,9 @@ impl Session {
         {
             return Err(LifecycleError::Invalid);
         }
-        // Keep the actual peer image inode fixed until the owning session ends.
-        process_identity(process)
+        // A short peer image remains pinned until FINISHED and checked close;
+        // persistent parent authentication stays pinned for the whole session.
+        Ok((process_identity(process)?, image))
     }
     fn peer(&mut self, pipe: HANDLE, server: bool) -> Result<HANDLE> {
         let mut pid = 0;
@@ -436,8 +483,52 @@ impl Session {
             checked?;
         }
         let process = self.resources.process(pid, Role::Control)?;
-        self.authenticate_image(process)?;
+        let (_, image) = self.authenticate_image(process)?;
+        self.peer_images.push((process, image));
         Ok(process)
+    }
+    fn close_peer(&mut self, process: HANDLE) -> Result<()> {
+        let index = self
+            .peer_images
+            .iter()
+            .position(|(p, _)| *p == process)
+            .ok_or(LifecycleError::Invalid)?;
+        let image = self.peer_images[index].1;
+        // No ACK if either original close is unknown. Keep the ledger entry on
+        // failure; Resources' sticky fault prohibits retry/replacement.
+        self.resources.close_handle(image)?;
+        self.resources.close_handle(process)?;
+        self.peer_images.remove(index);
+        Ok(())
+    }
+    fn finish_request(&mut self, pipe: HANDLE, peer: HANDLE) -> Result<()> {
+        self.send(pipe, Packet::new(FINISHED))?;
+        if self.receive(pipe)?.kind != RELEASED {
+            return Err(LifecycleError::Unsettled);
+        }
+        self.close_peer(peer)?;
+        self.send(pipe, Packet::new(RECEIVED))?;
+        self.resources.close_handle(pipe)
+    }
+    fn release_connection(&mut self, pipe: HANDLE, peer: HANDLE) -> Result<()> {
+        if self.receive(pipe)?.kind != FINISHED {
+            return Err(LifecycleError::Unsettled);
+        }
+        self.close_peer(peer)?;
+        // The client waits for RELEASED before exiting. Send before disconnect,
+        // after every short peer image/process pin has actually returned.
+        self.send(pipe, Packet::new(RELEASED))?;
+        // Disconnect discards unread outbound data. This bounded final receipt
+        // proves the peer actually consumed RELEASED; no unbounded pipe flush.
+        if self.receive(pipe)?.kind != RECEIVED {
+            return Err(LifecycleError::Unsettled);
+        }
+        if let Err(error) = unsafe { DisconnectNamedPipe(pipe) } {
+            if error.code() != ERROR_PIPE_NOT_CONNECTED.to_hresult() {
+                return Err(error.into());
+            }
+        }
+        Ok(())
     }
     fn server(&mut self) -> Result<HANDLE> {
         if self.resources.handles.len() >= HANDLE_LIMIT {
@@ -542,10 +633,9 @@ impl Session {
     fn request(&mut self, packet: Packet) -> Result<Packet> {
         let pipe = self.connect()?;
         self.send(pipe, packet)?;
-        self.peer(pipe, false)?;
+        let peer = self.peer(pipe, false)?;
         let response = self.receive(pipe)?;
-        self.send(pipe, Packet::new(FINISHED))?;
-        self.resources.close_handle(pipe)?;
+        self.finish_request(pipe, peer)?;
         Ok(response)
     }
     fn engine(&mut self, child: HANDLE) -> Result<HANDLE> {
@@ -610,22 +700,12 @@ pub(crate) fn run(role: EntryRole, deadline: Instant, resolved_target: Option<&s
         ),
         EntryRole::Broker => server(&mut session),
         EntryRole::Guardian(transaction) => guardian(&mut session, transaction),
-        EntryRole::RollbackNotice | EntryRole::CommitNotice => {
-            // This may report an engine stage, but cannot alter the decision,
-            // authenticate a guardian, settle effects, or create a maintenance.
-            let response = session.request(Packet::new(if role == EntryRole::RollbackNotice {
-                ROLLBACK_NOTICE
-            } else {
-                COMMIT_NOTICE
-            }))?;
-            if response.kind == ACK {
-                Ok(())
-            } else {
-                Err(LifecycleError::Unsettled)
-            }
-        }
+        EntryRole::Supervisor(transaction) => supervisor::run(&mut session, transaction),
     };
-    if result.is_err() && role == EntryRole::Broker {
+    if result.is_err() && matches!(role, EntryRole::Broker | EntryRole::Supervisor(_)) {
+        // A supervisor failure retains only its own native capabilities until
+        // its exit. After broker exit0 this does NOT recreate old Pending or
+        // change the already reconciled business outcome.
         session.resources.retain_until_exit();
     }
     result?;
@@ -678,8 +758,7 @@ fn begin(session: &mut Session, resolved_target: &str) -> Result<()> {
     if session.receive(pipe)?.kind != ACK {
         return Err(LifecycleError::Unsettled);
     }
-    session.send(pipe, Packet::new(FINISHED))?;
-    session.resources.close_handle(pipe)?;
+    session.finish_request(pipe, server)?;
     // No wait/kill: the exact broker intentionally outlives this synchronous CA.
     // Every native launch control is returned through checked Resources close;
     // there is no unchecked std::process::Child destructor on this success path.
@@ -688,7 +767,13 @@ fn begin(session: &mut Session, resolved_target: &str) -> Result<()> {
 }
 
 fn guardian(session: &mut Session, transaction: u32) -> Result<()> {
-    session.engine(unsafe { GetCurrentProcess() })?;
+    // The actual child belongs to the authenticated tracked supervisor, whose
+    // parent remains the original OS engine. The broker independently binds
+    // this same original supervisor before granting any decision.
+    let parent = session.resources.parent(unsafe { GetCurrentProcess() })?;
+    session.authenticate_image(parent)?;
+    session.engine(parent)?;
+    supervisor::await_parent(session, parent, transaction)?;
     let mut hello = Packet::new(GUARDIAN);
     hello.transaction = transaction;
     let decision = session.request(hello)?;
@@ -739,6 +824,7 @@ fn server(session: &mut Session) -> Result<()> {
     let result = (|| -> Result<()> {
         let pipe = session.server()?;
         let mut began = false;
+        let mut supervisor = None;
         let mut guardian = None;
         let mut decision = None;
         let mut effects_decision = None;
@@ -756,11 +842,29 @@ fn server(session: &mut Session) -> Result<()> {
                     began = true;
                     session.send(pipe, Packet::new(ACK))?;
                 }
-                GUARDIAN if began && guardian.is_none() => {
+                SUPERVISOR if began && supervisor.is_none() => {
                     let parent = session.engine(peer)?;
                     if process_identity(parent)? != original_engine {
                         return Err(LifecycleError::Invalid);
                     }
+                    live(engine)?;
+                    // Keep this original supervisor process and image pinned,
+                    // independent of the short hello connection capabilities.
+                    let original = duplicate_process(&mut session.resources, peer, Role::Control)?;
+                    session.authenticate_image(original)?;
+                    supervisor = Some((peer_id, original, packet.transaction));
+                    session.send(pipe, Packet::new(ACK))?;
+                }
+                GUARDIAN if began && guardian.is_none() => {
+                    let (expected_supervisor, original, transaction) =
+                        supervisor.ok_or(LifecycleError::Invalid)?;
+                    let parent = session.resources.parent(peer)?;
+                    if process_identity(parent)? != expected_supervisor
+                        || packet.transaction != transaction
+                    {
+                        return Err(LifecycleError::Invalid);
+                    }
+                    live(original)?;
                     live(engine)?;
                     // Transfer a duplicate of this authenticated original
                     // process object into the ORIGINAL maintenance ledger.
@@ -803,24 +907,9 @@ fn server(session: &mut Session) -> Result<()> {
                     ended = true;
                     session.send(pipe, Packet::new(ACK))?;
                 }
-                ROLLBACK_NOTICE | COMMIT_NOTICE if began => {
-                    // Deliberately no state change. Even same-image/SID notices
-                    // are not proof they were scheduled by this transaction.
-                    session.send(pipe, Packet::new(ACK))?;
-                }
                 _ => return Err(LifecycleError::Invalid),
             }
-            if session.receive(pipe)?.kind != FINISHED {
-                return Err(LifecycleError::Unsettled);
-            }
-            if let Err(error) = unsafe { DisconnectNamedPipe(pipe) } {
-                if error.code() != ERROR_PIPE_NOT_CONNECTED.to_hresult() {
-                    return Err(error.into());
-                }
-            }
-            // Return transient connection process/image/token capabilities; the
-            // original Begin/Engine and Maintenance's Guardian remain pinned.
-            session.resources.close_handle(peer)?;
+            session.release_connection(pipe, peer)?;
             if ended {
                 break;
             }
@@ -900,8 +989,8 @@ mod tests {
     }
 
     #[test]
-    fn notification_has_no_transaction_or_settlement_fields() {
-        for kind in [BEGIN, ROLLBACK_NOTICE, COMMIT_NOTICE] {
+    fn empty_control_packets_have_no_transaction_or_settlement_fields() {
+        for kind in [BEGIN, ACK, FINISHED, RELEASED, RECEIVED] {
             let mut p = Packet::new(kind);
             assert!(Packet::decode(p.encode()).is_ok());
             for forged in [1, 2] {
@@ -915,6 +1004,29 @@ mod tests {
             p.end = 0x1234;
             assert!(Packet::decode(p.encode()).is_err());
         }
+    }
+
+    #[test]
+    fn supervisor_hello_is_transaction_only_and_old_notices_are_rejected() {
+        for kind in [SUPERVISOR, GUARDIAN] {
+            let mut packet = Packet::new(kind);
+            assert!(Packet::decode(packet.encode()).is_err());
+            packet.transaction = 42;
+            assert!(Packet::decode(packet.encode()).is_ok());
+            for field in [0, 1, 2] {
+                let mut forged = packet;
+                match field {
+                    0 => forged.outcome = 1,
+                    1 => forged.join = 1,
+                    _ => forged.end = 1,
+                }
+                assert!(Packet::decode(forged.encode()).is_err());
+            }
+        }
+        assert!(
+            Packet::decode(Packet::new(5).encode()).is_err(),
+            "retired advisory commit role is not a protocol command"
+        );
     }
 
     fn fixture(name: &str, deadline: Instant) -> Session {
@@ -947,6 +1059,7 @@ mod tests {
             },
             pipe_name: HSTRING::from(name),
             deadline,
+            peer_images: Vec::new(),
         }
     }
     fn fixture_name() -> String {
@@ -989,6 +1102,23 @@ mod tests {
                     .all(|b| b.is_ascii_alphanumeric() || b"\\.-".contains(&b))
         );
         let mut session = fixture(&name, Instant::now() + Duration::from_secs(10));
+        if std::env::var("FC_LIFECYCLE_PIPE_RELEASE_FAULT").as_deref() == Ok("1") {
+            let pipe = session.server().unwrap();
+            session.accept(pipe).unwrap();
+            assert_eq!(session.receive(pipe).unwrap().kind, BEGIN);
+            let peer = session.peer(pipe, true).unwrap();
+            session.send(pipe, Packet::new(ACK)).unwrap();
+            session.resources.fail_close_role = Some(Role::Control);
+            assert!(session.release_connection(pipe, peer).is_err());
+            assert!(session.resources.failed);
+            assert!(
+                !session.peer_images.is_empty(),
+                "unknown original close cannot create RELEASED authority"
+            );
+            session.resources.retain_until_exit();
+            assert!(retained_count() > 0);
+            return;
+        }
         if std::env::var("FC_LIFECYCLE_PIPE_CLOSE_FAULT").as_deref() == Ok("1") {
             let pipe = session.server().unwrap();
             session.resources.fail_close_role = Some(Role::Control);
@@ -1010,6 +1140,11 @@ mod tests {
             );
             return;
         }
+        let parent = session
+            .resources
+            .parent(unsafe { GetCurrentProcess() })
+            .unwrap();
+        supervisor::await_parent(&mut session, parent, 42).unwrap();
         let response = session.request(Packet::new(BEGIN)).unwrap();
         assert_eq!(response.kind, ACK);
         session.resources.release().unwrap();
@@ -1024,14 +1159,32 @@ mod tests {
         let deadline = Instant::now() + Duration::from_secs(10);
         let mut session = fixture(&name, deadline);
         let pipe = session.server().unwrap();
+        let original_name = session.pipe_name.clone();
+        session.pipe_name = supervisor::child_pipe_name(
+            &original_name,
+            process_identity(unsafe { GetCurrentProcess() }).unwrap(),
+        );
+        let barrier = session.server().unwrap();
+        session.pipe_name = original_name;
         let mut child = FixtureChild(
             std::process::Command::new(std::env::current_exe().unwrap())
                 .args(["--exact", CHILD, "--nocapture"])
                 .env("FC_LIFECYCLE_PIPE_FIXTURE", &name)
                 .env_remove("FC_LIFECYCLE_PIPE_CLOSE_FAULT")
+                .env_remove("FC_LIFECYCLE_PIPE_RELEASE_FAULT")
                 .spawn()
                 .unwrap(),
         );
+        session.accept(barrier).unwrap();
+        let hello = session.receive(barrier).unwrap();
+        assert_eq!(hello.kind, GUARDIAN);
+        assert_eq!(hello.transaction, 42);
+        let original_child = process_identity(HANDLE(child.0.as_raw_handle())).unwrap();
+        let barrier_peer = session.peer(barrier, true).unwrap();
+        assert_eq!(process_identity(barrier_peer).unwrap(), original_child);
+        session.send(barrier, Packet::new(ACK)).unwrap();
+        session.release_connection(barrier, barrier_peer).unwrap();
+        session.resources.close_handle(barrier).unwrap();
         session.accept(pipe).unwrap();
         assert_eq!(session.receive(pipe).unwrap().kind, BEGIN);
         let peer = session.peer(pipe, true).unwrap();
@@ -1040,7 +1193,16 @@ mod tests {
             process_identity(HANDLE(child.0.as_raw_handle())).unwrap()
         );
         session.send(pipe, Packet::new(ACK)).unwrap();
-        assert_eq!(session.receive(pipe).unwrap().kind, FINISHED);
+        session.release_connection(pipe, peer).unwrap();
+        assert!(
+            session.peer_images.is_empty(),
+            "RELEASED returned the original short-peer image/process"
+        );
+        assert!(session
+            .resources
+            .handles
+            .iter()
+            .all(|owned| owned.handle != peer));
         loop {
             current(deadline).unwrap();
             if let Some(status) = child.0.try_wait().unwrap() {
@@ -1051,6 +1213,42 @@ mod tests {
         }
         session.resources.release().unwrap();
         assert!(session.resources.released());
+    }
+
+    #[test]
+    fn unknown_short_peer_close_never_grants_released_ack() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let name = fixture_name();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        let mut session = fixture(&name, deadline);
+        let mut child = FixtureChild(
+            std::process::Command::new(std::env::current_exe().unwrap())
+                .args(["--exact", CHILD, "--nocapture"])
+                .env("FC_LIFECYCLE_PIPE_FIXTURE", &name)
+                .env("FC_LIFECYCLE_PIPE_RELEASE_FAULT", "1")
+                .env_remove("FC_LIFECYCLE_PIPE_CLOSE_FAULT")
+                .spawn()
+                .unwrap(),
+        );
+        assert!(
+            session.request(Packet::new(BEGIN)).is_err(),
+            "original unknown image close must never receive RELEASED"
+        );
+        loop {
+            current(deadline).unwrap();
+            if let Some(status) = child.0.try_wait().unwrap() {
+                assert!(status.success());
+                break;
+            }
+            pause(deadline).unwrap();
+        }
+        session.resources.release().unwrap();
+        assert!(
+            session.resources.released(),
+            "child fault never resets/replaces an original owner in that process"
+        );
     }
 
     #[test]
@@ -1078,6 +1276,7 @@ mod tests {
                 .args(["--exact", CHILD, "--nocapture"])
                 .env("FC_LIFECYCLE_PIPE_FIXTURE", name)
                 .env("FC_LIFECYCLE_PIPE_CLOSE_FAULT", "1")
+                .env_remove("FC_LIFECYCLE_PIPE_RELEASE_FAULT")
                 .spawn()
                 .unwrap(),
         );

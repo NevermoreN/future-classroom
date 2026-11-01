@@ -1,0 +1,30 @@
+{
+  "status": "FINITE_DIAGNOSTIC_CLOSED_GCC_UNWIND0_LLD_ORIGINAL_EXIT_UNKNOWN",
+  "originalControllerExit": {
+    "unifiedSession": 91596,
+    "actualExitCode": 1
+  },
+  "originalWindowsResult": {
+    "path": "03-native-original-process-run.stdout.log",
+    "sha256": "db004beb77dc62526a63e25a68f51f907154a1e05a808e6126762faf81baa88a"
+  },
+  "gcc": {
+    "actualExitCode": 0,
+    "originalProcessHandleCheckedClose": true
+  },
+  "lld": {
+    "originalFiveSecondBudgetResult": "NOT_RETURNED",
+    "originalNaturalExitCode": null,
+    "laterExactPathQueryCount": 0,
+    "terminationCalls": 0,
+    "qualification": "No late PID absence is used as actual original exit0. No retry extended the first five-second clock."
+  },
+  "cleanup": {
+    "path": "cleanup-first.json",
+    "sha256": "9be4811ca811317d15978cf775d1fd2bf7de8c986d2eb2eaa0e7eeea3a00ea45",
+    "exactFiles": 3,
+    "rootAbsent": true,
+    "scopeQualification": "Initial 05-exact-inventory process query uses correct single separator and observed zero. Final remove source uses a double separator in its redundant process prefix; that field is not independent liveness proof. Exact original file identities/membership and actual file/directory deletion are verified; final project audit is separate."
+  },
+  "conclusion": "Same-source minimal GCC process caught unwind and returned0. LLD sample did not return within original clock. This supports testing repository default linker; it does not by itself prove the full harness failure cause."
+}

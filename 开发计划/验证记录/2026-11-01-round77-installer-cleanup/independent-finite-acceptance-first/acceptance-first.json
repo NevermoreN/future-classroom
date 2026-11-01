@@ -1,0 +1,982 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_R77_FINITE_GNU_WIN11_TESTS_AND_SUPERVISOR_PREREQUISITE_NOT_PRODUCT_MSI",
+  "sourceSha": "8931fabc0520ac659f9c019f9790e4d4f81ff9a7",
+  "reviewedAtUtc": "2026-11-01T17:34:03.355632+00:00",
+  "reviewScope": "Local read-only independent finite acceptance of frozen originals; no Cargo, Windows, network, main-source or original-evidence mutations.",
+  "source": {
+    "selectedInputs457BeforeAfterCurrentEqual": true,
+    "secondClippyProducerInputsEqualFourth": true,
+    "final4SourceFreeze": {
+      "path": "rust-supervisor-implementation-first/implementation-freeze-first.json",
+      "bytes": 5282,
+      "sha256": "9640bd7ba03209c8f33d26e71f787a28a89a8b4c76d2aa4dac87247cf9b93120"
+    },
+    "final4CurrentAndSnapshotEqual": true,
+    "files": [
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+        "bytes": 3502,
+        "sha256": "c74de12cc3ac0dc67652b8030ed4cfe93d149b65b32503e1251eab819e90c0d0"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+        "bytes": 49577,
+        "sha256": "c0ab9c5cfe7be2c433dce7ae2fca0471883a9fd58c925db4417d888cdba1b5cb"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker/supervisor.rs",
+        "bytes": 6219,
+        "sha256": "34dcf5a99e21970df6594af1ba81d556c9bb713c91d12c32b0a8a54f5ef1fd5f"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker/retirement.rs",
+        "bytes": 12820,
+        "sha256": "9696fb8d85676ea00ccb8c4ecdf32af8bca9917760a8fcb13c4d6ee89eb84807"
+      }
+    ]
+  },
+  "build": {
+    "fourthStatus": "PASS_COMPILE_ONLY_NOT_RUNTIME",
+    "defaultRepositoryGcc": "Use unchanged repository i686-pc-windows-gnu default GCC linker, matching prior successful R75 baseline. Earlier Win7-only wrapper override and original runtime FAIL are retained separately.",
+    "actualOperations": [
+      {
+        "name": "tests",
+        "command": [
+          "cargo",
+          "test",
+          "--workspace",
+          "--all-targets",
+          "--target",
+          "i686-pc-windows-gnu",
+          "--release",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j2",
+          "--message-format=json"
+        ],
+        "pid": 20915,
+        "budgetSeconds": 900,
+        "timedOut": false,
+        "ownedProcessGroupTerminated": false,
+        "actualExit": true,
+        "exitCode": 0,
+        "reaped": true,
+        "elapsedSeconds": 756.4648978339999,
+        "stdout": {
+          "path": "/tmp/fc-round77-installer-cleanup/native-build-fourth/tests.stdout.log",
+          "bytes": 105176,
+          "sha256": "705d4d7d7f706a25fb5e1636ea5d1c207e69e0f9d16446848043c15c46944ca8"
+        },
+        "stderr": {
+          "path": "/tmp/fc-round77-installer-cleanup/native-build-fourth/tests.stderr.log",
+          "bytes": 2927,
+          "sha256": "06cdfc3529eadab037e487ae1425188ca96bf4b4e31c283f1505b12fce905cec"
+        }
+      },
+      {
+        "name": "normal",
+        "command": [
+          "cargo",
+          "build",
+          "--workspace",
+          "--bins",
+          "--target",
+          "i686-pc-windows-gnu",
+          "--release",
+          "--locked",
+          "--offline",
+          "-j2",
+          "--message-format=json"
+        ],
+        "pid": 5674,
+        "budgetSeconds": 900,
+        "timedOut": false,
+        "ownedProcessGroupTerminated": false,
+        "actualExit": true,
+        "exitCode": 0,
+        "reaped": true,
+        "elapsedSeconds": 0.3178928760003146,
+        "stdout": {
+          "path": "/tmp/fc-round77-installer-cleanup/native-build-fourth/normal.stdout.log",
+          "bytes": 85892,
+          "sha256": "016e58feb0f3a255b07d18b4397c4aeac77f3f0adf33f2ea86fe62ba146d0d49"
+        },
+        "stderr": {
+          "path": "/tmp/fc-round77-installer-cleanup/native-build-fourth/normal.stderr.log",
+          "bytes": 62,
+          "sha256": "1d4a459075bb084f679636df54054e09c302d0ad0d545b52395925946c48d277"
+        }
+      }
+    ],
+    "artifactCount": 24,
+    "testHarnesses": 22,
+    "normalGuiProducts": 2,
+    "actual24FilesRehashed": true,
+    "artifacts": [
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+        "bytes": 2352762,
+        "sha256": "76bfea9aad11b98c3fcde0d8be0a6ac1646d5e63de0cf8bfbff476f1bd7a0933",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_materials",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-materials/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-materials#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/runtime_storage-c482f8ab0ffd29bd.exe",
+        "bytes": 4991709,
+        "sha256": "42f30590594bed094a2f3f355cab61aaec5a02630bb6378c77c834cdd931d5b6",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "runtime_storage",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/runtime_storage.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/voice_storage-6bb619ee5dee63b6.exe",
+        "bytes": 5235253,
+        "sha256": "aa0b723a2e3f3030b82a2a992fa6e168f288cfd15c29ee3a9162e562d07a0cd1",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "voice_storage",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/voice_storage.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/examples/verify_web_assets-8500932ea48ba2d2.exe",
+        "bytes": 1097065,
+        "sha256": "a8d656fa3511b1b4460b118391c9b46a731f9107fdf30cd04e2ca436b2302589",
+        "target": {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "verify_web_assets",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/examples/verify_web_assets.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-96edfabaffdd4929.exe",
+        "bytes": 5191010,
+        "sha256": "7b0f4904006d3fa2565f9b0040dc9dcb4d4d3203b6329a79865fe51927a6a26b",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "voice_limits_storage",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/voice_limits_storage.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-8fd20aa1db135542.exe",
+        "bytes": 13095048,
+        "sha256": "ddb320977ed8706441b6eeb3e35689b705e6c2832aa734e8264587d05f6fdcae",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_bootstrap",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-697f746362036af8.exe",
+        "bytes": 5624895,
+        "sha256": "bd2179ec03803eabe2a50e579ed491bcf7357c9f970df2c7848ffe0e9b122947",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "calendar_execution_fence",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/calendar_execution_fence.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/schedule_operations-9b4d7e2443bcde3a.exe",
+        "bytes": 5785392,
+        "sha256": "2a592876d4188053e99a19a548b6c0d29605a50a1352832b1d2e3818607758ae",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "schedule_operations",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/schedule_operations.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/business_storage-1758945f26dd4d24.exe",
+        "bytes": 6196953,
+        "sha256": "c586b182014364a4cdf6791c4d8598f17ec3acb11512f1d4ab95d7d1d16079e5",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "business_storage",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/business_storage.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-d4a98b3cdf6100eb.exe",
+        "bytes": 5534962,
+        "sha256": "efe8dd592bd29515dd80ce339fef788f3f5fc842288ad7aef52e2cd5aff3aab8",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "autostart_coordinator",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/autostart_coordinator.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-6cc266b4a69e4fd2.exe",
+        "bytes": 12846262,
+        "sha256": "d5148e1248ea01fb6183521c7654332414789e2bfa20a8d36787adb2fcd6aba4",
+        "target": {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "fc-bootstrap",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/main.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_installer_lifecycle-cab6782a752605cb.exe",
+        "bytes": 1311658,
+        "sha256": "b64b539ff275e2f6db9912e4dd12798d544de10986237f031d96015aa082f2bc",
+        "target": {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "fc-installer-lifecycle",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+        "bytes": 1224276,
+        "sha256": "e0e52f5cfc033bb04221b183a11c56b5e16476a634148e92a95cd2a162428cf5",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_security",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-security/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-security#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe",
+        "bytes": 4035316,
+        "sha256": "4d62040689de07ee19423671d917d83bccf241cb59ff87c861213c5dadfc065c",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_windows",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-windows#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+        "bytes": 1853766,
+        "sha256": "3da2573680daebcc303dfec875aa031b20b8693acce3f3ea695566835f7a421e",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_presentation",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-presentation/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-presentation#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+        "bytes": 1430273,
+        "sha256": "05b982922b0ab017daec3de6b9c76f1c6d6325fdf46da31d0c9527fe22da502a",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_runtime",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-runtime/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-runtime#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+        "bytes": 1246736,
+        "sha256": "39cfa27df2db7570e29b9e84773a539b38bb60c6d1ba3062621319082dc94dff",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_audio",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-audio/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-audio#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+        "bytes": 8423418,
+        "sha256": "8f945b07e929e3abe4489e374305111fa122eea0717be2f2a44985a76c2974f6",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_storage",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-storage/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-storage#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+        "bytes": 1185286,
+        "sha256": "c7fc85e9093b99b6692a1025479eb50944ac968118d0f373e24bb513e225d690",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_ports",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-ports/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-ports#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+        "bytes": 1280300,
+        "sha256": "33beff1dc3d897ce1d32c534e614009a57548dccc51ebdc711baaa4dc04df3f9",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_application",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-application/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-application#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+        "bytes": 1983421,
+        "sha256": "93c78a07a22393f9cace4eba97f135cb7ad4094bfb34e491042c1721240f9780",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_protocol",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-protocol/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-protocol#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "tests",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+        "bytes": 2403377,
+        "sha256": "4d559c4996fe760d535c9412f429bde940263aeccfb8dce5fa34c0f4ce1da646",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_domain",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-domain/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-domain#0.1.0",
+        "profileTest": true
+      },
+      {
+        "role": "normal",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+        "bytes": 715174,
+        "sha256": "2c67a838a8a282d6230ea84b814473ae4188f248aff51478f9f931e26172b5f4",
+        "target": {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "fc-installer-lifecycle",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": false
+      },
+      {
+        "role": "normal",
+        "path": "/tmp/fc-round77-installer-cleanup/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "bytes": 13351928,
+        "sha256": "863c7b195e197a20f5b7554bf0a00cf555b388f332a6c2806b0cf9b4833428f2",
+        "target": {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "fc-bootstrap",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/main.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": false,
+          "test": true
+        },
+        "packageId": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+        "profileTest": false
+      }
+    ],
+    "strictClippy": {
+      "producer": {
+        "path": "native-build-second/report.json",
+        "bytes": 170116,
+        "sha256": "d0a854c65c5c43ef9755b8b020ed12b98b1aaf7d6b5cbbad994dc9efaee2bce7"
+      },
+      "actualExitCode": 0,
+      "source457EqualFourth": true,
+      "qualification": "Second producer Clippy success retained even though its collector later failed. Fourth did not rerun Clippy; no new Clippy execution claimed."
+    }
+  },
+  "windows": {
+    "originalOperationActualExit0Reaped": true,
+    "status": "PASS",
+    "cleanup": "PASS",
+    "harnessCount": 22,
+    "passed": 1567,
+    "failed": 0,
+    "ignored": 0,
+    "filteredOut": 0,
+    "harnesses": [
+      {
+        "name": "fc_materials-f1a7d58c131e95d5.exe",
+        "passed": 39,
+        "sha256": "76bfea9aad11b98c3fcde0d8be0a6ac1646d5e63de0cf8bfbff476f1bd7a0933",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "runtime_storage-c482f8ab0ffd29bd.exe",
+        "passed": 3,
+        "sha256": "42f30590594bed094a2f3f355cab61aaec5a02630bb6378c77c834cdd931d5b6",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "voice_storage-6bb619ee5dee63b6.exe",
+        "passed": 6,
+        "sha256": "aa0b723a2e3f3030b82a2a992fa6e168f288cfd15c29ee3a9162e562d07a0cd1",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "verify_web_assets-8500932ea48ba2d2.exe",
+        "passed": 0,
+        "sha256": "a8d656fa3511b1b4460b118391c9b46a731f9107fdf30cd04e2ca436b2302589",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "voice_limits_storage-96edfabaffdd4929.exe",
+        "passed": 4,
+        "sha256": "7b0f4904006d3fa2565f9b0040dc9dcb4d4d3203b6329a79865fe51927a6a26b",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_bootstrap-8fd20aa1db135542.exe",
+        "passed": 348,
+        "sha256": "ddb320977ed8706441b6eeb3e35689b705e6c2832aa734e8264587d05f6fdcae",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "calendar_execution_fence-697f746362036af8.exe",
+        "passed": 4,
+        "sha256": "bd2179ec03803eabe2a50e579ed491bcf7357c9f970df2c7848ffe0e9b122947",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "schedule_operations-9b4d7e2443bcde3a.exe",
+        "passed": 5,
+        "sha256": "2a592876d4188053e99a19a548b6c0d29605a50a1352832b1d2e3818607758ae",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "business_storage-1758945f26dd4d24.exe",
+        "passed": 43,
+        "sha256": "c586b182014364a4cdf6791c4d8598f17ec3acb11512f1d4ab95d7d1d16079e5",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "autostart_coordinator-d4a98b3cdf6100eb.exe",
+        "passed": 13,
+        "sha256": "efe8dd592bd29515dd80ce339fef788f3f5fc842288ad7aef52e2cd5aff3aab8",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_bootstrap-6cc266b4a69e4fd2.exe",
+        "passed": 223,
+        "sha256": "d5148e1248ea01fb6183521c7654332414789e2bfa20a8d36787adb2fcd6aba4",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_installer_lifecycle-cab6782a752605cb.exe",
+        "passed": 1,
+        "sha256": "b64b539ff275e2f6db9912e4dd12798d544de10986237f031d96015aa082f2bc",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_security-2889fa9301b88e80.exe",
+        "passed": 19,
+        "sha256": "e0e52f5cfc033bb04221b183a11c56b5e16476a634148e92a95cd2a162428cf5",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_windows-ac67b5f1df5ec8b2.exe",
+        "passed": 274,
+        "sha256": "4d62040689de07ee19423671d917d83bccf241cb59ff87c861213c5dadfc065c",
+        "childScopesSeparate": 3
+      },
+      {
+        "name": "fc_presentation-b847dfa3b68d1237.exe",
+        "passed": 58,
+        "sha256": "3da2573680daebcc303dfec875aa031b20b8693acce3f3ea695566835f7a421e",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_runtime-a09be73363edd23a.exe",
+        "passed": 33,
+        "sha256": "05b982922b0ab017daec3de6b9c76f1c6d6325fdf46da31d0c9527fe22da502a",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_audio-e1b4eabc9ef1420f.exe",
+        "passed": 22,
+        "sha256": "39cfa27df2db7570e29b9e84773a539b38bb60c6d1ba3062621319082dc94dff",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+        "passed": 208,
+        "sha256": "8f945b07e929e3abe4489e374305111fa122eea0717be2f2a44985a76c2974f6",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_ports-15b1ad689f79c490.exe",
+        "passed": 8,
+        "sha256": "c7fc85e9093b99b6692a1025479eb50944ac968118d0f373e24bb513e225d690",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_application-fb16268b5eff3acf.exe",
+        "passed": 25,
+        "sha256": "33beff1dc3d897ce1d32c534e614009a57548dccc51ebdc711baaa4dc04df3f9",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_protocol-4316bb63b92dda4d.exe",
+        "passed": 82,
+        "sha256": "93c78a07a22393f9cace4eba97f135cb7ad4094bfb34e491042c1721240f9780",
+        "childScopesSeparate": 0
+      },
+      {
+        "name": "fc_domain-367747e306a1dd0e.exe",
+        "passed": 149,
+        "sha256": "4d559c4996fe760d535c9412f429bde940263aeccfb8dce5fa34c0f4ce1da646",
+        "childScopesSeparate": 0
+      }
+    ],
+    "childScopeQualification": "Three source-bound pipe fixture child running/case/summary scopes each passed1/filtered273; kept separate from outer274 and aggregate1567. Original raw lacks child PID/creation; not invented.",
+    "publicDesktop": {
+      "actualExitCode": 0,
+      "steps": 20,
+      "terminal": "PUBLIC_DESKTOP_NATIVE_PASS steps=20 shared_workers=2 public_session=NONE database_reopen=NOT_EXERCISED change_restore=PASS old_scene=REJECTED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=2473",
+      "independentDatabaseReopen": "NOT_EXERCISED",
+      "visibleForegroundOrSeewo": "NOT_RUN"
+    }
+  },
+  "supervisorPrerequisite": {
+    "status": "PASS_FINITE_CSHARP_REAL_CHILD_JOIN_END_ROLLBACK_AND_ORIGINAL_EXIT0",
+    "review": {
+      "path": "native-supervisor-actual-review-first/review-first.json",
+      "bytes": 13289,
+      "sha256": "87f2e217703ee1f8b331ceca578463293fc92169f7406b05386be92437c0c193"
+    },
+    "qualification": "Independent synthetic C# fixture only: real Join0/EndRollback0/event close, original child/supervisor/client exit0 and checked close. Exact fixture cleanup and cached paths automatic absence recorded; not new Rust product MSI execution."
+  },
+  "retainedFailures": {
+    "firstBuild": "Original report remains RUNNING; interrupted original session exit UNKNOWN. Later absence does not manufacture exit0.",
+    "secondBuild": "Actual commands exited0; collector FAIL miscounted non-test normal bin emissions; third read-only correction selects profile.test=true without rebuilding or rewriting original.",
+    "firstWindowsRuntime": "LLD override fc_bootstrap first harness actual exit3 FAIL retained; no passing replacement of original.",
+    "fourthQualification": "Restores unchanged project default GNU GCC configuration; all457 source bytes equal second, no product-source fix for linker failure.",
+    "asyncFixture": "First missing-Media inconclusive and second observed Type130/guardian sequence rejection remain separate; not promoted to successful Join.",
+    "unwindDiagnostic": {
+      "status": "FINITE_DIAGNOSTIC_CLOSED_GCC_UNWIND0_LLD_ORIGINAL_EXIT_UNKNOWN",
+      "originalControllerExit": {
+        "unifiedSession": 91596,
+        "actualExitCode": 1
+      },
+      "originalWindowsResult": {
+        "path": "03-native-original-process-run.stdout.log",
+        "sha256": "db004beb77dc62526a63e25a68f51f907154a1e05a808e6126762faf81baa88a"
+      },
+      "gcc": {
+        "actualExitCode": 0,
+        "originalProcessHandleCheckedClose": true
+      },
+      "lld": {
+        "originalFiveSecondBudgetResult": "NOT_RETURNED",
+        "originalNaturalExitCode": null,
+        "laterExactPathQueryCount": 0,
+        "terminationCalls": 0,
+        "qualification": "No late PID absence is used as actual original exit0. No retry extended the first five-second clock."
+      },
+      "cleanup": {
+        "path": "cleanup-first.json",
+        "sha256": "9be4811ca811317d15978cf775d1fd2bf7de8c986d2eb2eaa0e7eeea3a00ea45",
+        "exactFiles": 3,
+        "rootAbsent": true,
+        "scopeQualification": "Initial 05-exact-inventory process query uses correct single separator and observed zero. Final remove source uses a double separator in its redundant process prefix; that field is not independent liveness proof. Exact original file identities/membership and actual file/directory deletion are verified; final project audit is separate."
+      },
+      "conclusion": "Same-source minimal GCC process caught unwind and returned0. LLD sample did not return within original clock. This supports testing repository default linker; it does not by itself prove the full harness failure cause."
+    }
+  },
+  "finalReadOnlyAudit": {
+    "original": {
+      "path": "windows-readonly-final-first.json",
+      "bytes": 17078,
+      "sha256": "4f63e94977bb92d09b4d579a84e4a03430eb9c940c5c5753923c3c741cb4b88a"
+    },
+    "status": "PASS",
+    "scratchDirectories": 0,
+    "ownedProcesses": 0,
+    "ownedTasks": 0,
+    "runAndPublicSshAuthorizationUnchanged": true,
+    "sshd": "Running",
+    "privateKey": "Metadata only; mode0600; contents not read."
+  },
+  "notRun": [
+    "New Rust production MSI fresh/reapply/uninstall and automatic Type2 image retirement",
+    "New modern and Win7 MSVC CI for R77 source",
+    "Windows7 OS runtime",
+    "Windows10 OS runtime",
+    "Standard-user MSI runtime",
+    "Seewo hardware and campus acceptance",
+    "Normal Rust installer helper execution by full GNU runner",
+    "Independent desktop database process reopen"
+  ],
+  "originals": [
+    {
+      "path": "rust-supervisor-implementation-first/implementation-freeze-first.json",
+      "bytes": 5282,
+      "sha256": "9640bd7ba03209c8f33d26e71f787a28a89a8b4c76d2aa4dac87247cf9b93120"
+    },
+    {
+      "path": "native-production-source-review-first/review-first.json",
+      "bytes": 8297,
+      "sha256": "12454287fcef22cfa8e4639b56388a97614973b330f1558c6e92dbdd94bd8b10"
+    },
+    {
+      "path": "native-build-fourth/report.json",
+      "bytes": 189268,
+      "sha256": "c9cff3db7e764fa9d5cbae31d4b6da3eb388640bbe42e2d8bb7439a282013021"
+    },
+    {
+      "path": "native-build-second/report.json",
+      "bytes": 170116,
+      "sha256": "d0a854c65c5c43ef9755b8b020ed12b98b1aaf7d6b5cbbad994dc9efaee2bce7"
+    },
+    {
+      "path": "native-build-first/report.json",
+      "bytes": 84755,
+      "sha256": "66107be41f8fc768707c5f7da8cd145b8c73245761ea036945aa5910ec6ff9d8"
+    },
+    {
+      "path": "root-native-build-first-terminal-qualification.json",
+      "bytes": 8078,
+      "sha256": "753876f72f49063b1369781f5d063a122c9ff249e2a319b893ec3f12a1e32001"
+    },
+    {
+      "path": "native-build-capture-third/report.json",
+      "bytes": 193029,
+      "sha256": "944542bf7b453f9c9db93ad0168b2994cb558d6eab107eee14ffda4796c2fad7"
+    },
+    {
+      "path": "windows-native-full-first.json",
+      "bytes": 5638,
+      "sha256": "3831c0ea46cc89fe54cec186bb06160f0d2198e34fddfb0ee7f26824a57eaeca"
+    },
+    {
+      "path": "windows-native-full-operation-first.json",
+      "bytes": 7777,
+      "sha256": "6761984e4deb2ec0bad8bbeca127f19050fd4bb0ad58b17608e63d46db984538"
+    },
+    {
+      "path": "windows-native-full-second.json",
+      "bytes": 225600,
+      "sha256": "5825fee2c9f6619365e4158cf5637607abe3c3b1c246c24980c4a871b2ec5c93"
+    },
+    {
+      "path": "windows-native-full-operation-second.json",
+      "bytes": 7769,
+      "sha256": "534967ecd5a5b73d84ae73f7de8246348553011fbc7ea1ded712c3f89d8df1c4"
+    },
+    {
+      "path": "root-runtime-counts-first.json",
+      "bytes": 13459,
+      "sha256": "67904b90e8dfbcdeaaa7d9f12f7e55eb2099b73f0410aa6c78249c8c1b283de9"
+    },
+    {
+      "path": "root-runtime-counts-second.json",
+      "bytes": 15220,
+      "sha256": "5842c94f70b7ce183d51284899484a812c16a861b962a7a5297c3a946966766e"
+    },
+    {
+      "path": "supervisor-fixture-runtime-first/report.json",
+      "bytes": 49141,
+      "sha256": "6ba8ad2e4107c05325042aadd1385063b863cfdf75f0582de7412574251459fa"
+    },
+    {
+      "path": "native-supervisor-actual-review-first/review-first.json",
+      "bytes": 13289,
+      "sha256": "87f2e217703ee1f8b331ceca578463293fc92169f7406b05386be92437c0c193"
+    },
+    {
+      "path": "root-supervisor-fixture-cleanup-first.json",
+      "bytes": 2442,
+      "sha256": "e259e19d9cf5c28bcdcbb321c85e008cd7a663fea96b6f7938519db66ae08196"
+    },
+    {
+      "path": "unwind-linker-diagnostic-first/terminal-qualification-first.json",
+      "bytes": 1505,
+      "sha256": "d1bcb6d929f6e462df76a8ce4097da85edc731c0c5f8d1620edefedbedbdc3b8"
+    },
+    {
+      "path": "unwind-linker-diagnostic-first/windows-first.json",
+      "bytes": 5551,
+      "sha256": "59844719caf5f0d1259375dfdf371557c0f7a98ea1da47884ef1bb01a1a99733"
+    },
+    {
+      "path": "unwind-linker-diagnostic-first/cleanup-first.json",
+      "bytes": 5407,
+      "sha256": "9be4811ca811317d15978cf775d1fd2bf7de8c986d2eb2eaa0e7eeea3a00ea45"
+    },
+    {
+      "path": "windows-readonly-final-first.json",
+      "bytes": 17078,
+      "sha256": "4f63e94977bb92d09b4d579a84e4a03430eb9c940c5c5753923c3c741cb4b88a"
+    }
+  ]
+}

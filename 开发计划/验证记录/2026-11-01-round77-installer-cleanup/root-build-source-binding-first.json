@@ -1,0 +1,56 @@
+{
+  "status": "PASS_SAME_SOURCE_DIFFERENT_LINKER_RECORDS",
+  "sameActualInputs": 457,
+  "currentCompileOperations": [
+    {
+      "name": "tests",
+      "exitCode": 0,
+      "elapsedSeconds": 756.4648978339999,
+      "timedOut": false
+    },
+    {
+      "name": "normal",
+      "exitCode": 0,
+      "elapsedSeconds": 0.3178928760003146,
+      "timedOut": false
+    }
+  ],
+  "priorStrictClippy": {
+    "name": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--release",
+      "--locked",
+      "--offline",
+      "-j2",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "pid": 3985,
+    "budgetSeconds": 900,
+    "timedOut": false,
+    "ownedProcessGroupTerminated": false,
+    "actualExit": true,
+    "exitCode": 0,
+    "reaped": true,
+    "elapsedSeconds": 0.41497625699992113,
+    "stdout": {
+      "path": "/tmp/fc-round77-installer-cleanup/native-build-second/clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round77-installer-cleanup/native-build-second/clippy.stderr.log",
+      "bytes": 62,
+      "sha256": "bc91a3ed6ff9b29145787c6d9882965f4f24899753f0d8be62d8adc772989545"
+    }
+  },
+  "sourceChangesBetweenBuilds": false,
+  "qualification": "Current codegen uses repository default GCC; original Win7-only wrapper override failures retained. Same inputs do not promote compile evidence to runtime."
+}
