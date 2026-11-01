@@ -1,0 +1,535 @@
+{
+  "status": "PASS_COMPLETED_OWNED_ROOT_REMOVED",
+  "recordedUtc": "2026-11-01T08:49:46.086965+00:00",
+  "committedBytesProofSha256": "ab9aa3f9ace52f7abb27de8dc3e8476e1000dcbfd310c73264546f39bdaf40ed",
+  "verifiedCommit": "02332c3ec3e20a496f35213228f3ec141f63327a",
+  "removedRoot": "/tmp/fc-round68-production-https",
+  "removedRegularFiles": 65923,
+  "removedLogicalFileBytes": 7797243625,
+  "removedSymlinks": 7,
+  "physicalDiskBytesFreed": "NOT_MEASURED",
+  "worktrees": [
+    {
+      "path": "/tmp/fc-round68-production-https/native-check-worktree",
+      "changedFilesRetained": [
+        {
+          "path": "crates/fc-domain/src/https_settings.rs",
+          "bytes": 6829,
+          "sha256": "0f695a75dc2c8cda3bb0c0731c1bae0bf8ff1120b9a5b45ad65402b224db5999",
+          "archiveMember": "joint-source-after-fifth/crates/fc-domain/src/https_settings.rs"
+        },
+        {
+          "path": "crates/fc-domain/src/https_settings/source_networks.rs",
+          "bytes": 6518,
+          "sha256": "c22cf5e84666a02c2c8742c63a95e827d14f458fbb61bff9054eaf361438d297",
+          "archiveMember": "joint-source-after-fifth/crates/fc-domain/src/https_settings/source_networks.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "bytes": 9012,
+          "sha256": "3a0da2d116197107bf2d6bbe2d2196d7ba35b0cbc2210d704ed9861630d640d6",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/credentials.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials/host.rs",
+          "bytes": 5795,
+          "sha256": "02a02400dd156185f424035dbfe63f6d66d60688ac1b02d69100979c76775ff5",
+          "archiveMember": "native-A-source-first/crates/fc-windows/src/tls_frontdoor/credentials/host.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+          "bytes": 10617,
+          "sha256": "1186d9c4c78d52907397508a8af503ca4038404293a7df49430d08b9a109a5bc",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/mod.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "bytes": 61586,
+          "sha256": "6627580006ec8cf8d77f98322fa06995ad030d79be20042ab1a5da70f9e5e5dc",
+          "archiveMember": "native-A-source-first/crates/fc-windows/src/tls_frontdoor/native.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+          "bytes": 17494,
+          "sha256": "66bf7a67d7d76d113c9883978c686de4eabe076093ac1f113937b196f36c62cc",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/accept.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/configured.rs",
+          "bytes": 6487,
+          "sha256": "40269df8f57f2952056fe326d8bffb53e7b641e4cc563fafe99bdd09494d2d88",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/configured.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "bytes": 42907,
+          "sha256": "09abd31d2616dea0bf54b138b82d9eb7f7ae00280d09e0b16138821d0aadee74",
+          "archiveMember": "native-A-source-first/crates/fc-windows/src/tls_frontdoor/native/stream.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+          "bytes": 92452,
+          "sha256": "cf359c7f0c48ecc71d516c213104ea5740c863ccb9aa0303b8c07255c2d64c8b",
+          "archiveMember": "native-A-source-first/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+          "bytes": 30431,
+          "sha256": "e2dc64da924539611991db9e2b20b6515e2c4830db4979c73d809330ba2a3d38",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/schannel.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/worker.rs",
+          "bytes": 16613,
+          "sha256": "90fb20582984091754c3305b940d39b39298682ca0ac4310ac8f1e066419da03",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/worker.rs"
+        }
+      ]
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/native-check-worktree-second",
+      "changedFilesRetained": [
+        {
+          "path": "crates/fc-domain/src/https_settings.rs",
+          "bytes": 6829,
+          "sha256": "0f695a75dc2c8cda3bb0c0731c1bae0bf8ff1120b9a5b45ad65402b224db5999",
+          "archiveMember": "joint-source-after-fifth/crates/fc-domain/src/https_settings.rs"
+        },
+        {
+          "path": "crates/fc-domain/src/https_settings/source_networks.rs",
+          "bytes": 6518,
+          "sha256": "c22cf5e84666a02c2c8742c63a95e827d14f458fbb61bff9054eaf361438d297",
+          "archiveMember": "joint-source-after-fifth/crates/fc-domain/src/https_settings/source_networks.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "bytes": 9012,
+          "sha256": "3a0da2d116197107bf2d6bbe2d2196d7ba35b0cbc2210d704ed9861630d640d6",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/credentials.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials/host.rs",
+          "bytes": 6933,
+          "sha256": "51b475fb3fa4bb3efda912b1c9716ceca1fac4821b54553dde5445c4afb3a8d5",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/credentials/host.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+          "bytes": 10617,
+          "sha256": "1186d9c4c78d52907397508a8af503ca4038404293a7df49430d08b9a109a5bc",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/mod.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "bytes": 61586,
+          "sha256": "6627580006ec8cf8d77f98322fa06995ad030d79be20042ab1a5da70f9e5e5dc",
+          "archiveMember": "native-A-source-first/crates/fc-windows/src/tls_frontdoor/native.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+          "bytes": 17494,
+          "sha256": "66bf7a67d7d76d113c9883978c686de4eabe076093ac1f113937b196f36c62cc",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/accept.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/configured.rs",
+          "bytes": 6487,
+          "sha256": "40269df8f57f2952056fe326d8bffb53e7b641e4cc563fafe99bdd09494d2d88",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/configured.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "bytes": 42983,
+          "sha256": "a67a749a40ef28024ca748dd6349f5a522e2afa5ba0720a8408b4ccd14343996",
+          "archiveMember": "native-A-source-second/crates/fc-windows/src/tls_frontdoor/native/stream.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+          "bytes": 92452,
+          "sha256": "cf359c7f0c48ecc71d516c213104ea5740c863ccb9aa0303b8c07255c2d64c8b",
+          "archiveMember": "native-A-source-first/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+          "bytes": 30431,
+          "sha256": "e2dc64da924539611991db9e2b20b6515e2c4830db4979c73d809330ba2a3d38",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/schannel.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/worker.rs",
+          "bytes": 16613,
+          "sha256": "90fb20582984091754c3305b940d39b39298682ca0ac4310ac8f1e066419da03",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/worker.rs"
+        }
+      ]
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/native-check-worktree-third",
+      "changedFilesRetained": [
+        {
+          "path": "crates/fc-domain/src/https_settings.rs",
+          "bytes": 6829,
+          "sha256": "0f695a75dc2c8cda3bb0c0731c1bae0bf8ff1120b9a5b45ad65402b224db5999",
+          "archiveMember": "joint-source-after-fifth/crates/fc-domain/src/https_settings.rs"
+        },
+        {
+          "path": "crates/fc-domain/src/https_settings/source_networks.rs",
+          "bytes": 6518,
+          "sha256": "c22cf5e84666a02c2c8742c63a95e827d14f458fbb61bff9054eaf361438d297",
+          "archiveMember": "joint-source-after-fifth/crates/fc-domain/src/https_settings/source_networks.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "bytes": 9012,
+          "sha256": "3a0da2d116197107bf2d6bbe2d2196d7ba35b0cbc2210d704ed9861630d640d6",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/credentials.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials/host.rs",
+          "bytes": 6933,
+          "sha256": "51b475fb3fa4bb3efda912b1c9716ceca1fac4821b54553dde5445c4afb3a8d5",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/credentials/host.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+          "bytes": 10617,
+          "sha256": "1186d9c4c78d52907397508a8af503ca4038404293a7df49430d08b9a109a5bc",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/mod.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "bytes": 64132,
+          "sha256": "f7e4b8b22595bb68e7273a65c8b7b4e27ada6f38d08f4db3ec1529ab0dfe7fb4",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+          "bytes": 17494,
+          "sha256": "66bf7a67d7d76d113c9883978c686de4eabe076093ac1f113937b196f36c62cc",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/accept.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/configured.rs",
+          "bytes": 6487,
+          "sha256": "40269df8f57f2952056fe326d8bffb53e7b641e4cc563fafe99bdd09494d2d88",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/configured.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "bytes": 42731,
+          "sha256": "6072ccea148737523e3475be5355d62084d656158afbea19bb98240be5033b97",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/stream.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+          "bytes": 96831,
+          "sha256": "56737b7256c1ae9ee6b507c9c53b95cffcc9f8704c421e0ec6240a595fb87a4f",
+          "archiveMember": "joint-source-after-first/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+          "bytes": 30431,
+          "sha256": "e2dc64da924539611991db9e2b20b6515e2c4830db4979c73d809330ba2a3d38",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/schannel.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/worker.rs",
+          "bytes": 16613,
+          "sha256": "90fb20582984091754c3305b940d39b39298682ca0ac4310ac8f1e066419da03",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/worker.rs"
+        }
+      ]
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/worktree",
+      "changedFilesRetained": [
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "bytes": 262848,
+          "sha256": "2e764fa6be7070fdb5401b6998d8b422051aad97d70dd8e1b3e8ff3b640361e9",
+          "archiveMember": "independent-C-ui-contract-second-source/crates/fc-bootstrap/src/application.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/backup_controller.rs",
+          "bytes": 33579,
+          "sha256": "ae2bb5422c375efcb26910c384386775dd9f56027bb257d96f0b9f3a2c9a2042",
+          "archiveMember": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/application/backup_controller.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+          "bytes": 14009,
+          "sha256": "82bfdf13428f490aee41340ecb8d0fcb7401df4b886f3dda2863c8d89509128a",
+          "archiveMember": "joint-source-after-fifth/crates/fc-bootstrap/src/application/https_runtime_controller.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/https_settings_controller.rs",
+          "bytes": 21074,
+          "sha256": "e8e5ff01849061e5b7078a4e0b6b2a39a0d47a44a950fe683a232211b04f1d21",
+          "archiveMember": "joint-source-after-fifth/crates/fc-bootstrap/src/application/https_settings_controller.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/https_settings_controller/tests.rs",
+          "bytes": 6437,
+          "sha256": "ba0a0ab28a240d454dc2211f76a0d99b754c4d51cffa6a312c61ec5e5d04a296",
+          "archiveMember": "joint-source-after-seventh/crates/fc-bootstrap/src/application/https_settings_controller/tests.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/https_settings_editor.rs",
+          "bytes": 20711,
+          "sha256": "f899d911e374a0af511bca3e4e9cc353ee5d4516797fda7b547431e2d5529030",
+          "archiveMember": "joint-source-after-fifth/crates/fc-bootstrap/src/application/https_settings_editor.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/https_settings_editor/tests.rs",
+          "bytes": 10628,
+          "sha256": "4419b145293ea27379b798ea746896961b5b68bc450dec50ca75d9ccaed90494",
+          "archiveMember": "joint-source-after-fifth/crates/fc-bootstrap/src/application/https_settings_editor/tests.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/https_settings_probe.rs",
+          "bytes": 15967,
+          "sha256": "72db5cafd5ea617ae74026fa1988353537dbc02c6cfe2d87385157c5dc144d81",
+          "archiveMember": "joint-source-after-fifth/crates/fc-bootstrap/src/application/https_settings_probe.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+          "bytes": 20746,
+          "sha256": "23f85c2888cd47b5be2cbff3f3b8d3e1e6f285560b453c547047d0e622636768",
+          "archiveMember": "joint-source-after-fifth/crates/fc-bootstrap/src/application/ordinary_https_probe.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+          "bytes": 25255,
+          "sha256": "8d2f4a41a6a3361069f9f4120a1e7116e9e011ff25d807ca8ec8229e7134fde3",
+          "archiveMember": "independent-C-ui-contract-second-source/crates/fc-bootstrap/src/application/web_editor.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+          "bytes": 21849,
+          "sha256": "3535f6fd2c78d8ddf04af1a9a164fe2e404b6ed4fcabcd8c55d21a19573b15e5",
+          "archiveMember": "joint-source-after-fifth/crates/fc-bootstrap/src/application/web_editor/tests.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend.rs",
+          "bytes": 107515,
+          "sha256": "f319c893038fef6178c42170deb2be335695b64357cdd8349a5a0db5fc13b468",
+          "archiveMember": "B-fixture-origin-review-first-source/crates/fc-bootstrap/src/backend.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+          "bytes": 39896,
+          "sha256": "25d4afeaee28fc00dec03f1b8fa90c1fcdcd7549e32ca4821950a0cb695fe6a4",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/backend/account_management_tests.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/https_settings.rs",
+          "bytes": 4108,
+          "sha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/backend/https_settings.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/profiles/tests.rs",
+          "bytes": 18453,
+          "sha256": "44c2003f841b6cb528467b1dd3b7834815ab48d528ad90bd8bc22358efd99329",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/backend/profiles/tests.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/web.rs",
+          "bytes": 46785,
+          "sha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe",
+          "archiveMember": "B-fixture-origin-review-first-source/crates/fc-bootstrap/src/backend/web.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+          "bytes": 9910,
+          "sha256": "5bb04d3585f895381daa0ef3e28ef851d7304c0584cebf40a615a91468716e39",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/backend/web/runtime.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+          "bytes": 13885,
+          "sha256": "2173db6aece2d4cd4d192c58bdedabe304f8aa1ac2383327d1c15d553a745fa4",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/backend/web/runtime_tests.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/https_runtime.rs",
+          "bytes": 22674,
+          "sha256": "1005f9cd0db58ac692ed3f748b27b46b5f450856e7ca864f25aa487c462d6ee4",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/https_runtime.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/lib.rs",
+          "bytes": 626,
+          "sha256": "264fdf1aa1344616533ae82575e38d6bae717a172d877692b740bcac328e550c",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/lib.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/main.rs",
+          "bytes": 21856,
+          "sha256": "a30233d87465baca146f1bb985f1d75a8fc51afb72e10ed9d41c6f115051330b",
+          "archiveMember": "joint-source-after-fifth/crates/fc-bootstrap/src/main.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+          "bytes": 17949,
+          "sha256": "f53d793a1483a0532e27187c274e11d2f4755e69f072a6fa9a7b3b06cc1a39b3",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/web_application/voice_files.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer.rs",
+          "bytes": 10897,
+          "sha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/web_transfer.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/downloads.rs",
+          "bytes": 19977,
+          "sha256": "734820af5417f8cb51d2f0a12d8e1df0bb418d9356b15123ff0da0bb2a5db47a",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/web_transfer/downloads.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/executor.rs",
+          "bytes": 3619,
+          "sha256": "c60c10bfe9b4c2e50e270f9159d12a2942e05ae79b85064325c7d7d3212379d5",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/web_transfer/executor.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/live_cleanup.rs",
+          "bytes": 1931,
+          "sha256": "22b2c7fac3360de8c1fc71b3e409ebdad994428342ca0ece1f4c5a909281bf85",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/web_transfer/live_cleanup.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+          "bytes": 60038,
+          "sha256": "f20da7d047f6c42749efd5813295da6b707642277a108aa794f43534cbd896e2",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/web_transfer/network.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+          "bytes": 38186,
+          "sha256": "aed4160d24208d6bd491734515b9f3bf1794d4c7348cce251d150da040abf2e0",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/web_transfer/uploads.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+          "bytes": 49433,
+          "sha256": "fe09d4184289b8743df6492158cfb094b5588c0b0a8ad9f222ffbfa05b61e187",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/web_transfer/uploads/tests.rs"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+          "bytes": 8967,
+          "sha256": "59de85620ebac75d76274cc4f0f8732cb04339517e4cba2cc5c281cbad7cd1c6",
+          "archiveMember": "b-source-after-fifth/crates/fc-bootstrap/src/web_transfer/work/tests.rs"
+        },
+        {
+          "path": "crates/fc-domain/src/https_settings.rs",
+          "bytes": 6829,
+          "sha256": "0f695a75dc2c8cda3bb0c0731c1bae0bf8ff1120b9a5b45ad65402b224db5999",
+          "archiveMember": "joint-source-after-fifth/crates/fc-domain/src/https_settings.rs"
+        },
+        {
+          "path": "crates/fc-domain/src/https_settings/source_networks.rs",
+          "bytes": 6518,
+          "sha256": "c22cf5e84666a02c2c8742c63a95e827d14f458fbb61bff9054eaf361438d297",
+          "archiveMember": "joint-source-after-fifth/crates/fc-domain/src/https_settings/source_networks.rs"
+        },
+        {
+          "path": "crates/fc-storage/src/business/https_settings.rs",
+          "bytes": 17613,
+          "sha256": "cadd2ccc9056c536463d147ae58c74718d28e768446464fd9d523203f28bf4ec",
+          "archiveMember": "b-source-after-fifth/crates/fc-storage/src/business/https_settings.rs"
+        },
+        {
+          "path": "crates/fc-storage/src/business/https_settings/tests.rs",
+          "bytes": 32591,
+          "sha256": "e2f4d00e83e0eddfa5bc8dcf1048b376d0bf7e28d29c8727e45405154eb80a6c",
+          "archiveMember": "b-source-after-fifth/crates/fc-storage/src/business/https_settings/tests.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "bytes": 9012,
+          "sha256": "3a0da2d116197107bf2d6bbe2d2196d7ba35b0cbc2210d704ed9861630d640d6",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/credentials.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials/host.rs",
+          "bytes": 6933,
+          "sha256": "51b475fb3fa4bb3efda912b1c9716ceca1fac4821b54553dde5445c4afb3a8d5",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/credentials/host.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+          "bytes": 10617,
+          "sha256": "1186d9c4c78d52907397508a8af503ca4038404293a7df49430d08b9a109a5bc",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/mod.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "bytes": 64132,
+          "sha256": "f7e4b8b22595bb68e7273a65c8b7b4e27ada6f38d08f4db3ec1529ab0dfe7fb4",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+          "bytes": 17494,
+          "sha256": "66bf7a67d7d76d113c9883978c686de4eabe076093ac1f113937b196f36c62cc",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/accept.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/configured.rs",
+          "bytes": 6487,
+          "sha256": "40269df8f57f2952056fe326d8bffb53e7b641e4cc563fafe99bdd09494d2d88",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/configured.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "bytes": 42731,
+          "sha256": "6072ccea148737523e3475be5355d62084d656158afbea19bb98240be5033b97",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/stream.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+          "bytes": 99106,
+          "sha256": "4c6006687e4c60e28eb0dac08584a1cc61beeb6c8dfb44f75eeeef556ffe026f",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+          "bytes": 30431,
+          "sha256": "e2dc64da924539611991db9e2b20b6515e2c4830db4979c73d809330ba2a3d38",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/schannel.rs"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/worker.rs",
+          "bytes": 16613,
+          "sha256": "90fb20582984091754c3305b940d39b39298682ca0ac4310ac8f1e066419da03",
+          "archiveMember": "joint-source-after-fifth/crates/fc-windows/src/tls_frontdoor/worker.rs"
+        },
+        {
+          "path": "scripts/windows-ordinary-https-probe.py",
+          "bytes": 43248,
+          "sha256": "bf3ea57caf4a8c53a3be879345b0e41ada0329591b32c29213e79d5077aba375",
+          "archiveMember": "joint-source-after-seventh/scripts/windows-ordinary-https-probe.py"
+        },
+        {
+          "path": "开发计划/14-P0独立TCP接纳候选ADR.md",
+          "bytes": 23288,
+          "sha256": "cd74309da502efd8fbea0b334d53d66fc9e4f2e044c1faa1963a0b76da4b169f",
+          "archiveMember": "joint-source-after-fifth/开发计划/14-P0独立TCP接纳候选ADR.md"
+        },
+        {
+          "path": "开发计划/模块/06-局域网与React管理端.md",
+          "bytes": 20650,
+          "sha256": "f57333cf4bfa55dd81af46f0c3031c881b952745e02a7012cd693c83a558d8cc",
+          "archiveMember": "joint-source-after-fifth/开发计划/模块/06-局域网与React管理端.md"
+        }
+      ]
+    }
+  ],
+  "duplicateFailedArchiveMembersRetained": 1175,
+  "activeOwnedProcessesBeforeRemoval": [],
+  "scope": "Local completed R68 root only. No remote Windows mutation or process termination. Persistent SSH service/public keys/private key, main target/global caches, intentional dev ZIPs and active R69/R70 roots remain untouched.",
+  "helperSha256": "f0508e63ac45732248e9f5360f22df56621b8406873f996fe1911c3a29f986c8"
+}
