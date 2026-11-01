@@ -1,0 +1,67 @@
+{
+  "status": "DIAGNOSTIC_COMPLETED",
+  "recordedUtc": "2026-11-01T08:07:25.822491+00:00",
+  "command": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "IdentitiesOnly=yes",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAkAHMAbwB1AHIAYwBlAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABzAG8AdQByAGMAZQApACkAOwA="
+  ],
+  "source": {
+    "path": "/tmp/fc-round68-production-https/evidence/loopback-dotnet-diagnostic-first.ps1",
+    "bytes": 2125,
+    "sha256": "0f42ec52f9ce56c7ae91ad04072e112f6de3cdbd23cec9755d22b2af91f8d43b",
+    "base64": "JEVycm9yQWN0aW9uUHJlZmVyZW5jZT0nU3RvcCcKJFByb2dyZXNzUHJlZmVyZW5jZT0nU2lsZW50bHlDb250aW51ZScKW0NvbnNvbGVdOjpPdXRwdXRFbmNvZGluZz1bVGV4dC5VVEY4RW5jb2RpbmddOjpuZXcoJGZhbHNlKQokb2JzZXJ2YXRpb25zPUAoKQpmb3JlYWNoKCRsaXRlcmFsIGluIEAoJzEyNy4wLjAuMScsJzo6MScpKSB7CiAgICAkaXA9W05ldC5JUEFkZHJlc3NdOjpQYXJzZSgkbGl0ZXJhbCkKICAgICRsaXN0ZW5lcj0kbnVsbAogICAgJGNsaWVudD0kbnVsbAogICAgJHJvdz1Ae2FkZHJlc3M9JGxpdGVyYWw7ZmFtaWx5PSRpcC5BZGRyZXNzRmFtaWx5LlRvU3RyaW5nKCk7c3RhdHVzPSdOT1RfUlVOJztsaXN0ZW5lclN0b3BwZWQ9JGZhbHNlO2NsaWVudERpc3Bvc2VkPSRmYWxzZTtjb25uZWN0QnVkZ2V0TWlsbGlzZWNvbmRzPTEwMDB9CiAgICB0cnkgewogICAgICAgICRsaXN0ZW5lcj1bTmV0LlNvY2tldHMuVGNwTGlzdGVuZXJdOjpuZXcoJGlwLDApCiAgICAgICAgJGxpc3RlbmVyLkV4Y2x1c2l2ZUFkZHJlc3NVc2U9JHRydWUKICAgICAgICBpZigkaXAuQWRkcmVzc0ZhbWlseS1lcSBbTmV0LlNvY2tldHMuQWRkcmVzc0ZhbWlseV06OkludGVyTmV0d29ya1Y2KXskbGlzdGVuZXIuU2VydmVyLkR1YWxNb2RlPSRmYWxzZX0KICAgICAgICAkbGlzdGVuZXIuU3RhcnQoNCkKICAgICAgICAkcm93LmxvY2FsRW5kcG9pbnQ9JGxpc3RlbmVyLkxvY2FsRW5kcG9pbnQuVG9TdHJpbmcoKQogICAgICAgICRjbGllbnQ9W05ldC5Tb2NrZXRzLlRjcENsaWVudF06Om5ldygkaXAuQWRkcmVzc0ZhbWlseSkKICAgICAgICAkcGVuZGluZz0kY2xpZW50LkJlZ2luQ29ubmVjdCgkaXAsJGxpc3RlbmVyLkxvY2FsRW5kcG9pbnQuUG9ydCwkbnVsbCwkbnVsbCkKICAgICAgICB0cnkgewogICAgICAgICAgICBpZighJHBlbmRpbmcuQXN5bmNXYWl0SGFuZGxlLldhaXRPbmUoMTAwMCkpe3Rocm93ICdvd25lZCBsb29wYmFjayBjb25uZWN0IG9ic2VydmF0aW9uIGV4Y2VlZGVkIGl0cyBvcmlnaW5hbDEwMDBtcyd9CiAgICAgICAgICAgICRjbGllbnQuRW5kQ29ubmVjdCgkcGVuZGluZykKICAgICAgICB9IGZpbmFsbHkgeyRwZW5kaW5nLkFzeW5jV2FpdEhhbmRsZS5DbG9zZSgpfQogICAgICAgICRyb3cuc3RhdHVzPSdDT05ORUNURUQnCiAgICAgICAgJHJvdy5jb25uZWN0ZWQ9JGNsaWVudC5Db25uZWN0ZWQKICAgICAgICAkcm93LmFjdHVhbENsaWVudExvY2FsPSRjbGllbnQuQ2xpZW50LkxvY2FsRW5kUG9pbnQuVG9TdHJpbmcoKQogICAgICAgICRyb3cuYWN0dWFsQ2xpZW50UmVtb3RlPSRjbGllbnQuQ2xpZW50LlJlbW90ZUVuZFBvaW50LlRvU3RyaW5nKCkKICAgIH0gY2F0Y2ggewogICAgICAgICRlcnJvclZhbHVlPSRfLkV4Y2VwdGlvbi5HZXRCYXNlRXhjZXB0aW9uKCkKICAgICAgICAkcm93LnN0YXR1cz0nRkFJTEVEJwogICAgICAgICRyb3cuZXJyb3JUeXBlPSRlcnJvclZhbHVlLkdldFR5cGUoKS5GdWxsTmFtZQogICAgICAgICRyb3cuZXJyb3JNZXNzYWdlPSRlcnJvclZhbHVlLk1lc3NhZ2UKICAgICAgICBpZigkZXJyb3JWYWx1ZS1pcyBbTmV0LlNvY2tldHMuU29ja2V0RXhjZXB0aW9uXSl7JHJvdy5uYXRpdmVFcnJvckNvZGU9JGVycm9yVmFsdWUuTmF0aXZlRXJyb3JDb2RlOyRyb3cuc29ja2V0RXJyb3JDb2RlPSRlcnJvclZhbHVlLlNvY2tldEVycm9yQ29kZS5Ub1N0cmluZygpfQogICAgfSBmaW5hbGx5IHsKICAgICAgICBpZigkbnVsbC1uZSAkY2xpZW50KXskY2xpZW50LkRpc3Bvc2UoKTskcm93LmNsaWVudERpc3Bvc2VkPSR0cnVlfQogICAgICAgIGlmKCRudWxsLW5lICRsaXN0ZW5lcil7JGxpc3RlbmVyLlN0b3AoKTskcm93Lmxpc3RlbmVyU3RvcHBlZD0kdHJ1ZX0KICAgIH0KICAgICRvYnNlcnZhdGlvbnMrPSRyb3cKfQpAe3N0YXR1cz0nRElBR05PU1RJQ19DT01QTEVURUQnO2Nhc2VzPSRvYnNlcnZhdGlvbnM7c2NvcGU9J093bmVkIHRyYW5zaWVudCAuTkVUIGxvb3BiYWNrIHNvY2tldHMgdW5kZXIgdGhlIHNhbWUgU1NIIHVzZXI7IG5vIG5hdGl2ZSBUTFMgcHJvZHVjdCB2YWxpZGF0aW9uLCBuZXR3b3JrIHBvbGljeSBvciBmaXJld2FsbCBjaGFuZ2UuJ318Q29udmVydFRvLUpzb24gLURlcHRoIDYgLUNvbXByZXNzCg=="
+  },
+  "wrapper": "[Console]::InputEncoding=[Text.UTF8Encoding]::new($false);$source=[Console]::In.ReadToEnd();& ([ScriptBlock]::Create($source));",
+  "exitCode": 0,
+  "stdout": {
+    "bytes": 846,
+    "sha256": "6857311b9325f1c3aba7d34f0777670498b6d9453c32aef97421df8ca575940b",
+    "base64": "eyJzY29wZSI6Ik93bmVkIHRyYW5zaWVudCAuTkVUIGxvb3BiYWNrIHNvY2tldHMgdW5kZXIgdGhlIHNhbWUgU1NIIHVzZXI7IG5vIG5hdGl2ZSBUTFMgcHJvZHVjdCB2YWxpZGF0aW9uLCBuZXR3b3JrIHBvbGljeSBvciBmaXJld2FsbCBjaGFuZ2UuIiwic3RhdHVzIjoiRElBR05PU1RJQ19DT01QTEVURUQiLCJjYXNlcyI6W3sibG9jYWxFbmRwb2ludCI6IjEyNy4wLjAuMTo1NDU5NiIsImFjdHVhbENsaWVudFJlbW90ZSI6IjEyNy4wLjAuMTo1NDU5NiIsImxpc3RlbmVyU3RvcHBlZCI6dHJ1ZSwiZmFtaWx5IjoiSW50ZXJOZXR3b3JrIiwiYWN0dWFsQ2xpZW50TG9jYWwiOiIxMjcuMC4wLjE6NTQ1OTciLCJjb25uZWN0QnVkZ2V0TWlsbGlzZWNvbmRzIjoxMDAwLCJzdGF0dXMiOiJDT05ORUNURUQiLCJjbGllbnREaXNwb3NlZCI6dHJ1ZSwiY29ubmVjdGVkIjp0cnVlLCJhZGRyZXNzIjoiMTI3LjAuMC4xIn0seyJsb2NhbEVuZHBvaW50IjoiWzo6MV06NTQ1OTgiLCJsaXN0ZW5lclN0b3BwZWQiOnRydWUsImZhbWlseSI6IkludGVyTmV0d29ya1Y2IiwibmF0aXZlRXJyb3JDb2RlIjoxMDAxMywiY29ubmVjdEJ1ZGdldE1pbGxpc2Vjb25kcyI6MTAwMCwic3RhdHVzIjoiRkFJTEVEIiwiZXJyb3JNZXNzYWdlIjoi5Lul5LiA56eN6K6/6Zeu5p2D6ZmQ5LiN5YWB6K6455qE5pa55byP5YGa5LqG5LiA5Liq6K6/6Zeu5aWX5o6l5a2X55qE5bCd6K+V44CCIFs6OjFdOjU0NTk4IiwiY2xpZW50RGlzcG9zZWQiOnRydWUsImVycm9yVHlwZSI6IlN5c3RlbS5OZXQuU29ja2V0cy5Tb2NrZXRFeGNlcHRpb24iLCJzb2NrZXRFcnJvckNvZGUiOiJBY2Nlc3NEZW5pZWQiLCJhZGRyZXNzIjoiOjoxIn1dfQ0K"
+  },
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base64": ""
+  },
+  "scope": "Separate bounded .NET loopback diagnostic; no firewall, registry, trust, service, school setting or private-key read.",
+  "observations": {
+    "scope": "Owned transient .NET loopback sockets under the same SSH user; no native TLS product validation, network policy or firewall change.",
+    "status": "DIAGNOSTIC_COMPLETED",
+    "cases": [
+      {
+        "localEndpoint": "127.0.0.1:54596",
+        "actualClientRemote": "127.0.0.1:54596",
+        "listenerStopped": true,
+        "family": "InterNetwork",
+        "actualClientLocal": "127.0.0.1:54597",
+        "connectBudgetMilliseconds": 1000,
+        "status": "CONNECTED",
+        "clientDisposed": true,
+        "connected": true,
+        "address": "127.0.0.1"
+      },
+      {
+        "localEndpoint": "[::1]:54598",
+        "listenerStopped": true,
+        "family": "InterNetworkV6",
+        "nativeErrorCode": 10013,
+        "connectBudgetMilliseconds": 1000,
+        "status": "FAILED",
+        "errorMessage": "以一种访问权限不允许的方式做了一个访问套接字的尝试。 [::1]:54598",
+        "clientDisposed": true,
+        "errorType": "System.Net.Sockets.SocketException",
+        "socketErrorCode": "AccessDenied",
+        "address": "::1"
+      }
+    ]
+  }
+}

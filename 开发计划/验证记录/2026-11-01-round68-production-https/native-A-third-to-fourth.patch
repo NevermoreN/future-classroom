@@ -1,0 +1,67 @@
+--- native-A-source-third/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
+@@ -94,6 +94,39 @@
+     closed: Arc<AtomicUsize>,
+     retain_faulted_owner_on_drop: bool,
+ }
++fn fixture_local_address(socket: SOCKET) -> Result<std::net::SocketAddr, String> {
++    let mut storage = [0u64; 16];
++    let mut length = std::mem::size_of_val(&storage) as i32;
++    // SAFETY: diagnostic-only synchronous query into aligned, full-size native
++    // address storage. Decode only after checking the exact family and length.
++    unsafe {
++        check(
++            getsockname(socket, storage.as_mut_ptr().cast(), &mut length),
++            "fixture listener getsockname",
++        )?;
++        let family = *storage.as_ptr().cast::<ADDRESS_FAMILY>();
++        if family == AF_INET && length == size_of::<SOCKADDR_IN>() as i32 {
++            let address = &*storage.as_ptr().cast::<SOCKADDR_IN>();
++            Ok(std::net::SocketAddr::new(
++                std::net::Ipv4Addr::from(address.sin_addr.S_un.S_addr.to_ne_bytes()).into(),
++                u16::from_be(address.sin_port),
++            ))
++        } else if family == AF_INET6 && length == size_of::<SOCKADDR_IN6>() as i32 {
++            let address = &*storage.as_ptr().cast::<SOCKADDR_IN6>();
++            Ok(std::net::SocketAddr::V6(std::net::SocketAddrV6::new(
++                std::net::Ipv6Addr::from(address.sin6_addr.u.Byte),
++                u16::from_be(address.sin6_port),
++                u32::from_be(address.sin6_flowinfo),
++                address.Anonymous.sin6_scope_id,
++            )))
++        } else {
++            Err(format!(
++                "fixture listener address family={} length={length}",
++                family.0
++            ))
++        }
++    }
++}
+ impl Fixture {
+     fn new() -> Self {
+         Self::with_encrypt_hook(None)
+@@ -140,11 +173,19 @@
+         // This fixture's first connection inherits that actual bare post.
+         let posted_header_deadlines =
+             [owner.resources.accept.as_ref().unwrap().deadline().unwrap(); CONNECTION_SLOTS];
+-        let client = TcpStream::connect_timeout(
+-            &std::net::SocketAddr::new(bind_address.ip(), owner.port_number),
+-            Duration::from_secs(1),
+-        )
+-        .unwrap();
++        let selected_endpoint = std::net::SocketAddr::new(bind_address.ip(), owner.port_number);
++        let actual_local = fixture_local_address(owner.resources.listener);
++        let family = if bind_address.is_ipv4() {
++            "IPv4"
++        } else {
++            "IPv6"
++        };
++        let stage = "worker_ready+exact_bind+listen+iocp+bare_acceptex_post";
++        let client = TcpStream::connect_timeout(&selected_endpoint, Duration::from_secs(1))
++            .unwrap_or_else(|error| {
++                panic!("NATIVE_FIXTURE_CONNECT status=failed bind={bind_address} actual_local={actual_local:?} selected={selected_endpoint} family={family} stage={stage} original_os_code={:?} error={error}", error.raw_os_error())
++            });
++        eprintln!("NATIVE_FIXTURE_CONNECT status=connected bind={bind_address} actual_local={actual_local:?} selected={selected_endpoint} family={family} stage={stage} original_os_code=None");
+         let client_connected_at = Instant::now();
+         client.set_nonblocking(true).unwrap();
+         Self {

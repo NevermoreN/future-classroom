@@ -8,6 +8,7 @@ pub enum HttpsSettingsError {
     InvalidHost,
     InvalidPort,
     InvalidCertificate,
+    InvalidSourceNetworks,
     InvalidState,
     RevisionConflict { current: Revision },
     IdentityRevisionConflict { current: Revision },
@@ -98,11 +99,17 @@ impl HttpsCertificateRef {
         self.0.iter().map(|b| format!("{b:02x}")).collect()
     }
 }
+mod source_networks;
+pub use source_networks::{HttpsSourceNetwork, HttpsSourceNetworks};
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct HttpsConfiguration {
     pub host: HttpsHost,
     pub port: u16,
     pub certificate: HttpsCertificateRef,
+    /// Legacy saved settings have no network authority. Enabling requires an
+    /// explicit policy; no local or campus subnet is inferred.
+    pub source_networks: Option<HttpsSourceNetworks>,
 }
 impl HttpsConfiguration {
     pub fn new(
@@ -114,9 +121,14 @@ impl HttpsConfiguration {
             host,
             port,
             certificate,
+            source_networks: None,
         };
         value.validate()?;
         Ok(value)
+    }
+    pub fn with_source_networks(mut self, policy: HttpsSourceNetworks) -> Self {
+        self.source_networks = Some(policy);
+        self
     }
     pub fn validate(&self) -> Result<(), HttpsSettingsError> {
         if self.port == 0 {
@@ -138,6 +150,10 @@ impl HttpsConfiguration {
     }
     pub fn allocation_bytes(&self) -> usize {
         self.host.allocation_bytes()
+            + self
+                .source_networks
+                .as_ref()
+                .map_or(0, HttpsSourceNetworks::allocation_bytes)
     }
 }
 #[derive(Clone, Debug, Default, PartialEq, Eq)]

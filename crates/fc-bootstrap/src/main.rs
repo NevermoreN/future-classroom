@@ -56,6 +56,22 @@ fn manual_startup_feedback(args: impl IntoIterator<Item = std::ffi::OsString>) -
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag, reference, port, package, marker] if flag == "--ordinary-https-probe" => {
+            #[cfg(windows)]
+            {
+                application::ordinary_https_probe(
+                    reference,
+                    port.parse::<u16>().map_err(|_| "expected high TCP port")?,
+                    std::path::Path::new(package),
+                    marker,
+                )
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (reference, port, package, marker);
+                Err("ordinary HTTPS native composition probe requires Windows".into())
+            }
+        }
         [flag, thumbprint, marker] if flag == "--tls-business-probe" => {
             #[cfg(windows)]
             {

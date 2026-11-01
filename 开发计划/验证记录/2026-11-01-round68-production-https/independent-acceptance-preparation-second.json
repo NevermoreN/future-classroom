@@ -1,0 +1,22 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "script": {
+    "path": "/tmp/fc-round68-production-https/evidence/independent-acceptance-second.py",
+    "bytes": 24500,
+    "sha256": "dc140d7e4f6460365e79be5e90def21d8ae9144d1cad3a1523e6755669bb9ae6"
+  },
+  "syntax": "AST_PARSE_PASS_ONLY",
+  "previousPreparedScript": {
+    "path": "/tmp/fc-round68-production-https/evidence/independent-acceptance-first.py",
+    "sha256": "122a682c0cb97761f444011fbbe32e770a5e3b76c5b8461f120bf96bf235cd6d"
+  },
+  "changes": "Add actual header-deadline-only five-sample/native-token finite proof and bind root-confirmed final audit exact SHA. Earlier prepared helper remains byte-for-byte preserved.",
+  "execution": "Root may now execute this second helper; preparer has not run acceptance or created PASS report.",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round68-production-https/evidence/independent-acceptance-second.py"
+  ],
+  "finalAuditSha256": "75fdc192da4ad7026a8480118ab2cc305ccfe978a1cc8cb69cdc423defeb8659",
+  "scope": "Only evidence validation; no new product tests/Windows/SSH/Cargo/network; expired synthetic short-code handling belongs to separate transparent archive scan."
+}

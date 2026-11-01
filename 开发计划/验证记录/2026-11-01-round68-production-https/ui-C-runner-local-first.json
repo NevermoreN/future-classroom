@@ -1,0 +1,78 @@
+{
+  "status": "PASS",
+  "sourceSha256": "9183d72749a644f121ffd113096ee948b068692de4e36a90462f2a32988ef0f7",
+  "ast": "PASS",
+  "cases": [
+    {
+      "argv": [
+        "python3",
+        "/tmp/fc-round68-production-https/worktree/scripts/windows-ordinary-https-probe.py",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.2872904359828681,
+      "expectedExit": 0,
+      "stdout": {
+        "path": "/tmp/fc-round68-production-https/evidence/ui-C-runner-local-first-0.stdout.log",
+        "bytes": 136,
+        "sha256": "c426356fd8a13235fb6cb708323ac779580b3b33a759da91ad6f6dc37bc45af9",
+        "base64": "eyJzdGF0dXMiOiAiUEFTUyIsICJzY29wZSI6ICJwdXJlIHZhbGlkYXRvcnMgb25seSIsICJjaGVja3MiOiAyMCwgIndpbmRvd3MiOiAiTk9UX1JVTiIsICJ0bHMiOiAiTk9UX1JVTiIsICJvcmRpbmFyeVJ1bnRpbWUiOiAiTk9UX1JVTiJ9Cg=="
+      },
+      "stderr": {
+        "path": "/tmp/fc-round68-production-https/evidence/ui-C-runner-local-first-0.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/fc-round68-production-https/worktree/scripts/windows-ordinary-https-probe.py",
+        "--self-test",
+        "--report",
+        "/tmp/fc-round68-production-https/evidence/must-not-exist.json"
+      ],
+      "exitCode": 2,
+      "elapsedSeconds": 0.23917319509200752,
+      "expectedExit": 2,
+      "stdout": {
+        "path": "/tmp/fc-round68-production-https/evidence/ui-C-runner-local-first-1.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "path": "/tmp/fc-round68-production-https/evidence/ui-C-runner-local-first-1.stderr.log",
+        "bytes": 350,
+        "sha256": "d5e7175f33a1b0edcef7ba9b8fd4255586720aad9f29361d74391c954feb7600",
+        "base64": "dXNhZ2U6IHdpbmRvd3Mtb3JkaW5hcnktaHR0cHMtcHJvYmUucHkgWy1oXSBbLS1zc2gtdGFyZ2V0IFNTSF9UQVJHRVRdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLWlkZW50aXR5IElERU5USVRZXSBbLS1leGUgRVhFXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS13ZWItYnVuZGxlIFdFQl9CVU5ETEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXJlcG9ydCBSRVBPUlRdIFstLXNlbGYtdGVzdF0Kd2luZG93cy1vcmRpbmFyeS1odHRwcy1wcm9iZS5weTogZXJyb3I6IHNlbGYtdGVzdCBoYXMgbm8gcmVtb3RlIGlucHV0cwo="
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/fc-round68-production-https/worktree/scripts/windows-ordinary-https-probe.py",
+        "--self-test",
+        "--ssh-target",
+        "invalid-host"
+      ],
+      "exitCode": 2,
+      "elapsedSeconds": 0.19340531202033162,
+      "expectedExit": 2,
+      "stdout": {
+        "path": "/tmp/fc-round68-production-https/evidence/ui-C-runner-local-first-2.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "path": "/tmp/fc-round68-production-https/evidence/ui-C-runner-local-first-2.stderr.log",
+        "bytes": 350,
+        "sha256": "d5e7175f33a1b0edcef7ba9b8fd4255586720aad9f29361d74391c954feb7600",
+        "base64": "dXNhZ2U6IHdpbmRvd3Mtb3JkaW5hcnktaHR0cHMtcHJvYmUucHkgWy1oXSBbLS1zc2gtdGFyZ2V0IFNTSF9UQVJHRVRdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLWlkZW50aXR5IElERU5USVRZXSBbLS1leGUgRVhFXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS13ZWItYnVuZGxlIFdFQl9CVU5ETEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXJlcG9ydCBSRVBPUlRdIFstLXNlbGYtdGVzdF0Kd2luZG93cy1vcmRpbmFyeS1odHRwcy1wcm9iZS5weTogZXJyb3I6IHNlbGYtdGVzdCBoYXMgbm8gcmVtb3RlIGlucHV0cwo="
+      }
+    }
+  ],
+  "scope": "20 pure validator checks plus two CLI refusal cases; no SSH/Windows/TLS/native execution"
+}

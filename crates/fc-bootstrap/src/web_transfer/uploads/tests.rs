@@ -1219,3 +1219,101 @@ fn finished_response_hands_original_memory_control_to_net_until_response_retires
     drop(owner);
     backend.close().unwrap();
 }
+
+#[test]
+fn live_stop_drains_material_ready_and_live_download_pin_without_joining_shared_workers() {
+    let _physical = crate::web_application::upload_test_guard();
+    let mut f = Fixture::new();
+    let mut pool = Pool::new();
+    let (download_head, download_path, _) =
+        crate::web_transfer::downloads::tests::published(&mut f, &pool);
+    let (mut upload_owner, hub) = UploadHubOwner::new().unwrap();
+    let (mut download_owner, downloads) = crate::web_transfer::DownloadHubOwner::new().unwrap();
+    let (id, head, staged) = f.reserve(4);
+    let (admitted, life) = ready(&pool, &hub, &f, head, b"live");
+    assert!(staged.exists());
+    assert!(f.app.material_transfer_pending(admitted.key.token(), id));
+    assert!(OpenOptions::new().write(true).open(&staged).is_err());
+    let (control, download_life) =
+        TransferControl::new(download_head.token, Instant::now()).unwrap();
+    let worker = downloads.clone();
+    let app = f.app.clone();
+    let backend = f.backend.clone();
+    pool.call(move |context| {
+        assert!(worker
+            .begin(&app, &backend, &download_head, download_life, context)
+            .is_ok());
+    });
+    assert!(OpenOptions::new().write(true).open(&download_path).is_err());
+    // A second real Begin outlives suppression of its worker reply. Its
+    // physical stage and permit remain charged until this live stop cleanup.
+    let (_, lost_head, lost_path) = f.reserve(4);
+    let (lost_control, lost_life) = TransferControl::new(lost_head.token, Instant::now()).unwrap();
+    let (entered, seen) = std::sync::mpsc::sync_channel(1);
+    let (release, held) = std::sync::mpsc::sync_channel(1);
+    let worker = hub.clone();
+    let app = f.app.clone();
+    let ticket = match pool.0.as_ref().unwrap().handle().try_submit(
+        Job(Box::new(move |context| {
+            let admitted =
+                success(worker.begin_material(&app, &lost_head, lost_control, lost_life, context));
+            drop(admitted);
+            entered.send(()).unwrap();
+            held.recv_timeout(Duration::from_secs(3)).unwrap();
+        })),
+        Instant::now() + Duration::from_secs(15),
+    ) {
+        Ok(ticket) => ticket,
+        Err(error) => panic!("suppressed Begin admission {:?}", error.kind),
+    };
+    seen.recv_timeout(Duration::from_secs(3)).unwrap();
+    ticket.cancel();
+    release.send(()).unwrap();
+    assert_eq!(ticket.wait(), Err(fc_runtime::worker::JobError::Cancelled));
+    assert!(lost_path.exists());
+    let service = f.backend.lock().unwrap().web_service();
+    service.negative_runtime_stop();
+    assert!(service.settle_runtime_stop());
+    hub.request_domain_stop();
+    downloads.request_domain_stop();
+    let worker = hub.clone();
+    let download = downloads.clone();
+    let app = f.app.clone();
+    let status = pool.call(move |context| {
+        crate::web_transfer::live_cleanup::CleanupTask::new(
+            worker,
+            download,
+            app,
+            context.deadline(),
+        )
+        .run(context)
+    });
+    assert!(status.is_drained(), "{status:?}");
+    assert!(!life.is_active());
+    assert!(!staged.exists());
+    assert!(!lost_path.exists());
+    assert!(!f.app.material_transfer_pending(admitted.key.token(), id));
+    assert_eq!(
+        f.app.material_transfer_binding(id, &life),
+        MaterialTransferBinding::Absent
+    );
+    drop(OpenOptions::new().write(true).open(&download_path).unwrap());
+    assert!(upload_owner.confirm_live_drained());
+    assert!(download_owner.confirm_live_drained());
+    drop(upload_owner);
+    drop(download_owner);
+    drop(control);
+    // The very same original pool accepts further work: live cleanup did not
+    // borrow the final-coordinator after-join shortcut or terminate a worker.
+    assert!(pool.call(|context| context.checkpoint().is_ok()));
+    let (mut next_owner, next) = UploadHubOwner::new().unwrap();
+    let old = hub.clone();
+    assert_eq!(
+        pool.call(move |context| old.ready_material_key(id, context)),
+        Err(UploadHubError::Closed)
+    );
+    next.request_domain_stop();
+    assert!(next_owner.confirm_live_drained());
+    drop(next_owner);
+    pool.join().unwrap();
+}

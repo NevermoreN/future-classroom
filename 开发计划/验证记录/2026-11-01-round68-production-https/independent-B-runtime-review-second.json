@@ -1,0 +1,191 @@
+{
+  "round": 68,
+  "reviewer": "production_native_review",
+  "createdUtc": "2026-11-01T07:44:13.170518+00:00",
+  "status": "ORIGINAL_P1_CLOSED_STATIC_CONCURRENT_PRIVATE_STOP_CONTRACT_CAVEAT",
+  "scope": "Read-only B third18 immutable source review of prior P1 fix and stale negative-stop behavior; no edits/Cargo/Windows/network or runtime reproduction.",
+  "bManifest": {
+    "path": "b-implementation-freeze-third.json",
+    "sha256": "8ce345e70d0bd3d6de4d5fa48f26fb2c6476a6ae2a28ce015d3a4404316fe77a"
+  },
+  "jointSecondManifest": null,
+  "source": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 107515,
+      "sha256": "f319c893038fef6178c42170deb2be335695b64357cdd8349a5a0db5fc13b468",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "bytes": 4108,
+      "sha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 46785,
+      "sha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "bytes": 9927,
+      "sha256": "82d64afd133bd3b67a72cdcdaf94b4e5586c6434ace625a2294f2dd51477a4d3",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+      "bytes": 13885,
+      "sha256": "2173db6aece2d4cd4d192c58bdedabe304f8aa1ac2383327d1c15d553a745fa4",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/https_runtime.rs",
+      "bytes": 22547,
+      "sha256": "5a5cebf5906ee2726a9e2d8367cabb4030c3dd9ce99efe7c819bc627d68c0be0",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/lib.rs",
+      "bytes": 626,
+      "sha256": "264fdf1aa1344616533ae82575e38d6bae717a172d877692b740bcac328e550c",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "bytes": 17949,
+      "sha256": "f53d793a1483a0532e27187c274e11d2f4755e69f072a6fa9a7b3b06cc1a39b3",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer.rs",
+      "bytes": 10897,
+      "sha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/downloads.rs",
+      "bytes": 19977,
+      "sha256": "734820af5417f8cb51d2f0a12d8e1df0bb418d9356b15123ff0da0bb2a5db47a",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/executor.rs",
+      "bytes": 3619,
+      "sha256": "c60c10bfe9b4c2e50e270f9159d12a2942e05ae79b85064325c7d7d3212379d5",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 60038,
+      "sha256": "f20da7d047f6c42749efd5813295da6b707642277a108aa794f43534cbd896e2",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "bytes": 38186,
+      "sha256": "aed4160d24208d6bd491734515b9f3bf1794d4c7348cce251d150da040abf2e0",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "bytes": 49433,
+      "sha256": "fe09d4184289b8743df6492158cfb094b5588c0b0a8ad9f222ffbfa05b61e187",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/live_cleanup.rs",
+      "bytes": 1931,
+      "sha256": "22b2c7fac3360de8c1fc71b3e409ebdad994428342ca0ece1f4c5a909281bf85",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-storage/src/business/https_settings.rs",
+      "bytes": 17613,
+      "sha256": "cadd2ccc9056c536463d147ae58c74718d28e768446464fd9d523203f28bf4ec",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-storage/src/business/https_settings/tests.rs",
+      "bytes": 32591,
+      "sha256": "e2f4d00e83e0eddfa5bc8dcf1048b376d0bf7e28d29c8727e45405154eb80a6c",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+      "bytes": 8967,
+      "sha256": "59de85620ebac75d76274cc4f0f8732cb04339517e4cba2cc5c281cbad7cd1c6",
+      "immutableAndCurrentMatch": true,
+      "jointSecondMatches": false
+    }
+  ],
+  "priorFinding": {
+    "id": "R68-B-REVIEW-1",
+    "staticDisposition": "CLOSED_BY_THIRD_SOURCE",
+    "evidence": [
+      "backend/web.rs:167 runtime_claim is an AtomicU64 and all save/legacy-enable exclusion reads nonzero claim.",
+      "backend/web/runtime.rs:39-56 uses a fresh monotonic even epoch for exact CAS(0,epoch).",
+      "backend/web/runtime.rs:223-239 makes physical_returned one-shot via returned.swap before any claim release, clears readiness before relinquishing claim and CASes only original epoch to0.",
+      "backend/web/runtime.rs:243-256 never clears a returned claim in Drop; an unstarted Drop only CASes its original epoch to0.",
+      "backend/web/runtime_tests.rs:317-371 retains a returned old Arc across a new Starting/Stopping claim, repeats old return/drop and checks Busy/save exclusion."
+    ],
+    "runtimeQualification": "New regressions are source-reviewed, not executed by this reviewer; root unified typecheck/runtime are separate evidence."
+  },
+  "staleNegativeStop": {
+    "sequentialStaticDisposition": "CLOSED_FOR_ALREADY_RETURNED_OLD_OWNER",
+    "evidence": [
+      "https_runtime.rs:314-320 ignores a quiescent/no-longer-owning RuntimeOwner before its cancellation/stop.",
+      "backend/web/runtime.rs:190-199 rejects already returned or different exact claims.",
+      "runtime_tests.rs:375-400 checks old sequential stop/return/drop after new Running does not change new generation/pairing."
+    ],
+    "concurrentContractCaveat": {
+      "id": "R68-B-REVIEW-2",
+      "severity": "P2_PRIVATE_CONCURRENT_CONTRACT_UNPROVEN_PUBLIC_REACHABILITY",
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "lines": "196-218",
+      "detail": "negative_stop checks owns_claim separately from runtime_epoch CAS, ignores CAS failure and unconditionally writes global readiness/stopping flags afterwards. A concurrent old-reservation call which passed the early check can therefore write false/true after physical_returned releases claim and a new reservation activates. A successful old-epoch CAS can also pause before those flag stores, so merely returning on CAS failure is insufficient.",
+      "constructibleAtPrivateMethodBoundary": [
+        "ThreadA old.negative_stop passes owns_claim, pauses.",
+        "ThreadB old.physical_returned releases claim then new.reserve_runtime/new.activate sets fresh epoch and ready=true.",
+        "ThreadA epoch update rejects the fresh epoch but late global runtime_ready=false store makes runtime_generation None.",
+        "Alternate: ThreadA succeeds old epoch update and pauses before flag stores; ThreadB returns/reserves/activates, then same late flag write follows."
+      ],
+      "actualCallerReachabilityAudit": [
+        "Whole fc-bootstrap rg shows production physical_returned only called in RuntimeOwner::poll(&mut self), after original HTTP thread physical exit.",
+        "Public request_stop_at(&self) cannot safely race poll(&mut self) on the same RuntimeOwner using ordinary Rust borrowing.",
+        "HTTP-thread negative_stop occurs before that thread exits, so original production poll cannot concurrently release this claim while that call runs.",
+        "No current public/UI path reaching the private-boundary schedule has been established; do not promote it to an observed or proven productP1."
+      ],
+      "recommendation": "If exact reservation methods are intended thread-safe independently, bind readiness/stopping to the exact monotonic epoch or serialize the entire check/write/physical-return/new-reserve transition with bounded metadata coordination. Preserve atomic nonwaiting negative admission and do not introduce IO/worker/ledger waits. Otherwise document and enforce the stronger call-site ordering contract and test it.",
+      "notifications": "Immediate root/B message followed by explicit reachability limitation; no source changes made."
+    }
+  },
+  "faultRetention": {
+    "staticDisposition": "RETAINED",
+    "evidence": "https_runtime.rs fault retains claims for Cleanup/Native/Faulted/StopTimeout; poll only calls physical_returned when true actual-thread return and !retain_claim. Started unreturned reservation Drop does not clear claim. A third native sticky cleanup fault does not become public quiescent proof."
+  },
+  "notPerformed": [
+    "No compiler/Cargo/test execution",
+    "No Windows/SSH/network",
+    "No source change",
+    "No claim that static review proves actual runtime completion"
+  ]
+}

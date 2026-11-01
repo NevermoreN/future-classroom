@@ -1,0 +1,704 @@
+{
+  "status": "COLLECTED_FULL_RESULTS_SUITE_FAIL",
+  "startedUtc": "2026-11-01T08:17:23.145651+00:00",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round68-production-https/evidence/windows-probe-continue-tests-private-first.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round68-production-https/evidence/joint-release-tests-second.stdout.log",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--public-desktop",
+    "--report",
+    "/tmp/fc-round68-production-https/evidence/windows-release-full-second.json"
+  ],
+  "freeze": {
+    "path": "/tmp/fc-round68-production-https/evidence/joint-implementation-freeze-sixth.json",
+    "bytes": 121803,
+    "sha256": "1a18b1c081a04e246d44b4601df22a239523c56ef9a62dfdaea5e445851b4ece"
+  },
+  "workingFileCount": 595,
+  "source5NormalToCurrentDifferences": [],
+  "allowedDeltaScope": "C7 Python runner only; compiled Rust exactly unchanged",
+  "normalIdentityPriorReport": {
+    "path": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-third.json",
+    "bytes": 66716,
+    "sha256": "412da75403497b4fbfa5c41742a10817407daaa923725700181ab7e2f4ea62db"
+  },
+  "normalIdentityPriorReportStatus": "PASS",
+  "normalIdentityPriorScope": "Executable bytes only; prior FAIL is preserved and is not treated as runtime PASS",
+  "testBuild": {
+    "report": {
+      "path": "/tmp/fc-round68-production-https/evidence/joint-release-tests-second.json",
+      "bytes": 865,
+      "sha256": "b3d08800a68cd50df5d2836692f2085b091076ba4c7837e2c4c4b43c06be4d24"
+    },
+    "sourceFreeze": {
+      "path": "/tmp/fc-round68-production-https/evidence/joint-implementation-freeze-sixth.json",
+      "bytes": 121803,
+      "sha256": "1a18b1c081a04e246d44b4601df22a239523c56ef9a62dfdaea5e445851b4ece"
+    },
+    "stdout": {
+      "path": "/tmp/fc-round68-production-https/evidence/joint-release-tests-second.stdout.log",
+      "bytes": 100999,
+      "sha256": "62c093134a9838a4a1aead036c2ee485e191c9343a4511c936328752ff41556a"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round68-production-https/evidence/joint-release-tests-second.stderr.log",
+      "bytes": 253,
+      "sha256": "d7e9c28d92911a884e5d0ab08065033b31d648ae8a09a13da3343b89463c4c8d"
+    }
+  },
+  "productBuild": {
+    "report": {
+      "path": "/tmp/fc-round68-production-https/evidence/joint-release-product-third.json",
+      "bytes": 871,
+      "sha256": "058eb4b1a26fabd27cc7be6636ddcf1f41fc070ba8ab0d4c8cd365719be1e764"
+    },
+    "sourceFreeze": {
+      "path": "/tmp/fc-round68-production-https/evidence/joint-implementation-freeze-sixth.json",
+      "bytes": 121803,
+      "sha256": "1a18b1c081a04e246d44b4601df22a239523c56ef9a62dfdaea5e445851b4ece"
+    },
+    "stdout": {
+      "path": "/tmp/fc-round68-production-https/evidence/joint-release-product-third.stdout.log",
+      "bytes": 83893,
+      "sha256": "761e068b0ff3912898bcfb88fd1b16b4cc5f816f830157798a7f3afa3ca24d6c"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round68-production-https/evidence/joint-release-product-third.stderr.log",
+      "bytes": 62,
+      "sha256": "bc91a3ed6ff9b29145787c6d9882965f4f24899753f0d8be62d8adc772989545"
+    }
+  },
+  "privateRunner": {
+    "path": "/tmp/fc-round68-production-https/evidence/windows-probe-continue-tests-private-first.py",
+    "bytes": 60138,
+    "sha256": "3fcde8ac7b3408e151b5c2de41fabd8ea09e82fa3504fbef3c8f030a90151f1a"
+  },
+  "artifactGuardHelper": {
+    "path": "/tmp/fc-round68-production-https/evidence/root-run-windows-release-first.py",
+    "bytes": 9838,
+    "sha256": "6def3870e12884d4aee726bc5db089eeea6e5d371cca17953714248440ecca69"
+  },
+  "normal": {
+    "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13339299,
+    "sha256": "db6bb0bbc6df36804cfe721ad4e3fd1ec8ca0e5cac084c29a14ab97f894e22fa",
+    "cargoMetadataLine": 109,
+    "cargoMetadataLineSha256": "15968af0eef467ca4975fbbea5bfb93b73ace460b88d70b556824d2eae4c6ec1",
+    "cargoTarget": "fc-bootstrap",
+    "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+    "cargoProfileTest": false,
+    "peMachine": "I386",
+    "peMagic": "PE32",
+    "peSubsystem": 2
+  },
+  "tests": [
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+      "bytes": 1224276,
+      "sha256": "82b10ebde335eb0e3d1ea27aa8ab1afce675aa32b3bec9a4928fceff88919cf8",
+      "cargoMetadataLine": 105,
+      "cargoMetadataLineSha256": "acadea6eaee617b26692a804a4ecae278a5cd1e2be918dd7fc129227ec6b7903",
+      "cargoTarget": "fc_security",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-security#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+      "bytes": 8423418,
+      "sha256": "9e64b8c93c86cda6fcebd114ab797c7804257529cc5433f075d577d71b67d7b6",
+      "cargoMetadataLine": 109,
+      "cargoMetadataLineSha256": "ffa29e126161f829c06146e15c57a5de2ddceddadffbb8c57d2287382fb30538",
+      "cargoTarget": "fc_storage",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-storage#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+      "bytes": 2352762,
+      "sha256": "e2967b40ad0ff5bcd551b230538a7eefc9e9775e58cf2b0a070ff22bb0eb4b5c",
+      "cargoMetadataLine": 110,
+      "cargoMetadataLineSha256": "389c471b003762d1fa07bcba755858e31f931cf0d0cb9c4c9ae66590f9349988",
+      "cargoTarget": "fc_materials",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-materials#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+      "bytes": 1853766,
+      "sha256": "70a745c8b7eb6e5e7ab586047aaa09956829c10bd2d979a9a4976ea15c3c5206",
+      "cargoMetadataLine": 111,
+      "cargoMetadataLineSha256": "2e064a5c5dcbfc24d7cd0c13b32800b48cf58ebf4471149c17657584d5d196c6",
+      "cargoTarget": "fc_presentation",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-presentation#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+      "bytes": 1983421,
+      "sha256": "d1b56eaf45b5eeb0d48c73ddda15ff58ae8d1b39f80709676b42d6f2e6f45a30",
+      "cargoMetadataLine": 112,
+      "cargoMetadataLineSha256": "80b7b80e2937b7ea579f15134677d55bbbbaaa344ae2f486816750a8c3b38d41",
+      "cargoTarget": "fc_protocol",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-protocol#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-2d073072bc663873.exe",
+      "bytes": 13092134,
+      "sha256": "4183525b28459735a1dafbdc3f1a4ecbe486c68aa4956ebf606c5339744f6cc3",
+      "cargoMetadataLine": 114,
+      "cargoMetadataLineSha256": "5d997cb5f30036b8548a11777dfc008a04edaa07a8e56747c7aaceb060b1aec9",
+      "cargoTarget": "fc_bootstrap",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+      "bytes": 1280300,
+      "sha256": "48ae5499ba739934a96afe848bc47933548caca43b8667e9944571b43da500a8",
+      "cargoMetadataLine": 115,
+      "cargoMetadataLineSha256": "d306af20ad71e15ee22c672cf5126cc289c22ff4d8d2f1901392428ce87c80bf",
+      "cargoTarget": "fc_application",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-application#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+      "bytes": 1430273,
+      "sha256": "09a9879cc05abd238201f6c625067028d4815d82b1da75a3ea62cd11d774bf6e",
+      "cargoMetadataLine": 116,
+      "cargoMetadataLineSha256": "2f5501db8a6ff0e1656b4b8446be369cf159f2d54a93d87bfaca855387077ba3",
+      "cargoTarget": "fc_runtime",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-runtime#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+      "bytes": 1246736,
+      "sha256": "9c25aa78ff6357714483974227957b5f024b3ab684e1d36ffe76fe87df7a901e",
+      "cargoMetadataLine": 117,
+      "cargoMetadataLineSha256": "e2d8cd95dc74d06c904afeb3bb618b51d2d950c5caebeb2ff8a0dba276cd108b",
+      "cargoTarget": "fc_audio",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-audio#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+      "bytes": 1185286,
+      "sha256": "31a31a393eaf7c770e63e96f9ce135861c2e044c62499e75369e2e3bec0cc4e4",
+      "cargoMetadataLine": 118,
+      "cargoMetadataLineSha256": "f351279c6e8ff54877e328d92a32c1a97cf623f84b20c30bed817c0c5f1110b4",
+      "cargoTarget": "fc_ports",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-ports#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+      "bytes": 2403377,
+      "sha256": "ac9d6f63915f98d2351a3d8635c35f54e3dd1f277b9f177ade524da559fc0254",
+      "cargoMetadataLine": 119,
+      "cargoMetadataLineSha256": "d29fe0c9e324b4be711af072023209999f0e8c041001ed9356923b4ac13b3a44",
+      "cargoTarget": "fc_domain",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-domain#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-c79d3cfb3961109e.exe",
+      "bytes": 5624736,
+      "sha256": "6b40c02fe2eb5097aa659b2245533fe953ff12c54ca3f6f6c75581820894f39b",
+      "cargoMetadataLine": 120,
+      "cargoMetadataLineSha256": "f62dcc86a24263199f16a43d41eed6d33769e268f97473e7ad8b6b1564d14dd2",
+      "cargoTarget": "calendar_execution_fence",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/examples/verify_web_assets-d1cacbf262e9f4f4.exe",
+      "bytes": 1097061,
+      "sha256": "eb84267e1ce817848f03d9568e8cc3e975b46fa2557dd45cb1dac458a203bde4",
+      "cargoMetadataLine": 121,
+      "cargoMetadataLineSha256": "c01ac9a4fe2b703b4f087287ea764355a1251cba98f1e6fc5ea33941a949f618",
+      "cargoTarget": "verify_web_assets",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/schedule_operations-48fa032341d76709.exe",
+      "bytes": 5784765,
+      "sha256": "3600b2fbee6ba41238562301a9711b586be31c0d53495283e22a47880030124b",
+      "cargoMetadataLine": 122,
+      "cargoMetadataLineSha256": "28d56156d1dbd7ffbbcc93b369476bc076ac441d7617db639cbaa8f7d6365631",
+      "cargoTarget": "schedule_operations",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/runtime_storage-0e708d04bae2889e.exe",
+      "bytes": 4991689,
+      "sha256": "aed49141fc8a09889d8a752d0fcdfc32612d0bb4a4afbabd097ab98bf948d9ba",
+      "cargoMetadataLine": 123,
+      "cargoMetadataLineSha256": "219b3c24be96eea66939deeef596c04fe33e566a911c468c48a7942994e7ed0d",
+      "cargoTarget": "runtime_storage",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/business_storage-576d09efbb6083a0.exe",
+      "bytes": 6196993,
+      "sha256": "aeb2bed8dca7ddd99525302e590cb1cbc1fbce346335c70f287bddf144d64028",
+      "cargoMetadataLine": 124,
+      "cargoMetadataLineSha256": "fe5b4ba70d1de03866dcfb823c342fbae2196bd6d302acb57bf1adfc7c82eebf",
+      "cargoTarget": "business_storage",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-f0677ddaab0e1941.exe",
+      "bytes": 5191522,
+      "sha256": "2ef32edb27e456673ff1e86146fe373f8a50e909285de889f17f603c8ac53f8a",
+      "cargoMetadataLine": 125,
+      "cargoMetadataLineSha256": "e4d2121e583ca514ae627dc1e9af15ce507bae9d9d7b54c7f679427fe5eaaf89",
+      "cargoTarget": "voice_limits_storage",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-74ff40b715302c3c.exe",
+      "bytes": 5534337,
+      "sha256": "9549209bc5a6b7d25bff36549103e1e509b88e52c47a5c1db264ed8014992af6",
+      "cargoMetadataLine": 126,
+      "cargoMetadataLineSha256": "497bd49f2c511577df0d21f4531b92a88882246b79b235f7a64ee421cd9e23d7",
+      "cargoTarget": "autostart_coordinator",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/voice_storage-05cf611acb952b21.exe",
+      "bytes": 5235233,
+      "sha256": "0731781a7596c11e028754af323ab7caac651d0cbda7deb15cb95511f1e6f7e6",
+      "cargoMetadataLine": 128,
+      "cargoMetadataLineSha256": "9d5113347b8e6a8a7099cdbd0b9a468c5bcb59386d96da6b9e464199a494878e",
+      "cargoTarget": "voice_storage",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_windows-e3f8369176e1b545.exe",
+      "bytes": 3785742,
+      "sha256": "fc99c5bf980dd3c655018e0186f74b5352c701b75f0b3b0a92514d49f8039faf",
+      "cargoMetadataLine": 129,
+      "cargoMetadataLineSha256": "7c422bb1a3fce5a1442dfccb2b31e86354c04a81516547fe55315d8fa06afdf3",
+      "cargoTarget": "fc_windows",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-windows#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-d2b8e39fd0668fa3.exe",
+      "bytes": 12843331,
+      "sha256": "781fe4161b54e331e7d4c389200659701fc408fd238e375fc6f6b1ebe79eb719",
+      "cargoMetadataLine": 130,
+      "cargoMetadataLineSha256": "77e16c9c506ad4add109a0c79439e082d618455b54c05db3dedb04be0e05b31c",
+      "cargoTarget": "fc-bootstrap",
+      "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    }
+  ],
+  "harnessesExpected": 21,
+  "testTotal": "derive only from actual terminal harness summaries",
+  "policy": "nonzero original test binary recorded and remaining harnesses continue; final overall FAIL if any failed; timeout/transport/digest/parse/unsafe exceptions remain failfast",
+  "testThreads": 2,
+  "testTimeoutSeconds": 900,
+  "scope": "evidence-only collection, no suite PASS claim from skipped/filtered tests; actual B/storage regressions and hidden public20 may pass while native IPv6 harness remains FAIL",
+  "controllerPid": 31633,
+  "exitCode": 1,
+  "elapsedSeconds": 154.29427589685656,
+  "stdout": {
+    "path": "/tmp/fc-round68-production-https/evidence/windows-release-full-second.stdout.log",
+    "bytes": 947,
+    "sha256": "c00bbf4074125f5c908e7b28ae80dd80d653f86b39d05174a0d109a432462337"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round68-production-https/evidence/windows-release-full-second.stderr.log",
+    "bytes": 524,
+    "sha256": "fee8a586f8b52438956f37574120af3e14f57e7820c458b322532ba86f3e967d"
+  },
+  "sourceUnchanged": true,
+  "privateRunnerUnchanged": true,
+  "artifactsUnchanged": true,
+  "resultStatus": "FAIL",
+  "cleanup": "PASS",
+  "harnessesObserved": 21,
+  "failedTestBinaries": [
+    {
+      "name": "fc_bootstrap-2d073072bc663873.exe",
+      "exitCode": 101,
+      "binarySha256": "4183525b28459735a1dafbdc3f1a4ecbe486c68aa4956ebf606c5339744f6cc3"
+    },
+    {
+      "name": "fc_bootstrap-d2b8e39fd0668fa3.exe",
+      "exitCode": 101,
+      "binarySha256": "781fe4161b54e331e7d4c389200659701fc408fd238e375fc6f6b1ebe79eb719"
+    }
+  ],
+  "publicDesktopNativeStatus": "PASS",
+  "publicDesktopNativeSteps": 20,
+  "result": {
+    "path": "/tmp/fc-round68-production-https/evidence/windows-release-full-second.json",
+    "bytes": 234040,
+    "sha256": "19da0d2eb2b6ea9ad21139b69c1ac13f113299ab30ba4ab3a47443836f25f1a6"
+  },
+  "allOriginalHarnessIdentitiesMatch": true,
+  "actualHarnessSummaries": [
+    {
+      "name": "fc_security-2889fa9301b88e80.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          19,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          208,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_materials-f1a7d58c131e95d5.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          39,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_presentation-b847dfa3b68d1237.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          58,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_protocol-4316bb63b92dda4d.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          82,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_bootstrap-2d073072bc663873.exe",
+      "exitCode": 101,
+      "terminalSummaries": [
+        [
+          341,
+          7,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_application-fb16268b5eff3acf.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          25,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_runtime-a09be73363edd23a.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          33,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_audio-e1b4eabc9ef1420f.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          22,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_ports-15b1ad689f79c490.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          8,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_domain-367747e306a1dd0e.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          149,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "calendar_execution_fence-c79d3cfb3961109e.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          4,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "verify_web_assets-d1cacbf262e9f4f4.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "schedule_operations-48fa032341d76709.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          5,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "runtime_storage-0e708d04bae2889e.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          3,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "business_storage-576d09efbb6083a0.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          43,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "voice_limits_storage-f0677ddaab0e1941.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          4,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "autostart_coordinator-74ff40b715302c3c.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          13,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "voice_storage-05cf611acb952b21.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          6,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_windows-e3f8369176e1b545.exe",
+      "exitCode": 0,
+      "terminalSummaries": [
+        [
+          250,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "fc_bootstrap-d2b8e39fd0668fa3.exe",
+      "exitCode": 101,
+      "terminalSummaries": [
+        [
+          211,
+          12,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  ],
+  "allHarnessesTerminalUnfiltered": true,
+  "fullResultsCollected": true
+}

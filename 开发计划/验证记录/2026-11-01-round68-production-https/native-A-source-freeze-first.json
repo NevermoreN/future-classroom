@@ -1,0 +1,122 @@
+{
+  "round": 68,
+  "domain": "A configured native TLS and pure source CIDR policy",
+  "status": "SOURCE_IMPLEMENTED_NOT_COMPILED_OR_RUN",
+  "createdUtc": "2026-11-01T07:16:18.455833+00:00",
+  "baseCommit": "3fd34d5f650999b41e7332250ac3b5d3627bf924",
+  "worktree": "/tmp/fc-round68-production-https/worktree",
+  "files": [
+    {
+      "path": "crates/fc-domain/src/https_settings.rs",
+      "bytes": 6829,
+      "sha256": "0f695a75dc2c8cda3bb0c0731c1bae0bf8ff1120b9a5b45ad65402b224db5999",
+      "baseSha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96"
+    },
+    {
+      "path": "crates/fc-domain/src/https_settings/source_networks.rs",
+      "bytes": 6518,
+      "sha256": "c22cf5e84666a02c2c8742c63a95e827d14f458fbb61bff9054eaf361438d297",
+      "baseSha256": null
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10617,
+      "sha256": "1186d9c4c78d52907397508a8af503ca4038404293a7df49430d08b9a109a5bc",
+      "baseSha256": "2ac2e9b3cea4d6f6ef8aaa329398f93abca4b5ed3fa9707efde978010dde0174"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 61586,
+      "sha256": "6627580006ec8cf8d77f98322fa06995ad030d79be20042ab1a5da70f9e5e5dc",
+      "baseSha256": "e6a4938e8c096ac509a03e75345b847cedda795aa7cb2ef1d6524a2efdc964fd"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 17494,
+      "sha256": "66bf7a67d7d76d113c9883978c686de4eabe076093ac1f113937b196f36c62cc",
+      "baseSha256": "a7cbaf2a17af2f01280871f9b46c404430e1ef63e79293b18a476ce8452dd80b"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/configured.rs",
+      "bytes": 6487,
+      "sha256": "40269df8f57f2952056fe326d8bffb53e7b641e4cc563fafe99bdd09494d2d88",
+      "baseSha256": null
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 42907,
+      "sha256": "09abd31d2616dea0bf54b138b82d9eb7f7ae00280d09e0b16138821d0aadee74",
+      "baseSha256": "48fcff62625fdda506d6a4d6039b67190fea951e3b991bb3f880fb640274a783"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 92452,
+      "sha256": "cf359c7f0c48ecc71d516c213104ea5740c863ccb9aa0303b8c07255c2d64c8b",
+      "baseSha256": "5c7a68b887f572ee511ce9db2be017e7d97c727d22c9f4e3e97ef4d92fef74d1"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 9012,
+      "sha256": "3a0da2d116197107bf2d6bbe2d2196d7ba35b0cbc2210d704ed9861630d640d6",
+      "baseSha256": "acc08d0566f68f6e3b2e8aac04ac6eb307f4218a1a049377fc7d955cfa196f09"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials/host.rs",
+      "bytes": 5795,
+      "sha256": "02a02400dd156185f424035dbfe63f6d66d60688ac1b02d69100979c76775ff5",
+      "baseSha256": null
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+      "bytes": 30431,
+      "sha256": "e2dc64da924539611991db9e2b20b6515e2c4830db4979c73d809330ba2a3d38",
+      "baseSha256": "800c898e9b7d11eb9823dca075d6ebe2e8bc99dee0f6606d2ace334f9a3a9936"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker.rs",
+      "bytes": 16613,
+      "sha256": "90fb20582984091754c3305b940d39b39298682ca0ac4310ac8f1e066419da03",
+      "baseSha256": "212aa5bf10175bc553d2c4e720baf5d3f3843be90937f71348336de6f1194591"
+    }
+  ],
+  "patch": {
+    "path": "native-A-source-first.patch",
+    "bytes": 49476,
+    "sha256": "6ae35a26c1cceddda369533610548c19cd0243827d2619af217ea4574195db9a"
+  },
+  "publicContract": {
+    "domain": "HttpsConfiguration.source_networks: Option<HttpsSourceNetworks>; new3 stays legacy None; with_source_networks(policy)->Self. Nonempty 1..16 unique explicit CIDRs; /0, non-network host bits, multicast, unspecified, broadcast, mapped/scoped IPv6 rejected; IPv4 and IPv6 family-specific matching, mapped peers always false.",
+    "native": "TlsHttpHost::open_configured(&HttpsConfiguration)->Result<Self,ConfiguredTlsError>; sanitized Copy enum InvalidConfiguration/MissingSourceNetworks/UnsupportedAddress/AmbiguousAddress/AddressUnavailable/Certificate/Busy/Native/Cleanup; source_rejections()->u64.",
+    "endpoint": "Exactly one literal IPv4/IPv6 or one distinct DNS result, max16 resolver entries. No wildcard or first-result fallback; ambiguous A/AAAA explicitly refused. IPv6 uses native SOCKADDR_IN6 and IPV6_V6ONLY; mapped, scoped or link-local bind unsupported. Nonlocal address bind fails normally.",
+    "certificate": "Same exact selected readonly CurrentUser MY certificate is checked for current validity, explicit server EKU, silent existing matching private key, bounded SAN (exact IP iPAddress, exact DNS or whole one-label wildcard) and real Schannel acquisition before listener creation. No certificate query token or CN fallback; no claim of browser trust/revocation freshness.",
+    "physicalOwner": "Original singleton Owner, one SSPI worker, four business slots and one pinned bare AcceptEx reused. One consumed completion first updates accept context and checks getpeername against policy while bare socket still owns descriptor; reject closes that exact socket before replenishment, without SSPI or business permit. Ledger includes actual source rejection.",
+    "budgets": "Original post-derived 5s header, 25ms negative reserve, unique parsed-Head admitted_at+120s and negative-only service preserved. AcceptEx address region grows64->96 bytes per owner (48 each) for native IPv6 +16 padding; counts unchanged; policy owned heap is included in app_owned_bytes.",
+    "legacy": "TlsHttpHost::open marker+loopback and finite probe APIs retained. No default listener, trust/firewall/HTTP.sys mutation, auth bypass or new business pool."
+  },
+  "newTests": [
+    "fc-domain explicit_sources_are_bounded_canonical_and_family_specific",
+    "configured_certificate_san_matches_exact_ip_or_one_dns_label",
+    "configured_certificate_san_rejects_malformed_trailing_and_oversized_encoding",
+    "configured_endpoint_never_selects_first_ambiguous_or_unsupported_address",
+    "configured_source_filter_returns_real_ipv4_and_ipv6_accept_before_any_sspi_call",
+    "configured_explicit_ipv4_and_ipv6_source_keeps_original_deadline_and_real_drain",
+    "configured_exact_occupied_bind_returns_original_worker_before_replacement",
+    "configured_legacy_missing_policy_cannot_claim_listener_readiness"
+  ],
+  "validationActuallyPerformed": [
+    "rustfmt edition2021 on owned source files only: exit0",
+    "git diff --check on owned tracked sources: exit0",
+    "Read Windows0.62.2 local binding signatures/layouts for native calls; no Cargo executed"
+  ],
+  "pendingUnifiedValidation": [
+    "Compiler and strict Clippy, actual new native tests plus retained regression suite",
+    "Ordinary application enable/disable/authenticated real TLS integration with SAN-bearing existing test cert",
+    "Separate Win7/Win10, campus DNS/topology/trust/browser/Seewo and deployment acceptance"
+  ],
+  "notPerformed": [
+    "No Cargo/compiler/test execution",
+    "No Windows/SSH/network/listener/system configuration",
+    "No target, main, Cargo/lib.rs, B/C sources or old archived evidence changes",
+    "No commit/push"
+  ]
+}

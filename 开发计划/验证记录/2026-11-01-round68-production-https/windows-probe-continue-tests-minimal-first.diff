@@ -1,0 +1,26 @@
+--- main/scripts/windows-probe.py
++++ evidence/windows-probe-continue-tests-private-first.py
+@@ -429,8 +429,13 @@
+             result["timeoutSeconds"] = args.test_timeout_seconds
+             report["tests"].append(result)
+             print(path.name, "PASS" if result["exitCode"] == 0 else "FAIL", flush=True)
++            if type(result["exitCode"]) is not int:
++                raise RuntimeError("invalid remote test exit code: " + path.name)
+             if result["exitCode"] != 0:
+-                raise RuntimeError("remote test failed: " + path.name)
++                report.setdefault("failedTestBinaries", []).append({
++                    "name": path.name, "exitCode": result["exitCode"],
++                    "binarySha256": result["binarySha256"],
++                })
+         # The interactive task only runs our own probe, with a hidden console.
+         # It does not send keys, minimize windows, change focus, capture the desktop,
+         # install services, touch production ProgramData, or alter SSH authorization.
+@@ -691,6 +696,8 @@
+                     raise RuntimeError("Web voice diagnostic result marker missing: " + marker)
+             report["webVoiceStatus"] = "PASS"
+         print("native probe PASS; foreground/interaction evidence remains limited to counters", flush=True)
++        if report.get("failedTestBinaries"):
++            raise RuntimeError("remote test binary failures retained after remaining harnesses and native checks; overall suite FAIL")
+         report["status"] = "PASS"
+     except Exception as error:
+         report["status"] = "FAIL"

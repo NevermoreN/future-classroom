@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "scope": "Python AST + 34 pure validator checks + 2 CLI rejection cases; no Windows, SSH, listeners or Cargo",
+  "sourceSha256": "4f2393af24d20a4777c29942454f8eb9b30244b2a8571622429e09401639bdc5",
+  "cases": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round68-production-https/worktree/scripts/windows-ordinary-https-probe.py",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "expected": 0,
+      "elapsedSeconds": 0.3265469011384994,
+      "stdoutSha256": "2c2dc5fca25366adf77f9d4be176e4eb84389276e677b44fb148456b068941ec",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round68-production-https/worktree/scripts/windows-ordinary-https-probe.py",
+        "--self-test",
+        "--report",
+        "should-not-exist.json"
+      ],
+      "exitCode": 2,
+      "expected": 2,
+      "elapsedSeconds": 0.2103101119864732,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "d5e7175f33a1b0edcef7ba9b8fd4255586720aad9f29361d74391c954feb7600"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round68-production-https/worktree/scripts/windows-ordinary-https-probe.py"
+      ],
+      "exitCode": 2,
+      "expected": 2,
+      "elapsedSeconds": 0.1616179069969803,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "c6e072236881d240194aacfb47f3eb70fd397be27728c530a49765c8df3f8f72"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
-//! Owned TLS execution for the admission candidate. Native contexts stay on one
-//! fixed SSPI thread; bounded linear frames cross its mailbox. Production
-//! listening and the original strict first-connection deadline remain separate
-//! platform gates, rather than being inferred from a successful TLS handshake.
+//! Owned configured TLS transport and preserved isolated diagnostics. Native
+//! contexts stay on one fixed SSPI thread; bounded linear frames cross its
+//! mailbox. Exact configured readiness does not prove remote client trust,
+//! campus reachability or a hard real-time TCP scheduling bound.
 #[cfg(any(windows, test))]
 use fc_ports::http::RequestToken;
 #[cfg(any(windows, test))]
@@ -287,4 +287,19 @@ mod tests {
             assert!(CertificateThumbprint::parse(bad).is_err());
         }
     }
+}
+
+/// Sanitized startup result for an explicitly configured production listener.
+/// Native includes socket/bind/listen failure; no provider/path detail is exposed.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ConfiguredTlsError {
+    InvalidConfiguration,
+    MissingSourceNetworks,
+    UnsupportedAddress,
+    AmbiguousAddress,
+    AddressUnavailable,
+    Certificate,
+    Busy,
+    Native,
+    Cleanup,
 }

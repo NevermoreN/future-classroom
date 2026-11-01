@@ -1,0 +1,272 @@
+--- native-A-source-second/crates/fc-windows/src/tls_frontdoor/native.rs
++++ native-A-source-third/crates/fc-windows/src/tls_frontdoor/native.rs
+@@ -148,6 +148,12 @@
+     explicit_retirements: usize,
+     close_observations: TlsCloseSnapshot,
+ }
++#[cfg(test)]
++#[derive(Clone, Copy, PartialEq, Eq)]
++enum NativeReleaseFailure {
++    Iocp,
++    Winsock,
++}
+ struct Owner {
+     resources: ManuallyDrop<Resources>,
+     started: Instant,
+@@ -157,6 +163,11 @@
+     marker: String,
+     stopping: bool,
+     drained: bool,
++    cleanup_failed: bool,
++    #[cfg(test)]
++    release_failure: Option<NativeReleaseFailure>,
++    #[cfg(test)]
++    release_attempts: [usize; 2],
+     report: Report,
+     issuer: TokenIssuer,
+     credentials_ready: bool,
+@@ -291,6 +302,11 @@
+             marker: marker.into(),
+             stopping: false,
+             drained: false,
++            cleanup_failed: false,
++            #[cfg(test)]
++            release_failure: None,
++            #[cfg(test)]
++            release_attempts: [0; 2],
+             report: Report::default(),
+             issuer,
+             credentials_ready: false,
+@@ -1250,6 +1266,9 @@
+         if let Some(worker) = &self.resources.worker {
+             worker.request_stop();
+         }
++        if self.cleanup_failed {
++            return Err("TLS native cleanup failure retained; release cannot be retried".into());
++        }
+         let mut failure = None;
+         if let Err(error) = self.close_bare_accept() {
+             failure = Some(error);
+@@ -1278,6 +1297,9 @@
+         failure.map_or(Ok(()), Err)
+     }
+     fn finish(&mut self) -> Result<(), String> {
++        if self.cleanup_failed {
++            return Err("TLS native cleanup failure retained; release cannot be retried".into());
++        }
+         let stop_result = self.stop();
+         let deadline = Instant::now() + BUDGET;
+         loop {
+@@ -1335,17 +1357,7 @@
+                 // SAFETY: all IOCP packets and the actual SSPI thread have
+                 // terminated. Check real resource release before reporting a
+                 // completed cleanup; failures retain the bounded owner.
+-                unsafe {
+-                    if !self.resources.port.is_invalid() {
+-                        CloseHandle(self.resources.port)
+-                            .map_err(|e| format!("TLS IOCP close: {e}"))?;
+-                        self.resources.port = HANDLE::default();
+-                    }
+-                    if self.resources.winsock {
+-                        check(WSACleanup(), "TLS WSACleanup")?;
+-                        self.resources.winsock = false;
+-                    }
+-                }
++                self.release_native_resources()?;
+                 self.drained = true;
+                 return Ok(());
+             }
+@@ -1356,6 +1368,61 @@
+             }
+             std::thread::sleep(Duration::from_millis(1));
+         }
++    }
++    /// Call only after every real IOCP packet and SSPI worker has returned.
++    /// A failed release leaves its original reference untouched and permanently
++    /// forbids retry, quiescent acknowledgement and replacement in this process.
++    fn release_native_resources(&mut self) -> Result<(), String> {
++        self.release_native_resources_with(
++            |port| {
++                // SAFETY: callers have witnessed all original native borrowers.
++                unsafe { CloseHandle(port) }.map_err(|e| format!("TLS IOCP close: {e}"))
++            },
++            || {
++                // SAFETY: the original successful WSAStartup remains owned here.
++                check(unsafe { WSACleanup() }, "TLS WSACleanup")
++            },
++        )
++    }
++    fn release_native_resources_with(
++        &mut self,
++        close_port: impl FnOnce(HANDLE) -> Result<(), String>,
++        cleanup_winsock: impl FnOnce() -> Result<(), String>,
++    ) -> Result<(), String> {
++        if self.cleanup_failed || OWNER_FAULTED.load(Ordering::Acquire) {
++            self.cleanup_failed = true;
++            return Err("TLS native cleanup failure retained; quiescence unproven".into());
++        }
++        let result = (|| {
++            if !self.resources.port.is_invalid() {
++                #[cfg(test)]
++                {
++                    self.release_attempts[0] += 1;
++                    if self.release_failure == Some(NativeReleaseFailure::Iocp) {
++                        return Err("controlled original IOCP close failure".into());
++                    }
++                }
++                close_port(self.resources.port)?;
++                self.resources.port = HANDLE::default();
++            }
++            if self.resources.winsock {
++                #[cfg(test)]
++                {
++                    self.release_attempts[1] += 1;
++                    if self.release_failure == Some(NativeReleaseFailure::Winsock) {
++                        return Err("controlled original WSACleanup failure".into());
++                    }
++                }
++                cleanup_winsock()?;
++                self.resources.winsock = false;
++            }
++            Ok(())
++        })();
++        if result.is_err() {
++            self.cleanup_failed = true;
++            OWNER_FAULTED.store(true, Ordering::Release);
++        }
++        result
+     }
+ }
+ impl Drop for Owner {
+--- native-A-source-second/crates/fc-windows/src/tls_frontdoor/native/stream.rs
++++ native-A-source-third/crates/fc-windows/src/tls_frontdoor/native/stream.rs
+@@ -1034,6 +1034,9 @@
+         Ok(next)
+     }
+     fn poll_http_drain(&mut self) -> Result<bool, String> {
++        if self.cleanup_failed {
++            return Err("TLS HTTP native cleanup failure retained; quiescence unproven".into());
++        }
+         if self.drained {
+             return Ok(true);
+         }
+@@ -1083,17 +1086,7 @@
+         self.report.slot_frames_at_drain = CONNECTION_SLOTS;
+         // SAFETY: all native packets returned and the actual OS SSPI thread
+         // terminated. No in-flight operation can reference these resources.
+-        unsafe {
+-            if !self.resources.port.is_invalid() {
+-                CloseHandle(self.resources.port)
+-                    .map_err(|e| format!("TLS HTTP IOCP close: {e}"))?;
+-                self.resources.port = HANDLE::default();
+-            }
+-            if self.resources.winsock {
+-                check(WSACleanup(), "TLS HTTP WSACleanup")?;
+-                self.resources.winsock = false;
+-            }
+-        }
++        self.release_native_resources()?;
+         self.drained = true;
+         Ok(true)
+     }
+--- native-A-source-second/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
++++ native-A-source-third/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
+@@ -2383,3 +2383,98 @@
+         Err(ConfiguredTlsError::MissingSourceNetworks)
+     ));
+ }
++
++#[test]
++fn real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_child() {
++    let _serial = SERIAL.lock().unwrap();
++    const CHILD: &str = "FC_TLS_NATIVE_RELEASE_FAILURE_CHILD";
++    const NAME: &str = "tls_frontdoor::native::stream::tests::real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_child";
++    const MARKER: &str = "NATIVE_RELEASE_FAILURE_CHILD realIocp=true realWinsock=true outstandingIo=false secondClose=false quiescent=false replaced=false";
++    if let Ok(mode) = std::env::var(CHILD) {
++        let failure = match mode.as_str() {
++            "iocp" => super::super::NativeReleaseFailure::Iocp,
++            "winsock" => super::super::NativeReleaseFailure::Winsock,
++            _ => panic!("unknown native release fault mode"),
++        };
++        let mut owner = Owner::new("native-release-failure").unwrap();
++        owner.http_mode = true;
++        for slot in &mut owner.resources.slots {
++            slot.stream = Some(Stream::new());
++        }
++        // Real process-owned native resources, with no socket, operation or
++        // SSPI thread ever submitted. Injection only controls a final release
++        // return; it cannot discard a packet or free a borrowed OVERLAPPED.
++        unsafe {
++            let mut data = WSADATA::default();
++            assert_eq!(WSAStartup(0x202, &mut data), 0);
++            owner.resources.winsock = true;
++            owner.resources.port =
++                CreateIoCompletionPort(INVALID_HANDLE_VALUE, None, 0, 1).unwrap();
++        }
++        let original_port = owner.resources.port;
++        assert!(!original_port.is_invalid());
++        assert!(owner.resources.worker.is_none() && owner.resources.accept.is_none());
++        assert!(owner
++            .resources
++            .slots
++            .iter()
++            .all(|slot| slot.pending.is_none()
++                && slot.socket == INVALID_SOCKET
++                && slot.frame.is_some()));
++        owner.release_failure = Some(failure);
++        let mut host = TlsHttpHost {
++            owner,
++            drain_deadline: None,
++        };
++        host.request_stop().unwrap();
++        let first = host.poll_shutdown().unwrap_err();
++        assert!(first.contains("controlled original"));
++        assert!(host.owner.cleanup_failed && !host.owner.drained);
++        assert!(OWNER_FAULTED.load(Ordering::Acquire));
++        let attempts = host.owner.release_attempts;
++        assert_eq!(attempts, if mode == "iocp" { [1, 0] } else { [1, 1] });
++        assert_eq!(
++            host.owner.resources.port,
++            if mode == "iocp" {
++                original_port
++            } else {
++                HANDLE::default()
++            }
++        );
++        assert!(host.owner.resources.winsock);
++        // Remove the controlled failure: a later successful release callback
++        // would now be available, but the first unknown result is permanent.
++        host.owner.release_failure = None;
++        for _ in 0..3 {
++            assert!(host.poll_shutdown().is_err());
++            assert!(host.request_stop().is_err());
++            assert!(host.owner.finish().is_err());
++            assert_eq!(host.owner.release_attempts, attempts);
++            assert!(!host.owner.drained && host.owner.resources.winsock);
++            assert!(Owner::new("forbidden-after-native-release-failure").is_err());
++        }
++        drop(host);
++        assert!(OWNER_ACTIVE.load(Ordering::Acquire));
++        assert!(Owner::new("forbidden-after-failed-owner-drop").is_err());
++        // The independent child's actual OS exit owns final reclamation. No
++        // release/reset of the sticky admission flags occurs in this process.
++        println!("{MARKER} mode={mode}");
++        return;
++    }
++    for mode in ["iocp", "winsock"] {
++        let output = std::process::Command::new(std::env::current_exe().unwrap())
++            .args(["--exact", NAME, "--nocapture", "--test-threads=2"])
++            .env(CHILD, mode)
++            .output()
++            .unwrap();
++        assert!(
++            output.status.success(),
++            "{mode}: {} {}",
++            String::from_utf8_lossy(&output.stdout),
++            String::from_utf8_lossy(&output.stderr)
++        );
++        assert!(String::from_utf8_lossy(&output.stdout).contains(MARKER));
++        assert!(!OWNER_FAULTED.load(Ordering::Acquire));
++        assert!(!OWNER_ACTIVE.load(Ordering::Acquire));
++    }
++}

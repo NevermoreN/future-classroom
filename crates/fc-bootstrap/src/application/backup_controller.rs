@@ -572,6 +572,7 @@ impl App {
                     .as_ref()
                     .is_some_and(SessionControl::is_recovering))
         {
+            self.stop_teacher_https();
             self.backup.irreversible = true;
             self.stopping = true;
             self.screen = Screen::Restoring;
@@ -612,6 +613,7 @@ impl App {
             && !self.backup.finished
             && !self.backup.start_failed
             && self.shell.is_finished()
+            && self.teacher_https_quiescent()
             && (confirmed.is_some() || confirmation_failed)
         {
             // Validate every remaining owner before moving any out of the App.

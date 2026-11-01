@@ -1,0 +1,30 @@
+{
+  "status": "PASS_COMPLETE_NATIVE_LIBRARY_ONLY_NOT_WORKSPACE",
+  "recordedUtc": "2026-11-01T08:22:38.280539+00:00",
+  "fullRun": {
+    "path": "windows-release-full-second.json",
+    "sha256": "19da0d2eb2b6ea9ad21139b69c1ac13f113299ab30ba4ab3a47443836f25f1a6",
+    "status": "FAIL",
+    "cleanup": "PASS"
+  },
+  "nativeLibrary": {
+    "name": "fc_windows-e3f8369176e1b545.exe",
+    "sha256": "fc99c5bf980dd3c655018e0186f74b5352c701b75f0b3b0a92514d49f8039faf",
+    "exitCode": 0,
+    "summary": "test result: ok. 250 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 25.99s",
+    "ipv4Ipv6Cases": [
+      "test tls_frontdoor::native::stream::tests::configured_explicit_ipv4_and_ipv6_source_keeps_original_deadline_and_real_drain ... ok",
+      "test tls_frontdoor::native::stream::tests::configured_source_filter_returns_real_ipv4_and_ipv6_accept_before_any_sspi_call ... ok"
+    ],
+    "newStickyCleanupChildCase": "test tls_frontdoor::native::stream::tests::real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_child ... ok"
+  },
+  "publicDesktop": {
+    "status": "PASS",
+    "steps": 20
+  },
+  "userStateChange": {
+    "path": "user-clash-closed-observation-first.json",
+    "sha256": "9ae1b237c5d97011b89b15d849ef6ae640cc7c278559803d448c2e7d1b89b5f4"
+  },
+  "scope": "User reported Clash closed during the same original full regression. Actual native library now passes both address families and all250 unfiltered tests. Temporal association is observed; no sole causal attribution or Windows policy mutation asserted. Two bootstrap binaries remain FAIL; all earlier source4/focused IPv6 failures remain historical originals."
+}

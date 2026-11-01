@@ -1,0 +1,55 @@
+{
+  "round": 68,
+  "status": "READ_ONLY_SCRIPT_PREPARED_NOT_EXECUTED",
+  "createdUtc": "2026-11-01T08:11:58.287562+00:00",
+  "script": {
+    "path": "observe-ipv6-policy-first.ps1",
+    "bytes": 10154,
+    "sha256": "d5c4e6f007402e9dc591a5408270ca5985bc23119845797303adad46046f2642",
+    "encoding": "ASCII subset of UTF-8"
+  },
+  "observations": [
+    "Process64bit/OS64bit/OSversion/PowerShell version/Socket.OSSupportsIPv6",
+    "Read-only Tcpip6 Parameters DisabledComponents existence, DWord decimal and hex; unexpected kind recorded without raw content",
+    "ActiveStore exact::1/128 IPv6 route only, max8 output",
+    "Domain/Private/Public firewall Enabled and default inbound/outbound action only",
+    "Enabled outbound Block rule counts with explicit IPv6 address-filter aggregate and at most8 address-only samples; no rule names, application paths, interface names, VPN/network inventory"
+  ],
+  "bounds": {
+    "softBudgetSeconds": 45,
+    "maximumBlockRulesDefault": 128,
+    "maximumBlockRulesParameterCap": 512,
+    "maximumRoutesOutput": 8,
+    "maximumAddressFiltersPerRule": 3,
+    "maximumAddressEntriesPerDirectionPerRule": 64,
+    "maximumSampleRules": 8,
+    "maximumSampleAddressesPerDirection": 4,
+    "maximumSampleAddressCharacters": 107,
+    "individualOsCalls": "Not individually interruptible; root controller must enforce hard process deadline. A command/process timeout is not successful observation.",
+    "countSemantics": "Truncation, elapsed budget and address query failures disable exact explicitIPv6 count; observed rule count marked lower-bound when truncated."
+  },
+  "noMutation": [
+    "Only Get-Item/Get-NetRoute/Get-NetFirewallProfile/Get-NetFirewallRule/Get-NetFirewallAddressFilter queries plus memory formatting",
+    "Registry key opened via Get-Item and closed after observation",
+    "No socket connections or listener creation",
+    "No registry/policy/firewall/profile/interface/certificate changes",
+    "No jobs or new processes created by script itself"
+  ],
+  "limitations": [
+    "These fields may be insufficient to explain10013.",
+    "No observed Windows Firewall rule cannot exclude third-party WFP provider/callout decisions.",
+    "Explicit IPv6 means literal/range contains colon; Any/keywords can also match IPv6 and are not excluded by a zero explicit count.",
+    "PowerShell architecture is recorded;64bit observation does not prove32bit native client behavior."
+  ],
+  "staticChecksActuallyPerformed": [
+    "ASCII validation",
+    "Manual source read and bounded field/loop review",
+    "Anchored mutation-command scan with no matches"
+  ],
+  "notPerformed": [
+    "No PowerShell parser or execution",
+    "No Windows/SSH/network command",
+    "No source changes or compilers/Cargo"
+  ],
+  "rootExecutionGuidance": "Root alone should first parse this file with PowerShell Parser.ParseFile without invoking its AST, then run under the authorized same user with a parent-enforced hard process budget. Capture original stdout/stderr/exit and uploaded fileSHA. Do not infer cause solely from these observations."
+}

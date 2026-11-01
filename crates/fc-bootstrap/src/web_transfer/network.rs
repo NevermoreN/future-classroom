@@ -335,6 +335,7 @@ struct Core<E: HttpExecutor> {
     hub: UploadHub,
     downloads: DownloadHub,
     static_assets: Option<Arc<StaticAssets>>,
+    execution: Option<super::ExecutionFence>,
     started: bool,
     records: [Option<Record<E::Ticket>>; MAX_REQUESTS],
     report: NetworkReport,
@@ -384,6 +385,7 @@ where
             hub,
             downloads,
             static_assets: None,
+            execution: None,
             started: false,
             records,
             report: NetworkReport {
@@ -396,6 +398,14 @@ where
     }
     /// Install the immutable worker-verified package before any native poll or
     /// Head processing. It cannot be replaced during this owner's lifetime.
+    pub fn set_execution_fence(&mut self, fence: super::ExecutionFence) -> Result<(), String> {
+        let core = self.core_mut();
+        if core.started || core.execution.is_some() {
+            return Err("domain fence must be installed before first Net poll".into());
+        }
+        core.execution = Some(fence);
+        Ok(())
+    }
     pub fn set_static_assets(&mut self, assets: Arc<StaticAssets>) -> Result<(), String> {
         let core = self.core_mut();
         if core.started || core.static_assets.is_some() {
@@ -432,6 +442,9 @@ where
     }
     fn core_mut(&mut self) -> &mut Core<E> {
         self.core.as_deref_mut().expect("owned Net core")
+    }
+    pub(crate) fn executor(&self) -> &E {
+        &self.core().executor
     }
     pub fn port_number(&self) -> u16 {
         self.core().host.port_number()
@@ -601,6 +614,10 @@ impl<E: HttpExecutor> Core<E> {
         self.report.heads = self.report.heads.saturating_add(1);
         let (control, life) =
             TransferControl::new(head.token, at).map_err(|_| "trusted HTTP admission time")?;
+        let life = match &self.execution {
+            Some(fence) => life.with_domain_fence(fence.clone()),
+            None => life,
+        };
         record.cancellation = Some(control.cancellation_handle());
         record.control = Some(control);
         record.deadline = Some(life.deadline());

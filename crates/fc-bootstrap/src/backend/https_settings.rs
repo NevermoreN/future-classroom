@@ -85,3 +85,13 @@ impl Backend {
         Ok(result)
     }
 }
+
+impl Backend {
+    pub(crate) fn https_data_root(&self) -> Result<std::path::PathBuf> {
+        self.database_path
+            .parent()
+            .and_then(std::path::Path::parent)
+            .map(std::path::Path::to_owned)
+            .ok_or(BackendError::Closed)
+    }
+}

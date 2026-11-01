@@ -914,11 +914,15 @@ impl Backend {
         generation: u64,
         purpose: SessionPurpose,
     ) -> fc_storage::business::SessionGuard {
+        let web = self.web.clone();
         let ledger = self.ledger.clone();
         let control = self.control.clone();
         let wall = self.clock.clone();
         let monotonic = self.monotonic.clone();
         Arc::new(move |state, expected| {
+            if lease.origin() == TrustedOrigin::Web && !web.runtime_execution_current() {
+                return Err(StorageError::AuthorityUnavailable);
+            }
             control
                 .check(lease, generation)
                 .map_err(|_| StorageError::AuthorityUnavailable)?;
@@ -939,6 +943,9 @@ impl Backend {
             control
                 .check(lease, generation)
                 .map_err(|_| StorageError::AuthorityUnavailable)?;
+            if lease.origin() == TrustedOrigin::Web && !web.runtime_execution_current() {
+                return Err(StorageError::AuthorityUnavailable);
+            }
             if actual == *expected {
                 Ok(())
             } else {

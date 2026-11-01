@@ -1,0 +1,22 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "script": {
+    "path": "/tmp/fc-round68-production-https/evidence/archive-evidence-second.py",
+    "bytes": 17700,
+    "sha256": "821db3e0a040ec2188b3638be348b64f2c16c2404423c8592be88aa2fcab22f2"
+  },
+  "syntax": "AST_PARSE_PASS_ONLY",
+  "previousPreparedScript": {
+    "path": "/tmp/fc-round68-production-https/evidence/archive-evidence-first.py",
+    "sha256": "ef0a9a38a211ea416fdac1b6cd999ef5fbab0d30ebce1d7ebee8a679b7a98768"
+  },
+  "schemaCorrection": "Preparation-only inspection found persisted ready is a list with pairingCode already scrubbed; second helper derives only matching expired short-code values in memory from exact owned tls.stdout original and marker. No archive attempt or original modification occurred.",
+  "sourceRoot": "/tmp/fc-round68-production-https/evidence",
+  "archiveRoot": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round68-production-https",
+  "execute": [
+    "python3",
+    "-B",
+    "/tmp/fc-round68-production-https/evidence/archive-evidence-second.py"
+  ],
+  "scope": "Root may execute once evidence is quiescent; strict original bytes and no live credentials, with closed synthetic short-code paths transparently listed; preparer has not copied any main archive/Git/Windows/Cargo."
+}

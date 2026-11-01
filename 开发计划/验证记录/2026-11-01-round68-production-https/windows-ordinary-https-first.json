@@ -1,0 +1,399 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "cleanup": "PASS",
+  "marker": "FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53",
+  "scope": "finite ordinary configured owner with synthetic SQLite and owned IP-SAN certificate",
+  "campus": "NOT_VALIDATED",
+  "win7": "NOT_RUN",
+  "win10": "NOT_RUN",
+  "materialReadyStop": "NOT_EXERCISED",
+  "productionSchoolSettings": "UNCHANGED",
+  "runnerSourceSha256": "1f6565f2dfa2a622d622b30c7fca9d5d2abae1ce761f8c0f6c8db713b1bb4046",
+  "ownershipSourceSha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+  "fixtureSetupSourceSha256": "47560c6cb6f34e159274a59225238fbcfac897362c69cb340bc5c0aa44c0a968",
+  "businessHelperSourceSha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208",
+  "exeSha256": "095ec698f35f947c300594ea839d146ddc4ec4cb4a5a26471d179c3702047230",
+  "events": [],
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53",
+  "staticPackage": {
+    "manifestSha256": "2b4034c8a0f0bfa73812a7f2853ba83b766772ff55096fc1e33c9f2ddb9e4593",
+    "payloadBytes": 459077,
+    "assets": [
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sizeBytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "assets/index-BkiZ2CBl.js",
+        "sizeBytes": 415401,
+        "sha256": "cdf0d8f9c8cfa259031cb22e10aacb1ffea7b1f7affb3a4235478069b2138bf3"
+      },
+      {
+        "path": "assets/index-DrrJeLm9.css",
+        "sizeBytes": 39554,
+        "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f"
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sizeBytes": 1724,
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa"
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sizeBytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "index.html",
+        "sizeBytes": 1232,
+        "sha256": "8761e3d65d2bee4fb860e14b315eec9e634a019b1633aea627c335397f8299f2"
+      }
+    ],
+    "uploadedFiles": [
+      {
+        "path": "fc-assets.json",
+        "sha256": "2b4034c8a0f0bfa73812a7f2853ba83b766772ff55096fc1e33c9f2ddb9e4593",
+        "bytes": 1073
+      },
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+        "bytes": 282
+      },
+      {
+        "path": "assets/index-BkiZ2CBl.js",
+        "sha256": "cdf0d8f9c8cfa259031cb22e10aacb1ffea7b1f7affb3a4235478069b2138bf3",
+        "bytes": 415401
+      },
+      {
+        "path": "assets/index-DrrJeLm9.css",
+        "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+        "bytes": 39554
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+        "bytes": 1724
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+        "bytes": 884
+      },
+      {
+        "path": "index.html",
+        "sha256": "8761e3d65d2bee4fb860e14b315eec9e634a019b1633aea627c335397f8299f2",
+        "bytes": 1232
+      }
+    ],
+    "uploadVerification": "PASS"
+  },
+  "fixture": {
+    "thumbprint": "5A7AEA38F023E93087D9EA400A4BE215C283700C",
+    "keyName": "FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53-key",
+    "san": "DNS Name=localhost, IP Address=127.0.0.1",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "privateKeyExported": false,
+    "provider": "Microsoft Software Key Storage Provider",
+    "myBefore": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    }
+  },
+  "configuredPort": 49895,
+  "uploadedControlSources": {
+    "tls-cleanup.ps1": {
+      "bytes": 4997,
+      "sha256": "fb5c37d7ede1884b6240c4932b92d796afa1b8d1eaaa16a24e5c812874c19aab",
+      "source": "\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\nfunction Assert([bool]$Condition,[string]$Message){if(!$Condition){throw $Message}}\nfunction Write-Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 8 -Compress),[Text.UTF8Encoding]::new($false))}\nfunction Store-Snapshot([string]$Exclude=''){\n  $entries=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.Thumbprint-ne $Exclude}|ForEach-Object{\n    $cert=$_;$sha=[Security.Cryptography.SHA256]::Create()\n    try{$der=([BitConverter]::ToString($sha.ComputeHash($cert.RawData))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n    $cert.Thumbprint.ToUpperInvariant()+':'+$der+':'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$cert.FriendlyName))+':'+$cert.HasPrivateKey\n  })\n  [Array]::Sort($entries,[StringComparer]::Ordinal)\n  $sha=[Security.Cryptography.SHA256]::Create()\n  try{$digest=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($entries-join \"`n\"))))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n  return @{count=$entries.Count;sha256=$digest}\n}\n\n$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53';$marker='FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53'\nAssert ((Split-Path -Leaf $root)-eq $marker) 'TLS cleanup basename mismatch'\nAssert (([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-eq $marker) 'TLS cleanup root marker mismatch'\nAssert (@(Get-CimInstance Win32_Process|Where-Object{$_.ExecutablePath-and $_.ExecutablePath-eq (Join-Path $root 'fc-bootstrap.exe')}).Count-eq 0) 'TLS executable still running before key cleanup'\n$fixtureFile=Join-Path $root '.tls-fixture.json';$certificateRemoved=0;$keyExists=$false;$after=$null;$restored=$null;$deleteKeyFallback=$false\nif(Test-Path -LiteralPath $fixtureFile){\n  $entry=[IO.File]::ReadAllText($fixtureFile)|ConvertFrom-Json\n  Assert ($entry.marker-eq $marker-and $entry.keyName-eq ($marker+'-key')-and $entry.provider-eq 'Microsoft Software Key Storage Provider'-and $entry.keyAbsentBefore-eq $true) 'TLS fixture cleanup ownership mismatch'\n  $provider=[Security.Cryptography.CngProvider]::new($entry.provider)\n  $certificates=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.FriendlyName-eq $marker})\n  Assert ($certificates.Count-le 1) 'unexpected duplicate owned TLS certificates; refusing broad cleanup'\n  foreach($cert in $certificates){\n    Assert ((!$entry.thumbprint)-or $cert.Thumbprint-eq $entry.thumbprint) 'owned TLS certificate thumbprint changed'\n    $rsa=$null\n    try{\n      $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)\n      Assert ($rsa-is [Security.Cryptography.RSACng]-and $rsa.Key.KeyName-eq $entry.keyName-and $rsa.Key.Provider.Provider-eq $entry.provider) 'owned TLS certificate private key mismatch'\n    }finally{if($rsa){$rsa.Dispose()}}\n    $certPath='Cert:\\CurrentUser\\My\\'+$cert.Thumbprint\n    try{Remove-Item -Path $certPath -DeleteKey}\n    catch{\n      $deleteKeyFallback=$true\n      # Some Certificate-provider versions cannot perform DeleteKey. The exact\n      # existing named CNG key was checked above; never enumerate/delete keys.\n      if([Security.Cryptography.CngKey]::Exists($entry.keyName,$provider)){\n        $key=[Security.Cryptography.CngKey]::Open($entry.keyName,$provider)\n        try{$key.Delete()}finally{$key.Dispose()}\n      }\n      if(Test-Path -LiteralPath $certPath){Remove-Item -Path $certPath}\n    }\n    $certificateRemoved++\n  }\n  # A creation failure can leave just our previously absent, exact named key.\n  # Delete it through CNG only after the immutable ownership manifest checks.\n  if([Security.Cryptography.CngKey]::Exists($entry.keyName,$provider)){\n    $key=[Security.Cryptography.CngKey]::Open($entry.keyName,$provider)\n    try{$key.Delete()}finally{$key.Dispose()}\n  }\n  $keyExists=[Security.Cryptography.CngKey]::Exists($entry.keyName,$provider)\n  Assert (!$keyExists) 'owned TLS CNG key still exists'\n  Assert (@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.FriendlyName-eq $marker}).Count-eq 0) 'owned TLS certificate still exists'\n  $after=Store-Snapshot\n  $restored=($after.count-eq $entry.before.count-and $after.sha256-eq $entry.before.sha256)\n  Assert $restored 'CurrentUser MY collection digest not restored; preserving owned evidence root'\n}\nRemove-Item -LiteralPath $root -Recurse -Force\nAssert (!(Test-Path -LiteralPath $root)) 'owned TLS root remains'\n@{status='PASS';rootAbsent=$true;ownedProcessesRemaining=0;certificatesRemoved=$certificateRemoved;deleteKeyFallbackUsed=$deleteKeyFallback;cngKeyExists=$keyExists;myAfter=$after;myDigestRestored=$restored;sshConfiguration='UNTOUCHED';rootTrustStore='UNTOUCHED';httpSys='UNTOUCHED';firewall='UNTOUCHED'}|ConvertTo-Json -Depth 5 -Compress\n"
+    },
+    "tls-stop.ps1": {
+      "bytes": 4311,
+      "sha256": "98078db0e8a26340680ea4cef4bc3a291c8d550a25032426a76ff7d5158a156d",
+      "source": "\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\nfunction Assert([bool]$Condition,[string]$Message){if(!$Condition){throw $Message}}\nfunction Write-Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 8 -Compress),[Text.UTF8Encoding]::new($false))}\nfunction Store-Snapshot([string]$Exclude=''){\n  $entries=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.Thumbprint-ne $Exclude}|ForEach-Object{\n    $cert=$_;$sha=[Security.Cryptography.SHA256]::Create()\n    try{$der=([BitConverter]::ToString($sha.ComputeHash($cert.RawData))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n    $cert.Thumbprint.ToUpperInvariant()+':'+$der+':'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$cert.FriendlyName))+':'+$cert.HasPrivateKey\n  })\n  [Array]::Sort($entries,[StringComparer]::Ordinal)\n  $sha=[Security.Cryptography.SHA256]::Create()\n  try{$digest=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($entries-join \"`n\"))))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n  return @{count=$entries.Count;sha256=$digest}\n}\n\n$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53';$marker='FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53'\nAssert ((Split-Path -Leaf $root)-eq $marker) 'TLS cleanup basename mismatch'\nAssert (([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-eq $marker) 'TLS cleanup root marker mismatch'\n$killed=0\n# Stop the recorded supervisor first so it cannot create another child after\n# the native-child audit. A process object retains its original handle to exit.\nforeach($name in @('.tls-setup-process.json','.tls-supervisor.json','.tls-process.json')){\n  $processFile=Join-Path $root $name\n  if(Test-Path -LiteralPath $processFile){\n    $entry=[IO.File]::ReadAllText($processFile)|ConvertFrom-Json\n    Assert ($entry.marker-eq $marker-and [int]$entry.pid-ne $PID) 'TLS process journal ownership mismatch'\n    if($name-eq '.tls-process.json'){Assert ($entry.exe-eq (Join-Path $root 'fc-bootstrap.exe')) 'TLS native process path mismatch'}\n    else{Assert ((Split-Path -Leaf $entry.exe)-eq 'powershell.exe') 'TLS supervisor path mismatch'}\n    $ownedProcess=Get-Process -Id ([int]$entry.pid) -ErrorAction SilentlyContinue\n    if($ownedProcess){\n      $retainedHandle=$ownedProcess.Handle\n      Assert ($retainedHandle-ne [IntPtr]::Zero) 'owned TLS process handle unavailable during cleanup'\n      Assert ($ownedProcess.Path-eq $entry.exe-and $ownedProcess.StartTime.ToUniversalTime().Ticks.ToString()-eq $entry.startTicks) 'TLS process identity changed; refusing to kill reused PID'\n      $ownedProcess.Kill();Assert ($ownedProcess.WaitForExit(5000)) 'owned TLS process cleanup timeout';$killed++;$ownedProcess.Dispose()\n    }\n  }\n}\n# Recover the narrow Start-Process / process-journal gap, never a process-name\n# sweep. Both the unique uploaded path and the exact nonce argument must match.\n$recovered=0\n$remaining=@(Get-CimInstance Win32_Process|Where-Object{$_.ExecutablePath-and $_.ExecutablePath-eq (Join-Path $root 'fc-bootstrap.exe')})\nforeach($candidate in $remaining){\n  Assert ($candidate.CommandLine-and $candidate.CommandLine.Contains('--ordinary-https-probe')-and $candidate.CommandLine.Contains($marker)) 'unjournaled executable is not this owned diagnostic'\n  $ownedProcess=Get-Process -Id $candidate.ProcessId\n  $retainedHandle=$ownedProcess.Handle\n  Assert ($retainedHandle-ne [IntPtr]::Zero) 'recovered TLS process handle unavailable during cleanup'\n  Assert ($ownedProcess.Path-eq (Join-Path $root 'fc-bootstrap.exe')) 'unjournaled diagnostic path changed'\n  $ownedProcess.Kill();Assert ($ownedProcess.WaitForExit(5000)) 'recovered owned TLS process cleanup timeout';$recovered++;$ownedProcess.Dispose()\n}\n$remaining=@(Get-CimInstance Win32_Process|Where-Object{$_.ExecutablePath-and $_.ExecutablePath-eq (Join-Path $root 'fc-bootstrap.exe')})\nAssert ($remaining.Count-eq 0) 'owned TLS executable still running or process journal missing'\n@{status='PASS';ownedProcessesRemaining=0;ownedProcessesKilled=$killed;recoveredNativeProcesses=$recovered}|ConvertTo-Json -Compress\n"
+    },
+    "tls-capture.ps1": {
+      "bytes": 2452,
+      "sha256": "c073c918934bd6189c276e2b0211e23dc8a24af3991e518f8a03cd342b25d59e",
+      "source": "\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\nfunction Assert([bool]$Condition,[string]$Message){if(!$Condition){throw $Message}}\nfunction Write-Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 8 -Compress),[Text.UTF8Encoding]::new($false))}\nfunction Store-Snapshot([string]$Exclude=''){\n  $entries=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.Thumbprint-ne $Exclude}|ForEach-Object{\n    $cert=$_;$sha=[Security.Cryptography.SHA256]::Create()\n    try{$der=([BitConverter]::ToString($sha.ComputeHash($cert.RawData))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n    $cert.Thumbprint.ToUpperInvariant()+':'+$der+':'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$cert.FriendlyName))+':'+$cert.HasPrivateKey\n  })\n  [Array]::Sort($entries,[StringComparer]::Ordinal)\n  $sha=[Security.Cryptography.SHA256]::Create()\n  try{$digest=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($entries-join \"`n\"))))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n  return @{count=$entries.Count;sha256=$digest}\n}\n\n$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53';$marker='FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53'\nAssert (([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-eq $marker) 'TLS capture root marker mismatch'\n$data=@{}\nforeach($name in @('tls.stdout','tls.stderr','.tls-process.json','.tls-supervisor.json','.tls-setup-process.json','.tls-fixture.json','tls-public.pem')){\n  $path=Join-Path $root $name\n  if(Test-Path -LiteralPath $path){\n    # The process is physically stopped before this script runs. Hash a stream,\n    # never load a potentially oversized original failure log into memory/JSON.\n    $stream=[IO.File]::Open($path,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)\n    $sha=[Security.Cryptography.SHA256]::Create()\n    try{\n      $length=$stream.Length\n      $digest=([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-','').ToLowerInvariant()\n      Assert ($stream.Length-eq $length) 'TLS raw evidence length changed while hashing'\n      $data[$name]=@{bytes=$length;sha256=$digest}\n    }finally{$sha.Dispose();$stream.Dispose()}\n  }\n}\n$data|ConvertTo-Json -Depth 4 -Compress\n"
+    },
+    "tls-setup.ps1": {
+      "bytes": 4295,
+      "sha256": "9f772fa71ef8855ffc7f15b9d0e3e93b3e199be6ce3099afd98b4ba0687de790",
+      "source": "\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\nfunction Assert([bool]$Condition,[string]$Message){if(!$Condition){throw $Message}}\nfunction Write-Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 8 -Compress),[Text.UTF8Encoding]::new($false))}\nfunction Store-Snapshot([string]$Exclude=''){\n  $entries=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.Thumbprint-ne $Exclude}|ForEach-Object{\n    $cert=$_;$sha=[Security.Cryptography.SHA256]::Create()\n    try{$der=([BitConverter]::ToString($sha.ComputeHash($cert.RawData))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n    $cert.Thumbprint.ToUpperInvariant()+':'+$der+':'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$cert.FriendlyName))+':'+$cert.HasPrivateKey\n  })\n  [Array]::Sort($entries,[StringComparer]::Ordinal)\n  $sha=[Security.Cryptography.SHA256]::Create()\n  try{$digest=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($entries-join \"`n\"))))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n  return @{count=$entries.Count;sha256=$digest}\n}\n\n$marker='FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53';$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53'\nAssert (([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-eq $marker) 'TLS root marker mismatch'\n$setupProcess=Get-Process -Id $PID\nWrite-Json (Join-Path $root '.tls-setup-process.json') @{marker=$marker;pid=$PID;startTicks=$setupProcess.StartTime.ToUniversalTime().Ticks.ToString();exe=$setupProcess.Path}\n$setupProcess.Dispose()\n$provider=[Security.Cryptography.CngProvider]::MicrosoftSoftwareKeyStorageProvider\n$keyName=$marker+'-key'\n$before=Store-Snapshot\nAssert (![Security.Cryptography.CngKey]::Exists($keyName,$provider)) 'unique TLS key unexpectedly exists'\nAssert (@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.FriendlyName-eq $marker}).Count-eq 0) 'unique TLS certificate unexpectedly exists'\n$manifest=@{marker=$marker;keyName=$keyName;provider=$provider.Provider;keyAbsentBefore=$true;before=$before;thumbprint=$null}\nWrite-Json (Join-Path $root '.tls-fixture.json') $manifest\n$cert=New-SelfSignedCertificate -Type SSLServerAuthentication -Subject 'CN=localhost' -TextExtension @('2.5.29.17={text}DNS=localhost&IPAddress=127.0.0.1') -CertStoreLocation 'Cert:\\CurrentUser\\My' -Provider $provider.Provider -Container $keyName -KeyAlgorithm RSA -KeyLength 2048 -HashAlgorithm SHA256 -KeyExportPolicy NonExportable -KeyUsage DigitalSignature,KeyEncipherment -NotBefore (Get-Date).AddMinutes(-5) -NotAfter (Get-Date).AddDays(1) -FriendlyName $marker\n$manifest.thumbprint=$cert.Thumbprint.ToUpperInvariant()\nWrite-Json (Join-Path $root '.tls-fixture.json') $manifest\n$rsa=$null\ntry{\n  $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)\n  Assert ($rsa-is [Security.Cryptography.RSACng]) 'TLS fixture key is not CNG'\n  Assert ($rsa.Key.KeyName-eq $keyName-and $rsa.Key.Provider.Provider-eq $provider.Provider) 'TLS fixture key ownership mismatch'\n}finally{if($rsa){$rsa.Dispose()}}\nAssert ([Security.Cryptography.CngKey]::Exists($keyName,$provider)) 'TLS fixture key missing after creation'\n$unrelated=Store-Snapshot $manifest.thumbprint\nAssert ($unrelated.count-eq $before.count-and $unrelated.sha256-eq $before.sha256) 'unrelated MY certificates changed during fixture creation'\n$der=$cert.RawData\n$pem=\"-----BEGIN CERTIFICATE-----`n\"+[Convert]::ToBase64String($der,[Base64FormattingOptions]::InsertLineBreaks).Replace(\"`r\",'')+\"`n-----END CERTIFICATE-----`n\"\n[IO.File]::WriteAllText((Join-Path $root 'tls-public.pem'),$pem,[Text.ASCIIEncoding]::new())\n$os=Get-CimInstance Win32_OperatingSystem\n@{thumbprint=$manifest.thumbprint;keyName=$keyName;provider=$provider.Provider;myBefore=$before;publicPem=$pem;privateKeyExported=$false;san=(@($cert.Extensions|Where-Object{$_.Oid.Value-eq '2.5.29.17'}|ForEach-Object{$_.Format($false)})-join ';');platform=@{caption=$os.Caption;version=$os.Version;build=$os.BuildNumber;osArchitecture=$os.OSArchitecture}}|ConvertTo-Json -Depth 5 -Compress\n"
+    },
+    "tls-launch.ps1": {
+      "bytes": 4467,
+      "sha256": "acfe84c6ffec04198501f6c6b4d26fe7e820fd643c3552d89a3445b21b027412",
+      "source": "\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\nfunction Assert([bool]$Condition,[string]$Message){if(!$Condition){throw $Message}}\nfunction Write-Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 8 -Compress),[Text.UTF8Encoding]::new($false))}\nfunction Store-Snapshot([string]$Exclude=''){\n  $entries=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.Thumbprint-ne $Exclude}|ForEach-Object{\n    $cert=$_;$sha=[Security.Cryptography.SHA256]::Create()\n    try{$der=([BitConverter]::ToString($sha.ComputeHash($cert.RawData))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n    $cert.Thumbprint.ToUpperInvariant()+':'+$der+':'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$cert.FriendlyName))+':'+$cert.HasPrivateKey\n  })\n  [Array]::Sort($entries,[StringComparer]::Ordinal)\n  $sha=[Security.Cryptography.SHA256]::Create()\n  try{$digest=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($entries-join \"`n\"))))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n  return @{count=$entries.Count;sha256=$digest}\n}\n$ordinaryPort=49895\n\n$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53';$marker='FutureClassroom-Test-TLS-d7d060b57af64656965781481c16da53';$thumbprint='5A7AEA38F023E93087D9EA400A4BE215C283700C';$exe=Join-Path $root 'fc-bootstrap.exe'\nAssert (([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-eq $marker) 'TLS launch root marker mismatch'\n$env:TEMP=Join-Path $root 'temp';$env:TMP=$env:TEMP\nNew-Item -ItemType Directory -Path $env:TEMP|Out-Null\n$child=$null;$handle=[IntPtr]::Zero;$seen=0;$watch=[Diagnostics.Stopwatch]::StartNew()\n$supervisor=Get-Process -Id $PID\nWrite-Json (Join-Path $root '.tls-supervisor.json') @{marker=$marker;pid=$PID;startTicks=$supervisor.StartTime.ToUniversalTime().Ticks.ToString();exe=$supervisor.Path}\n$supervisor.Dispose()\nfunction Forward-Lines {\n  $path=Join-Path $root 'tls.stdout'\n  if(Test-Path -LiteralPath $path){\n    # Start-Process retains a redirected writer while the child is running.\n    # Permit that writer explicitly; ReadAllText's sharing mode conflicts with\n    # it. Keep both byte checks and a fixed, capped character allocation.\n    $stream=[IO.File]::Open($path,[IO.FileMode]::Open,[IO.FileAccess]::Read,([IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete))\n    $reader=$null\n    try{\n      Assert ($stream.Length-le 524288) 'native TLS stdout exceeded diagnostic bound'\n      $reader=[IO.StreamReader]::new($stream,[Text.UTF8Encoding]::new($false,$true),$false,4096,$true)\n      $chars=[char[]]::new(524289)\n      $length=$reader.ReadBlock($chars,0,$chars.Length)\n      Assert ($length -le 524288 -and $stream.Length -le 524288) 'native TLS stdout grew beyond diagnostic bound'\n      $text=[string]::new($chars,0,$length)\n    }finally{if($reader){$reader.Dispose()};$stream.Dispose()}\n    $lines=$text.Split([char]10)\n    $complete=$lines.Length-1\n    while($script:seen-lt $complete){[Console]::WriteLine($lines[$script:seen].TrimEnd([char]13));$script:seen++}\n    [Console]::Out.Flush()\n  }\n}\ntry{\n  $child=Start-Process -FilePath $exe -ArgumentList @('--ordinary-https-probe',$thumbprint,[string]$ordinaryPort,('\"'+(Join-Path $root 'web-package')+'\"'),$marker) -WindowStyle Hidden -WorkingDirectory $root -RedirectStandardOutput (Join-Path $root 'tls.stdout') -RedirectStandardError (Join-Path $root 'tls.stderr') -PassThru\n  $handle=$child.Handle\n  Assert ($handle-ne [IntPtr]::Zero) 'owned native TLS process handle missing'\n  $entry=@{marker=$marker;pid=$child.Id;startTicks=$child.StartTime.ToUniversalTime().Ticks.ToString();exe=$exe}\n  Write-Json (Join-Path $root '.tls-process.json') $entry\n  while(!$child.WaitForExit(10)){\n    Forward-Lines\n    Assert ($watch.ElapsedMilliseconds-lt 90000) 'native TLS diagnostic exceeded its independent 90-second observation limit'\n  }\n  Forward-Lines\n  Assert ($child.ExitCode-is [int]) 'actual native TLS Int32 exit code missing'\n  [Console]::WriteLine('TLS_FRONTDOOR_PROCESS_EXIT '+(@{code=$child.ExitCode}|ConvertTo-Json -Compress));[Console]::Out.Flush()\n}finally{\n  if($child){\n    if(!$child.HasExited){$child.Kill();Assert ($child.WaitForExit(5000)) 'owned TLS child did not terminate after diagnostic failure'}\n    $child.Dispose()\n  }\n}\n"
+    }
+  },
+  "clientVerification": {
+    "checkHostname": true,
+    "verifyMode": "CERT_REQUIRED",
+    "serverName": "127.0.0.1",
+    "minimumTls": "TLSv1.2",
+    "maximumTls": "TLSv1.2",
+    "peerCertificate": "EXACT_OWNED_DER",
+    "trustSource": "only owned public PEM",
+    "cleanTlsEof": "REQUIRED",
+    "systemTrust": "UNCHANGED"
+  },
+  "error": {
+    "kind": "RuntimeError",
+    "phase": "ordinary-https-composition",
+    "message": "ordinary exact twenty-five steps"
+  },
+  "sshLauncherRaw": {
+    "stdout": {
+      "bytes": 113,
+      "observedBytes": 113,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "f2529145715ab5416d7c818be5a38515ac16082ba0f72bac8902ba323db41282",
+      "base64": "T1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MCBuYW1lPXNldHVwLWxvY2FsLWdsb2JhbC1hZG1pbmlzdHJhdG9yDQpUTFNfRlJPTlRET09SX1BST0NFU1NfRVhJVCB7ImNvZGUiOjF9DQo="
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "sshTunnelRaw": {
+    "stdout": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "pairingSecretCleanup": "PASS",
+  "ownedProcessCleanup": {
+    "ownedProcessesRemaining": 0,
+    "status": "PASS",
+    "recoveredNativeProcesses": 0,
+    "ownedProcessesKilled": 0
+  },
+  "remoteRawEvidence": {
+    "tls.stdout": {
+      "bytes": 73,
+      "sha256": "9ec8902340b4579712fe08ded16d0ed66dff55e4d723e65c9252107ff0e4d3d1"
+    },
+    ".tls-process.json": {
+      "bytes": 240,
+      "sha256": "8cd1877564e9ef916b6d8b9285f33a3a89e5d3a581621cf2d2f20b46b2f982ff"
+    },
+    "tls-public.pem": {
+      "bytes": 1141,
+      "sha256": "7cf3ec1d85c053139beb62dc6b58ef128c3809fabc0434cf4d6efd1a96544e6a"
+    },
+    "tls.stderr": {
+      "bytes": 1121,
+      "sha256": "52f8bc1f335b7b73206144074bdcab280d71f0a83344baa5ea66a7dc29659ba7"
+    },
+    ".tls-supervisor.json": {
+      "bytes": 187,
+      "sha256": "7f889d4b4ec94eecbbd735f25e2278b099ab657865821146d44247e1ffcc7676"
+    },
+    ".tls-setup-process.json": {
+      "bytes": 187,
+      "sha256": "5c102c6accfc69e2a3b6cdad77546f0e7f2472ae06fa0bd595db876bccbb92b4"
+    },
+    ".tls-fixture.json": {
+      "bytes": 373,
+      "sha256": "d42daa82acbdbed03718483dd7650e0e2e33a059e8a527cac7e1f281c8f1dca6"
+    }
+  },
+  "rawPreservation": {
+    "status": "PASS",
+    "directory": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-first-d7d060b57af64656965781481c16da53-raw",
+    "files": {
+      "tls.stdout": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 73,
+          "sha256": "9ec8902340b4579712fe08ded16d0ed66dff55e4d723e65c9252107ff0e4d3d1"
+        },
+        "downloaded": {
+          "bytes": 73,
+          "sha256": "9ec8902340b4579712fe08ded16d0ed66dff55e4d723e65c9252107ff0e4d3d1"
+        },
+        "artifact": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-first-d7d060b57af64656965781481c16da53-raw/tls.stdout",
+        "base64": "T1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MCBuYW1lPXNldHVwLWxvY2FsLWdsb2JhbC1hZG1pbmlzdHJhdG9yCg=="
+      },
+      ".tls-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 240,
+          "sha256": "8cd1877564e9ef916b6d8b9285f33a3a89e5d3a581621cf2d2f20b46b2f982ff"
+        },
+        "downloaded": {
+          "bytes": 240,
+          "sha256": "8cd1877564e9ef916b6d8b9285f33a3a89e5d3a581621cf2d2f20b46b2f982ff"
+        },
+        "artifact": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-first-d7d060b57af64656965781481c16da53-raw/.tls-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtZDdkMDYwYjU3YWY2NDY1Njk2NTc4MTQ4MWMxNmRhNTMiLCJleGUiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLWQ3ZDA2MGI1N2FmNjQ2NTY5NjU3ODE0ODFjMTZkYTUzXFxmYy1ib290c3RyYXAuZXhlIiwicGlkIjozMDU2NCwic3RhcnRUaWNrcyI6IjYzOTI5MTE2ODc1NTM5ODc1NSJ9"
+      },
+      "tls-public.pem": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 1141,
+          "sha256": "7cf3ec1d85c053139beb62dc6b58ef128c3809fabc0434cf4d6efd1a96544e6a"
+        },
+        "downloaded": {
+          "bytes": 1141,
+          "sha256": "7cf3ec1d85c053139beb62dc6b58ef128c3809fabc0434cf4d6efd1a96544e6a"
+        },
+        "artifact": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-first-d7d060b57af64656965781481c16da53-raw/tls-public.pem",
+        "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURIakNDQWdhZ0F3SUJBZ0lRTk1oV3o0SjlwSVpMNjRwYi9mVERFakFOQmdrcWhraUc5dzBCQVFzRkFEQVVNUkl3RUFZRFZRUUQKREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TVRBeE1EYzFOakV5V2hjTk1qWXhNVEF5TURnd01URXlXakFVTVJJd0VBWURWUVFEREFscwpiMk5oYkdodmMzUXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDalBXQjd3V3pLUzJ4bEJTN0hWc0N5CmFtRFZFY094cDhJRjlEclk4dmYzck00N09yWlhmVExoSUp6OCs4blFDaWFhVjg3RU5zd0Z0OGwxYjJydW5KdzFZKzdCMld6VEJwa1EKY0ZKVmVoYlh2KzYrV2lnRTdWQzlKTnUyTUo5dlJpYTJhQWFsZUVoZHNwWXdBditYRjFsYThlM0hGYkpiSHF2MzhhWC9vUVBlcTI1NQovUGRsTXhyQTZIajFEWUhSVTN5T1FrcXorYmMyQ0hKcDF6QTNBeEtvUzk1RkxHNGtEL3gzVXhwKzlOeXBXM2VCVkxTYUQySWs2cVVQCm51ZWFyTGhERkhMdm1tTmN4VFJYV1ZSRUxjSmtJdzhQUWN3VVRuOThON1h4MHZYNDBEQm45NGFUa3d3ajdiVlZ3M1c4aE1RcFhnU2QKUFpqbU95K0hkYXlPVnJaVkFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRApBZ1lJS3dZQkJRVUhBd0V3R2dZRFZSMFJCQk13RVlJSmJHOWpZV3hvYjNOMGh3Ui9BQUFCTUIwR0ExVWREZ1FXQkJRMzd3V0d4b3BtCldzZmJlMVVXSno0V1dib24xVEFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBTlZ3TUNqWk1UVWtpem1HZ0Z2ck50MzE4WVIyMzVXcGcKZzROdzl2TW1kOFF5UGpPTEoyNjlDZFFaZGtkcnlYTWZoQXdUTjRINkhVZFJUWDJRemkzSVVzaURYQURjcml1S3FJcDVZUEwzNzNlLwpZYkI4ejU0VkRVb1FtRTRMay9BSFgrWGtBN2puSW4rTU1RK2VscmMvaXFhTzZsakJsbmJaNkhWaTd5cXBwK2NWMWJZOC9zSnkyMUR3Ck93cjdYaTRNUjQ0cFlxREhuM014N01xbXRjb3NzMmYrRkVjeGFMdXlFNXdOczFodURtdEQrcDBFZHhTUm16OUNKendQQ3lZVENJV2YKYTZKNEVEZW0ydldaYlJhaEJsU0M2d245WXpYMGdWMDk4UkRUeDZNWDlidnBYcnp1bnRHcDVJWFBkbE5WUyszdHYxZlZzQ05hNXNqSApDMTlPS0E9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+      },
+      "tls.stderr": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 1121,
+          "sha256": "52f8bc1f335b7b73206144074bdcab280d71f0a83344baa5ea66a7dc29659ba7"
+        },
+        "downloaded": {
+          "bytes": 1121,
+          "sha256": "52f8bc1f335b7b73206144074bdcab280d71f0a83344baa5ea66a7dc29659ba7"
+        },
+        "artifact": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-first-d7d060b57af64656965781481c16da53-raw/tls.stderr",
+        "base64": "UFJPQkVfU1VCTUlUIHRpY2s9MSBraW5kPW90aGVyIHBhZ2U95q2j5Zyo5omT5byA5pyq5p2l5pWZ5a6kClBST0JFX0NPTVBMRVRFIHRpY2s9NTEga2luZD1vdGhlciBwYWdlPeato+WcqOaJk+W8gOacquadpeaVmeWupApQUk9CRV9FVkVOVCB0aWNrPTU5IGFjdGlvbj0xIHBhZ2U96aaW5qyh6K6+572uIMK3IOWIm+W7uuS4u+euoeeQhuWRmCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9TVUJNSVQgdGljaz02OSBraW5kPXJlcXVlc3QgcGFnZT3pppbmrKHorr7nva4gwrcg5Yib5bu65Li7566h55CG5ZGYClBST0JFX0NPTVBMRVRFIHRpY2s9MTM0IGtpbmQ9dXBkYXRlZCBwYWdlPemmluasoeiuvue9riDCtyDliJvlu7rkuLvnrqHnkIblkZgKUFJPQkVfRVZFTlQgdGljaz0xNDEgYWN0aW9uPTUgcGFnZT3or7fkv53lrZjmgaLlpI3noIEgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTAKUFJPQkVfRVZFTlQgdGljaz0xNTIgYWN0aW9uPTMgcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOeZu+W9leW3peS9nOWPsCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9TVUJNSVQgdGljaz0xNjIga2luZD1yZXF1ZXN0IHBhZ2U9U3ludGhldGljIG9yZGluYXJ5IEhUVFBTIHNjaG9vbCDCtyDnmbvlvZXlt6XkvZzlj7AKUFJPQkVfQ09NUExFVEUgdGljaz0yMTkga2luZD11cGRhdGVkIHBhZ2U9U3ludGhldGljIG9yZGluYXJ5IEhUVFBTIHNjaG9vbCDCtyDnmbvlvZXlt6XkvZzlj7AKUFJPQkVfRVZFTlQgdGljaz0yMjIgYWN0aW9uPTcgcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOW3peS9nOWPsCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9FVkVOVCB0aWNrPTIyNCBhY3Rpb249MTMgcGFnZT3lrabmoKHkuI7nj63nuqcgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTAKUFJPQkVfU1VCTUlUIHRpY2s9MjI1IGtpbmQ9cmVxdWVzdCBwYWdlPeWtpuagoeS4juePree6pwpQUk9CRV9DT01QTEVURSB0aWNrPTIzMSBraW5kPXVwZGF0ZWQgcGFnZT3lrabmoKHkuI7nj63nuqcKRnV0dXJlQ2xhc3Nyb29tOiB2b2ljZS1zZXR0aW5ncy1wcm9iZTogaGlkZGVuIG5hdGl2ZSBjb250cm9sIGFkbWlzc2lvbgo="
+      },
+      ".tls-supervisor.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "7f889d4b4ec94eecbbd735f25e2278b099ab657865821146d44247e1ffcc7676"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "7f889d4b4ec94eecbbd735f25e2278b099ab657865821146d44247e1ffcc7676"
+        },
+        "artifact": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-first-d7d060b57af64656965781481c16da53-raw/.tls-supervisor.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtZDdkMDYwYjU3YWY2NDY1Njk2NTc4MTQ4MWMxNmRhNTMiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6NDE2NDAsInN0YXJ0VGlja3MiOiI2MzkyOTExNjg3NTI0MDQ5ODcifQ=="
+      },
+      ".tls-setup-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "5c102c6accfc69e2a3b6cdad77546f0e7f2472ae06fa0bd595db876bccbb92b4"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "5c102c6accfc69e2a3b6cdad77546f0e7f2472ae06fa0bd595db876bccbb92b4"
+        },
+        "artifact": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-first-d7d060b57af64656965781481c16da53-raw/.tls-setup-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtZDdkMDYwYjU3YWY2NDY1Njk2NTc4MTQ4MWMxNmRhNTMiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MjQ2MjgsInN0YXJ0VGlja3MiOiI2MzkyOTExNjg3MjAzNTg1OTAifQ=="
+      },
+      ".tls-fixture.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 373,
+          "sha256": "d42daa82acbdbed03718483dd7650e0e2e33a059e8a527cac7e1f281c8f1dca6"
+        },
+        "downloaded": {
+          "bytes": 373,
+          "sha256": "d42daa82acbdbed03718483dd7650e0e2e33a059e8a527cac7e1f281c8f1dca6"
+        },
+        "artifact": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-first-d7d060b57af64656965781481c16da53-raw/.tls-fixture.json",
+        "base64": "eyJ0aHVtYnByaW50IjoiNUE3QUVBMzhGMDIzRTkzMDg3RDlFQTQwMEE0QkUyMTVDMjgzNzAwQyIsInByb3ZpZGVyIjoiTWljcm9zb2Z0IFNvZnR3YXJlIEtleSBTdG9yYWdlIFByb3ZpZGVyIiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLWQ3ZDA2MGI1N2FmNjQ2NTY5NjU3ODE0ODFjMTZkYTUzIiwiYmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImtleUFic2VudEJlZm9yZSI6dHJ1ZSwia2V5TmFtZSI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy1kN2QwNjBiNTdhZjY0NjU2OTY1NzgxNDgxYzE2ZGE1My1rZXkifQ=="
+      }
+    }
+  },
+  "cleanupDetails": {
+    "myAfter": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    },
+    "cngKeyExists": false,
+    "httpSys": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "rootAbsent": true,
+    "deleteKeyFallbackUsed": false,
+    "rootTrustStore": "UNTOUCHED",
+    "certificatesRemoved": 1,
+    "firewall": "UNTOUCHED",
+    "myDigestRestored": true,
+    "status": "PASS",
+    "ownedProcessesRemaining": 0
+  },
+  "remoteControlRunsRaw": [
+    {
+      "script": "tls-setup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 1655,
+        "sha256": "65f7d76905e06be75c9bf63d0dd16f3d6b7b09c1d62bcee008ba8fee1642d9d2",
+        "base64": "eyJ0aHVtYnByaW50IjoiNUE3QUVBMzhGMDIzRTkzMDg3RDlFQTQwMEE0QkUyMTVDMjgzNzAwQyIsImtleU5hbWUiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtZDdkMDYwYjU3YWY2NDY1Njk2NTc4MTQ4MWMxNmRhNTMta2V5Iiwic2FuIjoiRE5TIE5hbWU9bG9jYWxob3N0LCBJUCBBZGRyZXNzPTEyNy4wLjAuMSIsInBsYXRmb3JtIjp7ImNhcHRpb24iOiJNaWNyb3NvZnQgV2luZG93cyAxMSDkuJPkuJrniYgiLCJvc0FyY2hpdGVjdHVyZSI6IjY0LWJpdCIsImJ1aWxkIjoiMjYzMDAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCJ9LCJwcml2YXRlS2V5RXhwb3J0ZWQiOmZhbHNlLCJwcm92aWRlciI6Ik1pY3Jvc29mdCBTb2Z0d2FyZSBLZXkgU3RvcmFnZSBQcm92aWRlciIsInB1YmxpY1BlbSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJREhqQ0NBZ2FnQXdJQkFnSVFOTWhXejRKOXBJWkw2NHBiL2ZUREVqQU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRFxuREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TVRBeE1EYzFOakV5V2hjTk1qWXhNVEF5TURnd01URXlXakFVTVJJd0VBWURWUVFEREFsc1xuYjJOaGJHaHZjM1F3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRQ2pQV0I3d1d6S1MyeGxCUzdIVnNDeVxuYW1EVkVjT3hwOElGOURyWTh2ZjNyTTQ3T3JaWGZUTGhJSno4KzhuUUNpYWFWODdFTnN3RnQ4bDFiMnJ1bkp3MVkrN0IyV3pUQnBrUVxuY0ZKVmVoYlh2KzYrV2lnRTdWQzlKTnUyTUo5dlJpYTJhQWFsZUVoZHNwWXdBditYRjFsYThlM0hGYkpiSHF2MzhhWC9vUVBlcTI1NVxuL1BkbE14ckE2SGoxRFlIUlUzeU9Ra3F6K2JjMkNISnAxekEzQXhLb1M5NUZMRzRrRC94M1V4cCs5TnlwVzNlQlZMU2FEMklrNnFVUFxubnVlYXJMaERGSEx2bW1OY3hUUlhXVlJFTGNKa0l3OFBRY3dVVG45OE43WHgwdlg0MERCbjk0YVRrd3dqN2JWVnczVzhoTVFwWGdTZFxuUFpqbU95K0hkYXlPVnJaVkFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRFxuQWdZSUt3WUJCUVVIQXdFd0dnWURWUjBSQkJNd0VZSUpiRzlqWVd4b2IzTjBod1IvQUFBQk1CMEdBMVVkRGdRV0JCUTM3d1dHeG9wbVxuV3NmYmUxVVdKejRXV2JvbjFUQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFOVndNQ2paTVRVa2l6bUdnRnZyTnQzMThZUjIzNVdwZ1xuZzROdzl2TW1kOFF5UGpPTEoyNjlDZFFaZGtkcnlYTWZoQXdUTjRINkhVZFJUWDJRemkzSVVzaURYQURjcml1S3FJcDVZUEwzNzNlL1xuWWJCOHo1NFZEVW9RbUU0TGsvQUhYK1hrQTdqbkluK01NUStlbHJjL2lxYU82bGpCbG5iWjZIVmk3eXFwcCtjVjFiWTgvc0p5MjFEd1xuT3dyN1hpNE1SNDRwWXFESG4zTXg3TXFtdGNvc3MyZitGRWN4YUx1eUU1d05zMWh1RG10RCtwMEVkeFNSbXo5Q0p6d1BDeVlUQ0lXZlxuYTZKNEVEZW0ydldaYlJhaEJsU0M2d245WXpYMGdWMDk4UkRUeDZNWDlidnBYcnp1bnRHcDVJWFBkbE5WUyszdHYxZlZzQ05hNXNqSFxuQzE5T0tBPT1cbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS1cbiIsIm15QmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-stop.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 101,
+        "sha256": "53af853d103fe4958b2bdf1ffb1afe8ffafe11de85c35a9d735fc38f0cb2ea42",
+        "base64": "eyJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MCwic3RhdHVzIjoiUEFTUyIsInJlY292ZXJlZE5hdGl2ZVByb2Nlc3NlcyI6MCwib3duZWRQcm9jZXNzZXNLaWxsZWQiOjB9DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-capture.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 766,
+        "sha256": "cdcd45dd27eea35cd2356ebf28171e3b3f0196aca0fe87ece6c18c8f8fc9970d",
+        "base64": "eyJ0bHMuc3Rkb3V0Ijp7ImJ5dGVzIjo3Mywic2hhMjU2IjoiOWVjODkwMjM0MGI0NTc5NzEyZmUwOGRlZDE2ZDBlZDY2ZGZmNTVlNGQ3MjNlNjVjOTI1MjEwN2ZmMGU0ZDNkMSJ9LCIudGxzLXByb2Nlc3MuanNvbiI6eyJieXRlcyI6MjQwLCJzaGEyNTYiOiI4Y2QxODc3NTY0ZTllZjkxNmI2ZDhiOTI4NWYzM2EzYTg5ZTVkM2E1ODE2MjFjZjJkMmYyMGI0NmIyZjk4MmZmIn0sInRscy1wdWJsaWMucGVtIjp7ImJ5dGVzIjoxMTQxLCJzaGEyNTYiOiI3Y2YzZWMxZDg1YzA1MzEzOWJlYjYyZGM2YjU4ZWYxMjhjMzgwOWZhYmMwNDM0Y2Y0ZDZlZmQxYTk2NTQ0ZTZhIn0sInRscy5zdGRlcnIiOnsiYnl0ZXMiOjExMjEsInNoYTI1NiI6IjUyZjhiYzFmMzM1YjdiNzMyMDYxNDQwNzRiZGNhYjI4MGQ3MWYwYTgzMzQ0YmFhNWVhNjZhN2RjMjk2NTliYTcifSwiLnRscy1zdXBlcnZpc29yLmpzb24iOnsiYnl0ZXMiOjE4Nywic2hhMjU2IjoiN2Y4ODlkNGI0ZWM5NGVlY2JiZDczNWYyNWUyMjc4YjA5OWFiNjU3ODY1ODIxMTQ2ZDQ0MjQ3ZTFmZmNjNzY3NiJ9LCIudGxzLXNldHVwLXByb2Nlc3MuanNvbiI6eyJieXRlcyI6MTg3LCJzaGEyNTYiOiI1YzEwMmM2YWNjZmM2OWUyYTNiNmNkYWQ3NzU0NmYwZTdmMjQ3MmFlMDZmYTBiZDU5NWRiODc2YmNjYmI5MmI0In0sIi50bHMtZml4dHVyZS5qc29uIjp7ImJ5dGVzIjozNzMsInNoYTI1NiI6ImQ0MmRhYTgyYWNiZGJlZDAzNzE4NDgzZGQ3NjUwZTBlMmUzM2EwNTllOGE1MjdjYWM3ZTFmMjgxYzhmMWRjYTYifX0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-cleanup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 367,
+        "sha256": "e9b460e15bfb44a4deff8e9c3252b582180ed8e64239d0ecbcc63102979228c3",
+        "base64": "eyJteUFmdGVyIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImNuZ0tleUV4aXN0cyI6ZmFsc2UsImh0dHBTeXMiOiJVTlRPVUNIRUQiLCJzc2hDb25maWd1cmF0aW9uIjoiVU5UT1VDSEVEIiwicm9vdEFic2VudCI6dHJ1ZSwiZGVsZXRlS2V5RmFsbGJhY2tVc2VkIjpmYWxzZSwicm9vdFRydXN0U3RvcmUiOiJVTlRPVUNIRUQiLCJjZXJ0aWZpY2F0ZXNSZW1vdmVkIjoxLCJmaXJld2FsbCI6IlVOVE9VQ0hFRCIsIm15RGlnZXN0UmVzdG9yZWQiOnRydWUsInN0YXR1cyI6IlBBU1MiLCJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MH0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}

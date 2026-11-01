@@ -1,0 +1,169 @@
+{
+  "status": "TWO_ACTUAL_FAILURES_RETAINED_NOT_WORKSPACE_PASS",
+  "recordedUtc": "2026-11-01T08:03:33.026858+00:00",
+  "sourceFreeze": {
+    "path": "joint-implementation-freeze-fourth.json",
+    "sha256": "fb957f0dfb80bc840507d2a737ba13f5aa09e436848bbe4e9d352a50df1cd196"
+  },
+  "normalSha256": "095ec698f35f947c300594ea839d146ddc4ec4cb4a5a26471d179c3702047230",
+  "runtime": {
+    "path": "windows-release-first.json",
+    "sha256": "b5bf72937189836895e481a80c568f98cba21ceb8c1c964ccbc9411d43ff3b08",
+    "actualHarnesses": 10,
+    "expectedHarnesses": 21,
+    "remainingHarnesses": "NOT_EXECUTED_AFTER_FIRST_FAILED_BINARY",
+    "cleanup": "PASS",
+    "harnesses": [
+      {
+        "binary": "fc_ports-15b1ad689f79c490.exe",
+        "sha256": "31a31a393eaf7c770e63e96f9ce135861c2e044c62499e75369e2e3bec0cc4e4",
+        "exitCode": 0,
+        "summary": {
+          "status": "ok",
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "binary": "fc_runtime-a09be73363edd23a.exe",
+        "sha256": "09a9879cc05abd238201f6c625067028d4815d82b1da75a3ea62cd11d774bf6e",
+        "exitCode": 0,
+        "summary": {
+          "status": "ok",
+          "passed": 33,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "binary": "fc_presentation-b847dfa3b68d1237.exe",
+        "sha256": "70a745c8b7eb6e5e7ab586047aaa09956829c10bd2d979a9a4976ea15c3c5206",
+        "exitCode": 0,
+        "summary": {
+          "status": "ok",
+          "passed": 58,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "binary": "fc_application-fb16268b5eff3acf.exe",
+        "sha256": "48ae5499ba739934a96afe848bc47933548caca43b8667e9944571b43da500a8",
+        "exitCode": 0,
+        "summary": {
+          "status": "ok",
+          "passed": 25,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "binary": "fc_audio-e1b4eabc9ef1420f.exe",
+        "sha256": "9c25aa78ff6357714483974227957b5f024b3ab684e1d36ffe76fe87df7a901e",
+        "exitCode": 0,
+        "summary": {
+          "status": "ok",
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "binary": "fc_security-2889fa9301b88e80.exe",
+        "sha256": "82b10ebde335eb0e3d1ea27aa8ab1afce675aa32b3bec9a4928fceff88919cf8",
+        "exitCode": 0,
+        "summary": {
+          "status": "ok",
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "binary": "fc_protocol-4316bb63b92dda4d.exe",
+        "sha256": "d1b56eaf45b5eeb0d48c73ddda15ff58ae8d1b39f80709676b42d6f2e6f45a30",
+        "exitCode": 0,
+        "summary": {
+          "status": "ok",
+          "passed": 82,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "binary": "fc_materials-f1a7d58c131e95d5.exe",
+        "sha256": "e2967b40ad0ff5bcd551b230538a7eefc9e9775e58cf2b0a070ff22bb0eb4b5c",
+        "exitCode": 0,
+        "summary": {
+          "status": "ok",
+          "passed": 39,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "binary": "fc_domain-367747e306a1dd0e.exe",
+        "sha256": "ac9d6f63915f98d2351a3d8635c35f54e3dd1f277b9f177ade524da559fc0254",
+        "exitCode": 0,
+        "summary": {
+          "status": "ok",
+          "passed": 149,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "binary": "fc_windows-e3f8369176e1b545.exe",
+        "sha256": "621ac0d0b27a05837cbd4e11728f4493a0f4769c51350147297c937380ee3cb6",
+        "exitCode": 101,
+        "summary": {
+          "status": "FAILED",
+          "passed": 200,
+          "failed": 50,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      }
+    ],
+    "firstFailure": "configured_explicit_ipv4_and_ipv6_source_keeps_original_deadline_and_real_drain: TcpStream connect_timeout at fixture line147 returned Windows10013. Original output does not identify IPv4 versus IPv6 loop; root cause unresolved. Later lock poison and admission failures remain original failures, not individually reclassified as PASS."
+  },
+  "ordinaryProbe": {
+    "path": "windows-ordinary-https-first.json",
+    "sha256": "4603042cfb5f5505991244e573b8081f9c4840aa0e1cf93f6183f0674e0e5eb3",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "events": 0,
+    "nativeStderr": {
+      "path": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-first-d7d060b57af64656965781481c16da53-raw/tls.stderr",
+      "sha256": "52f8bc1f335b7b73206144074bdcab280d71f0a83344baa5ea66a7dc29659ba7"
+    },
+    "cause": "Fixture ADD_CLASS completes at Home; immediate BIND_CLASS is not an available native control. First native step only; TLS/teacher workflow has not run. Fix actual navigation and audit subsequent real form transitions without fabricating screen/session/readiness."
+  },
+  "notProven": [
+    "Full Windows workspace success",
+    "IPv6 runtime compatibility",
+    "Ordinary configured TLS/authentication/reminder or stop/restart success",
+    "Win7/Win10 OS runtime",
+    "Campus deployment"
+  ]
+}

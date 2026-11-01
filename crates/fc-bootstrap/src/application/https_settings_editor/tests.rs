@@ -33,6 +33,7 @@ fn form(host: &str, port: &str) -> FormData {
     data.insert(HOST, host.into()).unwrap();
     data.insert(PORT, port.into()).unwrap();
     data.insert(CERTIFICATE, "ab".repeat(20)).unwrap();
+    data.insert(SOURCE_NETWORKS, "127.0.0.1/32".into()).unwrap();
     data
 }
 fn edit() -> Editor {
@@ -259,4 +260,56 @@ fn pending_page_allows_only_cancel_wait_and_lock_with_readonly_fields() {
         .iter()
         .filter(|a| a.enabled)
         .all(|a| [CANCEL_WAIT, LOCK].contains(&a.id)));
+}
+
+#[test]
+fn source_policy_must_be_explicit_and_is_part_of_original_unknown_command() {
+    let mut absent = form("localhost", "8443");
+    absent.take(SOURCE_NETWORKS);
+    assert!(edit().capture(absent).is_err());
+    for invalid in ["", "0.0.0.0/0", "192.168.1.1/24", "::/0"] {
+        let mut data = form("localhost", "8443");
+        data.take(SOURCE_NETWORKS);
+        data.insert(SOURCE_NETWORKS, invalid.into()).unwrap();
+        assert!(edit().handle(owner(1), SAVE_CONFIG, data).is_err());
+    }
+    let mut e = edit();
+    e.capture(form("localhost", "8443")).unwrap();
+    let request = e.prepare_save(id(78), Instant::now()).unwrap();
+    assert_eq!(
+        request
+            .configuration
+            .as_ref()
+            .unwrap()
+            .source_networks
+            .as_ref()
+            .unwrap()
+            .to_text(),
+        "127.0.0.1/32"
+    );
+    e.accepted();
+    let mut changed = form("localhost", "8443");
+    changed.take(SOURCE_NETWORKS);
+    changed
+        .insert(SOURCE_NETWORKS, "192.168.10.0/24".into())
+        .unwrap();
+    e.capture(changed).unwrap();
+    assert_eq!(e.query_request(), Some(request));
+    assert!(e.dirty());
+    assert!(e.handle(owner(1), SAVE_CONFIG, FormData::new()).is_err());
+}
+#[test]
+fn legacy_saved_configuration_does_not_invent_source_networks() {
+    let mut e = Editor::new(owner(1));
+    e.loaded(configured(3));
+    let v = e.view(owner(1), "", false);
+    assert_eq!(
+        v.fields
+            .iter()
+            .find(|f| f.id == SOURCE_NETWORKS)
+            .unwrap()
+            .value,
+        ""
+    );
+    assert!(e.prepare_save(id(79), Instant::now()).is_err());
 }

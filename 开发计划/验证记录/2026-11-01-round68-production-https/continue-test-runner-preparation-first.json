@@ -1,0 +1,34 @@
+{
+  "status": "PREPARED_AST_PASS_NOT_EXECUTED",
+  "atUtc": "2026-11-01T08:13:01.159515+00:00",
+  "original": {
+    "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+    "bytes": 59676,
+    "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14"
+  },
+  "privateCopy": {
+    "path": "windows-probe-continue-tests-private-first.py",
+    "bytes": 60138,
+    "sha256": "3fcde8ac7b3408e151b5c2de41fabd8ea09e82fa3504fbef3c8f030a90151f1a"
+  },
+  "minimalDiff": {
+    "path": "windows-probe-continue-tests-minimal-first.diff",
+    "bytes": 1596,
+    "sha256": "e25c5e7fd099ef1bd64c276603fa76ec9855b41fa1d73584c27d05a513387b17"
+  },
+  "unchangedCleanupFinallyBytes": true,
+  "nonzeroHarnessExit": "record original failure and continue next original harness; final suite remains FAIL",
+  "unsafeExceptions": "unchanged fail-fast timeout/digest/transport/parse/other exceptions",
+  "testThreads": 2,
+  "testTimeoutSeconds": 900,
+  "nativeFlags": [
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--public-desktop"
+  ],
+  "windowsExecuted": false,
+  "sourceTreeEdited": false,
+  "cargoInvoked": false,
+  "testsFilteredOrSkipped": false
+}

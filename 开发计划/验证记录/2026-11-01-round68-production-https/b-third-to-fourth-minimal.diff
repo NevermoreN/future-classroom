@@ -1,0 +1,27 @@
+--- third/crates/fc-bootstrap/src/backend/web/runtime.rs
++++ fourth/crates/fc-bootstrap/src/backend/web/runtime.rs
+@@ -93,7 +93,7 @@
+             .inner
+             .runtime_epoch
+             .try_update(Ordering::AcqRel, Ordering::Acquire, |word| {
+-                Some(word.checked_add(2).unwrap_or(u64::MAX) & !1)
++                Some(word.saturating_add(2) & !1)
+             });
+         self.inner.runtime_stopping.store(true, Ordering::Release);
+         self.inner.runtime_ready.store(false, Ordering::Release);
+--- third/crates/fc-bootstrap/src/https_runtime.rs
++++ fourth/crates/fc-bootstrap/src/https_runtime.rs
+@@ -595,10 +595,12 @@
+     Pending(HttpJob),
+     Running(T),
+ }
++// Next original job/ticket owner plus a checked physical-drain observation.
++type CleanupPollResult<T> = Result<(Option<CleanupWork<T>>, bool), RuntimeError>;
+ fn poll_cleanup<E: HttpExecutor>(
+     work: CleanupWork<E::Ticket>,
+     executor: &E,
+-) -> Result<(Option<CleanupWork<E::Ticket>>, bool), RuntimeError> {
++) -> CleanupPollResult<E::Ticket> {
+     match work {
+         CleanupWork::Pending(job) => match executor.try_submit_http(job) {
+             Ok(ticket) => Ok((Some(CleanupWork::Running(ticket)), false)),

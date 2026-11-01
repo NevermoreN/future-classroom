@@ -1,8 +1,8 @@
-//! Finite loopback evidence for owned TLS execution. This is not a production
-//! listener and does not prove the strict first-connection scheduler deadline.
+//! Original pinned TLS execution owner, shared by isolated diagnostics and
+//! explicitly configured listeners. No hard real-time TCP scheduling claim.
 use super::{
-    worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsAcceptClose, TlsAcceptSnapshot,
-    TlsCloseSnapshot, TlsError, TlsHeaderClose, BUFFER_BYTES, CONNECTION_SLOTS,
+    worker::Worker, Call, CertificateThumbprint, ConfiguredTlsError, Frame, Step, TlsAcceptClose,
+    TlsAcceptSnapshot, TlsCloseSnapshot, TlsError, TlsHeaderClose, BUFFER_BYTES, CONNECTION_SLOTS,
     HEADER_CLOSE_RESERVE, PLAINTEXT_BYTES,
 };
 use fc_ports::http::{RequestToken, ResponseHead, TokenIssuer};
@@ -29,8 +29,11 @@ use windows::{
     },
 };
 mod accept;
+mod configured;
 mod stream;
 pub use stream::{TlsHttpEvent, TlsHttpHost};
+const ACCEPT_ADDRESS_LENGTH: u32 = 48;
+const ACCEPT_ADDRESS_BYTES: usize = 96;
 const BUDGET: Duration = Duration::from_secs(5);
 fn header_close_alarm(hard_deadline: Instant) -> Instant {
     hard_deadline
@@ -42,7 +45,7 @@ static OWNER_FAULTED: AtomicBool = AtomicBool::new(false);
 
 struct IoMemory {
     operation: UnsafeCell<OVERLAPPED>,
-    addresses: UnsafeCell<[u8; 64]>,
+    addresses: UnsafeCell<[u8; ACCEPT_ADDRESS_BYTES]>,
     bytes: UnsafeCell<[u8; BUFFER_BYTES]>,
     flags: UnsafeCell<u32>,
     _pinned: PhantomPinned,
@@ -117,6 +120,7 @@ struct Report {
     accept_idle_returns: u64,
     accept_handoffs: u64,
     accept_capacity_rejections: u64,
+    accept_source_rejections: u64,
     accept_expired_discards: u64,
     accept_error_discards: u64,
     accept_stop_discards: u64,
@@ -144,6 +148,12 @@ struct Report {
     explicit_retirements: usize,
     close_observations: TlsCloseSnapshot,
 }
+#[cfg(test)]
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum NativeReleaseFailure {
+    Iocp,
+    Winsock,
+}
 struct Owner {
     resources: ManuallyDrop<Resources>,
     started: Instant,
@@ -153,9 +163,17 @@ struct Owner {
     marker: String,
     stopping: bool,
     drained: bool,
+    cleanup_failed: bool,
+    #[cfg(test)]
+    release_failure: Option<NativeReleaseFailure>,
+    #[cfg(test)]
+    release_attempts: [usize; 2],
     report: Report,
     issuer: TokenIssuer,
+    credentials_ready: bool,
     http_mode: bool,
+    bind_address: std::net::SocketAddr,
+    source_networks: Option<fc_domain::https_settings::HttpsSourceNetworks>,
 }
 fn socket_handle(socket: SOCKET) -> HANDLE {
     HANDLE(socket.0 as *mut _)
@@ -216,6 +234,13 @@ fn close_with(
     Ok(())
 }
 impl Owner {
+    fn address_family(&self) -> ADDRESS_FAMILY {
+        if self.bind_address.is_ipv4() {
+            AF_INET
+        } else {
+            AF_INET6
+        }
+    }
     fn new(marker: &str) -> Result<Self, String> {
         let started = Instant::now();
         if OWNER_FAULTED.load(Ordering::Acquire)
@@ -242,7 +267,7 @@ impl Owner {
                     Slot {
                         memory: Box::pin(IoMemory {
                             operation: UnsafeCell::new(OVERLAPPED::default()),
-                            addresses: UnsafeCell::new([0; 64]),
+                            addresses: UnsafeCell::new([0; ACCEPT_ADDRESS_BYTES]),
                             bytes: UnsafeCell::new([0; BUFFER_BYTES]),
                             flags: UnsafeCell::new(0),
                             _pinned: PhantomPinned,
@@ -277,9 +302,17 @@ impl Owner {
             marker: marker.into(),
             stopping: false,
             drained: false,
+            cleanup_failed: false,
+            #[cfg(test)]
+            release_failure: None,
+            #[cfg(test)]
+            release_attempts: [0; 2],
             report: Report::default(),
             issuer,
+            credentials_ready: false,
             http_mode: false,
+            bind_address: "127.0.0.1:0".parse().expect("literal diagnostic loopback"),
+            source_networks: None,
         })
     }
     fn start(&mut self, thumbprint: CertificateThumbprint) -> Result<(), String> {
@@ -292,6 +325,7 @@ impl Owner {
         loop {
             if let Some(result) = self.resources.worker.as_mut().unwrap().poll_ready() {
                 result.map_err(|e| format!("TLS credential readiness: {e:?}"))?;
+                self.credentials_ready = true;
                 break;
             }
             if self.started.elapsed() >= BUDGET {
@@ -312,7 +346,7 @@ impl Owner {
             }
             self.resources.winsock = true;
             self.resources.listener = WSASocketW(
-                AF_INET.0 as i32,
+                self.address_family().0 as i32,
                 SOCK_STREAM.0,
                 IPPROTO_TCP.0,
                 None,
@@ -329,24 +363,7 @@ impl Owner {
                 ),
                 "exclusive listener",
             )?;
-            let mut address = SOCKADDR_IN {
-                sin_family: AF_INET,
-                sin_port: 0,
-                sin_addr: IN_ADDR {
-                    S_un: IN_ADDR_0 {
-                        S_addr: u32::from_ne_bytes([127, 0, 0, 1]),
-                    },
-                },
-                ..Default::default()
-            };
-            check(
-                bind(
-                    self.resources.listener,
-                    ptr::from_ref(&address).cast(),
-                    size_of::<SOCKADDR_IN>() as i32,
-                ),
-                "loopback bind",
-            )?;
+            configured::bind_exact(self.resources.listener, self.bind_address)?;
             if self.started.elapsed() >= BUDGET {
                 return Err("TLS admission deadline before listen".into());
             }
@@ -354,16 +371,7 @@ impl Owner {
                 listen(self.resources.listener, CONNECTION_SLOTS as i32),
                 "listen",
             )?;
-            let mut length = size_of::<SOCKADDR_IN>() as i32;
-            check(
-                getsockname(
-                    self.resources.listener,
-                    ptr::from_mut(&mut address).cast(),
-                    &mut length,
-                ),
-                "getsockname",
-            )?;
-            self.port_number = u16::from_be(address.sin_port);
+            self.port_number = configured::local_port(self.resources.listener)?;
             self.resources.port = CreateIoCompletionPort(INVALID_HANDLE_VALUE, None, 0, 1)
                 .map_err(|e| format!("TLS IOCP: {e}"))?;
             CreateIoCompletionPort(
@@ -399,9 +407,10 @@ impl Owner {
                 self.post_bare_accept()?;
                 return Ok(());
             }
+            let family = self.address_family();
             for slot in &mut self.resources.slots {
                 slot.socket = WSASocketW(
-                    AF_INET.0 as i32,
+                    family.0 as i32,
                     SOCK_STREAM.0,
                     IPPROTO_TCP.0,
                     None,
@@ -414,8 +423,8 @@ impl Owner {
                     slot.socket,
                     slot.memory.addresses.get().cast(),
                     0,
-                    32,
-                    32,
+                    ACCEPT_ADDRESS_LENGTH,
+                    ACCEPT_ADDRESS_LENGTH,
                     &mut bytes,
                     slot.memory.operation.get(),
                 )
@@ -1231,6 +1240,10 @@ impl Owner {
             + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
             + self.target.capacity()
             + self.marker.capacity()
+            + self.source_networks.as_ref().map_or(
+                0,
+                fc_domain::https_settings::HttpsSourceNetworks::allocation_bytes,
+            )
             + self
                 .resources
                 .slots
@@ -1252,6 +1265,9 @@ impl Owner {
         self.stopping = true;
         if let Some(worker) = &self.resources.worker {
             worker.request_stop();
+        }
+        if self.cleanup_failed {
+            return Err("TLS native cleanup failure retained; release cannot be retried".into());
         }
         let mut failure = None;
         if let Err(error) = self.close_bare_accept() {
@@ -1281,6 +1297,9 @@ impl Owner {
         failure.map_or(Ok(()), Err)
     }
     fn finish(&mut self) -> Result<(), String> {
+        if self.cleanup_failed {
+            return Err("TLS native cleanup failure retained; release cannot be retried".into());
+        }
         let stop_result = self.stop();
         let deadline = Instant::now() + BUDGET;
         loop {
@@ -1338,17 +1357,7 @@ impl Owner {
                 // SAFETY: all IOCP packets and the actual SSPI thread have
                 // terminated. Check real resource release before reporting a
                 // completed cleanup; failures retain the bounded owner.
-                unsafe {
-                    if !self.resources.port.is_invalid() {
-                        CloseHandle(self.resources.port)
-                            .map_err(|e| format!("TLS IOCP close: {e}"))?;
-                        self.resources.port = HANDLE::default();
-                    }
-                    if self.resources.winsock {
-                        check(WSACleanup(), "TLS WSACleanup")?;
-                        self.resources.winsock = false;
-                    }
-                }
+                self.release_native_resources()?;
                 self.drained = true;
                 return Ok(());
             }
@@ -1359,6 +1368,61 @@ impl Owner {
             }
             std::thread::sleep(Duration::from_millis(1));
         }
+    }
+    /// Call only after every real IOCP packet and SSPI worker has returned.
+    /// A failed release leaves its original reference untouched and permanently
+    /// forbids retry, quiescent acknowledgement and replacement in this process.
+    fn release_native_resources(&mut self) -> Result<(), String> {
+        self.release_native_resources_with(
+            |port| {
+                // SAFETY: callers have witnessed all original native borrowers.
+                unsafe { CloseHandle(port) }.map_err(|e| format!("TLS IOCP close: {e}"))
+            },
+            || {
+                // SAFETY: the original successful WSAStartup remains owned here.
+                check(unsafe { WSACleanup() }, "TLS WSACleanup")
+            },
+        )
+    }
+    fn release_native_resources_with(
+        &mut self,
+        close_port: impl FnOnce(HANDLE) -> Result<(), String>,
+        cleanup_winsock: impl FnOnce() -> Result<(), String>,
+    ) -> Result<(), String> {
+        if self.cleanup_failed || OWNER_FAULTED.load(Ordering::Acquire) {
+            self.cleanup_failed = true;
+            return Err("TLS native cleanup failure retained; quiescence unproven".into());
+        }
+        let result = (|| {
+            if !self.resources.port.is_invalid() {
+                #[cfg(test)]
+                {
+                    self.release_attempts[0] += 1;
+                    if self.release_failure == Some(NativeReleaseFailure::Iocp) {
+                        return Err("controlled original IOCP close failure".into());
+                    }
+                }
+                close_port(self.resources.port)?;
+                self.resources.port = HANDLE::default();
+            }
+            if self.resources.winsock {
+                #[cfg(test)]
+                {
+                    self.release_attempts[1] += 1;
+                    if self.release_failure == Some(NativeReleaseFailure::Winsock) {
+                        return Err("controlled original WSACleanup failure".into());
+                    }
+                }
+                cleanup_winsock()?;
+                self.resources.winsock = false;
+            }
+            Ok(())
+        })();
+        if result.is_err() {
+            self.cleanup_failed = true;
+            OWNER_FAULTED.store(true, Ordering::Release);
+        }
+        result
     }
 }
 impl Drop for Owner {

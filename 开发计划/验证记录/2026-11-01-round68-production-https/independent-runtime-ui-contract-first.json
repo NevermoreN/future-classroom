@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "review": "READ_ONLY_SOURCE_CONTRACT_NOT_RUNTIME_PROOF",
+  "atUtc": "2026-11-01T07:28:53.987158+00:00",
+  "status": "ISSUE_FOUND",
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+      "bytes": 13841,
+      "sha256": "818995868d32d4edff3b667fd56e099380f07cb132c2ff999514f439f3b024d8",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 25255,
+      "sha256": "8d2f4a41a6a3361069f9f4120a1e7116e9e011ff25d807ca8ec8229e7134fde3",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/application.rs",
+      "bytes": 262848,
+      "sha256": "2e764fa6be7070fdb5401b6998d8b422051aad97d70dd8e1b3e8ff3b640361e9",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_controller.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/application/backup_controller.rs",
+      "bytes": 33579,
+      "sha256": "ae2bb5422c375efcb26910c384386775dd9f56027bb257d96f0b9f3a2c9a2042",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/https_runtime.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/https_runtime.rs",
+      "bytes": 22371,
+      "sha256": "6a5a3440b758bfa7818c2a6c0407630b80629a88a4150bf78c49adde26cb0631",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/physical_thread.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/physical_thread.rs",
+      "bytes": 391,
+      "sha256": "aa250255a7392ebf038145c8d86aade24d6f2e0108f1d32d429bd61e82933d96",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-windows/src/system/thread_exit.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-windows/src/system/thread_exit.rs",
+      "bytes": 1229,
+      "sha256": "a7535d4ef7111061481a2eac4c2d331f53f85af780059921f0e13b556c74964d",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "bytes": 8218,
+      "sha256": "201abcebcd35ddc7a2335eefff77511a42d96a6390c2e820505e5e0db8554b13",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+      "bytes": 10683,
+      "sha256": "422fde502c3af49477e755117509ed100738b2f9289240ed29eff6dc3952c666",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 46777,
+      "sha256": "092382e2904d5f4d0534ac0e0427185011631ac3f0eef86350a4ea011c178f52",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/backend.rs",
+      "bytes": 107515,
+      "sha256": "f319c893038fef6178c42170deb2be335695b64357cdd8349a5a0db5fc13b468",
+      "unchangedAtReport": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "snapshot": "independent-runtime-ui-contract-first-source/crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 60038,
+      "sha256": "f20da7d047f6c42749efd5813295da6b707642277a108aa794f43534cbd896e2",
+      "unchangedAtReport": true
+    }
+  ],
+  "finding": {
+    "id": "R68-C-B-STOP-ORIGIN-RENEWAL",
+    "severity": "P1",
+    "summary": "An internally faulted/StopTimeout HTTP domain can receive a fresh C stop interval, and beginning application shutdown grants another fresh shutdown interval.",
+    "pathEvidence": [
+      {
+        "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+        "line": 257,
+        "text": "if readiness == web_editor::Readiness::Faulted && !self.teacher_https.quiescent()"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+        "line": 75,
+        "text": ".get_or_insert(began_at + Duration::from_secs(5))"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+        "line": 137,
+        "text": "self.terminate_required = true;"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application.rs",
+        "line": 2023,
+        "text": "self.shutdown_deadline = Some(Instant::now() + Duration::from_secs(5));"
+      }
+    ],
+    "consequence": "No forever-Faulted UI path was found for a nonquiescent owner after its Faulted status is polled: C eventually installs a deadline. However the earliest B stop origin is not shared back to C; an already expired B budget can receive another 5 seconds, then begin_shutdown can delay process exit by another 5 seconds.",
+    "fixRecommendation": [
+      "Expose original B stop deadline as read-only metadata and clamp C deadline to the minimum original value.",
+      "For B StopTimeout do not start another stop grace period. Mark terminate_required and clamp app shutdown_deadline to the original expired stop deadline after begin_shutdown.",
+      "Keep all exact owners retained during controlled process exit; never detach or replace."
+    ],
+    "reportedTo": [
+      "root",
+      "production_ui"
+    ],
+    "sourceModifiedByReviewer": false
+  },
+  "checkedContracts": [
+    {
+      "contract": "UI explicit stop uses the same captured origin as B",
+      "conclusion": "SOURCE_MATCH",
+      "evidence": [
+        {
+          "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+          "line": 71,
+          "text": "owner.request_stop_at(began_at);"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/https_runtime.rs",
+          "line": 250,
+          "text": "state.stop_at = Some(state.stop_at.map_or(at, |original| original.min(at)));"
+        }
+      ]
+    },
+    {
+      "contract": "OS thread return before nonblocking join",
+      "conclusion": "SOURCE_MATCH_NOT_EXECUTED",
+      "detail": "RuntimeOwner.poll calls physical_thread::is_finished before taking and joining the original JoinHandle. On Windows this helper requires both Rust completion and WaitForSingleObject(original HANDLE,0)==WAIT_OBJECT_0. quiescent additionally requires shared returned and join success. Native/SSPI Drop is before setting returned. Native cleanup P1 is under separate repair and is not passed by this review.",
+      "evidence": [
+        {
+          "path": "crates/fc-bootstrap/src/https_runtime.rs",
+          "line": 328,
+          "text": ".is_some_and(crate::physical_thread::is_finished)"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/https_runtime.rs",
+          "line": 336,
+          "text": "self.quiescent = s.returned && joined.is_ok();"
+        },
+        {
+          "path": "crates/fc-windows/src/system/thread_exit.rs",
+          "line": 22,
+          "text": "WaitForSingleObject(HANDLE(thread.as_raw_handle()), 0) == WAIT_OBJECT_0"
+        }
+      ]
+    },
+    {
+      "contract": "Faulted claims cannot start replacement generation",
+      "conclusion": "SOURCE_MATCH_NOT_EXECUTED",
+      "detail": "Cleanup/Native/Faulted/StopTimeout set retain_claim. A quiescent faulted owner does not call physical_returned, and reservation Drop leaves runtime_owned set after started. reserve_runtime and configuration edit reject the retained claim. C also admits start only from Disabled and quiescent."
+    },
+    {
+      "contract": "Configuration claim and physical positive activation",
+      "conclusion": "SOURCE_MATCH_NOT_EXECUTED",
+      "detail": "reserve_runtime holds state/ledger while checking exact local admin and configuration_edit, sets runtime_owned by CAS, captures monotonic even epoch. prepare_start rechecks identity revision and validates saved configuration/policy; run opens configured native credential/listener before activate. activate rechecks original local authorization, revokes old browser leases/devices, and exact-CAS activates its original epoch. An intervening negative stop prevents late native-ready activation."
+    },
+    {
+      "contract": "Old worker-only Enable cannot bypass ordinary native start",
+      "conclusion": "SOURCE_MATCH_NOT_EXECUTED",
+      "detail": "application dispatch intercepts ordinary Enable to start_teacher_https. web_editor::run rejects Enable unless Readiness.synthetic, whose positive fixture variant is cfg(test). set_enabled remains public for explicit diagnostics, so this is ordinary composition proof, not a claim that every library caller must supply native readiness.",
+      "evidence": [
+        {
+          "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+          "line": 119,
+          "text": "if matches!(operation, Operation::Enable) && !readiness.synthetic()"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 3219,
+          "text": "return self.start_teacher_https(lease);"
+        }
+      ]
+    },
+    {
+      "contract": "Old Web lease does not revive across false/true epoch ABA",
+      "conclusion": "SOURCE_MATCH_NOT_EXECUTED",
+      "detail": "Backend session_guard checks atomic negative admission before acquiring ledger and again after actor verification. New activate cannot open a positive epoch without owning ledger and revoking old exact Web sessions; a guard blocked before restart therefore observes either negative admission or revoked lease, while one holding ledger cannot overlap a new activation. Material send fence captures exact runtime_epoch and checks it before/after. Existing tests include old lease after restart plus actual queued/precommit Writer negative stop, but this review did not run them."
+    },
+    {
+      "contract": "Writer/restore wait for HTTPS return",
+      "conclusion": "SOURCE_MATCH_NOT_EXECUTED",
+      "detail": "schedule_shutdown returns while !teacher_https_quiescent; recovery coordinator requires teacher_https_quiescent before taking pool/writer owners. State.quiescent also requires preparation ticket gone, so suppressed preparation result is not treated as physical worker return."
+    }
+  ],
+  "limitations": [
+    "No Cargo invocation, Windows operation, listener, network, or source edit.",
+    "C files remain under development and are not frozen; snapshots prove only the observed source bytes.",
+    "A pending native IOCP/WSACleanup sticky fault repair is not validated here.",
+    "New runtime and regression tests remain uncompiled/unexecuted until root integration checks."
+  ]
+}

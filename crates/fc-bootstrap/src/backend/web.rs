@@ -3,11 +3,13 @@
 //! A short code creates a request; only exact local administrator approval can
 //! issue a Web lease, and only the original polling secret can collect it.
 use super::*;
+mod runtime;
 use fc_runtime::{
     authority::AuthoritySnapshot,
     health::{GateError, Health},
 };
 use fc_security::web::{PairingCode, SecretText, SecretVerifier, WebSecret};
+pub(crate) use runtime::WebRuntimeReservation;
 
 pub const PAIR_WINDOW_MILLIS: u64 = 120_000;
 pub const MAX_PAIR_REQUESTS: usize = 8;
@@ -162,6 +164,11 @@ impl State {
 struct Inner {
     state: Mutex<State>,
     configuration_edit: AtomicBool,
+    runtime_claim: AtomicU64,
+    runtime_ready: AtomicBool,
+    runtime_stopping: AtomicBool,
+    runtime_epoch: AtomicU64,
+    runtime_native_generation: AtomicU64,
     ledger: Arc<Mutex<Ledger>>,
     control: SessionControl,
     authority: fc_runtime::authority::AuthorityReader<IdentityState>,
@@ -253,6 +260,11 @@ impl WebService {
             inner: Arc::new(Inner {
                 state: Mutex::new(State::default()),
                 configuration_edit: AtomicBool::new(false),
+                runtime_claim: AtomicU64::new(0),
+                runtime_ready: AtomicBool::new(false),
+                runtime_stopping: AtomicBool::new(false),
+                runtime_epoch: AtomicU64::new(0),
+                runtime_native_generation: AtomicU64::new(0),
                 ledger,
                 control,
                 authority,
@@ -371,6 +383,12 @@ impl WebService {
         identity: &IdentityState,
         tick: u64,
     ) -> WebResult<()> {
+        if !self.runtime_execution_current() {
+            state.enabled = false;
+            state.clear_pairing();
+            state.devices.clear();
+            ledger.sessions.revoke_web();
+        }
         if let Err(error) = state.tick(tick) {
             ledger.sessions.revoke_web();
             return Err(error);
@@ -432,7 +450,7 @@ impl WebService {
             .map_err(|_| WebServiceError::Busy)?;
         let generation = self.admin(&mut ledger, &snapshot.data, admin)?;
         self.admin_current(&snapshot, &mut ledger, admin, generation)?;
-        if state.enabled {
+        if state.enabled || self.inner.runtime_claim.load(Ordering::Acquire) != 0 {
             return Err(WebServiceError::Busy);
         }
         self.inner
@@ -469,8 +487,22 @@ impl WebService {
         )?;
         let generation = self.admin(&mut ledger, &snapshot.data, admin)?;
         self.admin_current(&snapshot, &mut ledger, admin, generation)?;
-        if enabled && self.inner.configuration_edit.load(Ordering::Acquire) {
+        if enabled
+            && (self.inner.configuration_edit.load(Ordering::Acquire)
+                || (self.inner.runtime_claim.load(Ordering::Acquire) != 0
+                    && (!self.inner.runtime_ready.load(Ordering::Acquire)
+                        || !self.runtime_execution_current())))
+        {
             return Err(WebServiceError::Busy);
+        }
+        if enabled && self.inner.runtime_claim.load(Ordering::Acquire) == 0 {
+            // Existing explicit finite diagnostic composition. Normal product
+            // composition exclusively uses the physical runtime reservation.
+            self.inner.runtime_stopping.store(false, Ordering::Release);
+            self.inner.runtime_epoch.fetch_or(1, Ordering::AcqRel);
+        }
+        if !enabled {
+            self.negative_runtime_stop();
         }
         state.enabled = enabled;
         if !enabled {
@@ -493,6 +525,20 @@ impl WebService {
         }
     }
     pub fn begin_pairing(&self, admin: SessionLease) -> WebResult<PairingWindow> {
+        self.begin_pairing_inner(admin, None)
+    }
+    pub fn begin_pairing_for_runtime(
+        &self,
+        admin: SessionLease,
+        generation: u64,
+    ) -> WebResult<PairingWindow> {
+        self.begin_pairing_inner(admin, Some(generation))
+    }
+    fn begin_pairing_inner(
+        &self,
+        admin: SessionLease,
+        expected_generation: Option<u64>,
+    ) -> WebResult<PairingWindow> {
         let code =
             PairingCode::generate(&mut PlatformRandom).map_err(|_| WebServiceError::Unavailable)?;
         let shown = PairingCode::parse(code.expose_text().as_str().to_owned())
@@ -519,6 +565,9 @@ impl WebService {
             return Err(WebServiceError::Disabled);
         }
         self.admin_current(&snapshot, &mut ledger, admin, local_generation)?;
+        if expected_generation.is_some_and(|expected| self.runtime_generation() != Some(expected)) {
+            return Err(WebServiceError::Disabled);
+        }
         state.clear_pairing();
         let id = state.next()?;
         state.window = Some(Window {
@@ -1038,11 +1087,14 @@ impl WebService {
         }
         let revision = snapshot.revision;
         let inner = self.inner.clone();
+        let runtime_epoch = inner.runtime_epoch.load(Ordering::Acquire);
         let last_tick = AtomicU64::new(inner.monotonic.monotonic_millis());
         let invalid = AtomicBool::new(false);
         let fence: TransactionExecutionFence = Arc::new(move || {
             let check = || {
-                if invalid.load(Ordering::Acquire)
+                if runtime_epoch & 1 == 0
+                    || inner.runtime_epoch.load(Ordering::Acquire) != runtime_epoch
+                    || invalid.load(Ordering::Acquire)
                     || cancelled.is_cancelled()
                     || inner.control.0.closed.load(Ordering::Acquire)
                     || inner.control.is_recovering()
@@ -1081,7 +1133,8 @@ impl WebService {
                 {
                     return false;
                 }
-                !cancelled.is_cancelled()
+                inner.runtime_epoch.load(Ordering::Acquire) == runtime_epoch
+                    && !cancelled.is_cancelled()
                     && !inner.control.0.closed.load(Ordering::Acquire)
                     && !inner.control.is_recovering()
                     && lifetime()
@@ -1228,6 +1281,10 @@ pub const CLEAR_SESSION_COOKIE: &str =
 #[cfg(test)]
 mod tests {
     include!("web/tests.rs");
+    mod runtime_tests {
+        use super::*;
+        include!("web/runtime_tests.rs");
+    }
     mod material_send_fence_tests {
         use super::*;
         include!("web/material_send_fence_tests.rs");

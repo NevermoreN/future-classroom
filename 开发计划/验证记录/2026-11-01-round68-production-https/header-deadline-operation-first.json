@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round68-production-https/worktree/scripts/windows-tls-business-probe.py",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "--web-bundle",
+    "/tmp/fc-round68-production-https/web-build/ordinary-https-web-first.zip",
+    "--header-deadline-only",
+    "--report",
+    "/tmp/fc-round68-production-https/evidence/windows-header-deadline-first.json"
+  ],
+  "cwd": "/tmp/fc-round68-production-https/worktree",
+  "sourceFreeze": "joint-implementation-freeze-seventh.json",
+  "sourceFreezeSha256": "89148f095235a850b0fc408aa24b79f6701d790791ccba6e1535a87cfc770137",
+  "workingFileCount": 595,
+  "originalBudgetSeconds": 900,
+  "startedUtc": "2026-11-01T08:36:22.074092+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 57.648247129051015,
+  "sourceUnchanged": true,
+  "stdoutBytes": 273,
+  "stdoutSha256": "6db6e2125ec297a01e9404b884d8dd3c1ae91f370fd8fd757c861e44d653df9d",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

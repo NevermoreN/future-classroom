@@ -1,0 +1,29 @@
+{
+  "status": "FAIL",
+  "command": [
+    "cargo",
+    "clippy",
+    "--locked",
+    "--offline",
+    "--workspace",
+    "--all-targets",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "/tmp/fc-round68-production-https/worktree",
+  "sourceFreeze": "joint-implementation-freeze-second.json",
+  "sourceFreezeSha256": "e9fc66cc6ac9d42e2de0ad6e7aa4ab88c222f780a9705d5dd14dc7de4582e874",
+  "workingFileCount": 595,
+  "originalBudgetSeconds": 900,
+  "startedUtc": "2026-11-01T07:45:54.456401+00:00",
+  "exitCode": 101,
+  "elapsedSeconds": 26.68771222792566,
+  "sourceUnchanged": true,
+  "stdoutBytes": 0,
+  "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrBytes": 2509,
+  "stderrSha256": "67c9a3840b37192914a586445204c5961ef783bf434289434aa2a2ac25f89017"
+}

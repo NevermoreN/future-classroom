@@ -251,6 +251,8 @@ impl Fixture {
                 },
             )
             .unwrap();
+        // The preceding synthetic local login may have revoked the old admin.
+        let admin = fixture.issue(1, TrustedOrigin::Local);
         fixture.seed(
             Some(admin),
             IdentityCommand::CreateAccount(NewAccount {
@@ -261,6 +263,8 @@ impl Fixture {
                 scopes: vec![scope(1, 1), scope(1, 2), scope(2, 1), scope(2, 2)],
             }),
         );
+        // The preceding synthetic local login may have revoked the old admin.
+        let admin = fixture.issue(1, TrustedOrigin::Local);
         fixture.seed(
             Some(admin),
             IdentityCommand::CreateAccount(NewAccount {
@@ -271,6 +275,8 @@ impl Fixture {
                 scopes: vec![],
             }),
         );
+        // The preceding synthetic local login may have revoked the old admin.
+        let admin = fixture.issue(1, TrustedOrigin::Local);
         fixture.seed(
             Some(admin),
             IdentityCommand::CreateAccount(NewAccount {
@@ -315,7 +321,9 @@ impl Fixture {
             .unwrap();
         self.backend.apply(&transition).unwrap();
         if admin.is_some() {
-            let lease = self.issue(principal.get(), TrustedOrigin::Web);
+            // Initial password change is a local component operation. No Web
+            // pairing/listener readiness is fabricated to complete this seed.
+            let lease = self.issue(principal.get(), TrustedOrigin::Local);
             let state = self.backend.state().unwrap();
             let request = self
                 .backend

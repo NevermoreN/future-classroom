@@ -493,7 +493,7 @@ fn strict_protected_document_rejects_bad_shape_store_noncanonical_values_and_cor
     let mut other_store = valid.clone();
     other_store["configuration"]["certificate_store"] = json!("LOCAL_MACHINE_MY");
     let mut old = valid.clone();
-    old["format"] = json!(2);
+    old["format"] = json!(3);
     let mut extra = valid.clone();
     extra["enabled"] = json!(true);
     let mut upper = valid.clone();
@@ -872,4 +872,44 @@ fn outcome_query_rejects_changed_payload_actor_digest_and_final_revoked_session_
         .base_repository(actor.clone())
         .query_https_settings_outcome(original, &actor)
         .is_err());
+}
+
+#[test]
+fn source_network_policy_roundtrips_current_installation_without_backup_export() {
+    let mut f = Fixture::new();
+    let base = f.read();
+    let mut configured = config("board.school", 8443);
+    configured.source_networks =
+        Some(HttpsSourceNetworks::parse("192.168.10.0/24,2001:db8::/64").unwrap());
+    let original = request(501, &base, Some(configured));
+    let saved = f.save(original.clone()).unwrap();
+    assert_eq!(f.save(original.clone()).unwrap(), saved);
+    let mut changed = original;
+    changed.configuration.as_mut().unwrap().source_networks =
+        Some(HttpsSourceNetworks::parse("192.168.20.0/24").unwrap());
+    assert_eq!(
+        f.save(changed),
+        Err(HttpsSettingsRepositoryError::IdempotencyConflict)
+    );
+    f.reopen();
+    assert_eq!(f.read(), saved);
+    assert_eq!(settings(&saved.settings)["format"], json!(2));
+}
+#[test]
+fn legacy_https_configuration_is_readable_but_has_no_invented_network_policy() {
+    let legacy = json!({"format":1,"revision":1,"configuration":{
+        "host":"board.school","port":443,"certificate_store":"CURRENT_USER_MY","thumbprint_sha1":"ab".repeat(20)}});
+    let decoded = read_settings(&legacy).unwrap();
+    assert!(decoded
+        .configuration
+        .as_ref()
+        .unwrap()
+        .source_networks
+        .is_none());
+    assert_eq!(read_settings(&settings(&decoded)).unwrap(), decoded);
+    let mut bad = settings(&decoded);
+    bad["configuration"]["source_networks"] = json!(["0.0.0.0/0"]);
+    assert!(read_settings(&bad).is_err());
+    bad["configuration"]["source_networks"] = json!([]);
+    assert!(read_settings(&bad).is_err());
 }

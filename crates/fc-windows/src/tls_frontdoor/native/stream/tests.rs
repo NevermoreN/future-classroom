@@ -94,6 +94,39 @@ struct Fixture {
     closed: Arc<AtomicUsize>,
     retain_faulted_owner_on_drop: bool,
 }
+fn fixture_local_address(socket: SOCKET) -> Result<std::net::SocketAddr, String> {
+    let mut storage = [0u64; 16];
+    let mut length = std::mem::size_of_val(&storage) as i32;
+    // SAFETY: diagnostic-only synchronous query into aligned, full-size native
+    // address storage. Decode only after checking the exact family and length.
+    unsafe {
+        check(
+            getsockname(socket, storage.as_mut_ptr().cast(), &mut length),
+            "fixture listener getsockname",
+        )?;
+        let family = *storage.as_ptr().cast::<ADDRESS_FAMILY>();
+        if family == AF_INET && length == size_of::<SOCKADDR_IN>() as i32 {
+            let address = &*storage.as_ptr().cast::<SOCKADDR_IN>();
+            Ok(std::net::SocketAddr::new(
+                std::net::Ipv4Addr::from(address.sin_addr.S_un.S_addr.to_ne_bytes()).into(),
+                u16::from_be(address.sin_port),
+            ))
+        } else if family == AF_INET6 && length == size_of::<SOCKADDR_IN6>() as i32 {
+            let address = &*storage.as_ptr().cast::<SOCKADDR_IN6>();
+            Ok(std::net::SocketAddr::V6(std::net::SocketAddrV6::new(
+                std::net::Ipv6Addr::from(address.sin6_addr.u.Byte),
+                u16::from_be(address.sin6_port),
+                u32::from_be(address.sin6_flowinfo),
+                address.Anonymous.sin6_scope_id,
+            )))
+        } else {
+            Err(format!(
+                "fixture listener address family={} length={length}",
+                family.0
+            ))
+        }
+    }
+}
 impl Fixture {
     fn new() -> Self {
         Self::with_encrypt_hook(None)
@@ -105,7 +138,22 @@ impl Fixture {
         encrypt_hook: Option<Arc<dyn Fn(usize) + Send + Sync>>,
         decrypt_hook: Option<Arc<dyn Fn() + Send + Sync>>,
     ) -> Self {
+        Self::with_binding(
+            "127.0.0.1:0".parse().unwrap(),
+            None,
+            encrypt_hook,
+            decrypt_hook,
+        )
+    }
+    fn with_binding(
+        bind_address: std::net::SocketAddr,
+        source_networks: Option<fc_domain::https_settings::HttpsSourceNetworks>,
+        encrypt_hook: Option<Arc<dyn Fn(usize) + Send + Sync>>,
+        decrypt_hook: Option<Arc<dyn Fn() + Send + Sync>>,
+    ) -> Self {
         let mut owner = Owner::new("FutureClassroom-Test-TLS-native-stream-fixture").unwrap();
+        owner.bind_address = bind_address;
+        owner.source_networks = source_networks;
         owner.http_mode = true;
         for slot in &mut owner.resources.slots {
             slot.stream = Some(Stream::new());
@@ -125,11 +173,19 @@ impl Fixture {
         // This fixture's first connection inherits that actual bare post.
         let posted_header_deadlines =
             [owner.resources.accept.as_ref().unwrap().deadline().unwrap(); CONNECTION_SLOTS];
-        let client = TcpStream::connect_timeout(
-            &SocketAddrV4::new(Ipv4Addr::LOCALHOST, owner.port_number).into(),
-            Duration::from_secs(1),
-        )
-        .unwrap();
+        let selected_endpoint = std::net::SocketAddr::new(bind_address.ip(), owner.port_number);
+        let actual_local = fixture_local_address(owner.resources.listener);
+        let family = if bind_address.is_ipv4() {
+            "IPv4"
+        } else {
+            "IPv6"
+        };
+        let stage = "worker_ready+exact_bind+listen+iocp+bare_acceptex_post";
+        let client = TcpStream::connect_timeout(&selected_endpoint, Duration::from_secs(1))
+            .unwrap_or_else(|error| {
+                panic!("NATIVE_FIXTURE_CONNECT status=failed bind={bind_address} actual_local={actual_local:?} selected={selected_endpoint} family={family} stage={stage} original_os_code={:?} error={error}", error.raw_os_error())
+            });
+        eprintln!("NATIVE_FIXTURE_CONNECT status=connected bind={bind_address} actual_local={actual_local:?} selected={selected_endpoint} family={family} stage={stage} original_os_code=None");
         let client_connected_at = Instant::now();
         client.set_nonblocking(true).unwrap();
         Self {
@@ -2240,4 +2296,226 @@ fn caller_deadline_service_keeps_original_head_request_budget_and_admission() {
     );
     f.host.ack_body(token, sequence, 3).unwrap();
     f.stop();
+}
+
+#[test]
+fn configured_source_filter_returns_real_ipv4_and_ipv6_accept_before_any_sspi_call() {
+    let _serial = SERIAL.lock().unwrap();
+    for (bind, allowed) in [
+        ("127.0.0.1:0", "127.0.0.2/32"),
+        ("[::1]:0", "2001:db8::/32"),
+    ] {
+        let policy = fc_domain::https_settings::HttpsSourceNetworks::parse(allowed).unwrap();
+        let mut f = Fixture::with_binding(bind.parse().unwrap(), Some(policy), None, None);
+        f.input(b"H");
+        let until = Instant::now() + Duration::from_secs(3);
+        while f.host.source_rejections() == 0 {
+            assert!(f.host.poll().unwrap().is_empty());
+            assert!(
+                Instant::now() < until,
+                "real source rejection packet deadline"
+            );
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert_eq!(f.host.source_rejections(), 1);
+        assert_eq!(f.host.owner.report.accept_completions, 1);
+        assert_eq!(f.host.owner.report.accept_posts, 2);
+        assert_eq!(f.host.owner.report.accept_handoffs, 0);
+        assert_eq!(f.host.owner.report.sspi_submissions, 0);
+        assert!(f.calls.lock().unwrap().handshake.is_empty());
+        assert!(f
+            .host
+            .owner
+            .resources
+            .slots
+            .iter()
+            .all(|slot| slot.phase == Phase::Ready
+                && slot.socket == INVALID_SOCKET
+                && slot.pending.is_none()));
+        f.stop();
+        assert!(f.host.owner.accept_ledger_matches());
+    }
+}
+#[test]
+fn configured_explicit_ipv4_and_ipv6_source_keeps_original_deadline_and_real_drain() {
+    let _serial = SERIAL.lock().unwrap();
+    for (bind, allowed) in [("127.0.0.1:0", "127.0.0.1/32"), ("[::1]:0", "::1/128")] {
+        let policy = fc_domain::https_settings::HttpsSourceNetworks::parse(allowed).unwrap();
+        let mut f = Fixture::with_binding(bind.parse().unwrap(), Some(policy), None, None);
+        f.input(b"H");
+        let until = Instant::now() + Duration::from_secs(3);
+        while f.host.owner.report.accept_handoffs == 0 {
+            assert!(f.host.poll().unwrap().is_empty());
+            assert!(Instant::now() < until);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        let slot = f
+            .host
+            .owner
+            .resources
+            .slots
+            .iter()
+            .find(|s| s.phase != Phase::Ready)
+            .unwrap();
+        assert_eq!(
+            slot.stream.as_ref().unwrap().header_deadline(),
+            Some(f.posted_header_deadlines[0])
+        );
+        f.input(&record(
+            b"GET /fc/api/v1/status HTTP/1.1\r\nHost: localhost\r\n\r\n",
+        ));
+        let (token, _) = f.head();
+        assert_eq!(f.host.owner.report.accept_handoffs, 1);
+        assert_eq!(f.host.source_rejections(), 0);
+        // Head has already moved to the 120-second request phase, while the
+        // accepted epoch remains the real original bare operation's deadline.
+        assert_eq!(f.calls.lock().unwrap().handshake.as_slice(), &[token]);
+        assert_eq!(f.host.owner.report.accept_expired_discards, 0);
+        assert!(f.client_connected_at < f.posted_header_deadlines[0]);
+        f.stop();
+        assert!(f.host.owner.accept_ledger_matches());
+        assert_eq!(
+            f.host.owner.report.submissions,
+            f.host.owner.report.completions
+        );
+    }
+}
+#[test]
+fn configured_exact_occupied_bind_returns_original_worker_before_replacement() {
+    let _serial = SERIAL.lock().unwrap();
+    let occupied = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let mut owner = Owner::new("configured-occupied-port-test").unwrap();
+    owner.http_mode = true;
+    owner.bind_address = occupied.local_addr().unwrap();
+    for slot in &mut owner.resources.slots {
+        slot.stream = Some(Stream::new());
+    }
+    let closed = Arc::new(AtomicUsize::new(0));
+    let driver = RecordDriver {
+        calls: Arc::new(Mutex::new(Calls::default())),
+        closed: closed.clone(),
+        encrypt_hook: None,
+        decrypt_hook: None,
+    };
+    let worker =
+        Worker::start_with_factory(owner.generation, move || Ok(Box::new(driver))).unwrap();
+    assert!(owner.start_with_worker(worker).is_err());
+    assert!(owner.credentials_ready);
+    assert_eq!(owner.report.accept_posts, 0);
+    assert!(Owner::new("must-not-replace-before-original-return").is_err());
+    owner.finish().unwrap();
+    assert_eq!(closed.load(Ordering::Acquire), 1);
+    assert!(owner.drained);
+    drop(owner);
+    drop(occupied);
+    let mut next = Owner::new("actual-original-returned").unwrap();
+    next.finish().unwrap();
+}
+#[test]
+fn configured_legacy_missing_policy_cannot_claim_listener_readiness() {
+    let configuration = fc_domain::https_settings::HttpsConfiguration::new(
+        fc_domain::https_settings::HttpsHost::parse("127.0.0.1").unwrap(),
+        9443,
+        fc_domain::https_settings::HttpsCertificateRef::parse(&"0".repeat(40)).unwrap(),
+    )
+    .unwrap();
+    assert!(matches!(
+        TlsHttpHost::open_configured(&configuration),
+        Err(ConfiguredTlsError::MissingSourceNetworks)
+    ));
+}
+
+#[test]
+fn real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_child() {
+    let _serial = SERIAL.lock().unwrap();
+    const CHILD: &str = "FC_TLS_NATIVE_RELEASE_FAILURE_CHILD";
+    const NAME: &str = "tls_frontdoor::native::stream::tests::real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_child";
+    const MARKER: &str = "NATIVE_RELEASE_FAILURE_CHILD realIocp=true realWinsock=true outstandingIo=false secondClose=false quiescent=false replaced=false";
+    if let Ok(mode) = std::env::var(CHILD) {
+        let failure = match mode.as_str() {
+            "iocp" => super::super::NativeReleaseFailure::Iocp,
+            "winsock" => super::super::NativeReleaseFailure::Winsock,
+            _ => panic!("unknown native release fault mode"),
+        };
+        let mut owner = Owner::new("native-release-failure").unwrap();
+        owner.http_mode = true;
+        for slot in &mut owner.resources.slots {
+            slot.stream = Some(Stream::new());
+        }
+        // Real process-owned native resources, with no socket, operation or
+        // SSPI thread ever submitted. Injection only controls a final release
+        // return; it cannot discard a packet or free a borrowed OVERLAPPED.
+        unsafe {
+            let mut data = WSADATA::default();
+            assert_eq!(WSAStartup(0x202, &mut data), 0);
+            owner.resources.winsock = true;
+            owner.resources.port =
+                CreateIoCompletionPort(INVALID_HANDLE_VALUE, None, 0, 1).unwrap();
+        }
+        let original_port = owner.resources.port;
+        assert!(!original_port.is_invalid());
+        assert!(owner.resources.worker.is_none() && owner.resources.accept.is_none());
+        assert!(owner
+            .resources
+            .slots
+            .iter()
+            .all(|slot| slot.pending.is_none()
+                && slot.socket == INVALID_SOCKET
+                && slot.frame.is_some()));
+        owner.release_failure = Some(failure);
+        let mut host = TlsHttpHost {
+            owner,
+            drain_deadline: None,
+        };
+        host.request_stop().unwrap();
+        let first = host.poll_shutdown().unwrap_err();
+        assert!(first.contains("controlled original"));
+        assert!(host.owner.cleanup_failed && !host.owner.drained);
+        assert!(OWNER_FAULTED.load(Ordering::Acquire));
+        let attempts = host.owner.release_attempts;
+        assert_eq!(attempts, if mode == "iocp" { [1, 0] } else { [1, 1] });
+        assert_eq!(
+            host.owner.resources.port,
+            if mode == "iocp" {
+                original_port
+            } else {
+                HANDLE::default()
+            }
+        );
+        assert!(host.owner.resources.winsock);
+        // Remove the controlled failure: a later successful release callback
+        // would now be available, but the first unknown result is permanent.
+        host.owner.release_failure = None;
+        for _ in 0..3 {
+            assert!(host.poll_shutdown().is_err());
+            assert!(host.request_stop().is_err());
+            assert!(host.owner.finish().is_err());
+            assert_eq!(host.owner.release_attempts, attempts);
+            assert!(!host.owner.drained && host.owner.resources.winsock);
+            assert!(Owner::new("forbidden-after-native-release-failure").is_err());
+        }
+        drop(host);
+        assert!(OWNER_ACTIVE.load(Ordering::Acquire));
+        assert!(Owner::new("forbidden-after-failed-owner-drop").is_err());
+        // The independent child's actual OS exit owns final reclamation. No
+        // release/reset of the sticky admission flags occurs in this process.
+        println!("{MARKER} mode={mode}");
+        return;
+    }
+    for mode in ["iocp", "winsock"] {
+        let output = std::process::Command::new(std::env::current_exe().unwrap())
+            .args(["--exact", NAME, "--nocapture", "--test-threads=2"])
+            .env(CHILD, mode)
+            .output()
+            .unwrap();
+        assert!(
+            output.status.success(),
+            "{mode}: {} {}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(String::from_utf8_lossy(&output.stdout).contains(MARKER));
+        assert!(!OWNER_FAULTED.load(Ordering::Acquire));
+        assert!(!OWNER_ACTIVE.load(Ordering::Acquire));
+    }
 }

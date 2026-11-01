@@ -1,0 +1,58 @@
+{
+  "round": 68,
+  "status": "IPV6_CLIENT_CONNECT_TIMEOUT_10013_CONFIRMED_CAUSE_UNRESOLVED",
+  "createdUtc": "2026-11-01T08:08:22.030434+00:00",
+  "scope": "Read-only source and actual focused report review only; no code changes, Cargo, Windows, SSH or network operations.",
+  "focusedEvidence": {
+    "path": "windows-focused-connect-first.json",
+    "sha256": "d8062703fd913ad36443e65c237d30f03cfd99adeb0d34f8b209532981a83595",
+    "nativeHarnessSha256": "6c8da79b01c01d29c3dbdff3e33a16893747b00de254e81a1c18c8c62af19b58",
+    "exitCode": 101,
+    "cleanup": "PASS"
+  },
+  "actualDiscriminator": [
+    "IPv4 bind127.0.0.1:0 actual127.0.0.1:52782 selected127.0.0.1:52782 connected.",
+    "IPv6 bind[::1]:0 actual[::1]:52784 selected[::1]:52784 failed raw_os_error10013.",
+    "For both, worker-ready/exact-bind/listen/IOCP/initial-AcceptEx-post completed before client call.",
+    "Focused test0pass1fail249filtered completed0.04s; no timing boundary was reached and there is no permission to skipIPv6."
+  ],
+  "clientStageLimit": {
+    "primaryLocalSources": [
+      {
+        "path": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/net/connection/socket/mod.rs",
+        "bytes": 28031,
+        "sha256": "603be0288ac6a1dae023bb5cc8a2c466f61e501ee926242b028b8604d251ed20"
+      },
+      {
+        "path": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/net/connection/socket/windows.rs",
+        "bytes": 16470,
+        "sha256": "27ec384456c226c78f56f2ee62e9e476aaa85bf69411988cd7f00d3fda9fb903"
+      }
+    ],
+    "finding": "Fixed Rust1.97.1 std TcpStream::connect_timeout first initializes networking and creates its own client Socket, then sets nonblocking, calls connect, restores blocking, and may select/read SO_ERROR. The returned10013 is not yet attributed to a particular native client operation.",
+    "locations": "socket/mod.rs:376-381; socket/windows.rs:119-151,161-212"
+  },
+  "nextMinimalDiagnostic": {
+    "rootScheduled": "Independent same-user .NET IPv4/IPv6 loopback baseline with own ephemeral sockets disposed in finally; no firewall/profile/network mutation.",
+    "record": [
+      "Process architecture/Is64BitProcess and exact executable path identity",
+      "Explicit socket AddressFamily and IPv6 DualMode=false",
+      "Stage-specific constructor/bind/listen/connect failures with native error code",
+      "Actual listener and selected client endpoint",
+      "Own socket cleanup receipt"
+    ],
+    "architectureQualification": "The failing harness is i686/WOW64. A64-bit PowerShell success alone does not establish the same32-bit path works. If necessary the same bounded own-socket script under SysWOW64 PowerShell can compare architecture without changing system state.",
+    "conditionalNext": "If both architecture baselines pass, separately authorize own diagnostic that records WSASocketW/ioctlsocket/connect/select/SO_ERROR stages against a matched own listener. Do not silently replace or retry the failing original test client or change production socket flags based on an untested theory."
+  },
+  "staticNoConcreteDefectEstablished": [
+    "IPv6 actual getsockname matches selected endpoint, narrowing port/address-codec hypothesis.",
+    "AF_INET6/V6ONLY and AcceptEx48-byte regions are intact.",
+    "Source policy and fake SSPI record code run after the failed client stage and cannot directly produce this original connect_timeout error."
+  ],
+  "notConcluded": [
+    "No claim10013 is environment, firewall or IPv6 support cause",
+    "No claim.NET baseline or independent IPv4 TLS proves nativeIPv6 test passes",
+    "No runtime fix claimed",
+    "No adjustment to1s/3s/5s limits or SERIAL behavior"
+  ]
+}

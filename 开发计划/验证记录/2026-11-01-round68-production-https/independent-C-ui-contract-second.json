@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "status": "C_PREVIOUS_P1_CLOSED_BY_SOURCE_REVIEW_B_RESERVATION_P1_OPEN",
+  "atUtc": "2026-11-01T07:39:04.712162+00:00",
+  "scope": "READ_ONLY_SOURCE_REVIEW_NO_CARGO_OR_WINDOWS",
+  "jointFreeze": {
+    "file": "joint-implementation-freeze-first.json",
+    "sha256": "cc2cbcb19530f13549b5358d56b18997302b046bca593e299b768330f20c94ed",
+    "changedFileCount": 43,
+    "allChangedFilesMatchAtReview": true
+  },
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+      "bytes": 13841,
+      "sha256": "e0abc02fc65b0c2a429662d3b3a3c0043c34f69b4bd3a2a509c055491de68698",
+      "snapshot": "independent-C-ui-contract-second-source/crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+      "jointChangedSourceMatch": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 262848,
+      "sha256": "2e764fa6be7070fdb5401b6998d8b422051aad97d70dd8e1b3e8ff3b640361e9",
+      "snapshot": "independent-C-ui-contract-second-source/crates/fc-bootstrap/src/application.rs",
+      "jointChangedSourceMatch": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 25255,
+      "sha256": "8d2f4a41a6a3361069f9f4120a1e7116e9e011ff25d807ca8ec8229e7134fde3",
+      "snapshot": "independent-C-ui-contract-second-source/crates/fc-bootstrap/src/application/web_editor.rs",
+      "jointChangedSourceMatch": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 20451,
+      "sha256": "50bfd301f46f7a9fad025d64969bd5f238ffccd4df416f5577bf62e88be628da",
+      "snapshot": "independent-C-ui-contract-second-source/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "jointChangedSourceMatch": true
+    },
+    {
+      "path": "scripts/windows-ordinary-https-probe.py",
+      "bytes": 33509,
+      "sha256": "1f6565f2dfa2a622d622b30c7fca9d5d2abae1ce761f8c0f6c8db713b1bb4046",
+      "snapshot": "independent-C-ui-contract-second-source/scripts/windows-ordinary-https-probe.py",
+      "jointChangedSourceMatch": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "bytes": 8218,
+      "sha256": "201abcebcd35ddc7a2335eefff77511a42d96a6390c2e820505e5e0db8554b13",
+      "snapshot": "independent-C-ui-contract-second-source/crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "jointChangedSourceMatch": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/https_runtime.rs",
+      "bytes": 22371,
+      "sha256": "6a5a3440b758bfa7818c2a6c0407630b80629a88a4150bf78c49adde26cb0631",
+      "snapshot": "independent-C-ui-contract-second-source/crates/fc-bootstrap/src/https_runtime.rs",
+      "jointChangedSourceMatch": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/voice_management_probe.rs",
+      "bytes": 25689,
+      "sha256": "e287098ddbd7c94005dac641932537c3971a282061ebddfd9ee0f003d591e0e4",
+      "snapshot": "independent-C-ui-contract-second-source/crates/fc-bootstrap/src/application/voice_management_probe.rs",
+      "jointChangedSourceMatch": false
+    },
+    {
+      "path": "scripts/windows-tls-business-probe.py",
+      "bytes": 162254,
+      "sha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208",
+      "snapshot": "independent-C-ui-contract-second-source/scripts/windows-tls-business-probe.py",
+      "jointChangedSourceMatch": false
+    },
+    {
+      "path": "scripts/windows-tls-probe.py",
+      "bytes": 50969,
+      "sha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+      "snapshot": "independent-C-ui-contract-second-source/scripts/windows-tls-probe.py",
+      "jointChangedSourceMatch": false
+    }
+  ],
+  "previousFinding": {
+    "id": "R68-C-B-STOP-ORIGIN-RENEWAL",
+    "sourceStatus": "CLOSED_NOT_RUNTIME_TESTED",
+    "mechanism": [
+      "B RuntimeOwner.poll emits StopTimeout after the original shared stop_at+5s if owner is not quiescent. C sees that exact status.error and calls force_teacher_https_exit in the same poll turn.",
+      "force_teacher_https_exit sets terminate_required=true, invokes begin_shutdown, then restores Faulted and clamps shutdown_deadline to min(existing, expired). StopTimeout passes Instant::now, already expired by the later main-pump deadline test.",
+      "The external C stop interval also uses its original stop_deadline and passes that already expired instant to force_teacher_https_exit. begin_shutdown cannot replace the final clamped value with a later fresh5s interval in this call order.",
+      "The normal main pump tests shutdown_deadline together with terminate_required and calls process::exit(2); the owner is retained through that process termination."
+    ],
+    "evidence": [
+      {
+        "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+        "line": 260,
+        "needle": "if status.error == Some(runtime::RuntimeError::StopTimeout)"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+        "line": 263,
+        "needle": "self.force_teacher_https_exit(Instant::now());"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+        "line": 141,
+        "needle": "self.shutdown_deadline = Some(self.shutdown_deadline.map_or(expired, |d| d.min(expired)));"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application.rs",
+        "line": 4786,
+        "needle": "eprintln!(\"未来教室关闭超时，停止当前进程并保留数据供启动核对。\");"
+      }
+    ]
+  },
+  "preparationTimeout": {
+    "sourceStatus": "MATCH_NOT_EXECUTED",
+    "detail": "prepare_deadline is captured once at start+30s. poll observes expiry while Starting and calls stop_teacher_https. stop cancels StartRequest and original running JobTicket, drops only Unadmitted work, preserves a Running ticket while !is_finished, and captures one 5s negative stop_deadline via get_or_insert. A suppressed delivery is not physical return. On that original stop interval expiry force_teacher_https_exit clamps global shutdown to the expired deadline.",
+    "evidence": [
+      {
+        "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+        "line": 113,
+        "needle": "let deadline = Instant::now() + Duration::from_secs(30);"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+        "line": 198,
+        "needle": "if !ticket.is_finished()"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+        "line": 75,
+        "needle": ".get_or_insert(began_at + Duration::from_secs(5))"
+      }
+    ]
+  },
+  "faultedOrdering": {
+    "sourceStatus": "MATCH_NOT_EXECUTED",
+    "detail": "force_teacher_https_exit calls begin_shutdown before setting readiness Faulted and clamping deadline. begin_shutdown may temporarily set Stopping, but final readiness in this function is Faulted. The subsequent quiescent branch only rewrites readiness==Stopping, so it does not rewrite final Faulted. Later App.poll health-triggered begin_shutdown is guarded by !stopping."
+  },
+  "ordinaryTeacherWireComposition": {
+    "sourceStatus": "MATCH_NOT_EXECUTED",
+    "detail": [
+      "Probe creates the independent TeacherAdmin through actual native form account creation/password change with scope class1/subject1; pairing is not issued to the setup global administrator.",
+      "Saved host/port/certificate/source policy go through native settings commands. Enable goes through App ordinary RuntimeOwner and configured host, not direct set_enabled or a replacement probe listener.",
+      "Pairing BEGIN, coherent REFRESH, actual request ComboBox selection and native APPROVE are normal app commands. External runner submits actual HTTPS pairing request and polls, verifies secure host-only cookie, exact TeacherAdmin principal2 and assignments, then performs authenticated session/scopes/reminder GET, reminder POST with CSRF, readback GET and durable receipt GET.",
+      "Both generations verify owned IP-SAN certificate with CERT_REQUIRED/check_hostname and TLS1.2, and require actual clean TLS EOF. Finite loopback composition, not campus or Win7/10 proof. MaterialReady stop remains explicitly NOT_EXERCISED in this ordinary probe; B separate regression covers it."
+    ],
+    "evidence": [
+      {
+        "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+        "line": 316,
+        "needle": "submit(app, web_editor::ENABLE, &[], deadline)?;"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+        "line": 386,
+        "needle": "app.window.probe_choice(web_editor::REQUEST, &request)"
+      },
+      {
+        "path": "scripts/windows-ordinary-https-probe.py",
+        "line": 193,
+        "needle": "validate_teacher_session(session)"
+      },
+      {
+        "path": "scripts/windows-ordinary-https-probe.py",
+        "line": 241,
+        "needle": "committed = client.request(\"ordinary-authenticated-reminder-post\""
+      }
+    ]
+  },
+  "secretOutputReview": {
+    "sourceStatus": "NO_SECRET_PERSISTENCE_PATH_FOUND_NOT_EXECUTED",
+    "detail": [
+      "Teacher initial and changed passwords are randomly generated SecretText passed only to native forms, dropped after use; native transcript prints fixed step labels/public rendezvous metadata.",
+      "Actual pairing code is written only to a fresh owned ACL-inheriting transient .secret sidechannel. read_pairing_secret uses direct subprocess capture into memory outside Remote.run_file raw recorder, removes the exact remote file before delivery, and reports no code/digest/body.",
+      "HTTP cookie/CSRF/poll secret and response JSON remain memory-only; event records contain status, lengths, route and boolean cookie/csrf presence. authenticate_and_write returns only fixed approval/readback/receipt metadata. Secret-bearing response body hashes are not added to events.",
+      "Raw capture allowlist does not include .secret; cleanup attempts removal before root raw preservation. Reports may archive control source code and public certificate metadata but not runtime authentication values.",
+      "Failure messages in ordinary parser/validator are static; common tls.failure preserves error strings, so this assessment relies on the observed paths not formatting request/response bodies or captured secret stdout into raised messages. Runtime evidence still needs an actual secret scan before archiving."
+    ],
+    "evidence": [
+      {
+        "path": "scripts/windows-ordinary-https-probe.py",
+        "line": 131,
+        "needle": "result = subprocess.run(remote.command(script), capture_output=True"
+      },
+      {
+        "path": "scripts/windows-ordinary-https-probe.py",
+        "line": 187,
+        "needle": "\"authenticatedCookieSent\": bool(authenticated and self.cookie)"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+        "line": 350,
+        "needle": "println!(\"ORDINARY_HTTPS_PAIR_READY"
+      },
+      {
+        "path": "scripts/windows-tls-probe.py",
+        "line": 36,
+        "needle": "RAW_NAMES = ("
+      }
+    ]
+  },
+  "independentOpenFinding": {
+    "id": "R68-B-RESERVATION-DROP-ABA",
+    "severity": "P1",
+    "status": "OPEN_REPORTED_BY_NATIVE_REVIEW_CONFIRMED_SOURCE",
+    "detail": "physical_returned marks returned=true and clears shared runtime_owned. If a new reservation sets runtime_owned=true while an old returned RuntimeOwner/Arc still exists, dropping that old reservation again clears runtime_owned due returned branch. C normally drops its old owner before preparing new start, but this is not an exact-owner release invariant and must be fixed before promotion. Source frozen and not changed by this reviewer.",
+    "evidence": [
+      {
+        "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+        "line": 206,
+        "needle": "if !self.started.load(Ordering::Acquire) || self.returned.load(Ordering::Acquire)"
+      }
+    ],
+    "reportedTo": [
+      "root",
+      "production_backend"
+    ]
+  },
+  "limitations": [
+    "No source changes, Cargo, Windows operation or network.",
+    "Build controller20208 is root-owned and not polled by this reviewer.",
+    "A third-freeze native cleanup change is not executed or independently passed by this report.",
+    "All conclusions are observed frozen-source control-flow checks, not runtime green evidence."
+  ]
+}

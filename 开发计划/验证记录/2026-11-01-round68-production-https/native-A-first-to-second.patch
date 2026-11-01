@@ -1,0 +1,62 @@
+--- native-A-source-first/crates/fc-windows/src/tls_frontdoor/native/stream.rs
++++ native-A-source-second/crates/fc-windows/src/tls_frontdoor/native/stream.rs
+@@ -272,7 +272,8 @@
+     /// Consumes saved explicit endpoint/source policy, with no diagnostic
+     /// marker. Exactly one A/AAAA endpoint is supported; ambiguous DNS, scoped
+     /// or mapped IPv6 and wildcard binding are rejected. SAN identity, validity,
+-    /// server EKU and real Schannel readiness precede exact bind/listen. Client
++    /// server EKU and real Schannel readiness precede exact bind/listen. SAN
++    /// entries support DNS/IP only; any other GeneralName is rejected. Client
+     /// trust/reachability and application authentication remain separate.
+     pub fn open_configured(
+         configuration: &fc_domain::https_settings::HttpsConfiguration,
+--- native-A-source-first/crates/fc-windows/src/tls_frontdoor/credentials/host.rs
++++ native-A-source-second/crates/fc-windows/src/tls_frontdoor/credentials/host.rs
+@@ -1,6 +1,9 @@
+ //! Configured listener SAN identity on its exact selected credential context.
+ //! No cached inspection report, CN fallback, trust-store mutation or claim of
+ //! a remote browser's trust. Administrator deployment supplies that trust.
++//! Configured certificates support dNSName/iPAddress SAN entries only. Every
++//! other GeneralName fails closed, even when valid; nested DER/other IA5/OID
++//! names are not silently treated as validated or ignored.
+ use super::*;
+ use std::net::IpAddr;
+ 
+@@ -96,10 +99,9 @@
+             return false;
+         };
+         names = rest;
+-        if !matches!(
+-            tag,
+-            0xa0 | 0x81 | 0x82 | 0xa3 | 0xa4 | 0xa5 | 0x86 | 0x87 | 0x88
+-        ) || tag == 0x87 && value.len() != 4 && value.len() != 16
++        // A supported matching name cannot hide an unvalidated later name.
++        if !matches!(tag, 0x82 | 0x87)
++            || tag == 0x87 && value.len() != 4 && value.len() != 16
+             || tag == 0x82
+                 && (value.is_empty()
+                     || value.len() > 253
+@@ -166,4 +168,23 @@
+             assert!(!matches_san(bytes, "a"));
+         }
+     }
++    #[test]
++    fn configured_certificate_san_rejects_other_general_names_after_a_matching_ip() {
++        let malformed_directory = [0x30, 9, 0x87, 4, 127, 0, 0, 1, 0xa4, 1, 0xff];
++        assert!(!matches_san(&malformed_directory, "127.0.0.1"));
++        // Even well-formed unsupported names must not become an accidental
++        // promise that this bounded matcher validates all GeneralName types.
++        for (tag, value) in [
++            (0xa4, &[0x30, 0][..]),
++            (0x86, &b"https://school.example"[..]),
++            (0x81, &b"admin@school.example"[..]),
++            (0x88, &[0x2a, 3, 4][..]),
++        ] {
++            let mut content = vec![0x87, 4, 127, 0, 0, 1, tag, value.len() as u8];
++            content.extend_from_slice(value);
++            let mut outer = vec![0x30, content.len() as u8];
++            outer.extend(content);
++            assert!(!matches_san(&outer, "127.0.0.1"));
++        }
++    }
+ }

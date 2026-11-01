@@ -146,7 +146,7 @@ impl App {
             principal: lease.principal_id(),
         })
     }
-    fn https_allowed(&self, lease: SessionLease) -> bool {
+    pub(super) fn https_allowed(&self, lease: SessionLease) -> bool {
         lease.origin() == TrustedOrigin::Local
             && self.current_global_owner() == Some(lease.principal_id())
             && self.profiles_memory_gate()

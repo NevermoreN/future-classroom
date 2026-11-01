@@ -1,0 +1,1557 @@
+--- base/crates/fc-domain/src/https_settings.rs
++++ native-A-source-fourth/crates/fc-domain/src/https_settings.rs
+@@ -8,6 +8,7 @@
+     InvalidHost,
+     InvalidPort,
+     InvalidCertificate,
++    InvalidSourceNetworks,
+     InvalidState,
+     RevisionConflict { current: Revision },
+     IdentityRevisionConflict { current: Revision },
+@@ -98,11 +99,17 @@
+         self.0.iter().map(|b| format!("{b:02x}")).collect()
+     }
+ }
++mod source_networks;
++pub use source_networks::{HttpsSourceNetwork, HttpsSourceNetworks};
++
+ #[derive(Clone, Debug, PartialEq, Eq)]
+ pub struct HttpsConfiguration {
+     pub host: HttpsHost,
+     pub port: u16,
+     pub certificate: HttpsCertificateRef,
++    /// Legacy saved settings have no network authority. Enabling requires an
++    /// explicit policy; no local or campus subnet is inferred.
++    pub source_networks: Option<HttpsSourceNetworks>,
+ }
+ impl HttpsConfiguration {
+     pub fn new(
+@@ -114,9 +121,14 @@
+             host,
+             port,
+             certificate,
++            source_networks: None,
+         };
+         value.validate()?;
+         Ok(value)
++    }
++    pub fn with_source_networks(mut self, policy: HttpsSourceNetworks) -> Self {
++        self.source_networks = Some(policy);
++        self
+     }
+     pub fn validate(&self) -> Result<(), HttpsSettingsError> {
+         if self.port == 0 {
+@@ -138,6 +150,10 @@
+     }
+     pub fn allocation_bytes(&self) -> usize {
+         self.host.allocation_bytes()
++            + self
++                .source_networks
++                .as_ref()
++                .map_or(0, HttpsSourceNetworks::allocation_bytes)
+     }
+ }
+ #[derive(Clone, Debug, Default, PartialEq, Eq)]
+--- base/crates/fc-domain/src/https_settings/source_networks.rs
++++ native-A-source-fourth/crates/fc-domain/src/https_settings/source_networks.rs
+@@ -0,0 +1,183 @@
++//! Explicit permitted peer CIDRs; a network range never grants application authority.
++use super::HttpsSettingsError;
++use std::net::IpAddr;
++
++pub const MAX_SOURCE_NETWORKS: usize = 16;
++
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct HttpsSourceNetwork {
++    network: IpAddr,
++    prefix: u8,
++    text: String,
++}
++impl HttpsSourceNetwork {
++    /// Host bits must already be zero. /0, scoped/mapped IPv6, multicast,
++    /// unspecified and broadcast ranges are unsupported rather than widened.
++    pub fn parse(value: &str) -> Result<Self, HttpsSettingsError> {
++        let invalid = || HttpsSettingsError::InvalidSourceNetworks;
++        if value.is_empty() || value.len() > 64 || !value.is_ascii() {
++            return Err(invalid());
++        }
++        let (address, prefix) = value.split_once('/').ok_or_else(invalid)?;
++        let network = address.parse::<IpAddr>().map_err(|_| invalid())?;
++        if prefix.is_empty() || !prefix.bytes().all(|b| b.is_ascii_digit()) {
++            return Err(invalid());
++        }
++        let prefix = prefix.parse::<u8>().map_err(|_| invalid())?;
++        let canonical = match network {
++            IpAddr::V4(v) => {
++                if prefix == 0
++                    || prefix > 32
++                    || v.is_unspecified()
++                    || v.is_multicast()
++                    || v.is_broadcast()
++                {
++                    return Err(invalid());
++                }
++                let mask = u32::MAX << (32 - prefix);
++                u32::from(v) & !mask == 0
++            }
++            IpAddr::V6(v) => {
++                if prefix == 0
++                    || prefix > 128
++                    || v.is_unspecified()
++                    || v.is_multicast()
++                    || v.to_ipv4_mapped().is_some()
++                {
++                    return Err(invalid());
++                }
++                let mask = u128::MAX << (128 - prefix);
++                u128::from(v) & !mask == 0
++            }
++        };
++        if !canonical {
++            return Err(invalid());
++        }
++        Ok(Self {
++            network,
++            prefix,
++            text: format!("{network}/{prefix}"),
++        })
++    }
++    pub fn as_str(&self) -> &str {
++        &self.text
++    }
++    pub fn contains(&self, peer: IpAddr) -> bool {
++        // Never reinterpret mapped IPv6 as IPv4 or accept unusable peers.
++        if peer.is_unspecified()
++            || peer.is_multicast()
++            || matches!(peer, IpAddr::V4(v) if v.is_broadcast())
++            || matches!(peer, IpAddr::V6(v) if v.to_ipv4_mapped().is_some())
++        {
++            return false;
++        }
++        match (self.network, peer) {
++            (IpAddr::V4(network), IpAddr::V4(peer)) => {
++                u32::from(network) == u32::from(peer) & (u32::MAX << (32 - self.prefix))
++            }
++            (IpAddr::V6(network), IpAddr::V6(peer)) => {
++                u128::from(network) == u128::from(peer) & (u128::MAX << (128 - self.prefix))
++            }
++            _ => false,
++        }
++    }
++}
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct HttpsSourceNetworks(Vec<HttpsSourceNetwork>);
++impl HttpsSourceNetworks {
++    pub const MAX_NETWORKS: usize = MAX_SOURCE_NETWORKS;
++    pub fn new(networks: Vec<HttpsSourceNetwork>) -> Result<Self, HttpsSettingsError> {
++        if networks.is_empty()
++            || networks.len() > MAX_SOURCE_NETWORKS
++            || networks
++                .iter()
++                .enumerate()
++                .any(|(n, v)| networks[..n].contains(v))
++        {
++            return Err(HttpsSettingsError::InvalidSourceNetworks);
++        }
++        // Do not retain an arbitrarily over-reserved caller Vec in this
++        // bounded pure value; the owned capacity is the validated length.
++        Ok(Self(networks.into_boxed_slice().into_vec()))
++    }
++    /// UI/storage text is bounded before parsing; tokens are comma or ASCII
++    /// whitespace separated. No empty input or implicit default is accepted.
++    pub fn parse(value: &str) -> Result<Self, HttpsSettingsError> {
++        if value.len() > MAX_SOURCE_NETWORKS * 65 || !value.is_ascii() {
++            return Err(HttpsSettingsError::InvalidSourceNetworks);
++        }
++        let mut networks = Vec::new();
++        for part in value
++            .split(|c: char| c == ',' || c.is_ascii_whitespace())
++            .filter(|p| !p.is_empty())
++        {
++            if networks.len() == MAX_SOURCE_NETWORKS {
++                return Err(HttpsSettingsError::InvalidSourceNetworks);
++            }
++            networks.push(HttpsSourceNetwork::parse(part)?);
++        }
++        Self::new(networks)
++    }
++    pub fn networks(&self) -> &[HttpsSourceNetwork] {
++        &self.0
++    }
++    pub fn contains(&self, peer: IpAddr) -> bool {
++        self.0.iter().any(|network| network.contains(peer))
++    }
++    pub fn to_text(&self) -> String {
++        self.0
++            .iter()
++            .map(HttpsSourceNetwork::as_str)
++            .collect::<Vec<_>>()
++            .join("\n")
++    }
++    pub fn allocation_bytes(&self) -> usize {
++        self.0.capacity() * std::mem::size_of::<HttpsSourceNetwork>()
++            + self.0.iter().map(|n| n.text.capacity()).sum::<usize>()
++    }
++}
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn explicit_sources_are_bounded_canonical_and_family_specific() {
++        let p =
++            HttpsSourceNetworks::parse("192.168.40.0/24, 2001:db8:1::/48\n127.0.0.1/32 ::1/128")
++                .unwrap();
++        for v in ["192.168.40.7", "2001:db8:1::7", "127.0.0.1", "::1"] {
++            assert!(p.contains(v.parse().unwrap()));
++        }
++        for v in [
++            "192.168.41.7",
++            "2001:db8:2::7",
++            "::ffff:192.168.40.7",
++            "224.0.0.1",
++            "::",
++            "ff02::1",
++        ] {
++            assert!(!p.contains(v.parse().unwrap()));
++        }
++        assert_eq!(HttpsSourceNetworks::parse(&p.to_text()).unwrap(), p);
++        for v in [
++            "",
++            "0.0.0.0/0",
++            "::/0",
++            "192.168.40.7/24",
++            "2001:db8:1::1/48",
++            "::ffff:192.168.40.0/120",
++            "fe80::1%2/128",
++            "224.0.0.0/4",
++            "127.0.0.1/33",
++            "::1/129",
++            "127.0.0.1/32,127.0.0.1/32",
++        ] {
++            assert!(HttpsSourceNetworks::parse(v).is_err(), "{v}");
++        }
++        assert!(HttpsSourceNetworks::new(
++            (1..=17)
++                .map(|n| HttpsSourceNetwork::parse(&format!("10.0.{n}.0/24")).unwrap())
++                .collect()
++        )
++        .is_err());
++    }
++}
+--- base/crates/fc-windows/src/tls_frontdoor/mod.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/mod.rs
+@@ -1,7 +1,7 @@
+-//! Owned TLS execution for the admission candidate. Native contexts stay on one
+-//! fixed SSPI thread; bounded linear frames cross its mailbox. Production
+-//! listening and the original strict first-connection deadline remain separate
+-//! platform gates, rather than being inferred from a successful TLS handshake.
++//! Owned configured TLS transport and preserved isolated diagnostics. Native
++//! contexts stay on one fixed SSPI thread; bounded linear frames cross its
++//! mailbox. Exact configured readiness does not prove remote client trust,
++//! campus reachability or a hard real-time TCP scheduling bound.
+ #[cfg(any(windows, test))]
+ use fc_ports::http::RequestToken;
+ #[cfg(any(windows, test))]
+@@ -288,3 +288,18 @@
+         }
+     }
+ }
++
++/// Sanitized startup result for an explicitly configured production listener.
++/// Native includes socket/bind/listen failure; no provider/path detail is exposed.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum ConfiguredTlsError {
++    InvalidConfiguration,
++    MissingSourceNetworks,
++    UnsupportedAddress,
++    AmbiguousAddress,
++    AddressUnavailable,
++    Certificate,
++    Busy,
++    Native,
++    Cleanup,
++}
+--- base/crates/fc-windows/src/tls_frontdoor/native.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/native.rs
+@@ -1,8 +1,8 @@
+-//! Finite loopback evidence for owned TLS execution. This is not a production
+-//! listener and does not prove the strict first-connection scheduler deadline.
++//! Original pinned TLS execution owner, shared by isolated diagnostics and
++//! explicitly configured listeners. No hard real-time TCP scheduling claim.
+ use super::{
+-    worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsAcceptClose, TlsAcceptSnapshot,
+-    TlsCloseSnapshot, TlsError, TlsHeaderClose, BUFFER_BYTES, CONNECTION_SLOTS,
++    worker::Worker, Call, CertificateThumbprint, ConfiguredTlsError, Frame, Step, TlsAcceptClose,
++    TlsAcceptSnapshot, TlsCloseSnapshot, TlsError, TlsHeaderClose, BUFFER_BYTES, CONNECTION_SLOTS,
+     HEADER_CLOSE_RESERVE, PLAINTEXT_BYTES,
+ };
+ use fc_ports::http::{RequestToken, ResponseHead, TokenIssuer};
+@@ -29,8 +29,11 @@
+     },
+ };
+ mod accept;
++mod configured;
+ mod stream;
+ pub use stream::{TlsHttpEvent, TlsHttpHost};
++const ACCEPT_ADDRESS_LENGTH: u32 = 48;
++const ACCEPT_ADDRESS_BYTES: usize = 96;
+ const BUDGET: Duration = Duration::from_secs(5);
+ fn header_close_alarm(hard_deadline: Instant) -> Instant {
+     hard_deadline
+@@ -42,7 +45,7 @@
+ 
+ struct IoMemory {
+     operation: UnsafeCell<OVERLAPPED>,
+-    addresses: UnsafeCell<[u8; 64]>,
++    addresses: UnsafeCell<[u8; ACCEPT_ADDRESS_BYTES]>,
+     bytes: UnsafeCell<[u8; BUFFER_BYTES]>,
+     flags: UnsafeCell<u32>,
+     _pinned: PhantomPinned,
+@@ -117,6 +120,7 @@
+     accept_idle_returns: u64,
+     accept_handoffs: u64,
+     accept_capacity_rejections: u64,
++    accept_source_rejections: u64,
+     accept_expired_discards: u64,
+     accept_error_discards: u64,
+     accept_stop_discards: u64,
+@@ -144,6 +148,12 @@
+     explicit_retirements: usize,
+     close_observations: TlsCloseSnapshot,
+ }
++#[cfg(test)]
++#[derive(Clone, Copy, PartialEq, Eq)]
++enum NativeReleaseFailure {
++    Iocp,
++    Winsock,
++}
+ struct Owner {
+     resources: ManuallyDrop<Resources>,
+     started: Instant,
+@@ -153,9 +163,17 @@
+     marker: String,
+     stopping: bool,
+     drained: bool,
++    cleanup_failed: bool,
++    #[cfg(test)]
++    release_failure: Option<NativeReleaseFailure>,
++    #[cfg(test)]
++    release_attempts: [usize; 2],
+     report: Report,
+     issuer: TokenIssuer,
++    credentials_ready: bool,
+     http_mode: bool,
++    bind_address: std::net::SocketAddr,
++    source_networks: Option<fc_domain::https_settings::HttpsSourceNetworks>,
+ }
+ fn socket_handle(socket: SOCKET) -> HANDLE {
+     HANDLE(socket.0 as *mut _)
+@@ -216,6 +234,13 @@
+     Ok(())
+ }
+ impl Owner {
++    fn address_family(&self) -> ADDRESS_FAMILY {
++        if self.bind_address.is_ipv4() {
++            AF_INET
++        } else {
++            AF_INET6
++        }
++    }
+     fn new(marker: &str) -> Result<Self, String> {
+         let started = Instant::now();
+         if OWNER_FAULTED.load(Ordering::Acquire)
+@@ -242,7 +267,7 @@
+                     Slot {
+                         memory: Box::pin(IoMemory {
+                             operation: UnsafeCell::new(OVERLAPPED::default()),
+-                            addresses: UnsafeCell::new([0; 64]),
++                            addresses: UnsafeCell::new([0; ACCEPT_ADDRESS_BYTES]),
+                             bytes: UnsafeCell::new([0; BUFFER_BYTES]),
+                             flags: UnsafeCell::new(0),
+                             _pinned: PhantomPinned,
+@@ -277,9 +302,17 @@
+             marker: marker.into(),
+             stopping: false,
+             drained: false,
++            cleanup_failed: false,
++            #[cfg(test)]
++            release_failure: None,
++            #[cfg(test)]
++            release_attempts: [0; 2],
+             report: Report::default(),
+             issuer,
++            credentials_ready: false,
+             http_mode: false,
++            bind_address: "127.0.0.1:0".parse().expect("literal diagnostic loopback"),
++            source_networks: None,
+         })
+     }
+     fn start(&mut self, thumbprint: CertificateThumbprint) -> Result<(), String> {
+@@ -292,6 +325,7 @@
+         loop {
+             if let Some(result) = self.resources.worker.as_mut().unwrap().poll_ready() {
+                 result.map_err(|e| format!("TLS credential readiness: {e:?}"))?;
++                self.credentials_ready = true;
+                 break;
+             }
+             if self.started.elapsed() >= BUDGET {
+@@ -312,7 +346,7 @@
+             }
+             self.resources.winsock = true;
+             self.resources.listener = WSASocketW(
+-                AF_INET.0 as i32,
++                self.address_family().0 as i32,
+                 SOCK_STREAM.0,
+                 IPPROTO_TCP.0,
+                 None,
+@@ -329,24 +363,7 @@
+                 ),
+                 "exclusive listener",
+             )?;
+-            let mut address = SOCKADDR_IN {
+-                sin_family: AF_INET,
+-                sin_port: 0,
+-                sin_addr: IN_ADDR {
+-                    S_un: IN_ADDR_0 {
+-                        S_addr: u32::from_ne_bytes([127, 0, 0, 1]),
+-                    },
+-                },
+-                ..Default::default()
+-            };
+-            check(
+-                bind(
+-                    self.resources.listener,
+-                    ptr::from_ref(&address).cast(),
+-                    size_of::<SOCKADDR_IN>() as i32,
+-                ),
+-                "loopback bind",
+-            )?;
++            configured::bind_exact(self.resources.listener, self.bind_address)?;
+             if self.started.elapsed() >= BUDGET {
+                 return Err("TLS admission deadline before listen".into());
+             }
+@@ -354,16 +371,7 @@
+                 listen(self.resources.listener, CONNECTION_SLOTS as i32),
+                 "listen",
+             )?;
+-            let mut length = size_of::<SOCKADDR_IN>() as i32;
+-            check(
+-                getsockname(
+-                    self.resources.listener,
+-                    ptr::from_mut(&mut address).cast(),
+-                    &mut length,
+-                ),
+-                "getsockname",
+-            )?;
+-            self.port_number = u16::from_be(address.sin_port);
++            self.port_number = configured::local_port(self.resources.listener)?;
+             self.resources.port = CreateIoCompletionPort(INVALID_HANDLE_VALUE, None, 0, 1)
+                 .map_err(|e| format!("TLS IOCP: {e}"))?;
+             CreateIoCompletionPort(
+@@ -399,9 +407,10 @@
+                 self.post_bare_accept()?;
+                 return Ok(());
+             }
++            let family = self.address_family();
+             for slot in &mut self.resources.slots {
+                 slot.socket = WSASocketW(
+-                    AF_INET.0 as i32,
++                    family.0 as i32,
+                     SOCK_STREAM.0,
+                     IPPROTO_TCP.0,
+                     None,
+@@ -414,8 +423,8 @@
+                     slot.socket,
+                     slot.memory.addresses.get().cast(),
+                     0,
+-                    32,
+-                    32,
++                    ACCEPT_ADDRESS_LENGTH,
++                    ACCEPT_ADDRESS_LENGTH,
+                     &mut bytes,
+                     slot.memory.operation.get(),
+                 )
+@@ -1231,6 +1240,10 @@
+             + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
+             + self.target.capacity()
+             + self.marker.capacity()
++            + self.source_networks.as_ref().map_or(
++                0,
++                fc_domain::https_settings::HttpsSourceNetworks::allocation_bytes,
++            )
+             + self
+                 .resources
+                 .slots
+@@ -1253,6 +1266,9 @@
+         if let Some(worker) = &self.resources.worker {
+             worker.request_stop();
+         }
++        if self.cleanup_failed {
++            return Err("TLS native cleanup failure retained; release cannot be retried".into());
++        }
+         let mut failure = None;
+         if let Err(error) = self.close_bare_accept() {
+             failure = Some(error);
+@@ -1281,6 +1297,9 @@
+         failure.map_or(Ok(()), Err)
+     }
+     fn finish(&mut self) -> Result<(), String> {
++        if self.cleanup_failed {
++            return Err("TLS native cleanup failure retained; release cannot be retried".into());
++        }
+         let stop_result = self.stop();
+         let deadline = Instant::now() + BUDGET;
+         loop {
+@@ -1338,17 +1357,7 @@
+                 // SAFETY: all IOCP packets and the actual SSPI thread have
+                 // terminated. Check real resource release before reporting a
+                 // completed cleanup; failures retain the bounded owner.
+-                unsafe {
+-                    if !self.resources.port.is_invalid() {
+-                        CloseHandle(self.resources.port)
+-                            .map_err(|e| format!("TLS IOCP close: {e}"))?;
+-                        self.resources.port = HANDLE::default();
+-                    }
+-                    if self.resources.winsock {
+-                        check(WSACleanup(), "TLS WSACleanup")?;
+-                        self.resources.winsock = false;
+-                    }
+-                }
++                self.release_native_resources()?;
+                 self.drained = true;
+                 return Ok(());
+             }
+@@ -1359,6 +1368,61 @@
+             }
+             std::thread::sleep(Duration::from_millis(1));
+         }
++    }
++    /// Call only after every real IOCP packet and SSPI worker has returned.
++    /// A failed release leaves its original reference untouched and permanently
++    /// forbids retry, quiescent acknowledgement and replacement in this process.
++    fn release_native_resources(&mut self) -> Result<(), String> {
++        self.release_native_resources_with(
++            |port| {
++                // SAFETY: callers have witnessed all original native borrowers.
++                unsafe { CloseHandle(port) }.map_err(|e| format!("TLS IOCP close: {e}"))
++            },
++            || {
++                // SAFETY: the original successful WSAStartup remains owned here.
++                check(unsafe { WSACleanup() }, "TLS WSACleanup")
++            },
++        )
++    }
++    fn release_native_resources_with(
++        &mut self,
++        close_port: impl FnOnce(HANDLE) -> Result<(), String>,
++        cleanup_winsock: impl FnOnce() -> Result<(), String>,
++    ) -> Result<(), String> {
++        if self.cleanup_failed || OWNER_FAULTED.load(Ordering::Acquire) {
++            self.cleanup_failed = true;
++            return Err("TLS native cleanup failure retained; quiescence unproven".into());
++        }
++        let result = (|| {
++            if !self.resources.port.is_invalid() {
++                #[cfg(test)]
++                {
++                    self.release_attempts[0] += 1;
++                    if self.release_failure == Some(NativeReleaseFailure::Iocp) {
++                        return Err("controlled original IOCP close failure".into());
++                    }
++                }
++                close_port(self.resources.port)?;
++                self.resources.port = HANDLE::default();
++            }
++            if self.resources.winsock {
++                #[cfg(test)]
++                {
++                    self.release_attempts[1] += 1;
++                    if self.release_failure == Some(NativeReleaseFailure::Winsock) {
++                        return Err("controlled original WSACleanup failure".into());
++                    }
++                }
++                cleanup_winsock()?;
++                self.resources.winsock = false;
++            }
++            Ok(())
++        })();
++        if result.is_err() {
++            self.cleanup_failed = true;
++            OWNER_FAULTED.store(true, Ordering::Release);
++        }
++        result
+     }
+ }
+ impl Drop for Owner {
+--- base/crates/fc-windows/src/tls_frontdoor/native/accept.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/native/accept.rs
+@@ -4,7 +4,7 @@
+ 
+ pub(super) struct AcceptMemory {
+     pub(super) operation: UnsafeCell<OVERLAPPED>,
+-    addresses: UnsafeCell<[u8; 64]>,
++    addresses: UnsafeCell<[u8; ACCEPT_ADDRESS_BYTES]>,
+     _pinned: PhantomPinned,
+ }
+ #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+@@ -35,7 +35,7 @@
+         Self {
+             memory: Box::pin(AcceptMemory {
+                 operation: UnsafeCell::new(OVERLAPPED::default()),
+-                addresses: UnsafeCell::new([0; 64]),
++                addresses: UnsafeCell::new([0; ACCEPT_ADDRESS_BYTES]),
+                 _pinned: PhantomPinned,
+             }),
+             socket: INVALID_SOCKET,
+@@ -188,6 +188,7 @@
+             return Err("bare AcceptEx listener stopped".into());
+         }
+         let listener = self.resources.listener;
++        let family = self.address_family();
+         let bare = self
+             .resources
+             .accept
+@@ -205,9 +206,9 @@
+         // was transferred/closed; only now may this pinned operation be reused.
+         unsafe {
+             *bare.memory.operation.get() = OVERLAPPED::default();
+-            *bare.memory.addresses.get() = [0; 64];
++            *bare.memory.addresses.get() = [0; ACCEPT_ADDRESS_BYTES];
+             bare.socket = WSASocketW(
+-                AF_INET.0 as i32,
++                family.0 as i32,
+                 SOCK_STREAM.0,
+                 IPPROTO_TCP.0,
+                 None,
+@@ -232,8 +233,8 @@
+                 bare.socket,
+                 bare.memory.addresses.get().cast(),
+                 0,
+-                32,
+-                32,
++                ACCEPT_ADDRESS_LENGTH,
++                ACCEPT_ADDRESS_LENGTH,
+                 &mut received,
+                 bare.memory.operation.get(),
+             )
+@@ -360,20 +361,42 @@
+                     "bare accept context",
+                 )
+                 .and_then(|()| {
++                    let peer =
++                        configured::peer_address(self.resources.accept.as_ref().unwrap().socket)?;
++                    if self
++                        .source_networks
++                        .as_ref()
++                        .is_some_and(|policy| !policy.contains(peer))
++                    {
++                        return Ok(false);
++                    }
+                     CreateIoCompletionPort(
+                         socket_handle(self.resources.accept.as_ref().unwrap().socket),
+                         Some(self.resources.port),
+                         index + 2,
+                         1,
+                     )
+-                    .map(|_| ())
++                    .map(|_| true)
+                     .map_err(|e| format!("bare socket association: {e}"))
+                 })
+             };
+-            if let Err(error) = association {
+-                self.report.accept_error_discards += 1;
+-                self.close_bare_socket()?;
+-                return Err(error);
++            match association {
++                Err(error) => {
++                    self.report.accept_error_discards += 1;
++                    self.close_bare_socket()?;
++                    return Err(error);
++                }
++                Ok(false) => {
++                    self.report.accept_source_rejections += 1;
++                    self.close_bare_socket()?;
++                    // This actual packet was consumed; replenish only after the
++                    // rejected socket really closed. No SSPI permit was used.
++                    if !self.stopping {
++                        self.post_bare_accept()?;
++                    }
++                    return Ok(());
++                }
++                Ok(true) => {}
+             }
+             // Recheck after association; no late success can gain a new clock.
+             if Instant::now() >= header_close_alarm(deadline) {
+@@ -418,6 +441,7 @@
+             && self.report.accept_completions
+                 == self.report.accept_handoffs
+                     + self.report.accept_capacity_rejections
++                    + self.report.accept_source_rejections
+                     + self.report.accept_expired_discards
+                     + self.report.accept_error_discards
+                     + self.report.accept_stop_discards
+--- base/crates/fc-windows/src/tls_frontdoor/native/configured.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/native/configured.rs
+@@ -0,0 +1,165 @@
++//! Exact one-address binding and bounded explicit source admission. No wildcard,
++//! interface guessing, trust-store/firewall mutation or HTTP.sys configuration.
++use super::*;
++use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, ToSocketAddrs};
++
++fn supported(address: IpAddr) -> bool {
++    !address.is_unspecified()
++        && !address.is_multicast()
++        && !matches!(address, IpAddr::V4(v) if v.is_broadcast())
++        && !matches!(address, IpAddr::V6(v) if v.to_ipv4_mapped().is_some() || v.is_unicast_link_local())
++}
++fn unique_endpoint(
++    addresses: impl IntoIterator<Item = SocketAddr>,
++) -> Result<SocketAddr, ConfiguredTlsError> {
++    let mut selected = None;
++    for (count, address) in addresses.into_iter().enumerate() {
++        if count >= 16
++            || !supported(address.ip())
++            || matches!(address, SocketAddr::V6(v) if v.scope_id() != 0)
++        {
++            return Err(ConfiguredTlsError::UnsupportedAddress);
++        }
++        match selected {
++            None => selected = Some(address),
++            Some(previous) if previous == address => {}
++            Some(_) => return Err(ConfiguredTlsError::AmbiguousAddress),
++        }
++    }
++    selected.ok_or(ConfiguredTlsError::AddressUnavailable)
++}
++pub(super) fn endpoint(
++    configuration: &fc_domain::https_settings::HttpsConfiguration,
++) -> Result<SocketAddr, ConfiguredTlsError> {
++    configuration
++        .validate()
++        .map_err(|_| ConfiguredTlsError::InvalidConfiguration)?;
++    if configuration.source_networks.is_none() {
++        return Err(ConfiguredTlsError::MissingSourceNetworks);
++    }
++    if let Ok(ip) = configuration.host.as_str().parse::<IpAddr>() {
++        return unique_endpoint([SocketAddr::new(ip, configuration.port)]);
++    }
++    let addresses = (configuration.host.as_str(), configuration.port)
++        .to_socket_addrs()
++        .map_err(|_| ConfiguredTlsError::AddressUnavailable)?;
++    unique_endpoint(addresses)
++}
++pub(super) fn bind_exact(socket: SOCKET, address: SocketAddr) -> Result<(), String> {
++    // SAFETY: synchronous bind copies the corresponding complete stack address.
++    unsafe {
++        match address {
++            SocketAddr::V4(v) => {
++                let address = SOCKADDR_IN {
++                    sin_family: AF_INET,
++                    sin_port: v.port().to_be(),
++                    sin_addr: IN_ADDR {
++                        S_un: IN_ADDR_0 {
++                            S_addr: u32::from_ne_bytes(v.ip().octets()),
++                        },
++                    },
++                    ..Default::default()
++                };
++                check(
++                    bind(
++                        socket,
++                        ptr::from_ref(&address).cast(),
++                        size_of::<SOCKADDR_IN>() as i32,
++                    ),
++                    "configured IPv4 bind",
++                )
++            }
++            SocketAddr::V6(v) => {
++                check(
++                    setsockopt(
++                        socket,
++                        IPPROTO_IPV6.0,
++                        IPV6_V6ONLY,
++                        Some(&1i32.to_ne_bytes()),
++                    ),
++                    "IPv6-only listener",
++                )?;
++                let address = SOCKADDR_IN6 {
++                    sin6_family: AF_INET6,
++                    sin6_port: v.port().to_be(),
++                    sin6_addr: IN6_ADDR {
++                        u: IN6_ADDR_0 {
++                            Byte: v.ip().octets(),
++                        },
++                    },
++                    ..Default::default()
++                };
++                check(
++                    bind(
++                        socket,
++                        ptr::from_ref(&address).cast(),
++                        size_of::<SOCKADDR_IN6>() as i32,
++                    ),
++                    "configured IPv6 bind",
++                )
++            }
++        }
++    }
++}
++fn socket_address(socket: SOCKET, peer: bool) -> Result<(IpAddr, u16), String> {
++    let mut storage = [0u64; 16];
++    let mut length = std::mem::size_of_val(&storage) as i32;
++    // SAFETY: aligned writable SOCKADDR_STORAGE-sized memory; the result is
++    // interpreted only after checking its exact family and returned length.
++    unsafe {
++        let pointer = storage.as_mut_ptr().cast();
++        check(
++            if peer {
++                getpeername(socket, pointer, &mut length)
++            } else {
++                getsockname(socket, pointer, &mut length)
++            },
++            "TLS socket address",
++        )?;
++        let family = *storage.as_ptr().cast::<ADDRESS_FAMILY>();
++        if family == AF_INET && length == size_of::<SOCKADDR_IN>() as i32 {
++            let v = &*storage.as_ptr().cast::<SOCKADDR_IN>();
++            Ok((
++                Ipv4Addr::from(v.sin_addr.S_un.S_addr.to_ne_bytes()).into(),
++                u16::from_be(v.sin_port),
++            ))
++        } else if family == AF_INET6 && length == size_of::<SOCKADDR_IN6>() as i32 {
++            let v = &*storage.as_ptr().cast::<SOCKADDR_IN6>();
++            let ip = Ipv6Addr::from(v.sin6_addr.u.Byte);
++            if v.Anonymous.sin6_scope_id != 0 || ip.to_ipv4_mapped().is_some() {
++                return Err("TLS mapped or scoped peer unsupported".into());
++            }
++            Ok((ip.into(), u16::from_be(v.sin6_port)))
++        } else {
++            Err("TLS socket address family or length unsupported".into())
++        }
++    }
++}
++pub(super) fn peer_address(socket: SOCKET) -> Result<IpAddr, String> {
++    socket_address(socket, true).map(|v| v.0)
++}
++pub(super) fn local_port(socket: SOCKET) -> Result<u16, String> {
++    socket_address(socket, false).map(|v| v.1)
++}
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn configured_endpoint_never_selects_first_ambiguous_or_unsupported_address() {
++        let one: SocketAddr = "127.0.0.1:9443".parse().unwrap();
++        assert_eq!(unique_endpoint([one, one]).unwrap(), one);
++        assert!(unique_endpoint([one, "[::1]:9443".parse().unwrap()]).is_err());
++        for s in [
++            "0.0.0.0:9443",
++            "[::]:9443",
++            "[::ffff:127.0.0.1]:9443",
++            "[fe80::1]:9443",
++            "224.0.0.1:9443",
++        ] {
++            assert!(unique_endpoint([s.parse().unwrap()]).is_err(), "{s}");
++        }
++        assert_eq!(size_of::<SOCKADDR_IN6>(), 28);
++        assert!(ACCEPT_ADDRESS_LENGTH as usize >= size_of::<SOCKADDR_IN6>() + 16);
++        assert_eq!(ACCEPT_ADDRESS_BYTES, 2 * ACCEPT_ADDRESS_LENGTH as usize);
++    }
++}
+--- base/crates/fc-windows/src/tls_frontdoor/native/stream.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/native/stream.rs
+@@ -1,5 +1,5 @@
+-//! Explicit isolated loopback HTTP/TLS candidate. Business work stays outside
+-//! this owner. No ordinary-startup, trust-store or strict-five-second claim.
++//! Thread-affine HTTP/TLS transport for explicit configured listeners and
++//! preserved isolated diagnostics. Business work remains outside this owner.
+ use super::*;
+ use fc_ports::http::{RequestHead, CHUNK_BYTES, MAX_POLL_EVENTS};
+ use std::sync::Arc;
+@@ -269,6 +269,67 @@
+             drain_deadline: None,
+         })
+     }
++    /// Consumes saved explicit endpoint/source policy, with no diagnostic
++    /// marker. Exactly one A/AAAA endpoint is supported; ambiguous DNS, scoped
++    /// or mapped IPv6 and wildcard binding are rejected. SAN identity, validity,
++    /// server EKU and real Schannel readiness precede exact bind/listen. SAN
++    /// entries support DNS/IP only; any other GeneralName is rejected. Client
++    /// trust/reachability and application authentication remain separate.
++    pub fn open_configured(
++        configuration: &fc_domain::https_settings::HttpsConfiguration,
++    ) -> Result<Self, ConfiguredTlsError> {
++        configuration
++            .validate()
++            .map_err(|_| ConfiguredTlsError::InvalidConfiguration)?;
++        if configuration.source_networks.is_none() {
++            return Err(ConfiguredTlsError::MissingSourceNetworks);
++        }
++        let mut owner = Owner::new("").map_err(|_| ConfiguredTlsError::Busy)?;
++        owner.http_mode = true;
++        owner.source_networks = configuration.source_networks.clone();
++        for slot in &mut owner.resources.slots {
++            slot.stream = Some(Stream::new());
++        }
++        let result = (|| {
++            owner.bind_address = configured::endpoint(configuration)?;
++            if owner.started.elapsed() >= BUDGET {
++                return Err(ConfiguredTlsError::AddressUnavailable);
++            }
++            let thumbprint = CertificateThumbprint::parse(&configuration.certificate.to_hex())
++                .map_err(|_| ConfiguredTlsError::InvalidConfiguration)?;
++            let worker = Worker::start_configured(
++                owner.generation,
++                thumbprint,
++                configuration.host.as_str().to_owned(),
++            )
++            .map_err(|error| match error {
++                TlsError::Cleanup(_) => ConfiguredTlsError::Cleanup,
++                TlsError::Busy | TlsError::Faulted => ConfiguredTlsError::Busy,
++                _ => ConfiguredTlsError::Certificate,
++            })?;
++            owner.start_with_worker(worker).map_err(|_| {
++                if owner.credentials_ready {
++                    ConfiguredTlsError::Native
++                } else {
++                    ConfiguredTlsError::Certificate
++                }
++            })
++        })();
++        if let Err(error) = result {
++            return Err(if owner.finish().is_err() {
++                ConfiguredTlsError::Cleanup
++            } else {
++                error
++            });
++        }
++        Ok(Self {
++            owner,
++            drain_deadline: None,
++        })
++    }
++    pub fn source_rejections(&self) -> u64 {
++        self.owner.report.accept_source_rejections
++    }
+     pub fn port_number(&self) -> u16 {
+         self.owner.port_number
+     }
+@@ -973,6 +1034,9 @@
+         Ok(next)
+     }
+     fn poll_http_drain(&mut self) -> Result<bool, String> {
++        if self.cleanup_failed {
++            return Err("TLS HTTP native cleanup failure retained; quiescence unproven".into());
++        }
+         if self.drained {
+             return Ok(true);
+         }
+@@ -1022,17 +1086,7 @@
+         self.report.slot_frames_at_drain = CONNECTION_SLOTS;
+         // SAFETY: all native packets returned and the actual OS SSPI thread
+         // terminated. No in-flight operation can reference these resources.
+-        unsafe {
+-            if !self.resources.port.is_invalid() {
+-                CloseHandle(self.resources.port)
+-                    .map_err(|e| format!("TLS HTTP IOCP close: {e}"))?;
+-                self.resources.port = HANDLE::default();
+-            }
+-            if self.resources.winsock {
+-                check(WSACleanup(), "TLS HTTP WSACleanup")?;
+-                self.resources.winsock = false;
+-            }
+-        }
++        self.release_native_resources()?;
+         self.drained = true;
+         Ok(true)
+     }
+--- base/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
+@@ -94,6 +94,39 @@
+     closed: Arc<AtomicUsize>,
+     retain_faulted_owner_on_drop: bool,
+ }
++fn fixture_local_address(socket: SOCKET) -> Result<std::net::SocketAddr, String> {
++    let mut storage = [0u64; 16];
++    let mut length = std::mem::size_of_val(&storage) as i32;
++    // SAFETY: diagnostic-only synchronous query into aligned, full-size native
++    // address storage. Decode only after checking the exact family and length.
++    unsafe {
++        check(
++            getsockname(socket, storage.as_mut_ptr().cast(), &mut length),
++            "fixture listener getsockname",
++        )?;
++        let family = *storage.as_ptr().cast::<ADDRESS_FAMILY>();
++        if family == AF_INET && length == size_of::<SOCKADDR_IN>() as i32 {
++            let address = &*storage.as_ptr().cast::<SOCKADDR_IN>();
++            Ok(std::net::SocketAddr::new(
++                std::net::Ipv4Addr::from(address.sin_addr.S_un.S_addr.to_ne_bytes()).into(),
++                u16::from_be(address.sin_port),
++            ))
++        } else if family == AF_INET6 && length == size_of::<SOCKADDR_IN6>() as i32 {
++            let address = &*storage.as_ptr().cast::<SOCKADDR_IN6>();
++            Ok(std::net::SocketAddr::V6(std::net::SocketAddrV6::new(
++                std::net::Ipv6Addr::from(address.sin6_addr.u.Byte),
++                u16::from_be(address.sin6_port),
++                u32::from_be(address.sin6_flowinfo),
++                address.Anonymous.sin6_scope_id,
++            )))
++        } else {
++            Err(format!(
++                "fixture listener address family={} length={length}",
++                family.0
++            ))
++        }
++    }
++}
+ impl Fixture {
+     fn new() -> Self {
+         Self::with_encrypt_hook(None)
+@@ -105,7 +138,22 @@
+         encrypt_hook: Option<Arc<dyn Fn(usize) + Send + Sync>>,
+         decrypt_hook: Option<Arc<dyn Fn() + Send + Sync>>,
+     ) -> Self {
++        Self::with_binding(
++            "127.0.0.1:0".parse().unwrap(),
++            None,
++            encrypt_hook,
++            decrypt_hook,
++        )
++    }
++    fn with_binding(
++        bind_address: std::net::SocketAddr,
++        source_networks: Option<fc_domain::https_settings::HttpsSourceNetworks>,
++        encrypt_hook: Option<Arc<dyn Fn(usize) + Send + Sync>>,
++        decrypt_hook: Option<Arc<dyn Fn() + Send + Sync>>,
++    ) -> Self {
+         let mut owner = Owner::new("FutureClassroom-Test-TLS-native-stream-fixture").unwrap();
++        owner.bind_address = bind_address;
++        owner.source_networks = source_networks;
+         owner.http_mode = true;
+         for slot in &mut owner.resources.slots {
+             slot.stream = Some(Stream::new());
+@@ -125,11 +173,19 @@
+         // This fixture's first connection inherits that actual bare post.
+         let posted_header_deadlines =
+             [owner.resources.accept.as_ref().unwrap().deadline().unwrap(); CONNECTION_SLOTS];
+-        let client = TcpStream::connect_timeout(
+-            &SocketAddrV4::new(Ipv4Addr::LOCALHOST, owner.port_number).into(),
+-            Duration::from_secs(1),
+-        )
+-        .unwrap();
++        let selected_endpoint = std::net::SocketAddr::new(bind_address.ip(), owner.port_number);
++        let actual_local = fixture_local_address(owner.resources.listener);
++        let family = if bind_address.is_ipv4() {
++            "IPv4"
++        } else {
++            "IPv6"
++        };
++        let stage = "worker_ready+exact_bind+listen+iocp+bare_acceptex_post";
++        let client = TcpStream::connect_timeout(&selected_endpoint, Duration::from_secs(1))
++            .unwrap_or_else(|error| {
++                panic!("NATIVE_FIXTURE_CONNECT status=failed bind={bind_address} actual_local={actual_local:?} selected={selected_endpoint} family={family} stage={stage} original_os_code={:?} error={error}", error.raw_os_error())
++            });
++        eprintln!("NATIVE_FIXTURE_CONNECT status=connected bind={bind_address} actual_local={actual_local:?} selected={selected_endpoint} family={family} stage={stage} original_os_code=None");
+         let client_connected_at = Instant::now();
+         client.set_nonblocking(true).unwrap();
+         Self {
+@@ -2241,3 +2297,225 @@
+     f.host.ack_body(token, sequence, 3).unwrap();
+     f.stop();
+ }
++
++#[test]
++fn configured_source_filter_returns_real_ipv4_and_ipv6_accept_before_any_sspi_call() {
++    let _serial = SERIAL.lock().unwrap();
++    for (bind, allowed) in [
++        ("127.0.0.1:0", "127.0.0.2/32"),
++        ("[::1]:0", "2001:db8::/32"),
++    ] {
++        let policy = fc_domain::https_settings::HttpsSourceNetworks::parse(allowed).unwrap();
++        let mut f = Fixture::with_binding(bind.parse().unwrap(), Some(policy), None, None);
++        f.input(b"H");
++        let until = Instant::now() + Duration::from_secs(3);
++        while f.host.source_rejections() == 0 {
++            assert!(f.host.poll().unwrap().is_empty());
++            assert!(
++                Instant::now() < until,
++                "real source rejection packet deadline"
++            );
++            std::thread::sleep(Duration::from_millis(1));
++        }
++        assert_eq!(f.host.source_rejections(), 1);
++        assert_eq!(f.host.owner.report.accept_completions, 1);
++        assert_eq!(f.host.owner.report.accept_posts, 2);
++        assert_eq!(f.host.owner.report.accept_handoffs, 0);
++        assert_eq!(f.host.owner.report.sspi_submissions, 0);
++        assert!(f.calls.lock().unwrap().handshake.is_empty());
++        assert!(f
++            .host
++            .owner
++            .resources
++            .slots
++            .iter()
++            .all(|slot| slot.phase == Phase::Ready
++                && slot.socket == INVALID_SOCKET
++                && slot.pending.is_none()));
++        f.stop();
++        assert!(f.host.owner.accept_ledger_matches());
++    }
++}
++#[test]
++fn configured_explicit_ipv4_and_ipv6_source_keeps_original_deadline_and_real_drain() {
++    let _serial = SERIAL.lock().unwrap();
++    for (bind, allowed) in [("127.0.0.1:0", "127.0.0.1/32"), ("[::1]:0", "::1/128")] {
++        let policy = fc_domain::https_settings::HttpsSourceNetworks::parse(allowed).unwrap();
++        let mut f = Fixture::with_binding(bind.parse().unwrap(), Some(policy), None, None);
++        f.input(b"H");
++        let until = Instant::now() + Duration::from_secs(3);
++        while f.host.owner.report.accept_handoffs == 0 {
++            assert!(f.host.poll().unwrap().is_empty());
++            assert!(Instant::now() < until);
++            std::thread::sleep(Duration::from_millis(1));
++        }
++        let slot = f
++            .host
++            .owner
++            .resources
++            .slots
++            .iter()
++            .find(|s| s.phase != Phase::Ready)
++            .unwrap();
++        assert_eq!(
++            slot.stream.as_ref().unwrap().header_deadline(),
++            Some(f.posted_header_deadlines[0])
++        );
++        f.input(&record(
++            b"GET /fc/api/v1/status HTTP/1.1\r\nHost: localhost\r\n\r\n",
++        ));
++        let (token, _) = f.head();
++        assert_eq!(f.host.owner.report.accept_handoffs, 1);
++        assert_eq!(f.host.source_rejections(), 0);
++        // Head has already moved to the 120-second request phase, while the
++        // accepted epoch remains the real original bare operation's deadline.
++        assert_eq!(f.calls.lock().unwrap().handshake.as_slice(), &[token]);
++        assert_eq!(f.host.owner.report.accept_expired_discards, 0);
++        assert!(f.client_connected_at < f.posted_header_deadlines[0]);
++        f.stop();
++        assert!(f.host.owner.accept_ledger_matches());
++        assert_eq!(
++            f.host.owner.report.submissions,
++            f.host.owner.report.completions
++        );
++    }
++}
++#[test]
++fn configured_exact_occupied_bind_returns_original_worker_before_replacement() {
++    let _serial = SERIAL.lock().unwrap();
++    let occupied = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
++    let mut owner = Owner::new("configured-occupied-port-test").unwrap();
++    owner.http_mode = true;
++    owner.bind_address = occupied.local_addr().unwrap();
++    for slot in &mut owner.resources.slots {
++        slot.stream = Some(Stream::new());
++    }
++    let closed = Arc::new(AtomicUsize::new(0));
++    let driver = RecordDriver {
++        calls: Arc::new(Mutex::new(Calls::default())),
++        closed: closed.clone(),
++        encrypt_hook: None,
++        decrypt_hook: None,
++    };
++    let worker =
++        Worker::start_with_factory(owner.generation, move || Ok(Box::new(driver))).unwrap();
++    assert!(owner.start_with_worker(worker).is_err());
++    assert!(owner.credentials_ready);
++    assert_eq!(owner.report.accept_posts, 0);
++    assert!(Owner::new("must-not-replace-before-original-return").is_err());
++    owner.finish().unwrap();
++    assert_eq!(closed.load(Ordering::Acquire), 1);
++    assert!(owner.drained);
++    drop(owner);
++    drop(occupied);
++    let mut next = Owner::new("actual-original-returned").unwrap();
++    next.finish().unwrap();
++}
++#[test]
++fn configured_legacy_missing_policy_cannot_claim_listener_readiness() {
++    let configuration = fc_domain::https_settings::HttpsConfiguration::new(
++        fc_domain::https_settings::HttpsHost::parse("127.0.0.1").unwrap(),
++        9443,
++        fc_domain::https_settings::HttpsCertificateRef::parse(&"0".repeat(40)).unwrap(),
++    )
++    .unwrap();
++    assert!(matches!(
++        TlsHttpHost::open_configured(&configuration),
++        Err(ConfiguredTlsError::MissingSourceNetworks)
++    ));
++}
++
++#[test]
++fn real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_child() {
++    let _serial = SERIAL.lock().unwrap();
++    const CHILD: &str = "FC_TLS_NATIVE_RELEASE_FAILURE_CHILD";
++    const NAME: &str = "tls_frontdoor::native::stream::tests::real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_child";
++    const MARKER: &str = "NATIVE_RELEASE_FAILURE_CHILD realIocp=true realWinsock=true outstandingIo=false secondClose=false quiescent=false replaced=false";
++    if let Ok(mode) = std::env::var(CHILD) {
++        let failure = match mode.as_str() {
++            "iocp" => super::super::NativeReleaseFailure::Iocp,
++            "winsock" => super::super::NativeReleaseFailure::Winsock,
++            _ => panic!("unknown native release fault mode"),
++        };
++        let mut owner = Owner::new("native-release-failure").unwrap();
++        owner.http_mode = true;
++        for slot in &mut owner.resources.slots {
++            slot.stream = Some(Stream::new());
++        }
++        // Real process-owned native resources, with no socket, operation or
++        // SSPI thread ever submitted. Injection only controls a final release
++        // return; it cannot discard a packet or free a borrowed OVERLAPPED.
++        unsafe {
++            let mut data = WSADATA::default();
++            assert_eq!(WSAStartup(0x202, &mut data), 0);
++            owner.resources.winsock = true;
++            owner.resources.port =
++                CreateIoCompletionPort(INVALID_HANDLE_VALUE, None, 0, 1).unwrap();
++        }
++        let original_port = owner.resources.port;
++        assert!(!original_port.is_invalid());
++        assert!(owner.resources.worker.is_none() && owner.resources.accept.is_none());
++        assert!(owner
++            .resources
++            .slots
++            .iter()
++            .all(|slot| slot.pending.is_none()
++                && slot.socket == INVALID_SOCKET
++                && slot.frame.is_some()));
++        owner.release_failure = Some(failure);
++        let mut host = TlsHttpHost {
++            owner,
++            drain_deadline: None,
++        };
++        host.request_stop().unwrap();
++        let first = host.poll_shutdown().unwrap_err();
++        assert!(first.contains("controlled original"));
++        assert!(host.owner.cleanup_failed && !host.owner.drained);
++        assert!(OWNER_FAULTED.load(Ordering::Acquire));
++        let attempts = host.owner.release_attempts;
++        assert_eq!(attempts, if mode == "iocp" { [1, 0] } else { [1, 1] });
++        assert_eq!(
++            host.owner.resources.port,
++            if mode == "iocp" {
++                original_port
++            } else {
++                HANDLE::default()
++            }
++        );
++        assert!(host.owner.resources.winsock);
++        // Remove the controlled failure: a later successful release callback
++        // would now be available, but the first unknown result is permanent.
++        host.owner.release_failure = None;
++        for _ in 0..3 {
++            assert!(host.poll_shutdown().is_err());
++            assert!(host.request_stop().is_err());
++            assert!(host.owner.finish().is_err());
++            assert_eq!(host.owner.release_attempts, attempts);
++            assert!(!host.owner.drained && host.owner.resources.winsock);
++            assert!(Owner::new("forbidden-after-native-release-failure").is_err());
++        }
++        drop(host);
++        assert!(OWNER_ACTIVE.load(Ordering::Acquire));
++        assert!(Owner::new("forbidden-after-failed-owner-drop").is_err());
++        // The independent child's actual OS exit owns final reclamation. No
++        // release/reset of the sticky admission flags occurs in this process.
++        println!("{MARKER} mode={mode}");
++        return;
++    }
++    for mode in ["iocp", "winsock"] {
++        let output = std::process::Command::new(std::env::current_exe().unwrap())
++            .args(["--exact", NAME, "--nocapture", "--test-threads=2"])
++            .env(CHILD, mode)
++            .output()
++            .unwrap();
++        assert!(
++            output.status.success(),
++            "{mode}: {} {}",
++            String::from_utf8_lossy(&output.stdout),
++            String::from_utf8_lossy(&output.stderr)
++        );
++        assert!(String::from_utf8_lossy(&output.stdout).contains(MARKER));
++        assert!(!OWNER_FAULTED.load(Ordering::Acquire));
++        assert!(!OWNER_ACTIVE.load(Ordering::Acquire));
++    }
++}
+--- base/crates/fc-windows/src/tls_frontdoor/credentials.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/credentials.rs
+@@ -6,6 +6,8 @@
+     Authentication::Identity::*, Credentials::SecHandle, Cryptography::*,
+ };
+ 
++mod host;
++
+ pub(super) struct Credentials {
+     pub handle: SecHandle,
+     acquired: bool,
+@@ -14,6 +16,18 @@
+ 
+ impl Credentials {
+     pub fn new(thumbprint: CertificateThumbprint) -> Result<Self, TlsError> {
++        Self::new_for_host(thumbprint, None)
++    }
++    pub(super) fn new_configured(
++        thumbprint: CertificateThumbprint,
++        host: &str,
++    ) -> Result<Self, TlsError> {
++        Self::new_for_host(thumbprint, Some(host))
++    }
++    fn new_for_host(
++        thumbprint: CertificateThumbprint,
++        host: Option<&str>,
++    ) -> Result<Self, TlsError> {
+         let selected = SelectedCertificate::open().map_err(|_| TlsError::Certificate)?;
+         let mut result = Self {
+             handle: SecHandle::default(),
+@@ -34,6 +48,9 @@
+                 || server_auth_usage(result.selected.certificate())? != ServerAuthUsage::Explicit
+             {
+                 return Err(TlsError::Certificate);
++            }
++            if let Some(host) = host {
++                host::verify(result.selected.certificate(), host)?;
+             }
+             result
+                 .selected
+--- base/crates/fc-windows/src/tls_frontdoor/credentials/host.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/credentials/host.rs
+@@ -0,0 +1,190 @@
++//! Configured listener SAN identity on its exact selected credential context.
++//! No cached inspection report, CN fallback, trust-store mutation or claim of
++//! a remote browser's trust. Administrator deployment supplies that trust.
++//! Configured certificates support dNSName/iPAddress SAN entries only. Every
++//! other GeneralName fails closed, even when valid; nested DER/other IA5/OID
++//! names are not silently treated as validated or ignored.
++use super::*;
++use std::net::IpAddr;
++
++pub(super) fn verify(certificate: *const CERT_CONTEXT, host: &str) -> Result<(), TlsError> {
++    // SAFETY: selected live CERT_CONTEXT/CERT_INFO owns all extension pointers.
++    let info = unsafe { &*(*certificate).pCertInfo };
++    if info.cExtension == 0 || info.cExtension > 128 || info.rgExtension.is_null() {
++        return Err(TlsError::Certificate);
++    }
++    let extensions =
++        unsafe { std::slice::from_raw_parts(info.rgExtension, info.cExtension as usize) };
++    let mut san = None;
++    for extension in extensions {
++        // Windows' certificate parser supplies a terminated OID per extension.
++        if !extension.pszObjId.is_null() && unsafe { extension.pszObjId.as_bytes() } == b"2.5.29.17"
++        {
++            if san.is_some()
++                || extension.Value.cbData == 0
++                || extension.Value.cbData > 65536
++                || extension.Value.pbData.is_null()
++            {
++                return Err(TlsError::Certificate);
++            }
++            san = Some(unsafe {
++                std::slice::from_raw_parts(extension.Value.pbData, extension.Value.cbData as usize)
++            });
++        }
++    }
++    if san.is_some_and(|bytes| matches_san(bytes, host)) {
++        Ok(())
++    } else {
++        Err(TlsError::Certificate)
++    }
++}
++fn tlv(bytes: &[u8]) -> Option<(u8, &[u8], &[u8])> {
++    let (&tag, rest) = bytes.split_first()?;
++    let (&first, mut rest) = rest.split_first()?;
++    let length = if first < 128 {
++        first as usize
++    } else {
++        let count = (first & 127) as usize;
++        if count == 0 || count > 4 || rest.len() < count || rest[0] == 0 {
++            return None;
++        }
++        let mut length = 0usize;
++        for byte in &rest[..count] {
++            length = length.checked_mul(256)?.checked_add(*byte as usize)?;
++        }
++        if length < 128 {
++            return None;
++        }
++        rest = &rest[count..];
++        length
++    };
++    if rest.len() < length {
++        return None;
++    }
++    Some((tag, &rest[..length], &rest[length..]))
++}
++fn dns_matches(name: &[u8], host: &str) -> bool {
++    if name.is_empty() || name.len() > 253 || !name.is_ascii() {
++        return false;
++    }
++    let Ok(name) = std::str::from_utf8(name) else {
++        return false;
++    };
++    if name.eq_ignore_ascii_case(host) {
++        return true;
++    }
++    let Some(suffix) = name.strip_prefix("*.") else {
++        return false;
++    };
++    // One whole leftmost label only, with at least two explicit suffix labels.
++    if suffix.contains('*') || !suffix.contains('.') {
++        return false;
++    }
++    host.split_once('.')
++        .is_some_and(|(first, rest)| !first.is_empty() && rest.eq_ignore_ascii_case(suffix))
++}
++fn matches_san(bytes: &[u8], host: &str) -> bool {
++    let Some((0x30, mut names, [])) = tlv(bytes) else {
++        return false;
++    };
++    let address = host.parse::<IpAddr>().ok();
++    let mut found = false;
++    let mut count = 0;
++    while !names.is_empty() {
++        count += 1;
++        if count > 128 {
++            return false;
++        }
++        let Some((tag, value, rest)) = tlv(names) else {
++            return false;
++        };
++        names = rest;
++        // A supported matching name cannot hide an unvalidated later name.
++        if !matches!(tag, 0x82 | 0x87)
++            || tag == 0x87 && value.len() != 4 && value.len() != 16
++            || tag == 0x82
++                && (value.is_empty()
++                    || value.len() > 253
++                    || !value.is_ascii()
++                    || value.contains(&0))
++        {
++            return false;
++        }
++        found |= match (tag, address) {
++            (0x82, None) => dns_matches(value, host),
++            (0x87, Some(IpAddr::V4(ip))) => value == ip.octets(),
++            (0x87, Some(IpAddr::V6(ip))) => value == ip.octets(),
++            _ => false,
++        };
++    }
++    found
++}
++#[cfg(test)]
++mod tests {
++    use super::*;
++    fn san(tag: u8, bytes: &[u8]) -> Vec<u8> {
++        let mut v = vec![0x30, (bytes.len() + 2) as u8, tag, bytes.len() as u8];
++        v.extend_from_slice(bytes);
++        v
++    }
++    #[test]
++    fn configured_certificate_san_matches_exact_ip_or_one_dns_label() {
++        assert!(matches_san(&san(0x87, &[127, 0, 0, 1]), "127.0.0.1"));
++        assert!(!matches_san(&san(0x82, b"127.0.0.1"), "127.0.0.1"));
++        assert!(!matches_san(&san(0x87, &[127, 0, 0, 2]), "127.0.0.1"));
++        assert!(matches_san(
++            &san(0x87, &std::net::Ipv6Addr::LOCALHOST.octets()),
++            "::1"
++        ));
++        assert!(matches_san(
++            &san(0x82, b"BOARD.school.example"),
++            "board.school.example"
++        ));
++        assert!(matches_san(
++            &san(0x82, b"*.school.example"),
++            "board.school.example"
++        ));
++        for host in [
++            "school.example",
++            "one.board.school.example",
++            "board.other.example",
++        ] {
++            assert!(!matches_san(&san(0x82, b"*.school.example"), host));
++        }
++        assert!(!matches_san(&san(0x82, b"*.example"), "board.example"));
++        assert!(!matches_san(
++            &san(0x82, b"board.school.example\0evil"),
++            "board.school.example"
++        ));
++    }
++    #[test]
++    fn configured_certificate_san_rejects_malformed_trailing_and_oversized_encoding() {
++        for bytes in [
++            &[0x30, 0x80, 0, 0][..],
++            &[0x30, 0x81, 3, 0x82, 1, b'a'],
++            &[0x30, 3, 0x82, 2, b'a'],
++            &[0x30, 3, 0x82, 1, b'a', 0],
++        ] {
++            assert!(!matches_san(bytes, "a"));
++        }
++    }
++    #[test]
++    fn configured_certificate_san_rejects_other_general_names_after_a_matching_ip() {
++        let malformed_directory = [0x30, 9, 0x87, 4, 127, 0, 0, 1, 0xa4, 1, 0xff];
++        assert!(!matches_san(&malformed_directory, "127.0.0.1"));
++        // Even well-formed unsupported names must not become an accidental
++        // promise that this bounded matcher validates all GeneralName types.
++        for (tag, value) in [
++            (0xa4, &[0x30, 0][..]),
++            (0x86, &b"https://school.example"[..]),
++            (0x81, &b"admin@school.example"[..]),
++            (0x88, &[0x2a, 3, 4][..]),
++        ] {
++            let mut content = vec![0x87, 4, 127, 0, 0, 1, tag, value.len() as u8];
++            content.extend_from_slice(value);
++            let mut outer = vec![0x30, content.len() as u8];
++            outer.extend(content);
++            assert!(!matches_san(&outer, "127.0.0.1"));
++        }
++    }
++}
+--- base/crates/fc-windows/src/tls_frontdoor/schannel.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/schannel.rs
+@@ -103,6 +103,17 @@
+     closed: bool,
+ }
+ impl SchannelSet {
++    pub(super) fn new_configured(
++        thumbprint: CertificateThumbprint,
++        host: &str,
++    ) -> Result<Self, TlsError> {
++        Ok(Self {
++            contexts: std::array::from_fn(|_| Context::default()),
++            credentials: Credentials::new_configured(thumbprint, host)?,
++            cleanup_failure: None,
++            closed: false,
++        })
++    }
+     pub fn new(thumbprint: CertificateThumbprint) -> Result<Self, TlsError> {
+         Ok(Self {
+             contexts: std::array::from_fn(|_| Context::default()),
+--- base/crates/fc-windows/src/tls_frontdoor/worker.rs
++++ native-A-source-fourth/crates/fc-windows/src/tls_frontdoor/worker.rs
+@@ -154,6 +154,18 @@
+             Ok(Box::new(super::schannel::SchannelSet::new(thumbprint)?))
+         })
+     }
++    #[cfg(windows)]
++    pub(super) fn start_configured(
++        generation: u64,
++        thumbprint: super::CertificateThumbprint,
++        host: String,
++    ) -> Result<Self, TlsError> {
++        Self::start_with_factory(generation, move || {
++            Ok(Box::new(super::schannel::SchannelSet::new_configured(
++                thumbprint, &host,
++            )?))
++        })
++    }
+     pub(super) fn start_with_factory(
+         generation: u64,
+         factory: impl FnOnce() -> Result<Box<dyn Driver>, TlsError> + Send + 'static,

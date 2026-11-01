@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--offline",
+    "-p",
+    "fc-bootstrap",
+    "--bin",
+    "fc-bootstrap",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--message-format=json"
+  ],
+  "cwd": "/tmp/fc-round68-production-https/worktree",
+  "sourceFreeze": "joint-implementation-freeze-seventh.json",
+  "sourceFreezeSha256": "89148f095235a850b0fc408aa24b79f6701d790791ccba6e1535a87cfc770137",
+  "workingFileCount": 595,
+  "originalBudgetSeconds": 900,
+  "startedUtc": "2026-11-01T08:27:24.681009+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 0.16466723196208477,
+  "sourceUnchanged": true,
+  "stdoutBytes": 83893,
+  "stdoutSha256": "6e45c2dbac7e8d1c63f67e3ce27f553356d6ea107eae27cec20e7394b4a9a20b",
+  "stderrBytes": 62,
+  "stderrSha256": "765f1396d07f30f3a451cd3f9d9cad4e83c92c8e0aecf955ffc09061a6cf1e02"
+}

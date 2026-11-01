@@ -1,5 +1,5 @@
-//! Explicit isolated loopback HTTP/TLS candidate. Business work stays outside
-//! this owner. No ordinary-startup, trust-store or strict-five-second claim.
+//! Thread-affine HTTP/TLS transport for explicit configured listeners and
+//! preserved isolated diagnostics. Business work remains outside this owner.
 use super::*;
 use fc_ports::http::{RequestHead, CHUNK_BYTES, MAX_POLL_EVENTS};
 use std::sync::Arc;
@@ -268,6 +268,67 @@ impl TlsHttpHost {
             owner,
             drain_deadline: None,
         })
+    }
+    /// Consumes saved explicit endpoint/source policy, with no diagnostic
+    /// marker. Exactly one A/AAAA endpoint is supported; ambiguous DNS, scoped
+    /// or mapped IPv6 and wildcard binding are rejected. SAN identity, validity,
+    /// server EKU and real Schannel readiness precede exact bind/listen. SAN
+    /// entries support DNS/IP only; any other GeneralName is rejected. Client
+    /// trust/reachability and application authentication remain separate.
+    pub fn open_configured(
+        configuration: &fc_domain::https_settings::HttpsConfiguration,
+    ) -> Result<Self, ConfiguredTlsError> {
+        configuration
+            .validate()
+            .map_err(|_| ConfiguredTlsError::InvalidConfiguration)?;
+        if configuration.source_networks.is_none() {
+            return Err(ConfiguredTlsError::MissingSourceNetworks);
+        }
+        let mut owner = Owner::new("").map_err(|_| ConfiguredTlsError::Busy)?;
+        owner.http_mode = true;
+        owner.source_networks = configuration.source_networks.clone();
+        for slot in &mut owner.resources.slots {
+            slot.stream = Some(Stream::new());
+        }
+        let result = (|| {
+            owner.bind_address = configured::endpoint(configuration)?;
+            if owner.started.elapsed() >= BUDGET {
+                return Err(ConfiguredTlsError::AddressUnavailable);
+            }
+            let thumbprint = CertificateThumbprint::parse(&configuration.certificate.to_hex())
+                .map_err(|_| ConfiguredTlsError::InvalidConfiguration)?;
+            let worker = Worker::start_configured(
+                owner.generation,
+                thumbprint,
+                configuration.host.as_str().to_owned(),
+            )
+            .map_err(|error| match error {
+                TlsError::Cleanup(_) => ConfiguredTlsError::Cleanup,
+                TlsError::Busy | TlsError::Faulted => ConfiguredTlsError::Busy,
+                _ => ConfiguredTlsError::Certificate,
+            })?;
+            owner.start_with_worker(worker).map_err(|_| {
+                if owner.credentials_ready {
+                    ConfiguredTlsError::Native
+                } else {
+                    ConfiguredTlsError::Certificate
+                }
+            })
+        })();
+        if let Err(error) = result {
+            return Err(if owner.finish().is_err() {
+                ConfiguredTlsError::Cleanup
+            } else {
+                error
+            });
+        }
+        Ok(Self {
+            owner,
+            drain_deadline: None,
+        })
+    }
+    pub fn source_rejections(&self) -> u64 {
+        self.owner.report.accept_source_rejections
     }
     pub fn port_number(&self) -> u16 {
         self.owner.port_number
@@ -973,6 +1034,9 @@ impl Owner {
         Ok(next)
     }
     fn poll_http_drain(&mut self) -> Result<bool, String> {
+        if self.cleanup_failed {
+            return Err("TLS HTTP native cleanup failure retained; quiescence unproven".into());
+        }
         if self.drained {
             return Ok(true);
         }
@@ -1022,17 +1086,7 @@ impl Owner {
         self.report.slot_frames_at_drain = CONNECTION_SLOTS;
         // SAFETY: all native packets returned and the actual OS SSPI thread
         // terminated. No in-flight operation can reference these resources.
-        unsafe {
-            if !self.resources.port.is_invalid() {
-                CloseHandle(self.resources.port)
-                    .map_err(|e| format!("TLS HTTP IOCP close: {e}"))?;
-                self.resources.port = HANDLE::default();
-            }
-            if self.resources.winsock {
-                check(WSACleanup(), "TLS HTTP WSACleanup")?;
-                self.resources.winsock = false;
-            }
-        }
+        self.release_native_resources()?;
         self.drained = true;
         Ok(true)
     }

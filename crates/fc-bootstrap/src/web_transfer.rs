@@ -17,6 +17,8 @@ pub type ExecutionFence = Arc<dyn Fn() -> bool + Send + Sync>;
 mod work;
 pub use work::{WebCompletion, WebTask};
 mod executor;
+#[cfg(windows)]
+pub(crate) mod live_cleanup;
 pub use executor::{HttpCompletion, HttpExecutor, HttpJob, HttpTicket};
 #[cfg(windows)]
 pub mod network;
@@ -95,6 +97,7 @@ impl TransferControl {
                 admitted_at,
                 deadline,
                 cancelled,
+                domain: None,
             },
         ))
     }
@@ -121,6 +124,7 @@ pub struct TransferLifetime {
     admitted_at: Instant,
     deadline: Instant,
     cancelled: Arc<AtomicBool>,
+    domain: Option<ExecutionFence>,
 }
 impl TransferLifetime {
     #[cfg(windows)]
@@ -149,8 +153,19 @@ impl TransferLifetime {
             ..self.clone()
         })
     }
+    pub(crate) fn with_domain_fence(mut self, fence: ExecutionFence) -> Self {
+        self.domain = Some(match self.domain.take() {
+            Some(previous) => Arc::new(move || previous() && fence()),
+            None => fence,
+        });
+        self
+    }
     pub fn checkpoint(&self) -> Result<(), TransferError> {
-        if self.cancelled.load(Ordering::Acquire) {
+        if self.cancelled.load(Ordering::Acquire)
+            || self.domain.as_ref().is_some_and(|f| {
+                !std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f())).unwrap_or(false)
+            })
+        {
             Err(TransferError::Cancelled)
         } else if Instant::now() >= self.deadline {
             Err(TransferError::Deadline)
@@ -185,6 +200,7 @@ impl TransferLifetime {
             admitted_at,
             deadline,
             cancelled: Arc::new(AtomicBool::new(false)),
+            domain: None,
         }
         .bounded(budget)
     }

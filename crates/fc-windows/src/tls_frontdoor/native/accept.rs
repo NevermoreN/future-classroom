@@ -4,7 +4,7 @@ use super::*;
 
 pub(super) struct AcceptMemory {
     pub(super) operation: UnsafeCell<OVERLAPPED>,
-    addresses: UnsafeCell<[u8; 64]>,
+    addresses: UnsafeCell<[u8; ACCEPT_ADDRESS_BYTES]>,
     _pinned: PhantomPinned,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -35,7 +35,7 @@ impl AcceptSlot {
         Self {
             memory: Box::pin(AcceptMemory {
                 operation: UnsafeCell::new(OVERLAPPED::default()),
-                addresses: UnsafeCell::new([0; 64]),
+                addresses: UnsafeCell::new([0; ACCEPT_ADDRESS_BYTES]),
                 _pinned: PhantomPinned,
             }),
             socket: INVALID_SOCKET,
@@ -188,6 +188,7 @@ impl Owner {
             return Err("bare AcceptEx listener stopped".into());
         }
         let listener = self.resources.listener;
+        let family = self.address_family();
         let bare = self
             .resources
             .accept
@@ -205,9 +206,9 @@ impl Owner {
         // was transferred/closed; only now may this pinned operation be reused.
         unsafe {
             *bare.memory.operation.get() = OVERLAPPED::default();
-            *bare.memory.addresses.get() = [0; 64];
+            *bare.memory.addresses.get() = [0; ACCEPT_ADDRESS_BYTES];
             bare.socket = WSASocketW(
-                AF_INET.0 as i32,
+                family.0 as i32,
                 SOCK_STREAM.0,
                 IPPROTO_TCP.0,
                 None,
@@ -232,8 +233,8 @@ impl Owner {
                 bare.socket,
                 bare.memory.addresses.get().cast(),
                 0,
-                32,
-                32,
+                ACCEPT_ADDRESS_LENGTH,
+                ACCEPT_ADDRESS_LENGTH,
                 &mut received,
                 bare.memory.operation.get(),
             )
@@ -360,20 +361,42 @@ impl Owner {
                     "bare accept context",
                 )
                 .and_then(|()| {
+                    let peer =
+                        configured::peer_address(self.resources.accept.as_ref().unwrap().socket)?;
+                    if self
+                        .source_networks
+                        .as_ref()
+                        .is_some_and(|policy| !policy.contains(peer))
+                    {
+                        return Ok(false);
+                    }
                     CreateIoCompletionPort(
                         socket_handle(self.resources.accept.as_ref().unwrap().socket),
                         Some(self.resources.port),
                         index + 2,
                         1,
                     )
-                    .map(|_| ())
+                    .map(|_| true)
                     .map_err(|e| format!("bare socket association: {e}"))
                 })
             };
-            if let Err(error) = association {
-                self.report.accept_error_discards += 1;
-                self.close_bare_socket()?;
-                return Err(error);
+            match association {
+                Err(error) => {
+                    self.report.accept_error_discards += 1;
+                    self.close_bare_socket()?;
+                    return Err(error);
+                }
+                Ok(false) => {
+                    self.report.accept_source_rejections += 1;
+                    self.close_bare_socket()?;
+                    // This actual packet was consumed; replenish only after the
+                    // rejected socket really closed. No SSPI permit was used.
+                    if !self.stopping {
+                        self.post_bare_accept()?;
+                    }
+                    return Ok(());
+                }
+                Ok(true) => {}
             }
             // Recheck after association; no late success can gain a new clock.
             if Instant::now() >= header_close_alarm(deadline) {
@@ -418,6 +441,7 @@ impl Owner {
             && self.report.accept_completions
                 == self.report.accept_handoffs
                     + self.report.accept_capacity_rejections
+                    + self.report.accept_source_rejections
                     + self.report.accept_expired_discards
                     + self.report.accept_error_discards
                     + self.report.accept_stop_discards

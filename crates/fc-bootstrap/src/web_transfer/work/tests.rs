@@ -92,6 +92,8 @@ fn run(pool: &WorkerPool<HttpJob>, task: WebTask) -> WebCompletion {
         Ok(HttpCompletion::Upload(_)) => panic!("wrong job correlation"),
         #[cfg(windows)]
         Ok(HttpCompletion::Download(_)) => panic!("wrong job correlation"),
+        #[cfg(windows)]
+        Ok(HttpCompletion::Cleanup(_)) => panic!("unexpected cleanup job correlation"),
         Err(e) => panic!("unexpected {e:?}"),
     }
 }

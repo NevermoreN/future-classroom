@@ -2,13 +2,16 @@
 //! authenticate, access SQLite, inspect a certificate or enable a listener.
 use super::*;
 use fc_bootstrap::backend::HttpsCertificateObservation;
-use fc_domain::https_settings::{HttpsCertificateRef, HttpsConfiguration, HttpsHost};
+use fc_domain::https_settings::{
+    HttpsCertificateRef, HttpsConfiguration, HttpsHost, HttpsSourceNetworks,
+};
 use fc_ports::{HttpsSettingsRequest, HttpsSettingsState};
 use fc_windows::tls_frontdoor::certificate_query::{CertificateCheck, CertificateQueryReport};
 
 pub(super) const HOST: FieldId = FieldId(920);
 pub(super) const PORT: FieldId = FieldId(921);
 pub(super) const CERTIFICATE: FieldId = FieldId(922);
+pub(super) const SOURCE_NETWORKS: FieldId = FieldId(923);
 pub(super) const SAVE_CONFIG: ActionId = ActionId(920);
 pub(super) const RELOAD: ActionId = ActionId(921);
 pub(super) const QUERY: ActionId = ActionId(922);
@@ -31,6 +34,7 @@ struct Draft {
     host: String,
     port: String,
     certificate: String,
+    source_networks: String,
 }
 impl Draft {
     fn from_state(state: &HttpsSettingsState) -> Self {
@@ -42,6 +46,10 @@ impl Draft {
                 host: c.host.as_str().into(),
                 port: c.port.to_string(),
                 certificate: c.certificate.to_hex(),
+                source_networks: c
+                    .source_networks
+                    .as_ref()
+                    .map_or_else(String::new, |p| p.to_text().replace('\n', ", ")),
             })
     }
     fn read(mut data: FormData) -> std::result::Result<Self, String> {
@@ -49,14 +57,23 @@ impl Draft {
             host: data.take(HOST).unwrap_or_default(),
             port: data.take(PORT).unwrap_or_default(),
             certificate: data.take(CERTIFICATE).unwrap_or_default(),
+            source_networks: data
+                .take(SOURCE_NETWORKS)
+                .ok_or("请明确填写允许连接的来源CIDR范围。")?,
         };
         if !data.is_empty()
             || draft.host.encode_utf16().count() > 253
             || draft.port.encode_utf16().count() > 5
             || draft.certificate.encode_utf16().count() > 40
-            || [&draft.host, &draft.port, &draft.certificate]
-                .iter()
-                .any(|v| v.contains('\0'))
+            || draft.source_networks.encode_utf16().count() > 1024
+            || [
+                &draft.host,
+                &draft.port,
+                &draft.certificate,
+                &draft.source_networks,
+            ]
+            .iter()
+            .any(|v| v.contains('\0'))
         {
             return Err("表单内容不受支持，请重新打开配置页面。".into());
         }
@@ -76,7 +93,11 @@ impl Draft {
             .ok_or("端口须为1至65535的整数。")?;
         let certificate = HttpsCertificateRef::parse(&self.certificate)
             .map_err(|_| "证书引用须为40位十六进制字符，不要填写证书文件路径。")?;
+        let networks = HttpsSourceNetworks::parse(&self.source_networks).map_err(|_| {
+            "请明确填写1至16个规范CIDR来源范围，以逗号或换行分隔；不能使用全网范围。"
+        })?;
         HttpsConfiguration::new(host, port, certificate)
+            .map(|configuration| configuration.with_source_networks(networks))
             .map_err(|_| "请核对域名、端口和证书引用。".into())
     }
 }
@@ -367,7 +388,7 @@ impl Editor {
             ];
             return view;
         }
-        view.description = "这里只保存本机连接配置，不启动网络监听，也不启用教师连接。证书存储固定为当前程序用户的MY；填写引用不代表证书可用或其他设备已信任。修改前须在设备管理中明确停用教师会话准入。".into();
+        view.description = "这里只保存本机连接配置，不启动网络监听，也不启用教师连接。证书存储固定为当前程序用户的MY；生产连接目前仅支持DNS或IP类型的证书备用名称，其它名称类型不受支持。填写引用不代表证书可用或其他设备已信任。修改前须在设备管理中明确停用教师连接，并等待未完成传输清理结束。允许来源只接受明确CIDR，不自动推测校园网段。域名须唯一解析；对应多个IPv4或IPv6地址时，本阶段不能启用。".into();
         if let Some(base) = &self.base {
             view.description.push_str(&format!(
                 "\n当前读取的配置版本：{}。",
@@ -406,6 +427,12 @@ impl Editor {
                 253,
             ),
             field(PORT, "HTTPS端口（1至65535）", &self.draft.port, 5),
+            field(
+                SOURCE_NETWORKS,
+                "允许来源CIDR（逗号分隔，1至16项，无默认网段）",
+                &self.draft.source_networks,
+                1024,
+            ),
             field(
                 CERTIFICATE,
                 "当前程序用户MY证书引用（40位十六进制）",

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 900,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "uploadedArtifacts": [
+    {
+      "name": "fc-bootstrap.exe",
+      "sha256": "095ec698f35f947c300594ea839d146ddc4ec4cb4a5a26471d179c3702047230"
+    },
+    {
+      "name": "fc_windows-71ded2d216b0c0ec.exe",
+      "sha256": "6c8da79b01c01d29c3dbdff3e33a16893747b00de254e81a1c18c8c62af19b58"
+    }
+  ],
+  "exeSha256": "095ec698f35f947c300594ea839d146ddc4ec4cb4a5a26471d179c3702047230",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [
+    {
+      "binarySha256": "6c8da79b01c01d29c3dbdff3e33a16893747b00de254e81a1c18c8c62af19b58",
+      "exitCode": 101,
+      "name": "fc_windows-71ded2d216b0c0ec.exe",
+      "output": [
+        "",
+        "running 1 test",
+        "NATIVE_FIXTURE_CONNECT status=connected bind=127.0.0.1:0 actual_local=Ok(127.0.0.1:52782) selected=127.0.0.1:52782 family=IPv4 stage=worker_ready+exact_bind+listen+iocp+bare_acceptex_post original_os_code=None",
+        "System.Management.Automation.RemoteException",
+        "thread 'tls_frontdoor::native::stream::tests::configured_explicit_ipv4_and_ipv6_source_keeps_original_deadline_and_real_drain' (34648) panicked at crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs:186:17:",
+        "NATIVE_FIXTURE_CONNECT status=failed bind=[::1]:0 actual_local=Ok([::1]:52784) selected=[::1]:52784 family=IPv6 stage=worker_ready+exact_bind+listen+iocp+bare_acceptex_post original_os_code=Some(10013) error=以一种访问权限不允许的方式做了一个访问套接字的尝试。 (os error 10013)",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        "test tls_frontdoor::native::stream::tests::configured_explicit_ipv4_and_ipv6_source_keeps_original_deadline_and_real_drain ... FAILED",
+        "",
+        "failures:",
+        "",
+        "failures:",
+        "    tls_frontdoor::native::stream::tests::configured_explicit_ipv4_and_ipv6_source_keeps_original_deadline_and_real_drain",
+        "",
+        "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 249 filtered out; finished in 0.04s",
+        ""
+      ],
+      "timeoutSeconds": 900
+    }
+  ],
+  "status": "FAIL",
+  "error": "remote test failed: fc_windows-71ded2d216b0c0ec.exe"
+}

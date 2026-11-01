@@ -1,0 +1,107 @@
+{
+  "round": 68,
+  "status": "FIRST_NONINJECTED_NATIVE_CONNECT_FAILURE_UNRESOLVED",
+  "createdUtc": "2026-11-01T08:02:40.936508+00:00",
+  "scope": "Read-only source/raw-report analysis only; no source edits, Cargo, Windows, SSH, network or diagnostic execution.",
+  "report": {
+    "path": "windows-release-first.json",
+    "sha256": "b5bf72937189836895e481a80c568f98cba21ceb8c1c964ccbc9411d43ff3b08"
+  },
+  "jointManifest": {
+    "path": "joint-implementation-freeze-fourth.json",
+    "sha256": "fb957f0dfb80bc840507d2a737ba13f5aa09e436848bbe4e9d352a50df1cd196"
+  },
+  "source": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 64132,
+      "sha256": "f7e4b8b22595bb68e7273a65c8b7b4e27ada6f38d08f4db3ec1529ab0dfe7fb4",
+      "matchesJointFourth": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/configured.rs",
+      "bytes": 6487,
+      "sha256": "40269df8f57f2952056fe326d8bffb53e7b641e4cc563fafe99bdd09494d2d88",
+      "matchesJointFourth": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 17494,
+      "sha256": "66bf7a67d7d76d113c9883978c686de4eabe076093ac1f113937b196f36c62cc",
+      "matchesJointFourth": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 96831,
+      "sha256": "56737b7256c1ae9ee6b507c9c53b95cffcc9f8704c421e0ec6240a595fb87a4f",
+      "matchesJointFourth": true
+    }
+  ],
+  "actualFailure": {
+    "binary": "fc_windows-e3f8369176e1b545.exe",
+    "binarySha256": "621ac0d0b27a05837cbd4e11728f4493a0f4769c51350147297c937380ee3cb6",
+    "exitCode": 101,
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "test": "configured_explicit_ipv4_and_ipv6_source_keeps_original_deadline_and_real_drain",
+    "location": "native/stream/tests.rs:147",
+    "error": "Os10013 PermissionDenied from TcpStream::connect_timeout",
+    "notProved": [
+      "Which IPv4/IPv6 loop iteration failed: panic lacks endpoint context.",
+      "That policy/firewall/profile caused it.",
+      "That source filtering, SAN, real TLS or SSPI failed: those stages had not run for this client.",
+      "That fifty reported failures are fifty independent defects; later SERIAL poison failures are consequences of the first panic."
+    ]
+  },
+  "staticFindings": [
+    {
+      "item": "Successful startup precedes failure",
+      "evidence": "Fixture::with_binding native/stream/tests.rs:131-147 calls owner.start_with_worker(...).unwrap before connect. Native start_with_worker binds/listens, obtains actual local_port, creates/associates IOCP and posts initial AcceptEx before returning.",
+      "implication": "The original report shows no earlier panic in server startup, but has no emitted actual endpoint/iteration receipt."
+    },
+    {
+      "item": "Address family and port codec",
+      "evidence": "native.rs address_family/WSASocketW; configured.rs bind_exact/socket_address",
+      "conclusion": "No concrete encoding defect found statically: AF_INET vs AF_INET6 follows original bind IP, port writes .to_be and getsockname reads u16::from_be, IPv6 Byte octets preserved, flow/scope default0, IPV6_V6ONLY=1. getpeername policy follows successful client connection, so it cannot directly explain this connect-time error."
+    },
+    {
+      "item": "AcceptEx region",
+      "evidence": "native.rs ACCEPT_ADDRESS_LENGTH48/ACCEPT_ADDRESS_BYTES96, configured.rs 28-byte SOCKADDR_IN6 assertion",
+      "conclusion": "Each region accommodates IPv6 native address plus16 padding. No region-size defect established."
+    },
+    {
+      "item": "Fixture unwind after failed connect",
+      "evidence": "Fixture construction has not returned when connect unwrap panics; local undrained Owner Drop retains native resources and marks processfault; test holds SERIAL lock.",
+      "conclusion": "The first failure naturally poisons SERIAL and makes later suite failures uninformative for original root cause. Preserve original failure and isolate next diagnostic rather than ignoring poison."
+    }
+  ],
+  "minimalSafeNextDiagnostics": [
+    {
+      "priority": 1,
+      "action": "Capture the exact bind address, native getsockname endpoint/port, address family, loop iteration, raw client error and completed startup stage for the failing fixture. A test-only panic context would suffice if root authorizes a new source freeze; do not change success conditions, family coverage, deadlines or SERIAL behavior."
+    },
+    {
+      "priority": 2,
+      "action": "Run the same exact test in its own process, keeping both IPv4/IPv6 iterations and normal assertions; capture complete original stdout/stderr and same binary identity. This avoids poisoning the rest of the suite while diagnosing, and does not replace required full-suite rerun."
+    },
+    {
+      "priority": 3,
+      "action": "Root may separately compare an own hidden child using ordinary .NET IPv4 and IPv6 loopback listener/client, with ephemeral ports and finally-close, plus read-only local IPv6/port/WFP information if needed. A baseline difference is diagnostic scope only; it cannot establish this native fixture or production listener passed."
+    },
+    {
+      "priority": 4,
+      "action": "Root scheduled ordinary IPv4 real TLS/auth flow against the same source is useful independent evidence; its result must remain distinct from unresolved native IPv6/family-discriminator test."
+    }
+  ],
+  "prohibitedShortcuts": [
+    "Do not assert environment cause from10013 alone",
+    "Do not skip IPv6 or turn unsupported connection into success",
+    "Do not widen1s/3s/5s budgets",
+    "Do not swallow SERIAL poisoning or replace required original test",
+    "Do not mutate firewall, network profile, certificate trust or user desktop for this diagnosis"
+  ]
+}

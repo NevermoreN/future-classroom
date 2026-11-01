@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 60,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "uploadedArtifacts": [
+    {
+      "name": "fc-bootstrap.exe",
+      "sha256": "db6bb0bbc6df36804cfe721ad4e3fd1ec8ca0e5cac084c29a14ab97f894e22fa"
+    }
+  ],
+  "exeSha256": "db6bb0bbc6df36804cfe721ad4e3fd1ec8ca0e5cac084c29a14ab97f894e22fa",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "reinitializationExitCode": 0,
+    "exitCode": 0,
+    "sessionId": 1,
+    "reinitializationOutput": [
+      "PROBE_SUBMIT tick=3 kind=other page=正在打开未来教室",
+      "PROBE_COMPLETE tick=47 kind=other page=正在打开未来教室",
+      "PROBE_EVENT tick=51 action=1 page=首次设置 · 创建主管理员 pending=false generation=0",
+      "PROBE_SUBMIT tick=51 kind=request page=首次设置 · 创建主管理员",
+      "PROBE_COMPLETE tick=105 kind=updated page=首次设置 · 创建主管理员",
+      "PROBE_EVENT tick=108 action=5 page=请保存恢复码 pending=false generation=0",
+      "PROBE_EVENT tick=111 action=3 page=Synthetic former school · 登录工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=111 kind=request page=Synthetic former school · 登录工作台",
+      "PROBE_COMPLETE tick=164 kind=updated page=Synthetic former school · 登录工作台",
+      "PROBE_EVENT tick=168 action=18 page=Synthetic former school · 工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=168 kind=display-load page=Synthetic former school · 工作台",
+      "PROBE_COMPLETE tick=170 kind=display page=Synthetic former school · 工作台",
+      "PROBE_EVENT tick=201 action=26 page=桌面显示设置 pending=false generation=0",
+      "PROBE_EVENT tick=207 action=670 page=完整备份与恢复 pending=false generation=0",
+      "REINITIALIZATION_CHILD_PASS stage=cancel nonce=2237d833d83764edd72c615ebb84012e",
+      "REINITIALIZATION_NATIVE_STEP cancel_preserves_database_and_key=PASS",
+      "REINITIALIZATION_CHILD_PASS stage=commit nonce=2237d833d83764edd72c615ebb84012e",
+      "REINITIALIZATION_NATIVE_STEP explicit_reset_deletes_local_database_and_key_external_copy_unchanged=PASS",
+      "REINITIALIZATION_CHILD_PASS stage=reopen nonce=2237d833d83764edd72c615ebb84012e",
+      "PROBE_SUBMIT tick=2 kind=other page=正在打开未来教室",
+      "PROBE_COMPLETE tick=46 kind=other page=正在打开未来教室",
+      "PROBE_EVENT tick=50 action=1 page=首次设置 · 创建主管理员 pending=false generation=0",
+      "PROBE_SUBMIT tick=50 kind=request page=首次设置 · 创建主管理员",
+      "PROBE_COMPLETE tick=102 kind=updated page=首次设置 · 创建主管理员",
+      "PROBE_EVENT tick=104 action=5 page=请保存恢复码 pending=false generation=0",
+      "PROBE_EVENT tick=107 action=3 page=Synthetic new school · 登录工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=107 kind=request page=Synthetic new school · 登录工作台",
+      "PROBE_COMPLETE tick=159 kind=updated page=Synthetic new school · 登录工作台",
+      "PROBE_EVENT tick=162 action=18 page=Synthetic new school · 工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=162 kind=display-load page=Synthetic new school · 工作台",
+      "PROBE_COMPLETE tick=164 kind=display page=Synthetic new school · 工作台",
+      "PROBE_EVENT tick=196 action=26 page=桌面显示设置 pending=false generation=0",
+      "PROBE_EVENT tick=202 action=670 page=完整备份与恢复 pending=false generation=0",
+      "PROBE_EVENT tick=380 action=673 page=完整备份与恢复 pending=false generation=0",
+      "reinitialization_native=PASS child_processes=3 cancel_exact_preservation=PASS default_and_partial_confirmation_denied=PASS full_reset=PASS new_dpapi=PASS new_installation=PASS native_setup=PASS old_account_absent=PASS old_backup_direct_restore_denied=PASS external_saved_copy=UNCHANGED foreground=UNTOUCHED real_run=UNTOUCHED isolated_cleanup=PASS"
+    ],
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=1252 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ]
+  },
+  "reinitializationNativeStatus": "PASS",
+  "reinitializationScope": "Synthetic hidden native controls, cancel exact bytes, explicit full reset, new process DPAPI and school/admin initialization, old backup installation rejection; foreground and real Run untouched; hardware power loss NOT_RUN",
+  "status": "PASS"
+}

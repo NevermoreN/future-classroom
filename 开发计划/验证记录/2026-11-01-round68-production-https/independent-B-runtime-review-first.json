@@ -1,0 +1,197 @@
+{
+  "round": 68,
+  "status": "REQUEST_CHANGES_READ_ONLY_REVIEW",
+  "reviewer": "production_native_review",
+  "createdUtc": "2026-11-01T07:39:42.312076+00:00",
+  "scope": "All17 B second-freeze immutable sources matched to joint first freeze, with referenced A third native behavior and zero-timeout physical-thread observer inspected. No edits, compiler execution, Windows, network, host reproduction or runtime conclusion.",
+  "bManifest": {
+    "path": "b-implementation-freeze-second.json",
+    "sha256": "10c460f306eab6bc5665e4dccd622877be4df80d268d8c48233667ee37ac58bc"
+  },
+  "jointManifest": {
+    "path": "joint-implementation-freeze-first.json",
+    "sha256": "cc2cbcb19530f13549b5358d56b18997302b046bca593e299b768330f20c94ed"
+  },
+  "source": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 107515,
+      "sha256": "f319c893038fef6178c42170deb2be335695b64357cdd8349a5a0db5fc13b468",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "bytes": 4108,
+      "sha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 46777,
+      "sha256": "092382e2904d5f4d0534ac0e0427185011631ac3f0eef86350a4ea011c178f52",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "bytes": 8218,
+      "sha256": "201abcebcd35ddc7a2335eefff77511a42d96a6390c2e820505e5e0db8554b13",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+      "bytes": 10683,
+      "sha256": "422fde502c3af49477e755117509ed100738b2f9289240ed29eff6dc3952c666",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/https_runtime.rs",
+      "bytes": 22371,
+      "sha256": "6a5a3440b758bfa7818c2a6c0407630b80629a88a4150bf78c49adde26cb0631",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/lib.rs",
+      "bytes": 626,
+      "sha256": "264fdf1aa1344616533ae82575e38d6bae717a172d877692b740bcac328e550c",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "bytes": 17956,
+      "sha256": "88436076beb39a1bc0dc21b849f8aa7e58abfb6625064b244d285a25a5b55be3",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer.rs",
+      "bytes": 10897,
+      "sha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/downloads.rs",
+      "bytes": 19977,
+      "sha256": "734820af5417f8cb51d2f0a12d8e1df0bb418d9356b15123ff0da0bb2a5db47a",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/executor.rs",
+      "bytes": 3619,
+      "sha256": "c60c10bfe9b4c2e50e270f9159d12a2942e05ae79b85064325c7d7d3212379d5",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 60038,
+      "sha256": "f20da7d047f6c42749efd5813295da6b707642277a108aa794f43534cbd896e2",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "bytes": 38186,
+      "sha256": "aed4160d24208d6bd491734515b9f3bf1794d4c7348cce251d150da040abf2e0",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "bytes": 49433,
+      "sha256": "fe09d4184289b8743df6492158cfb094b5588c0b0a8ad9f222ffbfa05b61e187",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/live_cleanup.rs",
+      "bytes": 1931,
+      "sha256": "22b2c7fac3360de8c1fc71b3e409ebdad994428342ca0ece1f4c5a909281bf85",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-storage/src/business/https_settings.rs",
+      "bytes": 17613,
+      "sha256": "cadd2ccc9056c536463d147ae58c74718d28e768446464fd9d523203f28bf4ec",
+      "matchesB2AndJointAndWorktree": true
+    },
+    {
+      "path": "crates/fc-storage/src/business/https_settings/tests.rs",
+      "bytes": 32591,
+      "sha256": "e2f4d00e83e0eddfa5bc8dcf1048b376d0bf7e28d29c8727e45405154eb80a6c",
+      "matchesB2AndJointAndWorktree": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "R68-B-REVIEW-1",
+      "severity": "P1",
+      "title": "Old returned reservation Drop can erase a new runtime reservation claim",
+      "evidence": [
+        {
+          "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+          "lines": "188-216",
+          "detail": "physical_returned sets returned=true and runtime_owned=false, then Drop unconditionally stores false again for returned reservations."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/https_runtime.rs",
+          "lines": "329-338",
+          "detail": "poll calls reservation.physical_returned while retaining the Arc in the old RuntimeOwner, so its final Drop can be delayed until after a later reservation is acquired."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+          "lines": "35-39",
+          "detail": "A new reservation only CASes the shared bool false-to-true; ownership is not bound to an exact reservation identity."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/web.rs",
+          "lines": "453-454",
+          "detail": "configuration_edit relies on runtime_owned while state.enabled is false; reserve_runtime similarly relies on it."
+        }
+      ],
+      "constructibleSequence": [
+        "Reserve old, mark started, activate; negative stop and settle state.enabled=false.",
+        "Call old.physical_returned but retain an old Arc/RuntimeOwner.",
+        "Reserve fresh: runtime_owned becomes true; before fresh activate state.enabled remains false.",
+        "Drop final old Arc: old returned=true causes Drop to overwrite runtime_owned=false.",
+        "configuration_edit or another reserve_runtime can now pass while fresh still owns its original reservation and may be opening a native listener. The same window exists during fresh stop after enabled=false but before physical return."
+      ],
+      "impactScope": "Normal Running state.enabled=true still separately rejects configuration edits; this finding does not claim that check is bypassed. The ordinary UI currently drops its old owner before preparing its replacement, but public runtime/service ownership must remain correct under legal delayed old-owner Drop.",
+      "minimalFix": "Release claim exactly once for the original reservation, preferably bind it to a monotonic reservation identity/CAS. In particular, a returned reservation Drop must not clear a newer claim. Add a real service/session regression retaining old returned Arc across fresh reserve and proving both save and another reserve remain Busy after old drop.",
+      "notExecuted": "This is a source-derived constructible schedule; no repro test was executed in this read-only task.",
+      "notifications": "Root and production_backend were sent immediate source finding and narrowed enabled-state impact before this report."
+    }
+  ],
+  "confirmedStaticProperties": [
+    {
+      "item": "Original native third cleanup fault crosses HTTP generations",
+      "evidence": "A third native.rs Owner cleanup_failed and process OWNER_FAULTED; B run maps ConfiguredTlsError::Cleanup to early_return physical=false and retains reservation.",
+      "conclusion": "The old HTTP thread cannot clear native static fault by exiting; startup Cleanup does not become physical-returned proof."
+    },
+    {
+      "item": "Worker/native completion before retirement",
+      "evidence": "web_transfer/network.rs:1171-1238,450-465; https_runtime.rs:519-579",
+      "conclusion": "Running tickets remain until is_finished plus actual result. Net idle requires native_drained and no records. Runtime then additionally requires stopped sessions, physically returned cleanup ticket and both Hub registries/quarantine empty before dropping original Net/Hub owners and marking returned."
+    },
+    {
+      "item": "Live negative cleanup of uploads/downloads",
+      "evidence": "uploads.rs:164-181,489-543,612-652; downloads.rs:436-477; live_cleanup.rs:42-63",
+      "conclusion": "Negative domain stop cancels exact Owned/Busy lifetimes. Fresh worker cleanup leases only Owned entries; Busy entries remain counted. MaterialReady/retained cleanup checks exact app binding and token; download close_entry runs on worker holding actual pin. This review does not assert actual IO disposal without runtime evidence."
+    },
+    {
+      "item": "Suppressed admission replies",
+      "evidence": "network.rs:1190-1237,1242-1274; uploads.rs key_for_request and cleanup_request; downloads.rs cleanup_request",
+      "conclusion": "Begin submission marks hub_touched before positive reply. Canceled/suppressed reply does not erase actual Running ticket; cleanup by original request token follows actual completion and can recover the Hub entry even without returned key."
+    },
+    {
+      "item": "Stop origin and UI physical wait",
+      "evidence": "https_runtime.rs:255-261,305-355,519-580; physical_thread.rs referenced from poll",
+      "conclusion": "Repeated stop stores minimum original timestamp; five-second fault does not start a new positive owner. Runtime joins only after physical_thread observer reports original HANDLE terminated. New negative cleanup job slices do not renew stored stop_at budget."
+    },
+    {
+      "item": "Exact session invalidation and admission",
+      "evidence": "backend/web/runtime.rs:93-105,142-185; backend.rs:922-950; backend/web.rs:1090-1139",
+      "conclusion": "Negative epoch and browser session revocation precede new epoch admission. SQL guard checks negative runtime before waiting ledger and again after authorization; old exact sessions are revoked before new activate. Permission state is separate from public desktop buttons."
+    }
+  ],
+  "limitations": [
+    "No joint-check result consumed as runtime proof",
+    "No source changes or compilers/Cargo started",
+    "No Windows/SSH/network operation",
+    "No claim of production readiness, actual failure injection, campus trust, Win7/Win10 or physical Seewo validation"
+  ]
+}

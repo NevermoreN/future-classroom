@@ -1,0 +1,32 @@
+    Checking fc-bootstrap v0.1.0 (/tmp/fc-round68-production-https/worktree/crates/fc-bootstrap)
+error: called `map(f)` on an `Option` value where `f` is a closure that returns the unit type `()`
+   --> crates/fc-bootstrap/src/application/https_runtime_controller.rs:168:25
+    |
+168 |                         self.teacher_https.request.take().map(|r| r.cancel());
+    |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#option_map_unit_fn
+    = note: `-D clippy::option-map-unit-fn` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::option_map_unit_fn)]`
+help: use `if let` instead
+    |
+168 -                         self.teacher_https.request.take().map(|r| r.cancel());
+168 +                         if let Some(r) = self.teacher_https.request.take() { r.cancel() }
+    |
+
+error: called `map(f)` on an `Option` value where `f` is a closure that returns the unit type `()`
+   --> crates/fc-bootstrap/src/application/https_runtime_controller.rs:189:33
+    |
+189 | ...                   self.teacher_https.request.take().map(|r| r.cancel());
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#option_map_unit_fn
+help: use `if let` instead
+    |
+189 -                                 self.teacher_https.request.take().map(|r| r.cancel());
+189 +                                 if let Some(r) = self.teacher_https.request.take() { r.cancel() }
+    |
+
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap" test) due to 2 previous errors

@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "status": "QUALIFIED_RUNNER_EVENT_COUNT_FALSE_NEGATIVE_ORIGINAL_FAIL_PRESERVED",
+  "utc": "2026-11-01T08:12:41.297749+00:00",
+  "originalReport": {
+    "path": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-second.json",
+    "bytes": 65686,
+    "sha256": "7a8fffdb94f9a3c41aff6c288758cd0aee89e3fffd916ced3b73ce6bfa05d462",
+    "originalStatus": "FAIL",
+    "cleanup": "PASS"
+  },
+  "originalRunnerSource": {
+    "path": "ui-C-source-seventh-before/scripts/windows-ordinary-https-probe.py",
+    "bytes": 33509,
+    "sha256": "1f6565f2dfa2a622d622b30c7fca9d5d2abae1ce761f8c0f6c8db713b1bb4046"
+  },
+  "cause": "Original runner required at least12 events although its unchanged operations contain2 public status requests +8 fixed business requests +1..8 bounded poll requests. Immediate native approval needs one poll: actual11 events close the full required journey.",
+  "actualOriginalEvents": {
+    "total": 11,
+    "publicStatusRequests": 2,
+    "fixedBusinessRequests": 8,
+    "pairingPollRequests": 1,
+    "pollStatuses": [
+      200
+    ],
+    "orderedBusinessMethodsRoutesStatuses": [
+      {
+        "case": "ordinary-private-without-session",
+        "method": "GET",
+        "route": "session",
+        "httpStatus": 401,
+        "authenticatedCookieSent": false,
+        "csrfSent": false
+      },
+      {
+        "case": "ordinary-pairing-request",
+        "method": "POST",
+        "route": "pairing/requests",
+        "httpStatus": 202,
+        "authenticatedCookieSent": false,
+        "csrfSent": false
+      },
+      {
+        "case": "ordinary-pairing-poll-1",
+        "method": "POST",
+        "route": "pairing/requests/2/poll",
+        "httpStatus": 200,
+        "authenticatedCookieSent": false,
+        "csrfSent": false
+      },
+      {
+        "case": "ordinary-authenticated-session",
+        "method": "GET",
+        "route": "session",
+        "httpStatus": 200,
+        "authenticatedCookieSent": true,
+        "csrfSent": false
+      },
+      {
+        "case": "ordinary-reminder-scopes",
+        "method": "GET",
+        "route": "content/reminders/scopes/0",
+        "httpStatus": 200,
+        "authenticatedCookieSent": true,
+        "csrfSent": false
+      },
+      {
+        "case": "ordinary-empty-reminder",
+        "method": "GET",
+        "route": "content/reminders/1/2026-11-01",
+        "httpStatus": 200,
+        "authenticatedCookieSent": true,
+        "csrfSent": false
+      },
+      {
+        "case": "ordinary-authenticated-reminder-post",
+        "method": "POST",
+        "route": "content/reminders/1/2026-11-01",
+        "httpStatus": 200,
+        "authenticatedCookieSent": true,
+        "csrfSent": true
+      },
+      {
+        "case": "ordinary-authenticated-reminder-readback",
+        "method": "GET",
+        "route": "content/reminders/1/2026-11-01",
+        "httpStatus": 200,
+        "authenticatedCookieSent": true,
+        "csrfSent": false
+      },
+      {
+        "case": "ordinary-durable-reminder-receipt",
+        "method": "GET",
+        "route": "content/commands/68001",
+        "httpStatus": 200,
+        "authenticatedCookieSent": true,
+        "csrfSent": false
+      }
+    ]
+  },
+  "nativeSeparateResult": {
+    "status": "PASS_FROM_ORIGINAL_RAW_TRANSCRIPT",
+    "contract": {
+      "steps": 25,
+      "authenticatedReminder": "PASS",
+      "physicalShutdown": "PASS",
+      "materialReadyStop": "NOT_EXERCISED"
+    },
+    "actualNativeExitCode": 0,
+    "readyCycles": [
+      {
+        "cycle": 1,
+        "marker": "FutureClassroom-Test-TLS-2d0db78d0f084c2db1f13fe99eb3e1bc",
+        "port": 54715,
+        "generation": 1,
+        "origin": "https://127.0.0.1:54715",
+        "target": "/fc/api/v1/status"
+      },
+      {
+        "cycle": 2,
+        "marker": "FutureClassroom-Test-TLS-2d0db78d0f084c2db1f13fe99eb3e1bc",
+        "port": 54715,
+        "generation": 2,
+        "origin": "https://127.0.0.1:54715",
+        "target": "/fc/api/v1/status"
+      }
+    ],
+    "rawStdout": {
+      "path": "/tmp/fc-round68-production-https/evidence/windows-ordinary-https-second-2d0db78d0f084c2db1f13fe99eb3e1bc-raw/tls.stdout",
+      "bytes": 2730,
+      "sha256": "67c6edc0100e1edd7a5fd13dd875b7262bfcc6d66ac681c69ba82b3723362268"
+    },
+    "footer": [
+      "ORDINARY_HTTPS_NATIVE_PASS steps=25 shared_workers=2 tls_cycles=2 authenticated_reminder=PASS physical_shutdown=PASS isolated_cleanup=PASS scope=OWNED_LOOPBACK_COMPOSITION material_ready_stop=NOT_EXERCISED campus=NOT_VALIDATED elapsed_ms=3230"
+    ]
+  },
+  "actualOriginalBusiness": {
+    "status": "PASS",
+    "session": "ACTUAL_NATIVE_APPROVAL",
+    "principalId": "2",
+    "role": "TEACHER_ADMIN",
+    "classId": "1",
+    "commandId": "68001",
+    "beforeRevision": "0",
+    "committedRevision": "1",
+    "readbackRevision": "1",
+    "durableReceipt": "COMMITTED",
+    "authenticatedGet": "PASS",
+    "authenticatedPost": "PASS",
+    "secretPersistence": "NONE"
+  },
+  "originalReportChanged": false,
+  "scope": "Read-only historical evidence qualification, no Windows re-run or new implementation runtime claim. Original second top-level FAIL and all raw/cleanup records remain unchanged. New C7 exact ordered validator requires fresh source-bound runner validation."
+}

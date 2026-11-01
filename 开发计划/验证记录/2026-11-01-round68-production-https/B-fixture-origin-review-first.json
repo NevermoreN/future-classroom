@@ -1,0 +1,56 @@
+{
+  "status": "READ_ONLY_OLD_TEST_FIXTURE_ORIGIN_MISMATCH_IDENTIFIED",
+  "atUtc": "2026-11-01T08:22:01.024379+00:00",
+  "actualReport": {
+    "path": "windows-release-full-second.json",
+    "sha256": "19da0d2eb2b6ea9ad21139b69c1ac13f113299ab30ba4ab3a47443836f25f1a6",
+    "status": "FAIL",
+    "cleanup": "PASS"
+  },
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+      "bytes": 39320,
+      "sha256": "28f16b4da5295ef6fb22648e1c12ba0ee8f736fde66d61fc4af8707e564b2edb",
+      "snapshot": "B-fixture-origin-review-first-source/crates/fc-bootstrap/src/backend/account_management_tests.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profiles/tests.rs",
+      "bytes": 17877,
+      "sha256": "bc063feb2c2b5d5334d2872da8605f6647939a8d5a878e8a15a9ee6d5e260fb5",
+      "snapshot": "B-fixture-origin-review-first-source/crates/fc-bootstrap/src/backend/profiles/tests.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 107515,
+      "sha256": "f319c893038fef6178c42170deb2be335695b64357cdd8349a5a0db5fc13b468",
+      "snapshot": "B-fixture-origin-review-first-source/crates/fc-bootstrap/src/backend.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 46785,
+      "sha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe",
+      "snapshot": "B-fixture-origin-review-first-source/crates/fc-bootstrap/src/backend/web.rs"
+    }
+  ],
+  "failedBootstrapLibraryTests": [
+    "test backend::account_management_tests::accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_atomically ... FAILED",
+    "test backend::account_management_tests::accounts_active_default_and_retained_history_references_reject_atomically_without_revoking ... FAILED",
+    "test backend::account_management_tests::accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected_records ... FAILED",
+    "test backend::account_management_tests::accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_without_revocation ... FAILED",
+    "test backend::account_management_tests::accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_access ... FAILED",
+    "test backend::profiles::tests::profiles_backend_exact_management_lease_joint_cas_and_restart ... FAILED",
+    "test backend::profiles::tests::profiles_backend_retained_disabled_owner_can_be_managed_but_not_reenabled ... FAILED"
+  ],
+  "finding": "Both component fixture seed helpers directly issue a Web lease to a newly created must-change-password account while Web/runtime admission is disabled and without pairing; the new Web negative session guard correctly rejects the ensuing credential write. This synthetic origin was previously used to avoid replacing the current local admin during setup. It is not the real native first-password-change path.",
+  "proposedMinimalChange": [
+    "Only account_management_tests.rs and backend/profiles/tests.rs seed(): use the existing trusted Local fixture lease issuance for first password change, retaining the real session_guard, credential transition, SQL writer and CAS.",
+    "Reissue/rebind the local global-admin lease before the second and third account seed, because the first-password-change local login correctly replaces/revokes the prior local session.",
+    "Keep all later Web denial, paired-session revocation, profile CAS/reopen and real credential tests unchanged. No runtime_ready/epoch mutation, no synthetic native owner, no production guard exception."
+  ],
+  "productionEvidenceScope": "Root reports C6 ordinary native workflow independently created TeacherAdmin and completed its real Local first-password-change before actual pairing. This read-only report does not reinterpret the failing component run as passing.",
+  "codeChanged": false,
+  "cargoInvoked": false,
+  "windowsInvoked": false,
+  "awaitingRootSourceAuthorization": true
+}

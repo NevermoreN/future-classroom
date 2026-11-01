@@ -1,0 +1,29 @@
+{
+  "status": "PREPARED_AST_PASS_NOT_EXECUTED",
+  "createdUtc": "2026-11-01T08:13:44.989915+00:00",
+  "wrapper": {
+    "path": "root-run-windows-release-continue-first.py",
+    "bytes": 9571,
+    "sha256": "014ea8c73ab68bba2995cf4eb19b077b916004eb66bb3627328cf3134ebb295b"
+  },
+  "executeTemplate": [
+    "python3",
+    "-B",
+    "/tmp/fc-round68-production-https/evidence/root-run-windows-release-continue-first.py",
+    "--execute",
+    "--freeze",
+    "<new-C7-joint-freeze>.json",
+    "--tests-report",
+    "<actual-full-second-codegen-PASS>.json",
+    "--product-report",
+    "joint-release-product-second.json",
+    "--label",
+    "full-second"
+  ],
+  "normalSource": "product source5; new source may differ only scripts/windows-ordinary-https-probe.py",
+  "codegen": "NOT_POLLED_OR_EXECUTED_BY_PREPARATION",
+  "windows": "NOT_CONNECTED",
+  "sourceEdits": false,
+  "cargoInvoked": false,
+  "testPolicy": "all21 original harnesses, only integer nonzero binary exit continues; original failures preserved and final overall FAIL; original900s/threads2/cleanup unchanged"
+}

@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "scope": "Host Rust tests execute byte-for-byte tlv/dns_matches/matches_san and exact cfg(test) module from second immutable source; no native certificate/Windows/TLS or full fc-windows runtime claim.",
+  "sourceSha256": "51b475fb3fa4bb3efda912b1c9716ceca1fac4821b54553dde5445c4afb3a8d5",
+  "sourceExtractSha256": "ccab2bff70b7f8a75d7f642d6e154cc24c1ae0cc9d064bf35d86ea7021fd67d6",
+  "commands": [
+    {
+      "command": [
+        "rustc",
+        "--edition=2021",
+        "--test",
+        "--crate-name",
+        "native_a_san_tests_second",
+        "/tmp/fc-round68-production-https/evidence/native-A-check-san-tests-second.rs",
+        "-o",
+        "/tmp/fc-round68-production-https/native-check-target/native-a-san-tests-second"
+      ],
+      "startedUtc": "2026-11-01T07:20:57.983983+00:00",
+      "endedUtc": "2026-11-01T07:20:58.230185+00:00",
+      "elapsedSeconds": 0.24620458716526628,
+      "budgetSeconds": 900,
+      "exitCode": 0,
+      "stdout": {
+        "path": "native-A-check-san-tests-second.compile.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "native-A-check-san-tests-second.compile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": [
+        "/tmp/fc-round68-production-https/native-check-target/native-a-san-tests-second",
+        "--nocapture"
+      ],
+      "startedUtc": "2026-11-01T07:20:58.230262+00:00",
+      "endedUtc": "2026-11-01T07:20:58.233007+00:00",
+      "elapsedSeconds": 0.0027527438942342997,
+      "budgetSeconds": 900,
+      "exitCode": 0,
+      "stdout": {
+        "path": "native-A-check-san-tests-second.run.stdout.log",
+        "bytes": 383,
+        "sha256": "c4f6ac17f94839d786ba2ed56eb22ca62c14a6ad306564384d2dc2cf0df98165"
+      },
+      "stderr": {
+        "path": "native-A-check-san-tests-second.run.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ]
+}

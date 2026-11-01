@@ -157,6 +157,7 @@ fn workflow(
             (h::HOST, "localhost"),
             (h::PORT, "0"),
             (h::CERTIFICATE, reference),
+            (h::SOURCE_NETWORKS, "127.0.0.1/32"),
         ],
         deadline,
     )?;
@@ -176,6 +177,7 @@ fn workflow(
             (h::HOST, "localhost"),
             (h::PORT, "8443"),
             (h::CERTIFICATE, reference),
+            (h::SOURCE_NETWORKS, "127.0.0.1/32"),
         ],
         deadline,
     )?;
@@ -259,7 +261,7 @@ fn workflow(
                 .view()
                 .fields
                 .iter()
-                .all(|f| ![h::HOST, h::PORT, h::CERTIFICATE].contains(&f.id)),
+                .all(|f| ![h::HOST, h::PORT, h::CERTIFICATE, h::SOURCE_NETWORKS].contains(&f.id)),
         "locked page hides configuration draft",
     )?;
     mark(step, "native-draft-retained-across-lock")?;

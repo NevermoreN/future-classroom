@@ -1,0 +1,476 @@
+{
+  "status": "PASS_EXACT_VALIDATED_SOURCE_INTEGRATED",
+  "createdUtc": "2026-11-01T08:38:06.708834+00:00",
+  "mainPreimageHead": "452b41984443d5cacb8b34219c92b64f0287c2ae",
+  "sourceFreeze": "joint-implementation-freeze-seventh.json",
+  "sourceFreezeSha256": "89148f095235a850b0fc408aa24b79f6701d790791ccba6e1535a87cfc770137",
+  "changedFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "owner": "C",
+      "bytes": 262848,
+      "sha256": "2e764fa6be7070fdb5401b6998d8b422051aad97d70dd8e1b3e8ff3b640361e9",
+      "before": {
+        "bytes": 260404,
+        "sha256": "a83fe4b049eb084823de5652c6105eee7717f797aef15236d96cfa8461a581ea"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_controller.rs",
+      "owner": "C",
+      "bytes": 33579,
+      "sha256": "ae2bb5422c375efcb26910c384386775dd9f56027bb257d96f0b9f3a2c9a2042",
+      "before": {
+        "bytes": 33494,
+        "sha256": "259282c9509bc780b550de6dd3f1aafa869fe3f35c8f6ddc6b14baa971a51cfc"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+      "owner": "C",
+      "bytes": 14009,
+      "sha256": "82bfdf13428f490aee41340ecb8d0fcb7401df4b886f3dda2863c8d89509128a",
+      "before": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_controller.rs",
+      "owner": "C",
+      "bytes": 21074,
+      "sha256": "e8e5ff01849061e5b7078a4e0b6b2a39a0d47a44a950fe683a232211b04f1d21",
+      "before": {
+        "bytes": 21063,
+        "sha256": "7cea5958edcbfe8aa479e5a6c64e92ef9301048333167c2e926b1edaf18ebe48"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_controller/tests.rs",
+      "owner": "C",
+      "bytes": 6437,
+      "sha256": "ba0a0ab28a240d454dc2211f76a0d99b754c4d51cffa6a312c61ec5e5d04a296",
+      "before": {
+        "bytes": 6354,
+        "sha256": "b4d88fe87fb246a0c816ec7702a299edcf8ef9343bbbf619c678a31adfeb3d44"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_editor.rs",
+      "owner": "C",
+      "bytes": 20711,
+      "sha256": "f899d911e374a0af511bca3e4e9cc353ee5d4516797fda7b547431e2d5529030",
+      "before": {
+        "bytes": 19304,
+        "sha256": "e72621498a23c864ba7cc16f26aa20d06a5d0be43fb487793bae08311c05b0a1"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_editor/tests.rs",
+      "owner": "C",
+      "bytes": 10628,
+      "sha256": "4419b145293ea27379b798ea746896961b5b68bc450dec50ca75d9ccaed90494",
+      "before": {
+        "bytes": 8905,
+        "sha256": "de7da26c9d830d264921b8bac12230afea681aee9249dbd94a804b0ea8edef81"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_settings_probe.rs",
+      "owner": "C",
+      "bytes": 15967,
+      "sha256": "72db5cafd5ea617ae74026fa1988353537dbc02c6cfe2d87385157c5dc144d81",
+      "before": {
+        "bytes": 15847,
+        "sha256": "48fa60b98669f9b10c7ead070a519b7d3564349950d762fc9ac4c8aa4a7aa071"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "owner": "C",
+      "bytes": 20746,
+      "sha256": "23f85c2888cd47b5be2cbff3f3b8d3e1e6f285560b453c547047d0e622636768",
+      "before": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "owner": "C",
+      "bytes": 25255,
+      "sha256": "8d2f4a41a6a3361069f9f4120a1e7116e9e011ff25d807ca8ec8229e7134fde3",
+      "before": {
+        "bytes": 22828,
+        "sha256": "c7ef558c7ee0923beeb90eda6e6d18c29bd2e56d24f50a0c10d482eb1f356cda"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+      "owner": "C",
+      "bytes": 21849,
+      "sha256": "3535f6fd2c78d8ddf04af1a9a164fe2e404b6ed4fcabcd8c55d21a19573b15e5",
+      "before": {
+        "bytes": 17040,
+        "sha256": "d6ef17cef5d726b007cda1dd12ae6c75db14e9165c16b12fdfb538106664703a"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "owner": "B",
+      "bytes": 107515,
+      "sha256": "f319c893038fef6178c42170deb2be335695b64357cdd8349a5a0db5fc13b468",
+      "before": {
+        "bytes": 107143,
+        "sha256": "24df808e779f556d5c50e207342b4261ca84d5b4246ec566ecb27b0077cbbcf9"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+      "owner": "B",
+      "bytes": 39896,
+      "sha256": "25d4afeaee28fc00dec03f1b8fa90c1fcdcd7549e32ca4821950a0cb695fe6a4",
+      "before": {
+        "bytes": 39320,
+        "sha256": "28f16b4da5295ef6fb22648e1c12ba0ee8f736fde66d61fc4af8707e564b2edb"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "owner": "B",
+      "bytes": 4108,
+      "sha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf",
+      "before": {
+        "bytes": 3830,
+        "sha256": "1cbc13e65a5c15ca98f9b43336d605ca3c7f6d86da2dc8c2c19f786268ff8492"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profiles/tests.rs",
+      "owner": "B",
+      "bytes": 18453,
+      "sha256": "44c2003f841b6cb528467b1dd3b7834815ab48d528ad90bd8bc22358efd99329",
+      "before": {
+        "bytes": 17877,
+        "sha256": "bc063feb2c2b5d5334d2872da8605f6647939a8d5a878e8a15a9ee6d5e260fb5"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "owner": "B",
+      "bytes": 46785,
+      "sha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe",
+      "before": {
+        "bytes": 44377,
+        "sha256": "495383fe8e6fae4669155f7375792a426e60f2edbcfa9225f24affeda1d6250f"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "owner": "B",
+      "bytes": 9910,
+      "sha256": "5bb04d3585f895381daa0ef3e28ef851d7304c0584cebf40a615a91468716e39",
+      "before": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+      "owner": "B",
+      "bytes": 13885,
+      "sha256": "2173db6aece2d4cd4d192c58bdedabe304f8aa1ac2383327d1c15d553a745fa4",
+      "before": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/https_runtime.rs",
+      "owner": "B",
+      "bytes": 22674,
+      "sha256": "1005f9cd0db58ac692ed3f748b27b46b5f450856e7ca864f25aa487c462d6ee4",
+      "before": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/lib.rs",
+      "owner": "B",
+      "bytes": 626,
+      "sha256": "264fdf1aa1344616533ae82575e38d6bae717a172d877692b740bcac328e550c",
+      "before": {
+        "bytes": 587,
+        "sha256": "4793b3d8614157539195e1d3d81d7410b652ce6afb09bcbcd72c47acdf1b6399"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "owner": "C",
+      "bytes": 21856,
+      "sha256": "a30233d87465baca146f1bb985f1d75a8fc51afb72e10ed9d41c6f115051330b",
+      "before": {
+        "bytes": 21233,
+        "sha256": "b17ca9391cf7eb267113a156d3a0793fdfb96fe7c30cd34e677dab8e7ead0f4c"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "owner": "B",
+      "bytes": 17949,
+      "sha256": "f53d793a1483a0532e27187c274e11d2f4755e69f072a6fa9a7b3b06cc1a39b3",
+      "before": {
+        "bytes": 17396,
+        "sha256": "9ded9359a8e5e5286bc9f15cabd5e3c25fe744e6fbbe6b7b125a53a568e892a1"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer.rs",
+      "owner": "B",
+      "bytes": 10897,
+      "sha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76",
+      "before": {
+        "bytes": 10324,
+        "sha256": "6eef089d5874c8dcb0183e5eba210f4af3bd749d39b48dc8ffe2c5bb2127773e"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/downloads.rs",
+      "owner": "B",
+      "bytes": 19977,
+      "sha256": "734820af5417f8cb51d2f0a12d8e1df0bb418d9356b15123ff0da0bb2a5db47a",
+      "before": {
+        "bytes": 17961,
+        "sha256": "85c3a9433544dae418a29a023596127882cded7fe37644e310c47dff7f603313"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/executor.rs",
+      "owner": "B",
+      "bytes": 3619,
+      "sha256": "c60c10bfe9b4c2e50e270f9159d12a2942e05ae79b85064325c7d7d3212379d5",
+      "before": {
+        "bytes": 3209,
+        "sha256": "f322dfc82c3471c06b546e4e0e9c0789df856970a860d5037c5ce3a2569252f4"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/live_cleanup.rs",
+      "owner": "B",
+      "bytes": 1931,
+      "sha256": "22b2c7fac3360de8c1fc71b3e409ebdad994428342ca0ece1f4c5a909281bf85",
+      "before": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "owner": "B",
+      "bytes": 60038,
+      "sha256": "f20da7d047f6c42749efd5813295da6b707642277a108aa794f43534cbd896e2",
+      "before": {
+        "bytes": 59397,
+        "sha256": "42feacea1410c3968734c9bc39d9c09c7c647095afeb29a9dba18800a335491f"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "owner": "B",
+      "bytes": 38186,
+      "sha256": "aed4160d24208d6bd491734515b9f3bf1794d4c7348cce251d150da040abf2e0",
+      "before": {
+        "bytes": 35986,
+        "sha256": "83a5e40e206489681662ea411813cf942c8f195fa41dfbf1673bc88bf94d76ad"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "owner": "B",
+      "bytes": 49433,
+      "sha256": "fe09d4184289b8743df6492158cfb094b5588c0b0a8ad9f222ffbfa05b61e187",
+      "before": {
+        "bytes": 45258,
+        "sha256": "9763c1a637973bb82f32f613421b4e55439de8a88c5fa536e3de7307b7347229"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+      "owner": "B",
+      "bytes": 8967,
+      "sha256": "59de85620ebac75d76274cc4f0f8732cb04339517e4cba2cc5c281cbad7cd1c6",
+      "before": {
+        "bytes": 8855,
+        "sha256": "42faf95294d1bdfcbb9764a0ed635c75873df8fbf508fd2402248f481e212391"
+      }
+    },
+    {
+      "path": "crates/fc-domain/src/https_settings.rs",
+      "owner": "A",
+      "bytes": 6829,
+      "sha256": "0f695a75dc2c8cda3bb0c0731c1bae0bf8ff1120b9a5b45ad65402b224db5999",
+      "before": {
+        "bytes": 6192,
+        "sha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96"
+      }
+    },
+    {
+      "path": "crates/fc-domain/src/https_settings/source_networks.rs",
+      "owner": "A",
+      "bytes": 6518,
+      "sha256": "c22cf5e84666a02c2c8742c63a95e827d14f458fbb61bff9054eaf361438d297",
+      "before": null
+    },
+    {
+      "path": "crates/fc-storage/src/business/https_settings.rs",
+      "owner": "B",
+      "bytes": 17613,
+      "sha256": "cadd2ccc9056c536463d147ae58c74718d28e768446464fd9d523203f28bf4ec",
+      "before": {
+        "bytes": 15843,
+        "sha256": "13a483458ebd390d227b628d40ed6a8c600fb50fb20c061b1dd042885e5e4e36"
+      }
+    },
+    {
+      "path": "crates/fc-storage/src/business/https_settings/tests.rs",
+      "owner": "B",
+      "bytes": 32591,
+      "sha256": "e2f4d00e83e0eddfa5bc8dcf1048b376d0bf7e28d29c8727e45405154eb80a6c",
+      "before": {
+        "bytes": 30945,
+        "sha256": "37200044b4983e8aee4e90808c5071dbc79252c4160aff7ffbc5029c6108c367"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "owner": "A",
+      "bytes": 9012,
+      "sha256": "3a0da2d116197107bf2d6bbe2d2196d7ba35b0cbc2210d704ed9861630d640d6",
+      "before": {
+        "bytes": 8515,
+        "sha256": "acc08d0566f68f6e3b2e8aac04ac6eb307f4218a1a049377fc7d955cfa196f09"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials/host.rs",
+      "owner": "A",
+      "bytes": 6933,
+      "sha256": "51b475fb3fa4bb3efda912b1c9716ceca1fac4821b54553dde5445c4afb3a8d5",
+      "before": null
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "owner": "A",
+      "bytes": 10617,
+      "sha256": "1186d9c4c78d52907397508a8af503ca4038404293a7df49430d08b9a109a5bc",
+      "before": {
+        "bytes": 10221,
+        "sha256": "2ac2e9b3cea4d6f6ef8aaa329398f93abca4b5ed3fa9707efde978010dde0174"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "owner": "A",
+      "bytes": 64132,
+      "sha256": "f7e4b8b22595bb68e7273a65c8b7b4e27ada6f38d08f4db3ec1529ab0dfe7fb4",
+      "before": {
+        "bytes": 61439,
+        "sha256": "e6a4938e8c096ac509a03e75345b847cedda795aa7cb2ef1d6524a2efdc964fd"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "owner": "A",
+      "bytes": 17494,
+      "sha256": "66bf7a67d7d76d113c9883978c686de4eabe076093ac1f113937b196f36c62cc",
+      "before": {
+        "bytes": 16364,
+        "sha256": "a7cbaf2a17af2f01280871f9b46c404430e1ef63e79293b18a476ce8452dd80b"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/configured.rs",
+      "owner": "A",
+      "bytes": 6487,
+      "sha256": "40269df8f57f2952056fe326d8bffb53e7b641e4cc563fafe99bdd09494d2d88",
+      "before": null
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "owner": "A",
+      "bytes": 42731,
+      "sha256": "6072ccea148737523e3475be5355d62084d656158afbea19bb98240be5033b97",
+      "before": {
+        "bytes": 40331,
+        "sha256": "48fcff62625fdda506d6a4d6039b67190fea951e3b991bb3f880fb640274a783"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "owner": "A",
+      "bytes": 99106,
+      "sha256": "4c6006687e4c60e28eb0dac08584a1cc61beeb6c8dfb44f75eeeef556ffe026f",
+      "before": {
+        "bytes": 86763,
+        "sha256": "5c7a68b887f572ee511ce9db2be017e7d97c727d22c9f4e3e97ef4d92fef74d1"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+      "owner": "A",
+      "bytes": 30431,
+      "sha256": "e2dc64da924539611991db9e2b20b6515e2c4830db4979c73d809330ba2a3d38",
+      "before": {
+        "bytes": 30063,
+        "sha256": "800c898e9b7d11eb9823dca075d6ebe2e8bc99dee0f6606d2ace334f9a3a9936"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker.rs",
+      "owner": "A",
+      "bytes": 16613,
+      "sha256": "90fb20582984091754c3305b940d39b39298682ca0ac4310ac8f1e066419da03",
+      "before": {
+        "bytes": 16232,
+        "sha256": "212aa5bf10175bc553d2c4e720baf5d3f3843be90937f71348336de6f1194591"
+      }
+    },
+    {
+      "path": "scripts/windows-ordinary-https-probe.py",
+      "owner": "C",
+      "bytes": 43248,
+      "sha256": "bf3ea57caf4a8c53a3be879345b0e41ada0329591b32c29213e79d5077aba375",
+      "before": null
+    },
+    {
+      "path": "开发计划/14-P0独立TCP接纳候选ADR.md",
+      "owner": "root",
+      "bytes": 23288,
+      "sha256": "cd74309da502efd8fbea0b334d53d66fc9e4f2e044c1faa1963a0b76da4b169f",
+      "before": {
+        "bytes": 19707,
+        "sha256": "ea73ea6fcf8b01f7efb2afbe7e6cf976f0283fac81a512b0387e656065870f4d"
+      }
+    },
+    {
+      "path": "开发计划/模块/06-局域网与React管理端.md",
+      "owner": "root",
+      "bytes": 20650,
+      "sha256": "f57333cf4bfa55dd81af46f0c3031c881b952745e02a7012cd693c83a558d8cc",
+      "before": {
+        "bytes": 20104,
+        "sha256": "2f0cadef2b7f29b100917d11b9cbfc81246955213d71ca2cd5c331634e3c53bb"
+      }
+    }
+  ],
+  "changedFileCount": 47,
+  "guardedWorkingFileCount": 595,
+  "scope": "595-file guard includes noncompiler metadata; actual build and runtime producers remain the isolated worktree. All Rust/Cargo/web/script bytes and all 47 changed files match. Main retains newer R67 metadata.",
+  "nonCompilerMetadataDifferences": [
+    {
+      "path": ".gitattributes",
+      "main": {
+        "bytes": 4710,
+        "sha256": "f94af4a5f6e76a860a459e9cbf0a612c1787c09cbf3da0f65f9b82c26ef4c9e1"
+      },
+      "isolated": {
+        "bytes": 4548,
+        "sha256": "0ca7bb0f41d0f78369c4f5c520cfe0476ad3f26c11378b77af2a33e62fa9ebad"
+      }
+    },
+    {
+      "path": "开发计划/10-实施进度与验证记录.md",
+      "main": {
+        "bytes": 485869,
+        "sha256": "18cbce5dbd1a35ebeb529f9fc45563e018db03f2764d836aa72df868f364f2ce"
+      },
+      "isolated": {
+        "bytes": 481320,
+        "sha256": "eca319611983a3f796f04351500665e6461a09cf3ab1ae2f9ba32a9159d1d22d"
+      }
+    }
+  ]
+}

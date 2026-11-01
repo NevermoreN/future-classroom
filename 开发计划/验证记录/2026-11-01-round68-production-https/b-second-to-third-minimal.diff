@@ -1,0 +1,383 @@
+--- second/crates/fc-bootstrap/src/backend/web.rs
++++ third/crates/fc-bootstrap/src/backend/web.rs
+@@ -164,7 +164,7 @@
+ struct Inner {
+     state: Mutex<State>,
+     configuration_edit: AtomicBool,
+-    runtime_owned: AtomicBool,
++    runtime_claim: AtomicU64,
+     runtime_ready: AtomicBool,
+     runtime_stopping: AtomicBool,
+     runtime_epoch: AtomicU64,
+@@ -260,7 +260,7 @@
+             inner: Arc::new(Inner {
+                 state: Mutex::new(State::default()),
+                 configuration_edit: AtomicBool::new(false),
+-                runtime_owned: AtomicBool::new(false),
++                runtime_claim: AtomicU64::new(0),
+                 runtime_ready: AtomicBool::new(false),
+                 runtime_stopping: AtomicBool::new(false),
+                 runtime_epoch: AtomicU64::new(0),
+@@ -450,7 +450,7 @@
+             .map_err(|_| WebServiceError::Busy)?;
+         let generation = self.admin(&mut ledger, &snapshot.data, admin)?;
+         self.admin_current(&snapshot, &mut ledger, admin, generation)?;
+-        if state.enabled || self.inner.runtime_owned.load(Ordering::Acquire) {
++        if state.enabled || self.inner.runtime_claim.load(Ordering::Acquire) != 0 {
+             return Err(WebServiceError::Busy);
+         }
+         self.inner
+@@ -489,13 +489,13 @@
+         self.admin_current(&snapshot, &mut ledger, admin, generation)?;
+         if enabled
+             && (self.inner.configuration_edit.load(Ordering::Acquire)
+-                || (self.inner.runtime_owned.load(Ordering::Acquire)
++                || (self.inner.runtime_claim.load(Ordering::Acquire) != 0
+                     && (!self.inner.runtime_ready.load(Ordering::Acquire)
+                         || !self.runtime_execution_current())))
+         {
+             return Err(WebServiceError::Busy);
+         }
+-        if enabled && !self.inner.runtime_owned.load(Ordering::Acquire) {
++        if enabled && self.inner.runtime_claim.load(Ordering::Acquire) == 0 {
+             // Existing explicit finite diagnostic composition. Normal product
+             // composition exclusively uses the physical runtime reservation.
+             self.inner.runtime_stopping.store(false, Ordering::Release);
+--- second/crates/fc-bootstrap/src/backend/web/runtime.rs
++++ third/crates/fc-bootstrap/src/backend/web/runtime.rs
+@@ -36,23 +36,23 @@
+         if state.enabled || self.inner.configuration_edit.load(Ordering::Acquire) {
+             return Err(WebServiceError::Busy);
+         }
++        if self.inner.runtime_claim.load(Ordering::Acquire) != 0 {
++            return Err(WebServiceError::Busy);
++        }
++        // This monotonically increasing value is the exact physical claim,
++        // independently retained while admission's epoch can become negative.
++        let epoch = self
++            .inner
++            .runtime_epoch
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |word| {
++                word.checked_add(2).map(|word| word & !1)
++            })
++            .map(|previous| (previous + 2) & !1)
++            .map_err(|_| WebServiceError::Overflow)?;
+         self.inner
+-            .runtime_owned
+-            .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+-            .map_err(|_| WebServiceError::Busy)?;
+-        let epoch =
+-            match self
+-                .inner
+-                .runtime_epoch
+-                .try_update(Ordering::AcqRel, Ordering::Acquire, |word| {
+-                    word.checked_add(2).map(|word| word & !1)
+-                }) {
+-                Ok(previous) => (previous + 2) & !1,
+-                Err(_) => {
+-                    self.inner.runtime_owned.store(false, Ordering::Release);
+-                    return Err(WebServiceError::Overflow);
+-                }
+-            };
++            .runtime_claim
++            .compare_exchange(0, epoch, Ordering::AcqRel, Ordering::Acquire)
++            .map_err(|_| WebServiceError::Busy)?;
+         self.inner.runtime_ready.store(false, Ordering::Release);
+         Ok(Arc::new(WebRuntimeReservation {
+             service: self.clone(),
+@@ -154,7 +154,7 @@
+             .map_err(|_| WebServiceError::Busy)?;
+         self.service
+             .admin_current(&self.snapshot, &mut ledger, self.lease, self.generation)?;
+-        if !self.service.inner.runtime_owned.load(Ordering::Acquire) {
++        if !self.owns_claim() {
+             return Err(WebServiceError::Disabled);
+         }
+         // Revoke the complete previous browser epoch before opening a new one;
+@@ -187,29 +187,72 @@
+         state.enabled = true;
+         Ok(())
+     }
++    pub(crate) fn owns_claim(&self) -> bool {
++        self.service.inner.runtime_claim.load(Ordering::Acquire) == self.epoch
++            && !self.returned.load(Ordering::Acquire)
++    }
++    /// Exact old runtime owners may revoke only their own admission epoch.
++    /// A delayed request_stop can never close a replacement generation.
++    pub(crate) fn negative_stop(&self) -> bool {
++        if !self.owns_claim() {
++            return false;
++        }
++        let _ = self.service.inner.runtime_epoch.try_update(
++            Ordering::AcqRel,
++            Ordering::Acquire,
++            |word| {
++                if word == self.epoch || word == (self.epoch | 1) {
++                    self.epoch.checked_add(2)
++                } else {
++                    None
++                }
++            },
++        );
++        self.service
++            .inner
++            .runtime_ready
++            .store(false, Ordering::Release);
++        self.service
++            .inner
++            .runtime_stopping
++            .store(true, Ordering::Release);
++        true
++    }
+     /// Caller must have observed the original HTTP thread's physical exit,
+     /// after its Net/native owner and final worker cleanup already returned.
+     pub(crate) fn physical_returned(&self) {
+-        self.returned.store(true, Ordering::Release);
+-        self.service
+-            .inner
+-            .runtime_ready
+-            .store(false, Ordering::Release);
+-        self.service
+-            .inner
+-            .runtime_owned
+-            .store(false, Ordering::Release);
++        if self.returned.swap(true, Ordering::AcqRel) {
++            return;
++        }
++        // Clear readiness while this claim still excludes a new reservation.
++        // No metadata store is permitted after relinquishing the exact claim.
++        if self.service.inner.runtime_claim.load(Ordering::Acquire) == self.epoch {
++            self.service
++                .inner
++                .runtime_ready
++                .store(false, Ordering::Release);
++            let _ = self.service.inner.runtime_claim.compare_exchange(
++                self.epoch,
++                0,
++                Ordering::AcqRel,
++                Ordering::Acquire,
++            );
++        }
+     }
+ }
+ impl Drop for WebRuntimeReservation {
+     fn drop(&mut self) {
+-        if !self.started.load(Ordering::Acquire) || self.returned.load(Ordering::Acquire) {
+-            self.service
+-                .inner
+-                .runtime_owned
+-                .store(false, Ordering::Release);
+-        }
+-        // Unknown native/worker retirement intentionally leaves runtime_owned
+-        // set. A replacement/configuration save is denied until process recovery.
+-    }
+-}
++        if !self.started.load(Ordering::Acquire) && !self.returned.load(Ordering::Acquire) {
++            // An unstarted plan may release only its own claim. A returned
++            // reservation was already released and must never clear it again.
++            let _ = self.service.inner.runtime_claim.compare_exchange(
++                self.epoch,
++                0,
++                Ordering::AcqRel,
++                Ordering::Acquire,
++            );
++        }
++        // Unknown native/worker retirement intentionally leaves its exact
++        // runtime_claim set until process recovery; no replacement is admitted.
++    }
++}
+--- second/crates/fc-bootstrap/src/backend/web/runtime_tests.rs
++++ third/crates/fc-bootstrap/src/backend/web/runtime_tests.rs
+@@ -1,5 +1,5 @@
+-//! Real credential/session and unique SQLite-writer regressions. Native-ready
+-//! metadata is injected only to test the service boundary, not TLS readiness.
++// Real credential/session and unique SQLite-writer regressions. Native-ready
++// metadata is injected only to test the service boundary, not TLS readiness.
+ #[test]
+ fn runtime_start_reservation_excludes_configuration_and_legacy_enable_until_return() {
+     let f = Fixture::new();
+@@ -312,3 +312,89 @@
+         Health::Healthy
+     );
+ }
++
++#[test]
++fn returned_old_reservation_cannot_clear_new_starting_or_stopping_exact_claim() {
++    for stopping in [false, true] {
++        let f = Fixture::new();
++        let service = f.service();
++        let old = service.reserve_runtime(f.admin).unwrap();
++        old.mark_started();
++        old.activate(31).unwrap();
++        assert!(old.negative_stop());
++        assert!(service.settle_runtime_stop());
++        old.physical_returned();
++        let delayed = old.clone();
++        drop(old);
++        let current = service.reserve_runtime(f.admin).unwrap();
++        current.mark_started();
++        if stopping {
++            current.activate(32).unwrap();
++            assert!(current.negative_stop());
++            assert!(service.settle_runtime_stop());
++        }
++        // Both Starting and Stopping have logical enabled=false. A bool-only
++        // test therefore cannot distinguish this exact active physical owner.
++        assert!(!service.management_snapshot(f.admin).unwrap().enabled);
++        let original_claim = service.inner.runtime_claim.load(Ordering::Acquire);
++        let original_epoch = service.inner.runtime_epoch.load(Ordering::Acquire);
++        assert_ne!(original_claim, 0);
++        delayed.physical_returned();
++        delayed.physical_returned();
++        assert!(!delayed.negative_stop());
++        drop(delayed);
++        assert_eq!(
++            service.inner.runtime_claim.load(Ordering::Acquire),
++            original_claim
++        );
++        assert_eq!(
++            service.inner.runtime_epoch.load(Ordering::Acquire),
++            original_epoch
++        );
++        assert!(matches!(
++            service.configuration_edit(f.admin),
++            Err(WebServiceError::Busy)
++        ));
++        assert!(matches!(
++            service.reserve_runtime(f.admin),
++            Err(WebServiceError::Busy)
++        ));
++        if !stopping {
++            current.activate(33).unwrap();
++            assert_eq!(service.runtime_generation(), Some(33));
++            assert!(current.negative_stop());
++            assert!(service.settle_runtime_stop());
++        }
++        current.physical_returned();
++        assert!(service.configuration_edit(f.admin).is_ok());
++    }
++}
++
++#[test]
++fn delayed_old_negative_stop_cannot_revoke_new_running_generation() {
++    let f = Fixture::new();
++    let service = f.service();
++    let old = service.reserve_runtime(f.admin).unwrap();
++    old.mark_started();
++    old.activate(41).unwrap();
++    assert!(old.negative_stop());
++    assert!(service.settle_runtime_stop());
++    old.physical_returned();
++    let current = service.reserve_runtime(f.admin).unwrap();
++    current.mark_started();
++    current.activate(42).unwrap();
++    assert!(!old.negative_stop());
++    old.physical_returned();
++    drop(old);
++    assert_eq!(service.runtime_generation(), Some(42));
++    assert!(service.runtime_execution_current());
++    assert!(service.management_snapshot(f.admin).unwrap().enabled);
++    assert!(service.begin_pairing_for_runtime(f.admin, 42).is_ok());
++    assert!(matches!(
++        service.configuration_edit(f.admin),
++        Err(WebServiceError::Busy)
++    ));
++    assert!(current.negative_stop());
++    assert!(service.settle_runtime_stop());
++    current.physical_returned();
++}
+--- second/crates/fc-bootstrap/src/https_runtime.rs
++++ third/crates/fc-bootstrap/src/https_runtime.rs
+@@ -4,7 +4,7 @@
+ use crate::{
+     backend::{
+         web::{WebRuntimeReservation, WebService},
+-        Backend, SessionLease,
++        Backend,
+     },
+     web_application::WebApplication,
+     web_assets::StaticAssets,
+@@ -13,6 +13,7 @@
+         DownloadHubOwner, HttpCompletion, HttpExecutor, HttpJob, HttpTicket, UploadHubOwner,
+     },
+ };
++use fc_application::identity::SessionLease;
+ use fc_domain::https_settings::HttpsConfiguration;
+ use fc_ports::http::ListenPrefix;
+ use fc_runtime::worker::{JobContext, Rejection};
+@@ -244,8 +245,10 @@
+     reservation: Arc<WebRuntimeReservation>,
+     quiescent: bool,
+ }
+-fn stop(shared: &Arc<Mutex<Shared>>, service: &WebService, at: Instant) {
+-    service.negative_runtime_stop();
++fn stop(shared: &Arc<Mutex<Shared>>, reservation: &WebRuntimeReservation, at: Instant) {
++    if !reservation.negative_stop() {
++        return;
++    }
+     let mut state = shared.lock().unwrap_or_else(|e| e.into_inner());
+     state.stop_at = Some(state.stop_at.map_or(at, |original| original.min(at)));
+     if !state.faulted {
+@@ -309,9 +312,12 @@
+     /// The UI/coordinator passes its original stop observation, before any
+     /// cancellation work. Repeated stop requests can only tighten that origin.
+     pub fn request_stop_at(&self, at: Instant) {
++        if self.quiescent || !self.reservation.owns_claim() {
++            return;
++        }
+         let at = at.min(Instant::now());
+         self.request.cancel();
+-        stop(&self.shared, &self.service, at);
++        stop(&self.shared, &self.reservation, at);
+     }
+     pub fn network_report(&self) -> Option<NetworkReport> {
+         self.shared.lock().unwrap_or_else(|e| e.into_inner()).report
+@@ -481,7 +487,7 @@
+     }
+     if let Some(e) = error {
+         fault(&shared, e);
+-        stop(&shared, &plan.service, Instant::now());
++        stop(&shared, &plan.reservation, Instant::now());
+     } else {
+         shared
+             .lock()
+@@ -496,7 +502,7 @@
+     loop {
+         let stop_at = shared.lock().unwrap_or_else(|e| e.into_inner()).stop_at;
+         if !stopping && (stop_at.is_some() || !plan.service.runtime_domain_current()) {
+-            stop(&shared, &plan.service, Instant::now());
++            stop(&shared, &plan.reservation, Instant::now());
+             stopping = true;
+             hub.request_domain_stop();
+             download.request_domain_stop();
+@@ -506,7 +512,7 @@
+         }
+         if net.poll().is_err() {
+             fault(&shared, RuntimeError::Native);
+-            stop(&shared, &plan.service, Instant::now());
++            stop(&shared, &plan.reservation, Instant::now());
+         }
+         {
+             shared.lock().unwrap_or_else(|e| e.into_inner()).report = Some(net.report());
+--- second/crates/fc-bootstrap/src/web_application/voice_files.rs
++++ third/crates/fc-bootstrap/src/web_application/voice_files.rs
+@@ -310,7 +310,7 @@
+     pub(crate) fn configure_voice_files_from_services(
+         &mut self,
+         web: &crate::backend::web::WebService,
+-        voice: crate::backend::voice::VoiceService,
++        voice: crate::backend::VoiceService,
+         root: &Path,
+     ) -> io::Result<()> {
+         if !self.service.same_instance(web) {
+--- second/crates/fc-bootstrap/src/web_transfer/work/tests.rs
++++ third/crates/fc-bootstrap/src/web_transfer/work/tests.rs
+@@ -92,6 +92,8 @@
+         Ok(HttpCompletion::Upload(_)) => panic!("wrong job correlation"),
+         #[cfg(windows)]
+         Ok(HttpCompletion::Download(_)) => panic!("wrong job correlation"),
++        #[cfg(windows)]
++        Ok(HttpCompletion::Cleanup(_)) => panic!("unexpected cleanup job correlation"),
+         Err(e) => panic!("unexpected {e:?}"),
+     }
+ }

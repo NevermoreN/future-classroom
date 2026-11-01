@@ -1,0 +1,13 @@
+--- a/crates/fc-bootstrap/src/application/https_runtime_controller.rs
++++ b/crates/fc-bootstrap/src/application/https_runtime_controller.rs
+@@ -133,9 +133,9 @@
+         self.render()
+     }
+     fn force_teacher_https_exit(&mut self, expired: Instant) {
+-        self.set_web_readiness(web_editor::Readiness::Faulted);
+         self.terminate_required = true;
+         self.begin_shutdown();
++        self.set_web_readiness(web_editor::Readiness::Faulted);
+         // begin_shutdown also coordinates unrelated owners, but may not renew
+         // the already expired network budget. Actual exit retains all owners.
+         self.shutdown_deadline = Some(self.shutdown_deadline.map_or(expired, |d| d.min(expired)));

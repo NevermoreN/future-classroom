@@ -121,6 +121,8 @@ fn old_page_generation_cannot_deliver_positive_saved_state_or_erase_original_que
     data.insert(editor::HOST, "localhost".into()).unwrap();
     data.insert(editor::PORT, "8443".into()).unwrap();
     data.insert(editor::CERTIFICATE, "ab".repeat(20)).unwrap();
+    data.insert(editor::SOURCE_NETWORKS, "127.0.0.1/32".into())
+        .unwrap();
     let e = app.https_editor.as_mut().unwrap();
     e.capture(data).unwrap();
     let original = e

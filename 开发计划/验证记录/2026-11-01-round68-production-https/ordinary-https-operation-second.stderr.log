@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/fc-round68-production-https/worktree/scripts/windows-ordinary-https-probe.py", line 485, in <module>
+    main()
+  File "/tmp/fc-round68-production-https/worktree/scripts/windows-ordinary-https-probe.py", line 480, in main
+    require(report["status"]==report["cleanup"]=="PASS","ordinary probe failed; preserve report "+str(args.report))
+  File "/tmp/fc-round68-production-https/worktree/scripts/windows-ordinary-https-probe.py", line 53, in require
+    raise RuntimeError(message)
+RuntimeError: ordinary probe failed; preserve report /tmp/fc-round68-production-https/evidence/windows-ordinary-https-second.json

@@ -2,6 +2,8 @@
 #![forbid(unsafe_code)]
 pub mod autostart;
 pub mod backend;
+#[cfg(windows)]
+pub mod https_runtime;
 mod physical_thread;
 pub mod profile_content_cache;
 #[cfg(windows)]

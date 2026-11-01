@@ -103,6 +103,17 @@ pub(super) struct SchannelSet {
     closed: bool,
 }
 impl SchannelSet {
+    pub(super) fn new_configured(
+        thumbprint: CertificateThumbprint,
+        host: &str,
+    ) -> Result<Self, TlsError> {
+        Ok(Self {
+            contexts: std::array::from_fn(|_| Context::default()),
+            credentials: Credentials::new_configured(thumbprint, host)?,
+            cleanup_failure: None,
+            closed: false,
+        })
+    }
     pub fn new(thumbprint: CertificateThumbprint) -> Result<Self, TlsError> {
         Ok(Self {
             contexts: std::array::from_fn(|_| Context::default()),

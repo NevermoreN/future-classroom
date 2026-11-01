@@ -1,0 +1,170 @@
+{
+  "round": 68,
+  "status": "REQUEST_CHANGES_READ_ONLY_REVIEW",
+  "createdUtc": "2026-11-01T07:26:35.905631+00:00",
+  "reviewer": "production_native_review",
+  "scope": "Immutable A second freeze only; no B/C implementation review or compiler/runtime/Windows result inferred.",
+  "manifest": {
+    "path": "/tmp/fc-round68-production-https/evidence/native-A-source-freeze-second.json",
+    "sha256": "20c68381fabef899217c0e8f77bddcd103cb4bf6baf1b1dca49eb6bb4105f22f"
+  },
+  "verifiedFiles": [
+    {
+      "path": "crates/fc-domain/src/https_settings.rs",
+      "bytes": 6829,
+      "sha256": "0f695a75dc2c8cda3bb0c0731c1bae0bf8ff1120b9a5b45ad65402b224db5999",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-domain/src/https_settings/source_networks.rs",
+      "bytes": 6518,
+      "sha256": "c22cf5e84666a02c2c8742c63a95e827d14f458fbb61bff9054eaf361438d297",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10617,
+      "sha256": "1186d9c4c78d52907397508a8af503ca4038404293a7df49430d08b9a109a5bc",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 61586,
+      "sha256": "6627580006ec8cf8d77f98322fa06995ad030d79be20042ab1a5da70f9e5e5dc",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 17494,
+      "sha256": "66bf7a67d7d76d113c9883978c686de4eabe076093ac1f113937b196f36c62cc",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/configured.rs",
+      "bytes": 6487,
+      "sha256": "40269df8f57f2952056fe326d8bffb53e7b641e4cc563fafe99bdd09494d2d88",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 42983,
+      "sha256": "a67a749a40ef28024ca748dd6349f5a522e2afa5ba0720a8408b4ccd14343996",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 92452,
+      "sha256": "cf359c7f0c48ecc71d516c213104ea5740c863ccb9aa0303b8c07255c2d64c8b",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 9012,
+      "sha256": "3a0da2d116197107bf2d6bbe2d2196d7ba35b0cbc2210d704ed9861630d640d6",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials/host.rs",
+      "bytes": 6933,
+      "sha256": "51b475fb3fa4bb3efda912b1c9716ceca1fac4821b54553dde5445c4afb3a8d5",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+      "bytes": 30431,
+      "sha256": "e2dc64da924539611991db9e2b20b6515e2c4830db4979c73d809330ba2a3d38",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker.rs",
+      "bytes": 16613,
+      "sha256": "90fb20582984091754c3305b940d39b39298682ca0ac4310ac8f1e066419da03",
+      "immutableMatchesFreeze": true,
+      "sharedWorktreeMatchesNow": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "R68-A-REVIEW-1",
+      "severity": "P1",
+      "title": "IOCP/Winsock close failures are not sticky and may later report quiescent/replacement",
+      "evidence": [
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "lines": "1088-1097",
+          "detail": "CloseHandle and WSACleanup failure propagate with ?; no fault field/store is changed. A later call can retry these releases then set drained=true."
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": "1340-1349",
+          "detail": "Synchronous finish contains the same release/retry pattern."
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": "1361-1376",
+          "detail": "When eventually drained=true, Drop releases OWNER_ACTIVE. No OWNER_FAULTED store occurs on these IOCP/Winsock release error paths."
+        }
+      ],
+      "consequence": "A checked cleanup failure can be reclassified as successful shutdown on the same owner; new caller generation can then replace it. Retrying a handle release after uncertain failure also conflicts with exact-original reference retention. The issue is inherited cleanup code exposed by configured production startup/stop; review does not claim an observed Windows failure.",
+      "minimalFix": "Record the first IOCP/Winsock checked-close failure as a sticky per-owner cleanup fault and process admission fault; preserve the original bounded resources, prohibit repeated release of uncertain references, and never return shutdown true or clear admission after that failure. Apply consistently to finish and poll_http_drain; ensure any earlier socket cleanup fault also cannot yield later quiescent true.",
+      "notification": "Sent concrete line evidence and recommendation to root and production_backend before report."
+    }
+  ],
+  "confirmedStaticProperties": [
+    {
+      "item": "Thread-generation isolation",
+      "evidence": "native.rs:43-44,235-239,1361-1376; worker.rs:16-22,75-95,175-182",
+      "conclusion": "OWNER_ACTIVE/OWNER_FAULTED and worker ADMITTED/CLEANUP_FAULTED are process static. An undrained Owner Drop retains ManuallyDrop Resources and permanently faults admission; merely exiting the old HTTP thread cannot reset these gates."
+    },
+    {
+      "item": "Configured startup cleanup classification",
+      "evidence": "native/stream.rs:278-327; native.rs:306-362",
+      "conclusion": "Explicit validated policy precedes listener startup; same owner retains worker during initialization, and failure of finish maps to distinct ConfiguredTlsError::Cleanup rather than successful readiness."
+    },
+    {
+      "item": "Source policy before business handoff",
+      "evidence": "native/accept.rs:351-417",
+      "conclusion": "SO_UPDATE_ACCEPT_CONTEXT/getpeername/policy execute while bare socket remains its owner, before business slot assignment/SSPI submission. A source rejection closes exact bare socket before replenishing and increments source_rejections. Capacity rejection is independently negative when no ready slot exists."
+    },
+    {
+      "item": "IPv6 address regions and codec",
+      "evidence": "native.rs:35-36; native/configured.rs:58-142; domain https_settings/source_networks.rs:14-86",
+      "conclusion": "Each AcceptEx address region is48 bytes >=28-byte SOCKADDR_IN6+16; total96. Exact IPv6-only bind and checked family/length decoding preserve network-byte ordering; mapped/scoped endpoints are refused. Domain policy is nonempty max16, canonical hostbits with family-specific membership and bounded retained capacity."
+    },
+    {
+      "item": "Same selected credential and bounded SAN",
+      "evidence": "credentials.rs:31-81; credentials/host.rs:10-137; worker.rs:154-165",
+      "conclusion": "Same selected CurrentUser MY context supplies time/EKU/SAN/private-key checks and AcquireCredentialsHandleW before listener creation. SAN only supports DNS/IP; every other GeneralName is explicitly rejected, even a valid URI or directoryName. This is a capability restriction, not validation of every SAN topology or browser trust."
+    },
+    {
+      "item": "Timing and owner capacity preserved",
+      "evidence": "native.rs:35-41; native/accept.rs:166-262; native/stream.rs:34-35,153-180",
+      "conclusion": "Original5-second post-derived header budget, negative reserve, parsed-head120-second phase and four business slots plus one bare accept remain; no physical TCP established hard-realtime proof is inferred."
+    }
+  ],
+  "notPerformed": [
+    "No source edits",
+    "No compilation or tests",
+    "No Windows/SSH/network/listener",
+    "No B/C mutable source review",
+    "No credentials access or commit/push"
+  ],
+  "runtimeAcceptanceStillRequired": [
+    "New configured IPv4 and IPv6 real source rejection/accept tests with actual return ledgers",
+    "Occupied bind cleanup and provider error retention, with process-wide replacement denial",
+    "Fault-injected checked IOCP/Winsock cleanup with sticky non-quiescent result",
+    "Ordinary product authenticated TLS enable/disable against same frozen integrated source",
+    "Separate Win7/Win10 and campus DNS/browser trust/topology deployment acceptance"
+  ]
+}

@@ -301,6 +301,24 @@ impl WebApplication {
                 "voice backend binding",
             ));
         }
+        self.configure_voice_files_from_services(
+            &backend.web_service(),
+            backend.voice_service(),
+            root,
+        )
+    }
+    pub(crate) fn configure_voice_files_from_services(
+        &mut self,
+        web: &crate::backend::web::WebService,
+        voice: crate::backend::VoiceService,
+        root: &Path,
+    ) -> io::Result<()> {
+        if !self.service.same_instance(web) {
+            return Err(io::Error::new(
+                io::ErrorKind::PermissionDenied,
+                "voice backend binding",
+            ));
+        }
         let mut configured = self
             .voice_files
             .lock()
@@ -312,7 +330,7 @@ impl WebApplication {
             ));
         }
         *configured = Some(Arc::new(VoiceFiles {
-            service: backend.voice_service(),
+            service: voice,
             files: ControlledVoiceFiles::new(root)?,
         }));
         Ok(())

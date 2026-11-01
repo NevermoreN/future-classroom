@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "status": "FROZEN_STATIC_CANDIDATE",
+  "utc": "2026-11-01T07:33:38.445888+00:00",
+  "baseCommit": "3fd34d5f650999b41e7332250ac3b5d3627bf924",
+  "files": [
+    {
+      "relativePath": "crates/fc-bootstrap/src/application.rs",
+      "before": {
+        "bytes": 260404,
+        "sha256": "a83fe4b049eb084823de5652c6105eee7717f797aef15236d96cfa8461a581ea"
+      },
+      "after": {
+        "bytes": 262848,
+        "sha256": "2e764fa6be7070fdb5401b6998d8b422051aad97d70dd8e1b3e8ff3b640361e9"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/application/backup_controller.rs",
+      "before": {
+        "bytes": 33494,
+        "sha256": "259282c9509bc780b550de6dd3f1aafa869fe3f35c8f6ddc6b14baa971a51cfc"
+      },
+      "after": {
+        "bytes": 33579,
+        "sha256": "ae2bb5422c375efcb26910c384386775dd9f56027bb257d96f0b9f3a2c9a2042"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/application/https_settings_controller.rs",
+      "before": {
+        "bytes": 21063,
+        "sha256": "7cea5958edcbfe8aa479e5a6c64e92ef9301048333167c2e926b1edaf18ebe48"
+      },
+      "after": {
+        "bytes": 21074,
+        "sha256": "e8e5ff01849061e5b7078a4e0b6b2a39a0d47a44a950fe683a232211b04f1d21"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/application/https_settings_editor.rs",
+      "before": {
+        "bytes": 19304,
+        "sha256": "e72621498a23c864ba7cc16f26aa20d06a5d0be43fb487793bae08311c05b0a1"
+      },
+      "after": {
+        "bytes": 20711,
+        "sha256": "f899d911e374a0af511bca3e4e9cc353ee5d4516797fda7b547431e2d5529030"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/application/https_settings_editor/tests.rs",
+      "before": {
+        "bytes": 8905,
+        "sha256": "de7da26c9d830d264921b8bac12230afea681aee9249dbd94a804b0ea8edef81"
+      },
+      "after": {
+        "bytes": 10628,
+        "sha256": "4419b145293ea27379b798ea746896961b5b68bc450dec50ca75d9ccaed90494"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/application/https_settings_probe.rs",
+      "before": {
+        "bytes": 15847,
+        "sha256": "48fa60b98669f9b10c7ead070a519b7d3564349950d762fc9ac4c8aa4a7aa071"
+      },
+      "after": {
+        "bytes": 15967,
+        "sha256": "72db5cafd5ea617ae74026fa1988353537dbc02c6cfe2d87385157c5dc144d81"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "before": {
+        "bytes": 22828,
+        "sha256": "c7ef558c7ee0923beeb90eda6e6d18c29bd2e56d24f50a0c10d482eb1f356cda"
+      },
+      "after": {
+        "bytes": 25255,
+        "sha256": "8d2f4a41a6a3361069f9f4120a1e7116e9e011ff25d807ca8ec8229e7134fde3"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+      "before": {
+        "bytes": 17040,
+        "sha256": "d6ef17cef5d726b007cda1dd12ae6c75db14e9165c16b12fdfb538106664703a"
+      },
+      "after": {
+        "bytes": 21849,
+        "sha256": "3535f6fd2c78d8ddf04af1a9a164fe2e404b6ed4fcabcd8c55d21a19573b15e5"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+      "before": null,
+      "after": {
+        "bytes": 13841,
+        "sha256": "818995868d32d4edff3b667fd56e099380f07cb132c2ff999514f439f3b024d8"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "before": null,
+      "after": {
+        "bytes": 20451,
+        "sha256": "50bfd301f46f7a9fad025d64969bd5f238ffccd4df416f5577bf62e88be628da"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/main.rs",
+      "before": {
+        "bytes": 21233,
+        "sha256": "b17ca9391cf7eb267113a156d3a0793fdfb96fe7c30cd34e677dab8e7ead0f4c"
+      },
+      "after": {
+        "bytes": 21856,
+        "sha256": "a30233d87465baca146f1bb985f1d75a8fc51afb72e10ed9d41c6f115051330b"
+      }
+    },
+    {
+      "relativePath": "scripts/windows-ordinary-https-probe.py",
+      "before": null,
+      "after": {
+        "bytes": 33509,
+        "sha256": "1f6565f2dfa2a622d622b30c7fca9d5d2abae1ce761f8c0f6c8db713b1bb4046"
+      }
+    }
+  ],
+  "format": {
+    "command": [
+      "rustfmt",
+      "--check",
+      "--edition",
+      "2021",
+      "--config",
+      "skip_children=true",
+      "crates/fc-bootstrap/src/application.rs",
+      "crates/fc-bootstrap/src/application/backup_controller.rs",
+      "crates/fc-bootstrap/src/application/https_settings_controller.rs",
+      "crates/fc-bootstrap/src/application/https_settings_editor.rs",
+      "crates/fc-bootstrap/src/application/https_settings_editor/tests.rs",
+      "crates/fc-bootstrap/src/application/https_settings_probe.rs",
+      "crates/fc-bootstrap/src/application/web_editor.rs",
+      "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+      "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+      "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "crates/fc-bootstrap/src/main.rs"
+    ],
+    "exitCode": 0
+  },
+  "localRunnerChecks": "ui-C-runner-local-third.json",
+  "implementation": [
+    "Normal product remains default Disabled, saved HTTPS config cannot logically enable networking. SyntheticFixture remains cfg(test) only.",
+    "Native workbench explicit enable admits exactly the existing two-worker preparation job; original 30s start timeout cancels/retains unfinished ticket. Actual RuntimeOwner phase/generation alone maps Running readiness.",
+    "First stop observation goes to RuntimeOwner.request_stop_at. Repeated stop never renews C deadline. Runtime StopTimeout invokes controlled exit in the observing poll, and clamps global shutdown deadline to expired point. Original owner/ticket retained.",
+    "Starting lock/cancel stops original request. Established Running service is independent of management page/local lock.",
+    "Writer shutdown and restore pool handoff wait preparing-none plus RuntimeOwner.is_quiescent, which B makes depend on exact physical Windows thread return.",
+    "Source CIDR form requires explicit bounded policy. All explicit classroom desktop actions remain public and passive widgets remain unchanged."
+  ],
+  "probeContract": [
+    "25 exact native steps; owned loopback IP-SAN HTTPS two actual generations. No runtime readiness synthesis.",
+    "Independent TeacherAdmin id2 created through native Accounts with class1/subject1 scope; SystemRandom passwords only in zeroing in-memory SecretText, actual first-login password change, real teacher relogin and local manager relogin.",
+    "Actual native pairing BEGIN, fixture-only secret sibling in private owned root, public PAIR_READY has no auth values; runner memory-only SSH reads/deletes secret, normal native ComboBox selects actual network request then APPPROVE.",
+    "Authenticated wire session must have role TEACHER_ADMIN/principal2/currentClass1/exact assignment, GET reminder scopes/original version0, CSRF POST version1, GET version1 and exact durable command receipt. No cookie/code/CSRF/body contents persisted in reports or raw scripts.",
+    "Client completion fixed sibling outside verified static package, magic+exact marker+20-digit original generation. It means client journey ended, not readiness/auth/commit evidence. Native separately waits >=9 actual ResponseComplete counts.",
+    "Actual per-host owner/native/Hub/thread quiescence before reenable, original common workers queried after first stop, established second generation survives local lock, relogin stop, actual shared writer/pool shutdown before own data removal.",
+    "Every TLS request verifies CERT_REQUIRED/check_hostname with server_hostname127.0.0.1/exact owned DER/TLS1.2 and actual clean TLS EOF. Fixture setup/template/helper exact source hashes recorded.",
+    "No school settings, ROOT trust, firewall, HTTP.sys, foreground, mic or playback changed; exact fixture cert/CNG key/process/root cleaned by inherited ownership helper."
+  ],
+  "scopeLimits": [
+    "No Cargo or Windows/SSH operation in C subtask. Rustfmt and Python AST/pure41 validators/CLI2 are static/local checks, not runtime proof.",
+    "MaterialReady stop is NOT_EXERCISED by ordinary probe; B has a separate live test candidate.",
+    "Starting cancel/30s prepare timeout/stop-timeout controlled exit currently statically reviewed C paths; full joint Windows validation belongs to root.",
+    "Win7/Win10/physical Seewo/campus are not validated by this loopback probe."
+  ],
+  "historicalEvidence": [
+    "ui-C-runner-local-first.json retains original20 pure validator contract.",
+    "ui-C-runner-local-second.json retains unrun GlobalAdmin candidate34 pure validator checks; does not prove network or user role."
+  ]
+}

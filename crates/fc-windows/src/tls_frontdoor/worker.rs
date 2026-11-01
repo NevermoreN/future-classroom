@@ -154,6 +154,18 @@ impl Worker {
             Ok(Box::new(super::schannel::SchannelSet::new(thumbprint)?))
         })
     }
+    #[cfg(windows)]
+    pub(super) fn start_configured(
+        generation: u64,
+        thumbprint: super::CertificateThumbprint,
+        host: String,
+    ) -> Result<Self, TlsError> {
+        Self::start_with_factory(generation, move || {
+            Ok(Box::new(super::schannel::SchannelSet::new_configured(
+                thumbprint, &host,
+            )?))
+        })
+    }
     pub(super) fn start_with_factory(
         generation: u64,
         factory: impl FnOnce() -> Result<Box<dyn Driver>, TlsError> + Send + 'static,

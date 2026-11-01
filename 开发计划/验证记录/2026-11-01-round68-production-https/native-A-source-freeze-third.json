@@ -1,0 +1,148 @@
+{
+  "round": 68,
+  "domain": "A configured native TLS and pure source CIDR policy",
+  "status": "SOURCE_IMPLEMENTED_STATIC_CHECKED_NOT_COMPILED_OR_RUN",
+  "createdUtc": "2026-11-01T07:29:40.279027+00:00",
+  "baseCommit": "3fd34d5f650999b41e7332250ac3b5d3627bf924",
+  "worktree": "/tmp/fc-round68-production-https/worktree",
+  "files": [
+    {
+      "path": "crates/fc-domain/src/https_settings.rs",
+      "bytes": 6829,
+      "sha256": "0f695a75dc2c8cda3bb0c0731c1bae0bf8ff1120b9a5b45ad65402b224db5999",
+      "baseSha256": "7f0f22316d94a3cf7e9b88d0930ec74f3908a451a4a3a025fec8c2448d9bdc96"
+    },
+    {
+      "path": "crates/fc-domain/src/https_settings/source_networks.rs",
+      "bytes": 6518,
+      "sha256": "c22cf5e84666a02c2c8742c63a95e827d14f458fbb61bff9054eaf361438d297",
+      "baseSha256": null
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10617,
+      "sha256": "1186d9c4c78d52907397508a8af503ca4038404293a7df49430d08b9a109a5bc",
+      "baseSha256": "2ac2e9b3cea4d6f6ef8aaa329398f93abca4b5ed3fa9707efde978010dde0174"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 64132,
+      "sha256": "f7e4b8b22595bb68e7273a65c8b7b4e27ada6f38d08f4db3ec1529ab0dfe7fb4",
+      "baseSha256": "e6a4938e8c096ac509a03e75345b847cedda795aa7cb2ef1d6524a2efdc964fd"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 17494,
+      "sha256": "66bf7a67d7d76d113c9883978c686de4eabe076093ac1f113937b196f36c62cc",
+      "baseSha256": "a7cbaf2a17af2f01280871f9b46c404430e1ef63e79293b18a476ce8452dd80b"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/configured.rs",
+      "bytes": 6487,
+      "sha256": "40269df8f57f2952056fe326d8bffb53e7b641e4cc563fafe99bdd09494d2d88",
+      "baseSha256": null
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 42731,
+      "sha256": "6072ccea148737523e3475be5355d62084d656158afbea19bb98240be5033b97",
+      "baseSha256": "48fcff62625fdda506d6a4d6039b67190fea951e3b991bb3f880fb640274a783"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 96831,
+      "sha256": "56737b7256c1ae9ee6b507c9c53b95cffcc9f8704c421e0ec6240a595fb87a4f",
+      "baseSha256": "5c7a68b887f572ee511ce9db2be017e7d97c727d22c9f4e3e97ef4d92fef74d1"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 9012,
+      "sha256": "3a0da2d116197107bf2d6bbe2d2196d7ba35b0cbc2210d704ed9861630d640d6",
+      "baseSha256": "acc08d0566f68f6e3b2e8aac04ac6eb307f4218a1a049377fc7d955cfa196f09"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials/host.rs",
+      "bytes": 6933,
+      "sha256": "51b475fb3fa4bb3efda912b1c9716ceca1fac4821b54553dde5445c4afb3a8d5",
+      "baseSha256": null
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+      "bytes": 30431,
+      "sha256": "e2dc64da924539611991db9e2b20b6515e2c4830db4979c73d809330ba2a3d38",
+      "baseSha256": "800c898e9b7d11eb9823dca075d6ebe2e8bc99dee0f6606d2ace334f9a3a9936"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker.rs",
+      "bytes": 16613,
+      "sha256": "90fb20582984091754c3305b940d39b39298682ca0ac4310ac8f1e066419da03",
+      "baseSha256": "212aa5bf10175bc553d2c4e720baf5d3f3843be90937f71348336de6f1194591"
+    }
+  ],
+  "patch": {
+    "path": "native-A-source-third.patch",
+    "bytes": 59075,
+    "sha256": "0eb1f3974588eb97f670e306ad2f7619243b375b6b1f97855f5c01b6b4e7e90b"
+  },
+  "publicContract": {
+    "domain": "HttpsConfiguration.source_networks: Option<HttpsSourceNetworks>; new3 stays legacy None; with_source_networks(policy)->Self. Nonempty 1..16 unique explicit CIDRs; /0, non-network host bits, multicast, unspecified, broadcast, mapped/scoped IPv6 rejected; IPv4 and IPv6 family-specific matching, mapped peers always false.",
+    "native": "TlsHttpHost::open_configured(&HttpsConfiguration)->Result<Self,ConfiguredTlsError>; sanitized Copy enum InvalidConfiguration/MissingSourceNetworks/UnsupportedAddress/AmbiguousAddress/AddressUnavailable/Certificate/Busy/Native/Cleanup; source_rejections()->u64.",
+    "endpoint": "Exactly one literal IPv4/IPv6 or one distinct DNS result, max16 resolver entries. No wildcard or first-result fallback; ambiguous A/AAAA explicitly refused. IPv6 uses native SOCKADDR_IN6 and IPV6_V6ONLY; mapped, scoped or link-local bind unsupported. Nonlocal address bind fails normally.",
+    "certificate": "Same exact selected readonly CurrentUser MY certificate is checked for current validity, explicit server EKU, silent existing matching private key, bounded SAN (exact IP iPAddress, exact DNS or whole one-label wildcard) and real Schannel acquisition before listener creation. No certificate query token or CN fallback; no claim of browser trust/revocation freshness. Only dNSName/iPAddress SAN entries are supported; every other GeneralName is rejected, even valid URI/directoryName/UPN/email/OID. This slice does not support every certificate SAN topology.",
+    "physicalOwner": "Original singleton Owner, one SSPI worker, four business slots and one pinned bare AcceptEx reused. One consumed completion first updates accept context and checks getpeername against policy while bare socket still owns descriptor; reject closes that exact socket before replenishment, without SSPI or business permit. Ledger includes actual source rejection.",
+    "budgets": "Original post-derived 5s header, 25ms negative reserve, unique parsed-Head admitted_at+120s and negative-only service preserved. AcceptEx address region grows64->96 bytes per owner (48 each) for native IPv6 +16 padding; counts unchanged; policy owned heap is included in app_owned_bytes.",
+    "legacy": "TlsHttpHost::open marker+loopback and finite probe APIs retained. No default listener, trust/firewall/HTTP.sys mutation, auth bypass or new business pool."
+  },
+  "newTests": [
+    "fc-domain explicit_sources_are_bounded_canonical_and_family_specific",
+    "configured_certificate_san_matches_exact_ip_or_one_dns_label",
+    "configured_certificate_san_rejects_malformed_trailing_and_oversized_encoding",
+    "configured_endpoint_never_selects_first_ambiguous_or_unsupported_address",
+    "configured_source_filter_returns_real_ipv4_and_ipv6_accept_before_any_sspi_call",
+    "configured_explicit_ipv4_and_ipv6_source_keeps_original_deadline_and_real_drain",
+    "configured_exact_occupied_bind_returns_original_worker_before_replacement",
+    "configured_legacy_missing_policy_cannot_claim_listener_readiness",
+    "configured_certificate_san_rejects_other_general_names_after_a_matching_ip",
+    "real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_child"
+  ],
+  "validationActuallyPerformed": [
+    "rustfmt edition2021 on three changed owned sources: exit0",
+    "rustfmt --check on three changed owned sources: exit0",
+    "git diff --check on three owned tracked sources: exit0",
+    "12 immutable source snapshots match manifest and current worktree bytes after static checks",
+    "No Cargo, compiler, Windows, SSH, listener or network operation executed by this reviewer"
+  ],
+  "pendingUnifiedValidation": [
+    "Independent GNU compiler and strict Clippy for third freeze",
+    "Actual Windows new real IOCP/Winsock failure child test plus retained regressions",
+    "Production integrated authenticated TLS enable/disable normal and failure lifecycle",
+    "Separate Win7/Win10 and campus DNS/browser trust/topology deployment acceptance"
+  ],
+  "notPerformed": [
+    "No Cargo/compiler/test execution",
+    "No Windows/SSH/network/listener/system configuration",
+    "No target, main, Cargo/lib.rs, B/C sources or old archived evidence changes",
+    "No commit/push"
+  ],
+  "predecessor": {
+    "manifest": "native-A-source-freeze-second.json",
+    "sha256": "20c68381fabef899217c0e8f77bddcd103cb4bf6baf1b1dca49eb6bb4105f22f",
+    "independentReview": "independent-native-review-first.json",
+    "independentReviewSha256": "c717b8dea55e8f1d54aaa7c5d3d2a6d9ac1abcd2cdd963d8c5608f85570e4a80"
+  },
+  "changesSinceSecond": {
+    "files": [
+      "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs"
+    ],
+    "diff": {
+      "path": "native-A-second-to-third.patch",
+      "bytes": 11305,
+      "sha256": "9e09bd4292acfa23b540abcc3165fe2fde0f7933c29dfbd76884e7545c3ee3f8"
+    },
+    "finding": "R68-A-REVIEW-1",
+    "behavior": "All final IOCP/Winsock releases share one checked helper. First release failure records per-owner cleanup_failed and process OWNER_FAULTED, leaves unknown reference untouched, never retries release and cannot later return drained or release owner admission. finish/request_stop/poll_http_drain honor sticky failure. Previously recorded socket cleanup faults also prevent final quiescent acknowledgement. Normal successful close order and counts unchanged.",
+    "regression": "One subprocess-isolated Windows native test covers both a real IOCP final-close failure seam and real WSAStartup cleanup-failure seam with no outstanding IO/SSPI. Repeated public poll_shutdown/request_stop and original finish after removing injection must remain errors with unchanged release attempt counters, no drained result or replacement, and Drop must retain process admission. OS child exit owns final fixture reclamation."
+  }
+}

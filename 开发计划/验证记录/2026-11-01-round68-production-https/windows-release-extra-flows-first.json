@@ -1,0 +1,84 @@
+{
+  "status": "PASS_TWO_DEDICATED_HIDDEN_FLOWS",
+  "normal": {
+    "path": "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13339299,
+    "sha256": "db6bb0bbc6df36804cfe721ad4e3fd1ec8ca0e5cac084c29a14ab97f894e22fa",
+    "cargoMetadataLine": 109,
+    "cargoMetadataLineSha256": "15968af0eef467ca4975fbbea5bfb93b73ace460b88d70b556824d2eae4c6ec1",
+    "cargoTarget": "fc-bootstrap",
+    "cargoPackageId": "path+file:///tmp/fc-round68-production-https/worktree/crates/fc-bootstrap#0.1.0",
+    "cargoProfileTest": false,
+    "peMachine": "I386",
+    "peMagic": "PE32",
+    "peSubsystem": 2
+  },
+  "sourceFreezeSha256": "89148f095235a850b0fc408aa24b79f6701d790791ccba6e1535a87cfc770137",
+  "scriptSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "operations": [
+    {
+      "kind": "visual",
+      "status": "PASS",
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--native-seconds",
+        "1",
+        "--subject-visuals",
+        "--report",
+        "/tmp/fc-round68-production-https/evidence/windows-release-visual-first.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 7.977346905972809,
+      "resultStatus": "PASS",
+      "cleanup": "PASS",
+      "stdout": {
+        "bytes": 93,
+        "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "kind": "repair",
+      "status": "PASS",
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round68-production-https/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--native-seconds",
+        "1",
+        "--reinitialization",
+        "--report",
+        "/tmp/fc-round68-production-https/evidence/windows-release-repair-first.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 18.10469517018646,
+      "resultStatus": "PASS",
+      "cleanup": "PASS",
+      "stdout": {
+        "bytes": 93,
+        "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ]
+}

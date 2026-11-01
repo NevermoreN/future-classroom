@@ -81,6 +81,16 @@ mod public_lesson_editor;
 pub fn public_desktop_probe() -> std::result::Result<(), String> {
     public_desktop_probe::run()
 }
+mod ordinary_https_probe;
+pub fn ordinary_https_probe(
+    reference: &str,
+    port: u16,
+    package: &Path,
+    marker: &str,
+) -> std::result::Result<(), String> {
+    ordinary_https_probe::run(reference, port, package, marker)
+}
+mod https_runtime_controller;
 mod https_settings_controller;
 mod https_settings_probe;
 pub fn https_settings_probe(reference: Option<&str>) -> std::result::Result<(), String> {
@@ -493,6 +503,7 @@ enum Outcome {
     MaterialLaunch(Box<material_flow::PreparedLaunch>),
     MaterialCleaned,
     LaunchCopies(material_flow::LaunchCopyReport),
+    HttpsRuntime(Box<https_runtime_controller::Prepared>),
     Https(Box<https_settings_controller::Completion>),
     WebOpened(WebService, web_editor::Loaded),
     WebLoaded(web_editor::Loaded),
@@ -515,6 +526,7 @@ struct Request {
     clock: Arc<CurrentClock>,
 }
 enum Work {
+    HttpsRuntime(Box<https_runtime_controller::Job>),
     Http(fc_bootstrap::web_transfer::HttpJob),
     HttpProbe(Box<http_business_probe::Job>),
     #[cfg(test)]
@@ -613,6 +625,7 @@ impl Task for Work {
     type Output = Result<Outcome>;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
+            Self::HttpsRuntime(job) => job.allocation_bytes(),
             Self::Https(_, _, operation) => operation.allocation_bytes(),
             Self::Http(job) => job.allocation_bytes(),
             Self::HttpProbe(job) => job.allocation_bytes(),
@@ -690,6 +703,7 @@ impl Task for Work {
     fn run(self, context: &JobContext) -> Self::Output {
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         match self {
+            Self::HttpsRuntime(job) => job.run(context),
             Self::Https(backend, lease, operation) => {
                 https_settings_controller::run(backend, lease, operation, context)
             }
@@ -1341,6 +1355,7 @@ struct App {
     https_unadmitted: Option<(Work, Instant)>,
     voice_editor: Option<voice_editor::Editor>,
     web_readiness: web_editor::Readiness,
+    teacher_https: https_runtime_controller::State,
     next_web_refresh: Instant,
     close_web: Option<(WebService, SessionLease)>,
     web_close_job: Option<JobTicket<Result<Outcome>>>,
@@ -1363,6 +1378,7 @@ impl App {
         self.stopping
             && (self.backup.irreversible() || self.backend.is_none() || self.writer_closed)
             && self.backup.exit_ready()
+            && self.teacher_https_quiescent()
             && self.pool.is_finished()
             && self.shell.is_finished()
             && self.audio.as_ref().is_none_or(|audio| {
@@ -1377,6 +1393,13 @@ impl App {
             (true, _) => self.desktop_notice.clone(),
             (_, true) => self.status.clone(),
             _ => format!("{}\n{}", self.status, self.desktop_notice),
+        };
+        let status = if self.screen == Screen::Web {
+            self.teacher_https
+                .failure_message()
+                .map_or(status.clone(), |error| format!("{error}。\n{status}"))
+        } else {
+            status
         };
         if matches!(self.screen, Screen::Backup | Screen::Restoring) {
             if let Some(view) = self.backup.view(&status) {
@@ -1914,6 +1937,9 @@ impl App {
         if self.backend.is_none() && self.screen == Screen::Starting {
             return;
         }
+        if self.web_readiness == web_editor::Readiness::Starting {
+            self.stop_teacher_https();
+        }
         self.suspend_https();
         self.leave_web();
         self.lock_backup();
@@ -1978,6 +2004,7 @@ impl App {
         self.status.clear();
     }
     fn begin_shutdown(&mut self) {
+        self.stop_teacher_https();
         self.close_public_lesson();
         if self
             .control
@@ -2021,6 +2048,11 @@ impl App {
         self.schedule_shutdown();
     }
     fn schedule_shutdown(&mut self) {
+        // Network workers may still need the original Writer for negative
+        // cleanup. Do not close it or stop the common worker domain first.
+        if !self.teacher_https_quiescent() {
+            return;
+        }
         if self.writer_closed {
             return;
         }
@@ -3180,6 +3212,19 @@ impl App {
                 self.lock();
                 self.render()?;
             }
+            Ok(web_editor::Command::Run(web_editor::Operation::Enable))
+                if self.web_readiness != web_editor::Readiness::Unavailable
+                    && !self.web_readiness.synthetic() =>
+            {
+                return self.start_teacher_https(lease);
+            }
+            Ok(web_editor::Command::Run(web_editor::Operation::Disable))
+                if !self.web_readiness.synthetic() =>
+            {
+                self.stop_teacher_https();
+                self.status = "正在停用教师连接并清理未完成传输，本地工作台仍可使用。".into();
+                return self.render();
+            }
             Ok(web_editor::Command::Run(operation)) => {
                 if let Some(service) = &self.web_service {
                     self.next_web_refresh = Instant::now() + Duration::from_secs(1);
@@ -3809,6 +3854,9 @@ impl App {
         {
             self.close_public_lesson();
         }
+        // Even irreversible restore must observe the HTTP thread's actual
+        // return before its coordinator can take the original shared workers.
+        self.poll_teacher_https()?;
         self.poll_backup()?;
         if self.backup.irreversible() {
             return Ok(());
@@ -4090,6 +4138,9 @@ impl App {
                     self.voice_service = Some(voice);
                     let _ = self.control_slot.set(control.clone());
                     self.control = Some(control);
+                    if !self.offscreen_probe {
+                        self.set_web_readiness(web_editor::Readiness::Disabled);
+                    }
                     self.state = Arc::new(state);
                     self.screen = if self.state.installation.is_none() {
                         Screen::Setup
@@ -4136,6 +4187,9 @@ impl App {
                     self.record = record;
                     self.screen = Screen::HomeworkEdit;
                     self.status.clear();
+                }
+                Ok(Outcome::HttpsRuntime(_)) => {
+                    self.status = "启动结果已不属于当前请求；未开启配对。".into();
                 }
                 Ok(Outcome::Https(_)) => {
                     self.status = "配置页面已变化，请重新读取核对。".into();
@@ -4827,6 +4881,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         https_unadmitted: None,
         voice_editor: None,
         web_readiness: web_editor::Readiness::Unavailable,
+        teacher_https: https_runtime_controller::State::default(),
         next_web_refresh: Instant::now() + Duration::from_secs(1),
         close_web: None,
         web_close_job: None,

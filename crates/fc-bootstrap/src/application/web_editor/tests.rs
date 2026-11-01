@@ -476,3 +476,145 @@ fn local_https_navigation_does_not_enable_unavailable_teacher_connections_or_exp
         assert!(!view.actions.iter().find(|a| a.id == id).unwrap().enabled);
     }
 }
+
+#[test]
+fn ordinary_lifecycle_never_allows_pairing_before_nonzero_physical_generation() {
+    let (identity, lease) = fixture(TrustedOrigin::Local);
+    for phase in [
+        Readiness::Disabled,
+        Readiness::Starting,
+        Readiness::Stopping,
+        Readiness::Faulted,
+        Readiness::Running { generation: 0 },
+    ] {
+        let mut current = snapshot();
+        current.enabled = true; // stale logical metadata cannot override transport
+        let mut e = Editor::new(lease.principal_id(), phase, loaded(current));
+        assert!(e.handle(BEGIN, &FormData::new(), &identity, lease).is_err());
+        assert!(
+            !e.view(&identity, "", false)
+                .actions
+                .iter()
+                .find(|a| a.id == BEGIN)
+                .unwrap()
+                .enabled
+        );
+    }
+    let mut e = Editor::new(
+        lease.principal_id(),
+        Readiness::Disabled,
+        loaded(snapshot()),
+    );
+    assert!(matches!(
+        e.handle(ENABLE, &FormData::new(), &identity, lease),
+        Ok(Command::Run(Operation::Enable))
+    ));
+    for phase in [Readiness::Starting, Readiness::Stopping, Readiness::Faulted] {
+        e.set_readiness(phase);
+        assert!(e
+            .handle(ENABLE, &FormData::new(), &identity, lease)
+            .is_err());
+    }
+    let mut current = snapshot();
+    current.enabled = true;
+    e.loaded(loaded(current));
+    e.set_readiness(Readiness::Running { generation: 71 });
+    assert!(matches!(
+        e.handle(BEGIN, &FormData::new(), &identity, lease),
+        Ok(Command::Run(Operation::Begin))
+    ));
+    e.set_readiness(Readiness::Stopping);
+    assert!(e.code.is_none());
+    assert!(e.confirmation.is_none());
+    assert!(e.handle(BEGIN, &FormData::new(), &identity, lease).is_err());
+}
+#[test]
+fn ordinary_starting_can_be_stopped_but_stopping_cannot_be_replaced() {
+    let (identity, lease) = fixture(TrustedOrigin::Local);
+    let mut e = Editor::new(
+        lease.principal_id(),
+        Readiness::Starting,
+        loaded(snapshot()),
+    );
+    assert!(
+        e.view(&identity, "", false)
+            .actions
+            .iter()
+            .find(|a| a.id == DISABLE)
+            .unwrap()
+            .enabled
+    );
+    assert!(matches!(
+        e.handle(DISABLE, &FormData::new(), &identity, lease),
+        Ok(Command::Stay)
+    ));
+    assert!(matches!(
+        e.handle(CONFIRM, &FormData::new(), &identity, lease),
+        Ok(Command::Run(Operation::Disable))
+    ));
+    e.set_readiness(Readiness::Stopping);
+    assert!(
+        !e.view(&identity, "", false)
+            .actions
+            .iter()
+            .find(|a| a.id == ENABLE)
+            .unwrap()
+            .enabled
+    );
+    assert!(e
+        .view(&identity, "", false)
+        .description
+        .contains("本地工作台仍可使用"));
+}
+
+#[test]
+fn ordinary_enable_without_saved_configuration_uses_original_workers_and_never_grants_pairing() {
+    let _serial = super::super::tests::SERIAL.lock().unwrap();
+    let (_scratch, mut app) = super::super::tests::fixture();
+    super::super::tests::wait_for(&mut app, |app| app.pending.is_none());
+    let mut setup = FormData::new();
+    for (id, value) in [
+        (SCHOOL, "Synthetic ordinary HTTPS school"),
+        (LOGIN, "admin"),
+        (NAME, "Administrator"),
+        (PASSWORD, "Native-HTTPS-password-2026"),
+        (super::super::CONFIRM, "Native-HTTPS-password-2026"),
+    ] {
+        setup.insert(id, value.into()).unwrap();
+    }
+    native_action(&mut app, SAVE, setup);
+    native_click(&mut app, ACK);
+    let mut form = FormData::new();
+    form.insert(LOGIN, "admin".into()).unwrap();
+    form.insert(PASSWORD, "Native-HTTPS-password-2026".into())
+        .unwrap();
+    native_action(&mut app, LOG_IN, form);
+    app.set_web_readiness(Readiness::Disabled);
+    native_click(&mut app, TO_WEB);
+    native_click(&mut app, ENABLE);
+    assert_eq!(app.web_readiness, Readiness::Starting);
+    super::super::tests::wait_for(&mut app, |app| {
+        app.teacher_https_quiescent() && app.web_readiness == Readiness::Disabled
+    });
+    assert!(app.teacher_https.owner.is_none());
+    assert!(!app.pool.is_finished());
+    assert!(
+        !app.web_service
+            .as_ref()
+            .unwrap()
+            .management_snapshot(app.lease.unwrap())
+            .unwrap()
+            .enabled
+    );
+    assert!(app.view().status.contains("请先保存"));
+    assert!(app
+        .web_editor
+        .as_mut()
+        .unwrap()
+        .handle(BEGIN, &FormData::new(), &app.state, app.lease.unwrap())
+        .is_err());
+    // A failed new preparation does not replace or stop the original pool.
+    native_click(&mut app, REFRESH);
+    assert!(!app.pool.is_finished() && !app.pool.is_faulted());
+    super::super::tests::drain(app);
+}

@@ -37,17 +37,34 @@ fn authorize(
 fn configuration(value: &Option<HttpsConfiguration>) -> Value {
     value.as_ref().map_or(Value::Null, |c| {
         json!({"host":c.host.as_str(),"port":c.port,
-        "certificate_store":"CURRENT_USER_MY","thumbprint_sha1":c.certificate.to_hex()})
+        "certificate_store":"CURRENT_USER_MY","thumbprint_sha1":c.certificate.to_hex(),
+        "source_networks":c.source_networks.as_ref().map(|p| p.networks().iter().map(|n| n.as_str()).collect::<Vec<_>>())})
     })
 }
-fn read_configuration(value: &Value) -> Result<Option<HttpsConfiguration>, StorageError> {
+fn read_configuration(
+    value: &Value,
+    format: u64,
+) -> Result<Option<HttpsConfiguration>, StorageError> {
     if value.is_null() {
         return Ok(None);
     }
-    codec::object_fields(
-        value,
-        &["host", "port", "certificate_store", "thumbprint_sha1"],
-    )?;
+    if format == 1 {
+        codec::object_fields(
+            value,
+            &["host", "port", "certificate_store", "thumbprint_sha1"],
+        )?;
+    } else {
+        codec::object_fields(
+            value,
+            &[
+                "host",
+                "port",
+                "certificate_store",
+                "thumbprint_sha1",
+                "source_networks",
+            ],
+        )?;
+    }
     if codec::text(value, "certificate_store")? != "CURRENT_USER_MY" {
         return Err(StorageError::Database);
     }
@@ -59,25 +76,45 @@ fn read_configuration(value: &Value) -> Result<Option<HttpsConfiguration>, Stora
     if host.as_str() != name || certificate.to_hex() != thumbprint {
         return Err(StorageError::Database);
     }
-    HttpsConfiguration::new(
+    let mut result = HttpsConfiguration::new(
         host,
         u16::try_from(codec::number(value, "port")?).map_err(|_| StorageError::Database)?,
         certificate,
     )
-    .map(Some)
-    .map_err(|_| StorageError::Database)
+    .map_err(|_| StorageError::Database)?;
+    if format == 2 && !value["source_networks"].is_null() {
+        let rows = value["source_networks"]
+            .as_array()
+            .ok_or(StorageError::Database)?;
+        if rows.is_empty() || rows.len() > 16 {
+            return Err(StorageError::Database);
+        }
+        let mut networks = Vec::with_capacity(rows.len());
+        for row in rows {
+            let text = row.as_str().ok_or(StorageError::Database)?;
+            let network = HttpsSourceNetwork::parse(text).map_err(|_| StorageError::Database)?;
+            if network.as_str() != text {
+                return Err(StorageError::Database);
+            }
+            networks.push(network);
+        }
+        result.source_networks =
+            Some(HttpsSourceNetworks::new(networks).map_err(|_| StorageError::Database)?);
+    }
+    Ok(Some(result))
 }
 fn settings(value: &HttpsSettings) -> Value {
-    json!({"format":1,"revision":value.revision.get(),"configuration":configuration(&value.configuration)})
+    json!({"format":2,"revision":value.revision.get(),"configuration":configuration(&value.configuration)})
 }
 fn read_settings(value: &Value) -> Result<HttpsSettings, StorageError> {
     codec::object_fields(value, &["format", "revision", "configuration"])?;
-    if codec::number(value, "format")? != 1 {
+    let format = codec::number(value, "format")?;
+    if !matches!(format, 1 | 2) {
         return Err(StorageError::Database);
     }
     let settings = HttpsSettings {
         revision: Revision::new(codec::number(value, "revision")?),
-        configuration: read_configuration(&value["configuration"])?,
+        configuration: read_configuration(&value["configuration"], format)?,
     };
     settings.validate().map_err(|_| StorageError::Database)?;
     Ok(settings)
@@ -136,7 +173,20 @@ fn fingerprint(
             "origin":match actor.origin {TrustedOrigin::Local=>"LOCAL",TrustedOrigin::Web=>"WEB"}}))?);
     hash.update(request.expected_revision.get().to_be_bytes());
     hash.update(request.expected_identity_revision.get().to_be_bytes());
-    hash.update(codec::bytes(&configuration(&request.configuration))?);
+    let mut canonical = configuration(&request.configuration);
+    // Preserve exact old command fingerprints when no policy was supplied.
+    // A configured policy is new command payload and must match in full.
+    if request
+        .configuration
+        .as_ref()
+        .is_some_and(|c| c.source_networks.is_none())
+    {
+        canonical
+            .as_object_mut()
+            .ok_or(StorageError::Database)?
+            .remove("source_networks");
+    }
+    hash.update(codec::bytes(&canonical)?);
     Ok(hash.finalize().to_vec())
 }
 fn original_outcome(

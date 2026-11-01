@@ -1,0 +1,24 @@
+{
+  "status": "DEFECT_REPRODUCED",
+  "scope": "Host Rust execution of exact tlv/dns_matches/matches_san function source extracted byte-for-byte from first immutable Windows source; no Windows API invoked, not production TLS runtime.",
+  "inputSourceSha256": "02a02400dd156185f424035dbfe63f6d66d60688ac1b02d69100979c76775ff5",
+  "extractedFunctionsSha256": "d5ca8792cb22d8c1238c271ea398a95de0349020dee89a8efcd6025eb31fcb38",
+  "reproSha256": "348099ee11e5c91d84fbc4378784f5f561a55bfcae092da286f00e8a7ecb7c6d",
+  "compileCommand": [
+    "rustc",
+    "--edition=2021",
+    "--crate-name",
+    "native_a_san_repro_first",
+    "/tmp/fc-round68-production-https/evidence/native-A-check-san-repro-first.rs",
+    "-o",
+    "/tmp/fc-round68-production-https/native-check-target/native-a-san-repro-first"
+  ],
+  "compileExitCode": 0,
+  "runExitCode": 0,
+  "budgetSecondsPerCommand": 900,
+  "startedUtc": "2026-11-01T07:19:21.251970+00:00",
+  "endedUtc": "2026-11-01T07:19:21.440000+00:00",
+  "elapsedSeconds": 0.18802257883362472,
+  "stdout": "malformed_directory_name_accepted=true\n",
+  "expectedNextFix": "Only dNSName/iPAddress supported in configured certificate SAN; fail closed on any other GeneralName instead of treating unsupported nested DER as validated."
+}

@@ -1,0 +1,11 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T08:16:51.409659+00:00",
+  "baseRunner": "scripts/windows-probe.py",
+  "baseRunnerSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "focusedRunner": "/tmp/fc-round68-production-https/evidence/windows-probe-focused-native-cleanup-first.py",
+  "focusedRunnerSha256": "1fa026dae7d0a9f465dc4f5f104a883b9f631705b0c532e7278cb52550fe54d6",
+  "selection": "tls_frontdoor::native::stream::tests::real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_child",
+  "minimalPatch": "--- scripts/windows-probe.py\n+++ windows-probe-focused-native-cleanup-first.py\n@@ -398,7 +398,7 @@\n                 raise RuntimeError(\"read-only system probe failed\")\n         report[\"tests\"] = []\n         for test_index, path in enumerate(tests):\n-            test_arguments = \" --test-threads=2\" + (\" --nocapture\" if path.name.startswith(\"fc_windows-\") else \"\")\n+            test_arguments = \" tls_frontdoor::native::stream::tests::real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_child --exact --test-threads=2 --nocapture\"\n             log = ps_literal(directory + \"\\\\test-\" + str(test_index) + \".log\")\n             script = child_temp + \"$exe=Join-Path \" + root + \" \" + ps_literal(path.name) + \";$log=\" + log + \";$digest=(Get-FileHash -Algorithm SHA256 -LiteralPath $exe).Hash.ToLowerInvariant();if($digest-ne \" + ps_literal(input_digests[path]) + \"){throw 'test executable digest mismatch'};$ErrorActionPreference='Continue';$output=@(& $exe\" + test_arguments + \" 2>&1 | ForEach-Object {\\\"$_\\\"} | Tee-Object -FilePath $log);$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{name=\" + ps_literal(path.name) + \";binarySha256=$digest;exitCode=$code;output=$output}|ConvertTo-Json -Compress\"\n             try:\n",
+  "scope": "Independent exact new sticky native cleanup regression masked by prior IPv6 mutex-poison cascade. Retains its child-process fault cases and original assertions/threads2/900s/remote cleanup. Filtered249 are not a full library or workspace pass; original full-suite IPv6 failures remain unchanged."
+}

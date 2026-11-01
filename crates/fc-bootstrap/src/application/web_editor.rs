@@ -17,24 +17,67 @@ pub(super) const DISABLE: ActionId = ActionId(507);
 const PREVIOUS_SCOPE: ActionId = ActionId(508);
 const NEXT_SCOPE: ActionId = ActionId(509);
 pub(super) const CONFIRM: ActionId = ActionId(510);
-const CANCEL: ActionId = ActionId(511);
+pub(super) const CANCEL: ActionId = ActionId(511);
 pub(super) const HTTPS_SETTINGS: ActionId = ActionId(512);
 const SCOPE_PAGE: usize = 8;
 pub(super) const NOT_READY: &str = "教师连接服务尚未就绪，暂不能通过浏览器配对。";
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum Readiness {
     Unavailable,
+    Disabled,
+    Starting,
+    Running {
+        generation: u64,
+    },
+    Stopping,
+    Faulted,
     // Only the private test fixture may simulate readiness, never a user setting.
     #[cfg(test)]
     SyntheticFixture,
 }
 impl Readiness {
-    fn ready(self) -> bool {
+    pub(super) fn ready(self) -> bool {
         match self {
-            Self::Unavailable => false,
+            Self::Running { generation } => generation != 0,
+            Self::Unavailable
+            | Self::Disabled
+            | Self::Starting
+            | Self::Stopping
+            | Self::Faulted => false,
             #[cfg(test)]
             Self::SyntheticFixture => true,
+        }
+    }
+}
+impl Readiness {
+    fn can_start(self) -> bool {
+        matches!(self, Self::Disabled) || cfg!(test) && self.synthetic()
+    }
+    pub(super) fn synthetic(self) -> bool {
+        #[cfg(test)]
+        if matches!(self, Self::SyntheticFixture) {
+            return true;
+        }
+        false
+    }
+    fn can_stop(self) -> bool {
+        matches!(self, Self::Starting | Self::Running { .. }) || self.synthetic()
+    }
+    fn description(self) -> &'static str {
+        match self {
+            Self::Unavailable => NOT_READY,
+            Self::Disabled => "教师连接已停用。核对本机HTTPS配置和允许来源后，可明确启用。",
+            Self::Starting => "正在启动教师连接，尚不能配对；可停用并等待清理完成。",
+            Self::Running { .. } => {
+                "教师连接已启用。其他设备仍须能够访问此地址并信任证书；可明确开启短时配对窗口。"
+            }
+            Self::Stopping => {
+                "正在停用教师连接并清理未完成传输。本地工作台仍可使用；清理完成前不能再次启用。"
+            }
+            Self::Faulted => "教师连接未能安全结束，不能再次启用。请保留数据并重新启动核对。",
+            #[cfg(test)]
+            Self::SyntheticFixture => "当前为自有隔离测试夹具，不是真实TLS。",
         }
     }
 }
@@ -71,13 +114,24 @@ pub(super) fn run(
     readiness: Readiness,
     context: &JobContext,
 ) -> Result<Loaded> {
-    if matches!(operation, Operation::Enable | Operation::Begin) && !readiness.ready() {
+    // Physical enable belongs to the ordinary runtime. A worker-only logical
+    // toggle is available solely to the existing private synthetic fixture.
+    if matches!(operation, Operation::Enable) && !readiness.synthetic()
+        || matches!(operation, Operation::Begin) && !readiness.ready()
+    {
         return Err(invalid(NOT_READY));
     }
     let applied = match operation {
         Operation::Refresh => Ok(None),
         Operation::Enable => service.set_enabled(admin, true).map(|_| None),
-        Operation::Begin => service.begin_pairing(admin).map(Some),
+        Operation::Begin => match readiness {
+            Readiness::Running { generation } => service
+                .begin_pairing_for_runtime(admin, generation)
+                .map(Some),
+            #[cfg(test)]
+            Readiness::SyntheticFixture => service.begin_pairing(admin).map(Some),
+            _ => return Err(invalid(NOT_READY)),
+        },
         Operation::Close => service.close_pairing(admin).map(|_| None),
         Operation::Approve {
             request_id,
@@ -143,6 +197,14 @@ pub(super) struct Editor {
     code_window: Option<u64>,
 }
 impl Editor {
+    pub(super) fn set_readiness(&mut self, readiness: Readiness) {
+        if self.readiness != readiness {
+            self.readiness = readiness;
+            if !readiness.ready() {
+                self.clear_sensitive();
+            }
+        }
+    }
     pub(super) fn new(owner: PrincipalId, readiness: Readiness, loaded: Loaded) -> Self {
         let mut editor = Self {
             owner,
@@ -286,7 +348,8 @@ impl Editor {
         match action {
             HTTPS_SETTINGS => Ok(Command::OpenHttpsSettings),
             REFRESH => Ok(Command::Run(Operation::Refresh)),
-            ENABLE | BEGIN if !self.readiness.ready() => Err(NOT_READY.into()),
+            ENABLE if !self.readiness.can_start() => Err(self.readiness.description().into()),
+            BEGIN if !self.readiness.ready() => Err(self.readiness.description().into()),
             ENABLE => Ok(Command::Run(Operation::Enable)),
             BEGIN => {
                 self.clear_code();
@@ -398,19 +461,11 @@ impl Editor {
             ];
             return view;
         }
-        let logical = if self.snapshot.enabled {
-            "内部教师会话准入已开启"
-        } else {
-            "内部教师会话准入已停用"
-        };
-        view.description = format!(
-            "{NOT_READY}\n{logical}。这里不表示HTTPS或浏览器已经可用。可查看并撤销现有设备。{}",
-            if self.readiness.ready() {
-                "\n当前为自有隔离测试夹具，不是真实TLS。"
-            } else {
-                ""
-            }
-        );
+        view.description = self.readiness.description().into();
+        if self.snapshot.enabled && !self.readiness.ready() {
+            view.description
+                .push_str("\n教师会话正在停止准入；页面中的旧设备记录不表示连接仍可使用。");
+        }
         let code_label = if let Some(deadline) = self.deadline {
             let seconds = deadline
                 .saturating_duration_since(Instant::now())
@@ -557,8 +612,8 @@ impl Editor {
             action(REFRESH, "刷新申请和设备", true),
             action(
                 ENABLE,
-                "开启教师会话准入",
-                self.readiness.ready() && !self.snapshot.enabled,
+                "启用教师连接",
+                self.readiness.can_start() && !self.snapshot.enabled,
             ),
             action(
                 BEGIN,
@@ -581,7 +636,9 @@ impl Editor {
             action(
                 DISABLE,
                 "停用并撤销全部设备",
-                self.snapshot.enabled || !self.snapshot.devices.is_empty(),
+                self.readiness.can_stop()
+                    || self.snapshot.enabled
+                    || !self.snapshot.devices.is_empty(),
             ),
             action(BACK, "返回工作台", true),
             action(LOCK, "锁定工作台", true),

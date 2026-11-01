@@ -6,6 +6,8 @@ use windows::Win32::Security::{
     Authentication::Identity::*, Credentials::SecHandle, Cryptography::*,
 };
 
+mod host;
+
 pub(super) struct Credentials {
     pub handle: SecHandle,
     acquired: bool,
@@ -14,6 +16,18 @@ pub(super) struct Credentials {
 
 impl Credentials {
     pub fn new(thumbprint: CertificateThumbprint) -> Result<Self, TlsError> {
+        Self::new_for_host(thumbprint, None)
+    }
+    pub(super) fn new_configured(
+        thumbprint: CertificateThumbprint,
+        host: &str,
+    ) -> Result<Self, TlsError> {
+        Self::new_for_host(thumbprint, Some(host))
+    }
+    fn new_for_host(
+        thumbprint: CertificateThumbprint,
+        host: Option<&str>,
+    ) -> Result<Self, TlsError> {
         let selected = SelectedCertificate::open().map_err(|_| TlsError::Certificate)?;
         let mut result = Self {
             handle: SecHandle::default(),
@@ -34,6 +48,9 @@ impl Credentials {
                 || server_auth_usage(result.selected.certificate())? != ServerAuthUsage::Explicit
             {
                 return Err(TlsError::Certificate);
+            }
+            if let Some(host) = host {
+                host::verify(result.selected.certificate(), host)?;
             }
             result
                 .selected

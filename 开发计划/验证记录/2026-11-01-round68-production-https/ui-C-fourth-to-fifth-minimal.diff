@@ -1,0 +1,24 @@
+--- C4/crates/fc-bootstrap/src/application/https_runtime_controller.rs
++++ C5/crates/fc-bootstrap/src/application/https_runtime_controller.rs
+@@ -165,7 +165,9 @@
+                         .prepare_deadline
+                         .ok_or("缺少原启动期限。")?;
+                     if Instant::now() >= deadline || self.teacher_https.stop_deadline.is_some() {
+-                        self.teacher_https.request.take().map(|r| r.cancel());
++                        if let Some(request) = self.teacher_https.request.take() {
++                            request.cancel();
++                        }
+                         self.set_web_readiness(web_editor::Readiness::Disabled);
+                         self.status = "本次教师连接启动未完成，可核对配置后明确重试。".into();
+                     } else {
+@@ -186,7 +188,9 @@
+                                 self.teacher_https.preparing = Some(Preparing::Unadmitted(job));
+                             }
+                             Err(_) => {
+-                                self.teacher_https.request.take().map(|r| r.cancel());
++                                if let Some(request) = self.teacher_https.request.take() {
++                                    request.cancel();
++                                }
+                                 self.set_web_readiness(web_editor::Readiness::Disabled);
+                                 self.status = "后台未接纳本次启动，请核对后明确重试。".into();
+                             }

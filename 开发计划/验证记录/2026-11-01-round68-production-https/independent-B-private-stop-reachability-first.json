@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "status": "P2_PRIVATE_CONCURRENCY_CAVEAT_NO_CURRENT_PUBLIC_REACHABILITY_ESTABLISHED",
+  "atUtc": "2026-11-01T07:45:52.977093+00:00",
+  "reviewedReport": {
+    "path": "independent-B-runtime-review-second.json",
+    "sha256": "e454ec881074c9182c40232366c302d2cbb0157a9d092db2d1ea8c3c1f0daa29"
+  },
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/https_runtime.rs",
+      "bytes": 22547,
+      "sha256": "5a5cebf5906ee2726a9e2d8367cabb4030c3dd9ce99efe7c819bc627d68c0be0",
+      "snapshot": "independent-B-private-stop-reachability-first-source/crates/fc-bootstrap/src/https_runtime.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "bytes": 9927,
+      "sha256": "82d64afd133bd3b67a72cdcdaf94b4e5586c6434ace625a2294f2dd51477a4d3",
+      "snapshot": "independent-B-private-stop-reachability-first-source/crates/fc-bootstrap/src/backend/web/runtime.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/https_runtime_controller.rs",
+      "bytes": 13841,
+      "sha256": "e0abc02fc65b0c2a429662d3b3a3c0043c34f69b4bd3a2a509c055491de68698",
+      "snapshot": "independent-B-private-stop-reachability-first-source/crates/fc-bootstrap/src/application/https_runtime_controller.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 46785,
+      "sha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe",
+      "snapshot": "independent-B-private-stop-reachability-first-source/crates/fc-bootstrap/src/backend/web.rs"
+    }
+  ],
+  "conclusion": "The described check-then-act interleaving is constructible if crate-private reservation methods are called independently on cloned Arcs, but the audited current production ownership order prevents its prerequisite old physical_returned from overlapping old negative_stop. No source change is necessary solely for that hypothetical call pattern in this batch.",
+  "ownershipEvidence": [
+    "The only non-test production caller of physical_returned is RuntimeOwner::poll(&mut self), after physical_thread::is_finished on the original HTTP JoinHandle and its subsequent join. shared.returned additionally requires completed Net/native/Hub destruction.",
+    "The HTTP thread owns the StartPlan reservation clone and calls negative_stop only while run() is live. That thread must finish all such calls before its kernel thread signals and UI poll may release the claim.",
+    "UI request_stop_at takes &self on the unique non-Clone RuntimeOwner; safely running poll(&mut self) on that same value concurrently is excluded by Rust borrowing. Sharing RuntimeOwner through a Mutex serializes those calls; sharing Arc<RuntimeOwner> does not yield &mut poll while outstanding shared references exist.",
+    "The public StartPlan and RuntimeOwner do not expose their reservation Arc or fields. WebRuntimeReservation and its methods are crate-private. Current UI State owns one Option<RuntimeOwner>; no clone/Arc of a reservation is supplied to another independent worker which can call physical_returned.",
+    "Drop/recover_retained transfers the original non-Clone owner through a single retained slot; it does not duplicate a live HTTP thread or permit concurrently polling two RuntimeOwners for one reservation."
+  ],
+  "limits": [
+    "This is a closed-world source call-site/ownership audit, not a claim that the private atomic methods are generally linearizable under every independently constructed schedule.",
+    "The P2 caveat remains valid documentation for a future internal caller change: adding independent concurrent physical_returned/negative_stop would need exact-epoch readiness or serialization and regression evidence.",
+    "The original unconditional old-returned Drop bool ABA is a separate P1 actually fixed by B third source; tests still need root execution.",
+    "No Cargo, Windows, network, or source edit. The joint compilation belongs to root and is not treated as terminal or passed here."
+  ],
+  "publicDesktopRequirement": "No change: explicit desktop buttons stay public/no login; timetable/clock/calendar/countdown remain passive and non-clickable."
+}

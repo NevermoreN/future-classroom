@@ -1,0 +1,28 @@
+{
+  "status": "PREPARED_AST_PASS_NOT_EXECUTED",
+  "createdUtc": "2026-11-01T07:50:01.349079+00:00",
+  "helper": {
+    "path": "/tmp/fc-round68-production-https/evidence/root-run-windows-release-first.py",
+    "bytes": 9838,
+    "sha256": "6def3870e12884d4aee726bc5db089eeea6e5d371cca17953714248440ecca69"
+  },
+  "sourceFreeze": {
+    "path": "joint-implementation-freeze-fourth.json",
+    "sha256": "fb957f0dfb80bc840507d2a737ba13f5aa09e436848bbe4e9d352a50df1cd196",
+    "workingFiles": 595,
+    "allCurrentMatch": true
+  },
+  "codegenReportObservedStatus": "RUNNING",
+  "codegenLiveHandle": "NOT_POLLED_BY_THIS_PREPARATION",
+  "productReportObservedStatus": "NOT_YET_CREATED",
+  "executeCommand": [
+    "python3",
+    "-B",
+    "/tmp/fc-round68-production-https/evidence/root-run-windows-release-first.py",
+    "--execute"
+  ],
+  "remoteExecution": "NOT_EXECUTED",
+  "cargoInvoked": false,
+  "privateKeyContentsRead": false,
+  "expectedRunGate": "original codegen + normal product + clippy terminal PASS, exact595 source hashes, 21 actual Cargo test artifacts and one actual normal product; individual PE/SHA provenance before launching"
+}

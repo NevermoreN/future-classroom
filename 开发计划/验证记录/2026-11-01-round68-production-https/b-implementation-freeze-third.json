@@ -1,0 +1,311 @@
+{
+  "schema": 1,
+  "status": "FROZEN_NOT_COMPILED_OR_EXECUTED",
+  "atUtc": "2026-11-01T07:41:43.906720+00:00",
+  "base": "3fd34d5f650999b41e7332250ac3b5d3627bf924",
+  "parentFreeze": {
+    "file": "b-implementation-freeze-second.json",
+    "bytes": 9147,
+    "sha256": "10c460f306eab6bc5665e4dccd622877be4df80d268d8c48233667ee37ac58bc"
+  },
+  "source": [
+    {
+      "relativePath": "crates/fc-bootstrap/src/backend.rs",
+      "before": {
+        "bytes": 107143,
+        "sha256": "24df808e779f556d5c50e207342b4261ca84d5b4246ec566ecb27b0077cbbcf9"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/backend.rs",
+        "bytes": 107515,
+        "sha256": "f319c893038fef6178c42170deb2be335695b64357cdd8349a5a0db5fc13b468"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "before": {
+        "bytes": 3830,
+        "sha256": "1cbc13e65a5c15ca98f9b43336d605ca3c7f6d86da2dc8c2c19f786268ff8492"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/backend/https_settings.rs",
+        "bytes": 4108,
+        "sha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/backend/web.rs",
+      "before": {
+        "bytes": 44377,
+        "sha256": "495383fe8e6fae4669155f7375792a426e60f2edbcfa9225f24affeda1d6250f"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/backend/web.rs",
+        "bytes": 46785,
+        "sha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "before": null,
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/backend/web/runtime.rs",
+        "bytes": 9927,
+        "sha256": "82d64afd133bd3b67a72cdcdaf94b4e5586c6434ace625a2294f2dd51477a4d3"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+      "before": null,
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+        "bytes": 13885,
+        "sha256": "2173db6aece2d4cd4d192c58bdedabe304f8aa1ac2383327d1c15d553a745fa4"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/https_runtime.rs",
+      "before": null,
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/https_runtime.rs",
+        "bytes": 22547,
+        "sha256": "5a5cebf5906ee2726a9e2d8367cabb4030c3dd9ce99efe7c819bc627d68c0be0"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/lib.rs",
+      "before": {
+        "bytes": 587,
+        "sha256": "4793b3d8614157539195e1d3d81d7410b652ce6afb09bcbcd72c47acdf1b6399"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/lib.rs",
+        "bytes": 626,
+        "sha256": "264fdf1aa1344616533ae82575e38d6bae717a172d877692b740bcac328e550c"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "before": {
+        "bytes": 17396,
+        "sha256": "9ded9359a8e5e5286bc9f15cabd5e3c25fe744e6fbbe6b7b125a53a568e892a1"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/web_application/voice_files.rs",
+        "bytes": 17949,
+        "sha256": "f53d793a1483a0532e27187c274e11d2f4755e69f072a6fa9a7b3b06cc1a39b3"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_transfer.rs",
+      "before": {
+        "bytes": 10324,
+        "sha256": "6eef089d5874c8dcb0183e5eba210f4af3bd749d39b48dc8ffe2c5bb2127773e"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/web_transfer.rs",
+        "bytes": 10897,
+        "sha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_transfer/downloads.rs",
+      "before": {
+        "bytes": 17961,
+        "sha256": "85c3a9433544dae418a29a023596127882cded7fe37644e310c47dff7f603313"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/web_transfer/downloads.rs",
+        "bytes": 19977,
+        "sha256": "734820af5417f8cb51d2f0a12d8e1df0bb418d9356b15123ff0da0bb2a5db47a"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_transfer/executor.rs",
+      "before": {
+        "bytes": 3209,
+        "sha256": "f322dfc82c3471c06b546e4e0e9c0789df856970a860d5037c5ce3a2569252f4"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/web_transfer/executor.rs",
+        "bytes": 3619,
+        "sha256": "c60c10bfe9b4c2e50e270f9159d12a2942e05ae79b85064325c7d7d3212379d5"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "before": {
+        "bytes": 59397,
+        "sha256": "42feacea1410c3968734c9bc39d9c09c7c647095afeb29a9dba18800a335491f"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/web_transfer/network.rs",
+        "bytes": 60038,
+        "sha256": "f20da7d047f6c42749efd5813295da6b707642277a108aa794f43534cbd896e2"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "before": {
+        "bytes": 35986,
+        "sha256": "83a5e40e206489681662ea411813cf942c8f195fa41dfbf1673bc88bf94d76ad"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/web_transfer/uploads.rs",
+        "bytes": 38186,
+        "sha256": "aed4160d24208d6bd491734515b9f3bf1794d4c7348cce251d150da040abf2e0"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "before": {
+        "bytes": 45258,
+        "sha256": "9763c1a637973bb82f32f613421b4e55439de8a88c5fa536e3de7307b7347229"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+        "bytes": 49433,
+        "sha256": "fe09d4184289b8743df6492158cfb094b5588c0b0a8ad9f222ffbfa05b61e187"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_transfer/live_cleanup.rs",
+      "before": null,
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/web_transfer/live_cleanup.rs",
+        "bytes": 1931,
+        "sha256": "22b2c7fac3360de8c1fc71b3e409ebdad994428342ca0ece1f4c5a909281bf85"
+      }
+    },
+    {
+      "relativePath": "crates/fc-storage/src/business/https_settings.rs",
+      "before": {
+        "bytes": 15843,
+        "sha256": "13a483458ebd390d227b628d40ed6a8c600fb50fb20c061b1dd042885e5e4e36"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-storage/src/business/https_settings.rs",
+        "bytes": 17613,
+        "sha256": "cadd2ccc9056c536463d147ae58c74718d28e768446464fd9d523203f28bf4ec"
+      }
+    },
+    {
+      "relativePath": "crates/fc-storage/src/business/https_settings/tests.rs",
+      "before": {
+        "bytes": 30945,
+        "sha256": "37200044b4983e8aee4e90808c5071dbc79252c4160aff7ffbc5029c6108c367"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-storage/src/business/https_settings/tests.rs",
+        "bytes": 32591,
+        "sha256": "e2f4d00e83e0eddfa5bc8dcf1048b376d0bf7e28d29c8727e45405154eb80a6c"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+      "before": {
+        "bytes": 8855,
+        "sha256": "42faf95294d1bdfcbb9764a0ed635c75873df8fbf508fd2402248f481e212391"
+      },
+      "after": {
+        "path": "b-source-after-third/crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+        "bytes": 8967,
+        "sha256": "59de85620ebac75d76274cc4f0f8732cb04339517e4cba2cc5c281cbad7cd1c6"
+      }
+    }
+  ],
+  "changedSinceSecondOrGitBase": [
+    {
+      "relativePath": "crates/fc-bootstrap/src/backend/web.rs",
+      "secondOrGitBase": {
+        "bytes": 46777,
+        "sha256": "092382e2904d5f4d0534ac0e0427185011631ac3f0eef86350a4ea011c178f52"
+      },
+      "third": {
+        "bytes": 46785,
+        "sha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "secondOrGitBase": {
+        "bytes": 8218,
+        "sha256": "201abcebcd35ddc7a2335eefff77511a42d96a6390c2e820505e5e0db8554b13"
+      },
+      "third": {
+        "bytes": 9927,
+        "sha256": "82d64afd133bd3b67a72cdcdaf94b4e5586c6434ace625a2294f2dd51477a4d3"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+      "secondOrGitBase": {
+        "bytes": 10683,
+        "sha256": "422fde502c3af49477e755117509ed100738b2f9289240ed29eff6dc3952c666"
+      },
+      "third": {
+        "bytes": 13885,
+        "sha256": "2173db6aece2d4cd4d192c58bdedabe304f8aa1ac2383327d1c15d553a745fa4"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/https_runtime.rs",
+      "secondOrGitBase": {
+        "bytes": 22371,
+        "sha256": "6a5a3440b758bfa7818c2a6c0407630b80629a88a4150bf78c49adde26cb0631"
+      },
+      "third": {
+        "bytes": 22547,
+        "sha256": "5a5cebf5906ee2726a9e2d8367cabb4030c3dd9ce99efe7c819bc627d68c0be0"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "secondOrGitBase": {
+        "bytes": 17956,
+        "sha256": "88436076beb39a1bc0dc21b849f8aa7e58abfb6625064b244d285a25a5b55be3"
+      },
+      "third": {
+        "bytes": 17949,
+        "sha256": "f53d793a1483a0532e27187c274e11d2f4755e69f072a6fa9a7b3b06cc1a39b3"
+      }
+    },
+    {
+      "relativePath": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+      "secondOrGitBase": {
+        "bytes": 8855,
+        "sha256": "42faf95294d1bdfcbb9764a0ed635c75873df8fbf508fd2402248f481e212391"
+      },
+      "third": {
+        "bytes": 8967,
+        "sha256": "59de85620ebac75d76274cc4f0f8732cb04339517e4cba2cc5c281cbad7cd1c6"
+      }
+    }
+  ],
+  "minimalDiff": {
+    "path": "b-second-to-third-minimal.diff",
+    "bytes": 15710,
+    "sha256": "bdabf177e200dbb5ac2646d6f7ce2299717593f5933171dd20ab51918c217f10"
+  },
+  "rustfmtCheckExitCode": 0,
+  "cargoInvoked": false,
+  "windowsInvoked": false,
+  "p1Fix": [
+    "Exact monotonic runtime_claim AtomicU64 independent of negative admission epoch; exact CAS release",
+    "physical_returned idempotent; old returned Drop never releases a replacement claim",
+    "quiescent/stale RuntimeOwner stop guarded; internal stop acts through exact original reservation",
+    "new regressions: old returned delayed Drop/repeated return during replacement Starting and Stopping; old negative stop during replacement Running"
+  ],
+  "compileFixes": [
+    "include! inner doc comments become ordinary comments",
+    "SessionLease from public fc_application identity import",
+    "VoiceService via public backend re-export",
+    "work test explicitly rejects unexpected Cleanup completion without weakening correlation"
+  ],
+  "notProven": [
+    "Rust typecheck/link",
+    "Windows execution",
+    "C/A integration behavior",
+    "Actual ordinary HTTPS probe and cleanup"
+  ]
+}

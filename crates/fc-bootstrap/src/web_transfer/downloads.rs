@@ -329,6 +329,14 @@ impl DownloadHubOwner {
             hub,
         ))
     }
+    /// Trusted HTTP coordinator calls only after Net is idle and its last
+    /// live-cleanup ticket has physically returned. All slots are rechecked;
+    /// a Busy/running owner or quarantine cannot be retired by this flag.
+    pub(crate) fn confirm_live_drained(&mut self) -> bool {
+        let shared = self.shared.as_ref().expect("live downloads owner");
+        self.drained = !shared.accepting.load(Ordering::Acquire) && shared.pending() == 0;
+        self.drained
+    }
     pub fn handle(&self) -> DownloadHub {
         DownloadHub {
             shared: Arc::downgrade(self.shared.as_ref().expect("live download owner")),
@@ -424,6 +432,49 @@ fn close_entry(entry: &mut Entry) {
     entry.stage = Stage::Complete;
 }
 impl DownloadHub {
+    /// Negative admission only; real file disposal remains a shared-worker job.
+    pub(crate) fn request_domain_stop(&self) {
+        if let Some(shared) = self.shared.upgrade() {
+            shared.cancel_all();
+        }
+    }
+    /// Fresh negative cleanup on the original shared workers while the rest of
+    /// that pool stays live. Busy registry cells remain occupied until their
+    /// original leased owner actually returns; they are never overwritten.
+    pub(crate) fn cleanup_live(
+        &self,
+        context: &JobContext,
+    ) -> Result<DownloadHubCleanup, DownloadHubError> {
+        context
+            .checkpoint()
+            .map_err(|_| DownloadHubError::Cancelled)?;
+        let shared = self.shared.upgrade().ok_or(DownloadHubError::Closed)?;
+        shared.cancel_all();
+
+        let keys: [Option<DownloadKey>; MAX_REQUESTS] = {
+            let slots = shared
+                .slots
+                .try_lock()
+                .map_err(|_| DownloadHubError::Busy)?;
+            std::array::from_fn(|i| match &slots[i] {
+                Slot::Owned(entry) => Some(entry.key),
+                _ => None,
+            })
+        };
+        for key in keys.into_iter().flatten() {
+            context
+                .checkpoint()
+                .map_err(|_| DownloadHubError::Cancelled)?;
+            if let Ok(mut lease) = shared.take(key) {
+                close_entry(lease.entry());
+            }
+        }
+
+        Ok(DownloadHubCleanup {
+            pending_slots: shared.pending(),
+        })
+    }
+
     pub fn begin(
         &self,
         app: &WebApplication,

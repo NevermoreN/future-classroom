@@ -1,0 +1,37 @@
+--- a/crates/fc-bootstrap/src/application/ordinary_https_probe.rs
++++ b/crates/fc-bootstrap/src/application/ordinary_https_probe.rs
+@@ -114,7 +114,10 @@
+         ],
+         deadline,
+     )?;
+-    submit(app, BACK, &[], deadline)?;
++    require(
++        app.screen == Screen::Home,
++        "subject save returned to actual home page",
++    )?;
+     submit(app, TO_ACCOUNTS, &[], deadline)?;
+     let initial = fixture_password()?;
+     let changed = fixture_password()?;
+@@ -257,13 +260,21 @@
+         app.state.classes.len() == 1,
+         "exact synthetic class created through native form",
+     )?;
++    require(
++        app.screen == Screen::Home,
++        "class save returned to actual home page",
++    )?;
++    submit(app, TO_SCHOOL, &[], deadline)?;
+     submit(
+         app,
+         BIND_CLASS,
+         &[(CLASS, "Synthetic ordinary HTTPS class")],
+         deadline,
+     )?;
+-    submit(app, BACK, &[], deadline)?;
++    require(
++        app.screen == Screen::Home,
++        "class binding returned to actual home page",
++    )?;
+     mark(steps, "native-create-synthetic-class")?;
+     create_teacher(app, deadline)?;
+     mark(

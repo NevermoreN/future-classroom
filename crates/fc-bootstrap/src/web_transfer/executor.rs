@@ -9,12 +9,16 @@ use std::time::Instant;
 pub enum HttpJob {
     Web(Box<WebTask>),
     #[cfg(windows)]
+    Cleanup(Box<super::live_cleanup::CleanupTask>),
+    #[cfg(windows)]
     Upload(Box<UploadTask>),
     #[cfg(windows)]
     Download(Box<DownloadTask>),
 }
 pub enum HttpCompletion {
     Web(WebCompletion),
+    #[cfg(windows)]
+    Cleanup(super::live_cleanup::CleanupStatus),
     #[cfg(windows)]
     Upload(UploadCompletion),
     #[cfg(windows)]
@@ -24,6 +28,8 @@ impl HttpJob {
     pub fn deadline(&self) -> Instant {
         match self {
             Self::Web(job) => job.deadline(),
+            #[cfg(windows)]
+            Self::Cleanup(job) => job.deadline(),
             #[cfg(windows)]
             Self::Upload(job) => job.deadline(),
             #[cfg(windows)]
@@ -35,6 +41,8 @@ impl Task for HttpJob {
     type Output = HttpCompletion;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
+            #[cfg(windows)]
+            Self::Cleanup(job) => job.allocation_bytes(),
             Self::Web(job) => job
                 .allocation_bytes()?
                 .checked_add(std::mem::size_of::<WebTask>()),
@@ -51,6 +59,8 @@ impl Task for HttpJob {
     fn run(self, context: &JobContext) -> HttpCompletion {
         match self {
             Self::Web(job) => HttpCompletion::Web(job.run(context)),
+            #[cfg(windows)]
+            Self::Cleanup(job) => HttpCompletion::Cleanup(job.run(context)),
             #[cfg(windows)]
             Self::Upload(job) => HttpCompletion::Upload(job.run(context)),
             #[cfg(windows)]

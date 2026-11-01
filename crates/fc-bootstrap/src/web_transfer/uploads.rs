@@ -378,6 +378,16 @@ impl UploadHubOwner {
                 drained: false,
             })
     }
+    /// Trusted HTTP coordinator calls only after Net is idle and its last
+    /// live-cleanup ticket has physically returned. All slots are rechecked;
+    /// a Busy/running owner or quarantine cannot be retired by this flag.
+    pub(crate) fn confirm_live_drained(&mut self) -> bool {
+        let shared = self.shared.as_ref().expect("live uploads owner");
+        self.drained = !shared.accepting.load(Ordering::Acquire)
+            && shared.pending() == 0
+            && quarantined_uploads() == 0;
+        self.drained
+    }
     pub fn handle(&self) -> UploadHub {
         UploadHub {
             shared: Arc::downgrade(self.shared.as_ref().expect("live upload owner")),
@@ -598,6 +608,49 @@ fn reap_inactive(
     context.checkpoint().map_err(|_| UploadHubError::Cancelled)
 }
 impl UploadHub {
+    /// Negative admission only; real file disposal remains a shared-worker job.
+    pub(crate) fn request_domain_stop(&self) {
+        if let Some(shared) = self.shared.upgrade() {
+            shared.cancel_all();
+        }
+    }
+    /// Fresh negative cleanup on the original shared workers while the rest of
+    /// that pool stays live. Busy registry cells remain occupied until their
+    /// original leased owner actually returns; they are never overwritten.
+    pub(crate) fn cleanup_live(
+        &self,
+        app: &WebApplication,
+        context: &JobContext,
+    ) -> Result<UploadHubCleanup, UploadHubError> {
+        context
+            .checkpoint()
+            .map_err(|_| UploadHubError::Cancelled)?;
+        let shared = self.shared.upgrade().ok_or(UploadHubError::Closed)?;
+        shared.cancel_all();
+        shared.check_application(app)?;
+        let keys: [Option<UploadKey>; SLOTS] = {
+            let slots = shared.slots.try_lock().map_err(|_| UploadHubError::Busy)?;
+            std::array::from_fn(|i| match &slots[i] {
+                Slot::Owned(entry) => Some(entry.key),
+                _ => None,
+            })
+        };
+        for key in keys.into_iter().flatten() {
+            context
+                .checkpoint()
+                .map_err(|_| UploadHubError::Cancelled)?;
+            if let Ok(mut lease) = shared.take(key) {
+                cleanup_entry(lease.entry(), app);
+            }
+        }
+        retry_quarantined_uploads();
+        let _ = app.sweep_material_uploads();
+        Ok(UploadHubCleanup {
+            pending_slots: shared.pending(),
+            quarantined: quarantined_uploads(),
+        })
+    }
+
     /// Worker-only bounded maintenance, using a fresh current job. Cleans only
     /// cancelled/expired non-Busy entries or App-absent material Ready/Retained
     /// descriptors of this exact application binding. Counts alone are not a
