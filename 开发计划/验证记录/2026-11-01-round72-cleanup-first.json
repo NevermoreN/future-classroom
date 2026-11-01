@@ -1,0 +1,32 @@
+{
+  "status": "PASS_ONLY_TERMINAL_OWNED_R72_ROOTS_REMOVED",
+  "verifiedCommit": "276d0f5943fdd6024c894d1b21868a0394466931",
+  "committedProof": {
+    "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round72-committed-bytes-first.json",
+    "sha256": "45c781897c4d0d0fdaa66ffe627a4cf0e1c904813d9d5d40b558d3863d2b2830"
+  },
+  "committedFilesReopened": 537,
+  "archivedOriginalsReplayed": 528,
+  "excludedPayloadIdentitiesVerified": 24,
+  "removedRoots": [
+    {
+      "path": "/tmp/fc-round72-ci-evidence",
+      "files": 552,
+      "logicalBytes": 283353177
+    },
+    {
+      "path": "/tmp/fc-round72-archive-controller",
+      "files": 8,
+      "logicalBytes": 501853
+    }
+  ],
+  "activeOwnedProcesses": [],
+  "elapsedDeletionSeconds": 0.18414685083553195,
+  "persistentPrivateKey": {
+    "mode": "0o600",
+    "contentsRead": false,
+    "preserved": true
+  },
+  "preserved": "Active R73, main target/global caches, development ZIPs, persistent Windows SSH service/public authorization/private key.",
+  "scope": "Local scratch cleanup only; exact committed blobs and source/stored/gzip bytes checked before deletion. No Windows/network/process termination or new runtime acceptance; physical disk freed not measured."
+}
