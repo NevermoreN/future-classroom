@@ -9,6 +9,11 @@ publish.workspace = true
 [lib]
 crate-type = ["rlib", "cdylib"]
 
+[features]
+default = []
+# Separate owned-test cleanup artifact only; normal/CI packages never enable it.
+owned-test-removal = []
+
 [dependencies]
 fc-domain.workspace = true
 fc-ports.workspace = true

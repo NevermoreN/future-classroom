@@ -6,6 +6,8 @@ use super::*;
 use windows::Win32::System::SystemInformation::GetTickCount64;
 
 mod guard_context;
+#[cfg(feature = "owned-test-removal")]
+pub(crate) mod recovery;
 pub(crate) mod setup_entry;
 
 pub(crate) const PACKAGE_SEAL_MAGIC: &[u8; 16] = b"FC-SETUP-MSI\0v1\0";

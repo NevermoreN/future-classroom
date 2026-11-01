@@ -336,6 +336,15 @@ impl Resources {
         Ok(())
     }
     pub(super) fn open(identity: &InstallIdentity, exclusive: bool) -> Result<Self> {
+        let mut owner = Self::open_gate(identity, exclusive, false)?;
+        owner.absent_pending()?;
+        owner.check_live()?;
+        Ok(owner)
+    }
+    // Native-private composition only. Ordinary startup/maintenance always use
+    // open above and retain their unconditional Pending refusal. The explicit
+    // removal module separately pins and validates an existing negative record.
+    fn open_gate(identity: &InstallIdentity, exclusive: bool, existing_only: bool) -> Result<Self> {
         let mut owner = Self::empty()?;
         // SAFETY: current-process pseudohandle is borrowed, never registered/closed.
         owner.sid = owner.token_sid(unsafe { GetCurrentProcess() })?;
@@ -373,13 +382,15 @@ impl Resources {
         #[cfg(not(test))]
         let leaf = "FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5";
         owner.root = identity.local.join(leaf);
-        let name = native_path(&owner.root)?;
-        let created = with_security(&owner.sid, true, |attributes| unsafe {
-            CreateDirectoryW(&name, Some(attributes))
-        });
-        if let Err(error) = created {
-            if error.code() != ERROR_ALREADY_EXISTS.to_hresult() {
-                return Err(error.into());
+        if !existing_only {
+            let name = native_path(&owner.root)?;
+            let created = with_security(&owner.sid, true, |attributes| unsafe {
+                CreateDirectoryW(&name, Some(attributes))
+            });
+            if let Err(error) = created {
+                if error.code() != ERROR_ALREADY_EXISTS.to_hresult() {
+                    return Err(error.into());
+                }
             }
         }
         let h = owner.open_file(
@@ -402,14 +413,17 @@ impl Resources {
             } else {
                 FILE_SHARE_READ
             },
-            OPEN_ALWAYS,
+            if existing_only {
+                OPEN_EXISTING
+            } else {
+                OPEN_ALWAYS
+            },
             false,
             true,
         )?;
         owner.add(gate, Role::Gate);
         verify_info(gate, false)?;
         verify_acl(gate, &owner.sid, true)?;
-        owner.absent_pending()?;
         owner.check_live()?;
         Ok(owner)
     }

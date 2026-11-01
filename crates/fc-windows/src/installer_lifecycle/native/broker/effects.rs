@@ -781,7 +781,7 @@ fn component_registration(manifest: &Manifest) -> Result<()> {
     }
     Ok(())
 }
-fn present(session: &Session) -> Result<Proof> {
+pub(super) fn present(session: &Session) -> Result<Proof> {
     let mut proof = Proof::new(session.deadline);
     let base = root()?;
     same_registration(&session.manifest, &session.resources.sid)?;
