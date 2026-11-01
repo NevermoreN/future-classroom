@@ -1,0 +1,49 @@
+{
+  "status": "FROZEN_THIRD_SINGLE_LINE_RESULT_CORRECTION",
+  "secondPreserved": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-owner-second/run-windows-probe.ps1",
+    "bytes": 23507,
+    "sha256": "99fbaa6659ce62c157b7e8f6241d74f8f68f5d94f9a35037af809a33406ca3dc"
+  },
+  "thirdRunner": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-owner-third/run-windows-probe.ps1",
+    "bytes": 23608,
+    "sha256": "f58ce9da9148014aa799939e9ae96865af177044818d4220a2692d274a090a3e"
+  },
+  "contract": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-run-contract-third.json",
+    "bytes": 12626,
+    "sha256": "73591720f5255ae19fc543cf7f9959e495c6bf9d60c8cefe15a67ffd063b073a"
+  },
+  "pureChecker": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/check-owner-third-contract.ps1",
+    "bytes": 3787,
+    "sha256": "1c5e8bfd2b7f0531671bb1a837e354f9a19dd0571da754c95a8a7b9b2aeb5853"
+  },
+  "patch": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/owner-second-to-third.patch",
+    "bytes": 1080,
+    "sha256": "5c9cd5d7f91b3fd0f6fb0f81bdcdffcc522517bc5285f063776f4bc4427dc16f"
+  },
+  "independentReview": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/independent-pre-runtime-second-first.json",
+    "bytes": 50160,
+    "sha256": "8acf66a9e5dd65800ca66316564aa30f22f066b8e2b4d4b717dfcf5e905a58f2"
+  },
+  "unchangedMsi": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.msi",
+    "bytes": 266752,
+    "sha256": "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e"
+  },
+  "unchangedGuardian": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/guardian.exe",
+    "bytes": 253577,
+    "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f"
+  },
+  "sourceDelta": "Exactly one added uninstall-commit nonzero rejection; all original guards/deadlines/process handling/cleanup unchanged.",
+  "rootPureReceipt": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-powershell-third-contract-first.json",
+    "present": true
+  },
+  "nativeOutcome": "NOT_ASSERTED; root owns actual Windows execution separately."
+}

@@ -1,0 +1,433 @@
+{
+    "schemaVersion":  1,
+    "status":  "OBSERVED_FOUR_DIRECT_OPERATIONS_NOT_PRODUCT_ACCEPTANCE",
+    "scope":  "Synthetic per-user single-MSI Join/End feasibility only, not product lifecycle acceptance",
+    "nonce":  "e3365555af2a409eba9bb94ab37b0e28",
+    "productCode":  "{51C60258-197D-4EA2-8859-F59ABA07AC38}",
+    "upgradeCode":  "{CAEA576F-831B-42A4-B563-973B45FB1531}",
+    "registryRoot":  "Software\\FutureClassroom-MsiGuardian-Test-e3365555af2a409eba9bb94ab37b0e28",
+    "registryView":  "Registry32",
+    "expectedSid":  "S-1-5-21-3896111207-1867804362-1971593122-1001",
+    "msiSha256":  "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e",
+    "guardianSha256":  "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+    "operations":  [
+                       {
+                           "name":  "install-commit",
+                           "operation":  "8fe4d58215764e45bdf6602144592422",
+                           "decision":  1,
+                           "productBefore":  {
+                                                 "productState":  -1,
+                                                 "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":-1}\r\n",
+                                                 "stderr":  "",
+                                                 "pid":  34988,
+                                                 "actualExit":  true,
+                                                 "exitCode":  0
+                                             },
+                           "payloadBefore":  {
+                                                 "keyPresent":  false,
+                                                 "valuePresent":  false
+                                             },
+                           "guardianObserved":  [
+                                                    {
+                                                        "creationFileTime":  134379835146759682,
+                                                        "originalProcessHandleRetained":  true,
+                                                        "actualImageSha256":  "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+                                                        "pid":  29844,
+                                                        "actualExit":  true,
+                                                        "exitCode":  0
+                                                    }
+                                                ],
+                           "physicalMsiExit":  true,
+                           "completion":  "OBSERVED_ORIGINALS_ONLY",
+                           "log":  "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28\\install-commit.msi.log",
+                           "msiPid":  14556,
+                           "msiStartFileTime":  134379835144470881,
+                           "msiExitCode":  0,
+                           "guardianEvidence":  [
+                                                    {
+                                                        "key":  "Guardian-29844",
+                                                        "ActualSid":  "S-1-5-21-3896111207-1867804362-1971593122-1001",
+                                                        "Pid":  29844,
+                                                        "CreationFileTime":  134379835146759682,
+                                                        "ArgCount":  2,
+                                                        "TransactionId":  2,
+                                                        "RequestedDecision":  1,
+                                                        "Stage":  "EndReturned",
+                                                        "ObserveAckWait":  0,
+                                                        "JoinExportPresent":  1,
+                                                        "EndExportPresent":  1,
+                                                        "JoinReturn":  0,
+                                                        "OwnerEventBeforeEnd":  258,
+                                                        "EndEntered":  1,
+                                                        "EndReturn":  0,
+                                                        "EndReturned":  1,
+                                                        "AboutToReturnCode":  0
+                                                    }
+                                                ],
+                           "productAfter":  {
+                                                "productState":  5,
+                                                "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":5}\r\n",
+                                                "stderr":  "",
+                                                "pid":  40340,
+                                                "actualExit":  true,
+                                                "exitCode":  0
+                                            },
+                           "payloadAfter":  {
+                                                "keyPresent":  true,
+                                                "valuePresent":  true,
+                                                "value":  1,
+                                                "kind":  "DWord"
+                                            },
+                           "elapsedMillis":  516,
+                           "logBytes":  78856,
+                           "logSha256":  "ec95c41b569859b1b4db2c5784d2a393b583abd9d63f3a36b6bf3518ffbaf99b"
+                       },
+                       {
+                           "name":  "repair-commit",
+                           "operation":  "32399528cff344d193dffffb0f97bf1b",
+                           "decision":  1,
+                           "productBefore":  {
+                                                 "productState":  5,
+                                                 "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":5}\r\n",
+                                                 "stderr":  "",
+                                                 "pid":  20416,
+                                                 "actualExit":  true,
+                                                 "exitCode":  0
+                                             },
+                           "payloadBefore":  {
+                                                 "keyPresent":  true,
+                                                 "valuePresent":  true,
+                                                 "value":  1,
+                                                 "kind":  "DWord"
+                                             },
+                           "guardianObserved":  [
+                                                    {
+                                                        "creationFileTime":  134379835151008401,
+                                                        "originalProcessHandleRetained":  true,
+                                                        "actualImageSha256":  "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+                                                        "pid":  13888,
+                                                        "actualExit":  true,
+                                                        "exitCode":  0
+                                                    }
+                                                ],
+                           "physicalMsiExit":  true,
+                           "completion":  "OBSERVED_ORIGINALS_ONLY",
+                           "log":  "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28\\repair-commit.msi.log",
+                           "msiPid":  22640,
+                           "msiStartFileTime":  134379835149709504,
+                           "msiExitCode":  0,
+                           "guardianEvidence":  [
+                                                    {
+                                                        "key":  "Guardian-13888",
+                                                        "ActualSid":  "S-1-5-21-3896111207-1867804362-1971593122-1001",
+                                                        "Pid":  13888,
+                                                        "CreationFileTime":  134379835151008401,
+                                                        "ArgCount":  2,
+                                                        "TransactionId":  4,
+                                                        "RequestedDecision":  1,
+                                                        "Stage":  "EndReturned",
+                                                        "ObserveAckWait":  0,
+                                                        "JoinExportPresent":  1,
+                                                        "EndExportPresent":  1,
+                                                        "JoinReturn":  0,
+                                                        "OwnerEventBeforeEnd":  258,
+                                                        "EndEntered":  1,
+                                                        "EndReturn":  0,
+                                                        "EndReturned":  1,
+                                                        "AboutToReturnCode":  0
+                                                    }
+                                                ],
+                           "productAfter":  {
+                                                "productState":  5,
+                                                "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":5}\r\n",
+                                                "stderr":  "",
+                                                "pid":  3676,
+                                                "actualExit":  true,
+                                                "exitCode":  0
+                                            },
+                           "payloadAfter":  {
+                                                "keyPresent":  true,
+                                                "valuePresent":  true,
+                                                "value":  1,
+                                                "kind":  "DWord"
+                                            },
+                           "elapsedMillis":  383,
+                           "logBytes":  71334,
+                           "logSha256":  "bd1a8a954ff7b08c29542e425839240c60ce89b7eae7d723691aa10aa52d678c"
+                       },
+                       {
+                           "name":  "uninstall-commit",
+                           "operation":  "75b4813b0b5147ddae5095dc0ee17bb7",
+                           "decision":  1,
+                           "productBefore":  {
+                                                 "productState":  5,
+                                                 "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":5}\r\n",
+                                                 "stderr":  "",
+                                                 "pid":  36588,
+                                                 "actualExit":  true,
+                                                 "exitCode":  0
+                                             },
+                           "payloadBefore":  {
+                                                 "keyPresent":  true,
+                                                 "valuePresent":  true,
+                                                 "value":  1,
+                                                 "kind":  "DWord"
+                                             },
+                           "guardianObserved":  [
+                                                    {
+                                                        "creationFileTime":  134379835154892399,
+                                                        "originalProcessHandleRetained":  true,
+                                                        "actualImageSha256":  "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+                                                        "pid":  2744,
+                                                        "actualExit":  true,
+                                                        "exitCode":  0
+                                                    }
+                                                ],
+                           "physicalMsiExit":  true,
+                           "completion":  "OBSERVED_ORIGINALS_ONLY",
+                           "log":  "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28\\uninstall-commit.msi.log",
+                           "msiPid":  38812,
+                           "msiStartFileTime":  134379835153655623,
+                           "msiExitCode":  0,
+                           "guardianEvidence":  [
+                                                    {
+                                                        "key":  "Guardian-2744",
+                                                        "ActualSid":  "S-1-5-21-3896111207-1867804362-1971593122-1001",
+                                                        "Pid":  2744,
+                                                        "CreationFileTime":  134379835154892399,
+                                                        "ArgCount":  2,
+                                                        "TransactionId":  6,
+                                                        "RequestedDecision":  1,
+                                                        "Stage":  "EndReturned",
+                                                        "ObserveAckWait":  0,
+                                                        "JoinExportPresent":  1,
+                                                        "EndExportPresent":  1,
+                                                        "JoinReturn":  0,
+                                                        "OwnerEventBeforeEnd":  258,
+                                                        "EndEntered":  1,
+                                                        "EndReturn":  0,
+                                                        "EndReturned":  1,
+                                                        "AboutToReturnCode":  0
+                                                    }
+                                                ],
+                           "productAfter":  {
+                                                "productState":  -1,
+                                                "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":-1}\r\n",
+                                                "stderr":  "",
+                                                "pid":  34276,
+                                                "actualExit":  true,
+                                                "exitCode":  0
+                                            },
+                           "payloadAfter":  {
+                                                "keyPresent":  false,
+                                                "valuePresent":  false
+                                            },
+                           "elapsedMillis":  377,
+                           "logBytes":  69528,
+                           "logSha256":  "7baab3db83dbdad279e006a4e2a20917cb14949f6bb815eac27313b169a03eec"
+                       },
+                       {
+                           "name":  "install-rollback",
+                           "operation":  "17e8b683b3cb438f91ad05df729fecfe",
+                           "decision":  0,
+                           "productBefore":  {
+                                                 "productState":  -1,
+                                                 "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":-1}\r\n",
+                                                 "stderr":  "",
+                                                 "pid":  36944,
+                                                 "actualExit":  true,
+                                                 "exitCode":  0
+                                             },
+                           "payloadBefore":  {
+                                                 "keyPresent":  false,
+                                                 "valuePresent":  false
+                                             },
+                           "guardianObserved":  [
+                                                    {
+                                                        "creationFileTime":  134379835158817043,
+                                                        "originalProcessHandleRetained":  true,
+                                                        "actualImageSha256":  "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+                                                        "pid":  36040,
+                                                        "actualExit":  true,
+                                                        "exitCode":  0
+                                                    }
+                                                ],
+                           "physicalMsiExit":  true,
+                           "completion":  "OBSERVED_ORIGINALS_ONLY",
+                           "log":  "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28\\install-rollback.msi.log",
+                           "msiPid":  34168,
+                           "msiStartFileTime":  134379835157532810,
+                           "msiExitCode":  0,
+                           "guardianEvidence":  [
+                                                    {
+                                                        "key":  "Guardian-36040",
+                                                        "ActualSid":  "S-1-5-21-3896111207-1867804362-1971593122-1001",
+                                                        "Pid":  36040,
+                                                        "CreationFileTime":  134379835158817043,
+                                                        "ArgCount":  2,
+                                                        "TransactionId":  8,
+                                                        "RequestedDecision":  0,
+                                                        "Stage":  "EndReturned",
+                                                        "ObserveAckWait":  0,
+                                                        "JoinExportPresent":  1,
+                                                        "EndExportPresent":  1,
+                                                        "JoinReturn":  0,
+                                                        "OwnerEventBeforeEnd":  258,
+                                                        "EndEntered":  1,
+                                                        "EndReturn":  0,
+                                                        "EndReturned":  1,
+                                                        "AboutToReturnCode":  0
+                                                    }
+                                                ],
+                           "productAfter":  {
+                                                "productState":  -1,
+                                                "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":-1}\r\n",
+                                                "stderr":  "",
+                                                "pid":  24628,
+                                                "actualExit":  true,
+                                                "exitCode":  0
+                                            },
+                           "payloadAfter":  {
+                                                "keyPresent":  false,
+                                                "valuePresent":  false
+                                            },
+                           "elapsedMillis":  395,
+                           "logBytes":  129396,
+                           "logSha256":  "29c95b82bab8a42d27f28d76359690fa02b63b8b5a5f86fd32d2de538517c987"
+                       }
+                   ],
+    "cleanup":  "PASS_OWN_PRODUCT_ABSENT_AND_NONCE_REGISTRY_REMOVED",
+    "ordinaryProductStartup":  "NOT_RUN",
+    "productBefore":  {
+                          "productState":  -1,
+                          "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":-1}\r\n",
+                          "stderr":  "",
+                          "pid":  37344,
+                          "actualExit":  true,
+                          "exitCode":  0
+                      },
+    "registryCreation":  {
+                             "parentOpenError":  0,
+                             "createError":  0,
+                             "parentCloseError":  0,
+                             "disposition":  1,
+                             "actualNew":  true,
+                             "nonceWritten":  true,
+                             "sidWritten":  true,
+                             "markersComplete":  true,
+                             "handleDisposed":  true
+                         },
+    "directSinglePackageContractSatisfied":  true,
+    "rollbackInstallerExitCode":  "Recorded verbatim; no predeclared native code substituted for original outcome.",
+    "finalProductState":  {
+                              "productState":  -1,
+                              "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":-1}\r\n",
+                              "stderr":  "",
+                              "pid":  36568,
+                              "actualExit":  true,
+                              "exitCode":  0
+                          },
+    "evidenceBeforeOwnRegistryCleanup":  [
+                                             {
+                                                 "operation":  "8fe4d58215764e45bdf6602144592422",
+                                                 "evidence":  [
+                                                                  {
+                                                                      "key":  "Guardian-29844",
+                                                                      "ActualSid":  "S-1-5-21-3896111207-1867804362-1971593122-1001",
+                                                                      "Pid":  29844,
+                                                                      "CreationFileTime":  134379835146759682,
+                                                                      "ArgCount":  2,
+                                                                      "TransactionId":  2,
+                                                                      "RequestedDecision":  1,
+                                                                      "Stage":  "EndReturned",
+                                                                      "ObserveAckWait":  0,
+                                                                      "JoinExportPresent":  1,
+                                                                      "EndExportPresent":  1,
+                                                                      "JoinReturn":  0,
+                                                                      "OwnerEventBeforeEnd":  258,
+                                                                      "EndEntered":  1,
+                                                                      "EndReturn":  0,
+                                                                      "EndReturned":  1,
+                                                                      "AboutToReturnCode":  0
+                                                                  }
+                                                              ],
+                                                 "name":  "install-commit"
+                                             },
+                                             {
+                                                 "operation":  "32399528cff344d193dffffb0f97bf1b",
+                                                 "evidence":  [
+                                                                  {
+                                                                      "key":  "Guardian-13888",
+                                                                      "ActualSid":  "S-1-5-21-3896111207-1867804362-1971593122-1001",
+                                                                      "Pid":  13888,
+                                                                      "CreationFileTime":  134379835151008401,
+                                                                      "ArgCount":  2,
+                                                                      "TransactionId":  4,
+                                                                      "RequestedDecision":  1,
+                                                                      "Stage":  "EndReturned",
+                                                                      "ObserveAckWait":  0,
+                                                                      "JoinExportPresent":  1,
+                                                                      "EndExportPresent":  1,
+                                                                      "JoinReturn":  0,
+                                                                      "OwnerEventBeforeEnd":  258,
+                                                                      "EndEntered":  1,
+                                                                      "EndReturn":  0,
+                                                                      "EndReturned":  1,
+                                                                      "AboutToReturnCode":  0
+                                                                  }
+                                                              ],
+                                                 "name":  "repair-commit"
+                                             },
+                                             {
+                                                 "operation":  "75b4813b0b5147ddae5095dc0ee17bb7",
+                                                 "evidence":  [
+                                                                  {
+                                                                      "key":  "Guardian-2744",
+                                                                      "ActualSid":  "S-1-5-21-3896111207-1867804362-1971593122-1001",
+                                                                      "Pid":  2744,
+                                                                      "CreationFileTime":  134379835154892399,
+                                                                      "ArgCount":  2,
+                                                                      "TransactionId":  6,
+                                                                      "RequestedDecision":  1,
+                                                                      "Stage":  "EndReturned",
+                                                                      "ObserveAckWait":  0,
+                                                                      "JoinExportPresent":  1,
+                                                                      "EndExportPresent":  1,
+                                                                      "JoinReturn":  0,
+                                                                      "OwnerEventBeforeEnd":  258,
+                                                                      "EndEntered":  1,
+                                                                      "EndReturn":  0,
+                                                                      "EndReturned":  1,
+                                                                      "AboutToReturnCode":  0
+                                                                  }
+                                                              ],
+                                                 "name":  "uninstall-commit"
+                                             },
+                                             {
+                                                 "operation":  "17e8b683b3cb438f91ad05df729fecfe",
+                                                 "evidence":  [
+                                                                  {
+                                                                      "key":  "Guardian-36040",
+                                                                      "ActualSid":  "S-1-5-21-3896111207-1867804362-1971593122-1001",
+                                                                      "Pid":  36040,
+                                                                      "CreationFileTime":  134379835158817043,
+                                                                      "ArgCount":  2,
+                                                                      "TransactionId":  8,
+                                                                      "RequestedDecision":  0,
+                                                                      "Stage":  "EndReturned",
+                                                                      "ObserveAckWait":  0,
+                                                                      "JoinExportPresent":  1,
+                                                                      "EndExportPresent":  1,
+                                                                      "JoinReturn":  0,
+                                                                      "OwnerEventBeforeEnd":  258,
+                                                                      "EndEntered":  1,
+                                                                      "EndReturn":  0,
+                                                                      "EndReturned":  1,
+                                                                      "AboutToReturnCode":  0
+                                                                  }
+                                                              ],
+                                                 "name":  "install-rollback"
+                                             }
+                                         ],
+    "unknownPhysicalOperation":  false
+}

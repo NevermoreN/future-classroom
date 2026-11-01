@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "status": "OFFICIAL_DOCUMENTATION_READ_ONLY_RESEARCH_NOT_RUNTIME_PROOF",
+  "observedUtc": "2026-11-01T04:22:11.423369+00:00",
+  "sources": [
+    {
+      "id": "begin",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msibegintransactionw",
+      "title": "MsiBeginTransactionW",
+      "observedLineReferences": [
+        32,
+        34,
+        64,
+        68,
+        79,
+        95
+      ],
+      "paraphrasedFinding": "Starts a multiple-package transaction. One process owns it. The event signals ownership transfer by Join; leaving no owner causes rollback. Only one open transaction; Windows Installer4.5+, including Win7 Installer5. This event is not a commit/rollback completion signal."
+    },
+    {
+      "id": "join",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msijointransaction",
+      "title": "MsiJoinTransaction",
+      "observedLineReferences": [
+        32,
+        65,
+        74,
+        80,
+        85,
+        86
+      ],
+      "paraphrasedFinding": "Ownership transfer requires same user and related process tree. It is rejected while an active installation is in progress. A live transaction ID is not a generic capability a running deferred CA can adopt at any phase."
+    },
+    {
+      "id": "end",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msiendtransaction",
+      "title": "MsiEndTransaction",
+      "observedLineReferences": [
+        32,
+        50,
+        53,
+        62,
+        65,
+        68,
+        70
+      ],
+      "paraphrasedFinding": "Only current owner ends the transaction. COMMIT runs commit actions and discards rollback script; ROLLBACK undoes transaction installations. Already-running/failure/rollback-disabled errors exist; an end request alone is not successful settlement."
+    },
+    {
+      "id": "embedded",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/msiembeddedchainer-table",
+      "title": "MsiEmbeddedChainer Table",
+      "observedLineReferences": [
+        31,
+        33,
+        35,
+        37,
+        62,
+        65,
+        68,
+        76
+      ],
+      "paraphrasedFinding": "Embedded EXE functions are referenced by a table in the MSI. The engine passes transaction ID; function must Join and End, otherwise early return causes rollback. Only one matching row may run; type2/18/50 only. Prevent advertisement. Documentation does not explicitly establish a no-additional-package guardian or all direct maintenance-mode invocation points."
+    },
+    {
+      "id": "multi",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/multiple-package-installations",
+      "title": "Multiple-Package Installations",
+      "observedLineReferences": [
+        31,
+        34,
+        51,
+        52,
+        55
+      ],
+      "paraphrasedFinding": "Installer4.5+ supports joint transactions including product install/configure/reinstall operations. ForceReboot/ScheduleReboot introduce exceptions, so exclude both. These APIs do not by themselves serialize the application data/runtime."
+    },
+    {
+      "id": "finalize",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/installfinalize-action",
+      "title": "InstallFinalize Action",
+      "observedLineReferences": [
+        32,
+        42,
+        43
+      ],
+      "paraphrasedFinding": "Runs the outstanding installation script and ends its Initialize transaction. It is an action, not a separately exposed native event proving every custom helper has returned. A standalone package transaction and an explicit outer multiple-package transaction must not be conflated."
+    },
+    {
+      "id": "commit",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/commit-custom-actions",
+      "title": "Commit Custom Actions",
+      "observedLineReferences": [
+        31,
+        35,
+        36,
+        37
+      ],
+      "paraphrasedFinding": "Commit CAs run after successful script processing, but failure can still initiate rollback; they are not all-work-finished notification. Commit/rollback CAs are skipped when rollback disabled; forbid that condition."
+    },
+    {
+      "id": "rollback",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/rollback-custom-actions",
+      "title": "Rollback Custom Actions",
+      "observedLineReferences": [
+        30,
+        31,
+        33,
+        35,
+        39,
+        43
+      ],
+      "paraphrasedFinding": "Rollback CA precedes the deferred action it reverses and must tolerate partial interruption. It runs synchronously during rollback; receiving or returning it is not a documented global rollback-completed signal. It must never alone clear maintenance blockage."
+    },
+    {
+      "id": "rep",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/removeexistingproducts-action",
+      "title": "RemoveExistingProducts Action",
+      "observedLineReferences": [
+        30,
+        31,
+        35,
+        36,
+        37,
+        38,
+        49
+      ],
+      "paraphrasedFinding": "Old products are removed through concurrent installations. Early-after-Initialize placement permits no intervening script-generating actions. Supported late transactional ordering is InstallExecute, RemoveExistingProducts, InstallFinalize. Placement after Finalize has different rollback semantics and is not selected."
+    },
+    {
+      "id": "change",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/changing-the-system-state-using-a-custom-action",
+      "title": "Changing the System State Using a Custom Action",
+      "observedLineReferences": [
+        31,
+        32
+      ],
+      "paraphrasedFinding": "Use deferred CAs for system state change, with preceding rollback CAs. An immediate action may set metadata/properties; do not disguise marker mutation or broker launch as an unrestricted immediate cleanup action."
+    },
+    {
+      "id": "context",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/obtaining-context-information-for-deferred-execution-custom-actions",
+      "title": "Obtaining Context Information for Deferred Execution Custom Actions",
+      "observedLineReferences": [],
+      "paraphrasedFinding": "Deferred actions do not retain full original session context; pass bounded canonical CustomActionData, ProductCode and UserSID as documented. Commit actions cannot read ProductCode normally; UserSID is not a substitute for checking the actual process token."
+    },
+    {
+      "id": "exe",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-type-2",
+      "title": "Custom Action Type2",
+      "observedLineReferences": [
+        32,
+        35,
+        49,
+        61,
+        64
+      ],
+      "paraphrasedFinding": "A Binary-table EXE is extracted temporarily; it does not depend on an installed file surviving uninstall. Nonzero exit is failure. Command line is not a safe secret transport and EXE exit is distinct from any child broker it launched."
+    },
+    {
+      "id": "sync",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-return-processing-options",
+      "title": "Custom Action Return Processing Options",
+      "observedLineReferences": [
+        31,
+        35,
+        37,
+        38,
+        40
+      ],
+      "paraphrasedFinding": "Default synchronous mode checks return; Continue hides failure and Async permits late work. Retain default checked synchronous CAs. A separately explicit broker is supervised by owned process handle and fixed IPC, never inferred finished from CA logical ACK."
+    },
+    {
+      "id": "sequence",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/using-a-sequence-table",
+      "title": "Using a Sequence Table",
+      "observedLineReferences": [
+        39,
+        41,
+        43,
+        45,
+        46
+      ],
+      "paraphrasedFinding": "Full/reduced UI sequences are not universal: execute sequence must enforce gate for silent/basic modes as well. Advertise/admin image paths are distinct and must be rejected or explicitly nonmutating."
+    },
+    {
+      "id": "file",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew",
+      "title": "CreateFileW",
+      "observedLineReferences": [
+        66,
+        73,
+        74,
+        77,
+        87,
+        90,
+        93
+      ],
+      "paraphrasedFinding": "Share conflicts reject subsequent incompatible opens; restrictions persist until exact handles close across process contexts. An open shared app handle can block exclusive maintenance, while exclusive maintenance blocks new app opens. Exclude share-delete to pin inode/path; file existence alone does not show ownership."
+    },
+    {
+      "id": "process",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/procthread/terminating-a-process",
+      "title": "Terminating a Process",
+      "observedLineReferences": [
+        31,
+        35,
+        37,
+        38,
+        39,
+        42,
+        43
+      ],
+      "paraphrasedFinding": "Termination sets exit code and signals original process object; resources/handles close, but child processes do not automatically terminate. Retain the actual original process HANDLE; PID reuse, sent STOP, pipe EOF or a completion JSON are not physical process-return proof."
+    }
+  ],
+  "prohibitedInferences": [
+    "ownerChange event is transaction finished",
+    "commit CA cannot fail into rollback",
+    "rollback CA ACK is global rollback completion",
+    "a property or PID/file presence proves exact MSI owner",
+    "no-extra-package chainer and direct cached repair behavior already documented or tested"
+  ],
+  "networkScope": "Only read-only official Microsoft Learn pages; no install, API mutation, Windows or CI operation."
+}

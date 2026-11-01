@@ -1,0 +1,359 @@
+{
+  "status": "CONFIRMED_ACTUAL_CHILD_INTENT_COUNTEREXAMPLE_NOT_PRODUCTION_QUALIFIED",
+  "inputs": [
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/windows-original-first/native-first.json",
+      "bytes": 206951,
+      "sha256": "d8602702835228277a6a5e78e8086ea8d1125ee793a3f5b28b223a738f26b25a"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/windows-original-first/native-first.stdout.log",
+      "bytes": 59998,
+      "sha256": "70b33c650453cebf187820d56be78ae0a15328d75e9cb0ddf6b17d7d9e1437c5"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/windows-original-first/native-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/source-final/registry-write-intent.c",
+      "bytes": 24750,
+      "sha256": "5de00b46563d3dba223088250dce79368520f3fd9974df0eab5ca74ecd002024"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/source-final/registry-write-intent.exe",
+      "bytes": 35045,
+      "sha256": "fc5868521d3d54130daf855a07ae1b703b33bb8f0c3832252970a49f14c75dfc"
+    }
+  ],
+  "actual": {
+    "outerOriginalPid": 36460,
+    "outerCreationFileTime": 134379838882210314,
+    "originalHandleRetained": true,
+    "physicalExit": true,
+    "exitCode": 0,
+    "elapsedMillis": 589,
+    "nativeCases": [
+      {
+        "case": "A",
+        "originalCasePid": 29844,
+        "classification": "SAME_VALUE_WRITE_NOT_CONFLICTED_DELETE_COMMITTED_NOT_BYTES_CAS_COUNTEREXAMPLE",
+        "commit": [
+          {
+            "pid": 29844,
+            "sequence": 21,
+            "tickMillis": 835897890,
+            "name": "tx_commit_return",
+            "code": 0,
+            "detail": 0,
+            "line": 94
+          }
+        ],
+        "final": [
+          {
+            "pid": 29844,
+            "sequence": 28,
+            "tickMillis": 835897890,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 1,
+            "line": 101
+          }
+        ]
+      },
+      {
+        "case": "B",
+        "originalCasePid": 37376,
+        "classification": "SAME_VALUE_WRITE_NOT_CONFLICTED_DELETE_COMMITTED_NOT_BYTES_CAS_COUNTEREXAMPLE",
+        "commit": [
+          {
+            "pid": 37376,
+            "sequence": 25,
+            "tickMillis": 835897937,
+            "name": "tx_commit_return",
+            "code": 0,
+            "detail": 0,
+            "line": 159
+          }
+        ],
+        "final": [
+          {
+            "pid": 37376,
+            "sequence": 32,
+            "tickMillis": 835897937,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 1,
+            "line": 166
+          }
+        ]
+      },
+      {
+        "case": "C",
+        "originalCasePid": 3436,
+        "classification": "SAME_VALUE_WRITE_NOT_CONFLICTED_DELETE_COMMITTED_NOT_BYTES_CAS_COUNTEREXAMPLE",
+        "commit": [
+          {
+            "pid": 3436,
+            "sequence": 25,
+            "tickMillis": 835897984,
+            "name": "tx_commit_return",
+            "code": 0,
+            "detail": 0,
+            "line": 224
+          }
+        ],
+        "final": [
+          {
+            "pid": 3436,
+            "sequence": 32,
+            "tickMillis": 835897984,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 1,
+            "line": 231
+          }
+        ]
+      },
+      {
+        "case": "D",
+        "originalCasePid": 8856,
+        "classification": "SAME_VALUE_WRITE_NOT_CONFLICTED_DELETE_COMMITTED_NOT_BYTES_CAS_COUNTEREXAMPLE",
+        "commit": [
+          {
+            "pid": 8856,
+            "sequence": 25,
+            "tickMillis": 835898031,
+            "name": "tx_commit_return",
+            "code": 0,
+            "detail": 0,
+            "line": 289
+          }
+        ],
+        "final": [
+          {
+            "pid": 8856,
+            "sequence": 32,
+            "tickMillis": 835898031,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 1,
+            "line": 296
+          }
+        ]
+      },
+      {
+        "case": "E",
+        "originalCasePid": 34072,
+        "classification": "SAME_VALUE_WRITE_NOT_CONFLICTED_DELETE_COMMITTED_NOT_BYTES_CAS_COUNTEREXAMPLE",
+        "commit": [
+          {
+            "pid": 34072,
+            "sequence": 25,
+            "tickMillis": 835898078,
+            "name": "tx_commit_return",
+            "code": 0,
+            "detail": 0,
+            "line": 354
+          }
+        ],
+        "final": [
+          {
+            "pid": 34072,
+            "sequence": 32,
+            "tickMillis": 835898078,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 1,
+            "line": 361
+          }
+        ]
+      },
+      {
+        "case": "F",
+        "originalCasePid": 10452,
+        "classification": "CANDIDATE_FALSIFIED_DISTINCT_REPLACEMENT_LOST",
+        "commit": [
+          {
+            "pid": 10452,
+            "sequence": 25,
+            "tickMillis": 835898125,
+            "name": "tx_commit_return",
+            "code": 0,
+            "detail": 0,
+            "line": 419
+          }
+        ],
+        "final": [
+          {
+            "pid": 10452,
+            "sequence": 32,
+            "tickMillis": 835898125,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 1,
+            "line": 426
+          }
+        ]
+      },
+      {
+        "case": "G",
+        "originalCasePid": 40524,
+        "classification": "BASELINE_DISTINCT_REPLACEMENT_LOST",
+        "commit": [
+          {
+            "pid": 40524,
+            "sequence": 21,
+            "tickMillis": 835898171,
+            "name": "tx_commit_return",
+            "code": 0,
+            "detail": 0,
+            "line": 480
+          }
+        ],
+        "final": [
+          {
+            "pid": 40524,
+            "sequence": 28,
+            "tickMillis": 835898171,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 1,
+            "line": 487
+          }
+        ]
+      },
+      {
+        "case": "H",
+        "originalCasePid": 36304,
+        "classification": "NO_COMPETITOR_PROGRESS_OBSERVED",
+        "commit": [
+          {
+            "pid": 36304,
+            "sequence": 18,
+            "tickMillis": 835898203,
+            "name": "tx_commit_return",
+            "code": 0,
+            "detail": 0,
+            "line": 527
+          }
+        ],
+        "final": [
+          {
+            "pid": 36304,
+            "sequence": 23,
+            "tickMillis": 835898203,
+            "name": "final_target_kind",
+            "code": 0,
+            "detail": 1,
+            "line": 532
+          }
+        ]
+      }
+    ],
+    "actualJobZero": 10,
+    "cleanup": "Original native lookup returned FILE_NOT_FOUND for exact own leaf after all owned Job actual zeros; only own synthetic scope.",
+    "registryNonce": "2a1c06d554b9bf3c1067c3439bc077b1"
+  },
+  "F": {
+    "casePid": 10452,
+    "writerPid": 18616,
+    "exactCausalEvents": [
+      {
+        "pid": 10452,
+        "sequence": 9,
+        "tickMillis": 835898109,
+        "name": "tx_create_intent_return",
+        "code": 0,
+        "detail": 1,
+        "line": 392
+      },
+      {
+        "pid": 10452,
+        "sequence": 11,
+        "tickMillis": 835898109,
+        "name": "tx_read_target",
+        "code": 0,
+        "detail": 38,
+        "line": 394
+      },
+      {
+        "pid": 18616,
+        "sequence": 9,
+        "tickMillis": 835898125,
+        "name": "ordinary_set_return",
+        "code": 0,
+        "detail": 0,
+        "line": 409
+      },
+      {
+        "pid": 18616,
+        "sequence": 10,
+        "tickMillis": 835898125,
+        "name": "writer_close_case",
+        "code": 0,
+        "detail": 0,
+        "line": 410
+      },
+      {
+        "pid": 10452,
+        "sequence": 19,
+        "tickMillis": 835898125,
+        "name": "ordinary_actual_exit_BEFORE_target_delete",
+        "code": 0,
+        "detail": 0,
+        "line": 413
+      },
+      {
+        "pid": 10452,
+        "sequence": 21,
+        "tickMillis": 835898125,
+        "name": "tx_delete_target_return",
+        "code": 0,
+        "detail": 0,
+        "line": 415
+      },
+      {
+        "pid": 10452,
+        "sequence": 22,
+        "tickMillis": 835898125,
+        "name": "tx_delete_intent_AFTER_target_stage",
+        "code": 0,
+        "detail": 0,
+        "line": 416
+      },
+      {
+        "pid": 10452,
+        "sequence": 25,
+        "tickMillis": 835898125,
+        "name": "tx_commit_return",
+        "code": 0,
+        "detail": 0,
+        "line": 419
+      },
+      {
+        "pid": 10452,
+        "sequence": 30,
+        "tickMillis": 835898125,
+        "name": "final_query_target",
+        "code": 2,
+        "detail": 256,
+        "line": 424
+      },
+      {
+        "pid": 10452,
+        "sequence": 32,
+        "tickMillis": 835898125,
+        "name": "final_target_kind",
+        "code": 0,
+        "detail": 1,
+        "line": 426
+      }
+    ],
+    "classification": "CANDIDATE_FALSIFIED_DISTINCT_REPLACEMENT_LOST",
+    "predicate": "Different replacement actually set/closed and its original process exit0 observed before target delete; own tx delete0+commit0 followed by absent. Temporary child namespace write supplied no parent-value conflict in this actual execution."
+  },
+  "conclusion": "Child-intent candidate is falsified for this concrete Win11/WOW64 build; do not advance it into production. Same-value A..E outcomes do not substitute for this distinct-value counterexample. H proves only no-competitor progress.",
+  "scope": "Only eight actual synthetic cases and exact-own cleanup; not a full product test or universal proof for a new mechanism."
+}

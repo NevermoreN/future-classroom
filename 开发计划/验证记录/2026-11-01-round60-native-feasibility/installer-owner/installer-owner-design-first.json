@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "status": "CONCRETE_PROTOCOL_DESIGN_WITH_DIRECT_MSI_FEASIBILITY_GATE_NOT_IMPLEMENTED",
+  "recordedUtc": "2026-11-01T04:22:11.423369+00:00",
+  "sourceCommitObserved": "6082dd0173a0b8884c27ac78fda5054275f99f14",
+  "scope": "R60 read-only installer owner research, P5-03/Q13. No repository mutation/build/Windows/install/CI/network mutation; no deleted old scratch accessed. All new records remain in this owned installer-owner directory for later archive/cleanup.",
+  "sourceFacts": [
+    {
+      "path": "AGENTS.md",
+      "bytes": 1514,
+      "sha256": "17c6afd464d32a6636aab0960479a4457e3ece4a073d3f9334a3ffadf80a21af"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round55-ci/installer-lifecycle-next-cut-readonly-first.json",
+      "bytes": 10815,
+      "sha256": "78e23c216b73162882561b4634348e0e81f5c2c2c7f388e21e04c3517c66a787"
+    },
+    {
+      "path": "开发计划/04-开发阶段与任务步骤.md",
+      "bytes": 27561,
+      "sha256": "5038eb9f75a71e33e091dd5142cd1cf2e406f44bdb04c4b72f0b889094efcf78"
+    },
+    {
+      "path": "开发计划/05-测试验收与发布清理.md",
+      "bytes": 39834,
+      "sha256": "e1fc342d7ddf5924f59d41753368cf706d842055c917c45f3239c3b66f836565"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 7057,
+      "sha256": "22904b474322cb96c2ee7afcf7f7c879919cfb68641f98fc9cb595b61332506e"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 36262,
+      "sha256": "d37a1f0275e0dbb45085b5059ced4e415b088b42e093863ecef27feae177679c"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 20199,
+      "sha256": "a8b9d7b433a3300d54f77b6c14c1878f6943e97f03770305ebb6a8095783b04c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 19408,
+      "sha256": "731dbf90fc1b2c297e8010ceacad3b3b257deef52c11b5548210de2bbdc0c50f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 260347,
+      "sha256": "9924f860568ef6adf521411caa01a5331674b6deccdfc027963b7b9fe4794671"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+      "bytes": 23662,
+      "sha256": "dcadeffda5381ec202f077aec780048e48e16ad9ea2ab2be7ae384496f9ec5f0"
+    },
+    {
+      "path": "crates/fc-windows/src/native.rs",
+      "bytes": 21100,
+      "sha256": "f81aa5fa6b1cac6a2777ae0d397264c9829ded85bdc1736b8ade0deadb871776"
+    },
+    {
+      "path": "crates/fc-windows/src/system/paths.rs",
+      "bytes": 23275,
+      "sha256": "15a43c6e75caf7de62c1bdc6e136f631470088b1907e3c33a5f76bccafdf434e"
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun.rs",
+      "bytes": 14491,
+      "sha256": "36aa0a7d6efea53a3da00e97c6a5dd6d46795dff5f38b96f7dff3e6a08af11ca"
+    }
+  ],
+  "primarySources": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/primary-sources-first.json",
+    "bytes": 9828,
+    "sha256": "70dfcd4cc01cf6d9ac522d8e6af56127bff3f23361adfb10212218a61d318a48"
+  },
+  "existingFacts": [
+    {
+      "path": "crates/fc-windows/src/native.rs",
+      "lines": [
+        545,
+        549,
+        576
+      ],
+      "fact": "InstanceGuard is data-root instance.lock based, creates parent/runtime and ignores CloseHandle result in Drop. It cannot alone serve absent-data install gate or trustworthy release receipt."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "lines": [
+        1362,
+        4395,
+        4418,
+        4431,
+        4440,
+        4444,
+        4738,
+        4773
+      ],
+      "fact": "Normal and --autostart converge on app run; writer/shared pool/shell/audio physical-close/joins precede outer return. Extend guard scope around this entire flow, not only setup or logical shutdown."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+      "lines": [
+        424,
+        430,
+        433,
+        437
+      ],
+      "fact": "Independent --repair must acquire the same new installation gate before touching school root or runtime directories. Existing data-root guard remains additional protection."
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "lines": [
+        34,
+        216,
+        217,
+        220,
+        221,
+        228,
+        309,
+        314
+      ],
+      "fact": "Candidate is per-user, fixed private FcInstallDir, no lifecycle CA/Binary currently allowed; old-product removal follows Initialize. Adding a deferred gate before that existing removal is not valid evidence it already executed, and violates early RemoveExistingProducts script restriction if naively authored."
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "lines": [
+        16,
+        28,
+        48,
+        53,
+        55
+      ],
+      "fact": "Active-process refusal and Run exact cleanup remain NOT_IMPLEMENTED; candidate already says data/DB not created. Keep these labels until actual lifecycle protocol is qualified."
+    }
+  ],
+  "decision": {
+    "oneSelectedProtocol": "Per-original-SID physical file-share gate plus durable negative pending marker; one bounded supervised native maintenance broker retains the gate across the actual MSI transaction. Every supported product MSI embeds the gate hook and a transaction guardian, including direct /i, /f and /x routes. Do not ship only an external-wrapper convention.",
+    "nextImplementableIncrement": "Implement and actually validate the cross-process startup/maintenance gate and sticky owner-loss state first, with synthetic owned coordination roots, before relaxing current MSI authoring ban. In parallel build a minimal real MSI embedded-guardian feasibility package; only integrate package tables after its direct maintenance/rollback tests prove the required engine call points.",
+    "noUnsupportedClaim": "Official MsiEmbeddedChainer is a real direct-MSI facility, but the pages do not prove a guardian that installs no additional packages or all repair/uninstall callback phases. Treat this as a blocking narrow feasibility probe, not an approved claim. Carrier+payload alone does not solve direct cached payload repair/uninstall."
+  },
+  "identityAndNamespace": {
+    "key": "Current token SID + fixed UpgradeCode/product family, independent of ProgramData existence and individual ProductCode version. All supported local app entry modes share it, including new cooperative ZIP builds.",
+    "paths": "Resolve original user LocalAppData via trusted Known Folder API; bounded SID-protected coordination sibling outside Programs/FutureClassroom and outside all school data. Pin/validate each parent and exact inode, reject reparse, hardlink alias, wrong owner/DACL or path ambiguity. Installer fixed install path remains LocalAppData/Programs/FutureClassroom; no arbitrary path/property or current_exe-of-msiexec rebinding.",
+    "account": "Compare actual effective token SID, canonical MSI UserSID and preexisting deployment SID if present. Wrong user/SYSTEM/elevated-other-account fails; no HKEY_USERS scan, no DPAPI/open-DB login fabrication. The per-user MSI cannot silently become per-machine.",
+    "legacy": "The first formally supported MSI baseline must include the new cooperative app gate and direct package hooks. Existing development ZIPs and cached uninstrumented MSIs do not honor it. Explicitly do not certify live upgrade against those; no currently released formal baseline is assumed. Existing root instance lock may help detect an old running app, but cannot prevent a legacy binary racing startup when no data root exists."
+  },
+  "gateAlgorithm": [
+    {
+      "step": 1,
+      "actor": "App normal/autostart/repair",
+      "rule": "Before any data-root creation/open, obtain StartupLease: open/create only fixed coordination gate with GENERIC_READ and FILE_SHARE_READ (no WRITE/DELETE sharing). Validate exact parent/inode/SID. Read the pending marker under this same retained lease. Exact absence permits continuing; malformed/inaccessible/present marker refuses. No user-account authentication or new desktop feature login is introduced."
+    },
+    {
+      "step": 2,
+      "actor": "App lifetime",
+      "rule": "Retain StartupLease in outer composition through all workers, SQLite, audio, shell, native/TLS handles and actual threads returning. Existing instance.lock still excludes duplicate normal app instances. A failed logical shutdown cannot release the new lease early; process fault path ends process instead of claiming a clean return."
+    },
+    {
+      "step": 3,
+      "actor": "First executed deferred gate hook",
+      "rule": "Synchronous checked embedded EXE starts/attaches one exact broker. Broker attempts exclusive gate (share mode0). A live app causes refusal before any program-file/installer-state mutation. On success broker creates bounded Pending marker, flushes it and verifies readback before returning BeginAck; no school root/DB initialized. Pending is negative state, not proof broker is alive."
+    },
+    {
+      "step": 4,
+      "actor": "Maintenance broker",
+      "rule": "One operation slot, one gate handle, one fixed-size marker <=4KiB, one local authenticated IPC session and exact guardian process HANDLE, no general path/command server. Bound all reads/messages and original operation deadline. Process-local statics may bound one process only; correctness rests on OS share owner+persisted marker, not CA reuse assumptions."
+    },
+    {
+      "step": 5,
+      "actor": "Owner loss / expiry / crash",
+      "rule": "Never infer success from STOP request, ownerChange event, PID disappearance, expired lease or present/missing broker pipe. Pending marker remains blocked when the broker dies or deadline elapses; absent physical gate does not override it. Unknown/torn marker parses blocked. Do not delete it or restart another owner automatically."
+    }
+  ],
+  "installerTransactionProtocol": [
+    {
+      "step": 1,
+      "name": "Prepare metadata",
+      "rule": "Immediate action only captures bounded canonical install identity/operation and CA data. No marker write or broker mutation from an immediate action. Reject rollback-disabled, ForceReboot/ScheduleReboot, unsupported install context/mode, transforms outside reviewed package boundary and unsupported path moves."
+    },
+    {
+      "step": 2,
+      "name": "Guard actual script",
+      "rule": "Precede first deferred BeginGate with its rollback companion; it must be the first actual state-changing script action. No raw parent msiexec PID/cross-CA static needed. Every later mutation asks broker to validate exact operation/generation and leaves marker blocked on missing owner."
+    },
+    {
+      "step": 3,
+      "name": "Major upgrade sequencing",
+      "rule": "Move old-product removal to the documented transactional InstallExecute -> RemoveExistingProducts -> InstallFinalize region, keeping BeginGate first in the script run by InstallExecute. Do not place a script-generating gate between current Initialize and early RemoveExistingProducts. Preserve component GUID rules and independently ICE/table/runtime verify this authoring change."
+    },
+    {
+      "step": 4,
+      "name": "Embedded transaction guardian",
+      "rule": "Selected candidate is a single MsiEmbeddedChainer type2 Binary-table EXE, not an installed EXE removed during uninstall and not UI-only embedded handler. At the engine-supported inactive cut it calls MsiJoinTransaction, keeps original transaction ID/ownerChange event, and ends the original transaction explicitly. Join failure denies release; event signals transfer only. Verify no-extra-package form in real MSI before integration."
+    },
+    {
+      "step": 5,
+      "name": "End exact transaction",
+      "rule": "Guardian calls MsiEndTransaction(COMMIT) only after all approved package operations; on any failure/cancel use ROLLBACK while still exact current owner. Retain actual UINT/result, mode and original operation. Any non-success, ownership transfer away, rollback-disabled/active-installation result, abnormal return or cleanup error remains OutcomeUnknown/Blocked; do not retry commit or replay installation."
+    },
+    {
+      "step": 6,
+      "name": "Physical delivery fence",
+      "rule": "Guardian explicitly closes transaction/event handles and its native work, publishes bounded settled receipt to broker, then exits. Broker holds original exact guardian process object, checks actual process signal+exit0 and receipt operation/generation+owner history. No child process can escape accounting. Physical lease remains held after mere receipt/pipe EOF and through physical guardian return."
+    },
+    {
+      "step": 7,
+      "name": "Positive release",
+      "rule": "Only after a known settled COMMIT, or a known completed ROLLBACK with verified previous exact installed-state/payload manifest, and all native resources returned, broker clears exact Pending marker under exclusive gate, verifies absence, closes IPC/process/control handles and finally the exact gate. Close failure is retained/faulted and never reported Released. Native owner return is physical boundary, not last CA scheduled or callback ACK."
+    }
+  ],
+  "directMsiAndRepairBoundary": {
+    "normalProductMsi": "One qualified package must carry all gate/guardian hooks in cached execute sequence. User may invoke normal MSI directly, quiet or full UI, without an outer setup EXE. Normal install/repair/uninstall all require BeginGate and settlement.",
+    "carrierNotSufficient": "A separate carrier MSI may help a feasibility experiment but is not accepted as the only owner. An installed payload directly repaired or uninstalled by product code must itself gate and either run its own qualified guardian or explicitly fail before mutation; the latter is a safe diagnostic fallback, not completion of the original direct-maintenance requirement.",
+    "delegation": "If a qualified outer transaction installs/removes a cooperative inner package, a table property may select delegated mode only after first hook authenticates the exact live broker receipt, SID/family/fixed path and original operation/generation. A user-supplied flag alone never bypasses the gate. Inner hooks cannot clear outer Pending or release its owner. Nested chainer suppression/handoff must be tested because a matching embedded function returning without End is specified to trigger rollback.",
+    "repair": "Application --repair uses StartupLease, entirely distinct from Windows Installer repair. MSI repair is a maintenance writer and must obtain exclusive MaintenanceOwner. Auto-repair/self-heal either enters the same supported transaction protocol or refuses safely; no silent ungated file replacement."
+  },
+  "rollbackAndRecovery": {
+    "normalRollback": "A rollback CA only informs broker that rollback started/owner is still live; it never clears Pending. For positive reopening require successful explicit MsiEndTransaction(ROLLBACK), exact owner retained, verification that old product/package/payload state is coherent, handle cleanup and actual guardian exit. Return success is not a proof every arbitrary external CA effect was undone: keep CAs limited/reviewed and verify their actual owned effects.",
+    "rollbackFailureOrMissingCompletion": "Leave Pending, do not label old config restored. Broker may exit at original finite budget but state stays blocked. No process termination of arbitrary msiexec and no heuristic polling of every system installer.",
+    "recovery": "An explicit trusted maintenance recovery under a new actual MSI serialized transaction may examine stale record and complete repair/rollback, but no startup-side stale-marker garbage collection. If prior transaction end cannot be proved, recover by an actual new qualified maintenance operation and validated installed-state reconciliation; simply absent PID/no files/productState is not enough.",
+    "powerLoss": "Persisted negative state provides fail-closed restart behavior under ordinary filesystem outcomes. No universal power-loss/disk-controller durability guarantee inferred from FlushFileBuffers. Partial/corrupt marker always blocks; no fallback to an older Ready record. Test real reboot/power failure separately before claiming that gate."
+  },
+  "concreteApisAndFiles": [
+    {
+      "file": "crates/fc-windows/src/installer_lifecycle.rs (+ child platform.rs/tests.rs)",
+      "apis": [
+        "InstallIdentity::for_current_user(fixed_family: FixedInstallFamily) -> Result<InstallIdentity>",
+        "LifecycleGate::acquire_startup(identity: &InstallIdentity, mode: StartupMode) -> Result<StartupLease>",
+        "LifecycleGate::try_begin_maintenance(identity: InstallIdentity, operation: MaintenanceOperation, original_deadline: Instant) -> Result<MaintenanceOwner>",
+        "MaintenanceOwner::accept_guardian(exact_process: OwnedProcess, binding: OperationBinding) -> Result<()>",
+        "MaintenanceOwner::settle_after_actual_return(receipt: EndReceipt) -> Result<ReleasedOrBlocked>"
+      ],
+      "constraints": "Opaque nonclone owners; constructors accept fixed trusted identity, not arbitrary user paths. Shared metadata <=4KiB+fixed handles. Explicit release returns error and retains failed owner; Drop cannot silently turn failure into successful release."
+    },
+    {
+      "file": "crates/fc-bootstrap/src/main.rs / application.rs / reinitialize_application.rs",
+      "apis": [
+        "one common native startup guard for manual/--autostart/--repair entry",
+        "hold through original outer run return or actual process shutdown"
+      ],
+      "constraints": "No extra resident pool/thread. This native lifecycle gate precedes school data and does not add authentication to public desktop buttons."
+    },
+    {
+      "file": "existing fc-bootstrap package additional isolated installer helper binary target (final placement to approve before code)",
+      "apis": [
+        "fixed-role gate-begin EXE",
+        "transaction-guardian EXE role parsing engine transaction ID",
+        "single supervised maintenance broker role"
+      ],
+      "constraints": "No extra crate/dependency edge assumed; no app DB/domain initialization, no normal listener, no arbitrary command executor. Dedicated maintenance process is finite, not an additional classroom worker pool."
+    },
+    {
+      "file": "scripts/package-msi-candidate.py / check-msi-candidate.py / packaging/MSI-CANDIDATE.md",
+      "apis": [
+        "explicit bounded Binary+gate CA+one MsiEmbeddedChainer allowlist",
+        "execute/rollback/upgrade/repair/uninstall exact sequence validator",
+        "separate immutable gate protocol version in manifest"
+      ],
+      "constraints": "Current broad no-CA ban must remain until approved narrow implementation/probe. Do not delete unrelated standard table checks, change fixed install path or call standard RemoveRegistry for Run."
+    }
+  ],
+  "firstRealFeasibilityProbe": {
+    "stopBeforeProductIntegration": "Use one disposable synthetic MSI with no school data and owned fixed temporary account namespace. Trace gate-held points and actual guardian process/End return. No product source change is authorized by this research.",
+    "blockingQuestions": [
+      "Does Windows Installer5 accept an embedded guardian that adds no other package and invokes Join/End for the current package? Official text does not explicitly promise it.",
+      "For /i, /f and /x plus cached ProductCode repair/uninstall, are direct gate and guardian executed once at a safe inactive transaction point, including /qn/basic/full?",
+      "Can first deferred gate actually run before every install/remove/registry script effect under authored InstallExecute/RemoveExistingProducts ordering?",
+      "Can normal rollback be explicitly ended with a known success, preserving the original owner through actual guardian exit? What exact return codes occur on owner death, partial rollback and disabled rollback?",
+      "Can concurrent old-product uninstall validate delegated live owner without a second function prematurely ending the outer transaction?"
+    ],
+    "failureDisposition": "If any mode lacks proven end/return ownership, leave marker blocked and keep product MSI lifecycle NOT_IMPLEMENTED. Do not patch around it with a wrapper-only rule, manual marker deletion, polling productState or guessing that commit/rollback callback means completion."
+  },
+  "necessaryActualValidation": [
+    "Cross-process sameSID app holds shared gate, maintenance exclusive acquisition fails before mutation; maintenance first blocks manual/autostart/appRepair at entry. No ProgramData exists in a separate case; gate still works without creating school root.",
+    "Hold actual last worker/TLS/destructor resource after logical app close; maintenance remains refused until original lease closes. Inject CloseHandle failure or retained-owner simulation and prove no replacement/Released.",
+    "Direct MSI full/basic/quiet install, repair and uninstall; direct cached payload productcode actions; user flags/delegation forgery; wrongSID/wrong fixedpath; first-run empty root and active old baseline cases.",
+    "Inject cancel before beginAck, after Pending durable write, before/after file staging, during old remove, before End, after End result but before process exit and after helper loss. Normal COMMIT/ROLLBACK positive release only with actual owner return; all unknowns block.",
+    "Signal ownerChange without End; close a pipe/sendSTOP/logreceipt while original guardian alive; PID reuse; broker/process deaths; old nested action completion cannot unlock a later or outer operation.",
+    "Rollback normal end verifies old exact payload/state before reopening; rollback failure/disabled/power loss keeps blocked across relaunch. No automatic marker timeout or file-existence liveness assumption.",
+    "Qualified cooperative versionA->B->rollback->uninstall preserves classroom data and startup intent. Existing devZIP/no-gate baseline is explicitly unsupported rather than silently upgraded.",
+    "Re-run formal Win7SP1x86/Win10/Win11 actual lifecycle and visibleSeewo QA separately. No current CI/artifact/browser result substitutes for install/reboot/upgrade evidence."
+  ],
+  "nonGoalsAndUnsolved": [
+    "Exact HKCU Run compare-delete remains separately unresolved after R56 real counterexample/withdrawal; owner protocol excludes cooperating app re-enables but cannot exclude arbitrary external registry writers. Do not reintroduce rejected TxR CAS or author Run removal based on this design.",
+    "No school data deletion/migration, app login bypass, production listener enabling, installer launch of the normal app, system certificate/firewall/service/Run mutation in this research.",
+    "No release/MSI qualification claimed; P5-01/P5-02/P5-06/P5-03/Q13 remain their original gates."
+  ],
+  "conclusion": "Implement the bounded native physical gate/negative persistence slice now only after parent scopes code; qualify direct embedded transaction guardian with an actual small MSI next. Official sources justify ownership transfer and explicit transaction end semantics, but do not close the zero-additional-package/all-maintenance timing questions. Until that probe succeeds, honest lifecycle status is partial implementation/proposed integration, never complete MSI owner protection."
+}

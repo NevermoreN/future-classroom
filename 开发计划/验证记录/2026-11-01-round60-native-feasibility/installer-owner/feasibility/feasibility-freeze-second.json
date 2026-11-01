@@ -1,0 +1,49 @@
+{
+  "status": "FROZEN_SECOND_RUNNER_SOURCE_ONLY_WINDOWS_PENDING_REVIEW",
+  "scope": "Minimal evidence-local runner-only registry ownership and conservative physical-cleanup fix; MSI, guardian and first freeze unchanged.",
+  "firstFreeze": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/feasibility-freeze-first.json",
+    "bytes": 4208,
+    "sha256": "944e28832695702d427b21bcde2bfbb121c93d23ec7976977d5dd22d23ce2722"
+  },
+  "secondImmutableRunner": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-owner-second/run-windows-probe.ps1",
+    "bytes": 23507,
+    "sha256": "99fbaa6659ce62c157b7e8f6241d74f8f68f5d94f9a35037af809a33406ca3dc"
+  },
+  "runnerActiveEqualsImmutable": true,
+  "review": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/owner-boundary-review-second.json",
+    "bytes": 4627,
+    "sha256": "35805a4062d7e90a803b6fb6f081dea97ef9dd8dceef80f739dca74ba66fed87"
+  },
+  "contract": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-run-contract-second.json",
+    "bytes": 11628,
+    "sha256": "df05f4e63eb912d25c15990dc2e4e1c91dd1b5ac2d329dbc79339dced31c699b"
+  },
+  "patch": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/owner-second.patch",
+    "bytes": 16303,
+    "sha256": "a6da462fb8701a3e0f69f6965166dbaada2c5d58ee5606e4fa14b3674d732038"
+  },
+  "unchangedMsi": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.msi",
+    "bytes": 266752,
+    "sha256": "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e"
+  },
+  "unchangedGuardian": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/guardian.exe",
+    "bytes": 253577,
+    "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f"
+  },
+  "freezeHelper": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/freeze-owner-second.py",
+    "bytes": 8109,
+    "sha256": "6026122f6974f1a7e9638bef55d00e939e3d413ae747e69307ea94feb92b9de0"
+  },
+  "windowsSyntax": "NOT_PARSED_NO_LOCAL_PWSH",
+  "windowsExecution": "NOT_RUN",
+  "mainR61RustCargo": "NOT_TOUCHED",
+  "furtherWrites": "Stop writing this R60 evidence root after this freeze; root reviews and archives later."
+}

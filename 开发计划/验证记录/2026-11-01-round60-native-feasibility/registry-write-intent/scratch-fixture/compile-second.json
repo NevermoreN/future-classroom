@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/usr/bin/i686-w64-mingw32-gcc",
+    "-std=c11",
+    "-Os",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-ffreestanding",
+    "-fno-builtin",
+    "-nostdlib",
+    "-mconsole",
+    "-Wl,--entry,_entry",
+    "-o",
+    "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.exe",
+    "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c",
+    "-ladvapi32",
+    "-lktmw32",
+    "-lkernel32",
+    "-lgcc"
+  ],
+  "exitCode": 0,
+  "sourceBytes": 19581,
+  "sourceSha256": "49ca41acfa69b33e9ced48a0c742451c34b80f00bf9826da846ef92faefcf995",
+  "stdoutBytes": 0,
+  "stderrBytes": 0
+}

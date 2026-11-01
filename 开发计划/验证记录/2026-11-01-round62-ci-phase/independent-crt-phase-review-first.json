@@ -1,0 +1,82 @@
+{
+  "status": "PASS_INDEPENDENT_READ_ONLY_REVIEW_NO_BUG_FOUND",
+  "reviewedUtc": "2026-11-01T05:23:11.972600+00:00",
+  "reviewer": "ci_phase_review",
+  "sourceSha256": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886",
+  "checkerSha256": "fdb57f148868845f4f75d5b2d7246f850080d42e86f894ad91fef520e6c9a05a",
+  "scope": "Read-only source and original receipt review; no Cargo, Windows, CI, network or product execution by reviewer. Only this JSON and adjacent digest are created.",
+  "findings": {
+    "exactCasePhaseAllowlist": [
+      "before-vs",
+      "after-vs",
+      "before-cargo",
+      "before-product",
+      "after-product"
+    ],
+    "expectedFlagsBoundToBaselineAndPhase": true,
+    "win7GuiSubsystemOnlyBeforeProduct": true,
+    "otherWin7PhasesRequireConsole61": true,
+    "modernRetainsStaticCrtFlags": true,
+    "actualFlagsRecordedBeforeMismatchRejection": true,
+    "encodedOverrideRejected": true,
+    "productFinallyRestoresOriginalFlagsAndChecksBaseline": true,
+    "checkerExecutesAstExtractedRealFunctions": true,
+    "checkerReplacesOnlyJsonWriterWithMemorySink": true,
+    "positiveCalls": 10,
+    "negativeCalls": 7,
+    "negativeCallsNotTextModel": true,
+    "compilerEnvironmentRestoredInCheckerFinally": true,
+    "diffLimitedToNewPhaseHelperAndWriterPrecondition": true,
+    "budgetsCargoArgumentsAndProductSourceUnchanged": true,
+    "issues": []
+  },
+  "rawReceipts": {
+    "windows-crt-phase-fixed-first": {
+      "receiptSha256": "dcd9a591556298f787fbd052e2a8b56ea488c73a7ad64d5b02b4a937d4448699",
+      "stdoutSha256": "cd64f4f2605d2a3d61e95c8ed0592634d453d627f04ae64f63f87ea2646b037e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutEqualsOriginal": true,
+      "encodedInputPayloadsMatchReceiptHashes": true,
+      "powershell": "5.1.26100.9711",
+      "status": "PASS_REAL_CRT_FUNCTION_MEMORY_SINK"
+    },
+    "windows-gui-contract-fixed-first": {
+      "receiptSha256": "d557b334647397a2fab0af9512839c368e82ddbe9f691a8bdf7a6df8fcb63d7a",
+      "stdoutSha256": "ac2793dc73497ee8231d9a64c766fe19791b51e9cca820b14a4c710d77254cec",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutEqualsOriginal": true,
+      "encodedInputPayloadsMatchReceiptHashes": true,
+      "powershell": "5.1.26100.9711",
+      "status": "PASS_PURE_POWERSHELL_GUI_CONTRACT_ONLY"
+    }
+  },
+  "previousFailedRuns": [
+    {
+      "baseline": "modern",
+      "runId": 41275211935,
+      "overallConclusion": "FAILED",
+      "failure": "Invalid CRT flag phase.",
+      "workspaceTestCompileExitCode": 0,
+      "workspaceTestCompileSeconds": 858.8400666,
+      "productCompileStarted": false,
+      "zipSha256": "af369e222fd5080752c61239e3bed1bccd161debe665bcaec6ac5b172a196c67",
+      "expandedFilesMatchOriginalZip": true
+    },
+    {
+      "baseline": "win7",
+      "runId": 41275263022,
+      "overallConclusion": "FAILED",
+      "failure": "Invalid CRT flag phase.",
+      "workspaceTestCompileExitCode": 0,
+      "workspaceTestCompileSeconds": 859.285258,
+      "productCompileStarted": false,
+      "zipSha256": "ff2fcf1079bdf12ffc250e29913484f9c247a96e9ebd9b6c7f4b726122e46d16",
+      "expandedFilesMatchOriginalZip": true
+    }
+  ],
+  "limitations": [
+    "PowerShell 5.1 checker receipts validate extracted functions only; hosted entrypoint requires PowerShell 7.2+.",
+    "No complete CI/product build pass exists for these two failed runs.",
+    "No Windows 7/10/11 application runtime or actual product PE proof added by this review."
+  ]
+}

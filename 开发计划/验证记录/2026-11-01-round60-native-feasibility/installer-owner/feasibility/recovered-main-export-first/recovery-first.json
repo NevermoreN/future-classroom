@@ -1,0 +1,265 @@
+{
+  "status": "PASS_EXACT_OWN_BINARY_RECOVERED_MAIN_BINARY_STATUS_EMPTY",
+  "scope": "Recover only exact R60 exported guardian stream accidentally written in inherited main cwd; no main source or other file mutation.",
+  "before": {
+    "path": "/workspace/共享/Eliora/未来教室计划/Binary/Binary.Guardian",
+    "bytes": 253577,
+    "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+    "device": 173,
+    "inode": 45858289,
+    "mode": 33188,
+    "mtimeNs": 1793507870829742491,
+    "ctimeNs": 1793507870845743125
+  },
+  "attributionReferences": [
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/guardian.exe",
+      "bytes": 253577,
+      "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+      "device": 1048772,
+      "inode": 1434062,
+      "mode": 33261,
+      "mtimeNs": 1793507870447727360,
+      "ctimeNs": 1793507870447727360
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/independent-guardian-stream.stdout.log",
+      "bytes": 253577,
+      "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+      "device": 1048772,
+      "inode": 1434158,
+      "mode": 33188,
+      "mtimeNs": 1793507870853743441,
+      "ctimeNs": 1793507870853743441
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/Binary/Binary.Guardian",
+      "bytes": 253577,
+      "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+      "device": 1048772,
+      "inode": 1434132,
+      "mode": 33188,
+      "mtimeNs": 1793507870690736985,
+      "ctimeNs": 1793507870690736985
+    }
+  ],
+  "exportCommand": {
+    "name": "table-Binary",
+    "argv": [
+      "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+      "export",
+      "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.msi",
+      "Binary"
+    ],
+    "actualExit": true,
+    "exitCode": 0,
+    "elapsedSeconds": 0.022829765919595957,
+    "stdout": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/independent-table-Binary.stdout.log",
+      "bytes": 58,
+      "sha256": "8d46dac1a420571b0d6408d472e925d034c89a0d6a16893b19039912d7be9e3b"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/independent-table-Binary.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "rootCause": {
+    "helper": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/verify-static.py",
+      "bytes": 7150,
+      "sha256": "27aac0f8726f82d74d66bcab0e8e13f650406d9f2fa6f6232ff7c95efa4e3715",
+      "device": 1048772,
+      "inode": 1432374,
+      "mode": 33188,
+      "mtimeNs": 1793507869511690285,
+      "ctimeNs": 1793507869511690285
+    },
+    "subprocessCwd": "Not specified; inherited main cwd for the independent audit invocation.",
+    "sideEffect": "msiinfo export Binary writes the Binary-table embedded stream into relative Binary/Binary.Guardian. Builder already used cwd=out; independent verifier omitted it.",
+    "evidenceLimit": "Original command JSON did not record cwd; source omission, exact stream identity and matching final artifact timing support attribution, not a newly rerun tool experiment."
+  },
+  "move": {
+    "method": "exclusive copy+fsync+byte/SHA recheck then unlink only original exact file (cross-filesystem)",
+    "destination": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/recovered-main-export-first/Binary.Guardian",
+      "bytes": 253577,
+      "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+      "device": 1048772,
+      "inode": 1436285,
+      "mode": 33188,
+      "mtimeNs": 1793508919990292086,
+      "ctimeNs": 1793508919990292086
+    },
+    "sourceAbsent": true
+  },
+  "mainDirectory": {
+    "path": "/workspace/共享/Eliora/未来教室计划/Binary",
+    "childrenBefore": [
+      "Binary.Guardian"
+    ],
+    "childrenAfter": [],
+    "removed": false,
+    "reason": "Filesystem birthtime unavailable and no pre-tool directory absence snapshot. Empty directory preserved rather than assert physical NEW ownership."
+  },
+  "git": {
+    "trackedBefore": {
+      "argv": [
+        "git",
+        "ls-files",
+        "--",
+        "Binary"
+      ],
+      "cwd": "/workspace/共享/Eliora/未来教室计划",
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/recovered-main-export-first/tracked-before.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "device": 1048772,
+        "inode": 1436281,
+        "mode": 33188,
+        "mtimeNs": 1793508919939290066,
+        "ctimeNs": 1793508919939290066
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/recovered-main-export-first/tracked-before.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "device": 1048772,
+        "inode": 1436282,
+        "mode": 33188,
+        "mtimeNs": 1793508919939290066,
+        "ctimeNs": 1793508919939290066
+      }
+    },
+    "statusBefore": {
+      "argv": [
+        "git",
+        "status",
+        "--short",
+        "--untracked-files=all"
+      ],
+      "cwd": "/workspace/共享/Eliora/未来教室计划",
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/recovered-main-export-first/status-before.stdout.log",
+        "bytes": 70065,
+        "sha256": "30684eae0bb351087d18eb1208af02f4073554f43819f26b75a380d16d10ebeb",
+        "device": 1048772,
+        "inode": 1436283,
+        "mode": 33188,
+        "mtimeNs": 1793508919989292046,
+        "ctimeNs": 1793508919989292046
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/recovered-main-export-first/status-before.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "device": 1048772,
+        "inode": 1436284,
+        "mode": 33188,
+        "mtimeNs": 1793508919989292046,
+        "ctimeNs": 1793508919989292046
+      }
+    },
+    "statusAfter": {
+      "argv": [
+        "git",
+        "status",
+        "--short",
+        "--untracked-files=all"
+      ],
+      "cwd": "/workspace/共享/Eliora/未来教室计划",
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/recovered-main-export-first/status-after.stdout.log",
+        "bytes": 70039,
+        "sha256": "c287f32c4b0f4c26a02923a6f187e0917f171f5b1c29f8be0ef92d2741377c25",
+        "device": 1048772,
+        "inode": 1436286,
+        "mode": 33188,
+        "mtimeNs": 1793508920063294977,
+        "ctimeNs": 1793508920063294977
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/recovered-main-export-first/status-after.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "device": 1048772,
+        "inode": 1436287,
+        "mode": 33188,
+        "mtimeNs": 1793508920063294977,
+        "ctimeNs": 1793508920063294977
+      }
+    },
+    "binaryStatusAfter": {
+      "argv": [
+        "git",
+        "status",
+        "--short",
+        "--untracked-files=all",
+        "--",
+        "Binary"
+      ],
+      "cwd": "/workspace/共享/Eliora/未来教室计划",
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/recovered-main-export-first/status-binary-after.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "device": 1048772,
+        "inode": 1436288,
+        "mode": 33188,
+        "mtimeNs": 1793508920071295293,
+        "ctimeNs": 1793508920071295293
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/recovered-main-export-first/status-binary-after.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "device": 1048772,
+        "inode": 1436289,
+        "mode": 33188,
+        "mtimeNs": 1793508920071295293,
+        "ctimeNs": 1793508920071295293
+      }
+    },
+    "binaryHasNoTrackedOrUntrackedFiles": true,
+    "wholeStatusScope": "Other current root-owned changes only recorded verbatim, not modified or interpreted by this recovery."
+  },
+  "futureToolFix": {
+    "newHelper": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/verify-static-cwd-fixed-first.py",
+      "bytes": 7160,
+      "sha256": "8ab6ec6f5c2c53d3ec9cfdf0c88fe8517e3af01493b43d7895c30f6f64518856",
+      "device": 1048772,
+      "inode": 1436290,
+      "mode": 33188,
+      "mtimeNs": 1793508920071295293,
+      "ctimeNs": 1793508920071295293
+    },
+    "PythonAST": "PASS_SYNTAX_ONLY_NOT_EXECUTED",
+    "change": "All independent msiinfo subprocesses now have explicit cwd=build; use only this new helper in a freshly owned output build context. Frozen old helper remains for history, not execution.",
+    "oldHelperUnchanged": true,
+    "newPatch": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/recovered-main-export-first/verify-static-cwd-fixed.patch",
+      "bytes": 982,
+      "sha256": "53c59399e3a140f14b2881bd25d55f6853a462794b011716cb0c3eb027252a8c",
+      "device": 1048772,
+      "inode": 1436291,
+      "mode": 33188,
+      "mtimeNs": 1793508920074295412,
+      "ctimeNs": 1793508920074295412
+    }
+  },
+  "notRun": [
+    "Windows",
+    "Cargo",
+    "MSI tools",
+    "Git mutation",
+    "main source edits",
+    "unknown-file removal"
+  ]
+}

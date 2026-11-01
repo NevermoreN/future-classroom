@@ -1,0 +1,304 @@
+{
+  "status": "PASS_ATTRIBUTION_TO_EXACT_SYNTHETIC_FIXTURE_ONLY",
+  "scope": "Only local backed-up SourceHash CFB and existing original logs/reports. Root alone performed actual Windows cleanup. No remote/Windows execution by this reviewer.",
+  "fixture": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.json",
+    "bytes": 648,
+    "sha256": "a53cd183503fe2e426814bec11280138fa3b4dc54542f7b3e952f299d51eed0b"
+  },
+  "productCode": "{51C60258-197D-4EA2-8859-F59ABA07AC38}",
+  "nonce": "e3365555af2a409eba9bb94ab37b0e28",
+  "backedOriginal": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/sourcehash-owned-original.bin",
+    "bytes": 20480,
+    "sha256": "f4beae102ae1cc02fdf9583ed7f21a34258310ab73b077862fab47d11a05b79e"
+  },
+  "oleCfbHeader": "d0cf11e0a1b11ae1",
+  "originalWindowsPath": "C:\\Windows\\Installer\\SourceHash{51C60258-197D-4EA2-8859-F59ABA07AC38}",
+  "rawContentObservations": {
+    "msiinfoTables": [
+      "_SummaryInformation",
+      "_ForceCodepage",
+      "SourceHash"
+    ],
+    "msiinfoStreams": [],
+    "suminfoOutputBytes": 0,
+    "asciiFixtureMsiOffset": 16468,
+    "internalProductCodeAsciiOffset": -1,
+    "sourceHashTableExport": "FAIL_ACTUAL_EXIT1 Table size is invalid8/6; table contents NOT_DECODED. No corruption or successful hash-row validation claim follows from this library error."
+  },
+  "commands": [
+    {
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "tables",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/sourcehash-owned-original.bin"
+      ],
+      "cwd": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first",
+      "actualExit": true,
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "streams",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/sourcehash-owned-original.bin"
+      ],
+      "cwd": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first",
+      "actualExit": true,
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "suminfo",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/sourcehash-owned-original.bin"
+      ],
+      "cwd": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first",
+      "actualExit": true,
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/sourcehash-owned-original.bin",
+        "SourceHash"
+      ],
+      "cwd": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first",
+      "actualExit": true,
+      "exitCode": 1
+    }
+  ],
+  "rawToolStreams": [
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first/tables.stdout.log",
+      "bytes": 46,
+      "sha256": "bba0d16de0fe9d9e4bcd1eb00a004f30dc9ebe5721d530924210545088719866"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first/tables.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first/streams.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first/streams.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first/suminfo.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first/suminfo.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first/sourcehash-table.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first/sourcehash-table.stderr.log",
+      "bytes": 194,
+      "sha256": "51ccc0c4c40e9fa26f78529944c127cdfd0c2468c660e13557382cca1d8f8a32"
+    }
+  ],
+  "explicitOwnedCwd": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/sourcehash-independent-first",
+  "backupMetadataOriginal": {
+    "identity": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-sourcehash-backup-first.json",
+      "bytes": 284,
+      "sha256": "49c2923c48c1f80441d4d99fe4365ae632944697f76b396aa697023292f704e3"
+    },
+    "original": {
+      "sha256": "f4beae102ae1cc02fdf9583ed7f21a34258310ab73b077862fab47d11a05b79e",
+      "bytes": 20480,
+      "path": "C:\\Windows\\Installer\\SourceHash{51C60258-197D-4EA2-8859-F59ABA07AC38}",
+      "modifiedUtc": "2026-11-01T05:11:55.8280000Z",
+      "createdUtc": "2026-11-01T05:11:54.6034244Z"
+    }
+  },
+  "logBinding": [
+    {
+      "identity": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/install-commit.msi.log",
+        "bytes": 78856,
+        "sha256": "ec95c41b569859b1b4db2c5784d2a393b583abd9d63f3a36b6bf3518ffbaf99b"
+      },
+      "encoding": "UTF16_BOM",
+      "matches": [
+        {
+          "line": 5,
+          "text": "           ******* Product: C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28\\fixture.msi"
+        },
+        {
+          "line": 18,
+          "text": "           ******* Product: C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28\\fixture.msi"
+        },
+        {
+          "line": 54,
+          "text": "MSI (s) (74:78) [13:11:54:552]: Product Code from property table after transforms:  '{51C60258-197D-4EA2-8859-F59ABA07AC38}'"
+        },
+        {
+          "line": 230,
+          "text": "MSI (s) (74:78) [13:11:54:602]: SECREPAIR: Hash Database: C:\\Windows\\Installer\\SourceHash{51C60258-197D-4EA2-8859-F59ABA07AC38}"
+        },
+        {
+          "line": 446,
+          "text": "MSI (s) (74:78) [13:11:54:654]: Product: FutureClassroom synthetic transaction feasibility e3365555af2a409eba9bb94ab37b0e28 -- Installation completed successfully."
+        }
+      ]
+    },
+    {
+      "identity": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/repair-commit.msi.log",
+        "bytes": 71334,
+        "sha256": "bd1a8a954ff7b08c29542e425839240c60ce89b7eae7d723691aa10aa52d678c"
+      },
+      "encoding": "UTF16_BOM",
+      "matches": [
+        {
+          "line": 48,
+          "text": "MSI (s) (74:44) [13:11:55:001]: Product Code from property table after transforms:  '{51C60258-197D-4EA2-8859-F59ABA07AC38}'"
+        },
+        {
+          "line": 237,
+          "text": "MSI (s) (74:44) [13:11:55:055]: SECREPAIR: Hash Database: C:\\Windows\\Installer\\SourceHash{51C60258-197D-4EA2-8859-F59ABA07AC38}"
+        },
+        {
+          "line": 426,
+          "text": "MSI (s) (74:44) [13:11:55:082]: Product: FutureClassroom synthetic transaction feasibility e3365555af2a409eba9bb94ab37b0e28 -- Configuration completed successfully."
+        }
+      ]
+    },
+    {
+      "identity": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/uninstall-commit.msi.log",
+        "bytes": 69528,
+        "sha256": "7baab3db83dbdad279e006a4e2a20917cb14949f6bb815eac27313b169a03eec"
+      },
+      "encoding": "UTF16_BOM",
+      "matches": [
+        {
+          "line": 48,
+          "text": "MSI (s) (74:E8) [13:11:55:396]: Product Code from property table after transforms:  '{51C60258-197D-4EA2-8859-F59ABA07AC38}'"
+        },
+        {
+          "line": 410,
+          "text": "MSI (s) (74:E8) [13:11:55:470]: Product: FutureClassroom synthetic transaction feasibility e3365555af2a409eba9bb94ab37b0e28 -- Removal completed successfully."
+        }
+      ]
+    },
+    {
+      "identity": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/install-rollback.msi.log",
+        "bytes": 129396,
+        "sha256": "29c95b82bab8a42d27f28d76359690fa02b63b8b5a5f86fd32d2de538517c987"
+      },
+      "encoding": "UTF16_BOM",
+      "matches": [
+        {
+          "line": 5,
+          "text": "           ******* Product: C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28\\fixture.msi"
+        },
+        {
+          "line": 18,
+          "text": "           ******* Product: C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28\\fixture.msi"
+        },
+        {
+          "line": 53,
+          "text": "MSI (s) (74:60) [13:11:55:788]: Product Code from property table after transforms:  '{51C60258-197D-4EA2-8859-F59ABA07AC38}'"
+        },
+        {
+          "line": 229,
+          "text": "MSI (s) (74:60) [13:11:55:825]: SECREPAIR: Hash Database: C:\\Windows\\Installer\\SourceHash{51C60258-197D-4EA2-8859-F59ABA07AC38}"
+        },
+        {
+          "line": 445,
+          "text": "MSI (s) (74:60) [13:11:55:861]: Product: FutureClassroom synthetic transaction feasibility e3365555af2a409eba9bb94ab37b0e28 -- Installation completed successfully."
+        }
+      ]
+    }
+  ],
+  "ownershipConclusion": "The exact random fixture ProductCode appears in the original Installer-generated Hash Database pathname, from the owned fixture MSI log. Original create timestamp follows that log by about1ms, the cached content has SourceHash table and fixture.msi string, and the final actual registration/payload/cache postcheck isolated this as the only present exact-address residue. This is sufficient attribution for this already-byte-backed single synthetic test file; internal table decode is not asserted.",
+  "originalPostcheck": {
+    "identity": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-postcheck-second-first.json",
+      "bytes": 7853,
+      "sha256": "eb56934c62fae813e9e6f1f916a72638978ecc722bcc82af355e46ca9fa2015e"
+    },
+    "exactAddresses": 37,
+    "presentCount": 1,
+    "present": [
+      {
+        "path": "C:\\Windows\\Installer\\SourceHash{51C60258-197D-4EA2-8859-F59ABA07AC38}",
+        "present": true,
+        "isDirectory": false,
+        "reparsePoint": false,
+        "bytes": 20480,
+        "sha256": "f4beae102ae1cc02fdf9583ed7f21a34258310ab73b077862fab47d11a05b79e"
+      }
+    ],
+    "allExactRegistrationAddressesAbsent": true
+  },
+  "cleanupBoundary": {
+    "actionSupported": "Root may remove ONLY this exact non-reparse file after rechecking its saved20480B/SHA identity and absent own product registrations. Preserve original backup and original logs. This is reversible test cleanup, not a generic installer-cache operation.",
+    "forbiddenExpansion": [
+      "No wildcard or folder cleanup in Windows Installer cache",
+      "No foreign MSI/MSP/SourceHash files",
+      "No manual Installer registry editing",
+      "No restarting/killing shared msiserver",
+      "No cache schema mutation/rebuild"
+    ],
+    "rootActualCleanupOriginal": {
+      "identity": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-sourcehash-cleanup-first.json",
+        "bytes": 594,
+        "sha256": "36e2d94b8f8cff7248574cb386dd5a08bcba4bca5f549dcba69d856ac36966dd"
+      },
+      "status": "PASS_EXACT_OWNED_SOURCEHASH_REMOVED",
+      "exactBeforeSha256": "f4beae102ae1cc02fdf9583ed7f21a34258310ab73b077862fab47d11a05b79e",
+      "afterAbsent": true
+    },
+    "rootActualPostcheckFinal": {
+      "identity": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-postcheck-second-final-first.json",
+        "bytes": 7679,
+        "sha256": "b2ff6c0d6b3896250f7504a4ef3554ed8d9249efebb2a713f65f6706cd13e986"
+      },
+      "status": "OBSERVED_EXACT_ADDRESSES_ABSENT",
+      "exactAddresses": 37,
+      "presentCount": 0,
+      "note": "This is a read of root-produced original audit, not a new Windows observation by this helper."
+    }
+  },
+  "primarySources": [
+    {
+      "url": "https://support.microsoft.com/en-us/servicing/os/windows/2020/04/unexpected-uac-prompt-after-you-install-update-2918614-in-windows",
+      "publisher": "Microsoft Support",
+      "supports": "Windows Installer uses a hash cache to validate installation files during repair.",
+      "doesNotSupport": "No published SourceHash internal table layout or general deletion authorization was obtained."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/application-management/missing-windows-installer-cache",
+      "publisher": "Microsoft Learn",
+      "supports": "Installer cache loss can disrupt servicing of real installed products; this review does not propose broad cache cleanup."
+    }
+  ],
+  "backupUnchangedAfterRead": true,
+  "limitations": [
+    "SourceHash row export failed in owned libmsi; failure stdout/stderr preserved.",
+    "Filename, exact original native log path, random fixture identity and timestamps supply attribution; no fabricated embedded ProductCode property.",
+    "No general SourceHash format or complete Installer internal-state enumeration proof.",
+    "MSI lifecycle feasibility/rollback limitations remain separate."
+  ]
+}

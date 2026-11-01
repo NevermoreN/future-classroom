@@ -1,0 +1,30 @@
+{
+  "status": "PASS_LOCAL_BUILD_PE_SOURCE_BINDING_ONLY_WINDOWS_NOT_RUN",
+  "originalStaticReport": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/static-first.json",
+    "bytes": 4748,
+    "sha256": "2e679755cf1c43590f36e6e2b658c88902b882df8e51423c669b01a4ec275180"
+  },
+  "finalSource": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/source-final/registry-write-intent.c",
+    "bytes": 24750,
+    "sha256": "5de00b46563d3dba223088250dce79368520f3fd9974df0eab5ca74ecd002024"
+  },
+  "finalExe": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/source-final/registry-write-intent.exe",
+    "bytes": 35045,
+    "sha256": "fc5868521d3d54130daf855a07ae1b703b33bb8f0c3832252970a49f14c75dfc"
+  },
+  "finalRunner": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/source-final/run-windows-probe.ps1",
+    "bytes": 9564,
+    "sha256": "ad2dbb622bb45b16cf2850ce346aabc566b59af7c0a7b5c954ff598069a48838"
+  },
+  "changesAfterOriginalStatic": "Runner-only final-hash handling when output-copy task has not physically returned; native source and executable unchanged from actual second compile/objdump. Original static runner exact bytes retained.",
+  "windowsParser": "NOT_RUN",
+  "contract": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/execution-contract-first.json",
+    "bytes": 12468,
+    "sha256": "9f2b735e60bafd007cca8d32cf8491d1b1d01e752cc46d4c4c401c7e9f3b592a"
+  }
+}

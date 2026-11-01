@@ -1,0 +1,3701 @@
+{
+  "status": "READY_EXACT_GUI_SOURCE_AND_R59_R61_ARCHIVES",
+  "sourceHead": "6082dd0173a0b8884c27ac78fda5054275f99f14",
+  "sourcePaths": [
+    ".gitattributes",
+    "README.md",
+    "crates/fc-bootstrap/src/main.rs",
+    "crates/fc-windows/Cargo.toml",
+    "crates/fc-windows/src/lib.rs",
+    "crates/fc-windows/src/startup.rs",
+    "packaging/PROBE-README.txt",
+    "scripts/audit-pe.py",
+    "scripts/check-msvc-gui-contract.ps1",
+    "scripts/check-pe-subsystem.py",
+    "scripts/package-msi-candidate.py",
+    "scripts/package-probe.py",
+    "scripts/windows-msvc-ci.ps1",
+    "开发计划/10-实施进度与验证记录.md",
+    "开发计划/22-自启动与系统变更核对.md"
+  ],
+  "count": 735,
+  "bytes": 153227487,
+  "explicitIgnoredLogs": 320,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 3979,
+      "sha256": "fc8efc35f8e365b8308b70aead5eabe7d55ce0c8f90079329e942a6ae491355a"
+    },
+    {
+      "path": "README.md",
+      "bytes": 17663,
+      "sha256": "00ffa15cd44756f4373d96f611d7f783bf5d6929110a8b4ea7d7b52058ddfe8c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 21191,
+      "sha256": "22fde2cbcbfd12d188c4c1bf1b4b6744226933869bf87f126e8775b4cb7cef63"
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1532,
+      "sha256": "b54f0c7b47107edb9a01eca9e35aec972fe12cd44cf53b6968d53af7e710cff8"
+    },
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "bytes": 862,
+      "sha256": "696c61b1aa08a56ed15e64412230c14b18e6ac1ac91aebd08a492d2e8cfb2677"
+    },
+    {
+      "path": "crates/fc-windows/src/startup.rs",
+      "bytes": 4998,
+      "sha256": "2acedef923e5d4a6a5269ef082f7a230928fa9f11a8b9c5f69c6b671614a3903"
+    },
+    {
+      "path": "packaging/PROBE-README.txt",
+      "bytes": 21767,
+      "sha256": "7ebdcc9f18d6f0c1f9d2471f7b496f317e1ac5797264940b0f95be1945f64e09"
+    },
+    {
+      "path": "scripts/audit-pe.py",
+      "bytes": 6034,
+      "sha256": "6e3669be5cbf697d87502ba4f3c632f33020659ad4117dcea5f616e0d182c5cb"
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 14248,
+      "sha256": "70414b86bba595f323b84af9404bb039af0c1c50f0786cd5e22fcec67a087259"
+    },
+    {
+      "path": "scripts/check-pe-subsystem.py",
+      "bytes": 3388,
+      "sha256": "be702fb06a1adff4c31c308525ccc085d94345d9e530bd9d962f848dc6bc3cdc"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 36605,
+      "sha256": "4e56ae981d9951da21c6a9d423e25e7e71d27380f16a8889d63b145208d8dbb0"
+    },
+    {
+      "path": "scripts/package-probe.py",
+      "bytes": 29849,
+      "sha256": "bf8339c74b958ae15fb63e04cf135fb13e633694d34453858768267a773ec940"
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 52758,
+      "sha256": "eac2e9e42cfd073aca58584e8dbc6d9cefa864a5b84711b27e0ab83d43689a7b"
+    },
+    {
+      "path": "开发计划/10-实施进度与验证记录.md",
+      "bytes": 462624,
+      "sha256": "5c40018a6f2aba9d2ba764d303ad4f5f763e614e3db5aec4e3b09dd4b659209d"
+    },
+    {
+      "path": "开发计划/22-自启动与系统变更核对.md",
+      "bytes": 11801,
+      "sha256": "d367c63f1995173a4f559283880a7c78d6db868843a71e9fbebdbd5dcf95a4a8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/FutureClassroom-round59-windows-msvc-dispatch.json",
+      "bytes": 21341,
+      "sha256": "491644d751b7bef1b0ce7c35c087ba8b7c215a2532b1d586355be410570ebaf5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/FutureClassroom-round59-windows-win7-msvc-dispatch.json",
+      "bytes": 21429,
+      "sha256": "2f0938426cc67890996c1436923afc427f92183632b4bb721af52f8ed79b1b63"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/archive-index-first.json",
+      "bytes": 248455,
+      "sha256": "8e3b771c13acaac58b1966e42fcdbf2f26a990fd17f167906c4b33694cf68650"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/archive-r59-ci-first.py",
+      "bytes": 9462,
+      "sha256": "46d1c315f0b22ae8f44c2eca9642c2daa7cfac962e6d806cc12c5d8c79d8f83d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/archive-source-review-first.json",
+      "bytes": 26198,
+      "sha256": "0bc96e24bf8fcc0847400920826c33b583ea711f2508b93e7e9037048c01318f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/batch-inventory-first.json",
+      "bytes": 225617,
+      "sha256": "876ca104ccc2dbfefe3d41869381b348d60afbeb45c2d3797f1ffc0c62807c66"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/batch-inventory-second.json",
+      "bytes": 227558,
+      "sha256": "4865d5086dce5d01e0ab475bbb01621961279fa4106536f269c023f3d66267fa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/batch-paths-first.json",
+      "bytes": 1076,
+      "sha256": "dca4bba0e7392830a692527d61a7d370422f588c7930b7fe6b29859ca2515f8a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/batch-paths-second.json",
+      "bytes": 1123,
+      "sha256": "ec9a42e0b2c0eb19889d45eff2c336a69a7579f409400a9d33bb2cb9dd9f010a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/cleanup-old-batch-first.py",
+      "bytes": 7370,
+      "sha256": "ec29c31c1323624b70ed3f3a08286b9e39a5cbd18c7bb6d48841917b6c86dc75"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/dispatch-ci-once.py",
+      "bytes": 5179,
+      "sha256": "2445d3db5f7298e18823c68fa4a57ad777789a4318a7d595b8e98647294ba1a9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/download-original.py",
+      "bytes": 3943,
+      "sha256": "c56583ef058095ec6916ad5b7898ed092b37bd125ea0ebd0539300a3f37ae602"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/final-commit-first.json",
+      "bytes": 938,
+      "sha256": "83896ad758c464917371ddb96737ceda1ea057c15b36676e8b708b6340062604"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-0.objdump.stdout.log",
+      "bytes": 2760885,
+      "sha256": "3558fec76322b8bf4f75e98a6dc97a2bd0331da40958760b23bfe042c78f7be1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-1.objdump.stdout.log",
+      "bytes": 2323597,
+      "sha256": "782012084361b5f796f35f3ccafa68885736840f51ab7c0a22fc4bcea98d1df5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-10.objdump.stdout.log",
+      "bytes": 5730340,
+      "sha256": "5e2243636cd8cb1e80d92c01d49609bcc7af961e3b3d9f03eba3b9d51bdd3628"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-11.objdump.stdout.log",
+      "bytes": 572315,
+      "sha256": "dd50c931e82118c27292197fea1d82c38e8fa5d4a0e50effce9709758b981667"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-12.objdump.stdout.log",
+      "bytes": 1053332,
+      "sha256": "c3a0db235f43985edba65b10aab148eeb87c19bee8bdac540069e5788cdfc088"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-13.objdump.stdout.log",
+      "bytes": 890203,
+      "sha256": "f53f31222931fa36a81af25a71d76980556236d8c953112b30a5b32bc66f8fa4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-14.objdump.stdout.log",
+      "bytes": 1089512,
+      "sha256": "d2bc3e1cbf98b21793d9ca91a27aca4685970dbd1f6082aecb5c5d538a27e30b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-15.objdump.stdout.log",
+      "bytes": 713341,
+      "sha256": "e3d9f4948df262321796dd29b5cf61b3a28dbf3e7d780eb93f8e760dcfde8f27"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-16.objdump.stdout.log",
+      "bytes": 566983,
+      "sha256": "29cde6346455a034d3c052593a89c1c32b9859bc82b80822b774be4f762b8e69"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-17.objdump.stdout.log",
+      "bytes": 612064,
+      "sha256": "b299f52bc7c0a4108e4c0bc3056a0d4e061084032b4474c53156b925bf0d900e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-18.objdump.stdout.log",
+      "bytes": 602797,
+      "sha256": "c0fafdcf325752701d1621afcbcc0472f1d8bc9bb81c8b61049e10708ed1ec9e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-19.objdump.stdout.log",
+      "bytes": 4086022,
+      "sha256": "bfb1e91ccfe4ccb08960000672d7a10df7c6c21d49580636e6348a64f959b754"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-2.objdump.stdout.log",
+      "bytes": 519147,
+      "sha256": "657971873dcae14bf757e7ae43abe19a54a1682e9e18a997f0cc3798f57f6e12"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-20.objdump.stdout.log",
+      "bytes": 1210748,
+      "sha256": "82fb24f657fee8ac25bd7f0fa2bff69fb84daf6938c16314ca4037ab59b468a9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-21.objdump.stdout.log",
+      "bytes": 5561946,
+      "sha256": "d0bcc8c9667f0b194e0481df01c9f413a08ef18d7dd246bbc5b87133570d64ec"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-3.objdump.stdout.log",
+      "bytes": 2090458,
+      "sha256": "880561c7039a2804ab8e8b1362d8a4bb3ae06b6db90730fff4c70170288dff0a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-4.objdump.stdout.log",
+      "bytes": 6722606,
+      "sha256": "a147889d411578669602cbc455ea9809a4a9b78928e6fdeb61c5119ebba73dde"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-5.objdump.stdout.log",
+      "bytes": 2186732,
+      "sha256": "3ffe187fbbb77ebfc3c333e90bfda77cb0c1649556198de18764ed2fdfb0b47e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-6.objdump.stdout.log",
+      "bytes": 2161237,
+      "sha256": "9c9920e4c7019ea40f853f0ca6ec07dd8fa3c5d289af78ec3bb3a88f353eaddd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-7.objdump.stdout.log",
+      "bytes": 2398155,
+      "sha256": "2560234a8c6eb52dae3ac4ee306c5fe94e77147003904d5e298998b4209bddc5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-8.objdump.stdout.log",
+      "bytes": 2310287,
+      "sha256": "b9c9faf5fb752040e60ed7c2410aefb3c69376c642ccda16bcb7d3824dd904a9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/pe-9.objdump.stdout.log",
+      "bytes": 2135991,
+      "sha256": "f7ff72d21a0b224361ffbae39469c15ca37c7ceecedb4c0c8f1f22668e86df1c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/LICENSE",
+      "bytes": 1088,
+      "sha256": "32b48e0a752c101a54d4ea1affc589dd99d8b553c72bedba17c6e2e30d319b30"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/THIRD-PARTY-NOTICES.txt",
+      "bytes": 2448718,
+      "sha256": "0bf19c345f74c394a7ba30f0059db8bd1943d30d564165eefe3eb3205c2c72c9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/artifact-sha256.json",
+      "bytes": 35479,
+      "sha256": "4b9a9a7cb6cdd49933ce47004f8657767d4d46a6dafbe0aa48bd8d6dff32e2cc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/bootstrap.json",
+      "bytes": 493,
+      "sha256": "38489883b391a75bb839e3bb73acf79342f028fefca0c65bd0a5e491c569b005"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/cleanup.json",
+      "bytes": 530,
+      "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/executables.json",
+      "bytes": 10960,
+      "sha256": "c45aba18f01a43711d02ead075bf1fbbd6b8035be2fee3911319d65882e5aaad"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/host.json",
+      "bytes": 673,
+      "sha256": "2b6d4abb9bf9ef0e31c3d52f227d27b00b432197d4f41528d70bf4f46157a3df"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/input-domains-after.json",
+      "bytes": 1713135,
+      "sha256": "1c3bbedf7ec076b5be29af74f394d3a108c00e95f8acab6ce6ef667bb0301c0d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/input-domains.json",
+      "bytes": 1713135,
+      "sha256": "1c3bbedf7ec076b5be29af74f394d3a108c00e95f8acab6ce6ef667bb0301c0d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/input-git-tree-after.json",
+      "bytes": 3444863,
+      "sha256": "9d6342aef36a88a51cf748c84d2475f5a4854b52e8a094a1c81271f18cc027e3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/input-git-tree.json",
+      "bytes": 3444863,
+      "sha256": "9d6342aef36a88a51cf748c84d2475f5a4854b52e8a094a1c81271f18cc027e3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/input-sha256-after.json",
+      "bytes": 100340,
+      "sha256": "e579e0215ee78afc98f5a91391bd22ae842158bf5acd972cf4068f3d223bb827"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/input-sha256.json",
+      "bytes": 100340,
+      "sha256": "e579e0215ee78afc98f5a91391bd22ae842158bf5acd972cf4068f3d223bb827"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/after-vs-crt-flags.json",
+      "bytes": 655,
+      "sha256": "48d388b0526a3fe341a41ffa7565f21f86e8dfd43d1117a4301936769447163e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/architecture.active.json",
+      "bytes": 136,
+      "sha256": "1fb2a9a99eff38d5ecc37570280c89ae8cb3c60eba9c0793ccf4ec231c8c0404"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/architecture.result.json",
+      "bytes": 522,
+      "sha256": "11155bdedc233431317044cf8a2c3c79a4fdfc951ded419d80efaa6f5e87f6a8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/architecture.stdout.log",
+      "bytes": 72,
+      "sha256": "87cbea92b1a7c0033871466cdea2da1a756ba4496cc5f3b6d25f79ec64f378c6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/before-cargo-crt-flags.json",
+      "bytes": 659,
+      "sha256": "82275d03dfef55736dbff319e08b7e23bd8daa9a83a7f6f6aa71a391b4747af3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/before-vs-crt-flags.json",
+      "bytes": 656,
+      "sha256": "dd474024dd355423bac97d2b9393a3949c2f2fca1bafa124f8b383cf5e212203"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cargo-metadata.active.json",
+      "bytes": 120,
+      "sha256": "337bf150fdc9c5641024f687060b8238be0a02a5602e727a7a87edd96e3ff599"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cargo-metadata.result.json",
+      "bytes": 561,
+      "sha256": "c4b5e1ba3d13e226c30b37616be832dbd3f5ad356fa6085fa6346f6c5b33434c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cargo-metadata.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cargo-metadata.stdout.log",
+      "bytes": 26371,
+      "sha256": "1d923cb6186be6706055db1096e78e1f267e42bf31f638199346d3259b33c551"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cargo-version.active.json",
+      "bytes": 120,
+      "sha256": "3ee2271c4a15381dd40a3a37caee0343e7363e318d0bef45a116ce458fe1e159"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cargo-version.result.json",
+      "bytes": 507,
+      "sha256": "5977e0ce52fd2223b2bc977c90862324c55fb6d858bfed21beb74f4d2062fe11"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cargo-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cargo-version.stdout.log",
+      "bytes": 328,
+      "sha256": "c6a8233f08426198bd488c0b77595ec9ef60c0a2136e24a29db40169f9db5731"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cl-version-probe.active.json",
+      "bytes": 191,
+      "sha256": "2fb5372091519bb22ea591fe1c485fe626eecd18dfad1018e5c7e58f03ec6143"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cl-version-probe.result.json",
+      "bytes": 781,
+      "sha256": "87ae9df22e1a5072d9a98ae7f985325700dd77db71dcf4ae6b3ab1ba376d291b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cl-version-probe.stderr.log",
+      "bytes": 1124,
+      "sha256": "4abd17eda59dbad0286f86d1dfe6dae2e84693133b14e8fca4ee883f0e224749"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/cl-version-probe.stdout.log",
+      "bytes": 20,
+      "sha256": "5659d789099daaf7eef45081ce59db678cbf430fd37d54ebf5e1b7d113cec605"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/clippy.active.json",
+      "bytes": 120,
+      "sha256": "bb7cf63462be17c521b2786b66768492a4239da84578f7e040384e711ebc7c6a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/clippy.result.json",
+      "bytes": 640,
+      "sha256": "0eb9906ea83be769c1a26bdf412ce9cc118297566c0dbe5391c14d0dbe736c52"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/clippy.stderr.log",
+      "bytes": 804126,
+      "sha256": "0e8915d11695643e40387cd5f44139fd03f96c730139d8975e28f87abb713975"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/clippy.stdout.log",
+      "bytes": 75,
+      "sha256": "7e2ed6c6ec8d2782960220c7609bbac84c2229bf9bbb58d37d8bde08c88ddcb3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/fmt.active.json",
+      "bytes": 120,
+      "sha256": "f272e0dab46ff5d82db8fa15f6f0880ab0cd15e04e954db6b4cd0bd58dfa3da9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/fmt.result.json",
+      "bytes": 494,
+      "sha256": "5c27ca29296199267658c4292e4a46262b22391563c21e41f5d67d1f950842ea"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/install-fixed-rust.active.json",
+      "bytes": 121,
+      "sha256": "47d276cdb07ac12f027aa4ac13bd90e446b0836706bdb0edae623f113d5d7a6f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/install-fixed-rust.result.json",
+      "bytes": 710,
+      "sha256": "59950bad0b2f837fe12ae6acfb4dac3b44e8fd66d881565e674bff13f8f2c411"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/install-fixed-rust.stderr.log",
+      "bytes": 252,
+      "sha256": "736b79282dc0ccb865c546083641434c61e2eb4c276e30079cd5ab1f8aae518c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/install-fixed-rust.stdout.log",
+      "bytes": 123,
+      "sha256": "9a0b4d69b31c145f26e2ca9ea017a1e32b6ee72aa47c7d8568a731489a9ecef0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-0.active.json",
+      "bytes": 196,
+      "sha256": "95298d6536a3f9365987593c3cb3340475fc34d688b91f12cf2c41285c38197d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-0.result.json",
+      "bytes": 691,
+      "sha256": "f8c4f1127dd816a52d06cb31714b632aef03337883b44c9073a6a9aae3e70c5a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-0.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-0.stdout.log",
+      "bytes": 553,
+      "sha256": "9be962350e9c861b45902ae8e762397c09bb4a4fc469d650168a542de7042eba"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-1.active.json",
+      "bytes": 196,
+      "sha256": "f4a9d10d7d98966e4c85700bde7ee0c919634ac93aea5fd9c8160dced90f7538"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-1.result.json",
+      "bytes": 697,
+      "sha256": "52bb6cc57e74be1c1470d5b9cfcf2f8f973bbe4cc10111731280d750bc1fae76"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-1.stdout.log",
+      "bytes": 610,
+      "sha256": "596b443bc4c55974f69b53041ac882fa6524227797ea695d50990100b4fa1292"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-10.active.json",
+      "bytes": 196,
+      "sha256": "af466d1bf9eaba19e0e8aba83cc04053ebccff5de5ae908e03a6bb3de5923062"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-10.result.json",
+      "bytes": 691,
+      "sha256": "47ae0741e6899ccae9156b382c4c14bd7f0dbead758169c17a60bdd84b8e7cc3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-10.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-10.stdout.log",
+      "bytes": 831,
+      "sha256": "bfd8d229ba662bf142f93f5dcb5bba3ac77fb1c095db9decb1b7bea1bd5a8928"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-11.active.json",
+      "bytes": 196,
+      "sha256": "35f530714572635eb3c337438e25e29a47cef38a283832739263dc5079c0476a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-11.result.json",
+      "bytes": 689,
+      "sha256": "3f00c74172956498a9f471eadfbd70a34396cee265ebaedac1eef53c4cccecd5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-11.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-11.stdout.log",
+      "bytes": 547,
+      "sha256": "02cd681b3853a97c167d639f8abd68be649f81476c8364cfe40f04c396ca297e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-12.active.json",
+      "bytes": 196,
+      "sha256": "15b6771158fedcc811956fa4690782195d42efa171ccbf4087526c9ad3593140"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-12.result.json",
+      "bytes": 691,
+      "sha256": "46cbf8c209154bf3e3dc0a2d1f8fe959c1e2b09a9dcd559feb253a6b7fd22eed"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-12.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-12.stdout.log",
+      "bytes": 549,
+      "sha256": "0db55bea3134f66adb663a697aec12c7696dc2ec17610fbd4ffa13cbde14fe6e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-13.active.json",
+      "bytes": 196,
+      "sha256": "f42eb6262d384f0663ce0a196697a5c75dcb9019042bb40ddac26601a1e7327b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-13.result.json",
+      "bytes": 697,
+      "sha256": "ef5cf77a8c63b2c22f4b5c3b7781e70449f6966ea7722243905e80ac49898cbd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-13.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-13.stdout.log",
+      "bytes": 555,
+      "sha256": "3242750a5f9f0df69606237f9cf7b2cc8150f313b8ec59357b367ea22cf37b76"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-14.active.json",
+      "bytes": 196,
+      "sha256": "2235a16f1063280c6788fe6c442d13b9618a8c18b31c78a106e301cb0c6a04c7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-14.result.json",
+      "bytes": 689,
+      "sha256": "e8d53bc163f8800fe1718a8147daa23b64ae3f1a03e6a0c463b5be501d783c90"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-14.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-14.stdout.log",
+      "bytes": 547,
+      "sha256": "07c63aecce0e215650bf2a519106ac1ecbc83851aca3c9beaa270a4e98341be0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-15.active.json",
+      "bytes": 196,
+      "sha256": "00f8df293f16bbf3fb4236a7721ffa905f5c04840fe6b34a834b8c7d20b1b7ff"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-15.result.json",
+      "bytes": 686,
+      "sha256": "901d0ca8a5940c1581869db64e269498f99ec9e44629b340a2c31783a291da7e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-15.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-15.stdout.log",
+      "bytes": 545,
+      "sha256": "88a1fb1a36335f94468ff17769561781fa674fe260bf494ba6a1fbcd3681b228"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-16.active.json",
+      "bytes": 196,
+      "sha256": "114bcb0cd42399d5155cf8c7555abb9c3563df90e53e80f98727fc96dec9aa3e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-16.result.json",
+      "bytes": 683,
+      "sha256": "b0dcc109043731f57fe99b910c9bb10630e4a33a76a8e35d45938ecc285dc7cb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-16.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-16.stdout.log",
+      "bytes": 541,
+      "sha256": "ac51b37a28a70d0eaac6544d0761676cbf23c77d811d42dde4683e478cd60767"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-17.active.json",
+      "bytes": 196,
+      "sha256": "b7f59151e131ac6cff46d43aa520121fed0a1370637c5a2314fd445f735de38b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-17.result.json",
+      "bytes": 683,
+      "sha256": "312583affb93a166931c8e82c67775dc50e207d01d6a3f60c36997e157c4297a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-17.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-17.stdout.log",
+      "bytes": 541,
+      "sha256": "f93504ca5fc9351b0d96c4a84e204e966487fff6635cd05cf8b4535cb12e0b1a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-18.active.json",
+      "bytes": 196,
+      "sha256": "4079e8e66effe006328104f2fd9538c1ee3eeff93f1de9e593c8164732892c9a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-18.result.json",
+      "bytes": 695,
+      "sha256": "08494243a7e2fe572f4b9eb9c31f4ddc954313bface007b5f28b4d745d8f2dfb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-18.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-18.stdout.log",
+      "bytes": 553,
+      "sha256": "8b4734d97b439392434702ec1ab2010e76a55a09b82e8a7045662eeb151efdfe"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-19.active.json",
+      "bytes": 196,
+      "sha256": "b4c1eccbe336ee78f53f23d54016bf01dec8da93d75afceb8dbd1b7cd3b5af2d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-19.result.json",
+      "bytes": 687,
+      "sha256": "db486c637a085e6a0df04410c1906a63f673acb85c49fa4a11f1767465d3d330"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-19.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-19.stdout.log",
+      "bytes": 545,
+      "sha256": "bcc916516bf23caae5cd01736bf6f28fe6bf0e968d44a0e9895b1796ba784ac8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-2.active.json",
+      "bytes": 196,
+      "sha256": "5b066663b88a4e7474123716c60c28ee85898b8cf33e91964229ef07dc33180c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-2.result.json",
+      "bytes": 693,
+      "sha256": "eb2a2ca498cd303fcb50b10e94b590cad871aa67fb4c67873c30a925fca4687f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-2.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-2.stdout.log",
+      "bytes": 572,
+      "sha256": "42fbaa6f23846191c96dc5888307ae3e912418031c515e549a62a7660eafe9e9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-20.active.json",
+      "bytes": 196,
+      "sha256": "ded4cd7fe0feb3e4923b9ecd1819f49f9ab55fb8737f572a2da80f32665f756e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-20.result.json",
+      "bytes": 685,
+      "sha256": "a39a0d57d8454459007feb487d71085038343aa10bf3a52c6a0c083c50226414"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-20.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-20.stdout.log",
+      "bytes": 543,
+      "sha256": "24b6dd8a98e80faf168568619a67e513580ad0289ec17a756798163902958f50"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-21.active.json",
+      "bytes": 196,
+      "sha256": "d25fde20390b9a3630ecdf1b5d2fb7d1d2f4837475ac6dcb9029e5895d5b5c67"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-21.result.json",
+      "bytes": 676,
+      "sha256": "16a8f69177d6b153a7451efbefe342666e0be73cdba5f604a31b3293f54803d5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-21.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-21.stdout.log",
+      "bytes": 849,
+      "sha256": "33aeb513b9de0bcc60cdd2e15d6b78450bec337cad1b9fe6ee25771cce95195b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-3.active.json",
+      "bytes": 196,
+      "sha256": "875984ceb5bed3e3bb53a339867e94afee64336c25df9c0e2259979ffe2351d0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-3.result.json",
+      "bytes": 691,
+      "sha256": "a4890013a694cadc7722e383a02f629fe792eead566db5eb278316af43fb2e9f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-3.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-3.stdout.log",
+      "bytes": 552,
+      "sha256": "6ec507b9ab23ff4252c79518df5ef529217dbc041c2840bbd2d0de31e2f6be2f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-4.active.json",
+      "bytes": 196,
+      "sha256": "d91efe8133d5e8513b7b1684ccef48b0b816f05739bd952468981b4bbc690cde"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-4.result.json",
+      "bytes": 687,
+      "sha256": "eb7576f1e87f4dd7507237e1027fe1965ce69914c2b1a030957efaa9252864f8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-4.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-4.stdout.log",
+      "bytes": 666,
+      "sha256": "89e3dd7fe0cb040a205d808fa750b88772dff326532e5ff6e46e357e6102b16a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-5.active.json",
+      "bytes": 194,
+      "sha256": "e67242583346b537412a5220f65b6e348eafe4dc357e2544db54e85429109d92"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-5.result.json",
+      "bytes": 689,
+      "sha256": "d5405b4a18f73d63890b52ed04eb247f690e5e9401b689f618e4271a958ad0a1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-5.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-5.stdout.log",
+      "bytes": 550,
+      "sha256": "74e7c167862148b15b9e1f2aac2acbf7656a2780169f245f7041810b397df416"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-6.active.json",
+      "bytes": 196,
+      "sha256": "88766db63dbbe79d08de04eb03e7cc3ef71d70c5790322d9b2d5cfcafd27ae02"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-6.result.json",
+      "bytes": 696,
+      "sha256": "41db8d2b150fa9b2d59df328ce49c07aa4480a17eb2410cdb091ca7b71b8e25e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-6.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-6.stdout.log",
+      "bytes": 557,
+      "sha256": "e1441e474f4ea2e8dbde008fe5a606e40f89519f7846a853a5bd706f08329e1a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-7.active.json",
+      "bytes": 196,
+      "sha256": "ac316253c58654044487af51960605c680c97f035fba026ffedaa0c11b538ded"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-7.result.json",
+      "bytes": 695,
+      "sha256": "c5e358e8f0ab5ce636e13cbe5bd119e48809605ced4d355630fccdeafbb761ce"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-7.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-7.stdout.log",
+      "bytes": 608,
+      "sha256": "6c3750423e784dac298c91db2e28ef619897313edd02193e5af7ff317f0601a4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-8.active.json",
+      "bytes": 196,
+      "sha256": "2acfdc8bbc9c597b2d36c0af8315dd935987f4c21998700d946594264649310c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-8.result.json",
+      "bytes": 700,
+      "sha256": "4684d72520b641b130b0cb4fa3e0d8492561b21edd0504da41cef717df81ad30"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-8.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-8.stdout.log",
+      "bytes": 613,
+      "sha256": "3a633aedaddd1938b88de2ad581b9041ed387f78ce956eb969466e87ff82a2bb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-9.active.json",
+      "bytes": 196,
+      "sha256": "a15da20d8dd0c80d10d1a43ae8eace5ccffb5ec4655b5751b9078215425359d1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-9.result.json",
+      "bytes": 684,
+      "sha256": "4a9d0b309af5c71db30278e355578f78b4297d59b29fca250698752886b6604b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-9.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/pe-imports-9.stdout.log",
+      "bytes": 826,
+      "sha256": "2fd1f3cf5205ceaee700055ccbaf95f87af4315f7a1cd6f60018c17a1e9c18e6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/product-compile.active.json",
+      "bytes": 120,
+      "sha256": "fb9c11a1acf3343ffea8324dd95d900df47a57a580525ed164ea9f7633ef7cbd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/product-compile.result.json",
+      "bytes": 681,
+      "sha256": "2b2a0ca81c0d093d042aab63a2b352791b44b81cdc6039b0a28ceaa47801d44d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/product-compile.stderr.log",
+      "bytes": 3352,
+      "sha256": "35f618c55f9ba84ee1e24fc76540c37ba7d4c70d8097dda73f1c071a4755307b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/product-compile.stdout.log",
+      "bytes": 621297,
+      "sha256": "5fcdfa4ad3b4b9345aa15aa7dccf12a4ccad82c677426e234d381a555b40d4ba"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rust-target-cfg.active.json",
+      "bytes": 120,
+      "sha256": "8094aee096c4d16ec055795dc8898bc763497082dde998c71963a80eeb0af421"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rust-target-cfg.result.json",
+      "bytes": 662,
+      "sha256": "e49f1016f2eb6cbbaac918c1e0b6845c46889afbd73c7afed43cf749da0b2f90"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rust-target-cfg.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rust-target-cfg.stdout.log",
+      "bytes": 625,
+      "sha256": "b71a82b0c5976579904ffd5ab2aefe99c193456657819ba81082ffe3847387aa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rust-version.active.json",
+      "bytes": 121,
+      "sha256": "4e14ff925e0d5ae6c15cb52661f03f0234aa93765eea8ed4acc2326774d61c0b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rust-version.result.json",
+      "bytes": 545,
+      "sha256": "3016449acd639c015db9ea1c44b258f3fa16477f7607357ff00814a486643281"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rust-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rust-version.stdout.log",
+      "bytes": 194,
+      "sha256": "7fad09dd8c16d49de37932475436003b5b1763c1015c5ce081ad7692db368ca3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rustup-version.active.json",
+      "bytes": 121,
+      "sha256": "fee450ad10fa9418beda2f83a70760265e1cf47a3a873542c9b5e3bc377a985b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rustup-version.result.json",
+      "bytes": 494,
+      "sha256": "527a9d07bdd80617277a400a093297d517df9ecc7d59b142e744d49844ebe42f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rustup-version.stderr.log",
+      "bytes": 601,
+      "sha256": "0478f13aeb57c90184a9accb45f2d1d33250286c498d2858f8655e98caa9e702"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/rustup-version.stdout.log",
+      "bytes": 37,
+      "sha256": "9d0fa5abe0036a64d33be57d0945ac3cb1a44507774f93c5f70ca1a848307b40"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-clean-after.active.json",
+      "bytes": 110,
+      "sha256": "299a9d569da3c0536dd9467f033a2239834456b22d6725ecddf319643f29d284"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-clean-after.result.json",
+      "bytes": 541,
+      "sha256": "2e5156512d5a7bbe7dedea313a9a7b314cb31ca177536529674e69b8a144bc79"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-clean-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-clean-after.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-clean-before.active.json",
+      "bytes": 110,
+      "sha256": "0d8cf977cdc877cc429498356b9e7961fff9ef7c38de368c468c267133c59dcc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-clean-before.result.json",
+      "bytes": 544,
+      "sha256": "93c3c00056a0911ffd62bcc949324f436ef03a63a20f8ff17203e13f2a51f097"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-clean-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-clean-before.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-after.active.json",
+      "bytes": 110,
+      "sha256": "e54380e783f54f5fb77cc77e85b966c867cc91ea1cd96bfb3bc423c8803f9cd4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-after.result.json",
+      "bytes": 567,
+      "sha256": "84055fa1f3b7e1a3d3b0ee53324e1d74e7e3630f59bffd4f17074bd3986bfed9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-after.stdout.log",
+      "bytes": 1676263,
+      "sha256": "9e81ead69f7cdbbe937d093f5155afa8f3ca5e8eb752e735b70a0f04951d97df"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-before.active.json",
+      "bytes": 110,
+      "sha256": "f7d38eafc7e81af0a6e08f39d42c137662767f5cda37a8e8d2c68b95841252c1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-before.result.json",
+      "bytes": 570,
+      "sha256": "aaadf1091baaf132b8a679422f5516242678f3ad659f290c8c0b0d0db5add112"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-before.stdout.log",
+      "bytes": 1676263,
+      "sha256": "9e81ead69f7cdbbe937d093f5155afa8f3ca5e8eb752e735b70a0f04951d97df"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-id-after.active.json",
+      "bytes": 110,
+      "sha256": "6ca6904596e9ffc7b0e7512cc5999644d49ee5a9bf94ddb638797b083bb03b6d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-id-after.result.json",
+      "bytes": 532,
+      "sha256": "9b2391054a0bbab98a95b6b2ce3342bd52bb619f4d052644a0b40129f5d74b3f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-id-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-id-after.stdout.log",
+      "bytes": 41,
+      "sha256": "5291ce2bd50ae1239b7923b6fb520be59fe2f7ed53a2fba93b25227ba1988fd1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-id-before.active.json",
+      "bytes": 110,
+      "sha256": "d2555fca515c85b316772091d32e60cbbb91b78250867cafd3f22c0e31711e66"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-id-before.result.json",
+      "bytes": 535,
+      "sha256": "2acf38ff209b85447ed57a8a041945f629933a95c96495c43a76879271e29d10"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-id-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-git-tree-id-before.stdout.log",
+      "bytes": 41,
+      "sha256": "5291ce2bd50ae1239b7923b6fb520be59fe2f7ed53a2fba93b25227ba1988fd1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-input-paths-after.active.json",
+      "bytes": 110,
+      "sha256": "0e7f332589a3ff192c3108b336a548e3cf0f195899369dd704542ce657bf12f9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-input-paths-after.result.json",
+      "bytes": 522,
+      "sha256": "1f64530d264c87456460ef71ad1e74fef55d94a22eaca2f1829461562e538d98"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-input-paths-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-input-paths-after.stdout.log",
+      "bytes": 1018317,
+      "sha256": "bf2444c6fb1a81f431c820de35d787afadbf66b81290f0920158c8e9f9d8c745"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-input-paths.active.json",
+      "bytes": 110,
+      "sha256": "7455ad93478b0b442f80d8e9a09b01d6f8277cd4bc23373f804ff3fe3eed71ec"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-input-paths.result.json",
+      "bytes": 504,
+      "sha256": "54c2d37ce71f32f503654cc6b036c3a2fd8f51061abbd427bfec6ed508793d59"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-input-paths.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-input-paths.stdout.log",
+      "bytes": 1018317,
+      "sha256": "bf2444c6fb1a81f431c820de35d787afadbf66b81290f0920158c8e9f9d8c745"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-sha-after.active.json",
+      "bytes": 110,
+      "sha256": "fe4d70ac9ff6dc0296eb36a80b484b1254e64c298e3666f0303f78b9ba7506ba"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-sha-after.result.json",
+      "bytes": 500,
+      "sha256": "428a39256e880279f85371db46b6991e8aef5905607a4d9a2cf3b69435425194"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-sha-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-sha-after.stdout.log",
+      "bytes": 41,
+      "sha256": "b52080ae027b616ca745659f56a7c834ec841b1f0ea5d7d7ff225e611ccbab45"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-sha.active.json",
+      "bytes": 110,
+      "sha256": "37cbfcf8dc8f97fd1647013ba64a9f2b3b87fa3fa1bc686835a3e443425eedae"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-sha.result.json",
+      "bytes": 483,
+      "sha256": "d6a310e0fc8d99c3d7490f284f118b01a1106d291149204cb05ed2f137d0ec40"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-sha.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/source-sha.stdout.log",
+      "bytes": 41,
+      "sha256": "b52080ae027b616ca745659f56a7c834ec841b1f0ea5d7d7ff225e611ccbab45"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/visual-studio.active.json",
+      "bytes": 146,
+      "sha256": "ff298a8f2858c2a28c0b890d59b8108495bec0393bc7d708c42db84158ae4baf"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/visual-studio.result.json",
+      "bytes": 683,
+      "sha256": "118af0497d010b4708d4590325bb603527d7b9c8e858c9316ccd9a4314dcc845"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/visual-studio.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/visual-studio.stdout.log",
+      "bytes": 2469,
+      "sha256": "cc8305173b5f73cd5ee1ac24f411ca1841da66eb2d6ce7c7e8aa9f99832841ab"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/workspace-test-compile.active.json",
+      "bytes": 120,
+      "sha256": "91dacbf3e1f3aee8b6c19a34c62a6ad696dd336661978830a1c2030e3ffb3036"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/workspace-test-compile.result.json",
+      "bytes": 695,
+      "sha256": "95a173087626b92441c73726adc9329a89121b5c5762076b93bc43564ac41892"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/workspace-test-compile.stderr.log",
+      "bytes": 991821,
+      "sha256": "97965c6fb6d15ae96e8fa6a3ecad31573d90696e24263785c7d7bb5a7c7d4e14"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/logs/workspace-test-compile.stdout.log",
+      "bytes": 685475,
+      "sha256": "a0adb691f25082260cd9ab9eef143ac3be2a1980e1ec6851cc4317ab6c65f8d0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/msvc-sdk.json",
+      "bytes": 1587,
+      "sha256": "68574ab1f91556256fd3b0b21d3c94178c536a86a3a89db22f3cfbbdba8748d5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/result.json",
+      "bytes": 33934,
+      "sha256": "52c4e1d782ccdbc7c9d03f25d3782912d929d87e7ec80d432b728a17e3d32131"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/raw/run-start.json",
+      "bytes": 635,
+      "sha256": "0eb66547c14e16957b24f1c476e26e802f460b7aad9427198b4aaf8c8585df0a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifact-original/test-metadata.jsonl",
+      "bytes": 21556,
+      "sha256": "228aecd8957d86b5fca477c23b6da7e7c66cd51f2572b7c08bd7b915b5cb4aae"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifacts-first.json",
+      "bytes": 161,
+      "sha256": "c3d575098a5138bf89dbf56b7529efa03609f2b319900cff0771df212f13b177"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifacts-fourth.json",
+      "bytes": 1079,
+      "sha256": "7875efafdfa19d099b6de43cf7814cfaa62fe9772c5e716c9c82339af545e9c2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifacts-second.json",
+      "bytes": 161,
+      "sha256": "c3d575098a5138bf89dbf56b7529efa03609f2b319900cff0771df212f13b177"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-artifacts-third.json",
+      "bytes": 161,
+      "sha256": "c3d575098a5138bf89dbf56b7529efa03609f2b319900cff0771df212f13b177"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-com-import-independent-first.json",
+      "bytes": 7764,
+      "sha256": "34efdfa9c12b6668e4d358576f39a2b48c16211bfe58042895fe71834412a365"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-download-original-first.command.json",
+      "bytes": 993,
+      "sha256": "c5e0739f215037b6142d32855844884f53e33c399a0f97134a9b940dbb65537f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-download-original-first.json",
+      "bytes": 718,
+      "sha256": "2b4e93de86443d765be1628e8317493b1ffa9f53c77e8e4e5a70baa808f7afb3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-download-original-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-download-original-first.stdout.log",
+      "bytes": 195,
+      "sha256": "b615e136b93e6d5774ab04880212c82649a61366b4279c180577c71cc369997c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-jobs-fifth.json",
+      "bytes": 1720,
+      "sha256": "ebf9ba26a1d5bbf827d5925074d039235179e166ef001f3ec672df0a5effa0f5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-jobs-first.json",
+      "bytes": 1720,
+      "sha256": "ebf9ba26a1d5bbf827d5925074d039235179e166ef001f3ec672df0a5effa0f5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-jobs-fourth.json",
+      "bytes": 1720,
+      "sha256": "ebf9ba26a1d5bbf827d5925074d039235179e166ef001f3ec672df0a5effa0f5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-jobs-second.json",
+      "bytes": 1720,
+      "sha256": "ebf9ba26a1d5bbf827d5925074d039235179e166ef001f3ec672df0a5effa0f5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-jobs-seventh.json",
+      "bytes": 1905,
+      "sha256": "591dd7acbf8ac1f277290142fe14d46827144615dbdfc10a9ac125cf61532d07"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-jobs-sixth.json",
+      "bytes": 1720,
+      "sha256": "ebf9ba26a1d5bbf827d5925074d039235179e166ef001f3ec672df0a5effa0f5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-jobs-third.json",
+      "bytes": 1720,
+      "sha256": "ebf9ba26a1d5bbf827d5925074d039235179e166ef001f3ec672df0a5effa0f5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-msvc-public-native-first.json",
+      "bytes": 8523,
+      "sha256": "9dc84bc9659017ec32e0c0308a65871e9be2ebf568f6279cb906c8f8b87d5a39"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-msvc-public-native-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-msvc-public-native-first.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-msvc-runtime-first.command.json",
+      "bytes": 1811,
+      "sha256": "058071275fc6395841c0b5b90b522b63752e01219f31f5fd681f47583946f632"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-msvc-runtime-first.json",
+      "bytes": 198609,
+      "sha256": "cce4e85faaed92bbd165b9dd6717ac5106caf0f859ea397fe233e62f952641a8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-msvc-runtime-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-msvc-runtime-first.stdout.log",
+      "bytes": 947,
+      "sha256": "d4625712ed65df3d73133b5bf72dabf9b9e7e57d146c5a59a7a1a2d5d67394ed"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-msvc-visual-native-first.json",
+      "bytes": 9897,
+      "sha256": "cff3451ec3561b08c127e6039c5abfc33eb0a195f3efe6836008379dc07870bd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-msvc-visual-native-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-msvc-visual-native-first.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-original-independent-first.command.json",
+      "bytes": 1592,
+      "sha256": "579c8b0d97fa0320c9c87b85897d35f760bb6ed7d699aa4d1a52d1dbb978d0f4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-original-independent-first.json",
+      "bytes": 498487,
+      "sha256": "1fe93cf20cba35a92286d536cacc68fc9445f2a02d712c4e78b4ea5e8044fb4f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-original-independent-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-original-independent-first.stdout.log",
+      "bytes": 693,
+      "sha256": "c871af04db657c80d1fe0a7dfde7e9f9b8f799f5357a6ff3b4f76e8b3ce47600"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-public-visual-operation-first.json",
+      "bytes": 3093,
+      "sha256": "244525c9c69009a1d06b1b717358fc7dbc79191d676a5c6394655876003c4647"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-run-final-first.json",
+      "bytes": 28354,
+      "sha256": "d6897eb422a4ccdb658e9847c90abc916e60663339498be9da155b3781a01d12"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-run-first.json",
+      "bytes": 28344,
+      "sha256": "f7e0eb5091dea31d6d6c6294da6a7eb107f920c7e473b2926aa816667334a99c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-run-second.json",
+      "bytes": 28344,
+      "sha256": "f7e0eb5091dea31d6d6c6294da6a7eb107f920c7e473b2926aa816667334a99c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/modern-run-third.json",
+      "bytes": 28344,
+      "sha256": "f7e0eb5091dea31d6d6c6294da6a7eb107f920c7e473b2926aa816667334a99c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/preparation-first.json",
+      "bytes": 2619,
+      "sha256": "abebdc9231db0e7b5df339cba6b81e37a8a2133616411a463678f8e9c71acf8c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/push-interruption-observation-first.json",
+      "bytes": 511,
+      "sha256": "28518b032656f0895ed4d6c3eea63be9ca428a32d03c0a67555bc88420069357"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/push-second.json",
+      "bytes": 496,
+      "sha256": "78299f590dc2a43027b370b746911f695d588654ec22547692b01f33895e7359"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/push-second.stderr.log",
+      "bytes": 88,
+      "sha256": "4af539d3f40e4a4b24dee9f721f631625cc1fa84f587fee58d6dcbc61a09f5df"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/push-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/review-runtime-public-visual-first.py",
+      "bytes": 11975,
+      "sha256": "a52ce5e16977b7231c793c75d0f82fb4b41b8da954b1266efcc36e3f05e3b48d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/run-public-visual-selected-first.py",
+      "bytes": 2972,
+      "sha256": "48f10257184a5e54118e917336a74c35343c6f984b4a3580b4edf7b6edc2b4f4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/run-recorded.py",
+      "bytes": 1288,
+      "sha256": "2005f0104838b82ab4936c89414c3da3257aa26e8ab46b5d03ca39353d161dd0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/run-windows-runtime-selected-first.py",
+      "bytes": 2617,
+      "sha256": "469e0ba034446a5d82fc437550134bb95f6550e3eacdbe8f5270aae96892e403"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/runtime-public-visual-independent-first.json",
+      "bytes": 553533,
+      "sha256": "8fff3194b9f0521c4170a849f5d5c9980143c8cd80b48816d002621a573a832f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/source-commit-first.json",
+      "bytes": 389,
+      "sha256": "2cde45dc1e10edfcad5af474ca5e0bf84fd617a53539579a31d5e0c8ea8e0a7d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/stage-and-verify-batch-first.py",
+      "bytes": 3043,
+      "sha256": "0e99e1d93153807ceccbc10af583e91a842d905039a1777a3b85b89c3e33393b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/staged-bytes-first.json",
+      "bytes": 429,
+      "sha256": "42af5c95a1ee32bed690dd33205966a86c3dc50771c08a4ed93ddb01a241a70e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/staging-guard-first-failure.json",
+      "bytes": 398,
+      "sha256": "2147f893740a0bb4674bfd03e97d09fb9fd8db6d385ffe95668f6d6d189f942d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/verify-ci-artifact-first.py",
+      "bytes": 61502,
+      "sha256": "de7d52d7ca2c04a72b4dcd4de727fd1b1b2882259024e5bbc8b184007679fbb9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-0.objdump.stdout.log",
+      "bytes": 1055126,
+      "sha256": "1e588e2df779a93a7e7b8bb068bd705492f778f23e88cd368fbbb9f23f01cd55"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-1.objdump.stdout.log",
+      "bytes": 2160694,
+      "sha256": "bd793dab2270c463f9318acfeb4549c2c379f7941e37016551857fedc0c65ed6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-10.objdump.stdout.log",
+      "bytes": 2184075,
+      "sha256": "ac779bc4402e7080797b11ec48c7b6672afa2bd3f5eef343b23f0755718443a8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-11.objdump.stdout.log",
+      "bytes": 582466,
+      "sha256": "9168f953445ea1e5c93576b593697d16bab37184816458883f6368199df98445"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-12.objdump.stdout.log",
+      "bytes": 2123329,
+      "sha256": "0c359010ab37a424cf5fe7480222bfdd2b8b78de98e88cab566d8e1990848b09"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-13.objdump.stdout.log",
+      "bytes": 610986,
+      "sha256": "753c60959d473fedfe4fef0cd07f3b487d5a930d9db9746762ef3712c59513db"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-14.objdump.stdout.log",
+      "bytes": 740454,
+      "sha256": "428be1c56f375c0e3a7011a8d50eae581bba172e17cc4171381a719ba1a04959"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-15.objdump.stdout.log",
+      "bytes": 898691,
+      "sha256": "bc862ac5090a3a347a2dc0cc4e0512d292aee99302ed41732c0f1c732734112f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-16.objdump.stdout.log",
+      "bytes": 580620,
+      "sha256": "576d4d3ccf8330795fc3e3a021aa52a655c2b833ab29ba2a9817755a70d9da24"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-17.objdump.stdout.log",
+      "bytes": 615558,
+      "sha256": "665b6dc540d5ae33a3186c5b42f0a138b6416da66f7fd1f4570d1a0da69a5ae9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-18.objdump.stdout.log",
+      "bytes": 4008380,
+      "sha256": "5daebb50a23897d97fd99145c24ef5a756b04b8b1bf75449a29bac2837054225"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-19.objdump.stdout.log",
+      "bytes": 1083631,
+      "sha256": "ed5b7049269e13db3c15687a924b670b68cf8a34c43eb4f55f85ff8fdaeea4cb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-2.objdump.stdout.log",
+      "bytes": 2392830,
+      "sha256": "bbe15bbece493beff743ffa57a6d608034db1ed405363fada9c0bb1fb0396359"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-20.objdump.stdout.log",
+      "bytes": 1199847,
+      "sha256": "0a7e3cc029f9a9852a19f30fa2427193da519a27763ef04071ac6da38ab387cb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-21.objdump.stdout.log",
+      "bytes": 5681704,
+      "sha256": "d56ef3b771b6f4c07377c8f77e027d2041695e3d76f0dc4de8e7c6f716fe14b9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-3.objdump.stdout.log",
+      "bytes": 6650577,
+      "sha256": "e0ff2973e95fad0a1112128705e52191b8757c755bcfb4ef559d6b79687b4c8e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-4.objdump.stdout.log",
+      "bytes": 5707017,
+      "sha256": "49aa4e8efc06170ad1501c73fc11fe72774e8ead11ef7fea69b53f58d8af1bc4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-5.objdump.stdout.log",
+      "bytes": 2092261,
+      "sha256": "ca7f1ad1dca268fa6f103af0fea25eb9b92f3ef306a5ef6a03c4727e4759d279"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-6.objdump.stdout.log",
+      "bytes": 533594,
+      "sha256": "b44256019718341fb0bee067dfa999720ac369f82b3a4e9bc805adb841f27eca"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-7.objdump.stdout.log",
+      "bytes": 2322939,
+      "sha256": "594166306081ebf42250d7d7fdcbb78f8aff5079cc1510ebbd8f9de24eedee9d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-8.objdump.stdout.log",
+      "bytes": 2314150,
+      "sha256": "7bb7c72dbae675a17a5846872d8d60bdfa3015a9a5749d8b98bfb5efd5f873e1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/pe-9.objdump.stdout.log",
+      "bytes": 2694947,
+      "sha256": "e84d1b7b49ead083bd2dd63656b600439d440da75f785a26109b159190673423"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/LICENSE",
+      "bytes": 1088,
+      "sha256": "32b48e0a752c101a54d4ea1affc589dd99d8b553c72bedba17c6e2e30d319b30"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/THIRD-PARTY-NOTICES.txt",
+      "bytes": 2448718,
+      "sha256": "0bf19c345f74c394a7ba30f0059db8bd1943d30d564165eefe3eb3205c2c72c9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/artifact-sha256.json",
+      "bytes": 36924,
+      "sha256": "f967e2203560a1a7419abdde1a8683f122151e8241fd5007638dd0c20fa7bf38"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/bootstrap.json",
+      "bytes": 501,
+      "sha256": "51066bf06e5e0cc97e6766973f1e4e4e6084feb3746b15dcab97bebc064d8409"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/cleanup.json",
+      "bytes": 530,
+      "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/executables.json",
+      "bytes": 10984,
+      "sha256": "d6fdddc986f6d3ba3a0648d6faef2a4be4fc4a1a29f58c94f7eed18bc62ba4ac"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/host.json",
+      "bytes": 673,
+      "sha256": "2b6d4abb9bf9ef0e31c3d52f227d27b00b432197d4f41528d70bf4f46157a3df"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/input-domains-after.json",
+      "bytes": 1713135,
+      "sha256": "1c3bbedf7ec076b5be29af74f394d3a108c00e95f8acab6ce6ef667bb0301c0d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/input-domains.json",
+      "bytes": 1713135,
+      "sha256": "1c3bbedf7ec076b5be29af74f394d3a108c00e95f8acab6ce6ef667bb0301c0d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/input-git-tree-after.json",
+      "bytes": 3444863,
+      "sha256": "9d6342aef36a88a51cf748c84d2475f5a4854b52e8a094a1c81271f18cc027e3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/input-git-tree.json",
+      "bytes": 3444863,
+      "sha256": "9d6342aef36a88a51cf748c84d2475f5a4854b52e8a094a1c81271f18cc027e3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/input-sha256-after.json",
+      "bytes": 100340,
+      "sha256": "e579e0215ee78afc98f5a91391bd22ae842158bf5acd972cf4068f3d223bb827"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/input-sha256.json",
+      "bytes": 100340,
+      "sha256": "e579e0215ee78afc98f5a91391bd22ae842158bf5acd972cf4068f3d223bb827"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/after-vs-crt-flags.json",
+      "bytes": 727,
+      "sha256": "745cab7d3166205eac27d63eb4ad0abfcd38712f2c9506f0c89ec76661ea24f3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/architecture.active.json",
+      "bytes": 136,
+      "sha256": "50dd6d6e436805a603416581593b855720ae9f71c4c07e1f5234e591f0a077e4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/architecture.result.json",
+      "bytes": 522,
+      "sha256": "223940e15e7dbc9da6134cd6578dad817e892b25d17f3ed5161f57b238f6d727"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/architecture.stdout.log",
+      "bytes": 72,
+      "sha256": "87cbea92b1a7c0033871466cdea2da1a756ba4496cc5f3b6d25f79ec64f378c6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/before-cargo-crt-flags.json",
+      "bytes": 731,
+      "sha256": "becc46bb342c7fba3c9d08b8ddd573816e40f18d6ec9cf07ec93e1589e6de671"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/before-vs-crt-flags.json",
+      "bytes": 728,
+      "sha256": "a7a16f342ec2cd0526c3245dbd609326e0d0f5a11a9b62e8b2411f342e68f64c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cargo-metadata.active.json",
+      "bytes": 120,
+      "sha256": "3c7e4826226b3455c848ce001a334937c5ab1905b01f3f47c45d2d50d95b9c79"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cargo-metadata.result.json",
+      "bytes": 561,
+      "sha256": "1ce5ceace97dbe2d0436ac2d69f0bab95be82ad3c0bdadadd51f4f32ebc1a8f6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cargo-metadata.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cargo-metadata.stdout.log",
+      "bytes": 26381,
+      "sha256": "28c8abc73c238d64fa4f0b38e17064fb023d45999f7db83d31272886381a49d8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cargo-version.active.json",
+      "bytes": 120,
+      "sha256": "62326c39ac15900683fbf9f583f01ae3987b4513bae776f37e05ca101a922517"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cargo-version.result.json",
+      "bytes": 507,
+      "sha256": "f6aca2933e7ea15b9f8a60badc17d68f26a9e7e44c71014755862c0627160256"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cargo-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cargo-version.stdout.log",
+      "bytes": 346,
+      "sha256": "59c06167beac3ae99f676c560037b9755891268ea08aeddd20477fce7ae22540"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cl-version-probe.active.json",
+      "bytes": 191,
+      "sha256": "de2120ba3cd970ce3e61c2412d084a6db646ea2fdc68b869eb9a949f33be0ff0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cl-version-probe.result.json",
+      "bytes": 845,
+      "sha256": "8c17609a9b6e662befbcfe8988d99c8145e488588059806f363a7e3006617a32"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cl-version-probe.stderr.log",
+      "bytes": 1124,
+      "sha256": "4abd17eda59dbad0286f86d1dfe6dae2e84693133b14e8fca4ee883f0e224749"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/cl-version-probe.stdout.log",
+      "bytes": 20,
+      "sha256": "5659d789099daaf7eef45081ce59db678cbf430fd37d54ebf5e1b7d113cec605"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/clippy.active.json",
+      "bytes": 120,
+      "sha256": "b74318cf77f7eb838de01f97c1f10bc497d0b9aca36a3e2a8b7035027ae020b7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/clippy.result.json",
+      "bytes": 671,
+      "sha256": "506eb21a409244a79b77eaf6e4c7697a91e085a27e99a40304e22ace03a59b88"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/clippy.stderr.log",
+      "bytes": 1480872,
+      "sha256": "058dc0afcf99ffade0da315f52c6a7079044ad095d92d7e41749ec99a9eb81c3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/clippy.stdout.log",
+      "bytes": 75,
+      "sha256": "7e2ed6c6ec8d2782960220c7609bbac84c2229bf9bbb58d37d8bde08c88ddcb3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/fmt.active.json",
+      "bytes": 120,
+      "sha256": "e1aef76f02937c0473c3f2625ffe51d8dec3837614fa2ed28844f390cc0a55ac"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/fmt.result.json",
+      "bytes": 493,
+      "sha256": "d89969fd75b14094e81ccfe3d5c353fb896796b4bd10459c576d8adf0bdc8c92"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/install-fixed-rust.active.json",
+      "bytes": 121,
+      "sha256": "01f8356fcf3c862c7d0a70bd53d36e5912dbe2d61114d67a2bbe4d22e810891e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/install-fixed-rust.result.json",
+      "bytes": 713,
+      "sha256": "b79942591aeaa32784e3b35a4c288027b45a42705149de6479b90c12a3986ec8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/install-fixed-rust.stderr.log",
+      "bytes": 273,
+      "sha256": "d433bfe6234502eb72c145280457714ab08b4056b5db88c8feb68a71c4cb7004"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/install-fixed-rust.stdout.log",
+      "bytes": 153,
+      "sha256": "c47ac27d8a2c1d200af1e8a5109d3df404883d413cf6688650408eab3ce1d3c4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-0.active.json",
+      "bytes": 196,
+      "sha256": "92fb9df9426d2c1e036fb8200997b0c16402473cb8b78e2d3ac33536e952a061"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-0.result.json",
+      "bytes": 693,
+      "sha256": "974aed9074297bcc3e4cd8b61e8ba0d1751179b1281dce596c581d2d765cdaa6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-0.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-0.stdout.log",
+      "bytes": 508,
+      "sha256": "fb1c75decdd37c4abf5da52c373cc8d25f6eed1768dcf33279b75db85b4a0f68"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-1.active.json",
+      "bytes": 196,
+      "sha256": "aa19f57c637eae4e6968985dd2779f48f67a46df415cb897d690fc05ff5945cb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-1.result.json",
+      "bytes": 701,
+      "sha256": "99a2bef05b40c15ad6780a55aee968fbbfe46e74169002a8ed69b05936f82a92"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-1.stdout.log",
+      "bytes": 516,
+      "sha256": "6a39d2a700cf1df605445718e50fb537831e9a707b960470a85b880c832d7bb5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-10.active.json",
+      "bytes": 196,
+      "sha256": "670f6f8fc53a3e4a1ad8e0fe3ac1295dcaf0b6a77f1f2fe18e4198101b490912"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-10.result.json",
+      "bytes": 697,
+      "sha256": "ba4503eb54743afaaf3519e8688ed07e320f53b1760e707778fcb1d5a91084b6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-10.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-10.stdout.log",
+      "bytes": 509,
+      "sha256": "a06b262d586510bc79ea41752e8a5d80c63300ade9471591d57bdd1f66f0b528"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-11.active.json",
+      "bytes": 196,
+      "sha256": "6082c5b7c15c8bdcf3264a6cd7bca5492a0e6ffe237b5bb8e23ead83b638d333"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-11.result.json",
+      "bytes": 693,
+      "sha256": "5ebccfb7e9641bffc87088984e58ca369a3e8d07db7afdad15db1e2ed1fdf1a8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-11.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-11.stdout.log",
+      "bytes": 506,
+      "sha256": "5bdd9b49bace2c5f1829546ea5edcfd7bfb2b2b27fe323f2b8579daccbf9c2ad"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-12.active.json",
+      "bytes": 196,
+      "sha256": "0fbad8bbb3e5775d2f0cbfdf15cb4819ad096815a2137e7d14bad8de1dfecc66"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-12.result.json",
+      "bytes": 692,
+      "sha256": "7e7e0f3a9a101efcdf28158d63fad82a2bdf64ece4f3c64821a63118cdd51dd4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-12.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-12.stdout.log",
+      "bytes": 767,
+      "sha256": "3a3a218c670e00b07ade018418da195b16e94ef40cc77b3c01da16a857271547"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-13.active.json",
+      "bytes": 196,
+      "sha256": "b4301a5369d37994eeffa44e38c85aa1a06e06752740fa9b9c6f327fb3dfceb4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-13.result.json",
+      "bytes": 700,
+      "sha256": "72cedea23e9f6faac9084723d7532fd9b38ca86121c76adbc46f9ed08717337b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-13.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-13.stdout.log",
+      "bytes": 512,
+      "sha256": "e602f2f253f68e57d1404d424b2b1781d3772a38787e697b47f49cb212d663db"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-14.active.json",
+      "bytes": 196,
+      "sha256": "8c47ed1ff1086328b244f93cedeab25a7059509d01e1fa1ad4860272e5f6af89"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-14.result.json",
+      "bytes": 692,
+      "sha256": "9500e024404bdad4d447dadc113f02c08107c1d67773f9742be10d66a98465e0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-14.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-14.stdout.log",
+      "bytes": 504,
+      "sha256": "336b78dd62dee6f727547e18b279fc3b67c54a5bdfb4a2a20376e5e778c76b29"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-15.active.json",
+      "bytes": 196,
+      "sha256": "b994440e9bf0965a245e836e1f8c16e3575a28ab3cc811ada37502b65e573a30"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-15.result.json",
+      "bytes": 701,
+      "sha256": "4c8a39384d81380140d2c60da287558f19b714a6e166537c3da160ece3e8d249"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-15.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-15.stdout.log",
+      "bytes": 514,
+      "sha256": "141120d81ce97880ba763f2eb13847af6af917bcd4e4d4e7f9b02c4749e893cb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-16.active.json",
+      "bytes": 196,
+      "sha256": "c898e072c39e2061c21a5f0525c3b2c864b8dfe9834cce3a23c1c8a7c06d6878"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-16.result.json",
+      "bytes": 688,
+      "sha256": "d1ed7195a0f443f90883cd99a8d5e9fd62c918a346d250945bf8f35f42a1dd35"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-16.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-16.stdout.log",
+      "bytes": 500,
+      "sha256": "14c0ae194bff448c3791657ebefd06ae61bb4d87da71923c5ed738c6d10a956d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-17.active.json",
+      "bytes": 196,
+      "sha256": "e6304ee1c697e4e73091764ac066b44e9d0bd371c73dbd2f7e05954f3f6e566c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-17.result.json",
+      "bytes": 688,
+      "sha256": "aecdc701bed7582586cefe67363b012d92028ab4e42e24142aeaa02430a8ade2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-17.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-17.stdout.log",
+      "bytes": 500,
+      "sha256": "fbdc590afbd053e7dc0b865549511aed3561d14a84d473f5060b2fac849d4f7f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-18.active.json",
+      "bytes": 196,
+      "sha256": "7b4ca9fd5b9ef843333c29609d18d73e5ca65be4b920c6a168ecd58d3c396c35"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-18.result.json",
+      "bytes": 692,
+      "sha256": "9759cb0ec686b74836cd0e9b9cd45b74e7efcb567e5254bd2a2c50eee5e95bec"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-18.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-18.stdout.log",
+      "bytes": 504,
+      "sha256": "e80033abe789c59d0b9fa3f0f36425eb53c01f5760d6130586b957293ab7acca"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-19.active.json",
+      "bytes": 196,
+      "sha256": "2461c36d1a88c7468f5c7d8db87d5141655e86e8af0f2380ea7e8cd5307b88a3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-19.result.json",
+      "bytes": 694,
+      "sha256": "8099406ce37772cf89ef6dccc210ed3d391656df0dfe7935da6095e12f122ee3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-19.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-19.stdout.log",
+      "bytes": 506,
+      "sha256": "b2832a4315e4dcd1c17c5cb3669b5bce05955fd0ff0805ca353984a5883ceec8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-2.active.json",
+      "bytes": 196,
+      "sha256": "cb52b93000201351853fe232db74a3c7d739843b00f00949c92cb41858161dd8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-2.result.json",
+      "bytes": 700,
+      "sha256": "6c756ab6eb29066ac5d8de024ab41e4c2d86371c7ec73974264291e3dd45da39"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-2.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-2.stdout.log",
+      "bytes": 567,
+      "sha256": "b551be191aedfd94d2dd39bd63156baf8fd5058f893948041f96c1b8afc7d13a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-20.active.json",
+      "bytes": 196,
+      "sha256": "5760d8dd694d56547a4588b753cc6aedb5e56bf6d4991476e4f6828e585d60a1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-20.result.json",
+      "bytes": 690,
+      "sha256": "9b71b29e9cbb6e02f67b66c1073941f19fb93156155a71cf30970b049c96d031"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-20.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-20.stdout.log",
+      "bytes": 502,
+      "sha256": "d11ed616d0bc69ece0783350ed4a0b748312f6a459364c8c486eb6e72493f970"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-21.active.json",
+      "bytes": 196,
+      "sha256": "1c4a2c47ea8f7a13ac151ac8bae9fb2cb821fa986d1af23e7ba0deb4eb9fad01"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-21.result.json",
+      "bytes": 681,
+      "sha256": "886a9ff0b832989b3c76d3d20d352ba0c0e5cdafb3283f047855758b2595803f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-21.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-21.stdout.log",
+      "bytes": 790,
+      "sha256": "26b3758c81943dfe62b8e58386d94cc1a3c71c702ce1df7b5ee02f444cc2f733"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-3.active.json",
+      "bytes": 196,
+      "sha256": "3d351baeac144633d53ff06c1873a7105030fc35e4fa27b53e2b544cd152f17d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-3.result.json",
+      "bytes": 693,
+      "sha256": "e13b5abca841e5d3f0cf110e0d7acbc5bd79a9593f54dbde92fae35f729f0eb8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-3.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-3.stdout.log",
+      "bytes": 607,
+      "sha256": "391d6f8adf0d1288109789b15b7f73840fffa27fa973878ff5a5d0687f99a154"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-4.active.json",
+      "bytes": 196,
+      "sha256": "2423428304b9553127c559ada03af580f371df15c8d0765ba0a9e549a227b2f3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-4.result.json",
+      "bytes": 693,
+      "sha256": "4d66979afd1c59bca7750f41fa826c80464885fc881372c0f7633382128d6add"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-4.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-4.stdout.log",
+      "bytes": 772,
+      "sha256": "761cf5673b4a96f737174441a483d124b1715bb73c50f3d6e1a5cc4864a79e94"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-5.active.json",
+      "bytes": 196,
+      "sha256": "0b43f47f3df0af40982a7cde6f1b731a81f2c28e103ce5b800d3058db5419224"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-5.result.json",
+      "bytes": 696,
+      "sha256": "2bf77decdf02cc4908fbc933b625b66364bf2ae3d3c175e048e9d668281ab3db"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-5.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-5.stdout.log",
+      "bytes": 511,
+      "sha256": "afea55d1c27f04d29291b8c4871001d563a9a84df743970dbea6b74718362684"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-6.active.json",
+      "bytes": 196,
+      "sha256": "5aca8cd515db64704321ee0566a4955469f22b059698b4ac18e0ea404998205e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-6.result.json",
+      "bytes": 698,
+      "sha256": "3ed46ec498aad0249f3116f5bb098b065e0e55741dc8046f2e7f8177d3022848"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-6.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-6.stdout.log",
+      "bytes": 531,
+      "sha256": "c7f8c1cace8bdfe73327c2f69d89c140277b63a4914fee9405768d7e6375e665"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-7.active.json",
+      "bytes": 196,
+      "sha256": "b48488adef57907738b94324ecc6d18d9fbc768b8664479c393b79415998a426"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-7.result.json",
+      "bytes": 702,
+      "sha256": "f6b231cced7a8631a461d3d617fa12a98e46e61401faa913fa0ff8cd55a2cd64"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-7.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-7.stdout.log",
+      "bytes": 569,
+      "sha256": "17eb6eb466d687f06e26a73c138b7b6b8db30e5ee91095b191717ac40bdf4da0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-8.active.json",
+      "bytes": 196,
+      "sha256": "82e22379e44642f7bf9346469925d6cee6059db379449b03157b447ec79d9734"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-8.result.json",
+      "bytes": 705,
+      "sha256": "dc21a332f479a855dcc28de34692303845de7c3ebad79828a9386d07640affd6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-8.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-8.stdout.log",
+      "bytes": 572,
+      "sha256": "f862360601a93f93f90c0f6d5bf0b814a5937cf4960dbf916acb6158f247bfc0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-9.active.json",
+      "bytes": 196,
+      "sha256": "f58d72853cc75e2c48684da9fffb5735eca11e0d186d6efa36309f3fe8e3b09a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-9.result.json",
+      "bytes": 696,
+      "sha256": "eabddc2312777f06dcf65e8a05261b2d733789cf35e853b3ddf8f380389ce934"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-9.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/pe-imports-9.stdout.log",
+      "bytes": 512,
+      "sha256": "73226d4d91bfe4680fa21ac395a68f3efb277b5003c9e918c89a1d52dbcf968f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/product-compile.active.json",
+      "bytes": 120,
+      "sha256": "a1b62e58d6146b2f977748dec329ef44c59524879a2dbc16d82097be2e8aab19"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/product-compile.result.json",
+      "bytes": 714,
+      "sha256": "03d71abc8443f5faaab9ef4e5e56d0e669e472f8b1b19643df03e8f3a61d6e8f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/product-compile.stderr.log",
+      "bytes": 828285,
+      "sha256": "ec7bd2f1365eb12f55cc5c5527d13bc1e6234792fcbf59872ef91ce8ab28460b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/product-compile.stdout.log",
+      "bytes": 714545,
+      "sha256": "4f823b5913c850f7fdb9731b28e861b353fb1a8c17b29a639e43d2703222a7ab"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-src-components.active.json",
+      "bytes": 121,
+      "sha256": "d7cb8d711db5d45f72b80bb332a4cd2cae0f62f46e24c1a88d80d5859745ac87"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-src-components.result.json",
+      "bytes": 611,
+      "sha256": "46009d58548511a1711336b01741a1b350505e49a14e3c615e072d1d56b23696"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-src-components.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-src-components.stdout.log",
+      "bytes": 193,
+      "sha256": "e9ef5626c16e238f38d71e3b5fd4a2529df2ec2dce84b09b12d809713bfa2ac8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-sysroot.active.json",
+      "bytes": 121,
+      "sha256": "c5192c16da0fcdfd1c84408dcf3247d902ed7ffc521f47a988bbda25a60836fe"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-sysroot.result.json",
+      "bytes": 577,
+      "sha256": "113fc7ca944a8535e0510553de2e7e198f33455654dbfa0a3a9645900ab77e82"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-sysroot.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-sysroot.stdout.log",
+      "bytes": 112,
+      "sha256": "bdf160056b14bf7f0975f46d1743fc8afabb11007d3c6969c10dedf011a8dbf7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-target-cfg.active.json",
+      "bytes": 121,
+      "sha256": "28533d1b9b9b7deee01a01aa5e5417040b2e1a6bb2957b07ae939eb8a930bc21"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-target-cfg.result.json",
+      "bytes": 676,
+      "sha256": "cdaeb08884ebc4e2e7f36c28497c8990bc8a5822f8d6f4631d4877c2a182d99f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-target-cfg.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-target-cfg.stdout.log",
+      "bytes": 1056,
+      "sha256": "8f2febba8d154b70c5e2bc884a32156afad61b629cd4ebb0046edd0dfd392956"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-version.active.json",
+      "bytes": 121,
+      "sha256": "982d45286fa43347c3391e573b74e806e83dbc56b42fccda355e571bd8374531"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-version.result.json",
+      "bytes": 557,
+      "sha256": "38f6b1bd8eece6f2e4df469c5d8b307dd60773888b6f60d8fcca0142675a919b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rust-version.stdout.log",
+      "bytes": 212,
+      "sha256": "100465d1cdcba9edbe56d8f0126660b5dc3562d45fb8b556603c6b105786724a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rustup-version.active.json",
+      "bytes": 121,
+      "sha256": "d318d5088550c3cb9ec64aa82dc43e169d911a7e34ef2d71184db24c879c18b4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rustup-version.result.json",
+      "bytes": 494,
+      "sha256": "9bc9df1c8406911bb96fc7cb7476ea1aea5432dc5797f32b2587ea4de59e81d1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rustup-version.stderr.log",
+      "bytes": 643,
+      "sha256": "f80d14258b6bcd66b11562bdb001bd5aa2813a2ee01d61cd6d65b6a2ebec46e9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/rustup-version.stdout.log",
+      "bytes": 37,
+      "sha256": "9d0fa5abe0036a64d33be57d0945ac3cb1a44507774f93c5f70ca1a848307b40"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-clean-after.active.json",
+      "bytes": 110,
+      "sha256": "f883e5a1565fd7f561b4f0e7c7c25f41d5f6af5c1a19bf648e6deb39e1b58b20"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-clean-after.result.json",
+      "bytes": 541,
+      "sha256": "d2802c3a6d617d2b862777219f0cf3026b4177506c601e23f611a28e17a8775d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-clean-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-clean-after.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-clean-before.active.json",
+      "bytes": 110,
+      "sha256": "0a9fe44fe08d7507d9dabe61248091d8a8688b71ed39a411eaace05c1d364eec"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-clean-before.result.json",
+      "bytes": 544,
+      "sha256": "e8c49ad3790a094b773ac456cb5aa71932670510bf19b4e48d04f0d3d16512ce"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-clean-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-clean-before.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-after.active.json",
+      "bytes": 110,
+      "sha256": "71da8809fc5c192241bd1f19e04736ad7e438db33d40d575f826fd17f99ef7fd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-after.result.json",
+      "bytes": 567,
+      "sha256": "1daf0978a5807bc06c58796e3d352a2c7ba73bd70124a7d45f17fa5220a6fd5f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-after.stdout.log",
+      "bytes": 1676263,
+      "sha256": "9e81ead69f7cdbbe937d093f5155afa8f3ca5e8eb752e735b70a0f04951d97df"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-before.active.json",
+      "bytes": 110,
+      "sha256": "8d15d181f8e990793ad9fc95630e8709fa68280941b9380bffbb8330b0bb78c0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-before.result.json",
+      "bytes": 570,
+      "sha256": "b1dfe5c58fa05901685097399d21a6901d22cc96d685ea5620d0f00862a7e052"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-before.stdout.log",
+      "bytes": 1676263,
+      "sha256": "9e81ead69f7cdbbe937d093f5155afa8f3ca5e8eb752e735b70a0f04951d97df"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-id-after.active.json",
+      "bytes": 110,
+      "sha256": "bbbb4115112ecafade019a1ec20722a2d9d189d85219a9e77360663a10a61c5c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-id-after.result.json",
+      "bytes": 532,
+      "sha256": "fb258ff4c2cec9ba84ee56fd13c686fce2379a0d284f5378d9b8c9a0f4733561"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-id-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-id-after.stdout.log",
+      "bytes": 41,
+      "sha256": "5291ce2bd50ae1239b7923b6fb520be59fe2f7ed53a2fba93b25227ba1988fd1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-id-before.active.json",
+      "bytes": 109,
+      "sha256": "c74946e4c53212f5560dc5435625eb6477ce9761f9b8af5a040c2a2ccf92bd7f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-id-before.result.json",
+      "bytes": 535,
+      "sha256": "3007ac84770f21c110bcae370125a3d977a50e7fb408a87faa7230f7c6f4a788"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-id-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-git-tree-id-before.stdout.log",
+      "bytes": 41,
+      "sha256": "5291ce2bd50ae1239b7923b6fb520be59fe2f7ed53a2fba93b25227ba1988fd1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-input-paths-after.active.json",
+      "bytes": 110,
+      "sha256": "3d4e63e52fb47c91f41def0491016320ebb73511884112e7349d251615d33eb8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-input-paths-after.result.json",
+      "bytes": 522,
+      "sha256": "caf3ee4587dbc6139a7abd1e5ed431ad6478d33e9c929cfa58f0a042e19010b2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-input-paths-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-input-paths-after.stdout.log",
+      "bytes": 1018317,
+      "sha256": "bf2444c6fb1a81f431c820de35d787afadbf66b81290f0920158c8e9f9d8c745"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-input-paths.active.json",
+      "bytes": 110,
+      "sha256": "507d151047ce82abef19a36bb17722fb13155cb73cdba9ba9fb2a57ae986f2ea"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-input-paths.result.json",
+      "bytes": 504,
+      "sha256": "8a8dc21d578c677e3118a9779b14c26f412c2c80f3965da3bc886f5a59eb9777"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-input-paths.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-input-paths.stdout.log",
+      "bytes": 1018317,
+      "sha256": "bf2444c6fb1a81f431c820de35d787afadbf66b81290f0920158c8e9f9d8c745"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-sha-after.active.json",
+      "bytes": 110,
+      "sha256": "0f52beb85ef996f17cd2940afed306e63e3da2fc18a2f0d900df9312ad02c61c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-sha-after.result.json",
+      "bytes": 501,
+      "sha256": "3961bdea4fe7626464c9106ac206203fe8088d804c450ae15cc3996a5b689f70"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-sha-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-sha-after.stdout.log",
+      "bytes": 41,
+      "sha256": "b52080ae027b616ca745659f56a7c834ec841b1f0ea5d7d7ff225e611ccbab45"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-sha.active.json",
+      "bytes": 110,
+      "sha256": "fb0e742da7bb53d19f7b7431211b4c9b73a90048e364cd34e934e025ce36f513"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-sha.result.json",
+      "bytes": 483,
+      "sha256": "2279b451340eee75a877929864235c36fef530699ffcfeeebf188c55df63d415"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-sha.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/source-sha.stdout.log",
+      "bytes": 41,
+      "sha256": "b52080ae027b616ca745659f56a7c834ec841b1f0ea5d7d7ff225e611ccbab45"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/visual-studio.active.json",
+      "bytes": 146,
+      "sha256": "d538ede6219f2761c2fb0a7377e56b39eb035cd0195ca8838760a754219b32ed"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/visual-studio.result.json",
+      "bytes": 683,
+      "sha256": "11ad0aa77fd1756ccb9d399cfa15cff44439e52b16e9cc1bf93fb8e1998469d9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/visual-studio.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/visual-studio.stdout.log",
+      "bytes": 2469,
+      "sha256": "cc8305173b5f73cd5ee1ac24f411ca1841da66eb2d6ce7c7e8aa9f99832841ab"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/workspace-test-compile.active.json",
+      "bytes": 120,
+      "sha256": "938474a26f2b5247230dc65661dd99fe9371f1c02fdda295858ba800765b5d2e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/workspace-test-compile.result.json",
+      "bytes": 725,
+      "sha256": "881337adfea3c9b486ebe21cd3ce3f0b1e383e96a36e0df75c9a34e72a7c2889"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/workspace-test-compile.stderr.log",
+      "bytes": 1816109,
+      "sha256": "c588b263f413c1258db47503b9d46d46f03677fce4893e5f7bcb34051ef425d1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/logs/workspace-test-compile.stdout.log",
+      "bytes": 790028,
+      "sha256": "70b9336b3b1ef9c129b217bc685d28a9e900f992af57fbcefbe04bffefc01d4b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/msvc-sdk.json",
+      "bytes": 1587,
+      "sha256": "68574ab1f91556256fd3b0b21d3c94178c536a86a3a89db22f3cfbbdba8748d5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/result.json",
+      "bytes": 35660,
+      "sha256": "cc32ea0f8a381e6d15abd72af92c3fa408f5707b318ad36ed0c92203579f5040"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/run-start.json",
+      "bytes": 691,
+      "sha256": "4a74e55d86d168566cd0b01d680508a414fa70a4f200115a9ecc7d1a42f0744a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/raw/rust-src-provenance.json",
+      "bytes": 2529,
+      "sha256": "e2de71a5e851db7085645b0cfae0a5cc8b24d80484701f4c5744950cdc89f12d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifact-original/test-metadata.jsonl",
+      "bytes": 23326,
+      "sha256": "d724aef2615e84c9e649e2797e227db2b00977c6758f82a47a100a6a0df5f18d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifacts-final-first.json",
+      "bytes": 1084,
+      "sha256": "ce91b7650d813b935f8dc80577327fa807a93b0d60c29e1b152ed20622c78033"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifacts-first.json",
+      "bytes": 161,
+      "sha256": "c3d575098a5138bf89dbf56b7529efa03609f2b319900cff0771df212f13b177"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifacts-fourth.json",
+      "bytes": 161,
+      "sha256": "c3d575098a5138bf89dbf56b7529efa03609f2b319900cff0771df212f13b177"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifacts-second.json",
+      "bytes": 161,
+      "sha256": "c3d575098a5138bf89dbf56b7529efa03609f2b319900cff0771df212f13b177"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-artifacts-third.json",
+      "bytes": 161,
+      "sha256": "c3d575098a5138bf89dbf56b7529efa03609f2b319900cff0771df212f13b177"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-com-import-independent-first.json",
+      "bytes": 9140,
+      "sha256": "5f2a68b29e476c1d13fe9f56d4b65408ef8695bfc432bdc33ed1ab30b8a3a661"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-download-original-first.command.json",
+      "bytes": 988,
+      "sha256": "879a94a236df8c6d024c63ea7fdbaf77cd85a378982650cb4dce70ef70f1da15"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-download-original-first.json",
+      "bytes": 718,
+      "sha256": "f57bb5455b6cde2690a2a7b81547f33dee367e586f45436e6e70b93b4539e379"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-download-original-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-download-original-first.stdout.log",
+      "bytes": 195,
+      "sha256": "73e0a575d1786ce9cfa66d0f3625c6474d5e2c17d0f03d8d2a6dabf6e58df1f2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-jobs-eighth.json",
+      "bytes": 1922,
+      "sha256": "ab1fc2e2aca4205a1a1ee58a479c3775443c2ada2e07e69a8057712ee6728c6f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-jobs-fifth.json",
+      "bytes": 1737,
+      "sha256": "7fdee2e68dc1bbe3338cbcde7a22eb30a69a8227c43fe709d23143e383bc6278"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-jobs-first.json",
+      "bytes": 1737,
+      "sha256": "7fdee2e68dc1bbe3338cbcde7a22eb30a69a8227c43fe709d23143e383bc6278"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-jobs-fourth.json",
+      "bytes": 1737,
+      "sha256": "7fdee2e68dc1bbe3338cbcde7a22eb30a69a8227c43fe709d23143e383bc6278"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-jobs-second.json",
+      "bytes": 1737,
+      "sha256": "7fdee2e68dc1bbe3338cbcde7a22eb30a69a8227c43fe709d23143e383bc6278"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-jobs-seventh.json",
+      "bytes": 1737,
+      "sha256": "7fdee2e68dc1bbe3338cbcde7a22eb30a69a8227c43fe709d23143e383bc6278"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-jobs-sixth.json",
+      "bytes": 1737,
+      "sha256": "7fdee2e68dc1bbe3338cbcde7a22eb30a69a8227c43fe709d23143e383bc6278"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-jobs-third.json",
+      "bytes": 1737,
+      "sha256": "7fdee2e68dc1bbe3338cbcde7a22eb30a69a8227c43fe709d23143e383bc6278"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-msvc-public-native-first.json",
+      "bytes": 8523,
+      "sha256": "af18c5e6034de7cd54f2d56c62a6f0626fc05c36e6444c32e29d7180a5313255"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-msvc-public-native-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-msvc-public-native-first.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-msvc-runtime-first.command.json",
+      "bytes": 1800,
+      "sha256": "4014a3690cd762b803fdfe6b726c6bef0656b2981976cc98886feaf41c976f92"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-msvc-runtime-first.json",
+      "bytes": 198607,
+      "sha256": "83fd6ccd6ff4f93bf6524909d8698ddccebfb5e9c0bbbcd2a2103f1ea075e5f5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-msvc-runtime-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-msvc-runtime-first.stdout.log",
+      "bytes": 947,
+      "sha256": "786bb7cb30659fa4ec1da8962ddf0a5f9d6f22c9eb18848bc04c699011bc8f2c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-msvc-visual-native-first.json",
+      "bytes": 9897,
+      "sha256": "0a1f955e1dde884e3ea5f4e9dfff0bd178627acd1ec19e14674913fb3a177f13"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-msvc-visual-native-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-msvc-visual-native-first.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-original-independent-first.command.json",
+      "bytes": 1579,
+      "sha256": "70737dd372e62defac06ff2475685f83b932370abbb7f5d9868a1f749fcb2afc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-original-independent-first.json",
+      "bytes": 479439,
+      "sha256": "cf06fc5ccd119595dcbbf5e744b2c4f26d85dfab918c3f5dcf945a9c7eace489"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-original-independent-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-original-independent-first.stdout.log",
+      "bytes": 691,
+      "sha256": "f306442e1c2d2f216a48d40f08a20ad1f5fd33249f50f522183a5c733c31fe46"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-public-visual-operation-first.json",
+      "bytes": 3073,
+      "sha256": "59b380a71106917c3b6e5444c53a7a2ccc1c31fdb49442200cc5bbc6ddf25477"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-run-final-first.json",
+      "bytes": 28396,
+      "sha256": "224a214672069a74c47af7ab83a0b33e9608faf7d2e735159c9e09cdbb907cf0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-run-first.json",
+      "bytes": 28386,
+      "sha256": "11461c61f4e73f3cf11bad6f157efc3624f14ea5ac5002578c5bd3779e0ab1a9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-run-second.json",
+      "bytes": 28386,
+      "sha256": "11461c61f4e73f3cf11bad6f157efc3624f14ea5ac5002578c5bd3779e0ab1a9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round59-ci/win7-run-third.json",
+      "bytes": 28386,
+      "sha256": "11461c61f4e73f3cf11bad6f157efc3624f14ea5ac5002578c5bd3779e0ab1a9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/adapt-gui-artifact-first.py",
+      "bytes": 7557,
+      "sha256": "068f1afaa028e41b9743542be3fdc5f5eda5e1e4e439b9aac11d45481f00e1f7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/adapt-gui-artifact-second.py",
+      "bytes": 4502,
+      "sha256": "49b4d9ee0c3c630cfec0acba433add4f02d208fda7e4c39b834c8909ac605f6d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/architecture-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/architecture-first.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/archive-index-first.json",
+      "bytes": 62811,
+      "sha256": "1d84139a1cbaf8cf30d0b9c9150ab235ce87344c711f67a9235317e8bce5d0ed"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/archive-r61-gui-first.py",
+      "bytes": 9464,
+      "sha256": "0d95060cfb19a1d3793768f907d6d9f33bd593b08581ee42d14415c8e285b28d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/archive-source-review-first.json",
+      "bytes": 6348,
+      "sha256": "b94f055f4f4f2deecd145096c46345720cd5a04434dc58abd6a7ef69c3c5db3a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/audit-windows-readonly-first.py",
+      "bytes": 9868,
+      "sha256": "21b7a66397955bb9a0019cf7ffd35cba0dfe06745124ff2e8fb5ea9a744ae2a6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-after-first/crates/fc-bootstrap/src/main.rs",
+      "bytes": 21191,
+      "sha256": "22fde2cbcbfd12d188c4c1bf1b4b6744226933869bf87f126e8775b4cb7cef63"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-after-first/scripts/check-msvc-gui-contract.ps1",
+      "bytes": 12188,
+      "sha256": "092d0ec685e4a5f51730e2776c53a81d89c6be8b622911cf34aae4325280b20f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-after-first/scripts/windows-msvc-ci.ps1",
+      "bytes": 51811,
+      "sha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-after-second/scripts/check-msvc-gui-contract.ps1",
+      "bytes": 14248,
+      "sha256": "70414b86bba595f323b84af9404bb039af0c1c50f0786cd5e22fcec67a087259"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-after-second/scripts/windows-msvc-ci.ps1",
+      "bytes": 52758,
+      "sha256": "eac2e9e42cfd073aca58584e8dbc6d9cefa864a5b84711b27e0ab83d43689a7b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-before-first.json",
+      "bytes": 404,
+      "sha256": "a7ac048514db12c30478edf94a9a48e5062a7c8dd3dfd836a77f15e8826425c0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-before-first/crates/fc-bootstrap/src/main.rs",
+      "bytes": 19408,
+      "sha256": "731dbf90fc1b2c297e8010ceacad3b3b257deef52c11b5548210de2bbdc0c50f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-before-first/scripts/windows-msvc-ci.ps1",
+      "bytes": 49976,
+      "sha256": "0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-before-second/scripts/check-msvc-gui-contract.ps1",
+      "bytes": 12188,
+      "sha256": "092d0ec685e4a5f51730e2776c53a81d89c6be8b622911cf34aae4325280b20f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-before-second/scripts/windows-msvc-ci.ps1",
+      "bytes": 51811,
+      "sha256": "43f6bc63800b36162d64285a77913d33a2aa30f0f34c07c9349f6836642813d3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-diff-check-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-diff-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-diff-check-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-diff-check-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-first-to-second.patch",
+      "bytes": 8934,
+      "sha256": "b8fde26789dd9d1f435433e5398ec504de64a342a0838516abf5b4c6ad6591ca"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-first.patch",
+      "bytes": 23458,
+      "sha256": "e13c086da5376624316186dd25913b70c990c134472e2754da8bc877118af3c1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-freeze-first.json",
+      "bytes": 3950,
+      "sha256": "57120a6fff7e088dabff8b14586d62f215f3dd24a1f6326e42e464455b6887b0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-freeze-second.json",
+      "bytes": 2037,
+      "sha256": "c42a51fd5eca0939f7c19f968c2ab3e045e18b6ec2b028865474de2d6f6ccc97"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-rustfmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-ci-rustfmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/bootstrap-test-static-first.json",
+      "bytes": 13005,
+      "sha256": "b21dff5226f452bdbf728a3bb35417f7768fd2a3f3888b9548778e38c0178784"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/cargo-final-flag-order-counterexample-first.json",
+      "bytes": 1116,
+      "sha256": "dd51fb1d84a15c6cabbed176bb153fcd766f26956a1ad643a422a9edd04b85a8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/cargo-final-flag-order-first.command.json",
+      "bytes": 1167,
+      "sha256": "a384be39dc6be30fe8dc01c1c9352851587491a6ea990a3612665da04328a381"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/cargo-final-flag-order-first.stderr.log",
+      "bytes": 1809,
+      "sha256": "6c2b328e2aec84d603809569a4e36e005f9c115c39e59515d34d3ee930e2df40"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/cargo-final-flag-order-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/cargo-product-environment-second.command.json",
+      "bytes": 1118,
+      "sha256": "1f690f957c92af43762be96238b1efb5aa9c3411dfd6c1405514d29660c4ad69"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/cargo-product-environment-second.stderr.log",
+      "bytes": 1795,
+      "sha256": "3c4149e56f1b6c4f57fb25a01f3768a654fca60901b2c4889f725eeb8926bd82"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/cargo-product-environment-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/cargo-product-environment-static-second.json",
+      "bytes": 442,
+      "sha256": "c9c32bc8019d32bd180face5ed44ab1bd4f375819ed7f2010dc61f7c8d4b85ec"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/correct-product-environment-second.py",
+      "bytes": 5785,
+      "sha256": "6bdc42935ab6e193dbd7b3d4615b69d6d5630d476ff85b6aea01a063fc1c80e3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/diffcheck-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/diffcheck-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/fmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/fmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-model-first.command.json",
+      "bytes": 577,
+      "sha256": "0c720cfa06505959f0f6d6db4fe86911eff10db12ced1f4cef98be0c0f15ab87"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-model-first.json",
+      "bytes": 3250,
+      "sha256": "2826ba12d739b2b760f34b48804b5a415b455744ff83935900ee8777374f392f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-model-first.phase-negative.json",
+      "bytes": 1049,
+      "sha256": "5cd513506ee81dde0baea504560ee0c585ac0f100db8c00ed8dc3ad8a65d17e4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-model-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-model-first.stdout.log",
+      "bytes": 504,
+      "sha256": "8f0ebbfa2b45ed35031322056bfdaaf11dbaba61423c4e2ad12b4c3f04cdab04"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-model-second.command.json",
+      "bytes": 623,
+      "sha256": "24767214a6de49329e20af5e275a33af6717cdabc56b83151634bae71e97907d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-model-second.json",
+      "bytes": 3391,
+      "sha256": "5cb0f94bf96fbc401a7e9c98c6586ac6cb7252a8426f5687c3aa60b676c7b84e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-model-second.phase-negative.json",
+      "bytes": 1050,
+      "sha256": "6325c87524cb7f536d285dfa7047f65c07ffc3324b61cb8cbba296b7e3b56b06"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-model-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-model-second.stdout.log",
+      "bytes": 506,
+      "sha256": "65d56c54a3c0e1d7abbe47010f0aa576af4db79224ce55d4674e105c0f7de123"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-verifier-freeze-first.json",
+      "bytes": 2850,
+      "sha256": "812f255e9ec9296744152ecaaba1eb1359efe2c9a18ba13f3d38a08ed4bc3cab"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-artifact-verifier-freeze-second.json",
+      "bytes": 3120,
+      "sha256": "20050a7927d873b53cf3261b77ab34dcfa3efb4183524c9643abef08c9ddd2ce"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-diagnostics-first.command.json",
+      "bytes": 742,
+      "sha256": "a20199b37a209b05362708c1500e2e4ce1317360588fc044d9051e1d87b0d72a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-diagnostics-first.json",
+      "bytes": 1714,
+      "sha256": "1db14d3969e7ae8fd907efd8833d4026d37e0b23c16d7e5c0edb4cb601bd5ce5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-diagnostics-first.remote.ps1",
+      "bytes": 1945,
+      "sha256": "25e462d5ed6385277e5a17ea51512f1eacf50db74648b4dea551cd6f08d58e0f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-diagnostics-first.remote.stdout",
+      "bytes": 673,
+      "sha256": "ed5ed0c974e78e81d9484d5b77cea18e52f982055f2b07005808443572ad1b86"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-diagnostics-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-diagnostics-first.stdout.log",
+      "bytes": 142,
+      "sha256": "ce3070675863a9b43dab51571ebb289e975b22e184af637a7141fccb68a3ecdf"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-pure-powershell-first.json",
+      "bytes": 4519,
+      "sha256": "16b4e3e3d83c59ab93e2c8df4115446c5747014e9b839cbfe5ad80b1dadb4020"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-pure-powershell-first.remote-input.ps1",
+      "bytes": 85789,
+      "sha256": "73836846f6585477bf76d5c266d98f0a1ff3026e8f344f3a6ac00a1165679b7f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-pure-powershell-first.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-pure-powershell-first.stdout",
+      "bytes": 1988,
+      "sha256": "cfc6f46546a82cd403cf9e25ff3b0fce332292b6cf99239b17a7673de6d74c3c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-pure-powershell-second.json",
+      "bytes": 4857,
+      "sha256": "2637f138da80a497f93f5ddc652ac12c0518e8bc7a7716ad64d62b733b5c1883"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-pure-powershell-second.remote-input.ps1",
+      "bytes": 89797,
+      "sha256": "9960000a361bb00b240658f8f9c67091fd9583a7785dc23ed82e108e5569838c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-pure-powershell-second.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-pure-powershell-second.stdout",
+      "bytes": 2235,
+      "sha256": "4691b041a3b46326f5f60d4e0e96210684aee3d11f4ec3a50997fef29fcb46e3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-affected-public-first.command.json",
+      "bytes": 1242,
+      "sha256": "f33052e9dcf4d71bc5f878152d25113c4d19905a3b08e3485f05b95f45549efe"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-affected-public-first.json",
+      "bytes": 41484,
+      "sha256": "92b1d003c7cadb5722c404cff5523a8181ec3ed49937ad918dbb531798fe7187"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-affected-public-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-affected-public-first.stdout.log",
+      "bytes": 130,
+      "sha256": "cdfd56a05f4e5ef2b2aa9f682eb4ceca4bc34653b3d3d0a3cdd225b979532e9e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-bootstrap-tests-first.command.json",
+      "bytes": 1205,
+      "sha256": "e8edabe57777e8d2fe4c8bed8fc3961d3fffdfb794aff41db1a65a6905252425"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-bootstrap-tests-first.json",
+      "bytes": 30766,
+      "sha256": "780f1306d5fa4ade3d3a1d930260a918ec0d8ccb4eee1cdc315c86bb0f25ce8f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-bootstrap-tests-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-bootstrap-tests-first.stdout.log",
+      "bytes": 132,
+      "sha256": "27ae09df08a1a748e440546d359530d6a60376ff0bd9d631b238816bda02dee9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-visual-first.command.json",
+      "bytes": 1052,
+      "sha256": "4d8ef7af6ed1a2aedaaaf94638622a9cf2e6d2a5895b1a411534c11b2c9852f2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-visual-first.json",
+      "bytes": 9897,
+      "sha256": "c9f25f70afa483d0293c138d75a8a8168e3cac69c2758500fbc0e073b01a9444"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-visual-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/gui-windows-visual-first.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/host-startup-feedback-first.command.json",
+      "bytes": 992,
+      "sha256": "04aa80e585229d1d4211bd2088c0a6eec9487df1ac05c820da1f6b0859580270"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/host-startup-feedback-first.stderr.log",
+      "bytes": 1887,
+      "sha256": "d7a6e8ae125d1406aafca0a5d046768ee793f80d0556e27a0bcd5a731ceeffb9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/host-startup-feedback-first.stdout.log",
+      "bytes": 207,
+      "sha256": "b041be4f5168637e3a4180af96e517d15f383b4e0c375713329ce013f915752a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/host-windows-adapter-tests-first.stderr.log",
+      "bytes": 1297,
+      "sha256": "2bb41de54b105f50ede926cbf8b6818b9025aef35b5d3d75e6b06e84c1d67ba7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/host-windows-adapter-tests-first.stdout.log",
+      "bytes": 5770,
+      "sha256": "f22ffa945424894805fbe297e05e3d90d79d5c4ddb4ba4a7f32255c703d9354f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/integrated-checks-first.json",
+      "bytes": 157164,
+      "sha256": "3f9cf72f1bd1d47297439f0cbf187f28ca3af067c48fa6fbd443bb88b5d41723"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/integration-independent-final-first.json",
+      "bytes": 560271,
+      "sha256": "20b4e0ace40a6fadb37b92dd9fcd053e6d7ed0a879d13eb38b446b240b5570bd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/inventory-pure-powershell-first.json",
+      "bytes": 5501,
+      "sha256": "638e6fc6ba251446852b166a765ff56b38b928a5c05a5280a101e322b2698dcf"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/inventory-pure-powershell-first.remote-input.ps1",
+      "bytes": 88073,
+      "sha256": "0dc5184b36c90229c4696fb37934cfdde9b58831e4bb2837fb3aa0fd8935997f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/inventory-pure-powershell-first.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/inventory-pure-powershell-first.stdout",
+      "bytes": 2714,
+      "sha256": "1481ff4e9d8687a156ef8a724ac08440d7b4f28c82f80b833472c10883bc0fea"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/inventory-pure-powershell-second.json",
+      "bytes": 5504,
+      "sha256": "7ded0c2229cf428eae43a5a8d2e3a673e40cec29cf0244580131b9fe46fedb56"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/inventory-pure-powershell-second.remote-input.ps1",
+      "bytes": 89333,
+      "sha256": "1767b1adcb0fcbb859597e2f2ba0b36124785c95d4fc9392732d4de7a708514b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/inventory-pure-powershell-second.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/inventory-pure-powershell-second.stdout",
+      "bytes": 2714,
+      "sha256": "c74399b5ab258d662024a2c0a8486557bd7a8a04037e7a257b3a17339234f5ea"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/link-order-source-first/Cargo.lock",
+      "bytes": 169,
+      "sha256": "bd2e4d544a50e6dcdaa76c9a76e80e1b1cf5f5117a69805beba78dbbfa84487c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/link-order-source-first/Cargo.toml",
+      "bytes": 86,
+      "sha256": "7f5dbc050df7d4e195c17f5211f3458db1a7fd03bd3a2212464366cb566bca57"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/link-order-source-first/src/main.rs",
+      "bytes": 64,
+      "sha256": "d43bcab34d64a4376b07765f9d0343779645fa33e2ac3abc671ce527fde1fba0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/main-architecture-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/main-architecture-first.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/main-checks-first.json",
+      "bytes": 1896,
+      "sha256": "8421b6abe3684fa91f14f12612d8385adc0ae41e700e918c25fc2b2d4782da7a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/main-diffcheck-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/main-diffcheck-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/main-fmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/main-fmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/main-integration-first.json",
+      "bytes": 2881,
+      "sha256": "b9cec771c9cd56824633c9874979305034fe2ba5702beb5adebcf6e00aa7b1c0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/msi-contract-model-first.stderr.log",
+      "bytes": 2574,
+      "sha256": "50221250e139428424eea150485790dc2ef37dab5485d1063de117ad12eb5af9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/msi-contract-model-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-after-first/crates/fc-windows/src/lib.rs",
+      "bytes": 862,
+      "sha256": "696c61b1aa08a56ed15e64412230c14b18e6ac1ac91aebd08a492d2e8cfb2677"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-after-first/crates/fc-windows/src/startup.rs",
+      "bytes": 4373,
+      "sha256": "23d6fa454463fd70a9327b9432d3a7b2303506b8da0a5e054c48e173e2c9b6ad"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-after-second/crates/fc-windows/Cargo.toml",
+      "bytes": 1532,
+      "sha256": "b54f0c7b47107edb9a01eca9e35aec972fe12cd44cf53b6968d53af7e710cff8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-after-second/crates/fc-windows/src/lib.rs",
+      "bytes": 862,
+      "sha256": "696c61b1aa08a56ed15e64412230c14b18e6ac1ac91aebd08a492d2e8cfb2677"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-after-second/crates/fc-windows/src/startup.rs",
+      "bytes": 4998,
+      "sha256": "2acedef923e5d4a6a5269ef082f7a230928fa9f11a8b9c5f69c6b671614a3903"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-before-first/crates/fc-windows/src/lib.rs",
+      "bytes": 845,
+      "sha256": "4963e6a462e1d9d3dd526e94ebf93d574fede686399aca5505cba49e5efe4919"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-before-second/crates/fc-windows/Cargo.toml",
+      "bytes": 1508,
+      "sha256": "546d4dcdea9d66c6aa2083f749815b19c4a7dc1382edb29829489ef496efe69a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-before-second/crates/fc-windows/src/startup.rs",
+      "bytes": 4373,
+      "sha256": "23d6fa454463fd70a9327b9432d3a7b2303506b8da0a5e054c48e173e2c9b6ad"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-diff-check-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-diff-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-diff-check-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-diff-check-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-first-to-second.diff",
+      "bytes": 1861,
+      "sha256": "cbd8c24f362ddd53537a8e6d83315a9f5ef932240c5d8523db5c723238cdc6db"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-first.diff",
+      "bytes": 4772,
+      "sha256": "68886a08aa3a1d60ae93135feb8928ecc6f654e0f4908a84c5897fed449a25f7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-fmt-check-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-fmt-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-fmt-check-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-fmt-check-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-freeze-first.json",
+      "bytes": 5824,
+      "sha256": "7fd95157b09aa191af88cfbbe434481ddd50a6f291771ad459b9b5992c684f3e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/native-feedback-freeze-second.json",
+      "bytes": 5056,
+      "sha256": "2dad9694d7108d30d7755494c69e6ea393e8e4dddf373bf1a69d607dd2390f18"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/packaging-independent-first.json",
+      "bytes": 6473,
+      "sha256": "2f8d3644fd8789c973178fb1612f67f08b50cabc9d12c3384b093a3b4b33b840"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/pe-role-model-first.stderr.log",
+      "bytes": 758,
+      "sha256": "6a90b50ae581f601ca1023a2c48f92d9bb9967c746d2c236dc79f241dca0f6d2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/pe-role-model-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-normal-objdump-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-normal-objdump-first.stdout.log",
+      "bytes": 3226534,
+      "sha256": "e677389dc5ef963dfa61def83a676a4c37ef2cf6643b8ff9d155b4cb637b69f1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-normal-pe-audit-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-normal-pe-audit-first.stdout.log",
+      "bytes": 13166,
+      "sha256": "e11cdae323c3de75a2785a2307d26f03c5d076ecfefd5903688c276a2a557bed"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-objdump-version-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-objdump-version-first.stdout.log",
+      "bytes": 289,
+      "sha256": "ddbfd9b9ba42894a45a45fc085e4a33a51f9326c99053f5cbd047dfcb53cee56"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-static-audit-first.py",
+      "bytes": 5632,
+      "sha256": "f92c65b64ee69803034ad4a568435423976c9499db36250dbb979d85af638142"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-static-first.json",
+      "bytes": 118156,
+      "sha256": "fce9539da219eaf3f048ae4755b7a37084af5c162d3e68f67674ec73a3dcf527"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-test-objdump-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-test-objdump-first.stdout.log",
+      "bytes": 1464521,
+      "sha256": "b1dd8acabe08b998bf561f8080bfd3218611c629c7ff34f1bc8a18307f23ae8b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-test-pe-audit-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/programs-test-pe-audit-first.stdout.log",
+      "bytes": 11140,
+      "sha256": "c3f22bc69c1a7d22a947d7bd3def7f08d91b7b6cd56db1215a4505015291eaf6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/review-integration-final-first.py",
+      "bytes": 17682,
+      "sha256": "aae1bddaa9546dd30c26f9d0dc80816b2c688d4bd28b3c15530216afcb645e93"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/run-gui-diagnostics-first.py",
+      "bytes": 5644,
+      "sha256": "2cfaed7e8aff67252031f613e085163e6505d1c72ab76e2f661709245dbc17cd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/run-integrated-first.py",
+      "bytes": 4817,
+      "sha256": "b1c80f5c6befdd55679e323c830a02eaa1326c927e47fae7f724c146355f98f4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/run-pure-powershell-first.py",
+      "bytes": 3984,
+      "sha256": "edbad7d664ebb8435df0dfb14c7b0285510f3eb50917a1d83ce5e08d4b64795b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/run-pure-powershell-second.py",
+      "bytes": 3986,
+      "sha256": "3cba5cd0df1415771fad8c72cc4bfed2d13d4e737f99afe50f606cb55fca033c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/run-recorded-extra-first.py",
+      "bytes": 1289,
+      "sha256": "456941411b07a416755a2202535bb814978d6985b6e8ad8bdbec228609b3d497"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/verify-ci-artifact-gui-first-to-second.patch",
+      "bytes": 8692,
+      "sha256": "c24acf4d66c963c63c8a374992e33cdc66677ac9428a102d5015a2c83fdc6e43"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/verify-ci-artifact-gui-first.patch",
+      "bytes": 13886,
+      "sha256": "862bfb69d082de86c6adda729bed033b792171fda30dbbbe4a3f661569ea302f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/verify-ci-artifact-gui-first.py",
+      "bytes": 64386,
+      "sha256": "7d67265ae31a6684fe87d026a5bedd70fd8be171d3308d3b817c10f332b2c188"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/verify-ci-artifact-gui-second.py",
+      "bytes": 66125,
+      "sha256": "962646b0c82670bf8553d1670ceddc954917d8a559b27dcfc0c2f4bc4a811836"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-adapter-compile-first.stderr.log",
+      "bytes": 1451,
+      "sha256": "c8c0b41ef8642cdcc4e49538b180ff63e915c2d9333db2007d8a37abc5215e7a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-adapter-compile-first.stdout.log",
+      "bytes": 38405,
+      "sha256": "7471d8825626085180d8fe8b2ad63a4eb178d7adfcfbe78959bd2cc20f32f958"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-bootstrap-tests-compile-first.command.json",
+      "bytes": 1066,
+      "sha256": "7692cb66d5086245df88e5842aa375fa92298603940a261b20b2ed8999dfe070"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-bootstrap-tests-compile-first.stderr.log",
+      "bytes": 147,
+      "sha256": "8ad5c206d7a039bab63669d740b3d8adc6bdb79acc0e71e41375a81c16967c3e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-bootstrap-tests-compile-first.stdout.log",
+      "bytes": 82250,
+      "sha256": "2475da45cacf7fa8ebbddeed7f0f062a53a30e4863fef624f7abdc3628f915d6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-nightly-strict-first.stderr.log",
+      "bytes": 3544,
+      "sha256": "fd45e73a7359da7854dc67ff3c082b9c15f7531f864fc58081f560f153d608f2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-nightly-strict-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-product-first.stderr.log",
+      "bytes": 1991,
+      "sha256": "9dce5a80f4e6754e27fcd096d345cc66869ac73e29a0c4c4f6acf04d26ad3c01"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-product-first.stdout.log",
+      "bytes": 82264,
+      "sha256": "415fd8d8cb46d518fc678f319a14ca742b7e78b5bba15bd22b0124b3e2286caa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-readonly-final-first.json",
+      "bytes": 16705,
+      "sha256": "c7c336ce67ce4490b622d529852a80a9d3a49f578aaa7d31aaa125544640bdf7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-stable-strict-first.stderr.log",
+      "bytes": 2746,
+      "sha256": "956503cae07e9fc4953cfc4e5cf74969a86e3bf5263f9a70e051b580c05f51ae"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-stable-strict-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/windows-test-metadata-static-first.jsonl",
+      "bytes": 38405,
+      "sha256": "7471d8825626085180d8fe8b2ad63a4eb178d7adfcfbe78959bd2cc20f32f958"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round61-gui/worktree-create-first.json",
+      "bytes": 2812,
+      "sha256": "c33fda35ad5e404ce7220cbdd0045ceff9318064723af6e8d7a3d3e857bc617a"
+    }
+  ]
+}

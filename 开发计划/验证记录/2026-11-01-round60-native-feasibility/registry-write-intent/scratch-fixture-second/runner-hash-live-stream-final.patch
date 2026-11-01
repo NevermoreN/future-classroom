@@ -1,0 +1,17 @@
+--- static-first-reviewed/runner.ps1
++++ final/runner.ps1
+@@ -81,7 +81,13 @@
+     if($started -and $proc -and $proc.HasExited){$report.physicalExit=$true;$report.exitCode=$proc.ExitCode;$proc.Dispose()}
+     $report.elapsedMillis=$watch.ElapsedMilliseconds
+     foreach($pair in @(@('stdout',$stdoutPath),@('stderr',$stderrPath))){
+-        if(Test-Path -LiteralPath $pair[1]){$report[$pair[0]+'Bytes']=(Get-Item -LiteralPath $pair[1]).Length;$report[$pair[0]+'Sha256']=(Get-FileHash -LiteralPath $pair[1] -Algorithm SHA256).Hash.ToLowerInvariant()}
++        if(Test-Path -LiteralPath $pair[1]){
++            $report[$pair[0]+'Bytes']=(Get-Item -LiteralPath $pair[1]).Length
++            $task=if($pair[0] -ceq 'stdout'){$outTask}else{$errTask}
++            if($null -eq $task -or $task.IsCompleted){
++                try{$report[$pair[0]+'Sha256']=(Get-FileHash -LiteralPath $pair[1] -Algorithm SHA256).Hash.ToLowerInvariant()}catch{$report[$pair[0]+'HashErrorKind']=$_.Exception.GetType().Name;$report.status='FAIL_OR_UNKNOWN_RETAINED'}
++            }else{$report[$pair[0]+'HashStatus']='INCOMPLETE_LIVE_STREAM_NO_FINAL_HASH'}
++        }
+     }
+     $stream=[IO.File]::Open($reportPath,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
+     try{$bytes=[Text.UTF8Encoding]::new($false).GetBytes(($report|ConvertTo-Json -Depth 16));$stream.Write($bytes,0,$bytes.Length)}finally{$stream.Dispose()}

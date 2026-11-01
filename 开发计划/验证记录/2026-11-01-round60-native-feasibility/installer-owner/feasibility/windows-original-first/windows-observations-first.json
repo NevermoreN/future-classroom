@@ -1,0 +1,66 @@
+{
+    "schemaVersion":  1,
+    "status":  "FAIL_OR_UNKNOWN_RETAINED",
+    "scope":  "Synthetic per-user single-MSI Join/End feasibility only, not product lifecycle acceptance",
+    "nonce":  "e3365555af2a409eba9bb94ab37b0e28",
+    "productCode":  "{51C60258-197D-4EA2-8859-F59ABA07AC38}",
+    "upgradeCode":  "{CAEA576F-831B-42A4-B563-973B45FB1531}",
+    "registryRoot":  "Software\\FutureClassroom-MsiGuardian-Test-e3365555af2a409eba9bb94ab37b0e28",
+    "registryView":  "Registry32",
+    "expectedSid":  "S-1-5-21-3896111207-1867804362-1971593122-1001",
+    "msiSha256":  "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e",
+    "guardianSha256":  "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+    "operations":  [
+                       {
+                           "name":  "install-commit",
+                           "operation":  "c8d7b6575126430e8e432d3c0508071c",
+                           "decision":  1,
+                           "productBefore":  {
+                                                 "productState":  -1,
+                                                 "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":-1}\r\n",
+                                                 "stderr":  "",
+                                                 "pid":  7752,
+                                                 "actualExit":  true,
+                                                 "exitCode":  0
+                                             },
+                           "payloadBefore":  {
+                                                 "keyPresent":  false,
+                                                 "valuePresent":  false
+                                             },
+                           "guardianObserved":  [
+
+                                                ],
+                           "physicalMsiExit":  false,
+                           "completion":  "UNKNOWN_ORIGINAL_PROCESS_RETAINED",
+                           "log":  "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28\\install-commit.msi.log",
+                           "msiPid":  35120,
+                           "msiStartFileTime":  134379832930466020
+                       }
+                   ],
+    "cleanup":  "UNKNOWN_LIVE_OPERATION_RETAINED_NO_CLEANUP",
+    "ordinaryProductStartup":  "NOT_RUN",
+    "productBefore":  {
+                          "productState":  -1,
+                          "stdout":  "{\"productCode\":\"{51C60258-197D-4EA2-8859-F59ABA07AC38}\",\"nonce\":\"e3365555af2a409eba9bb94ab37b0e28\",\"productState\":-1}\r\n",
+                          "stderr":  "",
+                          "pid":  4976,
+                          "actualExit":  true,
+                          "exitCode":  0
+                      },
+    "registryCreation":  {
+                             "parentOpenError":  0,
+                             "createError":  0,
+                             "parentCloseError":  0,
+                             "disposition":  1,
+                             "actualNew":  true,
+                             "nonceWritten":  true,
+                             "sidWritten":  true,
+                             "markersComplete":  true,
+                             "handleDisposed":  true
+                         },
+    "errorKind":  "RuntimeException",
+    "errorDetail":  "Original msiexec did not physically return; no cleanup/retry.",
+    "errorLine":  175,
+    "errorMessage":  "Owned MSI feasibility did not complete; original scoped observations/logs retained.",
+    "unknownPhysicalOperation":  true
+}

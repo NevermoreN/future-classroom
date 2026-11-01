@@ -1,0 +1,194 @@
+{
+  "schema": "future-classroom.registry-write-intent-primary-research/v1",
+  "status": "RESEARCH_ONLY_PARENT_VALUE_CONFLICT_AND_RETENTION_NOT_PROVEN",
+  "mainHeadObserved": "6082dd0173a0b8884c27ac78fda5054275f99f14",
+  "scope": "Only official documentation originals and local archived source/evidence reads. No main/source modification, worktree, Cargo/build, Windows/SSH, installation, CI or Git mutation.",
+  "baseline": {
+    "independentOriginal": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/r56-baseline/ordinary-counterexample-independent-first.json",
+      "bytes": 9672,
+      "sha256": "c900a7013a51ce935310f42d3a86fbedbd877dea3d9fec26ee6b1dcb51edd922"
+    },
+    "rawOriginal": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/r56-baseline/ordinary-diagnostic-windows-first.json",
+      "bytes": 2775,
+      "sha256": "5f9334127306ca1629ec4e4b1162a8ca35f2b5e65a31c361d80d10474e793ef8"
+    },
+    "actualScope": "Only one fresh-process ordinary competing-writer filtered native test on Win11/WOW64; not a full suite or qualified R56 CAS implementation. No new execution or source mutation by reviewer.",
+    "fact": {
+      "diagnosticOutputIndex": 2,
+      "originalDiagnosticLine": "TXR_SCRATCH_DIAGNOSTIC transacted=false enabled=false phase=2 fresh_calls=4 attempted=true foreign_committed=true ordinary_status=Some((0, Some(0), Some(0))) expected_preimage=Command(\"reviewed synthetic previous\") returned_observation=Absent ordinary_after=Absent own_failure=None own_mutated=true",
+      "transactedCompetitor": false,
+      "enableRequested": false,
+      "freshnessCallbackPhase": 2,
+      "totalFreshnessCalls": 4,
+      "competitorAttempted": true,
+      "foreignCommittedFlag": true,
+      "foreignOrdinaryLstatus": {
+        "open": 0,
+        "set": 0,
+        "close": 0
+      },
+      "expectedPreimage": "reviewed synthetic previous",
+      "returnedObservation": "Absent",
+      "ordinaryAfterObservation": "Absent",
+      "ownFailure": null,
+      "ownMutated": true,
+      "finalRaw": {
+        "outputIndex": 3,
+        "originalLine": "TXR_SCRATCH_FINAL_RAW open=0 query=2 kind=0 reported_bytes=520 close=0 decoded=Absent",
+        "openLstatus": 0,
+        "queryLstatus": 2,
+        "reportedKind": 0,
+        "reportedBytes": 520,
+        "closeLstatus": 0,
+        "decoded": "Absent",
+        "interpretation": "Query2 is ERROR_FILE_NOT_FOUND; kind0/520 length are not successful returned value/type proof."
+      },
+      "strictAssertion": {
+        "source": "crates/fc-windows/src/system/autorun_tests.rs",
+        "candidateLine": 676,
+        "message": "stale preimage must not commit over the replacement",
+        "passed": false
+      }
+    },
+    "conclusion": "The concrete ordinary replacement completed successfully after the transaction-bound preimage read and before staged delete, yet candidate committed deletion. This disproves that R56 read-before-write TxR supplied the needed compare-and-delete. The withdrawn candidate stays withdrawn."
+  },
+  "decision": {
+    "childIntent": "May be worth a scratch-only falsification experiment, but strict fixed-Run-value CAS is NOT established by the reviewed Microsoft contract.",
+    "documented": "RegCreateKeyTransacted creates or opens and returns NEW/EXISTING disposition in the same API call. This can distinguish a new transaction-owned child from a pre-existing child without a read-then-create ownership assumption.",
+    "missingGuarantees": [
+      "Creating a child must reserve/protect the PARENT key value namespace against ordinary RegSetValueEx on FutureClassroom, including previously opened nontransactional handles.",
+      "Such conflict coverage must hold continuously from before the first target value read through staged target delete and commit; deleting the temporary child or closing handles must not release it too soon.",
+      "Competing transactional writers and an ordinary writer that wins priority must not cause a stale target read to commit a delete over their committed replacement."
+    ],
+    "whyRemarksInsufficient": "RegCreate/Open remarks discuss operations on the returned key, and warn subkey operations are not automatically transacted. They do not specify parent-value versus child-name conflict granularity or lifetime of an insert-then-delete intent. R56 already refutes reading those broad remarks as a universal read-set CAS promise.",
+    "noClaims": "Not a proof that the proposed child scheme cannot work on a particular Windows build; also not a proof that it must work. No generic SERIALIZABLE setting exists in CreateTransaction: both isolation parameters are reserved zero."
+  },
+  "primaryContract": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regcreatekeytransactedw",
+      "saved": "primary/regcreatekeytransactedw.md",
+      "lines": [
+        173,
+        205,
+        224,
+        226
+      ],
+      "supports": "Creation disposition and transacted returned child. Does not promise parent value locking or lock duration for create-then-delete."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regopenkeytransactedw",
+      "saved": "primary/regopenkeytransactedw.md",
+      "lines": [
+        121,
+        123
+      ],
+      "supports": "Generic transacted handle remarks; subkeys do not automatically inherit transactions. The R56 concrete counterexample prevents treating this as serializable read protection."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regdeletekeytransactedw",
+      "saved": "primary/regdeletekeytransactedw.md",
+      "lines": [
+        142,
+        149
+      ],
+      "supports": "Delete the exact child with transacted API; its physical removal waits for last key handle. That handle rule does not document retention of a parent-value conflict."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ktmw32/nf-ktmw32-createtransaction",
+      "saved": "primary/createtransaction.md",
+      "supports": "IsolationLevel/IsolationFlags reserved zero; finite transaction timeout is not a documented universal bound on all synchronous calls."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/ktm/programming-model",
+      "saved": "primary/ktm-programming-model.md",
+      "supports": "A transaction can roll back at any time; do not assume active state."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regdeletevaluew",
+      "saved": "primary/regdeletevaluew.md",
+      "supports": "Fixed-name deletion accepts no expected value bytes/version parameter; its existence is not CAS."
+    }
+  ],
+  "ownershipAndLifecycle": [
+    "Only a new unique scratch root under HKCU\\Software\\FutureClassroom\\Tests\\RegistryWriteIntent is allowed. Never the real Run key, real autostart value, unrelated user data, or system security/configuration.",
+    "Create one bounded random child name in the SAME active transaction BEFORE any target-value read. Require successful REG_CREATED_NEW_KEY. On OPENED_EXISTING, abort/close without deleting it; no value read-then-create uniqueness claim.",
+    "Keep exact returned parent/child capabilities and original transaction/deadline. Stage target delete only after its exact compared preimage. Delete only the created child via RegDeleteKeyTransacted within that same active transaction after staging; never plain fallback cleanup against a name after rollback.",
+    "If an ordinary competing create claims that child after abort, its key/value must remain. Do not use DeleteTree or delete-by-random-name outside the owning transaction to force cleanup.",
+    "Close bound HKEYs with checked actual RegCloseKey before commit, classify actual Commit/rollback/outcome conservatively, close transaction handle, then use ordinary readback. Cancellation/closed Rust wrapper is not resource release.",
+    "No retry may rebuild an already-accepted transaction or renew its absolute deadline. Native close/unknown-outcome failure keeps ownership/recovery evidence and fails the experiment."
+  ],
+  "minimalFalsificationExperiment": {
+    "execution": "NOT_RUN; specification only. Finite isolated native fixture, no business API/installer or normal startup integration.",
+    "setup": "Fresh owned scratch parent and exact target synthetic REG_SZ A, plus unrelated sibling sentinel. One case per clean transaction/process state. B replacement is a distinct exact byte sequence F.",
+    "scheduling": "Use a bounded explicit A/B barrier with each native caller owning its own handles; do not rely on sleep to place B in the read/delete gap. Log B call start/end and A read/stage/commit start/end. If B blocks, release A using the original finite case deadline and report the actual final serialization; do not extend deadlines or count a timeout as protection.",
+    "minimalCases": [
+      {
+        "id": "BASELINE_NO_INTENT",
+        "case": "Exact old phase2 disable ordering without helper child; real B ordinary open/set/close must complete between A read and staged delete. Preserve the expected strict-assertion failure if the original lost-update behavior reproduces."
+      },
+      {
+        "id": "INTENT_NO_COMPETITOR",
+        "case": "Create new child, read A, stage delete, remove child in same transaction, close/commit/read back. Target absent, unrelated sentinel unchanged, temporary child absent, all owners actually closed. Prevent a scheme that only passes by always aborting."
+      },
+      {
+        "id": "INTENT_PHASE2_ORDINARY",
+        "case": "Create child before read, then B ordinary replacement at original phase2. If B set succeeds and completes before A stage, A must not commit stale deletion of F."
+      },
+      {
+        "id": "INTENT_PREOPENED_WRITER",
+        "case": "As above, but B obtained ordinary parent KEY_SET_VALUE before A began. Tests whether protection wrongly depends only on fresh opens."
+      },
+      {
+        "id": "AFTER_CHILD_DELETE_BEFORE_COMMIT",
+        "case": "After A staged target deletion and deleted its new child, but before commit, allow B write. Also cover the checked parent-HKEY-close to commit window. No assumption that prior child insertion keeps a lock after net-zero cleanup."
+      },
+      {
+        "id": "INTENT_PHASE2_TRANSACTED",
+        "case": "Real second transaction B writes F and commits. Do not waive the strict condition just because ordinary B was protected in another sample."
+      },
+      {
+        "id": "EXISTING_CHILD_DISPOSITION",
+        "case": "Pre-create same test child with a sentinel; A gets OPENED_EXISTING and must not target-write/delete child. Final sentinel and target unchanged."
+      },
+      {
+        "id": "FOREIGN_CHILD_AFTER_ABORT",
+        "case": "Let an ordinary B claim the same tentative child, forcing conflict if applicable. An aborted A cannot later remove B child by name. Preserve B sentinel and all original native statuses."
+      },
+      {
+        "id": "CANCEL_ORIGINAL_DEADLINE",
+        "case": "Cancel/expire after new child creation and after staged delete in separate cases. Real rollback/cleanup and target readback are required; no new deadline or forgotten owner."
+      }
+    ],
+    "record": "Full native LSTATUS for open/create/disposition/query/set/delete/close; transaction BOOL+immediate GetLastError/outcome for commit/rollback; exact successful returned kind/length/bytes (synthetic only); timestamps/barrier events; target/sibling/child before and after; source+testEXE hashes and original stdout/stderr. Failed query output buffers are not value evidence.",
+    "reject": "Any B replacement confirmed complete before A stage, followed by own successful committed deletion and final absent, is a concrete unsafe counterexample. Any leaked/foreign-deleted helper or false committed/cleanup claim also fails.",
+    "inconclusive": "A blocked call, native timeout or unknown outcome is not PASS. If B only completes after A committed, final F can be a valid A-then-B serialization; preserve ordering rather than demanding a particular writer priority.",
+    "successBoundary": "No-competitor progress plus all bounded cases passing supports only that actual build/platform matrix. It cannot supply the missing documented conflict-granularity/retention guarantee or a general strict CAS proof."
+  },
+  "otherMechanisms": [
+    {
+      "mechanism": "Named mutex / instance maintenance lock",
+      "finding": "Useful to serialize cooperating application and installer owners, but unrelated processes can write Run without that mutex. Does not close the exact-value query/delete gap."
+    },
+    {
+      "mechanism": "RegNotifyChangeKeyValue",
+      "finding": "Notification is not an atomic expected-bytes delete and does not veto a last-window writer. It has event/key/thread lifecycle caveats and Win8-only thread-agnostic flag; no new notification thread is proposed."
+    },
+    {
+      "mechanism": "ACL denial, whole-key rename/restore, ordinary compensation",
+      "finding": "Do not use to simulate a value lock: would affect shared key/other values, not revoke already-open write handles reliably, or introduce another TOCTOU/write. Outside authorized fixed-value cleanup."
+    },
+    {
+      "mechanism": "MSI standard Registry/RemoveRegistry rows",
+      "finding": "Not a documented external-writer CAS; condition/search results are not a lock. The candidate MSI and its exact Run cleanup gate remain separate."
+    }
+  ],
+  "nextStep": "Obtain an explicit authoritative parent-value conflict/lifetime contract (or equivalent published mechanism). If proceeding experimentally, implement only the isolated scratch fixture first and preserve the no-intent red control; do not re-integrate R56 or claim installer/Run cleanup completion from a sample result.",
+  "evidenceScope": "Only official Microsoft API/guide sources are used as authority. Nonofficial Windows Internals mirrors, generic SQL isolation pages and models were excluded from proof. Absence here means the reviewed sources did not establish the guarantee, not an exhaustive theorem that no Microsoft mechanism can exist.",
+  "primaryOriginals": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/primary-originals-first.json",
+    "bytes": 7188,
+    "sha256": "6ee67091c40db5a29987f2dddaabd2fdb5fecb7a209cc0b9558d44f8c67553a2"
+  }
+}

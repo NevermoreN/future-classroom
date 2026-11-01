@@ -1,0 +1,8 @@
+{
+  "status": "FAIL_ACTUAL_LOCAL_COMPILE_RETAINED",
+  "sourceSha256": "d3e752a2e55f1fbd56ad9f645673e92c378ce9e96328701304475bfb5190d57d",
+  "report": "build-first/build-report.json",
+  "stderr": "build-first/guardian-compile.stderr.log",
+  "cause": "-municode defines UNICODE; source redefinition is rejected by original -Werror. No Windows or MSI execution.",
+  "fix": "Guard source UNICODE/_UNICODE defines; do not weaken warnings."
+}

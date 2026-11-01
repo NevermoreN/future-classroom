@@ -1,0 +1,70 @@
+{
+  "status": "PREPARED_FIFTH_ARGUMENT_ENCODING_ONLY_WINDOWS_NOT_RUN",
+  "fourthUnchanged": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-owner-fourth/run-windows-probe.ps1",
+    "bytes": 23810,
+    "sha256": "e787bf4ff9bebf7a21c875e14fee7d32be7c4023b8bcfd9b3877febe0a36e2d5"
+  },
+  "fifth": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-owner-fifth/run-windows-probe.ps1",
+    "bytes": 23858,
+    "sha256": "b342315ac86a603407814818eeffd6f6b9fb37e7a5859883c8dfdc33034191b5"
+  },
+  "originalFailure": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-first/windows-observations-first.json",
+    "bytes": 3779,
+    "sha256": "7cf18ab246ad57282bd3567656a1f23ec7f43747f58036a44e9d16cef76782ff"
+  },
+  "laterReadonly": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-failure-readonly-first.json",
+    "bytes": 1412,
+    "sha256": "f7dc0efd4a89749509f11198b2e61826d91ef0a821540f64610e8e23b73c844a"
+  },
+  "actualObservations": {
+    "firstReport": "Original msiexec PID35120 had not returned by the60000ms operation limit; guardian list empty, MSI log absent and unknownPhysicalOperation=true. No Join/End conclusion available.",
+    "laterReadOnly": "Recorded original PID lookup empty and全msiexec list empty; nonce registry tree contains only four control scalars and no child. This is later absence observation, not recovery of original exit code or engine success.",
+    "notClaimed": "No actual usage dialog or GUI observation/full original OS command-line capture; no uniquely established root cause."
+  },
+  "primarySources": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec",
+      "checked": "Actual Microsoft Learn page read via web tool. Install/quiet/logging examples use unquoted option tokens with quoted path arguments. /qn documents no UI.",
+      "example": "msiexec.exe /i \"C:\\example.msi\" /qn"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/standard-installer-command-line-options",
+      "checked": "Actual Microsoft Learn page read via web tool. Incorrect option usage invokes help; help can be displayed in the user interface. /norestart corresponds to REBOOT=ReallySuppress.",
+      "shortQuote": "Incorrect use of any other option invokes this help option."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/command-line-options",
+      "checked": "Actual Microsoft Learn page read via web tool. Documents /I package or ProductCode, /f repair flags, /x uninstall, /L logging, /q level. Does not explicitly specify whether a quoted switch is rejected by the custom parser."
+    }
+  ],
+  "reasoning": {
+    "proven": "Fourth ProcessStartInfo.Arguments wraps every token including /i,/qn,/norestart,/l*v and property in quotes. Microsoft examples show option tokens unquoted and path arguments quoted.",
+    "inference": "This encoding could route custom msiexec parsing to help/usage before normal logging and guardian launch, consistent with observed zero log/guardian and long-lived client. Other initialization/failure causes are not eliminated.",
+    "scope": "Fifth changes only actual argument-string joining, retaining UseShellExecute=false, all safety switches and scope. It does not assert that native parser issue is fixed until a separately bounded real run."
+  },
+  "change": "Leave switches/properties/GUIDs and no-space paths unchanged; enclose arguments with ASCII space or Tab in quotes. Existing quote/CR/LF rejection remains. Actual arguments are only fixed switches/property/compiled ProductCode or exact owned file paths; no shell escaping fallback introduced.",
+  "unchanged": [
+    "actual returned handle NEW claim",
+    "PID/creation/SID/imageSHA guardian ACK and physical exits",
+    "sticky unknown/no nextMSI/no cleanup",
+    "committed i/f/x original exit0; rollback original code not forced0",
+    "original60000/10000/5000ms and16MiB bounds",
+    "no killing service/process, no desktop or realRun mutation",
+    "same pinned MSI/guardian/fixture"
+  ],
+  "pureChecker": {
+    "file": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/check-owner-fifth-arguments.ps1",
+      "bytes": 3682,
+      "sha256": "136ef3baeb8df1f1eb73e0cc78dfa06837ea2ab9afcd186408b4330e1c98dc6e"
+    },
+    "cases": 7,
+    "scope": "Prepared AST extraction of exact guard and joining RHS with4 positive synthetic argument lists and3 quote/newline rejections; NOT_RUN here, no native argument-parser claim."
+  },
+  "preRun": "Root must complete recorded original observation/capture and exact owned cleanup, preserve all fourth originals and satisfy fresh report/TEMP root/no-adoption guards before any new run. Reviewer does not authorize bypassing unknown-state gates or overwrite originals.",
+  "reviewerNoNativeExecution": true
+}

@@ -1,0 +1,47 @@
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c: In function ‘safe_values’:
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:164:3: error: this ‘if’ clause does not guard... [-Werror=misleading-indentation]
+  164 |   if(e==ERROR_NO_MORE_ITEMS)return TRUE;if(e||count==0||count>=128)return FALSE;
+      |   ^~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:164:41: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  164 |   if(e==ERROR_NO_MORE_ITEMS)return TRUE;if(e||count==0||count>=128)return FALSE;
+      |                                         ^~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c: In function ‘safe_case’:
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:176:3: error: this ‘if’ clause does not guard... [-Werror=misleading-indentation]
+  176 |   if(e==ERROR_NO_MORE_ITEMS)break;if(e||count>=128||!weq(name,intent)){safe=FALSE;break;}
+      |   ^~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:176:35: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  176 |   if(e==ERROR_NO_MORE_ITEMS)break;if(e||count>=128||!weq(name,intent)){safe=FALSE;break;}
+      |                                   ^~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:179:3: error: this ‘if’ clause does not guard... [-Werror=misleading-indentation]
+  179 |   if(e||subkeys||values)safe=FALSE;close_key(&child,"cleanup_close_intent");index++;
+      |   ^~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:179:36: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  179 |   if(e||subkeys||values)safe=FALSE;close_key(&child,"cleanup_close_intent");index++;
+      |                                    ^~~~~~~~~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c: In function ‘cleanup’:
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:187:3: error: this ‘if’ clause does not guard... [-Werror=misleading-indentation]
+  187 |   if(e==ERROR_NO_MORE_ITEMS)break;if(e||count!=1||name[0]<'A'||name[0]>'C'){safe=FALSE;break;}
+      |   ^~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:187:35: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  187 |   if(e==ERROR_NO_MORE_ITEMS)break;if(e||count!=1||name[0]<'A'||name[0]>'C'){safe=FALSE;break;}
+      |                                   ^~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:188:3: error: this ‘if’ clause does not guard... [-Werror=misleading-indentation]
+  188 |   if(!safe_case(root,name[0]))safe=FALSE;i++;
+      |   ^~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:188:42: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  188 |   if(!safe_case(root,name[0]))safe=FALSE;i++;
+      |                                          ^
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:194:2: error: this ‘if’ clause does not guard... [-Werror=misleading-indentation]
+  194 |  if(e!=ERROR_FILE_NOT_FOUND||!resource_ok)return 44;status("CLEANUP_COMPLETE_EXACT_OWNED_LEAF_ABSENT");return 0;
+      |  ^~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:194:53: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  194 |  if(e!=ERROR_FILE_NOT_FOUND||!resource_ok)return 44;status("CLEANUP_COMPLETE_EXACT_OWNED_LEAF_ABSENT");return 0;
+      |                                                     ^~~~~~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c: In function ‘parse_mode’:
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:230:2: error: this ‘while’ clause does not guard... [-Werror=misleading-indentation]
+  230 |  while(*p==' ')p++;if(!*p){mode[0]=0;return TRUE;}
+      |  ^~~~~
+/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c:230:20: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘while’
+  230 |  while(*p==' ')p++;if(!*p){mode[0]=0;return TRUE;}
+      |                    ^~
+cc1: all warnings being treated as errors

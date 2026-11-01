@@ -1,0 +1,3 @@
+#define FIXTURE_NONCE L"e3365555af2a409eba9bb94ab37b0e28"
+#define FIXTURE_ROOT L"Software\\FutureClassroom-MsiGuardian-Test-e3365555af2a409eba9bb94ab37b0e28"
+#define FIXTURE_PRODUCT L"{51C60258-197D-4EA2-8859-F59ABA07AC38}"

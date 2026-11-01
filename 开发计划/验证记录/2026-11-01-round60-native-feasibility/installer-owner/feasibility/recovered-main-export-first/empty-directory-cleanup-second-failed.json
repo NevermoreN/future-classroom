@@ -1,0 +1,19 @@
+{
+  "status": "FAIL_GUARD_BEFORE_RMDIR_NO_MUTATION",
+  "commandScope": "Second empty-directory cleanup attempt; first exact guardian recovery already succeeded.",
+  "actualOriginalExitCode": 1,
+  "actualOriginalStdout": "",
+  "actualOriginalStderr": "Traceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError: ([], 10)\n",
+  "failedGuard": "assert consumers==[] and unreadable==0; observed no cwd consumers but10 PermissionError while reading /proc/<pid>/cwd.",
+  "rmdirExecuted": false,
+  "directory": "/workspace/共享/Eliora/未来教室计划/Binary",
+  "current": {
+    "exists": true,
+    "isSymlink": false,
+    "ordinaryDirectory": true,
+    "children": []
+  },
+  "mainBinaryFileRecovered": true,
+  "noUnexpectedGitFileRemaining": "git status -- Binary empty in recovery-first original observation.",
+  "limit": "No claim every process cwd was inspected. Parent notified; leave empty directory pending its disposition."
+}

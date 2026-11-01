@@ -1,0 +1,11 @@
+--- implementation-owner-fourth/run-windows-probe.ps1
++++ implementation-owner-fifth/run-windows-probe.ps1
+@@ -156,7 +156,7 @@
+     if(-not $createdReady -or -not $createdAck){throw 'Refusing preexisting event ownership.'}
+         $all=@($arguments)+@('/qn','/norestart','REBOOT=ReallySuppress','/l*v',$log)
+         foreach($arg in $all){if($arg.Contains('"') -or $arg.Contains("`r") -or $arg.Contains("`n")){throw 'Unsafe argument representation.'}}
+-        $psi=[Diagnostics.ProcessStartInfo]::new();$psi.FileName=Join-Path ([Environment]::GetFolderPath('System')) 'msiexec.exe';$psi.Arguments=(($all|ForEach-Object{'"'+$_+'"'}) -join ' ');$psi.UseShellExecute=$false;$psi.CreateNoWindow=$true
++        $psi=[Diagnostics.ProcessStartInfo]::new();$psi.FileName=Join-Path ([Environment]::GetFolderPath('System')) 'msiexec.exe';$psi.Arguments=(($all|ForEach-Object{if($_.IndexOfAny([char[]]" `t") -ge 0){'"'+$_+'"'}else{$_}}) -join ' ');$psi.UseShellExecute=$false;$psi.CreateNoWindow=$true
+         $proc=[Diagnostics.Process]::new();$proc.StartInfo=$psi;if(-not $proc.Start()){throw 'Owned msiexec start failed.'};$procStarted=$true;$row.msiPid=$proc.Id;$row.msiStartFileTime=$proc.StartTime.ToUniversalTime().ToFileTimeUtc()
+         while(-not $proc.HasExited -and $watch.ElapsedMilliseconds -lt $deadlineMillis){
+             if((Test-Path -LiteralPath $log) -and (Get-Item -LiteralPath $log).Length -gt 16MB){$script:unknown=$true;throw 'MSI log exceeded original finite bound; unresolved process preserved.'}

@@ -1,0 +1,8 @@
+{
+  "status": "FAIL_ACTUAL_LOCAL_LINK_RETAINED",
+  "sourceSha256": "5abb7cd2ebb752d4ed60ccf5810b486d9474f1c8c1a89ab3d7ee7fd5aaea8389",
+  "report": "build-second/build-report.json",
+  "stderr": "build-second/guardian-compile.stderr.log",
+  "cause": "Installed MinGW libmsi.a lacks MsiJoinTransaction/MsiEndTransaction imports; header declarations exist. This is local link failure, not evidence of missing Windows exports.",
+  "fix": "Resolve exact documented WINAPI signatures in already-imported msi.dll; record lookup and fail if absent. Original API/result contract unchanged."
+}

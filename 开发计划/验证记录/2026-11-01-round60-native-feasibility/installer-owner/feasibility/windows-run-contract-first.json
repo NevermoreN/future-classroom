@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_STATIC_ONLY_WINDOWS_NOT_RUN",
+  "sourceScope": "Owned R60 single-package embedded-chainer feasibility fixture. Not product app, broker, release or install acceptance.",
+  "readyArtifactDirectory": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth",
+  "filesToCopyToNewWindowsOwnedRoot": [
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.msi",
+      "bytes": 266752,
+      "sha256": "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/guardian.exe",
+      "bytes": 253577,
+      "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.json",
+      "bytes": 648,
+      "sha256": "a53cd183503fe2e426814bec11280138fa3b4dc54542f7b3e952f299d51eed0b"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/run-windows-probe.ps1",
+      "bytes": 15322,
+      "sha256": "87585231a4c6dacf96c2d4b4f46ccabf31bf7701574a2874bde004598be71067"
+    }
+  ],
+  "windowsDirectory": "%TEMP%\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28",
+  "exactRegistryRoot": "HKCU32\\Software\\FutureClassroom-MsiGuardian-Test-e3365555af2a409eba9bb94ab37b0e28",
+  "newProductCode": "{51C60258-197D-4EA2-8859-F59ABA07AC38}",
+  "newUpgradeCode": "{CAEA576F-831B-42A4-B563-973B45FB1531}",
+  "entry": {
+    "script": "run-windows-probe.ps1",
+    "arguments": [
+      "-FixtureDirectory",
+      "<exact owned Temp directory>",
+      "-ExpectedMsiSha256",
+      "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e",
+      "-ExpectedGuardianSha256",
+      "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+      "-ExecuteOwnedProbe"
+    ],
+    "default": "Without explicit ExecuteOwnedProbe the script refuses before installation. Root must independently inspect and provide exact pins; no SSH/copy/install command executed here.",
+    "operationOrder": [
+      "direct /i fixture.msi, guardian COMMIT",
+      "direct /famus exact ProductCode, guardian COMMIT",
+      "direct /x exact ProductCode, guardian COMMIT",
+      "direct /i fixture.msi, guardian ROLLBACK",
+      "only if needed and all prior physical operations resolved: exact own /x cleanup COMMIT"
+    ],
+    "options": "Each /qn /norestart REBOOT=ReallySuppress and owned full MSI log. No visible prompt, restart or user desktop action intended."
+  },
+  "inputScopeGuards": [
+    "Only exact nonce-named directory directly under current TEMP; no reparse input directory/MSI/guardian.",
+    "Pinned guardian read-only query returns compiled fixed ProductCode+nonce; both must equal fixture.json before any MSI mutation, preventing a substituted JSON ProductCode selecting foreign software.",
+    "Only original synthetic product may be queried/repaired/removed; initial product state must be unknown.",
+    "Existing same-nonce HKCU root is refused, not adopted; original SID recorded and checked against actual guardian token SID.",
+    "HKCU root is a single new random leaf under existing Software, with no new FutureClassroom/Tests parent keys. Payload and evidence children disappear only with exact own leaf cleanup."
+  ],
+  "guardianWire": {
+    "argument": "Only engine-supplied transaction id, not a manufactured wrapper handle. ArgCount2 and bounded unsigned parse required.",
+    "nativeApis": "MsiJoinTransaction(originalId,0,&ownerChangeEvent); MsiEndTransaction(COMMIT|ROLLBACK). The installed MinGW libmsi.a lacks their import thunks, so resolve exact names in already imported msi.dll; record export absence and fail, never simulate.",
+    "sources": "Actual per-user token SID, original PID/GetProcessTimes creation time, requested mode, JoinReturn, owner event raw status, EndEntered/EndReturn/EndReturned, AboutToReturnCode in fixed own HKCU evidence key.",
+    "physicalObservation": "Guardian emits ready then waits10000ms for observer ACK. Supervisor opens original Process HANDLE, checks creation time and actual extracted-image SHA before ACK. It later waits exact original guardian and msiexec physical exit; AboutToReturnCode is explicitly not physical exit.",
+    "readOnlyQueryRole": "Same pinned GUI guardian --product-state calls only MsiQueryProductStateW for its compile-time random ProductCode and emits fixed JSON with compile-time nonce/productCode; stdout captured by original process pipes.",
+    "gui": "Actual PE32 GUI subsystem2, no Alloc/Attach/FreeConsole/MessageBox or app-launch behavior.",
+    "ownerEvent": "Recorded only; not interpreted as end/rollback complete."
+  },
+  "observationsAndOutcomes": {
+    "perOperationBudgetMillis": 60000,
+    "guardianAckBudgetMillis": 10000,
+    "readOnlyProductQueryBudgetMillis": 5000,
+    "perLogBoundBytes": 16777216,
+    "outcome": "All native return codes, MSI client exit, original process identity, registered product state and owned DWORD readback retained verbatim. Native rollback installer return is not predeclared or rewritten.",
+    "contractFlag": "Only4 expected modes each with actual guardian process exit0, Join0+End0, expected registered state and marker readback can set directSinglePackageContractSatisfied. It is still a feasibility-only observation, not a product lifecycle guarantee.",
+    "unknown": "No EndReturn or nonzero End after entry, timeout, live original process, PID/creation/SID/hash uncertainty leaves unknownPhysicalOperation and disables further operations/cleanup. No shared msiserver termination; no kill command or unrelated product search. Root must keep original supervision and resolve exact owned process identities before further cleanup.",
+    "cleanup": "After all operations physically returned and known state: if own random product is registered, explicit own /x is attempted; only actual absence + exact nonce/SID marker allow removal of that single HKCU leaf. Unknown/other state retained. No Run, ProgramData, trust, services, firewall, network, foreign files or school data touched.",
+    "report": "Owned Temp windows-observations-first.json plus original MSI logs; report is exclusive, actual failure originals never overwritten."
+  },
+  "staticProof": {
+    "actualBuiltMsi": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.msi",
+      "bytes": 266752,
+      "sha256": "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e"
+    },
+    "actualGuardian": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/guardian.exe",
+      "bytes": 253577,
+      "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f"
+    },
+    "tableAudit": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/static-independent-second.json",
+      "bytes": 46739,
+      "sha256": "9465723da03d033bb4d8f8b5e5cd517ea60eff74c9c5ec0577226622f23c36d2"
+    },
+    "exactTable": "One MsiEmbeddedChainer row, type2 Binary.Guardian, empty additional commandline. No extra payload package. Binary stream independently equals actual guardian PE.",
+    "closedSideEffects": "One own HKCU DWORD1 component, no installed File/CreateFolder, ordinary CustomAction, service, shortcut, RemoveFile, IniFile or Upgrade rows. Standard MSI product registration/ARP hidden markers still real and require uninstall cleanup.",
+    "msiApiVersion": "InstallerVersion500/Intel;1033, not a claim that Windows currently accepts guardian workflow."
+  },
+  "pendingBeforeActualRun": [
+    "Windows PowerShell5.1 Parser/strict collection and process handling have NOT_RUN; only read-only source review here. Root must parse/review before ExecuteOwnedProbe.",
+    "No direct MSI /i/f/x, MsiJoin/MsiEnd, rollback, process observation or product cleanup has been executed.",
+    "No proof of full installation rollback timing or cooperative startup gate.",
+    "GNU helper is for authorized Win11 feasibility; no formal MSVC/actualWin7/Win10 or visibleSeewo compatibility.",
+    "No-extra-package chainer support and maintenance-mode invocation are precisely the unknown facts this probe will measure."
+  ],
+  "localChecks": [
+    {
+      "source": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/prepare-tools.py",
+        "bytes": 4490,
+        "sha256": "fe5c2d243c01bbff7574f26768babfaf4223b138261ae279a91eeb6120763b1c"
+      },
+      "AST": "PASS_PYTHON_SYNTAX_ONLY"
+    },
+    {
+      "source": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fixture.py",
+        "bytes": 6324,
+        "sha256": "441a35944d0c352aa8c4390172c4867bfcd7859056d067e6c8327141dbf4d316"
+      },
+      "AST": "PASS_PYTHON_SYNTAX_ONLY"
+    },
+    {
+      "source": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/verify-static.py",
+        "bytes": 7150,
+        "sha256": "27aac0f8726f82d74d66bcab0e8e13f650406d9f2fa6f6232ff7c95efa4e3715"
+      },
+      "AST": "PASS_PYTHON_SYNTAX_ONLY"
+    }
+  ],
+  "retainedIterations": [
+    "build-first actual compiler FAIL: UNICODE macro redefinition under original Werror; preserved source and raw logs.",
+    "build-second actual linker FAIL: missing Join/End import thunks in installed MinGW library; preserved source and raw logs.",
+    "build-third static success before compiled product/nonce binding hardening; NOT Windows evidence.",
+    "build-fourth static success with old nested scratch root; NOT installed; superseded by latest single-leaf scope.",
+    "build-fifth final static success; static-independent-second final exported-table/stream/PE audit."
+  ],
+  "noExecutionHere": [
+    "Windows",
+    "SSH",
+    "MSI install/repair/uninstall",
+    "Cargo",
+    "CI",
+    "main or R61 source mutation"
+  ]
+}

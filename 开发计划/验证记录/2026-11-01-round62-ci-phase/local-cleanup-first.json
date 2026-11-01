@@ -1,0 +1,28 @@
+{
+  "status": "PASS_COMMITTED_R59_R61_OWNED_ROOTS_REMOVED",
+  "sourceCommit": "7442d46961046308b577e367a8e229cf0fb5fe72",
+  "proofSha256": "e981b8deb9eba6c8af58da0757ef6cebed9a7820afbf19ae8fc32e52c8d1909b",
+  "removedRoots": [
+    {
+      "path": "/tmp/fc-round59-ci-evidence",
+      "logicalBytes": 392595348,
+      "regularFiles": 599
+    },
+    {
+      "path": "/tmp/fc-round61-gui",
+      "logicalBytes": 1951591920,
+      "regularFiles": 13800
+    }
+  ],
+  "logicalBytes": 2344187268,
+  "elapsedSeconds": 1.4153509149327874,
+  "removedBranch": "codex/gui-startup",
+  "preserved": [
+    "main target/debug and global caches",
+    "Windows SSH service/public authorization and external0600privatekey",
+    "three intentional /mnt/data development ZIPs",
+    "R60 owned uncompleted MSI/registry fixtures for upcoming isolated native feasibility tests",
+    "active R62 evidence and next CI preparation"
+  ],
+  "scope": "Only exact marker-owned completed roots after committed full byte proof and all known consumers released. No Windows mutation or private-key read."
+}

@@ -1,0 +1,25 @@
+{
+  "sourceSha256": "a45a6868f87410d46e47a7bc94ea7fa6de04b00ca1b5759f7e976c11969326d7",
+  "command": [
+    "/usr/bin/i686-w64-mingw32-gcc",
+    "-std=c11",
+    "-Os",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-ffreestanding",
+    "-fno-builtin",
+    "-nostdlib",
+    "-mconsole",
+    "-Wl,--entry,_entry",
+    "-o",
+    "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.exe",
+    "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c",
+    "-ladvapi32",
+    "-lktmw32",
+    "-lkernel32",
+    "-lgcc"
+  ],
+  "exitCode": 1,
+  "scope": "Actual recapture of initial source compiler rejection, before formatting/minimal supervisor corrections; original initial tool output was not previously written to disk."
+}

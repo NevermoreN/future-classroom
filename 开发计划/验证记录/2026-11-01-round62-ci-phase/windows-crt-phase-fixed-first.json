@@ -1,0 +1,80 @@
+{
+  "sourceSha256": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886",
+  "checkerSha256": "fdb57f148868845f4f75d5b2d7246f850080d42e86f894ad91fef520e6c9a05a",
+  "sshExitCode": 0,
+  "elapsedSeconds": 0.6909654890187085,
+  "stdoutSha256": "cd64f4f2605d2a3d61e95c8ed0592634d453d627f04ae64f63f87ea2646b037e",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "original": {
+    "checks": [
+      {
+        "phase": "before-vs",
+        "status": "PASS_REAL_FUNCTION_MEMORY_SINK",
+        "baseline": "Modern"
+      },
+      {
+        "phase": "after-vs",
+        "status": "PASS_REAL_FUNCTION_MEMORY_SINK",
+        "baseline": "Modern"
+      },
+      {
+        "phase": "before-cargo",
+        "status": "PASS_REAL_FUNCTION_MEMORY_SINK",
+        "baseline": "Modern"
+      },
+      {
+        "phase": "before-product",
+        "status": "PASS_REAL_FUNCTION_MEMORY_SINK",
+        "baseline": "Modern"
+      },
+      {
+        "phase": "after-product",
+        "status": "PASS_REAL_FUNCTION_MEMORY_SINK",
+        "baseline": "Modern"
+      },
+      {
+        "phase": "before-vs",
+        "status": "PASS_REAL_FUNCTION_MEMORY_SINK",
+        "baseline": "Win7"
+      },
+      {
+        "phase": "after-vs",
+        "status": "PASS_REAL_FUNCTION_MEMORY_SINK",
+        "baseline": "Win7"
+      },
+      {
+        "phase": "before-cargo",
+        "status": "PASS_REAL_FUNCTION_MEMORY_SINK",
+        "baseline": "Win7"
+      },
+      {
+        "phase": "before-product",
+        "status": "PASS_REAL_FUNCTION_MEMORY_SINK",
+        "baseline": "Win7"
+      },
+      {
+        "phase": "after-product",
+        "status": "PASS_REAL_FUNCTION_MEMORY_SINK",
+        "baseline": "Win7"
+      },
+      {
+        "name": "five_invalid_phase_or_expected_flag_calls",
+        "status": "PASS_REJECTED"
+      },
+      {
+        "name": "actual_flag_and_encoded_override",
+        "status": "PASS_REJECTED_WITH_ORIGINAL_RECORDS"
+      }
+    ],
+    "acceptedPhaseCalls": 10,
+    "sourceSha256": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886",
+    "compilerFlagsScope": "Only current isolated process, restored in finally",
+    "filesystemWritten": false,
+    "powershell": "5.1.26100.9711",
+    "productCompilation": "NOT_RUN",
+    "childProcessStarted": false,
+    "capturedOriginalRecords": 12,
+    "rejectedCalls": 7,
+    "status": "PASS_REAL_CRT_FUNCTION_MEMORY_SINK"
+  }
+}

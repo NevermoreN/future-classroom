@@ -1,0 +1,3 @@
+#define FIXTURE_NONCE L"b085a44afc4142ed9c3dd0150e780f82"
+#define FIXTURE_ROOT L"Software\\FutureClassroom\\Tests\\MsiOwnerFeasibility\\b085a44afc4142ed9c3dd0150e780f82"
+#define FIXTURE_PRODUCT L"{CD2C1595-23D9-4EFA-BF56-170ADB1BB27D}"

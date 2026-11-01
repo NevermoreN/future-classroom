@@ -1,0 +1,1149 @@
+{
+  "status": "PASS_LOCAL_STATIC_BUILD_ONLY_NOT_INSTALLED",
+  "commands": [
+    {
+      "name": "gcc-version",
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-gcc",
+        "--version"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.002946021966636181,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/gcc-version.stdout.log",
+        "bytes": 238,
+        "sha256": "1e8c1e3b498f9edce82b842bf299a805696cc9d0c6da16b65fe3ee6ba867f3e9"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/gcc-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "guardian-compile",
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-gcc",
+        "-municode",
+        "-mwindows",
+        "-Os",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-static-libgcc",
+        "-Wl,--nxcompat,--dynamicbase",
+        "-I",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/guardian.c",
+        "-o",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/guardian.exe",
+        "-lmsi",
+        "-ladvapi32",
+        "-lshell32"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.7453565469477326,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/guardian-compile.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/guardian-compile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "guardian-imports",
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-objdump",
+        "-p",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/guardian.exe"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0024184598587453365,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/guardian-imports.stdout.log",
+        "bytes": 27762,
+        "sha256": "04ab5576d53fe7c1222c8c6241ae9d340f57a4a2826eea637ae8c1f8f203c583"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/guardian-imports.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "wixl-build",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/wixl",
+        "-a",
+        "x86",
+        "-o",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.wxs"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.014388585928827524,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/wixl-build.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/wixl-build.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "msibuild-import",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msibuild",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "-i",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/MsiEmbeddedChainer.idt"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.010457533178851008,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/msibuild-import.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/msibuild-import.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "msi-tables",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "tables",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.008799834875389934,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/msi-tables.stdout.log",
+        "bytes": 421,
+        "sha256": "55afec075529ab10a2044d555ef89ed29ac9d707021a12cc4986fb36642867cd"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/msi-tables.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-_SummaryInformation",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "_SummaryInformation"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.010557556990534067,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-_SummaryInformation.stdout.log",
+        "bytes": 498,
+        "sha256": "6828c5deba775b74f60f378fd431a4434d9fe48ce7e1741e852a01add9832423"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-_SummaryInformation.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-_ForceCodepage",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "_ForceCodepage"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.010966924019157887,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-_ForceCodepage.stdout.log",
+        "bytes": 23,
+        "sha256": "756e2010bef11d89ced632638fdcf69a7d00ccce12aa5643482bfe5a28d16777"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-_ForceCodepage.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-AdminUISequence",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "AdminUISequence"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.007714779116213322,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AdminUISequence.stdout.log",
+        "bytes": 141,
+        "sha256": "566f9c9710b1f128f4ff183d756546e5a78a7ac3ee66f8c3836876e0d2fe52e8"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AdminUISequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Media",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Media"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.008533383952453732,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Media.stdout.log",
+        "bytes": 97,
+        "sha256": "758fecf78bf246c2f555f0d2323b7564854bb419d8cf9f403fd356e759f287bc"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Media.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Error",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Error"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006868463940918446,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Error.stdout.log",
+        "bytes": 35,
+        "sha256": "5e2d23423ce8d0ddd97885c69b67b6d208a6604a18551bfa0f5dd68b36ff7f67"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Error.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-ServiceInstall",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "ServiceInstall"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.009916521143168211,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-ServiceInstall.stdout.log",
+        "bytes": 237,
+        "sha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-ServiceInstall.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-AppSearch",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "AppSearch"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.007445578929036856,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AppSearch.stdout.log",
+        "bytes": 61,
+        "sha256": "440f3a84ea50cc08e880a610578ec22dd5cbca6e2bea6bd2c59b8fabeb36628f"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AppSearch.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Property",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Property"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.007489890092983842,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Property.stdout.log",
+        "bytes": 402,
+        "sha256": "54f02d5e3196088fa0438c9f918eee7697929e07e1da5e37114119b9035e0884"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Property.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Upgrade",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Upgrade"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006420584861189127,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Upgrade.stdout.log",
+        "bytes": 170,
+        "sha256": "15c8dada7914dbfbd1aaa781c290689a5ad16c7adbf8cbe11f42547792b0eca4"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Upgrade.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Shortcut",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Shortcut"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005619133124127984,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Shortcut.stdout.log",
+        "bytes": 269,
+        "sha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Shortcut.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-InstallExecuteSequence",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "InstallExecuteSequence"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0060541408602148294,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-InstallExecuteSequence.stdout.log",
+        "bytes": 438,
+        "sha256": "0626b686d8ba5273e427e3404026a6fa24bcc845ddea5da8561e0f789897c924"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-InstallExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Registry",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Registry"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.00775365112349391,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Registry.stdout.log",
+        "bytes": 244,
+        "sha256": "75be9bfd35d4aa375209359e80d9ee0e6aa3805b9ac75c071986bbb838a2629b"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Registry.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-AdvtExecuteSequence",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "AdvtExecuteSequence"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006396713899448514,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AdvtExecuteSequence.stdout.log",
+        "bytes": 225,
+        "sha256": "c1986ae62815d6be46e6f3e314c0a803dac5bb01633af74a5f67f8dfc37b679d"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AdvtExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-ActionText",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "ActionText"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.010183732025325298,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-ActionText.stdout.log",
+        "bytes": 63,
+        "sha256": "08aff05632a6967c81c3af4c3ac120a0cff73275d34478cfd3c964a558962874"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-ActionText.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-FeatureComponents",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "FeatureComponents"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.011464825132861733,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-FeatureComponents.stdout.log",
+        "bytes": 88,
+        "sha256": "347c5aff2cfab029b3f233f146e013661b47584f57c6cc0280f97d05c854f612"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-FeatureComponents.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-File",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "File"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005425394978374243,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-File.stdout.log",
+        "bytes": 114,
+        "sha256": "4f1937086fda8b92caed35986d5fc5f8cc57ddbb8c5f8d67a1fc7eabde52ffdd"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-File.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Directory",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Directory"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.023541413946077228,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Directory.stdout.log",
+        "bytes": 220,
+        "sha256": "4ccef7dd04c03ccb9ec325b230e796c621e28847883b4b63cdfdd76255bf07b0"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Directory.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-IniFile",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "IniFile"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005734577775001526,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-IniFile.stdout.log",
+        "bytes": 119,
+        "sha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-IniFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-RemoveFile",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "RemoveFile"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.007971280021592975,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-RemoveFile.stdout.log",
+        "bytes": 94,
+        "sha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-RemoveFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-RemoveIniFile",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "RemoveIniFile"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.012197064934298396,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-RemoveIniFile.stdout.log",
+        "bytes": 137,
+        "sha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-RemoveIniFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-LaunchCondition",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "LaunchCondition"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.014568832935765386,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-LaunchCondition.stdout.log",
+        "bytes": 189,
+        "sha256": "390fc0cda1d78febdd0c23f8191106a2c25478d28e129d7f459ef1e0455f46b7"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-LaunchCondition.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Signature",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Signature"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.009940011892467737,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Signature.stdout.log",
+        "bytes": 140,
+        "sha256": "6e67486347b1205abb48db183d8ace73c4514504aad2cd4507a5c3658b04db18"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Signature.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-InstallUISequence",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "InstallUISequence"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.008392917923629284,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-InstallUISequence.stdout.log",
+        "bytes": 190,
+        "sha256": "6addaff4c25d625c879c9c4d26da415fcf5e6c01fe27a507af48656f50c31b92"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-InstallUISequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Component",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Component"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.005625193007290363,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Component.stdout.log",
+        "bytes": 209,
+        "sha256": "0eda87025430bfa3ec407180878089de7494ca32df7daa28053285feae0665ce"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Component.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-ServiceControl",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "ServiceControl"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.0070852129720151424,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-ServiceControl.stdout.log",
+        "bytes": 109,
+        "sha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-ServiceControl.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Feature",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Feature"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.007974661188200116,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Feature.stdout.log",
+        "bytes": 173,
+        "sha256": "e93c0231adbf2e6957097dfb197f1256dff897ca65ec43c0d7761275bfcdf119"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Feature.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Binary",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Binary"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.008301354013383389,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Binary.stdout.log",
+        "bytes": 58,
+        "sha256": "8d46dac1a420571b0d6408d472e925d034c89a0d6a16893b19039912d7be9e3b"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Binary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-CustomAction",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "CustomAction"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.007286322070285678,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-CustomAction.stdout.log",
+        "bytes": 81,
+        "sha256": "4ed7932415204180493560560cadee5180a86d44c63401db088c9f287bfab344"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-CustomAction.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-RegLocator",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "RegLocator"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.01040199096314609,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-RegLocator.stdout.log",
+        "bytes": 75,
+        "sha256": "2176ed2976acf3a3c96198c5d568ab76827d026312af71c1011139c5ba2a6e9e"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-RegLocator.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-MsiFileHash",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "MsiFileHash"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.010036125779151917,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-MsiFileHash.stdout.log",
+        "bytes": 94,
+        "sha256": "3a52ed674d8151ebd1b2bd99f12797abd0e6dd6dd3ecd78ca9a74737d8d8e5ef"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-MsiFileHash.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Icon",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Icon"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.007717099040746689,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Icon.stdout.log",
+        "bytes": 30,
+        "sha256": "a411636ecdd7c866a6b8c46387d24cf8471c47743fa51e2eebb018a3af5cc30c"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Icon.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-AdminExecuteSequence",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "AdminExecuteSequence"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.010198101866990328,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AdminExecuteSequence.stdout.log",
+        "bytes": 243,
+        "sha256": "70c4cead4ae9a2ce4f09637a962d277953c92e362de0a98b03ba34b8fc6b6293"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AdminExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-CreateFolder",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "CreateFolder"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.016985952854156494,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-CreateFolder.stdout.log",
+        "bytes": 68,
+        "sha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-CreateFolder.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-MsiEmbeddedChainer",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "MsiEmbeddedChainer"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006799980998039246,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-MsiEmbeddedChainer.stdout.log",
+        "bytes": 164,
+        "sha256": "c4aa5b9da0dc6c8b4797faa3a5aa004bb968ae0fb4a07e377140e56cefc9c1b4"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-MsiEmbeddedChainer.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "msi-summary",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "suminfo",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006614463869482279,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/msi-summary.stdout.log",
+        "bytes": 549,
+        "sha256": "bd21c0bfbf0b9790de7c0a7f91420ccf0250b1dc47fc8243a3b93147b74d1940"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/msi-summary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "guardian-binary-extract",
+      "argv": [
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+        "Binary.Guardian"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.008111215895041823,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/guardian-binary-extract.stdout.log",
+        "bytes": 253577,
+        "sha256": "dd37109a84228ec2c30f67bc098dd884728fe8323bcc850a34ea0b3c6bb203a3"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/guardian-binary-extract.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/guardian.c",
+      "bytes": 6729,
+      "sha256": "2879e7fb61048b9fff30eafd3f5b75eda7e57eed91359be798bef42448248a5d"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fixture.py",
+      "bytes": 6336,
+      "sha256": "38c344d529628a70a2bd5e5b4dd35d1e89f00f7c9b9f6b820a2e93d2b6dc8136"
+    }
+  ],
+  "fixture": {
+    "schemaVersion": 1,
+    "nonce": "b085a44afc4142ed9c3dd0150e780f82",
+    "productCode": "{CD2C1595-23D9-4EFA-BF56-170ADB1BB27D}",
+    "upgradeCode": "{BA396B3A-041F-4A5C-B24A-21A0F4758C44}",
+    "componentCode": "{1C5C4CEB-598E-4EAB-82D5-2A2F97C39753}",
+    "registryRoot": "Software\\FutureClassroom\\Tests\\MsiOwnerFeasibility\\b085a44afc4142ed9c3dd0150e780f82",
+    "payloadKey": "Software\\FutureClassroom\\Tests\\MsiOwnerFeasibility\\b085a44afc4142ed9c3dd0150e780f82\\Payload",
+    "payloadValue": "OwnedPayload",
+    "guardianHandshakeMillis": 10000,
+    "perOperationMillis": 60000,
+    "status": "SYNTHETIC_FIXTURE_NOT_INSTALLED",
+    "rollbackDecision": 0,
+    "commitDecision": 1
+  },
+  "guardian": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/guardian.exe",
+    "bytes": 253577,
+    "sha256": "dd37109a84228ec2c30f67bc098dd884728fe8323bcc850a34ea0b3c6bb203a3"
+  },
+  "msi": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/fixture.msi",
+    "bytes": 266752,
+    "sha256": "7a90cf631f710b0cf2abe969abaadbd2cdd0950fe3f0428adb856973f09b915e"
+  },
+  "tables": {
+    "_SummaryInformation": {
+      "bytes": 498,
+      "sha256": "6828c5deba775b74f60f378fd431a4434d9fe48ce7e1741e852a01add9832423",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-_SummaryInformation.stdout.log"
+    },
+    "_ForceCodepage": {
+      "bytes": 23,
+      "sha256": "756e2010bef11d89ced632638fdcf69a7d00ccce12aa5643482bfe5a28d16777",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-_ForceCodepage.stdout.log"
+    },
+    "AdminUISequence": {
+      "bytes": 141,
+      "sha256": "566f9c9710b1f128f4ff183d756546e5a78a7ac3ee66f8c3836876e0d2fe52e8",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AdminUISequence.stdout.log"
+    },
+    "Media": {
+      "bytes": 97,
+      "sha256": "758fecf78bf246c2f555f0d2323b7564854bb419d8cf9f403fd356e759f287bc",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Media.stdout.log"
+    },
+    "Error": {
+      "bytes": 35,
+      "sha256": "5e2d23423ce8d0ddd97885c69b67b6d208a6604a18551bfa0f5dd68b36ff7f67",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Error.stdout.log"
+    },
+    "ServiceInstall": {
+      "bytes": 237,
+      "sha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-ServiceInstall.stdout.log"
+    },
+    "AppSearch": {
+      "bytes": 61,
+      "sha256": "440f3a84ea50cc08e880a610578ec22dd5cbca6e2bea6bd2c59b8fabeb36628f",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AppSearch.stdout.log"
+    },
+    "Property": {
+      "bytes": 402,
+      "sha256": "54f02d5e3196088fa0438c9f918eee7697929e07e1da5e37114119b9035e0884",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Property.stdout.log"
+    },
+    "Upgrade": {
+      "bytes": 170,
+      "sha256": "15c8dada7914dbfbd1aaa781c290689a5ad16c7adbf8cbe11f42547792b0eca4",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Upgrade.stdout.log"
+    },
+    "Shortcut": {
+      "bytes": 269,
+      "sha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Shortcut.stdout.log"
+    },
+    "InstallExecuteSequence": {
+      "bytes": 438,
+      "sha256": "0626b686d8ba5273e427e3404026a6fa24bcc845ddea5da8561e0f789897c924",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-InstallExecuteSequence.stdout.log"
+    },
+    "Registry": {
+      "bytes": 244,
+      "sha256": "75be9bfd35d4aa375209359e80d9ee0e6aa3805b9ac75c071986bbb838a2629b",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Registry.stdout.log"
+    },
+    "AdvtExecuteSequence": {
+      "bytes": 225,
+      "sha256": "c1986ae62815d6be46e6f3e314c0a803dac5bb01633af74a5f67f8dfc37b679d",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AdvtExecuteSequence.stdout.log"
+    },
+    "ActionText": {
+      "bytes": 63,
+      "sha256": "08aff05632a6967c81c3af4c3ac120a0cff73275d34478cfd3c964a558962874",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-ActionText.stdout.log"
+    },
+    "FeatureComponents": {
+      "bytes": 88,
+      "sha256": "347c5aff2cfab029b3f233f146e013661b47584f57c6cc0280f97d05c854f612",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-FeatureComponents.stdout.log"
+    },
+    "File": {
+      "bytes": 114,
+      "sha256": "4f1937086fda8b92caed35986d5fc5f8cc57ddbb8c5f8d67a1fc7eabde52ffdd",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-File.stdout.log"
+    },
+    "Directory": {
+      "bytes": 220,
+      "sha256": "4ccef7dd04c03ccb9ec325b230e796c621e28847883b4b63cdfdd76255bf07b0",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Directory.stdout.log"
+    },
+    "IniFile": {
+      "bytes": 119,
+      "sha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-IniFile.stdout.log"
+    },
+    "RemoveFile": {
+      "bytes": 94,
+      "sha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-RemoveFile.stdout.log"
+    },
+    "RemoveIniFile": {
+      "bytes": 137,
+      "sha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-RemoveIniFile.stdout.log"
+    },
+    "LaunchCondition": {
+      "bytes": 189,
+      "sha256": "390fc0cda1d78febdd0c23f8191106a2c25478d28e129d7f459ef1e0455f46b7",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-LaunchCondition.stdout.log"
+    },
+    "Signature": {
+      "bytes": 140,
+      "sha256": "6e67486347b1205abb48db183d8ace73c4514504aad2cd4507a5c3658b04db18",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Signature.stdout.log"
+    },
+    "InstallUISequence": {
+      "bytes": 190,
+      "sha256": "6addaff4c25d625c879c9c4d26da415fcf5e6c01fe27a507af48656f50c31b92",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-InstallUISequence.stdout.log"
+    },
+    "Component": {
+      "bytes": 209,
+      "sha256": "0eda87025430bfa3ec407180878089de7494ca32df7daa28053285feae0665ce",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Component.stdout.log"
+    },
+    "ServiceControl": {
+      "bytes": 109,
+      "sha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-ServiceControl.stdout.log"
+    },
+    "Feature": {
+      "bytes": 173,
+      "sha256": "e93c0231adbf2e6957097dfb197f1256dff897ca65ec43c0d7761275bfcdf119",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Feature.stdout.log"
+    },
+    "Binary": {
+      "bytes": 58,
+      "sha256": "8d46dac1a420571b0d6408d472e925d034c89a0d6a16893b19039912d7be9e3b",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Binary.stdout.log"
+    },
+    "CustomAction": {
+      "bytes": 81,
+      "sha256": "4ed7932415204180493560560cadee5180a86d44c63401db088c9f287bfab344",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-CustomAction.stdout.log"
+    },
+    "RegLocator": {
+      "bytes": 75,
+      "sha256": "2176ed2976acf3a3c96198c5d568ab76827d026312af71c1011139c5ba2a6e9e",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-RegLocator.stdout.log"
+    },
+    "MsiFileHash": {
+      "bytes": 94,
+      "sha256": "3a52ed674d8151ebd1b2bd99f12797abd0e6dd6dd3ecd78ca9a74737d8d8e5ef",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-MsiFileHash.stdout.log"
+    },
+    "Icon": {
+      "bytes": 30,
+      "sha256": "a411636ecdd7c866a6b8c46387d24cf8471c47743fa51e2eebb018a3af5cc30c",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-Icon.stdout.log"
+    },
+    "AdminExecuteSequence": {
+      "bytes": 243,
+      "sha256": "70c4cead4ae9a2ce4f09637a962d277953c92e362de0a98b03ba34b8fc6b6293",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-AdminExecuteSequence.stdout.log"
+    },
+    "CreateFolder": {
+      "bytes": 68,
+      "sha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-CreateFolder.stdout.log"
+    },
+    "MsiEmbeddedChainer": {
+      "bytes": 164,
+      "sha256": "c4aa5b9da0dc6c8b4797faa3a5aa004bb968ae0fb4a07e377140e56cefc9c1b4",
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fourth/table-MsiEmbeddedChainer.stdout.log"
+    }
+  },
+  "embeddedGuardianByteIdentity": true
+}

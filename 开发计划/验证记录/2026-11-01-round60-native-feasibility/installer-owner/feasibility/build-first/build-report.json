@@ -1,0 +1,74 @@
+{
+  "status": "FAIL_LOCAL_STATIC_BUILD",
+  "commands": [
+    {
+      "name": "gcc-version",
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-gcc",
+        "--version"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.006788271013647318,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-first/gcc-version.stdout.log",
+        "bytes": 238,
+        "sha256": "1e8c1e3b498f9edce82b842bf299a805696cc9d0c6da16b65fe3ee6ba867f3e9"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-first/gcc-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "guardian-compile",
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-gcc",
+        "-municode",
+        "-Os",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-static-libgcc",
+        "-Wl,--nxcompat,--dynamicbase",
+        "-I",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-first",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/guardian.c",
+        "-o",
+        "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-first/guardian.exe",
+        "-lmsi",
+        "-ladvapi32"
+      ],
+      "actualExit": true,
+      "exitCode": 1,
+      "elapsedSeconds": 0.8290689531713724,
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-first/guardian-compile.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-first/guardian-compile.stderr.log",
+        "bytes": 268,
+        "sha256": "4de1772294f8bd6cc06c9ade8c5c3691e58ebb814f08146091bf9fb2f7831793"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/guardian.c",
+      "bytes": 5458,
+      "sha256": "d3e752a2e55f1fbd56ad9f645673e92c378ce9e96328701304475bfb5190d57d"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fixture.py",
+      "bytes": 6255,
+      "sha256": "5935389e7732fd9b681024f273f9c4257887feac0b20825a56c92ebe50b53cc0"
+    }
+  ],
+  "error": {
+    "kind": "RuntimeError",
+    "message": "Local build failed; exact command stdout/stderr and partial original files retained."
+  }
+}

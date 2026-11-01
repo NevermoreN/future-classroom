@@ -1,0 +1,158 @@
+{
+  "status": "PASS_SOURCE_DELTA_ONLY_NO_NEW_BLOCKER_FOUND",
+  "scope": "Read-only fourth-vs-third exact-byte delta and already completed root ParseInput/memory-check/upload receipts. Root Windows session33459 is independent; no live execute output read, no runtime outcome asserted and no native/SSH action by reviewer.",
+  "third": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-owner-third/run-windows-probe.ps1",
+    "bytes": 23608,
+    "sha256": "f58ce9da9148014aa799939e9ae96865af177044818d4220a2692d274a090a3e"
+  },
+  "fourth": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-owner-fourth/run-windows-probe.ps1",
+    "bytes": 23810,
+    "sha256": "e787bf4ff9bebf7a21c875e14fee7d32be7c4023b8bcfd9b3877febe0a36e2d5"
+  },
+  "delta": "Exactly two catch diagnostic expansions: original exception Message/ScriptLineNumber and cleanup exception Message/ScriptLineNumber. Reversing only those fields reproduces third byte-for-byte. Guards, result predicate, same-handle NEW, actual process/End checks, deadlines, cleanup and native inputs unchanged.",
+  "credentialScope": "This pinned synthetic runner contains no HTTP credentials/PFX/real Run payload; new exception details may contain owned paths, public product IDs/native error text. Preserve original bytes; archive review must still inspect actual error text after termination.",
+  "priorIndependentReview": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/independent-pre-runtime-second-first.json",
+    "bytes": 50160,
+    "sha256": "8acf66a9e5dd65800ca66316564aa30f22f066b8e2b4d4b717dfcf5e905a58f2"
+  },
+  "thirdFreeze": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/feasibility-freeze-third.json",
+    "bytes": 2446,
+    "sha256": "7211ef30222f4c12dae57801cfd1ed03ad8274602d57af71fb2d0d8a8f597581"
+  },
+  "secondDefect": "Second uninstall raw nonzero false-positive remains documented, second immutable preserved; third/fourth require raw0 for committed /i/f/x. Rollback1603 preserved by actual six-case memory check, not rewritten.",
+  "completedRootReceipts": [
+    {
+      "receipt": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-preflight-first.json",
+        "bytes": 441,
+        "sha256": "0e53b88324a35d0414cc233c1524a2e6b6c7e19e52e1cdae5f6ff3b5ce266d5b"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-preflight-first.stdout",
+        "bytes": 1220,
+        "sha256": "40a725db6c7d2eaa5f899b9a8cccdb19d05de080eab293dbb9156e53c0ae78e8"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-preflight-first.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "observed": [
+        {
+          "nativeExecuted": false,
+          "sourceSha256": "e787bf4ff9bebf7a21c875e14fee7d32be7c4023b8bcfd9b3877febe0a36e2d5",
+          "processStarted": false,
+          "parseErrors": 0,
+          "status": "PASS_PURE_RESULT_CONTRACT_ONLY",
+          "registryOrFileWritten": false,
+          "scope": "Synthetic result records run through the exact result block only; no native MSI/Join/End/cleanup/runtime evidence.",
+          "checks": [
+            {
+              "status": "PASS",
+              "rollbackOriginalCode": 1603,
+              "name": "normal",
+              "expectedAccepted": true
+            },
+            {
+              "status": "PASS",
+              "rollbackOriginalCode": 1603,
+              "name": "install-nonzero",
+              "expectedAccepted": false
+            },
+            {
+              "status": "PASS",
+              "rollbackOriginalCode": 1603,
+              "name": "repair-nonzero",
+              "expectedAccepted": false
+            },
+            {
+              "status": "PASS",
+              "rollbackOriginalCode": 1603,
+              "name": "uninstall-nonzero",
+              "expectedAccepted": false
+            },
+            {
+              "status": "PASS",
+              "rollbackOriginalCode": 1603,
+              "name": "guardian-failed",
+              "expectedAccepted": false
+            },
+            {
+              "status": "PASS",
+              "rollbackOriginalCode": 1603,
+              "name": "end-failed",
+              "expectedAccepted": false
+            }
+          ]
+        },
+        {
+          "powershell": "5.1.26100.9711",
+          "msiexecCount": 0,
+          "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "sshd": "Running",
+          "status": "READ_ONLY_PREFLIGHT",
+          "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28",
+          "registryPresent": false,
+          "rootPresent": false
+        }
+      ]
+    },
+    {
+      "receipt": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-upload-first.json",
+        "bytes": 437,
+        "sha256": "72b5447b66d082cb5f7078792e4d0810a75e271eafcc5e550b304f38ce4a4a05"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-upload-first.stdout",
+        "bytes": 728,
+        "sha256": "55357605a02bbcc52d9ead3e94426d2b71dcbdbddfa8937d89b1ee1a8fbd846b"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-upload-first.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "observed": [
+        {
+          "status": "UPLOADED_FRESH_OWNED_FIXTURE",
+          "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroomMsiOwner-e3365555af2a409eba9bb94ab37b0e28",
+          "files": [
+            {
+              "sha256": "72ea6b36c40de62d40caa8bebc8d4d75d0746930e35713cd751437db18525502",
+              "name": ".owner",
+              "bytes": 73
+            },
+            {
+              "sha256": "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e",
+              "name": "fixture.msi",
+              "bytes": 266752
+            },
+            {
+              "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f",
+              "name": "guardian.exe",
+              "bytes": 253577
+            },
+            {
+              "sha256": "a53cd183503fe2e426814bec11280138fa3b4dc54542f7b3e952f299d51eed0b",
+              "name": "fixture.json",
+              "bytes": 648
+            },
+            {
+              "sha256": "e787bf4ff9bebf7a21c875e14fee7d32be7c4023b8bcfd9b3877febe0a36e2d5",
+              "name": "run-windows-probe.ps1",
+              "bytes": 23810
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "runtime": "ROOT_OWNS_ACTUAL_EXECUTION; NOT_REVIEWED_HERE",
+  "followup": "Use exact read-only/owned-only failure guidance in prior independent review; no shared msiserver termination, no real Run/desktop mutations, unknown owners prevent next MSI and root deletion.",
+  "reviewerReleased": true
+}

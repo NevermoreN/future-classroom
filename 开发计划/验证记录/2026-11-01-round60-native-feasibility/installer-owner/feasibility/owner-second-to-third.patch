@@ -1,0 +1,10 @@
+--- implementation-owner-second/run-windows-probe.ps1
++++ implementation-owner-third/run-windows-probe.ps1
+@@ -217,6 +217,7 @@
+         foreach($field in @('JoinReturn','EndReturn','EndReturned','AboutToReturnCode')){if(-not $g.Contains($field)){$contract=$false}}
+         if(-not $contract){continue}
+         if($g.JoinReturn -ne 0 -or $g.EndReturn -ne 0 -or $g.EndReturned -ne 1 -or $g.AboutToReturnCode -ne 0 -or -not $observed.guardianObserved[0].actualExit -or $observed.guardianObserved[0].exitCode -ne 0){$contract=$false}
++        if($observed.name -eq 'uninstall-commit' -and $observed.msiExitCode -ne 0){$contract=$false}
+         if($observed.name -eq 'install-commit' -or $observed.name -eq 'repair-commit'){
+             if($observed.msiExitCode -ne 0 -or $observed.productAfter.productState -ne 5 -or -not $observed.payloadAfter.valuePresent -or $observed.payloadAfter.kind -cne 'DWord' -or $observed.payloadAfter.value -ne 1){$contract=$false}
+         }elseif($observed.productAfter.productState -ne -1 -or $observed.payloadAfter.valuePresent){$contract=$false}

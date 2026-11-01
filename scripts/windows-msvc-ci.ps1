@@ -218,9 +218,14 @@ function Resolve-Application([string]$Name) {
     return $path
 }
 
+function Get-CrtPhaseRustFlags([string]$Phase, [string]$SelectedBaseline) {
+    if ($Phase -cnotin @('before-vs', 'after-vs', 'before-cargo', 'before-product', 'after-product')) { throw 'Invalid CRT flag phase.' }
+    if ($Phase -ceq 'before-product') { return Get-ProductRustFlags $SelectedBaseline }
+    return (Get-MsvcBaseline $SelectedBaseline).rustflags
+}
+
 function Write-CrtFlagState([string]$Phase, [string]$ExpectedRustFlags = '-C target-feature=+crt-static') {
-    if ($ExpectedRustFlags -cnotin @('-C target-feature=+crt-static', '-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01')) { throw 'Invalid required CRT flags.' }
-    if ($Phase -notin @('before-vs', 'after-vs', 'before-cargo')) { throw 'Invalid CRT flag phase.' }
+    if ($ExpectedRustFlags -cne (Get-CrtPhaseRustFlags $Phase $Baseline)) { throw 'Invalid required CRT flags for baseline and phase.' }
     $flags = [ordered]@{}
     foreach ($name in @('RUSTFLAGS', 'CARGO_ENCODED_RUSTFLAGS')) {
         $value = [Environment]::GetEnvironmentVariable($name, 'Process')

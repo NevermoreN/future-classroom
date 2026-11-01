@@ -1,0 +1,72 @@
+{
+  "status": "PREPARED_SOURCE_REVIEW_ONLY_WINDOWS_POWERSHELL_NOT_PARSED_OR_EXECUTED",
+  "findingFirst": "The prior OpenSubKey-Absent then CreateSubKey sequence did not establish actual NEW ownership. Its finally could attempt product cleanup without successful ownership creation.",
+  "filesChanged": [
+    "run-windows-probe.ps1"
+  ],
+  "firstRunner": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-final/run-windows-probe.ps1",
+    "bytes": 15322,
+    "sha256": "87585231a4c6dacf96c2d4b4f46ccabf31bf7701574a2874bde004598be71067"
+  },
+  "secondRunner": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-owner-second/run-windows-probe.ps1",
+    "bytes": 23507,
+    "sha256": "99fbaa6659ce62c157b7e8f6241d74f8f68f5d94f9a35037af809a33406ca3dc"
+  },
+  "patch": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/owner-second.patch",
+    "bytes": 16303,
+    "sha256": "a6da462fb8701a3e0f69f6965166dbaada2c5d58ee5606e4fa14b3674d732038"
+  },
+  "localTextInvariants": {
+    "old_absence_claim_removed": true,
+    "only_single_leaf_native_creation": true,
+    "actual_new_before_markers": true,
+    "original_returned_handle_used": true,
+    "existing_does_not_reach_owned_cleanup": true,
+    "marker_partial_retained": true,
+    "unknown_before_next_operation": true,
+    "missing_guardian_is_unknown": true,
+    "all_started_exception_unknown": true,
+    "delete_checks_structure_and_processes": true,
+    "single_delete_site": true,
+    "no_kill_or_shared_service": true,
+    "budgets_not_extended": true
+  },
+  "localChecksScope": "Python evaluated these exact source-text predicates only. This is not PowerShell AST, Add-Type compilation, native registry disposition/marker/cleanup or installation execution.",
+  "closeAndFailureSemantics": [
+    "Open only existing HKCU32 Software, then native RegCreateKeyExW the single fixed random leaf. ERROR_SUCCESS plus disposition1 required before writing. Existing only has returned native handle disposed; no mark, product mutation or delete.",
+    "Nonce and original current SID are written via RegistryKey.FromHandle over the SAME returned owning SafeRegistryHandle. NEW disposition, parentOpen/Create/parentClose errors and each marker completion are recorded independently.",
+    "Failed marker write conservatively leaves the actually NEW root; original native handle is disposed in finally and handleDisposed reports disposal only, not a separate native-close completion receipt. It never removes or adopts an incompletely marked root.",
+    "Any exception after the original MSI starts sets unknown. Missing retained guardian, nonzero/unobserved End or incomplete physical exit prevents next MSI and final cleanup. Read-only query timeout also sets unknown.",
+    "Known cleanup requires actual NEW+both markers, all prior original msiexec and guardian actual exits, no unknown operation, correct marker types+nonce+SID, matching last operation control, bounded allowlisted known child/value structure, and exact own product absent. Then delete only the own leaf, close original key handles and reopen to observe absence.",
+    "The known-structure verification and path deletion are not an atomic content-CAS against a malicious concurrent same-SID writer. This fixture does not solve the production maintenance ownership protocol or withdrawn R56 CAS issue."
+  ],
+  "unchangedMsi": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.msi",
+    "bytes": 266752,
+    "sha256": "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e"
+  },
+  "unchangedGuardian": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/guardian.exe",
+    "bytes": 253577,
+    "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f"
+  },
+  "notRun": [
+    "Windows",
+    "PowerShell ParseInput",
+    "Add-Type C# compile",
+    "MSI install repair uninstall",
+    "native registry NEW/EXISTING tests",
+    "Cargo",
+    "SSH",
+    "CI"
+  ],
+  "pendingRootChecks": [
+    "Parse full second runner under real Windows PowerShell5.1 before explicit execution.",
+    "Verify Existing disposition leaves all preexisting values byteexact unchanged and does not start or clean MSI.",
+    "Verify actual NEW disposition/partial-marker failure retention/known-structure refusal and original handle cleanup with precise owned fixture.",
+    "Perform bounded direct /i /f /x and rollback feasibility only after independent review."
+  ]
+}

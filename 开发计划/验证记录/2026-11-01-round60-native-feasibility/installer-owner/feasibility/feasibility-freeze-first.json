@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "status": "FROZEN_ACTUAL_LOCAL_MSI_STATIC_ONLY_WINDOWS_PENDING_REVIEW",
+  "recordedUtc": "2026-11-01T04:39:37.380162+00:00",
+  "ownedRoot": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility",
+  "sourceSnapshots": [
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-final/guardian.c",
+      "bytes": 6729,
+      "sha256": "2879e7fb61048b9fff30eafd3f5b75eda7e57eed91359be798bef42448248a5d"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-final/prepare-tools.py",
+      "bytes": 4490,
+      "sha256": "fe5c2d243c01bbff7574f26768babfaf4223b138261ae279a91eeb6120763b1c"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-final/build-fixture.py",
+      "bytes": 6324,
+      "sha256": "441a35944d0c352aa8c4390172c4867bfcd7859056d067e6c8327141dbf4d316"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-final/verify-static.py",
+      "bytes": 7150,
+      "sha256": "27aac0f8726f82d74d66bcab0e8e13f650406d9f2fa6f6232ff7c95efa4e3715"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-final/run-windows-probe.ps1",
+      "bytes": 15322,
+      "sha256": "87585231a4c6dacf96c2d4b4f46ccabf31bf7701574a2874bde004598be71067"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-final/fixture.json",
+      "bytes": 648,
+      "sha256": "a53cd183503fe2e426814bec11280138fa3b4dc54542f7b3e952f299d51eed0b"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-final/fixture.h",
+      "bytes": 224,
+      "sha256": "8933e7d1c52524fd4caecb1b3e8070b3477c53c39f11fa1189f6a90a218ae36e"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-final/fixture.wxs",
+      "bytes": 1604,
+      "sha256": "243ffc135f0e625b390e5c218af95d679188b38d41bf2ddec49529e1b937b129"
+    }
+  ],
+  "originalToolDownloadAndBinding": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/tools-preparation-first.json",
+    "bytes": 8973,
+    "sha256": "af40dc3436ff40e5709017aae213d2c580e1f6496c75e282d0e1b976464dd5d8"
+  },
+  "actualFinalBuild": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/build-report.json",
+    "bytes": 50808,
+    "sha256": "f23d84c2703f9a6b659f1fa581100633dee4972ad98e64217c2f1ca568021974"
+  },
+  "independentFinalStaticAudit": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/static-independent-second.json",
+    "bytes": 46739,
+    "sha256": "9465723da03d033bb4d8f8b5e5cd517ea60eff74c9c5ec0577226622f23c36d2"
+  },
+  "windowsContract": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-run-contract-first.json",
+    "bytes": 10063,
+    "sha256": "b6834b464922e718cb47ceb5fcf4ba143dbf3eb6e52ecb13dd805c9ec6d68edb"
+  },
+  "artifacts": {
+    "msi": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.msi",
+      "bytes": 266752,
+      "sha256": "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e"
+    },
+    "guardian": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/guardian.exe",
+      "bytes": 253577,
+      "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f"
+    }
+  },
+  "actualStaticCheckCount": 246,
+  "allStaticChecksPassed": true,
+  "network": "Only root-authorized download of7 prior exact Ubuntu official hashes via fixed TLS transfer mirror into own tools directory;642534B total, no version change/system install/global LD setting.",
+  "windows": "NOT_RUN",
+  "powershellParser": "NOT_RUN_NO_LOCAL_PWSH",
+  "projectMutations": false,
+  "cleanup": "No temporary root/artifact deleted. Root owns later Windows execution, final archive and cleanup."
+}

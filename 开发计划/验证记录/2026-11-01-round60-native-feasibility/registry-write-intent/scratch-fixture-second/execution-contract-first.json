@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_ACTUAL_CROSS_COMPILED_NATIVE_WINDOWS_NOT_RUN",
+  "scope": "Scratch-only real process/native API falsification fixture. Not Run adapter, product installer, general CAS theorem or real Windows evidence.",
+  "parentResearch": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/research-first.json",
+    "bytes": 14524,
+    "sha256": "b71375d38ebcf9cf13b35916c90cfbc053f67ee8f81d38ba1fdfe10a76177c72"
+  },
+  "parentDecision": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/decision-first.md",
+    "bytes": 1519,
+    "sha256": "d504d7262b92a1e40ea17afc69c606cd3e42391134a9b1f81c80d6a6712c190f"
+  },
+  "preservedOldSource": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture/registry-write-intent.c",
+    "bytes": 19581,
+    "sha256": "49ca41acfa69b33e9ced48a0c742451c34b80f00bf9826da846ef92faefcf995"
+  },
+  "source": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/source-final/registry-write-intent.c",
+    "bytes": 24750,
+    "sha256": "5de00b46563d3dba223088250dce79368520f3fd9974df0eab5ca74ecd002024"
+  },
+  "executable": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/source-final/registry-write-intent.exe",
+    "bytes": 35045,
+    "sha256": "fc5868521d3d54130daf855a07ae1b703b33bb8f0c3832252970a49f14c75dfc"
+  },
+  "runner": {
+    "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/source-final/run-windows-probe.ps1",
+    "bytes": 9564,
+    "sha256": "ad2dbb622bb45b16cf2850ce346aabc566b59af7c0a7b5c954ff598069a48838"
+  },
+  "cases": [
+    {
+      "id": "A",
+      "target": "same",
+      "intent": "none",
+      "ordering": "tx read ORIGINAL -> ordinary writer sets identical ORIGINAL and returns -> tx delete -> commit"
+    },
+    {
+      "id": "B",
+      "target": "same",
+      "intent": "after-read",
+      "ordering": "tx read ORIGINAL -> actual NEW child -> close child handle -> ordinary identical write completes -> tx delete -> delete child in same tx -> close parent -> commit"
+    },
+    {
+      "id": "C",
+      "target": "same",
+      "intent": "after-read, child removed early",
+      "ordering": "tx read -> actual NEW child -> close child -> transacted child delete -> ordinary identical write completes -> target delete -> close parent -> commit"
+    },
+    {
+      "id": "D",
+      "target": "same",
+      "intent": "before-read",
+      "ordering": "actual NEW child -> close child -> tx read -> ordinary identical write completes -> target delete -> child delete -> close parent -> commit"
+    },
+    {
+      "id": "E",
+      "target": "same",
+      "intent": "before-read, child removed early",
+      "ordering": "actual NEW child -> close child -> tx read -> child delete -> ordinary identical write completes -> target delete -> close parent -> commit"
+    },
+    {
+      "id": "F",
+      "target": "distinct",
+      "intent": "before-read",
+      "ordering": "actual NEW child -> tx read ORIGINAL -> ordinary writes distinct REPLACEMENT and returns -> target delete -> child delete -> close parent -> commit"
+    },
+    {
+      "id": "G",
+      "target": "distinct",
+      "intent": "none",
+      "ordering": "tx read ORIGINAL -> ordinary writes distinct REPLACEMENT and returns -> target delete -> commit; old lost-update red control"
+    },
+    {
+      "id": "H",
+      "target": "none",
+      "intent": "before-read, no competitor",
+      "ordering": "actual NEW child -> tx read ORIGINAL -> target delete -> child delete -> close parent -> commit; real progress control"
+    }
+  ],
+  "windowsSteps": [
+    "Run serially after the root-owned MSI operation has physically returned. No parallel Windows process/registry mutation from this author.",
+    "Create a fresh owned direct TEMP directory named FutureClassroomRegistryIntent-<new32lowerhex>. Copy only final EXE and final runner there using exclusive writes; verify exact frozen hashes. This directory nonce is separate from native HKCU nonce.",
+    "Use Windows PowerShell5.1 Parser.ParseFile to inspect the entire runner before execution; errors are an actual failed preparation, not a reason to bypass validation.",
+    "Execute powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <owned>\\run-windows-probe.ps1 -FixtureDirectory <owned> -ExpectedSha256 fc5868521d3d54130daf855a07ae1b703b33bb8f0c3832252970a49f14c75dfc",
+    "Retain native-first.json and byte-original native-first.stdout.log/native-first.stderr.log, runner command/stdout/stderr plus process actual exit. No logs or reports may overwrite a prior run.",
+    "If native outcome or physical exit is unknown, do not run a second fixture or cleanup based only on nonce. Retain exact original PID/creation identity and all partial evidence. No shared process or registry cleanup by this runner.",
+    "After exact native process/child jobs physically returned, independently inspect raw statuses/ordering and cleanup. The native helper only deletes the closed synthetic leaf after all owned job ActiveProcesses==0; runner never accesses registry."
+  ],
+  "budgets": {
+    "runnerAbsoluteMillis": 90000,
+    "eachNativeCaseMillis": 6000,
+    "prepareMillis": 3000,
+    "cleanupMillis": 3000,
+    "eachTransactionTimeoutMillis": 3000,
+    "writerFirstObservationMillis": 1000,
+    "writerAfterRollbackMillis": 1500,
+    "ownedJobDrainMillis": 1500,
+    "maxStdoutBytes": 1048576,
+    "maxStderrBytes": 1048576,
+    "maxParsedLines": 4096,
+    "maxLineChars": 2048,
+    "maxSuccessfulValueBytes": 256
+  },
+  "ownership": [
+    "Native supervisor generates one16-byte RtlGenRandom nonce for this execution, fixed for all eight cases; only HKCU32 Software\\FutureClassroom-RegistryWriteIntent-Test-<nonce>. No shared intermediate parent creation.",
+    "Native prepare opens existing Software, creates only leaf and requires real REG_CREATED_NEW_KEY. It writes original token SID as exact REG_BINARY plus nonce through same returned root HKEY. Parent proceeds only after prepare0 and actual physical child/job return. Nonzero/timeout preparation never adopts or cleans a marker-observed root.",
+    "Each case/prepare/cleanup is CreateProcess suspended -> original HANDLE/GetProcessTimes identity -> assign own KILL_ON_JOB_CLOSE Job -> Resume. Case writer is another actual process; all shared operations are fixed synthetic strings under one of A..H.",
+    "Every original native handle/RegClose return is logged. A completed ordinary writer process is the causal barrier before target delete; no sleep positions that race. If not returned within1s, rollback original transaction and observe its actual return up to1.5s; blocked/rejected/timeout never becomes a positive protection claim.",
+    "Supervisor observes original process exit and owned Job ActiveProcesses0 before cleanup. Owned timeout termination applies only to that new suspended child/job; no PID lookup, foreign process termination, msiserver or real application owner mutation.",
+    "Cleanup requires exact nonce/SID and closed names/value schema: root markers only, A..H children only, exact sentinel and target ORIGINAL/REPLACEMENT/Absent, and only empty own intent child. Delete only this leaf. This scratch check/delete is not an adversarial same-SID atomic cleanup CAS guarantee."
+  ],
+  "rawWire": {
+    "nonce": "RWI_OWNED_NONCE <32lowerhex>; exactly once from original native supervisor. Public synthetic ownership ID only.",
+    "events": "RWI_EVENT pid=<u32> seq=<u32> tick_ms=<GetTickCount64> name=<fixed scalar> code=<raw Win32/LSTATUS> detail=<numeric>. Created process HANDLE identity uses original_child_process_identity plus original_creation_low/high; physical exit/wait and job counts are separate events.",
+    "values": "Only successful exact bounded REG_SZ reads emit RWI_VALUE type=<native> bytes=<actual> hex=<exact successful bytes>. Failed query lengths are not returned value evidence. Actual SID bytes are compared internally and are not printed.",
+    "ordering": "Per-process sequence and event names plus original writer-process completion establish the barrier. No wall-clock alignment or process timestamp inference supplies a missing completed native call. Output interleaving or unexpected lines fails parser and retains original raw logs."
+  },
+  "interpretation": [
+    "F with ordinary set/open/close all0 and exact writer actual exit0 BEFORE target delete, followed by own commit0 and finalAbsent, is a distinct-value stale-delete counterexample.",
+    "G is a no-intent distinct-value red control; successful deletion after the completed replacement reproduces the lost update without claiming the candidate passed.",
+    "A/B/C/D/E identical write can establish whether this actual execution conflicted; identical bytes followed by committed delete is explicitly NOT itself a distinct-value value-CAS counterexample.",
+    "H commit0 plus finalAbsent, unchanged sentinel and missing intent is required to establish no-competitor progress; an always-failing scheme is not progress.",
+    "Writer timeout/rejection, native transaction failure/unknown, killed process, imperfect cleanup or missing child observations remain FAIL/INCONCLUSIVE. The EXE and runner preserve their actual nonzero statuses.",
+    "Native exit0 and OBSERVATIONS_COMPLETE... mean only these finite observations and synthetic cleanup completed. They never mean candidate CAS is correct, supported universally, production-qualified or that absent documented conflict granularity has been supplied."
+  ],
+  "localActual": {
+    "compile": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/compile-second.json",
+      "bytes": 1748,
+      "sha256": "5e287970ce0be6a9b5ad8b3648454df4b6b84ce8526058876c327b339897e32d"
+    },
+    "staticPe": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/static-first.json",
+      "bytes": 4748,
+      "sha256": "2e679755cf1c43590f36e6e2b658c88902b882df8e51423c669b01a4ec275180"
+    },
+    "windowsExecution": "NOT_RUN",
+    "PowerShellParse": "NOT_RUN_NO_LOCAL_PWSH",
+    "mainRustCargoCiWindowsNetwork": "NOT_TOUCHED"
+  },
+  "iterationMapping": {
+    "firstCompileOriginal": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/compile-first.json",
+      "bytes": 1746,
+      "sha256": "5cbd403cf09a6bac153311a60498049fca067a66091396185b09643ce942ca3c"
+    },
+    "firstCompiledSourceRetained": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/source-first-compiled.c",
+      "bytes": 24545,
+      "sha256": "81a2ed7e1ce83250b878b023654a316571b1274de7946eeee464e61d3981c607"
+    },
+    "firstCompiledExeMovedWithoutByteChange": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/registry-write-intent-first.exe",
+      "bytes": 35045,
+      "sha256": "576d07388d5995d5fcaa9f6c73fda21fe747854e1652f5d94ba109afc2ba01be"
+    },
+    "secondCompileReason": "Conservative prepare failure boundary: physical return plus marker alone never authorizes cleanup after unsuccessful NEW-ownership establishment.",
+    "staticFirstRunnerOriginalRetained": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/runner-static-first-reviewed.ps1",
+      "bytes": 9198,
+      "sha256": "ebcccfcdd588d9c22709973d15441ea949c6ae737efb785d36f9e47887b679d0"
+    },
+    "finalRunnerOnlyDelta": "Live asynchronous output streams cannot be final-hashed while still open; retain incomplete hash status instead of losing unknown-state report in finally.",
+    "runnerDelta": {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/registry-write-intent/scratch-fixture-second/runner-hash-live-stream-final.patch",
+      "bytes": 1417,
+      "sha256": "c79d0e2902e7e9038144f6688b05ead52a9783504a241bd0fe5772add171fe8d"
+    }
+  },
+  "notExercised": [
+    "Any Windows execution",
+    "Real Run/autostart values",
+    "Production CAS/maintenance guard",
+    "Other transaction competitors/preopened handles/existing-intent takeover/cancellation matrix beyond fixed eight cases",
+    "MSI install/repair/uninstall",
+    "Win7/10 OS or MSVC ABI runtime"
+  ]
+}

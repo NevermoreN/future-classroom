@@ -1,0 +1,553 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_NARROW_FOUR_OPERATIONS_WITH_UNRESOLVED_ROLLBACK_DIAGNOSTIC",
+  "scope": "Independent local original-byte verification only. No new Windows execution, MSI installation, production owner integration or whole-product lifecycle acceptance.",
+  "checks": [
+    {
+      "name": "Exact fifth runner",
+      "passed": true
+    },
+    {
+      "name": "preflight original exit0/source binding",
+      "passed": true
+    },
+    {
+      "name": "preflight stdout actual bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "preflight stderr actual bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "upload original exit0/source binding",
+      "passed": true
+    },
+    {
+      "name": "upload stdout actual bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "upload stderr actual bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "execute original exit0/source binding",
+      "passed": true
+    },
+    {
+      "name": "execute stdout actual bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "execute stderr actual bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "collect original exit0/source binding",
+      "passed": true
+    },
+    {
+      "name": "collect stdout actual bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "collect stderr actual bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "install-commit.msi.log captured base64/remote bytes/hash/local original",
+      "passed": true
+    },
+    {
+      "name": "install-rollback.msi.log captured base64/remote bytes/hash/local original",
+      "passed": true
+    },
+    {
+      "name": "repair-commit.msi.log captured base64/remote bytes/hash/local original",
+      "passed": true
+    },
+    {
+      "name": "uninstall-commit.msi.log captured base64/remote bytes/hash/local original",
+      "passed": true
+    },
+    {
+      "name": "windows-observations-first.json captured base64/remote bytes/hash/local original",
+      "passed": true
+    },
+    {
+      "name": "Uploaded fixture.msi bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "Uploaded guardian.exe bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "Uploaded fixture.json bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "Uploaded run-windows-probe.ps1 bytes/hash",
+      "passed": true
+    },
+    {
+      "name": "Unique four operation order",
+      "passed": true
+    },
+    {
+      "name": "Original overall narrow contract and cleanup",
+      "passed": true
+    },
+    {
+      "name": "NEW root same markers",
+      "passed": true
+    },
+    {
+      "name": "install-commit exact single guardian",
+      "passed": true
+    },
+    {
+      "name": "install-commit original handles actual exit and no substituted result",
+      "passed": true
+    },
+    {
+      "name": "install-commit exact Join/End and decision",
+      "passed": true
+    },
+    {
+      "name": "install-commit original state/payload",
+      "passed": true
+    },
+    {
+      "name": "install-commit productBefore physical query/identity",
+      "passed": true
+    },
+    {
+      "name": "install-commit productAfter physical query/identity",
+      "passed": true
+    },
+    {
+      "name": "install-commit original UTF16 log bound",
+      "passed": true
+    },
+    {
+      "name": "repair-commit exact single guardian",
+      "passed": true
+    },
+    {
+      "name": "repair-commit original handles actual exit and no substituted result",
+      "passed": true
+    },
+    {
+      "name": "repair-commit exact Join/End and decision",
+      "passed": true
+    },
+    {
+      "name": "repair-commit original state/payload",
+      "passed": true
+    },
+    {
+      "name": "repair-commit productBefore physical query/identity",
+      "passed": true
+    },
+    {
+      "name": "repair-commit productAfter physical query/identity",
+      "passed": true
+    },
+    {
+      "name": "repair-commit original UTF16 log bound",
+      "passed": true
+    },
+    {
+      "name": "uninstall-commit exact single guardian",
+      "passed": true
+    },
+    {
+      "name": "uninstall-commit original handles actual exit and no substituted result",
+      "passed": true
+    },
+    {
+      "name": "uninstall-commit exact Join/End and decision",
+      "passed": true
+    },
+    {
+      "name": "uninstall-commit original state/payload",
+      "passed": true
+    },
+    {
+      "name": "uninstall-commit productBefore physical query/identity",
+      "passed": true
+    },
+    {
+      "name": "uninstall-commit productAfter physical query/identity",
+      "passed": true
+    },
+    {
+      "name": "uninstall-commit original UTF16 log bound",
+      "passed": true
+    },
+    {
+      "name": "install-rollback exact single guardian",
+      "passed": true
+    },
+    {
+      "name": "install-rollback original handles actual exit and no substituted result",
+      "passed": true
+    },
+    {
+      "name": "install-rollback exact Join/End and decision",
+      "passed": true
+    },
+    {
+      "name": "install-rollback original state/payload",
+      "passed": true
+    },
+    {
+      "name": "install-rollback productBefore physical query/identity",
+      "passed": true
+    },
+    {
+      "name": "install-rollback productAfter physical query/identity",
+      "passed": true
+    },
+    {
+      "name": "install-rollback original UTF16 log bound",
+      "passed": true
+    },
+    {
+      "name": "Rollback error preserved exactly once",
+      "passed": true
+    },
+    {
+      "name": "Root subsequent owned cleanup original",
+      "passed": true
+    },
+    {
+      "name": "Exact eight original PID/creation absence receipts",
+      "passed": true
+    },
+    {
+      "name": "Deletion identity fixture.msi",
+      "passed": true
+    },
+    {
+      "name": "Deletion identity guardian.exe",
+      "passed": true
+    },
+    {
+      "name": "Deletion identity fixture.json",
+      "passed": true
+    },
+    {
+      "name": "Deletion identity run-windows-probe.ps1",
+      "passed": true
+    },
+    {
+      "name": "Deletion identity install-commit.msi.log",
+      "passed": true
+    },
+    {
+      "name": "Deletion identity install-rollback.msi.log",
+      "passed": true
+    },
+    {
+      "name": "Deletion identity repair-commit.msi.log",
+      "passed": true
+    },
+    {
+      "name": "Deletion identity uninstall-commit.msi.log",
+      "passed": true
+    },
+    {
+      "name": "Deletion identity windows-observations-first.json",
+      "passed": true
+    }
+  ],
+  "checkCount": 65,
+  "operations": [
+    {
+      "name": "install-commit",
+      "operation": "8fe4d58215764e45bdf6602144592422",
+      "msiPid": 14556,
+      "msiCreationFileTime": 134379835144470881,
+      "guardianPid": 29844,
+      "guardianCreationFileTime": 134379835146759682,
+      "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "transactionId": 2,
+      "decision": 1,
+      "msiExitCode": 0,
+      "guardianExitCode": 0,
+      "joinReturn": 0,
+      "endReturn": 0,
+      "productBefore": -1,
+      "productAfter": 5,
+      "log": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/install-commit.msi.log",
+        "bytes": 78856,
+        "sha256": "ec95c41b569859b1b4db2c5784d2a393b583abd9d63f3a36b6bf3518ffbaf99b"
+      },
+      "logLineCount": 465
+    },
+    {
+      "name": "repair-commit",
+      "operation": "32399528cff344d193dffffb0f97bf1b",
+      "msiPid": 22640,
+      "msiCreationFileTime": 134379835149709504,
+      "guardianPid": 13888,
+      "guardianCreationFileTime": 134379835151008401,
+      "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "transactionId": 4,
+      "decision": 1,
+      "msiExitCode": 0,
+      "guardianExitCode": 0,
+      "joinReturn": 0,
+      "endReturn": 0,
+      "productBefore": 5,
+      "productAfter": 5,
+      "log": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/repair-commit.msi.log",
+        "bytes": 71334,
+        "sha256": "bd1a8a954ff7b08c29542e425839240c60ce89b7eae7d723691aa10aa52d678c"
+      },
+      "logLineCount": 445
+    },
+    {
+      "name": "uninstall-commit",
+      "operation": "75b4813b0b5147ddae5095dc0ee17bb7",
+      "msiPid": 38812,
+      "msiCreationFileTime": 134379835153655623,
+      "guardianPid": 2744,
+      "guardianCreationFileTime": 134379835154892399,
+      "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "transactionId": 6,
+      "decision": 1,
+      "msiExitCode": 0,
+      "guardianExitCode": 0,
+      "joinReturn": 0,
+      "endReturn": 0,
+      "productBefore": 5,
+      "productAfter": -1,
+      "log": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/uninstall-commit.msi.log",
+        "bytes": 69528,
+        "sha256": "7baab3db83dbdad279e006a4e2a20917cb14949f6bb815eac27313b169a03eec"
+      },
+      "logLineCount": 430
+    },
+    {
+      "name": "install-rollback",
+      "operation": "17e8b683b3cb438f91ad05df729fecfe",
+      "msiPid": 34168,
+      "msiCreationFileTime": 134379835157532810,
+      "guardianPid": 36040,
+      "guardianCreationFileTime": 134379835158817043,
+      "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "transactionId": 8,
+      "decision": 0,
+      "msiExitCode": 0,
+      "guardianExitCode": 0,
+      "joinReturn": 0,
+      "endReturn": 0,
+      "productBefore": -1,
+      "productAfter": -1,
+      "log": {
+        "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/install-rollback.msi.log",
+        "bytes": 129396,
+        "sha256": "29c95b82bab8a42d27f28d76359690fa02b63b8b5a5f86fd32d2de538517c987"
+      },
+      "logLineCount": 686
+    }
+  ],
+  "rollbackDiagnostic": {
+    "line": 677,
+    "context": [
+      {
+        "line": 673,
+        "text": "MSI (s) (74:5C) [13:11:56:114]: Note: 1: 1402 2: HKEY_CURRENT_USER32\\Software\\FutureClassroom-MsiGuardian-Test-e3365555af2a409eba9bb94ab37b0e28\\Payload 3: 2 "
+      },
+      {
+        "line": 674,
+        "text": "MSI (s) (74:5C) [13:11:56:114]: Executing op: ActionStart(Name=ProcessComponents,Description=Updating component registration,)"
+      },
+      {
+        "line": 675,
+        "text": "MSI (s) (74:5C) [13:11:56:114]: Executing op: ComponentUnregister(ComponentId={8548C110-43DA-4D67-AB9D-200718C483C9},ProductKey={51C60258-197D-4EA2-8859-F59ABA07AC38},BinaryType=0,)"
+      },
+      {
+        "line": 676,
+        "text": "MSI (s) (74:5C) [13:11:56:114]: Executing op: End(Checksum=0,ProgressTotalHDWord=0,ProgressTotalLDWord=0)"
+      },
+      {
+        "line": 677,
+        "text": "MSI (s) (74:5C) [13:11:56:114]: Error in rollback skipped.\tReturn: 5"
+      },
+      {
+        "line": 678,
+        "text": "MSI (s) (74:5C) [13:11:56:117]: Note: 1: 2318 2:  "
+      },
+      {
+        "line": 679,
+        "text": "MSI (s) (74:5C) [13:11:56:118]: Note: 1: 2318 2:  "
+      },
+      {
+        "line": 680,
+        "text": "MSI (s) (74:5C) [13:11:56:118]: Decrementing counter to disable shutdown. If counter >= 0, shutdown will be denied.  Counter after decrement: -1"
+      },
+      {
+        "line": 681,
+        "text": "MSI (s) (74:5C) [13:11:56:118]: No System Restore sequence number for this installation."
+      },
+      {
+        "line": 682,
+        "text": "=== Logging stopped: 2026/11/1  13:11:55 ==="
+      },
+      {
+        "line": 683,
+        "text": "MSI (c) (78:68) [13:11:56:127]: Decrementing counter to disable shutdown. If counter >= 0, shutdown will be denied.  Counter after decrement: -1"
+      },
+      {
+        "line": 684,
+        "text": "MSI (c) (78:68) [13:11:56:127]: MainEngineThread is returning 0"
+      }
+    ],
+    "conclusion": "Native rollback reported a skipped error after ComponentUnregister and End. It is not silently treated as clean rollback. The log alone does not identify the failing primitive or prove registration/cache absence; parent product state -1 and fixture payload absence are narrower observations."
+  },
+  "cleanupDistinction": {
+    "alreadyObserved": "Final product query -1, own NEW registry root absent, exact eight original MSI/guardian identities absent, ten exact owned input/log/report files deleted by root.",
+    "notYetObserved": "Original Installer cache/script/SourceHash and exact product/component/upgrade registration addresses; supplied read-only postcheck is PREPARED_NOT_RUN.",
+    "notClaimed": "Rollback error-free; every extracted embedded executable/temp path accounted; no stale system MSI registration; production maintenance gate, multi-package Join/End, full startup protection, Run ownership, Win7/Win10 or actual product upgrade/uninstall."
+  },
+  "followup": {
+    "script": "postcheck-owned-msi-second-first.ps1",
+    "paths": "postcheck-owned-msi-paths-second-first.json",
+    "scope": "11 exact file/directory addresses and 13 exact registry addresses in both views; no shared-state enumeration/deletion. No dependency on deleted fixture binaries."
+  },
+  "files": [
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/implementation-owner-fifth/run-windows-probe.ps1",
+      "bytes": 23858,
+      "sha256": "b342315ac86a603407814818eeffd6f6b9fb37e7a5859883c8dfdc33034191b5"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-preflight-second.json",
+      "bytes": 441,
+      "sha256": "3fbc2b2cd9654eaf37f494366619b19b27fe847fe5c24ed3f552be2fa3e2b9f7"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-preflight-second.stdout",
+      "bytes": 1220,
+      "sha256": "a263907af3289a24d15b132d1a81a14dcb7a8b00525398e6e20b24c4cfe20361"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-preflight-second.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-upload-second.json",
+      "bytes": 437,
+      "sha256": "ad61472dc15fe6a5b7c3e33248ff91812667355a5ba230536ebb13d9dcf66b2c"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-upload-second.stdout",
+      "bytes": 728,
+      "sha256": "ff23ede534957fb993a1d5a82bb82760d8870f4482fabdf385a7429d83bf2513"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-upload-second.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-execute-second.json",
+      "bytes": 437,
+      "sha256": "65751a279c17c953fbd693fc6768684a1918100a168111b6873e3ec2a79da8f7"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-execute-second.stdout",
+      "bytes": 147,
+      "sha256": "ee3779c6c803d8fc1afd663f3100ee7ed2ec3b0d7daef7a4b4a6fdb43a39fb3a"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-execute-second.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-collect-second.json",
+      "bytes": 1272,
+      "sha256": "e69dbbdc9048e4326985bb2d4431b2607652b13fe7ce1208090fe683322df633"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-collect-second.stdout",
+      "bytes": 508860,
+      "sha256": "71f94f2f7b20c61612b656da95b2b44da12e4ee93816677b353370a4bf95887c"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-collect-second.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/install-commit.msi.log",
+      "bytes": 78856,
+      "sha256": "ec95c41b569859b1b4db2c5784d2a393b583abd9d63f3a36b6bf3518ffbaf99b"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/install-rollback.msi.log",
+      "bytes": 129396,
+      "sha256": "29c95b82bab8a42d27f28d76359690fa02b63b8b5a5f86fd32d2de538517c987"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/repair-commit.msi.log",
+      "bytes": 71334,
+      "sha256": "bd1a8a954ff7b08c29542e425839240c60ce89b7eae7d723691aa10aa52d678c"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/uninstall-commit.msi.log",
+      "bytes": 69528,
+      "sha256": "7baab3db83dbdad279e006a4e2a20917cb14949f6bb815eac27313b169a03eec"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/windows-original-second/windows-observations-first.json",
+      "bytes": 31918,
+      "sha256": "3d4ac4b8a8e23f4dc747a54e98f4eadd2209f05b99935f51332104c7d2a1fd43"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.msi",
+      "bytes": 266752,
+      "sha256": "30a9eb8887321a4dc7a8c0caa2d8a63147cae486744314c324a32341b665016e"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/guardian.exe",
+      "bytes": 253577,
+      "sha256": "01c9c1182b1adab40c94f1daa40e617f4d0ca00e513c30a991b8f849fc16415f"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/build-fifth/fixture.json",
+      "bytes": 648,
+      "sha256": "a53cd183503fe2e426814bec11280138fa3b4dc54542f7b3e952f299d51eed0b"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/root-native-successful-cleanup-first.json",
+      "bytes": 2923,
+      "sha256": "c779ed305d151c725580c9216d9a9dccfa81d24e5ac91d3f15ea367180dc82e8"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/postcheck-owned-msi-second-first.ps1",
+      "bytes": 5668,
+      "sha256": "8f69c08c54047f34fe2ce47dfdbb8166560bf2e6d5a77f03692b1702791677e4"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/postcheck-owned-msi-paths-second-first.json",
+      "bytes": 9548,
+      "sha256": "c85b6e8b482e5de98e521684025b78018b94322bca33977e574e3b56110a272f"
+    },
+    {
+      "path": "/tmp/fc-round60-lifecycle-research-evidence/installer-owner/feasibility/verify-native-second-independent-first.py",
+      "bytes": 8243,
+      "sha256": "95c6d761a72774290db5a63f483da58cf540bdd407fa42d465c59c2ffd80316b"
+    }
+  ]
+}

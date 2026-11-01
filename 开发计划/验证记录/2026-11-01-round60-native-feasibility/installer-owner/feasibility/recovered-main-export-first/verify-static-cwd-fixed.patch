@@ -1,0 +1,11 @@
+--- frozen/verify-static.py
++++ new/verify-static-cwd-fixed-first.py
+@@ -22,7 +22,7 @@
+   check(b[:2]==b'MZ' and b[peoff:peoff+4]==b'PE\0\0' and machine==0x14c and magic==0x10b and subsystem==2,'actual embedded guardian PE32 x86 GUI (no console subsystem)')
+   tool=ROOT/'tools/root/usr/bin/msiinfo';env=os.environ.copy();env['LD_LIBRARY_PATH']=str(ROOT/'tools/root/usr/lib/x86_64-linux-gnu')
+   def run(name,argv):
+-   before=time.monotonic();cp=subprocess.run(argv,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env,timeout=120,check=False)
++   before=time.monotonic();cp=subprocess.run(argv,cwd=build,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env,timeout=120,check=False)
+    check(len(cp.stdout)<=MAX_LOG and len(cp.stderr)<=MAX_LOG,'independent command bound '+name)
+    row={'name':name,'argv':list(map(str,argv)),'actualExit':True,'exitCode':cp.returncode,'elapsedSeconds':time.monotonic()-before}
+    for kind,data in [('stdout',cp.stdout),('stderr',cp.stderr)]:
