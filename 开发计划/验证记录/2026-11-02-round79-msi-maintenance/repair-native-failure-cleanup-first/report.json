@@ -1,0 +1,181 @@
+{
+  "status": "PASS_FAILED_NATIVE_SCRATCH_CAPTURE_AND_CLEANUP_ONLY_ORIGINAL_TEST_REMAINS_FAIL",
+  "scope": "Original failed debug native-test scratch only; source failure remains FAIL",
+  "originalReport": {
+    "sha256": "24d7bbdffbce3d8406cc33c89cfc0f0d93cce054b0e0b5cdb4dac82e8f7022f8"
+  },
+  "originalRaw": {
+    "sha256": "ea02d0d05d4ca3458d45ebe8ac28445218b8935427b86ac6ba892a7a0b613276"
+  },
+  "windowsRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r79-repair-native-3e27ed3f2f4a3ce31c35bbbea8dd1a75",
+  "operations": [
+    {
+      "label": "01-owned-process-readonly",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "pid": 28400,
+      "actualReturnCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.6191197310017742,
+      "stdin": {
+        "bytes": 2581,
+        "sha256": "d95cadcb419efb98147b676efe038e44dc00cf4255c7e30be539ef18800bd95f"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-native-failure-cleanup-first/01-owned-process-readonly.stdout.log",
+        "bytes": 172,
+        "sha256": "18389eea2804d859efa44f3077812cca703e7ceba670559b4622da291e2af7a5"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-native-failure-cleanup-first/01-owned-process-readonly.stderr.log",
+        "bytes": 810,
+        "sha256": "803501899c0ecd52454194283da660731e8faba21d953ba287645754e4e81c91"
+      }
+    },
+    {
+      "label": "02-inventory",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "pid": 28401,
+      "actualReturnCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.610272829000678,
+      "stdin": {
+        "bytes": 2373,
+        "sha256": "1a5de5fa648eab9a40b56657b39aa7bde60be7bc24e364144ed02ecfa0e1eb56"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-native-failure-cleanup-first/02-inventory.stdout.log",
+        "bytes": 517,
+        "sha256": "f2fab3f753227ce627aecb76f9fdb4f1864d3cab87b1b20588b5db6f5ec02868"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-native-failure-cleanup-first/02-inventory.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "label": "03-download-originals",
+      "argv": [
+        "scp",
+        "-q",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r79-repair-native-3e27ed3f2f4a3ce31c35bbbea8dd1a75",
+        "/tmp/fc-round79-msi-maintenance/repair-native-failure-cleanup-first/download"
+      ],
+      "pid": 28405,
+      "actualReturnCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "remoteOriginalUnknown": false,
+      "seconds": 1.0703802639982314,
+      "stdout": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-native-failure-cleanup-first/03-download-originals.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-native-failure-cleanup-first/03-download-originals.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "04-exact-download-matched-delete",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "pid": 28421,
+      "actualReturnCode": 0,
+      "reaped": true,
+      "timedOut": false,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.6450940139984596,
+      "stdin": {
+        "bytes": 4035,
+        "sha256": "95ea380dd063f47946a51fbe2f1c65f1bd1c3f171baf7ffec812270489cf29f1"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-native-failure-cleanup-first/04-exact-download-matched-delete.stdout.log",
+        "bytes": 117,
+        "sha256": "3cacc446c2a26d18369060fa1a2a5b0cac7789ccd0703d8cac72056e6db2d110"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-native-failure-cleanup-first/04-exact-download-matched-delete.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    }
+  ],
+  "budgetSeconds": 180,
+  "cleanup": "PASS_EXACT_FAILED_TEST_SCRATCH_REMOVED_AFTER_ORIGINAL_CAPTURE",
+  "noTestRerun": true,
+  "noProductPendingRegistryCacheMutation": true,
+  "processReadback": {
+    "nonce": "3e27ed3f2f4a3ce31c35bbbea8dd1a75",
+    "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r79-repair-native-3e27ed3f2f4a3ce31c35bbbea8dd1a75",
+    "count": 0
+  },
+  "inventory": {
+    "directories": [
+      "compiler-temp",
+      "test-temp"
+    ],
+    "files": [
+      {
+        "path": ".owner",
+        "sha256": "f9791fbb34644a43af9c6148af7b62f2d3a4d2eddb51938b473f47ca740b896f",
+        "bytes": 52
+      },
+      {
+        "path": "candidate-tests.exe",
+        "sha256": "85c6fa0af05512aa326cdb05a66a705b71b38912da0c4929308ad1030e55a173",
+        "bytes": 97328442
+      },
+      {
+        "path": "Capture.cs",
+        "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a",
+        "bytes": 9814
+      },
+      {
+        "path": "native-result.json",
+        "sha256": "8aaf63a1096581d74e3c7b8413c13bffccf764de2f52ee0e60c09a3a475c1082",
+        "bytes": 20342
+      }
+    ]
+  },
+  "downloadVerified": "ALL_ORIGINAL_BYTES_SHA_MEMBERSHIP_RECEIPT_AND_SOURCE_EXACT",
+  "delete": {
+    "nonce": "3e27ed3f2f4a3ce31c35bbbea8dd1a75",
+    "status": "REMOVED_EXACT_REPAIR_NATIVE_RUNTIME_ROOT",
+    "knownAbsent": true
+  },
+  "seconds": 3.1673895929998253
+}

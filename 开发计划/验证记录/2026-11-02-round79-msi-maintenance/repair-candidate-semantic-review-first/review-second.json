@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_INDEPENDENT_SECOND_CAPTURE_FIX_REVIEW_AND_FINITE_WIN11_NATIVE_QUALIFICATION",
+  "reviewerScope": "Independent review of another agent repair implementation; not unified independent final product/MSI acceptance. Reviewer used only local immutable sources/reports/downloads.",
+  "observedAtUtc": "2026-11-01T19:48:59.498661+00:00",
+  "reviewActions": "LOCAL_READ_ONLY_NO_CARGO_WINDOWS_NETWORK_OR_SOURCE_CHANGE",
+  "closesFinding": {
+    "id": "R79-REPAIR-SEM-01",
+    "status": "CLOSED_FOR_UNCHECKED_MISSING_ANCESTOR_REGULAR_LEAF_CAPTURE",
+    "firstReviewSha256": "780422af3bbb57631c4d92efca107b1f2fc120ba8645553e4984abaae1c9b7b4",
+    "reason": "Directory and leaf paths cannot be traversed through an expected ancestor that was not originally Some and pinned. Such descendants remain conservative None/KnownAbsent, and every original None directory is reopened at end with only2/3 as absence. Unexpected open success enters original Proof ledger before rejection; no hash/ACL trust is granted to it.",
+    "anchors": [
+      "preimage.rs:66-79",
+      "preimage.rs:129-156",
+      "preimage.rs:171-178",
+      "preimage.rs:215-238"
+    ]
+  },
+  "source": [
+    {
+      "path": "/tmp/fc-round79-msi-maintenance/repair-capture-fix-preparation-first/candidate-second/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 50152,
+      "sha256": "8303bd999264c6b78d057dc71920058c9b3ff8be931664e35ac2f1bbab87359c",
+      "repositoryRelativePath": "crates/fc-windows/src/installer_lifecycle/native/broker.rs"
+    },
+    {
+      "path": "/tmp/fc-round79-msi-maintenance/repair-capture-fix-preparation-first/candidate-second/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 49786,
+      "sha256": "91d850385afd5ac721f2c5b46cb33667bddb532cf9c1a06527e2502eb2fddbf4",
+      "repositoryRelativePath": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs"
+    },
+    {
+      "path": "/tmp/fc-round79-msi-maintenance/repair-capture-fix-preparation-first/candidate-second/crates/fc-windows/src/installer_lifecycle/native/broker/effects/preimage.rs",
+      "bytes": 10869,
+      "sha256": "233a3752bd5baed898d421301597fa8c468d013467c316d2b70a18b1e3a18555",
+      "repositoryRelativePath": "crates/fc-windows/src/installer_lifecycle/native/broker/effects/preimage.rs"
+    }
+  ],
+  "oldFrozenSourcesManifest": {
+    "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-first-original-source/manifest.json",
+    "bytes": 1226,
+    "sha256": "6da21b50e4f80ebf2035677fdac4cf7404dd057644a1ec29c5e8f3a6d9d2130d"
+  },
+  "sourceDifferences": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "oldSha256": "8303bd999264c6b78d057dc71920058c9b3ff8be931664e35ac2f1bbab87359c",
+      "newSha256": "8303bd999264c6b78d057dc71920058c9b3ff8be931664e35ac2f1bbab87359c",
+      "diff": ""
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "oldSha256": "a63163cf9cea5307db6f60c49917e1be8f7e19fcebb1dfa704704da35817435e",
+      "newSha256": "91d850385afd5ac721f2c5b46cb33667bddb532cf9c1a06527e2502eb2fddbf4",
+      "diff": "--- frozen-first/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs\n+++ frozen-second/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs\n@@ -1315,6 +1315,48 @@\n         fs::rename(&moved, &base).unwrap();\n     }\n     #[test]\n+    fn actual_preimage_rejects_missing_ancestor_created_after_directory_snapshot() {\n+        let _serial = crate::NATIVE_TEST_SERIAL\n+            .lock()\n+            .unwrap_or_else(|p| p.into_inner());\n+        for (whole_root, with_leaf) in [(false, true), (true, true), (false, false), (true, false)]\n+        {\n+            let (_tree, base, manifest, sid) = fixture();\n+            let (directory, leaf) = if whole_root {\n+                (base.clone(), manifest_path(&base, \"LICENSE\").unwrap())\n+            } else {\n+                (\n+                    base.join(\"web\"),\n+                    manifest_path(&base, \"web/index.html\").unwrap(),\n+                )\n+            };\n+            let bytes = fs::read(&leaf).unwrap();\n+            let saved = base.parent().unwrap().join(\"saved-before-window\");\n+            fs::rename(&directory, &saved).unwrap();\n+            let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));\n+            let observed =\n+                preimage::capture_with_directory_hook(&mut proof, &base, &manifest, &sid, || {\n+                    // This deterministic Win32 window reproduced the old\n+                    // None-directory + Regular-leaf snapshot without a race.\n+                    fs::create_dir(&directory).unwrap();\n+                    if with_leaf {\n+                        fs::write(&leaf, &bytes).unwrap();\n+                    }\n+                });\n+            assert!(matches!(observed, Err(LifecycleError::Unsettled)));\n+            let moved_while_pinned = base.parent().unwrap().join(\"unexpected-during-proof\");\n+            assert!(fs::rename(&directory, &moved_while_pinned).is_err());\n+            // Unexpected directory open was added to the same native ledger;\n+            // it, and every earlier pin, must actually return before recovery.\n+            proof\n+                .release()\n+                .expect(\"checked return of the rejected proof\");\n+            fs::remove_dir_all(&directory).unwrap();\n+            fs::rename(&saved, &directory).unwrap();\n+            captured_files(&base, &manifest, &sid).unwrap();\n+        }\n+    }\n+    #[test]\n     fn actual_target_fact_cannot_select_directory_or_alias() {\n         let _serial = crate::NATIVE_TEST_SERIAL\n             .lock()\n"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects/preimage.rs",
+      "oldSha256": "8ffe1848b11160cdf5c1571d2486eae93b4c246746f71fd0f7e69eedce934304",
+      "newSha256": "233a3752bd5baed898d421301597fa8c468d013467c316d2b70a18b1e3a18555",
+      "diff": "--- frozen-first/crates/fc-windows/src/installer_lifecycle/native/broker/effects/preimage.rs\n+++ frozen-second/crates/fc-windows/src/installer_lifecycle/native/broker/effects/preimage.rs\n@@ -61,11 +61,54 @@\n     error.code() == ERROR_FILE_NOT_FOUND.to_hresult()\n         || error.code() == ERROR_PATH_NOT_FOUND.to_hresult()\n }\n+// This structural predicate grants traversal only through directory objects\n+// already captured and pinned by this same proof, up to mandatory Programs.\n+fn parents_pinned(\n+    path: &Path,\n+    boundary: &Path,\n+    directories: &BTreeMap<PathBuf, Option<Object>>,\n+) -> bool {\n+    let mut next = path.parent();\n+    while let Some(parent) = next.filter(|p| p.starts_with(boundary)) {\n+        if !directories.get(parent).is_some_and(Option::is_some) {\n+            return false;\n+        }\n+        next = parent.parent();\n+    }\n+    true\n+}\n pub(super) fn capture(\n     proof: &mut Proof,\n     base: &Path,\n     manifest: &Manifest,\n     sid: &[u8],\n+) -> Result<Snapshot> {\n+    #[cfg(test)]\n+    {\n+        capture_inner(proof, base, manifest, sid, None)\n+    }\n+    #[cfg(not(test))]\n+    {\n+        capture_inner(proof, base, manifest, sid)\n+    }\n+}\n+// No hook or caller state is compiled into the production entrypoint.\n+#[cfg(test)]\n+pub(super) fn capture_with_directory_hook(\n+    proof: &mut Proof,\n+    base: &Path,\n+    manifest: &Manifest,\n+    sid: &[u8],\n+    mut hook: impl FnMut(),\n+) -> Result<Snapshot> {\n+    capture_inner(proof, base, manifest, sid, Some(&mut hook))\n+}\n+fn capture_inner(\n+    proof: &mut Proof,\n+    base: &Path,\n+    manifest: &Manifest,\n+    sid: &[u8],\n+    #[cfg(test)] after_directories: Option<&mut dyn FnMut()>,\n ) -> Result<Snapshot> {\n     if manifest.entries.is_empty() || manifest.entries.len() > 72 {\n         return Err(LifecycleError::Invalid);\n@@ -85,6 +128,12 @@\n     // keeps every existing ancestor pinned while any child is resolved.\n     for dir in &expected {\n         valid_path(dir)?;\n+        if dir != &parent && !parents_pinned(dir, &parent, &directories) {\n+            // Do not resolve through an absent, unpinned intermediate ancestor.\n+            // Its original absence is checked again after all leaf observations.\n+            directories.insert(dir.clone(), None);\n+            continue;\n+        }\n         let owner = proof.owner()?;\n         let result = owner.open_file(\n             dir,\n@@ -113,10 +162,20 @@\n         .filter_map(|(p, id)| id.map(|_| p.clone()))\n         .collect();\n     exact_names(proof, base, &present_dirs, manifest)?;\n+    #[cfg(test)]\n+    if let Some(hook) = after_directories {\n+        hook();\n+    }\n     let mut leaves = Vec::with_capacity(manifest.entries.len());\n     let mut total = 0u64;\n     for entry in &manifest.entries {\n         let path = manifest_path(base, &entry.path)?;\n+        if !parents_pinned(&path, &parent, &directories) {\n+            // A regular leaf cannot be observed without every original\n+            // ancestor pinned. Never follow an ancestor that appeared later.\n+            leaves.push(Leaf::KnownAbsent);\n+            continue;\n+        }\n         let deadline = proof.deadline;\n         let owner = proof.owner()?;\n         let handle = match owner.open_file(\n@@ -153,6 +212,31 @@\n             sha256,\n         });\n     }\n+    // Original missing directories must still be known absent. In particular\n+    // this rejects a new empty directory, even when all its leaves are absent.\n+    for (dir, object) in &directories {\n+        if object.is_some() {\n+            continue;\n+        }\n+        let owner = proof.owner()?;\n+        match owner.open_file(\n+            dir,\n+            FILE_READ_ATTRIBUTES.0 | FILE_LIST_DIRECTORY.0 | READ_CONTROL.0,\n+            FILE_SHARE_READ | FILE_SHARE_WRITE,\n+            OPEN_EXISTING,\n+            true,\n+            false,\n+        ) {\n+            Ok(handle) => {\n+                // Record even an unexpected/reparse object before rejecting:\n+                // the same Proof must perform its actual checked return.\n+                owner.add(handle, Role::Parent);\n+                return Err(LifecycleError::Unsettled);\n+            }\n+            Err(error) if missing(&error) => {}\n+            Err(error) => return Err(error.into()),\n+        }\n+    }\n     proof.check()?;\n     Ok(Snapshot {\n         directories,\n@@ -175,6 +259,27 @@\n                 },\n             ],\n         }\n+    }\n+    #[test]\n+    fn traversal_requires_every_expected_original_ancestor_pin() {\n+        let parent = PathBuf::from(r\"C:\\fixed\\Programs\");\n+        let base = parent.join(\"FutureClassroom\");\n+        let web = base.join(\"web\");\n+        let leaf = web.join(\"index.html\");\n+        let mut dirs = BTreeMap::from([\n+            (parent.clone(), Some((1, 1))),\n+            (base.clone(), Some((1, 2))),\n+            (web.clone(), Some((1, 3))),\n+        ]);\n+        assert!(parents_pinned(&leaf, &parent, &dirs));\n+        dirs.insert(web.clone(), None);\n+        assert!(!parents_pinned(&leaf, &parent, &dirs));\n+        dirs.insert(web, Some((1, 3)));\n+        dirs.insert(base.clone(), None);\n+        assert!(!parents_pinned(&leaf, &parent, &dirs));\n+        dirs.insert(base, Some((1, 2)));\n+        dirs.remove(&parent);\n+        assert!(!parents_pinned(&leaf, &parent, &dirs));\n     }\n     #[test]\n     fn rollback_requires_original_bad_bytes_and_absence_but_not_old_object_ids() {\n"
+    }
+  ],
+  "proofPoints": [
+    {
+      "check": "ancestor helper boundary",
+      "result": "PASS_WITH_PRIVATE_CALLSITE_PRECONDITION",
+      "detail": "parents_pinned is vacuously true for a path with no parent within boundary. Actual private callsites are only expected directories derived from base or manifest_path(base, validatedRelative), or leaves from that same manifest_path, and boundary is mandatory base.parent Programs. The mandatory Programs directory is opened/verified directly, so neither live callsite reaches the vacuous outside-boundary case. No public arbitrary path caller is introduced."
+    },
+    {
+      "check": "same_objects/same_effects",
+      "result": "UNCHANGED",
+      "detail": "The full original comparison implementation before missing() is byte-identical. Revalidation still requires original directory/leaf IDs and actual bad bytes; semantic rollback still permits replacement IDs but requires same directory presence and exact actual original bad byte lengths/hash/missing leaves, with fresh native registration/marker/ACL/reparse/hardlink policy."
+    },
+    {
+      "check": "test hook production isolation",
+      "result": "PASS_STATIC",
+      "detail": "capture_with_directory_hook, its parameter and the hook invocation are all cfg(test). Production capture invokes capture_inner without a callback parameter. Hook runs after directory capture and exact_names and before any leaf traversal."
+    },
+    {
+      "check": "deterministic real native coverage",
+      "result": "ACTUAL_PASS_IN_BOTH_GROUPS",
+      "detail": "One newly named native test loops four deterministic cases: missing web + recreated leaf; missing root + recreated leaf; missing web + empty recreated directory; missing root + empty recreated directory. Every case requires Unsettled, rename failure while unexpected original directory is pinned, successful explicit checked Proof release and subsequent fixture restoration/recapture. These are four iterations of one test, not four independent reported test cases."
+    },
+    {
+      "check": "pure ancestor coverage",
+      "result": "ACTUAL_PASS_IN_BOTH_GROUPS",
+      "detail": "New traversal helper test accepts complete pinned Programs/base/web and rejects None web, None base and absent Programs map entry. This is one extra pure test, separate from the four-iteration native test."
+    },
+    {
+      "check": "resource and byte budgets",
+      "result": "UNCHANGED_LIMITS",
+      "detail": "No changes to broker.rs:64MiB nonempty normal image digest and private allow-empty preimage digest unchanged. Original6 Proof groups*64,8 process owner slots,72 leaves/closed directory set,30MiB checked aggregate,original120s lifecycle limit remain. Tail probes cover only fixed expected None directories (at most3 product descendants because Programs mandatory), one unexpected successful handle is added before immediate rejection, and uses existing owner rollover/cap/checked release. No new owner pool or native retry loop."
+    },
+    {
+      "check": "actual reparse coverage limit",
+      "result": "STATIC_REJECTION_PATH_NO_NEW_REPARSE_INJECTION_CLAIM",
+      "detail": "The new hook creates ordinary real directories, not junctions/reparse points. The static ancestor gate avoids opening/hash-reading all leaves under any originally absent ancestor regardless of what appears; final unexpected-open branch rejects both real/reparse directory objects without granting their trust. Arbitrary same-user mutation between successive observations or after pin return is not ruled out by these bounded checks."
+    }
+  ],
+  "build": {
+    "report": {
+      "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-release-build-second/report.json",
+      "bytes": 1741,
+      "sha256": "bbd1635f399846da56dc14788885dd41693c3804ca8c5578d68571858d916acb"
+    },
+    "status": "PASS_FC_WINDOWS_ALL_TARGETS_GNU_COMPILE_ONLY",
+    "actualExit": 0,
+    "originalReaped": true,
+    "sourceBeforeAfterEqual": true,
+    "sourceManifestEntries": 481,
+    "candidateMetadata": {
+      "path": "/tmp/fc-round79-msi-maintenance/repair-implementation-first/candidate-second/candidate-second.json",
+      "bytes": 2624,
+      "sha256": "86f3e4599d9d11f4313d4c49f572ae35f66f838f86dc4c7678f7b04c8b0d4f68"
+    },
+    "target": "i686-pc-windows-gnu",
+    "scope": "fc-windows release all-targets compile only; not second whole-workspace build or Win7 MSVC product CI",
+    "budgetSeconds": 900,
+    "elapsedSeconds": 60.75369821999993
+  },
+  "runtime": {
+    "report": {
+      "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-release-second/report.json",
+      "bytes": 23102,
+      "sha256": "b7736c2044d2e61b6a50acd275be306f98d261921a66c824a232ee8c5e9c0f81"
+    },
+    "originalDownloadedFiles": [
+      {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-release-second/download/FutureClassroom-r79-repair-native-b0161b854ef654759aa434a126da442e/.owner",
+        "bytes": 52,
+        "sha256": "f9791fbb34644a43af9c6148af7b62f2d3a4d2eddb51938b473f47ca740b896f"
+      },
+      {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-release-second/download/FutureClassroom-r79-repair-native-b0161b854ef654759aa434a126da442e/candidate-tests.exe",
+        "bytes": 4110237,
+        "sha256": "5168157085148b3774cdf8e204f999b9f8de85dee4746f3b59b6fecf1248ab8e"
+      },
+      {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-release-second/download/FutureClassroom-r79-repair-native-b0161b854ef654759aa434a126da442e/Capture.cs",
+        "bytes": 9814,
+        "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a"
+      },
+      {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-release-second/download/FutureClassroom-r79-repair-native-b0161b854ef654759aa434a126da442e/native-result.json",
+        "bytes": 13503,
+        "sha256": "f960640c0cf5a0b6641ecd176a384cd3f9049ed153ab1c64ccc51f0d018f0c1e"
+      }
+    ],
+    "exactFileMembership": 4,
+    "emptyDirectories": 2,
+    "nativeResult": {
+      "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-release-second/download/FutureClassroom-r79-repair-native-b0161b854ef654759aa434a126da442e/native-result.json",
+      "bytes": 13503,
+      "sha256": "f960640c0cf5a0b6641ecd176a384cd3f9049ed153ab1c64ccc51f0d018f0c1e"
+    },
+    "status": "PASS_CANDIDATE_NATIVE_TESTS_WIN11_ONLY",
+    "groups": [
+      {
+        "name": "effects",
+        "passed": 11,
+        "failed": 0,
+        "original": {
+          "Pid": 41932,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380356892806050,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r79-repair-native-b0161b854ef654759aa434a126da442e\\candidate-tests.exe",
+          "Sha256": "5168157085148b3774cdf8e204f999b9f8de85dee4746f3b59b6fecf1248ab8e",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true
+        },
+        "addedFiveExactNamesObserved": [
+          "rollback_requires_original_bad_bytes_and_absence_but_not_old_object_ids",
+          "actual_damaged_preimage_pins_zero_and_bad_bytes_and_requires_exact_rollback",
+          "actual_preimage_distinguishes_missing_tree_and_rejects_foreign_link_locked_and_large",
+          "actual_preimage_rejects_missing_ancestor_created_after_directory_snapshot",
+          "traversal_requires_every_expected_original_ancestor_pin"
+        ],
+        "scope": "46 lifecycle includes the11 effects tests; no sum as57 distinct tests"
+      },
+      {
+        "name": "lifecycle",
+        "passed": 46,
+        "failed": 0,
+        "original": {
+          "Pid": 40272,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380356894425750,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r79-repair-native-b0161b854ef654759aa434a126da442e\\candidate-tests.exe",
+          "Sha256": "5168157085148b3774cdf8e204f999b9f8de85dee4746f3b59b6fecf1248ab8e",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true
+        },
+        "addedFiveExactNamesObserved": [
+          "rollback_requires_original_bad_bytes_and_absence_but_not_old_object_ids",
+          "actual_damaged_preimage_pins_zero_and_bad_bytes_and_requires_exact_rollback",
+          "actual_preimage_distinguishes_missing_tree_and_rejects_foreign_link_locked_and_large",
+          "actual_preimage_rejects_missing_ancestor_created_after_directory_snapshot",
+          "traversal_requires_every_expected_original_ancestor_pin"
+        ],
+        "scope": "46 lifecycle includes the11 effects tests; no sum as57 distinct tests"
+      }
+    ],
+    "distinctTopLevelLifecycleTests": 46,
+    "effectsRepeatSubset": 11,
+    "newTestsSinceBaseMain": 5,
+    "newTestsSinceFirstCandidate": 2,
+    "nativeElapsedMilliseconds": 996,
+    "nativeWholeBudgetSeconds": 600,
+    "transportElapsedSeconds": 4.495279168000707,
+    "transportBudgetSeconds": 900,
+    "retainedTwoParentOriginalControls": "KNOWN_WAIT0_EXIT0_CHECKED_CLOSE_IDENTITY_SHA_SID",
+    "ownProcessReadback": 0,
+    "cleanup": "PASS_EXACT_DOWNLOADED_OWNED_SCRATCH_ONLY",
+    "exactRootDeleteReceipt": {
+      "nonce": "b0161b854ef654759aa434a126da442e",
+      "status": "REMOVED_EXACT_REPAIR_NATIVE_RUNTIME_ROOT",
+      "knownAbsent": true
+    },
+    "operations": [
+      {
+        "name": "create",
+        "actualReturnCode": 0,
+        "originalLocalReaped": true,
+        "budgetExceeded": false,
+        "remoteOriginalReturnUnknown": false
+      },
+      {
+        "name": "upload-Capture.cs",
+        "actualReturnCode": 0,
+        "originalLocalReaped": true,
+        "budgetExceeded": false,
+        "remoteOriginalReturnUnknown": false
+      },
+      {
+        "name": "upload-candidate-tests.exe",
+        "actualReturnCode": 0,
+        "originalLocalReaped": true,
+        "budgetExceeded": false,
+        "remoteOriginalReturnUnknown": false
+      },
+      {
+        "name": "run",
+        "actualReturnCode": 0,
+        "originalLocalReaped": true,
+        "budgetExceeded": false,
+        "remoteOriginalReturnUnknown": false
+      },
+      {
+        "name": "owned-processes",
+        "actualReturnCode": 0,
+        "originalLocalReaped": true,
+        "budgetExceeded": false,
+        "remoteOriginalReturnUnknown": false
+      },
+      {
+        "name": "inventory",
+        "actualReturnCode": 0,
+        "originalLocalReaped": true,
+        "budgetExceeded": false,
+        "remoteOriginalReturnUnknown": false
+      },
+      {
+        "name": "download",
+        "actualReturnCode": 0,
+        "originalLocalReaped": true,
+        "budgetExceeded": false,
+        "remoteOriginalReturnUnknown": false
+      },
+      {
+        "name": "delete",
+        "actualReturnCode": 0,
+        "originalLocalReaped": true,
+        "budgetExceeded": false,
+        "remoteOriginalReturnUnknown": false
+      }
+    ],
+    "scope": "Local requalification of recorded exact original parent controls and test outputs. Nested test fixture subprocess controls remain within tested product assertions; no additional external capture is claimed."
+  },
+  "minimalAcceptanceGate": {
+    "mayPrepareSourcePinnedIsolatedPackagePrototype": true,
+    "mayClaimProductionRepairReady": false,
+    "mayClaimRealDamagedMsiForcedRepairPassed": false,
+    "mayClaimEarlyTerminalAuthorityImplemented": false,
+    "next": "A package prototype may bind exactly this fixed candidate source/build provenance for static inspection. Before genuine damaged-MSI qualification, prove original MSI early-terminal transaction authority before guardian startup and failure-safe native owner/Pending behavior; then run source-pinned real forced repair and rollback matrix with original controls, exact tree/registration/cache cleanup and no user foreground/account/Run mutation.",
+    "actualRealMsiForcedRepair": "NOT_RUN",
+    "actualOriginalDamagedPreimageMsiRollback": "NOT_RUN",
+    "earlyTerminalAdapter": "NOT_IMPLEMENTED_BY_THIS_CAPTURE_FIX",
+    "arbitrarySameUserGlobalFilesystemAtomicity": "NOT_CLAIMED",
+    "persistentPowerLossRecovery": "NOT_IMPLEMENTED_VOLATILE_SNAPSHOT",
+    "runPresentOwnership": "NOT_IMPLEMENTED_STRICT_ABSENT_ONLY",
+    "win7Actual": "NOT_RUN",
+    "win10Actual": "NOT_RUN",
+    "win11Hardware": "NOT_RUN"
+  },
+  "earlierFirstEvidence": {
+    "firstReviewRetained": true,
+    "oldDebugFailure": "Preserved actual101/24pass20fail with97328442B debug image above original64MiB limit; second release PASS does not rewrite that failure.",
+    "oldFirstRelease44": "Not used as new hook proof; current qualification is the exact new11/46 original runtime only."
+  }
+}

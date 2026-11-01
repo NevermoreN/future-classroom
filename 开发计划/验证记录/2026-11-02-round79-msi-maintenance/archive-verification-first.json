@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_EXACT_ORIGINAL_TAR_REPLAY_AND_DECODED_CREDENTIAL_SCAN",
+  "sourceSha": "c44906517fbc62233dca755d7225cea375264cbc",
+  "members": 3121,
+  "originalBytes": 161164158,
+  "archiveBytes": 21388816,
+  "archiveSha256": "941e0f4c0793f10b5098b793ccf1571934628c81f1faab45129f0308d398d706",
+  "indexSha256": "6a843f8ea6d8e5e1e73f130859f37b11f28fee14711c8a39c059cd90ac1406d7",
+  "excludedBinaries": 185,
+  "prunedSubtrees": [
+    {
+      "path": "archive-preparation-first/__pycache__",
+      "scope": "ENTIRE_SUBTREE_PRUNED_NOT_RECURSED_NOT_MEMBER_HASHED",
+      "reason": "Rebuildable exact-source checkout, copied Web source/dist, dependencies, caches, process temp, or extracted tools. Original source/producer/provenance reports retained separately."
+    },
+    {
+      "path": "package-preparation-first/checkout-261c58a-first",
+      "scope": "ENTIRE_SUBTREE_PRUNED_NOT_RECURSED_NOT_MEMBER_HASHED",
+      "reason": "Rebuildable exact-source checkout, copied Web source/dist, dependencies, caches, process temp, or extracted tools. Original source/producer/provenance reports retained separately."
+    },
+    {
+      "path": "package-preparation-first/tools/root",
+      "scope": "ENTIRE_SUBTREE_PRUNED_NOT_RECURSED_NOT_MEMBER_HASHED",
+      "reason": "Rebuildable exact-source checkout, copied Web source/dist, dependencies, caches, process temp, or extracted tools. Original source/producer/provenance reports retained separately."
+    },
+    {
+      "path": "package-preparation-first/web-build-first/npm-cache",
+      "scope": "ENTIRE_SUBTREE_PRUNED_NOT_RECURSED_NOT_MEMBER_HASHED",
+      "reason": "Rebuildable exact-source checkout, copied Web source/dist, dependencies, caches, process temp, or extracted tools. Original source/producer/provenance reports retained separately."
+    },
+    {
+      "path": "package-preparation-first/web-build-first/process-temp",
+      "scope": "ENTIRE_SUBTREE_PRUNED_NOT_RECURSED_NOT_MEMBER_HASHED",
+      "reason": "Rebuildable exact-source checkout, copied Web source/dist, dependencies, caches, process temp, or extracted tools. Original source/producer/provenance reports retained separately."
+    },
+    {
+      "path": "package-preparation-first/web-build-first/source",
+      "scope": "ENTIRE_SUBTREE_PRUNED_NOT_RECURSED_NOT_MEMBER_HASHED",
+      "reason": "Rebuildable exact-source checkout, copied Web source/dist, dependencies, caches, process temp, or extracted tools. Original source/producer/provenance reports retained separately."
+    },
+    {
+      "path": "repair-candidate-target-first",
+      "scope": "ENTIRE_SUBTREE_PRUNED_NOT_RECURSED_NOT_MEMBER_HASHED",
+      "reason": "Rebuildable exact-source checkout, copied Web source/dist, dependencies, caches, process temp, or extracted tools. Original source/producer/provenance reports retained separately."
+    },
+    {
+      "path": "repair-implementation-first/checkout-c449-first",
+      "scope": "ENTIRE_SUBTREE_PRUNED_NOT_RECURSED_NOT_MEMBER_HASHED",
+      "reason": "Rebuildable exact-source checkout, copied Web source/dist, dependencies, caches, process temp, or extracted tools. Original source/producer/provenance reports retained separately."
+    }
+  ],
+  "credentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "statistics": {
+      "textViews": 1215706,
+      "utf16Views": 962,
+      "cp936Views": 68,
+      "clixmlDecodedViews": 176,
+      "decodedBase64Views": 657,
+      "jsonContainers": 166603,
+      "decodedJsonStringViews": 1208093,
+      "sourceFiles": 3121,
+      "storedFiles": 3121,
+      "promotedFiles": 21
+    },
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "findings": [],
+    "coverage": "Retained originals, full decompressed tar replay, promoted copies and index; strict UTF8/UTF16/CP936 roundtrip and parsed CLIXML text, declared and generic canonical nested base64 and JSON strings; maximum depth12 and traversal250000. Excluded binaries have exact identities only."
+  },
+  "processAfter": {
+    "status": "PASS_NO_OTHER_OWNED_ROOT_PROCESS_REFERENCE",
+    "scope": "Current /proc cmdline metadata; root terminal confirmation also required."
+  },
+  "sourceDeletion": false,
+  "windowsContacted": false,
+  "recordedUtc": "2026-11-01T20:34:43.759446+00:00"
+}

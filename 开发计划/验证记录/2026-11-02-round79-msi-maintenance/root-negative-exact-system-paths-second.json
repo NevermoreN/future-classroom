@@ -1,0 +1,873 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_ELEVEN_EXACT_PATHS_KNOWN_ABSENT_WIN11_ONLY",
+  "windows": "ACTUAL_REQUESTED",
+  "startedUtc": "2026-11-01T19:25:02.221204+00:00",
+  "mutations": "NONE",
+  "scope": "Exact eleven original C:\\Windows\\Installer path attributes only. No broad Installer enumeration, deleted original trial scratch query, file write/delete, process interaction, MSI, registry, task or service action.",
+  "freezeSha256": "bffadc96994d3a567157e49f720c885712ecce8efd23f82b91caef1b16c1d950",
+  "controllerSha256": "48b12d42b45990d2b9220f8fc071cc09d154ec072bfca9616da34b0ea1e6e187",
+  "inputsSha256": "add33cc22279c4f0efdf8bebd0f5068f2a251e1b2efab8f08b3125db5efec5cf",
+  "sourceRuntimeReportSha256": "0e4a2f4b24d594690e5f6278e1e622dee1c1d1f47bd633e9aa5954e6b16f637b",
+  "actualMetadataDiagnostic": {
+    "path": "/tmp/fc-round79-msi-maintenance/root-negative-path-metadata-diagnostic-first.json",
+    "sha256": "ad8820f7ee42deb8af3bfa17c7a2abeab43ce77a38e9cf7f0b0792a91877f606"
+  },
+  "paths": [
+    {
+      "path": "C:\\Windows\\Installer\\34ca58f9.msi",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\34ca58f9.msi\"",
+      "classifications": [
+        "MSI_CACHE_PACKAGE_LOG_ONLY"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-msi.log",
+          "sourceSha256": "7aff7f010f5e41bf082662b2009ba50c91f8d2d8cbc4a8ea32dc33aaf6b1b916",
+          "sourceBytes": 158914,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 136,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:30) [03:07:46:332]: Package we're running from ==> C:\\Windows\\Installer\\34ca58f9.msi",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:30) [03:07:46:332]: Package we're running from ==> C:\\\\Windows\\\\Installer\\\\34ca58f9.msi\"",
+          "phase": "fresh"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-msi.log",
+          "sourceSha256": "7aff7f010f5e41bf082662b2009ba50c91f8d2d8cbc4a8ea32dc33aaf6b1b916",
+          "sourceBytes": 158914,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 212,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:30) [03:07:46:358]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\Windows\\Installer\\34ca58f9.msi'.",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:30) [03:07:46:358]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\\\Windows\\\\Installer\\\\34ca58f9.msi'.\"",
+          "phase": "fresh"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-msi.log",
+          "sourceSha256": "7aff7f010f5e41bf082662b2009ba50c91f8d2d8cbc4a8ea32dc33aaf6b1b916",
+          "sourceBytes": 158914,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 493,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:30) [03:07:46:643]: Executing op: ChangeMedia(,MediaPrompt=Please insert the disk: ,MediaCabinet=payload.cab,BytesPerTick=65536,CopierType=2,ModuleFileName=C:\\Windows\\Installer\\34ca58f9.msi,,,,,IsFirstPhysicalMedia=1)",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:30) [03:07:46:643]: Executing op: ChangeMedia(,MediaPrompt=Please insert the disk: ,MediaCabinet=payload.cab,BytesPerTick=65536,CopierType=2,ModuleFileName=C:\\\\Windows\\\\Installer\\\\34ca58f9.msi,,,,,IsFirstPhysicalMedia=1)\"",
+          "phase": "fresh"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-msi.log",
+          "sourceSha256": "7aff7f010f5e41bf082662b2009ba50c91f8d2d8cbc4a8ea32dc33aaf6b1b916",
+          "sourceBytes": 158914,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 561,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:30) [03:07:46:710]: Executing op: ChangeMedia(,MediaPrompt=Please insert the disk: ,MediaCabinet=payload.cab,BytesPerTick=0,CopierType=2,ModuleFileName=C:\\Windows\\Installer\\34ca58f9.msi,,,,,IsFirstPhysicalMedia=1)",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:30) [03:07:46:710]: Executing op: ChangeMedia(,MediaPrompt=Please insert the disk: ,MediaCabinet=payload.cab,BytesPerTick=0,CopierType=2,ModuleFileName=C:\\\\Windows\\\\Installer\\\\34ca58f9.msi,,,,,IsFirstPhysicalMedia=1)\"",
+          "phase": "fresh"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-msi.log",
+          "sourceSha256": "7aff7f010f5e41bf082662b2009ba50c91f8d2d8cbc4a8ea32dc33aaf6b1b916",
+          "sourceBytes": 158914,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 562,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:30) [03:07:46:710]: Executing op: DatabaseCopy(DatabasePath=C:\\Windows\\Installer\\34ca58f9.msi,ProductCode={9E50831D-7811-5039-8BC3-4934647448D8},,,)",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:30) [03:07:46:710]: Executing op: DatabaseCopy(DatabasePath=C:\\\\Windows\\\\Installer\\\\34ca58f9.msi,ProductCode={9E50831D-7811-5039-8BC3-4934647448D8},,,)\"",
+          "phase": "fresh"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-msi.log",
+          "sourceSha256": "7aff7f010f5e41bf082662b2009ba50c91f8d2d8cbc4a8ea32dc33aaf6b1b916",
+          "sourceBytes": 158914,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 709,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "Property(S): DATABASE = C:\\Windows\\Installer\\34ca58f9.msi",
+          "rawLineVisibleEscaped": "\"Property(S): DATABASE = C:\\\\Windows\\\\Installer\\\\34ca58f9.msi\"",
+          "phase": "fresh"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\34ca58fd.msi",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+      "classifications": [
+        "ACTUAL_LOCALPACKAGE_API_PATH",
+        "MSI_CACHE_PACKAGE_LOG_ONLY"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/phase-runner-result.json",
+          "sourceSha256": "2d8704e7cd9a9e661e2cf711fddaf907ac085dce39067d77db02cb33cbb9f871",
+          "sourceBytes": 1176272,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 1217,
+          "classification": "ACTUAL_LOCALPACKAGE_API_PATH",
+          "rawLine": "                                                  \"path\":  \"C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\",",
+          "rawLineVisibleEscaped": "\"                                                  \\\"path\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\34ca58fd.msi\\\",\"",
+          "jsonPointer": "/freshCache/actualProductQuery/path",
+          "apiCode": 0,
+          "property": "LocalPackage",
+          "cacheSha256": "dfe09f2c31e7bef838813b62602037db5c58af9b3e93d8da9fa1c541b1f27663",
+          "cacheBytes": 6453248,
+          "historicalStatus": "KNOWN_PRESENT_EXACT_API_LOCALPACKAGE_READONLY"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-msi.log",
+          "sourceSha256": "7aff7f010f5e41bf082662b2009ba50c91f8d2d8cbc4a8ea32dc33aaf6b1b916",
+          "sourceBytes": 158914,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 564,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:30) [03:07:46:711]: Note: 1: 2318 2: C:\\Windows\\Installer\\34ca58fd.msi ",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:30) [03:07:46:711]: Note: 1: 2318 2: C:\\\\Windows\\\\Installer\\\\34ca58fd.msi \"",
+          "phase": "fresh"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/missing-reject-msi.log",
+          "sourceSha256": "7738c97f8e8e831e6adf033c0f77b82fdebc3594890a31eabfd48e320a8194d4",
+          "sourceBytes": 78462,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 35,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:4C) [03:07:47:454]: Package we're running from ==> C:\\Windows\\Installer\\34ca58fd.msi",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:4C) [03:07:47:454]: Package we're running from ==> C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+          "phase": "missing-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/missing-reject-msi.log",
+          "sourceSha256": "7738c97f8e8e831e6adf033c0f77b82fdebc3594890a31eabfd48e320a8194d4",
+          "sourceBytes": 78462,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 149,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:4C) [03:07:47:475]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\Windows\\Installer\\34ca58fd.msi'.",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:4C) [03:07:47:475]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\\\Windows\\\\Installer\\\\34ca58fd.msi'.\"",
+          "phase": "missing-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/missing-reject-msi.log",
+          "sourceSha256": "7738c97f8e8e831e6adf033c0f77b82fdebc3594890a31eabfd48e320a8194d4",
+          "sourceBytes": 78462,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 405,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "Property(S): DATABASE = C:\\Windows\\Installer\\34ca58fd.msi",
+          "rawLineVisibleEscaped": "\"Property(S): DATABASE = C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+          "phase": "missing-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/tampered-reject-msi.log",
+          "sourceSha256": "b5d62fc8a5f8902496bbdcd9945ac6f67a82afc87ba5fe30878880018b328568",
+          "sourceBytes": 78624,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 36,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:DC) [03:07:47:864]: Package we're running from ==> C:\\Windows\\Installer\\34ca58fd.msi",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:DC) [03:07:47:864]: Package we're running from ==> C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+          "phase": "tampered-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/tampered-reject-msi.log",
+          "sourceSha256": "b5d62fc8a5f8902496bbdcd9945ac6f67a82afc87ba5fe30878880018b328568",
+          "sourceBytes": 78624,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 150,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:DC) [03:07:47:888]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\Windows\\Installer\\34ca58fd.msi'.",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:DC) [03:07:47:888]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\\\Windows\\\\Installer\\\\34ca58fd.msi'.\"",
+          "phase": "tampered-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/tampered-reject-msi.log",
+          "sourceSha256": "b5d62fc8a5f8902496bbdcd9945ac6f67a82afc87ba5fe30878880018b328568",
+          "sourceBytes": 78624,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 406,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "Property(S): DATABASE = C:\\Windows\\Installer\\34ca58fd.msi",
+          "rawLineVisibleEscaped": "\"Property(S): DATABASE = C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+          "phase": "tampered-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/extra-reject-msi.log",
+          "sourceSha256": "8ba5108978382c7d2468927ffb5a56797c3b20ff229f9bca1f489f00a1701a7f",
+          "sourceBytes": 78606,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 36,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:50) [03:07:48:259]: Package we're running from ==> C:\\Windows\\Installer\\34ca58fd.msi",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:50) [03:07:48:259]: Package we're running from ==> C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+          "phase": "extra-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/extra-reject-msi.log",
+          "sourceSha256": "8ba5108978382c7d2468927ffb5a56797c3b20ff229f9bca1f489f00a1701a7f",
+          "sourceBytes": 78606,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 150,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:50) [03:07:48:281]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\Windows\\Installer\\34ca58fd.msi'.",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:50) [03:07:48:281]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\\\Windows\\\\Installer\\\\34ca58fd.msi'.\"",
+          "phase": "extra-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/extra-reject-msi.log",
+          "sourceSha256": "8ba5108978382c7d2468927ffb5a56797c3b20ff229f9bca1f489f00a1701a7f",
+          "sourceBytes": 78606,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 406,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "Property(S): DATABASE = C:\\Windows\\Installer\\34ca58fd.msi",
+          "rawLineVisibleEscaped": "\"Property(S): DATABASE = C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+          "phase": "extra-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-msi.log",
+          "sourceSha256": "bac64ec80873ad5c8bbf324081623fa6d0a3c82c36af979f886acfec672eb2c3",
+          "sourceBytes": 126880,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 37,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:DC) [03:07:48:524]: Original package ==> C:\\Windows\\Installer\\34ca58fd.msi",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:DC) [03:07:48:524]: Original package ==> C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+          "phase": "uninstall"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-msi.log",
+          "sourceSha256": "bac64ec80873ad5c8bbf324081623fa6d0a3c82c36af979f886acfec672eb2c3",
+          "sourceBytes": 126880,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 38,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:DC) [03:07:48:524]: Package we're running from ==> C:\\Windows\\Installer\\34ca58fd.msi",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:DC) [03:07:48:524]: Package we're running from ==> C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+          "phase": "uninstall"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-msi.log",
+          "sourceSha256": "bac64ec80873ad5c8bbf324081623fa6d0a3c82c36af979f886acfec672eb2c3",
+          "sourceBytes": 126880,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 143,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:DC) [03:07:48:547]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\Windows\\Installer\\34ca58fd.msi'.",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:DC) [03:07:48:547]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\\\Windows\\\\Installer\\\\34ca58fd.msi'.\"",
+          "phase": "uninstall"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-msi.log",
+          "sourceSha256": "bac64ec80873ad5c8bbf324081623fa6d0a3c82c36af979f886acfec672eb2c3",
+          "sourceBytes": 126880,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 144,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:DC) [03:07:48:547]: PROPERTY CHANGE: Adding OriginalDatabase property. Its value is 'C:\\Windows\\Installer\\34ca58fd.msi'.",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:DC) [03:07:48:547]: PROPERTY CHANGE: Adding OriginalDatabase property. Its value is 'C:\\\\Windows\\\\Installer\\\\34ca58fd.msi'.\"",
+          "phase": "uninstall"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-msi.log",
+          "sourceSha256": "bac64ec80873ad5c8bbf324081623fa6d0a3c82c36af979f886acfec672eb2c3",
+          "sourceBytes": 126880,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 404,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:DC) [03:07:48:846]: Scheduling file 'C:\\Windows\\Installer\\34ca58fd.msi' for deletion during post-install cleanup (not post-reboot).",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:DC) [03:07:48:846]: Scheduling file 'C:\\\\Windows\\\\Installer\\\\34ca58fd.msi' for deletion during post-install cleanup (not post-reboot).\"",
+          "phase": "uninstall"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-msi.log",
+          "sourceSha256": "bac64ec80873ad5c8bbf324081623fa6d0a3c82c36af979f886acfec672eb2c3",
+          "sourceBytes": 126880,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 640,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "Property(S): DATABASE = C:\\Windows\\Installer\\34ca58fd.msi",
+          "rawLineVisibleEscaped": "\"Property(S): DATABASE = C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+          "phase": "uninstall"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-msi.log",
+          "sourceSha256": "bac64ec80873ad5c8bbf324081623fa6d0a3c82c36af979f886acfec672eb2c3",
+          "sourceBytes": 126880,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 641,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "Property(S): OriginalDatabase = C:\\Windows\\Installer\\34ca58fd.msi",
+          "rawLineVisibleEscaped": "\"Property(S): OriginalDatabase = C:\\\\Windows\\\\Installer\\\\34ca58fd.msi\"",
+          "phase": "uninstall"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-msi.log",
+          "sourceSha256": "bac64ec80873ad5c8bbf324081623fa6d0a3c82c36af979f886acfec672eb2c3",
+          "sourceBytes": 126880,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 673,
+          "classification": "MSI_CACHE_PACKAGE_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:B4) [03:07:49:184]: Post-install cleanup: removing installer file 'C:\\Windows\\Installer\\34ca58fd.msi'",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:B4) [03:07:49:184]: Post-install cleanup: removing installer file 'C:\\\\Windows\\\\Installer\\\\34ca58fd.msi'\"",
+          "phase": "uninstall"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI5937.tmp",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\MSI5937.tmp\"",
+      "classifications": [
+        "AUTHENTICATED_ORIGINAL_HELPER_IMAGE"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-phase.json",
+          "sourceSha256": "3c22ca3880313f732e6963cce3b3e694c9a9f7d758cfb0010dd3266920228592",
+          "sourceBytes": 22014,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 64,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI5937.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI5937.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/0/Image",
+          "phase": "fresh",
+          "pid": 15532,
+          "role": "begin",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 0,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-phase.json",
+          "sourceSha256": "3c22ca3880313f732e6963cce3b3e694c9a9f7d758cfb0010dd3266920228592",
+          "sourceBytes": 22014,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 112,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI5937.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI5937.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/1/Image",
+          "phase": "fresh",
+          "pid": 29804,
+          "role": "broker",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 0,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI5A13.tmp",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\MSI5A13.tmp\"",
+      "classifications": [
+        "AUTHENTICATED_ORIGINAL_HELPER_IMAGE"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-phase.json",
+          "sourceSha256": "3c22ca3880313f732e6963cce3b3e694c9a9f7d758cfb0010dd3266920228592",
+          "sourceBytes": 22014,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 159,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI5A13.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI5A13.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/2/Image",
+          "phase": "fresh",
+          "pid": 8844,
+          "role": "supervisor",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 0,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-phase.json",
+          "sourceSha256": "3c22ca3880313f732e6963cce3b3e694c9a9f7d758cfb0010dd3266920228592",
+          "sourceBytes": 22014,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 207,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI5A13.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI5A13.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/3/Image",
+          "phase": "fresh",
+          "pid": 30620,
+          "role": "guardian",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 0,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI5A24.tmp",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\MSI5A24.tmp\"",
+      "classifications": [
+        "MSI_RUNNING_SCRIPT_LOG_ONLY"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/fresh-msi.log",
+          "sourceSha256": "7aff7f010f5e41bf082662b2009ba50c91f8d2d8cbc4a8ea32dc33aaf6b1b916",
+          "sourceBytes": 158914,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 454,
+          "classification": "MSI_RUNNING_SCRIPT_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:30) [03:07:46:630]: Running Script: C:\\Windows\\Installer\\MSI5A24.tmp",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:30) [03:07:46:630]: Running Script: C:\\\\Windows\\\\Installer\\\\MSI5A24.tmp\"",
+          "phase": "fresh"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI5DBF.tmp",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\MSI5DBF.tmp\"",
+      "classifications": [
+        "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+        "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/missing-reject-phase.json",
+          "sourceSha256": "7df23f1e9de0c049a1dcc8a38239844f2660f1e63d30aa6bf351f4cc2d5ba3cd",
+          "sourceBytes": 8823,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 66,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI5DBF.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI5DBF.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/0/Image",
+          "phase": "missing-reject",
+          "pid": 38296,
+          "role": "begin",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 1603,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/missing-reject-msi.log",
+          "sourceSha256": "7738c97f8e8e831e6adf033c0f77b82fdebc3594890a31eabfd48e320a8194d4",
+          "sourceBytes": 78462,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 303,
+          "classification": "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:4C) [03:07:47:620]: Note: 1: 1722 2: FcBeginGate 3: C:\\Windows\\Installer\\MSI5DBF.tmp 4: begin \"C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom\\fc-bootstrap.exe\" ",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:4C) [03:07:47:620]: Note: 1: 1722 2: FcBeginGate 3: C:\\\\Windows\\\\Installer\\\\MSI5DBF.tmp 4: begin \\\"C:\\\\Users\\\\Elior\\\\AppData\\\\Local\\\\Programs\\\\FutureClassroom\\\\fc-bootstrap.exe\\\" \"",
+          "phase": "missing-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/missing-reject-msi.log",
+          "sourceSha256": "7738c97f8e8e831e6adf033c0f77b82fdebc3594890a31eabfd48e320a8194d4",
+          "sourceBytes": 78462,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 307,
+          "classification": "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:4C) [03:07:47:620]: Product: FutureClassroom MSI candidate -- Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\Windows\\Installer\\MSI5DBF.tmp, command: begin \"C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom\\fc-bootstrap.exe\" ",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:4C) [03:07:47:620]: Product: FutureClassroom MSI candidate -- Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\\\Windows\\\\Installer\\\\MSI5DBF.tmp, command: begin \\\"C:\\\\Users\\\\Elior\\\\AppData\\\\Local\\\\Programs\\\\FutureClassroom\\\\fc-bootstrap.exe\\\" \"",
+          "phase": "missing-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/missing-reject-msi.log",
+          "sourceSha256": "7738c97f8e8e831e6adf033c0f77b82fdebc3594890a31eabfd48e320a8194d4",
+          "sourceBytes": 78462,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 309,
+          "classification": "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY",
+          "rawLine": "Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\Windows\\Installer\\MSI5DBF.tmp, command: begin \"C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom\\fc-bootstrap.exe\" ",
+          "rawLineVisibleEscaped": "\"Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\\\Windows\\\\Installer\\\\MSI5DBF.tmp, command: begin \\\"C:\\\\Users\\\\Elior\\\\AppData\\\\Local\\\\Programs\\\\FutureClassroom\\\\fc-bootstrap.exe\\\" \"",
+          "phase": "missing-reject"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI5F56.tmp",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\MSI5F56.tmp\"",
+      "classifications": [
+        "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+        "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/tampered-reject-phase.json",
+          "sourceSha256": "4951ce92f374faaa55dc75aa7bd4a60fc2ee5b372731b3a14d2c68f88083a0f0",
+          "sourceBytes": 8827,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 66,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI5F56.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI5F56.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/0/Image",
+          "phase": "tampered-reject",
+          "pid": 40360,
+          "role": "begin",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 1603,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/tampered-reject-msi.log",
+          "sourceSha256": "b5d62fc8a5f8902496bbdcd9945ac6f67a82afc87ba5fe30878880018b328568",
+          "sourceBytes": 78624,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 304,
+          "classification": "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:DC) [03:07:48:027]: Note: 1: 1722 2: FcBeginGate 3: C:\\Windows\\Installer\\MSI5F56.tmp 4: begin \"C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom\\fc-bootstrap.exe\" ",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:DC) [03:07:48:027]: Note: 1: 1722 2: FcBeginGate 3: C:\\\\Windows\\\\Installer\\\\MSI5F56.tmp 4: begin \\\"C:\\\\Users\\\\Elior\\\\AppData\\\\Local\\\\Programs\\\\FutureClassroom\\\\fc-bootstrap.exe\\\" \"",
+          "phase": "tampered-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/tampered-reject-msi.log",
+          "sourceSha256": "b5d62fc8a5f8902496bbdcd9945ac6f67a82afc87ba5fe30878880018b328568",
+          "sourceBytes": 78624,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 308,
+          "classification": "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:DC) [03:07:48:027]: Product: FutureClassroom MSI candidate -- Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\Windows\\Installer\\MSI5F56.tmp, command: begin \"C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom\\fc-bootstrap.exe\" ",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:DC) [03:07:48:027]: Product: FutureClassroom MSI candidate -- Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\\\Windows\\\\Installer\\\\MSI5F56.tmp, command: begin \\\"C:\\\\Users\\\\Elior\\\\AppData\\\\Local\\\\Programs\\\\FutureClassroom\\\\fc-bootstrap.exe\\\" \"",
+          "phase": "tampered-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/tampered-reject-msi.log",
+          "sourceSha256": "b5d62fc8a5f8902496bbdcd9945ac6f67a82afc87ba5fe30878880018b328568",
+          "sourceBytes": 78624,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 310,
+          "classification": "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY",
+          "rawLine": "Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\Windows\\Installer\\MSI5F56.tmp, command: begin \"C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom\\fc-bootstrap.exe\" ",
+          "rawLineVisibleEscaped": "\"Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\\\Windows\\\\Installer\\\\MSI5F56.tmp, command: begin \\\"C:\\\\Users\\\\Elior\\\\AppData\\\\Local\\\\Programs\\\\FutureClassroom\\\\fc-bootstrap.exe\\\" \"",
+          "phase": "tampered-reject"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI60DD.tmp",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\MSI60DD.tmp\"",
+      "classifications": [
+        "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+        "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/extra-reject-phase.json",
+          "sourceSha256": "6a20fa9757cbcd1a2a54e836b154b048a7e2d4f3706c1886f3ba4e655b085c2a",
+          "sourceBytes": 8814,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 66,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI60DD.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI60DD.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/0/Image",
+          "phase": "extra-reject",
+          "pid": 17680,
+          "role": "begin",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 1603,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/extra-reject-msi.log",
+          "sourceSha256": "8ba5108978382c7d2468927ffb5a56797c3b20ff229f9bca1f489f00a1701a7f",
+          "sourceBytes": 78606,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 304,
+          "classification": "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:50) [03:07:48:393]: Note: 1: 1722 2: FcBeginGate 3: C:\\Windows\\Installer\\MSI60DD.tmp 4: begin \"C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom\\fc-bootstrap.exe\" ",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:50) [03:07:48:393]: Note: 1: 1722 2: FcBeginGate 3: C:\\\\Windows\\\\Installer\\\\MSI60DD.tmp 4: begin \\\"C:\\\\Users\\\\Elior\\\\AppData\\\\Local\\\\Programs\\\\FutureClassroom\\\\fc-bootstrap.exe\\\" \"",
+          "phase": "extra-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/extra-reject-msi.log",
+          "sourceSha256": "8ba5108978382c7d2468927ffb5a56797c3b20ff229f9bca1f489f00a1701a7f",
+          "sourceBytes": 78606,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 308,
+          "classification": "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:50) [03:07:48:393]: Product: FutureClassroom MSI candidate -- Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\Windows\\Installer\\MSI60DD.tmp, command: begin \"C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom\\fc-bootstrap.exe\" ",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:50) [03:07:48:393]: Product: FutureClassroom MSI candidate -- Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\\\Windows\\\\Installer\\\\MSI60DD.tmp, command: begin \\\"C:\\\\Users\\\\Elior\\\\AppData\\\\Local\\\\Programs\\\\FutureClassroom\\\\fc-bootstrap.exe\\\" \"",
+          "phase": "extra-reject"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/extra-reject-msi.log",
+          "sourceSha256": "8ba5108978382c7d2468927ffb5a56797c3b20ff229f9bca1f489f00a1701a7f",
+          "sourceBytes": 78606,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 310,
+          "classification": "MSI_CUSTOM_ACTION_LOCATION_LOG_ONLY",
+          "rawLine": "Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\Windows\\Installer\\MSI60DD.tmp, command: begin \"C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom\\fc-bootstrap.exe\" ",
+          "rawLineVisibleEscaped": "\"Error 1722. There is a problem with this Windows Installer package. A program run as part of the setup did not finish as expected. Contact your support personnel or package vendor.  Action FcBeginGate, location: C:\\\\Windows\\\\Installer\\\\MSI60DD.tmp, command: begin \\\"C:\\\\Users\\\\Elior\\\\AppData\\\\Local\\\\Programs\\\\FutureClassroom\\\\fc-bootstrap.exe\\\" \"",
+          "phase": "extra-reject"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI61D8.tmp",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\MSI61D8.tmp\"",
+      "classifications": [
+        "AUTHENTICATED_ORIGINAL_HELPER_IMAGE"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-phase.json",
+          "sourceSha256": "e9dffdd7badf1fc441fbd8c3c19533a682df6e18611f187fea181b60ea56f005",
+          "sourceBytes": 21951,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 64,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI61D8.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI61D8.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/0/Image",
+          "phase": "uninstall",
+          "pid": 27420,
+          "role": "begin",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 0,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-phase.json",
+          "sourceSha256": "e9dffdd7badf1fc441fbd8c3c19533a682df6e18611f187fea181b60ea56f005",
+          "sourceBytes": 21951,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 112,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI61D8.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI61D8.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/1/Image",
+          "phase": "uninstall",
+          "pid": 18276,
+          "role": "broker",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 0,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI62C4.tmp",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\MSI62C4.tmp\"",
+      "classifications": [
+        "AUTHENTICATED_ORIGINAL_HELPER_IMAGE"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-phase.json",
+          "sourceSha256": "e9dffdd7badf1fc441fbd8c3c19533a682df6e18611f187fea181b60ea56f005",
+          "sourceBytes": 21951,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 159,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI62C4.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI62C4.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/2/Image",
+          "phase": "uninstall",
+          "pid": 25776,
+          "role": "supervisor",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 0,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        },
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-phase.json",
+          "sourceSha256": "e9dffdd7badf1fc441fbd8c3c19533a682df6e18611f187fea181b60ea56f005",
+          "sourceBytes": 21951,
+          "encoding": "UTF-8-BOM-compatible",
+          "lineNumber": 207,
+          "classification": "AUTHENTICATED_ORIGINAL_HELPER_IMAGE",
+          "rawLine": "                                                \"Image\":  \"C:\\\\Windows\\\\Installer\\\\MSI62C4.tmp\",",
+          "rawLineVisibleEscaped": "\"                                                \\\"Image\\\":  \\\"C:\\\\\\\\Windows\\\\\\\\Installer\\\\\\\\MSI62C4.tmp\\\",\"",
+          "jsonPointer": "/observerFinal/Processes/3/Image",
+          "phase": "uninstall",
+          "pid": 40976,
+          "role": "guardian",
+          "imageSha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "actualExitCode": 0,
+          "identityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI62C5.tmp",
+      "pathVisibleEscaped": "\"C:\\\\Windows\\\\Installer\\\\MSI62C5.tmp\"",
+      "classifications": [
+        "MSI_RUNNING_SCRIPT_LOG_ONLY"
+      ],
+      "origins": [
+        {
+          "sourceFile": "/tmp/fc-round79-msi-maintenance/product-negative-runtime-first/download/FutureClassroom-r79-production-msi-8670534e6d40f7df2af3981b6689d28c/uninstall-msi.log",
+          "sourceSha256": "bac64ec80873ad5c8bbf324081623fa6d0a3c82c36af979f886acfec672eb2c3",
+          "sourceBytes": 126880,
+          "encoding": "UTF-16-LE-BOM",
+          "lineNumber": 381,
+          "classification": "MSI_RUNNING_SCRIPT_LOG_ONLY",
+          "rawLine": "MSI (s) (5C:DC) [03:07:48:837]: Running Script: C:\\Windows\\Installer\\MSI62C5.tmp",
+          "rawLineVisibleEscaped": "\"MSI (s) (5C:DC) [03:07:48:837]: Running Script: C:\\\\Windows\\\\Installer\\\\MSI62C5.tmp\"",
+          "phase": "uninstall"
+        }
+      ]
+    }
+  ],
+  "command": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "IdentitiesOnly=yes",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApADsA"
+  ],
+  "stdin": {
+    "bytes": 6325,
+    "sha256": "61b179f3ac53e49a0007ad50380d586230b75dd2ececf6377c10f976d10ad467",
+    "base64": "IyBGaW5pdGUgcmVhZG9ubHkgaW5zdHJ1bWVudDogaW4tbWVtb3J5IFJlZmxlY3Rpb24uRW1pdCwgbm8gQyMgY29tcGlsZXIvdGVtcCBmaWxlcy4KJEVycm9yQWN0aW9uUHJlZmVyZW5jZT0nU3RvcCcKJFByb2dyZXNzUHJlZmVyZW5jZT0nU2lsZW50bHlDb250aW51ZScKW0NvbnNvbGVdOjpPdXRwdXRFbmNvZGluZz1bVGV4dC5VVEY4RW5jb2RpbmddOjpuZXcoJGZhbHNlKQokT3V0cHV0RW5jb2Rpbmc9W0NvbnNvbGVdOjpPdXRwdXRFbmNvZGluZwokZXhwZWN0ZWRTaWQ9J1MtMS01LTIxLTM4OTYxMTEyMDctMTg2NzgwNDM2Mi0xOTcxNTkzMTIyLTEwMDEnCiRzaWQ9W1NlY3VyaXR5LlByaW5jaXBhbC5XaW5kb3dzSWRlbnRpdHldOjpHZXRDdXJyZW50KCkuVXNlci5WYWx1ZQppZiAoJHNpZCAtY25lICRleHBlY3RlZFNpZCkgeyB0aHJvdyAnVW5leHBlY3RlZCBjdXJyZW50IFdpbmRvd3MgU0lEOyBubyBwYXRoIHF1ZXJ5IGF0dGVtcHRlZC4nIH0KJGFzc2VtYmx5PVtBcHBEb21haW5dOjpDdXJyZW50RG9tYWluLkRlZmluZUR5bmFtaWNBc3NlbWJseShbUmVmbGVjdGlvbi5Bc3NlbWJseU5hbWVdOjpuZXcoJ0Z1dHVyZUNsYXNzcm9vbS5SNzkuRXhhY3RSZWFkb25seUF0dHJpYnV0ZXMnKSxbUmVmbGVjdGlvbi5FbWl0LkFzc2VtYmx5QnVpbGRlckFjY2Vzc106OlJ1bikKJG1vZHVsZT0kYXNzZW1ibHkuRGVmaW5lRHluYW1pY01vZHVsZSgnTWVtb3J5T25seScpCiR0eXBlPSRtb2R1bGUuRGVmaW5lVHlwZSgnRXhhY3RSZWFkb25seUF0dHJpYnV0ZXMnLFtSZWZsZWN0aW9uLlR5cGVBdHRyaWJ1dGVzXSdQdWJsaWMsIEFic3RyYWN0LCBTZWFsZWQnKQokbmF0aXZlPSR0eXBlLkRlZmluZU1ldGhvZCgnR2V0RmlsZUF0dHJpYnV0ZXNXJyxbUmVmbGVjdGlvbi5NZXRob2RBdHRyaWJ1dGVzXSdQdWJsaWMsIFN0YXRpYywgUGludm9rZUltcGwnLFtSZWZsZWN0aW9uLkNhbGxpbmdDb252ZW50aW9uc106OlN0YW5kYXJkLFt1aW50MzJdLFtUeXBlW11dQChbc3RyaW5nXSkpCiRjdG9yPVtSdW50aW1lLkludGVyb3BTZXJ2aWNlcy5EbGxJbXBvcnRBdHRyaWJ1dGVdLkdldENvbnN0cnVjdG9yKFtUeXBlW11dQChbc3RyaW5nXSkpCiRmaWVsZHM9W1JlZmxlY3Rpb24uRmllbGRJbmZvW11dQChbUnVudGltZS5JbnRlcm9wU2VydmljZXMuRGxsSW1wb3J0QXR0cmlidXRlXS5HZXRGaWVsZCgnRW50cnlQb2ludCcpLFtSdW50aW1lLkludGVyb3BTZXJ2aWNlcy5EbGxJbXBvcnRBdHRyaWJ1dGVdLkdldEZpZWxkKCdDaGFyU2V0JyksW1J1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLkRsbEltcG9ydEF0dHJpYnV0ZV0uR2V0RmllbGQoJ1NldExhc3RFcnJvcicpLFtSdW50aW1lLkludGVyb3BTZXJ2aWNlcy5EbGxJbXBvcnRBdHRyaWJ1dGVdLkdldEZpZWxkKCdFeGFjdFNwZWxsaW5nJyksW1J1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLkRsbEltcG9ydEF0dHJpYnV0ZV0uR2V0RmllbGQoJ0NhbGxpbmdDb252ZW50aW9uJyksW1J1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLkRsbEltcG9ydEF0dHJpYnV0ZV0uR2V0RmllbGQoJ1ByZXNlcnZlU2lnJyksW1J1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLkRsbEltcG9ydEF0dHJpYnV0ZV0uR2V0RmllbGQoJ0Jlc3RGaXRNYXBwaW5nJyksW1J1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLkRsbEltcG9ydEF0dHJpYnV0ZV0uR2V0RmllbGQoJ1Rocm93T25Vbm1hcHBhYmxlQ2hhcicpKQokdmFsdWVzPVtvYmplY3RbXV1AKCdHZXRGaWxlQXR0cmlidXRlc1cnLFtSdW50aW1lLkludGVyb3BTZXJ2aWNlcy5DaGFyU2V0XTo6VW5pY29kZSwkdHJ1ZSwkdHJ1ZSxbUnVudGltZS5JbnRlcm9wU2VydmljZXMuQ2FsbGluZ0NvbnZlbnRpb25dOjpXaW5hcGksJHRydWUsJGZhbHNlLCRmYWxzZSkKJG5hdGl2ZS5TZXRDdXN0b21BdHRyaWJ1dGUoW1JlZmxlY3Rpb24uRW1pdC5DdXN0b21BdHRyaWJ1dGVCdWlsZGVyXTo6bmV3KCRjdG9yLFtvYmplY3RbXV1AKCdrZXJuZWwzMi5kbGwnKSwkZmllbGRzLCR2YWx1ZXMpKQokbmF0aXZlLlNldEltcGxlbWVudGF0aW9uRmxhZ3MoJG5hdGl2ZS5HZXRNZXRob2RJbXBsZW1lbnRhdGlvbkZsYWdzKCkgLWJvciBbUmVmbGVjdGlvbi5NZXRob2RJbXBsQXR0cmlidXRlc106OlByZXNlcnZlU2lnKQojIENhcHR1cmUgTWFyc2hhbCdzIHNhdmVkIGxhc3QgZXJyb3IgaW1tZWRpYXRlbHkgYWZ0ZXIgdGhlIFAvSW52b2tlLCBpbnNpZGUgSUwsCiMgYmVmb3JlIHJlZmxlY3Rpb24gSW52b2tlIHJldHVybnMuIFN1Y2Nlc3MgbGFzdC1lcnJvciB2YWx1ZXMgYXJlIHVuc3BlY2lmaWVkLgokcXVlcnk9JHR5cGUuRGVmaW5lTWV0aG9kKCdRdWVyeScsW1JlZmxlY3Rpb24uTWV0aG9kQXR0cmlidXRlc10nUHVibGljLCBTdGF0aWMnLFt1aW50MzJbXV0sW1R5cGVbXV1AKFtzdHJpbmddKSkKJGlsPSRxdWVyeS5HZXRJTEdlbmVyYXRvcigpCiRhdHRycz0kaWwuRGVjbGFyZUxvY2FsKFt1aW50MzJdKTskZXJyb3JDb2RlPSRpbC5EZWNsYXJlTG9jYWwoW2ludDMyXSkKJGlsLkVtaXQoW1JlZmxlY3Rpb24uRW1pdC5PcENvZGVzXTo6TGRhcmdfMCkKJGlsLkVtaXQoW1JlZmxlY3Rpb24uRW1pdC5PcENvZGVzXTo6Q2FsbCwkbmF0aXZlKQokaWwuRW1pdChbUmVmbGVjdGlvbi5FbWl0Lk9wQ29kZXNdOjpTdGxvYywkYXR0cnMpCiRpbC5FbWl0KFtSZWZsZWN0aW9uLkVtaXQuT3BDb2Rlc106OkNhbGwsW1J1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLk1hcnNoYWxdLkdldE1ldGhvZCgnR2V0TGFzdFdpbjMyRXJyb3InLFtUeXBlW11dQCgpKSkKJGlsLkVtaXQoW1JlZmxlY3Rpb24uRW1pdC5PcENvZGVzXTo6U3Rsb2MsJGVycm9yQ29kZSkKJGlsLkVtaXQoW1JlZmxlY3Rpb24uRW1pdC5PcENvZGVzXTo6TGRjX0k0XzIpCiRpbC5FbWl0KFtSZWZsZWN0aW9uLkVtaXQuT3BDb2Rlc106Ok5ld2FycixbdWludDMyXSkKJGlsLkVtaXQoW1JlZmxlY3Rpb24uRW1pdC5PcENvZGVzXTo6RHVwKQokaWwuRW1pdChbUmVmbGVjdGlvbi5FbWl0Lk9wQ29kZXNdOjpMZGNfSTRfMCkKJGlsLkVtaXQoW1JlZmxlY3Rpb24uRW1pdC5PcENvZGVzXTo6TGRsb2MsJGF0dHJzKQokaWwuRW1pdChbUmVmbGVjdGlvbi5FbWl0Lk9wQ29kZXNdOjpTdGVsZW1fSTQpCiRpbC5FbWl0KFtSZWZsZWN0aW9uLkVtaXQuT3BDb2Rlc106OkR1cCkKJGlsLkVtaXQoW1JlZmxlY3Rpb24uRW1pdC5PcENvZGVzXTo6TGRjX0k0XzEpCiRpbC5FbWl0KFtSZWZsZWN0aW9uLkVtaXQuT3BDb2Rlc106OkxkbG9jLCRlcnJvckNvZGUpCiRpbC5FbWl0KFtSZWZsZWN0aW9uLkVtaXQuT3BDb2Rlc106OlN0ZWxlbV9JNCkKJGlsLkVtaXQoW1JlZmxlY3Rpb24uRW1pdC5PcENvZGVzXTo6UmV0KQokbmF0aXZlVHlwZT0kdHlwZS5DcmVhdGVUeXBlKCkKJGltcG9ydD1bQXR0cmlidXRlXTo6R2V0Q3VzdG9tQXR0cmlidXRlKCRuYXRpdmVUeXBlLkdldE1ldGhvZCgnR2V0RmlsZUF0dHJpYnV0ZXNXJyksW1J1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLkRsbEltcG9ydEF0dHJpYnV0ZV0pCiRpbXBvcnRNZXRhZGF0YT1Ae3ZhbHVlPSRpbXBvcnQuVmFsdWU7ZW50cnlQb2ludD0kaW1wb3J0LkVudHJ5UG9pbnQ7Y2hhclNldD0kaW1wb3J0LkNoYXJTZXQuVG9TdHJpbmcoKTtjYWxsaW5nQ29udmVudGlvbj0kaW1wb3J0LkNhbGxpbmdDb252ZW50aW9uLlRvU3RyaW5nKCk7c2V0TGFzdEVycm9yPVtib29sXSRpbXBvcnQuU2V0TGFzdEVycm9yO2V4YWN0U3BlbGxpbmc9W2Jvb2xdJGltcG9ydC5FeGFjdFNwZWxsaW5nO3ByZXNlcnZlU2lnPVtib29sXSRpbXBvcnQuUHJlc2VydmVTaWc7YmVzdEZpdE1hcHBpbmc9W2Jvb2xdJGltcG9ydC5CZXN0Rml0TWFwcGluZzt0aHJvd09uVW5tYXBwYWJsZUNoYXI9W2Jvb2xdJGltcG9ydC5UaHJvd09uVW5tYXBwYWJsZUNoYXJ9CmlmICgtbm90ICRpbXBvcnQuU2V0TGFzdEVycm9yIC1vciAtbm90ICRpbXBvcnQuRXhhY3RTcGVsbGluZyAtb3IgJGltcG9ydC5DaGFyU2V0IC1uZSBbUnVudGltZS5JbnRlcm9wU2VydmljZXMuQ2hhclNldF06OlVuaWNvZGUgLW9yICRpbXBvcnQuRW50cnlQb2ludCAtY25lICdHZXRGaWxlQXR0cmlidXRlc1cnIC1vciAkaW1wb3J0LlZhbHVlIC1jbmUgJ2tlcm5lbDMyLmRsbCcgLW9yICRpbXBvcnQuQ2FsbGluZ0NvbnZlbnRpb24gLW5lIFtSdW50aW1lLkludGVyb3BTZXJ2aWNlcy5DYWxsaW5nQ29udmVudGlvbl06OldpbmFwaSAtb3IgLW5vdCAkaW1wb3J0LlByZXNlcnZlU2lnIC1vciAkaW1wb3J0LkJlc3RGaXRNYXBwaW5nIC1vciAkaW1wb3J0LlRocm93T25Vbm1hcHBhYmxlQ2hhcikgeyB0aHJvdyAoJ1BJbnZva2UgbWV0YWRhdGEgbm90IGV4YWN0OyBubyBwYXRoIHF1ZXJ5IGF0dGVtcHRlZC4gJysoJGltcG9ydE1ldGFkYXRhfENvbnZlcnRUby1Kc29uIC1Db21wcmVzcykpIH0KJHF1ZXJ5TWV0aG9kPSRuYXRpdmVUeXBlLkdldE1ldGhvZCgnUXVlcnknKQokcGF0aHM9QCgnQzpcV2luZG93c1xJbnN0YWxsZXJcMzRjYTU4ZjkubXNpJywnQzpcV2luZG93c1xJbnN0YWxsZXJcMzRjYTU4ZmQubXNpJywnQzpcV2luZG93c1xJbnN0YWxsZXJcTVNJNTkzNy50bXAnLCdDOlxXaW5kb3dzXEluc3RhbGxlclxNU0k1QTEzLnRtcCcsJ0M6XFdpbmRvd3NcSW5zdGFsbGVyXE1TSTVBMjQudG1wJywnQzpcV2luZG93c1xJbnN0YWxsZXJcTVNJNURCRi50bXAnLCdDOlxXaW5kb3dzXEluc3RhbGxlclxNU0k1RjU2LnRtcCcsJ0M6XFdpbmRvd3NcSW5zdGFsbGVyXE1TSTYwREQudG1wJywnQzpcV2luZG93c1xJbnN0YWxsZXJcTVNJNjFEOC50bXAnLCdDOlxXaW5kb3dzXEluc3RhbGxlclxNU0k2MkM0LnRtcCcsJ0M6XFdpbmRvd3NcSW5zdGFsbGVyXE1TSTYyQzUudG1wJykKaWYgKCRwYXRocy5Db3VudCAtbmUgMTEpIHsgdGhyb3cgJ0Nsb3NlZCBleGFjdCBwYXRoIGNvdW50IG1pc21hdGNoLicgfQokc2Vlbj1Ae30KZm9yZWFjaCAoJHAgaW4gJHBhdGhzKSB7CiBpZiAoJHAgLWNub3RtYXRjaCAnXkM6XFxXaW5kb3dzXFxJbnN0YWxsZXJcXCg/OlswLTlhLWZdezEsMTZ9XC5tc2l8TVNJWzAtOUEtRl17MSw4fVwudG1wKSQnIC1vciAkc2Vlbi5Db250YWluc0tleSgkcC5Ub0xvd2VySW52YXJpYW50KCkpKSB7IHRocm93ICdQYXRoIGVzY2FwZWQgY2xvc2VkIEluc3RhbGxlciBuYW1lc3BhY2UuJyB9CiAkc2Vlbi5BZGQoJHAuVG9Mb3dlckludmFyaWFudCgpLCR0cnVlKQp9CiRmYWN0cz1AKGZvcmVhY2goJHAgaW4gJHBhdGhzKXsKICRhdD1bRGF0ZVRpbWVdOjpVdGNOb3cuVG9TdHJpbmcoJ28nKQogJHBhaXI9W3VpbnQzMltdXSRxdWVyeU1ldGhvZC5JbnZva2UoJG51bGwsW29iamVjdFtdXUAoW3N0cmluZ10kcCkpCiBpZiAoJHBhaXIuTGVuZ3RoIC1uZSAyKSB7IHRocm93ICdOYXRpdmUgcXVlcnkgcmVzdWx0IGxlbmd0aCBtaXNtYXRjaC4nIH0KICRhPSRwYWlyWzBdOyRlPSRwYWlyWzFdCiAkcz1pZigkYSAtbmUgW3VpbnQzMl06Ok1heFZhbHVlKXsnUFJFU0VOVCd9ZWxzZWlmKCRlIC1lcSAyIC1vciAkZSAtZXEgMyl7J0tOT1dOX0FCU0VOVCd9ZWxzZXsnVU5LTk9XTid9CiBAe3BhdGg9JHA7b2JzZXJ2ZWRBdFV0Yz0kYXQ7YXR0cmlidXRlcz1bdWludDY0XSRhO3dpbjMyRXJyb3I9W3VpbnQ2NF0kZTt3aW4zMkVycm9yTWVhbmluZz1pZigkYSAtZXEgW3VpbnQzMl06Ok1heFZhbHVlKXsnU0FWRURfRVJST1JfRk9SX0ZBSUxFRF9BUEknfWVsc2V7J1VOU1BFQ0lGSUVEX09OX1NVQ0NFU1MnfTtzdGF0dXM9JHN9Cn0pCkB7c2NoZW1hVmVyc2lvbj0xO3BpbnZva2VDb25zdHJ1Y3Rpb249J0RFRklORV9NRVRIT0RfVEhFTl9DT01QTEVURV9ETExJTVBPUlRfQVRUUklCVVRFJztwaW52b2tlTWV0YWRhdGE9JGltcG9ydE1ldGFkYXRhO2ZhY3RzPSRmYWN0cztjdXJyZW50U2lkPSRzaWQ7cXVlcnlBcGk9J0dldEZpbGVBdHRyaWJ1dGVzVyc7cGludm9rZVNldExhc3RFcnJvcj0kaW1wb3J0LlNldExhc3RFcnJvcjtwaW52b2tlRXhhY3RTcGVsbGluZz0kaW1wb3J0LkV4YWN0U3BlbGxpbmc7cGludm9rZUNoYXJTZXQ9JGltcG9ydC5DaGFyU2V0LlRvU3RyaW5nKCk7bGFzdEVycm9yQ2FwdHVyZT0nSU1NRURJQVRFX01BTkFHRURfSUxfQUZURVJfU0FNRV9OQVRJVkVfQ0FMTCc7aW5zdHJ1bWVudD0nTUVNT1JZX09OTFlfUkVGTEVDVElPTl9FTUlUX05PX0NPTVBJTEVSX09SX0RJU0tfQVNTRU1CTFknO211dGF0aW9ucz0nTk9ORSc7c2NvcGU9J0VsZXZlbiBleGFjdCBwYXRocyBvbmx5LiBObyBkaXJlY3RvcnkgZW51bWVyYXRpb24sIGRlbGV0ZWQgdHJpYWwgbm9uY2VSb290IHF1ZXJ5LCBmaWxlIHdyaXRlL2RlbGV0ZSwgcHJvY2VzcyBpbnRlcmFjdGlvbiwgcmVnaXN0cnksIHNlcnZpY2UsIG9yIE1TSSBhY3Rpb24uJ318Q29udmVydFRvLUpzb24gLURlcHRoIDggLUNvbXByZXNzCg==",
+    "captureScope": "COMPLETE"
+  },
+  "powershellSource": "# Finite readonly instrument: in-memory Reflection.Emit, no C# compiler/temp files.\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\n$expectedSid='S-1-5-21-3896111207-1867804362-1971593122-1001'\n$sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value\nif ($sid -cne $expectedSid) { throw 'Unexpected current Windows SID; no path query attempted.' }\n$assembly=[AppDomain]::CurrentDomain.DefineDynamicAssembly([Reflection.AssemblyName]::new('FutureClassroom.R79.ExactReadonlyAttributes'),[Reflection.Emit.AssemblyBuilderAccess]::Run)\n$module=$assembly.DefineDynamicModule('MemoryOnly')\n$type=$module.DefineType('ExactReadonlyAttributes',[Reflection.TypeAttributes]'Public, Abstract, Sealed')\n$native=$type.DefineMethod('GetFileAttributesW',[Reflection.MethodAttributes]'Public, Static, PinvokeImpl',[Reflection.CallingConventions]::Standard,[uint32],[Type[]]@([string]))\n$ctor=[Runtime.InteropServices.DllImportAttribute].GetConstructor([Type[]]@([string]))\n$fields=[Reflection.FieldInfo[]]@([Runtime.InteropServices.DllImportAttribute].GetField('EntryPoint'),[Runtime.InteropServices.DllImportAttribute].GetField('CharSet'),[Runtime.InteropServices.DllImportAttribute].GetField('SetLastError'),[Runtime.InteropServices.DllImportAttribute].GetField('ExactSpelling'),[Runtime.InteropServices.DllImportAttribute].GetField('CallingConvention'),[Runtime.InteropServices.DllImportAttribute].GetField('PreserveSig'),[Runtime.InteropServices.DllImportAttribute].GetField('BestFitMapping'),[Runtime.InteropServices.DllImportAttribute].GetField('ThrowOnUnmappableChar'))\n$values=[object[]]@('GetFileAttributesW',[Runtime.InteropServices.CharSet]::Unicode,$true,$true,[Runtime.InteropServices.CallingConvention]::Winapi,$true,$false,$false)\n$native.SetCustomAttribute([Reflection.Emit.CustomAttributeBuilder]::new($ctor,[object[]]@('kernel32.dll'),$fields,$values))\n$native.SetImplementationFlags($native.GetMethodImplementationFlags() -bor [Reflection.MethodImplAttributes]::PreserveSig)\n# Capture Marshal's saved last error immediately after the P/Invoke, inside IL,\n# before reflection Invoke returns. Success last-error values are unspecified.\n$query=$type.DefineMethod('Query',[Reflection.MethodAttributes]'Public, Static',[uint32[]],[Type[]]@([string]))\n$il=$query.GetILGenerator()\n$attrs=$il.DeclareLocal([uint32]);$errorCode=$il.DeclareLocal([int32])\n$il.Emit([Reflection.Emit.OpCodes]::Ldarg_0)\n$il.Emit([Reflection.Emit.OpCodes]::Call,$native)\n$il.Emit([Reflection.Emit.OpCodes]::Stloc,$attrs)\n$il.Emit([Reflection.Emit.OpCodes]::Call,[Runtime.InteropServices.Marshal].GetMethod('GetLastWin32Error',[Type[]]@()))\n$il.Emit([Reflection.Emit.OpCodes]::Stloc,$errorCode)\n$il.Emit([Reflection.Emit.OpCodes]::Ldc_I4_2)\n$il.Emit([Reflection.Emit.OpCodes]::Newarr,[uint32])\n$il.Emit([Reflection.Emit.OpCodes]::Dup)\n$il.Emit([Reflection.Emit.OpCodes]::Ldc_I4_0)\n$il.Emit([Reflection.Emit.OpCodes]::Ldloc,$attrs)\n$il.Emit([Reflection.Emit.OpCodes]::Stelem_I4)\n$il.Emit([Reflection.Emit.OpCodes]::Dup)\n$il.Emit([Reflection.Emit.OpCodes]::Ldc_I4_1)\n$il.Emit([Reflection.Emit.OpCodes]::Ldloc,$errorCode)\n$il.Emit([Reflection.Emit.OpCodes]::Stelem_I4)\n$il.Emit([Reflection.Emit.OpCodes]::Ret)\n$nativeType=$type.CreateType()\n$import=[Attribute]::GetCustomAttribute($nativeType.GetMethod('GetFileAttributesW'),[Runtime.InteropServices.DllImportAttribute])\n$importMetadata=@{value=$import.Value;entryPoint=$import.EntryPoint;charSet=$import.CharSet.ToString();callingConvention=$import.CallingConvention.ToString();setLastError=[bool]$import.SetLastError;exactSpelling=[bool]$import.ExactSpelling;preserveSig=[bool]$import.PreserveSig;bestFitMapping=[bool]$import.BestFitMapping;throwOnUnmappableChar=[bool]$import.ThrowOnUnmappableChar}\nif (-not $import.SetLastError -or -not $import.ExactSpelling -or $import.CharSet -ne [Runtime.InteropServices.CharSet]::Unicode -or $import.EntryPoint -cne 'GetFileAttributesW' -or $import.Value -cne 'kernel32.dll' -or $import.CallingConvention -ne [Runtime.InteropServices.CallingConvention]::Winapi -or -not $import.PreserveSig -or $import.BestFitMapping -or $import.ThrowOnUnmappableChar) { throw ('PInvoke metadata not exact; no path query attempted. '+($importMetadata|ConvertTo-Json -Compress)) }\n$queryMethod=$nativeType.GetMethod('Query')\n$paths=@('C:\\Windows\\Installer\\34ca58f9.msi','C:\\Windows\\Installer\\34ca58fd.msi','C:\\Windows\\Installer\\MSI5937.tmp','C:\\Windows\\Installer\\MSI5A13.tmp','C:\\Windows\\Installer\\MSI5A24.tmp','C:\\Windows\\Installer\\MSI5DBF.tmp','C:\\Windows\\Installer\\MSI5F56.tmp','C:\\Windows\\Installer\\MSI60DD.tmp','C:\\Windows\\Installer\\MSI61D8.tmp','C:\\Windows\\Installer\\MSI62C4.tmp','C:\\Windows\\Installer\\MSI62C5.tmp')\nif ($paths.Count -ne 11) { throw 'Closed exact path count mismatch.' }\n$seen=@{}\nforeach ($p in $paths) {\n if ($p -cnotmatch '^C:\\\\Windows\\\\Installer\\\\(?:[0-9a-f]{1,16}\\.msi|MSI[0-9A-F]{1,8}\\.tmp)$' -or $seen.ContainsKey($p.ToLowerInvariant())) { throw 'Path escaped closed Installer namespace.' }\n $seen.Add($p.ToLowerInvariant(),$true)\n}\n$facts=@(foreach($p in $paths){\n $at=[DateTime]::UtcNow.ToString('o')\n $pair=[uint32[]]$queryMethod.Invoke($null,[object[]]@([string]$p))\n if ($pair.Length -ne 2) { throw 'Native query result length mismatch.' }\n $a=$pair[0];$e=$pair[1]\n $s=if($a -ne [uint32]::MaxValue){'PRESENT'}elseif($e -eq 2 -or $e -eq 3){'KNOWN_ABSENT'}else{'UNKNOWN'}\n @{path=$p;observedAtUtc=$at;attributes=[uint64]$a;win32Error=[uint64]$e;win32ErrorMeaning=if($a -eq [uint32]::MaxValue){'SAVED_ERROR_FOR_FAILED_API'}else{'UNSPECIFIED_ON_SUCCESS'};status=$s}\n})\n@{schemaVersion=1;pinvokeConstruction='DEFINE_METHOD_THEN_COMPLETE_DLLIMPORT_ATTRIBUTE';pinvokeMetadata=$importMetadata;facts=$facts;currentSid=$sid;queryApi='GetFileAttributesW';pinvokeSetLastError=$import.SetLastError;pinvokeExactSpelling=$import.ExactSpelling;pinvokeCharSet=$import.CharSet.ToString();lastErrorCapture='IMMEDIATE_MANAGED_IL_AFTER_SAME_NATIVE_CALL';instrument='MEMORY_ONLY_REFLECTION_EMIT_NO_COMPILER_OR_DISK_ASSEMBLY';mutations='NONE';scope='Eleven exact paths only. No directory enumeration, deleted trial nonceRoot query, file write/delete, process interaction, registry, service, or MSI action.'}|ConvertTo-Json -Depth 8 -Compress\n",
+  "timeoutSeconds": 45,
+  "privateKeyContentsRead": false,
+  "ssh": {
+    "actualExit": true,
+    "exitCode": 0,
+    "stdout": {
+      "bytes": 3108,
+      "sha256": "9b98f7afa40d74abbc0926ba24753e54c06c531e511bef6b54817410ab5fd658",
+      "base64": "eyJjdXJyZW50U2lkIjoiUy0xLTUtMjEtMzg5NjExMTIwNy0xODY3ODA0MzYyLTE5NzE1OTMxMjItMTAwMSIsInBpbnZva2VDb25zdHJ1Y3Rpb24iOiJERUZJTkVfTUVUSE9EX1RIRU5fQ09NUExFVEVfRExMSU1QT1JUX0FUVFJJQlVURSIsInBpbnZva2VTZXRMYXN0RXJyb3IiOnRydWUsImluc3RydW1lbnQiOiJNRU1PUllfT05MWV9SRUZMRUNUSU9OX0VNSVRfTk9fQ09NUElMRVJfT1JfRElTS19BU1NFTUJMWSIsInBpbnZva2VNZXRhZGF0YSI6eyJjYWxsaW5nQ29udmVudGlvbiI6IldpbmFwaSIsImNoYXJTZXQiOiJVbmljb2RlIiwiYmVzdEZpdE1hcHBpbmciOmZhbHNlLCJzZXRMYXN0RXJyb3IiOnRydWUsInZhbHVlIjoia2VybmVsMzIuZGxsIiwiZW50cnlQb2ludCI6IkdldEZpbGVBdHRyaWJ1dGVzVyIsInByZXNlcnZlU2lnIjp0cnVlLCJ0aHJvd09uVW5tYXBwYWJsZUNoYXIiOmZhbHNlLCJleGFjdFNwZWxsaW5nIjp0cnVlfSwicGludm9rZUNoYXJTZXQiOiJVbmljb2RlIiwicXVlcnlBcGkiOiJHZXRGaWxlQXR0cmlidXRlc1ciLCJsYXN0RXJyb3JDYXB0dXJlIjoiSU1NRURJQVRFX01BTkFHRURfSUxfQUZURVJfU0FNRV9OQVRJVkVfQ0FMTCIsImZhY3RzIjpbeyJ3aW4zMkVycm9yIjoyLCJhdHRyaWJ1dGVzIjo0Mjk0OTY3Mjk1LCJwYXRoIjoiQzpcXFdpbmRvd3NcXEluc3RhbGxlclxcMzRjYTU4ZjkubXNpIiwid2luMzJFcnJvck1lYW5pbmciOiJTQVZFRF9FUlJPUl9GT1JfRkFJTEVEX0FQSSIsInN0YXR1cyI6IktOT1dOX0FCU0VOVCIsIm9ic2VydmVkQXRVdGMiOiIyMDI2LTExLTAxVDE5OjI1OjAyLjY2MzgwNDBaIn0seyJ3aW4zMkVycm9yIjoyLCJhdHRyaWJ1dGVzIjo0Mjk0OTY3Mjk1LCJwYXRoIjoiQzpcXFdpbmRvd3NcXEluc3RhbGxlclxcMzRjYTU4ZmQubXNpIiwid2luMzJFcnJvck1lYW5pbmciOiJTQVZFRF9FUlJPUl9GT1JfRkFJTEVEX0FQSSIsInN0YXR1cyI6IktOT1dOX0FCU0VOVCIsIm9ic2VydmVkQXRVdGMiOiIyMDI2LTExLTAxVDE5OjI1OjAyLjY3NDEyMzRaIn0seyJ3aW4zMkVycm9yIjoyLCJhdHRyaWJ1dGVzIjo0Mjk0OTY3Mjk1LCJwYXRoIjoiQzpcXFdpbmRvd3NcXEluc3RhbGxlclxcTVNJNTkzNy50bXAiLCJ3aW4zMkVycm9yTWVhbmluZyI6IlNBVkVEX0VSUk9SX0ZPUl9GQUlMRURfQVBJIiwic3RhdHVzIjoiS05PV05fQUJTRU5UIiwib2JzZXJ2ZWRBdFV0YyI6IjIwMjYtMTEtMDFUMTk6MjU6MDIuNjc0MTIzNFoifSx7IndpbjMyRXJyb3IiOjIsImF0dHJpYnV0ZXMiOjQyOTQ5NjcyOTUsInBhdGgiOiJDOlxcV2luZG93c1xcSW5zdGFsbGVyXFxNU0k1QTEzLnRtcCIsIndpbjMyRXJyb3JNZWFuaW5nIjoiU0FWRURfRVJST1JfRk9SX0ZBSUxFRF9BUEkiLCJzdGF0dXMiOiJLTk9XTl9BQlNFTlQiLCJvYnNlcnZlZEF0VXRjIjoiMjAyNi0xMS0wMVQxOToyNTowMi42NzQxMjM0WiJ9LHsid2luMzJFcnJvciI6MiwiYXR0cmlidXRlcyI6NDI5NDk2NzI5NSwicGF0aCI6IkM6XFxXaW5kb3dzXFxJbnN0YWxsZXJcXE1TSTVBMjQudG1wIiwid2luMzJFcnJvck1lYW5pbmciOiJTQVZFRF9FUlJPUl9GT1JfRkFJTEVEX0FQSSIsInN0YXR1cyI6IktOT1dOX0FCU0VOVCIsIm9ic2VydmVkQXRVdGMiOiIyMDI2LTExLTAxVDE5OjI1OjAyLjY3NDEyMzRaIn0seyJ3aW4zMkVycm9yIjoyLCJhdHRyaWJ1dGVzIjo0Mjk0OTY3Mjk1LCJwYXRoIjoiQzpcXFdpbmRvd3NcXEluc3RhbGxlclxcTVNJNURCRi50bXAiLCJ3aW4zMkVycm9yTWVhbmluZyI6IlNBVkVEX0VSUk9SX0ZPUl9GQUlMRURfQVBJIiwic3RhdHVzIjoiS05PV05fQUJTRU5UIiwib2JzZXJ2ZWRBdFV0YyI6IjIwMjYtMTEtMDFUMTk6MjU6MDIuNjc0MTIzNFoifSx7IndpbjMyRXJyb3IiOjIsImF0dHJpYnV0ZXMiOjQyOTQ5NjcyOTUsInBhdGgiOiJDOlxcV2luZG93c1xcSW5zdGFsbGVyXFxNU0k1RjU2LnRtcCIsIndpbjMyRXJyb3JNZWFuaW5nIjoiU0FWRURfRVJST1JfRk9SX0ZBSUxFRF9BUEkiLCJzdGF0dXMiOiJLTk9XTl9BQlNFTlQiLCJvYnNlcnZlZEF0VXRjIjoiMjAyNi0xMS0wMVQxOToyNTowMi42NzQxMjM0WiJ9LHsid2luMzJFcnJvciI6MiwiYXR0cmlidXRlcyI6NDI5NDk2NzI5NSwicGF0aCI6IkM6XFxXaW5kb3dzXFxJbnN0YWxsZXJcXE1TSTYwREQudG1wIiwid2luMzJFcnJvck1lYW5pbmciOiJTQVZFRF9FUlJPUl9GT1JfRkFJTEVEX0FQSSIsInN0YXR1cyI6IktOT1dOX0FCU0VOVCIsIm9ic2VydmVkQXRVdGMiOiIyMDI2LTExLTAxVDE5OjI1OjAyLjY3NDEyMzRaIn0seyJ3aW4zMkVycm9yIjoyLCJhdHRyaWJ1dGVzIjo0Mjk0OTY3Mjk1LCJwYXRoIjoiQzpcXFdpbmRvd3NcXEluc3RhbGxlclxcTVNJNjFEOC50bXAiLCJ3aW4zMkVycm9yTWVhbmluZyI6IlNBVkVEX0VSUk9SX0ZPUl9GQUlMRURfQVBJIiwic3RhdHVzIjoiS05PV05fQUJTRU5UIiwib2JzZXJ2ZWRBdFV0YyI6IjIwMjYtMTEtMDFUMTk6MjU6MDIuNjc0MTIzNFoifSx7IndpbjMyRXJyb3IiOjIsImF0dHJpYnV0ZXMiOjQyOTQ5NjcyOTUsInBhdGgiOiJDOlxcV2luZG93c1xcSW5zdGFsbGVyXFxNU0k2MkM0LnRtcCIsIndpbjMyRXJyb3JNZWFuaW5nIjoiU0FWRURfRVJST1JfRk9SX0ZBSUxFRF9BUEkiLCJzdGF0dXMiOiJLTk9XTl9BQlNFTlQiLCJvYnNlcnZlZEF0VXRjIjoiMjAyNi0xMS0wMVQxOToyNTowMi42NzQxMjM0WiJ9LHsid2luMzJFcnJvciI6MiwiYXR0cmlidXRlcyI6NDI5NDk2NzI5NSwicGF0aCI6IkM6XFxXaW5kb3dzXFxJbnN0YWxsZXJcXE1TSTYyQzUudG1wIiwid2luMzJFcnJvck1lYW5pbmciOiJTQVZFRF9FUlJPUl9GT1JfRkFJTEVEX0FQSSIsInN0YXR1cyI6IktOT1dOX0FCU0VOVCIsIm9ic2VydmVkQXRVdGMiOiIyMDI2LTExLTAxVDE5OjI1OjAyLjY3NDEyMzRaIn1dLCJwaW52b2tlRXhhY3RTcGVsbGluZyI6dHJ1ZSwic2NoZW1hVmVyc2lvbiI6MSwic2NvcGUiOiJFbGV2ZW4gZXhhY3QgcGF0aHMgb25seS4gTm8gZGlyZWN0b3J5IGVudW1lcmF0aW9uLCBkZWxldGVkIHRyaWFsIG5vbmNlUm9vdCBxdWVyeSwgZmlsZSB3cml0ZS9kZWxldGUsIHByb2Nlc3MgaW50ZXJhY3Rpb24sIHJlZ2lzdHJ5LCBzZXJ2aWNlLCBvciBNU0kgYWN0aW9uLiIsIm11dGF0aW9ucyI6Ik5PTkUifQ0K",
+      "captureScope": "COMPLETE"
+    },
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": "",
+      "captureScope": "COMPLETE"
+    }
+  },
+  "observed": {
+    "currentSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+    "pinvokeConstruction": "DEFINE_METHOD_THEN_COMPLETE_DLLIMPORT_ATTRIBUTE",
+    "pinvokeSetLastError": true,
+    "instrument": "MEMORY_ONLY_REFLECTION_EMIT_NO_COMPILER_OR_DISK_ASSEMBLY",
+    "pinvokeMetadata": {
+      "callingConvention": "Winapi",
+      "charSet": "Unicode",
+      "bestFitMapping": false,
+      "setLastError": true,
+      "value": "kernel32.dll",
+      "entryPoint": "GetFileAttributesW",
+      "preserveSig": true,
+      "throwOnUnmappableChar": false,
+      "exactSpelling": true
+    },
+    "pinvokeCharSet": "Unicode",
+    "queryApi": "GetFileAttributesW",
+    "lastErrorCapture": "IMMEDIATE_MANAGED_IL_AFTER_SAME_NATIVE_CALL",
+    "facts": [
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\34ca58f9.msi",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6638040Z"
+      },
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\34ca58fd.msi",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6741234Z"
+      },
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\MSI5937.tmp",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6741234Z"
+      },
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\MSI5A13.tmp",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6741234Z"
+      },
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\MSI5A24.tmp",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6741234Z"
+      },
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\MSI5DBF.tmp",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6741234Z"
+      },
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\MSI5F56.tmp",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6741234Z"
+      },
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\MSI60DD.tmp",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6741234Z"
+      },
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\MSI61D8.tmp",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6741234Z"
+      },
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\MSI62C4.tmp",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6741234Z"
+      },
+      {
+        "win32Error": 2,
+        "attributes": 4294967295,
+        "path": "C:\\Windows\\Installer\\MSI62C5.tmp",
+        "win32ErrorMeaning": "SAVED_ERROR_FOR_FAILED_API",
+        "status": "KNOWN_ABSENT",
+        "observedAtUtc": "2026-11-01T19:25:02.6741234Z"
+      }
+    ],
+    "pinvokeExactSpelling": true,
+    "schemaVersion": 1,
+    "scope": "Eleven exact paths only. No directory enumeration, deleted trial nonceRoot query, file write/delete, process interaction, registry, service, or MSI action.",
+    "mutations": "NONE"
+  },
+  "completedUtc": "2026-11-01T19:25:02.742352+00:00"
+}

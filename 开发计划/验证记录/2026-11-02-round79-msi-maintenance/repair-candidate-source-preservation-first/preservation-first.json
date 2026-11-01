@@ -1,0 +1,80 @@
+{
+  "status": "PASS_EXACT_REVIEWED_CANDIDATE_COMMITTED_LOCALLY_NOT_MERGED_OR_DEPLOYED",
+  "branch": "candidate/r79-damaged-install-preimage",
+  "commit": "52d6392552679e7cedb564cd52db08e6e2ebc04b",
+  "parent": "c44906517fbc62233dca755d7225cea375264cbc",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 50152,
+      "sha256": "8303bd999264c6b78d057dc71920058c9b3ff8be931664e35ac2f1bbab87359c",
+      "candidateGitBlob": "66aeb6e2864732232116bc000216e03028aec1b6",
+      "baseGitBlob": "56466c3d2a98d1c61d40a9c54962927952d29332",
+      "actualCommittedBlob": "66aeb6e2864732232116bc000216e03028aec1b6"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 49786,
+      "sha256": "91d850385afd5ac721f2c5b46cb33667bddb532cf9c1a06527e2502eb2fddbf4",
+      "candidateGitBlob": "69e84f87e23a358e1bce3a90056098b0275f3ff4",
+      "baseGitBlob": "2be27200f7cfb1991136feefb3690a721f631d5c",
+      "actualCommittedBlob": "69e84f87e23a358e1bce3a90056098b0275f3ff4"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects/preimage.rs",
+      "bytes": 10869,
+      "sha256": "233a3752bd5baed898d421301597fa8c468d013467c316d2b70a18b1e3a18555",
+      "candidateGitBlob": "a4545d2610c10591af88c483950e4de1b2da586f",
+      "baseGitBlob": null,
+      "actualCommittedBlob": "a4545d2610c10591af88c483950e4de1b2da586f"
+    }
+  ],
+  "completePatch": {
+    "bytes": 28243,
+    "sha256": "b9e6b0e12b518667483ec6c1c6d55e2146189d1685b4701a02bebc5935596289"
+  },
+  "operations": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first",
+        "switch",
+        "-c",
+        "candidate/r79-damaged-install-preimage"
+      ],
+      "actualExit": 0,
+      "stdout": "",
+      "stderr": "Switched to a new branch 'candidate/r79-damaged-install-preimage'\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first",
+        "add",
+        "--",
+        "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+        "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+        "crates/fc-windows/src/installer_lifecycle/native/broker/effects/preimage.rs"
+      ],
+      "actualExit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "commit",
+        "-F",
+        "owned-commit-message"
+      ],
+      "actualExit": 0,
+      "stdout": "[candidate/r79-damaged-install-preimage 52d6392] Capture damaged installation preimages in gated repair candidate\n 3 files changed, 537 insertions(+), 21 deletions(-)\n create mode 100644 crates/fc-windows/src/installer_lifecycle/native/broker/effects/preimage.rs\n",
+      "stderr": ""
+    }
+  ],
+  "worktreeClean": true,
+  "productionGateUnchanged": "NOT_MERGED_MAIN_NO_REAL_DAMAGED_MSI_AUTHORITY",
+  "remoteSync": "NOT_RUN"
+}

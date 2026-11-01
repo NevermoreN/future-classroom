@@ -1,0 +1,520 @@
+{
+  "status": "PASS_TEST_SCRATCH_CLEANUP_ORIGINAL_NATIVE_FAILURE_RETAINED",
+  "originalFailure": {
+    "path": "/tmp/fc-round79-msi-maintenance/controlled-owner-runtime-first/runtime-operation.json",
+    "bytes": 40354,
+    "sha256": "82569f2897bb0e7da0587de83b48ff174e56718a3f495a82f99acb32320c5ae8"
+  },
+  "originalNativeFailure": "MsiCloseHandle(transaction1)=6; G/thread exit76",
+  "nativeFailureUnchanged": true,
+  "productionAuthority": "NONE",
+  "cleanupBudgetSeconds": 180,
+  "originalNative120Renewed": false,
+  "emittedExactSystemPaths": [],
+  "pathEvidence": "NOT_EMITTED_IN_ORIGINAL_LOG",
+  "operations": [
+    {
+      "label": "01-readonly-original-inventory-and-zero",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.6519962929996836,
+      "stdin.ps1": {
+        "path": "01-readonly-original-inventory-and-zero.stdin.ps1",
+        "bytes": 8725,
+        "sha256": "9523ef7e566ac784307d36de434067d25a39502af123de44dd3602dfcaf9cd32"
+      },
+      "stdout.log": {
+        "path": "01-readonly-original-inventory-and-zero.stdout.log",
+        "bytes": 2072,
+        "sha256": "9b80e903a3aab395a4eadb181c78d5112feb4c9654e420143871c3d03e1ba4e8"
+      },
+      "stderr.log": {
+        "path": "01-readonly-original-inventory-and-zero.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "label": "02-independent-readonly-fixture",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.678326900000684,
+      "stdin.ps1": {
+        "path": "02-independent-readonly-fixture.stdin.ps1",
+        "bytes": 10287,
+        "sha256": "2fd94cad7ffe0cf6037f6e8f35d666c25f635c4fe5def3f497d10c57e5feb2da"
+      },
+      "stdout.log": {
+        "path": "02-independent-readonly-fixture.stdout.log",
+        "bytes": 810,
+        "sha256": "a1275f2150917d0ac45450276c45a2058954446293cc01e6f79488296936631b"
+      },
+      "stderr.log": {
+        "path": "02-independent-readonly-fixture.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "label": "03-readonly-extended-inventory-and-zero",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.6333275360011612,
+      "stdin.ps1": {
+        "path": "03-readonly-extended-inventory-and-zero.stdin.ps1",
+        "bytes": 8725,
+        "sha256": "9523ef7e566ac784307d36de434067d25a39502af123de44dd3602dfcaf9cd32"
+      },
+      "stdout.log": {
+        "path": "03-readonly-extended-inventory-and-zero.stdout.log",
+        "bytes": 2097,
+        "sha256": "ba5ae1060ca3521ef8c50061e8a47a78bc1ac6685084b0f8369a3acada5c799e"
+      },
+      "stderr.log": {
+        "path": "03-readonly-extended-inventory-and-zero.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "label": "05-final-stable-inventory-and-zero",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.6222221560001344,
+      "stdin.ps1": {
+        "path": "05-final-stable-inventory-and-zero.stdin.ps1",
+        "bytes": 8725,
+        "sha256": "9523ef7e566ac784307d36de434067d25a39502af123de44dd3602dfcaf9cd32"
+      },
+      "stdout.log": {
+        "path": "05-final-stable-inventory-and-zero.stdout.log",
+        "bytes": 2097,
+        "sha256": "ba5ae1060ca3521ef8c50061e8a47a78bc1ac6685084b0f8369a3acada5c799e"
+      },
+      "stderr.log": {
+        "path": "05-final-stable-inventory-and-zero.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "label": "06-delete-exact-downloaded-scratch",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.6879189800001768,
+      "stdin.ps1": {
+        "path": "06-delete-exact-downloaded-scratch.stdin.ps1",
+        "bytes": 11616,
+        "sha256": "9cb3dc287e417af8ff07c04e5c238d9ddfe34702882eb192b742c78907284df5"
+      },
+      "stdout.log": {
+        "path": "06-delete-exact-downloaded-scratch.stdout.log",
+        "bytes": 121,
+        "sha256": "eb6306bca304a3eeccdaab9ca339b21ca7007fa3749215e16c989a039eaa5d85"
+      },
+      "stderr.log": {
+        "path": "06-delete-exact-downloaded-scratch.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    }
+  ],
+  "cleanup": {
+    "nonce": "048185bd83264d1b8abf282244500f4b",
+    "status": "PASS_REMOVED_EXACT_FAILED_EXPERIMENT_SCRATCH",
+    "knownAbsent": true
+  },
+  "before": {
+    "inventory": {
+      "directories": [
+        "compiler-temp"
+      ],
+      "files": [
+        {
+          "path": ".owner",
+          "sha256": "60f5bff57e6ca56a577cce6e1025aeb8d8087edcc6b9270282bfd362ab841350",
+          "bytes": 53
+        },
+        {
+          "path": "build-report.json",
+          "sha256": "d4caef0f814a38f2e698af5454e515c9e76b4d87971b1fac098176c3e82110b8",
+          "bytes": 68086
+        },
+        {
+          "path": "Capture.cs",
+          "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580",
+          "bytes": 11335
+        },
+        {
+          "path": "controlled-owner-result.json",
+          "sha256": "f14799006e07bebbfaa00d3e8997ca6373cec3f25aa3264b9e8bc0dbe184c185",
+          "bytes": 25202
+        },
+        {
+          "path": "early-fail-rollback-case.json",
+          "sha256": "38eff46b6ed16557da2236ec744d433ed87fe4b18f9dc0ee326b18e7ff472334",
+          "bytes": 13662
+        },
+        {
+          "path": "early-fail-rollback-msi.log",
+          "sha256": "50740aa888ad322ada44e453aec8af37ad9c6fbe4ddd689142afc40b5b1cfe49",
+          "bytes": 3252
+        },
+        {
+          "path": "early-fail-rollback.capture-ack",
+          "sha256": "1732f474d5ff82a8be38dc6f0aa7bd7ac684feb9a6355a0e0f8588f40616530d",
+          "bytes": 32
+        },
+        {
+          "path": "early-fail-rollback.jsonl",
+          "sha256": "0ceb9780380deaa9ce4fd4e77001dbfbffdf7a91674334538096c7de5d473f4a",
+          "bytes": 2694
+        },
+        {
+          "path": "early-fail.msi",
+          "sha256": "fe7755aac462dd71fb401d3a7bf09983225fb424a5d2d44af82e7a278627d15d",
+          "bytes": 232448
+        },
+        {
+          "path": "EarlyTerminal.dll",
+          "sha256": "ebe0a2a1a3be5adc4c09f67eea1a0336cf05344a48f2ed21b61a4c2ff59701e2",
+          "bytes": 219125
+        },
+        {
+          "path": "healthy.msi",
+          "sha256": "547f68ad8be99eb9a356e21b68f36bf88700f905abf9e60951f1c23550b33033",
+          "bytes": 232448
+        },
+        {
+          "path": "Invoke-ControlledOwner.ps1",
+          "sha256": "90928aa3d7165b2061673312dbc03640e6f7dee219b02c3229d3d3a6040ed22d",
+          "bytes": 11905
+        },
+        {
+          "path": "Owner.exe",
+          "sha256": "46d8bbd86d7aa9f285976b0b3e8dc95d73d528eac36dc74f8c9b9afabaa9ee7e",
+          "bytes": 298613
+        },
+        {
+          "path": "payload.txt",
+          "sha256": "c3f7033489ab4a957f7bacb32e14d517193297c3d603de2cb99086ce25d20215",
+          "bytes": 70
+        },
+        {
+          "path": "runtime-inputs.json",
+          "sha256": "bfab9f8735bf5bbe2cfac8297c7cce70d0d8cca06680c2395a3d9e2390c09728",
+          "bytes": 1722
+        },
+        {
+          "path": "spec.json",
+          "sha256": "d283a211e4bce74dfb4a409b441cec952b101d2b3cb0ae9c34b4fad8f8dc7b13",
+          "bytes": 2260
+        }
+      ]
+    },
+    "zero": {
+      "ownCandidates": [],
+      "foreignIgnoredCount": 0,
+      "status": "ACTUAL_ZERO_EXACT_ROOT_OWNER_COMPILER"
+    }
+  },
+  "finalReadOnly": {
+    "effect": {
+      "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r79-early-terminal-048185bd83264d1b8abf282244500f4b\\effect",
+      "status": "KNOWN_ABSENT",
+      "attributes": 4294967295,
+      "lastError": 2
+    },
+    "product": {
+      "registrations": [],
+      "enumerationReturns": [
+        259
+      ],
+      "related": [],
+      "localPackageRc": 1605,
+      "localPackage": null
+    },
+    "markerKnownAbsent": true,
+    "msiExecuted": false,
+    "fixtureKnownAbsent": true,
+    "components": {
+      "rows": [
+        {
+          "context": 1,
+          "state": -1,
+          "path": "",
+          "returnedLength": 32768
+        },
+        {
+          "context": 2,
+          "state": -1,
+          "path": "",
+          "returnedLength": 32768
+        },
+        {
+          "context": 4,
+          "state": -1,
+          "path": "",
+          "returnedLength": 32768
+        }
+      ],
+      "allUnknownStates": true
+    },
+    "registryParent": {
+      "status": "KNOWN_ABSENT",
+      "key": "Software\\FutureClassroomTest",
+      "view": "Registry32"
+    },
+    "status": "ACTUAL_READONLY_FIXTURE_AND_EXACT_SYSTEM_PATH_FACTS",
+    "sharedServiceKilled": false,
+    "paths": []
+  },
+  "extended": {
+    "inventory": {
+      "directories": [
+        "compiler-temp",
+        "readback-compiler-temp"
+      ],
+      "files": [
+        {
+          "path": ".owner",
+          "sha256": "60f5bff57e6ca56a577cce6e1025aeb8d8087edcc6b9270282bfd362ab841350",
+          "bytes": 53
+        },
+        {
+          "path": "build-report.json",
+          "sha256": "d4caef0f814a38f2e698af5454e515c9e76b4d87971b1fac098176c3e82110b8",
+          "bytes": 68086
+        },
+        {
+          "path": "Capture.cs",
+          "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580",
+          "bytes": 11335
+        },
+        {
+          "path": "controlled-owner-result.json",
+          "sha256": "f14799006e07bebbfaa00d3e8997ca6373cec3f25aa3264b9e8bc0dbe184c185",
+          "bytes": 25202
+        },
+        {
+          "path": "early-fail-rollback-case.json",
+          "sha256": "38eff46b6ed16557da2236ec744d433ed87fe4b18f9dc0ee326b18e7ff472334",
+          "bytes": 13662
+        },
+        {
+          "path": "early-fail-rollback-msi.log",
+          "sha256": "50740aa888ad322ada44e453aec8af37ad9c6fbe4ddd689142afc40b5b1cfe49",
+          "bytes": 3252
+        },
+        {
+          "path": "early-fail-rollback.capture-ack",
+          "sha256": "1732f474d5ff82a8be38dc6f0aa7bd7ac684feb9a6355a0e0f8588f40616530d",
+          "bytes": 32
+        },
+        {
+          "path": "early-fail-rollback.jsonl",
+          "sha256": "0ceb9780380deaa9ce4fd4e77001dbfbffdf7a91674334538096c7de5d473f4a",
+          "bytes": 2694
+        },
+        {
+          "path": "early-fail.msi",
+          "sha256": "fe7755aac462dd71fb401d3a7bf09983225fb424a5d2d44af82e7a278627d15d",
+          "bytes": 232448
+        },
+        {
+          "path": "EarlyTerminal.dll",
+          "sha256": "ebe0a2a1a3be5adc4c09f67eea1a0336cf05344a48f2ed21b61a4c2ff59701e2",
+          "bytes": 219125
+        },
+        {
+          "path": "healthy.msi",
+          "sha256": "547f68ad8be99eb9a356e21b68f36bf88700f905abf9e60951f1c23550b33033",
+          "bytes": 232448
+        },
+        {
+          "path": "Invoke-ControlledOwner.ps1",
+          "sha256": "90928aa3d7165b2061673312dbc03640e6f7dee219b02c3229d3d3a6040ed22d",
+          "bytes": 11905
+        },
+        {
+          "path": "Owner.exe",
+          "sha256": "46d8bbd86d7aa9f285976b0b3e8dc95d73d528eac36dc74f8c9b9afabaa9ee7e",
+          "bytes": 298613
+        },
+        {
+          "path": "payload.txt",
+          "sha256": "c3f7033489ab4a957f7bacb32e14d517193297c3d603de2cb99086ce25d20215",
+          "bytes": 70
+        },
+        {
+          "path": "runtime-inputs.json",
+          "sha256": "bfab9f8735bf5bbe2cfac8297c7cce70d0d8cca06680c2395a3d9e2390c09728",
+          "bytes": 1722
+        },
+        {
+          "path": "spec.json",
+          "sha256": "d283a211e4bce74dfb4a409b441cec952b101d2b3cb0ae9c34b4fad8f8dc7b13",
+          "bytes": 2260
+        }
+      ]
+    },
+    "zero": {
+      "ownCandidates": [],
+      "foreignIgnoredCount": 0,
+      "status": "ACTUAL_ZERO_EXACT_ROOT_OWNER_COMPILER"
+    }
+  },
+  "stable": {
+    "inventory": {
+      "directories": [
+        "compiler-temp",
+        "readback-compiler-temp"
+      ],
+      "files": [
+        {
+          "path": ".owner",
+          "sha256": "60f5bff57e6ca56a577cce6e1025aeb8d8087edcc6b9270282bfd362ab841350",
+          "bytes": 53
+        },
+        {
+          "path": "build-report.json",
+          "sha256": "d4caef0f814a38f2e698af5454e515c9e76b4d87971b1fac098176c3e82110b8",
+          "bytes": 68086
+        },
+        {
+          "path": "Capture.cs",
+          "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580",
+          "bytes": 11335
+        },
+        {
+          "path": "controlled-owner-result.json",
+          "sha256": "f14799006e07bebbfaa00d3e8997ca6373cec3f25aa3264b9e8bc0dbe184c185",
+          "bytes": 25202
+        },
+        {
+          "path": "early-fail-rollback-case.json",
+          "sha256": "38eff46b6ed16557da2236ec744d433ed87fe4b18f9dc0ee326b18e7ff472334",
+          "bytes": 13662
+        },
+        {
+          "path": "early-fail-rollback-msi.log",
+          "sha256": "50740aa888ad322ada44e453aec8af37ad9c6fbe4ddd689142afc40b5b1cfe49",
+          "bytes": 3252
+        },
+        {
+          "path": "early-fail-rollback.capture-ack",
+          "sha256": "1732f474d5ff82a8be38dc6f0aa7bd7ac684feb9a6355a0e0f8588f40616530d",
+          "bytes": 32
+        },
+        {
+          "path": "early-fail-rollback.jsonl",
+          "sha256": "0ceb9780380deaa9ce4fd4e77001dbfbffdf7a91674334538096c7de5d473f4a",
+          "bytes": 2694
+        },
+        {
+          "path": "early-fail.msi",
+          "sha256": "fe7755aac462dd71fb401d3a7bf09983225fb424a5d2d44af82e7a278627d15d",
+          "bytes": 232448
+        },
+        {
+          "path": "EarlyTerminal.dll",
+          "sha256": "ebe0a2a1a3be5adc4c09f67eea1a0336cf05344a48f2ed21b61a4c2ff59701e2",
+          "bytes": 219125
+        },
+        {
+          "path": "healthy.msi",
+          "sha256": "547f68ad8be99eb9a356e21b68f36bf88700f905abf9e60951f1c23550b33033",
+          "bytes": 232448
+        },
+        {
+          "path": "Invoke-ControlledOwner.ps1",
+          "sha256": "90928aa3d7165b2061673312dbc03640e6f7dee219b02c3229d3d3a6040ed22d",
+          "bytes": 11905
+        },
+        {
+          "path": "Owner.exe",
+          "sha256": "46d8bbd86d7aa9f285976b0b3e8dc95d73d528eac36dc74f8c9b9afabaa9ee7e",
+          "bytes": 298613
+        },
+        {
+          "path": "payload.txt",
+          "sha256": "c3f7033489ab4a957f7bacb32e14d517193297c3d603de2cb99086ce25d20215",
+          "bytes": 70
+        },
+        {
+          "path": "runtime-inputs.json",
+          "sha256": "bfab9f8735bf5bbe2cfac8297c7cce70d0d8cca06680c2395a3d9e2390c09728",
+          "bytes": 1722
+        },
+        {
+          "path": "spec.json",
+          "sha256": "d283a211e4bce74dfb4a409b441cec952b101d2b3cb0ae9c34b4fad8f8dc7b13",
+          "bytes": 2260
+        }
+      ]
+    },
+    "zero": {
+      "ownCandidates": [],
+      "foreignIgnoredCount": 0,
+      "status": "ACTUAL_ZERO_EXACT_ROOT_OWNER_COMPILER"
+    }
+  },
+  "originalFailurePreserved": true,
+  "originalFileCount": 16,
+  "elapsedSeconds": 3.299349771001289
+}

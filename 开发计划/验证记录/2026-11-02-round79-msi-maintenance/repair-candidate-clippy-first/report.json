@@ -1,0 +1,59 @@
+{
+  "schema": "future-classroom-r79-candidate-gnu-build/v1",
+  "status": "PASS_FC_WINDOWS_GNU_STRICT_CLIPPY_ONLY",
+  "candidateSha256": "86f3e4599d9d11f4313d4c49f572ae35f66f838f86dc4c7678f7b04c8b0d4f68",
+  "cwd": "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first",
+  "argv": [
+    "cargo",
+    "clippy",
+    "--release",
+    "--offline",
+    "--locked",
+    "-p",
+    "fc-windows",
+    "--all-targets",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--target-dir",
+    "/tmp/fc-round79-msi-maintenance/repair-candidate-target-first",
+    "--message-format=json-render-diagnostics",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "budgetSeconds": 900,
+  "harvestGraceSeconds": 10,
+  "targetDir": "/tmp/fc-round79-msi-maintenance/repair-candidate-target-first",
+  "sourceBeforeSha256": "a204c2d88b3513fec70f1772fcf0f29235cd81a9e307d64daf2e9e74fc9e1592",
+  "defaultRepositoryLinker": true,
+  "windowsRuntime": "NOT_RUN",
+  "mainMerge": "NOT_RUN",
+  "originalPid": 10048,
+  "budgetExceeded": false,
+  "actualReturnCode": 0,
+  "originalReaped": true,
+  "elapsedSeconds": 52.97731861000102,
+  "sourceUnchanged": true,
+  "outputs": [
+    {
+      "path": "stdout.jsonl",
+      "bytes": 38684,
+      "sha256": "77cf42ab23f20e8b3d3e733b27681adc5ae537f131d6f2fed47248d61376db8b"
+    },
+    {
+      "path": "stderr.log",
+      "bytes": 1618,
+      "sha256": "d211c9d5d560a8d91238464f45ac202895396e90737dccf0fd1336780421417d"
+    },
+    {
+      "path": "source-before.json",
+      "bytes": 82520,
+      "sha256": "a204c2d88b3513fec70f1772fcf0f29235cd81a9e307d64daf2e9e74fc9e1592"
+    },
+    {
+      "path": "source-after.json",
+      "bytes": 82520,
+      "sha256": "a204c2d88b3513fec70f1772fcf0f29235cd81a9e307d64daf2e9e74fc9e1592"
+    }
+  ]
+}

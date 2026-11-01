@@ -1,0 +1,2625 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_INDEPENDENT_LOCAL_QUALIFICATION_OBSERVATIONAL_FIXTURE_ONLY",
+  "scope": "Already executed Windows 11 R79 observational fixture; finite local original-byte/source/provenance/control/cleanup qualification. No test re-execution.",
+  "windowsContactedByReviewer": false,
+  "productionAuthority": "UNPROVEN_NOT_GRANTED",
+  "inputs": {
+    "early-terminal-runtime-first/runtime-operation.json": {
+      "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/runtime-operation.json",
+      "bytes": 131966,
+      "sha256": "d8893598f781188b0b8b3e2655ecaf90dd8fc5b1317f6e46980e1bd2d20f9bdb"
+    },
+    "early-terminal-preparation-fifth/freeze-fifth.json": {
+      "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/freeze-fifth.json",
+      "bytes": 3376,
+      "sha256": "378c0ad3e716effb5a2215fd7c6d58ba1a9fb3eba3f7ead88d114772e2752a2b"
+    },
+    "early-terminal-runtime-transport-preparation-first/freeze-first.json": {
+      "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/freeze-first.json",
+      "bytes": 2035,
+      "sha256": "e17c48e51430e22558f3836a512b277b9946056edee8093154e9b349ad6151d8"
+    },
+    "early-terminal-stage-runtime-first/runtime-inputs.json": {
+      "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/runtime-inputs.json",
+      "bytes": 2364,
+      "sha256": "2fb3a130d04c21156a9c8599a681f4aaccf40b98865b0f15427928c01868cf68"
+    },
+    "early-terminal-inputs-derived-fifth/spec.json": {
+      "path": "/tmp/fc-round79-msi-maintenance/early-terminal-inputs-derived-fifth/spec.json",
+      "bytes": 2045,
+      "sha256": "dfc23dab1c2f3d039a7386178f8c0113f56317382930adc642c9985b5fb8b89f"
+    },
+    "early-terminal-inputs-derived-fifth/derivation.json": {
+      "path": "/tmp/fc-round79-msi-maintenance/early-terminal-inputs-derived-fifth/derivation.json",
+      "bytes": 1888,
+      "sha256": "d5d202a5006c64701a8457c2ca6c212e0476c261d6ccb82727e085f0ba27858b"
+    },
+    "early-terminal-inputs-second/spec.json": {
+      "path": "/tmp/fc-round79-msi-maintenance/early-terminal-inputs-second/spec.json",
+      "bytes": 2045,
+      "sha256": "f96275a93a88110065b10f905c07c5362258187be2ef5bfde9967c3915bf92a6"
+    },
+    "early-terminal-compile-fifth/compile-operation.json": {
+      "path": "/tmp/fc-round79-msi-maintenance/early-terminal-compile-fifth/compile-operation.json",
+      "bytes": 24727,
+      "sha256": "b69d863edd80ac22c2eae52f98740664dd9b559367cfe2708b0b3ace0be52943"
+    },
+    "early-terminal-compile-fifth/download/positive-compile-receipt.json": {
+      "path": "/tmp/fc-round79-msi-maintenance/early-terminal-compile-fifth/download/positive-compile-receipt.json",
+      "bytes": 1625,
+      "sha256": "b83980e0728fc7281c8ed40507c230f66742bf83e1dff0f8fcb445547ce77197"
+    },
+    "early-terminal-package-build-second/build-report.json": {
+      "path": "/tmp/fc-round79-msi-maintenance/early-terminal-package-build-second/build-report.json",
+      "bytes": 75254,
+      "sha256": "b96670c9fb492cb9ca043ba1bbd513a7227823d85ae6c7d552fa34d6f2388c23"
+    }
+  },
+  "findings": [
+    "Positive client exit 0 and Type1 TERMINAL_SUCCESS at sequence -1 coexisted with genuine outer MsiJoinTransaction(0)/MsiEndTransaction(ROLLBACK)(0), child and supervisor exit 0, final absence. Client/callback success does not establish outer COMMIT.",
+    "Negative client exit 1603, native valid rollback runmode 1, -3 failure callback and final absence are actual observations. Embedded chainer NOT_OBSERVED is not a proof that it was never launched.",
+    "All 12 callback process+thread capability captures remain UNKNOWN: held host process metadata alone is insufficient production terminal authority.",
+    "Five original process capabilities and ten checked native close facts returned successfully. No shared host death requirement, shared kill, cache deletion, registry deletion or fallback formal uninstall was used.",
+    "Standalone per-case snapshots precede final checked-close; only False-to-True CheckedClose/CloseAttempted facts differ from final phase. The final phase equals the downloaded original result exactly.",
+    "Original GUI compilation remains bound to original spec. Derived spec changed only fixture.py size/hash; no compiler report was retroactively rebound.",
+    "600 second scenario, 120 second client, 180 second finally reserve and 300 second new-client cutoff remain distinct from observed 1384 ms fixture phase and 14.457683997 second transport.",
+    "Twelve emitted exact system paths, product/component/marker/effect and HKCU Registry32 parent were absent before exact owned runtime-root deletion. No new Windows query was made by this reviewer."
+  ],
+  "checks": [
+    {
+      "name": "exact_root_runtime_identity",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:.owner",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/.owner",
+        "bytes": 57,
+        "sha256": "cddcea2f2e75524553be312a520931aa1f0e8c4f6f04e0cce870d8f2007f8db3"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:Capture.cs",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/Capture.cs",
+        "bytes": 11335,
+        "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:Compile-PositiveControl.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/Compile-PositiveControl.ps1",
+        "bytes": 6445,
+        "sha256": "aa562d0d9c5b33f2c5a4011d1a58bb2f36ddc689e57e13ab64e87db6e31bc432"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:EarlyTerminal.c",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/EarlyTerminal.c",
+        "bytes": 7254,
+        "sha256": "dc8630277b69dfc4e7cf2ee3eebd476970ffc94138d7581be7934aed706ee9da"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:Invoke-EarlyTerminal.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/Invoke-EarlyTerminal.ps1",
+        "bytes": 21633,
+        "sha256": "bb7ba13417b7af95acce74e557f764dd8a6a61a61065cab192e5b044dcf83a3c"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:PositiveControl.cs",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/PositiveControl.cs",
+        "bytes": 16463,
+        "sha256": "ae0a1c90e5d551cd824eef0cc1b7afdf0b92174b091b7b68bbea02bb21796e04"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:README-fifth.md",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/README-fifth.md",
+        "bytes": 2145,
+        "sha256": "839771b8ae15d2357d674095da206c40bc9558a3476116edb6c704c8d8589928"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:README.md",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/README.md",
+        "bytes": 12189,
+        "sha256": "9798c08b5c38afb26a2a92e5920fc410d39fa39289f265c328f48e8839d63ad6"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:actual-pinned-tool-usage.txt",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/actual-pinned-tool-usage.txt",
+        "bytes": 405,
+        "sha256": "ed4e55247b431ef7220f6c7b5fdae894db1260cc37180006ab98c8bdb102f190"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:check_preparation.py",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/check_preparation.py",
+        "bytes": 3830,
+        "sha256": "46de4dfdbe780a5f16ef07461863b8a2210c7a71a7103d4978ca3f52776ac3d6"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:check_preparation.py.stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/check_preparation.py.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:check_preparation.py.stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/check_preparation.py.stdout.log",
+        "bytes": 733,
+        "sha256": "6ee8728ef8cf00418879376d837fffca521e28433ebf3bc9cd19b8ac342e2235"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:derive-spec.py",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/derive-spec.py",
+        "bytes": 4876,
+        "sha256": "db796ab119de448b5bff8bac202d5241cf079ff91d6e6cad1d272bf9d5527846"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:derive-spec.py.stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/derive-spec.py.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:derive-spec.py.stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/derive-spec.py.stdout.log",
+        "bytes": 116,
+        "sha256": "82ec39f161e6dc16c8fb8d78e9d2e9aeeb340d1a5d8f0bda3715190b3d73a6f7"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:fixture.py",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/fixture.py",
+        "bytes": 24097,
+        "sha256": "6e1c8520ac799af57ed0b9a440cb3e855c6629cead01a4a6d18b1279a438360a"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:fourth-to-fifth-minimal.diff",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/fourth-to-fifth-minimal.diff",
+        "bytes": 1460,
+        "sha256": "dff908e84f44d9e6abe4157254bdf96270cda21c55f1bffca78c312e2e8912e0"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:positive-control-original.cs",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/positive-control-original.cs",
+        "bytes": 16471,
+        "sha256": "7dfdbf67192eff24c1c87db373ca0d104ff270b64a894afb9909bfb52f3b6901"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:positive-control-source-only.diff",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/positive-control-source-only.diff",
+        "bytes": 926,
+        "sha256": "64253fde344ceccd91fbeff1d7e9d5d7ff7c6422121e3d2508d39e71bbe7a095"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-preparation-fifth/freeze-fifth.json:preparation-fifth.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/preparation-fifth.json",
+        "bytes": 895,
+        "sha256": "e8630f2f8333bf5035e140a656c65fe8b9e94aa7000cfa9c4bde56256651239e"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-runtime-transport-preparation-first/freeze-first.json:.owner",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/.owner",
+        "bytes": 66,
+        "sha256": "671fefb4b9229aab4186eb8fe4c9c2dd8b6bd35281294b93a210c2f49b8b845a"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-runtime-transport-preparation-first/freeze-first.json:README.md",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/README.md",
+        "bytes": 3254,
+        "sha256": "ff6e3ac3e5fe5521fb96c4ba01a6c80278afd54b6ada36d73e2a6fc5b775a381"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-runtime-transport-preparation-first/freeze-first.json:actual-local-admission.stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/actual-local-admission.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-runtime-transport-preparation-first/freeze-first.json:actual-local-admission.stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/actual-local-admission.stdout.log",
+        "bytes": 362,
+        "sha256": "0d108671683de61e063e063ff257d1db624025822305380d33239e17c849b777"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-runtime-transport-preparation-first/freeze-first.json:check-preparation.py",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/check-preparation.py",
+        "bytes": 4500,
+        "sha256": "ff8739bc82c0ecaf48edbd3bcc66972a98b1f82d073cc63e73e262e95d64a723"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-runtime-transport-preparation-first/freeze-first.json:default.stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/default.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-runtime-transport-preparation-first/freeze-first.json:default.stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/default.stdout.log",
+        "bytes": 199,
+        "sha256": "3422dd2b1cbe9da62103f3d64710e1d1cb04d58857ddf607a51965d727ce4aab"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-runtime-transport-preparation-first/freeze-first.json:execution-plan-first.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/execution-plan-first.json",
+        "bytes": 1425,
+        "sha256": "9c57ec986b6002e96edf0a7938a9e289af64b4a501db4755dc8fd888f731be1d"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-runtime-transport-preparation-first/freeze-first.json:preparation-validation-first.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/preparation-validation-first.json",
+        "bytes": 3657,
+        "sha256": "e3abb09ddda9c3994d97d37fb3f1bc8346757e87c54b17e13efc9274cf7b3acb"
+      }
+    },
+    {
+      "name": "frozen:early-terminal-runtime-transport-preparation-first/freeze-first.json:run-runtime.py",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/run-runtime.py",
+        "bytes": 28491,
+        "sha256": "6bb6a094e8ab55765fc45c1becc06b8d545aa4c271ffef765b903736080746fa"
+      }
+    },
+    {
+      "name": "runtime_external_binding:transport",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-transport-preparation-first/run-runtime.py",
+        "bytes": 28491,
+        "sha256": "6bb6a094e8ab55765fc45c1becc06b8d545aa4c271ffef765b903736080746fa"
+      }
+    },
+    {
+      "name": "runtime_external_binding:baseTransport",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-transport-preparation-fifth/compile-only.py",
+        "bytes": 29374,
+        "sha256": "3b3aa837646c78157c0c8ce1d5d44f4325f8bcdd34f4fc59e85c801b555a4783"
+      }
+    },
+    {
+      "name": "runtime_external_binding:sourceFreeze",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-fifth/freeze-fifth.json",
+        "bytes": 3376,
+        "sha256": "378c0ad3e716effb5a2215fd7c6d58ba1a9fb3eba3f7ead88d114772e2752a2b"
+      }
+    },
+    {
+      "name": "runtime_external_binding:stageManifest",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/runtime-inputs.json",
+        "bytes": 2364,
+        "sha256": "2fb3a130d04c21156a9c8599a681f4aaccf40b98865b0f15427928c01868cf68"
+      }
+    },
+    {
+      "name": "runtime_external_binding:guiOriginalCompileReport",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-compile-fifth/compile-operation.json",
+        "bytes": 24727,
+        "sha256": "b69d863edd80ac22c2eae52f98740664dd9b559367cfe2708b0b3ace0be52943"
+      }
+    },
+    {
+      "name": "runtime_external_binding:specDerivation",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-inputs-derived-fifth/derivation.json",
+        "bytes": 1888,
+        "sha256": "d5d202a5006c64701a8457c2ca6c212e0476c261d6ccb82727e085f0ba27858b"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:01-before-parent-and-create",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:01-before-parent-and-create:stdin.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/01-before-parent-and-create.stdin.ps1",
+        "bytes": 10131,
+        "sha256": "8d125292d2f503b8cca1590426bcb72a4f640a1f4852defbc22c1fcdb6a3f60a"
+      }
+    },
+    {
+      "name": "original_operation_stream:01-before-parent-and-create:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/01-before-parent-and-create.stdout.log",
+        "bytes": 385,
+        "sha256": "5fe64e2b7032cf41128d8df951739231603a63f1af2cf261e80f2de1523d639a"
+      }
+    },
+    {
+      "name": "original_operation_stream:01-before-parent-and-create:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/01-before-parent-and-create.stderr.log",
+        "bytes": 618,
+        "sha256": "57aa5ca00c305862c0dcde30c4865943b5e6bc6218de1e727fd9ce4a76614423"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:02-upload-actual-stage",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:02-upload-actual-stage:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/02-upload-actual-stage.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:02-upload-actual-stage:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/02-upload-actual-stage.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:03-original-fixture-phase",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:03-original-fixture-phase:stdin.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/03-original-fixture-phase.stdin.ps1",
+        "bytes": 8507,
+        "sha256": "d0be24ecea256f5c598b6d0063622cdbe1737ecd9c2365c3ef8426950248185d"
+      }
+    },
+    {
+      "name": "original_operation_stream:03-original-fixture-phase:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/03-original-fixture-phase.stdout.log",
+        "bytes": 130884,
+        "sha256": "7b8c3763ebe98831012d2bafe64b3040254de7d223e585fc68ae2f2dc97e4b3e"
+      }
+    },
+    {
+      "name": "original_operation_stream:03-original-fixture-phase:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/03-original-fixture-phase.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:04-readonly-original-inventory",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:04-readonly-original-inventory:stdin.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/04-readonly-original-inventory.stdin.ps1",
+        "bytes": 8409,
+        "sha256": "54c86ee028d64b3d13a9e74e32cba8a4b83a32f608cf80a2b30aac8d8cf3e9fb"
+      }
+    },
+    {
+      "name": "original_operation_stream:04-readonly-original-inventory:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/04-readonly-original-inventory.stdout.log",
+        "bytes": 4490,
+        "sha256": "77329d93bdeaae5dc5fbfc2eefc2689f4f4112cc874b67aef7f55f39b5466497"
+      }
+    },
+    {
+      "name": "original_operation_stream:04-readonly-original-inventory:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/04-readonly-original-inventory.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-000",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-000:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-000.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-000:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-000.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-001",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-001:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-001.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-001:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-001.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-002",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-002:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-002.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-002:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-002.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-003",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-003:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-003.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-003:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-003.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-004",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-004:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-004.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-004:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-004.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-005",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-005:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-005.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-005:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-005.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-006",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-006:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-006.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-006:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-006.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-007",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-007:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-007.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-007:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-007.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-008",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-008:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-008.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-008:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-008.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-009",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-009:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-009.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-009:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-009.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-010",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-010:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-010.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-010:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-010.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-011",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-011:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-011.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-011:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-011.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-012",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-012:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-012.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-012:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-012.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-013",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-013:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-013.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-013:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-013.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-014",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-014:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-014.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-014:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-014.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-015",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-015:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-015.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-015:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-015.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-016",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-016:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-016.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-016:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-016.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-017",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-017:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-017.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-017:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-017.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-018",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-018:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-018.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-018:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-018.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-019",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-019:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-019.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-019:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-019.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-020",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-020:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-020.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-020:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-020.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-021",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-021:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-021.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-021:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-021.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-022",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-022:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-022.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-022:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-022.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-023",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-023:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-023.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-023:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-023.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-024",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-024:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-024.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-024:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-024.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-025",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-025:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-025.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-025:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-025.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-026",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-026:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-026.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-026:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-026.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-027",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-027:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-027.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-027:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-027.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-028",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-028:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-028.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-028:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-028.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-029",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-029:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-029.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-029:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-029.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-030",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-030:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-030.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-030:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-030.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-031",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-031:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-031.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-031:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-031.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-032",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-032:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-032.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-032:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-032.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:05-download-033",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:05-download-033:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-033.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "original_operation_stream:05-download-033:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/05-download-033.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:06-second-readonly-inventory",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:06-second-readonly-inventory:stdin.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/06-second-readonly-inventory.stdin.ps1",
+        "bytes": 8409,
+        "sha256": "54c86ee028d64b3d13a9e74e32cba8a4b83a32f608cf80a2b30aac8d8cf3e9fb"
+      }
+    },
+    {
+      "name": "original_operation_stream:06-second-readonly-inventory:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/06-second-readonly-inventory.stdout.log",
+        "bytes": 4490,
+        "sha256": "77329d93bdeaae5dc5fbfc2eefc2689f4f4112cc874b67aef7f55f39b5466497"
+      }
+    },
+    {
+      "name": "original_operation_stream:06-second-readonly-inventory:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/06-second-readonly-inventory.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:07-independent-final-readonly",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:07-independent-final-readonly:stdin.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/07-independent-final-readonly.stdin.ps1",
+        "bytes": 10484,
+        "sha256": "e203b65d6427d234d640a9c17242f168b644ec09422afd2c138fe78aaac44793"
+      }
+    },
+    {
+      "name": "original_operation_stream:07-independent-final-readonly:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/07-independent-final-readonly.stdout.log",
+        "bytes": 2769,
+        "sha256": "d5b03a7215208cf9ddfd11f8df7648063361bf12cb33339a1bbf761d5906dec7"
+      }
+    },
+    {
+      "name": "original_operation_stream:07-independent-final-readonly:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/07-independent-final-readonly.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:08-after-readonly-compiler-inventory",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:08-after-readonly-compiler-inventory:stdin.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/08-after-readonly-compiler-inventory.stdin.ps1",
+        "bytes": 8409,
+        "sha256": "54c86ee028d64b3d13a9e74e32cba8a4b83a32f608cf80a2b30aac8d8cf3e9fb"
+      }
+    },
+    {
+      "name": "original_operation_stream:08-after-readonly-compiler-inventory:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/08-after-readonly-compiler-inventory.stdout.log",
+        "bytes": 4515,
+        "sha256": "8d02bcb09c8abafd8dccf4382d215288bdc30371e4009dde9406217cb3783795"
+      }
+    },
+    {
+      "name": "original_operation_stream:08-after-readonly-compiler-inventory:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/08-after-readonly-compiler-inventory.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:10-final-stable-inventory",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:10-final-stable-inventory:stdin.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/10-final-stable-inventory.stdin.ps1",
+        "bytes": 8409,
+        "sha256": "54c86ee028d64b3d13a9e74e32cba8a4b83a32f608cf80a2b30aac8d8cf3e9fb"
+      }
+    },
+    {
+      "name": "original_operation_stream:10-final-stable-inventory:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/10-final-stable-inventory.stdout.log",
+        "bytes": 4515,
+        "sha256": "8d02bcb09c8abafd8dccf4382d215288bdc30371e4009dde9406217cb3783795"
+      }
+    },
+    {
+      "name": "original_operation_stream:10-final-stable-inventory:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/10-final-stable-inventory.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "name": "actual_operation_terminal:11-exact-downloaded-root-delete",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_operation_stream:11-exact-downloaded-root-delete:stdin.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/11-exact-downloaded-root-delete.stdin.ps1",
+        "bytes": 13861,
+        "sha256": "fae7b5675c8ece055bb0ad3d76231716f89864d11332ab3768388cd934ababf8"
+      }
+    },
+    {
+      "name": "original_operation_stream:11-exact-downloaded-root-delete:stdout.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/11-exact-downloaded-root-delete.stdout.log",
+        "bytes": 119,
+        "sha256": "ca06970b8f6516d3d43ad7346f19efdbc5874faeeb46571f3325ae62a458a39b"
+      }
+    },
+    {
+      "name": "original_operation_stream:11-exact-downloaded-root-delete:stderr.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/11-exact-downloaded-root-delete.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "name": "stage:.owner",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/.owner",
+        "bytes": 53,
+        "sha256": "60f5bff57e6ca56a577cce6e1025aeb8d8087edcc6b9270282bfd362ab841350"
+      }
+    },
+    {
+      "name": "download_stage:.owner",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/.owner",
+        "bytes": 53,
+        "sha256": "60f5bff57e6ca56a577cce6e1025aeb8d8087edcc6b9270282bfd362ab841350"
+      }
+    },
+    {
+      "name": "stage:Capture.cs",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/Capture.cs",
+        "bytes": 11335,
+        "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580"
+      }
+    },
+    {
+      "name": "download_stage:Capture.cs",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/Capture.cs",
+        "bytes": 11335,
+        "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580"
+      }
+    },
+    {
+      "name": "stage:Compile-PositiveControl.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/Compile-PositiveControl.ps1",
+        "bytes": 6445,
+        "sha256": "aa562d0d9c5b33f2c5a4011d1a58bb2f36ddc689e57e13ab64e87db6e31bc432"
+      }
+    },
+    {
+      "name": "download_stage:Compile-PositiveControl.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/Compile-PositiveControl.ps1",
+        "bytes": 6445,
+        "sha256": "aa562d0d9c5b33f2c5a4011d1a58bb2f36ddc689e57e13ab64e87db6e31bc432"
+      }
+    },
+    {
+      "name": "stage:EarlyTerminal.c",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/EarlyTerminal.c",
+        "bytes": 7254,
+        "sha256": "dc8630277b69dfc4e7cf2ee3eebd476970ffc94138d7581be7934aed706ee9da"
+      }
+    },
+    {
+      "name": "download_stage:EarlyTerminal.c",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/EarlyTerminal.c",
+        "bytes": 7254,
+        "sha256": "dc8630277b69dfc4e7cf2ee3eebd476970ffc94138d7581be7934aed706ee9da"
+      }
+    },
+    {
+      "name": "stage:EarlyTerminal.dll",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/EarlyTerminal.dll",
+        "bytes": 219125,
+        "sha256": "44129a2d36cb49eede6eaef5d61f3bc2a5b8621290727b44326225dae5113569"
+      }
+    },
+    {
+      "name": "download_stage:EarlyTerminal.dll",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/EarlyTerminal.dll",
+        "bytes": 219125,
+        "sha256": "44129a2d36cb49eede6eaef5d61f3bc2a5b8621290727b44326225dae5113569"
+      }
+    },
+    {
+      "name": "stage:Invoke-EarlyTerminal.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/Invoke-EarlyTerminal.ps1",
+        "bytes": 21633,
+        "sha256": "bb7ba13417b7af95acce74e557f764dd8a6a61a61065cab192e5b044dcf83a3c"
+      }
+    },
+    {
+      "name": "download_stage:Invoke-EarlyTerminal.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/Invoke-EarlyTerminal.ps1",
+        "bytes": 21633,
+        "sha256": "bb7ba13417b7af95acce74e557f764dd8a6a61a61065cab192e5b044dcf83a3c"
+      }
+    },
+    {
+      "name": "stage:PositiveControl.cs",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/PositiveControl.cs",
+        "bytes": 16463,
+        "sha256": "ae0a1c90e5d551cd824eef0cc1b7afdf0b92174b091b7b68bbea02bb21796e04"
+      }
+    },
+    {
+      "name": "download_stage:PositiveControl.cs",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/PositiveControl.cs",
+        "bytes": 16463,
+        "sha256": "ae0a1c90e5d551cd824eef0cc1b7afdf0b92174b091b7b68bbea02bb21796e04"
+      }
+    },
+    {
+      "name": "stage:PositiveControl.exe",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/PositiveControl.exe",
+        "bytes": 18944,
+        "sha256": "35f048d69447778ff98ffef98dd404a256d21165d78a3fe79d3913b1e916f66c"
+      }
+    },
+    {
+      "name": "download_stage:PositiveControl.exe",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/PositiveControl.exe",
+        "bytes": 18944,
+        "sha256": "35f048d69447778ff98ffef98dd404a256d21165d78a3fe79d3913b1e916f66c"
+      }
+    },
+    {
+      "name": "stage:build-report.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/build-report.json",
+        "bytes": 75254,
+        "sha256": "b96670c9fb492cb9ca043ba1bbd513a7227823d85ae6c7d552fa34d6f2388c23"
+      }
+    },
+    {
+      "name": "download_stage:build-report.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/build-report.json",
+        "bytes": 75254,
+        "sha256": "b96670c9fb492cb9ca043ba1bbd513a7227823d85ae6c7d552fa34d6f2388c23"
+      }
+    },
+    {
+      "name": "stage:early-fail.msi",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/early-fail.msi",
+        "bytes": 251904,
+        "sha256": "a1a8a80a373f73d575af677fe54dc046c8e43b8107d1ba859c3781577164e913"
+      }
+    },
+    {
+      "name": "download_stage:early-fail.msi",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/early-fail.msi",
+        "bytes": 251904,
+        "sha256": "a1a8a80a373f73d575af677fe54dc046c8e43b8107d1ba859c3781577164e913"
+      }
+    },
+    {
+      "name": "stage:fixture.py",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/fixture.py",
+        "bytes": 24097,
+        "sha256": "6e1c8520ac799af57ed0b9a440cb3e855c6629cead01a4a6d18b1279a438360a"
+      }
+    },
+    {
+      "name": "download_stage:fixture.py",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/fixture.py",
+        "bytes": 24097,
+        "sha256": "6e1c8520ac799af57ed0b9a440cb3e855c6629cead01a4a6d18b1279a438360a"
+      }
+    },
+    {
+      "name": "stage:payload.txt",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/payload.txt",
+        "bytes": 70,
+        "sha256": "79dca9209e0f4f4293625618c2a5160e336d59f19018ef292d71b22a5c43d1ce"
+      }
+    },
+    {
+      "name": "download_stage:payload.txt",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/payload.txt",
+        "bytes": 70,
+        "sha256": "79dca9209e0f4f4293625618c2a5160e336d59f19018ef292d71b22a5c43d1ce"
+      }
+    },
+    {
+      "name": "stage:positive.msi",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/positive.msi",
+        "bytes": 251904,
+        "sha256": "95aea29a425d7a4240e41ac279f914c0386ae40c0cc3f233833124531600b57f"
+      }
+    },
+    {
+      "name": "download_stage:positive.msi",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive.msi",
+        "bytes": 251904,
+        "sha256": "95aea29a425d7a4240e41ac279f914c0386ae40c0cc3f233833124531600b57f"
+      }
+    },
+    {
+      "name": "stage:spec.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-stage-runtime-first/spec.json",
+        "bytes": 2045,
+        "sha256": "dfc23dab1c2f3d039a7386178f8c0113f56317382930adc642c9985b5fb8b89f"
+      }
+    },
+    {
+      "name": "download_stage:spec.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/spec.json",
+        "bytes": 2045,
+        "sha256": "dfc23dab1c2f3d039a7386178f8c0113f56317382930adc642c9985b5fb8b89f"
+      }
+    },
+    {
+      "name": "download_stage_manifest",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/runtime-inputs.json",
+        "bytes": 2364,
+        "sha256": "2fb3a130d04c21156a9c8599a681f4aaccf40b98865b0f15427928c01868cf68"
+      }
+    },
+    {
+      "name": "runtime_spec_actual",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/spec.json",
+        "bytes": 2045,
+        "sha256": "dfc23dab1c2f3d039a7386178f8c0113f56317382930adc642c9985b5fb8b89f"
+      }
+    },
+    {
+      "name": "derived_spec_only_fixture_py_source_row_changed",
+      "passed": true,
+      "detail": [
+        [
+          "/sources/5/bytes",
+          23613,
+          24097
+        ],
+        [
+          "/sources/5/sha256",
+          "15f4497618fdffc90d7781985d8a290e9af8120cb7259c57f7733482add2760e",
+          "6e1c8520ac799af57ed0b9a440cb3e855c6629cead01a4a6d18b1279a438360a"
+        ]
+      ]
+    },
+    {
+      "name": "derivation:originalSpec",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-inputs-second/spec.json",
+        "bytes": 2045,
+        "sha256": "f96275a93a88110065b10f905c07c5362258187be2ef5bfde9967c3915bf92a6"
+      }
+    },
+    {
+      "name": "derivation:derivedSpec",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-inputs-derived-fifth/spec.json",
+        "bytes": 2045,
+        "sha256": "dfc23dab1c2f3d039a7386178f8c0113f56317382930adc642c9985b5fb8b89f"
+      }
+    },
+    {
+      "name": "original_compile_kept:report",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-compile-fifth/compile-operation.json",
+        "bytes": 24727,
+        "sha256": "b69d863edd80ac22c2eae52f98740664dd9b559367cfe2708b0b3ace0be52943"
+      }
+    },
+    {
+      "name": "original_compile_kept:receipt",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-compile-fifth/download/positive-compile-receipt.json",
+        "bytes": 1625,
+        "sha256": "b83980e0728fc7281c8ed40507c230f66742bf83e1dff0f8fcb445547ce77197"
+      }
+    },
+    {
+      "name": "original_compile_kept:exe",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-compile-fifth/download/PositiveControl.exe",
+        "bytes": 18944,
+        "sha256": "35f048d69447778ff98ffef98dd404a256d21165d78a3fe79d3913b1e916f66c"
+      }
+    },
+    {
+      "name": "genuine_original_csc_exit0_wait_pipes_disposed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "original_csc_spec_not_rebound",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "actual_runtime_gui_same_original_csc_exe",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/PositiveControl.exe",
+        "bytes": 18944,
+        "sha256": "35f048d69447778ff98ffef98dd404a256d21165d78a3fe79d3913b1e916f66c"
+      }
+    },
+    {
+      "name": "actual_runtime_gui_same_original_csc_source",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/PositiveControl.cs",
+        "bytes": 16463,
+        "sha256": "ae0a1c90e5d551cd824eef0cc1b7afdf0b92174b091b7b68bbea02bb21796e04"
+      }
+    },
+    {
+      "name": "download_build_report",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/build-report.json",
+        "bytes": 75254,
+        "sha256": "b96670c9fb492cb9ca043ba1bbd513a7227823d85ae6c7d552fa34d6f2388c23"
+      }
+    },
+    {
+      "name": "build_spec_exact",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "84_build_commands_actual0_reaped",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "dll_compile_strict_warnings",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "exact_built_msi:positive",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive.msi",
+        "bytes": 251904,
+        "sha256": "95aea29a425d7a4240e41ac279f914c0386ae40c0cc3f233833124531600b57f"
+      }
+    },
+    {
+      "name": "one_file_no_extra_machine_effects:positive",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "terminal_sequence_positions:positive",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "exact_built_msi:early-fail",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/early-fail.msi",
+        "bytes": 251904,
+        "sha256": "a1a8a80a373f73d575af677fe54dc046c8e43b8107d1ba859c3781577164e913"
+      }
+    },
+    {
+      "name": "one_file_no_extra_machine_effects:early-fail",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "terminal_sequence_positions:early-fail",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "early_failure_after_execute_before_finalize",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "distinct_package_codes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "complete_download:.owner",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/.owner",
+        "bytes": 53,
+        "sha256": "60f5bff57e6ca56a577cce6e1025aeb8d8087edcc6b9270282bfd362ab841350"
+      }
+    },
+    {
+      "name": "complete_download:build-report.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/build-report.json",
+        "bytes": 75254,
+        "sha256": "b96670c9fb492cb9ca043ba1bbd513a7227823d85ae6c7d552fa34d6f2388c23"
+      }
+    },
+    {
+      "name": "complete_download:Capture.cs",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/Capture.cs",
+        "bytes": 11335,
+        "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580"
+      }
+    },
+    {
+      "name": "complete_download:Compile-PositiveControl.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/Compile-PositiveControl.ps1",
+        "bytes": 6445,
+        "sha256": "aa562d0d9c5b33f2c5a4011d1a58bb2f36ddc689e57e13ab64e87db6e31bc432"
+      }
+    },
+    {
+      "name": "complete_download:early-fail-case.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/early-fail-case.json",
+        "bytes": 43887,
+        "sha256": "28aee7bc708eaea60eea0b2b94f0a9f1aec8c1099bae0a46175d5cb6391e2124"
+      }
+    },
+    {
+      "name": "complete_download:early-fail-msi.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/early-fail-msi.log",
+        "bytes": 187876,
+        "sha256": "7fe5efbe60501efc4b70380737bd05d3b4bb9b4ea3f9fe73d8086e3a2a08d288"
+      }
+    },
+    {
+      "name": "complete_download:early-fail.msi",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/early-fail.msi",
+        "bytes": 251904,
+        "sha256": "a1a8a80a373f73d575af677fe54dc046c8e43b8107d1ba859c3781577164e913"
+      }
+    },
+    {
+      "name": "complete_download:early-terminal-result.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/early-terminal-result.json",
+        "bytes": 130883,
+        "sha256": "5981bf64829e58b602bfe3926f7a9ce018762120c24253bdfac9e0f8c8580afb"
+      }
+    },
+    {
+      "name": "complete_download:EarlyTerminal.c",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/EarlyTerminal.c",
+        "bytes": 7254,
+        "sha256": "dc8630277b69dfc4e7cf2ee3eebd476970ffc94138d7581be7934aed706ee9da"
+      }
+    },
+    {
+      "name": "complete_download:EarlyTerminal.dll",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/EarlyTerminal.dll",
+        "bytes": 219125,
+        "sha256": "44129a2d36cb49eede6eaef5d61f3bc2a5b8621290727b44326225dae5113569"
+      }
+    },
+    {
+      "name": "complete_download:fixture.py",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/fixture.py",
+        "bytes": 24097,
+        "sha256": "6e1c8520ac799af57ed0b9a440cb3e855c6629cead01a4a6d18b1279a438360a"
+      }
+    },
+    {
+      "name": "complete_download:Invoke-EarlyTerminal.ps1",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/Invoke-EarlyTerminal.ps1",
+        "bytes": 21633,
+        "sha256": "bb7ba13417b7af95acce74e557f764dd8a6a61a61065cab192e5b044dcf83a3c"
+      }
+    },
+    {
+      "name": "complete_download:payload.txt",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/payload.txt",
+        "bytes": 70,
+        "sha256": "79dca9209e0f4f4293625618c2a5160e336d59f19018ef292d71b22a5c43d1ce"
+      }
+    },
+    {
+      "name": "complete_download:positive-case.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-case.json",
+        "bytes": 42447,
+        "sha256": "78bb2cf9641d9594cd687bec7fb764e3a8dbd797a6fc2972dfe04b2c6389bf29"
+      }
+    },
+    {
+      "name": "complete_download:positive-msi.log",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-msi.log",
+        "bytes": 181158,
+        "sha256": "2ec18e86f113824487a9f9b643031f04af125db808188807e83b2e25c971eb2f"
+      }
+    },
+    {
+      "name": "complete_download:positive.msi",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive.msi",
+        "bytes": 251904,
+        "sha256": "95aea29a425d7a4240e41ac279f914c0386ae40c0cc3f233833124531600b57f"
+      }
+    },
+    {
+      "name": "complete_download:PositiveControl.cs",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/PositiveControl.cs",
+        "bytes": 16463,
+        "sha256": "ae0a1c90e5d551cd824eef0cc1b7afdf0b92174b091b7b68bbea02bb21796e04"
+      }
+    },
+    {
+      "name": "complete_download:PositiveControl.exe",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/PositiveControl.exe",
+        "bytes": 18944,
+        "sha256": "35f048d69447778ff98ffef98dd404a256d21165d78a3fe79d3913b1e916f66c"
+      }
+    },
+    {
+      "name": "complete_download:runtime-inputs.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/runtime-inputs.json",
+        "bytes": 2364,
+        "sha256": "2fb3a130d04c21156a9c8599a681f4aaccf40b98865b0f15427928c01868cf68"
+      }
+    },
+    {
+      "name": "complete_download:spec.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/spec.json",
+        "bytes": 2045,
+        "sha256": "dfc23dab1c2f3d039a7386178f8c0113f56317382930adc642c9985b5fb8b89f"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/.supervisor-child-original-captured",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/.supervisor-child-original-captured",
+        "bytes": 530,
+        "sha256": "ea43c50d0c77e3a7a4ffcd69f44e751b5371e0139d0cfa97cfe478cca889d59a"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/.supervisor-original-captured",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/.supervisor-original-captured",
+        "bytes": 336,
+        "sha256": "cd0f23c6ebdf68800127233cdf8058c9081d392aaf47113b7a5ad0a04c0e3578"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/CHANGE_EVENT_CLOSED.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/CHANGE_EVENT_CLOSED.json",
+        "bytes": 375,
+        "sha256": "2404902873ff49646ab84eaa959eaea3ff7940026ed00ab59e39b6d6a9e624b7"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/CHILD_ENTER.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/CHILD_ENTER.json",
+        "bytes": 530,
+        "sha256": "ea43c50d0c77e3a7a4ffcd69f44e751b5371e0139d0cfa97cfe478cca889d59a"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/CHILD_EXIT_RETURN.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/CHILD_EXIT_RETURN.json",
+        "bytes": 414,
+        "sha256": "00cbe58d7116877bc8d0a9f662e1a897d738cbd1cdc4c5f30fcff53e72383193"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/CHILD_PROCESS_CLOSED.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/CHILD_PROCESS_CLOSED.json",
+        "bytes": 372,
+        "sha256": "6505020f352127b132d75465c9e6c8ef3bbd79fca44eb41b68924925f187aeee"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/CHILD_THREAD_CLOSED.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/CHILD_THREAD_CLOSED.json",
+        "bytes": 378,
+        "sha256": "9d2ad24efb2bd1e52d1d0002b0246d64d75f081efd8b4fb626a096551b334573"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/CREATE_PROCESS_RETURN.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/CREATE_PROCESS_RETURN.json",
+        "bytes": 873,
+        "sha256": "30de76ca21eca0dde8002f701f770a7a7ab1991bf2885d865c673cddc5692677"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/END_ENTER.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/END_ENTER.json",
+        "bytes": 377,
+        "sha256": "192c7e5401d747b788b25d2ca9d96d47552bb965dfbfb161fe02dc9e14cf10c2"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/END_RETURN.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/END_RETURN.json",
+        "bytes": 370,
+        "sha256": "29e929e06eb35f3673d421ab53dcbdf5dfd6f41ac0c16cb507e1be36afd59e6a"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/GUARDIAN_CHILD_DONE.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/GUARDIAN_CHILD_DONE.json",
+        "bytes": 393,
+        "sha256": "a059ee39b944c4585825fd53889656ba5c6e801a6822f423429e897ae5d0fd00"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/JOIN_RETURN.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/JOIN_RETURN.json",
+        "bytes": 397,
+        "sha256": "c49845f8d5bf55c3705ae9995b9c97d105980cf8e53eb8347ca4375600ea4791"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/supervisor-identity.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/supervisor-identity.json",
+        "bytes": 336,
+        "sha256": "cd0f23c6ebdf68800127233cdf8058c9081d392aaf47113b7a5ad0a04c0e3578"
+      }
+    },
+    {
+      "name": "complete_download:positive-positive-raw/SUPERVISOR_DONE.json",
+      "passed": true,
+      "detail": {
+        "path": "/tmp/fc-round79-msi-maintenance/early-terminal-runtime-first/download/positive-positive-raw/SUPERVISOR_DONE.json",
+        "bytes": 391,
+        "sha256": "487a76af9dd752a07fcc9103b99b19f347f82de5f0d4dc2581922ad3d6e2c405"
+      }
+    },
+    {
+      "name": "download_exact_final_membership",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "final_inventory_preserves_original_inventory_files",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "phase_equals_downloaded_original_exactly",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "actual_outer_phase_exit0_no_errors_no_unknown_close",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "budgets_unchanged_600_120_180_300",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "timings_separate_scopes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "five_actual_original_process_caps_returned_checked_close",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "ten_native_close_returns_actual_success",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "case_snapshot_only_later_checked_close_fields_changed:positive",
+      "passed": true,
+      "detail": [
+        "/client/identity/heldOriginal/CheckedClose",
+        "/client/identity/heldOriginal/CloseAttempted",
+        "/nativeCallbacks/0/process/CheckedClose",
+        "/nativeCallbacks/0/process/CloseAttempted",
+        "/nativeCallbacks/1/process/CheckedClose",
+        "/nativeCallbacks/1/process/CloseAttempted",
+        "/nativeCallbacks/2/process/CheckedClose",
+        "/nativeCallbacks/2/process/CloseAttempted",
+        "/nativeCallbacks/3/process/CheckedClose",
+        "/nativeCallbacks/3/process/CloseAttempted"
+      ]
+    },
+    {
+      "name": "before_after_absence:positive",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "client_actual_handle_return:positive",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:positive:PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:positive:PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:positive:PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:positive:BEFORE_RETURN_PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:positive:BEFORE_RETURN_PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:positive:BEFORE_RETURN_PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:positive:TERMINAL_SUCCESS",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:positive:TERMINAL_SUCCESS",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:positive:TERMINAL_SUCCESS",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:positive:BEFORE_RETURN_TERMINAL_SUCCESS",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:positive:BEFORE_RETURN_TERMINAL_SUCCESS",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:positive:BEFORE_RETURN_TERMINAL_SUCCESS",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "engine_action_end_facts_from_original_log:positive",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "case_snapshot_only_later_checked_close_fields_changed:early-fail",
+      "passed": true,
+      "detail": [
+        "/client/identity/heldOriginal/CheckedClose",
+        "/client/identity/heldOriginal/CloseAttempted",
+        "/nativeCallbacks/0/process/CheckedClose",
+        "/nativeCallbacks/0/process/CloseAttempted",
+        "/nativeCallbacks/1/process/CheckedClose",
+        "/nativeCallbacks/1/process/CloseAttempted",
+        "/nativeCallbacks/2/process/CheckedClose",
+        "/nativeCallbacks/2/process/CloseAttempted",
+        "/nativeCallbacks/3/process/CheckedClose",
+        "/nativeCallbacks/3/process/CloseAttempted",
+        "/nativeCallbacks/4/process/CheckedClose",
+        "/nativeCallbacks/4/process/CloseAttempted",
+        "/nativeCallbacks/5/process/CheckedClose",
+        "/nativeCallbacks/5/process/CloseAttempted",
+        "/nativeCallbacks/6/process/CheckedClose",
+        "/nativeCallbacks/6/process/CloseAttempted",
+        "/nativeCallbacks/7/process/CheckedClose",
+        "/nativeCallbacks/7/process/CloseAttempted"
+      ]
+    },
+    {
+      "name": "before_after_absence:early-fail",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "client_actual_handle_return:early-fail",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:early-fail:PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:early-fail:PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:early-fail:PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:early-fail:BEFORE_RETURN_PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:early-fail:BEFORE_RETURN_PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:early-fail:BEFORE_RETURN_PREPARE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:early-fail:FORCE_FAIL",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:early-fail:FORCE_FAIL",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:early-fail:FORCE_FAIL",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:early-fail:BEFORE_RETURN_FORCE_FAIL",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:early-fail:BEFORE_RETURN_FORCE_FAIL",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:early-fail:BEFORE_RETURN_FORCE_FAIL",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:early-fail:ROLLBACK",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:early-fail:ROLLBACK",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:early-fail:ROLLBACK",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:early-fail:BEFORE_RETURN_ROLLBACK",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:early-fail:BEFORE_RETURN_ROLLBACK",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:early-fail:BEFORE_RETURN_ROLLBACK",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:early-fail:TERMINAL_FAILURE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:early-fail:TERMINAL_FAILURE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:early-fail:TERMINAL_FAILURE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_raw_parse_and_original_log:early-fail:BEFORE_RETURN_TERMINAL_FAILURE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_valid_x86_current_nonce_product:early-fail:BEFORE_RETURN_TERMINAL_FAILURE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "callback_capability_unknown_preserved:early-fail:BEFORE_RETURN_TERMINAL_FAILURE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "engine_action_end_facts_from_original_log:early-fail",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:END_ENTER.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:CREATE_PROCESS_RETURN.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:SUPERVISOR_DONE.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:END_RETURN.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:CHANGE_EVENT_CLOSED.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:CHILD_THREAD_CLOSED.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:CHILD_EXIT_RETURN.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:CHILD_PROCESS_CLOSED.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:GUARDIAN_CHILD_DONE.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:JOIN_RETURN.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:CHILD_ENTER.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_original_fact:supervisor-identity.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_genuine_join_end_rollback_child_supervisor0",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "positive_client0_terminal_success_but_outer_rollback_counterexample",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "negative_real1603_rollback_mode1_terminal_failure_no_chainer_claim",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "all12_callback_capabilities_unknown",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "phase_absent:before",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "phase_absent:after",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "phase_absent:beforeFinally",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "phase_absent:afterFinally",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "no_formal_uninstall_needed_no_shared_kill_manual_delete",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "12_exact_system_paths_all_known_absent_no_enumeration",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "registry_parent_initial_final_absent",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "final_fixture_product_component_marker_effect_absent",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "exact_downloaded_root_deleted",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "checkCount": 337,
+  "downloadOriginalCount": 34,
+  "downloadOriginalBytes": 1501213,
+  "mayMergeRepairCandidate": false,
+  "mayDeployDamagedRepair": false,
+  "nextRequiredEvidence": "Genuine early-install-failure outer transaction settlement with owned original control, actual API returns/checked resources and independent effects; full repair integration remains gated.",
+  "retainedLimits": [
+    "Windows 7/10 and Seewo hardware NOT_RUN by this fixture",
+    "No production Pending/gate settlement capability",
+    "No crash/power-loss durability proof",
+    "No inference of outer transaction COMMIT from client 0 or -1 callback"
+  ]
+}

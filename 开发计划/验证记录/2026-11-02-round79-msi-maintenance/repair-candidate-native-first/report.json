@@ -1,0 +1,133 @@
+{
+  "status": "FAIL_RETAIN_ORIGINALS",
+  "producer": {
+    "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-build-first/report.json",
+    "bytes": 1718,
+    "sha256": "eddfdd01b729fb64ce4a6624715825b12d00cd3124617df57ee550fd76d926bc"
+  },
+  "nativeInput": {
+    "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/fc_windows-4b6e570bbd6447d4.exe",
+    "bytes": 97328442,
+    "sha256": "85c6fa0af05512aa326cdb05a66a705b71b38912da0c4929308ad1030e55a173"
+  },
+  "capture": {
+    "path": "/tmp/fc-round79-msi-maintenance/early-terminal-preparation-first/Capture.cs",
+    "bytes": 9814,
+    "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a"
+  },
+  "operations": [
+    {
+      "name": "create",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.5115154779996374,
+      "stdout": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-first/create.stdout.log",
+        "bytes": 138,
+        "sha256": "3ccdbc900dbde2cf6ec138abafd7f2aa0c3cb4f47623bd2be9b2c938756f89b8"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-first/create.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "name": "upload-Capture.cs",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round79-msi-maintenance/repair-candidate-native-first/upload/Capture.cs",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r79-repair-native-3e27ed3f2f4a3ce31c35bbbea8dd1a75/"
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.21357950899982825,
+      "stdout": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-first/upload-Capture.cs.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-first/upload-Capture.cs.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "upload-candidate-tests.exe",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round79-msi-maintenance/repair-candidate-native-first/upload/candidate-tests.exe",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r79-repair-native-3e27ed3f2f4a3ce31c35bbbea8dd1a75/"
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 1.112163382998915,
+      "stdout": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-first/upload-candidate-tests.exe.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-first/upload-candidate-tests.exe.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "run",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 1,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 1.1822339209993515,
+      "stdout": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-first/run.stdout.log",
+        "bytes": 17224,
+        "sha256": "ea02d0d05d4ca3458d45ebe8ac28445218b8935427b86ac6ba892a7a0b613276"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round79-msi-maintenance/repair-candidate-native-first/run.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    }
+  ],
+  "cleanup": "NOT_RUN",
+  "outerSeconds": 900,
+  "windowsRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r79-repair-native-3e27ed3f2f4a3ce31c35bbbea8dd1a75",
+  "errorType": "AssertionError",
+  "error": "('run', 1, 'ACTUAL_NONZERO')",
+  "elapsedSeconds": 3.2036835470007645,
+  "compiledExeUnchanged": true
+}
