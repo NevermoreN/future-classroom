@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FINITE_R80_ADAPTER_COMPONENT_BATCH_NOT_PRODUCTION_COUPLED_FLOW",
+  "sourceCommit": "b7e4c938ab8ff391e2ad6c1d681e074881118c0a",
+  "checks": [
+    {
+      "check": "design_frozen_stopped_scope_only",
+      "status": "PASS",
+      "freezeSha256": "19382e9276a416f31c99d9de561d93be401055df2e4a55568603845c48629669"
+    },
+    {
+      "check": "nine_immutable_git_blobs_full_patch_compile_inventory_and_sync",
+      "status": "PASS",
+      "commit": "b7e4c938ab8ff391e2ad6c1d681e074881118c0a",
+      "sourceCount": 9
+    },
+    {
+      "check": "actual_gnu_build_and_strict_clippy_with_first101_preserved",
+      "status": "PASS",
+      "finalBuild0": true,
+      "finalClippy0": true,
+      "firstActualExit": 101
+    },
+    {
+      "check": "two_control_findings_closed_and_nine_python_byte_tests_bound",
+      "status": "PASS"
+    },
+    {
+      "check": "win11_component_original_caps_final_summaries_complete_download_and_cleanup",
+      "status": "PASS",
+      "cases": [
+        {
+          "name": "controlled",
+          "outerPassed": 6,
+          "nestedSummaries": 0,
+          "originalExit": 0,
+          "checkedClose": true
+        },
+        {
+          "name": "lifecycle",
+          "outerPassed": 54,
+          "nestedSummaries": 3,
+          "originalExit": 0,
+          "checkedClose": true
+        }
+      ],
+      "scopeOverlap": "54 includes6/11effects/2newparser tests; do not sum",
+      "downloadMembers": 4
+    },
+    {
+      "check": "ps_ast1_and_one_character_ast0_and_final_readonly_audit",
+      "status": "PASS"
+    }
+  ],
+  "coreInputs": [
+    {
+      "path": "adapter-source-preservation-first/preservation-first.json",
+      "bytes": 2897,
+      "sha256": "5668be59f3efbf655bc3e3e46fd35a5e9ca146881391d8027340e49323e95080"
+    },
+    {
+      "path": "adapter-inputs-third.json",
+      "bytes": 83628,
+      "sha256": "86d98bcf92ac77125195f0c4c2acf0931e2204eb0101fc1e150434593df3b4e8"
+    },
+    {
+      "path": "adapter-build-third/report.json",
+      "bytes": 167815,
+      "sha256": "27b454457e299379f2d0e9ea723f1384727c2be5b719db474d120aa9e8ab46e5"
+    },
+    {
+      "path": "adapter-clippy-second/report.json",
+      "bytes": 167210,
+      "sha256": "f8482e0df70241b1b6df4a001fb1c5d3fd52d48d9882cc4faae1d9981ee3af33"
+    },
+    {
+      "path": "adapter-native-runtime-first/report.json",
+      "bytes": 107917,
+      "sha256": "668911bdd55e00e7a1807d884aee9cce30db13bff445408da5a4bdb7dded3602"
+    },
+    {
+      "path": "windows-readonly-adapter-first.json",
+      "bytes": 17045,
+      "sha256": "df246bee9cffaf236492554a199b210fbbee357f8af2bf9a24e80260c9a06a61"
+    },
+    {
+      "path": "adapter-candidate-sync-first.json",
+      "bytes": 330,
+      "sha256": "f7676b3d8195c48cf282b6dcab87cb534eb874630f8132d3693723f8a5d0bb11"
+    }
+  ],
+  "preservedFailures": [
+    "first GNU actual101 missing cfg(test) Session field; original stdout/stderr retained",
+    "first semantic draft two control-order findings retained; closed only by third source static review",
+    "first actual PS AST1 comma error; exact1byte semicolon correction then second actualAST0; original streams retained",
+    "setup-seal local git diff new-file actual1 wrapper failure retained separately from passing9 pure tests",
+    "pending/preparation NOT_RUN evidence kept as contemporaneous original"
+  ],
+  "qualifiedScopes": {
+    "purePythonByteTests": 9,
+    "Win11Controlled": 6,
+    "Win11Lifecycle": 54,
+    "scopeOverlap": "54 includes6,11effects,2new pure parsers",
+    "actualNativeCoupledBeginFlow": "NOT_RUN",
+    "genuineInnerGuard": "NOT_IMPLEMENTED_IN_THIS_BATCH",
+    "publicSetupEntry": "NOT_IMPLEMENTED_IN_THIS_BATCH",
+    "Windows7": "NOT_RUN",
+    "Windows10": "NOT_RUN"
+  },
+  "productionAdmission": false,
+  "fullGoalComplete": false,
+  "archiveScope": "Components and pure sealing functions only; no production release",
+  "reviewerActions": {
+    "Windows": false,
+    "Cargo": false,
+    "sourceWrite": false,
+    "keyRead": false,
+    "binaryContentRead": false,
+    "commit": false,
+    "deletion": false
+  }
+}

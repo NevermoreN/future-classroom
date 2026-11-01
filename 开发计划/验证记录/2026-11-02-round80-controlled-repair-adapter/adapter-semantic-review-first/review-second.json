@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FINITE_ADAPTER_SOURCE_REVIEW_TWO_CONTROL_ORDERING_FINDINGS_CLOSED_NOT_RUNTIME",
+  "sourceInventory": {
+    "path": "adapter-inputs-third.json",
+    "bytes": 83628,
+    "sha256": "86d98bcf92ac77125195f0c4c2acf0931e2204eb0101fc1e150434593df3b4e8",
+    "declaredSources": 456,
+    "reviewedSources": 6,
+    "scope": "Inventory hash pinned; six relevant file bytes independently matched. This is not a claim to have semantically reviewed all456 sources."
+  },
+  "sources": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3779,
+      "sha256": "b69c481fdc7b5558e6b088a6bc73241f37f986f2a322bd750af42776526ffc84"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/controlled.rs",
+      "bytes": 10117,
+      "sha256": "e57e90baaf811279d584da20a8236067e5aed1e58a37e9ec8eaadb45472aa300"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 42759,
+      "sha256": "8d223c85b4ee87b8e6614a4bd9775a7da9d283469daf7856656ea8dd99e2b701"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 51105,
+      "sha256": "697b467715c0114e635432f97c2b9684f71a87827314f18f4e7eed0bd9b5599c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 49962,
+      "sha256": "a031c4565a4fdf5be90477d8fa8427dfbc2593e81a9b1a9e9c0f0950a73da302"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+      "bytes": 22827,
+      "sha256": "a3ded43d79a4c74456165e3a8704d52bef3d51a1b308bae6b33408651c863875"
+    }
+  ],
+  "priorReview": {
+    "path": "review-first-draft.json",
+    "sha256": "e9d4dd5565fb9662fecb9864b5bec79420901c4b5d2342ebf8c1532aacbf72cf",
+    "preserved": true
+  },
+  "blockingFindings": [],
+  "closedFindings": [
+    {
+      "id": "A80SEM01",
+      "result": "CLOSED_IN_THIRD_SOURCE",
+      "evidence": "abort now waits original G exit0, then checks s.resources.release before draft.try_abort. Source MSI/image/ancestor/original child-process controls are therefore returned before Draft gate release. Draft uses its independent original process/thread duplicates. Any Session close error returns before try_abort and Draft Drop retains the original gate.",
+      "runtimeFaultInjection": "NOT_RUN_BY_REVIEWER"
+    },
+    {
+      "id": "A80SEM02",
+      "result": "CLOSED_IN_THIRD_SOURCE",
+      "evidence": "launch receives Draft and, immediately after successful CreateProcess and registering its original handles, watches/copies original process+primary-thread before temporary thread close, image authentication, accept/peer/HELLO. watch_native_guardian sets watch_attempted before native capture and only checks original deadline after negative accounting; expiry/partial capture/authentication/peer failure cannot drop an unaccounted launched G and release gate. HELLO is compared against already-fixed original thread ID. No deadline renewed and no READY/Begin/Run authorized by accounting.",
+      "runtimeFaultInjection": "NOT_RUN_BY_REVIEWER"
+    }
+  ],
+  "otherVerifiedSourceBehavior": [
+    "Actual named-pipe peer/process creation binding and G original parent image/SID checks remain distinct from packet claims.",
+    "Original process/thread wait+exit0, native checked controls, Begin ownership kind and transaction ID remain required before positive settlement.",
+    "Actual Begin0 precedes admission/revalidation; proof pins return before tag5 arm and Run.",
+    "Typed SetupResult keeps installation return separate from rollback resource settlement; clean rollback1603 is not installation_succeeded.",
+    "New Uninstall remains refused; old Join route and OwnedByBegin do not substitute authority.",
+    "After-arm error retention and G original-thread negative rollback on broken parent/timeout remain intact."
+  ],
+  "knownSeparateChange": "Root reported one cfg(test) retirement.rs Session literal initialized sealed_package_sha=None after first GNU101. It is outside these six reviewed production files and changes no native production path.",
+  "limits": "Static finite source review only. Actual third compile/Clippy/Win11 results belong to root evidence. Public Setup entry and genuine inner session guard remain unfinished integration scope, not passing runtime or full-goal completion.",
+  "reviewerActions": {
+    "sourceModified": false,
+    "mainModified": false,
+    "Cargo": false,
+    "Windows": false,
+    "archive": false,
+    "newGlobalSameUserGuarantee": false
+  }
+}

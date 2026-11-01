@@ -1,0 +1,70 @@
+{
+  "candidateCommit": "b7e4c938ab8ff391e2ad6c1d681e074881118c0a",
+  "parent": "3e790e555a61a843e801000b371773a134df5c03",
+  "sources": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3779,
+      "sha256": "b69c481fdc7b5558e6b088a6bc73241f37f986f2a322bd750af42776526ffc84",
+      "blob": "63c5c33cf014a3ff00a410087cff242638d059b8"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/controlled.rs",
+      "bytes": 10117,
+      "sha256": "e57e90baaf811279d584da20a8236067e5aed1e58a37e9ec8eaadb45472aa300",
+      "blob": "473baf8c809aa1e9daa63169dd17d2fe844c750f"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 42759,
+      "sha256": "8d223c85b4ee87b8e6614a4bd9775a7da9d283469daf7856656ea8dd99e2b701",
+      "blob": "4e3fddcbef4fd294bd5710f0b436edbe136121aa"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 51105,
+      "sha256": "697b467715c0114e635432f97c2b9684f71a87827314f18f4e7eed0bd9b5599c",
+      "blob": "48c412afae8c0a5d8dff9039e41852bbbcbc7fec"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+      "bytes": 22827,
+      "sha256": "a3ded43d79a4c74456165e3a8704d52bef3d51a1b308bae6b33408651c863875",
+      "blob": "445d858d93db7a065d2004187f662790a21bde54"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 49962,
+      "sha256": "a031c4565a4fdf5be90477d8fa8427dfbc2593e81a9b1a9e9c0f0950a73da302",
+      "blob": "778d692a3db488e7cab099d2852c5eb37686d249"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/retirement.rs",
+      "bytes": 12862,
+      "sha256": "87510347e546dba5459a9bc5891d71d27a59b6189be53150cd750ca929e8be97",
+      "blob": "47db16a69261d94d18137360d0bc1c0707bb67eb"
+    },
+    {
+      "path": "scripts/controlled-setup-seal.py",
+      "bytes": 3793,
+      "sha256": "1beac71c68ac4f0f6a4f5d73e247e33102fa43703c26ecaf6d9bdc2799100598",
+      "blob": "4befd4cbd15201e5ebb277b1c5e209975d779857"
+    },
+    {
+      "path": "scripts/test-controlled-setup-seal.py",
+      "bytes": 6866,
+      "sha256": "e40a6b0dc4cc49b75f420cc9bd053df902b57254d846a426fd7ef59ff243de0c",
+      "blob": "2d2723191398657f3b86215d331e9ab94110384c"
+    }
+  ],
+  "patchSha256": "43c011ba96347251f13dfbe1d0cedf3a1031074ab62a3b7eb3ae0cbcf942b42b",
+  "validation": {
+    "build": "27b454457e299379f2d0e9ea723f1384727c2be5b719db474d120aa9e8ab46e5",
+    "strictClippy": "f8482e0df70241b1b6df4a001fb1c5d3fd52d48d9882cc4faae1d9981ee3af33",
+    "Win11ComponentRuntime": "668911bdd55e00e7a1807d884aee9cce30db13bff445408da5a4bdb7dded3602"
+  },
+  "productionAdmission": false,
+  "actualBeginOwnerCoupledFlow": "NOT_RUN",
+  "innerGuardAndSetupEntry": "NOT_IMPLEMENTED",
+  "gitClean": true
+}

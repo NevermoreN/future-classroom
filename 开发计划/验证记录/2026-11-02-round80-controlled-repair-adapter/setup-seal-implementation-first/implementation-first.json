@@ -1,0 +1,166 @@
+{
+  "status": "PASS_PURE_SETUP_SEAL_BYTES_IMPLEMENTED_9_TESTS_FORMAT_SYNTAX_DIFF_NOT_PRODUCT_INTEGRATED",
+  "sources": [
+    {
+      "path": "scripts/controlled-setup-seal.py",
+      "bytes": 3793,
+      "sha256": "1beac71c68ac4f0f6a4f5d73e247e33102fa43703c26ecaf6d9bdc2799100598"
+    },
+    {
+      "path": "scripts/test-controlled-setup-seal.py",
+      "bytes": 6866,
+      "sha256": "e40a6b0dc4cc49b75f420cc9bd053df902b57254d846a426fd7ef59ff243de0c"
+    }
+  ],
+  "reusedBuilder": {
+    "path": "scripts/package-msi-candidate.py",
+    "bytes": 63415,
+    "sha256": "bc51fe8f5fe49476aa0152b398d5fce858e638c51169c2a04b75701e0669452f",
+    "changed": false
+  },
+  "contract": {
+    "sealMagicHex": "46432d53455455502d4d534900763100",
+    "magicBytes": 16,
+    "sealBytes": 48,
+    "layout": "normal_helper + sealMagic16 + sha256(full_final_innerMSI_bytes).digest32 + original_manifest_raw + original_u32LE_length + original16byteFooter",
+    "maxSetupBytes": 67108864,
+    "maxInnerMsiReadBytes": 67108864,
+    "existingProducerAdmission": "UNCHANGED: source/CI provenance,30MiB MSI/payload,32MiB normal-helper input are independent",
+    "noncircular": "Final inner MSI first; seal only separate Setup wrapper. Do not modify helper embedded in inner MSI."
+  },
+  "functions": [
+    "seal_setup_image(bytes,bytes)->bytes",
+    "parse_sealed_setup_image(bytes,bytes)->(normal_helper,closed_records)"
+  ],
+  "pureTests": {
+    "operation": "tests-first-operation.json",
+    "actualExit": 0,
+    "tests": 9,
+    "scenarios": [
+      "independent exact48-byte layout and suffix preservation",
+      "complete MSI tail/prefix/truncation mismatch vs unchanged ledger",
+      "each48 seal byte tampered and zero hash",
+      "legacy and duplicate seal rejection",
+      "short input/48 in-seal deletions/footer/length bounds",
+      "existing PE/product/closed-ledger restrictions",
+      "actual64MiB MSI positive and above-bound negative; immutable bytes only",
+      "exact64MiB Setup output positive and extra byte refused",
+      "source AST/no product CLI"
+    ],
+    "Windows": "NOT_RUN",
+    "productInstaller": "NOT_GENERATED"
+  },
+  "checks": [
+    {
+      "label": "format-syntax-second",
+      "argv": [
+        "python3",
+        "-B",
+        "-c",
+        "import ast,pathlib; paths=[pathlib.Path(x) for x in ['scripts/controlled-setup-seal.py', 'scripts/test-controlled-setup-seal.py']]; [(ast.parse(p.read_text(),filename=str(p)),compile(p.read_bytes(),str(p),'exec')) for p in paths]; assert all(p.read_bytes().endswith(b'\\n') and b'\\r' not in p.read_bytes() and all(not l.endswith((' ','\\t')) and '\\t' not in l[:len(l)-len(l.lstrip())] and len(l)<=100 for l in p.read_text().splitlines()) for p in paths); print('PASS_AST_COMPILE_AND_PYTHON_FORMAT_NO_BYTECODE')"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.04857362400070997,
+      "qualification": "PASS",
+      "stdout": {
+        "bytes": 47,
+        "sha256": "daa6e344140da5dfe40eca439ab943c0dbe606f4266e914323103adbfd21294c"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "diff-check-second-1",
+      "argv": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "scripts/controlled-setup-seal.py"
+      ],
+      "actualExit": 1,
+      "originalParentReaped": true,
+      "seconds": 0.00209884499963664,
+      "qualification": "PASS_NEW_FILE_DIFFERENCE_WITH_NO_WHITESPACE_DIAGNOSTIC",
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "diff-check-second-2",
+      "argv": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "scripts/test-controlled-setup-seal.py"
+      ],
+      "actualExit": 1,
+      "originalParentReaped": true,
+      "seconds": 0.001929199001097004,
+      "qualification": "PASS_NEW_FILE_DIFFERENCE_WITH_NO_WHITESPACE_DIAGNOSTIC",
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "git-diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "scripts/controlled-setup-seal.py",
+        "scripts/test-controlled-setup-seal.py"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.00515528000141785,
+      "qualification": "PASS",
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "formatScope": "Direct deterministic Python format checks:100columns,no trailing whitespace/CR/indent tabs,newline, AST+compile without bytecode. black/ruff/autopep8 unavailable; no tool installed.",
+  "preservedCheckFailure": "verification-wrapper-first-failure.json; first raw git new-file diff actual1 was wrongly expected0 by local wrapper, no implementation/test failure. Original logs retained; corrected check retains actual1 and requires empty diagnostic streams.",
+  "authorization": "Seal binds provided immutable bytes only; no MSI validity, compile provenance or installation authorization. Payload ledger is effects only.",
+  "limitations": [
+    "No user CLI, install entry or release Setup generated",
+    "Native private route and session/inner guard not integrated or activated by this script",
+    "Already-sealed detection means exact canonical adjacent48-byte seal; existing PE parser unchanged",
+    "Pure synthetic byte fixtures do not prove runtime or source-CI readiness"
+  ],
+  "cleanup": "Pure in-memory fixtures; -B/sys.dont_write_bytecode prevent own bytecode. No test files/directories/processes/install artifacts generated; evidence logs/source snapshots intentionally retained.",
+  "actions": {
+    "commit": false,
+    "push": false,
+    "Windows": false,
+    "Cargo": false,
+    "mainModified": false,
+    "existingBuilderModified": false,
+    "RustModified": false
+  }
+}

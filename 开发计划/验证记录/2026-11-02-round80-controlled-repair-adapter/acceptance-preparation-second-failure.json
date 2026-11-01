@@ -1,0 +1,11 @@
+{
+  "status": "FAIL_LOCAL_ACCEPTANCE_WRAPPER_GROUPED_PYTHON_IN_RUST_COMPILE_INVENTORY",
+  "actualLocalExit": 1,
+  "errorType": "KeyError",
+  "detail": "Rust producer inventory contains Rust/build inputs, while two Python files are separately pinned in runtime sealedPythonInputs and their9 pure tests. First wrapper incorrectly indexed Python paths in Rust inventory. Corrected only that grouping and added exact independent two-Python binding. Fixed9Gitblobs remain all checked.",
+  "originalControllerSha256": "4a59cf73f7dc3c5cf0f100670d391728684e472183ad61119e3c878761aa3d5b",
+  "firstOriginalStderrCapturedToSeparateFile": false,
+  "Windows": false,
+  "Cargo": false,
+  "archiveWritten": false
+}

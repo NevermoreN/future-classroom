@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_201_ORIGINALS_FULL_TAR_REPLAY_AND_DECODED_CREDENTIAL_SCAN",
+  "sourceCommit": "b7e4c938ab8ff391e2ad6c1d681e074881118c0a",
+  "archiveSha256": "5d8b1e32cb93c6d5ca658d00fc028e35ef8223dac8d765c00a945ce31e60a3a7",
+  "archiveBytes": 588340,
+  "indexSha256": "509cfc68c8be831461f209d7704ae81e0a4bfd30c916b20c63c2960d1d94e796",
+  "memberCount": 201,
+  "originalBytes": 2353258,
+  "binaryIdentitiesOnly": 2,
+  "binaryOriginalReads": false,
+  "credentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "statistics": {
+      "textViews": 36694,
+      "utf16Views": 84,
+      "cp936Views": 20,
+      "clixmlDecodedViews": 20,
+      "decodedBase64Views": 60,
+      "jsonContainers": 179,
+      "decodedJsonStringViews": 36151
+    },
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "findings": [],
+    "coverage": "All201 original text byte streams, full decompressed tar replay, 8 promoted original reports, frozen manifest, archiver source and index; strict UTF8/UTF16/CP936 roundtrip, CLIXML parsed/decoded text, JSON strings and canonical nested generic/declared base64; unknown controls rejected without exceptions. Limits depth12, JSON250000 and decoded64MiB per original."
+  },
+  "scope": "Adapter component source/build/Clippy,9 Python byte tests and Win11 synthetic-observation gate tests; production coupled native MSI adapter not exercised. 54 includes6/11effects/2pure parsers. Win7/Win10 true runtime NOT_RUN. No claim of full project completion.",
+  "sourceDeletion": false,
+  "WindowsContacted": false,
+  "Cargo": false,
+  "worktreeOrTargetRead": false,
+  "newIndependentReviewStarted": false
+}
