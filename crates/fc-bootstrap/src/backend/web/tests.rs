@@ -1076,3 +1076,6 @@ fn teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_ch
         Err(WebServiceError::Denied)
     ));
 }
+
+#[path = "https_settings_tests.rs"]
+mod https_settings_tests;

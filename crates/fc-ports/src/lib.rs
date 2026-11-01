@@ -622,3 +622,6 @@ pub use subject_visual::*;
 
 pub mod desktop_lesson;
 pub use desktop_lesson::*;
+
+pub mod https_settings;
+pub use https_settings::*;

@@ -20,3 +20,5 @@ pub mod time;
 pub mod voice;
 
 pub mod subject_visual;
+
+pub mod https_settings;

@@ -642,6 +642,8 @@ pub(crate) fn allowed(key: &str) -> bool {
         ]
         .contains(&key)
 }
+// HTTPS settings live under business/security/https/v1: ordinary teaching
+// exports omit them and both recovery modes preserve the CURRENT target row.
 pub(crate) fn protected(key: &str) -> bool {
     key == IDENTITY
         || key.starts_with("business/credential/")

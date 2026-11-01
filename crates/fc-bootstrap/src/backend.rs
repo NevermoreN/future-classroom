@@ -10,6 +10,11 @@ mod desktop_lesson;
 pub use desktop_lesson::{DesktopLessonFlow, DesktopLessonGuard, DesktopLessonStamp};
 #[cfg(test)]
 mod execution_scope_tests;
+pub mod https_certificate;
+pub use https_certificate::{
+    HttpsCertificateError, HttpsCertificateObservation, HttpsCertificateService,
+};
+mod https_settings;
 mod materials_web;
 mod profile_content;
 mod profiles;
@@ -99,6 +104,7 @@ pub enum BackendError {
     Autostart(fc_ports::autostart::AutostartRepositoryError),
     Lesson(LessonRepositoryError),
     Display(DisplayRepositoryError),
+    HttpsSettings(fc_ports::HttpsSettingsRepositoryError),
     SubjectVisual(fc_ports::subject_visual::SubjectVisualRepositoryError),
     Profile(fc_ports::ProfileRepositoryError),
     ProfileContent(fc_ports::ProfileContentRepositoryError),
@@ -154,6 +160,11 @@ impl From<fc_ports::autostart::AutostartRepositoryError> for BackendError {
 impl From<LessonRepositoryError> for BackendError {
     fn from(error: LessonRepositoryError) -> Self {
         Self::Lesson(error)
+    }
+}
+impl From<fc_ports::HttpsSettingsRepositoryError> for BackendError {
+    fn from(error: fc_ports::HttpsSettingsRepositoryError) -> Self {
+        Self::HttpsSettings(error)
     }
 }
 impl From<DisplayRepositoryError> for BackendError {

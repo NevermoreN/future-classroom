@@ -154,6 +154,27 @@ fn run() -> Result<(), String> {
             #[cfg(not(windows))]
             Err("native voice output query probe requires Windows".into())
         }
+        [flag] if flag == "--https-settings-probe" => {
+            #[cfg(windows)]
+            {
+                application::https_settings_probe(None)
+            }
+            #[cfg(not(windows))]
+            Err("native HTTPS settings probe requires Windows".into())
+        }
+        [flag, option, reference]
+            if flag == "--https-settings-probe" && option == "--certificate-thumbprint" =>
+        {
+            #[cfg(windows)]
+            {
+                application::https_settings_probe(Some(reference))
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = reference;
+                Err("native HTTPS settings probe requires Windows".into())
+            }
+        }
         [flag] if flag == "--voice-settings-probe" => {
             #[cfg(windows)]
             {

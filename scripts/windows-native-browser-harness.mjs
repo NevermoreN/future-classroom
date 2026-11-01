@@ -17,6 +17,33 @@ const MAX_LINE = 64 * 1024;
 const MAX_CDP = 8 * 1024 * 1024;
 const MAX_REQUESTS = 128;
 const MAX_BUNDLE = 5 * 1024 * 1024;
+// Diagnostics are observations of local CDP delivery, not socket/native clocks.
+// One fixed record per already bounded request; no frame/header/body storage.
+const DIAGNOSTIC_MILLIS = 60000;
+const DIAGNOSTIC_EVENTS = 65536;
+const FAILURE_PHASES = new Set(['connect', 'await-run', 'inject-existing-approved-cookie', 'navigate-native',
+  'read-original-content', 'visual-original', 'enter-synthetic-text', 'visual-refresh-with-draft',
+  'save-once', 'visual-after-save', 'reload-and-read-durable-content', 'visual-after-reload',
+  'settle-observed-responses', 'complete']);
+// Closed names only: a syntactically valid ERR_<hex credential> is not a safe diagnostic.
+const NETWORK_ERRORS = new Set(['net::ERR_FAILED', 'net::ERR_ABORTED', 'net::ERR_TIMED_OUT',
+  'net::ERR_CONNECTION_CLOSED', 'net::ERR_CONNECTION_RESET', 'net::ERR_CONNECTION_REFUSED',
+  'net::ERR_CONNECTION_ABORTED', 'net::ERR_CONNECTION_FAILED', 'net::ERR_EMPTY_RESPONSE',
+  'net::ERR_CONTENT_LENGTH_MISMATCH', 'net::ERR_INCOMPLETE_CHUNKED_ENCODING', 'net::ERR_INVALID_CHUNKED_ENCODING',
+  'net::ERR_NAME_NOT_RESOLVED', 'net::ERR_ADDRESS_UNREACHABLE', 'net::ERR_INTERNET_DISCONNECTED',
+  'net::ERR_NETWORK_CHANGED', 'net::ERR_SSL_PROTOCOL_ERROR', 'net::ERR_SSL_VERSION_OR_CIPHER_MISMATCH',
+  'net::ERR_CERT_AUTHORITY_INVALID', 'net::ERR_CERT_COMMON_NAME_INVALID', 'net::ERR_CERT_DATE_INVALID',
+  'net::ERR_CERT_INVALID', 'net::ERR_BLOCKED_BY_CLIENT', 'net::ERR_BLOCKED_BY_RESPONSE',
+  'net::ERR_HTTP2_PROTOCOL_ERROR', 'net::ERR_QUIC_PROTOCOL_ERROR']);
+const BLOCKED_REASONS = new Set(['other', 'csp', 'mixed-content', 'origin', 'inspector', 'subresource-filter',
+  'content-type', 'coep-frame-resource-needs-coep-header', 'coop-sandboxed-iframe-cannot-navigate-to-coop-page',
+  'corp-not-same-origin', 'corp-not-same-origin-after-defaulted-to-same-origin-by-coep', 'corp-not-same-site']);
+function diagnosticCount(record, key, value, maximum) {
+  if (!Number.isSafeInteger(value) || value < 0) { record.countsClamped = true; return; }
+  if (value > maximum - record[key]) { record[key] = maximum; record.countsClamped = true; }
+  else record[key] += value;
+}
+
 const U64_MAX = (1n << 64n) - 1n;
 const SHA = /^[0-9a-f]{64}$/;
 const HEX_SECRET = /^[0-9a-fA-F]{64}$/;
@@ -281,7 +308,7 @@ class Harness {
     this.requests = new Map(); this.earlyExtra = new Map(); this.bodies = new Set(); this.scope = null; this.initial = null; this.committed = null;
     this.reloaded = null; this.post = null; this.saveClicks = 0; this.sessionCount = 0; this.statusCount = 0;
     this.pageErrors = 0; this.consoleErrors = 0; this.scopeReads = 0; this.contentReads = 0;
-    this.visualReads = 0; this.visualPayloads = []; this.visualObservations = [];
+    this.visualReads = 0; this.visualPayloads = []; this.visualObservations = []; this.runStartedAt = null;
     this.reminderShortcutClicks = 0; this.reminderObservations = [];
     this.report = { schemaVersion: 1, status: 'FAIL', marker: init.marker, contentKind: init.contentKind,
       scope: init.contentKind === 'REMINDER'
@@ -327,6 +354,24 @@ class Harness {
     if (!reminder && method === 'GET' && /^\/fc\/api\/v1\/content\/homework\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[0-9]{4}-[0-9]{2}-[0-9]{2}\/visual$/.test(path)) return { kind: 'visual', path };
     return null;
   }
+  diagnosticMillis() {
+    if (!Number.isFinite(this.runStartedAt)) return null;
+    const elapsed = Math.floor(performance.now() - this.runStartedAt);
+    // A missing/out-of-bound clock is explicit unknown, never a deadline claim.
+    return Number.isSafeInteger(elapsed) && elapsed >= 0 && elapsed <= DIAGNOSTIC_MILLIS ? elapsed : null;
+  }
+  requestFailure(record, params) {
+    const d = record.diagnostic;
+    return Object.freeze({ requestOrdinal: d.requestOrdinal, kind: record.kind, path: record.path,
+      phase: FAILURE_PHASES.has(this.phase) ? this.phase : 'OTHER',
+      canceled: params.canceled === true,
+      errorText: NETWORK_ERRORS.has(params.errorText) ? params.errorText : 'OTHER',
+      blockedReason: params.blockedReason === undefined ? 'NONE' : BLOCKED_REASONS.has(params.blockedReason) ? params.blockedReason : 'OTHER',
+      failureMillis: this.diagnosticMillis(), requestMillis: d.requestMillis, responseMillis: d.responseMillis,
+      extraInfoMillis: d.extraInfoMillis, finishedMillis: d.finishedMillis, bodyVerifiedMillis: d.bodyVerifiedMillis,
+      responseReceived: record.response, finished: record.finished, bodyVerified: record.analyzed,
+      dataEvents: d.dataEvents, dataBytes: d.dataBytes, encodedBytes: d.encodedBytes, countsClamped: d.countsClamped });
+  }
   event(method, params, session) {
     if (session !== this.sessionId || !this.run || this.disposePromise) return;
     try {
@@ -339,7 +384,10 @@ class Harness {
         check(classified, 'UNEXPECTED_NETWORK_TARGET_OR_METHOD');
         const record = { method: request.method, url: request.url, kind: classified.kind, path: classified.path,
           servedFromCache: false, fromDiskCache: false, fromServiceWorker: false, fromPrefetchCache: false,
-          response: false, finished: false, analyzed: false, extraStatus: null };
+          response: false, finished: false, analyzed: false, extraStatus: null,
+          diagnostic: { requestOrdinal: this.requests.size + 1, requestMillis: this.diagnosticMillis(), responseMillis: null,
+            extraInfoMillis: null, finishedMillis: null, bodyVerifiedMillis: null,
+            dataEvents: 0, dataBytes: 0, encodedBytes: 0, countsClamped: false } };
         this.requests.set(params.requestId, record);
         if (this.earlyExtra.has(params.requestId)) { record.extraStatus = this.earlyExtra.get(params.requestId); this.earlyExtra.delete(params.requestId); }
         if (record.method === 'POST') {
@@ -370,17 +418,30 @@ class Harness {
           record.csp = this.init.expectedCsp;
           check(record.status === 200, 'STATIC_HTTP_STATUS');
         } else check(record.status === 200 && record.mime === 'application/json', 'API_HTTP_STATUS_OR_MIME');
-        record.response = true;
+        record.response = true; record.diagnostic.responseMillis = this.diagnosticMillis();
       } else if (method === 'Network.responseReceivedExtraInfo') {
         check(Number.isInteger(params.statusCode) && [200, 304].includes(params.statusCode), 'WIRE_HTTP_STATUS');
         const record = this.requests.get(params.requestId);
-        if (record) { check(record.extraStatus === null, 'DUPLICATE_EXTRA_RESPONSE'); record.extraStatus = params.statusCode; }
+        if (record) { check(record.extraStatus === null, 'DUPLICATE_EXTRA_RESPONSE'); record.extraStatus = params.statusCode; record.diagnostic.extraInfoMillis = this.diagnosticMillis(); }
         else { check(this.earlyExtra.size < MAX_REQUESTS && !this.earlyExtra.has(params.requestId), 'EXTRA_RESPONSE_BUDGET'); this.earlyExtra.set(params.requestId, params.statusCode); }
+      } else if (method === 'Network.dataReceived') {
+        const record = this.requests.get(params.requestId);
+        if (record) {
+          diagnosticCount(record.diagnostic, 'dataEvents', 1, DIAGNOSTIC_EVENTS);
+          diagnosticCount(record.diagnostic, 'dataBytes', params.dataLength, MAX_CDP);
+          diagnosticCount(record.diagnostic, 'encodedBytes', params.encodedDataLength, MAX_CDP);
+        }
       } else if (method === 'Network.loadingFailed') {
-        if (this.requests.has(params.requestId)) throw new Fault('NETWORK_LOAD_FAILED');
+        const record = this.requests.get(params.requestId);
+        if (record) {
+          // Freeze the FIRST fault synchronously before original fail/dispose.
+          // Unknown request/context/cleanup events retain the original filter.
+          if (!this.fault) record.failure = this.requestFailure(record, params);
+          throw new Fault('NETWORK_LOAD_FAILED');
+        }
       } else if (method === 'Network.loadingFinished') {
         const record = this.requests.get(params.requestId); check(record && record.response, 'UNMATCHED_FINISH');
-        check(!record.finished, 'DUPLICATE_FINISH'); record.finished = true;
+        check(!record.finished, 'DUPLICATE_FINISH'); record.finished = true; record.diagnostic.finishedMillis = this.diagnosticMillis();
         const task = this.analyze(params.requestId, record).catch(error => this.fail(error));
         this.bodies.add(task); void task.finally(() => this.bodies.delete(task));
       }
@@ -455,7 +516,7 @@ class Harness {
         this.contentReads++;
       }
     }
-    record.analyzed = true;
+    record.analyzed = true; record.diagnostic.bodyVerifiedMillis = this.diagnosticMillis();
   }
   async evaluate(expression) {
     const result = await this.command('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: false });
@@ -554,7 +615,7 @@ class Harness {
       revision: document.revision, ...dom });
   }
   async execute(run, receivedAt) {
-    this.run = run; this.until = receivedAt + run.maxMillis; this.text = `Synthetic Native Edge content ${run.marker}`;
+    this.run = run; this.runStartedAt = receivedAt; this.until = receivedAt + run.maxMillis; this.text = `Synthetic Native Edge content ${run.marker}`;
     this.report.generation = run.generation; this.report.origin = run.origin; this.report.maxMillis = run.maxMillis;
     this.report.syntheticTextSha256 = hash(this.text); const began = performance.now();
     this.phase = 'inject-existing-approved-cookie';
@@ -614,6 +675,7 @@ class Harness {
     this.phase = 'complete';
   }
   checkApiLedger() {
+    check(![...this.requests.values()].some(r => r.failure), 'NETWORK_FAILURE_NOT_SUCCESS');
     const api = [...this.requests.values()].filter(r => r.kind !== 'asset');
     check(api.length === Object.values(this.apiOperations).reduce((a, b) => a + b, 0)
       && this.sessionCount === this.apiOperations.sessionGets && this.statusCount === this.apiOperations.statusGets
@@ -651,7 +713,8 @@ class Harness {
       mime: typeof r.mime === 'string' && /^[a-zA-Z0-9.+/-]{1,100}$/.test(r.mime) ? r.mime : null,
       ...(r.csp ? { csp: r.csp } : {}), servedFromCache: r.servedFromCache, fromDiskCache: r.fromDiskCache,
       fromServiceWorker: r.fromServiceWorker, fromPrefetchCache: r.fromPrefetchCache,
-      wireStatus: r.extraStatus, finished: r.finished, bodyVerified: r.analyzed }));
+      wireStatus: r.extraStatus, finished: r.finished, bodyVerified: r.analyzed,
+      ...(r.failure ? { failure: r.failure } : {}) }));
     this.report.network = records;
     // Cached 200 ExtraInfo alone does not prove a new wire response; a raw
     // 304 proves revalidation even when the effective page response is 200.
@@ -883,14 +946,85 @@ async function selfTest() {
   owned.until = performance.now() - 1;
   await assert.rejects(owned.command('Runtime.evaluate'), error => error.code === 'RUN_DEADLINE');
   assert.equal(await owned.dispose(), true); assert.equal(calls, 1); assert.equal(owned.report.contextDisposed, true);
+  await diagnosticSelfTest(init, run);
   await socketSelfTest();
   writeSync(1, JSON.stringify({ type: 'SELF_TEST', status: 'PASS', builtinWebSocket: typeof WebSocket,
     checks: ['synthetic scoped visual payload/DOM CSS alpha and border checks; exact HOMEWORK13-operation workflow (not browser evidence)',
       'mandatory contentKind; strict REMINDER9 versus HOMEWORK13 routes/scopes/keys/ledger; cross-kind and any reminder visual rejected',
       'bottom-only reminder selector hit test rejects decoy/disabled/duplicate; shortcut count increments only after successful mouse ACKs',
       'reminder title/date/expiry/draft/no-visual DOM booleans validated without recording body', 'strict INIT/RUN and finite budget', 'pairing/logout/foreign target rejection', 'cached response excluded; raw304 wire status counted',
-      'Cookie/CSRF/Set-Cookie omitted from summaries', 'actual loopback WebSocket CDP correlation and deadline', 'unknown/failed/owned context disposal and expired positive command rejection', 'verified cached assets do not wait for absent ExtraInfo; incomplete bodies/API/wire proof still block'],
+      'Cookie/CSRF/Set-Cookie omitted from summaries', 'actual loopback WebSocket CDP correlation and deadline', 'unknown/failed/owned context disposal and expired positive command rejection', 'verified cached assets do not wait for absent ExtraInfo; incomplete bodies/API/wire proof still block',
+      'first loadingFailed snapshot precedes dispose; fixed path/enum/counter/timing facts, hostile text omitted, cleanup events filtered and no success/retry'],
     windowsBrowser: 'NOT_RUN', sourceSha256: hash(readFileSync(fileURLToPath(import.meta.url))) }) + '\n');
+}
+
+// Pure event-handler models only. No website, TLS or Windows evidence.
+async function diagnosticSelfTest(init, run) {
+  const target = run.origin + '/fc/api/v1/content/homework/1/1/1/2026-11-01/visual';
+  const setup = () => {
+    const h = new Harness(init); h.sessionId = 'owned'; h.run = { ...run };
+    h.runStartedAt = performance.now() - 10; h.phase = 'visual-refresh-with-draft';
+    h.event('Network.requestWillBeSent', { requestId: 'visual', request: { method: 'GET', url: target } }, 'owned');
+    return h;
+  };
+  const h = setup();
+  h.event('Network.responseReceived', { requestId: 'visual', response: { url: target, status: 200,
+    mimeType: 'application/json', headers: { 'Set-Cookie': run.cookie } } }, 'owned');
+  h.event('Network.responseReceivedExtraInfo', { requestId: 'visual', statusCode: 200, headers: { 'Set-Cookie': run.cookie } }, 'owned');
+  h.event('Network.dataReceived', { requestId: 'visual', dataLength: 31, encodedDataLength: 17, data: run.expectedCsrf }, 'owned');
+  let disposals = 0;
+  h.contextId = 'own'; h.cdp = { send: async () => {
+    disposals++; assert.equal(h.requests.get('visual').failure.errorText, 'net::ERR_CONTENT_LENGTH_MISMATCH');
+  } };
+  h.event('Network.loadingFailed', { requestId: 'visual', canceled: false, errorText: 'net::ERR_CONTENT_LENGTH_MISMATCH',
+    headers: { Cookie: run.cookie }, postData: run.expectedCsrf }, 'owned');
+  assert.equal(h.fault.code, 'NETWORK_LOAD_FAILED'); assert.equal(disposals, 1);
+  const failure = h.requests.get('visual').failure;
+  assert(Object.isFrozen(failure)); assert.equal(failure.requestOrdinal, 1); assert.equal(failure.kind, 'visual');
+  assert.equal(failure.path, '/fc/api/v1/content/homework/1/1/1/2026-11-01/visual');
+  assert.equal(failure.phase, 'visual-refresh-with-draft'); assert.equal(failure.responseReceived, true);
+  assert.equal(failure.finished, false); assert.equal(failure.bodyVerified, false);
+  assert.equal(failure.dataEvents, 1); assert.equal(failure.dataBytes, 31); assert.equal(failure.encodedBytes, 17);
+  assert.equal(failure.countsClamped, false); assert.equal(failure.blockedReason, 'NONE');
+  for (const key of ['requestMillis', 'responseMillis', 'extraInfoMillis', 'failureMillis'])
+    assert(Number.isInteger(failure[key]) && failure[key] >= 0 && failure[key] <= 60000);
+  assert.equal(failure.finishedMillis, null); assert.equal(failure.bodyVerifiedMillis, null);
+  const before = JSON.stringify(h.summary());
+  h.event('Network.loadingFailed', { requestId: 'visual', canceled: true, errorText: 'net::ERR_ABORTED' }, 'owned');
+  h.event('Network.dataReceived', { requestId: 'visual', dataLength: 999, encodedDataLength: 999 }, 'owned');
+  assert.equal(JSON.stringify(h.summary()), before); // original cleanup filter
+  assert(!before.includes(run.cookie)); assert(!before.includes(run.expectedCsrf));
+  assert(!before.includes('postData')); assert(!before.includes('headers')); assert(!before.includes('requestId'));
+  await h.disposePromise;
+  for (const [errorText, sanitized] of [['net::ERR_ABORTED', 'net::ERR_ABORTED'], ['net::ERR_CONNECTION_RESET', 'net::ERR_CONNECTION_RESET'],
+    [run.cookie, 'OTHER'], ['net::ERR_' + COOKIE.exec(run.cookie)[1].toUpperCase(), 'OTHER'],
+    ['net::ERR_' + run.expectedCsrf.toUpperCase(), 'OTHER'], ['net::ERR_UNRECOGNIZED_NAME', 'OTHER'], ['net::ERR_ABORTED\n', 'OTHER'], ['net::ERR_ABORTED\nCookie: ' + run.cookie, 'OTHER'], ['net::ERR_' + 'A'.repeat(81), 'OTHER']]) {
+    const x = setup(); x.phase = run.cookie;
+    x.event('Network.loadingFailed', { requestId: 'visual', errorText, canceled: true, blockedReason: run.expectedCsrf }, 'owned');
+    const d = x.requests.get('visual').failure;
+    assert.equal(d.errorText, sanitized); assert.equal(d.phase, 'OTHER'); assert.equal(d.blockedReason, 'OTHER'); assert.equal(d.canceled, true);
+    assert.equal(x.fault.code, 'NETWORK_LOAD_FAILED');
+    const encoded = JSON.stringify(x.summary()); assert(!encoded.includes(run.cookie)); assert(!encoded.includes(run.expectedCsrf));
+    assert.throws(() => x.checkApiLedger(), error => error.code === 'NETWORK_FAILURE_NOT_SUCCESS');
+    const first = JSON.stringify(d);
+    x.event('Network.loadingFailed', { requestId: 'visual', errorText: 'net::ERR_NEW_ERROR' }, 'owned');
+    assert.equal(JSON.stringify(x.requests.get('visual').failure), first); // first fault only, even without context
+  }
+  const bounded = setup(), r = bounded.requests.get('visual');
+  bounded.event('Network.dataReceived', { requestId: 'visual', dataLength: MAX_CDP + 1, encodedDataLength: -1 }, 'owned');
+  assert.equal(r.diagnostic.dataBytes, MAX_CDP); assert.equal(r.diagnostic.encodedBytes, 0); assert.equal(r.diagnostic.countsClamped, true);
+  r.diagnostic.dataEvents = DIAGNOSTIC_EVENTS;
+  bounded.event('Network.dataReceived', { requestId: 'visual', dataLength: 1, encodedDataLength: 1.5 }, 'owned');
+  assert.equal(r.diagnostic.dataEvents, DIAGNOSTIC_EVENTS); assert.equal(r.diagnostic.dataBytes, MAX_CDP);
+  bounded.runStartedAt = performance.now() - 60001;
+  bounded.event('Network.loadingFailed', { requestId: 'visual', errorText: 'arbitrary', blockedReason: 'csp' }, 'owned');
+  assert.equal(r.failure.failureMillis, null); assert.equal(r.failure.blockedReason, 'csp');
+  const ignored = setup();
+  ignored.event('Network.loadingFailed', { requestId: 'foreign', errorText: run.cookie }, 'owned');
+  ignored.event('Network.loadingFailed', { requestId: 'visual', errorText: run.cookie }, 'foreign');
+  assert.equal(ignored.fault, null); assert.equal(ignored.requests.get('visual').failure, undefined);
+  assert(!Object.hasOwn(ignored.summary().network[0], 'failure'));
+  ignored.runStartedAt = null; assert.equal(ignored.diagnosticMillis(), null);
 }
 
 // A tiny owned loopback RFC6455 peer tests Node's REAL builtin WebSocket; it

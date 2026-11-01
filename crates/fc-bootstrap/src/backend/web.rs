@@ -161,11 +161,47 @@ impl State {
 }
 struct Inner {
     state: Mutex<State>,
+    configuration_edit: AtomicBool,
     ledger: Arc<Mutex<Ledger>>,
     control: SessionControl,
     authority: fc_runtime::authority::AuthorityReader<IdentityState>,
     clock: Arc<dyn Clock + Send + Sync>,
     monotonic: Arc<dyn MonotonicClock + Send + Sync>,
+}
+// The last writer-held guard, not cancellation or UI return, releases the
+// configuration slot. No mutex is held across writer evaluation/COMMIT.
+struct ConfigurationLease {
+    inner: Arc<Inner>,
+    active: AtomicBool,
+}
+impl Drop for ConfigurationLease {
+    fn drop(&mut self) {
+        self.inner
+            .configuration_edit
+            .store(false, Ordering::Release);
+    }
+}
+pub(super) struct ConfigurationEdit {
+    lease: Arc<ConfigurationLease>,
+}
+impl ConfigurationEdit {
+    pub(super) fn guard(&self) -> fc_storage::business::HttpsConfigurationGuard {
+        let lease = self.lease.clone();
+        Arc::new(move || {
+            lease.active.load(Ordering::Acquire)
+                && lease.inner.configuration_edit.load(Ordering::Acquire)
+                && lease
+                    .inner
+                    .state
+                    .try_lock()
+                    .is_ok_and(|state| !state.enabled)
+        })
+    }
+}
+impl Drop for ConfigurationEdit {
+    fn drop(&mut self) {
+        self.lease.active.store(false, Ordering::Release);
+    }
 }
 #[derive(Clone)]
 pub struct WebService {
@@ -216,6 +252,7 @@ impl WebService {
         Self {
             inner: Arc::new(Inner {
                 state: Mutex::new(State::default()),
+                configuration_edit: AtomicBool::new(false),
                 ledger,
                 control,
                 authority,
@@ -375,6 +412,40 @@ impl WebService {
             current_class: identity.installation.as_ref().and_then(|i| i.current_class),
         })
     }
+    #[cfg(test)]
+    fn configuration_in_progress(&self) -> bool {
+        self.inner.configuration_edit.load(Ordering::Acquire)
+    }
+    /// Only trusted local settings composition can claim this slot. The
+    /// disabled check and Enable exclusion serialize under the same state lock.
+    pub(super) fn configuration_edit(&self, admin: SessionLease) -> WebResult<ConfigurationEdit> {
+        let snapshot = self.snapshot()?;
+        let state = self
+            .inner
+            .state
+            .try_lock()
+            .map_err(|_| WebServiceError::Busy)?;
+        let mut ledger = self
+            .inner
+            .ledger
+            .try_lock()
+            .map_err(|_| WebServiceError::Busy)?;
+        let generation = self.admin(&mut ledger, &snapshot.data, admin)?;
+        self.admin_current(&snapshot, &mut ledger, admin, generation)?;
+        if state.enabled {
+            return Err(WebServiceError::Busy);
+        }
+        self.inner
+            .configuration_edit
+            .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+            .map_err(|_| WebServiceError::Busy)?;
+        Ok(ConfigurationEdit {
+            lease: Arc::new(ConfigurationLease {
+                inner: self.inner.clone(),
+                active: AtomicBool::new(true),
+            }),
+        })
+    }
     /// Logical Web admission only. HTTP/TLS deployment separately owns actual
     /// listening; this service never creates a URL reservation or opens a port.
     pub fn set_enabled(&self, admin: SessionLease, enabled: bool) -> WebResult<()> {
@@ -398,6 +469,9 @@ impl WebService {
         )?;
         let generation = self.admin(&mut ledger, &snapshot.data, admin)?;
         self.admin_current(&snapshot, &mut ledger, admin, generation)?;
+        if enabled && self.inner.configuration_edit.load(Ordering::Acquire) {
+            return Err(WebServiceError::Busy);
+        }
         state.enabled = enabled;
         if !enabled {
             state.clear_pairing();

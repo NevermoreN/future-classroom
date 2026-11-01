@@ -18,6 +18,7 @@ const PREVIOUS_SCOPE: ActionId = ActionId(508);
 const NEXT_SCOPE: ActionId = ActionId(509);
 pub(super) const CONFIRM: ActionId = ActionId(510);
 const CANCEL: ActionId = ActionId(511);
+pub(super) const HTTPS_SETTINGS: ActionId = ActionId(512);
 const SCOPE_PAGE: usize = 8;
 pub(super) const NOT_READY: &str = "教师连接服务尚未就绪，暂不能通过浏览器配对。";
 
@@ -113,6 +114,7 @@ pub(super) fn run(
     Ok(result)
 }
 pub(super) enum Command {
+    OpenHttpsSettings,
     Stay,
     Back,
     Lock,
@@ -282,6 +284,7 @@ impl Editor {
             return Ok(Command::Stay);
         }
         match action {
+            HTTPS_SETTINGS => Ok(Command::OpenHttpsSettings),
             REFRESH => Ok(Command::Run(Operation::Refresh)),
             ENABLE | BEGIN if !self.readiness.ready() => Err(NOT_READY.into()),
             ENABLE => Ok(Command::Run(Operation::Enable)),
@@ -585,6 +588,15 @@ impl Editor {
             action(PREVIOUS_SCOPE, "上一页任教范围", self.scope_page > 0),
             action(NEXT_SCOPE, "下一页任教范围", more_scopes),
         ];
+        if self.selected_request.is_none() {
+            // Keep the existing twelve-action native bound. Scope pagination
+            // has no target until a request is selected; configuration is a
+            // separate local page, never part of granting that request.
+            view.actions
+                .retain(|a| ![PREVIOUS_SCOPE, NEXT_SCOPE].contains(&a.id));
+            view.actions
+                .insert(0, action(HTTPS_SETTINGS, "配置本机HTTPS", true));
+        }
         view
     }
 }

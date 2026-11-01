@@ -452,3 +452,27 @@ fn native_teacher_device_page_uses_the_shared_worker_and_exact_confirmed_revocat
     assert!(app.lease.is_none());
     super::super::tests::drain(app);
 }
+
+#[test]
+fn local_https_navigation_does_not_enable_unavailable_teacher_connections_or_expand_action_bound() {
+    let (state, lease) = fixture(TrustedOrigin::Local);
+    let mut e = Editor::new(
+        lease.principal_id(),
+        Readiness::Unavailable,
+        loaded(snapshot()),
+    );
+    let view = e.view(&state, "", false);
+    view.validate().unwrap();
+    assert!(view
+        .actions
+        .iter()
+        .any(|a| a.id == HTTPS_SETTINGS && a.enabled));
+    assert!(matches!(
+        e.handle(HTTPS_SETTINGS, &FormData::new(), &state, lease)
+            .unwrap(),
+        Command::OpenHttpsSettings
+    ));
+    for id in [ENABLE, BEGIN] {
+        assert!(!view.actions.iter().find(|a| a.id == id).unwrap().enabled);
+    }
+}

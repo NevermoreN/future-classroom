@@ -37,7 +37,35 @@ REPORT_KEYS = frozenset((
 ))
 RECORD_KEYS = frozenset((
     "method", "url", "status", "mime", "csp", "servedFromCache", "fromDiskCache",
-    "fromServiceWorker", "fromPrefetchCache", "wireStatus", "finished", "bodyVerified",
+    "fromServiceWorker", "fromPrefetchCache", "wireStatus", "finished", "bodyVerified", "failure",
+))
+
+FAILURE_KEYS = frozenset((
+    "requestOrdinal", "kind", "path", "phase", "canceled", "errorText", "blockedReason",
+    "failureMillis", "requestMillis", "responseMillis", "extraInfoMillis", "finishedMillis", "bodyVerifiedMillis",
+    "responseReceived", "finished", "bodyVerified", "dataEvents", "dataBytes", "encodedBytes", "countsClamped",
+))
+FAILURE_PHASES = frozenset((
+    "connect", "await-run", "inject-existing-approved-cookie", "navigate-native", "read-original-content",
+    "visual-original", "enter-synthetic-text", "visual-refresh-with-draft", "save-once", "visual-after-save",
+    "reload-and-read-durable-content", "visual-after-reload", "settle-observed-responses", "complete", "OTHER",
+))
+# Same finite names as Node; do not reflect an arbitrary ERR_<credential>.
+NETWORK_ERRORS = frozenset((
+    "net::ERR_FAILED", "net::ERR_ABORTED", "net::ERR_TIMED_OUT",
+    "net::ERR_CONNECTION_CLOSED", "net::ERR_CONNECTION_RESET", "net::ERR_CONNECTION_REFUSED",
+    "net::ERR_CONNECTION_ABORTED", "net::ERR_CONNECTION_FAILED", "net::ERR_EMPTY_RESPONSE",
+    "net::ERR_CONTENT_LENGTH_MISMATCH", "net::ERR_INCOMPLETE_CHUNKED_ENCODING", "net::ERR_INVALID_CHUNKED_ENCODING",
+    "net::ERR_NAME_NOT_RESOLVED", "net::ERR_ADDRESS_UNREACHABLE", "net::ERR_INTERNET_DISCONNECTED",
+    "net::ERR_NETWORK_CHANGED", "net::ERR_SSL_PROTOCOL_ERROR", "net::ERR_SSL_VERSION_OR_CIPHER_MISMATCH",
+    "net::ERR_CERT_AUTHORITY_INVALID", "net::ERR_CERT_COMMON_NAME_INVALID", "net::ERR_CERT_DATE_INVALID",
+    "net::ERR_CERT_INVALID", "net::ERR_BLOCKED_BY_CLIENT", "net::ERR_BLOCKED_BY_RESPONSE",
+    "net::ERR_HTTP2_PROTOCOL_ERROR", "net::ERR_QUIC_PROTOCOL_ERROR",
+))
+BLOCKED_REASONS = frozenset((
+    "NONE", "OTHER", "other", "csp", "mixed-content", "origin", "inspector", "subresource-filter", "content-type",
+    "coep-frame-resource-needs-coep-header", "coop-sandboxed-iframe-cannot-navigate-to-coop-page",
+    "corp-not-same-origin", "corp-not-same-origin-after-defaulted-to-same-origin-by-coep", "corp-not-same-site",
 ))
 
 
@@ -58,6 +86,73 @@ def failure(error, phase):
     # Exception messages can contain private stdin, a CDP capability or a remote
     # response body. Only static phase/type metadata belongs in the QA report.
     return {"phase": phase, "kind": type(error).__name__}
+
+
+def validate_network_failures(value, run, manifest, content_kind):
+    """Validate only finite diagnostic facts, never relax the PASS contract.
+
+    Milliseconds describe local Node CDP event receipt relative to RUN receipt;
+    null means unavailable/outside the 60s observation bound. Counters are
+    capped with an explicit countsClamped flag. No socket/native clock claim.
+    """
+    records = value.get("network", [])
+    require(isinstance(records, list) and len(records) <= 128, "NODE_FAILURE_NETWORK_BOUND")
+    failures = []
+    for index, record in enumerate(records):
+        require(isinstance(record, dict), "NODE_FAILURE_RECORD_SHAPE")
+        if "failure" not in record:
+            continue
+        require(set(record) <= RECORD_KEYS and value.get("status") == "FAIL"
+                and isinstance(value.get("error"), dict) and value["error"].get("code") == "NETWORK_LOAD_FAILED",
+                "NODE_FAILURE_OUTCOME")
+        observation = record["failure"]
+        require(isinstance(observation, dict) and set(observation) == FAILURE_KEYS, "NODE_FAILURE_SHAPE")
+        path = observation["path"]
+        require(isinstance(path, str) and len(path) <= 512 and record.get("url") == run["origin"] + path
+                and record.get("method") in ("GET", "POST"), "NODE_FAILURE_PATH")
+        prefix = "homework" if content_kind == "HOMEWORK" else "reminders"
+        fixed_api = ("/fc/api/v1/status", "/fc/api/v1/session", f"/fc/api/v1/content/{prefix}/scopes/0")
+        ids = r"[1-9][0-9]{0,19}/" * (3 if content_kind == "HOMEWORK" else 1)
+        content = f"/fc/api/v1/content/{prefix}/" + ids + r"[0-9]{4}-[0-9]{2}-[0-9]{2}"
+        assets = {"/fc/" + asset["path"] for asset in manifest["assets"]} | {"/fc/"}
+        kind = ("content" if re.fullmatch(content, path) else
+                "visual" if content_kind == "HOMEWORK" and re.fullmatch(content + r"/visual", path) else
+                "api" if path in fixed_api else "asset" if path in assets else None)
+        require(kind is not None and observation["kind"] == kind
+                and (kind == "content" or record["method"] == "GET"), "NODE_FAILURE_UNEXPECTED_TARGET")
+        require(type(observation["requestOrdinal"]) is int and observation["requestOrdinal"] == index + 1
+                and isinstance(observation["phase"], str) and observation["phase"] in FAILURE_PHASES
+                and type(observation["canceled"]) is bool
+                and isinstance(observation["errorText"], str)
+                and (observation["errorText"] == "OTHER" or observation["errorText"] in NETWORK_ERRORS)
+                and isinstance(observation["blockedReason"], str) and observation["blockedReason"] in BLOCKED_REASONS,
+                "NODE_FAILURE_CLASSIFICATION")
+        for key in ("failureMillis", "requestMillis", "responseMillis", "extraInfoMillis", "finishedMillis", "bodyVerifiedMillis"):
+            number = observation[key]
+            require(number is None or type(number) is int and 0 <= number <= 60000, "NODE_FAILURE_TIME_BOUND")
+            require(number is None or observation["failureMillis"] is None or number <= observation["failureMillis"],
+                    "NODE_FAILURE_TIME_ORDER")
+        for key in ("responseReceived", "finished", "bodyVerified", "countsClamped"):
+            require(type(observation[key]) is bool, "NODE_FAILURE_FLAG")
+        # This is a fault-instant snapshot: an already pending body-analysis
+        # promise may complete during cleanup before summary. Facts may advance
+        # false -> true afterwards, never erase something already observed.
+        require(type(record.get("finished")) is bool and type(record.get("bodyVerified")) is bool
+                and (not observation["finished"] or record["finished"])
+                and (not observation["bodyVerified"] or record["bodyVerified"])
+                and (not observation["responseReceived"] or record.get("status") is not None), "NODE_FAILURE_LIFECYCLE")
+        for key, bound in (("dataEvents", 65536), ("dataBytes", 8 * 1024 * 1024), ("encodedBytes", 8 * 1024 * 1024)):
+            require(type(observation[key]) is int and 0 <= observation[key] <= bound, "NODE_FAILURE_COUNTER")
+        failures.append(dict(observation))
+    require(len(failures) <= 1, "NODE_MULTIPLE_FIRST_FAILURES")
+    # Summary's wire subset may repeat that same record, never add a hidden
+    # second diagnostic or change its snapshot. It remains partial evidence.
+    wires = value.get("wireResponses", [])
+    require(isinstance(wires, list) and len(wires) <= 128, "NODE_FAILURE_WIRE_BOUND")
+    for record in wires:
+        if isinstance(record, dict) and "failure" in record:
+            require(record in records, "NODE_FAILURE_WIRE_SUBSET")
+    return failures
 
 
 API_OPERATIONS = {"statusGets": 2, "sessionGets": 2, "scopeGets": 2,
@@ -326,6 +421,7 @@ class BrowserObserver:
             raise RuntimeError("NATIVE_BROWSER_PREPARE_FAILED") from None
 
     def _validate_result(self, value, message, run):
+        validate_network_failures(value, run, self.manifest, self.content_kind)
         expected_operations = API_OPERATIONS if self.content_kind == "HOMEWORK" else REMINDER_OPERATIONS
         require(set(value) <= REPORT_KEYS and value.get("schemaVersion") == 1
                 and value.get("status") == "PASS" and value.get("marker") == self.marker
@@ -472,6 +568,13 @@ class BrowserObserver:
             self._node_raw()
             value, identity = self._file(self.node_report)
             self.report["nodeReport"] = identity
+            diagnostics = validate_network_failures(value, run, self.manifest, self.content_kind)
+            if diagnostics:
+                require(value.get("marker") == self.marker and value.get("generation") == run["generation"]
+                        and value.get("origin") == run["origin"] and value.get("maxMillis") == run["maxMillis"]
+                        and value.get("sourceSha256") == self._node_source_sha and value.get("contentKind") == self.content_kind,
+                        "NODE_FAILURE_REPORT_IDENTITY")
+                self.report["networkFailureDiagnostics"] = diagnostics
             require(self.node.returncode == 0, "NODE_ACTUAL_EXIT_FAILED")
             stdout_lines = bytes(self.node_logs.stdout).decode("utf-8", "strict").splitlines()
             require(len(stdout_lines) == 2 and json.loads(stdout_lines[0]).get("type") == "READY"

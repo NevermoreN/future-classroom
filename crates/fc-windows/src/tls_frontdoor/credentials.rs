@@ -1,7 +1,7 @@
 //! Read-only certificate selection. Provisioning belongs to the administrator;
 //! this module never imports certificates or creates/deletes key containers.
+use super::certificate_selection::SelectedCertificate;
 use super::{CertificateThumbprint, TlsError};
-use std::{marker::PhantomData, rc::Rc};
 use windows::Win32::Security::{
     Authentication::Identity::*, Credentials::SecHandle, Cryptography::*,
 };
@@ -9,102 +9,37 @@ use windows::Win32::Security::{
 pub(super) struct Credentials {
     pub handle: SecHandle,
     acquired: bool,
-    certificate: *mut CERT_CONTEXT,
-    store: Option<HCERTSTORE>,
-    key: Option<(HCRYPTPROV_OR_NCRYPT_KEY_HANDLE, CERT_KEY_SPEC)>,
-    // Construction, use and destruction all belong to the fixed SSPI thread.
-    _thread_bound: PhantomData<Rc<()>>,
+    selected: SelectedCertificate,
 }
 
 impl Credentials {
     pub fn new(thumbprint: CertificateThumbprint) -> Result<Self, TlsError> {
-        let name = windows::core::w!("MY");
-        // SAFETY: constant provider/name, read-only existing current-user store.
-        let store = unsafe {
-            CertOpenStore(
-                CERT_STORE_PROV_SYSTEM_W,
-                CERT_QUERY_ENCODING_TYPE(0),
-                None,
-                CERT_OPEN_STORE_FLAGS(CERT_SYSTEM_STORE_CURRENT_USER)
-                    | CERT_STORE_OPEN_EXISTING_FLAG
-                    | CERT_STORE_READONLY_FLAG,
-                Some(name.as_ptr().cast()),
-            )
-        }
-        .map_err(|_| TlsError::Certificate)?;
+        let selected = SelectedCertificate::open().map_err(|_| TlsError::Certificate)?;
         let mut result = Self {
             handle: SecHandle::default(),
             acquired: false,
-            certificate: std::ptr::null_mut(),
-            store: Some(store),
-            key: None,
-            _thread_bound: PhantomData,
+            selected,
         };
         let initialized = (|| -> Result<(), TlsError> {
-            let hash = CRYPT_INTEGER_BLOB {
-                cbData: 20,
-                pbData: thumbprint.bytes().as_ptr().cast_mut(),
-            };
-            // SAFETY: hash remains live and points to exactly twenty public bytes.
-            result.certificate = unsafe {
-                CertFindCertificateInStore(
-                    store,
-                    X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
-                    0,
-                    CERT_FIND_HASH,
-                    Some((&hash as *const CRYPT_INTEGER_BLOB).cast()),
-                    None,
-                )
-            };
-            if result.certificate.is_null() {
-                return Err(TlsError::Certificate);
-            }
-            let mut actual = [0u8; 20];
-            let mut actual_len = 20;
-            // SAFETY: owned live certificate and exactly-sized writable hash buffer.
-            unsafe {
-                CertGetCertificateContextProperty(
-                    result.certificate,
-                    CERT_SHA1_HASH_PROP_ID,
-                    Some(actual.as_mut_ptr().cast()),
-                    &mut actual_len,
-                )
-            }
-            .map_err(|_| TlsError::Certificate)?;
-            if actual_len != 20 || &actual != thumbprint.bytes() {
-                return Err(TlsError::Certificate);
-            }
-            // SAFETY: CertFindCertificateInStore returned a live context owned above.
-            if unsafe { CertVerifyTimeValidity(None, (*result.certificate).pCertInfo) } != 0
-                || !server_auth_usage(result.certificate)?
+            if !result
+                .selected
+                .find(thumbprint)
+                .map_err(|_| TlsError::Certificate)?
             {
                 return Err(TlsError::Certificate);
             }
-            let mut key = HCRYPTPROV_OR_NCRYPT_KEY_HANDLE::default();
-            let mut spec = CERT_KEY_SPEC::default();
-            let mut free = windows::core::BOOL(0);
-            // SAFETY: only opens the selected existing private key, never prompts.
-            unsafe {
-                CryptAcquireCertificatePrivateKey(
-                    result.certificate,
-                    CRYPT_ACQUIRE_SILENT_FLAG
-                        | CRYPT_ACQUIRE_ALLOW_NCRYPT_KEY_FLAG
-                        | CRYPT_ACQUIRE_NO_HEALING
-                        | CRYPT_ACQUIRE_COMPARE_KEY_FLAG,
-                    None,
-                    &mut key,
-                    Some(&mut spec),
-                    Some(&mut free),
-                )
-            }
-            .map_err(|_| TlsError::Certificate)?;
-            if free.as_bool() {
-                result.key = Some((key, spec));
-            }
-            if key.0 == 0 {
+            // SAFETY: CertFindCertificateInStore returned a live context owned above.
+            if unsafe { CertVerifyTimeValidity(None, (*result.selected.certificate()).pCertInfo) }
+                != 0
+                || server_auth_usage(result.selected.certificate())? != ServerAuthUsage::Explicit
+            {
                 return Err(TlsError::Certificate);
             }
-            let mut certificate = result.certificate;
+            result
+                .selected
+                .acquire_private_key()
+                .map_err(|_| TlsError::Certificate)?;
+            let mut certificate = result.selected.certificate();
             let config = SCHANNEL_CRED {
                 dwVersion: SCHANNEL_CRED_VERSION,
                 cCreds: 1,
@@ -158,26 +93,27 @@ impl Credentials {
             if std::mem::replace(&mut self.acquired, false) {
                 remember(FreeCredentialsHandle(&self.handle));
             }
-            if let Some((key, spec)) = self.key.take() {
-                if spec == CERT_NCRYPT_KEY_SPEC {
-                    remember(NCryptFreeObject(NCRYPT_HANDLE(key.0)));
-                } else {
-                    remember(CryptReleaseContext(key.0, 0));
-                }
-            }
-            let certificate = std::mem::replace(&mut self.certificate, std::ptr::null_mut());
-            if !certificate.is_null() {
-                remember(CertFreeCertificateContext(Some(certificate)).ok());
-            }
-            if let Some(store) = self.store.take() {
-                remember(CertCloseStore(Some(store), 0));
-            }
+        }
+        if let Err(error) = self.selected.close(false) {
+            failure.get_or_insert(error);
         }
         failure.map_or(Ok(()), Err)
     }
 }
 
-fn server_auth_usage(certificate: *const CERT_CONTEXT) -> Result<bool, TlsError> {
+/// Explicit is the historical Schannel admission requirement. Inspection also
+/// distinguishes unrestricted usage (the documented zero-count/not-found case).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum ServerAuthUsage {
+    Explicit,
+    Unrestricted,
+    Rejected,
+    Unverified,
+}
+
+pub(super) fn server_auth_usage(
+    certificate: *const CERT_CONTEXT,
+) -> Result<ServerAuthUsage, TlsError> {
     let mut bytes = 0;
     // SAFETY: live caller-owned certificate; first call only obtains buffer size.
     unsafe { CertGetEnhancedKeyUsage(certificate, 0, None, &mut bytes) }
@@ -190,16 +126,24 @@ fn server_auth_usage(certificate: *const CERT_CONTEXT) -> Result<bool, TlsError>
     let capacity = backing.len() * 8;
     let base = backing.as_mut_ptr().cast::<u8>();
     // SAFETY: aligned writable region of at least the requested bounded size.
-    unsafe { CertGetEnhancedKeyUsage(certificate, 0, Some(base.cast()), &mut bytes) }
-        .map_err(|_| TlsError::Certificate)?;
+    unsafe { windows::Win32::Foundation::SetLastError(windows::Win32::Foundation::WIN32_ERROR(0)) };
+    let usage_result =
+        unsafe { CertGetEnhancedKeyUsage(certificate, 0, Some(base.cast()), &mut bytes) };
+    // GetLastError distinguishes unrestricted zero usage from an empty allowed
+    // intersection; capture it before any other native call.
+    let usage_error = unsafe { windows::Win32::Foundation::GetLastError() }.0;
+    usage_result.map_err(|_| TlsError::Certificate)?;
     if bytes as usize > capacity || bytes < std::mem::size_of::<CTL_USAGE>() as u32 {
         return Err(TlsError::Certificate);
     }
     // SAFETY: the first call required at least a CTL_USAGE and second succeeded.
     let usage = unsafe { &*base.cast::<CTL_USAGE>() };
     let count = usage.cUsageIdentifier as usize;
-    if count == 0 || count > 128 {
-        return Ok(false);
+    if count == 0 {
+        return Ok(empty_usage(usage_error));
+    }
+    if count > 128 {
+        return Ok(ServerAuthUsage::Unverified);
     }
     let start = base as usize;
     let end = start
@@ -232,12 +176,41 @@ fn server_auth_usage(certificate: *const CERT_CONTEXT) -> Result<bool, TlsError>
             .ok_or(TlsError::Certificate)?;
         found |= &value[..=nul] == SERVER_AUTH;
     }
-    Ok(found)
+    Ok(if found {
+        ServerAuthUsage::Explicit
+    } else {
+        ServerAuthUsage::Rejected
+    })
+}
+
+fn empty_usage(last_error: u32) -> ServerAuthUsage {
+    match last_error {
+        0x80092004 => ServerAuthUsage::Unrestricted, // CRYPT_E_NOT_FOUND
+        0 => ServerAuthUsage::Rejected,
+        _ => ServerAuthUsage::Unverified,
+    }
 }
 
 impl Drop for Credentials {
     fn drop(&mut self) {
         // Explicit worker shutdown observes close(); unwinding is best effort.
         let _ = self.close();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn certificate_query_empty_eku_preserves_unrestricted_empty_and_unknown_distinction() {
+        assert_eq!(empty_usage(0x80092004), ServerAuthUsage::Unrestricted);
+        assert_eq!(empty_usage(0), ServerAuthUsage::Rejected);
+        assert_eq!(empty_usage(5), ServerAuthUsage::Unverified);
+        // None of those becomes Explicit, so legacy Credentials admission
+        // still rejects every zero-count case exactly as before extraction.
+        for error in [0x80092004, 0, 5] {
+            assert_ne!(empty_usage(error), ServerAuthUsage::Explicit);
+        }
     }
 }

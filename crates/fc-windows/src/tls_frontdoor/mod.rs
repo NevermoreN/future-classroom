@@ -215,6 +215,9 @@ pub(super) trait Driver {
         Ok(())
     }
 }
+pub mod certificate_query;
+#[cfg(windows)]
+mod certificate_selection;
 #[cfg(windows)]
 mod credentials;
 #[cfg(any(windows, test))]

@@ -13,6 +13,7 @@ mod desktop;
 mod desktop_lesson;
 mod display;
 mod display_codec;
+mod https_settings;
 mod lesson;
 mod lesson_codec;
 #[cfg(test)]
@@ -68,6 +69,7 @@ pub(crate) fn validate_documents(
     schedule::change_proof(d)?;
     lesson::load(d)?;
     display::load(d, identity)?;
+    https_settings::load(d, identity)?;
     profiles::startup_check(d, identity)?;
     desktop::read_watermark(d, identity)?;
     materials::startup_check(d, identity)?;
@@ -90,6 +92,8 @@ pub type AutostartExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
 pub type CalendarExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
 /// Bounded memory-only policy handoff fence for native driver transactions.
 pub type VoiceDriverGuard = Arc<dyn Fn() -> bool + Send + Sync>;
+/// Exact logical-Web-disabled configuration permit; default denied.
+pub type HttpsConfigurationGuard = Arc<dyn Fn() -> bool + Send + Sync>;
 /// A short memory-only native-flow capability. Never grants account authority.
 /// False/panic cancels; no SQL, native waiting or new lease is allowed inside.
 pub type DesktopLessonGuard = Arc<dyn Fn() -> bool + Send + Sync>;
@@ -115,6 +119,7 @@ pub struct BusinessRepository<S> {
     voice_timeout: Option<(std::time::Duration, Arc<dyn Fn() -> bool + Send + Sync>)>,
     voice_driver_guard: VoiceDriverGuard,
     initial_installation_identity: Option<[u8; 32]>,
+    https_configuration_guard: Option<HttpsConfigurationGuard>,
 }
 impl<S> Clone for BusinessRepository<S> {
     fn clone(&self) -> Self {
@@ -132,6 +137,7 @@ impl<S> Clone for BusinessRepository<S> {
             voice_timeout: self.voice_timeout.clone(),
             voice_driver_guard: self.voice_driver_guard.clone(),
             initial_installation_identity: self.initial_installation_identity,
+            https_configuration_guard: self.https_configuration_guard.clone(),
         }
     }
 }
@@ -161,12 +167,22 @@ impl<S: Send + 'static> BusinessRepository<S> {
             voice_timeout: None,
             voice_driver_guard: Arc::new(|| true),
             initial_installation_identity: None,
+            https_configuration_guard: None,
         }
     }
     /// Scoped native desktop capability. An unbound repository denies access;
     /// rebinding an existing capability can only tighten it.
     pub fn with_desktop_lesson_guard(mut self, guard: DesktopLessonGuard) -> Self {
         self.desktop_lesson_guard = Some(match self.desktop_lesson_guard.take() {
+            Some(previous) => Arc::new(move || previous() && guard()),
+            None => guard,
+        });
+        self
+    }
+    /// Trusted short metadata permit. Rebinding can only tighten; callbacks must
+    /// not wait on native resources, SQL or another execution queue.
+    pub fn with_https_configuration_guard(mut self, guard: HttpsConfigurationGuard) -> Self {
+        self.https_configuration_guard = Some(match self.https_configuration_guard.take() {
             Some(previous) => Arc::new(move || previous() && guard()),
             None => guard,
         });

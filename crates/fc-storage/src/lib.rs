@@ -36,6 +36,7 @@ pub enum StorageError {
     DocumentTooLarge,
     Schedule(fc_domain::schedule_document::ScheduleDocumentError),
     Display(fc_domain::desktop::DisplayError),
+    HttpsSettings(fc_domain::https_settings::HttpsSettingsError),
     SubjectVisual(fc_domain::subject_visual::SubjectVisualError),
     Profile(fc_domain::profile::ProfileError),
     ProfileContent(fc_domain::profile_content::ProfileContentError),

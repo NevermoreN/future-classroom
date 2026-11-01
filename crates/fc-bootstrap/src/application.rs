@@ -81,6 +81,12 @@ mod public_lesson_editor;
 pub fn public_desktop_probe() -> std::result::Result<(), String> {
     public_desktop_probe::run()
 }
+mod https_settings_controller;
+mod https_settings_probe;
+pub fn https_settings_probe(reference: Option<&str>) -> std::result::Result<(), String> {
+    https_settings_probe::run(reference)
+}
+mod https_settings_editor;
 mod schedule_editor;
 mod schedule_operations_probe;
 mod voice_controller;
@@ -195,6 +201,7 @@ enum Screen {
     Lesson,
     Voice,
     Web,
+    HttpsSettings,
     ExitDraft,
     Repair,
 }
@@ -223,6 +230,7 @@ fn fatal(error: &Failure) -> bool {
                 | BackendError::Lesson(fc_ports::LessonRepositoryError::Faulted)
                 | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
                 | BackendError::SubjectVisual(fc_ports::SubjectVisualRepositoryError::Faulted)
+                | BackendError::HttpsSettings(fc_ports::HttpsSettingsRepositoryError::Faulted)
                 | BackendError::Profile(fc_ports::ProfileRepositoryError::Faulted)
                 | BackendError::ProfileContent(fc_ports::ProfileContentRepositoryError::Faulted)
                 | BackendError::Material(fc_ports::MaterialRepositoryError::Faulted)
@@ -292,6 +300,8 @@ fn error_text(error: &Failure) -> String {
         Failure::Web(WebServiceError::Busy) => "教师设备状态正在更新，请稍后刷新。".into(),
         Failure::Web(_) => "教师设备操作未完成，请刷新核对当前状态。".into(),
         Failure::Backend(e) => match e {
+            BackendError::HttpsSettings(fc_ports::HttpsSettingsRepositoryError::Domain(fc_domain::https_settings::HttpsSettingsError::ConfigurationUnavailable)) => "教师会话准入仍开启或另一配置任务未结束。请返回设备管理核对并明确停用后再保存。".into(),
+            BackendError::HttpsSettings(_) => "配置的权限或版本已变化，请保留草稿并核对原操作结果。".into(),
             BackendError::SubjectVisual(_) => "科目配色或显示设置的权限、版本已变化，本次未确认保存。草稿保留，请核对后明确取消并重新加载。".into(),
             BackendError::Voice(_) => "语音权限、任务或版本已变化，本次结果尚未确认，请刷新核对后再操作。".into(),
             BackendError::Autostart(_) => "启动项的权限、版本或实际状态已变化，请重新读取、核对后再明确确认。".into(),
@@ -483,6 +493,7 @@ enum Outcome {
     MaterialLaunch(Box<material_flow::PreparedLaunch>),
     MaterialCleaned,
     LaunchCopies(material_flow::LaunchCopyReport),
+    Https(Box<https_settings_controller::Completion>),
     WebOpened(WebService, web_editor::Loaded),
     WebLoaded(web_editor::Loaded),
     VoiceLoaded(
@@ -584,6 +595,11 @@ enum Work {
     Material(Box<material_flow::MaterialJob>),
     CleanupMaterial(PathBuf, PathBuf),
     Voice(VoiceService, SessionLease, voice_controller::Operation),
+    Https(
+        Arc<Mutex<Backend>>,
+        SessionLease,
+        https_settings_controller::Operation,
+    ),
     OpenWeb(Arc<Mutex<Backend>>, SessionLease),
     Web(
         WebService,
@@ -597,6 +613,7 @@ impl Task for Work {
     type Output = Result<Outcome>;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
+            Self::Https(_, _, operation) => operation.allocation_bytes(),
             Self::Http(job) => job.allocation_bytes(),
             Self::HttpProbe(job) => job.allocation_bytes(),
             #[cfg(test)]
@@ -673,6 +690,9 @@ impl Task for Work {
     fn run(self, context: &JobContext) -> Self::Output {
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         match self {
+            Self::Https(backend, lease, operation) => {
+                https_settings_controller::run(backend, lease, operation, context)
+            }
             Self::Http(job) => Ok(Outcome::Http(job.run(context))),
             Self::HttpProbe(job) => job
                 .run(context)
@@ -1316,6 +1336,9 @@ struct App {
     public_lesson_flow: Option<fc_bootstrap::backend::DesktopLessonFlow>,
     web_service: Option<WebService>,
     web_editor: Option<web_editor::Editor>,
+    https_editor: Option<https_settings_editor::Editor>,
+    https_pending: Option<https_settings_controller::Pending>,
+    https_unadmitted: Option<(Work, Instant)>,
     voice_editor: Option<voice_editor::Editor>,
     web_readiness: web_editor::Readiness,
     next_web_refresh: Instant,
@@ -1451,6 +1474,11 @@ impl App {
                     label: "锁定".into(),
                     enabled: true,
                 });
+                return view;
+            }
+        }
+        if self.screen == Screen::HttpsSettings {
+            if let Some(view) = self.https_view(&status, self.pending.is_some() || self.stopping) {
                 return view;
             }
         }
@@ -1794,6 +1822,11 @@ impl App {
                     action(LOCK, "锁定"),
                 ];
             }
+            Screen::HttpsSettings => {
+                view.title = "本机 HTTPS 连接配置".into();
+                view.description = "正在读取配置；这里不会启动或启用教师连接。".into();
+                view.actions = vec![action(LOCK, "锁定工作台")];
+            }
             Screen::Web => {
                 view.title = "正在加载教师设备".into();
                 view.description = web_editor::NOT_READY.into();
@@ -1881,6 +1914,7 @@ impl App {
         if self.backend.is_none() && self.screen == Screen::Starting {
             return;
         }
+        self.suspend_https();
         self.leave_web();
         self.lock_backup();
         self.clear_profile_preview();
@@ -1967,6 +2001,8 @@ impl App {
             return;
         }
         self.stopping = true;
+        self.suspend_https();
+        self.https_unadmitted = None;
         self.close_backup();
         if let Some(ticket) = &self.content_maintenance {
             ticket.cancel();
@@ -2140,6 +2176,11 @@ impl App {
                         }
                     }
                 }
+                if self.screen == Screen::HttpsSettings && self.pending.is_none() {
+                    if let Ok(data) = self.window.draft_nonsecret() {
+                        self.https_capture(data);
+                    }
+                }
                 if self.screen == Screen::Web && self.pending.is_none() {
                     if let (Some(editor), Ok(data)) =
                         (&mut self.web_editor, self.window.draft_nonsecret())
@@ -2263,6 +2304,9 @@ impl App {
                 }
                 if self.screen == Screen::Backup && !self.stopping {
                     return self.backup_event(action, data);
+                }
+                if self.screen == Screen::HttpsSettings && !self.stopping {
+                    return self.https_event(action, data);
                 }
                 if self.pending.is_some() || self.autostart_job.is_some() || self.stopping {
                     return Ok(());
@@ -3119,6 +3163,9 @@ impl App {
             .ok_or("教师设备页面已关闭")?
             .handle(action, &data, &self.state, lease);
         match command {
+            Ok(web_editor::Command::OpenHttpsSettings) => {
+                return self.open_https_settings();
+            }
             Ok(web_editor::Command::Stay) => {
                 self.status.clear();
                 self.render()?;
@@ -3782,6 +3829,7 @@ impl App {
             self.render()?;
         }
         self.poll_voice_management()?;
+        self.poll_https_settings()?;
         if self
             .web_editor
             .as_mut()
@@ -4003,6 +4051,9 @@ impl App {
             let completed_pending = self.pending.take();
             let public_lesson = completed_pending.as_ref().is_some_and(|p| p.public_lesson);
             let generation = completed_pending.map_or(self.generation, |p| p.generation);
+            if let Some(https) = self.https_pending.take() {
+                return self.https_completed(https, generation, outcome);
+            }
             if generation != self.generation && public_lesson {
                 self.render()?;
                 return Ok(());
@@ -4085,6 +4136,9 @@ impl App {
                     self.record = record;
                     self.screen = Screen::HomeworkEdit;
                     self.status.clear();
+                }
+                Ok(Outcome::Https(_)) => {
+                    self.status = "配置页面已变化，请重新读取核对。".into();
                 }
                 Ok(Outcome::WebOpened(service, loaded)) => {
                     if let Some(lease) = self.lease {
@@ -4766,6 +4820,9 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         public_lesson_flow: None,
         web_service: None,
         web_editor: None,
+        https_editor: None,
+        https_pending: None,
+        https_unadmitted: None,
         voice_editor: None,
         web_readiness: web_editor::Readiness::Unavailable,
         next_web_refresh: Instant::now() + Duration::from_secs(1),
