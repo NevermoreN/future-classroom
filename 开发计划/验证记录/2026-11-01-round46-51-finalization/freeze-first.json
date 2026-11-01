@@ -1,0 +1,31 @@
+{
+  "status": "FROZEN_TOOL_READY_NOT_EXECUTED",
+  "files": [
+    {
+      "path": "/tmp/fc-round46-51-finalization-review/.owner",
+      "bytes": 70,
+      "sha256": "5101158233d63c7cdb6c5a1e663df4865666c0e7f37991ffd78ca66696e4e22d"
+    },
+    {
+      "path": "/tmp/fc-round46-51-finalization-review/roots.json",
+      "bytes": 6238,
+      "sha256": "8e5b1c8d1e13f0c27150c7abd85d73f4ef0e4e0e8a77c9f14fd298a862610897"
+    },
+    {
+      "path": "/tmp/fc-round46-51-finalization-review/finalize.py",
+      "bytes": 19294,
+      "sha256": "0d8212c3304b094b2dfbb4f1625cc9f66065d24c7358700b49756effeb997438"
+    },
+    {
+      "path": "/tmp/fc-round46-51-finalization-review/CHECKLIST.md",
+      "bytes": 2812,
+      "sha256": "7766851685ab32c4d5dc5710f87fa62fa4cb8bd067e932193ce7c2fc9ae944e3"
+    }
+  ],
+  "actualChecks": [
+    "Python AST parse PASS"
+  ],
+  "rootCount": 13,
+  "scope": "Only this finalization directory written. No proof/deletion/SSH/Cargo/sudo/main/evidence/worktree changes executed. Root performs actual proof then separately requested cleanup.",
+  "processScope": "Only UID1026 references checked; inaccessible otherUID recorded NOT_INSPECTED, not a global process guarantee."
+}

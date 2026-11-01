@@ -1,0 +1,154 @@
+{
+  "schema": "fc.r46-51.exact-finalization-roots/v1",
+  "ownerUid": 1026,
+  "toolRoot": "/tmp/fc-round46-51-finalization-review",
+  "toolOwnerSha256": "5101158233d63c7cdb6c5a1e663df4865666c0e7f37991ffd78ca66696e4e22d",
+  "archives": [
+    {
+      "archive": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round46-msvc",
+      "indexSha256": "c95eb324af4db4bf2ca59d795690726d25d8d422376f39c9d5c2b0bbfbc2a5cb",
+      "source": "/tmp/fc-round46-ci-evidence",
+      "owner": {
+        "path": "/tmp/fc-round46-ci-evidence/.owner",
+        "bytes": 42,
+        "sha256": "4052408e54bd53df5297857374a0d058b0be949302e84759d3f89094cde8ff87"
+      }
+    },
+    {
+      "archive": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round47-https-settings",
+      "indexSha256": "25cd4796872f1672ede6a72ba8f6f512e9f2814987b169faf4fc3eeaa8796917",
+      "source": "/tmp/fc-round47-https-settings-evidence",
+      "owner": {
+        "path": "/tmp/fc-round47-https-settings-evidence/.owner",
+        "bytes": 50,
+        "sha256": "b3260b8fcecebb3d67483f7f6c7e2bb56fe95974943b75c2f42fbaab64f3171f"
+      }
+    },
+    {
+      "archive": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round48-certificate-query",
+      "indexSha256": "97f33e85578770153f2cbaadadedbb1c822c4e6b8504d01fada3f409075ca388",
+      "source": "/tmp/fc-round48-certificate-query-evidence",
+      "owner": {
+        "path": "/tmp/fc-round48-certificate-query-evidence/.owner.json",
+        "bytes": 165,
+        "sha256": "85925c51e7827d9739f3bf4e8bcbfee18236a82b93a1dc6e673299e132216489"
+      }
+    },
+    {
+      "archive": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round49-https-ui",
+      "indexSha256": "c7baead07288213e96092f1d25cff7a74ebff97327d49218c6155296e3ec395e",
+      "source": "/tmp/fc-round49-https-settings-ui-evidence",
+      "owner": {
+        "path": "/tmp/fc-round49-https-settings-ui-evidence/.owner",
+        "bytes": 46,
+        "sha256": "cd125bcf7c62e90ae9af055836d2c23101b1b1bad9ce090dae8a1a14891139f4"
+      }
+    },
+    {
+      "archive": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round50-https-integration",
+      "indexSha256": "9d15dc5a567873141e394b7835d0ba0e585607b641517dfa1687de163ff3281c",
+      "source": "/tmp/fc-round50-https-integration-evidence",
+      "owner": {
+        "path": "/tmp/fc-round50-https-integration-evidence/.owner",
+        "bytes": 57,
+        "sha256": "8828909afe415d1004addc3131cca8f5985841c32493dba0fb3bbe6e20d55f4b"
+      }
+    },
+    {
+      "archive": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round51-browser-diagnostics",
+      "indexSha256": "18cc2cb2a747c7793db432fe12ce6285e770b2e498f57825dc479805b7f546ef",
+      "source": "/tmp/fc-round51-browser-diagnostics-evidence",
+      "owner": {
+        "path": "/tmp/fc-round51-browser-diagnostics-evidence/.owner",
+        "bytes": 193,
+        "sha256": "9500e7cc18a6ad2d0b98b49a4dc47ede60a4502310f51f698f9dd57c9f94d681"
+      }
+    }
+  ],
+  "worktrees": [
+    {
+      "path": "/tmp/fc-round47-https-settings-worktree",
+      "branch": "codex/https-settings",
+      "baseHead": "e23bd538d828aeed4378a88f69cf81cb85a4389f",
+      "gitFileSha256": "0d5e1790a6d5dc742bb3cef9c42f994f62c6243b7c793ee505a8cea7aa9f954d",
+      "gitFileBytes": 102
+    },
+    {
+      "path": "/tmp/fc-round48-certificate-query-worktree",
+      "branch": "codex/https-certificate-query",
+      "baseHead": "bcd51dacb5ba69a184546e5180569a8fd1b3ebad",
+      "gitFileSha256": "c63e5369d62cd43c0bd61a7533154d0542f9f472e9fbfa70117f19e33767cbfc",
+      "gitFileBytes": 105
+    },
+    {
+      "path": "/tmp/fc-round49-https-settings-ui-worktree",
+      "branch": "codex/https-settings-ui",
+      "baseHead": "e23bd538d828aeed4378a88f69cf81cb85a4389f",
+      "gitFileSha256": "c144179d693131b532415c4ec3ea26266b80fd97c9a9820c7388f15125008717",
+      "gitFileBytes": 105
+    },
+    {
+      "path": "/tmp/fc-round51-browser-diagnostics-worktree",
+      "branch": "codex/browser-failure-diagnostics",
+      "baseHead": "e23bd538d828aeed4378a88f69cf81cb85a4389f",
+      "gitFileSha256": "253eaf2ee8df9925f47308ec67981e307d963d6d37b00baaf02b9eda08894619",
+      "gitFileBytes": 107
+    }
+  ],
+  "outputs": [
+    {
+      "path": "/tmp/fc-round47-https-settings-target",
+      "kind": "cache",
+      "ownerBytes": 41,
+      "ownerSha256": "5a41f4e708c081b2db639ea9fb9a4343db8a76532d43d868c4617af65f557236",
+      "topMembers": [
+        ".owner",
+        ".rustc_info.json",
+        "release",
+        "tmp"
+      ]
+    },
+    {
+      "path": "/tmp/fc-round50-https-windows-target",
+      "kind": "cache",
+      "ownerBytes": 51,
+      "ownerSha256": "f730c38db55cf8665a359a4a84db712f62f6e2661b1c3c58833bcd9d779a6738",
+      "topMembers": [
+        ".owner",
+        "nightly",
+        "stable"
+      ]
+    },
+    {
+      "path": "/tmp/fc-round50-https-programs-preliminary",
+      "kind": "programs",
+      "ownerBytes": 57,
+      "ownerSha256": "eb55d55079999082bea9637eb453e1264cbdd19b610e4656a3db182252f4788b",
+      "topMembers": [
+        ".owner",
+        "autostart_coordinator-3f86162353dcbd5b.exe",
+        "business_storage-17284d3ac1a257da.exe",
+        "calendar_execution_fence-1ec83488dbed4f30.exe",
+        "fc-bootstrap.exe",
+        "fc_application-fb16268b5eff3acf.exe",
+        "fc_audio-e1b4eabc9ef1420f.exe",
+        "fc_bootstrap-dd30f52d529302ea.exe",
+        "fc_bootstrap-e6c3a587f31bdfb6.exe",
+        "fc_domain-367747e306a1dd0e.exe",
+        "fc_materials-f1a7d58c131e95d5.exe",
+        "fc_ports-15b1ad689f79c490.exe",
+        "fc_presentation-b847dfa3b68d1237.exe",
+        "fc_protocol-4316bb63b92dda4d.exe",
+        "fc_runtime-a09be73363edd23a.exe",
+        "fc_security-2889fa9301b88e80.exe",
+        "fc_storage-3ccf7e5bedbf5d94.exe",
+        "fc_windows-4026d62a77fcc28b.exe",
+        "runtime_storage-6432f0544bdb6c95.exe",
+        "schedule_operations-2019e4752789692d.exe",
+        "verify_web_assets-2cd688c78134cd47.exe",
+        "voice_limits_storage-0b21db1adf2928be.exe",
+        "voice_storage-fee498fb1bb1e971.exe"
+      ]
+    }
+  ]
+}
