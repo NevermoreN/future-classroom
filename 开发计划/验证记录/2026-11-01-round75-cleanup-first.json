@@ -1,0 +1,79 @@
+{
+  "status": "PASS_EXACT_R75_ROOTS_REMOVED",
+  "commands": [
+    {
+      "command": [
+        "git",
+        "-C",
+        "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+        "worktree",
+        "remove",
+        "--force",
+        "/tmp/fc-round75-installer-maintenance/worktree"
+      ],
+      "pid": 988,
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+        "branch",
+        "-D",
+        "codex/installer-maintenance"
+      ],
+      "pid": 996,
+      "actualExit": true,
+      "exitCode": 0,
+      "stdout": "Deleted branch codex/installer-maintenance (was 2dfb2e7).\n",
+      "stderr": ""
+    }
+  ],
+  "rootsRemoved": [
+    "/tmp/fc-round75-installer-maintenance",
+    "/tmp/fc-round75-archive-controller"
+  ],
+  "verifiedCommit": "ef2e9a5f0ea37c1bfd65e0af6d33aaf67e49e1f1",
+  "provedFiles": 1537,
+  "archiveOriginalFiles": 1517,
+  "excluded56AndFinal24Verified": true,
+  "omissionThreeVerified": true,
+  "worktreeSevenPreserved": true,
+  "plannedRemoval": {
+    "root": {
+      "regularFiles": 20928,
+      "logicalBytes": 3324661329,
+      "directories": 2878,
+      "symlinksUnlinkedOnly": 5
+    },
+    "outer": {
+      "regularFiles": 3001,
+      "logicalBytes": 18088186,
+      "directories": 214,
+      "symlinksUnlinkedOnly": 0
+    }
+  },
+  "measurement": "regular logical file bytes; no physical disk-space claim",
+  "proofSha256": "a4819acbcd28981155a13fa9336d64d606b5a06703547c3110fb8c0949017f77",
+  "outerCopyMapSha256": "9d854785e07d65918bda9f2a159065cb4c5c5fa6bd9c55c811e08b37df52f9ec",
+  "actualRemoved": {
+    "root": {
+      "regularFiles": 20928,
+      "logicalBytes": 3324661329,
+      "directories": 2878,
+      "symlinksUnlinkedOnly": 5
+    },
+    "outer": {
+      "regularFiles": 3001,
+      "logicalBytes": 18088186,
+      "directories": 214,
+      "symlinksUnlinkedOnly": 0
+    }
+  },
+  "r76Untouched": true,
+  "sshAuthorizationUntouched": true
+}
