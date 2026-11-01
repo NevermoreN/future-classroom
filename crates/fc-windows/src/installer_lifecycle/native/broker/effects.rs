@@ -89,6 +89,19 @@ impl Decision {
             }
         }
     }
+    fn require_absent(self, admission: Admission) -> Self {
+        if admission == Admission::SameManifest
+            && self.outcome == SettledOutcome::Commit
+            && self.expected == ExpectedState::Absent
+        {
+            self
+        } else {
+            Self {
+                outcome: SettledOutcome::Rollback,
+                expected: admission.preimage(),
+            }
+        }
+    }
 }
 
 fn local() -> Result<PathBuf> {
@@ -810,6 +823,12 @@ pub(super) fn failed_install(admission: &Admitted) -> Decision {
 pub(super) fn staged_present(session: &mut Session, admission: &Admitted) -> Result<Decision> {
     Ok(staged(session, admission)?.require_present(admission.kind))
 }
+/// The closed Setup uninstall request requires the observed tree/markers absent.
+/// After actual EndCommit/original G return, reconcile independently requires
+/// complete product/context, tree and marker absence before releasing the owner.
+pub(super) fn staged_absent(session: &mut Session, admission: &Admitted) -> Result<Decision> {
+    Ok(staged(session, admission)?.require_absent(admission.kind))
+}
 pub(super) fn reconcile(
     session: &mut Session,
     admission: &Admitted,
@@ -849,6 +868,26 @@ mod tests {
     use super::super::super::super::broker::manifest::Entry;
     use super::*;
     use std::{fs, os::windows::io::AsRawHandle};
+
+    #[test]
+    fn setup_uninstall_requires_same_manifest_and_absence_not_present_or_partial() {
+        for admission in [Admission::Fresh, Admission::SameManifest] {
+            for observed in [
+                Observation::Present,
+                Observation::Absent,
+                Observation::Other,
+            ] {
+                let decision = Decision::observed(admission, observed).require_absent(admission);
+                if admission == Admission::SameManifest && observed == Observation::Absent {
+                    assert_eq!(decision.outcome(), SettledOutcome::Commit);
+                    assert_eq!(decision.expected, ExpectedState::Absent);
+                } else {
+                    assert_eq!(decision.outcome(), SettledOutcome::Rollback);
+                    assert_eq!(decision.expected, admission.preimage());
+                }
+            }
+        }
+    }
 
     #[test]
     fn setup_repair_cannot_commit_an_absent_payload_as_success() {

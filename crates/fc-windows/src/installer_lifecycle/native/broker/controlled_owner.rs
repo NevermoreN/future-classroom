@@ -1,11 +1,12 @@
 //! Original native Begin owner, separate from the legacy embedded Join route.
-//! No public Setup entry or controlled-inner MSI guard is released here. The
-//! fixed package seal is absent from existing helpers, which reject this route.
+//! The closed Setup request entry requires its own nonzero fixed-package seal;
+//! legacy helpers without that seal cannot enter this route.
 use super::super::super::guard_contract::{Bridge, BridgeKind, Nonce};
 use super::*;
 use windows::Win32::System::SystemInformation::GetTickCount64;
 
 mod guard_context;
+pub(crate) mod setup_entry;
 
 pub(crate) const PACKAGE_SEAL_MAGIC: &[u8; 16] = b"FC-SETUP-MSI\0v1\0";
 const INNER_MSI: &str = "FutureClassroom.msi";
@@ -32,7 +33,7 @@ pub(super) fn package_seal(bytes: [u8; 48]) -> Result<Option<[u8; 32]>> {
 }
 
 /// Closed trusted Setup UI choice; never a command-line MSI path or property.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Operation {
     Install,
     Repair,
@@ -56,6 +57,16 @@ impl Operation {
             Self::Repair => 2,
             Self::Uninstall => 3,
         }
+    }
+    fn admits(self, observed: MaintenanceOperation) -> bool {
+        matches!(
+            (self, observed),
+            (Self::Install, MaintenanceOperation::Install)
+                | (
+                    Self::Repair | Self::Uninstall,
+                    MaintenanceOperation::SameManifest
+                )
+        )
     }
 }
 
@@ -119,7 +130,7 @@ impl Message {
             RUN => {
                 m.thread == 0
                     && m.transaction != 0
-                    && (1..=2).contains(&m.outcome)
+                    && (1..=3).contains(&m.outcome)
                     && m.code == 0
                     && m.ticks == 0
             }
@@ -326,7 +337,17 @@ impl ApiOwner {
                 2 => MsiInstallProductW(
                     &HSTRING::from(path.as_os_str()),
                     windows::core::w!(
-                        "REINSTALL=ALL REINSTALLMODE=amus REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown"
+                        "REINSTALL=ALL REINSTALLMODE=vamus REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown"
+                    ),
+                ),
+                // Fixed sealed source, not ConfigureProductEx's registered
+                // LocalPackage selector. Active DB/DLL/cache provenance still
+                // requires the guarded joint runtime checks; this API name is
+                // not independent proof of which registered package MSI uses.
+                3 => MsiInstallProductW(
+                    &HSTRING::from(path.as_os_str()),
+                    windows::core::w!(
+                        "REMOVE=ALL REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown"
                     ),
                 ),
                 _ => return Err(LifecycleError::Invalid),
@@ -545,16 +566,9 @@ fn abort(
     }))
 }
 
-/// Private actual Setup adapter, intentionally not in run_helper's user grammar.
-/// A future separate Setup artifact must append the reviewed seal and use a new
-/// verified inner guard. Existing packages/normal app startup cannot enter it.
+/// Actual closed Setup adapter. Only a separately sealed image with its fixed
+/// source can enter; the request supplies no authority or caller-selected path.
 pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
-    // ConfigureProductEx selects registered LocalPackage, whose complete bytes
-    // and CA identity are not proven by the separate sealed source MSI digest.
-    // Keep this new route closed for uninstall until that scope is verified.
-    if matches!(operation, Operation::Uninstall) {
-        return Err(LifecycleError::Invalid);
-    }
     let deadline = Instant::now() + super::super::super::broker::BROKER_BUDGET;
     let mut s = Session::new(deadline)?;
     s.sealed_package_sha.ok_or(LifecycleError::Invalid)?;
@@ -626,11 +640,7 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
             return Err(e);
         }
     };
-    if !matches!(
-        (operation, admission.operation()),
-        (Operation::Install, MaintenanceOperation::Install)
-            | (Operation::Repair, MaintenanceOperation::SameManifest)
-    ) {
+    if !operation.admits(admission.operation()) {
         abort(
             &mut s,
             pipe,
@@ -667,7 +677,12 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
             return Err(LifecycleError::Invalid);
         }
         let decision = if installed.code == 0 {
-            effects::staged_present(&mut s, &admission)?
+            match operation {
+                Operation::Install | Operation::Repair => {
+                    effects::staged_present(&mut s, &admission)?
+                }
+                Operation::Uninstall => effects::staged_absent(&mut s, &admission)?,
+            }
         } else {
             effects::failed_install(&admission)
         };
@@ -731,6 +746,34 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn setup_operation_requires_native_admission_and_closed_run_tags() {
+        assert!(Operation::Install.admits(MaintenanceOperation::Install));
+        assert!(!Operation::Install.admits(MaintenanceOperation::SameManifest));
+        for operation in [Operation::Repair, Operation::Uninstall] {
+            assert!(operation.admits(MaintenanceOperation::SameManifest));
+            assert!(!operation.admits(MaintenanceOperation::Install));
+        }
+        for operation in [Operation::Install, Operation::Repair, Operation::Uninstall] {
+            for observed in [
+                MaintenanceOperation::Repair,
+                MaintenanceOperation::Upgrade,
+                MaintenanceOperation::Uninstall,
+            ] {
+                assert!(!operation.admits(observed));
+            }
+            let mut run = Message::new(RUN);
+            run.transaction = 42;
+            run.outcome = operation.tag();
+            assert!(Message::parse(run.bytes()).is_ok());
+        }
+        for tag in [0, 4, 5, 255] {
+            let mut run = Message::new(RUN);
+            run.transaction = 42;
+            run.outcome = tag;
+            assert!(Message::parse(run.bytes()).is_err());
+        }
+    }
     #[test]
     fn setup_seal_is_optional_for_legacy_but_never_zero_digest_authority() {
         assert_eq!(package_seal([0; 48]).unwrap(), None);

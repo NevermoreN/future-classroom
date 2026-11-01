@@ -36,6 +36,10 @@ FORBIDDEN_TABLES = {"RemoveRegistry", "RemoveFile", "ServiceInstall", "ServiceCo
                     "Shortcut", "Environment", "CreateFolder", "IniFile", "RemoveIniFile", "LockPermissions", "MsiLockPermissionsEx"}
 REQUIRED_TABLES = {"Property", "Directory", "Component", "File", "Feature", "FeatureComponents", "Media", "Upgrade", "LaunchCondition", "InstallExecuteSequence", "InstallUISequence", "Registry", "Binary", "CustomAction", "MsiEmbeddedChainer"}
 HELPER_BINARY = "FcLifecycleHelper"
+GUARD_BINARY = "FcControlledGuardDll"
+TEMPLATE_BINARY = "FcGuardClientTemplate"
+GUARD_ACTION = "FcControlledInnerGuard"
+CONTROLLED_REQUIRED_TABLES = REQUIRED_TABLES - {"MsiEmbeddedChainer"}
 LIFECYCLE_ACTIONS = {
     "FcBeginGate": (2, 'begin "[FcInstallDir]fc-bootstrap.exe"', 1499),
 }
@@ -59,8 +63,19 @@ LIMITATIONS = [
 ]
 
 
-def lifecycle_capabilities() -> dict:
+def lifecycle_capabilities(controlled: bool = False) -> dict:
     """Describe the candidate contract; package inspection grants no runtime PASS."""
+    if controlled:
+        return {
+            "scope": "CONTROLLED_SEALED_SAME_SOURCE_BUNDLE_CANDIDATE",
+            "candidate_paths": ["fresh_install", "same_manifest_version_damaged_repair", "same_bundle_source_remove_all", "known_rollback"],
+            "runtime_validation": "NOT_EXERCISED",
+            "admission": "ORIGINAL_B_G_ACTIVE_INSTALL_ACK_AND_EXACT_TEMPLATE_PROCESS_CAP; NO_CLI_PROPERTY_AUTHORITY",
+            "settlement": "ORIGINAL_BEGIN_END_G_THREAD_PROCESS_CAPS_PLUS_STRICT_EXPECTED_EFFECTS",
+            "run_policy": "FIXED_PROJECT_VALUE_ABSENT_ONLY; NO_WRITE_OR_DELETE",
+            "diagnostic_logging": "FIXED_MsiLogging_voicewarmup!; DEVELOPMENT_CANDIDATE_ONLY",
+            "unsupported": ["standard_ARP_uninstall", "moved_or_deleted_bundle", "different_manifest_or_version", "major_upgrade", "run_cleanup"],
+        }
     return {
         "scope": "CONTROLLED_SAME_SOURCE_UNTRANSFORMED_PER_USER_CANDIDATE",
         "candidate_paths": ["fresh_install", "healthy_same_manifest_version_reapplication", "formal_uninstall", "known_rollback"],
@@ -122,7 +137,7 @@ def valid_features(features: object) -> bool:
     return True
 
 
-def validate_zip(raw: bytes) -> tuple[dict, dict[str, bytes]]:
+def validate_zip(raw: bytes, expected_target: str = TARGET, expected_role: str = "formal-candidate-unvalidated") -> tuple[dict, dict[str, bytes]]:
     """Bound metadata before decompression, then verify every closed-set member."""
     if not 1 <= len(raw) <= MAX_ZIP:
         raise ValueError("ZIP exceeds 15 MiB candidate input limit")
@@ -156,8 +171,8 @@ def validate_zip(raw: bytes) -> tuple[dict, dict[str, bytes]]:
         raise ValueError("Unexpected development manifest fields")
     if (type(manifest["schema_version"]) is not int or manifest["schema_version"] != 1
         or manifest["product"] != "FutureClassroom" or manifest["artifact_type"] != "development-probe"
-        or manifest["status"] != "NOT_VALIDATED" or manifest["target"] != TARGET
-        or manifest["target_role"] != "formal-candidate-unvalidated"):
+        or manifest["status"] != "NOT_VALIDATED" or manifest["target"] != expected_target
+        or manifest["target_role"] != expected_role):
         raise ValueError("Only the unvalidated Win7 MSVC development ZIP is currently supported")
     version_parts(manifest["version"])
     if (not isinstance(manifest["artifact_name"], str) or re.fullmatch(r"[A-Za-z0-9._-]+\.zip", manifest["artifact_name"]) is None
@@ -455,36 +470,134 @@ def admit_normal_helper(args, payloads: dict[str, bytes], version: str) -> tuple
                     "cargo_metadata_sha256": metadata_sha, "cargo_package_id": package["id"], "cargo_manifest_path": package["manifest_path"]}
 
 
+def admit_normal_guard(args, helper_provenance: dict, version: str) -> tuple[bytes, dict]:
+    """Additional same-CI normal library admission; never an arbitrary DLL SHA gate."""
+    root = args.build_evidence.absolute()
+    result_raw = PROBE["bounded_regular_file"](root / "result.json", MAX_LOG)
+    if digest(result_raw) != helper_provenance["result_sha256"]:
+        raise ValueError("Guard and ordinary programs require the same accepted CI result")
+    result = json_document(result_raw)
+    metadata_raw = PROBE["bounded_regular_file"](root / "logs/cargo-metadata.stdout.log", MAX_LOG)
+    if digest(metadata_raw) != helper_provenance["cargo_metadata_sha256"]:
+        raise ValueError("Guard metadata differs from the original normal program metadata")
+    metadata = json_document(metadata_raw)
+    packages = [p for p in metadata["packages"] if p.get("name") == "fc-windows"]
+    if len(packages) != 1:
+        raise ValueError("Expected one original fc-windows workspace package")
+    package = packages[0]
+    workspace = metadata["workspace_root"].replace("\\", "/").rstrip("/")
+    if (package.get("source") is not None or package.get("version") != version
+        or package.get("id") not in metadata["workspace_members"]
+        or package.get("manifest_path", "").replace("\\", "/") != workspace + "/crates/fc-windows/Cargo.toml"):
+        raise ValueError("Guard package source/version/workspace differs")
+    targets = [t for t in package.get("targets", []) if t.get("name") == "fc_windows"]
+    if (len(targets) != 1 or set(targets[0].get("crate_types", [])) != {"rlib", "cdylib"}
+        or set(targets[0].get("kind", [])) not in ({"rlib", "cdylib"}, {"lib"})
+        or targets[0].get("src_path", "").replace("\\", "/") != workspace + "/crates/fc-windows/src/lib.rs"):
+        raise ValueError("Guard is not the exact normal library target")
+    ledger_raw = PROBE["bounded_regular_file"](root / "executables.json", MAX_LOG)
+    if digest(ledger_raw) != result.get("executables_manifest_sha256"):
+        raise ValueError("Guard ledger is not bound by the accepted CI result")
+    rows = [r for r in json_document(ledger_raw) if r.get("role") == "custom_action_library"]
+    if (len(rows) != 1 or rows[0].get("package") != "fc-windows" or rows[0].get("target") != "fc_windows"
+        or rows[0].get("cargo_profile_test") is not False or rows[0].get("pe_subsystem") not in (2, 3)
+        or rows[0].get("relative_path") != "custom_action_library/fc-windows/fc_windows.dll"):
+        raise ValueError("Guard requires its one normal CI library ledger entry")
+    row = rows[0]
+    data = PROBE["bounded_regular_file"](root / row["relative_path"], 32 * 1024 * 1024)
+    if (len(data) != row.get("bytes") or digest(data) != row.get("sha256")
+        or getattr(args, "guard_library", None) is None
+        or PROBE["bounded_regular_file"](args.guard_library.absolute(), 32 * 1024 * 1024) != data
+        or getattr(args, "guard_library_sha256", None) != digest(data)):
+        raise ValueError("Guard DLL differs from the actual same-source CI library")
+    pe_dll_header(data)
+    steps = [r for r in result["commands"] if r.get("name") == "guard-library-compile"]
+    if (len(steps) != 1 or steps[0].get("passed") is not True or steps[0].get("exit_code") != 0
+        or steps[0].get("parent_exited") is not True or steps[0].get("timed_out_or_pipe_stalled") is not False
+        or steps[0].get("log_truncated") is not False or steps[0].get("stdout") != "logs/guard-library-compile.stdout.log"):
+        raise ValueError("Original guard library compiler did not complete")
+    step = steps[0]
+    arguments = step.get("arguments", [])
+    if (arguments[:3] != ["-Z", "build-std", "build"] or "--lib" not in arguments or "--release" not in arguments
+        or "--locked" not in arguments or "--message-format=json" not in arguments
+        or any(x in arguments for x in ("--bin", "--tests", "--all-targets", "--examples", "--features", "--all-features", "--no-default-features"))
+        or arguments.count("-p") != 1 or arguments.index("-p") + 1 >= len(arguments) or arguments[arguments.index("-p") + 1] != "fc-windows"
+        or arguments.count("--target") != 1 or arguments.index("--target") + 1 >= len(arguments) or arguments[arguments.index("--target") + 1] != TARGET):
+        raise ValueError("Guard compiler command is not the closed normal library build")
+    log = PROBE["bounded_regular_file"](root / step["stdout"], MAX_LOG)
+    if digest(log) != step.get("stdout_sha256"):
+        raise ValueError("Original guard compiler JSON log changed")
+    messages = [json_document(line) for line in log.splitlines() if line.startswith(b"{")]
+    messages = [m for m in messages if m.get("reason") == "compiler-artifact" and m.get("package_id") == package["id"] and m.get("target", {}).get("name") == "fc_windows"]
+    if (len(messages) != 1 or messages[0].get("profile", {}).get("test") is not False
+        or messages[0].get("manifest_path") != package["manifest_path"] or messages[0].get("target") != targets[0]
+        or len([v for v in messages[0].get("filenames", []) if v.replace("\\", "/").endswith("/fc_windows.dll")]) != 1):
+        raise ValueError("Original Cargo JSON does not prove the exact normal fc-windows cdylib")
+    return data, {"result_sha256": digest(result_raw), "source_sha": helper_provenance["source_sha"],
+                  "cargo_metadata_sha256": digest(metadata_raw), "compiler_stdout_sha256": digest(log),
+                  "package_id": package["id"], "dll_sha256": digest(data), "profile_test": False}
+
+
+def pe_dll_header(data: bytes) -> None:
+    # A DLL's subsystem does not launch a console; keep executable GUI admission
+    # unchanged and validate the library's own PE role rather than rewriting it.
+    if len(data) < 64 or data[:2] != b"MZ":
+        raise ValueError("Missing guard DOS header")
+    offset = struct.unpack_from("<I", data, 60)[0]
+    if (offset > len(data) - 96 or data[offset:offset + 4] != b"PE\0\0"
+        or struct.unpack_from("<H", data, offset + 4)[0] != 0x14C
+        or struct.unpack_from("<H", data, offset + 24)[0] != 0x10B
+        or struct.unpack_from("<H", data, offset + 20)[0] < 70
+        or struct.unpack_from("<H", data, offset + 20)[0] > len(data) - offset - 24
+        or struct.unpack_from("<H", data, offset + 92)[0] not in (2, 3)
+        or struct.unpack_from("<HH", data, offset + 72) != (6, 1)):
+        raise ValueError("Guard requires complete x86 PE32/subsystem6.1 library header")
+    if not struct.unpack_from("<H", data, offset + 22)[0] & 0x2000:
+        raise ValueError("Guard library must be an actual x86 DLL")
+
+
+def verify_guard_exports(inspection: bytes) -> None:
+    names = re.findall(rb"^\s*\[\s*[0-9]+\]\s+(FcControlledInnerGuard[^\s]*)\s*$", inspection, re.MULTILINE)
+    if names != [b"FcControlledInnerGuard"]:
+        raise ValueError("Guard must expose its exact undecorated system-ABI Target")
+
+
 def chainer_idt() -> bytes:
     return ("MsiEmbeddedChainer\tCondition\tCommandLine\tSource\tType\r\n"
             "s72\tS255\tS255\ts72\ti2\r\nMsiEmbeddedChainer\tMsiEmbeddedChainer\r\n"
             "FcLifecycleGuardian\tNOT (ACTION = \"ADVERTISE\")\tsupervisor\t" + HELPER_BINARY + "\t2\r\n").encode("ascii")
 
 
-def lifecycle_custom_action_idt() -> bytes:
+def lifecycle_custom_action_idt(controlled: bool = False) -> bytes:
     lines = ["Action\tType\tSource\tTarget", "s72\ti2\tS72\tS255", "CustomAction\tAction"]
+    if controlled:
+        lines.append("\t".join((GUARD_ACTION, "1", GUARD_BINARY, GUARD_ACTION)))
+        return ("\r\n".join(lines) + "\r\n").encode("ascii")
     for name, (kind, target, _) in LIFECYCLE_ACTIONS.items():
         lines.append("\t".join((name, str(kind), HELPER_BINARY, target)))
     return ("\r\n".join(lines) + "\r\n").encode("ascii")
 
 
-def lifecycle_execute_sequence_idt(intermediate: bytes) -> bytes:
+def lifecycle_execute_sequence_idt(intermediate: bytes, controlled: bool = False) -> bytes:
     """Preserve compiler standard rows and add only the fixed synchronous begin."""
     rows = idt_rows(intermediate, "InstallExecuteSequence")
     if any(set(row) != {"Action", "Condition", "Sequence"} for row in rows):
         raise ValueError("Unexpected intermediate execution schema")
-    if any(row["Action"] in LIFECYCLE_ACTIONS.keys() | REMOVED_LIFECYCLE_ACTIONS for row in rows):
+    if any(row["Action"] in LIFECYCLE_ACTIONS.keys() | REMOVED_LIFECYCLE_ACTIONS | {GUARD_ACTION} for row in rows):
         raise ValueError("Intermediate compiler output already contains lifecycle hooks")
     lines = ["Action\tCondition\tSequence", "s72\tS255\ti2", "InstallExecuteSequence\tAction"]
     for row in rows:
         lines.append("\t".join(row[name] for name in ("Action", "Condition", "Sequence")))
-    lines.extend("\t".join((name, "1", str(spec[2]))) for name, spec in LIFECYCLE_ACTIONS.items())
+    if controlled:
+        lines.append("\t".join((GUARD_ACTION, "1", "1499")))
+    else:
+        lines.extend("\t".join((name, "1", str(spec[2]))) for name, spec in LIFECYCLE_ACTIONS.items())
     raw = ("\r\n".join(lines) + "\r\n").encode("ascii")
-    verify_transaction_sequence(raw)
+    verify_transaction_sequence(raw, controlled)
     return raw
 
 
-def authoring(version: str, names: list[str]) -> bytes:
+def authoring(version: str, names: list[str], controlled: bool = False) -> bytes:
     """Unexecuted compiler subset; final lifecycle tables require explicit import."""
     ET.register_namespace("", WIX_NS)
     def element(parent, name, **attrs):
@@ -497,11 +610,17 @@ def authoring(version: str, names: list[str]) -> bytes:
     sequence = element(product, "InstallExecuteSequence")
     element(sequence, "InstallExecute", Sequence="6500")
     element(sequence, "RemoveExistingProducts", After="InstallExecute")
-    element(product, "Binary", Id=HELPER_BINARY, SourceFile="lifecycle/fc-installer-lifecycle.exe")
+    if controlled:
+        element(product, "Binary", Id=GUARD_BINARY, SourceFile="lifecycle/fc_windows.dll")
+        element(product, "Binary", Id=TEMPLATE_BINARY, SourceFile="lifecycle/guard-client-template.exe")
+    else:
+        element(product, "Binary", Id=HELPER_BINARY, SourceFile="lifecycle/fc-installer-lifecycle.exe")
     # wixl 0.103 cannot populate BinaryKey/ExeCommand CustomAction rows.
     # This unexecuted compiler subset omits both declarations and references;
     # exact final lifecycle tables are imported and read back below.
     element(product, "Property", Id="MSIRESTARTMANAGERCONTROL", Value="DisableShutdown")
+    if controlled:
+        element(product, "Property", Id="MsiLogging", Value="voicewarmup!")
     element(product, "Condition", Message="This candidate supports only the current user installation context.").text = "NOT ALLUSERS"
     element(product, "Condition", Message="Windows 7 or later is required; actual OS compatibility remains unvalidated.").text = "Installed OR VersionNT >= 601"
     element(product, "Condition", Message="Rollback must remain enabled for this lifecycle candidate.").text = "NOT RollbackDisabled AND NOT DISABLEROLLBACK"
@@ -589,29 +708,38 @@ def integer(value: str) -> int:
     return int(value)
 
 
-def verify_transaction_sequence(raw: bytes) -> dict[str, int]:
+def verify_transaction_sequence(raw: bytes, controlled: bool = False) -> dict[str, int]:
     rows = idt_rows(raw, "InstallExecuteSequence")
     if any(set(row) != {"Action", "Condition", "Sequence"} for row in rows):
         raise ValueError("Invalid InstallExecuteSequence schema")
     actions = {row["Action"]: integer(row["Sequence"]) for row in rows}
-    required = {"CostFinalize", "InstallValidate", "InstallInitialize", "InstallExecute", "RemoveExistingProducts", "InstallFinalize"} | LIFECYCLE_ACTIONS.keys()
+    hooks = {GUARD_ACTION: (1, GUARD_ACTION, 1499)} if controlled else LIFECYCLE_ACTIONS
+    gate = GUARD_ACTION if controlled else "FcBeginGate"
+    required = {"CostFinalize", "InstallValidate", "InstallInitialize", "InstallExecute", "RemoveExistingProducts", "InstallFinalize"} | hooks.keys()
+    if (controlled and LIFECYCLE_ACTIONS.keys() & actions.keys()) or (not controlled and GUARD_ACTION in actions):
+        raise ValueError("Legacy and controlled guards cannot be mixed")
     if REMOVED_LIFECYCLE_ACTIONS & actions.keys():
         raise ValueError("Removed lifecycle notifications cannot remain in the execution sequence")
-    if not required <= actions.keys() or not (actions["CostFinalize"] < actions["InstallValidate"] < actions["FcBeginGate"] < actions["InstallInitialize"] < actions["InstallExecute"] < actions["RemoveExistingProducts"] < actions["InstallFinalize"]):
+    if not required <= actions.keys() or not (actions["CostFinalize"] < actions["InstallValidate"] < actions[gate] < actions["InstallInitialize"] < actions["InstallExecute"] < actions["RemoveExistingProducts"] < actions["InstallFinalize"]):
         raise ValueError("Lifecycle gate must execute before mutation; removal must follow InstallExecute and precede InstallFinalize")
-    if any(actions[name] != spec[2] for name, spec in LIFECYCLE_ACTIONS.items()):
+    if controlled and actions["InstallInitialize"] != 1500:
+        raise ValueError("Controlled guard1499 requires its exact successor1500")
+    if any(actions[name] != spec[2] for name, spec in hooks.items()):
         raise ValueError("Lifecycle hook sequence differs from the exact reviewed topology")
     for row in rows:
-        if row["Action"] in LIFECYCLE_ACTIONS and row["Condition"] != "1":
+        if row["Action"] in hooks and row["Condition"] != "1":
             raise ValueError("Lifecycle hooks cannot depend on caller-controlled bypass properties")
         if row["Action"] in {"InstallFiles", "RemoveFiles", "WriteRegistryValues", "RemoveRegistryValues", "RegisterProduct", "PublishProduct"} and integer(row["Sequence"]) <= actions["InstallInitialize"]:
             raise ValueError("An installer mutation precedes the initialized lifecycle transaction")
     return {name: actions[name] for name in sorted(required)}
 
 
-def verify_msi_contract(summary: bytes, tables: dict[str, bytes], version: str, payloads: dict[str, bytes]) -> dict:
+def verify_msi_contract(summary: bytes, tables: dict[str, bytes], version: str, payloads: dict[str, bytes], controlled: bool = False) -> dict:
     """Check actual compiler output, not just table existence or authored XML."""
-    if len(summary) > 64 * 1024 or not REQUIRED_TABLES <= tables.keys():
+    required_tables = CONTROLLED_REQUIRED_TABLES if controlled else REQUIRED_TABLES
+    if controlled and "MsiEmbeddedChainer" in tables:
+        raise ValueError("Controlled inner cannot contain a legacy chainer table")
+    if len(summary) > 64 * 1024 or not required_tables <= tables.keys():
         raise ValueError("Missing required MSI table/summary export")
     fields = {}
     for line in summary.decode("utf-8", "strict").splitlines():
@@ -633,22 +761,31 @@ def verify_msi_contract(summary: bytes, tables: dict[str, bytes], version: str, 
             raise ValueError("Unexpected MSI columns: " + name)
         return found
 
-    if rows("Binary", ["Name", "Data"]) != [{"Name": HELPER_BINARY, "Data": "Binary." + HELPER_BINARY}]:
-        raise ValueError("Only the exact lifecycle helper Binary stream is allowed")
-    expected_actions = [{"Action": name, "Type": str(kind), "Source": HELPER_BINARY, "Target": role}
-                        for name, (kind, role, _) in LIFECYCLE_ACTIONS.items()]
-    actual_actions = rows("CustomAction", ["Action", "Type", "Source", "Target"])
-    if sorted(actual_actions, key=lambda row: row["Action"]) != sorted(expected_actions, key=lambda row: row["Action"]):
-        raise ValueError("Lifecycle CustomAction type/source/role must match the exact allowlist")
-    if rows("MsiEmbeddedChainer", ["MsiEmbeddedChainer", "Condition", "CommandLine", "Source", "Type"]) != [
-            {"MsiEmbeddedChainer": "FcLifecycleGuardian", "Condition": 'NOT (ACTION = "ADVERTISE")',
-             "CommandLine": "supervisor", "Source": HELPER_BINARY, "Type": "2"}]:
-        raise ValueError("Only the exact engine-launched lifecycle supervisor is allowed")
-
+    if controlled:
+        expected_binary = [{"Name": name, "Data": "Binary." + name} for name in (GUARD_BINARY, TEMPLATE_BINARY)]
+        if sorted(rows("Binary", ["Name", "Data"]), key=lambda row: row["Name"]) != sorted(expected_binary, key=lambda row: row["Name"]):
+            raise ValueError("Controlled inner requires exactly DLL and canonical client template Binary streams")
+        if rows("CustomAction", ["Action", "Type", "Source", "Target"]) != [
+            {"Action": GUARD_ACTION, "Type": "1", "Source": GUARD_BINARY, "Target": GUARD_ACTION}]:
+            raise ValueError("Controlled inner requires its one synchronous Type1 guard")
+    else:
+        if rows("Binary", ["Name", "Data"]) != [{"Name": HELPER_BINARY, "Data": "Binary." + HELPER_BINARY}]:
+            raise ValueError("Only the exact lifecycle helper Binary stream is allowed")
+        expected_actions = [{"Action": name, "Type": str(kind), "Source": HELPER_BINARY, "Target": role}
+                            for name, (kind, role, _) in LIFECYCLE_ACTIONS.items()]
+        actual_actions = rows("CustomAction", ["Action", "Type", "Source", "Target"])
+        if sorted(actual_actions, key=lambda row: row["Action"]) != sorted(expected_actions, key=lambda row: row["Action"]):
+            raise ValueError("Lifecycle CustomAction type/source/role must match the exact allowlist")
+        if rows("MsiEmbeddedChainer", ["MsiEmbeddedChainer", "Condition", "CommandLine", "Source", "Type"]) != [
+                {"MsiEmbeddedChainer": "FcLifecycleGuardian", "Condition": 'NOT (ACTION = "ADVERTISE")',
+                 "CommandLine": "supervisor", "Source": HELPER_BINARY, "Type": "2"}]:
+            raise ValueError("Only the exact engine-launched lifecycle supervisor is allowed")
     properties = {row["Property"]: row["Value"] for row in rows("Property", ["Property", "Value"])}
     expected_properties = {"Manufacturer": "FutureClassroom", "ProductLanguage": "1033", "ProductName": "FutureClassroom MSI candidate",
         "ProductVersion": version, "ProductCode": "{" + product_code(version) + "}", "UpgradeCode": "{" + UPGRADE_CODE + "}",
         "MSIRESTARTMANAGERCONTROL": "DisableShutdown", "SecureCustomProperties": "WIX_DOWNGRADE_DETECTED;WIX_UPGRADE_DETECTED"}
+    if controlled:
+        expected_properties["MsiLogging"] = "voicewarmup!"
     # Property order is irrelevant, including the order of the two secure names.
     secure = properties.get("SecureCustomProperties", "").split(";")
     if len(secure) != 2 or set(secure) != {"WIX_DOWNGRADE_DETECTED", "WIX_UPGRADE_DETECTED"}:
@@ -657,7 +794,7 @@ def verify_msi_contract(summary: bytes, tables: dict[str, bytes], version: str, 
     if properties != expected_properties:
         raise ValueError("MSI product/version/scope properties differ from admitted authoring")
 
-    xml = ET.fromstring(authoring(version, list(payloads)))
+    xml = ET.fromstring(authoring(version, list(payloads), controlled))
     ns = {"w": WIX_NS}
     expected_dirs = {}
     def directory(node, parent):
@@ -717,7 +854,7 @@ def verify_msi_contract(summary: bytes, tables: dict[str, bytes], version: str, 
     expected_conditions["NOT WIX_DOWNGRADE_DETECTED"] = "A newer FutureClassroom candidate is installed."
     if {row["Condition"]: row["Description"] for row in conditions} != expected_conditions:
         raise ValueError("MSI scope/OS/downgrade launch conditions differ from authoring")
-    transaction = verify_transaction_sequence(tables["InstallExecuteSequence"])
+    transaction = verify_transaction_sequence(tables["InstallExecuteSequence"], controlled)
     for name in ("InstallExecuteSequence", "InstallUISequence"):
         sequence = {row["Action"]: integer(row["Sequence"]) for row in rows(name, ["Action", "Condition", "Sequence"])}
         if not 0 < sequence.get("FindRelatedProducts", 0) < sequence.get("LaunchConditions", 0):
@@ -727,7 +864,7 @@ def verify_msi_contract(summary: bytes, tables: dict[str, bytes], version: str, 
         if {"ForceReboot", "ScheduleReboot", "StartServices", "StopServices", "DeleteServices", "CreateShortcuts", "RemoveShortcuts", "WriteRegistryValues"} & sequence.keys() - ({"WriteRegistryValues"} if name == "InstallExecuteSequence" else set()):
             raise ValueError("Unexpected MSI lifecycle/system action")
     return {"status": "PASS", "template": fields["Template"], "installer_version": 500, "source_flags": 10,
-            "lifecycle_capabilities": lifecycle_capabilities(),
+            "lifecycle_capabilities": lifecycle_capabilities(controlled),
             "payload_files": len(payloads), "registry_scope": "Exact installer-only HKCU component markers; no Run cleanup", "transaction_sequence": transaction}
 
 
@@ -787,22 +924,41 @@ def build(args) -> dict:
     manifest, payloads = validate_zip(raw)
     pe_header(payloads["fc-bootstrap.exe"])
     normal_helper, helper_provenance = admit_normal_helper(args, payloads, manifest["version"])
+    guard_dll = None
+    if getattr(args, "controlled", False):
+        guard_dll, guard_provenance = admit_normal_guard(args, helper_provenance, manifest["version"])
+        helper_provenance["guard_library"] = guard_provenance
+    return assemble(args, raw, source, manifest, payloads, normal_helper, helper_provenance, guard_dll)
+
+
+def assemble(args, raw: bytes, source: Path, manifest: dict, payloads: dict[str, bytes], normal_helper: bytes, helper_provenance: dict, guard_dll: bytes | None) -> dict:
+    controlled = getattr(args, "controlled", False)
+    if controlled != (guard_dll is not None):
+        raise ValueError("Controlled assembly requires its independently admitted normal DLL")
+    msi_name = "FutureClassroom.msi" if controlled else "candidate.msi"
     tools = {name: tool_file(getattr(args, name)) for name in ("wixl", "msibuild", "msiinfo", "msiextract", "objdump")}
     if not re.fullmatch(r"[0-9a-f]{64}", args.msibuild_sha256) or file_digest(tools["msibuild"]) != args.msibuild_sha256:
         raise ValueError("msibuild does not match its explicit reviewed SHA")
     output = fresh_output(args.output_dir)
-    report = {"schema_version": 1, "status": "FAIL", "candidate_status": "NOT_VALIDATED", "scope": "MSI_CANDIDATE_BUILD_AND_STATIC_TABLE_INSPECTION_ONLY", "readiness": "NOT_GRANTED", "installation": "NOT_RUN", "target": TARGET,
+    report = {"schema_version": 1, "status": "FAIL", "candidate_status": "NOT_VALIDATED", "scope": "MSI_CANDIDATE_BUILD_AND_STATIC_TABLE_INSPECTION_ONLY", "readiness": "NOT_GRANTED", "installation": "NOT_RUN", "target": helper_provenance.get("target", TARGET),
+              "controlled_inner": controlled, "development_fixture_only": helper_provenance.get("development_fixture_only", False),
+              "production_integration": "NOT_EXERCISED" if controlled else "NOT_RUN",
               "source_zip": {"path": str(source), "size": len(raw), "sha256": digest(raw)}, "source_manifest": manifest,
               "script_sha256": digest(Path(__file__).read_bytes()),
               "builder_source": {"script_path": str(Path(__file__).absolute()), "script_sha256": digest(Path(__file__).read_bytes()), "default_root": str(BUILDER_ROOT)},
               "source_checkout": {"path": str(ROOT), "head": helper_provenance["source_sha"], "original_ci_inputs_verified": helper_provenance["current_inputs_verified"]},
-              "commands": [], "limitations": LIMITATIONS,
-              "lifecycle_capabilities": lifecycle_capabilities(),
+              "commands": [], "limitations": (["CONTROLLED JOINT MSI AND FULL FOURTEEN-PAYLOAD DAMAGED REPAIR NOT_EXERCISED", "Same sealed source bundle required; standard ARP removal and moved/deleted bundle remain unsupported", "Source/cache selection, failure rollback, full P5/Q13 and Win7/Win10/Seewo actual acceptance remain independent", "No production listener, Run cleanup or school data deletion is authorized"] if controlled else LIMITATIONS),
+              "lifecycle_capabilities": lifecycle_capabilities(controlled),
               "normal_helper_provenance": helper_provenance,
               "installation_scope": "per-user; fixed LocalAppData/Programs/FutureClassroom; business data remains original protected ProgramData",
               "tools": {name: {"path": str(path), "sha256": digest(path.read_bytes())} for name, path in tools.items()}}
+    if helper_provenance.get("development_fixture_only", False):
+        report["scope"] = "DEV_CONTROLLED_PRODUCT_STATIC_BUILD_NOT_FORMAL_MSVC"
+        report["source_checkout"]["scope"] = "ACTUAL_FROZEN_INPUT_BYTES_AND_BASE_GIT_HEAD_NOT_FORMAL_CI"
     report["packaging_dependencies"] = {str(path.relative_to(ROOT)): file_digest(path) for path in (
-        ROOT / "scripts/package-probe.py", ROOT / "scripts/audit-pe.py", ROOT / "packaging/MSI-CANDIDATE.md")}
+        ROOT / "scripts/package-probe.py", ROOT / "scripts/audit-pe.py", ROOT / ("packaging/CONTROLLED-MSI-CANDIDATE.md" if controlled else "packaging/MSI-CANDIDATE.md"))}
+    if controlled:
+        report["packaging_dependencies"]["scripts/controlled-setup-seal.py"] = file_digest(ROOT / "scripts/controlled-setup-seal.py")
     try:
         report["tools"]["msibuild"]["reviewed_version"] = "0.103+repack-1build3"
         report["tools"]["msibuild"]["version_basis"] = "Caller-reviewed exact binary SHA from the pinned tool package; upstream v0.103 msibuild has no --version option."
@@ -811,7 +967,7 @@ def build(args) -> dict:
             report["tools"][name]["version_output"] = version.decode("utf-8", "replace")
             if name == "wixl" and version.strip() != b"0.103":
                 raise ValueError("Only the reviewed wixl 0.103 authoring subset is accepted")
-        payloads["MSI-CANDIDATE.txt"] = PROBE["bounded_regular_file"](ROOT / "packaging/MSI-CANDIDATE.md", 64 * 1024)
+        payloads["MSI-CANDIDATE.txt"] = PROBE["bounded_regular_file"](ROOT / ("packaging/CONTROLLED-MSI-CANDIDATE.md" if controlled else "packaging/MSI-CANDIDATE.md"), 64 * 1024)
         if sum(map(len, payloads.values())) > MAX_INSTALLED:
             raise ValueError("Installed payload including candidate instructions exceeds 30 MiB")
         report["payloads"] = [{"path": name, "size": len(data), "sha256": digest(data), "component_guid": component_code(name)} for name, data in sorted(payloads.items())]
@@ -836,53 +992,83 @@ def build(args) -> dict:
         report["helper_pe_audit"] = helper_audit
         if helper_audit["structural_errors"] or any(risk["kind"] == "RUNTIME_DEPLOYMENT" for risk in helper_audit["risks"]):
             raise ValueError("Lifecycle helper PE/static runtime audit failed")
-        authored = authoring(manifest["version"], list(payloads))
+        template = None
+        if controlled:
+            if len(payloads) != 14:
+                raise ValueError("Controlled product requires the complete fourteen payloads")
+            seal = runpy.run_path(str(ROOT / "scripts/controlled-setup-seal.py"))
+            template = seal["make_setup_template"](image)
+            (lifecycle / "guard-client-template.exe").write_bytes(template)
+            (lifecycle / "fc_windows.dll").write_bytes(guard_dll)
+            pe_dll_header(guard_dll)
+            guard_inspection = run_tool(output, "guard-pe", [str(tools["objdump"]), "-p", str(lifecycle / "fc_windows.dll")], report["commands"])
+            verify_guard_exports(guard_inspection)
+            guard_subsystem = struct.unpack_from("<H", guard_dll, struct.unpack_from("<I", guard_dll, 60)[0] + 92)[0]
+            guard_audit = PE["parse_objdump"](guard_inspection.decode("utf-8", "strict"), "gui" if guard_subsystem == 2 else "console")
+            if guard_audit["structural_errors"] or any(r["kind"] == "RUNTIME_DEPLOYMENT" for r in guard_audit["risks"]):
+                raise ValueError("Guard DLL PE/static runtime audit failed")
+            report["guard_pe_audit"] = guard_audit
+        authored = authoring(manifest["version"], list(payloads), controlled)
         (output / "candidate.wxs").write_bytes(authored)
         report["authoring"] = {"path": "candidate.wxs", "sha256": digest(authored), "product_code": product_code(manifest["version"]), "upgrade_code": UPGRADE_CODE}
-        run_tool(output, "wixl-build", [str(tools["wixl"]), "-a", "x86", "-o", "candidate.msi", "candidate.wxs"], report["commands"])
-        intermediate_actions = run_tool(output, "intermediate-CustomAction", [str(tools["msiinfo"]), "export", "candidate.msi", "CustomAction"], report["commands"])
+        run_tool(output, "wixl-build", [str(tools["wixl"]), "-a", "x86", "-o", msi_name, "candidate.wxs"], report["commands"])
+        intermediate_actions = run_tool(output, "intermediate-CustomAction", [str(tools["msiinfo"]), "export", msi_name, "CustomAction"], report["commands"])
         if (intermediate_actions.decode("ascii", "strict").splitlines()[:3] !=
                 ["Action\tType\tSource\tTarget\tExtendedType", "s72\ti2\tS72\tS255\tI4", "CustomAction\tAction"]
                 or idt_rows(intermediate_actions, "CustomAction")):
             raise ValueError("Expected the pinned compiler's empty intermediate CustomAction table")
-        intermediate_sequence = run_tool(output, "intermediate-InstallExecuteSequence", [str(tools["msiinfo"]), "export", "candidate.msi", "InstallExecuteSequence"], report["commands"])
-        (output / "CustomAction.idt").write_bytes(lifecycle_custom_action_idt())
-        (output / "InstallExecuteSequence.idt").write_bytes(lifecycle_execute_sequence_idt(intermediate_sequence))
-        (output / "MsiEmbeddedChainer.idt").write_bytes(chainer_idt())
-        # DELETE leaves ExtendedType behind; replace the empty compiler schema.
-        run_tool(output, "lifecycle-import", [str(tools["msibuild"]), "candidate.msi",
-                 "-q", "DROP TABLE `CustomAction`", "-q", "DROP TABLE `InstallExecuteSequence`",
-                 "-i", "CustomAction.idt", "-i", "InstallExecuteSequence.idt", "-i", "MsiEmbeddedChainer.idt"], report["commands"])
+        intermediate_sequence = run_tool(output, "intermediate-InstallExecuteSequence", [str(tools["msiinfo"]), "export", msi_name, "InstallExecuteSequence"], report["commands"])
+        (output / "CustomAction.idt").write_bytes(lifecycle_custom_action_idt(controlled))
+        (output / "InstallExecuteSequence.idt").write_bytes(lifecycle_execute_sequence_idt(intermediate_sequence, controlled))
+        imports = [str(tools["msibuild"]), msi_name, "-q", "DROP TABLE `CustomAction`", "-q", "DROP TABLE `InstallExecuteSequence`", "-i", "CustomAction.idt", "-i", "InstallExecuteSequence.idt"]
+        if not controlled:
+            (output / "MsiEmbeddedChainer.idt").write_bytes(chainer_idt())
+            imports += ["-i", "MsiEmbeddedChainer.idt"]
+        run_tool(output, "lifecycle-import", imports, report["commands"])
         report["lifecycle_table_authoring"] = {
             "intermediate": "UNEXECUTED_COMPILER_SUBSET_NOT_FINAL_CANDIDATE",
-            "custom_action_import": "EXACT_FOUR_COLUMNS_THREE_FIXED_ROWS",
-            "execution_import": "ORIGINAL_STANDARD_ROWS_PLUS_THREE_FIXED_CONDITION1_HOOKS",
+            "custom_action_import": "EXACT_FOUR_COLUMNS_ONE_TYPE1_ROW" if controlled else "EXACT_FOUR_COLUMNS_THREE_FIXED_ROWS",
+            "execution_import": "ORIGINAL_STANDARD_ROWS_PLUS_GUARD1499_CONDITION1" if controlled else "ORIGINAL_STANDARD_ROWS_PLUS_THREE_FIXED_CONDITION1_HOOKS",
             "final_validation": "REQUIRES_UNCHANGED_EXPORTED_CONTRACT_AND_BINARY_PAYLOAD_READBACK"}
-        msi = PROBE["bounded_regular_file"](output / "candidate.msi", MAX_INSTALLED)
-        report["msi"] = {"path": "candidate.msi", "size": len(msi), "sha256": digest(msi)}
-        summary = run_tool(output, "msi-summary", [str(tools["msiinfo"]), "suminfo", "candidate.msi"], report["commands"])
-        tables = run_tool(output, "msi-tables", [str(tools["msiinfo"]), "tables", "candidate.msi"], report["commands"]).decode("utf-8", "strict").splitlines()
-        if not REQUIRED_TABLES <= set(tables):
+        msi = PROBE["bounded_regular_file"](output / msi_name, MAX_INSTALLED)
+        report["msi"] = {"path": msi_name, "size": len(msi), "sha256": digest(msi)}
+        summary = run_tool(output, "msi-summary", [str(tools["msiinfo"]), "suminfo", msi_name], report["commands"])
+        tables = run_tool(output, "msi-tables", [str(tools["msiinfo"]), "tables", msi_name], report["commands"]).decode("utf-8", "strict").splitlines()
+        required_tables = CONTROLLED_REQUIRED_TABLES if controlled else REQUIRED_TABLES
+        if controlled and "MsiEmbeddedChainer" in tables:
+            raise ValueError("Controlled MSI cannot contain legacy chainer")
+        if not required_tables <= set(tables):
             raise ValueError("Missing required MSI tables")
         exports = {}
-        for table in sorted(set(tables) & (REQUIRED_TABLES | FORBIDDEN_TABLES)):
-            data = run_tool(output, "table-" + table, [str(tools["msiinfo"]), "export", "candidate.msi", table], report["commands"])
+        for table in sorted(set(tables) & (required_tables | FORBIDDEN_TABLES)):
+            data = run_tool(output, "table-" + table, [str(tools["msiinfo"]), "export", msi_name, table], report["commands"])
             exports[table] = data
         expected_sequence = idt_rows((output / "InstallExecuteSequence.idt").read_bytes(), "InstallExecuteSequence")
         if sorted(idt_rows(exports["InstallExecuteSequence"], "InstallExecuteSequence"), key=lambda row: row["Action"]) != sorted(expected_sequence, key=lambda row: row["Action"]):
             raise ValueError("Imported execution table changed the compiler standard rows or fixed hooks")
-        report["msi_contract"] = verify_msi_contract(summary, exports, manifest["version"], payloads)
-        embedded = run_tool(output, "lifecycle-binary-extract", [str(tools["msiinfo"]), "extract", "candidate.msi", "Binary." + HELPER_BINARY], report["commands"])
-        if embedded != image:
-            raise ValueError("Actual MSI Binary stream differs from admitted normal prefix plus exact overlay")
-        prefix, decoded = parse_lifecycle_image(embedded)
-        if prefix != normal_helper or decoded != {name: {"bytes": len(data), "sha256": digest(data), "component_guid": component_code(name)} for name, data in payloads.items()}:
-            raise ValueError("Actual MSI helper overlay/payload ledger mismatch")
-        report["msi_lifecycle_binary_readback"] = "EXACT_NORMAL_PREFIX_AND_CLOSED_OVERLAY_BYTES_MATCH"
+        report["msi_contract"] = verify_msi_contract(summary, exports, manifest["version"], payloads, controlled)
+        if controlled:
+            for binary, expected in ((GUARD_BINARY, guard_dll), (TEMPLATE_BINARY, template)):
+                actual_binary = run_tool(output, "binary-readback-" + binary, [str(tools["msiinfo"]), "extract", msi_name, "Binary." + binary], report["commands"])
+                if actual_binary != expected:
+                    raise ValueError("Controlled MSI Binary differs from admitted exact bytes")
+            setup = seal["bind_setup_template"](template, msi)
+            seal["verify_setup_template_binding"](template, setup, msi)
+            (output / "Setup.exe").write_bytes(setup)
+            report["setup"] = {"path": "Setup.exe", "bytes": len(setup), "sha256": digest(setup), "template_sha256": digest(template), "inner_sha256": digest(msi), "only_zero32_filled": True}
+            report["msi_lifecycle_binary_readback"] = "EXACT_SAME_SOURCE_DLL_AND_ZERO32_TEMPLATE"
+        else:
+            embedded = run_tool(output, "lifecycle-binary-extract", [str(tools["msiinfo"]), "extract", msi_name, "Binary." + HELPER_BINARY], report["commands"])
+            if embedded != image:
+                raise ValueError("Actual MSI Binary stream differs from admitted normal prefix plus exact overlay")
+            prefix, decoded = parse_lifecycle_image(embedded)
+            if prefix != normal_helper or decoded != {name: {"bytes": len(data), "sha256": digest(data), "component_guid": component_code(name)} for name, data in payloads.items()}:
+                raise ValueError("Actual MSI helper overlay/payload ledger mismatch")
+            report["msi_lifecycle_binary_readback"] = "EXACT_NORMAL_PREFIX_AND_CLOSED_OVERLAY_BYTES_MATCH"
         report["transaction_sequence"] = report["msi_contract"]["transaction_sequence"]
         extracted = output / "extracted"
         extracted.mkdir()
-        run_tool(output, "msi-extract", [str(tools["msiextract"]), "-C", str(extracted), "candidate.msi"], report["commands"])
+        run_tool(output, "msi-extract", [str(tools["msiextract"]), "-C", str(extracted), msi_name], report["commands"])
         # The directory emitted by msiextract may include LocalAppData/Programs.
         matches = list(extracted.rglob("fc-bootstrap.exe"))
         if len(matches) != 1:
@@ -912,6 +1098,9 @@ def build(args) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-root", type=Path, default=ROOT, help="Original CI source checkout; HEAD and every selected raw input must match the accepted result; builder identity remains separate")
+    parser.add_argument("--controlled", action="store_true", help="Separate Type1 guarded inner + sealed Setup bundle; no production readiness granted")
+    parser.add_argument("--guard-library", type=Path, help="Exact same-source normal fc-windows CI DLL; required for controlled mode")
+    parser.add_argument("--guard-library-sha256")
     parser.add_argument("--input-zip", type=Path, required=True)
     parser.add_argument("--input-sha256", required=True)
     parser.add_argument("--lifecycle-helper", type=Path, required=True, help="Actual same-source profile.test=false normal CI helper")
