@@ -7,6 +7,10 @@ use std::{path::PathBuf, time::Instant};
 use windows::{core::HRESULT, Win32::Foundation::ERROR_SHARING_VIOLATION};
 
 pub mod broker;
+// This private foundation has no production installation entry until the
+// original native API owner and broker are integrated and jointly validated.
+#[allow(dead_code)]
+pub(crate) mod controlled;
 mod native;
 #[cfg(test)]
 mod tests;
@@ -137,6 +141,7 @@ impl LifecycleGate {
             guardian: None,
             watch_attempted: false,
             settled: false,
+            transaction_origin: TransactionOrigin::OwnedByJoin,
         })
     }
 }
@@ -215,6 +220,13 @@ pub struct MaintenanceOwner {
     guardian: Option<GuardianIdentity>,
     watch_attempted: bool,
     settled: bool,
+    transaction_origin: TransactionOrigin,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum TransactionOrigin {
+    OwnedByJoin,
+    OwnedByBegin { transaction_id: u32 },
 }
 impl MaintenanceOwner {
     pub fn operation_id(&self) -> OperationId {
@@ -244,13 +256,35 @@ impl MaintenanceOwner {
     /// record. Original process must be signaled with exit0 as well as matching
     /// the trusted settlement and original operation/creation identity.
     pub fn record_settlement(&mut self, receipt: Settlement) -> Result<()> {
+        self.record_transaction_settlement(
+            receipt.operation_id,
+            receipt.guardian,
+            receipt.outcome,
+            TransactionOrigin::OwnedByJoin,
+            receipt.join_return,
+            receipt.end_return,
+            receipt.effects_reconciled,
+        )
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn record_transaction_settlement(
+        &mut self,
+        operation_id: OperationId,
+        guardian: GuardianIdentity,
+        _outcome: SettledOutcome,
+        origin: TransactionOrigin,
+        ownership_return: u32,
+        end_return: u32,
+        effects_reconciled: bool,
+    ) -> Result<()> {
         self.current()?;
         if self.settled
-            || receipt.operation_id != self.operation_id
-            || self.guardian != Some(receipt.guardian)
-            || receipt.join_return != 0
-            || receipt.end_return != 0
-            || !receipt.effects_reconciled
+            || operation_id != self.operation_id
+            || self.guardian != Some(guardian)
+            || self.transaction_origin != origin
+            || ownership_return != 0
+            || end_return != 0
+            || !effects_reconciled
         {
             return Err(LifecycleError::Unsettled);
         }

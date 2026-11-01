@@ -261,6 +261,43 @@ fn native_child() {
             // The process will exit with original native handles retained.
             // No parent cleanup starts before actual child process return.
         }
+        "draft-loss" | "draft-close-fault" => {
+            let close_fault = std::env::var(ENV_MODE).unwrap() == "draft-close-fault";
+            let mut draft = LifecycleGate::try_draft_maintenance(
+                &identity,
+                Instant::now() + Duration::from_secs(20),
+            )
+            .unwrap();
+            assert!(!root.join("pending.v1").exists());
+            let mut guardian = spawn_child(&identity, "guardian");
+            guardian.ready(&root);
+            let original = draft.watch_guardian(&guardian.child).unwrap();
+            if close_fault {
+                guardian.close_and_wait();
+                draft.inject_close_failure_for_test("guardian");
+                let failed_begin =
+                    native::DraftAbortObservation::for_test(original, Some((1618, 0)), None, 0);
+                assert_eq!(
+                    draft.try_abort(Some(failed_begin)),
+                    Err(LifecycleError::Faulted)
+                );
+            } else {
+                drop(draft);
+                assert!(native::retained_count() > 0);
+                assert!(matches!(
+                    LifecycleGate::acquire_startup(&identity),
+                    Err(LifecycleError::Faulted)
+                ));
+                // The nested guardian has already made the exact ready file.
+                // Keep this original broker process alive for the parent probe.
+                wait_stdin();
+                guardian.close_and_wait();
+                return;
+            }
+            drop(draft);
+            assert!(native::retained_count() > 0);
+            assert!(!root.join("pending.v1").exists());
+        }
         mode if mode.starts_with("maintenance-fault-") => {
             let role = &mode["maintenance-fault-".len()..];
             assert!(["guardian", "pending", "parent", "gate"].contains(&role));
@@ -396,6 +433,277 @@ fn receipt_before_actual_guardian_exit_cannot_clear_pending() {
     owner.record_settlement(receipt).unwrap();
     owner.try_release().unwrap();
     assert!(owner.is_released());
+    assert!(!fixture.root.join("pending.v1").exists());
+    let mut startup = LifecycleGate::acquire_startup(&fixture.identity).unwrap();
+    startup.try_release().unwrap();
+}
+
+#[test]
+fn controlled_draft_blocks_startup_without_creating_pending_and_checked_aborts() {
+    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
+    let fixture = Fixture::new();
+    let mut draft = LifecycleGate::try_draft_maintenance(
+        &fixture.identity,
+        Instant::now() + Duration::from_secs(20),
+    )
+    .unwrap();
+    assert!(!fixture.root.join("pending.v1").exists());
+    assert!(matches!(
+        LifecycleGate::acquire_startup(&fixture.identity),
+        Err(LifecycleError::Busy)
+    ));
+    assert!(matches!(
+        draft.arm(&fixture.identity),
+        Err(LifecycleError::Unsettled)
+    ));
+    draft.expire_for_test();
+    assert!(matches!(
+        draft.arm(&fixture.identity),
+        Err(LifecycleError::Expired)
+    ));
+    // Negative cleanup does not renew or issue an installation permit.
+    draft.try_abort(None).unwrap();
+    let mut startup = LifecycleGate::acquire_startup(&fixture.identity).unwrap();
+    startup.try_release().unwrap();
+}
+
+#[test]
+fn controlled_failed_begin_requires_original_guardian_exit_before_draft_abort() {
+    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
+    let fixture = Fixture::new();
+    let mut draft = LifecycleGate::try_draft_maintenance(
+        &fixture.identity,
+        Instant::now() + Duration::from_secs(20),
+    )
+    .unwrap();
+    let mut guardian = fixture.child("guardian");
+    guardian.ready(&fixture.root);
+    let actual = draft.watch_guardian(&guardian.child).unwrap();
+    // These are explicitly synthetic native-return observations; actual OS gate
+    // and original process objects are exercised. No MSI success is claimed.
+    assert_eq!(
+        draft.observe_begin(native::BeginObservation::for_test(actual, 1618, 0)),
+        Err(LifecycleError::Unsettled)
+    );
+    assert!(matches!(
+        draft.arm(&fixture.identity),
+        Err(LifecycleError::Unsettled)
+    ));
+    assert_eq!(draft.try_abort(None), Err(LifecycleError::Unsettled));
+    let abort = native::DraftAbortObservation::for_test(actual, Some((1618, 0)), None, 0);
+    assert_eq!(
+        draft.try_abort(Some(abort)),
+        Err(LifecycleError::GuardianRunning)
+    );
+    assert!(!fixture.root.join("pending.v1").exists());
+    guardian.close_and_wait();
+    draft.try_abort(Some(abort)).unwrap();
+    let mut startup = LifecycleGate::acquire_startup(&fixture.identity).unwrap();
+    startup.try_release().unwrap();
+}
+
+#[test]
+fn controlled_begin_draft_expiry_requires_real_empty_end_observation_and_actual_exit() {
+    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
+    let fixture = Fixture::new();
+    let mut draft = LifecycleGate::try_draft_maintenance(
+        &fixture.identity,
+        Instant::now() + Duration::from_secs(20),
+    )
+    .unwrap();
+    let mut guardian = fixture.child("guardian");
+    guardian.ready(&fixture.root);
+    let actual = draft.watch_guardian(&guardian.child).unwrap();
+    let mut wrong = actual;
+    wrong.creation_filetime += 1;
+    assert_eq!(
+        draft.observe_begin(native::BeginObservation::for_test(wrong, 0, 31)),
+        Err(LifecycleError::Unsettled)
+    );
+    draft
+        .observe_begin(native::BeginObservation::for_test(actual, 0, 31))
+        .unwrap();
+    draft.expire_for_test();
+    assert!(matches!(
+        draft.arm(&fixture.identity),
+        Err(LifecycleError::Expired)
+    ));
+    guardian.close_and_wait();
+    for receipt in [
+        native::DraftAbortObservation::for_test(actual, None, None, 0),
+        native::DraftAbortObservation::for_test(actual, Some((0, 31)), None, 0),
+        native::DraftAbortObservation::for_test(actual, Some((0, 31)), Some(1603), 0),
+        native::DraftAbortObservation::for_test(actual, Some((0, 31)), Some(0), 6),
+        native::DraftAbortObservation::for_test(actual, Some((0, 32)), Some(0), 0),
+    ] {
+        assert_eq!(
+            draft.try_abort(Some(receipt)),
+            Err(LifecycleError::Unsettled)
+        );
+    }
+    assert!(!fixture.root.join("pending.v1").exists());
+    draft
+        .try_abort(Some(native::DraftAbortObservation::for_test(
+            actual,
+            Some((0, 31)),
+            Some(0),
+            0,
+        )))
+        .unwrap();
+    let mut startup = LifecycleGate::acquire_startup(&fixture.identity).unwrap();
+    startup.try_release().unwrap();
+}
+
+#[test]
+fn controlled_arm_uses_original_tag5_and_cannot_settle_with_synthetic_join0() {
+    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
+    let fixture = Fixture::new();
+    let mut draft = LifecycleGate::try_draft_maintenance(
+        &fixture.identity,
+        Instant::now() + Duration::from_secs(20),
+    )
+    .unwrap();
+    let mut guardian = fixture.child("guardian");
+    guardian.ready(&fixture.root);
+    let actual = draft.watch_guardian(&guardian.child).unwrap();
+    draft
+        .observe_begin(native::BeginObservation::for_test(actual, 0, 41))
+        .unwrap();
+    assert!(!fixture.root.join("pending.v1").exists());
+    let mut owner = draft.arm(&fixture.identity).unwrap();
+    assert_eq!(
+        owner.transaction_origin,
+        TransactionOrigin::OwnedByBegin { transaction_id: 41 }
+    );
+    assert!(fixture.root.join("pending.v1").exists());
+    guardian.close_and_wait();
+    let legacy = Settlement {
+        operation_id: owner.operation_id(),
+        guardian: actual,
+        outcome: SettledOutcome::Rollback,
+        join_return: 0,
+        end_return: 0,
+        effects_reconciled: true,
+    };
+    assert_eq!(
+        owner.record_settlement(legacy),
+        Err(LifecycleError::Unsettled)
+    );
+    let origin = native::TransactionOwnership::OwnedByBegin {
+        begin_return: 0,
+        transaction_id: 41,
+    };
+    for receipt in [
+        native::TransactionObservation::for_test(
+            owner.operation_id(),
+            actual,
+            native::TransactionOwnership::OwnedByJoin { join_return: 0 },
+            SettledOutcome::Rollback,
+            1603,
+            0,
+            0,
+            true,
+        ),
+        native::TransactionObservation::for_test(
+            owner.operation_id(),
+            actual,
+            native::TransactionOwnership::OwnedByBegin {
+                begin_return: 0,
+                transaction_id: 42,
+            },
+            SettledOutcome::Rollback,
+            1603,
+            0,
+            0,
+            true,
+        ),
+        native::TransactionObservation::for_test(
+            owner.operation_id(),
+            actual,
+            origin,
+            SettledOutcome::Rollback,
+            1603,
+            1603,
+            0,
+            true,
+        ),
+        native::TransactionObservation::for_test(
+            owner.operation_id(),
+            actual,
+            origin,
+            SettledOutcome::Rollback,
+            1603,
+            0,
+            6,
+            true,
+        ),
+        native::TransactionObservation::for_test(
+            owner.operation_id(),
+            actual,
+            origin,
+            SettledOutcome::Commit,
+            1603,
+            0,
+            0,
+            true,
+        ),
+        native::TransactionObservation::for_test(
+            owner.operation_id(),
+            actual,
+            origin,
+            SettledOutcome::Rollback,
+            1603,
+            0,
+            0,
+            false,
+        ),
+    ] {
+        assert_eq!(
+            owner.record_controlled_settlement(receipt),
+            Err(LifecycleError::Unsettled)
+        );
+    }
+    assert_eq!(owner.try_release(), Err(LifecycleError::Unsettled));
+    owner
+        .record_controlled_settlement(native::TransactionObservation::for_test(
+            owner.operation_id(),
+            actual,
+            origin,
+            SettledOutcome::Rollback,
+            1603,
+            0,
+            0,
+            true,
+        ))
+        .unwrap();
+    owner.try_release().unwrap();
+    assert!(!fixture.root.join("pending.v1").exists());
+    let mut startup = LifecycleGate::acquire_startup(&fixture.identity).unwrap();
+    startup.try_release().unwrap();
+}
+
+#[test]
+fn controlled_unknown_original_draft_owner_retains_gate_until_actual_process_exit() {
+    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
+    let fixture = Fixture::new();
+    let mut child = fixture.child("draft-loss");
+    child.ready(&fixture.root);
+    assert!(!fixture.root.join("pending.v1").exists());
+    assert!(matches!(
+        LifecycleGate::acquire_startup(&fixture.identity),
+        Err(LifecycleError::Busy)
+    ));
+    child.close_and_wait();
+    let mut startup = LifecycleGate::acquire_startup(&fixture.identity).unwrap();
+    startup.try_release().unwrap();
+}
+
+#[test]
+fn controlled_draft_checked_close_failure_has_no_pending_and_no_release_until_exit() {
+    let _serial = crate::NATIVE_TEST_SERIAL.lock().unwrap();
+    let fixture = Fixture::new();
+    let mut child = fixture.child("draft-close-fault");
+    child.close_and_wait();
     assert!(!fixture.root.join("pending.v1").exists());
     let mut startup = LifecycleGate::acquire_startup(&fixture.identity).unwrap();
     startup.try_release().unwrap();
