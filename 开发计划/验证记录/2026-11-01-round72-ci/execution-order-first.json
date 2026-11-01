@@ -1,0 +1,64 @@
+{
+  "status": "COMMAND_PREPARATION_ONLY_NO_EXECUTION",
+  "requiredBeforeDispatch": "Root completes R70 verification/archive/commit/push and confirms main clean. Supply that final exact SOURCE_SHA; do not default HEAD before that gate.",
+  "commands": {
+    "dispatchExactlyOncePerWorkflow": [
+      "python3",
+      "-B",
+      "/tmp/fc-round72-ci-evidence/dispatch-ci-once.py",
+      "--source-sha",
+      "<FINAL_SOURCE_SHA>",
+      "--workflow",
+      "<windows-msvc.yml|windows-win7-msvc.yml>"
+    ],
+    "observeExactRun": [
+      "python3",
+      "-B",
+      "/tmp/fc-round72-ci-evidence/observe-run-once.py",
+      "--baseline",
+      "<modern|win7>",
+      "--source-sha",
+      "<FINAL_SOURCE_SHA>",
+      "--run-id",
+      "<EXACT_DISPATCH_RUN_ID>",
+      "--label",
+      "finalfirst"
+    ],
+    "downloadExactOfficialArtifact": [
+      "python3",
+      "-B",
+      "/tmp/fc-round72-ci-evidence/record-download-first.py",
+      "--baseline",
+      "<modern|win7>",
+      "--source-sha",
+      "<FINAL_SOURCE_SHA>",
+      "--run-id",
+      "<EXACT_DISPATCH_RUN_ID>",
+      "--artifact-id",
+      "<OFFICIAL_ARTIFACT_ID>",
+      "--expected-bytes",
+      "<OFFICIAL_EXACT_BYTES>",
+      "--expected-sha256",
+      "<OFFICIAL_ARTIFACT_SHA256>"
+    ],
+    "staticPreparation": [
+      "python3",
+      "-B",
+      "/tmp/fc-round72-ci-evidence/prepare-ci-inputs-first.py",
+      "--baseline",
+      "<modern|win7>",
+      "--source-sha",
+      "<FINAL_SOURCE_SHA>",
+      "--run-metadata",
+      "/tmp/fc-round72-ci-evidence/<baseline>-run-finalfirst.json",
+      "--job-metadata",
+      "/tmp/fc-round72-ci-evidence/<baseline>-jobs-first.json",
+      "--artifact-metadata",
+      "/tmp/fc-round72-ci-evidence/<baseline>-artifacts-first.json"
+    ],
+    "executeStaticAuditor": "Only append --execute-static after original download and its controller are both terminal. This invokes local static audit, never a product/test EXE.",
+    "runtimeInputs": "--mode runtime-inputs yields source/bytes/path inputs after static PASS; no runtime controllers have been prepared."
+  },
+  "metadata": "Use connected GitHub metadata tools where sufficient. Exact workflow_dispatch observation and binary download use previously authorized controlled REST fallback. No current network calls made.",
+  "ambiguity": "Never repeat POST after timeout, accepted-but-not-yet-identified, preexisting run or ambiguity; inspect original saved report/state. Existing R69 Win7 FAIL is preserved."
+}

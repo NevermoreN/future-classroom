@@ -1,0 +1,36 @@
+{
+  "status": "PASS_COMMAND",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round72-ci-evidence/archive-preparation-first/archive-evidence-parameterized-first.py",
+    "--source-sha",
+    "00120a026eea5dc4ff330f8526bf31169b373565",
+    "--acceptance-report",
+    "independent-joint-first.json",
+    "--expected-acceptance-sha256",
+    "882e33ccb1b7e65f07c45c003d53378f9c1d7d460460695c779723e57eff7d2f",
+    "--expected-acceptance-status",
+    "PASS_R72_MODERN_WIN11_WITH_WIN7_CI_FAILURE_PRESERVED",
+    "--readonly-audit",
+    "windows-readonly-final-second.json",
+    "--expected-readonly-sha256",
+    "e43eace48db68cbbe813d190655a8e6d497226542705fb1c5f078ba16fac42dd",
+    "--root-controllers-terminal",
+    "--execute"
+  ],
+  "scope": "Exact R72 originals archive only; no deletion, Git or runtime certification.",
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 75.33107319916598,
+  "stdout": {
+    "path": "/tmp/fc-round72-archive-controller/archive-operation-first.stdout.log",
+    "bytes": 440,
+    "sha256": "f1c889c9ebe38394078475663530af58382f231afbf3d0900f37bc81c5eeca96"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round72-archive-controller/archive-operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "status": "ACTUAL_WIN7_CI_FAILURE_DIAGNOSIS_NOT_RUNTIME_APPROVED",
+  "sourceSha": "00120a026eea5dc4ff330f8526bf31169b373565",
+  "runId": 41296702693,
+  "jobId": 124818963251,
+  "diagnosticLog": {
+    "path": "win7-failed-original-raw-first/logs/clippy.stderr.log",
+    "bytes": 1431650,
+    "sha256": "2f4588a75fbfc9b0db9e8193c16ef8f7cef2d449a42bcd73504ac431278f428a"
+  },
+  "firstPartyFatalDiagnostic": {
+    "lint": "clippy::needless_bool",
+    "source": "crates/fc-bootstrap/src/application/web_editor.rs",
+    "line": 59,
+    "originalExcerpt": [
+      "error: this `if` guard returns a bool literal and is followed by another",
+      "  --> crates\\fc-bootstrap\\src\\application\\web_editor.rs:59:9",
+      "   |",
+      "59 | /         if matches!(self, Self::SyntheticFixture) {",
+      "60 | |             return true;",
+      "61 | |         }",
+      "62 | |         false",
+      "   | |_____________^ help: you can reduce it to: `matches!(self, Self::SyntheticFixture)`",
+      "   |",
+      "   = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#needless_bool",
+      "   = note: `-D clippy::needless-bool` implied by `-D warnings`",
+      "   = help: to override `-D warnings` add `#[allow(clippy::needless_bool)]`",
+      ""
+    ]
+  },
+  "commands": [
+    {
+      "name": "workspace-test-compile",
+      "duration_seconds": 803.3743582,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "passed": true
+    },
+    {
+      "name": "product-compile",
+      "duration_seconds": 246.9109076,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "passed": true
+    },
+    {
+      "name": "clippy",
+      "duration_seconds": 68.3652145,
+      "exit_code": 101,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "passed": false
+    }
+  ],
+  "candidateExecuted": false,
+  "qualification": "Successful compilation phases do not turn failed strict Clippy into successful Win7 candidate CI or actual OS validation. Equivalent candidate source correction is isolated in R73 and has not altered these originals."
+}

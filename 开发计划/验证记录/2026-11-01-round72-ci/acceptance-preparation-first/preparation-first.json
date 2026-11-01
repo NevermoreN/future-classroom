@@ -1,0 +1,41 @@
+{
+  "status": "PREPARED_AST_ONLY_NOT_EXECUTED",
+  "sourceSha": "00120a026eea5dc4ff330f8526bf31169b373565",
+  "helper": {
+    "path": "independent-joint-first.py",
+    "bytes": 25330,
+    "sha256": "9b7ef2b4ab862ab659f32a7181a3d912a68260ca15400e270a1507c11f1d0364"
+  },
+  "finalRuntimeInputsRead": false,
+  "networkWindowsCargoMainSourceMutation": false,
+  "usage": "python3 -B R72ROOT/acceptance-preparation-first/independent-joint-first.py --readonly-operation R72ROOT/FINAL_READONLY_OPERATION.json --readonly-sha256 ACTUAL_FINAL_SHA64 [--modern-run-metadata PATH --modern-job-metadata PATH --modern-artifact-metadata PATH --modern-static-operation PATH --win7-run-metadata PATH --win7-job-metadata PATH --win7-artifact-metadata PATH --win7-failed-receipt PATH --report R72ROOT/independent-joint-first.json]",
+  "modernOfficial": {
+    "runId": 41296599777,
+    "jobId": 124818653405,
+    "artifactId": 13080086867,
+    "zipBytes": 44077101,
+    "zipSha256": "87bd9b85c638fe2dd01540476070ff6750222837b25df4a75a081ee688e0653f"
+  },
+  "win7Official": {
+    "runId": 41296702693,
+    "jobId": 124818963251,
+    "artifactId": 13080595231,
+    "zipBytes": 44806575,
+    "zipSha256": "c5cc184bf36ef951be4f39fe5e91fa45f6f44033bda59fe714bd92495e5e07dd",
+    "actualConclusion": "failure",
+    "runtime": "FORBIDDEN_NOT_RUN"
+  },
+  "defaultMetadataPaths": "TAG-run-final-first.json/TAG-jobs-first.json/TAG-artifacts-first.json; override with exact root-selected originals when actual filenames differ. Win7 failed receipt directory is receipt.with_suffix(\"\").",
+  "successStatuses": {
+    "bothActualSuccess": "PASS_R72_MODERN_AND_WIN7_TARGET_ON_WIN11_ONLY",
+    "actualFailurePreserved": "PASS_R72_MODERN_WIN11_WITH_WIN7_CI_FAILURE_PRESERVED"
+  },
+  "limitations": [
+    "No actual acceptance or source/ZIP/runtime read was performed during preparation.",
+    "Missing/incomplete/nonterminal required inputs return WAIT without creating report. Failed-candidate branch never bypasses any modern success requirement and never requires failed static PASS or executes a candidate.",
+    "Failure cause is derived only from actual retained result/commands/logs at execution; no specific lint is assumed. All metadata first observations and historical JSON identities are retained without changing statuses.",
+    "Source partition sizes and per-harness totals are derived from actual original source metadata/case lines, never fixed1542/historical archive totals.",
+    "R67 original strict ZIP/producer/Cargo22/PE21test+GUI, harness unique running/summary and public20 parsers reused. Normalized runtime lines and independently captured raw controller streams stay distinct.",
+    "Scope excludes Win7/Win10 OS, ordinary31 rerun/GNU substitution, MSI/campus/final-product acceptance. Archive helper accepts qualified PASS_R72_ status but never static-only status."
+  ]
+}

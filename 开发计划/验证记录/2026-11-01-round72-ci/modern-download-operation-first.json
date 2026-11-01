@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "sourceSha": "00120a026eea5dc4ff330f8526bf31169b373565",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round72-ci-evidence/download-original.py",
+    "--baseline",
+    "modern",
+    "--source-sha",
+    "00120a026eea5dc4ff330f8526bf31169b373565",
+    "--run-id",
+    "41296599777",
+    "--artifact-id",
+    "13080086867",
+    "--expected-bytes",
+    "44077101",
+    "--expected-sha256",
+    "87bd9b85c638fe2dd01540476070ff6750222837b25df4a75a081ee688e0653f"
+  ],
+  "originalBudgetSeconds": 1200,
+  "startedUtc": "2026-11-01T10:32:55.350299+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 202.43556821299717,
+  "actualControllerReturned": true,
+  "stdout": {
+    "path": "modern-download-operation-first.stdout.log",
+    "bytes": 196,
+    "sha256": "fa9cd37a9330c7af753d83fb44db394ebf81096e1ad5d5e7821b1edc2a3f6de9"
+  },
+  "stderr": {
+    "path": "modern-download-operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

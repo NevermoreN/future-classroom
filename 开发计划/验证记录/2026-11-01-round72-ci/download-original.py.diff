@@ -1,0 +1,27 @@
+--- round69/download-original.py
++++ round72/download-original.py
+@@ -5,17 +5,23 @@
+ parser = argparse.ArgumentParser()
+ parser.add_argument('--baseline', choices=['modern','win7'], required=True)
+ parser.add_argument('--run-id', type=int, required=True)
++parser.add_argument('--source-sha', required=True)
+ parser.add_argument('--artifact-id', type=int, required=True)
+ parser.add_argument('--expected-bytes', type=int, required=True)
+ parser.add_argument('--expected-sha256', required=True)
+ args = parser.parse_args()
+ root = Path(__file__).resolve().parent
++assert (root/'.owner').read_bytes()==b'future-classroom-owned-r72-ci-evidence/v1\n'
++assert len(args.source_sha)==40 and all(c in '0123456789abcdef' for c in args.source_sha)
++workflow='windows-msvc' if args.baseline=='modern' else 'windows-win7-msvc'
++dispatch=json.loads((root/('FutureClassroom-round72-'+workflow+'-dispatch.json')).read_text())
++assert dispatch.get('status')=='RUN_IDENTIFIED' and dispatch.get('sourceSha')==args.source_sha and dispatch.get('runId')==args.run_id and dispatch.get('workflowPath')=='.github/workflows/'+workflow+'.yml'
+ dest = root / (args.baseline+'-original.zip')
+ out = root / (args.baseline+'-download-original-first.json')
+ assert not out.exists() and not dest.exists()
+ assert 0 < args.expected_bytes <= 512*1024*1024
+ assert len(args.expected_sha256)==64 and all(c in '0123456789abcdef' for c in args.expected_sha256)
+-r = {'status':'RUNNING','scope':'Exact bytes from official artifact API; plugin metadata separately retained. Binary downloads need local official API because connector export has no local accessor. Redirect URL and credentials stay only in memory. No product/test executable is run.', 'runId':args.run_id,'artifactId':args.artifact_id,'expectedBytes':args.expected_bytes,'expectedSha256':args.expected_sha256,'overallBudgetSeconds':1200,'socketTimeoutSeconds':25}
++r = {'status':'RUNNING','scope':'Exact bytes from official artifact API; plugin metadata separately retained. Binary downloads need local official API because connector export has no local accessor. Redirect URL and credentials stay only in memory. No product/test executable is run.', 'runId':args.run_id,'sourceSha':args.source_sha,'artifactId':args.artifact_id,'expectedBytes':args.expected_bytes,'expectedSha256':args.expected_sha256,'overallBudgetSeconds':1200,'socketTimeoutSeconds':25}
+ def save(): out.write_text(json.dumps(r,indent=2)+'\n')
+ class NoRedirect(urllib.request.HTTPRedirectHandler):
+     def redirect_request(self,*a,**kw): return None

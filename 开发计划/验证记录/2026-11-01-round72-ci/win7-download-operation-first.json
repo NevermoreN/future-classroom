@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "sourceSha": "00120a026eea5dc4ff330f8526bf31169b373565",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round72-ci-evidence/download-original.py",
+    "--baseline",
+    "win7",
+    "--source-sha",
+    "00120a026eea5dc4ff330f8526bf31169b373565",
+    "--run-id",
+    "41296702693",
+    "--artifact-id",
+    "13080595231",
+    "--expected-bytes",
+    "44806575",
+    "--expected-sha256",
+    "c5cc184bf36ef951be4f39fe5e91fa45f6f44033bda59fe714bd92495e5e07dd"
+  ],
+  "originalBudgetSeconds": 1200,
+  "startedUtc": "2026-11-01T10:39:00.547707+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 31.22019287198782,
+  "actualControllerReturned": true,
+  "stdout": {
+    "path": "win7-download-operation-first.stdout.log",
+    "bytes": 196,
+    "sha256": "e1d24371036d9648c18d97db7d06176b0bdb4e83de047f22cef0eaa738824975"
+  },
+  "stderr": {
+    "path": "win7-download-operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

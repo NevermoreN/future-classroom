@@ -1,0 +1,47 @@
+{
+  "status": "PREPARED_ONLY_NOT_EXECUTED",
+  "schemaVersion": 1,
+  "root": "/tmp/fc-round72-ci-evidence",
+  "sourceShaArgumentRequired": true,
+  "helpers": [
+    {
+      "path": "archive-evidence-parameterized-first.py",
+      "bytes": 20400,
+      "sha256": "d0fd8903c3d010cb7dd5cfabf77cb833efd8859e6b0483b9566d37c57f3e618d"
+    },
+    {
+      "path": "verify-archive-bytes-first.py",
+      "bytes": 4982,
+      "sha256": "00793f74cd4177050efeb1bda88bd18f53043190042688b0a68a0a9fa8d04367"
+    }
+  ],
+  "archivedTemplateIdentities": [
+    {
+      "path": "开发计划/验证记录/2026-11-01-round69-ci/archive-evidence-first.py",
+      "sha256": "5739be9ec8de02ecbad4fda6e60ed81779560264585a478cd36d79d39d367733"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/archive-evidence-first.py",
+      "sha256": "476aaf2fd68e78359b0362f302ba8986acfd2ddb06dda8ae9cd83a76a84570a7"
+    }
+  ],
+  "checked": "ast.parse only; no helper invocation or archive/replay/certificate operation performed",
+  "sourcePayloadsRead": false,
+  "mainWritten": false,
+  "downloadedZipRead": false,
+  "commands": {
+    "archive": "python3 -B R72/archive-preparation-first/archive-evidence-parameterized-first.py --source-sha SOURCE40 --acceptance-report FINAL_ACCEPTANCE.json --expected-acceptance-sha256 SHA64 --expected-acceptance-status PASS_R72_ACTUAL_SCOPED_STATUS --expected-readonly-sha256 SHA64 --root-controllers-terminal --execute",
+    "byteReplay": "python3 -B R72/archive-preparation-first/verify-archive-bytes-first.py --source-sha SOURCE40 --index-sha256 SHA64 --receipt-sha256 SHA64 --report /tmp/fc-round72-archive-controller/byte-replay-first.json"
+  },
+  "requirements": [
+    "Root must wait actual all-controller terminal and freeze source membership before archive; run controller/log output outside source.",
+    "Default archive invocation without --execute reads no source payload and creates no archive; missing/nonterminal final reports on explicit execution return WAIT/no report.",
+    "Final acceptance must be source-bound actual PASS_R72_ scope; static/prepared/not-run statuses rejected. This gate does not itself prove any runtime.",
+    "Only original PE objdump stdout is derived lossless gzip with source/stored identities. EXE/ZIP/compiled/database/cache payload bytes excluded with exact identities; all phase/log/API/source/metadata originals retained.",
+    "Private key/PFX/P12 filenames rejected before content access. Public certificate suffixes rejected unless exact reviewed source/path/bytes/SHA/original raw report and controlled base64 provenance match, single canonical public PEM+DER+X509 checks pass. No current public certificate is admitted.",
+    "Strict UTF8/UTF16/nested base64/all decoded JSON strings and gzip-decoded scanning; no inherited expired-token/public-identifier exceptions. Any real finding blocks PASS.",
+    "Byte replay is archive/source equality only, not Git staging proof or new OS/runtime certification. It emits only to a separately owned outside controller, does not alter frozen source.",
+    "No Windows/network/Cargo/main/source edits, archive, cleanup, deletion or ZIP reading during preparation."
+  ],
+  "scope": "R72 final finite source/CI/runtime states must remain distinct; R70 GNU ordinary31 remains independent archived evidence; no Win7/10 OS/campus/MSI promotion."
+}

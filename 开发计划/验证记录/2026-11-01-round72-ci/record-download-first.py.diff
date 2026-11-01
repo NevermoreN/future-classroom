@@ -1,0 +1,21 @@
+--- round69/record-download-first.py
++++ round72/record-download-first.py
+@@ -10,13 +10,16 @@
+ ROOT = Path(__file__).resolve().parent
+ parser = argparse.ArgumentParser()
+ parser.add_argument('--baseline', choices=['modern', 'win7'], required=True)
++parser.add_argument('--source-sha', required=True)
+ args, tail = parser.parse_known_args()
++assert (ROOT/'.owner').read_bytes()==b'future-classroom-owned-r72-ci-evidence/v1\n'
++assert len(args.source_sha)==40 and all(c in '0123456789abcdef' for c in args.source_sha)
+ report = ROOT / (args.baseline + '-download-operation-first.json')
+ stdout = ROOT / (args.baseline + '-download-operation-first.stdout.log')
+ stderr = ROOT / (args.baseline + '-download-operation-first.stderr.log')
+ assert not any(p.exists() for p in (report, stdout, stderr))
+-command = ['python3', '-B', str(ROOT / 'download-original.py'), '--baseline', args.baseline, *tail]
+-value = {'status': 'RUNNING', 'command': command, 'originalBudgetSeconds': 1200,
++command = ['python3', '-B', str(ROOT / 'download-original.py'), '--baseline', args.baseline, '--source-sha', args.source_sha, *tail]
++value = {'status': 'RUNNING', 'sourceSha': args.source_sha, 'command': command, 'originalBudgetSeconds': 1200,
+          'startedUtc': datetime.datetime.now(datetime.timezone.utc).isoformat()}
+ with report.open('x') as stream:
+     json.dump(value, stream, indent=2)

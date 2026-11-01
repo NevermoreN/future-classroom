@@ -1,0 +1,99 @@
+{
+  "status": "PREPARED_ONLY_NOT_DISPATCHED",
+  "scope": "R72 source-parametric CI preparation only. No network, dispatch, downloads, Cargo, Windows, product execution or main mutation. Original R69 failures unchanged.",
+  "owner": "future-classroom-owned-r72-ci-evidence/v1\n",
+  "scripts": [
+    {
+      "path": "dispatch-ci-once.py",
+      "bytes": 5263,
+      "sha256": "e978b60cb4b549a901617d6f843617780a0c6120d609f8288f85f5f904700283",
+      "reusedFrom": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round69-ci/dispatch-ci-once.py",
+      "originalSha256": "7bb4241c8ccfdb3be356a7952baf2b5c4a33d5290e4dcfc7f0ac6a5ca111993b",
+      "byteEqualOriginal": false
+    },
+    {
+      "path": "observe-run-once.py",
+      "bytes": 3420,
+      "sha256": "1eba3b7368f58cd88f762c883262cc7eb0b1f6c0db779c1199ea0c7ff5cd4840",
+      "reusedFrom": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round69-ci/observe-run-once.py",
+      "originalSha256": "109ca6cca3d1b519686365a55ec3bee525ab4b3fcfa6011605288ba9d2259c1b",
+      "byteEqualOriginal": false
+    },
+    {
+      "path": "download-original.py",
+      "bytes": 4572,
+      "sha256": "328ddf669176a8101f8094ee783d8207921f7ef2bca44c993ea8c937a63e0e62",
+      "reusedFrom": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round69-ci/download-original.py",
+      "originalSha256": "c56583ef058095ec6916ad5b7898ed092b37bd125ea0ebd0539300a3f37ae602",
+      "byteEqualOriginal": false
+    },
+    {
+      "path": "record-download-first.py",
+      "bytes": 2186,
+      "sha256": "e8a5cc2d13bcf3df2e43bc0f408dd852a15861fd4d8b2f1c37c69b52dc235f60",
+      "reusedFrom": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round69-ci/record-download-first.py",
+      "originalSha256": "ef50908364aa6c41b7560491a388bc23ed335ae26149e089f3bf60de010efa21",
+      "byteEqualOriginal": false
+    },
+    {
+      "path": "prepare-ci-inputs-first.py",
+      "bytes": 11649,
+      "sha256": "15ef935d61aa74a306abcc55598a66c91edf91fef2530955d470ca6b107c5ca0",
+      "reusedFrom": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round69-ci/prepare-ci-inputs-first.py",
+      "originalSha256": "03cded9509546f0e455b4c83612c643a334f66e7e4b6add668fac54ab4fe75c3",
+      "byteEqualOriginal": false
+    },
+    {
+      "path": "verify-ci-artifact-first.py",
+      "bytes": 66125,
+      "sha256": "c136efb0ecb5dc1dbffadadae31b933c43ac3d298c308921dd7c8e409fc75527",
+      "reusedFrom": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round69-ci/verify-ci-artifact-first.py",
+      "originalSha256": "c136efb0ecb5dc1dbffadadae31b933c43ac3d298c308921dd7c8e409fc75527",
+      "byteEqualOriginal": true
+    },
+    {
+      "path": "prepare-ci-inputs-model-first.py",
+      "bytes": 6309,
+      "sha256": "39bfb7fbdeb55041ae5f3eed1cb36457176f1c9ac2d8eb4dc7e1d49f6e459297",
+      "reusedFrom": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round69-ci/prepare-ci-inputs-model-first.py",
+      "originalSha256": "6dcd9e1fc9683bb77f1234efa79579dfd52b028e1408bb9cb6c204aff15d2893",
+      "byteEqualOriginal": false
+    }
+  ],
+  "budgets": {
+    "apiSocketSeconds": 25,
+    "dispatchIdentifySeconds": 60,
+    "downloadSeconds": 1200,
+    "downloadControllerSeconds": 1200,
+    "workflowBudgets": "Unchanged checked-in workflows"
+  },
+  "runtimeControllersPrepared": false,
+  "nextGate": "Root must finish R70 archive/commit/push and clean main before exactly one dispatch per workflow using final source SHA.",
+  "modelFixtureCorrection": {
+    "firstSelfTest": "FAIL MODEL_NEW_CI_PIN retained in artifact-auditor-model-first.operation.json",
+    "cause": "R61 after-helper eac2... predates immutable auditor pin d4d5...; corrected fixture is exact committed R64 after-helper bytes, no auditor source changes",
+    "originalWrongFixture": "artifact-auditor-model-first-wrong-fixture.ps1"
+  },
+  "localVerification": {
+    "ast": "PASS seven helpers",
+    "sourceRunUnboundUntilParameters": "PASS no prior source SHA/run IDs in helpers",
+    "gateModels": {
+      "status": "PASS_PURE_GATE_MODELS_ONLY_NO_ARTIFACT",
+      "checks": 24
+    },
+    "staticAuditorModels": {
+      "status": "PASS_MODEL_ONLY_NO_ARTIFACT",
+      "checks": 26,
+      "report": "artifact-auditor-model-second.json",
+      "expectedNegativePhaseReceipt": "artifact-auditor-model-second.phase-negative.json"
+    },
+    "missingDispatchInput": "Actual WAIT exit3; no ZIP access",
+    "noProcessesRemaining": "Both pure model controllers terminal exit0; first wrong-fixture model terminal exit1 preserved",
+    "network": "NOT_RUN",
+    "dispatch": "NOT_RUN",
+    "download": "NOT_RUN",
+    "windows": "NOT_RUN",
+    "cargo": "NOT_RUN",
+    "mainMutation": "NONE"
+  }
+}

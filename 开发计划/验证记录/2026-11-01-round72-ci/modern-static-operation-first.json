@@ -1,0 +1,36 @@
+{
+  "status": "PASS_COMMAND",
+  "sourceSha": "00120a026eea5dc4ff330f8526bf31169b373565",
+  "baseline": "modern",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round72-ci-evidence/prepare-ci-inputs-first.py",
+    "--baseline",
+    "modern",
+    "--source-sha",
+    "00120a026eea5dc4ff330f8526bf31169b373565",
+    "--run-metadata",
+    "/tmp/fc-round72-ci-evidence/modern-run-finalfirst.json",
+    "--job-metadata",
+    "/tmp/fc-round72-ci-evidence/modern-jobs-fourth.json",
+    "--artifact-metadata",
+    "/tmp/fc-round72-ci-evidence/modern-artifacts-first.json",
+    "--execute-static"
+  ],
+  "startedUtc": "2026-11-01T10:36:53.354781+00:00",
+  "scope": "Local static verification only; no product/test execution or network.",
+  "exitCode": 0,
+  "actualExit": true,
+  "elapsedSeconds": 17.719595920061693,
+  "stdout": {
+    "path": "modern-static-operation-first.stdout.log",
+    "bytes": 695,
+    "sha256": "229453e447bb0aa386d62f6903e8baadc22913b48153cac920e469e5e00a6772"
+  },
+  "stderr": {
+    "path": "modern-static-operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

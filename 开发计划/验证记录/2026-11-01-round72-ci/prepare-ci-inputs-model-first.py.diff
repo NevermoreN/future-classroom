@@ -1,0 +1,47 @@
+--- round69/prepare-ci-inputs-model-first.py
++++ round72/prepare-ci-inputs-model-first.py
+@@ -1,11 +1,13 @@
+ #!/usr/bin/env python3
+-"""Pure synthetic R69 gate models. No artifact, ZIP, remote or executable access."""
++"""Pure synthetic R72 gate models. No artifact, ZIP, remote or executable access."""
+ from pathlib import Path
+ import copy,hashlib,json,runpy,datetime
+ EV=Path(__file__).resolve().parent
+ 
+ def main():
+  ns=runpy.run_path(str(EV/'prepare-ci-inputs-first.py'));ns=ns['download_gate'].__globals__
++ ns['SOURCE']='a'*40
++ for i,tag in enumerate(('modern','win7'),start=1):ns['BASELINES'][tag]['run']=1000+i
+  # Original immutable helper functions are used with synthetic I/O adapters only.
+  original={k:ns[k] for k in ('bootstrap','read','api','fact')};checks=[]
+  def exercise(tag,change=None,expected=None,zip_allowed=False):
+@@ -16,8 +18,8 @@
+   job=dict(id=jobid,run_id=cfg['run'],name=cfg['job'],status='completed',conclusion='success')
+   artifact=dict(id=artifactid,name=f"{cfg['prefix']}-i686-{ns['SOURCE']}-{cfg['run']}-{attempt}",expired=False,
+    workflow_run=dict(id=cfg['run'],head_sha=ns['SOURCE']),size_in_bytes=size,digest='sha256:'+digest)
+-  downloaded=dict(status='PASS',runId=cfg['run'],artifactId=artifactid,expectedBytes=size,bytes=size,expectedSha256=digest,sha256=digest)
+-  command=['python3','-B',str(EV/'download-original.py'),'--baseline',tag,'--run-id',str(cfg['run']),
++  downloaded=dict(status='PASS',sourceSha=ns['SOURCE'],runId=cfg['run'],artifactId=artifactid,expectedBytes=size,bytes=size,expectedSha256=digest,sha256=digest)
++  command=['python3','-B',str(EV/'download-original.py'),'--baseline',tag,'--source-sha',ns['SOURCE'],'--run-id',str(cfg['run']),
+    '--artifact-id',str(artifactid),'--expected-bytes',str(size),'--expected-sha256',digest]
+   operation=dict(status='PASS',exitCode=0,actualExit=True,command=command)
+   fixture=dict(dispatch=dispatch,run=run,jobs={'jobs':[job]},artifacts={'artifacts':[artifact]},downloaded=downloaded,downloadOperation=operation)
+@@ -25,7 +27,7 @@
+   calls=[]
+   def read(path):
+    name=Path(path).name
+-   if name.startswith('FutureClassroom-round69-'):return fixture['dispatch']
++   if name.startswith('FutureClassroom-round72-'):return fixture['dispatch']
+    if name==tag+'-download-original-first.json':return fixture['downloaded']
+    for key,path_value in paths.items():
+     if Path(path)==path_value:
+@@ -45,6 +47,9 @@
+  for tag in ('modern','win7'):
+   exercise(tag,zip_allowed=True);checks.append(tag+' synthetic complete gate permits one exact ZIP fact only after terminal receipt')
+  cases=[
++  ('wrong dispatch source',lambda f:f['dispatch'].update(sourceSha='0'*40),'Invalid'),
++  ('wrong dispatch run',lambda f:f['dispatch'].update(runId=1),'Invalid'),
++  ('wrong downloaded source',lambda f:f['downloaded'].update(sourceSha='0'*40),'Invalid'),
+   ('queued run',lambda f:f['run'].update(status='queued',conclusion=None),'Waiting'),
+   ('running job',lambda f:f['jobs']['jobs'][0].update(status='in_progress',conclusion=None),'Waiting'),
+   ('wrong run',lambda f:f['run'].update(id=1),'Invalid'),

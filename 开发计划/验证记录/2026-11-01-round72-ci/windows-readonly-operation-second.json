@@ -1,0 +1,26 @@
+{
+  "status": "PASS_COMMAND",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round72-ci-evidence/audit-windows-readonly-first.py",
+    "--report",
+    "/tmp/fc-round72-ci-evidence/windows-readonly-final-second.json",
+    "--baseline",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round70-transfer-stop/windows-readonly-final-first.json"
+  ],
+  "scope": "Read-only final owned-residue, Run and persistent SSH audit; no mutation.",
+  "exitCode": 0,
+  "actualExit": true,
+  "elapsedSeconds": 1.4756174660287797,
+  "stdout": {
+    "path": "/tmp/fc-round72-ci-evidence/windows-readonly-operation-second.stdout.log",
+    "bytes": 471,
+    "sha256": "186c970a36a3622b480ddac153bac2abd21e2e1535b63648925cec4b79a648af"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round72-ci-evidence/windows-readonly-operation-second.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

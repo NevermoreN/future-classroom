@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round72-ci-evidence/acceptance-preparation-first/independent-joint-second.py",
+    "--readonly-operation",
+    "/tmp/fc-round72-ci-evidence/windows-readonly-operation-second.json",
+    "--readonly-sha256",
+    "e43eace48db68cbbe813d190655a8e6d497226542705fb1c5f078ba16fac42dd"
+  ],
+  "actualToolReturn": {
+    "chunk_id": "739552",
+    "wall_time_seconds": 0.0000151,
+    "exit_code": 0,
+    "original_token_count": 54,
+    "output": "{\"status\": \"PASS_R72_MODERN_WIN11_WITH_WIN7_CI_FAILURE_PRESERVED\", \"report\": \"/tmp/fc-round72-ci-evidence/independent-joint-first.json\", \"sha256\": \"882e33ccb1b7e65f07c45c003d53378f9c1d7d460460695c779723e57eff7d2f\"}\n"
+  },
+  "scope": "Original terminal write_stdin return for root-invoked independent audit; no inferred wall time or reconstructed raw child stderr."
+}

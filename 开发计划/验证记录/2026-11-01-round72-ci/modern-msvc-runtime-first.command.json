@@ -1,0 +1,511 @@
+{
+  "status": "PASS_COMMAND",
+  "startedUtc": "2026-11-01T10:37:25.911405+00:00",
+  "args": [
+    "python3",
+    "-B",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/test-metadata.jsonl",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--public-desktop",
+    "--report",
+    "/tmp/fc-round72-ci-evidence/modern-msvc-runtime-first.json"
+  ],
+  "gateCommand": [
+    "python3",
+    "-B",
+    "/tmp/fc-round72-ci-evidence/prepare-ci-inputs-first.py",
+    "--mode",
+    "runtime-inputs",
+    "--source-sha",
+    "00120a026eea5dc4ff330f8526bf31169b373565",
+    "--baseline",
+    "modern"
+  ],
+  "baseline": "modern",
+  "sourceSha": "00120a026eea5dc4ff330f8526bf31169b373565",
+  "runId": 41296599777,
+  "staticAudit": {
+    "path": "/tmp/fc-round72-ci-evidence/modern-original-independent-first.json",
+    "bytes": 510257,
+    "sha256": "f2de266568b9d32c2fb012d8333353b6e37b11050a447bd7808123c5dccd9ed3"
+  },
+  "normal": {
+    "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe",
+    "bytes": 10700800,
+    "sha256": "f1d9a7cbeedd9da7dd752e91f4d73772dd62edb7f3c193a06a12c489864c7fbb"
+  },
+  "metadata": {
+    "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/test-metadata.jsonl",
+    "bytes": 21556,
+    "sha256": "05e692d3506ffbfb6c5a43e96dd13881c0d55a7b2fd4f29ea10ecacfe6c18761"
+  },
+  "scriptSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "inputNormalSha256": "f1d9a7cbeedd9da7dd752e91f4d73772dd62edb7f3c193a06a12c489864c7fbb",
+  "metadataSha256": "05e692d3506ffbfb6c5a43e96dd13881c0d55a7b2fd4f29ea10ecacfe6c18761",
+  "inputIdentities": {
+    "/tmp/fc-round72-ci-evidence/prepare-ci-inputs-first.py": {
+      "path": "/tmp/fc-round72-ci-evidence/prepare-ci-inputs-first.py",
+      "bytes": 11649,
+      "sha256": "15ef935d61aa74a306abcc55598a66c91edf91fef2530955d470ca6b107c5ca0"
+    },
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py": {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+      "bytes": 59676,
+      "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14"
+    },
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round67-ci/independent-runtime-first.py": {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round67-ci/independent-runtime-first.py",
+      "bytes": 25653,
+      "sha256": "0317ffb1719737bd9dfa45ca7952c242df6ffff0baa6b1611d7b912277f9e0e5"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-original-independent-first.json": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-original-independent-first.json",
+      "bytes": 510257,
+      "sha256": "f2de266568b9d32c2fb012d8333353b6e37b11050a447bd7808123c5dccd9ed3"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/test-metadata.jsonl": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/test-metadata.jsonl",
+      "bytes": 21556,
+      "sha256": "05e692d3506ffbfb6c5a43e96dd13881c0d55a7b2fd4f29ea10ecacfe6c18761"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/product/fc-bootstrap/fc-bootstrap.exe",
+      "bytes": 10700800,
+      "sha256": "f1d9a7cbeedd9da7dd752e91f4d73772dd62edb7f3c193a06a12c489864c7fbb"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-application/fc_application-452d4d2887413f93.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-application/fc_application-452d4d2887413f93.exe",
+      "bytes": 844800,
+      "sha256": "e212d21816f306367adc62532b07c480e1cf67726ad07c81bc94f1c06b07ca41"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-audio/fc_audio-3b8d060b615f92df.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-audio/fc_audio-3b8d060b615f92df.exe",
+      "bytes": 828928,
+      "sha256": "48f4031bb29906ffc6125daf9125a884ef67e20712cc76c3f31c5ddb94c8bd2a"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/autostart_coordinator-4d8ffe50e568cd1d.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/autostart_coordinator-4d8ffe50e568cd1d.exe",
+      "bytes": 3978752,
+      "sha256": "a83653e9d3fa4f094e48d6f8d94f61b2b30b7a73ece10bd025a36bea494f0738"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/business_storage-d7acb8a02f6a164c.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/business_storage-d7acb8a02f6a164c.exe",
+      "bytes": 4622336,
+      "sha256": "4dc4802a20c6fa8cb87bafef142383f9b83cef5ea34662634b80552edd297f38"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/calendar_execution_fence-90c781596b821bb1.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/calendar_execution_fence-90c781596b821bb1.exe",
+      "bytes": 4037120,
+      "sha256": "1238b12cd2a447baca05e707ee14ef6f952439eb1726cd4aea159e764c0de18d"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/fc_bootstrap-1904026c21c0adea.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/fc_bootstrap-1904026c21c0adea.exe",
+      "bytes": 10873344,
+      "sha256": "2bdb42d018f3b381992e1aa36aed77ccc8ece7dd2ba32f2d9726eafd1c734b58"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/fc_bootstrap-f2a1cc65f02b0804.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/fc_bootstrap-f2a1cc65f02b0804.exe",
+      "bytes": 10311168,
+      "sha256": "1805aceb7670d654ad860211fe814979d274776174b20c79f72925c828a986d9"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/runtime_storage-be315465b9650302.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/runtime_storage-be315465b9650302.exe",
+      "bytes": 3566080,
+      "sha256": "ea2ee7e10946e8cbe8e70f7d49690263cf78da5e5101653fb89474a49c47afe5"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/schedule_operations-75016802763f2d21.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/schedule_operations-75016802763f2d21.exe",
+      "bytes": 4169216,
+      "sha256": "0768d64de7025508b3acf2449d8810e95d17544937509131149774f8ae27c4d2"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/verify_web_assets-875fd155fb56602c.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/verify_web_assets-875fd155fb56602c.exe",
+      "bytes": 696320,
+      "sha256": "ba0fb7f4f6196df7ed6a3cfa0ff3a93ed4f2dfbd0c07e27bd78d4b389758cf5b"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/voice_limits_storage-fa38bda5134dfcda.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/voice_limits_storage-fa38bda5134dfcda.exe",
+      "bytes": 3714048,
+      "sha256": "4bdd3d67641996715d7d13ae4c00cc133b75eac7133e8bbb83612e6cfb7b03ac"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/voice_storage-2f35be146f47b683.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-bootstrap/voice_storage-2f35be146f47b683.exe",
+      "bytes": 3760640,
+      "sha256": "91d6fa3bf789ce02afe464c80f0600f84bdaebeeda9f920fe0c8120fab3468b9"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-domain/fc_domain-7c20761d03caf301.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-domain/fc_domain-7c20761d03caf301.exe",
+      "bytes": 1783296,
+      "sha256": "cbcfeb8cb28e0899f4bed15ed50c1c2af1dd95800d36a99284c5d271c13a3f33"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-materials/fc_materials-2e428b959a090e75.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-materials/fc_materials-2e428b959a090e75.exe",
+      "bytes": 1793536,
+      "sha256": "5298a6c1c5cfe2e58e7fac19ff96da43a2dca83ec3b41d9b6277b6f949ad1772"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-ports/fc_ports-2a65d64830b4e099.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-ports/fc_ports-2a65d64830b4e099.exe",
+      "bytes": 765440,
+      "sha256": "7cdde874e55d5f077fee0115b1c2020931b694502b599fcbb999c5d95d89b42a"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-presentation/fc_presentation-0ebca4673ff953f0.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-presentation/fc_presentation-0ebca4673ff953f0.exe",
+      "bytes": 1305088,
+      "sha256": "aac64128b1bc60aa387da2c099c4e81d36c9f827e32c0ff985b0851f3bb394c3"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-protocol/fc_protocol-a7cf91af1d25db3b.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-protocol/fc_protocol-a7cf91af1d25db3b.exe",
+      "bytes": 1449472,
+      "sha256": "661c06eb2b58a9090eef1b15207d6ee553b678d628e3510e9ca48b8d8abb6846"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-runtime/fc_runtime-beae710b833bf51a.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-runtime/fc_runtime-beae710b833bf51a.exe",
+      "bytes": 991232,
+      "sha256": "311441fed12aa7fdd7ebefcf2e4875e0fd9ef640cb5cba435e1cb63ae8034fe0"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-security/fc_security-897ee1bbd038f1a8.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-security/fc_security-897ee1bbd038f1a8.exe",
+      "bytes": 806400,
+      "sha256": "394fceda271d0e3ced9a0129dc650685f8a26a75012defca6d9de0b833e1f317"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-storage/fc_storage-e351e410d252c84e.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-storage/fc_storage-e351e410d252c84e.exe",
+      "bytes": 6800384,
+      "sha256": "13b6beb0e62276060efca6bc37cfd75cbade9c2391de267b157c7acd91c013e5"
+    },
+    "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-windows/fc_windows-cd50618b48fb17d8.exe": {
+      "path": "/tmp/fc-round72-ci-evidence/modern-artifact-original/programs/tests/fc-windows/fc_windows-cd50618b48fb17d8.exe",
+      "bytes": 3026944,
+      "sha256": "fa3cf4818723ff84cdab4ee86401d2f161f8c91bf372427e68af7ac2a3df80f8"
+    }
+  },
+  "originalPerTestBudgetSeconds": 900,
+  "nativeSeconds": 1,
+  "harnessCount": 21,
+  "scope": "R72 source-bound CI MSVC full21/public20 finite execution on authorized Win11 build26300/WOW64 only. Win7-target on Win11 is not Win7/10 OS evidence. GNU ordinary31/material-stop, recovery and reinitialization are separate R70 archived evidence, not rerun or promoted here. No independent visual/Edge/header/ordinary31, campus or MSI acceptance.",
+  "pid": 26069,
+  "exitCode": 0,
+  "actualExit": true,
+  "elapsedSeconds": 156.1175981638953,
+  "inputsUnchanged": true,
+  "scriptUnchanged": true,
+  "metadataUnchanged": true,
+  "artifactsUnchanged": true,
+  "resultStatus": "PASS",
+  "cleanup": "PASS",
+  "actualReport": {
+    "path": "/tmp/fc-round72-ci-evidence/modern-msvc-runtime-first.json",
+    "bytes": 221526,
+    "sha256": "f184629d6bf88d766e0ae55522eb66a5890f705334ac9c1cd2b1b711a56b6e3f"
+  },
+  "publicDesktop": {
+    "steps": 20,
+    "elapsedMs": 2436,
+    "foreground": "UNTOUCHED",
+    "capture": "normalized merged native output lines; controller stdout/stderr separately byte-verified"
+  },
+  "harnesses": [
+    {
+      "name": "voice_limits_storage-fa38bda5134dfcda.exe",
+      "binarySha256": "4bdd3d67641996715d7d13ae4c00cc133b75eac7133e8bbb83612e6cfb7b03ac",
+      "declared": 4,
+      "actualCaseLines": 4,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.13,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "autostart_coordinator-4d8ffe50e568cd1d.exe",
+      "binarySha256": "a83653e9d3fa4f094e48d6f8d94f61b2b30b7a73ece10bd025a36bea494f0738",
+      "declared": 13,
+      "actualCaseLines": 13,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 2.14,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "calendar_execution_fence-90c781596b821bb1.exe",
+      "binarySha256": "1238b12cd2a447baca05e707ee14ef6f952439eb1726cd4aea159e764c0de18d",
+      "declared": 4,
+      "actualCaseLines": 4,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 4.68,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_bootstrap-1904026c21c0adea.exe",
+      "binarySha256": "2bdb42d018f3b381992e1aa36aed77ccc8ece7dd2ba32f2d9726eafd1c734b58",
+      "declared": 348,
+      "actualCaseLines": 348,
+      "passed": 348,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 66.01,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "verify_web_assets-875fd155fb56602c.exe",
+      "binarySha256": "ba0fb7f4f6196df7ed6a3cfa0ff3a93ed4f2dfbd0c07e27bd78d4b389758cf5b",
+      "declared": 0,
+      "actualCaseLines": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.0,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "business_storage-d7acb8a02f6a164c.exe",
+      "binarySha256": "4dc4802a20c6fa8cb87bafef142383f9b83cef5ea34662634b80552edd297f38",
+      "declared": 43,
+      "actualCaseLines": 43,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 2.6,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "runtime_storage-be315465b9650302.exe",
+      "binarySha256": "ea2ee7e10946e8cbe8e70f7d49690263cf78da5e5101653fb89474a49c47afe5",
+      "declared": 3,
+      "actualCaseLines": 3,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.13,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "voice_storage-2f35be146f47b683.exe",
+      "binarySha256": "91d6fa3bf789ce02afe464c80f0600f84bdaebeeda9f920fe0c8120fab3468b9",
+      "declared": 6,
+      "actualCaseLines": 6,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.74,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "schedule_operations-75016802763f2d21.exe",
+      "binarySha256": "0768d64de7025508b3acf2449d8810e95d17544937509131149774f8ae27c4d2",
+      "declared": 5,
+      "actualCaseLines": 5,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 1.23,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_bootstrap-f2a1cc65f02b0804.exe",
+      "binarySha256": "1805aceb7670d654ad860211fe814979d274776174b20c79f72925c828a986d9",
+      "declared": 223,
+      "actualCaseLines": 223,
+      "passed": 223,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 3.12,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_windows-cd50618b48fb17d8.exe",
+      "binarySha256": "fa3cf4818723ff84cdab4ee86401d2f161f8c91bf372427e68af7ac2a3df80f8",
+      "declared": 250,
+      "actualCaseLines": 250,
+      "passed": 250,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 25.98,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_security-897ee1bbd038f1a8.exe",
+      "binarySha256": "394fceda271d0e3ced9a0129dc650685f8a26a75012defca6d9de0b833e1f317",
+      "declared": 19,
+      "actualCaseLines": 19,
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.2,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_materials-2e428b959a090e75.exe",
+      "binarySha256": "5298a6c1c5cfe2e58e7fac19ff96da43a2dca83ec3b41d9b6277b6f949ad1772",
+      "declared": 39,
+      "actualCaseLines": 39,
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.08,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_presentation-0ebca4673ff953f0.exe",
+      "binarySha256": "aac64128b1bc60aa387da2c099c4e81d36c9f827e32c0ff985b0851f3bb394c3",
+      "declared": 58,
+      "actualCaseLines": 58,
+      "passed": 58,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.02,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_protocol-a7cf91af1d25db3b.exe",
+      "binarySha256": "661c06eb2b58a9090eef1b15207d6ee553b678d628e3510e9ca48b8d8abb6846",
+      "declared": 82,
+      "actualCaseLines": 82,
+      "passed": 82,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.06,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_application-452d4d2887413f93.exe",
+      "binarySha256": "e212d21816f306367adc62532b07c480e1cf67726ad07c81bc94f1c06b07ca41",
+      "declared": 25,
+      "actualCaseLines": 25,
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.0,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_audio-3b8d060b615f92df.exe",
+      "binarySha256": "48f4031bb29906ffc6125daf9125a884ef67e20712cc76c3f31c5ddb94c8bd2a",
+      "declared": 22,
+      "actualCaseLines": 22,
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.0,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_runtime-beae710b833bf51a.exe",
+      "binarySha256": "311441fed12aa7fdd7ebefcf2e4875e0fd9ef640cb5cba435e1cb63ae8034fe0",
+      "declared": 33,
+      "actualCaseLines": 33,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.1,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_storage-e351e410d252c84e.exe",
+      "binarySha256": "13b6beb0e62276060efca6bc37cfd75cbade9c2391de267b157c7acd91c013e5",
+      "declared": 208,
+      "actualCaseLines": 208,
+      "passed": 208,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 6.79,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_ports-2a65d64830b4e099.exe",
+      "binarySha256": "7cdde874e55d5f077fee0115b1c2020931b694502b599fcbb999c5d95d89b42a",
+      "declared": 8,
+      "actualCaseLines": 8,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.0,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    },
+    {
+      "name": "fc_domain-7c20761d03caf301.exe",
+      "binarySha256": "cbcfeb8cb28e0899f4bed15ed50c1c2af1dd95800d36a99284c5d271c13a3f33",
+      "declared": 149,
+      "actualCaseLines": 149,
+      "passed": 149,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0,
+      "summarySeconds": 0.01,
+      "capture": "normalized merged per-harness output lines; not raw streams"
+    }
+  ],
+  "totals": {
+    "passed": 1542,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filteredOut": 0
+  },
+  "stdout": {
+    "path": "/tmp/fc-round72-ci-evidence/modern-msvc-runtime-first.stdout.log",
+    "bytes": 947,
+    "sha256": "cf21ad25d13eb149aab9b977ed1110bdf74c4704cd298f291284f972d4e3c887"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round72-ci-evidence/modern-msvc-runtime-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

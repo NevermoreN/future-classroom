@@ -1,0 +1,12 @@
+--- round69/dispatch-ci-once.py
++++ round72/dispatch-ci-once.py
+@@ -3,7 +3,8 @@
+ import argparse
+ parser=argparse.ArgumentParser();parser.add_argument('--source-sha',required=True);parser.add_argument('--workflow',choices=['windows-msvc.yml','windows-win7-msvc.yml'],required=True);args=parser.parse_args()
+ workflow_file=args.workflow
+-base=Path('/tmp/fc-round69-ci-evidence');path=base/('FutureClassroom-round69-'+workflow_file.removesuffix('.yml')+'-dispatch.json')
++base=Path('/tmp/fc-round72-ci-evidence');path=base/('FutureClassroom-round72-'+workflow_file.removesuffix('.yml')+'-dispatch.json')
++assert (base/'.owner').read_bytes()==b'future-classroom-owned-r72-ci-evidence/v1\n'
+ assert not path.exists(),'Do not repeat dispatch; inspect original report/run first'
+ head=subprocess.run(['git','rev-parse','HEAD'],capture_output=True,check=True).stdout.decode().strip();assert head==args.source_sha and len(head)==40
+ assert subprocess.check_output(['git','ls-remote','origin','refs/heads/main']).decode().split()[0]==head
