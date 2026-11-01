@@ -261,6 +261,20 @@ impl Resources {
         Ok(())
     }
     fn digest(&mut self, h: HANDLE, limit: u64, deadline: Instant) -> Result<[u8; 32]> {
+        self.digest_file(h, limit, deadline, false)
+    }
+    // Only the private damaged-preimage reader accepts an actually zero-byte
+    // regular file. Existing image/manifest callers keep their nonempty guard.
+    fn digest_preimage(&mut self, h: HANDLE, limit: u64, deadline: Instant) -> Result<[u8; 32]> {
+        self.digest_file(h, limit, deadline, true)
+    }
+    fn digest_file(
+        &mut self,
+        h: HANDLE,
+        limit: u64,
+        deadline: Instant,
+        allow_empty: bool,
+    ) -> Result<[u8; 32]> {
         if self.handles.len() + 2 > HANDLE_LIMIT {
             return Err(LifecycleError::Invalid);
         }
@@ -268,7 +282,7 @@ impl Resources {
         unsafe {
             GetFileSizeEx(h, &mut size)?;
         }
-        if size <= 0 || size as u64 > limit {
+        if size < 0 || (!allow_empty && size == 0) || size as u64 > limit {
             return Err(LifecycleError::Invalid);
         }
         let mut algorithm = BCRYPT_ALG_HANDLE::default();
@@ -838,7 +852,7 @@ fn server(session: &mut Session) -> Result<()> {
                 BEGIN if !began && peer_id == process_identity(begin)? => {
                     // Revalidate the same original preimage under the exclusive
                     // gate. Its checked pins return before first MSI mutation.
-                    effects::revalidate(session, admission)?;
+                    effects::revalidate(session, &admission)?;
                     began = true;
                     session.send(pipe, Packet::new(ACK))?;
                 }
@@ -883,7 +897,7 @@ fn server(session: &mut Session) -> Result<()> {
                     }
                     owner.resources.add(duplicate, Role::Guardian);
                     owner.guardian = Some(peer_id);
-                    let observed = effects::staged(session, admission)?;
+                    let observed = effects::staged(session, &admission)?;
                     let mut response = Packet::new(DECISION);
                     response.transaction = packet.transaction;
                     response.outcome = match observed.outcome() {
@@ -927,7 +941,7 @@ fn server(session: &mut Session) -> Result<()> {
         }
         let observed = effects_decision.ok_or(LifecycleError::Unsettled)?;
         let outcome = observed.outcome();
-        let mut proof = effects::reconcile(session, observed)?;
+        let mut proof = effects::reconcile(session, &admission, observed)?;
         proof.check()?;
         // This receipt is constructed solely here, after actual native facts
         // and independently verified effects. There is no wire Settlement API.

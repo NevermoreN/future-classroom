@@ -4,6 +4,8 @@
 //! engine cache/log internals are not deleted or claimed absent here.
 use super::*;
 
+mod preimage;
+
 const MARKERS: &str = r"Software\FutureClassroom\Installer\Components";
 const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
 const PIN_GROUPS: usize = 6; // + session + original Maintenance = original 8 slots
@@ -23,14 +25,25 @@ impl Admission {
     fn preimage(self) -> ExpectedState {
         match self {
             Self::Fresh => ExpectedState::Absent,
-            Self::SameManifest => ExpectedState::Present,
+            Self::SameManifest => ExpectedState::CapturedPreimage,
         }
+    }
+}
+/// Broker-private memory only. No packet/property can supply or replace it.
+pub(super) struct Admitted {
+    kind: Admission,
+    snapshot: Option<preimage::Snapshot>,
+}
+impl Admitted {
+    pub(super) fn operation(&self) -> MaintenanceOperation {
+        self.kind.operation()
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum ExpectedState {
     Present,
     Absent,
+    CapturedPreimage,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Observation {
@@ -362,26 +375,53 @@ fn fresh(session: &mut Session) -> Result<()> {
     current(session.deadline)
 }
 
-pub(super) fn admit(session: &mut Session) -> Result<Admission> {
-    current(session.deadline)?;
-    let admission = if product(&session.manifest, "VersionString")?.is_some() {
-        Admission::SameManifest
-    } else {
-        Admission::Fresh
-    };
-    revalidate(session, admission)?;
-    Ok(admission)
-}
-pub(super) fn revalidate(session: &mut Session, admission: Admission) -> Result<()> {
+pub(super) fn admit(session: &mut Session) -> Result<Admitted> {
     current(session.deadline)?;
     run_absent_at(RUN_KEY)?;
-    match admission {
+    if product(&session.manifest, "VersionString")?.is_some() {
+        let mut proof = Proof::new(session.deadline);
+        let captured = registered_preimage(session, &mut proof);
+        // Return pins even on an invalid preimage. Unknown close remains fatal.
+        proof.release()?;
+        Ok(Admitted {
+            kind: Admission::SameManifest,
+            snapshot: Some(captured?),
+        })
+    } else {
+        fresh(session)?;
+        Ok(Admitted {
+            kind: Admission::Fresh,
+            snapshot: None,
+        })
+    }
+}
+fn registered_preimage(session: &Session, proof: &mut Proof) -> Result<preimage::Snapshot> {
+    same_registration(&session.manifest, &session.resources.sid)?;
+    let snapshot = preimage::capture(proof, &root()?, &session.manifest, &session.resources.sid)?;
+    markers(proof, &session.manifest)?;
+    proof.check()?;
+    Ok(snapshot)
+}
+pub(super) fn revalidate(session: &mut Session, admission: &Admitted) -> Result<()> {
+    current(session.deadline)?;
+    run_absent_at(RUN_KEY)?;
+    match admission.kind {
         Admission::Fresh => fresh(session)?,
         Admission::SameManifest => {
-            let mut proof = present(session)?;
-            // These preimage pins must return before Begin ACK: the original
-            // installer needs write/delete access for both reapply and remove.
+            let mut proof = Proof::new(session.deadline);
+            let observed = registered_preimage(session, &mut proof);
+            let matches = observed.as_ref().is_ok_and(|actual| {
+                admission
+                    .snapshot
+                    .as_ref()
+                    .is_some_and(|original| original.same_objects(actual))
+            });
+            // Checked returns precede Begin ACK and every MSI write/delete.
             proof.release()?;
+            observed?;
+            if !matches {
+                return Err(LifecycleError::Unsettled);
+            }
         }
     }
     current(session.deadline)
@@ -727,7 +767,7 @@ fn present(session: &Session) -> Result<Proof> {
     proof.check()?;
     Ok(proof)
 }
-pub(super) fn staged(session: &mut Session, admission: Admission) -> Result<Decision> {
+pub(super) fn staged(session: &mut Session, admission: &Admitted) -> Result<Decision> {
     current(session.deadline)?;
     run_absent_at(RUN_KEY)?;
     let mut proof = Proof::new(session.deadline);
@@ -746,13 +786,32 @@ pub(super) fn staged(session: &mut Session, admission: Admission) -> Result<Deci
         Observation::Other
     };
     current(session.deadline)?;
-    Ok(Decision::observed(admission, observed))
+    Ok(Decision::observed(admission.kind, observed))
 }
-pub(super) fn reconcile(session: &mut Session, decision: Decision) -> Result<Proof> {
+pub(super) fn reconcile(
+    session: &mut Session,
+    admission: &Admitted,
+    decision: Decision,
+) -> Result<Proof> {
     current(session.deadline)?;
     run_absent_at(RUN_KEY)?;
     if decision.expected == ExpectedState::Present {
         return present(session);
+    }
+    if decision.expected == ExpectedState::CapturedPreimage {
+        // Caller reaches this only after the original guardian's successful
+        // Join/EndRollback and checked original process exit. A bad original
+        // payload is compared with its actual bad bytes, never the manifest.
+        let mut proof = Proof::new(session.deadline);
+        let actual = registered_preimage(session, &mut proof)?;
+        if !admission
+            .snapshot
+            .as_ref()
+            .is_some_and(|original| original.same_effects(&actual))
+        {
+            return Err(LifecycleError::Unsettled);
+        }
+        return Ok(proof);
     }
     let proof = Proof::new(session.deadline);
     let base = root()?;
@@ -820,7 +879,7 @@ mod tests {
                 Admission::SameManifest,
                 Observation::Other,
                 SettledOutcome::Rollback,
-                ExpectedState::Present,
+                ExpectedState::CapturedPreimage,
             ),
         ] {
             let decision = Decision::observed(admission, observation);
@@ -1156,6 +1215,146 @@ mod tests {
         assert!(files(&mut proof, &base, &wrong, &sid).is_err());
         proof.release().unwrap();
         fs::remove_file(alias).unwrap();
+    }
+    fn captured_files(base: &Path, manifest: &Manifest, sid: &[u8]) -> Result<preimage::Snapshot> {
+        let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));
+        let result = preimage::capture(&mut proof, base, manifest, sid);
+        proof.release()?;
+        result
+    }
+    #[test]
+    fn actual_damaged_preimage_pins_zero_and_bad_bytes_and_requires_exact_rollback() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let (_tree, base, manifest, sid) = fixture();
+        let leaf = manifest_path(&base, "web/index.html").unwrap();
+        let healthy = fs::read(&leaf).unwrap();
+        // Empty/truncated regular files are repairable facts, not absence or
+        // an invented healthy digest. The original image digest remains strict.
+        fs::write(&leaf, []).unwrap();
+        let empty = captured_files(&base, &manifest, &sid).unwrap();
+        fs::write(&leaf, &healthy[..1]).unwrap();
+        let truncated = captured_files(&base, &manifest, &sid).unwrap();
+        assert!(!empty.same_effects(&truncated));
+        let mut bad = healthy.clone();
+        bad[0] ^= 1;
+        fs::write(&leaf, &bad).unwrap();
+        let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));
+        let damaged = preimage::capture(&mut proof, &base, &manifest, &sid).unwrap();
+        assert!(fs::OpenOptions::new().write(true).open(&leaf).is_err());
+        proof.release().unwrap();
+        // Pins really returned. Full healthy content is a successful repair,
+        // but cannot masquerade as exact restoration after EndRollback.
+        fs::write(&leaf, &healthy).unwrap();
+        assert!(!damaged.same_effects(&captured_files(&base, &manifest, &sid).unwrap()));
+        fs::write(&leaf, &bad).unwrap();
+        assert!(damaged.same_objects(&captured_files(&base, &manifest, &sid).unwrap()));
+        let replacement = base.parent().unwrap().join("replacement");
+        fs::write(&replacement, &bad).unwrap();
+        fs::remove_file(&leaf).unwrap();
+        fs::rename(&replacement, &leaf).unwrap();
+        let replaced = captured_files(&base, &manifest, &sid).unwrap();
+        assert!(!damaged.same_objects(&replaced));
+        assert!(damaged.same_effects(&replaced));
+    }
+    #[test]
+    fn actual_preimage_distinguishes_missing_tree_and_rejects_foreign_link_locked_and_large() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let (_tree, base, manifest, sid) = fixture();
+        let leaf = manifest_path(&base, "web/index.html").unwrap();
+        let bytes = fs::read(&leaf).unwrap();
+        fs::remove_file(&leaf).unwrap();
+        let missing = captured_files(&base, &manifest, &sid).unwrap();
+        assert!(missing.same_objects(&captured_files(&base, &manifest, &sid).unwrap()));
+        fs::write(&leaf, []).unwrap();
+        assert!(!missing.same_effects(&captured_files(&base, &manifest, &sid).unwrap()));
+        fs::write(&leaf, &bytes).unwrap();
+        fs::write(base.join("foreign.txt"), b"unowned").unwrap();
+        assert!(captured_files(&base, &manifest, &sid).is_err());
+        fs::remove_file(base.join("foreign.txt")).unwrap();
+        let alias = base.parent().unwrap().join("outside-link");
+        fs::hard_link(&leaf, &alias).unwrap();
+        assert!(captured_files(&base, &manifest, &sid).is_err());
+        fs::remove_file(&alias).unwrap();
+        let mut lock = Resources::empty().unwrap();
+        let handle = lock
+            .open_file(
+                &leaf,
+                GENERIC_WRITE.0,
+                FILE_SHARE_READ,
+                OPEN_EXISTING,
+                false,
+                false,
+            )
+            .unwrap();
+        lock.add(handle, Role::Parent);
+        assert!(captured_files(&base, &manifest, &sid).is_err());
+        lock.release().unwrap();
+        fs::OpenOptions::new()
+            .write(true)
+            .open(&leaf)
+            .unwrap()
+            .set_len(u64::from(manifest::MAX_PAYLOAD) + 1)
+            .unwrap();
+        assert!(captured_files(&base, &manifest, &sid).is_err());
+        fs::write(&leaf, &bytes).unwrap();
+        let web = base.join("web");
+        let saved = base.parent().unwrap().join("saved-web");
+        fs::rename(&web, &saved).unwrap();
+        let absent_directory = captured_files(&base, &manifest, &sid).unwrap();
+        fs::create_dir(&web).unwrap();
+        assert!(!absent_directory.same_effects(&captured_files(&base, &manifest, &sid).unwrap()));
+        fs::remove_dir(&web).unwrap();
+        fs::rename(&saved, &web).unwrap();
+        let moved = base.parent().unwrap().join("saved-root");
+        fs::rename(&base, &moved).unwrap();
+        assert!(captured_files(&base, &manifest, &sid).is_ok());
+        fs::rename(&moved, &base).unwrap();
+    }
+    #[test]
+    fn actual_preimage_rejects_missing_ancestor_created_after_directory_snapshot() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        for (whole_root, with_leaf) in [(false, true), (true, true), (false, false), (true, false)]
+        {
+            let (_tree, base, manifest, sid) = fixture();
+            let (directory, leaf) = if whole_root {
+                (base.clone(), manifest_path(&base, "LICENSE").unwrap())
+            } else {
+                (
+                    base.join("web"),
+                    manifest_path(&base, "web/index.html").unwrap(),
+                )
+            };
+            let bytes = fs::read(&leaf).unwrap();
+            let saved = base.parent().unwrap().join("saved-before-window");
+            fs::rename(&directory, &saved).unwrap();
+            let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));
+            let observed =
+                preimage::capture_with_directory_hook(&mut proof, &base, &manifest, &sid, || {
+                    // This deterministic Win32 window reproduced the old
+                    // None-directory + Regular-leaf snapshot without a race.
+                    fs::create_dir(&directory).unwrap();
+                    if with_leaf {
+                        fs::write(&leaf, &bytes).unwrap();
+                    }
+                });
+            assert!(matches!(observed, Err(LifecycleError::Unsettled)));
+            let moved_while_pinned = base.parent().unwrap().join("unexpected-during-proof");
+            assert!(fs::rename(&directory, &moved_while_pinned).is_err());
+            // Unexpected directory open was added to the same native ledger;
+            // it, and every earlier pin, must actually return before recovery.
+            proof
+                .release()
+                .expect("checked return of the rejected proof");
+            fs::remove_dir_all(&directory).unwrap();
+            fs::rename(&saved, &directory).unwrap();
+            captured_files(&base, &manifest, &sid).unwrap();
+        }
     }
     #[test]
     fn actual_target_fact_cannot_select_directory_or_alias() {
