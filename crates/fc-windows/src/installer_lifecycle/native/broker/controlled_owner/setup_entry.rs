@@ -85,7 +85,9 @@ fn template() -> Vec<u32> {
     // DLGTEMPLATE/each item requires DWORD alignment. Vec<u32> guarantees that
     // alignment while preserving the fixed little-endian Windows word layout.
     words
-        .chunks_exact(2)
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|pair| u32::from(pair[0]) | (u32::from(pair[1]) << 16))
         .collect()
 }

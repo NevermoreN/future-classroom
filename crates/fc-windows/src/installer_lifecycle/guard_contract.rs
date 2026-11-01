@@ -33,7 +33,7 @@ impl Nonce {
             }
         }
         let mut bytes = [0; 16];
-        for (i, pair) in hex.as_bytes().chunks_exact(2).enumerate() {
+        for (i, pair) in hex.as_bytes().as_chunks::<2>().0.iter().enumerate() {
             bytes[i] = (nibble(pair[0])? << 4) | nibble(pair[1])?;
         }
         Self::from_bytes(bytes)
