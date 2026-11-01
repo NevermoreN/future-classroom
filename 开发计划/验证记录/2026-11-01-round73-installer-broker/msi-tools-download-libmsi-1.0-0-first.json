@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_EXACT_PUBLISHED_BYTES_AND_SHA256",
+  "package": "libmsi-1.0-0",
+  "expectedBytes": 70066,
+  "expectedSha256": "e6187a2eb31f595e61a3c864d83400060f06ff13517774dcc37e65d6730ff754",
+  "command": [
+    "curl",
+    "--disable",
+    "--fail",
+    "--location",
+    "--max-redirs",
+    "3",
+    "--proto",
+    "=https",
+    "--proto-redir",
+    "=https",
+    "--tlsv1.2",
+    "--connect-timeout",
+    "15",
+    "--max-time",
+    "120",
+    "--max-filesize",
+    "70066",
+    "--output",
+    "/tmp/fc-round73-installer-broker/tools/packages/libmsi-1.0-0_0.103+repack-1build3_amd64.deb",
+    "https://mirrors.edge.kernel.org/ubuntu/pool/universe/m/msitools/libmsi-1.0-0_0.103+repack-1build3_amd64.deb"
+  ],
+  "startedUtc": "2026-11-01T10:45:20.848930+00:00",
+  "deadlineSeconds": 120,
+  "connectionDeadlineSeconds": 15,
+  "candidateMsiProduced": false,
+  "windowsInvoked": false,
+  "controllerTimedOut": false,
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 1.123048237990588,
+  "logs": [
+    {
+      "path": "msi-tools-download-libmsi-1.0-0-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "msi-tools-download-libmsi-1.0-0-first.stderr.log",
+      "bytes": 396,
+      "sha256": "24c6c1a357244f009c05db1ea528fdb12ef3dec25078150eae6ab3ed090747a9"
+    }
+  ],
+  "downloaded": {
+    "path": "/tmp/fc-round73-installer-broker/tools/packages/libmsi-1.0-0_0.103+repack-1build3_amd64.deb",
+    "bytes": 70066,
+    "sha256": "e6187a2eb31f595e61a3c864d83400060f06ff13517774dcc37e65d6730ff754"
+  }
+}

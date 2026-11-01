@@ -1,0 +1,84 @@
+{
+  "status": "ORIGINAL_FAILURE_PRESERVED_NOT_FIXED",
+  "createdUtc": "2026-11-01T11:03:35.570738+00:00",
+  "source": [
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "sha256": "02f544d4ea42c291d9356781e8b79f3e709837feec440d54ccc1caed3fce68bf",
+      "bytes": 1645
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98",
+      "bytes": 9592
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f",
+      "bytes": 36478
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb",
+      "bytes": 3198
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959",
+      "bytes": 8256
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04",
+      "bytes": 38816
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "sha256": "fb54da0bc8b4fc2c905c64a95e0df23ce1ec836e7d9814cf1560d94c57cb19dd",
+      "bytes": 22760
+    }
+  ],
+  "originalEvidence": [
+    {
+      "path": "n-implementation-freeze-second.json",
+      "sha256": "25d6f11c55b5d4e7638fdd36246794c7711ae6ea98dcbd09116082535ddc96e2",
+      "bytes": 5777
+    },
+    {
+      "path": "root-windows-gnu-full-first.json",
+      "sha256": "37a64d413fc4a3560eac92fdeaa2a00644b28935036b85fb393956b120875b82",
+      "bytes": 109139
+    },
+    {
+      "path": "root-windows-gnu-full-first.command.json",
+      "sha256": "0346b5eb5a3632a60932a4552a8e500f0b8670290887cd1d74a8f38ef412b749",
+      "bytes": 17322
+    },
+    {
+      "path": "root-windows-gnu-full-first.stdout.log",
+      "sha256": "d2a6f75c68ccac31234b9c2bbf0f8ce291271696cc11ddcc973047aea738c93c",
+      "bytes": 392
+    },
+    {
+      "path": "root-windows-gnu-full-first.stderr.log",
+      "sha256": "651edf3b56e19cf9b91eecf6a2efe9f9f968e05df7e9249ed9015e84a144d43f",
+      "bytes": 365
+    },
+    {
+      "path": "windows-readonly-after-first-failure.json",
+      "sha256": "98458faa6fc47287478507bb137a96df007ac1a5a114644ee3db2f3ecf325bae",
+      "bytes": 16755
+    }
+  ],
+  "staticFinding": {
+    "manifestSeparator": "ASCII / in closed validated relative names",
+    "productionJoinLines": [
+      239,
+      275,
+      330
+    ],
+    "strictValidator": "native.rs valid_path rejects / with E_INVALIDARG",
+    "candidate": "Join each previously validated manifest component separately to the fixed native base; leave external strict path policy and authority unchanged."
+  },
+  "runtime": "First files(proof) E_INVALIDARG actual, no independent stage attribution yet. Remaining 17 cases are poisoned global serialization lock cascade; no lock changes."
+}

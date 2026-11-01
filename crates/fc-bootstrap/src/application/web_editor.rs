@@ -56,10 +56,13 @@ impl Readiness {
     }
     pub(super) fn synthetic(self) -> bool {
         #[cfg(test)]
-        if matches!(self, Self::SyntheticFixture) {
-            return true;
+        {
+            matches!(self, Self::SyntheticFixture)
         }
-        false
+        #[cfg(not(test))]
+        {
+            false
+        }
     }
     fn can_stop(self) -> bool {
         matches!(self, Self::Starting | Self::Running { .. }) || self.synthetic()

@@ -1,0 +1,46 @@
+{
+  "status": "STATIC_READONLY_TRIAGE_COMPLETE_NOT_RUNTIME_PASS",
+  "atUtc": "2026-11-01T11:05:48.467303+00:00",
+  "originalFailureReport": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/root-windows-gnu-full-first.json",
+    "bytes": 109139,
+    "sha256": "37a64d413fc4a3560eac92fdeaa2a00644b28935036b85fb393956b120875b82"
+  },
+  "reviewedCurrentSource": [
+    {
+      "path": "/tmp/fc-round73-installer-broker/worktree/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/worktree/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/worktree/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 24471,
+      "sha256": "8eccbed8b0c916aed63103d1e98f89db948b0578648289ca317f1841fe82dff4"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/worktree/crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8256,
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959"
+    }
+  ],
+  "finding": {
+    "confirmedCodeConflict": "Closed manifest stores forward-slash relative paths. Original effects joined those strings directly to Windows PathBuf, retaining an internal slash. Global native::valid_path rejects slash and invalid() synthesizes E_INVALIDARG (0x80070057), so observed Native HRESULT need not be a Win32 call returning errno87.",
+    "observedFirstFailure": "actual_closed_file_effects_pin_bytes_and_reject_extra_changed_and_linked_files unwrap at effects.rs619 files(proof), Native(HRESULT0x80070057). Original failure retained.",
+    "n3DirectionReview": "Private manifest_path first rechecks existing closed manifest::path grammar, then pushes each single slash-separated component to the fixed base. Three actual production construction sites use it: parent-directory pins, expected-name set, file opens. Global native path guard remains strict.",
+    "regressionSourceReview": "Original mixed-separator construction is checked to retain slash and both native guards reject with the same local E_INVALIDARG; new component paths must pass both guards; traversal/drive/backslash manifest inputs rejected. Original actual file pin proof and extra-file/changed-digest/hardlink rejection scenarios remain. These are source assertions pending new actual Windows run."
+  },
+  "otherPathApiReview": {
+    "pinDirectories": "CreateFileW directory flags/access/read-control and deny-delete directory pins remain; no proven independent invalid parameter was found.",
+    "exactNames": "FindFirstFileW/FindNextFileW search handles registered Role::Search; close dispatch FindClose.",
+    "digest": "CNG Algorithm/Hash close dispatch uses BCryptCloseAlgorithmProvider/BCryptDestroyHash, with role+handle identity lookup. Fixture already completed ten digest calls before reaching its later files() unwrap. This does not prove every later path succeeds.",
+    "resourcesClose": "Search/Registry/CNG/kernel handles have matching distinct close APIs in inspected source. No additional demonstrated wrong-role close in the current files chain.",
+    "fallbackIfNewRunFails": "Use bounded typed stage/error diagnosis for pin-directory/open/info/ACL, name enumeration/search-close, file-open/size/digest. Never print paths/SID/payload or weaken admission to obtain a pass."
+  },
+  "runtimeQualification": "No Windows/Cargo/network/PE/controller execution performed by this reviewer. Current source snapshot is the N3 candidate, not a claim that the failed binary contained this correction; next PASS must not be used to infer a unique original OS API failure. Later SERIAL poison failures remain consequences and were not changed.",
+  "mutationScope": "Only this new owned triage directory/report. Existing reports/raw, N/B/root source, main, Run and persistent SSH authorization unchanged."
+}

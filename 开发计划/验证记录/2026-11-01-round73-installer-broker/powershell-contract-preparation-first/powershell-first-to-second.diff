@@ -1,0 +1,19 @@
+--- run-powershell-contract-first.py
++++ run-powershell-contract-second.py
+@@ -55,7 +55,7 @@
+     return json.loads('\n'.join(lines).strip())
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('--execute', action='store_true')
+-    parser.add_argument('--report', type=Path, default=EV / 'windows-powershell-contract-first.json'); args = parser.parse_args()
++    parser.add_argument('--report', type=Path, default=EV / 'windows-powershell-contract-second.json'); args = parser.parse_args()
+     need((ROOT / '.owner').read_bytes() == b'future-classroom-owned-r73-installer-broker/v1\n', 'EXACT_R73_OWNER')
+     before = {name: fact(WORK / 'scripts' / name) for name in FILES}
+     need(all(before[name]['sha256'] == FILES[name] for name in FILES), 'EXACT_B_FROZEN_SOURCES')
+@@ -96,6 +96,7 @@
+     def ps(label, text, executable='powershell.exe', reserve=12, is_contract=False):
+         need('"' not in executable and '\n' not in executable and '\r' not in executable, 'CLOSED_INTERPRETER_PATH')
+         command = ('"' + executable + '"') if ' ' in executable else executable
++        if executable.lower() == 'powershell.exe': command += ' -ExecutionPolicy Bypass'
+         command += ' -NoProfile -NonInteractive -EncodedCommand ' + encode(text)
+         need(len(command) <= 7600, 'SHORT_COMMAND_LINE_BOUND')
+         return call(label, ['ssh', *options, HOST, command], reserve, is_contract)

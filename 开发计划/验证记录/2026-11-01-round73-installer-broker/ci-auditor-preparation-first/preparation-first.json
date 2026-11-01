@@ -1,0 +1,62 @@
+{
+  "status": "PREPARED_AST_ONLY_NOT_EXECUTED",
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "template-r69-original.py",
+      "bytes": 66125,
+      "sha256": "c136efb0ecb5dc1dbffadadae31b933c43ac3d298c308921dd7c8e409fc75527"
+    },
+    {
+      "path": "verify-ci-artifact-dual-gui-first.py",
+      "bytes": 53361,
+      "sha256": "e7553ef84b240453784a38df370db86e5f03f2f60b3c65910ebec17da282466f"
+    },
+    {
+      "path": "template-to-dual-gui-first.diff",
+      "bytes": 37696,
+      "sha256": "315c41a7b59ca0502356c6c79c5dfe8592ed6f3ab383a9496aa2d74659903ac9"
+    }
+  ],
+  "templateSha256": "c136efb0ecb5dc1dbffadadae31b933c43ac3d298c308921dd7c8e409fc75527",
+  "bFreeze": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/b-implementation-freeze-first.json",
+    "sha256": "bb49743c651cf0e8940fc039a0c3f54885ab1f0ea76f5dda66a149ed60888c2e"
+  },
+  "pinnedCiSource": {
+    "path": "scripts/windows-msvc-ci.ps1",
+    "bytes": 54457,
+    "sha256": "edec879ecad9bad5b3ef21f48afa895bb3e8f0ac58e6aba561d5748e5e147802",
+    "before": {
+      "present": true,
+      "bytes": 52976,
+      "sha256": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886"
+    }
+  },
+  "sourceFullyFrozen": false,
+  "newCiExists": false,
+  "artifactValidated": false,
+  "peExecuted": false,
+  "cargoWindowsNetworkMainMutation": false,
+  "plannedCurrentInventory": {
+    "tests": 22,
+    "normalTargets": [
+      "fc-bootstrap",
+      "fc-installer-lifecycle"
+    ],
+    "normalProducts": 2,
+    "PEs": 24,
+    "qualification": "Expected from the newly declared second binary, not an observed CI result. Auditor derives complete test target membership from actual source-bound Cargo metadata and checks each emitted artifact rather than accepting a magic old count."
+  },
+  "invocation": "python3 -B verify-ci-artifact-dual-gui-first.py --source NEW_SOURCE40 --baseline Modern|Win7 --zip TERMINAL_ORIGINAL.zip --zip-bytes ACTUAL_BYTES --zip-sha256 SHA64 --run-id ACTUAL_RUN --job-id ACTUAL_JOB --artifact-id ACTUAL_ARTIFACT --run-metadata ORIGINAL_RUN.json --job-metadata ORIGINAL_JOBS.json --artifact-metadata ORIGINAL_ARTIFACTS.json --output-dir FRESH_OWNED_DIR --report FRESH_OWNED_REPORT.json --repo COMMITTED_REPO",
+  "requiredRules": [
+    "No source/run/job/artifact/ZIP old defaults; actual full official identity and original terminal-success rules unchanged.",
+    "Old model entry removed: no --self-test/prepared/model path may emit a PASS artifact report. No helper execution occurred here; only ast.parse.",
+    "Current twelve workspace packages; dynamic metadata test target inventory equals original no-run Cargo JSON, producer ledger and all PE membership. Historical Git archive metadata and real checkout SHA partition remain distinct and dynamically counted.",
+    "Normal roles both product; exact command->target map product-compile:fc-bootstrap/lifecycle-compile:fc-installer-lifecycle, same source-bound fc-bootstrap package/version/release profile, profile.test strictly false, exact owned target/release filenames. Generic extra product rejected.",
+    "Producer cargo_profile_test must be exact bool matching actual Cargo profile; target/package/kinds/metadata source paths/crate types and message filenames checked.",
+    "Two normal GUI2, tests CUI3; all Win7 subsystem6.1; independent import/staticCRT checks unchanged. Actual command flags/CRT scope and source-pinned original phases retained.",
+    "Budgets remain workspace2400/product1200/lifecycle1200/clippy1500, log16MiB, payload512MiB, source20k/perfile64MiB/actualSHA256MiB unchanged. No new OS/runtime/MSI acceptance."
+  ],
+  "reportContract": "counts.tests/products/executables dynamic; normalExecutables maps exactly both closed targets, normalExecutable explicitly aliases fc-bootstrap GUI app, lifecycleExecutable explicitly identifies helper, cargoExecutableAssociations contains original compile/target/package/version/profile facts."
+}

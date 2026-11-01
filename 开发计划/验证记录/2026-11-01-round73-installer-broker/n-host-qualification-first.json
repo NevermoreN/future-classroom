@@ -1,0 +1,404 @@
+{
+  "status": "HOST_TEST_PASS_HOST_STRICT_CLIPPY_FAIL_PREEXISTING_WINDOWS_CALLER_CFG",
+  "createdUtc": "2026-11-01T11:46:48.701881+00:00",
+  "originalReport": {
+    "path": "n-host-first.json",
+    "sha256": "da0715d485985841af18f274ba28a6db9425f0edcc596877c392d206f89db036"
+  },
+  "actualParentTerminal": {
+    "path": "n-host-producer-terminal-first.json",
+    "sha256": "35043829f5a53c286c8c9564e696865de2c8438fb755043208882eb5a23c9779"
+  },
+  "qualification": "Host tests actually passed 989/22 with no failures, ignored or filtered. Strict Host release Clippy actually FAILED exit101 at six primary diagnostics. Failure stays a failure; no baseline rerun was performed and no baseline Host-Clippy PASS/FAIL is invented. All four diagnosed files exactly match both pre-round commits and current main bytes; none belongs to this round sixteen changed inputs. No observed fatal primary points to the newly modified fifteen source files/Cargo metadata. This is a finite diagnostic conclusion, not proof that lint checking reached every downstream item after compilation stopped.",
+  "diagnosticFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 46785,
+      "worktreeSha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe",
+      "base00120Sha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe",
+      "mainHead9c410Sha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe",
+      "mainCurrentSha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe",
+      "exactByteEqualToBothCommitsAndMainCurrent": true,
+      "inSixteenRoundInputs": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "bytes": 4108,
+      "worktreeSha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf",
+      "base00120Sha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf",
+      "mainHead9c410Sha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf",
+      "mainCurrentSha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf",
+      "exactByteEqualToBothCommitsAndMainCurrent": true,
+      "inSixteenRoundInputs": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "bytes": 9910,
+      "worktreeSha256": "5bb04d3585f895381daa0ef3e28ef851d7304c0584cebf40a615a91468716e39",
+      "base00120Sha256": "5bb04d3585f895381daa0ef3e28ef851d7304c0584cebf40a615a91468716e39",
+      "mainHead9c410Sha256": "5bb04d3585f895381daa0ef3e28ef851d7304c0584cebf40a615a91468716e39",
+      "mainCurrentSha256": "5bb04d3585f895381daa0ef3e28ef851d7304c0584cebf40a615a91468716e39",
+      "exactByteEqualToBothCommitsAndMainCurrent": true,
+      "inSixteenRoundInputs": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer.rs",
+      "bytes": 10897,
+      "worktreeSha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76",
+      "base00120Sha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76",
+      "mainHead9c410Sha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76",
+      "mainCurrentSha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76",
+      "exactByteEqualToBothCommitsAndMainCurrent": true,
+      "inSixteenRoundInputs": false
+    }
+  ],
+  "primaryDiagnostics": [
+    {
+      "primaryPath": "crates/fc-bootstrap/src/backend/web.rs",
+      "primaryLine": 12,
+      "kind": "unused_imports",
+      "item": "runtime::WebRuntimeReservation"
+    },
+    {
+      "primaryPath": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "primaryLine": 90,
+      "kind": "dead_code",
+      "item": "Backend::https_data_root"
+    },
+    {
+      "primaryPath": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "primaryLine": 5,
+      "kind": "dead_code",
+      "item": "WebRuntimeReservation"
+    },
+    {
+      "primaryPath": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "primaryLine": 15,
+      "kind": "dead_code",
+      "item": "WebService::{reserve_runtime,runtime_domain_current,settle_runtime_stop}",
+      "secondaryLines": [
+        72,
+        101
+      ]
+    },
+    {
+      "primaryPath": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "primaryLine": 120,
+      "kind": "dead_code",
+      "item": "WebRuntimeReservation::{identity_revision,current,execution_fence,mark_started,activate,owns_claim,negative_stop,physical_returned}",
+      "secondaryLines": [
+        123,
+        131,
+        136,
+        142,
+        190,
+        196,
+        223
+      ]
+    },
+    {
+      "primaryPath": "crates/fc-bootstrap/src/web_transfer.rs",
+      "primaryLine": 156,
+      "kind": "dead_code",
+      "item": "TransferLifetime::with_domain_fence"
+    }
+  ],
+  "callerCfgEvidence": [
+    {
+      "path": "crates/fc-bootstrap/src/lib.rs",
+      "lines": [
+        5,
+        6
+      ],
+      "fact": "https_runtime module is compiled only on Windows."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/https_runtime.rs",
+      "lines": [
+        6,
+        133,
+        174,
+        177,
+        245,
+        248,
+        398,
+        504,
+        522
+      ],
+      "fact": "Production caller/imports for runtime reservation/data-root/domain-current/settlement reside in Windows-only https_runtime."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer.rs",
+      "lines": [
+        23,
+        24
+      ],
+      "fact": "network module is compiled only on Windows."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "lines": [
+        618
+      ],
+      "fact": "Production with_domain_fence caller is within Windows-only network module."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "lines": [
+        1281,
+        1284,
+        1286
+      ],
+      "fact": "Runtime reservation test uses exist under cfg(test); non-test Host library Clippy can still flag production-only unused items."
+    }
+  ],
+  "sourceUnchangedSixteenInputs": true,
+  "scratchCleanup": "PASS_ONLY_EXACT_OWNED_MARKER_AND_EMPTY_ROOT_REMOVED",
+  "scratchRootAbsent": true,
+  "testHarnessCounts": [
+    {
+      "target": "fc_application",
+      "kind": [
+        "lib"
+      ],
+      "running": 25,
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_audio",
+      "kind": [
+        "lib"
+      ],
+      "running": 22,
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_bootstrap",
+      "kind": [
+        "lib"
+      ],
+      "running": 216,
+      "passed": 216,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc-bootstrap",
+      "kind": [
+        "bin"
+      ],
+      "running": 1,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc-installer-lifecycle",
+      "kind": [
+        "bin"
+      ],
+      "running": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "autostart_coordinator",
+      "kind": [
+        "test"
+      ],
+      "running": 13,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "business_storage",
+      "kind": [
+        "test"
+      ],
+      "running": 43,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "calendar_execution_fence",
+      "kind": [
+        "test"
+      ],
+      "running": 4,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "runtime_storage",
+      "kind": [
+        "test"
+      ],
+      "running": 3,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "schedule_operations",
+      "kind": [
+        "test"
+      ],
+      "running": 5,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "voice_limits_storage",
+      "kind": [
+        "test"
+      ],
+      "running": 4,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "voice_storage",
+      "kind": [
+        "test"
+      ],
+      "running": 6,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "verify_web_assets",
+      "kind": [
+        "example"
+      ],
+      "running": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_domain",
+      "kind": [
+        "lib"
+      ],
+      "running": 149,
+      "passed": 149,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_materials",
+      "kind": [
+        "lib"
+      ],
+      "running": 39,
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_ports",
+      "kind": [
+        "lib"
+      ],
+      "running": 8,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_presentation",
+      "kind": [
+        "lib"
+      ],
+      "running": 58,
+      "passed": 58,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_protocol",
+      "kind": [
+        "lib"
+      ],
+      "running": 82,
+      "passed": 82,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_runtime",
+      "kind": [
+        "lib"
+      ],
+      "running": 33,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_security",
+      "kind": [
+        "lib"
+      ],
+      "running": 19,
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_storage",
+      "kind": [
+        "lib"
+      ],
+      "running": 208,
+      "passed": 208,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "fc_windows",
+      "kind": [
+        "lib"
+      ],
+      "running": 51,
+      "passed": 51,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    }
+  ],
+  "normalHelperUnsupportedMain": "NOT_RUN; Host helper libtest is 0 cases and does not execute normal main.",
+  "action": "Per root, retain finite Host lint FAIL for Windows-only production callers. No allow, cfg changes, source edit, broader Linux support, Cargo retry or Windows operation. GNU cross-target strict Clippy and Win11 runtime evidence remain independent, neither converts this Host lint FAIL into PASS."
+}

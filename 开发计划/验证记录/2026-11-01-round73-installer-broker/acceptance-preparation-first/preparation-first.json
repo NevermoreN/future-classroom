@@ -1,0 +1,26 @@
+{
+  "status": "PREPARED_AST_ONLY_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T11:27:16.310173+00:00",
+  "helper": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/acceptance-preparation-first/independent-finite-first.py",
+    "bytes": 22657,
+    "sha256": "6a14e7b4274911b6c420ab012d4bc04c38ef04396d1f758c7ca8f9b710e05e6c"
+  },
+  "validation": "AST parse only plus read-only terminal schema adaptation; no invocation of acceptance or imported validator functions.",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round73-installer-broker/evidence/acceptance-preparation-first/independent-finite-first.py",
+    "--report",
+    "/tmp/fc-round73-installer-broker/evidence/independent-finite-acceptance-first.json"
+  ],
+  "scope": "R73 frozen N3 finite GNU Win11 and Desktop5.1 pure contract only. Missing or nonterminal required original yields WAIT/no report. Other OS runtime NOT_RUN; no hosted CI or MSI acceptance.",
+  "budgets": {
+    "producerPerCommand900": true,
+    "fullPerHarness900": true,
+    "purePowershell120": true
+  },
+  "historicalFailures": "Original first policy refusal, N2 native 243/18 failure and N3 old root parser failure/stale RUNNING recorder remain unchanged.",
+  "sourceAndMainChanged": false,
+  "executedWindowsCargoNetworkOrPE": false
+}

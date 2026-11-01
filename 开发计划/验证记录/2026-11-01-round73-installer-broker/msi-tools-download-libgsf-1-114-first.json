@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_EXACT_PUBLISHED_BYTES_AND_SHA256",
+  "package": "libgsf-1-114",
+  "expectedBytes": 104918,
+  "expectedSha256": "fa61257611e56ecbf75f42de477016fbb3792bfce9c837232254bdb0a2820b26",
+  "command": [
+    "curl",
+    "--disable",
+    "--fail",
+    "--location",
+    "--max-redirs",
+    "3",
+    "--proto",
+    "=https",
+    "--proto-redir",
+    "=https",
+    "--tlsv1.2",
+    "--connect-timeout",
+    "15",
+    "--max-time",
+    "120",
+    "--max-filesize",
+    "104918",
+    "--output",
+    "/tmp/fc-round73-installer-broker/tools/packages/libgsf-1-114_1.14.51-2ubuntu0.1_amd64.deb",
+    "https://mirrors.edge.kernel.org/ubuntu/pool/main/libg/libgsf/libgsf-1-114_1.14.51-2ubuntu0.1_amd64.deb"
+  ],
+  "startedUtc": "2026-11-01T10:45:20.866310+00:00",
+  "deadlineSeconds": 120,
+  "connectionDeadlineSeconds": 15,
+  "candidateMsiProduced": false,
+  "windowsInvoked": false,
+  "controllerTimedOut": false,
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 1.3184794108383358,
+  "logs": [
+    {
+      "path": "msi-tools-download-libgsf-1-114-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "msi-tools-download-libgsf-1-114-first.stderr.log",
+      "bytes": 396,
+      "sha256": "e71e2f1c5bea9220b17b847acdcade03ea62a2e3cb04ab1fbbc42b8888581131"
+    }
+  ],
+  "downloaded": {
+    "path": "/tmp/fc-round73-installer-broker/tools/packages/libgsf-1-114_1.14.51-2ubuntu0.1_amd64.deb",
+    "bytes": 104918,
+    "sha256": "fa61257611e56ecbf75f42de477016fbb3792bfce9c837232254bdb0a2820b26"
+  }
+}

@@ -1,0 +1,689 @@
+{
+  "status": "FAIL",
+  "scope": "Actual complete Host release workspace/all-target tests, then Host release strict Clippy; no Windows, source mutation or unsupported normal-main execution.",
+  "normalHelperUnsupportedMain": "NOT_RUN: libtest harness replaces the normal main; Host helper has zero tests.",
+  "toolchain": "1.97.1",
+  "originalPerCommandBudgetSeconds": 900,
+  "jobs": 2,
+  "rustTestThreads": 2,
+  "sourceBefore": [
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    {
+      "path": "crates/fc-bootstrap/Cargo.toml",
+      "bytes": 676,
+      "sha256": "9bf57af8f2f872f7cf438daefa92e88fc286d7bc4b49d6c0ca3bfd79e9dea1b4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 25289,
+      "sha256": "541c7743fff130df55d36675cdf4c57a13218db2b7ebc21a531239eeffa2f627"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "bytes": 1162,
+      "sha256": "4b4c5b1a4e81d5e80094743f211d8c3f262aed4a0a99ab973d6c6903bf0b6292"
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1645,
+      "sha256": "02f544d4ea42c291d9356781e8b79f3e709837feec440d54ccc1caed3fce68bf"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9592,
+      "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8256,
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 24471,
+      "sha256": "8eccbed8b0c916aed63103d1e98f89db948b0578648289ca317f1841fe82dff4"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 10471,
+      "sha256": "e6e3e2140cf46c11a4b4bccef8af40b3522ae17717f4e7453bdf31bf04b7fa79"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 30725,
+      "sha256": "b14f40537c70606ad1c566c806b1e5902b8a1b30dfff6f27fd04eaa6469b670b"
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 15333,
+      "sha256": "cc6f4600666604824049d5bfc3d3ebb9da288452154e6cead300f1417b10cc50"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 54045,
+      "sha256": "e1a6fbac4d49f7c3644620a37cd4f951cec042be021f2fb759e4d6a6b62d591a"
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 54457,
+      "sha256": "edec879ecad9bad5b3ef21f48afa895bb3e8f0ac58e6aba561d5748e5e147802"
+    }
+  ],
+  "nativeFreezeSha256": "fbcdee53b97badcdb323e22cfb0649e851798d8756d5552833cf46f959c24131",
+  "scratchRoot": "/tmp/fc-round73-installer-broker/host-scratch-first",
+  "scratchBefore": [
+    {
+      "path": ".owner",
+      "mode": 420,
+      "type": "regular",
+      "bytes": 43,
+      "inode": 1781156,
+      "device": 1048772
+    }
+  ],
+  "startedUtc": "2026-11-01T11:32:02.421550+00:00",
+  "steps": [
+    {
+      "name": "tests",
+      "command": [
+        "rustup",
+        "run",
+        "1.97.1",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "2",
+        "--target-dir",
+        "/tmp/fc-round73-installer-broker/target",
+        "--release",
+        "--workspace",
+        "--all-targets",
+        "--message-format=json"
+      ],
+      "environmentOverrides": {
+        "TMPDIR": "/tmp/fc-round73-installer-broker/host-scratch-first",
+        "RUST_TEST_THREADS": "2"
+      },
+      "status": "PASS",
+      "pid": 31498,
+      "timedOut": false,
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 798.4513200679794,
+      "stdout": {
+        "path": "n-host-tests-first.stdout.log",
+        "bytes": 219184,
+        "sha256": "315a7a25f007d1163d9f621e397b10137f969df48a8c0c08ee83e1d8de6b8dd3"
+      },
+      "stderr": {
+        "path": "n-host-tests-first.stderr.log",
+        "bytes": 5407,
+        "sha256": "9c45e88854f0211b23029bef1a5ee73a1fd474145645e84ba44a89ce05bf299d"
+      }
+    },
+    {
+      "name": "strict-clippy",
+      "command": [
+        "rustup",
+        "run",
+        "1.97.1",
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "2",
+        "--target-dir",
+        "/tmp/fc-round73-installer-broker/target",
+        "--release",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "environmentOverrides": {
+        "TMPDIR": "/tmp/fc-round73-installer-broker/host-scratch-first",
+        "RUST_TEST_THREADS": "2"
+      },
+      "status": "FAIL",
+      "pid": 18776,
+      "timedOut": false,
+      "exitCode": 101,
+      "actualExit": true,
+      "elapsedSeconds": 21.58403779589571,
+      "stdout": {
+        "path": "n-host-strict-clippy-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "n-host-strict-clippy-first.stderr.log",
+        "bytes": 5539,
+        "sha256": "c6af3cb9840a7039430ce2a413fc20d39db3bc1e993735b31d5cdbc40d06cae7"
+      }
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    {
+      "path": "crates/fc-bootstrap/Cargo.toml",
+      "bytes": 676,
+      "sha256": "9bf57af8f2f872f7cf438daefa92e88fc286d7bc4b49d6c0ca3bfd79e9dea1b4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 25289,
+      "sha256": "541c7743fff130df55d36675cdf4c57a13218db2b7ebc21a531239eeffa2f627"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "bytes": 1162,
+      "sha256": "4b4c5b1a4e81d5e80094743f211d8c3f262aed4a0a99ab973d6c6903bf0b6292"
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1645,
+      "sha256": "02f544d4ea42c291d9356781e8b79f3e709837feec440d54ccc1caed3fce68bf"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9592,
+      "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8256,
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 24471,
+      "sha256": "8eccbed8b0c916aed63103d1e98f89db948b0578648289ca317f1841fe82dff4"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 10471,
+      "sha256": "e6e3e2140cf46c11a4b4bccef8af40b3522ae17717f4e7453bdf31bf04b7fa79"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 30725,
+      "sha256": "b14f40537c70606ad1c566c806b1e5902b8a1b30dfff6f27fd04eaa6469b670b"
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 15333,
+      "sha256": "cc6f4600666604824049d5bfc3d3ebb9da288452154e6cead300f1417b10cc50"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 54045,
+      "sha256": "e1a6fbac4d49f7c3644620a37cd4f951cec042be021f2fb759e4d6a6b62d591a"
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 54457,
+      "sha256": "edec879ecad9bad5b3ef21f48afa895bb3e8f0ac58e6aba561d5748e5e147802"
+    }
+  ],
+  "scratchAfter": [
+    {
+      "path": ".owner",
+      "mode": 420,
+      "type": "regular",
+      "bytes": 43,
+      "inode": 1781156,
+      "device": 1048772
+    }
+  ],
+  "elapsedSeconds": 820.1202606391162,
+  "sourceUnchanged": true,
+  "scratchDelta": [],
+  "scratchMissing": [],
+  "testHarnesses": [
+    {
+      "target": "fc_application",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-application#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_application-496471dd70afe184",
+      "sha256": "c42c84af60299e34abef3d207b0f726713b2e8ef9801c5989f35fc217acc101a",
+      "profileTest": true,
+      "running": 25,
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.0,
+      "summaryLine": 162
+    },
+    {
+      "target": "fc_audio",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-audio#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_audio-8fd269f7e0a78166",
+      "sha256": "36973f42cfc3e52235456c1ca70361240b2a78bc703984e8038a7248ca8b1ee5",
+      "profileTest": true,
+      "running": 22,
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.0,
+      "summaryLine": 189
+    },
+    {
+      "target": "fc_bootstrap",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_bootstrap-0a9672e9745706e7",
+      "sha256": "0efe3e656a84b658a6cf179d90531b6978f40cb84617dc4e3ffbe45a36d851f0",
+      "profileTest": true,
+      "running": 216,
+      "passed": 216,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 69.68,
+      "summaryLine": 410
+    },
+    {
+      "target": "fc-bootstrap",
+      "kind": [
+        "bin"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_bootstrap-83fd785a586e3513",
+      "sha256": "f86e5d7da940422811fbd025b8fc68d6fea81493c74f64cb4cec88233ea46a7a",
+      "profileTest": true,
+      "running": 1,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.0,
+      "summaryLine": 416
+    },
+    {
+      "target": "fc-installer-lifecycle",
+      "kind": [
+        "bin"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_installer_lifecycle-36f58fe611fc6a49",
+      "sha256": "c2dc30cce93c31be50083f90426390a58963f6b1d807e4add3189746d67dfa35",
+      "profileTest": true,
+      "running": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.0,
+      "summaryLine": 421
+    },
+    {
+      "target": "autostart_coordinator",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/autostart_coordinator-b6caf59b07290a45",
+      "sha256": "f2fb337fd8116a566b1d1d98601782ba40e8661388e3479bdd84f4e5f7ccc5d1",
+      "profileTest": true,
+      "running": 13,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 6.54,
+      "summaryLine": 439
+    },
+    {
+      "target": "business_storage",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/business_storage-a25ac0b9fb86753e",
+      "sha256": "36709bd00e6642b522f0d8c5a669673776deeb1695a3fdffe0b5b1d41a542ce9",
+      "profileTest": true,
+      "running": 43,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 26.5,
+      "summaryLine": 487
+    },
+    {
+      "target": "calendar_execution_fence",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/calendar_execution_fence-dd4c617db3aeef5b",
+      "sha256": "be04d2f031dc31e5b58b385ac319829a5768db2dc84eb5ca3b5da798d4953cf0",
+      "profileTest": true,
+      "running": 4,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 6.32,
+      "summaryLine": 496
+    },
+    {
+      "target": "runtime_storage",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/runtime_storage-08d71affa3195856",
+      "sha256": "52171def41b7ce123e81949582b9f3feeaa57a36777a304b79893f9deaa0190b",
+      "profileTest": true,
+      "running": 3,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.29,
+      "summaryLine": 504
+    },
+    {
+      "target": "schedule_operations",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/schedule_operations-feac05677bf884e1",
+      "sha256": "8b37be373c6058a526180891255ffe89b8fe6bf59835b23722bede383a98bada",
+      "profileTest": true,
+      "running": 5,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 3.9,
+      "summaryLine": 514
+    },
+    {
+      "target": "voice_limits_storage",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/voice_limits_storage-a4141b2322cdfbde",
+      "sha256": "4c0b8904ddf2fb162c121bcaa7395304da96cc6d86c32fe21bfcb0228640d28f",
+      "profileTest": true,
+      "running": 4,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 1.81,
+      "summaryLine": 523
+    },
+    {
+      "target": "voice_storage",
+      "kind": [
+        "test"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/voice_storage-88e4aca377d8b7bf",
+      "sha256": "37e83b990aa110ee78afaee9057314d5d0128d05b092ade58da69ddacc5269ab",
+      "profileTest": true,
+      "running": 6,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 16.21,
+      "summaryLine": 534
+    },
+    {
+      "target": "verify_web_assets",
+      "kind": [
+        "example"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/examples/verify_web_assets-686bf4a86fdbba4d",
+      "sha256": "8ec3cc998d0968def3bb3a0a8268f367fe5cef639e637572ae395d31ac7dd5ef",
+      "profileTest": true,
+      "running": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.0,
+      "summaryLine": 539
+    },
+    {
+      "target": "fc_domain",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-domain#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_domain-74d504fc50556e61",
+      "sha256": "c2d35f9e6b88b84af14318507aa4ae249914b71d753a68ce642f7ca05ba0607c",
+      "profileTest": true,
+      "running": 149,
+      "passed": 149,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.01,
+      "summaryLine": 693
+    },
+    {
+      "target": "fc_materials",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-materials#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_materials-c70694769ac6ff79",
+      "sha256": "91d5458439b5f8496fbd01d4fc591306394f0be5cf4a955925ecd5a7db667f9c",
+      "profileTest": true,
+      "running": 39,
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.13,
+      "summaryLine": 737
+    },
+    {
+      "target": "fc_ports",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-ports#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_ports-02b160eb844c47f4",
+      "sha256": "7ef499990bcfa3afe5247bfdaaf2586d0ef26a15f169cc1ef3715aea2522b90a",
+      "profileTest": true,
+      "running": 8,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.0,
+      "summaryLine": 750
+    },
+    {
+      "target": "fc_presentation",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-presentation#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_presentation-90026aa7e95eec3e",
+      "sha256": "054c19a85eb78e0b0886e9d9e31b19eaea442d7523c547ad55c790b45d9b5e78",
+      "profileTest": true,
+      "running": 58,
+      "passed": 58,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.03,
+      "summaryLine": 813
+    },
+    {
+      "target": "fc_protocol",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-protocol#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_protocol-94fabff2daa536dd",
+      "sha256": "7fa29d7048afec0036a96946ff98dec88fe0da783da2d386a395a69ca2fa4b8f",
+      "profileTest": true,
+      "running": 82,
+      "passed": 82,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.12,
+      "summaryLine": 900
+    },
+    {
+      "target": "fc_runtime",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-runtime#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_runtime-bad4922eb9fb158e",
+      "sha256": "2e0091045c967befd3927548a8b980aaa566b10df63309d900f58f45846d3037",
+      "profileTest": true,
+      "running": 33,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.1,
+      "summaryLine": 938
+    },
+    {
+      "target": "fc_security",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-security#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_security-90a92c5620c0eb4c",
+      "sha256": "e41a98b8aebfa28f53f14b177ab6e386ab3d80db7a87e9afaf8f2fd84b1074d8",
+      "profileTest": true,
+      "running": 19,
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.3,
+      "summaryLine": 962
+    },
+    {
+      "target": "fc_storage",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-storage#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_storage-38578a2c1ae7e01f",
+      "sha256": "2ee0a050a061c142cd8dc23a12850abc77ec7b19f9534e8ab91808f334a853ef",
+      "profileTest": true,
+      "running": 208,
+      "passed": 208,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 76.52,
+      "summaryLine": 1175
+    },
+    {
+      "target": "fc_windows",
+      "kind": [
+        "lib"
+      ],
+      "packageId": "path+file:///tmp/fc-round73-installer-broker/worktree/crates/fc-windows#0.1.0",
+      "path": "/tmp/fc-round73-installer-broker/target/release/deps/fc_windows-01a8414be8da61f7",
+      "sha256": "c4b5f37db77a8988e464ce58dba0fb67babbf7797bd6b34fbda4647c0d727ac1",
+      "profileTest": true,
+      "running": 51,
+      "passed": 51,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsedSeconds": 0.21,
+      "summaryLine": 1231
+    }
+  ],
+  "testHarnessCount": 22,
+  "totalPassed": 989,
+  "zeroTestHarnesses": [
+    "fc-installer-lifecycle",
+    "verify_web_assets"
+  ],
+  "scratchCleanup": "PASS_ONLY_EXACT_OWNED_MARKER_AND_EMPTY_ROOT_REMOVED"
+}

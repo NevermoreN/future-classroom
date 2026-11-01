@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round73-installer-broker/evidence/archive-preparation-first/archive-evidence-second.py",
+    "--source-base-git",
+    "00120a026eea5dc4ff330f8526bf31169b373565",
+    "--acceptance-report",
+    "independent-finite-acceptance-first.json",
+    "--expected-acceptance-sha256",
+    "8d2aaadc96212736aec0318a2b99b9de06570191f7206fde6d620562e23bb96a",
+    "--expected-acceptance-status",
+    "PASS_R73_FINITE_GNU_WIN11_AND_PURE_PS_ONLY",
+    "--expected-readonly-sha256",
+    "eb279c7fd15815a4a5f60b34472114abab983d62ea5ec5678cef01fd7e6d8387",
+    "--root-controllers-terminal",
+    "--execute"
+  ],
+  "originalBudgetSeconds": 300,
+  "startedUtc": "2026-11-01T11:47:20.182231+00:00",
+  "scope": "Exact R73 frozen-evidence archive only; no new product/runtime acceptance.",
+  "pid": 20095,
+  "timedOut": false,
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 4.322227824945003,
+  "completedUtc": "2026-11-01T11:47:24.504704+00:00",
+  "stdout": {
+    "path": "/tmp/fc-round73-archive-controller/archive-operation-first.stdout.log",
+    "bytes": 439,
+    "sha256": "90e19a544783b51968967f5527bbb627ebff20d2dad367b5ab45f77a753c1a78"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round73-archive-controller/archive-operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

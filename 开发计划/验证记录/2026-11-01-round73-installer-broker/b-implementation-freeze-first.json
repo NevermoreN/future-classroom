@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "status": "B_IMPLEMENTATION_FIRST_FROZEN_PURE_CHECKS_PASS_NATIVE_INTEGRATION_PENDING",
+  "atUtc": "2026-11-01T10:39:55.787924+00:00",
+  "baseCommit": "00120a026eea5dc4ff330f8526bf31169b373565",
+  "ownedSource": [
+    {
+      "path": "crates/fc-bootstrap/Cargo.toml",
+      "bytes": 676,
+      "sha256": "9bf57af8f2f872f7cf438daefa92e88fc286d7bc4b49d6c0ca3bfd79e9dea1b4",
+      "before": {
+        "present": true,
+        "bytes": 494,
+        "sha256": "09c891535e4c37e50b4a50a19d1ff012b8353c09b06782a5c2a9597370399a66"
+      }
+    },
+    {
+      "path": "crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "bytes": 1162,
+      "sha256": "4b4c5b1a4e81d5e80094743f211d8c3f262aed4a0a99ab973d6c6903bf0b6292",
+      "before": {
+        "present": false,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 54045,
+      "sha256": "e1a6fbac4d49f7c3644620a37cd4f951cec042be021f2fb759e4d6a6b62d591a",
+      "before": {
+        "present": true,
+        "bytes": 36605,
+        "sha256": "4e56ae981d9951da21c6a9d423e25e7e71d27380f16a8889d63b145208d8dbb0"
+      }
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 30725,
+      "sha256": "b14f40537c70606ad1c566c806b1e5902b8a1b30dfff6f27fd04eaa6469b670b",
+      "before": {
+        "present": true,
+        "bytes": 20199,
+        "sha256": "a8b9d7b433a3300d54f77b6c14c1878f6943e97f03770305ebb6a8095783b04c"
+      }
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 54457,
+      "sha256": "edec879ecad9bad5b3ef21f48afa895bb3e8f0ac58e6aba561d5748e5e147802",
+      "before": {
+        "present": true,
+        "bytes": 52976,
+        "sha256": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886"
+      }
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 15333,
+      "sha256": "cc6f4600666604824049d5bfc3d3ebb9da288452154e6cead300f1417b10cc50",
+      "before": {
+        "present": true,
+        "bytes": 14248,
+        "sha256": "70414b86bba595f323b84af9404bb039af0c1c50f0786cd5e22fcec67a087259"
+      }
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 10471,
+      "sha256": "e6e3e2140cf46c11a4b4bccef8af40b3522ae17717f4e7453bdf31bf04b7fa79",
+      "before": {
+        "present": true,
+        "bytes": 7057,
+        "sha256": "22904b474322cb96c2ee7afcf7f7c879919cfb68641f98fc9cb595b61332506e"
+      }
+    }
+  ],
+  "sourceCount": 7,
+  "actualChecks": [
+    {
+      "path": "b-msi-contract-second.json",
+      "sha256": "da06c64778726670df96c6f65cb04478fa7e4cd30f570a3f2137e17875865e6d",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/check-msi-candidate.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.896103929029778
+    },
+    {
+      "path": "b-architecture-first.json",
+      "sha256": "a31915e72d87459bc938021b188f96a370d9d853608e776f072061edba4a4ca9",
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.16397532494738698
+    },
+    {
+      "path": "b-diffcheck-second.json",
+      "sha256": "da756d7ac7d7e047b462cfd7871ee18213849b77290eb9cf60fb651dde1de8df",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.1346457910258323
+    },
+    {
+      "path": "b-rustfmt-first.json",
+      "sha256": "e3ed4aa8452fb0411cfd11ff5c1692220001a257ef44ebf87e863a12bf6d2b16",
+      "command": [
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.14179843408055604
+    }
+  ],
+  "pureMsiContractTests": 22,
+  "normalBinaries": {
+    "closed": [
+      "fc-bootstrap",
+      "fc-installer-lifecycle"
+    ],
+    "normalSubsystem": 2,
+    "testSubsystem": 3,
+    "helperHarnessDisabled": false,
+    "defaultRun": "fc-bootstrap",
+    "ciCommands": "two independently selected normal Cargo rustc phases, actual profile.test=false records and original Cargo JSON, result-bound executable-ledger/log SHA256; test count remains dynamic"
+  },
+  "protocol": {
+    "api": "fc_windows::installer_lifecycle::broker::run_helper(&[String]) -> Result<()>",
+    "begin": "begin \"[FcInstallDir]fc-bootstrap.exe\"",
+    "beginSequence": 1499,
+    "order": "CostFinalize < InstallValidate < BeginGate < InstallInitialize < rollback/commit schedule < first mutation; InstallExecute < RemoveExistingProducts < InstallFinalize",
+    "notificationTypes": {
+      "begin": 2,
+      "rollback": 1282,
+      "commit": 1538
+    },
+    "chainer": "Binary FcLifecycleHelper type2, CommandLine guardian; engine transaction decimal precedes guardian arg",
+    "manifest": "FCLM73\\0\\0/v1 closed9-required<=72sortedrecords, fixed paths/bytes/SHA/component UUID; u32length+FCLIFE73-END-v1\\0 footer; exact original normal PE prefix preserved"
+  },
+  "qualification": [
+    "Native/combined typecheck and codegen owned by N/root; this B report makes no compile or Windows result claim.",
+    "PowerShell contract execution not run here because pwsh is unavailable; source syntax/model must be run by root on its unique Windows slot.",
+    "No MSI lifecycle, original engine argv, install/rollback effects, full/basic/quiet UI, Win7/Win10/Win11 or Seewo runtime acceptance from pure checks.",
+    "Original directory-only begin string diagnostic retained; final fixed main-file fact avoids quoted trailing separator.",
+    "msibuild v0.103 has no --version; explicit reviewed binary SHA required; version is reviewed provenance rather than fabricated tool output."
+  ],
+  "cargoInvokedByThisAgent": false,
+  "windowsInvoked": false,
+  "msiExecuted": false,
+  "mainWritten": false,
+  "commitInvoked": false,
+  "pushInvoked": false
+}

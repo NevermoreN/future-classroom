@@ -1,0 +1,18 @@
+--- record-archive-first.py
++++ record-archive-second.py
+@@ -7,9 +7,13 @@
+ helper = E / 'archive-preparation-first/archive-evidence-second.py'
+ assert hashlib.sha256(helper.read_bytes()).hexdigest() == 'c29f93178ddca078a0335234ea6c38e001b98027f7d76a6e68e118ddbba1740b'
+ host = json.loads((E / 'n-host-first.json').read_bytes())
+-assert host['status'] == 'PASS_HOST_TESTS_AND_CLIPPY' and host['sourceUnchanged']
++assert host['status'] == 'FAIL' and host['sourceUnchanged']
++assert hashlib.sha256((E / 'n-host-first.json').read_bytes()).hexdigest() == 'da0715d485985841af18f274ba28a6db9425f0edcc596877c392d206f89db036'
++assert hashlib.sha256((E / 'n-host-qualification-first.json').read_bytes()).hexdigest() == 'c2883954cb93bea75730c95a42b56430fe1759b162b078ab1648ce60089ad6d1'
++assert hashlib.sha256((E / 'n-host-producer-terminal-first.json').read_bytes()).hexdigest() == '35043829f5a53c286c8c9564e696865de2c8438fb755043208882eb5a23c9779'
++assert host['testHarnessCount'] == 22 and host['totalPassed'] == 989
++assert [(s['name'], s['status'], s['exitCode'], s['actualExit'], s['timedOut']) for s in host['steps']] == [('tests', 'PASS', 0, True, False), ('strict-clippy', 'FAIL', 101, True, False)]
+ assert host['scratchCleanup'].startswith('PASS')
+-assert all(s['actualExit'] and s['exitCode'] == 0 for s in host['steps'])
+ assert (E / 'n-host-producer-terminal-first.json').is_file()
+ command = ['python3', '-B', str(helper), '--source-base-git', '00120a026eea5dc4ff330f8526bf31169b373565',
+     '--acceptance-report', 'independent-finite-acceptance-first.json',

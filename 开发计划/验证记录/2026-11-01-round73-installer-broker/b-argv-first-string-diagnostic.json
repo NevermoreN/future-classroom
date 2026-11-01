@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_ARGV_BOUNDARY_DIAGNOSIS_NOT_WINDOWS_REPRODUCED",
+  "createdUtc": "2026-11-01T10:38:08.004251+00:00",
+  "firstTarget": "begin \"[FcInstallDir]\"",
+  "basis": "MSI CostFinalize resolves directory properties with a trailing separator. On standard Windows command-line parsing, a quoted trailing single backslash escapes the closing quote. This can make the argv path malformed and fail a legitimate fresh install. Pure static checks did not establish actual argv execution.",
+  "finalApprovedTarget": "begin \"[FcInstallDir]fc-bootstrap.exe\"",
+  "nativeContract": "Compare this untrusted resolved main-file fact only against OS KnownFolder fixed root.join(fc-bootstrap.exe); do not derive root/open caller path/accept literal quote.",
+  "sourceBefore": [
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 54020,
+      "sha256": "65ae825efe32d904f8c469894c08c9938791ce89e40f09f94a51a2a12e4ae784"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 29916,
+      "sha256": "f6a0c38ed571912082fc235f6fc0737c5490da9e71989ec9550362a3e9c163d2"
+    }
+  ],
+  "windowsInvoked": false,
+  "msiInvoked": false
+}

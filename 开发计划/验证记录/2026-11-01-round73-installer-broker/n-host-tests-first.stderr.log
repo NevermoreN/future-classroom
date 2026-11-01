@@ -1,0 +1,83 @@
+   Compiling typenum v1.20.1
+   Compiling generic-array v0.14.7
+   Compiling cfg-if v1.0.5
+   Compiling fc-domain v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-domain)
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling subtle v2.6.1
+   Compiling digest v0.10.7
+   Compiling cpufeatures v0.2.17
+   Compiling sha2 v0.10.9
+   Compiling memchr v2.8.3
+   Compiling fc-ports v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-ports)
+   Compiling serde_core v1.0.228
+   Compiling syn v2.0.119
+   Compiling zerocopy v0.8.63
+   Compiling serde_json v1.0.145
+   Compiling serde v1.0.228
+   Compiling serde_derive v1.0.228
+   Compiling ryu v1.0.23
+   Compiling itoa v1.0.18
+   Compiling ahash v0.8.12
+   Compiling once_cell v1.21.4
+   Compiling smallvec v1.16.4
+   Compiling zeroize v1.8.2
+   Compiling crc32fast v1.5.3
+   Compiling inout v0.1.4
+   Compiling simd-adler32 v0.3.10
+   Compiling adler2 v2.0.1
+   Compiling miniz_oxide v0.9.1
+   Compiling cipher v0.4.4
+   Compiling encoding_rs v0.8.42
+   Compiling libsqlite3-sys v0.30.1
+   Compiling hashbrown v0.14.5
+   Compiling scopeguard v1.2.0
+   Compiling simdutf8 v0.1.5
+   Compiling core_detect v1.0.0
+   Compiling zlib-rs v0.6.8
+   Compiling flate2 v1.1.10
+   Compiling hashlink v0.9.1
+   Compiling aes v0.8.4
+   Compiling hmac v0.12.1
+   Compiling fallible-iterator v0.3.0
+   Compiling bitflags v2.13.2
+   Compiling log v0.4.34
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling rustc-hash v2.1.3
+   Compiling pdf-syntax v0.6.1
+   Compiling pbkdf2 v0.12.2
+   Compiling quick-xml v0.42.0
+   Compiling fc-presentation v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-presentation)
+   Compiling fc-protocol v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-protocol)
+   Compiling fc-runtime v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-runtime)
+   Compiling fc-bootstrap v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-bootstrap)
+   Compiling fc-windows v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-windows)
+   Compiling fc-materials v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-materials)
+   Compiling fc-security v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-security)
+   Compiling fc-audio v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-audio)
+   Compiling fc-application v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-application)
+   Compiling rusqlite v0.32.1
+   Compiling fc-storage v0.1.0 (/tmp/fc-round73-installer-broker/worktree/crates/fc-storage)
+    Finished `release` profile [optimized] target(s) in 9m 49s
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_application-496471dd70afe184)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_audio-8fd269f7e0a78166)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_bootstrap-0a9672e9745706e7)
+     Running unittests src/main.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_bootstrap-83fd785a586e3513)
+     Running unittests src/bin/fc-installer-lifecycle.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_installer_lifecycle-36f58fe611fc6a49)
+     Running tests/autostart_coordinator.rs (/tmp/fc-round73-installer-broker/target/release/deps/autostart_coordinator-b6caf59b07290a45)
+     Running tests/business_storage.rs (/tmp/fc-round73-installer-broker/target/release/deps/business_storage-a25ac0b9fb86753e)
+     Running tests/calendar_execution_fence.rs (/tmp/fc-round73-installer-broker/target/release/deps/calendar_execution_fence-dd4c617db3aeef5b)
+     Running tests/runtime_storage.rs (/tmp/fc-round73-installer-broker/target/release/deps/runtime_storage-08d71affa3195856)
+     Running tests/schedule_operations.rs (/tmp/fc-round73-installer-broker/target/release/deps/schedule_operations-feac05677bf884e1)
+     Running tests/voice_limits_storage.rs (/tmp/fc-round73-installer-broker/target/release/deps/voice_limits_storage-a4141b2322cdfbde)
+     Running tests/voice_storage.rs (/tmp/fc-round73-installer-broker/target/release/deps/voice_storage-88e4aca377d8b7bf)
+     Running unittests examples/verify_web_assets.rs (/tmp/fc-round73-installer-broker/target/release/examples/verify_web_assets-686bf4a86fdbba4d)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_domain-74d504fc50556e61)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_materials-c70694769ac6ff79)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_ports-02b160eb844c47f4)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_presentation-90026aa7e95eec3e)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_protocol-94fabff2daa536dd)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_runtime-bad4922eb9fb158e)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_security-90a92c5620c0eb4c)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_storage-38578a2c1ae7e01f)
+     Running unittests src/lib.rs (/tmp/fc-round73-installer-broker/target/release/deps/fc_windows-01a8414be8da61f7)

@@ -1,0 +1,47 @@
+{
+  "status": "RUNNING",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round73-installer-broker/worktree/scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round73-installer-broker/evidence/root-native-harness-metadata-third.jsonl",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--report",
+    "/tmp/fc-round73-installer-broker/evidence/root-windows-native-harness-third.json"
+  ],
+  "inputIdentities": [
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe",
+      "bytes": 3941293,
+      "sha256": "998ae30c1c70a60fe6b25b49090d7db3ca4ba161a033656b5bd03e947df70104"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13352051,
+      "sha256": "b9a68552ee4f08d3e5c4e8886d0c337e71bc88bb1e4d69d3aba17c01b8df8314"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/evidence/root-native-harness-metadata-third.jsonl",
+      "bytes": 792,
+      "sha256": "592165091ee4defa38f31300274469dc310d84ee29c44637760791dfc76df258"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/evidence/n-release-third.json",
+      "bytes": 28911,
+      "sha256": "858d3c62e4d3c4e6739a5763a77e26ccf368038a22d4ef150f5d284a080b5b07"
+    }
+  ],
+  "originalPerTestBudgetSeconds": 900,
+  "scope": "One complete native harness, original unfiltered cases, native1/system. Not full22/public20/MSI or Win7/10 OS acceptance."
+}

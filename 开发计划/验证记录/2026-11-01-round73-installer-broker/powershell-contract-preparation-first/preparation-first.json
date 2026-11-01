@@ -1,0 +1,28 @@
+{
+  "status": "PREPARED_ONLY_NOT_EXECUTED",
+  "helper": {
+    "path": "run-powershell-contract-first.py",
+    "bytes": 15049,
+    "sha256": "c48dcd8ec45c44534c1a57b29302172dc7ad02a19030ccf6f10b826d5d293ca5"
+  },
+  "invocation": "python3 -B R73/E/powershell-contract-preparation-first/run-powershell-contract-first.py --execute",
+  "budgetSeconds": 120,
+  "encodedCommandCharacters": {
+    "create": 1728,
+    "discovery": 4648,
+    "contract": 6532,
+    "cleanup": 3560
+  },
+  "preparationChecks": "Python ast.parse plus isolated pure string-generation/encoded-length checks only. No controller main, SSH/SCP/Windows/contract invocation. No model or actual contract PASS created.",
+  "sourcePins": {
+    "check-msvc-gui-contract.ps1": "cc6f4600666604824049d5bfc3d3ebb9da288452154e6cead300f1417b10cc50",
+    "windows-msvc-ci.ps1": "edec879ecad9bad5b3ef21f48afa895bb3e8f0ac58e6aba561d5748e5e147802"
+  },
+  "limitations": [
+    "Root must separately observe actual controller terminal exit; report alone does not prove parent exit.",
+    "Desktop5.1 and each read-only-discovered pwsh actual version recorded separately; no hosted7.2 CI proof.",
+    "Complete CI string read from exact SCP source file and passed only to pure checker -TextSource/-ExpectedSourceSha256; CI entrypoint/compilers/products never invoked.",
+    "Unique opaque TEMP root; exact owner/member guard; normal finally cleanup; original120s includes reserved cleanup12s. Unknown contract return preserves FAIL and root owner-review recovery command, never renews test budget.",
+    "SSH/SCP uses authorized identity path as transport only, never reads/hashes key contents. All raw stdout/stderr/exit/source SHA and checker JSON pipeline bytes/base64 retained; normalized pipeline capture qualified separately from SSH raw streams."
+  ]
+}

@@ -1,0 +1,2127 @@
+--- a/crates/fc-windows/Cargo.toml
++++ b/crates/fc-windows/Cargo.toml
+@@ -24,5 +24,6 @@
+   "Win32_UI_Controls", "Win32_UI_Controls_Dialogs", "Win32_UI_Input_KeyboardAndMouse", "Win32_System_SystemServices",
+   "Win32_System_DataExchange", "Win32_System_Memory", "Win32_UI_Accessibility", "Win32_Graphics_Imaging",
+   "Win32_System_ProcessStatus", "Win32_System_WindowsProgramming", "Win32_UI_Shell_Common", "Win32_System_JobObjects", "Win32_Security_Authentication_Identity", "Win32_Security_Credentials",
+-  "Win32_Media_Audio", "Win32_Networking_HttpServer", "Win32_System_IO", "Win32_Networking_WinSock", "Win32_Networking_WinHttp"
++  "Win32_Media_Audio", "Win32_Networking_HttpServer", "Win32_System_IO", "Win32_Networking_WinSock", "Win32_Networking_WinHttp",
++  "Win32_System_Pipes", "Win32_System_ApplicationInstallationAndServicing", "Win32_System_Diagnostics_ToolHelp"
+ ] }
+--- a/crates/fc-windows/src/installer_lifecycle.rs
++++ b/crates/fc-windows/src/installer_lifecycle.rs
+@@ -1,10 +1,12 @@
+-//! Installation coordination shared by application startup and repair. MSI
+-//! actions are not yet wired. Pending is durable negative state, never liveness.
+-//! The trusted broker must separately authenticate transaction receipts and verify
+-//! the original payload state; this module does not perform/approve MSI actions.
++//! Installation coordination shared by application startup and repair. The
++//! native broker module implements the first fresh-install MSI candidate slice;
++//! its target runtime/installer acceptance remains separate from compilation.
++//! Pending is durable negative state, never liveness. Only the broker's actual
++//! authenticated guardian, native return and verified effects can settle it.
+ use std::{path::PathBuf, time::Instant};
+ use windows::{core::HRESULT, Win32::Foundation::ERROR_SHARING_VIOLATION};
+ 
++pub mod broker;
+ mod native;
+ #[cfg(test)]
+ mod tests;
+--- a/crates/fc-windows/src/installer_lifecycle/native.rs
++++ b/crates/fc-windows/src/installer_lifecycle/native.rs
+@@ -20,6 +20,8 @@
+     },
+ };
+ 
++pub(super) mod broker;
++
+ const HANDLE_LIMIT: usize = 64;
+ const PROCESS_OWNERS: usize = 8;
+ const PATH_LIMIT: usize = 1024;
+@@ -49,6 +51,12 @@
+     Pending,
+     Guardian,
+     Token,
++    Hash,
++    Algorithm,
++    Search,
++    Registry,
++    Control,
++    Engine,
+ }
+ struct Owned {
+     handle: HANDLE,
+@@ -141,6 +149,9 @@
+             OpenProcessToken(process, TOKEN_QUERY, &mut token)?;
+         }
+         self.add(token, Role::Token);
++        Self::sid_from_token(token)
++    }
++    fn sid_from_token(token: HANDLE) -> WinResult<Vec<u8>> {
+         let mut buffer = [0u64; 512];
+         let mut size = 0;
+         unsafe {
+@@ -498,7 +509,29 @@
+         }
+         // SAFETY: uniquely registered successful handle, removed only on checked
+         // CloseHandle success. Error never becomes Released or a replacement.
+-        if let Err(error) = unsafe { CloseHandle(self.handles[index].handle) } {
++        let owned = &self.handles[index];
++        let closed = unsafe {
++            match owned.role {
++                Role::Hash => windows::Win32::Security::Cryptography::BCryptDestroyHash(
++                    windows::Win32::Security::Cryptography::BCRYPT_HASH_HANDLE(owned.handle.0),
++                )
++                .ok(),
++                Role::Algorithm => {
++                    windows::Win32::Security::Cryptography::BCryptCloseAlgorithmProvider(
++                        windows::Win32::Security::Cryptography::BCRYPT_ALG_HANDLE(owned.handle.0),
++                        0,
++                    )
++                    .ok()
++                }
++                Role::Search => FindClose(owned.handle),
++                Role::Registry => windows::Win32::System::Registry::RegCloseKey(
++                    windows::Win32::System::Registry::HKEY(owned.handle.0),
++                )
++                .ok(),
++                _ => CloseHandle(owned.handle),
++            }
++        };
++        if let Err(error) = closed {
+             self.failed = true;
+             FAULTED.store(true, Ordering::Release);
+             return Err(error.into());
+--- /dev/null
++++ b/crates/fc-windows/src/installer_lifecycle/broker.rs
+@@ -0,0 +1,88 @@
++//! Closed MSI helper entrypoints. Notifications are advisory, never authority to
++//! end a transaction or clear Pending. The server derives its decision from its
++//! pinned own-image manifest and actual effects, then requires the original
++//! authenticated guardian's real Join/End and physical exit.
++use super::{native, LifecycleError, Result};
++use std::time::{Duration, Instant};
++
++pub(super) mod manifest;
++
++/// One original budget for startup, authenticated IPC, transaction observation,
++/// effect verification and cleanup. A timeout never grants a replacement owner.
++pub const BROKER_BUDGET: Duration = Duration::from_secs(120);
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(super) enum Role {
++    Begin,
++    Broker,
++    Guardian(u32),
++    RollbackNotice,
++    CommitNotice,
++}
++
++fn role(args: &[String]) -> Result<Role> {
++    match args {
++        [one, target]
++            if one == "begin"
++                && !target.is_empty()
++                && target.encode_utf16().count() < 1024
++                && !target.contains('\0') =>
++        {
++            Ok(Role::Begin)
++        }
++        [one] if one == "broker" => Ok(Role::Broker),
++        [one] if one == "rollback" => Ok(Role::RollbackNotice),
++        [one] if one == "commit" => Ok(Role::CommitNotice),
++        [transaction, guardian] if guardian == "guardian" => {
++            if transaction.is_empty()
++                || transaction.len() > 10
++                || !transaction.bytes().all(|b| b.is_ascii_digit())
++            {
++                return Err(LifecycleError::Invalid);
++            }
++            match transaction.parse::<u32>() {
++                Ok(value) if value != 0 => Ok(Role::Guardian(value)),
++                _ => Err(LifecycleError::Invalid),
++            }
++        }
++        _ => Err(LifecycleError::Invalid),
++    }
++}
++
++/// `args` excludes argv[0]. Begin's resolved main-file path is an untrusted fact,
++/// compared only to the OS-resolved fixed installation destination; it cannot
++/// select a path. No PID, SID, result, operation nonce or effects flag is admitted.
++/// The engine puts its transaction handle BEFORE the
++/// literal `guardian` command. The helper reads only its own pinned image.
++pub fn run_helper(args: &[String]) -> Result<()> {
++    let role = role(args)?; // malformed/unsupported commands cannot create state
++    let deadline = Instant::now() + BROKER_BUDGET;
++    native::broker::run(role, deadline, args.get(1).map(String::as_str))
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    fn args(words: &[&str]) -> Vec<String> {
++        words.iter().map(|s| (*s).to_owned()).collect()
++    }
++
++    #[test]
++    fn role_grammar_has_no_external_authority_fields() {
++        assert_eq!(role(&args(&["123", "guardian"])), Ok(Role::Guardian(123)));
++        for words in [
++            vec!["guardian", "123"],
++            vec!["0", "guardian"],
++            vec!["-1", "guardian"],
++            vec!["4294967296", "guardian"],
++            vec!["begin", "--pid", "1"],
++            vec!["commit", "--effects-reconciled"],
++            vec!["repair"],
++            vec!["upgrade"],
++            vec!["uninstall"],
++        ] {
++            assert_eq!(role(&args(&words)), Err(LifecycleError::Invalid));
++        }
++    }
++}
+--- /dev/null
++++ b/crates/fc-windows/src/installer_lifecycle/broker/manifest.rs
+@@ -0,0 +1,265 @@
++use super::super::{LifecycleError, Result};
++use std::collections::BTreeSet;
++
++pub(crate) const MAGIC: &[u8; 8] = b"FCLM73\0\0";
++pub(crate) const FOOTER: &[u8; 16] = b"FCLIFE73-END-v1\0";
++pub(crate) const MAX_MANIFEST: usize = 32768;
++pub(crate) const MAX_PAYLOAD: u32 = 30 * 1024 * 1024;
++
++#[derive(Debug)]
++pub(crate) struct Entry {
++    pub path: String,
++    pub bytes: u32,
++    pub sha256: [u8; 32],
++    pub component: String,
++}
++#[derive(Debug)]
++pub(crate) struct Manifest {
++    pub product: String,
++    pub version: String,
++    pub entries: Vec<Entry>,
++}
++
++fn invalid<T>() -> Result<T> {
++    Err(LifecycleError::Invalid)
++}
++fn take<'a>(bytes: &mut &'a [u8], n: usize) -> Result<&'a [u8]> {
++    if bytes.len() < n {
++        return invalid();
++    }
++    let (value, rest) = bytes.split_at(n);
++    *bytes = rest;
++    Ok(value)
++}
++fn u16le(bytes: &mut &[u8]) -> Result<u16> {
++    Ok(u16::from_le_bytes(take(bytes, 2)?.try_into().unwrap()))
++}
++fn u32le(bytes: &mut &[u8]) -> Result<u32> {
++    Ok(u32::from_le_bytes(take(bytes, 4)?.try_into().unwrap()))
++}
++fn ascii(bytes: &mut &[u8], n: usize) -> Result<String> {
++    let value = take(bytes, n)?;
++    if !value.is_ascii() {
++        return invalid();
++    }
++    String::from_utf8(value.to_vec()).map_err(|_| LifecycleError::Invalid)
++}
++pub(crate) fn uuid(text: &str) -> bool {
++    text.len() == 36
++        && text.bytes().enumerate().all(|(i, b)| {
++            if [8, 13, 18, 23].contains(&i) {
++                b == b'-'
++            } else {
++                b.is_ascii_digit() || (b'A'..=b'F').contains(&b)
++            }
++        })
++}
++fn version(text: &str) -> bool {
++    let fields: Vec<_> = text.split('.').collect();
++    fields.len() == 3
++        && fields.iter().enumerate().all(|(i, field)| {
++            !field.is_empty()
++                && field.bytes().all(|b| b.is_ascii_digit())
++                && field
++                    .parse::<u32>()
++                    .is_ok_and(|n| n <= if i == 2 { 65535 } else { 255 })
++        })
++}
++pub(crate) fn path(text: &str) -> bool {
++    if text.is_empty() || text.len() > 240 || !text.is_ascii() {
++        return false;
++    }
++    if matches!(
++        text,
++        "fc-bootstrap.exe"
++            | "LICENSE"
++            | "PROBE-README.txt"
++            | "THIRD-PARTY-NOTICES.txt"
++            | "manifest.json"
++            | "MSI-CANDIDATE.txt"
++            | "web/index.html"
++            | "web/fc-assets.json"
++            | "web/THIRD-PARTY-NOTICES.txt"
++    ) {
++        return true;
++    }
++    let Some(name) = text.strip_prefix("web/assets/") else {
++        return false;
++    };
++    let stem = name.split('.').next().unwrap_or("").to_ascii_uppercase();
++    !name.is_empty()
++        && name.len() <= 128
++        && !name.starts_with('.')
++        && name
++            .bytes()
++            .all(|b| b.is_ascii_alphanumeric() || b"-_.".contains(&b))
++        && !matches!(stem.as_str(), "CON" | "PRN" | "AUX" | "NUL")
++        && !(stem.len() == 4
++            && (stem.starts_with("COM") || stem.starts_with("LPT"))
++            && matches!(stem.as_bytes()[3], b'1'..=b'9'))
++        && name.rsplit_once('.').is_some_and(|(_, extension)| {
++            matches!(
++                extension,
++                "js" | "css" | "svg" | "png" | "jpg" | "jpeg" | "webp"
++            )
++        })
++}
++
++pub(crate) fn parse(mut bytes: &[u8]) -> Result<Manifest> {
++    if bytes.len() > MAX_MANIFEST || take(&mut bytes, 8)? != MAGIC || u16le(&mut bytes)? != 1 {
++        return invalid();
++    }
++    let count = usize::from(u16le(&mut bytes)?);
++    if !(1..=72).contains(&count) {
++        return invalid();
++    }
++    let product = ascii(&mut bytes, 36)?;
++    let length = usize::from(take(&mut bytes, 1)?[0]);
++    if !(1..=24).contains(&length) {
++        return invalid();
++    }
++    let product_version = ascii(&mut bytes, length)?;
++    if !uuid(&product) || !version(&product_version) {
++        return invalid();
++    }
++    let mut entries = Vec::with_capacity(count);
++    let mut paths = BTreeSet::new();
++    let mut components = BTreeSet::new();
++    let mut total = 0u32;
++    let mut previous = String::new();
++    for _ in 0..count {
++        let length = usize::from(u16le(&mut bytes)?);
++        if !(1..=240).contains(&length) {
++            return invalid();
++        }
++        let name = ascii(&mut bytes, length)?;
++        let size = u32le(&mut bytes)?;
++        let digest: [u8; 32] = take(&mut bytes, 32)?.try_into().unwrap();
++        let component = ascii(&mut bytes, 36)?;
++        total = total.checked_add(size).ok_or(LifecycleError::Invalid)?;
++        if !path(&name)
++            || name <= previous
++            || !paths.insert(name.to_ascii_lowercase())
++            || size == 0
++            || total > MAX_PAYLOAD
++            || !uuid(&component)
++            || !components.insert(component.clone())
++        {
++            return invalid();
++        }
++        previous = name.clone();
++        entries.push(Entry {
++            path: name,
++            bytes: size,
++            sha256: digest,
++            component,
++        });
++    }
++    for required in [
++        "fc-bootstrap.exe",
++        "LICENSE",
++        "PROBE-README.txt",
++        "THIRD-PARTY-NOTICES.txt",
++        "manifest.json",
++        "MSI-CANDIDATE.txt",
++        "web/index.html",
++        "web/fc-assets.json",
++        "web/THIRD-PARTY-NOTICES.txt",
++    ] {
++        if !paths.contains(&required.to_ascii_lowercase()) {
++            return invalid();
++        }
++    }
++    // A file cannot simultaneously be the ancestor of another declared file.
++    if !bytes.is_empty()
++        || entries.iter().any(|a| {
++            entries
++                .iter()
++                .any(|b| b.path.starts_with(&(a.path.clone() + "/")))
++        })
++    {
++        return invalid();
++    }
++    Ok(Manifest {
++        product,
++        version: product_version,
++        entries,
++    })
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn paths_cannot_escape_or_create_win32_aliases() {
++        for value in [
++            "web/../a",
++            "web/a:ads",
++            "web/a.",
++            "web/NUL.txt",
++            "web/a\\b",
++            "C:/x",
++            "web//a",
++            "web/.hidden",
++        ] {
++            assert!(!path(value), "{value}");
++        }
++        assert!(!path("web/资料.js"));
++        assert!(path("web/assets/main-1.js"));
++    }
++
++    fn fixture() -> Vec<u8> {
++        let mut names = [
++            "fc-bootstrap.exe",
++            "LICENSE",
++            "PROBE-README.txt",
++            "THIRD-PARTY-NOTICES.txt",
++            "manifest.json",
++            "MSI-CANDIDATE.txt",
++            "web/index.html",
++            "web/fc-assets.json",
++            "web/THIRD-PARTY-NOTICES.txt",
++        ];
++        names.sort();
++        let mut b = MAGIC.to_vec();
++        b.extend(1u16.to_le_bytes());
++        b.extend((names.len() as u16).to_le_bytes());
++        b.extend(b"12345678-1234-1234-1234-123456789ABC");
++        b.push(5);
++        b.extend(b"0.1.0");
++        for (i, name) in names.iter().enumerate() {
++            b.extend((name.len() as u16).to_le_bytes());
++            b.extend(name.as_bytes());
++            b.extend(1u32.to_le_bytes());
++            b.extend([i as u8; 32]);
++            b.extend(format!("00000000-0000-0000-0000-{:012X}", i + 1).as_bytes());
++        }
++        b
++    }
++    #[test]
++    fn actual_closed_format_accepts_full_set_and_rejects_truncation_tail_and_aliases() {
++        let b = fixture();
++        let value = parse(&b).unwrap();
++        assert_eq!(value.entries.len(), 9);
++        assert_eq!(value.version, "0.1.0");
++        for end in 0..b.len() {
++            assert!(parse(&b[..end]).is_err(), "truncation {end}");
++        }
++        let mut tail = b.clone();
++        tail.push(0);
++        assert!(parse(&tail).is_err());
++        let mut magic = b.clone();
++        magic[0] ^= 1;
++        assert!(parse(&magic).is_err());
++        let mut duplicate = b.clone();
++        let positions: Vec<_> = duplicate
++            .windows(36)
++            .enumerate()
++            .filter(|(_, v)| v.starts_with(b"00000000-0000-0000-0000-"))
++            .map(|(i, _)| i)
++            .collect();
++        let first: Vec<_> = duplicate[positions[0]..positions[0] + 36].to_vec();
++        duplicate[positions[1]..positions[1] + 36].copy_from_slice(&first);
++        assert!(parse(&duplicate).is_err());
++    }
++}
+--- /dev/null
++++ b/crates/fc-windows/src/installer_lifecycle/native/broker.rs
+@@ -0,0 +1,1053 @@
++//! The local pipe transports facts only. Same SID/image is necessary but not
++//! sufficient: Begin is the original server parent; Guardian must have the same
++//! still-live original engine parent, then MSI itself validates Join ownership.
++use super::super::broker::{
++    manifest::{self, Manifest},
++    Role as EntryRole,
++};
++use super::*;
++use std::{collections::BTreeSet, ffi::OsString, os::windows::ffi::OsStringExt, time::Duration};
++use windows::Win32::{
++    Security::Cryptography::*,
++    System::{
++        ApplicationInstallationAndServicing::*, Diagnostics::ToolHelp::*, Pipes::*, Registry::*,
++        SystemInformation::GetWindowsDirectoryW,
++    },
++};
++
++mod effects;
++
++const FRAME: usize = 32;
++const BEGIN: u8 = 1;
++const GUARDIAN: u8 = 2;
++const ENDED: u8 = 3;
++const ROLLBACK_NOTICE: u8 = 4;
++const COMMIT_NOTICE: u8 = 5;
++const ACK: u8 = 128;
++const DECISION: u8 = 129;
++const FINISHED: u8 = 130;
++const MAX_CONNECTIONS: usize = 12;
++
++#[derive(Clone, Copy, Debug)]
++struct Packet {
++    kind: u8,
++    outcome: u8,
++    transaction: u32,
++    join: u32,
++    end: u32,
++}
++impl Packet {
++    fn new(kind: u8) -> Self {
++        Self {
++            kind,
++            outcome: 0,
++            transaction: 0,
++            join: 0,
++            end: 0,
++        }
++    }
++    fn encode(self) -> [u8; FRAME] {
++        let mut b = [0; FRAME];
++        b[..4].copy_from_slice(b"FCI1");
++        b[4] = self.kind;
++        b[5] = self.outcome;
++        b[8..12].copy_from_slice(&self.transaction.to_le_bytes());
++        b[12..16].copy_from_slice(&self.join.to_le_bytes());
++        b[16..20].copy_from_slice(&self.end.to_le_bytes());
++        b
++    }
++    fn decode(b: [u8; FRAME]) -> Result<Self> {
++        if &b[..4] != b"FCI1" || b[6..8] != [0, 0] || b[20..].iter().any(|&x| x != 0) {
++            return Err(LifecycleError::Invalid);
++        }
++        let p = Self {
++            kind: b[4],
++            outcome: b[5],
++            transaction: u32::from_le_bytes(b[8..12].try_into().unwrap()),
++            join: u32::from_le_bytes(b[12..16].try_into().unwrap()),
++            end: u32::from_le_bytes(b[16..20].try_into().unwrap()),
++        };
++        let good = match p.kind {
++            BEGIN | ROLLBACK_NOTICE | COMMIT_NOTICE | ACK | FINISHED => {
++                p.outcome == 0 && p.transaction == 0 && p.join == 0 && p.end == 0
++            }
++            GUARDIAN => p.outcome == 0 && p.transaction != 0 && p.join == 0 && p.end == 0,
++            ENDED => matches!(p.outcome, 1 | 2) && p.transaction != 0,
++            DECISION => {
++                matches!(p.outcome, 1 | 2) && p.transaction != 0 && p.join == 0 && p.end == 0
++            }
++            _ => false,
++        };
++        if good {
++            Ok(p)
++        } else {
++            Err(LifecycleError::Invalid)
++        }
++    }
++}
++
++fn current(deadline: Instant) -> Result<()> {
++    if Instant::now() >= deadline {
++        Err(LifecycleError::Expired)
++    } else if FAULTED.load(Ordering::Acquire) {
++        Err(LifecycleError::Faulted)
++    } else {
++        Ok(())
++    }
++}
++fn pause(deadline: Instant) -> Result<()> {
++    current(deadline)?;
++    std::thread::sleep(Duration::from_millis(2));
++    current(deadline)
++}
++fn process_identity(process: HANDLE) -> Result<GuardianIdentity> {
++    let mut c = FILETIME::default();
++    let mut e = FILETIME::default();
++    let mut k = FILETIME::default();
++    let mut u = FILETIME::default();
++    unsafe {
++        GetProcessTimes(process, &mut c, &mut e, &mut k, &mut u)?;
++    }
++    let process_id = unsafe { GetProcessId(process) };
++    if process_id == 0 {
++        return Err(LifecycleError::Invalid);
++    }
++    Ok(GuardianIdentity {
++        process_id,
++        creation_filetime: u64::from(c.dwLowDateTime) | (u64::from(c.dwHighDateTime) << 32),
++    })
++}
++fn live(process: HANDLE) -> Result<()> {
++    match unsafe { WaitForSingleObject(process, 0) } {
++        WAIT_TIMEOUT => Ok(()),
++        _ => Err(LifecycleError::Unsettled),
++    }
++}
++fn image_path(process: HANDLE) -> Result<PathBuf> {
++    let mut b = [0u16; PATH_LIMIT];
++    let mut n = b.len() as u32;
++    unsafe {
++        QueryFullProcessImageNameW(
++            process,
++            PROCESS_NAME_WIN32,
++            windows::core::PWSTR(b.as_mut_ptr()),
++            &mut n,
++        )?;
++    }
++    if n == 0 || n as usize >= b.len() {
++        return Err(LifecycleError::Invalid);
++    }
++    let path = PathBuf::from(OsString::from_wide(&b[..n as usize]));
++    valid_path(&path)?;
++    Ok(path)
++}
++
++impl Resources {
++    fn close_handle(&mut self, h: HANDLE) -> Result<()> {
++        let index = self
++            .handles
++            .iter()
++            .position(|v| v.handle == h)
++            .ok_or(LifecycleError::Invalid)?;
++        self.close(index)
++    }
++    fn process(&mut self, pid: u32, role: Role) -> Result<HANDLE> {
++        if pid == 0 || self.handles.len() >= HANDLE_LIMIT {
++            return Err(LifecycleError::Invalid);
++        }
++        let h = unsafe {
++            OpenProcess(
++                PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_SYNCHRONIZE,
++                false,
++                pid,
++            )?
++        };
++        self.add(h, role);
++        Ok(h)
++    }
++    fn parent(&mut self, child: HANDLE) -> Result<HANDLE> {
++        let child_id = process_identity(child)?;
++        if self.handles.len() >= HANDLE_LIMIT {
++            return Err(LifecycleError::Invalid);
++        }
++        let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)? };
++        self.add(snapshot, Role::Control);
++        let mut entry = PROCESSENTRY32W {
++            dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32,
++            ..Default::default()
++        };
++        let mut found = None;
++        let mut next = unsafe { Process32FirstW(snapshot, &mut entry) };
++        for _ in 0..8192 {
++            if next.is_err() {
++                break;
++            }
++            if entry.th32ProcessID == child_id.process_id {
++                found = Some(entry.th32ParentProcessID);
++                break;
++            }
++            next = unsafe { Process32NextW(snapshot, &mut entry) };
++        }
++        self.close_handle(snapshot)?;
++        let parent = self.process(found.ok_or(LifecycleError::Invalid)?, Role::Engine)?;
++        let identity = process_identity(parent)?;
++        if identity.creation_filetime >= child_id.creation_filetime {
++            return Err(LifecycleError::Invalid);
++        }
++        live(parent)?;
++        Ok(parent)
++    }
++    fn read_at(&self, h: HANDLE, offset: i64, bytes: &mut [u8]) -> Result<()> {
++        let mut read = 0;
++        unsafe {
++            SetFilePointerEx(h, offset, None, FILE_BEGIN)?;
++            ReadFile(h, Some(bytes), Some(&mut read), None)?;
++        }
++        if read as usize != bytes.len() {
++            return Err(LifecycleError::Unsettled);
++        }
++        Ok(())
++    }
++    fn digest(&mut self, h: HANDLE, limit: u64, deadline: Instant) -> Result<[u8; 32]> {
++        if self.handles.len() + 2 > HANDLE_LIMIT {
++            return Err(LifecycleError::Invalid);
++        }
++        let mut size = 0;
++        unsafe {
++            GetFileSizeEx(h, &mut size)?;
++        }
++        if size <= 0 || size as u64 > limit {
++            return Err(LifecycleError::Invalid);
++        }
++        let mut algorithm = BCRYPT_ALG_HANDLE::default();
++        unsafe {
++            BCryptOpenAlgorithmProvider(
++                &mut algorithm,
++                BCRYPT_SHA256_ALGORITHM,
++                None,
++                BCRYPT_OPEN_ALGORITHM_PROVIDER_FLAGS(0),
++            )
++            .ok()?;
++        }
++        let algorithm_handle = self.add(HANDLE(algorithm.0), Role::Algorithm);
++        let mut hash = BCRYPT_HASH_HANDLE::default();
++        // Windows 7+ CNG owns the hash-object storage when pbHashObject=NULL.
++        unsafe {
++            BCryptCreateHash(algorithm, &mut hash, None, None, 0).ok()?;
++        }
++        let hash_handle = self.add(HANDLE(hash.0), Role::Hash);
++        unsafe {
++            SetFilePointerEx(h, 0, None, FILE_BEGIN)?;
++        }
++        let mut buffer = [0u8; 16384];
++        let mut remaining = size as usize;
++        while remaining != 0 {
++            current(deadline)?;
++            let mut n = 0;
++            let count = buffer.len().min(remaining);
++            unsafe {
++                ReadFile(h, Some(&mut buffer[..count]), Some(&mut n), None)?;
++            }
++            if n == 0 || n as usize > remaining {
++                return Err(LifecycleError::Unsettled);
++            }
++            unsafe {
++                BCryptHashData(hash, &buffer[..n as usize], 0).ok()?;
++            }
++            remaining -= n as usize;
++        }
++        let mut result = [0; 32];
++        unsafe {
++            BCryptFinishHash(hash, &mut result, 0).ok()?;
++        }
++        // Crypto handles have their own namespace; never identify one only by
++        // an integer that could coincide with an unrelated kernel handle.
++        let index = self
++            .handles
++            .iter()
++            .position(|v| v.role == Role::Hash && v.handle == hash_handle)
++            .ok_or(LifecycleError::Invalid)?;
++        self.close(index)?;
++        let index = self
++            .handles
++            .iter()
++            .position(|v| v.role == Role::Algorithm && v.handle == algorithm_handle)
++            .ok_or(LifecycleError::Invalid)?;
++        self.close(index)?;
++        current(deadline)?;
++        Ok(result)
++    }
++}
++
++struct Session {
++    resources: Resources,
++    manifest: Manifest,
++    image: PathBuf,
++    image_sha: [u8; 32],
++    pipe_name: HSTRING,
++    deadline: Instant,
++}
++impl Session {
++    fn new(deadline: Instant) -> Result<Self> {
++        let mut resources = Resources::empty()?;
++        resources.sid = resources.token_sid(unsafe { GetCurrentProcess() })?;
++        require_user(&resources.sid)?;
++        let image = image_path(unsafe { GetCurrentProcess() })?;
++        let mut parents: Vec<_> = image.ancestors().skip(1).collect();
++        parents.reverse();
++        if parents.len() > 40 {
++            return Err(LifecycleError::Invalid);
++        }
++        for path in parents {
++            let h = resources.open_file(
++                path,
++                FILE_READ_ATTRIBUTES.0,
++                FILE_SHARE_READ | FILE_SHARE_WRITE,
++                OPEN_EXISTING,
++                true,
++                false,
++            )?;
++            resources.add(h, Role::Parent);
++            verify_info(h, true)?;
++        }
++        let h = resources.open_file(
++            &image,
++            GENERIC_READ.0,
++            FILE_SHARE_READ,
++            OPEN_EXISTING,
++            false,
++            false,
++        )?;
++        resources.add(h, Role::Parent);
++        verify_info(h, false)?;
++        let mut size = 0;
++        unsafe {
++            GetFileSizeEx(h, &mut size)?;
++        }
++        if !(21..=64 * 1024 * 1024).contains(&size) {
++            return Err(LifecycleError::Invalid);
++        }
++        let mut footer = [0u8; 20];
++        resources.read_at(h, size - 20, &mut footer)?;
++        if &footer[4..] != manifest::FOOTER {
++            return Err(LifecycleError::Invalid);
++        }
++        let n = u32::from_le_bytes(footer[..4].try_into().unwrap()) as usize;
++        if n == 0 || n > manifest::MAX_MANIFEST || n as i64 + 20 >= size {
++            return Err(LifecycleError::Invalid);
++        }
++        let mut raw = vec![0; n];
++        resources.read_at(h, size - 20 - n as i64, &mut raw)?;
++        let manifest = manifest::parse(&raw)?;
++        let image_sha = resources.digest(h, 64 * 1024 * 1024, deadline)?;
++        let sid_hex: String = resources.sid.iter().map(|b| format!("{b:02X}")).collect();
++        let pipe_name = HSTRING::from(format!(
++            r"\\.\pipe\FutureClassroom-Installer-{}-{}",
++            INSTALL_FAMILY, sid_hex
++        ));
++        Ok(Self {
++            resources,
++            manifest,
++            image,
++            image_sha,
++            pipe_name,
++            deadline,
++        })
++    }
++    fn authenticate_image(&mut self, process: HANDLE) -> Result<GuardianIdentity> {
++        live(process)?;
++        let sid = self.resources.token_sid(process)?;
++        if sid != self.resources.sid {
++            return Err(LifecycleError::Invalid);
++        }
++        // Token capability is no longer needed after actual SID comparison.
++        let token = self
++            .resources
++            .handles
++            .iter()
++            .rposition(|h| h.role == Role::Token)
++            .ok_or(LifecycleError::Invalid)?;
++        self.resources.close(token)?;
++        let path = image_path(process)?;
++        let image = self.resources.open_file(
++            &path,
++            GENERIC_READ.0,
++            FILE_SHARE_READ,
++            OPEN_EXISTING,
++            false,
++            false,
++        )?;
++        self.resources.add(image, Role::Control);
++        verify_info(image, false)?;
++        if self
++            .resources
++            .digest(image, 64 * 1024 * 1024, self.deadline)?
++            != self.image_sha
++        {
++            return Err(LifecycleError::Invalid);
++        }
++        // Keep the actual peer image inode fixed until the owning session ends.
++        process_identity(process)
++    }
++    fn peer(&mut self, pipe: HANDLE, server: bool) -> Result<HANDLE> {
++        let mut pid = 0;
++        unsafe {
++            if server {
++                GetNamedPipeClientProcessId(pipe, &mut pid)?;
++            } else {
++                GetNamedPipeServerProcessId(pipe, &mut pid)?;
++            }
++        }
++        if server {
++            // Actual connected security context, not a packet PID/SID. This is
++            // identification only; no operation uses the impersonated authority.
++            unsafe {
++                ImpersonateNamedPipeClient(pipe)?;
++            }
++            let checked = (|| -> Result<()> {
++                if self.resources.handles.len() >= HANDLE_LIMIT {
++                    return Err(LifecycleError::Invalid);
++                }
++                let mut token = HANDLE::default();
++                unsafe {
++                    OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, true, &mut token)?;
++                }
++                self.resources.add(token, Role::Token);
++                let sid = Resources::sid_from_token(token)?;
++                if sid != self.resources.sid {
++                    return Err(LifecycleError::Invalid);
++                }
++                self.resources.close_handle(token)
++            })();
++            // A revert failure is process-fatal negative state; never continue
++            // filesystem work under an unknown caller token.
++            if unsafe { RevertToSelf() }.is_err() {
++                self.resources.retain_until_exit();
++                return Err(LifecycleError::Faulted);
++            }
++            checked?;
++        }
++        let process = self.resources.process(pid, Role::Control)?;
++        self.authenticate_image(process)?;
++        Ok(process)
++    }
++    fn server(&mut self) -> Result<HANDLE> {
++        if self.resources.handles.len() >= HANDLE_LIMIT {
++            return Err(LifecycleError::Invalid);
++        }
++        let pipe = with_security(&self.resources.sid, false, |sa| {
++            let h = unsafe {
++                CreateNamedPipeW(
++                    &self.pipe_name,
++                    PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE,
++                    PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_NOWAIT | PIPE_REJECT_REMOTE_CLIENTS,
++                    1,
++                    4096,
++                    4096,
++                    0,
++                    Some(sa),
++                )
++            };
++            if h == INVALID_HANDLE_VALUE {
++                Err(Error::from_thread())
++            } else {
++                Ok(h)
++            }
++        })?;
++        self.resources.add(pipe, Role::Control);
++        Ok(pipe)
++    }
++    fn connect(&mut self) -> Result<HANDLE> {
++        loop {
++            current(self.deadline)?;
++            if self.resources.handles.len() >= HANDLE_LIMIT {
++                return Err(LifecycleError::Invalid);
++            }
++            let result = unsafe {
++                CreateFileW(
++                    &self.pipe_name,
++                    GENERIC_READ.0 | GENERIC_WRITE.0,
++                    FILE_SHARE_MODE(0),
++                    None,
++                    OPEN_EXISTING,
++                    SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION,
++                    None,
++                )
++            };
++            match result {
++                Ok(h) => {
++                    self.resources.add(h, Role::Control);
++                    let mode = PIPE_READMODE_BYTE | PIPE_NOWAIT;
++                    unsafe {
++                        SetNamedPipeHandleState(h, Some(&mode), None, None)?;
++                    }
++                    return Ok(h);
++                }
++                Err(e)
++                    if e.code() == ERROR_PIPE_BUSY.to_hresult()
++                        || e.code() == ERROR_FILE_NOT_FOUND.to_hresult() =>
++                {
++                    pause(self.deadline)?
++                }
++                Err(e) => return Err(e.into()),
++            }
++        }
++    }
++    fn accept(&self, pipe: HANDLE) -> Result<()> {
++        loop {
++            current(self.deadline)?;
++            match unsafe { ConnectNamedPipe(pipe, None) } {
++                Ok(()) => return Ok(()),
++                Err(e) if e.code() == ERROR_PIPE_CONNECTED.to_hresult() => return Ok(()),
++                Err(e) if e.code() == ERROR_PIPE_LISTENING.to_hresult() => pause(self.deadline)?,
++                Err(e) => return Err(e.into()),
++            }
++        }
++    }
++    fn send(&self, pipe: HANDLE, packet: Packet) -> Result<()> {
++        current(self.deadline)?;
++        let bytes = packet.encode();
++        let mut n = 0;
++        unsafe {
++            WriteFile(pipe, Some(&bytes), Some(&mut n), None)?;
++        }
++        if n as usize != FRAME {
++            return Err(LifecycleError::Unsettled);
++        }
++        current(self.deadline)
++    }
++    fn receive(&self, pipe: HANDLE) -> Result<Packet> {
++        let mut bytes = [0; FRAME];
++        let mut offset = 0;
++        while offset < FRAME {
++            current(self.deadline)?;
++            let mut n = 0;
++            match unsafe { ReadFile(pipe, Some(&mut bytes[offset..]), Some(&mut n), None) } {
++                Ok(()) if n != 0 => offset += n as usize,
++                Ok(()) => pause(self.deadline)?,
++                Err(e) if e.code() == ERROR_NO_DATA.to_hresult() => pause(self.deadline)?,
++                Err(e) => return Err(e.into()),
++            }
++        }
++        Packet::decode(bytes)
++    }
++    fn request(&mut self, packet: Packet) -> Result<Packet> {
++        let pipe = self.connect()?;
++        self.send(pipe, packet)?;
++        self.peer(pipe, false)?;
++        let response = self.receive(pipe)?;
++        self.send(pipe, Packet::new(FINISHED))?;
++        self.resources.close_handle(pipe)?;
++        Ok(response)
++    }
++    fn engine(&mut self, child: HANDLE) -> Result<HANDLE> {
++        let engine = self.resources.parent(child)?;
++        let path = image_path(engine)?;
++        let mut windows = [0u16; PATH_LIMIT];
++        let n = unsafe { GetWindowsDirectoryW(Some(&mut windows)) };
++        if n == 0 || n as usize >= windows.len() {
++            return Err(LifecycleError::Invalid);
++        }
++        let root = PathBuf::from(OsString::from_wide(&windows[..n as usize]));
++        let actual = path.to_string_lossy().to_ascii_lowercase();
++        if ![
++            root.join("System32").join("msiexec.exe"),
++            root.join("SysWOW64").join("msiexec.exe"),
++        ]
++        .iter()
++        .any(|p| p.to_string_lossy().to_ascii_lowercase() == actual)
++        {
++            return Err(LifecycleError::Invalid);
++        }
++        if self.resources.token_sid(engine)? != self.resources.sid {
++            return Err(LifecycleError::Invalid);
++        }
++        // Keep the actual OS engine image fixed, too. Serviced system binaries
++        // can legitimately have WinSxS hard links, so do not pretend the payload
++        // single-link policy applies to Windows' own system image.
++        let image = self.resources.open_file(
++            &path,
++            GENERIC_READ.0,
++            FILE_SHARE_READ,
++            OPEN_EXISTING,
++            false,
++            false,
++        )?;
++        self.resources.add(image, Role::Control);
++        let mut details = BY_HANDLE_FILE_INFORMATION::default();
++        unsafe {
++            GetFileInformationByHandle(image, &mut details)?;
++        }
++        if details.dwFileAttributes & (FILE_ATTRIBUTE_REPARSE_POINT.0 | FILE_ATTRIBUTE_DIRECTORY.0)
++            != 0
++        {
++            return Err(LifecycleError::Invalid);
++        }
++        Ok(engine)
++    }
++}
++
++pub(crate) fn run(role: EntryRole, deadline: Instant, resolved_target: Option<&str>) -> Result<()> {
++    let mut session = Session::new(deadline)?;
++    let result = match role {
++        EntryRole::Begin => begin(
++            &mut session,
++            resolved_target.ok_or(LifecycleError::Invalid)?,
++        ),
++        EntryRole::Broker => server(&mut session),
++        EntryRole::Guardian(transaction) => guardian(&mut session, transaction),
++        EntryRole::RollbackNotice | EntryRole::CommitNotice => {
++            // This may report an engine stage, but cannot alter the decision,
++            // authenticate a guardian, settle effects, or create a maintenance.
++            let response = session.request(Packet::new(if role == EntryRole::RollbackNotice {
++                ROLLBACK_NOTICE
++            } else {
++                COMMIT_NOTICE
++            }))?;
++            if response.kind == ACK {
++                Ok(())
++            } else {
++                Err(LifecycleError::Unsettled)
++            }
++        }
++    };
++    if result.is_err() && role == EntryRole::Broker {
++        session.resources.retain_until_exit();
++    }
++    result?;
++    session.resources.release()
++}
++
++fn begin(session: &mut Session, resolved_target: &str) -> Result<()> {
++    // Unsupported maintenance/foreign/preexisting state is rejected before
++    // spawning a broker or creating durable Pending, independent of MSI flags.
++    effects::target(resolved_target)?;
++    effects::fresh(session)?;
++    session.engine(unsafe { GetCurrentProcess() })?;
++    if session.resources.handles.len() + 2 > HANDLE_LIMIT {
++        return Err(LifecycleError::Invalid);
++    }
++    let application = HSTRING::from(session.image.as_os_str());
++    let mut command: Vec<u16> = format!("\"{}\" broker", session.image.display())
++        .encode_utf16()
++        .chain(Some(0))
++        .collect();
++    let startup = STARTUPINFOW {
++        cb: std::mem::size_of::<STARTUPINFOW>() as u32,
++        ..Default::default()
++    };
++    let mut child = PROCESS_INFORMATION::default();
++    unsafe {
++        CreateProcessW(
++            &application,
++            Some(windows::core::PWSTR(command.as_mut_ptr())),
++            None,
++            None,
++            false,
++            PROCESS_CREATION_FLAGS(0),
++            None,
++            None,
++            &startup,
++            &mut child,
++        )?;
++    }
++    session.resources.add(child.hProcess, Role::Control);
++    session.resources.add(child.hThread, Role::Control);
++    session.resources.close_handle(child.hThread)?;
++    let pipe = session.connect()?;
++    session.send(pipe, Packet::new(BEGIN))?;
++    let server = session.peer(pipe, false)?;
++    let expected = process_identity(child.hProcess)?;
++    if process_identity(server)? != expected {
++        return Err(LifecycleError::Invalid);
++    }
++    if session.receive(pipe)?.kind != ACK {
++        return Err(LifecycleError::Unsettled);
++    }
++    session.send(pipe, Packet::new(FINISHED))?;
++    session.resources.close_handle(pipe)?;
++    // No wait/kill: the exact broker intentionally outlives this synchronous CA.
++    // Every native launch control is returned through checked Resources close;
++    // there is no unchecked std::process::Child destructor on this success path.
++    live(child.hProcess)?;
++    Ok(())
++}
++
++fn guardian(session: &mut Session, transaction: u32) -> Result<()> {
++    session.engine(unsafe { GetCurrentProcess() })?;
++    let mut hello = Packet::new(GUARDIAN);
++    hello.transaction = transaction;
++    let decision = session.request(hello)?;
++    if decision.kind != DECISION || decision.transaction != transaction {
++        return Err(LifecycleError::Invalid);
++    }
++    let mut changed = HANDLE::default();
++    let join = unsafe { MsiJoinTransaction(MSIHANDLE(transaction), 0, &mut changed) };
++    if !changed.is_invalid() {
++        session.resources.add(changed, Role::Control);
++    }
++    let end = if join == 0 {
++        unsafe {
++            MsiEndTransaction(if decision.outcome == 1 {
++                MSITRANSACTIONSTATE_COMMIT
++            } else {
++                MSITRANSACTIONSTATE_ROLLBACK
++            })
++        }
++    } else {
++        u32::MAX
++    };
++    if !changed.is_invalid() {
++        session.resources.close_handle(changed)?;
++    }
++    let receipt = Packet {
++        kind: ENDED,
++        outcome: decision.outcome,
++        transaction,
++        join,
++        end,
++    };
++    if session.request(receipt)?.kind != ACK || join != 0 || end != 0 {
++        return Err(LifecycleError::Unsettled);
++    }
++    Ok(())
++}
++
++fn server(session: &mut Session) -> Result<()> {
++    let begin = session.resources.parent(unsafe { GetCurrentProcess() })?;
++    session.authenticate_image(begin)?;
++    let engine = session.engine(begin)?;
++    let original_engine = process_identity(engine)?;
++    effects::fresh(session)?;
++    let identity = InstallIdentity::for_current_user()?;
++    let mut owner = LifecycleGate::try_begin_maintenance(
++        &identity,
++        MaintenanceOperation::Install,
++        session.deadline,
++    )?;
++    let result = (|| -> Result<()> {
++        let pipe = session.server()?;
++        let mut began = false;
++        let mut guardian = None;
++        let mut decision = None;
++        let mut ended = false;
++        for _ in 0..MAX_CONNECTIONS {
++            session.accept(pipe)?;
++            let packet = session.receive(pipe)?;
++            let peer = session.peer(pipe, true)?;
++            let peer_id = process_identity(peer)?;
++            match packet.kind {
++                BEGIN if !began && peer_id == process_identity(begin)? => {
++                    // Revalidate absence under the already-acquired exclusive
++                    // gate immediately before allowing first MSI mutation.
++                    effects::fresh(session)?;
++                    began = true;
++                    session.send(pipe, Packet::new(ACK))?;
++                }
++                GUARDIAN if began && guardian.is_none() => {
++                    let parent = session.engine(peer)?;
++                    if process_identity(parent)? != original_engine {
++                        return Err(LifecycleError::Invalid);
++                    }
++                    live(engine)?;
++                    // Transfer a duplicate of this authenticated original
++                    // process object into the ORIGINAL maintenance ledger.
++                    owner.watch_attempted = true;
++                    let mut duplicate = HANDLE::default();
++                    unsafe {
++                        DuplicateHandle(
++                            GetCurrentProcess(),
++                            peer,
++                            GetCurrentProcess(),
++                            &mut duplicate,
++                            0,
++                            false,
++                            DUPLICATE_SAME_ACCESS,
++                        )?;
++                    }
++                    owner.resources.add(duplicate, Role::Guardian);
++                    owner.guardian = Some(peer_id);
++                    let committed = effects::staged(session)?;
++                    let mut response = Packet::new(DECISION);
++                    response.transaction = packet.transaction;
++                    response.outcome = if committed { 1 } else { 2 };
++                    guardian = Some(peer_id);
++                    decision = Some(response);
++                    session.send(pipe, response)?;
++                }
++                ENDED if guardian == Some(peer_id) => {
++                    let expected = decision.ok_or(LifecycleError::Unsettled)?;
++                    if packet.transaction != expected.transaction
++                        || packet.outcome != expected.outcome
++                        || packet.join != 0
++                        || packet.end != 0
++                    {
++                        return Err(LifecycleError::Unsettled);
++                    }
++                    ended = true;
++                    session.send(pipe, Packet::new(ACK))?;
++                }
++                ROLLBACK_NOTICE | COMMIT_NOTICE if began => {
++                    // Deliberately no state change. Even same-image/SID notices
++                    // are not proof they were scheduled by this transaction.
++                    session.send(pipe, Packet::new(ACK))?;
++                }
++                _ => return Err(LifecycleError::Invalid),
++            }
++            if session.receive(pipe)?.kind != FINISHED {
++                return Err(LifecycleError::Unsettled);
++            }
++            if let Err(error) = unsafe { DisconnectNamedPipe(pipe) } {
++                if error.code() != ERROR_PIPE_NOT_CONNECTED.to_hresult() {
++                    return Err(error.into());
++                }
++            }
++            // Return transient connection process/image/token capabilities; the
++            // original Begin/Engine and Maintenance's Guardian remain pinned.
++            session.resources.close_handle(peer)?;
++            if ended {
++                break;
++            }
++        }
++        if !ended {
++            return Err(LifecycleError::Unsettled);
++        }
++        loop {
++            current(session.deadline)?;
++            match owner.resources.guardian_returned() {
++                Ok(()) => break,
++                Err(LifecycleError::GuardianRunning) => pause(session.deadline)?,
++                Err(e) => return Err(e),
++            }
++        }
++        let outcome = if decision.ok_or(LifecycleError::Unsettled)?.outcome == 1 {
++            SettledOutcome::Commit
++        } else {
++            SettledOutcome::Rollback
++        };
++        let mut proof = effects::reconcile(session, outcome)?;
++        proof.check()?;
++        // This receipt is constructed solely here, after actual native facts
++        // and independently verified effects. There is no wire Settlement API.
++        owner.record_settlement(Settlement {
++            operation_id: owner.operation_id(),
++            guardian: guardian.ok_or(LifecycleError::Unsettled)?,
++            outcome,
++            join_return: 0,
++            end_return: 0,
++            effects_reconciled: true,
++        })?;
++        proof.check()?;
++        // Return every IPC/effects/control capability before the original
++        // maintenance owner is allowed its final Pending/gate commitpoint.
++        proof.release()?;
++        session.resources.release()?;
++        owner.try_release()?;
++        Ok(())
++    })();
++    if result.is_err() {
++        owner.resources.retain_until_exit();
++    }
++    result
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn notification_has_no_transaction_or_settlement_fields() {
++        for kind in [BEGIN, ROLLBACK_NOTICE, COMMIT_NOTICE] {
++            let mut p = Packet::new(kind);
++            assert!(Packet::decode(p.encode()).is_ok());
++            for forged in [1, 2] {
++                p.outcome = forged;
++                assert!(Packet::decode(p.encode()).is_err());
++            }
++            p.outcome = 0;
++            p.transaction = 1;
++            assert!(Packet::decode(p.encode()).is_err());
++            p.transaction = 0;
++            p.end = 0x1234;
++            assert!(Packet::decode(p.encode()).is_err());
++        }
++    }
++
++    fn fixture(name: &str, deadline: Instant) -> Session {
++        let mut resources = Resources::empty().unwrap();
++        resources.sid = resources.token_sid(unsafe { GetCurrentProcess() }).unwrap();
++        let image = image_path(unsafe { GetCurrentProcess() }).unwrap();
++        let handle = resources
++            .open_file(
++                &image,
++                GENERIC_READ.0,
++                FILE_SHARE_READ,
++                OPEN_EXISTING,
++                false,
++                false,
++            )
++            .unwrap();
++        resources.add(handle, Role::Parent);
++        verify_info(handle, false).unwrap();
++        let image_sha = resources
++            .digest(handle, 64 * 1024 * 1024, deadline)
++            .unwrap();
++        Session {
++            resources,
++            image,
++            image_sha,
++            manifest: Manifest {
++                product: String::new(),
++                version: String::new(),
++                entries: Vec::new(),
++            },
++            pipe_name: HSTRING::from(name),
++            deadline,
++        }
++    }
++    fn fixture_name() -> String {
++        use fc_ports::RandomSource;
++        let mut nonce = [0; 16];
++        crate::SystemRandom.fill(&mut nonce).unwrap();
++        let tail: String = nonce.iter().map(|b| format!("{b:02x}")).collect();
++        format!(
++            r"\\.\pipe\FutureClassroom-Test-Lifecycle-{}-{tail}",
++            std::process::id()
++        )
++    }
++    const CHILD: &str = "installer_lifecycle::native::broker::tests::pipe_process_fixture_child";
++
++    struct FixtureChild(std::process::Child);
++    impl Drop for FixtureChild {
++        fn drop(&mut self) {
++            if !matches!(self.0.try_wait(), Ok(Some(_))) {
++                // Only our closed test-role subprocess, never an MSI engine or
++                // guardian transaction, can enter this fixture-only cleanup.
++                let _ = self.0.kill();
++                self.0.wait().expect("owned pipe fixture subprocess reaped");
++            }
++        }
++    }
++
++    // A separate real process gives the pipe an actual OS identity and lets a
++    // permanent cleanup fault remain process-local. This role is test-only and
++    // never present in the normal helper's parser/manifest/command surface.
++    #[test]
++    fn pipe_process_fixture_child() {
++        let Ok(name) = std::env::var("FC_LIFECYCLE_PIPE_FIXTURE") else {
++            return;
++        };
++        assert!(name.starts_with(r"\\.\pipe\FutureClassroom-Test-Lifecycle-"));
++        assert!(
++            name.len() < 160
++                && name
++                    .bytes()
++                    .all(|b| b.is_ascii_alphanumeric() || b"\\.-".contains(&b))
++        );
++        let mut session = fixture(&name, Instant::now() + Duration::from_secs(10));
++        if std::env::var("FC_LIFECYCLE_PIPE_CLOSE_FAULT").as_deref() == Ok("1") {
++            let pipe = session.server().unwrap();
++            session.resources.fail_close_role = Some(Role::Control);
++            assert_eq!(session.resources.release(), Err(LifecycleError::Faulted));
++            let before = session.resources.handles.len();
++            assert_eq!(session.resources.release(), Err(LifecycleError::Faulted));
++            assert_eq!(
++                session.resources.handles.len(),
++                before,
++                "unknown close must never be retried"
++            );
++            assert!(!session.resources.released());
++            session.resources.retain_until_exit();
++            assert!(retained_count() > 0);
++            assert!(matches!(Resources::empty(), Err(LifecycleError::Faulted)));
++            assert!(
++                unsafe { GetNamedPipeInfo(pipe, None, None, None, None) }.is_ok(),
++                "original real pipe capability retained"
++            );
++            return;
++        }
++        let response = session.request(Packet::new(BEGIN)).unwrap();
++        assert_eq!(response.kind, ACK);
++        session.resources.release().unwrap();
++    }
++
++    #[test]
++    fn actual_local_pipe_binds_original_process_sid_image_and_returns_controls() {
++        let _serial = crate::NATIVE_TEST_SERIAL
++            .lock()
++            .unwrap_or_else(|p| p.into_inner());
++        let name = fixture_name();
++        let deadline = Instant::now() + Duration::from_secs(10);
++        let mut session = fixture(&name, deadline);
++        let pipe = session.server().unwrap();
++        let mut child = FixtureChild(
++            std::process::Command::new(std::env::current_exe().unwrap())
++                .args(["--exact", CHILD, "--nocapture"])
++                .env("FC_LIFECYCLE_PIPE_FIXTURE", &name)
++                .env_remove("FC_LIFECYCLE_PIPE_CLOSE_FAULT")
++                .spawn()
++                .unwrap(),
++        );
++        session.accept(pipe).unwrap();
++        assert_eq!(session.receive(pipe).unwrap().kind, BEGIN);
++        let peer = session.peer(pipe, true).unwrap();
++        assert_eq!(
++            process_identity(peer).unwrap(),
++            process_identity(HANDLE(child.0.as_raw_handle())).unwrap()
++        );
++        session.send(pipe, Packet::new(ACK)).unwrap();
++        assert_eq!(session.receive(pipe).unwrap().kind, FINISHED);
++        loop {
++            current(deadline).unwrap();
++            if let Some(status) = child.0.try_wait().unwrap() {
++                assert!(status.success());
++                break;
++            }
++            pause(deadline).unwrap();
++        }
++        session.resources.release().unwrap();
++        assert!(session.resources.released());
++    }
++
++    #[test]
++    fn unconnected_pipe_timeout_has_no_outstanding_io_or_replacement() {
++        let _serial = crate::NATIVE_TEST_SERIAL
++            .lock()
++            .unwrap_or_else(|p| p.into_inner());
++        let name = fixture_name();
++        let mut session = fixture(&name, Instant::now() + Duration::from_secs(10));
++        let pipe = session.server().unwrap();
++        session.deadline = Instant::now() + Duration::from_millis(10);
++        assert_eq!(session.accept(pipe), Err(LifecycleError::Expired));
++        session.resources.release().unwrap();
++        assert!(session.resources.released());
++    }
++
++    #[test]
++    fn real_pipe_cleanup_fault_retains_original_and_faults_only_subprocess() {
++        let _serial = crate::NATIVE_TEST_SERIAL
++            .lock()
++            .unwrap_or_else(|p| p.into_inner());
++        let name = fixture_name();
++        let mut child = FixtureChild(
++            std::process::Command::new(std::env::current_exe().unwrap())
++                .args(["--exact", CHILD, "--nocapture"])
++                .env("FC_LIFECYCLE_PIPE_FIXTURE", name)
++                .env("FC_LIFECYCLE_PIPE_CLOSE_FAULT", "1")
++                .spawn()
++                .unwrap(),
++        );
++        let deadline = Instant::now() + Duration::from_secs(10);
++        loop {
++            current(deadline).unwrap();
++            if let Some(status) = child.0.try_wait().unwrap() {
++                assert!(status.success());
++                break;
++            }
++            pause(deadline).unwrap();
++        }
++        // Child process exit is the OS cleanup boundary for that real pipe;
++        // parent remains usable and does not reset the child's sticky fault.
++        let mut owner = Resources::empty().unwrap();
++        owner.release().unwrap();
++    }
++}
+--- /dev/null
++++ b/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
+@@ -0,0 +1,615 @@
++//! Trusted, fixed-scope reconciliation. No caller boolean or notification can
++//! manufacture this proof. The scope is the approved payload, installer-owned
++//! component markers, and MSI product/context/version registration. Installer
++//! engine cache/log internals are not deleted or claimed absent here.
++use super::*;
++
++const MARKERS: &str = r"Software\FutureClassroom\Installer\Components";
++const PIN_GROUPS: usize = 6; // + session + original Maintenance = original 8 slots
++
++fn local() -> Result<PathBuf> {
++    Ok(InstallIdentity::for_current_user()?.local)
++}
++fn root() -> Result<PathBuf> {
++    Ok(local()?.join("Programs").join("FutureClassroom"))
++}
++pub(super) fn target(untrusted: &str) -> Result<()> {
++    // Append the fixed filename in the MSI formatted command. Quoting a bare
++    // CostFinalize directory (which ends in '\\') would escape its closing
++    // quote in the CRT argv grammar and reject every legitimate fresh install.
++    let path = PathBuf::from(untrusted);
++    // Do not canonicalize/open the caller's directory: comparison never grants
++    // it authority. No UNC/verbatim/ADS/relative/traversal or slash alias enters.
++    valid_path(&path)?;
++    if !path
++        .to_string_lossy()
++        .eq_ignore_ascii_case(&root()?.join("fc-bootstrap.exe").to_string_lossy())
++    {
++        return Err(LifecycleError::Invalid);
++    }
++    Ok(())
++}
++
++fn product(manifest: &Manifest, property: &str) -> Result<Option<String>> {
++    let code = HSTRING::from(format!("{{{}}}", manifest.product));
++    let property = HSTRING::from(property);
++    let mut buffer = [0u16; 256];
++    let mut n = buffer.len() as u32;
++    let result = unsafe {
++        MsiGetProductInfoExW(
++            &code,
++            None,
++            MSIINSTALLCONTEXT_USERUNMANAGED,
++            &property,
++            Some(windows::core::PWSTR(buffer.as_mut_ptr())),
++            Some(&mut n),
++        )
++    };
++    if result == ERROR_UNKNOWN_PRODUCT.0 {
++        return Ok(None);
++    }
++    if result != 0 || n as usize >= buffer.len() {
++        return Err(LifecycleError::Unsettled);
++    }
++    String::from_utf16(&buffer[..n as usize])
++        .map(Some)
++        .map_err(|_| LifecycleError::Invalid)
++}
++fn no_product(manifest: &Manifest) -> Result<()> {
++    let code = HSTRING::from(format!("{{{}}}", manifest.product));
++    let mut found = [0u16; 39];
++    let mut context = MSIINSTALLCONTEXT_NONE;
++    let result = unsafe {
++        MsiEnumProductsExW(
++            &code,
++            None,
++            MSIINSTALLCONTEXT_ALL.0 as u32,
++            0,
++            Some(&mut found),
++            Some(&mut context),
++            None,
++            None,
++        )
++    };
++    if result != ERROR_NO_MORE_ITEMS.0 {
++        return Err(LifecycleError::Unsettled);
++    }
++    let upgrade = HSTRING::from(format!("{{{INSTALL_FAMILY}}}"));
++    let result = unsafe {
++        MsiEnumRelatedProductsW(&upgrade, None, 0, windows::core::PWSTR(found.as_mut_ptr()))
++    };
++    if result != ERROR_NO_MORE_ITEMS.0 {
++        return Err(LifecycleError::Unsettled);
++    }
++    Ok(())
++}
++fn absent(path: &Path) -> Result<()> {
++    valid_path(path)?;
++    match std::fs::symlink_metadata(path) {
++        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
++        _ => Err(LifecycleError::Unsettled),
++    }
++}
++fn marker_absent() -> Result<()> {
++    let name = HSTRING::from(MARKERS);
++    let mut key = HKEY::default();
++    let result = unsafe {
++        RegOpenKeyExW(
++            HKEY_CURRENT_USER,
++            &name,
++            Some(0),
++            KEY_READ | KEY_WOW64_32KEY,
++            &mut key,
++        )
++    };
++    if result == ERROR_FILE_NOT_FOUND {
++        return Ok(());
++    }
++    if result == ERROR_SUCCESS {
++        let mut owner = Resources::empty()?;
++        owner.add(HANDLE(key.0), Role::Registry);
++        owner.release()?;
++    }
++    Err(LifecycleError::Unsettled)
++}
++pub(super) fn fresh(session: &mut Session) -> Result<()> {
++    current(session.deadline)?;
++    no_product(&session.manifest)?;
++    let local = local()?;
++    // Existing Programs must be a real directory. Its exact handle remains
++    // pinned through this session; absence is permitted for a fresh MSI only.
++    let programs = local.join("Programs");
++    match session.resources.open_file(
++        &programs,
++        FILE_READ_ATTRIBUTES.0 | READ_CONTROL.0,
++        FILE_SHARE_READ | FILE_SHARE_WRITE,
++        OPEN_EXISTING,
++        true,
++        false,
++    ) {
++        Ok(h) => {
++            session.resources.add(h, Role::Parent);
++            verify_info(h, true)?;
++            verify_acl(h, &session.resources.sid, false)?;
++        }
++        Err(e)
++            if e.code() == ERROR_FILE_NOT_FOUND.to_hresult()
++                || e.code() == ERROR_PATH_NOT_FOUND.to_hresult() => {}
++        Err(e) => return Err(e.into()),
++    }
++    absent(&local.join("Programs").join("FutureClassroom"))?;
++    marker_absent()?;
++    current(session.deadline)
++}
++
++/// Each group uses the existing checked native ledger (64 resources/8 owners),
++/// with at most six groups for <=72 files and <=4 path components. No unbounded
++/// owner pool or additional native resource budget is introduced.
++pub(super) struct Proof {
++    groups: Vec<Resources>,
++    deadline: Instant,
++    returned: bool,
++    marker_watch: Option<HANDLE>,
++}
++impl Proof {
++    fn new(deadline: Instant) -> Self {
++        Self {
++            groups: Vec::new(),
++            deadline,
++            returned: false,
++            marker_watch: None,
++        }
++    }
++    fn owner(&mut self) -> Result<&mut Resources> {
++        current(self.deadline)?;
++        if self
++            .groups
++            .last()
++            .is_none_or(|g| g.handles.len() > HANDLE_LIMIT - 4)
++        {
++            if self.groups.len() >= PIN_GROUPS {
++                return Err(LifecycleError::Invalid);
++            }
++            self.groups.push(Resources::empty()?);
++        }
++        self.groups.last_mut().ok_or(LifecycleError::Invalid)
++    }
++    pub(super) fn check(&self) -> Result<()> {
++        current(self.deadline)?;
++        if self.returned {
++            return Err(LifecycleError::Invalid);
++        }
++        for owner in &self.groups {
++            owner.check_live()?;
++        }
++        if self
++            .marker_watch
++            .is_some_and(|event| unsafe { WaitForSingleObject(event, 0) } != WAIT_TIMEOUT)
++        {
++            return Err(LifecycleError::Unsettled);
++        }
++        Ok(())
++    }
++    pub(super) fn release(&mut self) -> Result<()> {
++        self.check()?;
++        for group in self.groups.iter_mut().rev() {
++            group.release()?;
++        }
++        self.returned = true;
++        Ok(())
++    }
++    fn retain(&mut self) {
++        for group in &mut self.groups {
++            group.retain_until_exit();
++        }
++        self.returned = true;
++    }
++}
++impl Drop for Proof {
++    fn drop(&mut self) {
++        if !self.returned && self.release().is_err() {
++            self.retain();
++        }
++    }
++}
++
++fn pin_directories(
++    proof: &mut Proof,
++    base: &Path,
++    manifest: &Manifest,
++    sid: &[u8],
++) -> Result<BTreeSet<PathBuf>> {
++    let mut dirs = BTreeSet::new();
++    dirs.insert(base.parent().ok_or(LifecycleError::Invalid)?.to_owned());
++    dirs.insert(base.to_owned());
++    for entry in &manifest.entries {
++        let path = base.join(&entry.path);
++        let mut parent = path.parent();
++        while let Some(dir) = parent {
++            if !dir.starts_with(base) {
++                break;
++            }
++            dirs.insert(dir.to_owned());
++            parent = dir.parent();
++        }
++    }
++    for dir in &dirs {
++        valid_path(dir)?;
++        let owner = proof.owner()?;
++        let h = owner.open_file(
++            dir,
++            FILE_READ_ATTRIBUTES.0 | FILE_LIST_DIRECTORY.0 | READ_CONTROL.0,
++            FILE_SHARE_READ | FILE_SHARE_WRITE,
++            OPEN_EXISTING,
++            true,
++            false,
++        )?;
++        owner.add(h, Role::Parent);
++        verify_info(h, true)?;
++        verify_acl(h, sid, false)?;
++    }
++    Ok(dirs)
++}
++fn exact_names(
++    proof: &mut Proof,
++    base: &Path,
++    dirs: &BTreeSet<PathBuf>,
++    manifest: &Manifest,
++) -> Result<()> {
++    let expected: BTreeSet<_> = manifest
++        .entries
++        .iter()
++        .map(|e| base.join(&e.path))
++        .chain(dirs.iter().filter(|d| d.starts_with(base)).cloned())
++        .collect();
++    for dir in dirs.iter().filter(|d| d.starts_with(base)) {
++        let name = native_path(&dir.join("*"))?;
++        let owner = proof.owner()?;
++        let mut found = WIN32_FIND_DATAW::default();
++        let search = unsafe { FindFirstFileW(&name, &mut found)? };
++        owner.add(search, Role::Search);
++        let mut entries = 0usize;
++        loop {
++            current(proof.deadline)?;
++            let n = found
++                .cFileName
++                .iter()
++                .position(|&c| c == 0)
++                .ok_or(LifecycleError::Invalid)?;
++            let name = OsString::from_wide(&found.cFileName[..n]);
++            if name != "." && name != ".." {
++                entries += 1;
++                if entries > 144 || found.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT.0 != 0 {
++                    return Err(LifecycleError::Unsettled);
++                }
++                let path = dir.join(name);
++                if !expected.contains(&path) {
++                    return Err(LifecycleError::Unsettled);
++                }
++            }
++            match unsafe { FindNextFileW(search, &mut found) } {
++                Ok(()) => {}
++                Err(e) if e.code() == ERROR_NO_MORE_FILES.to_hresult() => break,
++                Err(e) => return Err(e.into()),
++            }
++        }
++        // The search belongs to the same fixed group that created it.
++        let owner = proof
++            .groups
++            .iter_mut()
++            .find(|g| {
++                g.handles
++                    .iter()
++                    .any(|h| h.handle == search && h.role == Role::Search)
++            })
++            .ok_or(LifecycleError::Invalid)?;
++        owner.close_handle(search)?;
++    }
++    Ok(())
++}
++fn files(proof: &mut Proof, base: &Path, manifest: &Manifest, sid: &[u8]) -> Result<()> {
++    let dirs = pin_directories(proof, base, manifest, sid)?;
++    exact_names(proof, base, &dirs, manifest)?;
++    for entry in &manifest.entries {
++        let deadline = proof.deadline;
++        let owner = proof.owner()?;
++        let h = owner.open_file(
++            &base.join(&entry.path),
++            GENERIC_READ.0 | READ_CONTROL.0,
++            FILE_SHARE_READ,
++            OPEN_EXISTING,
++            false,
++            false,
++        )?;
++        owner.add(h, Role::Parent);
++        verify_info(h, false)?;
++        let mut n = 0;
++        unsafe {
++            GetFileSizeEx(h, &mut n)?;
++        }
++        if n != i64::from(entry.bytes)
++            || owner.digest(h, u64::from(manifest::MAX_PAYLOAD), deadline)? != entry.sha256
++        {
++            return Err(LifecycleError::Unsettled);
++        }
++    }
++    Ok(())
++}
++fn markers(proof: &mut Proof, manifest: &Manifest) -> Result<()> {
++    let name = HSTRING::from(MARKERS);
++    let mut key = HKEY::default();
++    unsafe {
++        RegOpenKeyExW(
++            HKEY_CURRENT_USER,
++            &name,
++            Some(0),
++            KEY_READ | KEY_WOW64_32KEY,
++            &mut key,
++        )
++        .ok()?;
++    }
++    proof.owner()?.add(HANDLE(key.0), Role::Registry);
++    // Observe actual writes throughout enumeration and the final proof checks.
++    // This is not a claimed registry CAS or Run-value deletion primitive.
++    let event = unsafe { CreateEventW(None, true, false, None)? };
++    proof.owner()?.add(event, Role::Control);
++    unsafe {
++        RegNotifyChangeKeyValue(
++            key,
++            true,
++            REG_NOTIFY_CHANGE_NAME | REG_NOTIFY_CHANGE_LAST_SET,
++            Some(event),
++            true,
++        )
++        .ok()?;
++    }
++    proof.marker_watch = Some(event);
++    let mut subkeys = 0;
++    let mut values = 0;
++    unsafe {
++        RegQueryInfoKeyW(
++            key,
++            None,
++            None,
++            None,
++            Some(&mut subkeys),
++            None,
++            None,
++            Some(&mut values),
++            None,
++            None,
++            None,
++            None,
++        )
++        .ok()?;
++    }
++    if subkeys != 0 || values as usize != manifest.entries.len() {
++        return Err(LifecycleError::Unsettled);
++    }
++    let expected: BTreeSet<_> = manifest
++        .entries
++        .iter()
++        .map(|e| e.component.clone())
++        .collect();
++    let mut seen = BTreeSet::new();
++    for index in 0..=72u32 {
++        let mut name = [0u16; 40];
++        let mut n = name.len() as u32;
++        let mut kind = 0u32;
++        let mut data = [0u8; 4];
++        let mut size = 4;
++        let status = unsafe {
++            RegEnumValueW(
++                key,
++                index,
++                Some(windows::core::PWSTR(name.as_mut_ptr())),
++                &mut n,
++                None,
++                Some(&mut kind),
++                Some(data.as_mut_ptr()),
++                Some(&mut size),
++            )
++        };
++        if status == ERROR_NO_MORE_ITEMS {
++            return if seen == expected {
++                Ok(())
++            } else {
++                Err(LifecycleError::Unsettled)
++            };
++        }
++        if status != ERROR_SUCCESS
++            || n as usize >= name.len()
++            || kind != REG_DWORD.0
++            || size != 4
++            || u32::from_le_bytes(data) != 1
++        {
++            return Err(LifecycleError::Unsettled);
++        }
++        let value = String::from_utf16(&name[..n as usize]).map_err(|_| LifecycleError::Invalid)?;
++        if !expected.contains(&value) || !seen.insert(value) {
++            return Err(LifecycleError::Unsettled);
++        }
++    }
++    Err(LifecycleError::Unsettled)
++}
++fn component_registration(manifest: &Manifest) -> Result<()> {
++    let code = HSTRING::from(format!("{{{}}}", manifest.product));
++    for entry in &manifest.entries {
++        let component = HSTRING::from(format!("{{{}}}", entry.component));
++        let mut path = [0u16; PATH_LIMIT];
++        let mut n = path.len() as u32;
++        let state = unsafe {
++            MsiGetComponentPathExW(
++                &code,
++                &component,
++                None,
++                Some(MSIINSTALLCONTEXT_USERUNMANAGED),
++                Some(windows::core::PWSTR(path.as_mut_ptr())),
++                Some(&mut n),
++            )
++        };
++        if state != INSTALLSTATE_LOCAL || n == 0 || n as usize >= path.len() {
++            return Err(LifecycleError::Unsettled);
++        }
++    }
++    Ok(())
++}
++pub(super) fn staged(session: &mut Session) -> Result<bool> {
++    let mut proof = Proof::new(session.deadline);
++    let base = root()?;
++    let observed = files(&mut proof, &base, &session.manifest, &session.resources.sid)
++        .and_then(|()| markers(&mut proof, &session.manifest));
++    // These pins must ACTUALLY close before End: a rollback needs DELETE access.
++    // Cleanup failure is fatal, never a reason to authorize End or replacement.
++    proof.release()?;
++    current(session.deadline)?;
++    Ok(observed.is_ok())
++}
++pub(super) fn reconcile(session: &mut Session, outcome: SettledOutcome) -> Result<Proof> {
++    let mut proof = Proof::new(session.deadline);
++    let base = root()?;
++    match outcome {
++        SettledOutcome::Commit => {
++            if product(&session.manifest, "VersionString")?.as_deref()
++                != Some(session.manifest.version.as_str())
++            {
++                return Err(LifecycleError::Unsettled);
++            }
++            component_registration(&session.manifest)?;
++            files(&mut proof, &base, &session.manifest, &session.resources.sid)?;
++            markers(&mut proof, &session.manifest)?;
++        }
++        SettledOutcome::Rollback => {
++            no_product(&session.manifest)?;
++            absent(&base)?;
++            marker_absent()?;
++        }
++    }
++    proof.check()?;
++    Ok(proof)
++}
++
++#[cfg(test)]
++mod tests {
++    use super::super::super::super::broker::manifest::Entry;
++    use super::*;
++    use std::{fs, os::windows::io::AsRawHandle};
++
++    struct Tree(PathBuf);
++    impl Drop for Tree {
++        fn drop(&mut self) {
++            fs::remove_dir_all(&self.0).expect("owned effects fixture cleaned");
++        }
++    }
++    fn fixture() -> (Tree, PathBuf, Manifest, Vec<u8>) {
++        use fc_ports::RandomSource;
++        let mut nonce = [0; 16];
++        crate::SystemRandom.fill(&mut nonce).unwrap();
++        let name: String = nonce.iter().map(|b| format!("{b:02x}")).collect();
++        let tree = Tree(std::env::temp_dir().join(format!(
++            "FutureClassroom-Test-InstallerEffects-{}-{name}",
++            std::process::id()
++        )));
++        fs::create_dir(&tree.0).unwrap();
++        let base = tree.0.join("install");
++        fs::create_dir(&base).unwrap();
++        fs::create_dir(base.join("web")).unwrap();
++        fs::create_dir(base.join("web/assets")).unwrap();
++        let mut owner = Resources::empty().unwrap();
++        let sid = owner.token_sid(unsafe { GetCurrentProcess() }).unwrap();
++        let mut entries = Vec::new();
++        for (i, path) in [
++            "LICENSE",
++            "MSI-CANDIDATE.txt",
++            "PROBE-README.txt",
++            "THIRD-PARTY-NOTICES.txt",
++            "fc-bootstrap.exe",
++            "manifest.json",
++            "web/THIRD-PARTY-NOTICES.txt",
++            "web/assets/main.js",
++            "web/fc-assets.json",
++            "web/index.html",
++        ]
++        .iter()
++        .enumerate()
++        {
++            let bytes = format!("public effects fixture {i}\n").into_bytes();
++            let file = base.join(path);
++            fs::write(&file, &bytes).unwrap();
++            let file = fs::File::open(file).unwrap();
++            let sha256 = owner
++                .digest(
++                    HANDLE(file.as_raw_handle()),
++                    1024,
++                    Instant::now() + Duration::from_secs(10),
++                )
++                .unwrap();
++            entries.push(Entry {
++                path: (*path).to_owned(),
++                bytes: bytes.len() as u32,
++                sha256,
++                component: format!("00000000-0000-0000-0000-{:012X}", i + 1),
++            });
++        }
++        owner.release().unwrap();
++        (
++            tree,
++            base,
++            Manifest {
++                product: "12345678-1234-1234-1234-123456789ABC".into(),
++                version: "0.1.0".into(),
++                entries,
++            },
++            sid,
++        )
++    }
++    #[test]
++    fn actual_closed_file_effects_pin_bytes_and_reject_extra_changed_and_linked_files() {
++        let _serial = crate::NATIVE_TEST_SERIAL
++            .lock()
++            .unwrap_or_else(|p| p.into_inner());
++        let (_tree, base, manifest, sid) = fixture();
++        let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));
++        files(&mut proof, &base, &manifest, &sid).unwrap();
++        proof.check().unwrap();
++        assert!(fs::OpenOptions::new()
++            .write(true)
++            .open(base.join("fc-bootstrap.exe"))
++            .is_err());
++        assert!(fs::rename(&base, base.with_file_name("unexpected-move")).is_err());
++        proof.release().unwrap();
++        fs::write(base.join("unlisted.txt"), b"must reject").unwrap();
++        let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));
++        assert!(files(&mut proof, &base, &manifest, &sid).is_err());
++        proof.release().unwrap();
++        fs::remove_file(base.join("unlisted.txt")).unwrap();
++        let mut wrong = manifest;
++        wrong.entries[0].sha256[0] ^= 1;
++        let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));
++        assert!(files(&mut proof, &base, &wrong, &sid).is_err());
++        proof.release().unwrap();
++        wrong.entries[0].sha256[0] ^= 1;
++        let alias = base.parent().unwrap().join("outside-link.txt");
++        fs::hard_link(base.join("LICENSE"), &alias).unwrap();
++        let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));
++        assert!(files(&mut proof, &base, &wrong, &sid).is_err());
++        proof.release().unwrap();
++        fs::remove_file(alias).unwrap();
++    }
++    #[test]
++    fn actual_target_fact_cannot_select_directory_or_alias() {
++        let _serial = crate::NATIVE_TEST_SERIAL
++            .lock()
++            .unwrap_or_else(|p| p.into_inner());
++        let expected = root().unwrap().join("fc-bootstrap.exe");
++        assert!(target(expected.to_str().unwrap()).is_ok());
++        for path in [
++            root().unwrap(),
++            expected.with_file_name("other.exe"),
++            expected.with_extension("exe:ads"),
++            root().unwrap().join("..").join("fc-bootstrap.exe"),
++        ] {
++            assert!(target(path.to_str().unwrap()).is_err());
++        }
++    }
++}

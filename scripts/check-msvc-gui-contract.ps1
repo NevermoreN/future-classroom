@@ -85,11 +85,13 @@ try {
         Require ($win7.rustflags -ceq '-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01') 'Win7 dependencies/tests must retain old console flags.'
         Require ($win7.toolchain -ceq 'nightly-2026-10-29-x86_64-pc-windows-msvc') 'Win7 pinned toolchain changed.'
     }
-    Check 'normal rustc selects only product without a conflicting final subsystem override' {
-        $modernArgs = [string[]]@('-vv','--release','--locked','--target','i686-pc-windows-msvc','-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json')
-        $win7Args = [string[]]@('-vv','--release','--locked','--target','i686-win7-windows-msvc','-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json')
-        Equal-Arguments (Get-BaselineCargoArguments rustc $modernArgs Modern) (@('rustc') + $modernArgs)
-        Equal-Arguments (Get-BaselineCargoArguments rustc $win7Args Win7) (@('-Z','build-std','rustc') + $win7Args)
+    Check 'normal rustc selects each closed product without a conflicting final subsystem override' {
+        foreach ($binaryName in @('fc-bootstrap','fc-installer-lifecycle')) {
+            $modernArgs = [string[]]@('-vv','--release','--locked','--target','i686-pc-windows-msvc','-p','fc-bootstrap','--bin',$binaryName,'--message-format=json')
+            $win7Args = [string[]]@('-vv','--release','--locked','--target','i686-win7-windows-msvc','-p','fc-bootstrap','--bin',$binaryName,'--message-format=json')
+            Equal-Arguments (Get-BaselineCargoArguments rustc $modernArgs Modern) (@('rustc') + $modernArgs)
+            Equal-Arguments (Get-BaselineCargoArguments rustc $win7Args Win7) (@('-Z','build-std','rustc') + $win7Args)
+        }
     }
     Check 'product-only environment and finally restore are wired around the real command' {
         Require ((Get-ProductRustFlags Modern) -ceq '-C target-feature=+crt-static') 'Modern product flags changed.'
@@ -130,7 +132,7 @@ try {
             @('-p','other','--bin','fc-bootstrap'), @('-p','fc-bootstrap','--bin','other'),
             ($good + @('-p','fc-bootstrap')), ($good + @('--bin','fc-bootstrap')),
             ($good + @('--')), ($good + @('--all-targets')), ($good + @('--tests')), ($good + @('--bins')))) {
-            Reject { Get-BaselineCargoArguments rustc $bad Win7 } 'Product rustc requires only the explicit fc-bootstrap binary.'
+            Reject { Get-BaselineCargoArguments rustc $bad Win7 } 'Product rustc requires one explicit closed fc-bootstrap product binary.'
         }
         Reject { Get-BaselineCargoArguments rustc @('--target','i686-pc-windows-msvc','-p','fc-bootstrap','--bin','fc-bootstrap') Win7 } 'Win7 compilation requires its explicit target.'
         Reject { Get-BaselineCargoArguments test @('--workspace') Win7 } 'Win7 compilation requires its explicit target.'
@@ -168,7 +170,7 @@ try {
         [BitConverter]::GetBytes([UInt16]512).CopyTo($bad, 148)
         Reject { Test-MsvcExecutableHeader $bad Modern product } 'Truncated PE32 optional header'
     }
-    Check 'real product invocation and copy gate bind the checked role without extra build' {
+    Check 'both real normal invocations and copy gate bind the closed targets' {
         $productCalls = @($ast.FindAll({ param($node)
             $node -is [Management.Automation.Language.CommandAst] -and $node.GetCommandName() -ceq 'Invoke-Logged' -and
             $node.CommandElements.Count -gt 1 -and $node.CommandElements[1].Extent.Text -ceq "'product-compile'"
@@ -176,6 +178,15 @@ try {
         Require ($productCalls.Count -eq 1) 'Expected exactly one normal product compilation.'
         Require ($productCalls[0].Extent.Text.Contains("Get-BaselineCargoArguments 'rustc'")) 'Product does not use final-target rustc.'
         Require ($productCalls[0].Extent.Text.Contains("'--bin','fc-bootstrap'")) 'Product is not explicitly selected.'
+        $helperCalls = @($ast.FindAll({ param($node)
+            $node -is [Management.Automation.Language.CommandAst] -and $node.GetCommandName() -ceq 'Invoke-Logged' -and
+            $node.CommandElements.Count -gt 1 -and $node.CommandElements[1].Extent.Text -ceq "'lifecycle-compile'"
+        }, $true))
+        Require ($helperCalls.Count -eq 1) 'Expected exactly one normal lifecycle compilation.'
+        Require ($helperCalls[0].Extent.Text.Contains("Get-BaselineCargoArguments 'rustc'")) 'Lifecycle helper does not use final-target rustc.'
+        Require ($helperCalls[0].Extent.Text.Contains("'--bin','fc-installer-lifecycle'")) 'Lifecycle helper is not explicitly selected.'
+        Require ($TextSource.Contains('foreach ($build in @($tests, $binary, $lifecycle))')) 'Actual normal helper Cargo messages are not collected.'
+        Require ($TextSource.Contains('cargo_profile_test = [bool]$Message.profile.test')) 'Metadata lost actual Cargo test/non-test distinction.'
         Require ($TextSource.Contains('Test-MsvcExecutableHeader $bytes $Baseline $Role')) 'Copy admission lost actual role.'
         Require ($TextSource.Contains('pe_subsystem = $actualSubsystem')) 'Metadata lost actual subsystem.'
         Require ($TextSource.Contains('$LogLimit = 16MB')) 'Original stdout/stderr cap changed.'

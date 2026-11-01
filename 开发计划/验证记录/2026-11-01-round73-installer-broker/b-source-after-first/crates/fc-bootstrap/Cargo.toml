@@ -1,0 +1,30 @@
+[package]
+name = "fc-bootstrap"
+default-run = "fc-bootstrap"
+autobins = false
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "fc-bootstrap"
+path = "src/main.rs"
+
+[[bin]]
+name = "fc-installer-lifecycle"
+path = "src/bin/fc-installer-lifecycle.rs"
+
+[dependencies]
+fc-domain.workspace = true
+fc-ports.workspace = true
+fc-runtime.workspace = true
+fc-application.workspace = true
+fc-storage.workspace = true
+fc-security.workspace = true
+fc-materials.workspace = true
+fc-audio.workspace = true
+fc-presentation.workspace = true
+fc-protocol.workspace = true
+fc-windows.workspace = true

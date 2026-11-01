@@ -1,0 +1,64 @@
+{
+  "status": "PREPARED_AST_ONLY_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T11:27:54.490951+00:00",
+  "originalFirst": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/ci-auditor-preparation-first/verify-ci-artifact-dual-gui-first.py",
+    "bytes": 53361,
+    "sha256": "e7553ef84b240453784a38df370db86e5f03f2f60b3c65910ebec17da282466f"
+  },
+  "second": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/ci-auditor-preparation-first/verify-ci-artifact-dual-gui-second.py",
+    "bytes": 53791,
+    "sha256": "ca0d64eff8d8e4c38dd8a8673d60631fb3b7a1d9fa3c5b4402348dd324d2565b"
+  },
+  "minimalDiff": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/ci-auditor-preparation-first/first-to-second-all-targets.diff",
+    "bytes": 1225,
+    "sha256": "cdfc51a1eabac769591958c84e341556d5a24adc264064d36d4d1244fc47e8c3"
+  },
+  "qualification": "The unexecuted first prepared auditor would falsely reject the example target selected by the already pinned cargo test --workspace --all-targets --no-run command because Cargo metadata.test=false is only its default-selection flag. This is a preparation false-negative, not a failed CI audit, product or GNU runtime result. First source/preparation retained unchanged.",
+  "change": "Closed lib/bin/example/test/bench targets selected by explicit all-targets; custom-build excluded. Nonempty required-features is an explicit unsupported fail-closed boundary; current source has none. Test producer must still be profile.test=true, complete metadata identity and one original workspace-test-compile command. Both normal GUI product commands and all other gates unchanged.",
+  "basis": {
+    "historicalMetadata": {
+      "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round69-ci/modern-artifact-original/raw/logs/cargo-metadata.stdout.log",
+      "bytes": 26394,
+      "sha256": "4ad7e78c5904ad2a73f095df741cf687c5204084648c7b4faf71202b85941294"
+    },
+    "historicalExample": {
+      "name": "verify_web_assets",
+      "kind": [
+        "example"
+      ],
+      "metadataTest": false,
+      "requiredFeatures": []
+    },
+    "actualCurrentGNUProducer": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/n-release-third.json",
+      "bytes": 28911,
+      "sha256": "858d3c62e4d3c4e6739a5763a77e26ccf368038a22d4ef150f5d284a080b5b07"
+    },
+    "actualExample": {
+      "target": "verify_web_assets",
+      "kind": [
+        "example"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "sha256": "ef7cd6b1836478b9584d25e86f4afc1f41885dcd645358f08eefcc47cfe425b9"
+    },
+    "interpretation": "Actual N3 Cargo JSON and producer contain this profile.test=true example; no new test/model/CI execution performed."
+  },
+  "checks": {
+    "astParseOnly": true,
+    "validatorInvoked": false,
+    "modelInvoked": false,
+    "WindowsCargoNetworkInvoked": false,
+    "firstSourceUnchanged": true
+  },
+  "scope": "Preparation for future real R73 CI artifact audit only. No artifact downloaded, no PE executed, no actual static/runtime/Hosted CI PASS issued."
+}

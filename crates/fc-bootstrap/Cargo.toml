@@ -1,10 +1,20 @@
 [package]
 name = "fc-bootstrap"
+default-run = "fc-bootstrap"
+autobins = false
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
+
+[[bin]]
+name = "fc-bootstrap"
+path = "src/main.rs"
+
+[[bin]]
+name = "fc-installer-lifecycle"
+path = "src/bin/fc-installer-lifecycle.rs"
 
 [dependencies]
 fc-domain.workspace = true

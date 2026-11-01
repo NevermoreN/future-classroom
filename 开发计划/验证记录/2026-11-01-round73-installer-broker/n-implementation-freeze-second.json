@@ -1,0 +1,119 @@
+{
+  "status": "SOURCE_FROZEN_RUNTIME_NOT_RUN",
+  "createdUtc": "2026-11-01T10:44:48.388457+00:00",
+  "baseCommit": "00120a026eea5dc4ff330f8526bf31169b373565",
+  "source": [
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1645,
+      "sha256": "02f544d4ea42c291d9356781e8b79f3e709837feec440d54ccc1caed3fce68bf",
+      "before": {
+        "bytes": 1532,
+        "sha256": "b54f0c7b47107edb9a01eca9e35aec972fe12cd44cf53b6968d53af7e710cff8"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9592,
+      "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98",
+      "before": {
+        "bytes": 9506,
+        "sha256": "5d21ab12b6acc03f942de3dff6c61b9abfb7fe8a1f6bcb50afed92f267e2b22e"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f",
+      "before": {
+        "bytes": 35343,
+        "sha256": "2fd1cfdb5ce742b70575ebf4548dbebd5b91fa3f4ad63bd6b8ead1ee41251c99"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb",
+      "before": null
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8256,
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959",
+      "before": null
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04",
+      "before": null
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 22760,
+      "sha256": "fb54da0bc8b4fc2c905c64a95e0df23ce1ec836e7d9814cf1560d94c57cb19dd",
+      "before": null
+    }
+  ],
+  "nativeBudgets": {
+    "brokerOriginalDeadlineSeconds": 120,
+    "frameBytes": 32,
+    "maxConnections": 12,
+    "nativeHandleSlotsPerOwnerUnchanged": 64,
+    "processOwnerSlotsUnchanged": 8,
+    "maxEffectGroups": 6,
+    "pendingBytesUnchanged": 4096,
+    "manifestBytes": 32768,
+    "payloadTotalBytes": 31457280,
+    "payloadRecordLimit": 72
+  },
+  "contract": {
+    "begin": "begin \"[FcInstallDir]fc-bootstrap.exe\"; only compare to OS known-folder fixed main-file path, never choose/open argument",
+    "otherRoles": [
+      "broker",
+      "<engineDecimalTransaction> guardian",
+      "rollback",
+      "commit"
+    ],
+    "notices": "advisory only, no state change/End decision/Settlement authority",
+    "authority": "original parent Begin process + pinned original engine object; actual connected token SID and helper image; guardian same original still-live engine parent, then real MSI Join validates transaction/sameuser/tree; original guardian object must exit0",
+    "settlement": "Internal only after actual End0/Join0, original guardian exit0 and native closed-manifest files/markers/product-context/version or original absence. All effect+IPC controls checked returned before original Pending/gate commitpoint.",
+    "unsupported": "Existing same ProductCode across current-user/machine contexts or related UpgradeCode rejects before Pending/mutation; repair/upgrade/uninstall completion not implemented.",
+    "failure": "Unknown/timeout/close failure retains original Pending/resources; never adopts stale Pending or reports quiescent/replacement."
+  },
+  "newTestScope": [
+    "closed role/record/path packet parsers",
+    "actual sameSID/sameimage original-process pipe fixture",
+    "no-outstanding-IO pipe timeout",
+    "real pipe sticky close-fault subprocess with OS-exit cleanup",
+    "actual bounded immutable file-effect proof rejecting changed/extraneous/hardlinked inputs and destination escape"
+  ],
+  "notYetProven": [
+    "Windows native tests runtime",
+    "actual MSI fresh-install and known guardian-owned rollback",
+    "engine actual Begin/guardian parent topology and SID on this new candidate",
+    "MSI/helper controlled temp-file cleanup",
+    "full release/Win7/Win10/Win11 lifecycle acceptance",
+    "Run exact compare/delete or full upgrade/uninstall",
+    "MSI engine cache internals absence (not in this verifier scope)"
+  ],
+  "officialReferences": [
+    "https://learn.microsoft.com/en-us/windows/win32/msi/msiembeddedchainer-table",
+    "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msijointransaction",
+    "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msiendtransaction",
+    "https://learn.microsoft.com/en-us/windows/win32/api/bcrypt/nf-bcrypt-bcryptcreatehash",
+    "https://learn.microsoft.com/en-us/windows/win32/ipc/named-pipe-type-read-and-wait-modes"
+  ],
+  "dependencies": "Only three generated Windows0.62.2 feature additions. No new crate/direct third-party dependency/lock changes.",
+  "previousFreeze": {
+    "path": "n-implementation-freeze-first.json",
+    "sha256": "6b06ac159c1a2b4176a942a239b0d4a07cc79e82b84d08c2d9d655ed6ecdbb0c"
+  },
+  "minimalSecondChange": [
+    "MsiEnumProductsEx ERROR_UNKNOWN_PRODUCT explicitly accepted as known absence alongside NO_MORE_ITEMS; no other errors admitted",
+    "MsiGetComponentPathEx exact documented x86 HKCU numeric01 full installer marker value keypath; reject64-bit/other-root/other-value/trailingseparator",
+    "Pure same predicate negative regression for known absence and exact keypath added"
+  ],
+  "officialComponentPathReference": "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msigetcomponentpathexw",
+  "officialProductEnumReference": "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msienumproductsexw"
+}

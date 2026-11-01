@@ -20,6 +20,8 @@ use windows::{
     },
 };
 
+pub(super) mod broker;
+
 const HANDLE_LIMIT: usize = 64;
 const PROCESS_OWNERS: usize = 8;
 const PATH_LIMIT: usize = 1024;
@@ -49,6 +51,12 @@ enum Role {
     Pending,
     Guardian,
     Token,
+    Hash,
+    Algorithm,
+    Search,
+    Registry,
+    Control,
+    Engine,
 }
 struct Owned {
     handle: HANDLE,
@@ -141,6 +149,9 @@ impl Resources {
             OpenProcessToken(process, TOKEN_QUERY, &mut token)?;
         }
         self.add(token, Role::Token);
+        Self::sid_from_token(token)
+    }
+    fn sid_from_token(token: HANDLE) -> WinResult<Vec<u8>> {
         let mut buffer = [0u64; 512];
         let mut size = 0;
         unsafe {
@@ -498,7 +509,29 @@ impl Resources {
         }
         // SAFETY: uniquely registered successful handle, removed only on checked
         // CloseHandle success. Error never becomes Released or a replacement.
-        if let Err(error) = unsafe { CloseHandle(self.handles[index].handle) } {
+        let owned = &self.handles[index];
+        let closed = unsafe {
+            match owned.role {
+                Role::Hash => windows::Win32::Security::Cryptography::BCryptDestroyHash(
+                    windows::Win32::Security::Cryptography::BCRYPT_HASH_HANDLE(owned.handle.0),
+                )
+                .ok(),
+                Role::Algorithm => {
+                    windows::Win32::Security::Cryptography::BCryptCloseAlgorithmProvider(
+                        windows::Win32::Security::Cryptography::BCRYPT_ALG_HANDLE(owned.handle.0),
+                        0,
+                    )
+                    .ok()
+                }
+                Role::Search => FindClose(owned.handle),
+                Role::Registry => windows::Win32::System::Registry::RegCloseKey(
+                    windows::Win32::System::Registry::HKEY(owned.handle.0),
+                )
+                .ok(),
+                _ => CloseHandle(owned.handle),
+            }
+        };
+        if let Err(error) = closed {
             self.failed = true;
             FAULTED.store(true, Ordering::Release);
             return Err(error.into());

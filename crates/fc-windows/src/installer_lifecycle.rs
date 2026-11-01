@@ -1,10 +1,12 @@
-//! Installation coordination shared by application startup and repair. MSI
-//! actions are not yet wired. Pending is durable negative state, never liveness.
-//! The trusted broker must separately authenticate transaction receipts and verify
-//! the original payload state; this module does not perform/approve MSI actions.
+//! Installation coordination shared by application startup and repair. The
+//! native broker module implements the first fresh-install MSI candidate slice;
+//! its target runtime/installer acceptance remains separate from compilation.
+//! Pending is durable negative state, never liveness. Only the broker's actual
+//! authenticated guardian, native return and verified effects can settle it.
 use std::{path::PathBuf, time::Instant};
 use windows::{core::HRESULT, Win32::Foundation::ERROR_SHARING_VIOLATION};
 
+pub mod broker;
 mod native;
 #[cfg(test)]
 mod tests;

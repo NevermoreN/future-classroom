@@ -1,0 +1,16 @@
+--- verify-ci-artifact-dual-gui-first.py
++++ verify-ci-artifact-dual-gui-second.py
+@@ -563,7 +563,12 @@
+                 key=(package['id'],target['name'],tuple(target['kind']))
+                 need(key not in targets,'DUPLICATE_METADATA_TARGET');targets[key]=target
+                 need(type(target.get('test')) is bool,'TYPED_METADATA_TEST_TARGET')
+-                if target['test'] is True and target['kind']!=['custom-build']:expected_tests[key]=target
++                # The pinned command explicitly selects --all-targets; metadata.test
++                # describes the default selection, not this override (examples too).
++                need(tuple(target['kind']) in {('lib',),('bin',),('example',),('test',),('bench',),('custom-build',)},'CLOSED_ALL_TARGETS_METADATA_KINDS')
++                if target['kind']!=['custom-build']:
++                    need(not target.get('required-features'),'ALL_TARGETS_FEATURE_GATED_TARGET_NOT_SUPPORTED')
++                    expected_tests[key]=target
+         need(expected_tests,'NO_METADATA_TEST_TARGETS')
+         observed={};test_seen=set();normal_seen={};normal_profiles={};tests=[];associations=[]
+         for command in ['workspace-test-compile',*PRODUCT_COMMANDS]:

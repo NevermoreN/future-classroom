@@ -1,0 +1,51 @@
+{
+  "status": "PASS_CONTROLLER_ACTUAL_EXIT0_REAPED",
+  "recordedUtc": "2026-11-01T11:11:03.448281+00:00",
+  "producerExecSession": 85270,
+  "actualToolTerminal": {
+    "chunkId": "5be72f",
+    "exitCode": 0,
+    "wallTimeSeconds": 1.271e-05,
+    "runningSessionReturned": false
+  },
+  "report": {
+    "path": "n-release-third.json",
+    "sha256": "858d3c62e4d3c4e6739a5763a77e26ccf368038a22d4ef150f5d284a080b5b07"
+  },
+  "sourceFreeze": {
+    "path": "n-implementation-freeze-third.json",
+    "sha256": "fbcdee53b97badcdb323e22cfb0649e851798d8756d5552833cf46f959c24131",
+    "sevenSourceCurrentShaMatch": true
+  },
+  "scope": "Only native implementation and local GNU compile/PE producer handoff. No corrected Windows runtime or MSI installation/rollback claim. Root exclusively owns subsequent Windows/full tests/cleanup. Original N2 failure is preserved.",
+  "tests": {
+    "count": 22,
+    "allProfileTest": true,
+    "allPe32I386": true,
+    "allConsoleSubsystem": 3,
+    "newHelperHarnessSha256": "b5fb0dbf2cc754e2d6140314c9f74a3870c4131fd19ca5164181791d03eb254f",
+    "fcWindowsHarnessSha256": "998ae30c1c70a60fe6b25b49090d7db3ca4ba161a033656b5bd03e947df70104"
+  },
+  "normalExecutables": [
+    {
+      "target": "fc-installer-lifecycle",
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 691180,
+      "sha256": "e851ea2e108fc282d29ccdc7a5edcebf1d2ce9b1b0e251628b98cf084fc22aea",
+      "peSubsystem": 2
+    },
+    {
+      "target": "fc-bootstrap",
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13352051,
+      "sha256": "b9a68552ee4f08d3e5c4e8886d0c337e71bc88bb1e4d69d3aba17c01b8df8314",
+      "peSubsystem": 2
+    }
+  ],
+  "cargoMetadata": {
+    "path": "n-stable-release-tests-third.stdout.log",
+    "sha256": "c42886718d75bc5b5fad0d2cf0cf1c3a1a3f1bc279c1d4f421b2c39c21264a59",
+    "bytes": 102819
+  },
+  "controls": "No Cargo or native/Windows process from this agent remains running. No source changes after N3 freeze. Native normal helper is pinned/classified only, not executed by fullrunner."
+}

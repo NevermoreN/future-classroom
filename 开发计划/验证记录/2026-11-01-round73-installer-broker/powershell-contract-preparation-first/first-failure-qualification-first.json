@@ -1,0 +1,32 @@
+{
+  "status": "FIRST_ACTUAL_FAILURE_QUALIFIED_NOT_CHANGED",
+  "firstReport": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/powershell-contract-preparation-first/windows-powershell-contract-first.json",
+    "bytes": 28080,
+    "sha256": "27c43f4fd5624a982fa2b72c041694e3a3a647ec4a57055ec0b2052d836507bd"
+  },
+  "originalOuterControllerExit": {
+    "exitCode": 1,
+    "provenance": "Root reported actual parent terminal; this qualification is not a replacement outer-controller raw record."
+  },
+  "actualRemoteOperation": {
+    "label": "05-contract-desktop51",
+    "exitCode": 1,
+    "stdout": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/05-contract-desktop51.stdout.log",
+      "bytes": 458,
+      "sha256": "1c1a55deb571c6575cbd2230f5ad315b08e9571cc73c90bb1a045d5e39fccc9e"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/05-contract-desktop51.stderr.log",
+      "bytes": 616,
+      "sha256": "9483ff7adc8edd3f35442799b1fc66dbbb2db2aa0cd5c867ebf3084cc7825535"
+    }
+  },
+  "underlyingObservation": "Original Desktop PowerShell5.1 stderr contains PSSecurityException/UnauthorizedAccess and about_Execution_Policies. Loading the checker .ps1 was denied before its actual body/contract JSON. Wrapper then parsed an empty contract payload and recorded JSONDecodeError.",
+  "actualChecks": "CHECKER_NOT_ENTERED_NO_CONTRACT_RESULT",
+  "scope": "Windows test-machine process policy/load refusal plus secondary wrapper parsing failure only. No product/GUI/compiler/MSI/HostedCI failure or success is established. No pwsh was discovered. Original report/raw bytes and original error classification remain unchanged.",
+  "cleanup": "PASS",
+  "sourceUnchanged": true,
+  "secondChange": "Only Desktop powershell.exe process flag -ExecutionPolicy Bypass and fresh second report default. No Set-ExecutionPolicy, registry, machine/user policy change; same120s/cleanup marker protocol and new opaque uuid."
+}

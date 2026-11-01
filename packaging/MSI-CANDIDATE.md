@@ -9,7 +9,9 @@ The candidate currently accepts only the `i686-win7-windows-msvc` development
 ZIP produced by `scripts/package-probe.py`, including the complete verified Web
 manifest, assets and notices. Native-only ZIPs are rejected. This is an input-scope limit, not a
 removal of the formal Windows 7 SP1 x86, Windows 10 and Windows 11 targets.
-The package remains a CUI development build. The original ZIP manifest, notices
+The two normal application/helper binaries require GUI subsystem 2; test
+harnesses remain CUI subsystem 3. The lifecycle helper is a Binary-table stream,
+not an installed application file. The original ZIP manifest, notices
 and exact Web resource bytes are retained; no development server is installed.
 
 ## Deployment decision for this candidate
@@ -44,29 +46,65 @@ HTTP binding or listener is created or deleted. No application-data cleanup or
 wildcard file deletion is authored. Removing installed program files does not
 constitute complete product uninstall: ownership-aware cleanup remains pending.
 
-## Incomplete lifecycle protections
+## Lifecycle candidate boundary
 
-* Active-process upgrade/uninstall refusal is not implemented. Do not install,
-  upgrade, repair or uninstall this candidate on an active classroom computer.
-  `MSIRESTARTMANAGERCONTROL=DisableShutdown` is not a fail-closed process guard;
-  FilesInUse/reboot behavior is not a substitute for that guard.
-* Exact type/value/ownership-checked cleanup of the deployment account's HKCU Run
-  value is not implemented. Standard registry removal cannot safely replace it.
-* The wixl 0.103 MajorUpgrade helper defaults to removal before InstallInitialize.
-  This candidate explicitly sequences RemoveExistingProducts after
-  InstallInitialize and verifies its exported sequence before InstallFinalize.
-  Transactional authoring does not establish actual Windows upgrade rollback or
-  failure preservation: those runtime checks remain NOT_RUN/NOT_VALIDATED.
-* The first three MSI version fields determine upgrades. ProductCode changes
-  deterministically with that version; UpgradeCode and unchanged file-component
-  identities remain stable. Same-version upgrades and downgrades are not enabled.
-* Actual Win7/Win10/Win11 install/repair/upgrade/downgrade/uninstall, ordinary
-  standard-user startup, Run reconciliation, cross-account handover, Seewo and
-  power-loss acceptance are NOT_RUN. Do not infer them from static PE/MSI checks.
+The first synchronous execute action, `FcBeginGate`, runs the closed helper
+`begin "[FcInstallDir]fc-bootstrap.exe"` role after `CostFinalize`/`InstallValidate` and
+before `InstallInitialize` or any product mutation. This avoids the documented
+full-UI client/server repeat of pre-InstallValidate actions. Its resolved main-file path
+is an untrusted fact compared only against the native fixed Known Folder root
+plus the fixed fc-bootstrap.exe filename;
+it never selects or authorizes a caller path. The
+helper composes the same current-SID/install-family gate used by ordinary,
+autostart and application repair. Its broker retains the exclusive owner and
+durable Pending through the original transaction and process/effects return.
+This is direct MSI wiring; there is no outer setup wrapper or public approval
+property. MSI launch conditions are additional early rejection, never identity
+or permission authority.
 
-No installation experiment is performed by the packaging script. The package's
-candidate status and incomplete lifecycle protections remain explicit; it does
-not add an application password, approval condition or pre-install reading gate.
+The exact `DisableShutdown` property and pre-costing launch condition reject an
+override enabling automatic Restart Manager shutdown. `InstallValidate` can
+still detect occupied files; it does not replace the native gate. Full-UI,
+basic-UI and quiet execution remain separate runtime checks.
+
+Only fresh per-user installation and its known rollback are implemented in this
+slice. Pre-existing product/target state, repair, upgrade, uninstall and unknown
+delegation must be refused before mutation. They remain required follow-up work.
+No application startup, Run write/delete, school database or credential change
+is part of this candidate. In particular, ordinary registry removal must not be
+used as an ownership-safe Run cleanup substitute.
+
+The exact Binary table contains one separately compiled normal
+`fc-installer-lifecycle` image. The packager first binds it and the ordinary
+application to one accepted same-source CI result, original non-test Cargo
+messages and source/byte ledgers. It appends a bounded immutable payload/effects
+manifest to that original helper PE, preserving the normal PE prefix byte for
+byte. The embedded guardian receives the engine transaction ID followed by the
+fixed `guardian` argument; it is not a broker-created imitation of an engine
+child. The native implementation authenticates actual peer/process capabilities
+and reads the manifest from its pinned image. A caller cannot send an
+`effects_reconciled` boolean as proof.
+
+Only three exact CustomAction rows are admitted: synchronous immediate begin
+(type 2), impersonated deferred rollback notification (1282), and impersonated
+deferred commit notification (1538). Notifications are advisory. Successful
+Join/End, an ACK or pipe EOF alone cannot release Pending: the broker also needs
+the original guardian's actual return and independently reconciled closed
+payload/registration effects or the original absent rollback baseline. Failure,
+unknown effects or cleanup retains negative state. No ignore/async or
+NoImpersonate variant is admitted.
+
+`RemoveExistingProducts` follows `InstallExecute` and precedes
+`InstallFinalize`. Fresh-only admission currently prevents a supported major
+upgrade from reaching that action; its transactional location is not evidence
+of implemented upgrade handoff or rollback. ProductCode remains deterministic
+per version, and the existing family/component identities stay stable.
+
+Actual fresh-install/rollback, active-app refusal, process return and residual
+cleanup must still be demonstrated on an owned Windows fixture. Real
+Win7/Win10/Win11, classroom hardware, repair/upgrade/uninstall, strict Run cleanup,
+standard-user handover, reboot/power-loss, signing and full ICE/release acceptance
+remain separate and unvalidated. `DisableShutdown` alone is not a process guard.
 
 ## Build and inspect
 
@@ -76,12 +114,20 @@ Check official package hashes and dependencies first. Do not install tools
 globally or replace system libraries. If required, set `LD_LIBRARY_PATH` only
 for the single packaging subprocess. The script accepts only explicit absolute
 tool paths and records their actual hashes, version outputs and command logs.
+The explicit `msibuild` SHA is required and is bound to the reviewed
+0.103+repack-1build3 tool package (upstream msibuild has no `--version` option).
+Its reviewed importer authors the
+unsupported-in-wixl `MsiEmbeddedChainer` table, which is then exported and checked.
 
 ```sh
 python3 scripts/package-msi-candidate.py \
   --input-zip /owned/input.zip --input-sha256 EXPECTED_SHA256 \
+  --lifecycle-helper /owned/ci/product/fc-bootstrap/fc-installer-lifecycle.exe \
+  --lifecycle-helper-sha256 EXPECTED_NORMAL_HELPER_SHA256 \
+  --build-evidence /owned/ci --build-result-sha256 EXPECTED_CI_RESULT_SHA256 \
   --output-dir /owned/new-output \
   --wixl /owned/tools/usr/bin/wixl \
+  --msibuild /owned/tools/usr/bin/msibuild --msibuild-sha256 EXPECTED_TOOL_SHA256 \
   --msiinfo /owned/tools/usr/bin/msiinfo \
   --msiextract /owned/tools/usr/bin/msiextract \
   --objdump /usr/bin/x86_64-linux-gnu-objdump
@@ -90,7 +136,9 @@ python3 scripts/package-msi-candidate.py \
 Output is exclusive: existing destinations, directory aliases and reparse points
 are refused. Inputs are bounded and admitted by a closed ZIP/manifest namespace;
 all payload size/SHA/CRC, licenses, Web versions and exact membership are checked.
-The source ZIP's claimed compiler provenance is not independently certified.
+The ZIP claim alone is insufficient: both normal executables must match the
+accepted original CI artifacts and current source input ledger. A helper test
+EXE, other source/version, third normal target or changed compiler log is rejected.
 Generated `candidate.wxs`, original payloads, MSI, table exports, extraction and
 complete command stdout/stderr remain in the owned output for review. Failures
 retain their evidence. Tool commands have a 120-second deadline and 16-MiB
@@ -99,14 +147,18 @@ review; never delete school data, persistent SSH authorization or unrelated file
 
 Before any release, independently examine summary architecture/installer version,
 Property, Directory, Component, File, Upgrade, LaunchCondition, both sequences,
-and the exact installer-only Registry marker set plus the absence of
-RemoveRegistry/CustomAction/service/shortcut/environment/ACL side effects.
+the exact installer-only Registry marker set, the single helper Binary stream,
+the exact three CustomAction rows and one embedded chainer. Extra roles, binary
+streams, bypass conditions and altered sequencing fail inspection.
+RemoveRegistry/service/shortcut/environment/ACL side effects remain forbidden.
 The initial candidate does not perform Windows Installer ICE validation. The
 Linux pure input/authoring tests are not a Windows Installer runtime simulator.
 
 Sources: [GNOME v0.103 implementation](https://github.com/GNOME/msitools/tree/v0.103),
 [Windows Installer 5.0/Win7](https://learn.microsoft.com/en-us/windows/win32/msi/released-versions-of-windows-installer),
 [installation context](https://learn.microsoft.com/en-us/windows/win32/msi/installation-context),
+[directory costing](https://learn.microsoft.com/en-us/windows/win32/msi/using-a-directory-property-in-a-path),
+[client/server custom-action sequencing](https://learn.microsoft.com/en-us/windows/win32/msi/sequencing-custom-actions),
 [Restart Manager property](https://learn.microsoft.com/en-us/windows/win32/msi/msirestartmanagercontrol).
 Tool licenses and dependencies must be recorded separately from the application's
 notices; extracting a build tool does not make it an installed application payload.

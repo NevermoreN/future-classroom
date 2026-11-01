@@ -1,0 +1,26 @@
+{
+  "status": "ACTUAL_NATIVE261_PASS_WITH_ROOT_PARSER_FAILURE_PRESERVED",
+  "actualRootParentExitCode": 1,
+  "actualTerminalToolChunk": "9ab62b",
+  "remoteProbeStatus": "PASS",
+  "remoteCleanup": "PASS",
+  "remoteHarnessExitCode": 0,
+  "actualReport": {
+    "path": "root-windows-native-harness-third.json",
+    "bytes": 49302,
+    "sha256": "a7366a2bac75aeb07beaf587c4a18a038ad93773af4794ef209c46f2e8e1626f"
+  },
+  "originalCommandReportState": "RUNNING is the incomplete recorder state after uncaught root parser AssertionError; this qualification preserves it rather than rewriting it.",
+  "sourceParser": "R67 harness unique running/summary assertion does not yet support these two newly added inherited child outputs.",
+  "actualRunningLines": [
+    "running 261 tests",
+    "running 1 test",
+    "running 1 test"
+  ],
+  "actualSummaryLines": [
+    "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 260 filtered out; finished in 0.01s",
+    "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 260 filtered out; finished in 0.00s",
+    "test result: ok. 261 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 26.07s"
+  ],
+  "scope": "Original raw native report shows outer261 passed/0failed/0ignored/0filtered and two child1 passed/260filtered summaries. Full22/public20 not run. Separate strict attribution verification is still required; no source or product threshold weakened."
+}

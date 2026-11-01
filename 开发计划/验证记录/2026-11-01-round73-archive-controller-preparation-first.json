@@ -1,0 +1,56 @@
+{
+  "status": "PREPARED_AST_ONLY_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T11:41:22.190526+00:00",
+  "owner": {
+    "path": "/tmp/fc-round73-archive-controller/.owner",
+    "bytes": 49,
+    "sha256": "f0642719ce60621fd1c73df923e2e10ea91e475cb6508a608603e64a9f0a22d0"
+  },
+  "helpers": [
+    {
+      "path": "/tmp/fc-round73-archive-controller/verify-archive-bytes-first.py",
+      "bytes": 6799,
+      "sha256": "a3f7e6d2f283355c08c583a788fa6c8d1b779f758248891f34476b3d4ebc3277"
+    },
+    {
+      "path": "/tmp/fc-round73-archive-controller/round73-verify-git-bytes-first.py",
+      "bytes": 7894,
+      "sha256": "6bf27afa6f5e290ab99f4c24c8b411ba053ae1cc6c3b1cb19e0371f26925d40d"
+    }
+  ],
+  "explicit15SourceList": {
+    "path": "/tmp/fc-round73-archive-controller/candidate-source-paths-first.json",
+    "bytes": 733,
+    "sha256": "78ff96030d96c03a4dbfa47c5b6777c41f597c26c5a2b973bc3e8c084000cbb6"
+  },
+  "templates": [
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round72-ci/archive-preparation-first/verify-archive-bytes-first.py",
+      "bytes": 4982,
+      "sha256": "00793f74cd4177050efeb1bda88bd18f53043190042688b0a68a0a9fa8d04367"
+    },
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round72-verify-git-bytes-first.py",
+      "bytes": 2375,
+      "sha256": "288050af4d626a4e60a6de5a70c7e305aed9e09133d9aea138ff316f8e9b0dec"
+    }
+  ],
+  "sourceRoot": "/tmp/fc-round73-installer-broker/evidence",
+  "destination": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round73-installer-broker",
+  "sourceBaseGitOnly": "00120a026eea5dc4ff330f8526bf31169b373565",
+  "executedCandidateProducerSha256": "858d3c62e4d3c4e6739a5763a77e26ccf368038a22d4ef150f5d284a080b5b07",
+  "candidateSourceFreezeSha256": "fbcdee53b97badcdb323e22cfb0649e851798d8756d5552833cf46f959c24131",
+  "validation": "Only AST parse plus source/schema/template reading; neither helper invoked. No archive/replay/Git stage/commit/Windows/Cargo/network. Existing evidence/main unchanged by this preparation.",
+  "usage": {
+    "replay": "python3 -B /tmp/fc-round73-archive-controller/verify-archive-bytes-first.py --source-base-git 00120a026eea5dc4ff330f8526bf31169b373565 --index-sha256 <actual-final-index-SHA256> --receipt-sha256 <actual-final-receipt-SHA256> --report /tmp/fc-round73-archive-controller/byte-replay-first.json --execute",
+    "staged": "python3 -B /tmp/fc-round73-archive-controller/round73-verify-git-bytes-first.py --base <actual-current-main-HEAD> --source-paths /tmp/fc-round73-archive-controller/candidate-source-paths-first.json --index-sha256 <actual-final-index-SHA256> --receipt-sha256 <actual-final-receipt-SHA256> --outer-path <each-reviewed-R73-controller-or-proof-path> --report /tmp/fc-round73-archive-controller/staged-first.json --execute",
+    "committed": "Same Git proof args with --commit <actual-commit> and fresh committed-first.json; commit must have the explicit --base as sole parent."
+  },
+  "limitations": [
+    "Both helpers default to PREPARED and require --execute for root actual invocation.",
+    "Archive must already be finalized with exact index/receipt SHA and the second archive helper schema.",
+    "Git proof accepts exactly 15 candidate source changes, AGENTS/compat/progress/attrs, full indexed archive and explicit closed R73 outside paths. Cargo.lock is an unchanged guard only.",
+    "No staging/commit/deletion is implemented; no runtime acceptance is inferred.",
+    "Caller must copy reviewed helpers/proofs to main through explicit outer paths; controller output stays outside frozen evidence."
+  ]
+}

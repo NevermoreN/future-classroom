@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_TOOL_PREPARATION_AND_FROZEN_B7_SOURCE_RECHECK_ONLY",
+  "toolPreparation": {
+    "path": "msi-tools-preparation-first.json",
+    "sha256": "d955b2b42162c2f037ba2b1b94fa64e10dbda895cb0e8d66e09b888c0bd8c229"
+  },
+  "frozenBSourceUnchanged": 7,
+  "downloads": 7,
+  "downloadBytes": 642534,
+  "extractedPackages": 7,
+  "nativeTools": 4,
+  "resolvedLibraryFiles": 23,
+  "wixlWrapper": {
+    "path": "/tmp/fc-round73-installer-broker/tools/wrappers/wixl",
+    "bytes": 613,
+    "sha256": "1d90366a5f0ed7f91ffb5e7ccafb2c754a03bc007f41da1cc9cc3d7c7431238a"
+  },
+  "invocation": {
+    "environment": {
+      "LD_LIBRARY_PATH": "/tmp/fc-round73-installer-broker/tools/root/usr/lib/x86_64-linux-gnu"
+    },
+    "wixl": "/tmp/fc-round73-installer-broker/tools/wrappers/wixl",
+    "msibuild": "/tmp/fc-round73-installer-broker/tools/root/usr/bin/msibuild",
+    "msiinfo": "/tmp/fc-round73-installer-broker/tools/root/usr/bin/msiinfo",
+    "msiextract": "/tmp/fc-round73-installer-broker/tools/root/usr/bin/msiextract",
+    "msibuild_sha256": "87ee3aa0af25bb997646071a45e35ebae3e3ba5f26fe7b479df97aa31bd8a1eb",
+    "note": "Set LD_LIBRARY_PATH only for the packaging child; no global environment/cache change. This preparation never calls package-msi-candidate.py."
+  },
+  "objdump": {
+    "path": "/usr/bin/x86_64-linux-gnu-objdump",
+    "bytes": 390848,
+    "sha256": "325c4205a4c658a9d1e1ebc469ae55975a2b897a3d3c1e79d9b158612d37f745",
+    "command": [
+      "/usr/bin/x86_64-linux-gnu-objdump",
+      "--version"
+    ],
+    "actualExit": true,
+    "exitCode": 0,
+    "elapsedSeconds": 0.08444896806031466,
+    "stdoutSha256": "8feb2cb2830955a0c282e6abca2b512dcf52cb9380e6b0263a481bf1c6349d8d",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "noMsiUnderOwnedTools": true,
+  "scope": "No candidate build, MSI operation or Windows invocation. ELF loading/version and expected msibuild no-argument usage do not prove MSI build or runtime behavior. Source7 remains frozen."
+}

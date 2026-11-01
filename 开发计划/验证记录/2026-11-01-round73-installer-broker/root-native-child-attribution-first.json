@@ -1,0 +1,75 @@
+{
+  "status": "PASS_SOURCE_BOUND_NATIVE_PARENT_AND_CHILD_ATTRIBUTION_ONLY",
+  "actualReport": {
+    "path": "root-windows-native-harness-third.json",
+    "sha256": "a7366a2bac75aeb07beaf587c4a18a038ad93773af4794ef209c46f2e8e1626f"
+  },
+  "parent": {
+    "name": "fc_windows-ac67b5f1df5ec8b2.exe",
+    "binarySha256": "998ae30c1c70a60fe6b25b49090d7db3ca4ba161a033656b5bd03e947df70104",
+    "declared": 261,
+    "actualCaseLines": 261,
+    "passed": 261,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filteredOut": 0,
+    "summarySeconds": 26.07,
+    "capture": "normalized merged per-harness output lines; not raw streams",
+    "childScopes": [
+      {
+        "ordinal": 1,
+        "case": "installer_lifecycle::native::broker::tests::pipe_process_fixture_child",
+        "rawLineIndices": [
+          90,
+          91,
+          93
+        ],
+        "originalLines": [
+          "running 1 test",
+          "test installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 260 filtered out; finished in 0.01s"
+        ],
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 260,
+        "identityQualification": "Original child PID/creation not printed. The pinned source tests assert original process capability binding and successful original Child exit; no independent raw OS identity is claimed."
+      },
+      {
+        "ordinal": 2,
+        "case": "installer_lifecycle::native::broker::tests::pipe_process_fixture_child",
+        "rawLineIndices": [
+          97,
+          98,
+          100
+        ],
+        "originalLines": [
+          "running 1 test",
+          "test installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 260 filtered out; finished in 0.00s"
+        ],
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 260,
+        "identityQualification": "Original child PID/creation not printed. The pinned source tests assert original process capability binding and successful original Child exit; no independent raw OS identity is claimed."
+      }
+    ],
+    "removedControlLineIndices": [
+      90,
+      91,
+      93,
+      97,
+      98,
+      100
+    ],
+    "originalNormalizedLinesSha256": "cc0dd56c7df883a670fdbd1104566300b6df9104dc197977441181ebecb8e9ce",
+    "derivedParentLinesSha256": "d0ca25a9b2e5693c2a138eabdbbaa6fd672fa90e076b3adb62f8ed93d839c1ca",
+    "qualification": "Strict unchanged R67 parser applied to an explicit derived parent view. Exactly two source-bound child running/case/summary triples attributed separately; all original raw and normalized lines remain unchanged. Child filtered counts never promoted to outer passed/ignored/filtered totals."
+  },
+  "helperSha256": "8dfd6c4731f25a4e981a985b7c85566889e6100e83f49180e70555a29ee69a62",
+  "scope": "Native261 and known child subruns only; no full22/public20/MSI or Win7/10 OS acceptance."
+}

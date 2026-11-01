@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-11-01T11:17:11.142919+00:00",
+  "status": "READ_ONLY_DESIGN_COMPLETE_RUNTIME_AND_IMPLEMENTATION_NOT_RUN",
+  "sourceFreeze": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/b-implementation-freeze-first.json",
+    "sha256": "bb49743c651cf0e8940fc039a0c3f54885ab1f0ea76f5dda66a149ed60888c2e"
+  },
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/Cargo.toml",
+      "bytes": 676,
+      "sha256": "9bf57af8f2f872f7cf438daefa92e88fc286d7bc4b49d6c0ca3bfd79e9dea1b4",
+      "b7Unchanged": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "bytes": 1162,
+      "sha256": "4b4c5b1a4e81d5e80094743f211d8c3f262aed4a0a99ab973d6c6903bf0b6292",
+      "b7Unchanged": true
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 54045,
+      "sha256": "e1a6fbac4d49f7c3644620a37cd4f951cec042be021f2fb759e4d6a6b62d591a",
+      "b7Unchanged": true
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 30725,
+      "sha256": "b14f40537c70606ad1c566c806b1e5902b8a1b30dfff6f27fd04eaa6469b670b",
+      "b7Unchanged": true
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 54457,
+      "sha256": "edec879ecad9bad5b3ef21f48afa895bb3e8f0ac58e6aba561d5748e5e147802",
+      "b7Unchanged": true
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 15333,
+      "sha256": "cc6f4600666604824049d5bfc3d3ebb9da288452154e6cead300f1417b10cc50",
+      "b7Unchanged": true
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 10471,
+      "sha256": "e6e3e2140cf46c11a4b4bccef8af40b3522ae17717f4e7453bdf31bf04b7fa79",
+      "b7Unchanged": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04",
+      "readOnlyReference": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 24471,
+      "sha256": "8eccbed8b0c916aed63103d1e98f89db948b0578648289ca317f1841fe82dff4",
+      "readOnlyReference": true
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f",
+      "readOnlyReference": true
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun.rs",
+      "bytes": 14491,
+      "sha256": "36aa0a7d6efea53a3da00e97c6a5dd6d46795dff5f38b96f7dff3e6a08af11ca",
+      "readOnlyReference": true
+    }
+  ],
+  "bFilesProposedMax": 3,
+  "productionEdited": false,
+  "mainEdited": false,
+  "cargoRun": false,
+  "windowsRun": false,
+  "msiBuilt": false,
+  "knownCorrections": [
+    "Absence of CreateFolder is not a proven folder-cleanup defect: official docs specify automatic empty-folder deletion for installer-created unlisted folders. No table expansion before evidence.",
+    "Parent SID equality is an unverified deployment premise, not a proven current failure."
+  ],
+  "artifacts": [
+    {
+      "path": ".owner",
+      "bytes": 61,
+      "sha256": "7d73aed7547eb90f4a865a28d559c7b6856050478bb91289e00a63560845cf1e"
+    },
+    {
+      "path": "acceptance-matrix.json",
+      "bytes": 2906,
+      "sha256": "8bdb8b84c31929b609a5362011b1178c613eeaffb2c1c376340c1d8a58263814"
+    },
+    {
+      "path": "authoring.md",
+      "bytes": 7113,
+      "sha256": "610b66d44c5fd3005b57a66963725a009e579247df6f2498cdca42f4e25d919a"
+    },
+    {
+      "path": "engine-context-probe.md",
+      "bytes": 4176,
+      "sha256": "4bd5c8078b3645a4dad446a250ed93c2d6151b67db496acc746491522111894d"
+    }
+  ],
+  "scopeClarification": "Parent limited acceptance to controlled original package without transforms; arbitrary external MSI/hostile transformed-session guarantees and new DLL are outside this slice. No explicit D11 requirement for runtime effective-table authentication was identified."
+}

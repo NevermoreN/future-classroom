@@ -1,0 +1,46 @@
+{
+  "status": "PASS_CONTROLLER_ACTUAL_EXIT0_REAPED",
+  "recordedUtc": "2026-11-01T10:58:47.495658+00:00",
+  "producerExecSession": 90276,
+  "actualToolTerminal": {
+    "chunkId": "0ce646",
+    "exitCode": 0,
+    "wallTimeSeconds": 1.5661e-05,
+    "runningSessionReturned": false
+  },
+  "report": {
+    "path": "n-release-first.json",
+    "sha256": "1da38a99c0b7f0eef9bc22d2f2502d9e6e7569ddcfc1312a9f316a166e86d892"
+  },
+  "sourceFreeze": {
+    "path": "n-implementation-freeze-second.json",
+    "sha256": "25d6f11c55b5d4e7638fdd36246794c7711ae6ea98dcbd09116082535ddc96e2",
+    "sevenSourceCurrentShaMatch": true
+  },
+  "scope": "Only native implementation and local GNU compile/PE producer handoff. No Windows runtime or MSI installation/rollback claim. Root exclusively owns subsequent Windows/full tests/cleanup.",
+  "tests": {
+    "count": 22,
+    "allProfileTest": true,
+    "allPe32I386": true,
+    "allConsoleSubsystem": 3,
+    "newHelperHarnessSha256": "a7df7bf74362513730fcba78decb2cf7b25a5c143bbe58e03945ad01b6901e50",
+    "fcWindowsHarnessSha256": "0be6c20c6ba2d41e25f09149656ddfe4e1339341a03747b530ef39477e0b8af5"
+  },
+  "normalExecutables": [
+    {
+      "target": "fc-installer-lifecycle",
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 691511,
+      "sha256": "44e2a605d6ccfc6e10be4b455a1342d5b9ac7e92bef2fff3844ec253e5905261",
+      "peSubsystem": 2
+    },
+    {
+      "target": "fc-bootstrap",
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13351882,
+      "sha256": "ee5479a539cfd3df6ecc04620e4da6458130ca2bbe57f429344baf7564a72057",
+      "peSubsystem": 2
+    }
+  ],
+  "controls": "No Cargo or native/Windows process from this agent remains running. No source changes after N2 freeze. Native normal helper is pinned/classified only, not executed by fullrunner."
+}

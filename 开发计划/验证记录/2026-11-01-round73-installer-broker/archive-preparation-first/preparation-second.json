@@ -1,0 +1,5 @@
+{
+  "status": "PREPARED_ONLY_NOT_EXECUTED",
+  "helperSha256": "c29f93178ddca078a0335234ea6c38e001b98027f7d76a6e68e118ddbba1740b",
+  "reason": "First was an unexecuted R72 CI template assuming an exact committed sourceSha field. R73 is an uncommitted candidate: base00120 is only its Git base, actual executed source is independently bound by N3 producer/freeze/SHA and 16 before-after inputs. No synthetic sourceSha inserted into original acceptance."
+}

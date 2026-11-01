@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_EXACT_PUBLISHED_BYTES_AND_SHA256",
+  "package": "msitools",
+  "expectedBytes": 49618,
+  "expectedSha256": "a524b4ee9abc2d7d1d3cb0fd4a7629510285eb5c5271acab73c5c69e21eb1f58",
+  "command": [
+    "curl",
+    "--disable",
+    "--fail",
+    "--location",
+    "--max-redirs",
+    "3",
+    "--proto",
+    "=https",
+    "--proto-redir",
+    "=https",
+    "--tlsv1.2",
+    "--connect-timeout",
+    "15",
+    "--max-time",
+    "120",
+    "--max-filesize",
+    "49618",
+    "--output",
+    "/tmp/fc-round73-installer-broker/tools/packages/msitools_0.103+repack-1build3_amd64.deb",
+    "https://mirrors.edge.kernel.org/ubuntu/pool/universe/m/msitools/msitools_0.103+repack-1build3_amd64.deb"
+  ],
+  "startedUtc": "2026-11-01T10:45:20.858779+00:00",
+  "deadlineSeconds": 120,
+  "connectionDeadlineSeconds": 15,
+  "candidateMsiProduced": false,
+  "windowsInvoked": false,
+  "controllerTimedOut": false,
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 1.1474201658274978,
+  "logs": [
+    {
+      "path": "msi-tools-download-msitools-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "msi-tools-download-msitools-first.stderr.log",
+      "bytes": 396,
+      "sha256": "5a5685a5f500d318780be2c679f32211f0e5838e55ee834815b1b9a0817cf3dd"
+    }
+  ],
+  "downloaded": {
+    "path": "/tmp/fc-round73-installer-broker/tools/packages/msitools_0.103+repack-1build3_amd64.deb",
+    "bytes": 49618,
+    "sha256": "a524b4ee9abc2d7d1d3cb0fd4a7629510285eb5c5271acab73c5c69e21eb1f58"
+  }
+}

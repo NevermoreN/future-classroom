@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "status": "DESIGN_ONLY_NOT_EXECUTED",
+  "cases": [
+    {
+      "id": "intact_reapply",
+      "trigger": "Install genuine accepted package, reapply/famus using genuine package/cache",
+      "requiredEvidence": "same exact full final state; original owner returned; no Run/data edits; classify intact reapplication only"
+    },
+    {
+      "id": "genuine_uninstall",
+      "trigger": "After successful install invoke genuine MSI /x without transforms or disabled hooks",
+      "requiredEvidence": "root+markers+own Product/context/components absent; no manual cache/registration deletion; no Pending"
+    },
+    {
+      "id": "maintenance_rollback",
+      "trigger": "Owned injected failure after actual repair/removal effects with real EndRollback",
+      "requiredEvidence": "captured intact baseline fully restored; original guardian exit and all handles returned"
+    },
+    {
+      "id": "fresh_rollback",
+      "trigger": "Actual failure after fresh files/markers created",
+      "requiredEvidence": "program root+marker+Product absence; not absence inferred from exit status"
+    },
+    {
+      "id": "partial_or_damaged_baseline",
+      "trigger": "Missing/corrupt/foreign payload or marker; project Run value present",
+      "requiredEvidence": "beforemutation rejection; all observed preimages preserved"
+    },
+    {
+      "id": "unsupported_family",
+      "trigger": "Different Product/version/context or related upgrade product",
+      "requiredEvidence": "beforemutation rejection; not bypassed by public Installed/REMOVE claims"
+    },
+    {
+      "id": "public_override",
+      "trigger": "TARGETDIR/FcInstallDir/ALLUSERS/RM and conditional Begin tampering",
+      "requiredEvidence": "rejected without files/registry mutation; fixed own main path comparison retained"
+    },
+    {
+      "id": "unrelated_sentinels",
+      "trigger": "Owned unrelated Run value and unrelated sibling program/registry marker",
+      "requiredEvidence": "unchanged; no wildcard/remove-key cleanup"
+    },
+    {
+      "id": "live_application",
+      "trigger": "Owned original app process holds original resources",
+      "requiredEvidence": "no forced shutdown; fail/rollback safely; root original process preserved"
+    },
+    {
+      "id": "ui_os_contexts",
+      "trigger": "Win7x86/Win10/Win11; full/basic/quiet; elevation routes",
+      "requiredEvidence": "separate actual evidence; no GNU typecheck or one-UI pass promoted to universal support"
+    },
+    {
+      "id": "owner_reuse",
+      "trigger": "Concurrent gate attempt and stale/helper notification",
+      "requiredEvidence": "busy/fail closed; no deadline renewal or notice-controlled settlement; replacement only after physical cleanup"
+    }
+  ],
+  "scope": "Controlled exact original candidate; no TRANSFORMS. Offline checker is not claimed as arbitrary effective-session authentication; no new DLL requirement."
+}

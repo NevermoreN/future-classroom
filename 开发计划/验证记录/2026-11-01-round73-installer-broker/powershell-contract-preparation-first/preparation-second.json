@@ -1,0 +1,18 @@
+{
+  "status": "PREPARED_SECOND_ONLY_NOT_EXECUTED",
+  "helper": {
+    "path": "run-powershell-contract-second.py",
+    "bytes": 15139,
+    "sha256": "b03734a8be5207aeccb4f952e09a7ce8fa5bb447136edc916af6ca35e45144d1"
+  },
+  "diff": {
+    "path": "powershell-first-to-second.diff",
+    "bytes": 1439,
+    "sha256": "741a0c910abf50cbcbd8188a2a295b112ea14a1635dd304bff1ece8dae715b5b"
+  },
+  "firstFailureQualificationSha256": "2157609ad1e3d83d5e1de55883d8414e7f32312f682014c35b7a4e55aa5e28bd",
+  "invocation": "python3 -B R73/E/powershell-contract-preparation-first/run-powershell-contract-second.py --execute",
+  "budgetSeconds": 120,
+  "firstOriginalsModified": false,
+  "scope": "AST parse and minimal source diff only. Root must actually execute and observe parent terminal before accepting a result. Process-only policy flag, no machine/user policy mutation."
+}

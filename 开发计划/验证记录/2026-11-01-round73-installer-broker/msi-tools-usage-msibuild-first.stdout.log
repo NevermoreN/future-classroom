@@ -1,0 +1,9 @@
+Usage: msibuild MSIFILE [OPTION]...
+Options:
+  -s name [author] [template] [uuid] Set summary information.
+  -q query         Execute SQL query/queries.
+  -i table1.idt    Import one table into the database.
+  -a stream file   Add 'stream' to storage with contents of 'file'.
+
+Existing tables or streams will be overwritten. If package.msi does not exist a new file
+will be created with an empty database.

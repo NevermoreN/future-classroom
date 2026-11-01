@@ -9,14 +9,32 @@ import json
 from pathlib import Path
 import runpy
 import stat
+import struct
+import subprocess
 import tempfile
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 import warnings
 import xml.etree.ElementTree as ET
 import zipfile
 
 M = runpy.run_path(str(Path(__file__).absolute().with_name("package-msi-candidate.py")))
 ROOT, SHA = M["ROOT"], M["digest"]
+
+
+def normal_pe_fixture(subsystem=2):
+    """Synthetic structural input, never executable/compiler provenance evidence."""
+    data = bytearray(512)
+    data[:2] = b"MZ"
+    struct.pack_into("<I", data, 60, 128)
+    data[128:132] = b"PE\0\0"
+    struct.pack_into("<H", data, 132, 0x14C)
+    struct.pack_into("<H", data, 148, 224)
+    struct.pack_into("<H", data, 152, 0x10B)
+    struct.pack_into("<HH", data, 200, 6, 1)
+    struct.pack_into("<H", data, 220, subsystem)
+    return bytes(data)
 
 
 def real_packager_features():
@@ -101,10 +119,14 @@ def compiled_contract_model():
     add("FeatureComponents", "Feature_ Component_", [["Main", cid]], ["Feature_", "Component_"])
     add("Media", "DiskId LastSequence DiskPrompt Cabinet VolumeLabel Source", [["1", "1", "", "#payload.cab", "", ""]])
     add("Upgrade", "UpgradeCode VersionMin VersionMax Language Attributes Remove ActionProperty", [["{" + M["UPGRADE_CODE"] + "}", "", version, "", "1", "", "WIX_UPGRADE_DETECTED"], ["{" + M["UPGRADE_CODE"] + "}", version, "", "", "2", "", "WIX_DOWNGRADE_DETECTED"]], ["UpgradeCode", "VersionMin", "VersionMax", "Language", "Attributes"])
-    add("LaunchCondition", "Condition Description", [["NOT WIX_DOWNGRADE_DETECTED", "A newer FutureClassroom candidate is installed."], ["NOT ALLUSERS", "This candidate supports only the current user installation context."], ["Installed OR VersionNT >= 601", "Windows 7 or later is required; actual OS compatibility remains unvalidated."]])
-    add("InstallExecuteSequence", "Action Condition Sequence", [["FindRelatedProducts", "", "25"], ["LaunchConditions", "", "100"], ["InstallInitialize", "", "1500"], ["RemoveExistingProducts", "", "1501"], ["InstallFinalize", "", "6600"]])
+    add("LaunchCondition", "Condition Description", [["NOT WIX_DOWNGRADE_DETECTED", "A newer FutureClassroom candidate is installed."], ["NOT ALLUSERS", "This candidate supports only the current user installation context."], ["Installed OR VersionNT >= 601", "Windows 7 or later is required; actual OS compatibility remains unvalidated."],
+        ["NOT RollbackDisabled AND NOT DISABLEROLLBACK", "Rollback must remain enabled for this lifecycle candidate."],
+        ['MSIRESTARTMANAGERCONTROL = "DisableShutdown"', "Automatic application shutdown is not allowed by this lifecycle candidate."]])
+    add("InstallExecuteSequence", "Action Condition Sequence", [["FindRelatedProducts", "", "25"], ["LaunchConditions", "", "100"], ["CostFinalize", "", "1000"], ["InstallValidate", "", "1400"], ["FcBeginGate", "1", "1499"], ["InstallInitialize", "", "1500"], ["FcRollbackNotify", "1", "1501"], ["FcCommitNotify", "1", "1502"], ["InstallExecute", "", "6500"], ["RemoveExistingProducts", "", "6501"], ["InstallFinalize", "", "6600"]])
     add("InstallUISequence", "Action Condition Sequence", [["FindRelatedProducts", "", "25"], ["LaunchConditions", "", "100"]])
-    add("CustomAction", "Action Type Source Target", [])
+    add("Binary", "Name Data", [["FcLifecycleHelper", "Binary.FcLifecycleHelper"]])
+    add("CustomAction", "Action Type Source Target", [["FcBeginGate", "2", "FcLifecycleHelper", 'begin "[FcInstallDir]fc-bootstrap.exe"'], ["FcRollbackNotify", "1282", "FcLifecycleHelper", "rollback"], ["FcCommitNotify", "1538", "FcLifecycleHelper", "commit"]])
+    add("MsiEmbeddedChainer", "MsiEmbeddedChainer Condition CommandLine Source Type", [["FcLifecycleGuardian", 'NOT (ACTION = "ADVERTISE")', "guardian", "FcLifecycleHelper", "2"]])
     return b"Template: Intel;1033\nVersion: 500 (1f4)\nSource: 10 (a)\n", tables, version, {path: data}
 
 
@@ -223,6 +245,128 @@ class Inputs(unittest.TestCase):
 
 
 class AuthoredContract(unittest.TestCase):
+    def test_resolved_fixed_file_fact_has_no_quoted_trailing_slash(self):
+        directory = "C:\\Owned Classroom\\FutureClassroom\\"
+        target = M["LIFECYCLE_ACTIONS"]["FcBeginGate"][1]
+        self.assertEqual(target, 'begin "[FcInstallDir]fc-bootstrap.exe"')
+        expanded = target.replace("[FcInstallDir]", directory)
+        self.assertEqual(expanded, subprocess.list2cmdline(["begin", directory + "fc-bootstrap.exe"]))
+        # The old directory-only template is not a correct encoding of the
+        # intended argv. This is an encoder contract, not Windows execution.
+        old = 'begin "[FcInstallDir]"'.replace("[FcInstallDir]", directory)
+        self.assertNotEqual(old, subprocess.list2cmdline(["begin", directory]))
+
+    def test_normal_helper_admission_binds_result_ledger_cargo_and_source(self):
+        # Pure provenance-gate vector: these structural PE bytes are never
+        # executed and are not presented as compiler/MSVC/runtime evidence.
+        with tempfile.TemporaryDirectory(prefix="FutureClassroom-helper-admission-") as name:
+            root = Path(name)
+            head = "7" * 40
+            source = (ROOT / "Cargo.toml").read_bytes()
+            inputs = [{"path": "Cargo.toml", "bytes": len(source), "sha256": SHA(source)}]
+            inventory = json.dumps(inputs).encode()
+            for path in ("input-sha256.json", "input-sha256-after.json"):
+                (root / path).write_bytes(inventory)
+            ledger, steps, binaries = [], [], {}
+            for target, phase in (("fc-bootstrap", "product-compile"), ("fc-installer-lifecycle", "lifecycle-compile")):
+                data = normal_pe_fixture() + target.encode()
+                relative = "product/fc-bootstrap/" + target + ".exe"
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(data)
+                binaries[target] = data
+                ledger.append({"role": "product", "package": "fc-bootstrap", "target": target,
+                    "cargo_profile_test": False, "pe_subsystem": 2, "relative_path": relative,
+                    "bytes": len(data), "sha256": SHA(data)})
+                log = (json.dumps({"reason": "compiler-artifact", "target": {"name": target, "kind": ["bin"]},
+                    "package_id": "path+file:///owned/source#fc-bootstrap@0.1.0",
+                    "profile": {"test": False}, "executable": "C:/owned/" + target + ".exe"}) + "\n").encode()
+                log_path = "logs/" + phase + ".stdout.log"
+                (root / "logs").mkdir(exist_ok=True)
+                (root / log_path).write_bytes(log)
+                steps.append({"name": phase, "passed": True, "exit_code": 0, "parent_exited": True,
+                              "stdout": log_path, "stdout_sha256": SHA(log)})
+            ledger_raw = json.dumps(ledger).encode()
+            (root / "executables.json").write_bytes(ledger_raw)
+            result = {"status": "COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN", "target": M["TARGET"], "baseline": "Win7",
+                      "source_sha": head, "dispatch_source_sha": head, "input_manifest_sha256": SHA(inventory),
+                      "executables_manifest_sha256": SHA(ledger_raw), "commands": steps}
+            raw = json.dumps(result).encode()
+            (root / "result.json").write_bytes(raw)
+            args = SimpleNamespace(build_evidence=root, build_result_sha256=SHA(raw),
+                lifecycle_helper=root / "product/fc-bootstrap/fc-installer-lifecycle.exe",
+                lifecycle_helper_sha256=SHA(binaries["fc-installer-lifecycle"]))
+            def git(arguments, **_):
+                return head.encode() + b"\n" if arguments == ["git", "rev-parse", "HEAD"] else b"Cargo.toml\0"
+            with patch.dict(M["admit_normal_helper"].__globals__["subprocess"].__dict__, check_output=git):
+                helper, facts = M["admit_normal_helper"](args, {"fc-bootstrap.exe": binaries["fc-bootstrap"]}, "0.1.0")
+                self.assertEqual(helper, binaries["fc-installer-lifecycle"])
+                self.assertIs(facts["profile_test"], False)
+                # Neither an edited original Cargo stream nor edited ledger can
+                # be laundered through the unchanged accepted result SHA.
+                path = root / steps[1]["stdout"]
+                original = path.read_bytes()
+                path.write_bytes(original.replace(b'"test": false', b'"test": true'))
+                with self.assertRaises(ValueError):
+                    M["admit_normal_helper"](args, {"fc-bootstrap.exe": binaries["fc-bootstrap"]}, "0.1.0")
+                path.write_bytes(original)
+                (root / "executables.json").write_bytes(ledger_raw + b" ")
+                with self.assertRaises(ValueError):
+                    M["admit_normal_helper"](args, {"fc-bootstrap.exe": binaries["fc-bootstrap"]}, "0.1.0")
+                (root / "executables.json").write_bytes(ledger_raw)
+                with self.assertRaises(ValueError):
+                    M["admit_normal_helper"](args, {"fc-bootstrap.exe": b"different payload"}, "0.1.0")
+                with self.assertRaises(ValueError):
+                    M["admit_normal_helper"](args, {"fc-bootstrap.exe": binaries["fc-bootstrap"]}, "0.1.1")
+
+    def test_overlay_preserves_normal_pe_prefix_and_exact_closed_effects(self):
+        normal = normal_pe_fixture()
+        payloads = {name: ("synthetic " + name).encode() for name in (
+            "fc-bootstrap.exe", "LICENSE", "PROBE-README.txt", "THIRD-PARTY-NOTICES.txt", "manifest.json",
+            "MSI-CANDIDATE.txt", "web/index.html", "web/fc-assets.json", "web/THIRD-PARTY-NOTICES.txt")}
+        image = M["lifecycle_image"](normal, "0.1.0", payloads)
+        prefix, records = M["parse_lifecycle_image"](image)
+        self.assertEqual(prefix, normal)
+        self.assertEqual(records, {name: {"bytes": len(data), "sha256": SHA(data), "component_guid": M["component_code"](name)} for name, data in payloads.items()})
+        self.assertEqual(image[-16:], b"FCLIFE73-END-v1\0")
+        length = int.from_bytes(image[-20:-16], "little")
+        self.assertEqual(image[len(normal):len(normal)+8], b"FCLM73\0\0")
+        self.assertEqual(len(normal) + length + 20, len(image))
+        for invalid in (image[:-1], image + b"trailing", image[:-20] + (32769).to_bytes(4, "little") + image[-16:],
+                        image[:len(normal)+8] + b"\x02\x00" + image[len(normal)+10:]):
+            with self.subTest(invalid_size=len(invalid)), self.assertRaises(ValueError):
+                M["parse_lifecycle_image"](invalid)
+        with self.assertRaises(ValueError):
+            M["lifecycle_image"](image, "0.1.0", payloads)
+
+    def test_overlay_refuses_test_console_and_unknown_effects(self):
+        for payloads in ({"../escape": b"x"}, {"any.exe": b"x"}, {"LICENSE": b""}, {"C:/escape": b"x"}):
+            with self.subTest(payloads=payloads), self.assertRaises(ValueError):
+                M["lifecycle_image"](normal_pe_fixture(), "0.1.0", payloads)
+        with self.assertRaises(ValueError):
+            M["lifecycle_image"](normal_pe_fixture(3), "0.1.0", {"LICENSE": b"x"})
+
+    def test_only_exact_native_roles_binary_and_flags_are_admitted(self):
+        summary, tables, version, payloads = compiled_contract_model()
+        changes = [
+            ("CustomAction", b"FcBeginGate\t2", b"FcBeginGate\t2050"),
+            ("CustomAction", b'\tbegin "[FcInstallDir]fc-bootstrap.exe"\n', b"\tbegin arbitrary-path\n"),
+            ("CustomAction", b"FcRollbackNotify\t1282", b"FcRollbackNotify\t1026"),
+            ("CustomAction", b"FcCommitNotify\t1538", b"FcCommitNotify\t66"),
+            ("Binary", b"Binary.FcLifecycleHelper", b"Binary.Foreign"),
+            ("MsiEmbeddedChainer", b"\tguardian\t", b"\tbegin\t"),
+        ]
+        for table, before, after in changes:
+            changed = dict(tables)
+            self.assertIn(before, changed[table])
+            changed[table] = changed[table].replace(before, after)
+            with self.subTest(table=table), self.assertRaises(ValueError):
+                M["verify_msi_contract"](summary, changed, version, payloads)
+        changed = dict(tables)
+        changed["Binary"] += b"Foreign\tBinary.Foreign\n"
+        with self.assertRaises(ValueError):
+            M["verify_msi_contract"](summary, changed, version, payloads)
+
     def test_actual_table_contract_rejects_wrong_compiled_semantics(self):
         summary, tables, version, payloads = compiled_contract_model()
         self.assertEqual(M["verify_msi_contract"](summary, tables, version, payloads)["status"], "PASS")
@@ -272,13 +416,14 @@ class AuthoredContract(unittest.TestCase):
                 M["idt_rows"](raw, "Property")
 
     def test_actual_export_requires_removal_inside_transaction(self):
-        def export(initialize=1500, remove=1501, finalize=6600):
+        def export(initialize=1500, remove=6501, finalize=6600):
             return ("Action\tCondition\tSequence\ns72\tS255\tI2\nInstallExecuteSequence\tAction\n"
-                    f"InstallInitialize\t\t{initialize}\nRemoveExistingProducts\t\t{remove}\nInstallFinalize\t\t{finalize}\n").encode()
-        self.assertEqual(M["verify_transaction_sequence"](export())["RemoveExistingProducts"], 1501)
-        for data in (export(remove=1401), export(remove=1500), export(remove=6600), export(remove=6700),
+                    f"CostFinalize\t\t1000\nInstallValidate\t\t1400\nFcBeginGate\t1\t1499\nInstallInitialize\t\t{initialize}\nFcRollbackNotify\t1\t1501\nFcCommitNotify\t1\t1502\nInstallExecute\t\t6500\nRemoveExistingProducts\t\t{remove}\nInstallFinalize\t\t{finalize}\n").encode()
+        self.assertEqual(M["verify_transaction_sequence"](export())["RemoveExistingProducts"], 6501)
+        for data in (export(remove=1401), export(remove=1500), export(remove=6500), export(remove=6600), export(remove=6700),
                      export().replace(b"RemoveExistingProducts", b"Missing"),
-                     export() + b"RemoveExistingProducts\t\t1502\n"):
+                     export() + b"RemoveExistingProducts\t\t6502\n",
+                     export().replace(b"FcBeginGate\t1", b"FcBeginGate\tPUBLIC_BYPASS")):
             with self.subTest(data=data), self.assertRaises(ValueError):
                 M["verify_transaction_sequence"](data)
 
@@ -296,13 +441,13 @@ class AuthoredContract(unittest.TestCase):
         nodes = list(root.iter())
         tags = [node.tag.split("}")[-1] for node in nodes]
         self.assertTrue({"Product", "Package", "MajorUpgrade", "Condition", "File"} <= set(tags))
-        self.assertFalse({"CustomAction", "Registry", "RemoveRegistryValue", "RemoveFile", "ServiceInstall", "ServiceControl", "Launch", "Shortcut"} & set(tags))
+        self.assertFalse({"Registry", "RemoveRegistryValue", "RemoveFile", "ServiceInstall", "ServiceControl", "Launch", "Shortcut"} & set(tags))
         ns = {"w": M["WIX_NS"]}
         self.assertEqual(root.find("w:Product/w:Package", ns).attrib, {"InstallerVersion": "500", "Compressed": "yes", "InstallScope": "perUser"})
         conditions = [node.text for node in root.findall("w:Product/w:Condition", ns)]
         self.assertIn("NOT ALLUSERS", conditions)
         self.assertIn("Installed OR VersionNT >= 601", conditions)
-        self.assertEqual(len(conditions), 2)
+        self.assertEqual(len(conditions), 4)
         self.assertNotIn(b"FC_CANDIDATE_ACK", raw)
         components = root.findall(".//w:Component", ns)
         self.assertEqual(len(components), 3)
@@ -310,7 +455,10 @@ class AuthoredContract(unittest.TestCase):
         self.assertTrue(all(node[1].get("Root") == "HKCU" and node[1].get("Key") == M["REGISTRY_KEY"] and node[1].get("Name") == node.get("Guid") and node[1].get("Value") == "1" for node in components))
         self.assertNotIn(b"ProgramData", raw)
         self.assertNotIn(b"Schedule=", raw)
-        self.assertEqual(root.find("w:Product/w:InstallExecuteSequence/w:RemoveExistingProducts", ns).attrib, {"After": "InstallInitialize"})
+        self.assertEqual(root.find("w:Product/w:InstallExecuteSequence/w:RemoveExistingProducts", ns).attrib, {"After": "InstallExecute"})
+        self.assertEqual([node.get("Id") for node in root.findall("w:Product/w:Binary", ns)], ["FcLifecycleHelper"])
+        self.assertEqual({node.get("Id"): node.get("ExeCommand") for node in root.findall("w:Product/w:CustomAction", ns)},
+                         {"FcBeginGate": 'begin "[FcInstallDir]fc-bootstrap.exe"', "FcRollbackNotify": "rollback", "FcCommitNotify": "commit"})
         directories = {node.get("Id"): node for node in root.findall(".//w:Directory", ns)}
         self.assertEqual(directories["FcInstallDir"].get("Name"), "FutureClassroom")
         self.assertIn(directories["FcInstallDir"], list(directories["UserPrograms"]))

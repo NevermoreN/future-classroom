@@ -1,0 +1,90 @@
+--- n2/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
++++ n3/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
+@@ -226,6 +226,20 @@
+     }
+ }
+ 
++fn manifest_path(base: &Path, relative: &str) -> Result<PathBuf> {
++    // The closed manifest uses '/' on the wire. Push only its validated single
++    // components so the native DOS path never retains a wire separator. The
++    // fixed base and the external/native path policy remain unchanged.
++    if !manifest::path(relative) {
++        return Err(LifecycleError::Invalid);
++    }
++    let mut path = base.to_owned();
++    for component in relative.split('/') {
++        path.push(component);
++    }
++    Ok(path)
++}
++
+ fn pin_directories(
+     proof: &mut Proof,
+     base: &Path,
+@@ -236,7 +250,7 @@
+     dirs.insert(base.parent().ok_or(LifecycleError::Invalid)?.to_owned());
+     dirs.insert(base.to_owned());
+     for entry in &manifest.entries {
+-        let path = base.join(&entry.path);
++        let path = manifest_path(base, &entry.path)?;
+         let mut parent = path.parent();
+         while let Some(dir) = parent {
+             if !dir.starts_with(base) {
+@@ -269,12 +283,12 @@
+     dirs: &BTreeSet<PathBuf>,
+     manifest: &Manifest,
+ ) -> Result<()> {
+-    let expected: BTreeSet<_> = manifest
++    let mut expected: BTreeSet<_> = manifest
+         .entries
+         .iter()
+-        .map(|e| base.join(&e.path))
+-        .chain(dirs.iter().filter(|d| d.starts_with(base)).cloned())
+-        .collect();
++        .map(|e| manifest_path(base, &e.path))
++        .collect::<Result<_>>()?;
++    expected.extend(dirs.iter().filter(|d| d.starts_with(base)).cloned());
+     for dir in dirs.iter().filter(|d| d.starts_with(base)) {
+         let name = native_path(&dir.join("*"))?;
+         let owner = proof.owner()?;
+@@ -327,7 +341,7 @@
+         let deadline = proof.deadline;
+         let owner = proof.owner()?;
+         let h = owner.open_file(
+-            &base.join(&entry.path),
++            &manifest_path(base, &entry.path)?,
+             GENERIC_READ.0 | READ_CONTROL.0,
+             FILE_SHARE_READ,
+             OPEN_EXISTING,
+@@ -615,8 +629,30 @@
+             .lock()
+             .unwrap_or_else(|p| p.into_inner());
+         let (_tree, base, manifest, sid) = fixture();
++        // Reproduce the previous internal guard conflict without relaxing that
++        // guard: Windows join preserves the wire text's embedded '/'.
++        let wire_path = base.join("web/assets/main.js");
++        assert!(wire_path.to_str().unwrap().contains('/'));
++        let invalid = windows::core::HRESULT(0x80070057u32 as i32);
++        assert_eq!(valid_path(&wire_path).unwrap_err().code(), invalid);
++        assert_eq!(native_path(&wire_path).unwrap_err().code(), invalid);
++        for entry in &manifest.entries {
++            let path = manifest_path(&base, &entry.path).unwrap();
++            assert!(!path.to_str().unwrap().contains('/'));
++            valid_path(&path).expect("closed manifest component path passes native guard");
++            native_path(&path).expect("closed manifest component path admits extended DOS path");
++        }
++        for invalid in [
++            "../outside",
++            "web/../outside",
++            "C:\\outside",
++            "web\\index.html",
++        ] {
++            assert!(manifest_path(&base, invalid).is_err());
++        }
+         let mut proof = Proof::new(Instant::now() + Duration::from_secs(10));
+-        files(&mut proof, &base, &manifest, &sid).unwrap();
++        files(&mut proof, &base, &manifest, &sid)
++            .expect("actual file proof after closed manifest path preflight");
+         proof.check().unwrap();
+         assert!(fs::OpenOptions::new()
+             .write(true)

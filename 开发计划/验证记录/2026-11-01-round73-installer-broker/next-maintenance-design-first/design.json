@@ -1,0 +1,134 @@
+{
+  "status": "READ_ONLY_DESIGN_NOT_IMPLEMENTED_OR_RUNTIME_VALIDATED",
+  "createdUtc": "2026-11-01T11:19:39.829127+00:00",
+  "scope": "下一受控、未变换本项目候选的真实 fresh install → healthy same-version reapplication → formal uninstall 与已证 rollback 闭环。不是完整缺损repair/major upgrade/Run cleanup或任意第三方MSI安全声明。",
+  "frozenSource": {
+    "path": "n-implementation-freeze-third.json",
+    "sha256": "fbcdee53b97badcdb323e22cfb0649e851798d8756d5552833cf46f959c24131",
+    "sevenNativeSourceShaUnchanged": true
+  },
+  "currentFacts": [
+    {
+      "source": "native/broker.rs:716-737",
+      "fact": "server仅effects::fresh并创建Install Pending；Begin condition1覆盖维护，但fresh在既有注册/目录上拒绝，所以当前正式/x不能清理一次成功commit。"
+    },
+    {
+      "source": "native/broker.rs:764-770;effects.rs:486-519",
+      "fact": "当前staged bool仅完整files+markers；Commit最终验version/组件/完整files/markers；Rollback固定验fresh absence，尚不能恢复已有安装preimage。"
+    },
+    {
+      "source": "installer_lifecycle.rs:60-75",
+      "fact": "现Pending operation为Install/Repair/Upgrade/Uninstall，尚无before-action中性维护标签。"
+    },
+    {
+      "source": "native/broker.rs:804-806",
+      "fact": "commit/rollback通知无statechange；必须原guardian身份匹配、实际Join/End0、原guardian实际exit后native proof才构造Settlement。保持此边界。"
+    },
+    {
+      "source": "scripts/package-msi-candidate.py:34-41,393-411",
+      "fact": "现固定三EXE CA、Begin1499、fixedfilefact、原embedded guardian、closed File/Directory/Registry schema；不需要为维护新增EXE/CLI bool。"
+    }
+  ],
+  "authorityAndAdmission": {
+    "untrustedFacts": "REMOVE、Installed、REINSTALL、CLI role/操作bool、通知或nonce均不授动作权限；外部Type2无安装session hInstall。真实transaction handle不是hInstall，不可转作MsiGetMode/MsiGetComponentState参数。",
+    "admissionKinds": [
+      "Fresh: same ProductCode current-user/machine contexts均无，related UpgradeCode无，fixed target与installer marker均无。",
+      "SameManifest:当前SID恰一个USERUNMANAGED同ProductCode/Version，related集合恰自身；组件注册精确keypath与标记，fixed closed files完整且字节/SHA/ACL/link/reparse符合受审manifest。其他context、related、damage、未知API结果均在ACK前拒绝。"
+    ],
+    "scope": "仅支持健康same-manifest重新应用与正式卸载；缺文件、损坏或未知preimage不是此首片的repair支持。",
+    "neutralPending": "建议新增MaintenanceOperation::SameManifest内部tag5；不把未观察到的动作提前标成Repair或Uninstall。仍原Pending v1固定一字节tag、原4096B预算、无旧Pending adoption。",
+    "runAbsentOnly": "只读原x86 HKCU Run固定FutureClassroom值；值存在（任何类型/字节，包括看似匹配）均拒绝，未知错误拒绝。无创建/设置/删除，不调用helper current_executable形成app命令。Run不存在的有限路径不等于完成Run卸载。",
+    "ordering": "完整admission→原独占gate/Pending→同kind在原owner下重新验全部事实与Run absence→实际归还preimage proof全部句柄→Begin ACK；固定Programs父capability可保持。不能持有deny-delete root/file pins让真正MSI卸载永远失败。"
+  },
+  "nativeStateMachine": {
+    "context": "内部Admission记录Fresh/HealthySameManifest和已批准immutable manifest；不接收公开effects_reconciled或caller finalState。无需复制用户数据/持久化额外preimage bytes；healthy preimage本身必须等于闭manifest。",
+    "staged": "Fresh/full→EndCommit；Fresh/其他known不完整→EndRollback。Healthy/full→EndCommit with ExpectedPresent（same-version reapplication）；Healthy/fixed root+markers全无→EndCommit with ExpectedAbsent（uninstall）；Healthy/partial或未知→EndRollback with ExpectedOriginalPresent。Run值必须保持不存在，related/context检查按阶段适用。",
+    "registrationTiming": "staged权限取自固定物理files/markers；不假定MsiGetProductInfoEx在未End事务时暴露最终注册。正式Commit后独立检查才判成功；实际可见性/顺序要保留MSI日志并实测。",
+    "reconcile": "原guardian End0+原process exit0后：ExpectedPresent验证same ProductCode/current SID/unmanaged/精确version+related仅自身+组件keypath+closed files+markers；ExpectedAbsent验证product/related已无+fixedroot无+markerkey无；Rollback按原admission恢复FreshAbsent或HealthyPresent。不能因Commit成功而跳过实际状态。",
+    "returnOrder": "沿现顺序：proof.check→仅内部native已核事实构造Settlement并record→proof.check→原effect proof checked release→原IPC/session checked release→原Maintenance Pending/gate最终try_release。record不等于已释放；任一close失败都不能放行startup。任何超时/unknown close/错误状态保留原owner/Pending，不允许replacement、补发假quiescent或自动清全局gate。",
+    "retainedBudgets": "原120s deadline不续期，32B packet、12 connections、64handle/group、8 process owners、6proofgroups、manifest/payload容量均不增。"
+  },
+  "minimalFileClosure": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "change": "SameManifest中性Pending tag；必要内联enum/record不变性测试。"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "change": "选择并重验Admission；staged decision与ExpectedState分离；原peer/engine/guardian/Join/End/exit协议不变。"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "change": "有界same-product/context/related健康preimage、Run absence只读、三种原生reconcile；owned fixture实际文件/注册表只用scratch另证明。"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "change": "更新准确能力描述/原正常helper sourceSHA/provenance绑定；保留原closed authoring。目录无实际失败不增加表。"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "change": "相同三恒定CA/1499/fixedfilefact/closed表的维护负例与候选能力合同。"
+    },
+    {
+      "path": "开发计划/相关现有packaging文档（B实际owned文档）",
+      "change": "只在真实验收后记录healthy reapplication/uninstall/rollback范围及缺损repair、Run、upgrade剩余项。"
+    }
+  ],
+  "artifactAndCiClosure": "同一normal helper与normal app，两GUI生产物+原22测试harness结构均保留；无需新bin/Cargo成员/DLL/额外CI helper。代码变化仍需固定nightly strictClippy、实际normal profile.test=false ledger、GUI2与新sourceSHA更新。新增native tests不删原case，独立parser按本candidate source-bound清单核新的准确数量；不固定旧261而漏新增。",
+  "directoryAuthoring": "官方CreateFolder说明未列入该表、由installer创建的目录变空时自动删除。因此当前无CreateFolder不是已证bug；先实测原File/Directory正式/x和rollback是否fixedroot真正消失。不猜需CreateFolder/RemoveFile，也不加文件wildcard/RemoveRegistry/Run rows。只有保留实际残留再最小闭表修正。",
+  "finiteEvidenceBoundary": {
+    "controlledMajorUpgrade": "我们受控新候选的fresh gate检测related旧产品后在其自身mutation前拒绝；已装same-product admission只准本候选健康同manifest。",
+    "notClaimed": "不声称能控制任意外部升级发起者；官方允许RemoveExistingProducts在新包InstallInitialize前先卸旧包，旧缓存包观察可与/x相同。也不声称离线闭表checker已认证运行中的TRANSFORMS effective table。按root限定，此边界不是自行新增D11 DLL/额外产物发布门槛。",
+    "engineParent": "当前实际parent sameSID/limited-query+sync权限与MSI服务拓扑仍待真实context probe；管理员SSH运行不能证明标准用户无提权。拒绝不放宽权利/SID，不把观察器成功当生产broker成功。",
+    "unchangedFailures": "旧CAS6701/权限失败、N2 first FAIL/Poison连锁与原验证器FAIL均保留，不借新证据覆盖。"
+  },
+  "realValidationMatrix": [
+    "只读生产前guard：fixed Programs/FutureClassroom、same/related产品注册、markerkey、原Pending/gate、Run值均准确预检；任何非owned现有对象不碰。",
+    "标准用户和已授权管理员用户分别核真实Begin/engine/guardian SID+原process capability；所有父句柄limited-query/sync，失败原样记录。",
+    "受控无变换原candidate fresh默认安装真实Commit：原Join/End/guardianexit、完整exact files/markers/版本/组件path、Pending实际归还和startup原gate恢复。首次成功安装必须已有同candidate正式/x完整清理路径，禁止transform/跳CA/手删MSI注册作为清理。",
+    "健康已装状态同source /f（至少显式全部文件+registry重应用语义）和/i默认重新应用；真实MSI成功且最终全manifest仍精确，不冒缺损修复。",
+    "同candidate正常/x正式卸载：真实事务/guardian完整，product/related注册无、fixedroot真正无、markers无、无Run写入；Windows Installer自己管理cache，另记现场观测而不手删cache。",
+    "缺文件/改字节/多文件/硬链接/reparse/marker错或额外值/组件路径错/版本错/managed或machine重复context：ACK前拒绝，无产品mutation，不产生伪success。只用owned fixture构造，不触真实学校资料。",
+    "当前Run absent首片：scratch RegSZ/expand/其他类型/错路径/匹配路径/零字节均拒绝；正式Run只读且前后hash不变，不声称原CAS问题解决。",
+    "固定target fact逃逸、related旧新ProductCode、既有Pending、活动startup gate、stale原guardian/packet、sameimage自启notice均拒绝/无authority。",
+    "真实已知rollback：须实际原guardian Join/EndRollback0和exit0，再各自核FreshAbsent或HealthyPresent；纯合成proof/state-machine测试不算MSI回滚。还需root确定可复现且不绕过认证、生产guard或正式清理的真实事务触发方案；不能用失败before-guardian导致timeout的样本冒known rollback，不能假定回滚必保留原inode（只声称已核状态/字节/ACL）。",
+    "原engine或guardian提前exit/超时、Join/End失败、effects未知或close失败：原owner/Pending保留、startup被挡、不能replacement；fixture进程退出OS清理只适用于scratch，不清生产Pending掩盖失败。",
+    "远端进程/任务/owned测试目录最终清理receipt；保留SSH服务/公钥/私钥，前后Run只读hash；全22/native准确计数原raw及child归属分别保存。",
+    "Win7 SP1 x86/Win10/Win11分别保留真实运行证据；GNU/MSVC编译、管理员Win11或纯fixture均不代替其余平台或学校希沃现场。"
+  ],
+  "references": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-type-2",
+      "supports": "EXE command-line role from Binary temporary stream; not installation hInstall callback."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/msiembeddedchainer-table",
+      "supports": "Engine transaction handle is before CommandLine; real Join/End required; chainer may execute advertisement unless conditioned."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/msiquery/nf-msiquery-msigetmode",
+      "supports": "Takes actual installation hInstall supplied to DLL CA or obtained by open; does not make packet/transaction handle an installation session."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/msiquery/nf-msiquery-msigetcomponentstatew",
+      "supports": "Component planned/action state also requires installation hInstall; not available merely from current EXE transaction argv."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/createfolder-table",
+      "supports": "Installer-created directories absent from CreateFolder are removed when empty; no speculative table expansion."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/msi/removeexistingproducts-action",
+      "supports": "Supported early and late upgrade removal locations; bounded own-candidate upgrade guarantee only."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msijointransaction",
+      "supports": "Original transaction joining and sameuser/tree checks remain required."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/msi/nf-msi-msiendtransaction",
+      "supports": "Actual transaction Commit/Rollback, not notice/CLI decision, is required for settlement."
+    }
+  ],
+  "workPerformed": "Read existing N3/B7 source and official Microsoft docs only; wrote this design. No source change/Cargo/Windows/CI/network mutation/main change."
+}

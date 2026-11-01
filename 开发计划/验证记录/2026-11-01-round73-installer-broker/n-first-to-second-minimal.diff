@@ -1,0 +1,78 @@
+--- n1/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
++++ n2/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs
+@@ -71,7 +71,7 @@
+             None,
+         )
+     };
+-    if result != ERROR_NO_MORE_ITEMS.0 {
++    if !known_product_absence(result) {
+         return Err(LifecycleError::Unsettled);
+     }
+     let upgrade = HSTRING::from(format!("{{{INSTALL_FAMILY}}}"));
+@@ -82,6 +82,19 @@
+         return Err(LifecycleError::Unsettled);
+     }
+     Ok(())
++}
++fn known_product_absence(result: u32) -> bool {
++    // EnumProductsEx explicitly distinguishes an exhausted enumeration from a
++    // specified product unknown in all requested contexts. Both are absence;
++    // access/configuration/argument errors are never converted to absence.
++    result == ERROR_NO_MORE_ITEMS.0 || result == ERROR_UNKNOWN_PRODUCT.0
++}
++fn exact_component_key_path(actual: &str, component: &str) -> bool {
++    // Microsoft documents numeric HKCU root 01 for a 32-bit registry keypath,
++    // and root+20 for a 64-bit registry keypath. Approved components have exact
++    // Attributes=4 (registry keypath), no 64-bit bit, and their keypath is this
++    // value (no trailing separator), not a registry subkey.
++    actual.eq_ignore_ascii_case(&format!(r"01:\{MARKERS}\{component}"))
+ }
+ fn absent(path: &Path) -> Result<()> {
+     valid_path(path)?;
+@@ -451,6 +464,11 @@
+         if state != INSTALLSTATE_LOCAL || n == 0 || n as usize >= path.len() {
+             return Err(LifecycleError::Unsettled);
+         }
++        let actual =
++            String::from_utf16(&path[..n as usize]).map_err(|_| LifecycleError::Invalid)?;
++        if !exact_component_key_path(&actual, &entry.component) {
++            return Err(LifecycleError::Unsettled);
++        }
+     }
+     Ok(())
+ }
+@@ -494,6 +512,34 @@
+     use super::super::super::super::broker::manifest::Entry;
+     use super::*;
+     use std::{fs, os::windows::io::AsRawHandle};
++
++    #[test]
++    fn enum_absence_and_x86_registry_component_paths_are_exact() {
++        for result in [ERROR_UNKNOWN_PRODUCT.0, ERROR_NO_MORE_ITEMS.0] {
++            assert!(known_product_absence(result));
++        }
++        for result in [
++            ERROR_SUCCESS.0,
++            ERROR_ACCESS_DENIED.0,
++            ERROR_INVALID_PARAMETER.0,
++            ERROR_BAD_CONFIGURATION.0,
++        ] {
++            assert!(!known_product_absence(result));
++        }
++        let component = "12345678-1234-1234-1234-123456789ABC";
++        assert!(exact_component_key_path(
++            &format!(r"01:\{MARKERS}\{component}"),
++            component
++        ));
++        for actual in [
++            format!(r"21:\{MARKERS}\{component}"),
++            format!(r"02:\{MARKERS}\{component}"),
++            format!(r"01:\{MARKERS}\{component}\"),
++            format!(r"01:\{MARKERS}\other"),
++        ] {
++            assert!(!exact_component_key_path(&actual, component));
++        }
++    }
+ 
+     struct Tree(PathBuf);
+     impl Drop for Tree {

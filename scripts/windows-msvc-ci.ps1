@@ -57,12 +57,12 @@ function Get-BaselineCargoArguments([string]$Command, [string[]]$Arguments,
         if ($packageIndex -lt 0 -or $packageIndex + 1 -ge $Arguments.Length -or
             $Arguments[$packageIndex + 1] -cne 'fc-bootstrap' -or
             $binaryIndex -lt 0 -or $binaryIndex + 1 -ge $Arguments.Length -or
-            $Arguments[$binaryIndex + 1] -cne 'fc-bootstrap' -or
+            $Arguments[$binaryIndex + 1] -cnotin @('fc-bootstrap','fc-installer-lifecycle') -or
             @($Arguments | Where-Object { $_ -ceq '-p' }).Count -ne 1 -or
             @($Arguments | Where-Object { $_ -ceq '--bin' }).Count -ne 1 -or
             $Arguments -contains '--' -or $Arguments -contains '--all-targets' -or
             $Arguments -contains '--tests' -or $Arguments -contains '--bins') {
-            throw 'Product rustc requires only the explicit fc-bootstrap binary.'
+            throw 'Product rustc requires one explicit closed fc-bootstrap product binary.'
         }
     }
     if ($Name -eq 'Win7' -and $Command -in @('test','build','rustc','clippy')) {
@@ -352,6 +352,8 @@ function Invoke-Logged {
         exit_code = $exitCode; parent_exited = $exited; timed_out_or_pipe_stalled = $timedOut
         log_truncated = $truncated; log_limit_bytes_per_stream = $LogLimit
         stdout = "logs/$Name.stdout.log"; stderr = "logs/$Name.stderr.log"
+        stdout_sha256 = (Get-FileHash -LiteralPath (Join-Path $Logs "$Name.stdout.log") -Algorithm SHA256).Hash.ToLowerInvariant()
+        stderr_sha256 = (Get-FileHash -LiteralPath (Join-Path $Logs "$Name.stderr.log") -Algorithm SHA256).Hash.ToLowerInvariant()
         passed = (-not $timedOut -and -not $truncated -and $exited -and ($AllowedExitCodes -contains $exitCode))
     }
     $Steps.Add($step)
@@ -509,6 +511,7 @@ function Copy-Executable($Message, [string]$Role, [string]$PackageName, [string]
     $script:PayloadBytes += $item.Length
     [ordered]@{
         role = $Role; package = $PackageName; target = $Message.target.name
+        cargo_profile_test = [bool]$Message.profile.test
         kinds = $Message.target.kind; relative_path = $relative; package_working_directory = $PackagePath
         bytes = $item.Length; sha256 = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToLowerInvariant()
         pe_machine = '0x014c'; pe_optional_magic = '0x010b'; pe_subsystem = $actualSubsystem; pe_subsystem_version = $subsystemVersion; executed = $false
@@ -695,18 +698,23 @@ try {
         $env:RUSTFLAGS = $productRustFlags
         Write-CrtFlagState 'before-product' $productRustFlags
         $binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200
+        $lifecycle = Invoke-Logged 'lifecycle-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-installer-lifecycle','--message-format=json') $Baseline) 1200
     } finally {
         $env:RUSTFLAGS = $originalProductRustFlags
         Write-CrtFlagState 'after-product' $BaselineConfiguration.rustflags
     }
     Invoke-Logged 'clippy' $cargo (Get-BaselineCargoArguments 'clippy' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') $Baseline) 1500 | Out-Null
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-    foreach ($build in @($tests, $binary)) {
+    foreach ($build in @($tests, $binary, $lifecycle)) {
         foreach ($line in [IO.File]::ReadLines((Join-Path $Artifact $build.stdout), $Utf8)) {
             if (-not $line.StartsWith('{')) { continue }
             $message = $line | ConvertFrom-Json
             if ($message.reason -ne 'compiler-artifact' -or -not $message.executable -or -not $packages.ContainsKey($message.package_id)) { continue }
-            $role = if ($message.profile.test) { 'tests' } elseif ($build.name -eq 'product-compile' -and $message.target.kind -contains 'bin') { 'product' } else { continue }
+            $role = if ($message.profile.test) { 'tests' } elseif ($build.name -in @('product-compile','lifecycle-compile') -and $message.target.kind -contains 'bin') { 'product' } else { continue }
+            if ($role -eq 'product') {
+                $expectedTarget = if ($build.name -ceq 'product-compile') { 'fc-bootstrap' } else { 'fc-installer-lifecycle' }
+                if ($packages[$message.package_id].name -cne 'fc-bootstrap' -or $message.target.name -cne $expectedTarget) { throw 'Unexpected normal product Cargo target.' }
+            }
             if (-not $seen.Add([string]$message.executable)) { continue }
             if ($executables.Count -ge 128) { throw 'Executable count bound exceeded.' }
             $package = $packages[$message.package_id]
@@ -715,7 +723,9 @@ try {
         }
     }
     if (@($executables | Where-Object { $_.role -eq 'tests' }).Count -lt 12 -or
-        @($executables | Where-Object { $_.role -eq 'product' }).Count -ne 1) { throw 'Required workspace test/product executables missing.' }
+        @($executables | Where-Object { $_.role -eq 'product' }).Count -ne 2 -or
+        @($executables | Where-Object { $_.role -eq 'product' -and $_.target -ceq 'fc-bootstrap' }).Count -ne 1 -or
+        @($executables | Where-Object { $_.role -eq 'product' -and $_.target -ceq 'fc-installer-lifecycle' }).Count -ne 1) { throw 'Required workspace test/two closed product executables missing.' }
     [long]$payloadBytes = 0
     foreach ($executable in $executables) {
         [long]$size = $executable['bytes']
@@ -790,6 +800,7 @@ Write-NewJson (Join-Path $Artifact 'result.json') ([ordered]@{
         historical_content_sha256 = 'NOT_READ_BY_INPUT_HASHER'
     } })
     commands = $Steps.ToArray(); executable_count = $executables.Count
+    executables_manifest_sha256 = $(if (Test-Path -LiteralPath (Join-Path $Artifact 'executables.json')) { (Get-FileHash -LiteralPath (Join-Path $Artifact 'executables.json') -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null })
     windows7 = 'NOT_RUN'; windows10 = 'NOT_RUN'; windows11 = 'NOT_RUN'; seewo_device = 'NOT_RUN'
     purpose = $(if ($Baseline -eq 'Win7') { 'Win7 MSVC candidate COMPILE_ONLY with rebuilt std/test and PE32 subsystem6.1; not Win7 API, SDK/CRT compatibility or runtime certification.' } else { 'Modern formal MSVC build evidence and portable test executables, not a product installer or runtime certification.' })
     later_test_arguments = @('--test-threads=2'); test_working_directories = 'Package paths in executables.json; choose an isolated controlled root.'

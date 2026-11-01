@@ -1,0 +1,20 @@
+--- before
++++ after
+@@ -56,10 +56,13 @@
+     }
+     pub(super) fn synthetic(self) -> bool {
+         #[cfg(test)]
+-        if matches!(self, Self::SyntheticFixture) {
+-            return true;
+-        }
+-        false
++        {
++            matches!(self, Self::SyntheticFixture)
++        }
++        #[cfg(not(test))]
++        {
++            false
++        }
+     }
+     fn can_stop(self) -> bool {
+         matches!(self, Self::Starting | Self::Running { .. }) || self.synthetic()

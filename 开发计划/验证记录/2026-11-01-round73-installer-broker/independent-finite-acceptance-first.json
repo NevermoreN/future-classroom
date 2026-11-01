@@ -1,0 +1,922 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_R73_FINITE_GNU_WIN11_AND_PURE_PS_ONLY",
+  "recordedUtc": "2026-11-01T11:27:47.787798+00:00",
+  "producer": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/n-release-third.json",
+    "bytes": 28911,
+    "sha256": "858d3c62e4d3c4e6739a5763a77e26ccf368038a22d4ef150f5d284a080b5b07"
+  },
+  "producerTerminal": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/n-producer-terminal-third.json",
+    "bytes": 2157,
+    "sha256": "e5a5041f66e359aef2e1e865760ebd2dce71d0c5a3e45f1fb6314f5801988ae9"
+  },
+  "sourceBeforeAfter": [
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    {
+      "path": "crates/fc-bootstrap/Cargo.toml",
+      "bytes": 676,
+      "sha256": "9bf57af8f2f872f7cf438daefa92e88fc286d7bc4b49d6c0ca3bfd79e9dea1b4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 25289,
+      "sha256": "541c7743fff130df55d36675cdf4c57a13218db2b7ebc21a531239eeffa2f627"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "bytes": 1162,
+      "sha256": "4b4c5b1a4e81d5e80094743f211d8c3f262aed4a0a99ab973d6c6903bf0b6292"
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1645,
+      "sha256": "02f544d4ea42c291d9356781e8b79f3e709837feec440d54ccc1caed3fce68bf"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9592,
+      "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8256,
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 24471,
+      "sha256": "8eccbed8b0c916aed63103d1e98f89db948b0578648289ca317f1841fe82dff4"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 10471,
+      "sha256": "e6e3e2140cf46c11a4b4bccef8af40b3522ae17717f4e7453bdf31bf04b7fa79"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 30725,
+      "sha256": "b14f40537c70606ad1c566c806b1e5902b8a1b30dfff6f27fd04eaa6469b670b"
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 15333,
+      "sha256": "cc6f4600666604824049d5bfc3d3ebb9da288452154e6cead300f1417b10cc50"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 54045,
+      "sha256": "e1a6fbac4d49f7c3644620a37cd4f951cec042be021f2fb759e4d6a6b62d591a"
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 54457,
+      "sha256": "edec879ecad9bad5b3ef21f48afa895bb3e8f0ac58e6aba561d5748e5e147802"
+    }
+  ],
+  "actualArtifacts": [
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+      "bytes": 2352762,
+      "sha256": "ed6b6bf87e5b48982eeb6c463dec8fc96b6410db93cf30df16555d2a9491a75f"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+      "bytes": 8423418,
+      "sha256": "660cdf86e0e3a6f04d50739e10afefbeaac97f5b0c3834e8efef1bede923b61c"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+      "bytes": 1224276,
+      "sha256": "0e7296766e8ca39a95b027e0a6c67080c36d641ef1dd8992e0c2d8df8b477844"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+      "bytes": 1853766,
+      "sha256": "bfff6271db7ed076b02c46f0b61f25bcdd65e2992f8c004d9a49176eb49a9987"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+      "bytes": 1983421,
+      "sha256": "9050336ae12791b3d9e5c66a26beec7adf88982bd9d54680b7b1706ea3664b9b"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+      "bytes": 1280300,
+      "sha256": "2531f3fbc1515ae86e043166288f7426b9e886adbaa00f9bd222291f0fbf5ff2"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+      "bytes": 1430273,
+      "sha256": "fb5c72930fe48fac80347623f8a12511aaa3df50659f5b07335f30242109d1be"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+      "bytes": 1246736,
+      "sha256": "d135ec02617711cc71acb40e2667e84a086fbcad5e8e27284ab7ad0714c3971b"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+      "bytes": 1185286,
+      "sha256": "83d3ddc4830ebcf50ddf732a2db36f3621d16fcc0ab8a428e7036827aaad9c4c"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+      "bytes": 2403377,
+      "sha256": "d0e90e8d901b65ba38ab69a7cdb9233f53d2698cee7f38cc043423a2ae3375bf"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/examples/verify_web_assets-8500932ea48ba2d2.exe",
+      "bytes": 1097061,
+      "sha256": "ef7cd6b1836478b9584d25e86f4afc1f41885dcd645358f08eefcc47cfe425b9"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_installer_lifecycle-cab6782a752605cb.exe",
+      "bytes": 1287790,
+      "sha256": "b5fb0dbf2cc754e2d6140314c9f74a3870c4131fd19ca5164181791d03eb254f"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe",
+      "bytes": 3941293,
+      "sha256": "998ae30c1c70a60fe6b25b49090d7db3ca4ba161a033656b5bd03e947df70104"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-d4a98b3cdf6100eb.exe",
+      "bytes": 5534952,
+      "sha256": "8919046dce014107112c65a139cc768333a0c6cbfbbdd510824862b13966f5ad"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-697f746362036af8.exe",
+      "bytes": 5624885,
+      "sha256": "aefebe939dd2d92b9107b8411cabf21012d07b4324a0b1e84939ba184c26f122"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-96edfabaffdd4929.exe",
+      "bytes": 5191010,
+      "sha256": "95629843bbef466e70de3c2a6cd983c29f3c6ee5b2b311e9f81a93fa58c77422"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/runtime_storage-c482f8ab0ffd29bd.exe",
+      "bytes": 4991709,
+      "sha256": "48118db00d3c973ed4ae31c20148dd6d424aa184aa69b2dd29de87cfe2a067c5"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/voice_storage-6bb619ee5dee63b6.exe",
+      "bytes": 5235253,
+      "sha256": "71b76f127581d11e85ca1d9db0d6b49582f9bcf7ebd52b892d271b274fd2f9ac"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/business_storage-1758945f26dd4d24.exe",
+      "bytes": 6196953,
+      "sha256": "5093b6444c3ea1b14bdb4eb93fa71d890f0f8900b0db8f4a8b34431d8e7ba16d"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/schedule_operations-9b4d7e2443bcde3a.exe",
+      "bytes": 5785382,
+      "sha256": "eba6b5a51b3332f0b19454c70a3c7b609004dbadfdc5aecf6aa851b45931fdff"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-6cc266b4a69e4fd2.exe",
+      "bytes": 12846354,
+      "sha256": "00ba729580839ffc11cb5ad1dcb2b9a59de9c85fb400fe3734d666c1c708ef0b"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-8fd20aa1db135542.exe",
+      "bytes": 13095098,
+      "sha256": "b4db08d3a9106d3f76216a31142d25fb235a792802ffeeb847a7f244527858a5"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 691180,
+      "sha256": "e851ea2e108fc282d29ccdc7a5edcebf1d2ce9b1b0e251628b98cf084fc22aea"
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13352051,
+      "sha256": "b9a68552ee4f08d3e5c4e8886d0c337e71bc88bb1e4d69d3aba17c01b8df8314"
+    }
+  ],
+  "cargoAssociations": [
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 105,
+      "lineSha256": "1460c9dfcfb79879f3adb97c164e7814e6b65e7bac5840226392e9409499ffb4",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 108,
+      "lineSha256": "a54784e2e41a8df7afa1d116ea68eaa364c63ef294eabfb9d8bb5af70b1dd0b7",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 109,
+      "lineSha256": "0f1764755aa9d7db9e1b05579f558d4d7c76ba3d7707f03d44564a3b29ad7a5e",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 110,
+      "lineSha256": "e12b9b6fbe913c38b5472262dfbd30d968a470903a374e52cd76210773845ebe",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 111,
+      "lineSha256": "8f632a37192b10c9539e1a572a8b24411913f8617f33cec6d1dabc1782dd9884",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 112,
+      "lineSha256": "43536f952024dd51c380e8b984feebf1ea8b26928efa00d775d9f143762e0f8b",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 113,
+      "lineSha256": "61cbb8f26d422224d5629f5199e5ada8a9e647dfcc5720f173e62da0cf96bf7a",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 114,
+      "lineSha256": "6ba961e5cb6f1cb8c98db89b5d3b312670d5e123e1d03878de3ee8489d67ff35",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 115,
+      "lineSha256": "f6cf1d96a17c7d17f247273e90c705119c5aa85739c501bc6629010842733128",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 116,
+      "lineSha256": "3a94a6d0179f8542f58214fc101a7a10b56c9b1b8baa64484eb1158a31efcc63",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/examples/verify_web_assets-8500932ea48ba2d2.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 120,
+      "lineSha256": "d6ce5a2099568a92044e8a734abcfa2b82f2ceacfcb0a9a22304d0780b2cc22d",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_installer_lifecycle-cab6782a752605cb.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 121,
+      "lineSha256": "e840619d91beafc700515790f8935e6062f5aa3827c4388c0a6c67e8e2d4dfcb",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_windows-ac67b5f1df5ec8b2.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 122,
+      "lineSha256": "592165091ee4defa38f31300274469dc310d84ee29c44637760791dfc76df258",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-d4a98b3cdf6100eb.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 123,
+      "lineSha256": "2558dd7fc9f5489eed5d72756b08a119958ffa8a79a8686575e082321bb5f884",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-697f746362036af8.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 124,
+      "lineSha256": "a6d49d1499941706c938086f18a524e64f927348e65bd8c4d9b59259987c0e1b",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-96edfabaffdd4929.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 125,
+      "lineSha256": "fe63bb0e70a2552d677ad3cc6a6cbc7e17db85346ce96b8ca6b9209e4fc59059",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/runtime_storage-c482f8ab0ffd29bd.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 126,
+      "lineSha256": "672bb49ec9bc31e037adfeb846f9b9d5335778cfe91d4d03f5f6be17f4f583cf",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/voice_storage-6bb619ee5dee63b6.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 127,
+      "lineSha256": "b3e36480a9d701796387109f0307333a57f12338a56e58ae0f6128bf3b9375fa",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/business_storage-1758945f26dd4d24.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 128,
+      "lineSha256": "0439c1da9e19a569dfcaea6f76eddfd59a29c4dd9ffa2bad22465886e1f25785",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/schedule_operations-9b4d7e2443bcde3a.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 129,
+      "lineSha256": "7a621bab3133469a5f6a30ec8bd64bd75c6b4e337097747c1c875ec668e56fa2",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-6cc266b4a69e4fd2.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 130,
+      "lineSha256": "be2a83869692b974e0391c814cda409650ce74204b238b3cc1392d8bd8b071ca",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-8fd20aa1db135542.exe",
+      "compileCommand": "stable-release-tests",
+      "cargoLine": 132,
+      "lineSha256": "3994d444a647f3bdb5376255e9353f2f6bb4008c0391edb13d99f0bd0d09530b",
+      "profileTest": true
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "compileCommand": "stable-release-bins",
+      "cargoLine": 109,
+      "lineSha256": "6a5523a16822e5b1d2b759ff49c994deb773dbb7a1cc4466a6ef05a8adfad4ba",
+      "profileTest": false
+    },
+    {
+      "path": "/tmp/fc-round73-installer-broker/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "compileCommand": "stable-release-bins",
+      "cargoLine": 110,
+      "lineSha256": "e0c9ffd9222496ea9da4023c4a16965bff0ccbfdc3464d4da292e47cd7b655cd",
+      "profileTest": false
+    }
+  ],
+  "fullRegression": {
+    "report": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/root-windows-gnu-full-third.json",
+      "bytes": 224052,
+      "sha256": "0f306c60555b316e48b6046194c172926a46b4e7df82549c2e48ab457c27696f"
+    },
+    "controller": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/root-windows-gnu-full-third.command.json",
+      "bytes": 29688,
+      "sha256": "fec8be2067db62892afc3babf8cc178e122130ccaa96e939fcdb85da122a1cab"
+    },
+    "uploadedArtifacts": [
+      {
+        "name": "fc-bootstrap.exe",
+        "sha256": "b9a68552ee4f08d3e5c4e8886d0c337e71bc88bb1e4d69d3aba17c01b8df8314"
+      },
+      {
+        "name": "fc_materials-f1a7d58c131e95d5.exe",
+        "sha256": "ed6b6bf87e5b48982eeb6c463dec8fc96b6410db93cf30df16555d2a9491a75f"
+      },
+      {
+        "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+        "sha256": "660cdf86e0e3a6f04d50739e10afefbeaac97f5b0c3834e8efef1bede923b61c"
+      },
+      {
+        "name": "fc_security-2889fa9301b88e80.exe",
+        "sha256": "0e7296766e8ca39a95b027e0a6c67080c36d641ef1dd8992e0c2d8df8b477844"
+      },
+      {
+        "name": "fc_presentation-b847dfa3b68d1237.exe",
+        "sha256": "bfff6271db7ed076b02c46f0b61f25bcdd65e2992f8c004d9a49176eb49a9987"
+      },
+      {
+        "name": "fc_protocol-4316bb63b92dda4d.exe",
+        "sha256": "9050336ae12791b3d9e5c66a26beec7adf88982bd9d54680b7b1706ea3664b9b"
+      },
+      {
+        "name": "fc_application-fb16268b5eff3acf.exe",
+        "sha256": "2531f3fbc1515ae86e043166288f7426b9e886adbaa00f9bd222291f0fbf5ff2"
+      },
+      {
+        "name": "fc_runtime-a09be73363edd23a.exe",
+        "sha256": "fb5c72930fe48fac80347623f8a12511aaa3df50659f5b07335f30242109d1be"
+      },
+      {
+        "name": "fc_audio-e1b4eabc9ef1420f.exe",
+        "sha256": "d135ec02617711cc71acb40e2667e84a086fbcad5e8e27284ab7ad0714c3971b"
+      },
+      {
+        "name": "fc_ports-15b1ad689f79c490.exe",
+        "sha256": "83d3ddc4830ebcf50ddf732a2db36f3621d16fcc0ab8a428e7036827aaad9c4c"
+      },
+      {
+        "name": "fc_domain-367747e306a1dd0e.exe",
+        "sha256": "d0e90e8d901b65ba38ab69a7cdb9233f53d2698cee7f38cc043423a2ae3375bf"
+      },
+      {
+        "name": "verify_web_assets-8500932ea48ba2d2.exe",
+        "sha256": "ef7cd6b1836478b9584d25e86f4afc1f41885dcd645358f08eefcc47cfe425b9"
+      },
+      {
+        "name": "fc_installer_lifecycle-cab6782a752605cb.exe",
+        "sha256": "b5fb0dbf2cc754e2d6140314c9f74a3870c4131fd19ca5164181791d03eb254f"
+      },
+      {
+        "name": "fc_windows-ac67b5f1df5ec8b2.exe",
+        "sha256": "998ae30c1c70a60fe6b25b49090d7db3ca4ba161a033656b5bd03e947df70104"
+      },
+      {
+        "name": "autostart_coordinator-d4a98b3cdf6100eb.exe",
+        "sha256": "8919046dce014107112c65a139cc768333a0c6cbfbbdd510824862b13966f5ad"
+      },
+      {
+        "name": "calendar_execution_fence-697f746362036af8.exe",
+        "sha256": "aefebe939dd2d92b9107b8411cabf21012d07b4324a0b1e84939ba184c26f122"
+      },
+      {
+        "name": "voice_limits_storage-96edfabaffdd4929.exe",
+        "sha256": "95629843bbef466e70de3c2a6cd983c29f3c6ee5b2b311e9f81a93fa58c77422"
+      },
+      {
+        "name": "runtime_storage-c482f8ab0ffd29bd.exe",
+        "sha256": "48118db00d3c973ed4ae31c20148dd6d424aa184aa69b2dd29de87cfe2a067c5"
+      },
+      {
+        "name": "voice_storage-6bb619ee5dee63b6.exe",
+        "sha256": "71b76f127581d11e85ca1d9db0d6b49582f9bcf7ebd52b892d271b274fd2f9ac"
+      },
+      {
+        "name": "business_storage-1758945f26dd4d24.exe",
+        "sha256": "5093b6444c3ea1b14bdb4eb93fa71d890f0f8900b0db8f4a8b34431d8e7ba16d"
+      },
+      {
+        "name": "schedule_operations-9b4d7e2443bcde3a.exe",
+        "sha256": "eba6b5a51b3332f0b19454c70a3c7b609004dbadfdc5aecf6aa851b45931fdff"
+      },
+      {
+        "name": "fc_bootstrap-6cc266b4a69e4fd2.exe",
+        "sha256": "00ba729580839ffc11cb5ad1dcb2b9a59de9c85fb400fe3734d666c1c708ef0b"
+      },
+      {
+        "name": "fc_bootstrap-8fd20aa1db135542.exe",
+        "sha256": "b4db08d3a9106d3f76216a31142d25fb235a792802ffeeb847a7f244527858a5"
+      }
+    ],
+    "harnesses": [
+      {
+        "name": "fc_materials-f1a7d58c131e95d5.exe",
+        "binarySha256": "ed6b6bf87e5b48982eeb6c463dec8fc96b6410db93cf30df16555d2a9491a75f",
+        "declared": 39,
+        "actualCaseLines": 39,
+        "passed": 39,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.08,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+        "binarySha256": "660cdf86e0e3a6f04d50739e10afefbeaac97f5b0c3834e8efef1bede923b61c",
+        "declared": 208,
+        "actualCaseLines": 208,
+        "passed": 208,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 6.92,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_security-2889fa9301b88e80.exe",
+        "binarySha256": "0e7296766e8ca39a95b027e0a6c67080c36d641ef1dd8992e0c2d8df8b477844",
+        "declared": 19,
+        "actualCaseLines": 19,
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.19,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_presentation-b847dfa3b68d1237.exe",
+        "binarySha256": "bfff6271db7ed076b02c46f0b61f25bcdd65e2992f8c004d9a49176eb49a9987",
+        "declared": 58,
+        "actualCaseLines": 58,
+        "passed": 58,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.02,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_protocol-4316bb63b92dda4d.exe",
+        "binarySha256": "9050336ae12791b3d9e5c66a26beec7adf88982bd9d54680b7b1706ea3664b9b",
+        "declared": 82,
+        "actualCaseLines": 82,
+        "passed": 82,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.07,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_application-fb16268b5eff3acf.exe",
+        "binarySha256": "2531f3fbc1515ae86e043166288f7426b9e886adbaa00f9bd222291f0fbf5ff2",
+        "declared": 25,
+        "actualCaseLines": 25,
+        "passed": 25,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.0,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_runtime-a09be73363edd23a.exe",
+        "binarySha256": "fb5c72930fe48fac80347623f8a12511aaa3df50659f5b07335f30242109d1be",
+        "declared": 33,
+        "actualCaseLines": 33,
+        "passed": 33,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.1,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_audio-e1b4eabc9ef1420f.exe",
+        "binarySha256": "d135ec02617711cc71acb40e2667e84a086fbcad5e8e27284ab7ad0714c3971b",
+        "declared": 22,
+        "actualCaseLines": 22,
+        "passed": 22,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.0,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_ports-15b1ad689f79c490.exe",
+        "binarySha256": "83d3ddc4830ebcf50ddf732a2db36f3621d16fcc0ab8a428e7036827aaad9c4c",
+        "declared": 8,
+        "actualCaseLines": 8,
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.0,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_domain-367747e306a1dd0e.exe",
+        "binarySha256": "d0e90e8d901b65ba38ab69a7cdb9233f53d2698cee7f38cc043423a2ae3375bf",
+        "declared": 149,
+        "actualCaseLines": 149,
+        "passed": 149,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.01,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "verify_web_assets-8500932ea48ba2d2.exe",
+        "binarySha256": "ef7cd6b1836478b9584d25e86f4afc1f41885dcd645358f08eefcc47cfe425b9",
+        "declared": 0,
+        "actualCaseLines": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.0,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_installer_lifecycle-cab6782a752605cb.exe",
+        "binarySha256": "b5fb0dbf2cc754e2d6140314c9f74a3870c4131fd19ca5164181791d03eb254f",
+        "declared": 1,
+        "actualCaseLines": 1,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.0,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_windows-ac67b5f1df5ec8b2.exe",
+        "binarySha256": "998ae30c1c70a60fe6b25b49090d7db3ca4ba161a033656b5bd03e947df70104",
+        "declared": 261,
+        "actualCaseLines": 261,
+        "passed": 261,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 26.07,
+        "capture": "normalized merged per-harness output lines; not raw streams",
+        "childScopes": [
+          {
+            "ordinal": 1,
+            "case": "installer_lifecycle::native::broker::tests::pipe_process_fixture_child",
+            "rawLineIndices": [
+              90,
+              91,
+              93
+            ],
+            "originalLines": [
+              "running 1 test",
+              "test installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok",
+              "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 260 filtered out; finished in 0.01s"
+            ],
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 260,
+            "identityQualification": "Original child PID/creation not printed. The pinned source tests assert original process capability binding and successful original Child exit; no independent raw OS identity is claimed."
+          },
+          {
+            "ordinal": 2,
+            "case": "installer_lifecycle::native::broker::tests::pipe_process_fixture_child",
+            "rawLineIndices": [
+              97,
+              98,
+              100
+            ],
+            "originalLines": [
+              "running 1 test",
+              "test installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok",
+              "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 260 filtered out; finished in 0.00s"
+            ],
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filteredOut": 260,
+            "identityQualification": "Original child PID/creation not printed. The pinned source tests assert original process capability binding and successful original Child exit; no independent raw OS identity is claimed."
+          }
+        ],
+        "removedControlLineIndices": [
+          90,
+          91,
+          93,
+          97,
+          98,
+          100
+        ],
+        "originalNormalizedLinesSha256": "8e7014ccd966d845f076e704f56e0efdf6bf7b492dc2f84b7e9d9fa766e9b11d",
+        "derivedParentLinesSha256": "a4bdacbd01e7243ba6d18bb0421793b751021181a9892d7f796d87a14a641a56",
+        "qualification": "Strict unchanged R67 parser applied to an explicit derived parent view. Exactly two source-bound child running/case/summary triples attributed separately; all original raw and normalized lines remain unchanged. Child filtered counts never promoted to outer passed/ignored/filtered totals."
+      },
+      {
+        "name": "autostart_coordinator-d4a98b3cdf6100eb.exe",
+        "binarySha256": "8919046dce014107112c65a139cc768333a0c6cbfbbdd510824862b13966f5ad",
+        "declared": 13,
+        "actualCaseLines": 13,
+        "passed": 13,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 2.13,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "calendar_execution_fence-697f746362036af8.exe",
+        "binarySha256": "aefebe939dd2d92b9107b8411cabf21012d07b4324a0b1e84939ba184c26f122",
+        "declared": 4,
+        "actualCaseLines": 4,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 4.7,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "voice_limits_storage-96edfabaffdd4929.exe",
+        "binarySha256": "95629843bbef466e70de3c2a6cd983c29f3c6ee5b2b311e9f81a93fa58c77422",
+        "declared": 4,
+        "actualCaseLines": 4,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.14,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "runtime_storage-c482f8ab0ffd29bd.exe",
+        "binarySha256": "48118db00d3c973ed4ae31c20148dd6d424aa184aa69b2dd29de87cfe2a067c5",
+        "declared": 3,
+        "actualCaseLines": 3,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.12,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "voice_storage-6bb619ee5dee63b6.exe",
+        "binarySha256": "71b76f127581d11e85ca1d9db0d6b49582f9bcf7ebd52b892d271b274fd2f9ac",
+        "declared": 6,
+        "actualCaseLines": 6,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 0.72,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "business_storage-1758945f26dd4d24.exe",
+        "binarySha256": "5093b6444c3ea1b14bdb4eb93fa71d890f0f8900b0db8f4a8b34431d8e7ba16d",
+        "declared": 43,
+        "actualCaseLines": 43,
+        "passed": 43,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 2.51,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "schedule_operations-9b4d7e2443bcde3a.exe",
+        "binarySha256": "eba6b5a51b3332f0b19454c70a3c7b609004dbadfdc5aecf6aa851b45931fdff",
+        "declared": 5,
+        "actualCaseLines": 5,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 1.25,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_bootstrap-6cc266b4a69e4fd2.exe",
+        "binarySha256": "00ba729580839ffc11cb5ad1dcb2b9a59de9c85fb400fe3734d666c1c708ef0b",
+        "declared": 223,
+        "actualCaseLines": 223,
+        "passed": 223,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 3.12,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      },
+      {
+        "name": "fc_bootstrap-8fd20aa1db135542.exe",
+        "binarySha256": "b4db08d3a9106d3f76216a31142d25fb235a792802ffeeb847a7f244527858a5",
+        "declared": 348,
+        "actualCaseLines": 348,
+        "passed": 348,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0,
+        "summarySeconds": 66.45,
+        "capture": "normalized merged per-harness output lines; not raw streams"
+      }
+    ],
+    "totals": {
+      "passed": 1554,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 0
+    },
+    "publicDesktop": {
+      "steps": 20,
+      "elapsedMs": 2459,
+      "foreground": "UNTOUCHED",
+      "capture": "normalized merged native output lines; controller stdout/stderr separately byte-verified"
+    },
+    "normalHelperExecution": "NOT_RUN_PINNED_ONLY; its separate unit-test harness is part of22 tests"
+  },
+  "purePowershell": {
+    "report": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/powershell-contract-preparation-first/windows-powershell-contract-second.json",
+      "bytes": 40667,
+      "sha256": "3ef8b20183e35217c840436000ee8658fbac68473dd103874f5dc35022b1bdb9"
+    },
+    "actualVersion": "5.1.26100.9711",
+    "edition": "Desktop",
+    "checks": 9,
+    "assertions": 212,
+    "cleanup": "PASS",
+    "hostedPowerShell72": "NOT_VALIDATED",
+    "capture": "Checker pipeline JSON string UTF8 bytes; actual SSH stdout/stderr separately byte/base64 checked."
+  },
+  "historical": {
+    "firstPolicyFailure": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/powershell-contract-preparation-first/windows-powershell-contract-first.json",
+      "bytes": 28080,
+      "sha256": "27c43f4fd5624a982fa2b72c041694e3a3a647ec4a57055ec0b2052d836507bd"
+    },
+    "n2NativeFailure": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/root-windows-gnu-full-first.json",
+      "bytes": 109139,
+      "sha256": "37a64d413fc4a3560eac92fdeaa2a00644b28935036b85fb393956b120875b82"
+    },
+    "nativeParserTerminalQualification": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/root-native-harness-third-terminal-qualification.json",
+      "bytes": 1426,
+      "sha256": "408c3027d37d424f9e5de590ecc9a791a3ae1e70db3b412b7f51592a10368636"
+    },
+    "originalStaleNativeRecorder": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/root-windows-native-harness-third.command.json",
+      "bytes": 1779,
+      "sha256": "066a8cf08baa9f7aee8ad06d94ffc098500bfadcc82a768d60ff27aeee7a6338"
+    },
+    "policyQualification": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/powershell-contract-preparation-first/first-failure-qualification-first.json",
+      "bytes": 2103,
+      "sha256": "2157609ad1e3d83d5e1de55883d8414e7f32312f682014c35b7a4e55aa5e28bd"
+    }
+  },
+  "readonly": {
+    "audit": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/windows-readonly-final-first.json",
+      "bytes": 16755,
+      "sha256": "eb279c7fd15815a4a5f60b34472114abab983d62ea5ec5678cef01fd7e6d8387"
+    },
+    "controller": {
+      "path": "/tmp/fc-round73-installer-broker/evidence/windows-readonly-operation-first.json",
+      "bytes": 1083,
+      "sha256": "99e62deb733dd518f8c11494dd30a53b3f5f9bffa8490bf24ef00aea3e827f16"
+    },
+    "fullCompletedRecordMtimeUtc": "2026-11-01T11:18:20.982462+00:00",
+    "orderingQualification": "Read-only observation follows the completed full-controller file mtime and explicit PS completedUtc. Full completed record contains actualExit0 after wait; mtime is local file metadata, not an invented raw process timestamp."
+  },
+  "childAttributionParser": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/root-parse-native-children-first.py",
+    "bytes": 4505,
+    "sha256": "8dfd6c4731f25a4e981a985b7c85566889e6100e83f49180e70555a29ee69a62"
+  },
+  "priorIndependentChildReview": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/child-attribution-review-first/review-first.json",
+    "bytes": 7539,
+    "sha256": "b8421c635b2f4b90e85535428f2b8dfbdef829ee4d4f42ec3e525ac035cccd41"
+  },
+  "scope": "Frozen N3 local GNU22 harnesses/app self/system/hidden lifecycle/public20 on authorized Win11 build26300/WOW64, dual normal GUI headers/bytes pinning, and actual Desktop5.1 pure PS contract only. No Hosted MSVC/new CI, MSI fresh install/rollback, Win7 or Win10 OS, campus or final product acceptance. Only the current Win11 environment is provided; other OS runtime states remain NOT_RUN.",
+  "privateKey": "No content read or hash. SSH/SCP path was transport-only; final audit preserved only0600 metadata.",
+  "helper": {
+    "path": "/tmp/fc-round73-installer-broker/evidence/acceptance-preparation-first/independent-finite-first.py",
+    "bytes": 22657,
+    "sha256": "6a14e7b4274911b6c420ab012d4bc04c38ef04396d1f758c7ca8f9b710e05e6c"
+  }
+}

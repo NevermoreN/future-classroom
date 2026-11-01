@@ -1,0 +1,67 @@
+{
+  "status": "FAIL_HOST_CLIPPY_CONTROLLER_ACTUAL_EXIT1_REAPED",
+  "recordedUtc": "2026-11-01T11:46:48.640499+00:00",
+  "producerExecSession": 83153,
+  "actualToolTerminal": {
+    "chunkId": "355584",
+    "exitCode": 1,
+    "wallTimeSeconds": 1.1901e-05,
+    "runningSessionReturned": false
+  },
+  "report": {
+    "path": "n-host-first.json",
+    "sha256": "da0715d485985841af18f274ba28a6db9425f0edcc596877c392d206f89db036"
+  },
+  "nativeFreeze": {
+    "path": "n-implementation-freeze-third.json",
+    "sha256": "fbcdee53b97badcdb323e22cfb0649e851798d8756d5552833cf46f959c24131"
+  },
+  "sourceInputCount": 16,
+  "sourceBeforeAfterIdentical": true,
+  "tests": {
+    "exitCode": 0,
+    "elapsedSeconds": 798.4513200679794,
+    "harnessCount": 22,
+    "passed": 989,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 0,
+    "zeroTestHarnesses": [
+      "fc-installer-lifecycle",
+      "verify_web_assets"
+    ],
+    "unsupportedNormalHelperMain": "NOT_RUN"
+  },
+  "strictClippy": {
+    "exitCode": 101,
+    "elapsedSeconds": 21.58403779589571,
+    "status": "FAIL_UNCHANGED"
+  },
+  "scratch": {
+    "before": [
+      {
+        "path": ".owner",
+        "mode": 420,
+        "type": "regular",
+        "bytes": 43,
+        "inode": 1781156,
+        "device": 1048772
+      }
+    ],
+    "after": [
+      {
+        "path": ".owner",
+        "mode": 420,
+        "type": "regular",
+        "bytes": 43,
+        "inode": 1781156,
+        "device": 1048772
+      }
+    ],
+    "delta": [],
+    "missing": [],
+    "cleanup": "PASS_ONLY_EXACT_OWNED_MARKER_AND_EMPTY_ROOT_REMOVED",
+    "rootAbsent": true
+  },
+  "scope": "Host actual complete tests and strict lint are separate results; original Host Clippy FAIL preserved, no source edit/retry/allow/Windows operation. No producer Cargo process remains active."
+}
