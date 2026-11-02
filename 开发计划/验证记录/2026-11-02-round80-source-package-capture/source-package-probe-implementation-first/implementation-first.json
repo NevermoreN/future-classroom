@@ -1,0 +1,183 @@
+{
+  "status": "PASS_FROZEN_NATIVE_SOURCE_PROBE_PREPARATION_NOT_RUN",
+  "worktree": "/tmp/fc-round80-controlled-repair/checkout-source-package-probe-first",
+  "sourceBase": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "parentFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-reader-implementation-first/freeze-first.json",
+    "bytes": 9205,
+    "sha256": "24cb67c98fe05e5005781718aacd3325e5b72d5ac3dc5271240f96992c2260df"
+  },
+  "ownedSources": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-source-package-probe-first/crates/fc-windows/src/installer_lifecycle/native/broker/source_package.rs",
+      "bytes": 12995,
+      "sha256": "013fe942e53f48e99caf1e2d04868652bb58268f6add17231d8c70295c54eb90"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-source-package-probe-first/crates/fc-windows/src/installer_lifecycle/native/broker/source_package/native_probe.rs",
+      "bytes": 8785,
+      "sha256": "8afe19c46a8beb504e9d5ef785b96635fa08a889eb522e70f7f41ea0ecfa460a"
+    }
+  ],
+  "compilerProducer": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/producer-report-third.json",
+    "bytes": 179326,
+    "sha256": "87d77fcc01804087f6ce074e348f21a170ad655de17a0b29c539cfd0884f5c07"
+  },
+  "compilerArtifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///tmp/fc-round80-controlled-repair/checkout-source-package-probe-first/crates/fc-windows#0.1.0",
+    "manifest_path": "/tmp/fc-round80-controlled-repair/checkout-source-package-probe-first/crates/fc-windows/Cargo.toml",
+    "target": {
+      "kind": [
+        "rlib",
+        "cdylib"
+      ],
+      "crate_types": [
+        "rlib",
+        "cdylib"
+      ],
+      "name": "fc_windows",
+      "src_path": "/tmp/fc-round80-controlled-repair/checkout-source-package-probe-first/crates/fc-windows/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "features": [
+      "default"
+    ],
+    "filenames": [
+      "/tmp/fc-round80-controlled-repair/source-package-probe-target-first/i686-pc-windows-gnu/release/deps/fc_windows-06e7a7d73a7d6c45.exe"
+    ],
+    "executable": "/tmp/fc-round80-controlled-repair/source-package-probe-target-first/i686-pc-windows-gnu/release/deps/fc_windows-06e7a7d73a7d6c45.exe",
+    "fresh": false
+  },
+  "sourceInputCount": 477,
+  "sourceInputsUnchanged": true,
+  "profileOverride": {
+    "CARGO_PROFILE_RELEASE_STRIP": "symbols"
+  },
+  "features": [
+    "default"
+  ],
+  "compiledScope": "ENV_UNSET_DEFAULT_OFF",
+  "originalExecutable": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/artifact-third/fc_windows.exe",
+    "bytes": 3678208,
+    "sha256": "b7bc5c77a8434058453f3f64e742c0e3d4eb6d32eba0ad9898d558cbb1127bd5"
+  },
+  "peBoundary": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/raw-pe-boundary-third.json",
+    "bytes": 629,
+    "sha256": "54fb14e5c0db214305a1f3ab7bc27b49b2928da25951da019b636f1e964cda9f"
+  },
+  "expectedLedger": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/expected-ledger-origin.json",
+    "bytes": 3429,
+    "sha256": "fd3fa368e1a57f8e069c1b0372c8fb7c69344856617603fa367e08d39660e960"
+  },
+  "cases": [
+    {
+      "name": "installer_lifecycle::native::broker::source_package::native_probe::actual_fixed_source_capture_closes_all_msi_before_begin",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/artifact-third/fc_windows.exe",
+        "--exact",
+        "installer_lifecycle::native::broker::source_package::native_probe::actual_fixed_source_capture_closes_all_msi_before_begin",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "name": "installer_lifecycle::native::broker::source_package::native_probe::sibling_msi_seal_mismatch_rejects_before_begin",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/artifact-third/fc_windows.exe",
+        "--exact",
+        "installer_lifecycle::native::broker::source_package::native_probe::sibling_msi_seal_mismatch_rejects_before_begin",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "name": "installer_lifecycle::native::broker::source_package::native_probe::sibling_template_outside_digest_hole_rejects_before_begin",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/artifact-third/fc_windows.exe",
+        "--exact",
+        "installer_lifecycle::native::broker::source_package::native_probe::sibling_template_outside_digest_hole_rejects_before_begin",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    }
+  ],
+  "assertions": [
+    "ABI2 actual Session.currentOSimage+fixed sibling readonly source capture",
+    "fixed Package/Product/version/family/full14path-size-sha-component ledger",
+    "original pinned image HANDLE directly re-reads actual32-byte seal equal CNG source SHA",
+    "10 actual MsiCloseHandle0 receipts including3 MsiViewClose0; allMSI return before Resources.release",
+    "one original CLAIMS slot while Session owns pins; release returns CLAIMS0/FAULTEDfalse/RETAINED0",
+    "negativecase known Invalid from exact externally qualified fixture; checked-return all original controls, never native-unknown success"
+  ],
+  "doesNotCall": [
+    "Begin",
+    "Run",
+    "Install",
+    "Configure",
+    "create gate",
+    "create Pending"
+  ],
+  "nativeWindows": "NOT_RUN_ROOT_ONLY",
+  "upgradeAuthorization": false,
+  "fixturePublication": false,
+  "normalHelper": false,
+  "productionDelta": "Only #[cfg(test)] native_probe module declaration; every production reader statement unchanged.",
+  "firstWrapperFailure": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/producer-wrapper-failure-first.json",
+    "bytes": 598,
+    "sha256": "28f1afdf5cf3ac3a9264ddf8b75b10877f565ba458b725ad01f599b297c1611a"
+  },
+  "patches": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/incremental-from-source-reader-first.patch",
+      "bytes": 9567,
+      "sha256": "89ca410c10082586d56598a9e49378d1021e56927a31eb358cb81831ef552d62"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/complete.patch",
+      "bytes": 155476,
+      "sha256": "e9692922d45182cde56c9633687735b4a4cf7358a4d7f59867de5b20bf96e503"
+    }
+  ],
+  "toolChecks": [
+    {
+      "name": "rustc-version",
+      "argv": [
+        "rustc",
+        "--version",
+        "--verbose"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.03600660400115885
+    },
+    {
+      "name": "cargo-version",
+      "argv": [
+        "cargo",
+        "--version"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.038690293000399834
+    }
+  ]
+}

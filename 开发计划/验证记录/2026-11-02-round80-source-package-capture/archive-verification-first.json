@@ -1,0 +1,24 @@
+{
+  "status": "PASS_FULL_MEMBER_SOURCE_REPLAY_AND_STRICT_SCAN",
+  "members": 527,
+  "statistics": {
+    "textViews": 69496,
+    "utf16Views": 72,
+    "cp936Views": 24,
+    "clixmlDecodedViews": 14,
+    "decodedBase64Views": 36,
+    "jsonContainers": 1464,
+    "decodedJsonStringViews": 67957
+  },
+  "credentialFindings": [],
+  "scanner": {
+    "sourceArchive": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/evidence-originals-first.tar.gz",
+    "member": "archive-preparation-second/archive-second.py",
+    "bytes": 26272,
+    "sha256": "da2906c450ea8c2ac7d18e358507023f519dbcc6faf1a9ac1abb1ae16af8c30f"
+  },
+  "controlPolicy": "Only11 exact path/bytes/SHA+structural views from text-forms-first.json; all raw/visible/concatenated views scanned. Unknown controls rejected.",
+  "coverage": "UTF8/UTF16/CP936/CLIXML/JSON and nested base64; frozen depth12/decoded64MiB/250000 bounds unchanged.",
+  "Windows": false,
+  "Cargo": false
+}

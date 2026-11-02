@@ -1,0 +1,461 @@
+{
+  "status": "FROZEN_STOPPED_WRITING",
+  "worktree": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first",
+  "sourceBase": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "ownedSources": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/guard_contract.rs",
+      "bytes": 9686,
+      "sha256": "8a26efb5b6ea7f6b59069446bbd507153ec61d895175e89bacee7033c76f205c"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/guard_contract/v2.rs",
+      "bytes": 3882,
+      "sha256": "61a579032022a49611f57723109d0089e0d39eb163648ac5ed31801684824161"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/native/inner_guard.rs",
+      "bytes": 27099,
+      "sha256": "e8fa2b3b78e9ef51624506ed784572bcf05c28907e3318ce9ab3c6c9c127bd54"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/native/inner_guard/abi2.rs",
+      "bytes": 9552,
+      "sha256": "30241071199164504ca260d3890b5357bde83947f3296d8c1f74a82e623a4b67"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/native/inner_guard/carrier_image.rs",
+      "bytes": 7025,
+      "sha256": "a5a2d32ff775966e0577728d55ac683fb4d383cf093d3c236789d8a69a12cd9d"
+    }
+  ],
+  "report": {
+    "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/implementation-second.json",
+    "bytes": 8613,
+    "sha256": "17f4cd79a4ff11ade6e906ac9da34e5067ee510d68110451942c75c7fab0332a"
+  },
+  "patches": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/incremental-from-carrier-first.patch",
+      "bytes": 30615,
+      "sha256": "34e578395665646a46057129f5b553466374b9850122dbb42359c61113bb1710"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/complete.patch",
+      "bytes": 112894,
+      "sha256": "56d25f87c3b16f985b762f7911929a9eb0a571b97b222fbb080f550356b76b85"
+    }
+  ],
+  "verification": {
+    "nativeChecks": {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/native-checks-fourth.json",
+      "bytes": 178054,
+      "sha256": "b1e0a703c74dc475de1f4df528c6529d5ad583d5d535eecc6d79e7b66e460ed4"
+    },
+    "pureChecks": {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-checks-third.json",
+      "bytes": 658,
+      "sha256": "306c33b65587c6ebdccac64564b458b6c78db612aaf1051b8ce2ea4cb4969a0d"
+    },
+    "pureTests": 19,
+    "patchReverseCheckActualExit": 0,
+    "all473CompileInputsUnchanged": true
+  },
+  "files": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/architecture-fourth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/architecture-fourth.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/architecture-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/architecture-second.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/architecture-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/architecture-third.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/clippy-fourth.stderr.log",
+      "bytes": 72,
+      "sha256": "59639588a6f1826f129cbcd121edc07279dab94786f5fa5bde6b3439b2e845cc"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/clippy-fourth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/clippy-second.stderr.log",
+      "bytes": 781,
+      "sha256": "4bfee22aba88dc547d02032056947fef0a9b86755214157ddd0602f373b64a82"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/clippy-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/clippy-third.stderr.log",
+      "bytes": 189,
+      "sha256": "3524b168e311c3764af3523c59fb17328b9a049bf4863e40156ecdcb2387de35"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/clippy-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/compiler-inputs-final.json",
+      "bytes": 86730,
+      "sha256": "e0961def30ccaf228f667115718fff5b2de1766dfa285918848be5ee685a9bad"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/compiler-inputs-second.json",
+      "bytes": 86881,
+      "sha256": "210afab1e37d545708aeb6588fbae7496759b0f7c75cb69896eebd7e9690a3c7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/complete.patch",
+      "bytes": 112894,
+      "sha256": "56d25f87c3b16f985b762f7911929a9eb0a571b97b222fbb080f550356b76b85"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/diff-fourth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/diff-fourth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/diff-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/diff-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/diff-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/diff-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/fmt-fourth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/fmt-fourth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/fmt-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/fmt-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/fmt-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/fmt-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/gnu-check-first.stderr.log",
+      "bytes": 2398,
+      "sha256": "d0f32f00659dfd0f627eb720049e1104b967bf75f81b55a21b3244f44f909b7d"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/gnu-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/gnu-check-fourth.stderr.log",
+      "bytes": 72,
+      "sha256": "a5f4c585ee974ca44916ac30a98bbc189e067a7e0a6bc6d2e8d6bc525be724af"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/gnu-check-fourth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/gnu-check-second.stderr.log",
+      "bytes": 189,
+      "sha256": "b890b80f5e3b642c6612926f8433ca0d89b4e1d52ebd8b50d78f1a338d18efac"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/gnu-check-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/gnu-check-third.stderr.log",
+      "bytes": 189,
+      "sha256": "bf8baf12aee57edbe38680b2ddf73a3036f9ac6875e13d8d9663c33c03b8c004"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/gnu-check-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/implementation-first.json",
+      "bytes": 7921,
+      "sha256": "e85ac2e65474ebf272f01c043cf697bacb841244c29ac4b76215158f56b9c1a5"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/implementation-second.json",
+      "bytes": 8613,
+      "sha256": "17f4cd79a4ff11ade6e906ac9da34e5067ee510d68110451942c75c7fab0332a"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/incremental-from-carrier-first.patch",
+      "bytes": 30615,
+      "sha256": "34e578395665646a46057129f5b553466374b9850122dbb42359c61113bb1710"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/native-checks-first.json",
+      "bytes": 175926,
+      "sha256": "bb2e4c5a3a36119156ac61707b7076c46996be7a6f42a0d5bb576d6dc3a0bdb9"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/native-checks-fourth.json",
+      "bytes": 178054,
+      "sha256": "b1e0a703c74dc475de1f4df528c6529d5ad583d5d535eecc6d79e7b66e460ed4"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/native-checks-second.json",
+      "bytes": 177743,
+      "sha256": "5ee16f8c38acf66ccc3930a26dd8bd1a00b418c1cd890cb5a0dd890e81cbbc26"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/native-checks-third.json",
+      "bytes": 177741,
+      "sha256": "f0d8938d079361ad09cb68781ef84134df75051fc3cfa716d249c69f7d623f54"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/patch-reverse-check.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/patch-reverse-check.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-checks-first.json",
+      "bytes": 401,
+      "sha256": "53cd383bc8fb5004ebb48a7f8f2523c870909ffac4e57654456d55b6e36ddafa"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-checks-second.json",
+      "bytes": 664,
+      "sha256": "0117ba833486f319a9a678e7f7684e1997721e487a5bc83ad2d2273ac9e20256"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-checks-third.json",
+      "bytes": 658,
+      "sha256": "306c33b65587c6ebdccac64564b458b6c78db612aaf1051b8ce2ea4cb4969a0d"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-compile-first.stderr.log",
+      "bytes": 1439,
+      "sha256": "e7ae47c8ab2ea263d557de33a2831ea72582bfd52b0bbbce8ae39bc2023c1c11"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-compile-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-compile-second.stderr.log",
+      "bytes": 1721,
+      "sha256": "21b37d938e05537a80e65cbdaea94fd1e931a6c61f4ea93c8a378bec2df7ff61"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-compile-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-compile-third.stderr.log",
+      "bytes": 1718,
+      "sha256": "b607642d24a171a2c8edc1376ed5a10f1b880cd6e3e63fd5a23aee412b60243c"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-compile-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-tests-second.stderr.log",
+      "bytes": 399,
+      "sha256": "9771c545e72407173e3aec1437765cb3ee12a3962f05c37c8e613da5ae12e485"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-tests-second.stdout.log",
+      "bytes": 13304,
+      "sha256": "72681b77ff28c9fd7b9580e148e8e59a56354a7cd476ffb712abd9da45f8837e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-tests-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-tests-third.stdout.log",
+      "bytes": 13143,
+      "sha256": "08f2a246a436e420ee4dd41a26dc049b98ed540e7764ba28e0eb67f479e5b9ca"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/run-native-checks-first.py",
+      "bytes": 2110,
+      "sha256": "c3bdc67ecfb5e4e5c6416c5278e411236351c7ae594099eb571530a3c92f5d75"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/run-native-checks-fourth.py",
+      "bytes": 2250,
+      "sha256": "8d204ac219bd7b195daea163b0c6f889584179017cd61b5d8258c5a83ca061a7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/run-native-checks-second.py",
+      "bytes": 2229,
+      "sha256": "b49ae3bf1defb6093bcc416654a358e9338d1de4bad44733ab8b69c91e92075d"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/run-native-checks-third.py",
+      "bytes": 2223,
+      "sha256": "508c10c337634d004ea0c7138313a28d892ebe534b1003af7521c1cde0f2ea50"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/run-pure-first.py",
+      "bytes": 1609,
+      "sha256": "dd991b496afab9c35e9259a90285c6914e4e6df3f3a4ce7d86a9e4fe356b0c1e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/run-pure-second.py",
+      "bytes": 1821,
+      "sha256": "f57773fff58c6b011fa8eee50aea04a0911bd3f358227dd15dd3499affb8d73b"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/run-pure-third.py",
+      "bytes": 1816,
+      "sha256": "9f0c22d74d237d3c948396021b65645cd4913ccb82d97c14f08c90031505c5f9"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-final/guard_contract/v2.rs",
+      "bytes": 3882,
+      "sha256": "61a579032022a49611f57723109d0089e0d39eb163648ac5ed31801684824161"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-final/guard_contract.rs",
+      "bytes": 9686,
+      "sha256": "8a26efb5b6ea7f6b59069446bbd507153ec61d895175e89bacee7033c76f205c"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-final/native/inner_guard/abi2.rs",
+      "bytes": 9552,
+      "sha256": "30241071199164504ca260d3890b5357bde83947f3296d8c1f74a82e623a4b67"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-final/native/inner_guard/carrier_image.rs",
+      "bytes": 7025,
+      "sha256": "a5a2d32ff775966e0577728d55ac683fb4d383cf093d3c236789d8a69a12cd9d"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-final/native/inner_guard.rs",
+      "bytes": 27099,
+      "sha256": "e8fa2b3b78e9ef51624506ed784572bcf05c28907e3318ce9ab3c6c9c127bd54"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-first/guard_contract/v2.rs",
+      "bytes": 3882,
+      "sha256": "61a579032022a49611f57723109d0089e0d39eb163648ac5ed31801684824161"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-first/guard_contract.rs",
+      "bytes": 9686,
+      "sha256": "8a26efb5b6ea7f6b59069446bbd507153ec61d895175e89bacee7033c76f205c"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-first/native/inner_guard/abi2.rs",
+      "bytes": 9552,
+      "sha256": "30241071199164504ca260d3890b5357bde83947f3296d8c1f74a82e623a4b67"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-first/native/inner_guard/carrier_image.rs",
+      "bytes": 5077,
+      "sha256": "288930d092b154f6a51e053446a896304ba3211812b0e1e82787e27dda0b72c9"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-first/native/inner_guard.rs",
+      "bytes": 27099,
+      "sha256": "e8fa2b3b78e9ef51624506ed784572bcf05c28907e3318ce9ab3c6c9c127bd54"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-second/guard_contract/v2.rs",
+      "bytes": 3882,
+      "sha256": "61a579032022a49611f57723109d0089e0d39eb163648ac5ed31801684824161"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-second/guard_contract.rs",
+      "bytes": 9686,
+      "sha256": "8a26efb5b6ea7f6b59069446bbd507153ec61d895175e89bacee7033c76f205c"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-second/native/inner_guard/abi2.rs",
+      "bytes": 9552,
+      "sha256": "30241071199164504ca260d3890b5357bde83947f3296d8c1f74a82e623a4b67"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-second/native/inner_guard/carrier_image.rs",
+      "bytes": 6565,
+      "sha256": "44fcc35dbf1d87fac95e2920468aca64969564cc2e719e43697a724db3bfc7b3"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/source-second/native/inner_guard.rs",
+      "bytes": 27099,
+      "sha256": "e8fa2b3b78e9ef51624506ed784572bcf05c28907e3318ce9ab3c6c9c127bd54"
+    }
+  ]
+}

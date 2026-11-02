@@ -1,0 +1,548 @@
+{
+  "status": "PASS_THREE_FIXED_SOURCE_PACKAGE_CFGTESTS_BEFORE_BEGIN_WIN11_ONLY",
+  "scope": "THREE_BEFORE_BEGIN_READONLY_SOURCE_CAPTURE_TESTS",
+  "newNormalProductOrFormalCI": "NOT_GRANTED",
+  "installedProductState": "NO_INSTALL_OR_PRODUCT_MUTATION_AUTHORIZED",
+  "WindowsOS": "WIN11_ONLY_WHEN_ACTUAL",
+  "producer": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/producer-report-third.json",
+    "bytes": 179326,
+    "sha256": "87d77fcc01804087f6ce074e348f21a170ad655de17a0b29c539cfd0884f5c07"
+  },
+  "producerFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-implementation-first/freeze-first.json",
+    "bytes": 14144,
+    "sha256": "1adf6729449e50e05451a5229d10249e20da0e497ec35858ca7c9d4e169d6355"
+  },
+  "fixtureReport": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-fixtures-first/report.json",
+    "bytes": 135464,
+    "sha256": "29c434756c732cf27efc6438e52fa8199e8a605c6667ebf5caddcb7c663750f5"
+  },
+  "fixtureFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-fixtures-first/freeze-first.json",
+    "bytes": 51913,
+    "sha256": "9c5349d2dc27dd6d4e062b8564f2399b6bc0ef33944255d6486b0b47fce9368b"
+  },
+  "controllerInput": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-preparation-first/run-probe.py",
+    "bytes": 19853,
+    "sha256": "4e7e82241205606b74dc14959b13a5fcb24a47fa280ffe8096f6e2a914eb89dd"
+  },
+  "preparationFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-preparation-first/freeze-first.json",
+    "bytes": 1974,
+    "sha256": "8b8949ac8c7c80730edb52fb89ef86cfb3e21898fd4d73bca82538ee647223a3"
+  },
+  "fixtureInputs": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/native-reference-first/run-negative-msi-r79-third.py",
+      "bytes": 21961,
+      "sha256": "da74f0058deac86507b712075904556780be6b262b18acb82415da6725c6e202"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/native-reference-first/Capture.cs",
+      "bytes": 9814,
+      "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a"
+    }
+  ],
+  "operations": [
+    {
+      "name": "create",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.5220431669986283,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/create.stdout.log",
+        "bytes": 145,
+        "sha256": "ef70b190a5a1f3fa6203fee734265613e08a95fde3baeb22e8b71289dff50624"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/create.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "name": "upload-Capture.cs",
+      "argv": [
+        "scp",
+        "-q",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/upload/Capture.cs",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-source-package-probe-ba7133d731102b415753c4d1101c6e2e/"
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.22968611900068936,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/upload-Capture.cs.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/upload-Capture.cs.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "upload-cases",
+      "argv": [
+        "scp",
+        "-q",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/upload/cases",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-source-package-probe-ba7133d731102b415753c4d1101c6e2e/"
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.6496439160000591,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/upload-cases.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/upload-cases.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "run",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.9282583940002951,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/run.stdout.log",
+        "bytes": 5581,
+        "sha256": "604bceb7fe53d9f9937c348d4baef5abad2bf43e39fe3f17c6fc85612a1ef8af"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/run.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "name": "owned-processes",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.563341525998112,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/owned-processes.stdout.log",
+        "bytes": 13,
+        "sha256": "7886222597aa503c7fcb97ba200bf66c918aaf8bb08b6c702386457d30bdf0d7"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/owned-processes.stderr.log",
+        "bytes": 596,
+        "sha256": "be2a813c5e264e6e4b05c9816b17dc6eb039a1cc247767c8927d259fa5541e12"
+      }
+    },
+    {
+      "name": "inventory",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.566965493002499,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/inventory.stdout.log",
+        "bytes": 1283,
+        "sha256": "9104cb73de1f1add0822ae649a1eeff827df5dfbc19bb2068054de02cbb9a4fa"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/inventory.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "name": "download",
+      "argv": [
+        "scp",
+        "-q",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-source-package-probe-ba7133d731102b415753c4d1101c6e2e",
+        "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/download"
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.6068230540004151,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/download.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/download.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "owned-processes-before-delete",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.556651344999409,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/owned-processes-before-delete.stdout.log",
+        "bytes": 13,
+        "sha256": "7886222597aa503c7fcb97ba200bf66c918aaf8bb08b6c702386457d30bdf0d7"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/owned-processes-before-delete.stderr.log",
+        "bytes": 596,
+        "sha256": "be2a813c5e264e6e4b05c9816b17dc6eb039a1cc247767c8927d259fa5541e12"
+      }
+    },
+    {
+      "name": "delete",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.6180826119998528,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/delete.stdout.log",
+        "bytes": 124,
+        "sha256": "c6f3be12a20684adf2bced3d6862d7b7dc77e561fe5757175cbba12676061bc3"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/source-package-probe-runtime-first/delete.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    }
+  ],
+  "cleanup": "PASS_EXACT_DOWNLOADED_OWNED_SCRATCH_ONLY",
+  "outerSeconds": 900,
+  "windowsRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-source-package-probe-ba7133d731102b415753c4d1101c6e2e",
+  "native": {
+    "originalObjects": [
+      {
+        "Pid": 36464,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380561349370963,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-source-package-probe-ba7133d731102b415753c4d1101c6e2e\\cases\\positive\\SourceProbe.exe",
+        "Sha256": "e02a24058cd20ca008ddd3bb65e010d16b2115a23d956275bd3992afb2f6ef87",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true
+      },
+      {
+        "Pid": 780,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380561350238202,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-source-package-probe-ba7133d731102b415753c4d1101c6e2e\\cases\\bad-seal\\SourceProbe.exe",
+        "Sha256": "9537ea3aeecd5c9c2681dcac1c3c16d27ec5a393d963666e765ac6186fe6f619",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true
+      },
+      {
+        "Pid": 22416,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380561350799672,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-source-package-probe-ba7133d731102b415753c4d1101c6e2e\\cases\\bad-template\\SourceProbe.exe",
+        "Sha256": "d4c512fbcf39a8d657b19519a4da96b1789b84bd493238000e7421e75b6734e5",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true
+      }
+    ],
+    "installation": "NOT_AUTHORIZED_NOT_RUN",
+    "elapsedMilliseconds": 316,
+    "cases": [
+      {
+        "stdout": "\nrunning 1 test\ntest installer_lifecycle::native::broker::source_package::native_probe::actual_fixed_source_capture_closes_all_msi_before_begin ... SOURCE_PACKAGE_NATIVE_CAPTURE_OK abi=2 payloads=14 msiCloses=10 sourceSha=87918add823461ebb8b36a23d621503a5bd7c0861027cffece56d61e6bca5a4f templateSha=98fd492bfbb78ac606ea226259e5e46f7472b648b6aa0c6d50dcb02a3922d076 claims=0\nok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 325 filtered out; finished in 0.03s\n\n",
+        "originalDeadlineWholeMilliseconds": 150110,
+        "name": "positive",
+        "pid": 36464,
+        "stderr": "",
+        "startedWholeMilliseconds": 110,
+        "originalSeconds": 150,
+        "endedWholeMilliseconds": 198,
+        "actualExit": true,
+        "argv": "--exact installer_lifecycle::native::broker::source_package::native_probe::actual_fixed_source_capture_closes_all_msi_before_begin --ignored --nocapture --test-threads=1",
+        "original": {
+          "Pid": 36464,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380561349370963,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-source-package-probe-ba7133d731102b415753c4d1101c6e2e\\cases\\positive\\SourceProbe.exe",
+          "Sha256": "e02a24058cd20ca008ddd3bb65e010d16b2115a23d956275bd3992afb2f6ef87",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true
+        },
+        "exitCode": 0,
+        "creation": 134380561349370963
+      },
+      {
+        "stdout": "\nrunning 1 test\ntest installer_lifecycle::native::broker::source_package::native_probe::sibling_msi_seal_mismatch_rejects_before_begin ... SOURCE_PACKAGE_NATIVE_SEAL_REJECT_OK claims=0\nok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 325 filtered out; finished in 0.01s\n\n",
+        "originalDeadlineWholeMilliseconds": 150200,
+        "name": "bad-seal",
+        "pid": 780,
+        "stderr": "",
+        "startedWholeMilliseconds": 200,
+        "originalSeconds": 150,
+        "endedWholeMilliseconds": 255,
+        "actualExit": true,
+        "argv": "--exact installer_lifecycle::native::broker::source_package::native_probe::sibling_msi_seal_mismatch_rejects_before_begin --ignored --nocapture --test-threads=1",
+        "original": {
+          "Pid": 780,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380561350238202,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-source-package-probe-ba7133d731102b415753c4d1101c6e2e\\cases\\bad-seal\\SourceProbe.exe",
+          "Sha256": "9537ea3aeecd5c9c2681dcac1c3c16d27ec5a393d963666e765ac6186fe6f619",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true
+        },
+        "exitCode": 0,
+        "creation": 134380561350238202
+      },
+      {
+        "stdout": "\nrunning 1 test\ntest installer_lifecycle::native::broker::source_package::native_probe::sibling_template_outside_digest_hole_rejects_before_begin ... SOURCE_PACKAGE_NATIVE_TEMPLATE_REJECT_OK claims=0\nok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 325 filtered out; finished in 0.01s\n\n",
+        "originalDeadlineWholeMilliseconds": 150256,
+        "name": "bad-template",
+        "pid": 22416,
+        "stderr": "",
+        "startedWholeMilliseconds": 256,
+        "originalSeconds": 150,
+        "endedWholeMilliseconds": 312,
+        "actualExit": true,
+        "argv": "--exact installer_lifecycle::native::broker::source_package::native_probe::sibling_template_outside_digest_hole_rejects_before_begin --ignored --nocapture --test-threads=1",
+        "original": {
+          "Pid": 22416,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380561350799672,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-source-package-probe-ba7133d731102b415753c4d1101c6e2e\\cases\\bad-template\\SourceProbe.exe",
+          "Sha256": "d4c512fbcf39a8d657b19519a4da96b1789b84bd493238000e7421e75b6734e5",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true
+        },
+        "exitCode": 0,
+        "creation": 134380561350799672
+      }
+    ],
+    "originalParentReturned": true,
+    "status": "PASS_THREE_EXACT_SOURCE_PACKAGE_CFGTEST_PROCESSES_WIN11_ONLY",
+    "scope": "THREE_FIXED_IGNORED_CFGTEST_BEFORE_BEGIN_READONLY",
+    "originalWholeSeconds": 600,
+    "captureSourceOnlyProcessMethods": true,
+    "cleanup": "ROOT_DOWNLOAD_THEN_EXACT_DELETE_REQUIRED",
+    "normalProductOrFormalCI": "NOT_GRANTED"
+  },
+  "qualifiedCases": [
+    {
+      "name": "positive",
+      "exactTest": "installer_lifecycle::native::broker::source_package::native_probe::actual_fixed_source_capture_closes_all_msi_before_begin",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "marker": "SOURCE_PACKAGE_NATIVE_CAPTURE_OK abi=2 payloads=14 msiCloses=10 sourceSha=87918add823461ebb8b36a23d621503a5bd7c0861027cffece56d61e6bca5a4f templateSha=98fd492bfbb78ac606ea226259e5e46f7472b648b6aa0c6d50dcb02a3922d076 claims=0",
+      "authority": "ORIGINAL_PARENT_EXIT0_AND_CHECKED_CLOSE_PLUS_FROZEN_TEST_ASSERTIONS",
+      "beforeBeginOnly": true
+    },
+    {
+      "name": "bad-seal",
+      "exactTest": "installer_lifecycle::native::broker::source_package::native_probe::sibling_msi_seal_mismatch_rejects_before_begin",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "marker": "SOURCE_PACKAGE_NATIVE_SEAL_REJECT_OK claims=0",
+      "authority": "ORIGINAL_PARENT_EXIT0_AND_CHECKED_CLOSE_PLUS_FROZEN_TEST_ASSERTIONS",
+      "beforeBeginOnly": true
+    },
+    {
+      "name": "bad-template",
+      "exactTest": "installer_lifecycle::native::broker::source_package::native_probe::sibling_template_outside_digest_hole_rejects_before_begin",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "marker": "SOURCE_PACKAGE_NATIVE_TEMPLATE_REJECT_OK claims=0",
+      "authority": "ORIGINAL_PARENT_EXIT0_AND_CHECKED_CLOSE_PLUS_FROZEN_TEST_ASSERTIONS",
+      "beforeBeginOnly": true
+    }
+  ],
+  "ownedProcessReadback": {
+    "count": 0
+  },
+  "inventory": {
+    "directories": [
+      "cases",
+      "compiler-temp",
+      "test-temp",
+      "cases/bad-seal",
+      "cases/bad-template",
+      "cases/positive"
+    ],
+    "files": [
+      {
+        "path": ".owner",
+        "sha256": "87427053d112e53ce011a595db059bb909a296305c19f5a5ae9baf5d0a56ea4a",
+        "bytes": 59
+      },
+      {
+        "path": "Capture.cs",
+        "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a",
+        "bytes": 9814
+      },
+      {
+        "path": "native-result.json",
+        "sha256": "55f8d53a7cf99908f06598a6fb0f02c9735d9351bfe8b0ad749422101eb3dddc",
+        "bytes": 10217
+      },
+      {
+        "path": "cases/bad-seal/FutureClassroom.msi",
+        "sha256": "87918add823461ebb8b36a23d621503a5bd7c0861027cffece56d61e6bca5a4f",
+        "bytes": 10009088
+      },
+      {
+        "path": "cases/bad-seal/SourceProbe.exe",
+        "sha256": "9537ea3aeecd5c9c2681dcac1c3c16d27ec5a393d963666e765ac6186fe6f619",
+        "bytes": 3678340
+      },
+      {
+        "path": "cases/bad-template/FutureClassroom.msi",
+        "sha256": "bce6d8bf1ed907661053bdcb3b457923e1431712ac246d33806d917f7cee0d68",
+        "bytes": 10009088
+      },
+      {
+        "path": "cases/bad-template/SourceProbe.exe",
+        "sha256": "d4c512fbcf39a8d657b19519a4da96b1789b84bd493238000e7421e75b6734e5",
+        "bytes": 3678340
+      },
+      {
+        "path": "cases/positive/FutureClassroom.msi",
+        "sha256": "87918add823461ebb8b36a23d621503a5bd7c0861027cffece56d61e6bca5a4f",
+        "bytes": 10009088
+      },
+      {
+        "path": "cases/positive/SourceProbe.exe",
+        "sha256": "e02a24058cd20ca008ddd3bb65e010d16b2115a23d956275bd3992afb2f6ef87",
+        "bytes": 3678340
+      }
+    ]
+  },
+  "downloadVerified": true,
+  "downloadCounts": {
+    "files": 9,
+    "directories": 6
+  },
+  "delete": {
+    "nonce": "ba7133d731102b415753c4d1101c6e2e",
+    "status": "REMOVED_EXACT_SOURCE_PACKAGE_PROBE_RUNTIME_ROOT",
+    "knownAbsent": true
+  },
+  "elapsedSeconds": 5.656300013000873,
+  "sourceArtifactsAndControllerUnchanged": true
+}

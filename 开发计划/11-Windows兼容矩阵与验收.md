@@ -389,3 +389,6 @@ R80最新终态：上述正式MSVC包的[安装及受损修复写后失败回滚
 host平台cfg修正后，实际严格Clippy及8项受影响运行状态测试、自检均通过，详见[本批主机证据](验证记录/2026-11-02-round80-host-regression/archive-index-first.json)。修正仅为4文件11行条件编译，不改变Windows函数体；此host通过不等于新修订MSVC编译或Windows运行通过。后续新源码的两套MSVC构建及各操作系统实际验收继续单列。
 
 后续ABI2格式候选73aea的13项Rust/10项Python纯测试及跨语言字节对照通过；布局读取候选1be5在同一授权Win11实际读取目录/守卫/序列表（内部断言74次MSI关闭），完整77项生命周期组件回归通过并精确清理，详见[格式](验证记录/2026-11-02-round80-carrier-format/archive-index-first.json)与[布局](验证记录/2026-11-02-round80-installed-release-layout/archive-index-first.json)两份独立归档。该两候选整合的GNU检查通过，正式升级入口及published-host准入仍未实现。当前现代run41368780507与Win7目标run41368783471实际正在编译较早abf71f4，不能据此放行新增格式/布局版本；Win7/Win10操作系统实机、真实希沃及其余现场门槛保持未完成。
+
+
+R80新增范围：abf71f4的现代run41368780507及Win7目标run41368783471现均completed/success，两原ZIP与各623项提交输入、全部原命令/日志已核；这些产物尚无新运行，且不覆盖后续d9/f95389源码。另在授权Win11实际完成三项GNU cfgtest ABI2源包只读测试（正常捕获、整包seal错误拒绝、内嵌模板洞外篡改拒绝），三个原进程均exit0/checked-close、下载核同及精确临时清理完成。它们不启动Begin、不安装产品，不代替新的160字节安装授权联动或完整升级；细节及来源限制见[实施记录](10-实施进度与验证记录.md)。Win7 SP1 x86、Win10各自实机及现场门槛继续NOT_RUN。

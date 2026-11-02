@@ -1,0 +1,56 @@
+{
+  "status": "PASS_FINITE_FROZEN_SOURCE_AND_THREE_ACTUAL_WIN11_READONLY_CAPTURE_CASES",
+  "runtimeOriginalSha256": "6aefdbe85d887a2202d579ab6a38936810e6a259f16b33eb196b3b8e370cbcc5",
+  "runtimeOriginalStatus": "PASS_THREE_FIXED_SOURCE_PACKAGE_CFGTESTS_BEFORE_BEGIN_WIN11_ONLY",
+  "runtimeSourceBase": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "runtimeProducerInputs": 477,
+  "integratedChecks": {
+    "sourceBase": "d9dacefb481678a2f1c12cf8371fa6567820547d",
+    "candidateCommit": "f95389d42a9868d5cb595c33393834c235dbdd37",
+    "sourceInputs": 482,
+    "sourceFiles": 11,
+    "allSevenOperationsActual0": true,
+    "candidateNotPushedOrMainAtPreservation": true,
+    "runtimeQualification": "Original three Win11 probes used separately frozen a470+W5+carrier+CA+Source+Probe inputs, excluding W6/hostcfg; they were not run against this later d9 integrated candidate."
+  },
+  "cases": [
+    {
+      "name": "positive",
+      "originalPid": 36464,
+      "exitCode": 0,
+      "checkedClose": true
+    },
+    {
+      "name": "bad-seal",
+      "originalPid": 780,
+      "exitCode": 0,
+      "checkedClose": true
+    },
+    {
+      "name": "bad-template",
+      "originalPid": 22416,
+      "exitCode": 0,
+      "checkedClose": true
+    }
+  ],
+  "positiveCapture": "ABI2 actual readonly MSI database/summary/streams; exact14 ledger;10 actual MSI close receipts before Begin, with3 view close returns; source/template bindings asserted by frozen ignored test.",
+  "negativeCases": [
+    "wholeMSI seal mismatch rejected before Begin",
+    "template byte outside32-byte digest hole rejected before Begin"
+  ],
+  "sourceReview": "Frozen native_probe.rs inspected: positive verifies actual close receipts and checked Resources release; both negative probes require Invalid plus pristine claims/fault/retained state. No MSI Begin/Install/End or install mutation called by these exact tests.",
+  "downloadVerified": {
+    "files": 9,
+    "directories": 6
+  },
+  "ownedProcessCount": 0,
+  "exactNonceKnownAbsent": "ba7133d731102b415753c4d1101c6e2e",
+  "historicalFailures": "Original GNU compiler101, pure compile/test failures and producer wrapper1 are retained unchanged. First wrapper did not serialize numeric compiler exit; do not invent it. Earlier static NOT_RUN reports remain historical.",
+  "scope": "GNU DEV cfg(test) Win11 readonly source capture before Begin only. Header-patched testPE fixtures and original canonical payload evidence do not authorize normal/official product, PublishedHost, Fresh/maintenance/upgrade, Win7/Win10 runtime or new-source MSVC. Prior carrier/CI and active later implementations excluded.",
+  "actions": {
+    "Windows": false,
+    "Cargo": false,
+    "Git": false,
+    "sourceDeletion": false
+  }
+}

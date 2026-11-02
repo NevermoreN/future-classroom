@@ -210,6 +210,7 @@ mod tests {
                 deadline,
                 peer_images: Vec::new(),
                 sealed_package_sha: None,
+                captured_source: None,
             };
             Self { root, session }
         }

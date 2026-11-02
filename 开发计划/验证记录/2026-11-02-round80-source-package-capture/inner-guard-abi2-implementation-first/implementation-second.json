@@ -1,0 +1,211 @@
+{
+  "status": "PASS_LOCAL_CA_ABI2_READ_AND_FORMAT_FOUNDATION_ONLY",
+  "worktree": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first",
+  "sourceBase": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "inheritedFrozenCarrier": {
+    "path": "/tmp/fc-round80-controlled-repair/carrier-abi2-implementation-first/freeze-first.json",
+    "bytes": 13145,
+    "sha256": "44eef26f5f4668687275cb89faec33d1524cdd517d30137c26edafbc2a62709c"
+  },
+  "ownedSources": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/guard_contract.rs",
+      "bytes": 9686,
+      "sha256": "8a26efb5b6ea7f6b59069446bbd507153ec61d895175e89bacee7033c76f205c"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/guard_contract/v2.rs",
+      "bytes": 3882,
+      "sha256": "61a579032022a49611f57723109d0089e0d39eb163648ac5ed31801684824161"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/native/inner_guard.rs",
+      "bytes": 27099,
+      "sha256": "e8fa2b3b78e9ef51624506ed784572bcf05c28907e3318ce9ab3c6c9c127bd54"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/native/inner_guard/abi2.rs",
+      "bytes": 9552,
+      "sha256": "30241071199164504ca260d3890b5357bde83947f3296d8c1f74a82e623a4b67"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/native/inner_guard/carrier_image.rs",
+      "bytes": 7025,
+      "sha256": "a5a2d32ff775966e0577728d55ac683fb4d383cf093d3c236789d8a69a12cd9d"
+    }
+  ],
+  "carrierFourByteUnchanged": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7600,
+      "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+      "bytes": 12154,
+      "sha256": "e354f1e8b5bf08a9137f91fa6abc483ae120093c45516c586915d725fe6acd1b"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+      "bytes": 8701,
+      "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-inner-guard-abi2-first/crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    }
+  ],
+  "compilerInputCount": 473,
+  "checks": [
+    {
+      "name": "gnu-check-fourth",
+      "argv": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "-p",
+        "fc-windows",
+        "--tests"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.16492727100194315,
+      "targetDir": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-target-first"
+    },
+    {
+      "name": "clippy-fourth",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "-p",
+        "fc-windows",
+        "--tests",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.16475919499862357,
+      "targetDir": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-target-first"
+    },
+    {
+      "name": "fmt-fourth",
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "--config",
+        "skip_children=true",
+        "crates/fc-windows/src/installer_lifecycle/guard_contract.rs",
+        "crates/fc-windows/src/installer_lifecycle/guard_contract/v2.rs",
+        "crates/fc-windows/src/installer_lifecycle/native/inner_guard.rs",
+        "crates/fc-windows/src/installer_lifecycle/native/inner_guard/abi2.rs",
+        "crates/fc-windows/src/installer_lifecycle/native/inner_guard/carrier_image.rs"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.11443893400064553,
+      "targetDir": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-target-first"
+    },
+    {
+      "name": "architecture-fourth",
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.11443418400085648,
+      "targetDir": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-target-first"
+    },
+    {
+      "name": "diff-fourth",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.06447448800099664,
+      "targetDir": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-target-first"
+    }
+  ],
+  "pureTests": 19,
+  "pureTestsReceipt": {
+    "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/pure-checks-third.json",
+    "bytes": 658,
+    "sha256": "306c33b65587c6ebdccac64564b458b6c78db612aaf1051b8ce2ea4cb4969a0d"
+  },
+  "infoFormat": "FCGI2:<nonce32lowerhex>:<ProductCode36uppercase>:<PackageCode36uppercase>:<fixedFamily36>:<canonicalVersion>:2",
+  "infoMaximumBytes": 170,
+  "sourceFacts": [
+    "borrowed hInstall -> MsiGetActiveDatabase readonly owned database",
+    "fixed Binary.FcGuardClientTemplate classification; exact legacy footer remains legacy",
+    "ABI2 fixed Binary.FcPayloadManifest bounded32856B -> independent v2 ABI/family/body parse",
+    "Property table exact ProductCode/UpgradeCode/ProductVersion 3 rows, no runtime property role",
+    "Summary9 VT_LPSTR/38 chars/capacity39 -> package equals envelope",
+    "pinned original G PE streamed versus entire activeDB template with only fixed32 digest hole"
+  ],
+  "resourceContract": {
+    "ownerPool": 8,
+    "liveKernelPlusModulePlusMsiMaximum": 64,
+    "deadlineMilliseconds": 120000,
+    "wholeImageCopies": false,
+    "borrowedInstallClosed": false,
+    "unknownClose": "original claim/typed MSI IDs/stable Box retained without retry-close"
+  },
+  "authority": {
+    "newOrOldRole": "NOT_IMPLEMENTED_PRIVATE_PLAN_REQUIRED",
+    "newV2Ticket": "NOT_IMPLEMENTED",
+    "legacyFcga1CanAuthorizeAbi2": false,
+    "v2Runtime": "FAIL_CLOSED_NO_PACKAGE_BOUND_TICKET",
+    "nativeWindows": "NOT_RUN",
+    "upgrade": "NOT_IMPLEMENTED",
+    "publishedHostRegistryUsedAsAuthority": false,
+    "sourcePropertyOrHashIsPermit": false
+  },
+  "preservedFailures": [
+    "pure-compile-first: standalone harness path resolution plus private fixture visibility",
+    "gnu-check-first101: private cross-module test fixture",
+    "pure-tests-second101: test incorrectly expected permitted digest-hole mutation to be invalid"
+  ],
+  "patches": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/incremental-from-carrier-first.patch",
+      "bytes": 30615,
+      "sha256": "34e578395665646a46057129f5b553466374b9850122dbb42359c61113bb1710"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/complete.patch",
+      "bytes": 112894,
+      "sha256": "56d25f87c3b16f985b762f7911929a9eb0a571b97b222fbb080f550356b76b85"
+    }
+  ],
+  "primarySources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/msiquery/nf-msiquery-msigetactivedatabase",
+    "https://learn.microsoft.com/en-us/windows/win32/api/msiquery/nf-msiquery-msisummaryinfogetpropertyw",
+    "https://learn.microsoft.com/en-us/windows/win32/msi/summary-information-stream-property-set"
+  ],
+  "previousReportInventoryOmission": "First local report had472 inputs, omitted unchanged .cargo/config.toml; fourth check binds all473 including same frozen configuration; source unchanged.",
+  "fullCompilerInventory": {
+    "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/compiler-inputs-second.json",
+    "bytes": 86881,
+    "sha256": "210afab1e37d545708aeb6588fbae7496759b0f7c75cb69896eebd7e9690a3c7"
+  },
+  "previousReport": {
+    "path": "/tmp/fc-round80-controlled-repair/inner-guard-abi2-implementation-first/implementation-first.json",
+    "bytes": 7921,
+    "sha256": "e85ac2e65474ebf272f01c043cf697bacb841244c29ac4b76215158f56b9c1a5"
+  }
+}

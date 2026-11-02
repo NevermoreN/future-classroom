@@ -26,6 +26,9 @@ use windows::{
     },
 };
 
+mod abi2;
+mod carrier_image;
+
 const MSI_FAILURE: u32 = 1603;
 const MAX_IMAGE: usize = 64 * 1024 * 1024;
 const SEAL_MAGIC: &[u8; 16] = b"FC-SETUP-MSI\0v1\0";
@@ -221,10 +224,10 @@ impl GuardState {
             }
         }
     }
-    fn message(&mut self, install: MSIHANDLE, nonce: Nonce) -> Result<()> {
+    fn message(&mut self, install: MSIHANDLE, info: &str) -> Result<()> {
         self.room(1)?;
         let record = self.register_msi(unsafe { MsiCreateRecord(1) }, false)?;
-        let text = HSTRING::from(nonce.info());
+        let text = HSTRING::from(info);
         let format = HSTRING::from("[1]");
         if unsafe { MsiRecordSetStringW(record, 0, &format) } != 0
             || unsafe { MsiRecordSetStringW(record, 1, &text) } != 0
@@ -425,7 +428,12 @@ impl GuardState {
         }
         Ok(())
     }
-    fn template_matches(&mut self, install: MSIHANDLE, image: HANDLE) -> Result<()> {
+    fn template_matches(
+        &mut self,
+        install: MSIHANDLE,
+        image: HANDLE,
+        format: &abi2::PackageFormat,
+    ) -> Result<()> {
         self.room(1)?;
         let database = self.register_msi(unsafe { MsiGetActiveDatabase(install) }, false)?;
         self.room(1)?;
@@ -453,53 +461,59 @@ impl GuardState {
         if !(69..=MAX_IMAGE).contains(&length) || image_length != length as i64 {
             return Err(LifecycleError::Invalid);
         }
-        let mut footer = [0; 20];
-        self.read_at(image, length - 20, &mut footer)?;
-        let n = u32::from_le_bytes(
-            footer[..4]
-                .try_into()
-                .map_err(|_| LifecycleError::Invalid)?,
-        ) as usize;
-        if &footer[4..] != manifest::FOOTER
-            || n == 0
-            || n > manifest::MAX_MANIFEST
-            || n + 68 >= length
-        {
-            return Err(LifecycleError::Invalid);
-        }
-        let seal = length - 20 - n - 48;
-        let hole = seal + 16;
-        let mut seal_bytes = [0; 48];
-        self.read_at(image, seal, &mut seal_bytes)?;
-        if &seal_bytes[..16] != SEAL_MAGIC || seal_bytes[16..].iter().all(|&b| b == 0) {
-            return Err(LifecycleError::Invalid);
-        }
-        if seal >= 48 {
-            let mut prior = [0; 16];
-            self.read_at(image, seal - 48, &mut prior)?;
-            if &prior == SEAL_MAGIC {
-                return Err(LifecycleError::Invalid);
+        let hole = match format {
+            abi2::PackageFormat::Abi2(_) => self.abi2_image_hole(image, length)?,
+            abi2::PackageFormat::Legacy => {
+                let mut footer = [0; 20];
+                self.read_at(image, length - 20, &mut footer)?;
+                let n = u32::from_le_bytes(
+                    footer[..4]
+                        .try_into()
+                        .map_err(|_| LifecycleError::Invalid)?,
+                ) as usize;
+                if &footer[4..] != manifest::FOOTER
+                    || n == 0
+                    || n > manifest::MAX_MANIFEST
+                    || n + 68 >= length
+                {
+                    return Err(LifecycleError::Invalid);
+                }
+                let seal = length - 20 - n - 48;
+                let hole = seal + 16;
+                let mut seal_bytes = [0; 48];
+                self.read_at(image, seal, &mut seal_bytes)?;
+                if &seal_bytes[..16] != SEAL_MAGIC || seal_bytes[16..].iter().all(|&b| b == 0) {
+                    return Err(LifecycleError::Invalid);
+                }
+                if seal >= 48 {
+                    let mut prior = [0; 16];
+                    self.read_at(image, seal - 48, &mut prior)?;
+                    if &prior == SEAL_MAGIC {
+                        return Err(LifecycleError::Invalid);
+                    }
+                }
+                let mut raw_manifest = vec![0; n];
+                self.read_at(image, length - 20 - n, &mut raw_manifest)?;
+                let manifest = manifest::parse(&raw_manifest)?;
+                let mut product = [0u16; 40];
+                let mut product_length = product.len() as u32;
+                if unsafe {
+                    MsiGetPropertyW(
+                        install,
+                        &HSTRING::from("ProductCode"),
+                        Some(PWSTR(product.as_mut_ptr())),
+                        Some(&mut product_length),
+                    )
+                } != 0
+                    || product_length as usize >= product.len()
+                    || String::from_utf16(&product[..product_length as usize]).ok()
+                        != Some(format!("{{{}}}", manifest.product))
+                {
+                    return Err(LifecycleError::Invalid);
+                }
+                hole
             }
-        }
-        let mut raw_manifest = vec![0; n];
-        self.read_at(image, length - 20 - n, &mut raw_manifest)?;
-        let manifest = manifest::parse(&raw_manifest)?;
-        let mut product = [0u16; 40];
-        let mut product_length = product.len() as u32;
-        if unsafe {
-            MsiGetPropertyW(
-                install,
-                &HSTRING::from("ProductCode"),
-                Some(PWSTR(product.as_mut_ptr())),
-                Some(&mut product_length),
-            )
-        } != 0
-            || product_length as usize >= product.len()
-            || String::from_utf16(&product[..product_length as usize]).ok()
-                != Some(format!("{{{}}}", manifest.product))
-        {
-            return Err(LifecycleError::Invalid);
-        }
+        };
         let mut offset = 0;
         let mut template = [0u8; 16384];
         let mut actual = [0u8; 16384];
@@ -610,14 +624,36 @@ impl GuardState {
         let mut bytes = [0; 16];
         crate::SystemRandom.fill(&mut bytes)?;
         let nonce = Nonce::from_bytes(bytes)?;
+        let format = self.package_format(install)?;
+        let info = match &format {
+            abi2::PackageFormat::Legacy => nonce.info(),
+            abi2::PackageFormat::Abi2(package) => {
+                let info = package.info(nonce);
+                // Format roundtrip does not turn DB facts into a ticket.
+                let (parsed, echoed) =
+                    crate::installer_lifecycle::guard_contract::v2::ObservedPackage::parse_info(
+                        &info,
+                    )?;
+                if &parsed != package || echoed != nonce {
+                    return Err(LifecycleError::Invalid);
+                }
+                info
+            }
+        };
         self.prepare_accept(nonce)?;
-        self.message(install, nonce)?;
+        self.message(install, &info)?;
         // The client remains held in G's original callback context until its
         // later InstallInitialize callback or negative API return. Consequently
         // the actual peer query does not depend on a closed client's metadata.
         let grant = self.receive(nonce)?;
         let image = self.peer_image()?;
-        self.template_matches(install, image)?;
+        self.template_matches(install, image, &format)?;
+        if matches!(format, abi2::PackageFormat::Abi2(_)) {
+            // The old FCGA v1 nonce-only grant can never authorize ABI2. A
+            // private Plan/package-bound ticket and original G/B bridge are
+            // deliberately not wired in this revision. Old G ignores FCGI2.
+            return Err(LifecycleError::Invalid);
+        }
         let process = self.resources.handle(Role::Guardian)?;
         let peer = self.peer.ok_or(LifecycleError::Invalid)?;
         if unsafe { GetProcessId(process) } != peer.process_id
