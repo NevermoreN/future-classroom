@@ -547,6 +547,9 @@ pub struct InstanceGuard {
     _thread: PhantomData<Rc<()>>,
 }
 impl InstanceGuard {
+    pub fn is_occupied(error: &Error) -> bool {
+        error.code() == windows::core::HRESULT::from_win32(ERROR_SHARING_VIOLATION.0)
+    }
     pub fn acquire(root: &Path) -> Result<Self> {
         if !root.is_absolute() {
             return Err(Error::from_hresult(E_INVALIDARG));

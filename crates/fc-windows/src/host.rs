@@ -2,8 +2,12 @@
 //! No writer/network joins, secret material, or privileged settings live here.
 use std::{
     cell::{Cell, RefCell},
+    fs::{File, OpenOptions},
+    io::{Read, Write},
     marker::PhantomData,
+    os::windows::fs::{MetadataExt, OpenOptionsExt},
     panic::{catch_unwind, AssertUnwindSafe},
+    path::Path,
     rc::Rc,
     sync::{
         atomic::{AtomicU32, Ordering},
@@ -11,10 +15,11 @@ use std::{
     },
 };
 use windows::{
-    core::{w, Error, Result},
+    core::{w, Error, Result, HSTRING},
     Win32::{
         Foundation::*,
-        System::{LibraryLoader::*, RemoteDesktop::*},
+        Storage::FileSystem::*,
+        System::{LibraryLoader::*, RemoteDesktop::*, Threading::GetCurrentProcessId},
         UI::{Accessibility::*, Shell::*, WindowsAndMessaging::*},
     },
 };
@@ -22,6 +27,7 @@ use windows::{
 const TIMER: usize = 0xfc01;
 const TRAY_MESSAGE: u32 = WM_APP + 41;
 const FOREGROUND_MESSAGE: u32 = WM_APP + 42;
+const OPEN_INSTANCE_MESSAGE: u32 = WM_APP + 43;
 thread_local! {
     // Out-of-context callbacks are delivered on the hook owner's UI thread.
     // Only an HWND value is retained; there is no cross-thread State pointer.
@@ -166,13 +172,100 @@ pub struct HiddenHost {
     class: u16,
     instance: HINSTANCE,
     foreground_hook: HWINEVENTHOOK,
+    instance_owner: Option<File>,
     _thread: PhantomData<Rc<()>>,
+}
+#[derive(Debug, PartialEq, Eq)]
+pub enum InstanceRequest {
+    Requested,
+    OtherSession(u32),
 }
 impl HiddenHost {
     /// A tray is required in normal interactive operation. Headless tests can
     /// disable it explicitly; that does not count as a real tray acceptance test.
     pub fn new(enable_tray: bool) -> Result<Self> {
         Self::with_interval(enable_tray, 1000)
+    }
+    /// Publish only while the caller holds this root's original InstanceGuard.
+    /// The readable owner record is deleted by the OS when this host closes,
+    /// including process termination. It is routing information, not authority.
+    pub fn for_instance(root: &Path, enable_tray: bool) -> Result<Self> {
+        if !root.is_absolute() {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let mut host = Self::new(enable_tray)?;
+        let title = HSTRING::from(root.join("runtime/instance.lock").as_os_str());
+        let pid = unsafe { GetCurrentProcessId() };
+        let mut session = 0;
+        unsafe {
+            ProcessIdToSessionId(pid, &mut session)?;
+            SetWindowTextW(host.hwnd, &title)?;
+        }
+        let mut owner = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .access_mode(GENERIC_WRITE.0 | DELETE.0)
+            .share_mode(FILE_SHARE_READ.0)
+            .custom_flags(FILE_FLAG_DELETE_ON_CLOSE.0 | FILE_FLAG_OPEN_REPARSE_POINT.0)
+            .open(root.join("runtime/instance.owner"))
+            .map_err(|_| Error::from_hresult(E_ACCESSDENIED))?;
+        let mut record = [0u8; 12];
+        record[..4].copy_from_slice(b"FCI1");
+        record[4..8].copy_from_slice(&pid.to_le_bytes());
+        record[8..].copy_from_slice(&session.to_le_bytes());
+        owner
+            .write_all(&record)
+            .map_err(|_| Error::from_hresult(E_FAIL))?;
+        host.instance_owner = Some(owner);
+        Ok(host)
+    }
+    /// Called only after the root's lock is busy. No data connection is opened,
+    /// and no message is sent to another Windows session or another data root.
+    pub fn request_existing(root: &Path) -> Result<InstanceRequest> {
+        let mut file = OpenOptions::new()
+            .read(true)
+            .share_mode(FILE_SHARE_READ.0 | FILE_SHARE_WRITE.0 | FILE_SHARE_DELETE.0)
+            .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT.0)
+            .open(root.join("runtime/instance.owner"))
+            .map_err(|_| Error::from_hresult(E_FAIL))?;
+        let metadata = file.metadata().map_err(|_| Error::from_hresult(E_FAIL))?;
+        if !metadata.is_file()
+            || metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT.0 != 0
+            || metadata.len() != 12
+        {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let mut record = [0u8; 12];
+        file.read_exact(&mut record)
+            .map_err(|_| Error::from_hresult(E_FAIL))?;
+        if &record[..4] != b"FCI1" {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let pid = u32::from_le_bytes(record[4..8].try_into().unwrap());
+        let session = u32::from_le_bytes(record[8..].try_into().unwrap());
+        let mut observed = 0;
+        let mut current = 0;
+        // SAFETY: scalar process/session identities only. FindWindow searches
+        // this desktop; the matching title binds the original data root.
+        unsafe {
+            ProcessIdToSessionId(pid, &mut observed)?;
+            if session != observed {
+                return Err(Error::from_hresult(E_INVALIDARG));
+            }
+            ProcessIdToSessionId(GetCurrentProcessId(), &mut current)?;
+            if session != current {
+                return Ok(InstanceRequest::OtherSession(session));
+            }
+            let title = HSTRING::from(root.join("runtime/instance.lock").as_os_str());
+            let hwnd = FindWindowW(w!("FutureClassroom.HiddenHost.v1"), &title)?;
+            let mut actual_pid = 0;
+            GetWindowThreadProcessId(hwnd, Some(&mut actual_pid));
+            if actual_pid != pid {
+                return Err(Error::from_hresult(E_INVALIDARG));
+            }
+            PostMessageW(Some(hwnd), OPEN_INSTANCE_MESSAGE, WPARAM(0), LPARAM(0))?;
+        }
+        Ok(InstanceRequest::Requested)
     }
     /// Pace the explicitly isolated application diagnostic without waiting a
     /// production second for each synthetic UI step or worker completion.
@@ -208,6 +301,7 @@ impl HiddenHost {
             class: atom,
             instance,
             foreground_hook: HWINEVENTHOOK::default(),
+            instance_owner: None,
             _thread: PhantomData,
         };
         if host.state.taskbar_recreated == 0 {
@@ -494,6 +588,10 @@ unsafe extern "system" fn window_proc(
                     return LRESULT(0);
                 }
                 match message {
+                    OPEN_INSTANCE_MESSAGE if wparam.0 == 0 && lparam.0 == 0 => {
+                        state.hint(HostHints::OPEN_STATUS);
+                        return LRESULT(0);
+                    }
                     FOREGROUND_MESSAGE => {
                         FOREGROUND_PENDING.with(|pending| pending.set(false));
                         // Sample once before the main application pump. The
@@ -633,6 +731,81 @@ pub fn probe_lifecycle(seconds: u32, with_tray: bool) -> Result<HostLifecycleRep
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn repeated_start_requests_only_the_original_root_without_foreground_changes() {
+        use std::os::windows::process::CommandExt;
+        const CHILD_ROOT: &str = "FC_TEST_INSTANCE_REQUEST_ROOT";
+        if let Some(root) = std::env::var_os(CHILD_ROOT) {
+            assert_eq!(
+                HiddenHost::request_existing(Path::new(&root)).unwrap(),
+                InstanceRequest::Requested
+            );
+            return;
+        }
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let foreground = unsafe { GetForegroundWindow() };
+        let root = std::env::temp_dir().join(format!(
+            "FutureClassroom-Test-InstanceRequest-{}",
+            std::process::id()
+        ));
+        std::fs::create_dir(&root).unwrap();
+        struct Scratch(std::path::PathBuf);
+        impl Drop for Scratch {
+            fn drop(&mut self) {
+                let result = std::fs::remove_dir_all(&self.0);
+                if !std::thread::panicking() {
+                    result.unwrap();
+                }
+            }
+        }
+        let _scratch = Scratch(root.clone());
+        let guard = crate::InstanceGuard::acquire(&root).unwrap();
+        assert_eq!(
+            crate::InstanceGuard::acquire(&root).err().unwrap().code(),
+            windows::core::HRESULT::from_win32(ERROR_SHARING_VIOLATION.0)
+        );
+        let host = HiddenHost::for_instance(&root, false).unwrap();
+        assert!(HiddenHost::request_existing(&root.join("other-root")).is_err());
+        assert_eq!(
+            host.state.hints.load(Ordering::Acquire) & HostHints::OPEN_STATUS.0,
+            0
+        );
+        let output = std::process::Command::new(std::env::current_exe().unwrap())
+            .creation_flags(windows::Win32::System::Threading::CREATE_NO_WINDOW.0)
+            .args([
+                "--exact",
+                "host::tests::repeated_start_requests_only_the_original_root_without_foreground_changes",
+                "--test-threads=1",
+            ])
+            .env(CHILD_ROOT, &root)
+            .output()
+            .unwrap();
+        assert!(
+            output.status.success(),
+            "child request failed: {:?}",
+            output
+        );
+        let stop = host.controller();
+        let started = std::time::Instant::now();
+        let mut requested = false;
+        host.run(|hints| {
+            if hints.contains(HostHints::OPEN_STATUS) {
+                requested = true;
+                stop.stop();
+            } else if started.elapsed() >= std::time::Duration::from_secs(3) {
+                stop.stop();
+            }
+            Ok(())
+        })
+        .unwrap();
+        assert!(requested);
+        assert!(!root.join("runtime/instance.owner").exists());
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
+        drop(guard);
+        drop(crate::InstanceGuard::acquire(&root).unwrap());
+    }
     #[test]
     fn hidden_top_level_routes_events_and_control_stops_without_queue() {
         let _serial = crate::NATIVE_TEST_SERIAL

@@ -5618,12 +5618,26 @@ fn run_at_inner(
         .map_err(|_| "实例运行目录权限不符合要求，需要修复".to_owned())?;
     let _runtime = fc_windows::materials::files::PinnedDirectory::open(&paths.runtime())
         .map_err(|_| "实例运行目录不是受控本地目录".to_owned())?;
-    let _instance = InstanceGuard::acquire(paths.root())
-        .map_err(|_| "未来教室已运行，或数据目录被其他会话占用".to_owned())?;
+    let _instance = match InstanceGuard::acquire(paths.root()) {
+        Ok(instance) => instance,
+        Err(error) if !probe && InstanceGuard::is_occupied(&error) => {
+            if autostart {
+                return Ok(false);
+            }
+            return match HiddenHost::request_existing(paths.root()) {
+                Ok(fc_windows::host::InstanceRequest::Requested) => Ok(false),
+                Ok(fc_windows::host::InstanceRequest::OtherSession(session)) => Err(format!(
+                    "未来教室已在Windows会话{session}中运行。请在原会话正常退出后再启动；不会激活其他会话的桌面。"
+                )),
+                Err(_) => Err("未来教室已运行或正在启动，但暂时无法请求原入口。请使用原实例托盘，或稍后重试；不会另开数据连接。".into()),
+            };
+        }
+        Err(_) => return Err("无法取得未来教室数据目录的独占运行锁，请核对目录权限。".into()),
+    };
     let host = if probe {
         HiddenHost::for_isolated_probe()
     } else {
-        HiddenHost::new(true)
+        HiddenHost::for_instance(paths.root(), true)
     }
     .map_err(|_| "无法创建托盘宿主".to_owned())?;
     let stop = host.controller();
