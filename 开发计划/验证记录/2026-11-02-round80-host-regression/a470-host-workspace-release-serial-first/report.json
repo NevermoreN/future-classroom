@@ -1,0 +1,1255 @@
+{
+  "schema": "future-classroom-host-release-serial-result/v1",
+  "status": "PASS_RELEASE_SERIAL_HOST_WORKSPACE",
+  "sourceGit": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "argv": [
+    "cargo",
+    "test",
+    "--workspace",
+    "--release",
+    "--locked",
+    "--offline",
+    "--",
+    "--test-threads=1"
+  ],
+  "budgetSeconds": 3600,
+  "actualExit": 0,
+  "timedOut": false,
+  "elapsedSeconds": 870.406404393998,
+  "originalCargoReaped": true,
+  "controllerPid": 25708,
+  "originalCargoPid": 25738,
+  "processGroup": 25738,
+  "remainingGroup": [],
+  "signals": [],
+  "observedProcesses": [
+    {
+      "pid": 25738,
+      "group": 25738,
+      "startTicks": 2664328,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/cargo"
+    },
+    {
+      "pid": 25755,
+      "group": 25738,
+      "startTicks": 2664358,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25756,
+      "group": 25738,
+      "startTicks": 2664358,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25768,
+      "group": 25738,
+      "startTicks": 2664387,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25775,
+      "group": 25738,
+      "startTicks": 2664391,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 25776,
+      "group": 25738,
+      "startTicks": 2664392,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 25777,
+      "group": 25738,
+      "startTicks": 2664393,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+    },
+    {
+      "pid": 25799,
+      "group": 25738,
+      "startTicks": 2664402,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25807,
+      "group": 25738,
+      "startTicks": 2664468,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25821,
+      "group": 25738,
+      "startTicks": 2664531,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25837,
+      "group": 25738,
+      "startTicks": 2664546,
+      "state": "R",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25845,
+      "group": 25738,
+      "startTicks": 2664557,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25861,
+      "group": 25738,
+      "startTicks": 2664576,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25884,
+      "group": 25738,
+      "startTicks": 2664737,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25901,
+      "group": 25738,
+      "startTicks": 2664806,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25939,
+      "group": 25738,
+      "startTicks": 2664825,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 25940,
+      "group": 25738,
+      "startTicks": 2664826,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 25941,
+      "group": 25738,
+      "startTicks": 2664826,
+      "state": "R",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+    },
+    {
+      "pid": 25975,
+      "group": 25738,
+      "startTicks": 2664842,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25989,
+      "group": 25738,
+      "startTicks": 2664957,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 25999,
+      "group": 25738,
+      "startTicks": 2664966,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 26000,
+      "group": 25738,
+      "startTicks": 2664966,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 26015,
+      "group": 25738,
+      "startTicks": 2664971,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26033,
+      "group": 25738,
+      "startTicks": 2665022,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26065,
+      "group": 25738,
+      "startTicks": 2665043,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26076,
+      "group": 25738,
+      "startTicks": 2665064,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26108,
+      "group": 25738,
+      "startTicks": 2665296,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26154,
+      "group": 25738,
+      "startTicks": 2665554,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26179,
+      "group": 25738,
+      "startTicks": 2665568,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26225,
+      "group": 25738,
+      "startTicks": 2665889,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 26229,
+      "group": 25738,
+      "startTicks": 2665891,
+      "state": "D",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 26246,
+      "group": 25738,
+      "startTicks": 2665910,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26254,
+      "group": 25738,
+      "startTicks": 2665926,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26265,
+      "group": 25738,
+      "startTicks": 2665943,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26270,
+      "group": 25738,
+      "startTicks": 2665949,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26284,
+      "group": 25738,
+      "startTicks": 2666017,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26292,
+      "group": 25738,
+      "startTicks": 2666031,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26303,
+      "group": 25738,
+      "startTicks": 2666048,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 26304,
+      "group": 25738,
+      "startTicks": 2666048,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 26305,
+      "group": 25738,
+      "startTicks": 2666048,
+      "state": "R",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+    },
+    {
+      "pid": 26315,
+      "group": 25738,
+      "startTicks": 2666051,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26342,
+      "group": 25738,
+      "startTicks": 2666071,
+      "state": "R",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26361,
+      "group": 25738,
+      "startTicks": 2666079,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26369,
+      "group": 25738,
+      "startTicks": 2666091,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26377,
+      "group": 25738,
+      "startTicks": 2666113,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26388,
+      "group": 25738,
+      "startTicks": 2666134,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26418,
+      "group": 25738,
+      "startTicks": 2666213,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26464,
+      "group": 25738,
+      "startTicks": 2666324,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26486,
+      "group": 25738,
+      "startTicks": 2666371,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26494,
+      "group": 25738,
+      "startTicks": 2666380,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26513,
+      "group": 25738,
+      "startTicks": 2666421,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26532,
+      "group": 25738,
+      "startTicks": 2666433,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26548,
+      "group": 25738,
+      "startTicks": 2666494,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26567,
+      "group": 25738,
+      "startTicks": 2666512,
+      "state": "D",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/cargo"
+    },
+    {
+      "pid": 26571,
+      "group": 25738,
+      "startTicks": 2666518,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26578,
+      "group": 25738,
+      "startTicks": 2666523,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 26590,
+      "group": 25738,
+      "startTicks": 2666527,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26598,
+      "group": 25738,
+      "startTicks": 2666536,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26606,
+      "group": 25738,
+      "startTicks": 2666573,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26614,
+      "group": 25738,
+      "startTicks": 2666580,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26678,
+      "group": 25738,
+      "startTicks": 2666650,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26689,
+      "group": 25738,
+      "startTicks": 2666664,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26700,
+      "group": 25738,
+      "startTicks": 2666722,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26710,
+      "group": 25738,
+      "startTicks": 2666748,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26718,
+      "group": 25738,
+      "startTicks": 2666749,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/build/libsqlite3-sys-696d653f45f37193/build-script-build"
+    },
+    {
+      "pid": 26726,
+      "group": 25738,
+      "startTicks": 2666756,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 26727,
+      "group": 25738,
+      "startTicks": 2666756,
+      "state": "R",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1"
+    },
+    {
+      "pid": 26747,
+      "group": 25738,
+      "startTicks": 2666781,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26755,
+      "group": 25738,
+      "startTicks": 2666796,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26782,
+      "group": 25738,
+      "startTicks": 2666808,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26805,
+      "group": 25738,
+      "startTicks": 2667175,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26816,
+      "group": 25738,
+      "startTicks": 2667234,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26839,
+      "group": 25738,
+      "startTicks": 2667536,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26849,
+      "group": 25738,
+      "startTicks": 2667596,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26860,
+      "group": 25738,
+      "startTicks": 2667627,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26932,
+      "group": 25738,
+      "startTicks": 2668618,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26977,
+      "group": 25738,
+      "startTicks": 2668955,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 26996,
+      "group": 25738,
+      "startTicks": 2669007,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27004,
+      "group": 25738,
+      "startTicks": 2669031,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27028,
+      "group": 25738,
+      "startTicks": 2669058,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27036,
+      "group": 25738,
+      "startTicks": 2669091,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27094,
+      "group": 25738,
+      "startTicks": 2669827,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27102,
+      "group": 25738,
+      "startTicks": 2669833,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27128,
+      "group": 25738,
+      "startTicks": 2670041,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27166,
+      "group": 25738,
+      "startTicks": 2670331,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27174,
+      "group": 25738,
+      "startTicks": 2670401,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27181,
+      "group": 25738,
+      "startTicks": 2670437,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 27193,
+      "group": 25738,
+      "startTicks": 2670440,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27201,
+      "group": 25738,
+      "startTicks": 2670465,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27209,
+      "group": 25738,
+      "startTicks": 2670497,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27216,
+      "group": 25738,
+      "startTicks": 2670500,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 27217,
+      "group": 25738,
+      "startTicks": 2670500,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 27218,
+      "group": 25738,
+      "startTicks": 2670500,
+      "state": "R",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+    },
+    {
+      "pid": 27230,
+      "group": 25738,
+      "startTicks": 2670503,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27504,
+      "group": 25738,
+      "startTicks": 2673886,
+      "state": "R",
+      "exe": "/usr/bin/x86_64-linux-gnu-as"
+    },
+    {
+      "pid": 27526,
+      "group": 25738,
+      "startTicks": 2673960,
+      "state": "R",
+      "exe": "/usr/bin/x86_64-linux-gnu-ar"
+    },
+    {
+      "pid": 27535,
+      "group": 25738,
+      "startTicks": 2673968,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27566,
+      "group": 25738,
+      "startTicks": 2673979,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27574,
+      "group": 25738,
+      "startTicks": 2673984,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27587,
+      "group": 25738,
+      "startTicks": 2674156,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27754,
+      "group": 25738,
+      "startTicks": 2675393,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 27886,
+      "group": 25738,
+      "startTicks": 2676361,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 28243,
+      "group": 25738,
+      "startTicks": 2677205,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 29197,
+      "group": 25738,
+      "startTicks": 2684140,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 30208,
+      "group": 25738,
+      "startTicks": 2689065,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 30209,
+      "group": 25738,
+      "startTicks": 2689066,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 30210,
+      "group": 25738,
+      "startTicks": 2689066,
+      "state": "R",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+    },
+    {
+      "pid": 30223,
+      "group": 25738,
+      "startTicks": 2689076,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 30398,
+      "group": 25738,
+      "startTicks": 2690166,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 30626,
+      "group": 25738,
+      "startTicks": 2692315,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 30627,
+      "group": 25738,
+      "startTicks": 2692316,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 30628,
+      "group": 25738,
+      "startTicks": 2692316,
+      "state": "R",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+    },
+    {
+      "pid": 30638,
+      "group": 25738,
+      "startTicks": 2692341,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 30908,
+      "group": 25738,
+      "startTicks": 2694916,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 30909,
+      "group": 25738,
+      "startTicks": 2694916,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 30910,
+      "group": 25738,
+      "startTicks": 2694916,
+      "state": "R",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+    },
+    {
+      "pid": 30920,
+      "group": 25738,
+      "startTicks": 2694924,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 31119,
+      "group": 25738,
+      "startTicks": 2696143,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 31138,
+      "group": 25738,
+      "startTicks": 2696149,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 31238,
+      "group": 25738,
+      "startTicks": 2696732,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 31360,
+      "group": 25738,
+      "startTicks": 2697670,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 31361,
+      "group": 25738,
+      "startTicks": 2697670,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 31362,
+      "group": 25738,
+      "startTicks": 2697671,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+    },
+    {
+      "pid": 31372,
+      "group": 25738,
+      "startTicks": 2697675,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 31768,
+      "group": 25738,
+      "startTicks": 2701191,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 31925,
+      "group": 25738,
+      "startTicks": 2702679,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 32232,
+      "group": 25738,
+      "startTicks": 2705682,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 32233,
+      "group": 25738,
+      "startTicks": 2705683,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 32244,
+      "group": 25738,
+      "startTicks": 2705692,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 32556,
+      "group": 25738,
+      "startTicks": 2707408,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 32557,
+      "group": 25738,
+      "startTicks": 2707408,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 32558,
+      "group": 25738,
+      "startTicks": 2707409,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+    },
+    {
+      "pid": 32573,
+      "group": 25738,
+      "startTicks": 2707416,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 348,
+      "group": 25738,
+      "startTicks": 2709908,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 670,
+      "group": 25738,
+      "startTicks": 2713641,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 965,
+      "group": 25738,
+      "startTicks": 2716239,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 1127,
+      "group": 25738,
+      "startTicks": 2717639,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 1213,
+      "group": 25738,
+      "startTicks": 2718120,
+      "state": "S",
+      "exe": "/usr/bin/x86_64-linux-gnu-gcc-13"
+    },
+    {
+      "pid": 1214,
+      "group": 25738,
+      "startTicks": 2718121,
+      "state": "S",
+      "exe": "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2"
+    },
+    {
+      "pid": 1215,
+      "group": 25738,
+      "startTicks": 2718121,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
+    },
+    {
+      "pid": 1225,
+      "group": 25738,
+      "startTicks": 2718130,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 1334,
+      "group": 25738,
+      "startTicks": 2718969,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 1408,
+      "group": 25738,
+      "startTicks": 2719620,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc"
+    },
+    {
+      "pid": 1776,
+      "group": 25738,
+      "startTicks": 2722668,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_bootstrap-b092a74d5e0da5e9"
+    },
+    {
+      "pid": 3210,
+      "group": 25738,
+      "startTicks": 2733358,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/autostart_coordinator-163e86d18bbe4ede"
+    },
+    {
+      "pid": 3314,
+      "group": 25738,
+      "startTicks": 2734261,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/business_storage-1e94c14fb0b8e70a"
+    },
+    {
+      "pid": 3783,
+      "group": 25738,
+      "startTicks": 2738200,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/calendar_execution_fence-a82aef5927204173"
+    },
+    {
+      "pid": 3901,
+      "group": 25738,
+      "startTicks": 2738846,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/runtime_storage-202191c1d75042a3"
+    },
+    {
+      "pid": 3914,
+      "group": 25738,
+      "startTicks": 2738890,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/schedule_operations-89bd5c5873460f81"
+    },
+    {
+      "pid": 3948,
+      "group": 25738,
+      "startTicks": 2739307,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/voice_limits_storage-b5e8cf3e633b2ffc"
+    },
+    {
+      "pid": 3987,
+      "group": 25738,
+      "startTicks": 2739641,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/voice_storage-f4e808f7430e9ee4"
+    },
+    {
+      "pid": 4324,
+      "group": 25738,
+      "startTicks": 2741442,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_materials-fca9b99e1d12daa8"
+    },
+    {
+      "pid": 4432,
+      "group": 25738,
+      "startTicks": 2741461,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_protocol-4f83b5a15e9f8854"
+    },
+    {
+      "pid": 4515,
+      "group": 25738,
+      "startTicks": 2741475,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_runtime-3f68a038e44927c2"
+    },
+    {
+      "pid": 4650,
+      "group": 25738,
+      "startTicks": 2741491,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_security-7da6d32085b96235"
+    },
+    {
+      "pid": 4676,
+      "group": 25738,
+      "startTicks": 2741522,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_storage-f551ec92e37a3558"
+    },
+    {
+      "pid": 5736,
+      "group": 25738,
+      "startTicks": 2751223,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_windows-b8565a71f8558cd2"
+    },
+    {
+      "pid": 5823,
+      "group": 25738,
+      "startTicks": 2751250,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustdoc"
+    },
+    {
+      "pid": 5826,
+      "group": 25738,
+      "startTicks": 2751254,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustdoc"
+    },
+    {
+      "pid": 5829,
+      "group": 25738,
+      "startTicks": 2751271,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustdoc"
+    },
+    {
+      "pid": 5832,
+      "group": 25738,
+      "startTicks": 2751290,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustdoc"
+    },
+    {
+      "pid": 5838,
+      "group": 25738,
+      "startTicks": 2751301,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustdoc"
+    },
+    {
+      "pid": 5841,
+      "group": 25738,
+      "startTicks": 2751308,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustdoc"
+    },
+    {
+      "pid": 5847,
+      "group": 25738,
+      "startTicks": 2751324,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustdoc"
+    },
+    {
+      "pid": 5856,
+      "group": 25738,
+      "startTicks": 2751331,
+      "state": "S",
+      "exe": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustdoc"
+    }
+  ],
+  "ownedFixtureCleanup": [
+    {
+      "root": "/tmp/fc-round80-controlled-repair/a470-host-workspace-release-serial-first/fixture-5e2d825ae2bd47c0bb8c6ea5d72f79e1",
+      "dev": 4194542,
+      "ino": 2464597,
+      "filesBeforeCleanup": [
+        {
+          "path": "/tmp/fc-round80-controlled-repair/a470-host-workspace-release-serial-first/fixture-5e2d825ae2bd47c0bb8c6ea5d72f79e1/.owner",
+          "bytes": 61,
+          "sha256": "ecb3e510b686c27fb8201b520df9767a2fcc089a35544c8ae0daba413ea62913"
+        }
+      ]
+    }
+  ],
+  "ownedFixtureRootsKnownAbsent": true,
+  "unownedNewShmEntriesNotTouched": 0,
+  "sourceInputsBefore": {
+    "Cargo.toml": {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/Cargo.toml",
+      "bytes": 1173,
+      "sha256": "95d5c4a52c154ef80ae54a42dc228e081bb3956a0ede5e4260b967d723fd7de7"
+    },
+    "Cargo.lock": {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    "rust-toolchain.toml": {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/rust-toolchain.toml",
+      "bytes": 86,
+      "sha256": "559f488c181e0e9e77cf17c29de663977f036ec7ff2e2060585714bf53c52d62"
+    },
+    "scripts/verify.sh": {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/scripts/verify.sh",
+      "bytes": 789,
+      "sha256": "735ff1000dee4ed3815ed2c0af10fa08945604817249c1dea931068df9b24a9d"
+    }
+  },
+  "sourceInputsAfter": {
+    "Cargo.toml": {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/Cargo.toml",
+      "bytes": 1173,
+      "sha256": "95d5c4a52c154ef80ae54a42dc228e081bb3956a0ede5e4260b967d723fd7de7"
+    },
+    "Cargo.lock": {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    "rust-toolchain.toml": {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/rust-toolchain.toml",
+      "bytes": 86,
+      "sha256": "559f488c181e0e9e77cf17c29de663977f036ec7ff2e2060585714bf53c52d62"
+    },
+    "scripts/verify.sh": {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/scripts/verify.sh",
+      "bytes": 789,
+      "sha256": "735ff1000dee4ed3815ed2c0af10fa08945604817249c1dea931068df9b24a9d"
+    }
+  },
+  "sourceStatusClean": true,
+  "stdout": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-host-workspace-release-serial-first/stdout.log",
+    "bytes": 107417,
+    "sha256": "533d3a0963e32ad6f7b945c7c284fe088e31b74fff150b207ac1253fb2c8e956"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-host-workspace-release-serial-first/stderr.log",
+    "bytes": 10286,
+    "sha256": "7da4e7c1f7d459e0e23aa9f56d8614c4c061a926b199548312b0051247a380f8"
+  },
+  "windows": "NOT_CONTACTED",
+  "scope": "Host release profile, serial harness. Existing Linux fixtures that explicitly select/dev/shm retain their source-defined behavior; no full-disk durability or Windows/native claim. Original debug failures not reclassified."
+}

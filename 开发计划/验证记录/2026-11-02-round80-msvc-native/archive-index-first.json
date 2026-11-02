@@ -1,0 +1,60 @@
+{
+  "status": "PASS_FINITE_A470_OFFICIAL_MSVC_AND_WIN11_NATIVE_ARCHIVED",
+  "sourceGit": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "archive": {
+    "path": "evidence-originals-first.tar.gz",
+    "bytes": 1428227,
+    "sha256": "2a3009e0848aab44d598a0872fd2beb486ac7b0f9b482d7f182a104847940232",
+    "storedOriginalMembers": 307,
+    "storedOriginalBytes": 15785047
+  },
+  "selectedOriginals": 400,
+  "selectedOriginalBytes": 26307089,
+  "aliasContract": "All400 source originals were read, bytes/SHA checked and individually credential scanned. 93 exact full-byte duplicates reference canonical storedPath in source-manifest; the307 tar members are complete unmodified original bytes. Four before/after Git-tree streams each strictly19297 NUL-delimited records match exactly. Every alias full-byte equality checked, not hash alone.",
+  "identityOnlyCount": 72,
+  "manifest": {
+    "path": "source-manifest-first.json",
+    "sha256": "feb8dfc55216b8e347e512519c9c1762bd68299388f018ecbf95a3798c74b09f"
+  },
+  "promotedCoreReports": [
+    "a470-modern-native-runtime-first/report.json",
+    "a470-modern-native-retrieval-first/report.json",
+    "a470-win7-native-runtime-second/report.json",
+    "root-a470-msvc-native-two-targets-first.json",
+    "a470-integration-review-first/review-first.json",
+    "a470-download-metadata-repair-first.json",
+    "official-zip/modern/result.json",
+    "official-zip/win7/result.json"
+  ],
+  "scope": {
+    "officialCi": "COMPILE_ONLY; normal product/helper/DLL and tests built with official MSVC; no CI native execution",
+    "Win11": "Modern and Win7-target original processes actually ran controlled6 and full lifecycle66 each;6 is subset of66",
+    "source69VersusDefault66": "Three compiled-scope feature-only tests excluded from default normal CI, not silently counted as native execution",
+    "modernOriginalWrapper": "Original FAIL NameError retained; later readback qualified exact existing native result and cleaned original nonce, nativeRerun=false",
+    "Win7OS": "NOT_RUN",
+    "Win10OS": "NOT_RUN",
+    "productionMsiFromTheseArtifacts": "NOT_RUN",
+    "nativeBeginEnd": "Component synthetic/cfgtest observations only, no new production MSI transaction receipt"
+  },
+  "scanner": {
+    "backendMember": "archive-preparation-second/archive-second.py",
+    "backendSha256": "da2906c450ea8c2ac7d18e358507023f519dbcc6faf1a9ac1abb1ae16af8c30f",
+    "extraStructuralForms": "Only four exact path/bytes/SHA Git tree streams,19,297 strict long mode/type/OID/size/tab/path records; raw/visible-boundary/concatenated views scanned",
+    "findings": [],
+    "statistics": {
+      "textViews": 49879,
+      "utf16Views": 132,
+      "cp936Views": 26,
+      "clixmlDecodedViews": 16,
+      "decodedBase64Views": 70,
+      "jsonContainers": 801,
+      "decodedJsonStringViews": 48998
+    }
+  },
+  "excluded": "PE/ZIP identities only; invalid first download metadata identity only and exact repair receipt retained; redundant broad input-domain/tree JSON identity only. No raw scope/credentials/school data/tools/target/activewriter source/future packaging/unfinished host evidence.",
+  "WindowsContacted": false,
+  "Cargo": false,
+  "Git": false,
+  "sourceDeletion": false,
+  "progressWritten": false
+}

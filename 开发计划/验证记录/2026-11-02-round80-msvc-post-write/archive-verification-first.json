@@ -1,0 +1,40 @@
+{
+  "status": "PASS_ALL_ORIGINALS_FULL_TAR_REPLAY_AND_STRICT_CREDENTIAL_SCAN",
+  "archiveSha256": "94d316251a1fd4572f9a555c53cf974b4fc39bc8894192aecfe3ee6cd4cdab05",
+  "originalsChecked": 278,
+  "identityOnlyChecked": 23,
+  "fullTarMembersReplayed": 278,
+  "promotedRawReports": 8,
+  "credentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "findings": [],
+    "statistics": {
+      "textViews": 30170,
+      "utf16Views": 74,
+      "cp936Views": 0,
+      "clixmlDecodedViews": 10,
+      "decodedBase64Views": 47,
+      "jsonContainers": 132,
+      "decodedJsonStringViews": 29417
+    },
+    "jsonlRecords": 36,
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "coverage": "Complete selected rawtext/full decompressed tar/raw promotions/controller/selector/manifests/index; UTF8/UTF16/CP936/CLIXML/JSON/JSONL/nested generic and declaredbase64; only14 exact structural forms"
+  },
+  "originalReportsAndLabelsPreserved": true,
+  "Windows": false,
+  "Cargo": false,
+  "Git": false
+}

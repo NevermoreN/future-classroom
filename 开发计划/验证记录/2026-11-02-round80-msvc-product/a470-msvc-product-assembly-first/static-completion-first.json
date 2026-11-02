@@ -1,0 +1,68 @@
+{
+  "status": "PASS_A470_OFFICIAL_WIN7_NORMAL_CONTROLLED_PACKAGE_STATIC_ONLY",
+  "sourceSha": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "preparationFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-preparation-first/freeze-first.json",
+    "bytes": 1298,
+    "sha256": "8d2bcbe9b26766c38a9b0fc02eb8ffddaf15970a469aaa33508b177639a2a231"
+  },
+  "inputManifest": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-input-first/manifest.json",
+    "bytes": 721344,
+    "sha256": "60821498b9899c15efc9197835d6cd690de532ef93808df0c015355960f657eb"
+  },
+  "inputPreparationOperation": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-input-first/prepare-operation-first.json",
+    "bytes": 405,
+    "sha256": "279c1772c56b75a81d304cbb1d0f56377c2253452c2b2b0933723f9ee372541e"
+  },
+  "assemblyOperation": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-assembly-first/assemble-operation-first.json",
+    "bytes": 502,
+    "sha256": "71fd6299a716b9b9f9beb752667047581607450598ec26aa546c2ce171eda30d"
+  },
+  "assemblyReport": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-assembly-first/report.json",
+    "bytes": 5351,
+    "sha256": "c247ef8d79d4179f79378c8be6e008a632351c4bc9ac8401e7d0057cc0666d5d"
+  },
+  "packagingReport": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-package-first/report.json",
+    "bytes": 93983,
+    "sha256": "f6b5265bf94dd0b88cd493a6a731a82cfe297cd991e7505d5ca5b811099eb6e5"
+  },
+  "controlledMsi": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-package-first/FutureClassroom.msi",
+    "bytes": 6787072,
+    "sha256": "bfa908c58450016ad219e372a0c47dd13d9d71a68270e9cdbf2b9c6fc3b52fdc"
+  },
+  "sealedSetup": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-package-first/Setup.exe",
+    "bytes": 483768,
+    "sha256": "35b2f66be2aa0276d6954e41634acc30987a84cb72806bc6808262633ee8136c"
+  },
+  "normalProbeZip": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-assembly-first/normal-product.zip",
+    "bytes": 5445072,
+    "sha256": "d2ed4f52e31761befaeec92548677aee240d7a8e790b694da5af973701359c8d"
+  },
+  "normalCIArtifactCount": 3,
+  "rawCISourceRows": 618,
+  "sourceMaterializationCounts": {
+    "EXACT_GIT_BLOB": 6,
+    "EXACT_UTF8_LF_TO_CRLF_CHECKOUT_BYTES": 612
+  },
+  "fullWebSourceRowsVerified": 65,
+  "unchangedSourceToolZipAndDistReadback": "PASS",
+  "formalAdmissionUnmodified": true,
+  "actualCurrentInputsVerified": 557,
+  "payloadCount": 14,
+  "exactPayloadReadback": "EXACT_BYTES_MATCH",
+  "exactGuardTemplateReadback": "EXACT_SAME_SOURCE_DLL_AND_ZERO32_TEMPLATE",
+  "windows": "NOT_RUN",
+  "productionIntegrationForThisPackage": "NOT_EXERCISED",
+  "windows7": "NOT_RUN",
+  "windows10": "NOT_RUN",
+  "readiness": "NOT_GRANTED",
+  "ownedInputSourceCopy": "PARTIAL_618_RAW_CI_INPUTS_WITH_DETACHED_ACTUAL_COMMIT_AND_ORIGINAL_INDEX_NOT_FULL_CLEAN_WORKTREE"
+}

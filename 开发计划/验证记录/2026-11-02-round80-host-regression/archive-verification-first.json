@@ -1,0 +1,45 @@
+{
+  "status": "PASS_FULL_MEMBER_REPLAY_AND_STRICT_CREDENTIAL_SCAN",
+  "archiveSha256": "3db4a8570d479d51448a36a222ad75280add1f028583743cbc3671060ac12eae",
+  "archiveBytes": 296036,
+  "members": 103,
+  "originalTextBytes": 1708568,
+  "statistics": {
+    "textViews": 33133,
+    "utf16Views": 0,
+    "cp936Views": 0,
+    "clixmlDecodedViews": 0,
+    "decodedBase64Views": 0,
+    "jsonContainers": 139,
+    "decodedJsonStringViews": 32905
+  },
+  "jsonlRecordsAlsoDecoded": 0,
+  "credentialFindings": [],
+  "scanner": {
+    "sourceArchive": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/evidence-originals-first.tar.gz",
+    "member": "archive-preparation-second/archive-second.py",
+    "bytes": 26272,
+    "sha256": "da2906c450ea8c2ac7d18e358507023f519dbcc6faf1a9ac1abb1ae16af8c30f"
+  },
+  "patterns": [
+    "private-key-pem",
+    "github-token",
+    "openai-secret",
+    "aws-access-key",
+    "bearer-secret",
+    "basic-secret",
+    "signed-download-url",
+    "session-cookie-bearer",
+    "json-issued-web-secret",
+    "json-password-value",
+    "potential-pairing-short-code"
+  ],
+  "coverage": "Strict UTF8/UTF16/CP936/CLIXML, JSON strings and nested base64; original depth12/decoded64MiB/container250000 bounds. No text/control whitelist added; unknown controls rejected.",
+  "actions": {
+    "Windows": false,
+    "Cargo": false,
+    "activeWorktreeRead": false,
+    "sourceDeletion": false,
+    "otherDocsCodeGitWritten": false
+  }
+}

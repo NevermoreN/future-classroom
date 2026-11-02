@@ -1,0 +1,36 @@
+{
+  "status": "PASS_FULL_TAR_BYTE_REPLAY_AND_STRICT_CREDENTIAL_SCAN",
+  "sourceOriginalsCheckedAndScanned": 400,
+  "storedMembersReplayed": 307,
+  "identityOnlyChecked": 72,
+  "promotedRawCoreReports": 8,
+  "archiveSha256": "2a3009e0848aab44d598a0872fd2beb486ac7b0f9b482d7f182a104847940232",
+  "credentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "statistics": {
+      "textViews": 49907,
+      "utf16Views": 132,
+      "cp936Views": 26,
+      "clixmlDecodedViews": 16,
+      "decodedBase64Views": 70,
+      "jsonContainers": 802,
+      "decodedJsonStringViews": 49025
+    },
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "findings": [],
+    "coverage": "All400 source originals,307 complete decompressed tar members,8 raw promoted core reports, controller/selector/manifest/default output/index; strict committed UTF8/UTF16/CP936/CLIXML/JSON/generic+declaredbase64 decoder. Only exact four tree streams structural exception; no generic controls permitted."
+  },
+  "noSourceOrWindowsMutation": true
+}

@@ -1,0 +1,59 @@
+{
+  "status": "PASS_ROOT_TWO_OFFICIAL_MSVC_TARGETS_RUNTIME_WIN11_ONLY",
+  "sourceSha": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "facts": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/a470-native-preparation-first/freeze-first.json",
+      "bytes": 2829,
+      "sha256": "b2b15c7e61f1a981aa6bab951b1df21b37bff5005222a5cb63e313faa5e6c464"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/a470-native-preparation-second/freeze-first.json",
+      "bytes": 3801,
+      "sha256": "96345224708e840bbb235dbae37a8f20319f170eea471aaa067ef55f59ad62b0"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/report.json",
+      "bytes": 20893,
+      "sha256": "2f0fb8df3e7ece2cb7ba63cac142766b356676ad035f37c4dc883ef5612ce8fc"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/report.json",
+      "bytes": 10725,
+      "sha256": "610b8627858a22aa281ee03c3bc5bcac4f5cb7464b6ee0144e6d663af143ec3e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/a470-win7-native-runtime-second/report.json",
+      "bytes": 27772,
+      "sha256": "41759beef57f9582dd04f9d97802547d55fdcb1f0938ed1c6b161e59b38719af"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/root-a470-native-ps-parse-first.json",
+      "bytes": 670,
+      "sha256": "63fa291b235ab9661b87bdcc9547a47e703bf2b4bc28f701b2f0e9cdb436a162"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/root-a470-native-ps-parse-second.json",
+      "bytes": 748,
+      "sha256": "9d1c09b64faf03084ecfb4bae398a710bebe3c139ed136f3c982b081305f1f9a"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/a470-integration-local-first/report.json",
+      "bytes": 1068,
+      "sha256": "68b44ffca7cef056026142846ba1e4ce2bc480169710e348df306c4612602bcc"
+    }
+  ],
+  "modernOriginalOverallFailure": "RETAINED_LOCAL_MISSING_IMPORT_RE_NOT_REWRITTEN",
+  "modernNativeMilliseconds": 1232,
+  "modernReadbackElapsedSeconds": 2.5641456930025015,
+  "win7TargetNativeMilliseconds": 1273,
+  "nativeCountsEach": {
+    "controlled": 6,
+    "lifecycleIncludesControlled": 66
+  },
+  "originalProcessObjectsActualZeroWaitClose": 4,
+  "bothOwnedNonceDirectoriesKnownAbsent": true,
+  "windows7Actual": "NOT_RUN",
+  "windows10Actual": "NOT_RUN",
+  "msiIntegrationFromTheseArtifacts": "NOT_RUN"
+}

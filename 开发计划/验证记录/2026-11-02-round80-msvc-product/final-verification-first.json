@@ -1,0 +1,61 @@
+{
+  "status": "PASS_FINITE_D4_OFFICIAL_MSVC_PRODUCT_ARCHIVE_FINAL_REPLAY_AND_STRICT_SCAN",
+  "sourceSha": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "archive": {
+    "path": "evidence-originals-first.tar.gz",
+    "bytes": 1901971,
+    "sha256": "a24f43d94e1856c40b5fa86876e80a0d605fc64e68ff49db812395510cbc317e",
+    "members": 229,
+    "originalBytes": 9549168
+  },
+  "originalCount": 229,
+  "originalBytes": 9549168,
+  "identityOnlyCount": 19,
+  "rawPromotedReports": 11,
+  "sourceMembershipUnchanged": true,
+  "upstreamD3FreezeUnchanged": true,
+  "actualArchiveExit": 0,
+  "actualReplayExit": 0,
+  "firstRuntimeFailurePreserved": {
+    "reportSha256": "34089633dda32e7e31589eff18b421f2b9ef31f88e020465bc466cbb404aba6c",
+    "scope": "PRECHECK_ACTUAL1_BEFORE_ROOT_OR_MSI",
+    "oldNonceActualKnownAbsent": true
+  },
+  "secondRuntime": {
+    "reportSha256": "4a1dd14e32be5c8c4519876a5aee534712870dc344fd889291733c48f41c7d7f",
+    "sourceTarget": "i686-win7-windows-msvc",
+    "runtimeOS": "WIN11_ONLY",
+    "originalProcessInstances": "THREE_B_PLUS_THREE_G_KNOWN_WAIT0_EXIT0_CHECKED_CLOSE",
+    "nativeMilliseconds": 5997,
+    "outerSeconds": 8.200375734999398,
+    "full14Repair": true,
+    "productAndCoordinationAndObservedCacheKnownAbsent": true,
+    "downloadedOriginals": 30,
+    "downloadedDirectories": 4,
+    "nonceExactAbsent": true,
+    "beginEnd": "NOT_ASSERTED_FROM_LOGS_OR_EXTERNAL_PROCESS_OBSERVER"
+  },
+  "credentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "findings": [],
+    "statistics": {
+      "textViews": 11585,
+      "utf16Views": 20,
+      "cp936Views": 0,
+      "clixmlDecodedViews": 0,
+      "decodedBase64Views": 10,
+      "jsonContainers": 35,
+      "decodedJsonStringViews": 11539
+    },
+    "jsonlRecords": 0,
+    "finalVerificationAndFreezeAlsoScannedBeforeWrite": true,
+    "forms": "Only two exact path/size/SHA-bound UTF16 MSI signature diagnostic structures; no generic control tolerance"
+  },
+  "excluded": "Only identities for PE/MSI/ZIP; source copy/.git, original histories, tools/cache/node_modules not traversed; no raw owned removal scope/private key/credential content.",
+  "boundaries": [
+    "Formal target source static packaging and exact Win11 joint success; Win7/Win10 actual still NOT_RUN.",
+    "D3 official full CI text/ZIP identity references retained without duplicate CI closure.",
+    "Archive operation did not contact Windows, run PE/Cargo/Git, write main progress/host/DB or modify D1/D2/D3."
+  ],
+  "stopWritingAfterFreeze": true
+}

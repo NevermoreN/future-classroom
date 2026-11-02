@@ -1,0 +1,31 @@
+{
+  "schema": "future-classroom-host-strict-clippy-diagnosis/v1",
+  "status": "ORIGINAL_HOST_STRICT_CLIPPY_FAIL_CONFIRMED",
+  "originalReport": {
+    "path": "report.json",
+    "bytes": 915788,
+    "sha256": "2af0afddaea8f462d218453b65c1fb3392449e5d37339bf0968220edf7953562"
+  },
+  "sourceGit": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "actualExit": 101,
+  "elapsedSeconds": 29.406931633002387,
+  "errors": [
+    "unused import: `runtime::WebRuntimeReservation`",
+    "method `https_data_root` is never used",
+    "struct `WebRuntimeReservation` is never constructed",
+    "methods `reserve_runtime`, `runtime_domain_current`, and `settle_runtime_stop` are never used",
+    "multiple methods are never used",
+    "method `with_domain_fence` is never used",
+    "could not compile `fc-bootstrap` (lib) due to 6 previous errors"
+  ],
+  "cause": "Windows-only runtime/transfer composition consumers are cfg(windows), while their crate-private exports/helpers were compiled and unused in ordinary Linux lib; runtime unit tests require the common reservation helper on test builds.",
+  "fixScope": "Separate Windows-only methods/reexport from Windows-or-test reservation type/ctor/lifecycle and settle helper, using exact cfg attributes only. No allow or body/permission/budget change.",
+  "mainW2Windows": "NOT_MODIFIED_OR_CONTACTED",
+  "cleanup": {
+    "root": "/tmp/fc-round80-controlled-repair/a470-host-strict-clippy-first/tmp-89306274c6004a1f89f4af149547eefe",
+    "dev": 4194542,
+    "ino": 2504649,
+    "filesBeforeCleanup": [],
+    "knownAbsent": true
+  }
+}

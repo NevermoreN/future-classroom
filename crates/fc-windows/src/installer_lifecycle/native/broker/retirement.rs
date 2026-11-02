@@ -209,6 +209,7 @@ mod tests {
                 pipe_name: HSTRING::new(),
                 deadline,
                 peer_images: Vec::new(),
+                sealed_package_sha: None,
             };
             Self { root, session }
         }

@@ -1,0 +1,187 @@
+{
+  "schema": "future-classroom-host-platform-cfg-implementation/v1",
+  "status": "MINIMAL_CFG_FIX_HOST_WORKSPACE_STRICT_CLIPPY_PASSED",
+  "baseGit": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "branch": "implementation/r80-host-platform-cfg",
+  "worktree": "/tmp/fc-round80-controlled-repair/checkout-host-cfg-first",
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "bytes": 4124,
+      "sha256": "6eed2e681f9580343e0c18e2dc3b635c62c35aa0fcd7898f044e3c98341713b0",
+      "baseBytes": 4108,
+      "baseSha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 46801,
+      "sha256": "2e8b94f640c400c3e35d22261d3db5ff7da4d68507625577ad4f99371ef02043",
+      "baseBytes": 46785,
+      "baseSha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "bytes": 10113,
+      "sha256": "1ec0c01a52b614547f1a1defead6e85e297ce51a1593b954b81589b93e5c0d07",
+      "baseBytes": 9910,
+      "baseSha256": "5bb04d3585f895381daa0ef3e28ef851d7304c0584cebf40a615a91468716e39"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer.rs",
+      "bytes": 10917,
+      "sha256": "6065f1df8269a23bfeb3fee9670a77dea3798a756a86954c2b796214373bf498",
+      "baseBytes": 10897,
+      "baseSha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76"
+    }
+  ],
+  "patch": {
+    "path": "complete.patch",
+    "bytes": 3762,
+    "sha256": "343cccc8870934841c3bb43bfb5a29d3af43ffb6733a28dd50e38fec9ed8bd84"
+  },
+  "patchReverseCheckActualExit": 0,
+  "delta": {
+    "files": 4,
+    "addedLines": 11,
+    "deletedLines": 0,
+    "onlyAdditions": [
+      "#[cfg(windows)]",
+      "#[cfg(windows)]",
+      "#[cfg(any(windows, test))]",
+      "#[cfg(any(windows, test))]",
+      "#[cfg(windows)]",
+      "#[cfg(any(windows, test))]",
+      "#[cfg(any(windows, test))]",
+      "#[cfg(windows)]",
+      "#[cfg(windows)]",
+      "#[cfg(any(windows, test))]",
+      "#[cfg(windows)]"
+    ],
+    "functionBodyChanges": "NONE",
+    "allowAttributesAdded": "NONE"
+  },
+  "baselineFailure": {
+    "report": "/tmp/fc-round80-controlled-repair/a470-host-strict-clippy-first/report.json",
+    "sha256": "2af0afddaea8f462d218453b65c1fb3392449e5d37339bf0968220edf7953562",
+    "freeze": {
+      "path": "freeze-first.json",
+      "bytes": 1206,
+      "sha256": "8f6587c441297e8a128e3f8f7cf2862c88894dfbfe329024ca459dc62e7aa68d"
+    },
+    "actualExit": 101,
+    "elapsedSeconds": 29.406931633002387,
+    "classification": "Original real Linux host strict failure; retained, not overwritten or reclassified"
+  },
+  "cfgMapping": {
+    "windowsOnly": [
+      "backend/web.rs WebRuntimeReservation reexport",
+      "backend/https_settings.rs Backend::https_data_root impl",
+      "backend/web/runtime.rs WebService::runtime_domain_current",
+      "backend/web/runtime.rs WebRuntimeReservation::identity_revision/execution_fence",
+      "web_transfer.rs TransferLifetime::with_domain_fence"
+    ],
+    "windowsOrTest": [
+      "WebRuntimeReservation struct/impl/Drop",
+      "WebService::reserve_runtime/settle_runtime_stop"
+    ],
+    "preservedAlwaysCompiled": [
+      "WebService::runtime_execution_current/runtime_generation/negative_runtime_stop and ordinary Web authorization logic"
+    ]
+  },
+  "actualChecks": [
+    {
+      "name": "fmt",
+      "argv": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "actualExit": 0,
+      "elapsedSeconds": 3.5801212369988207,
+      "budgetSeconds": 600,
+      "timedOut": false,
+      "signals": [],
+      "originalPid": 9585,
+      "reaped": true,
+      "remainingGroup": [],
+      "tmpRoot": "/tmp/fc-round80-controlled-repair/host-platform-cfg-implementation-first/tmp-fmt-86c0237e797a4b2fb9eec3c5ef8a4a2a",
+      "tmpFilesBeforeCleanup": [],
+      "tmpKnownAbsent": true,
+      "targetDir": "/tmp/fc-round80-controlled-repair/target-a470-host-first"
+    },
+    {
+      "name": "architecture",
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "actualExit": 0,
+      "elapsedSeconds": 0.1209380849977606,
+      "budgetSeconds": 600,
+      "timedOut": false,
+      "signals": [],
+      "originalPid": 9623,
+      "reaped": true,
+      "remainingGroup": [],
+      "tmpRoot": "/tmp/fc-round80-controlled-repair/host-platform-cfg-implementation-first/tmp-architecture-f28588e1a6b8499c96e32bc551c45b96",
+      "tmpFilesBeforeCleanup": [],
+      "tmpKnownAbsent": true,
+      "targetDir": "/tmp/fc-round80-controlled-repair/target-a470-host-first"
+    },
+    {
+      "name": "diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "actualExit": 0,
+      "elapsedSeconds": 0.47731324800042785,
+      "budgetSeconds": 600,
+      "timedOut": false,
+      "signals": [],
+      "originalPid": 9635,
+      "reaped": true,
+      "remainingGroup": [],
+      "tmpRoot": "/tmp/fc-round80-controlled-repair/host-platform-cfg-implementation-first/tmp-diff-52a8797e95d444318eca9b7bcebbcfdf",
+      "tmpFilesBeforeCleanup": [],
+      "tmpKnownAbsent": true,
+      "targetDir": "/tmp/fc-round80-controlled-repair/target-a470-host-first"
+    },
+    {
+      "name": "strict-clippy",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "actualExit": 0,
+      "elapsedSeconds": 31.048138641999685,
+      "budgetSeconds": 600,
+      "timedOut": false,
+      "signals": [],
+      "originalPid": 9663,
+      "reaped": true,
+      "remainingGroup": [],
+      "tmpRoot": "/tmp/fc-round80-controlled-repair/host-platform-cfg-implementation-first/tmp-strict-clippy-a9a0168ebf26488fbfa2c46888d00fc1",
+      "tmpFilesBeforeCleanup": [],
+      "tmpKnownAbsent": true,
+      "targetDir": "/tmp/fc-round80-controlled-repair/target-a470-host-first"
+    }
+  ],
+  "sourceUnchangedDuringChecks": true,
+  "architecture": "12crates33edges actual checker0",
+  "scope": "Actual Linux host workspace all-target strict Clippy, including lib and test compilation. Not Windows Clippy used as a substitute. New cfg additions all evaluate true on Windows; actual Windows rebuild/runtime of this4file candidate NOT_RUN.",
+  "tests": "All-target Clippy compiled existing host runtime unit tests. No new tests and no new full functional test run after these cfg insertions. Prior a470 release989 pass remains separate baseline evidence, not claimed for this new worktree.",
+  "mainW2": "Untouched; original W2 source still a470 clean",
+  "commitPushWindows": "NOT_RUN",
+  "cleanup": "Every command original process/group returned, self-owned TMPDIR/TEMP/TMP roots inventoried and removed; active shared target cache retained, no test product created."
+}

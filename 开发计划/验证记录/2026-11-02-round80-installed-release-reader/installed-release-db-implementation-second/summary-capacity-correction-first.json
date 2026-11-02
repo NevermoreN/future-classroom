@@ -1,0 +1,13 @@
+{
+  "status": "ROOT_PRIMARY_DOC_SEMANTIC_FIX_BEFORE_NATIVE_EXECUTION",
+  "source": "https://learn.microsoft.com/en-us/windows/win32/api/msiquery/nf-msiquery-msisummaryinfogetpropertyw",
+  "cause": "Input pcchValueBuf is full buffer capacity including terminating NUL; output successful character count excludes it. Canonical braced GUID38 requires input39, successoutput38.",
+  "oldProducer": {
+    "path": "/tmp/fc-round80-controlled-repair/installed-release-db-implementation-second/build-report-first.json",
+    "bytes": 175433,
+    "sha256": "aa61dd6d1c3b22a1415accee165bfcee32897e677a40acb05cee810dbd7d7d6c"
+  },
+  "oldNativeExecution": "NOT_RUN",
+  "firstSourcesPreserved": "source-before-summary-fix",
+  "newRevision": "Only len=buf.len() as u32 and explicit outputbuf[38]==0; keep kind30/returnedlen38/exact GUID; unrelated RecordGetString budgets unchanged."
+}

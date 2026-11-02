@@ -1,0 +1,140 @@
+{
+  "schema": "future-classroom-a470-host-failure-diagnosis/v1",
+  "status": "CONCURRENT_KDF_CAPACITY_FAILURE_REPRODUCED_ORIGINAL_TESTS_PASS_ISOLATED_FULL_SUITE_NOT_PASSED",
+  "sourceGit": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "worktree": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first",
+  "sourceStatusClean": true,
+  "sourceIdentities": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/crates/fc-storage/src/login.rs",
+      "bytes": 19710,
+      "sha256": "9e9702f037aa6eb335551141ac048940c92db6989b7e969f7c643a0b35c3cf02"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/crates/fc-bootstrap/src/backend/https_certificate/tests.rs",
+      "bytes": 12173,
+      "sha256": "482c098aa35305c2ab770ff89c9856427ddce025613a5b30cadef54b56df7683"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/crates/fc-bootstrap/src/recovery/test_support.rs",
+      "bytes": 7600,
+      "sha256": "d709a5a751e5a352e97ed3cff409c2d4cd9e97d0ea65b70cbc6783bce802606f"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/crates/fc-bootstrap/src/backend.rs",
+      "bytes": 107515,
+      "sha256": "f319c893038fef6178c42170deb2be335695b64357cdd8349a5a0db5fc13b468"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-msvc-clippy-fix-first/scripts/verify.sh",
+      "bytes": 789,
+      "sha256": "735ff1000dee4ed3815ed2c0af10fa08945604817249c1dea931068df9b24a9d"
+    }
+  ],
+  "criticalSourcesMatchMainHead": true,
+  "sourceModifications": "NONE",
+  "originalRun": {
+    "report": {
+      "path": "/tmp/fc-round80-controlled-repair/a470-host-workspace-first/report.json",
+      "bytes": 401,
+      "sha256": "950666ab4f5ce6e3a890414636576b1a550389692cd4b6db691860779de42c0b"
+    },
+    "status": "FAIL_TIMEOUT_ACTUAL_MINUS9_600_SECONDS_WITH11_FAILED_LINES_NO_FINAL_HARNESS_STACKS",
+    "unchanged": true
+  },
+  "serialDisk": {
+    "originalFailedTestNames": 11,
+    "actualPassedNames": 11,
+    "individualProcesses": "Ten original exact tests actual0 in first60s wrapper; final reopen exact test actual0 in separate180s wrapper,96.679s. Not a full-suite or same-process11test pass.",
+    "firstPassReport": "disk-results.json",
+    "reopenSecond": "disk-reopen-second-results.json",
+    "earlierDiagnosisTimeout": {
+      "actualExit": -15,
+      "budgetSeconds": 60,
+      "preserved": true,
+      "signals": "Exact owned processgroup SIGTERM; all members gone; fixture bytes/SHA inventoried then removed"
+    },
+    "medium": "Original btrfs disk, isolated TMPDIR/TEMP/TMP, no fixture or production code change"
+  },
+  "parallelDisk": {
+    "report": "disk-batch-first.json",
+    "actualExit": 101,
+    "testThreads": 8,
+    "tests": 11,
+    "failed": 9,
+    "passed": 2,
+    "elapsedSeconds": 110.82869253899844,
+    "panicReadbacks": [
+      {
+        "test": "backend::https_certificate::tests::https_certificate_discards_query_after_configuration_publication_or_local_lock_and_keeps_native_error",
+        "location": "crates/fc-bootstrap/src/backend/https_certificate/tests.rs:55:56",
+        "reason": "called `Result::unwrap()` on an `Err` value: Storage(LoginCapacity)"
+      },
+      {
+        "test": "backend::recovery::tests::canceled_barrier_leaves_live_data_and_authorization_floor_unchanged",
+        "location": "crates/fc-bootstrap/src/recovery/test_support.rs:74:56",
+        "reason": "called `Result::unwrap()` on an `Err` value: Storage(LoginCapacity)"
+      },
+      {
+        "test": "backend::recovery::migration::tests::source_manifest_and_source_database_must_match_before_any_mapping_review",
+        "location": "crates/fc-bootstrap/src/recovery/test_support.rs:74:56",
+        "reason": "called `Result::unwrap()` on an `Err` value: Storage(LoginCapacity)"
+      },
+      {
+        "test": "backend::recovery::tests::captured_backup_rejects_revision_drift_and_lock_without_renewing_session",
+        "location": "crates/fc-bootstrap/src/recovery/test_support.rs:74:56",
+        "reason": "called `Result::unwrap()` on an `Err` value: Storage(LoginCapacity)"
+      },
+      {
+        "test": "backend::https_certificate::tests::https_certificate_requires_configured_exact_state_and_original_nonrelaxable_fence",
+        "location": "crates/fc-bootstrap/src/backend/https_certificate/tests.rs:55:56",
+        "reason": "called `Result::unwrap()` on an `Err` value: Storage(LoginCapacity)"
+      },
+      {
+        "test": "backend::recovery::migration::tests::mapped_projection_is_inert_and_ordinary_guard_still_rejects_original_foreign_package",
+        "location": "crates/fc-bootstrap/src/recovery/test_support.rs:74:56",
+        "reason": "called `Result::unwrap()` on an `Err` value: Storage(LoginCapacity)"
+      },
+      {
+        "test": "backend::recovery::tests::restore_review_digest_school_and_stale_lease_cannot_authorize_barrier",
+        "location": "crates/fc-bootstrap/src/recovery/test_support.rs:74:56",
+        "reason": "called `Result::unwrap()` on an `Err` value: Storage(LoginCapacity)"
+      },
+      {
+        "test": "backend::recovery::tests::confirmed_candidate_blocks_new_login_keeps_current_password_and_advances_both_floors",
+        "location": "crates/fc-bootstrap/src/backend/recovery/tests.rs:267:53",
+        "reason": "called `Result::unwrap()` on an `Err` value: Storage(LoginCapacity)"
+      },
+      {
+        "test": "backend::recovery::migration::tests::fresh_target_access_cannot_rebless_old_inspection_and_lock_closes_mapping_admission",
+        "location": "crates/fc-bootstrap/src/recovery/test_support.rs:74:56",
+        "reason": "called `Result::unwrap()` on an `Err` value: Storage(LoginCapacity)"
+      }
+    ],
+    "timeout": false
+  },
+  "cause": {
+    "observed": "All9 reproduced panics are fixture login unwrap Storage(LoginCapacity), before their intended business assertion.",
+    "mechanism": "fc-storage/src/login.rs MAX_KDF_WORKERS=2; CPU_POOL is process-global OnceLock; admission atomic try_update rejects a third concurrent KDF with LoginCapacity. Independent database fixtures in one libtest process share this real production pool.",
+    "existingVerificationContract": "At fixed a470, scripts/verify.sh already documents the two process-wide slots and invokes cargo test --workspace --locked -- --test-threads=2. Original manual command omitted this existing harness bound and used default8 (nproc8).",
+    "qualification": "The interrupted original11 failures did not preserve full panic stacks, so the new9 LoginCapacity stacks establish a concrete reproduced failure mechanism; do not assert recovered original stack text or exact one-to-one cause for each original11.",
+    "btrfs": "No reproduced panic was Faulted or a100ms writer-fence error. Do not attribute these failures to disk based on historical comments.",
+    "tmpfs": "NOT_RUN; unnecessary for this proven capacity mechanism, no tmpfs result substitutes for disk durability."
+  },
+  "recommendation": {
+    "productionChange": "NONE; retain original2KDFslots/100ms business fences/password600000iterations",
+    "repositoryStandardCommand": "scripts/verify.sh already uses --test-threads=2; keep documentation consistent",
+    "additionalStableValidation": "New separately budgeted release-optimized workspace --test-threads=1 run authorized by root, to avoid debug PBKDF cost and unrelated-fixture competition; not yet run at this diagnosis freeze",
+    "fullSuiteStatus": "Original full suite remainsFAIL/TIMEOUT; no full-suite pass inferred from these11 individual names"
+  },
+  "cleanup": {
+    "serialFirst": "disk-cleanup.json",
+    "serialReopen": "disk-reopen-second-cleanup.json",
+    "parallelExactRootKnownAbsent": true,
+    "parallelOwnedRemainingFilesBeforeCleanup": 8,
+    "ownProcessGroupsKnownAbsent": true,
+    "sharedBuildCache": "Retained for root-authorized full release run; not a test product or temporary database"
+  },
+  "windows": "NOT_CONTACTED",
+  "mainGit": "NOT_MODIFIED_COMMITTED_OR_SYNCED"
+}

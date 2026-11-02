@@ -9,6 +9,7 @@ use fc_runtime::{
     health::{GateError, Health},
 };
 use fc_security::web::{PairingCode, SecretText, SecretVerifier, WebSecret};
+#[cfg(windows)]
 pub(crate) use runtime::WebRuntimeReservation;
 
 pub const PAIR_WINDOW_MILLIS: u64 = 120_000;

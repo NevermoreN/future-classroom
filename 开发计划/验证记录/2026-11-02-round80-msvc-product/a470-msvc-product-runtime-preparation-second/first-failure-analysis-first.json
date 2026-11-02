@@ -1,0 +1,133 @@
+{
+  "status": "CONFIRMED_FIRST_CREATE_SEMANTIC_BINDING_REJECTION_BEFORE_PROJECT_MUTATION",
+  "firstReport": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-first/report.json",
+    "bytes": 2580,
+    "sha256": "34089633dda32e7e31589eff18b421f2b9ef31f88e020465bc466cbb404aba6c"
+  },
+  "firstStderr": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-first/01-create.stderr.log",
+    "bytes": 1014,
+    "sha256": "4c0830735757749df380673a67a99e9cc3f6d7820d24d5d7a5cef602284983ca"
+  },
+  "firstInputScript": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-first/01-create.stdin.ps1",
+    "bytes": 13245,
+    "sha256": "a1b6d34daf4e84d12e1086f80dc0eca18ca474d79162954cc5f6184d30c39233"
+  },
+  "firstFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-first/freeze-first.json",
+    "bytes": 2979,
+    "sha256": "f67d0a2ee5f968d9cd0660b0e8a65e502873bb0c3e649aaf24a46e67b08a69bb"
+  },
+  "firstStatusPreserved": "FAIL_OR_UNKNOWN_RETAIN_ORIGINALS",
+  "firstRuntime": "NOT_RUN",
+  "firstOperationActualExit": 1,
+  "firstNonce": "0a3c0a1912ae4049bee91d02b9a14f28",
+  "rootCause": "Both borrowed readonly preflight and product-state PS wrappers still rejected MSVC target/schema. Actual first stopped at preflight status/target guard. There was no 33c literal; old source allowed any40hex. Second explicitly pins a470 rather than loosening it.",
+  "beforeMutationProof": "CREATE first invokes Measure-FcBeforePreflight; that function first evaluates the fixed status/source/target/family guard and throws. RootPath/existence checks/CreateDirectory follow only after successful preflight. Upload and Setup/PE/MSI stages were not reached; first actual operations list contains only01-create.",
+  "semanticScope": "Python source-order/literal+actual failure diagnosis, not a PowerShell runtime PASS. AST success did not establish semantic admissibility.",
+  "sources": [
+    {
+      "name": "Capture.cs",
+      "first": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-first/sources/Capture.cs",
+        "bytes": 11335,
+        "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580"
+      },
+      "second": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-second/sources/Capture.cs",
+        "bytes": 11335,
+        "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "GateRetirement.cs",
+      "first": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-first/sources/GateRetirement.cs",
+        "bytes": 10693,
+        "sha256": "6384a7e0ab90e91fc3eeed9f0d922fc73f7a1f6d9c70062cf949253265d6cf01"
+      },
+      "second": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-second/sources/GateRetirement.cs",
+        "bytes": 10693,
+        "sha256": "6384a7e0ab90e91fc3eeed9f0d922fc73f7a1f6d9c70062cf949253265d6cf01"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "ProcessObserver.cs",
+      "first": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-first/sources/ProcessObserver.cs",
+        "bytes": 26810,
+        "sha256": "b363b6947a90f4697af50300d24a71154ed29e355bdbb863b4707e1ba1549e7f"
+      },
+      "second": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-second/sources/ProcessObserver.cs",
+        "bytes": 26810,
+        "sha256": "b363b6947a90f4697af50300d24a71154ed29e355bdbb863b4707e1ba1549e7f"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "ProductState.cs",
+      "first": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-first/sources/ProductState.cs",
+        "bytes": 28349,
+        "sha256": "f1ed5387d971ecdf5de1416bcf78d613e4d3a8d0b12f82548db0f5514c93a6a7"
+      },
+      "second": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-second/sources/ProductState.cs",
+        "bytes": 28349,
+        "sha256": "f1ed5387d971ecdf5de1416bcf78d613e4d3a8d0b12f82548db0f5514c93a6a7"
+      },
+      "unchanged": true
+    },
+    {
+      "name": "ProductState.ps1",
+      "first": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-first/sources/ProductState.ps1",
+        "bytes": 3391,
+        "sha256": "48bf9e33450d5a8f82876ee5967381ecac213cc631da700d9800fbd3abb10e3c"
+      },
+      "second": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-second/sources/ProductState.ps1",
+        "bytes": 3423,
+        "sha256": "3b298a66d193443e7e7c481508d01aed885e044cc7f0c27f3e433cc3fcbb82d9"
+      },
+      "unchanged": false
+    },
+    {
+      "name": "ReadOnlyPreflightFunction.ps1",
+      "first": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-first/sources/ReadOnlyPreflightFunction.ps1",
+        "bytes": 4944,
+        "sha256": "7a0421a1809896ab0eb824d55bb64b71d7a65d4db8e0ebef75001cdecb30a729"
+      },
+      "second": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-second/sources/ReadOnlyPreflightFunction.ps1",
+        "bytes": 4976,
+        "sha256": "d320a3bff4a0aad1ec44fc9947b97d76f9679206f2f5f8f057cc093ea255eb9a"
+      },
+      "unchanged": false
+    },
+    {
+      "name": "Invoke-ControlledProduct.ps1",
+      "first": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-first/sources/Invoke-ControlledProduct.ps1",
+        "bytes": 24628,
+        "sha256": "b0f7163c8541d302c6d3d5df18631ec4457cc418fda92bd6bc2c2045bc68ad0d"
+      },
+      "second": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-second/sources/Invoke-ControlledProduct.ps1",
+        "bytes": 24628,
+        "sha256": "b0f7163c8541d302c6d3d5df18631ec4457cc418fda92bd6bc2c2045bc68ad0d"
+      },
+      "unchanged": true
+    }
+  ],
+  "scan": "All seven PS/C# reviewed; only two PS wrappers had oldGNU schema/target; after second no oldGNU target/source literals remain.",
+  "readonlyFirstNonceScript": "check-first-nonce-readonly.ps1",
+  "Windows": "NOT_RUN_AGENT"
+}

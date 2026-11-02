@@ -1,0 +1,52 @@
+{
+  "status": "FAIL_OR_UNKNOWN_RETAIN_ORIGINALS",
+  "scope": "MSVC_WIN7_TARGET_WIN11_CANDIDATE_PRODUCT_NOT_RELEASE",
+  "sourceManifest": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-first/source-manifest.json",
+    "bytes": 111081,
+    "sha256": "837191c4c731aadc96f185dc1a4a34957d5d7d6499b52d580549b0394695f3a1"
+  },
+  "artifactManifest": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-preparation-first/artifact-manifest.json",
+    "bytes": 4806,
+    "sha256": "5c3048fe132543abbf6ed1da57f1e60d76d758583951fb1be10fe5dbe91776aa"
+  },
+  "nonce": "0a3c0a1912ae4049bee91d02b9a14f28",
+  "operations": [
+    {
+      "label": "01-create",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA7ACQAbwBrAD0AJAA/ADsAJABjAG8AZABlAD0ARwBlAHQALQBWAGEAcgBpAGEAYgBsAGUAIAAtAE4AYQBtAGUAIABMAEEAUwBUAEUAWABJAFQAQwBPAEQARQAgAC0ARQByAHIAbwByAEEAYwB0AGkAbwBuACAAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQA7AGkAZgAoACQAbgB1AGwAbAAtAG4AZQAkAGMAbwBkAGUAKQB7AGUAeABpAHQAIAAoAFsAaQBuAHQAXQAkAGMAbwBkAGUALgBWAGEAbAB1AGUAKQB9ADsAaQBmACgAJABvAGsAKQB7AGUAeABpAHQAIAAwAH0AOwBlAHgAaQB0ACAAMQA="
+      ],
+      "budgetSeconds": 30,
+      "actualExit": 1,
+      "originalLocalParentReaped": true,
+      "remoteReturnUnknown": false,
+      "originalLocalPid": 19537,
+      "elapsedWholeSeconds": 0.5156233009984135,
+      "stdout": {
+        "path": "01-create.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "01-create.stderr.log",
+        "bytes": 1014,
+        "sha256": "4c0830735757749df380673a67a99e9cc3f6d7820d24d5d7a5cef602284983ca"
+      }
+    }
+  ],
+  "runtime": "NOT_RUN",
+  "cleanup": "NOT_RUN",
+  "sourceDeletion": false,
+  "failureType": "AssertionError",
+  "failureCode": "CREATE_ACTUAL0",
+  "elapsedSeconds": 0.5165428189975501,
+  "originalWholeBudgetExceeded": false
+}

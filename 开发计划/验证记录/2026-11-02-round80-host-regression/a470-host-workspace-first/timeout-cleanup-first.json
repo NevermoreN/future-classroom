@@ -1,0 +1,161 @@
+{
+  "status": "PASS_EXACT_OWNED_HOST_TIMEOUT_CLEANUP_ORIGINAL_RUN_NOT_PASSED",
+  "originalReportStatusPreserved": "FAIL",
+  "originalTestProcess": {
+    "pid": 9243,
+    "parentPid": 32365,
+    "startTicks": 2545492,
+    "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/debug/deps/fc_bootstrap-a88ba188b35c70f2",
+    "argv": [
+      "/tmp/fc-round80-controlled-repair/target-a470-host-first/debug/deps/fc_bootstrap-a88ba188b35c70f2"
+    ]
+  },
+  "signal": "SIGTERM_AFTER_EXACT_EXE_STARTTICKS_AND_PROCESS_GROUP_READBACK",
+  "localPidfdAttempts": "os.pidfd_open unavailable then libc.pidfd_open returned ENOSYS38 before any signal; used standard POSIX signal after revalidating exact owned test PID",
+  "Windows": "NOT_CONTACTED",
+  "roots": [
+    {
+      "root": "/tmp/FutureClassroom-Https-Query-9243-1793577118433454189",
+      "dev": 4194542,
+      "ino": 2430452,
+      "files": [
+        {
+          "path": "state.sqlite3",
+          "bytes": 24576,
+          "sha256": "5d1381fb32af0e3fd2b94763050543a6334030bab930d218bcd66f33f64806c0"
+        }
+      ]
+    },
+    {
+      "root": "/tmp/FutureClassroom-Https-Query-9243-1793577118630667229",
+      "dev": 4194542,
+      "ino": 2430470,
+      "files": [
+        {
+          "path": "state.sqlite3",
+          "bytes": 24576,
+          "sha256": "f0e5da83f190aac2e54d12a54d191f2cec751a9c62c7771138b2bdd822069bdc"
+        }
+      ]
+    },
+    {
+      "root": "/tmp/FutureClassroom-Test-Round22-Bootstrap-9243-1793577157605396391",
+      "dev": 4194542,
+      "ino": 2431050,
+      "files": [
+        {
+          "path": "state/classroom.sqlite3",
+          "bytes": 24576,
+          "sha256": "128af50d0ac0468cc098903bf131525532bc47183dc4a8756d0a55d3b35ef592"
+        }
+      ]
+    },
+    {
+      "root": "/tmp/FutureClassroom-Test-Round22-Bootstrap-9243-1793577158753996722",
+      "dev": 4194542,
+      "ino": 2431060,
+      "files": [
+        {
+          "path": "state/classroom.sqlite3",
+          "bytes": 24576,
+          "sha256": "287611a9c2bbb4e4778d1ededb1c5537fd25a9c0238219f4811c6895f25e1ffc"
+        }
+      ]
+    },
+    {
+      "root": "/tmp/FutureClassroom-Test-Round22-Bootstrap-9243-1793577159274007495",
+      "dev": 4194542,
+      "ino": 2431066,
+      "files": [
+        {
+          "path": "state/classroom.sqlite3",
+          "bytes": 24576,
+          "sha256": "9cbef4bb7ce62709df87616064f94017e8a9a21a9e125bcf6f547da679b16d13"
+        }
+      ]
+    },
+    {
+      "root": "/tmp/FutureClassroom-Test-Round22-Bootstrap-9243-1793577160312155615",
+      "dev": 4194542,
+      "ino": 2431081,
+      "files": [
+        {
+          "path": "state/classroom.sqlite3",
+          "bytes": 24576,
+          "sha256": "01b776d870788bb3dc07f68c60010e128b922f56b3ef37b7834f05d004b41a37"
+        }
+      ]
+    },
+    {
+      "root": "/tmp/FutureClassroom-Test-Round22-Bootstrap-9243-1793577164510202698",
+      "dev": 4194542,
+      "ino": 2431096,
+      "files": [
+        {
+          "path": "state/classroom.sqlite3",
+          "bytes": 24576,
+          "sha256": "7dd4fd40bb096155e05aa75f17563ecf8c2211c678065fce06a5f441c480479a"
+        }
+      ]
+    },
+    {
+      "root": "/tmp/FutureClassroom-Test-Round22-Bootstrap-9243-1793577178228358599",
+      "dev": 4194542,
+      "ino": 2431121,
+      "files": [
+        {
+          "path": "state/classroom.sqlite3",
+          "bytes": 24576,
+          "sha256": "cf5deadcd4c3f208c25de8a4bf3a35d32228caf1b78952a5a55103b6199a52a9"
+        }
+      ]
+    },
+    {
+      "root": "/tmp/FutureClassroom-Test-Round22-Bootstrap-9243-1793577185256819739",
+      "dev": 4194542,
+      "ino": 2431228,
+      "files": [
+        {
+          "path": "state/classroom.sqlite3",
+          "bytes": 24576,
+          "sha256": "87757b49b46c9130924dd4e920897f8a881e18ea85b1c3900f8e6fc6f0e6653f"
+        }
+      ]
+    },
+    {
+      "root": "/tmp/FutureClassroom-Test-Round22-Bootstrap-9243-1793577185458851507",
+      "dev": 4194542,
+      "ino": 2431236,
+      "files": [
+        {
+          "path": "state/classroom.sqlite3",
+          "bytes": 24576,
+          "sha256": "286315d6dcb39609c6655b9dd699fd77f2942cf504bc057900b51624293bc76f"
+        }
+      ]
+    },
+    {
+      "root": "/dev/shm/FutureClassroom-Voice-Service-9243-1793577581109011359",
+      "dev": 7340115,
+      "ino": 48031348,
+      "files": [
+        {
+          "path": "state.sqlite3-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "path": "state.sqlite3-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "state.sqlite3",
+          "bytes": 24576,
+          "sha256": "359c11860b7bbb512d9289572c485e50cc9ea17b57bd47ad19a66161e52d07d3"
+        }
+      ]
+    }
+  ],
+  "knownAbsentRoots": 11
+}

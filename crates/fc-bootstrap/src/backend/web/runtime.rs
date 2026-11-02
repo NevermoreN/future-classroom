@@ -2,6 +2,7 @@
 //! HTTPS domain. Neither cancellation nor a UI ticket releases this claim.
 use super::*;
 
+#[cfg(any(windows, test))]
 pub(crate) struct WebRuntimeReservation {
     service: WebService,
     snapshot: Arc<AuthoritySnapshot<IdentityState>>,
@@ -12,6 +13,7 @@ pub(crate) struct WebRuntimeReservation {
     returned: AtomicBool,
 }
 impl WebService {
+    #[cfg(any(windows, test))]
     pub(crate) fn reserve_runtime(
         &self,
         lease: SessionLease,
@@ -69,6 +71,7 @@ impl WebService {
     pub fn runtime_execution_current(&self) -> bool {
         self.inner.runtime_epoch.load(Ordering::Acquire) & 1 == 1
     }
+    #[cfg(windows)]
     pub(crate) fn runtime_domain_current(&self) -> bool {
         self.runtime_execution_current()
             && !self.inner.control.0.closed.load(Ordering::Acquire)
@@ -98,6 +101,7 @@ impl WebService {
         self.inner.runtime_stopping.store(true, Ordering::Release);
         self.inner.runtime_ready.store(false, Ordering::Release);
     }
+    #[cfg(any(windows, test))]
     pub(crate) fn settle_runtime_stop(&self) -> bool {
         self.negative_runtime_stop();
         // HTTP must keep servicing cancellation/deadline/IOCP while another
@@ -116,7 +120,9 @@ impl WebService {
         true
     }
 }
+#[cfg(any(windows, test))]
 impl WebRuntimeReservation {
+    #[cfg(windows)]
     pub(crate) fn identity_revision(&self) -> Revision {
         self.snapshot.data.revision
     }
@@ -128,6 +134,7 @@ impl WebRuntimeReservation {
             .admin_current(&self.snapshot, &mut ledger, self.lease, self.generation)
             .is_ok()
     }
+    #[cfg(windows)]
     pub(crate) fn execution_fence(&self) -> TransactionExecutionFence {
         let inner = self.service.inner.clone();
         let epoch = self.epoch | 1;
@@ -240,6 +247,7 @@ impl WebRuntimeReservation {
         }
     }
 }
+#[cfg(any(windows, test))]
 impl Drop for WebRuntimeReservation {
     fn drop(&mut self) {
         if !self.started.load(Ordering::Acquire) && !self.returned.load(Ordering::Acquire) {

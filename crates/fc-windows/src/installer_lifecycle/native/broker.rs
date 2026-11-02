@@ -18,7 +18,11 @@ use windows::Win32::{
 
 #[cfg(test)]
 mod context_probe;
+#[allow(dead_code)] // Fixed Setup entry/inner guard are not released by this slice.
+pub(crate) mod controlled_owner;
 mod effects;
+#[allow(dead_code)] // Read-only capture foundation; not wired to an upgrade permit.
+mod installed_release;
 mod retirement;
 mod supervisor;
 
@@ -261,6 +265,20 @@ impl Resources {
         Ok(())
     }
     fn digest(&mut self, h: HANDLE, limit: u64, deadline: Instant) -> Result<[u8; 32]> {
+        self.digest_file(h, limit, deadline, false)
+    }
+    // Only the private damaged-preimage reader accepts an actually zero-byte
+    // regular file. Existing image/manifest callers keep their nonempty guard.
+    fn digest_preimage(&mut self, h: HANDLE, limit: u64, deadline: Instant) -> Result<[u8; 32]> {
+        self.digest_file(h, limit, deadline, true)
+    }
+    fn digest_file(
+        &mut self,
+        h: HANDLE,
+        limit: u64,
+        deadline: Instant,
+        allow_empty: bool,
+    ) -> Result<[u8; 32]> {
         if self.handles.len() + 2 > HANDLE_LIMIT {
             return Err(LifecycleError::Invalid);
         }
@@ -268,7 +286,7 @@ impl Resources {
         unsafe {
             GetFileSizeEx(h, &mut size)?;
         }
-        if size <= 0 || size as u64 > limit {
+        if size < 0 || (!allow_empty && size == 0) || size as u64 > limit {
             return Err(LifecycleError::Invalid);
         }
         let mut algorithm = BCRYPT_ALG_HANDLE::default();
@@ -339,6 +357,7 @@ struct Session {
     pipe_name: HSTRING,
     deadline: Instant,
     peer_images: Vec<(HANDLE, HANDLE)>,
+    sealed_package_sha: Option<[u8; 32]>,
 }
 impl Session {
     fn new(deadline: Instant) -> Result<Self> {
@@ -392,6 +411,21 @@ impl Session {
         let mut raw = vec![0; n];
         resources.read_at(h, size - 20 - n as i64, &mut raw)?;
         let manifest = manifest::parse(&raw)?;
+        let sealed_package_sha = if size - 20 - n as i64 >= 48 {
+            let mut seal = [0; 48];
+            resources.read_at(h, size - 20 - n as i64 - 48, &mut seal)?;
+            let package = controlled_owner::package_seal(seal)?;
+            if package.is_some() && size - 20 - n as i64 >= 96 {
+                let mut prior = [0; 16];
+                resources.read_at(h, size - 20 - n as i64 - 96, &mut prior)?;
+                if &prior == controlled_owner::PACKAGE_SEAL_MAGIC {
+                    return Err(LifecycleError::Invalid);
+                }
+            }
+            package
+        } else {
+            None
+        };
         let image_sha = resources.digest(h, 64 * 1024 * 1024, deadline)?;
         let sid_hex: String = resources.sid.iter().map(|b| format!("{b:02X}")).collect();
         let pipe_name = HSTRING::from(format!(
@@ -406,6 +440,7 @@ impl Session {
             pipe_name,
             deadline,
             peer_images: Vec::new(),
+            sealed_package_sha,
         })
     }
     fn authenticate_image(&mut self, process: HANDLE) -> Result<(GuardianIdentity, HANDLE)> {
@@ -701,6 +736,7 @@ pub(crate) fn run(role: EntryRole, deadline: Instant, resolved_target: Option<&s
         EntryRole::Broker => server(&mut session),
         EntryRole::Guardian(transaction) => guardian(&mut session, transaction),
         EntryRole::Supervisor(transaction) => supervisor::run(&mut session, transaction),
+        EntryRole::OwnedGuardian => controlled_owner::guardian(&mut session),
     };
     if result.is_err() && matches!(role, EntryRole::Broker | EntryRole::Supervisor(_)) {
         // A supervisor failure retains only its own native capabilities until
@@ -838,7 +874,7 @@ fn server(session: &mut Session) -> Result<()> {
                 BEGIN if !began && peer_id == process_identity(begin)? => {
                     // Revalidate the same original preimage under the exclusive
                     // gate. Its checked pins return before first MSI mutation.
-                    effects::revalidate(session, admission)?;
+                    effects::revalidate(session, &admission)?;
                     began = true;
                     session.send(pipe, Packet::new(ACK))?;
                 }
@@ -883,7 +919,7 @@ fn server(session: &mut Session) -> Result<()> {
                     }
                     owner.resources.add(duplicate, Role::Guardian);
                     owner.guardian = Some(peer_id);
-                    let observed = effects::staged(session, admission)?;
+                    let observed = effects::staged(session, &admission)?;
                     let mut response = Packet::new(DECISION);
                     response.transaction = packet.transaction;
                     response.outcome = match observed.outcome() {
@@ -927,7 +963,7 @@ fn server(session: &mut Session) -> Result<()> {
         }
         let observed = effects_decision.ok_or(LifecycleError::Unsettled)?;
         let outcome = observed.outcome();
-        let mut proof = effects::reconcile(session, observed)?;
+        let mut proof = effects::reconcile(session, &admission, observed)?;
         proof.check()?;
         // This receipt is constructed solely here, after actual native facts
         // and independently verified effects. There is no wire Settlement API.
@@ -1060,6 +1096,7 @@ mod tests {
             pipe_name: HSTRING::from(name),
             deadline,
             peer_images: Vec::new(),
+            sealed_package_sha: None,
         }
     }
     fn fixture_name() -> String {

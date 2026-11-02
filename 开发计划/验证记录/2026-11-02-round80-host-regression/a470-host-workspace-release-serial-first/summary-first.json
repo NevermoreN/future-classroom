@@ -1,0 +1,554 @@
+{
+  "schema": "future-classroom-host-release-serial-summary/v1",
+  "status": "PASS_HOST_RELEASE_SERIAL_WORKSPACE_989",
+  "sourceGit": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "originalReport": {
+    "path": "report.json",
+    "bytes": 34804,
+    "sha256": "98b053c5c52a0de4ab7867f4b43e3ced06fdeba5ce9de8426187a3796e6cc575"
+  },
+  "originalStdout": {
+    "path": "stdout.log",
+    "bytes": 107417,
+    "sha256": "533d3a0963e32ad6f7b945c7c284fe088e31b74fff150b207ac1253fb2c8e956"
+  },
+  "originalStderr": {
+    "path": "stderr.log",
+    "bytes": 10286,
+    "sha256": "7da4e7c1f7d459e0e23aa9f56d8614c4c061a926b199548312b0051247a380f8"
+  },
+  "actualExit": 0,
+  "elapsedSeconds": 870.406404393998,
+  "fixedBudgetSeconds": 3600,
+  "cargoReportedColdBuild": "9m 43s",
+  "host": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "toolchains": {
+      "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+      "cargo": "cargo 1.97.1 (c980f4866 2026-06-30)\nrelease: 1.97.1\ncommit-hash: c980f4866141969fab6254a680546a277789d6f0\ncommit-date: 2026-06-30\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.2 (sys:0.20.4 vendored)\nlibcurl: 8.20.0-DEV (sys:0.4.88+curl-8.20.0 vendored ssl:OpenSSL/3.6.2)\nssl: OpenSSL 3.6.2 7 Apr 2026\nos: Ubuntu 24.4.0 [64-bit]\n"
+    }
+  },
+  "harnessCount": 33,
+  "passed": 989,
+  "failed": 0,
+  "ignored": 0,
+  "measured": 0,
+  "filtered": 0,
+  "harnesses": [
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_application-7d98b4941e04cea2)",
+      "status": "ok",
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_audio-13c6cd2c3be28ead)",
+      "status": "ok",
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_bootstrap-b092a74d5e0da5e9)",
+      "status": "ok",
+      "passed": 216,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "106.89s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/main.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_bootstrap-511b52bec30d1c45)",
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/bin/fc-installer-lifecycle.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_installer_lifecycle-8ae82744ed6485e2)",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "tests/autostart_coordinator.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/autostart_coordinator-163e86d18bbe4ede)",
+      "status": "ok",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "9.03s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "tests/business_storage.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/business_storage-1e94c14fb0b8e70a)",
+      "status": "ok",
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "39.38s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "tests/calendar_execution_fence.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/calendar_execution_fence-a82aef5927204173)",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "6.46s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "tests/runtime_storage.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/runtime_storage-202191c1d75042a3)",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.43s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "tests/schedule_operations.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/schedule_operations-89bd5c5873460f81)",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "4.17s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "tests/voice_limits_storage.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/voice_limits_storage-b5e8cf3e633b2ffc)",
+      "status": "ok",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "3.33s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "tests/voice_storage.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/voice_storage-f4e808f7430e9ee4)",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "17.99s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_domain-74d504fc50556e61)",
+      "status": "ok",
+      "passed": 149,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.02s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_materials-fca9b99e1d12daa8)",
+      "status": "ok",
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.15s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_ports-8a6440a92fc16b10)",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_presentation-94c3e84d99185a76)",
+      "status": "ok",
+      "passed": 58,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.04s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_protocol-4f83b5a15e9f8854)",
+      "status": "ok",
+      "passed": 82,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.13s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_runtime-3f68a038e44927c2)",
+      "status": "ok",
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.16s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_security-7da6d32085b96235)",
+      "status": "ok",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.31s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_storage-f551ec92e37a3558)",
+      "status": "ok",
+      "passed": 208,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "97.00s"
+    },
+    {
+      "kind": "unit_or_integration",
+      "harness": "unittests src/lib.rs (/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_windows-b8565a71f8558cd2)",
+      "status": "ok",
+      "passed": 51,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.21s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_application",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_audio",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_bootstrap",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_domain",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_materials",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_ports",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_presentation",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_protocol",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_runtime",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_security",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_storage",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    },
+    {
+      "kind": "doc_test",
+      "harness": "fc_windows",
+      "status": "ok",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "duration": "0.00s"
+    }
+  ],
+  "allOriginal11FailingNamesNowActualOk": [
+    "backend::https_certificate::tests::https_certificate_discards_query_after_configuration_publication_or_local_lock_and_keeps_native_error",
+    "backend::https_certificate::tests::https_certificate_requires_configured_exact_state_and_original_nonrelaxable_fence",
+    "backend::recovery::tests::canceled_barrier_leaves_live_data_and_authorization_floor_unchanged",
+    "backend::recovery::tests::confirmed_candidate_blocks_new_login_keeps_current_password_and_advances_both_floors",
+    "backend::recovery::tests::captured_backup_rejects_revision_drift_and_lock_without_renewing_session",
+    "backend::recovery::migration::tests::source_manifest_and_source_database_must_match_before_any_mapping_review",
+    "backend::recovery::tests::full_preflight_binds_the_actual_database_bytes_not_only_its_revision_and_media",
+    "backend::recovery::tests::restore_review_digest_school_and_stale_lease_cannot_authorize_barrier",
+    "backend::recovery::migration::tests::fresh_target_access_cannot_rebless_old_inspection_and_lock_closes_mapping_admission",
+    "backend::recovery::migration::tests::mapped_projection_is_inert_and_ordinary_guard_still_rejects_original_foreign_package",
+    "backend::tests::real_backend_accounts_catalog_homework_recovery_and_exact_local_input_survive_reopen"
+  ],
+  "reasonForThisAdditionalProfile": "Release avoids debug600000-round PBKDF cost; serial prevents unrelated backend fixture setups from overloading the real process-global2KDFslots. Existing repository verify.sh standard already explicitly uses2testthreads; this is additional1thread steady-state validation.",
+  "diagnosisFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-host-failure-diagnosis-first/freeze-first.json",
+    "sha256": "fa4200a03d86b22ad0c1c17ca5b3e7ddafe05cbf73d3150e90785f43fc2563e5"
+  },
+  "historicalResults": "Original debug600s timeout/11FAILED and diagnosis60s reopen timeout remain unchanged; this new pass does not reclassify them.",
+  "actualTestProcessIdentityReadbacks": [
+    {
+      "pid": 1776,
+      "group": 25738,
+      "startTicks": 2722668,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_bootstrap-b092a74d5e0da5e9",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 3210,
+      "group": 25738,
+      "startTicks": 2733358,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/autostart_coordinator-163e86d18bbe4ede",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 3314,
+      "group": 25738,
+      "startTicks": 2734261,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/business_storage-1e94c14fb0b8e70a",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 3783,
+      "group": 25738,
+      "startTicks": 2738200,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/calendar_execution_fence-a82aef5927204173",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 3901,
+      "group": 25738,
+      "startTicks": 2738846,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/runtime_storage-202191c1d75042a3",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 3914,
+      "group": 25738,
+      "startTicks": 2738890,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/schedule_operations-89bd5c5873460f81",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 3948,
+      "group": 25738,
+      "startTicks": 2739307,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/voice_limits_storage-b5e8cf3e633b2ffc",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 3987,
+      "group": 25738,
+      "startTicks": 2739641,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/voice_storage-f4e808f7430e9ee4",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 4324,
+      "group": 25738,
+      "startTicks": 2741442,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_materials-fca9b99e1d12daa8",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 4432,
+      "group": 25738,
+      "startTicks": 2741461,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_protocol-4f83b5a15e9f8854",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 4515,
+      "group": 25738,
+      "startTicks": 2741475,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_runtime-3f68a038e44927c2",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 4650,
+      "group": 25738,
+      "startTicks": 2741491,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_security-7da6d32085b96235",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 4676,
+      "group": 25738,
+      "startTicks": 2741522,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_storage-f551ec92e37a3558",
+      "originalIdentityKnownAbsent": true
+    },
+    {
+      "pid": 5736,
+      "group": 25738,
+      "startTicks": 2751223,
+      "state": "S",
+      "exe": "/tmp/fc-round80-controlled-repair/target-a470-host-first/release/deps/fc_windows-b8565a71f8558cd2",
+      "originalIdentityKnownAbsent": true
+    }
+  ],
+  "cleanup": {
+    "originalCargoReapedActual0": true,
+    "originalGroup25738KnownEmpty": true,
+    "signals": "NONE",
+    "exactOwnedFixtureRootKnownAbsent": true,
+    "remainingFixtureFilesBeforeRootRemoval": "Only own marker, no synthetic database/data files remained",
+    "devShm": "Source-defined tmpfs fixture behavior unchanged; all dropped normally. New/devshm entries0; no external directory removal performed.",
+    "sharedTargetCache": "Retained; no active Cargo/compiler/test writer remains from this run"
+  },
+  "sourceChanges": "NONE; W2 GitHEAD/source inputs unchanged and clean",
+  "scopeLimitations": [
+    "Host release optimization and1thread harness only",
+    "fc-installer-lifecycle host harness reports0tests due cfg(windows); no native Windows runtime inferred",
+    "Source-defined Linux tmpfs fixtures keep their existing scope; no new disk durability/power-loss claim",
+    "Host Clippy history and warnings not reclassified by cargo test success",
+    "No MSI upgrade implementation/admission or production release proof",
+    "Windows7/10/11 runtimes and parent MSVC evidence remain separate"
+  ]
+}

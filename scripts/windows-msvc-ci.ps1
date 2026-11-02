@@ -518,6 +518,48 @@ function Copy-Executable($Message, [string]$Role, [string]$PackageName, [string]
     }
 }
 
+function Copy-GuardLibrary($Message, $Package) {
+    if ($Package.name -cne 'fc-windows' -or $Message.target.name -cne 'fc_windows' -or
+        $Message.profile.test -ne $false -or $Message.target.crate_types -notcontains 'cdylib' -or
+        $Message.target.crate_types -notcontains 'rlib' -or $Message.manifest_path -cne $Package.manifest_path) {
+        throw 'Not the exact original normal fc-windows library artifact.'
+    }
+    $dlls = @($Message.filenames | Where-Object { [IO.Path]::GetFileName($_) -ceq 'fc_windows.dll' })
+    if ($dlls.Count -ne 1) { throw 'Expected one original normal fc_windows.dll.' }
+    $source = [IO.Path]::GetFullPath([string]$dlls[0])
+    $expectedParent = [IO.Path]::GetFullPath((Join-Path $RunRoot "target\$Target\release"))
+    if (-not [string]::Equals([IO.Path]::GetDirectoryName($source), $expectedParent, [StringComparison]::OrdinalIgnoreCase)) { throw 'Library escaped original normal target release directory.' }
+    $item = Get-Item -LiteralPath $source
+    if ($item.Length -lt 256 -or $item.Length -gt 32MB -or
+        ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or
+        $script:PayloadBytes + $item.Length -gt 512MB) { throw 'Library bound/reparse rejected.' }
+    $bytes = [IO.File]::ReadAllBytes($source)
+    $pe = [BitConverter]::ToInt32($bytes, 0x3c)
+    if ($bytes[0] -ne 0x4d -or $bytes[1] -ne 0x5a -or $pe -lt 64 -or $pe -gt $bytes.Length - 96 -or
+        [BitConverter]::ToUInt32($bytes, $pe) -ne 0x4550 -or
+        [BitConverter]::ToUInt16($bytes, $pe + 4) -ne 0x14c -or
+        [BitConverter]::ToUInt16($bytes, $pe + 24) -ne 0x10b -or
+        ([BitConverter]::ToUInt16($bytes, $pe + 22) -band 0x2000) -eq 0) { throw 'Library is not x86 PE32 DLL.' }
+    $optional = [BitConverter]::ToUInt16($bytes, $pe + 20)
+    $subsystem = [BitConverter]::ToUInt16($bytes, $pe + 92)
+    if ($optional -lt 70 -or $optional -gt $bytes.Length - $pe - 24 -or $subsystem -notin @(2,3)) { throw 'Truncated/invalid library subsystem.' }
+    $subsystemVersion = $null
+    if ($Baseline -eq 'Win7') {
+        if ([BitConverter]::ToUInt16($bytes, $pe + 72) -ne 6 -or [BitConverter]::ToUInt16($bytes, $pe + 74) -ne 1) { throw 'Win7 DLL must declare subsystem6.1.' }
+        $subsystemVersion = '6.1'
+    }
+    $relative = 'custom_action_library/fc-windows/fc_windows.dll'
+    $destination = Join-Path $Artifact $relative
+    New-Item -ItemType Directory -Path ([IO.Path]::GetDirectoryName($destination)) -Force | Out-Null
+    if (Test-Path -LiteralPath $destination) { throw 'Duplicate library artifact path.' }
+    Copy-Item -LiteralPath $source -Destination $destination
+    $script:PayloadBytes += $item.Length
+    [ordered]@{role='custom_action_library';package='fc-windows';target='fc_windows';cargo_profile_test=$false
+        kinds=$Message.target.kind;relative_path=$relative;package_working_directory='crates/fc-windows'
+        bytes=$item.Length;sha256=(Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToLowerInvariant()
+        pe_machine='0x014c';pe_optional_magic='0x010b';pe_subsystem=$subsystem;pe_subsystem_version=$subsystemVersion;executed=$false}
+}
+
 $savedEnvironment = @{}
 foreach ($name in @('RUSTUP_HOME','CARGO_HOME','RUSTUP_TOOLCHAIN','CARGO_TARGET_DIR','CARGO_BUILD_JOBS','CARGO_TERM_COLOR',
     'CARGO_ENCODED_RUSTFLAGS','RUSTFLAGS','CARGO_TARGET_I686_PC_WINDOWS_MSVC_LINKER','CC_i686_pc_windows_msvc',
@@ -699,6 +741,8 @@ try {
         Write-CrtFlagState 'before-product' $productRustFlags
         $binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200
         $lifecycle = Invoke-Logged 'lifecycle-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-installer-lifecycle','--message-format=json') $Baseline) 1200
+        $guardLibrary = Invoke-Logged 'guard-library-compile' $cargo (Get-BaselineCargoArguments 'build' @('-vv','--release','--locked','--target',$Target,'-p','fc-windows','--lib','--message-format=json') $Baseline) 1200
+        Require-Step $guardLibrary
     } finally {
         $env:RUSTFLAGS = $originalProductRustFlags
         Write-CrtFlagState 'after-product' $BaselineConfiguration.rustflags
@@ -722,8 +766,18 @@ try {
             $executables.Add((Copy-Executable $message $role $package.name $packagePath))
         }
     }
+    $guardMessages = @([IO.File]::ReadLines((Join-Path $Artifact $guardLibrary.stdout), $Utf8) | Where-Object { $_.StartsWith('{') } | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object {
+        $_.reason -ceq 'compiler-artifact' -and $_.target.name -ceq 'fc_windows' -and
+        $packages.ContainsKey($_.package_id) -and $packages[$_.package_id].name -ceq 'fc-windows'
+    })
+    if ($guardMessages.Count -ne 1) { throw 'Expected one actual normal library Cargo JSON message.' }
+    $executables.Add((Copy-GuardLibrary $guardMessages[0] $packages[$guardMessages[0].package_id]))
+    $guardExports = Invoke-Logged 'guard-exports' $dumpbin @('/EXPORTS',(Join-Path $Artifact 'custom_action_library/fc-windows/fc_windows.dll'))
+    Require-Step $guardExports
+    if ((Read-Output $guardExports) -notmatch '(?m)^\s*\d+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+FcControlledInnerGuard(?:\s+=.*)?\s*$') { throw 'Missing exact undecorated Type1 guard export.' }
     if (@($executables | Where-Object { $_.role -eq 'tests' }).Count -lt 12 -or
         @($executables | Where-Object { $_.role -eq 'product' }).Count -ne 2 -or
+        @($executables | Where-Object { $_.role -eq 'custom_action_library' }).Count -ne 1 -or
         @($executables | Where-Object { $_.role -eq 'product' -and $_.target -ceq 'fc-bootstrap' }).Count -ne 1 -or
         @($executables | Where-Object { $_.role -eq 'product' -and $_.target -ceq 'fc-installer-lifecycle' }).Count -ne 1) { throw 'Required workspace test/two closed product executables missing.' }
     [long]$payloadBytes = 0

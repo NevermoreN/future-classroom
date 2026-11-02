@@ -21,6 +21,7 @@ use windows::{
 };
 
 pub(super) mod broker;
+mod inner_guard;
 
 const HANDLE_LIMIT: usize = 64;
 const PROCESS_OWNERS: usize = 8;
@@ -44,12 +45,148 @@ static RETAINED: Mutex<[Retained; PROCESS_OWNERS]> = Mutex::new(
     }; PROCESS_OWNERS],
 );
 
+// Only a native child module can construct these production observations. In
+// particular controlled::Draft accepts no caller-selected Begin-success bool.
+// The future original API-owner adapter must populate them from its actual
+// authenticated original process/thread calls and checked control returns.
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+pub(crate) struct BeginObservation {
+    guardian: GuardianIdentity,
+    return_code: u32,
+    transaction_id: u32,
+}
+impl BeginObservation {
+    pub(super) fn values(self) -> (GuardianIdentity, u32, u32) {
+        (self.guardian, self.return_code, self.transaction_id)
+    }
+    #[cfg(test)]
+    pub(super) fn for_test(
+        guardian: GuardianIdentity,
+        return_code: u32,
+        transaction_id: u32,
+    ) -> Self {
+        Self {
+            guardian,
+            return_code,
+            transaction_id,
+        }
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+pub(crate) struct DraftAbortObservation {
+    guardian: GuardianIdentity,
+    begin: Option<(u32, u32)>,
+    empty_rollback_return: Option<u32>,
+    control_return: u32,
+}
+impl DraftAbortObservation {
+    pub(super) fn values(self) -> (GuardianIdentity, Option<(u32, u32)>, Option<u32>, u32) {
+        (
+            self.guardian,
+            self.begin,
+            self.empty_rollback_return,
+            self.control_return,
+        )
+    }
+    #[cfg(test)]
+    pub(super) fn for_test(
+        guardian: GuardianIdentity,
+        begin: Option<(u32, u32)>,
+        empty_rollback_return: Option<u32>,
+        control_return: u32,
+    ) -> Self {
+        Self {
+            guardian,
+            begin,
+            empty_rollback_return,
+            control_return,
+        }
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+pub(crate) enum TransactionOwnership {
+    OwnedByJoin {
+        join_return: u32,
+    },
+    OwnedByBegin {
+        begin_return: u32,
+        transaction_id: u32,
+    },
+}
+
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+pub(crate) struct TransactionObservation {
+    operation_id: OperationId,
+    guardian: GuardianIdentity,
+    ownership: TransactionOwnership,
+    outcome: SettledOutcome,
+    install_return: u32,
+    end_return: u32,
+    control_return: u32,
+    effects_reconciled: bool,
+}
+impl TransactionObservation {
+    pub(super) fn values(
+        self,
+    ) -> (
+        OperationId,
+        GuardianIdentity,
+        TransactionOwnership,
+        SettledOutcome,
+        u32,
+        u32,
+        u32,
+        bool,
+    ) {
+        (
+            self.operation_id,
+            self.guardian,
+            self.ownership,
+            self.outcome,
+            self.install_return,
+            self.end_return,
+            self.control_return,
+            self.effects_reconciled,
+        )
+    }
+    #[cfg(test)]
+    #[allow(clippy::too_many_arguments)]
+    pub(super) fn for_test(
+        operation_id: OperationId,
+        guardian: GuardianIdentity,
+        ownership: TransactionOwnership,
+        outcome: SettledOutcome,
+        install_return: u32,
+        end_return: u32,
+        control_return: u32,
+        effects_reconciled: bool,
+    ) -> Self {
+        Self {
+            operation_id,
+            guardian,
+            ownership,
+            outcome,
+            install_return,
+            end_return,
+            control_return,
+            effects_reconciled,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Role {
     Parent,
     Gate,
     Pending,
     Guardian,
+    GuardianThread,
     Token,
     Hash,
     Algorithm,
@@ -199,6 +336,15 @@ impl Resources {
         Ok(())
     }
     pub(super) fn open(identity: &InstallIdentity, exclusive: bool) -> Result<Self> {
+        let mut owner = Self::open_gate(identity, exclusive, false)?;
+        owner.absent_pending()?;
+        owner.check_live()?;
+        Ok(owner)
+    }
+    // Native-private composition only. Ordinary startup/maintenance always use
+    // open above and retain their unconditional Pending refusal. The explicit
+    // removal module separately pins and validates an existing negative record.
+    fn open_gate(identity: &InstallIdentity, exclusive: bool, existing_only: bool) -> Result<Self> {
         let mut owner = Self::empty()?;
         // SAFETY: current-process pseudohandle is borrowed, never registered/closed.
         owner.sid = owner.token_sid(unsafe { GetCurrentProcess() })?;
@@ -236,13 +382,15 @@ impl Resources {
         #[cfg(not(test))]
         let leaf = "FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5";
         owner.root = identity.local.join(leaf);
-        let name = native_path(&owner.root)?;
-        let created = with_security(&owner.sid, true, |attributes| unsafe {
-            CreateDirectoryW(&name, Some(attributes))
-        });
-        if let Err(error) = created {
-            if error.code() != ERROR_ALREADY_EXISTS.to_hresult() {
-                return Err(error.into());
+        if !existing_only {
+            let name = native_path(&owner.root)?;
+            let created = with_security(&owner.sid, true, |attributes| unsafe {
+                CreateDirectoryW(&name, Some(attributes))
+            });
+            if let Err(error) = created {
+                if error.code() != ERROR_ALREADY_EXISTS.to_hresult() {
+                    return Err(error.into());
+                }
             }
         }
         let h = owner.open_file(
@@ -265,14 +413,17 @@ impl Resources {
             } else {
                 FILE_SHARE_READ
             },
-            OPEN_ALWAYS,
+            if existing_only {
+                OPEN_EXISTING
+            } else {
+                OPEN_ALWAYS
+            },
             false,
             true,
         )?;
         owner.add(gate, Role::Gate);
         verify_info(gate, false)?;
         verify_acl(gate, &owner.sid, true)?;
-        owner.absent_pending()?;
         owner.check_live()?;
         Ok(owner)
     }
@@ -329,6 +480,9 @@ impl Resources {
         operation: MaintenanceOperation,
     ) -> Result<OperationId> {
         self.check_live()?;
+        if identity.sid != self.sid || self.root.parent() != Some(identity.local.as_path()) {
+            return Err(LifecycleError::Invalid);
+        }
         use fc_ports::RandomSource;
         let mut nonce = [0; 16];
         crate::SystemRandom.fill(&mut nonce)?;
@@ -402,6 +556,13 @@ impl Resources {
         &mut self,
         child: &std::process::Child,
     ) -> Result<GuardianIdentity> {
+        let identity = self.watch_guardian_handle(HANDLE(child.as_raw_handle()))?;
+        if identity.process_id != child.id() {
+            return Err(LifecycleError::Invalid);
+        }
+        Ok(identity)
+    }
+    pub(super) fn watch_guardian_handle(&mut self, original: HANDLE) -> Result<GuardianIdentity> {
         if self.handles.len() >= HANDLE_LIMIT {
             return Err(LifecycleError::Invalid);
         }
@@ -409,7 +570,7 @@ impl Resources {
         unsafe {
             DuplicateHandle(
                 GetCurrentProcess(),
-                HANDLE(child.as_raw_handle()),
+                original,
                 GetCurrentProcess(),
                 &mut process,
                 0,
@@ -430,7 +591,7 @@ impl Resources {
             GetProcessTimes(process, &mut created, &mut exited, &mut kernel, &mut user)?;
         }
         let process_id = unsafe { GetProcessId(process) };
-        if process_id == 0 || process_id != child.id() {
+        if process_id == 0 {
             return Err(LifecycleError::Invalid);
         }
         Ok(GuardianIdentity {
@@ -438,6 +599,44 @@ impl Resources {
             creation_filetime: (u64::from(created.dwHighDateTime) << 32)
                 | u64::from(created.dwLowDateTime),
         })
+    }
+    pub(super) fn watch_guardian_thread(&mut self, original: HANDLE) -> Result<()> {
+        self.check_live()?;
+        if self.handles.len() >= HANDLE_LIMIT
+            || self.handles.iter().any(|x| x.role == Role::GuardianThread)
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        let mut thread = HANDLE::default();
+        unsafe {
+            DuplicateHandle(
+                GetCurrentProcess(),
+                original,
+                GetCurrentProcess(),
+                &mut thread,
+                0,
+                false,
+                DUPLICATE_SAME_ACCESS,
+            )?;
+        }
+        self.add(thread, Role::GuardianThread);
+        let process = self.handle(Role::Guardian)?;
+        if unsafe { GetProcessIdOfThread(thread) } != unsafe { GetProcessId(process) }
+            || unsafe { WaitForSingleObject(thread, 0) } != WAIT_TIMEOUT
+        {
+            return Err(LifecycleError::Unsettled);
+        }
+        let mut created = FILETIME::default();
+        let mut exited = FILETIME::default();
+        let mut kernel = FILETIME::default();
+        let mut user = FILETIME::default();
+        unsafe {
+            GetThreadTimes(thread, &mut created, &mut exited, &mut kernel, &mut user)?;
+        }
+        if created.dwHighDateTime == 0 && created.dwLowDateTime == 0 {
+            return Err(LifecycleError::Invalid);
+        }
+        Ok(())
     }
     pub(super) fn guardian_returned(&self) -> Result<()> {
         let process = self.handle(Role::Guardian)?;
@@ -455,7 +654,35 @@ impl Resources {
         if code != 0 {
             return Err(LifecycleError::Unsettled);
         }
+        if let Some(thread) = self.handles.iter().find(|h| h.role == Role::GuardianThread) {
+            if unsafe { WaitForSingleObject(thread.handle, 0) } != WAIT_OBJECT_0 {
+                return Err(LifecycleError::GuardianRunning);
+            }
+            let mut code = u32::MAX;
+            unsafe {
+                GetExitCodeThread(thread.handle, &mut code)?;
+            }
+            if code != 0 {
+                return Err(LifecycleError::Unsettled);
+            }
+        }
         Ok(())
+    }
+    pub(super) fn guardian_running(&self) -> Result<()> {
+        self.check_live()?;
+        let process = self.handle(Role::Guardian)?;
+        if unsafe { WaitForSingleObject(process, 0) } != WAIT_TIMEOUT {
+            return Err(LifecycleError::Unsettled);
+        }
+        Ok(())
+    }
+    pub(super) fn release_draft(&mut self) -> Result<()> {
+        self.check_live()?;
+        if self.pending_identity.is_some() || !self.pending.is_empty() {
+            return Err(LifecycleError::Pending);
+        }
+        self.absent_pending()?;
+        self.release()
     }
     pub(super) fn clear_pending(&mut self, deadline: Instant) -> Result<()> {
         if self.producers_returned {

@@ -86,6 +86,7 @@ impl Backend {
     }
 }
 
+#[cfg(windows)]
 impl Backend {
     pub(crate) fn https_data_root(&self) -> Result<std::path::PathBuf> {
         self.database_path

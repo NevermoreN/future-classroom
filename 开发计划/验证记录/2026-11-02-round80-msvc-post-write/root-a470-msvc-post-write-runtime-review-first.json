@@ -1,0 +1,105 @@
+{
+  "status": "PASS_ROOT_MSVC_PRODUCT_GNU_WITNESS_POST_WRITE_RUNTIME_AND_EXACT_CLEANUP_REVIEW",
+  "report": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-post-write-runtime-first/report.json",
+    "bytes": 185723,
+    "sha256": "ba2826bb9dd3b80ad18fa8c9c7511312b07fa9a0a3217f56400f448c99542dad"
+  },
+  "productSource": "OFFICIAL_A470_WIN7_MSVC_NORMAL",
+  "witnessSource": "GNU_TEST_ONLY",
+  "runtimeOS": "WIN11_ONLY",
+  "nativeElapsedMilliseconds": 9872,
+  "outerElapsedSeconds": 12.321780760001275,
+  "originalProcessInstances": [
+    {
+      "phase": "forced-fresh-install",
+      "role": "setup-install",
+      "pid": 40296,
+      "exit": 1603,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "phase": "forced-fresh-install",
+      "role": "owned-guardian",
+      "pid": 14512,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "phase": "canonical-install",
+      "role": "setup-install",
+      "pid": 38056,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "phase": "canonical-install",
+      "role": "owned-guardian",
+      "pid": 12268,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "phase": "forced-damaged-repair",
+      "role": "setup-repair",
+      "pid": 5244,
+      "exit": 1603,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "phase": "forced-damaged-repair",
+      "role": "owned-guardian",
+      "pid": 22312,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "phase": "canonical-final-repair",
+      "role": "setup-repair",
+      "pid": 22652,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "phase": "canonical-final-repair",
+      "role": "owned-guardian",
+      "pid": 35352,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "phase": "canonical-uninstall",
+      "role": "setup-uninstall",
+      "pid": 37408,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "phase": "canonical-uninstall",
+      "role": "owned-guardian",
+      "pid": 17124,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    }
+  ],
+  "freshForcedRollbackAbsent": true,
+  "damagedPreimageRestored": true,
+  "downloadedFiles": 46,
+  "downloadedDirectories": 8,
+  "nonce": "45683d45ba7948bb850c2319d92c1bf2",
+  "knownAbsentNonce": true,
+  "cleanupStatusLiteral": "Original generic helper retains GNU_DEV name; exact new MSVC namespace and all bytes verified; label is not compiler provenance.",
+  "beginEndObservationScope": "NOT_SERIALIZED_FIXED_NATIVE_SOURCE_AND_G0_AND_EFFECTS_INFERENCE_ONLY",
+  "windows7Actual": "NOT_RUN",
+  "windows10Actual": "NOT_RUN"
+}

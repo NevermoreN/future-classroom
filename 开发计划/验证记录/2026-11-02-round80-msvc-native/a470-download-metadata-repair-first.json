@@ -1,0 +1,36 @@
+{
+  "status": "PASS_EXACT_METADATA_ENCODING_REPAIR_ORIGINALS_RETAINED",
+  "originalProblem": "Root download wrapper double-escaped terminal newline, causing strict JSON ExtraData; actual downloads and official byte/SHA checks had returned0",
+  "artifactDownloadsRepeated": false,
+  "files": [
+    {
+      "original": "/tmp/fc-round80-controlled-repair/a470-modern-download-first/download-report.json",
+      "originalSha256": "86ad2e9f663f4960126bc7712955b921ea856461b69ee360e06681a56580b64d",
+      "corrected": "/tmp/fc-round80-controlled-repair/a470-modern-download-first/download-report-second.json",
+      "correctedSha256": "5b39176035fab64d39035eba28b5b68f9cc1dc8b692f93ed8f5d67840990d3f0",
+      "change": "Replace exactly final literal backslash+n with actual LF; object/ZIP bytes unchanged"
+    },
+    {
+      "original": "/tmp/fc-round80-controlled-repair/a470-modern-download-first/zip-inventory.json",
+      "originalSha256": "3f539dc6dbcffc152420588ef2b024a82bcdab3bd5cea1017168c0c86e63a158",
+      "corrected": "/tmp/fc-round80-controlled-repair/a470-modern-download-first/zip-inventory-second.json",
+      "correctedSha256": "62f478cc037cedbe0e5b7c112e80618f696779b6ee24c0b98664a8a97517cf9a",
+      "change": "Replace exactly final literal backslash+n with actual LF; object/ZIP bytes unchanged"
+    },
+    {
+      "original": "/tmp/fc-round80-controlled-repair/a470-win7-download-first/download-report.json",
+      "originalSha256": "6d9894967cdadf5578d607c5e7908889f211eae768caa36deaa6bf8aa37bb8b6",
+      "corrected": "/tmp/fc-round80-controlled-repair/a470-win7-download-first/download-report-second.json",
+      "correctedSha256": "163fa031583d9c506f354517fc2d0bcac23ff2e1d6e220f28080faf81e698967",
+      "change": "Replace exactly final literal backslash+n with actual LF; object/ZIP bytes unchanged"
+    },
+    {
+      "original": "/tmp/fc-round80-controlled-repair/a470-win7-download-first/zip-inventory.json",
+      "originalSha256": "95ea988a1ca87c5c9079a9f91bb00293f5bf6f0c9bb3f45aa44ad588cf5d6568",
+      "corrected": "/tmp/fc-round80-controlled-repair/a470-win7-download-first/zip-inventory-second.json",
+      "correctedSha256": "33694732521a86f29b40ba08491a318f533c8b4a882b9b2edccf71cff6686c78",
+      "change": "Replace exactly final literal backslash+n with actual LF; object/ZIP bytes unchanged"
+    }
+  ],
+  "credentialsOrSignedUrlStored": false
+}

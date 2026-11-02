@@ -153,6 +153,7 @@ impl TransferLifetime {
             ..self.clone()
         })
     }
+    #[cfg(windows)]
     pub(crate) fn with_domain_fence(mut self, fence: ExecutionFence) -> Self {
         self.domain = Some(match self.domain.take() {
             Some(previous) => Arc::new(move || previous() && fence()),

@@ -1,0 +1,28 @@
+{
+  "sourceSha": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "references": [
+    {
+      "path": "开发计划/验证记录/2026-11-02-round80-msvc-native/freeze-first.json",
+      "bytes": 3595,
+      "sha256": "3b25afaee9802333ddbb9ee406111b8bf13d9a180861392d39ea99b2ff158ec2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round80-msvc-product/freeze-second.json",
+      "bytes": 5559,
+      "sha256": "be8a3d1c0807dbf7bc6e2ee02658b82ea366ecbe66980e6f7d88ec2f9bf8c946"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round80-msvc-product/final-verification-second.json",
+      "bytes": 1752,
+      "sha256": "b8eacdedac201f92c5a130fa74c2e2eb0f50531f87c7b9d0174dc29c2e524f9b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round80-msvc-product/a470-msvc-product-package-first/report.json",
+      "bytes": 93983,
+      "sha256": "f6b5265bf94dd0b88cd493a6a731a82cfe297cd991e7505d5ca5b811099eb6e5"
+    }
+  ],
+  "policy": "D3 full CI source/logs/official ZIP and D4 canonical normal product immutable upstream; not duplicated here",
+  "scope": "Official Win7 MSVC product plus GNU test-only witness; actual OS only Win11; Win7 and Win10 actual NOT_RUN",
+  "D4OriginalIncompleteFreeze": "Preserved upstream first freeze omitted one nested path; exact-root-path second freeze used here"
+}

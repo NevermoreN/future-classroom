@@ -1,0 +1,200 @@
+{
+  "status": "NO_CONCRETE_SOURCE_MERGE_BLOCKER_IDENTIFIED_READONLY_LIMITED_REVIEW",
+  "candidate": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "mergeIntent": "DEVELOPMENT_MAIN_ONLY_NOT_RELEASE; root decides integration",
+  "baseline": "07ef084 parent-reported; filesystem code compared without invoking Git",
+  "reviewedCodeFileCount": 27,
+  "blockingFindings": [],
+  "checks": [
+    {
+      "topic": "ordinary startup and maintenance retain unconditional Pending refusal",
+      "result": "PASS_READONLY",
+      "locations": [
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native.rs",
+          "line": 338
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native.rs",
+          "line": 460
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/controlled.rs",
+          "line": 18
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+          "line": 573
+        }
+      ],
+      "reason": "All normal startup/legacy maintenance/Draft paths use Resources::open and absent_pending; Pending presence or unknown open error rejects. Only private feature recovery uses existing-only open_gate and separately pins exact negative inode/bytes."
+    },
+    {
+      "topic": "owned-test-removal default off and compile-only closed scope",
+      "result": "PASS_READONLY",
+      "locations": [
+        {
+          "file": "crates/fc-windows/Cargo.toml",
+          "line": 12
+        },
+        {
+          "file": "crates/fc-bootstrap/Cargo.toml",
+          "line": 11
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+          "line": 51
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+          "line": 9
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/recovery/scope.rs",
+          "line": 114
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/recovery.rs",
+          "line": 449
+        }
+      ],
+      "reason": "Both Cargo defaults empty. Module/one fixed owned-test-remove word cfg-gated. option_env compile constant only; missing/invalid scope rejects before Session/gate discovery, no runtime env/path/hash/PID/nonce/result grant. Strict bounded full original14 manifest/receipt/SID/inode data still native-rechecked. Ordinary packaging admission remains closed/default-only."
+    },
+    {
+      "topic": "temporary watch TOKEN_QUERY checked-close before second G",
+      "result": "PASS_READONLY",
+      "locations": [
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/recovery.rs",
+          "line": 205
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/recovery.rs",
+          "line": 253
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native.rs",
+          "line": 730
+        }
+      ],
+      "reason": "watch_start records exact pre-watch ledger boundary; only successful watch new Role::Token entries close. Actual close failure retains same failed ledger/gate and aborts before READY or G2. Original G1 process/thread and Session image controls close before Completed0 allows second launch; initial self-user tokens are not mistaken for G1 tokens."
+    },
+    {
+      "topic": "typed duplicate InstallInitialize fix remains one original receipt",
+      "result": "PASS_READONLY",
+      "locations": [
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/guard_context.rs",
+          "line": 339
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/guard_context.rs",
+          "line": 565
+        }
+      ],
+      "reason": "Only granted=true/returned=true typed successor is idempotently ignored; no new grant, pipe close, release or Returned frame. First successor closes real CA pipe/context controls before sending Returned and only then sets returned. Missing grant and sticky callback fault remain negative; duplicate INFO/nonce still rejects."
+    },
+    {
+      "topic": "real Begin ownership and expected effects; legacy Join kept distinct",
+      "result": "PASS_READONLY",
+      "locations": [
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/controlled.rs",
+          "line": 119
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle.rs",
+          "line": 259
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle.rs",
+          "line": 285
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+          "line": 681
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+          "line": 717
+        }
+      ],
+      "reason": "Draft has exclusive gate without Pending, arm needs original real Begin0, tag5 still written only there. TransactionOrigin matching prevents synthetic legacy Join0 settling OwnedByBegin. Install/Repair require Present, Uninstall Absent; nonzero install uses captured-preimage rollback; original actual process/thread return and checked effects/source controls precede normal same-owner clear/release. End nonzero retains original claim."
+    },
+    {
+      "topic": "a470 chunks iterator-only correction preserves closed bytes and alignment",
+      "result": "PASS_READONLY",
+      "locations": [
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/guard_contract.rs",
+          "line": 23
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/recovery/scope.rs",
+          "line": 119
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/setup_entry.rs",
+          "line": 82
+        }
+      ],
+      "reason": "Nonce byte length32 and scope nonempty/bounded/even check precede as_chunks<2>; invalid UTF8 bytes reject through same lowerhex nibble. Dialog adds odd final padding before DWORD packing. No lint weakening or new permissions."
+    },
+    {
+      "topic": "D11 dependency and capacity boundaries",
+      "result": "PASS_STATIC_READONLY",
+      "locations": [
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/native.rs",
+          "line": 26
+        },
+        {
+          "file": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+          "line": 11
+        }
+      ],
+      "reason": "Direct TOML scan unchanged12 crates/33 allowed first-party edges; native HANDLE ownership remains in fc-windows; original120s/64handles/8slots/4096Pending/30MiB effect limits unchanged. No tests/Cargo/build invoked by reviewer."
+    }
+  ],
+  "sourceIdentity": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-integration-review-first/source-identities-first.json",
+    "bytes": 12362,
+    "sha256": "40031a09d9949b8933d9371f35f4de10041d029d1b2cb9483b441156a1c255a4"
+  },
+  "priorEvidenceScope": {
+    "GNUOwnedRemovalAndJointMsi": "Previously frozen R80 real explicit recovery and five post-write/canonical Setup paths; not rerun here; no direct serialized Begin/End claim",
+    "modernMsvcWin11OriginalFailure": {
+      "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/report.json",
+      "bytes": 20893,
+      "sha256": "2f0fb8df3e7ece2cb7ba63cac142766b356676ad035f37c4dc883ef5612ce8fc"
+    },
+    "originalWrapperFailurePreserved": "NameError: re not defined; overall first FAIL remains. Subsequent retrieval qualifies existing original native0 and exact-cleans original nonce, without native rerun.",
+    "modernMsvcWin11Retrieval": {
+      "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/report.json",
+      "bytes": 10725,
+      "sha256": "610b8627858a22aa281ee03c3bc5bcac4f5cb7464b6ee0144e6d663af143ec3e"
+    },
+    "modernRetrievalStatus": "PASS_EXISTING_MODERN_NATIVE_QUALIFICATION_AND_SCRATCH_CLEANUP_ONLY",
+    "modernCleanup": "PASS_EXACT_ORIGINAL_DOWNLOADED_NATIVE_NONCE_REMOVED",
+    "win7TargetMsvcOnWin11": {
+      "path": "/tmp/fc-round80-controlled-repair/a470-win7-native-runtime-second/report.json",
+      "bytes": 27772,
+      "sha256": "41759beef57f9582dd04f9d97802547d55fdcb1f0938ed1c6b161e59b38719af"
+    },
+    "win7TargetRuntimeOS": "WINDOWS11_ONLY",
+    "win7TargetCleanup": "PASS_FULL_DOWNLOAD_VERIFIED_EXACT_OWNED_NONCE_REMOVED",
+    "bothQualifiedScopes": "controlled6 + lifecycle66 including controlled6; not additive72",
+    "actualWin7OS": "NOT_RUN",
+    "actualWin10OS": "NOT_RUN",
+    "productionMsiForA470OfficialMsvc": "NOT_EXERCISED_BY_COMPONENT_NATIVE_RUNS",
+    "parentReportedSupplemental": "a47013 seal negative tests/5 controlledMSI static checks/format/architecture actual0; independent host workspace still running when instruction received; reviewer did not rerun or promote unfinished result"
+  },
+  "actions": {
+    "Windows": false,
+    "SSH": false,
+    "CargoOrBuild": false,
+    "GitCommands": false,
+    "W_W2_Main_ArchiveModified": false,
+    "writesOnly": "/tmp/fc-round80-controlled-repair/a470-integration-review-first"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "status": "PASS_FINITE_A470_OFFICIAL_MSVC_PRODUCT_GNU_WITNESS_WIN11_POST_WRITE_ARCHIVE",
+  "sourceSha": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "archive": {
+    "path": "evidence-originals-first.tar.gz",
+    "bytes": 487933,
+    "sha256": "94d316251a1fd4572f9a555c53cf974b4fc39bc8894192aecfe3ee6cd4cdab05",
+    "members": 278,
+    "originalBytes": 3013146
+  },
+  "originals": 278,
+  "identityOnly": 23,
+  "manifest": {
+    "path": "source-manifest-first.json",
+    "sha256": "4c86166d8ec94997a73f7a69471f7f662901b5db6e7cf2caed390f9d20e4a20e"
+  },
+  "promoted": [
+    "a470-msvc-post-write-package-first/derivation-report.json",
+    "a470-msvc-post-write-operation-first/report.json",
+    "a470-msvc-post-write-operation-first/static-review.json",
+    "a470-msvc-post-write-runtime-preparation-first/freeze-first.json",
+    "a470-msvc-post-write-runtime-preparation-first/semantic-source-review-first.json",
+    "a470-msvc-post-write-runtime-first/report.json",
+    "root-a470-msvc-post-write-ps-parse-first.json",
+    "root-a470-msvc-post-write-runtime-review-first.json"
+  ],
+  "upstream": "upstream-reference-first.json immutable D3 CI and corrected D4 canonical normal-product freeze; bodies not duplicated",
+  "scope": {
+    "product": "Official a470 Win7 MSVC main/helper/guard/default/profiletestfalse normal14",
+    "witness": "GNU_C_READONLY_TEST_DLL_ONLY_NOT_PRODUCT_OR_PERMISSION",
+    "injection": "InstallExecute6500/RemoveExistingProducts6501 unchanged; witness6502 verifies actual14 bytes then Type19 6503 fails; same PackageCode diagnostic fixture only",
+    "actual": "Win11 forced fresh1603→Absent; canonical install0; original LICENSE delete+51B probe preimage; forced repair1603→exact damaged preimage restored; canonical repair0 healthy14; uninstall0 Absent; five B exits1603/0/1603/0/0 and five G0 known checkedclosed;46files/8dirs exactdownload and new nonceAbsent",
+    "nativeMilliseconds": 9872,
+    "outerSeconds": 12.321780760001275,
+    "BeginEnd": "NOT_DIRECTLY_SERIALIZED_SOURCE_G0_AND_EFFECTS_INFERENCE_ONLY",
+    "originalCleanupLabel": "REMOVED_EXACT_DOWNLOADED_GNU_DEV_PRODUCT_ROOT",
+    "cleanupLabelScope": "Preserved generic GNU_DEV label; actual namespace and payload/product provenance are new MSVC and independently byte bound",
+    "Win7OS": "NOT_RUN",
+    "Win10OS": "NOT_RUN",
+    "releaseReadiness": "NOT_GRANTED"
+  },
+  "exclusions": [
+    {
+      "path": "a470-msvc-post-write-package-first/extracted",
+      "policy": "DUPLICATE_14_PAYLOAD_TREE_NOT_TRAVERSED",
+      "identitySource": "derivation-report.json exact14 payload extraction; frozen D4 normal package"
+    },
+    {
+      "path": "upstream-D3-CI",
+      "policy": "ALREADY_FROZEN_FULL_CI_SOURCE_LOGS_AND_OFFICIAL_ZIP_NOT_DUPLICATED"
+    },
+    {
+      "path": "upstream-D4-normal-product",
+      "policy": "ALREADY_FROZEN_CANONICAL_INPUTS_AND_NORMAL_PACKAGE_NOT_DUPLICATED"
+    },
+    {
+      "path": "tools/targets/caches/.git/sourcecopy/privatekeys/host/Reader",
+      "policy": "OUTSIDE_EXPLICIT_SELECTION_NOT_TRAVERSED"
+    }
+  ],
+  "credentials": {
+    "findings": [],
+    "backendMember": "archive-preparation-second/archive-second.py",
+    "backendSha256": "da2906c450ea8c2ac7d18e358507023f519dbcc6faf1a9ac1abb1ae16af8c30f",
+    "structuralForms": "Four exact UTF16 MSI DigitalSignature notes; two exact stream lists; two exact ForceCodepage terminators; six exact decoded SummaryInformation argv names; all path/size/SHA/parent-SHA bound, raw/boundary/concatenated views scanned"
+  },
+  "WindowsContacted": false,
+  "Cargo": false,
+  "Git": false,
+  "sourceDeletion": false
+}

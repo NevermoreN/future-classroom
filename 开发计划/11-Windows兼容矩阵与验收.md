@@ -379,3 +379,11 @@ R78同一源码261c58a的现代与Win7专用MSVC构建均通过，在该Win11各
 R80后续固定源码33c11f5的[69项生命周期组件](验证记录/2026-11-02-round80-owned-removal/owned-removal-native-runtime-first/report.json)、[正常Setup安装／缺失文件修复／卸载](验证记录/2026-11-02-round80-owned-removal/controlled-product-runtime-second/report.json)及[完整14文件写入后的首次安装／受损修复失败回滚](验证记录/2026-11-02-round80-post-write-rollback/controlled-post-write-runtime-first/report.json)均已在该Win11实际通过。69项包含原维护6项及新解析3项，不重复相加；普通三阶段实际B/G均0，五阶段回滚流程B1603/0/1603/0/0且五G均0。损坏前像包含LICENSE缺失和51字节PROBE内容，回滚逐字节及组件／注册事实恢复；随后正常修复及卸载通过。各自原件完整下载核对，相关nonce、Pending及gate均精确清理，持续SSH授权保持。独立显式恢复清除上一次失败测试安装不回填旧事务End0，原卸载失败仍保持。
 
 这些为固定GNU DEV产物的Win11运行证据；7c135c的现代MSVC编译成功与Win7严格Clippy失败分别保留，修正候选a4702b5的新现代MSVC和Win7目标MSVC工作流均实际SUCCESS，官方ZIP大小及SHA核同；两份原结果均为COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN，尚未执行这些产物的Win11运行。当前没有新增Win7或Win10实机证据，也没有以这些安装测试代替可见白板、触控／DPI、物理音频、真实登录、跨版本升级、Run所有权、校园网络或72小时验收。
+
+R80补充：a470两套官方MSVC的维护6项/完整66项（6包含在66内）已分别在Win11实际通过，原过程退出/checked-close及精确清理具证，[原运行及补取索引](验证记录/2026-11-02-round80-msvc-native/archive-index-first.json)另存现代首wrapper本地NameError的整体FAIL。此处是Win11上的两个目标产物运行，不是Win7/Win10实机；该候选MSVC完整产品联合安装与host整轮回归仍另验，后者本轮600秒超时且日志有11条FAILED，尚在定位。
+
+R80正式目标完整包补证：a470官方i686-win7-windows-msvc正常产物完整封包后，[Win11真实安装/单缺失文件修复/卸载](验证记录/2026-11-02-round80-msvc-product/a470-msvc-product-runtime-second/report.json)三阶段均0，六个原B/G均实际Wait0/exit0/checked-close，完整14份修复及最终Absent、精确目录清理有证。首PS旧GNU绑定预检FAIL仍保留；Windows7/10各自实机不变。此MSVC包的写后失败回滚、升级/Run/标准用户等仍分别待验，当前新host Release/串行回归尚在运行。
+
+R80最新终态：上述正式MSVC包的[安装及受损修复写后失败回滚](验证记录/2026-11-02-round80-msvc-post-write/a470-msvc-post-write-runtime-first/report.json)已在Win11实际通过，精确恢复损坏前像，随后正常修复/卸载及残留清理通过。见证DLL单独标为GNU测试来源，非产品payload。新只读安装信息读取器的[真实安装态](验证记录/2026-11-02-round80-installed-release-reader/installed-release-db-runtime-first/report.json)及[74项组件回归](验证记录/2026-11-02-round80-installed-release-reader/installed-release-db-native-runtime-first/report.json)亦在Win11实际通过，后者包含维护6项；新读取器为独立GNU来源，不能套用a470官方MSVC编译结论。host Release/串行989通过、0失败另列，host严格Clippy的平台cfg问题正在修正。完整升级、Run/标准用户、崩溃恢复、可见希沃、物理音频、校园网络与72小时等门槛不变；Win7 SP1 x86及Win10各自实机仍NOT_RUN。
+
+host平台cfg修正后，实际严格Clippy及8项受影响运行状态测试、自检均通过，详见[本批主机证据](验证记录/2026-11-02-round80-host-regression/archive-index-first.json)。修正仅为4文件11行条件编译，不改变Windows函数体；此host通过不等于新修订MSVC编译或Windows运行通过。后续新源码的两套MSVC构建及各操作系统实际验收继续单列。

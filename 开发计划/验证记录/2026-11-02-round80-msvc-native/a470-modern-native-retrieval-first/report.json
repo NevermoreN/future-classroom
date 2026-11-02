@@ -1,0 +1,278 @@
+{
+  "status": "PASS_EXISTING_MODERN_NATIVE_QUALIFICATION_AND_SCRATCH_CLEANUP_ONLY",
+  "firstReport": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/report.json",
+    "bytes": 20893,
+    "sha256": "2f0fb8df3e7ece2cb7ba63cac142766b356676ad035f37c4dc883ef5612ce8fc"
+  },
+  "firstOverallStatusPreserved": "FAIL_RETAIN_ORIGINALS",
+  "firstNativeCanonicalSha256": "40b6ca39d20b27418e3f53ea0402e5afe264703d70f4b9c61ff0674ea82e7f26",
+  "comparisonScope": "ENTIRE_NATIVE_JSON_VALUE_CANONICAL_UTF8_BYTES_EQUAL_FIRST_REPORT; FIRST_REPORT_HAS_NO_ORIGINAL_RAW_FILE_HASH; READBACK_RAW_BYTES_SHA_MUST_EQUAL_COMPLETE_DOWNLOAD",
+  "qualifiedCases": [
+    {
+      "name": "controlled",
+      "outerTotals": {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 293
+      },
+      "outerRunningCount": 6,
+      "expectedOuterStarts": 6,
+      "summaryCount": 1,
+      "nestedSummaryCount": 0,
+      "summaryAuthority": "FINAL_ORIGINAL_PARENT_SUMMARY_WITH_ORIGINAL_PARENT_EXIT0_AND_CHECKED_CLOSE"
+    },
+    {
+      "name": "lifecycle",
+      "outerTotals": {
+        "passed": 66,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 233
+      },
+      "outerRunningCount": 66,
+      "expectedOuterStarts": 66,
+      "summaryCount": 4,
+      "nestedSummaryCount": 3,
+      "summaryAuthority": "FINAL_ORIGINAL_PARENT_SUMMARY_WITH_ORIGINAL_PARENT_EXIT0_AND_CHECKED_CLOSE"
+    }
+  ],
+  "originalObjects": [
+    {
+      "Pid": 37876,
+      "Tid": 0,
+      "Wait": 0,
+      "ExitCode": 0,
+      "Creation": 134380504268956712,
+      "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb\\candidate-tests.exe",
+      "Sha256": "3edb598e3514eb68debfb6bedd0d7cab4844cd291348cc14afc1c32cd11765a8",
+      "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "Kind": "process",
+      "Status": "HELD_ORIGINAL_IDENTITY",
+      "Error": null,
+      "ExitKnown": true,
+      "CheckedClose": true
+    },
+    {
+      "Pid": 38092,
+      "Tid": 0,
+      "Wait": 0,
+      "ExitCode": 0,
+      "Creation": 134380504271087480,
+      "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb\\candidate-tests.exe",
+      "Sha256": "3edb598e3514eb68debfb6bedd0d7cab4844cd291348cc14afc1c32cd11765a8",
+      "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "Kind": "process",
+      "Status": "HELD_ORIGINAL_IDENTITY",
+      "Error": null,
+      "ExitKnown": true,
+      "CheckedClose": true
+    }
+  ],
+  "nativeRerun": false,
+  "noCreateOrAddType": true,
+  "wholeSeconds": 180,
+  "budgetScope": "SEPARATE_EXISTING_RESULT_READBACK_DOWNLOAD_AND_EXACT_SCRATCH_CLEANUP; DOES_NOT_RENEW_OR_RERUN_ORIGINAL_600_SECOND_NATIVE",
+  "operations": [
+    {
+      "name": "read-existing-native",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualExit": 0,
+      "originalLocalReaped": true,
+      "remoteReturnUnknown": false,
+      "timedOut": false,
+      "seconds": 0.5502029019990005,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/read-existing-native.stdout.log",
+        "bytes": 21053,
+        "sha256": "74c01bbe6ce65284082ebee321a6a0a4a0c99294bde11a079e0df1f58b54ead1"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/read-existing-native.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      },
+      "stdin": {
+        "bytes": 2856,
+        "sha256": "fe81fcfe71bf1299a90d5779de95801fa7be29ecca90e45886a9d22434a4b457"
+      }
+    },
+    {
+      "name": "owned-processes",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualExit": 0,
+      "originalLocalReaped": true,
+      "remoteReturnUnknown": false,
+      "timedOut": false,
+      "seconds": 0.5944124249981542,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/owned-processes.stdout.log",
+        "bytes": 13,
+        "sha256": "7886222597aa503c7fcb97ba200bf66c918aaf8bb08b6c702386457d30bdf0d7"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/owned-processes.stderr.log",
+        "bytes": 596,
+        "sha256": "be2a813c5e264e6e4b05c9816b17dc6eb039a1cc247767c8927d259fa5541e12"
+      },
+      "stdin": {
+        "bytes": 2547,
+        "sha256": "a8283c0ed1ada5dadeb88b39fe4dc06f2191332e0a64dda1f8ea33833327f534"
+      }
+    },
+    {
+      "name": "inventory",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualExit": 0,
+      "originalLocalReaped": true,
+      "remoteReturnUnknown": false,
+      "timedOut": false,
+      "seconds": 0.5479973210021853,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/inventory.stdout.log",
+        "bytes": 516,
+        "sha256": "c4d526cf07f7b3ca269a186ea2c7a48b6988db075c739ad6144543d6691fc274"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/inventory.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      },
+      "stdin": {
+        "bytes": 2385,
+        "sha256": "4f36301fd9486dfa0d74956b5f7c7634c717452801b93bc02aebd1cecc5fc68a"
+      }
+    },
+    {
+      "name": "download",
+      "argv": [
+        "scp",
+        "-q",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb",
+        "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/download"
+      ],
+      "actualExit": 0,
+      "originalLocalReaped": true,
+      "remoteReturnUnknown": false,
+      "timedOut": false,
+      "seconds": 0.2854055290008546,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/download.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/download.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "delete",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualExit": 0,
+      "originalLocalReaped": true,
+      "remoteReturnUnknown": false,
+      "timedOut": false,
+      "seconds": 0.5436603840025782,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/delete.stdout.log",
+        "bytes": 111,
+        "sha256": "43ddbaaf8c747eef5b8e67461cd1605a65d1d7974cd08d515137678821b91016"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-retrieval-first/delete.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      },
+      "stdin": {
+        "bytes": 4040,
+        "sha256": "d5ff93d1956eb679014b1d05183fadcced12d0b3db7ce13fc16bd2821013771e"
+      }
+    }
+  ],
+  "cleanup": "PASS_EXACT_ORIGINAL_DOWNLOADED_NATIVE_NONCE_REMOVED",
+  "originalRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb",
+  "nativeFileReadback": {
+    "bytes": 15646,
+    "sha256": "1d83722c4ac71d2aab0ed66495f41602fb699cd98e0e8e7985fd95116795fce4"
+  },
+  "nativeCanonicalBytesEqualFirstReport": true,
+  "ownedProcessReadback": {
+    "count": 0
+  },
+  "inventory": {
+    "directories": [
+      "compiler-temp",
+      "test-temp"
+    ],
+    "files": [
+      {
+        "path": ".owner",
+        "sha256": "cb7d78bcaf5f35ac26e19d2a00af779cfbaa212e5db7dc860fda12ccd71efe82",
+        "bytes": 55
+      },
+      {
+        "path": "candidate-tests.exe",
+        "sha256": "3edb598e3514eb68debfb6bedd0d7cab4844cd291348cc14afc1c32cd11765a8",
+        "bytes": 3434496
+      },
+      {
+        "path": "Capture.cs",
+        "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a",
+        "bytes": 9814
+      },
+      {
+        "path": "native-result.json",
+        "sha256": "1d83722c4ac71d2aab0ed66495f41602fb699cd98e0e8e7985fd95116795fce4",
+        "bytes": 15646
+      }
+    ]
+  },
+  "allOriginalNonceFilesDownloadedExact": true,
+  "delete": {
+    "nonce": "120c495e90a98bbcb628e9f6c31df2bb",
+    "status": "REMOVED_EXACT_PRODUCT_RUNTIME_ROOT",
+    "knownAbsent": true
+  },
+  "originalFailureAndPreparationUnchanged": true,
+  "elapsedSeconds": 2.5641456930025015
+}

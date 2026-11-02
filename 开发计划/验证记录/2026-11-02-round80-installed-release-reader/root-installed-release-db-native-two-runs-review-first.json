@@ -1,0 +1,22 @@
+{
+  "status": "PASS_ROOT_EXACT_NATIVE_PROBE_AND_74_COMPONENT_REGRESSION_REVIEW",
+  "positive": {
+    "path": "/tmp/fc-round80-controlled-repair/installed-release-db-runtime-first/report.json",
+    "bytes": 101874,
+    "sha256": "c477f6777ba72ac9d100370602fadc09e770b167e206818b0d539485ee25ce95"
+  },
+  "regression": {
+    "path": "/tmp/fc-round80-controlled-repair/installed-release-db-native-runtime-first/report.json",
+    "bytes": 115609,
+    "sha256": "353637662fd9fbb3ed02d90608439ab3678c172e5ac7d2317a36d69bf422f823"
+  },
+  "positiveDownloadedFiles": 31,
+  "regressionDownloadedFiles": 4,
+  "controlledSubset": 6,
+  "lifecycleTotal": 74,
+  "countsAdditive": false,
+  "positiveCase": "One explicit ignored cfgtest real installed cache reader run separately, not skipped as success",
+  "msiCloseReceipts": "41 asserted inside actual Rust probe; not serialized native return ledger",
+  "scope": "Two source domains: fixed a470 MSVC product fixture and new GNU cfgtest reader; no upgrade permit, new revision MSVC/Win7OS/Win10OS not verified",
+  "windowsMutations": "NONE_DURING_THIS_READONLY_REVIEW"
+}

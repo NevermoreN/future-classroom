@@ -1,0 +1,308 @@
+{
+  "status": "FROZEN_SOURCE_AND_FINITE_LOCAL_CHECKS_STOPPED_WRITING",
+  "baseCommit": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "worktree": "/tmp/fc-round80-controlled-repair/checkout-installed-release-db-first",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 51213,
+      "sha256": "6fdc1c54fc91b83fd2f0ec556d687a9764192f2139771393f5fb925a00b6e2d1"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release.rs",
+      "bytes": 14288,
+      "sha256": "18b22d9241e1525839146c3dd27166772ac5b3ad14a149a4d2ccb604dd953536"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/format.rs",
+      "bytes": 5341,
+      "sha256": "3f98688a6efc6e9eca0c2d347ddeda3959fcf6528fef1ab392b754435412f0a5"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/database_rules.rs",
+      "bytes": 3403,
+      "sha256": "b7a4a67ef44c43a6a8b57ff33c82db2b9c092ca234ee48c0e972734a9de77f8d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database.rs",
+      "bytes": 18093,
+      "sha256": "d72ecb16e3e09543e6bd46c807b4afc9ffb0ce0e0aaf6944c8fa7da86497bc27"
+    }
+  ],
+  "compilerInputsCount": 466,
+  "evidenceFiles": [
+    {
+      "path": ".owner",
+      "bytes": 62,
+      "sha256": "6b53d139646fb53488bdf79ad79944aff36172e3e20630008b42e6fe9ba1347b"
+    },
+    {
+      "path": "architecture-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "architecture-final.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "cargo-check-first.stderr.log",
+      "bytes": 2780,
+      "sha256": "108d6c2a0d7da1e8b4c62b19d566b602739851721069ed90ca7fbfbd148582cf"
+    },
+    {
+      "path": "cargo-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cargo-check-second.stderr.log",
+      "bytes": 1136,
+      "sha256": "060cb06124d8b432f876c27edcab7855ca6f1abd613bf742299cf8f7650a422e"
+    },
+    {
+      "path": "cargo-check-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cargo-check-third.stderr.log",
+      "bytes": 193,
+      "sha256": "47e688ae2616990074b8f025e47f88ab88f1fbbf1756d73147921877481657fb"
+    },
+    {
+      "path": "cargo-check-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "clippy-first.stderr.log",
+      "bytes": 2028,
+      "sha256": "7d66d1b31190e14eb14536accb132d525cb85c1eb6d2e19bb4577b3c94e65262"
+    },
+    {
+      "path": "clippy-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "clippy-second.stderr.log",
+      "bytes": 194,
+      "sha256": "9aea0ff5836d7584b1aab8f6cc7d4468dd5b0bdfffb646b8cc7fa921d2957c74"
+    },
+    {
+      "path": "clippy-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "compiler-inputs-final.json",
+      "bytes": 85603,
+      "sha256": "d4ad9a8531064174807377a14d15389011ecb148de8ffd7133d6581261a39ca8"
+    },
+    {
+      "path": "complete.patch",
+      "bytes": 44155,
+      "sha256": "8aa2dfb2977e51e0b8927ba556917b33951045c680b5fd7121b741315dff8326"
+    },
+    {
+      "path": "diff-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "diff-final.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-checks-first.json",
+      "bytes": 3152,
+      "sha256": "f56605e59b1638329acfbcdb51a1105652b7811b2d2683ff9bf701751c804ce9"
+    },
+    {
+      "path": "final-checks-second.json",
+      "bytes": 4579,
+      "sha256": "48596d84611d4688e508e53d961915c240972f9bcc77660b94576b9d035ff3c3"
+    },
+    {
+      "path": "fmt-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "fmt-final.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "implementation-first.json",
+      "bytes": 8078,
+      "sha256": "b217ba6215ad0673f5fb4a0dd6c4a674cd61aab6a677af57ea92236feadec2ac"
+    },
+    {
+      "path": "incremental-from-first.patch",
+      "bytes": 28294,
+      "sha256": "2a0e300de7664e5465fdc0ee30aa21afa801492db25e7a0fc4c396211785e783"
+    },
+    {
+      "path": "native-checks-first.json",
+      "bytes": 2674,
+      "sha256": "504efe4e8e595285d22ae2cfa1dc7da9bd4dd89938a3b255da2d5a19f1f2201a"
+    },
+    {
+      "path": "official-abi-first.json",
+      "bytes": 4683,
+      "sha256": "7d92fd3a9871373d0816c9adb0eacaa77f35b43d08fbe9ae9c84f1e1f4b19702"
+    },
+    {
+      "path": "patch-reverse-check.json",
+      "bytes": 75,
+      "sha256": "e827f77c5ce2399fdd05a47d551e901a60cf27b18ac0e9e2bd8a684ef3bdf5ba"
+    },
+    {
+      "path": "patch-reverse-check.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "patch-reverse-check.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance-first.json",
+      "bytes": 486,
+      "sha256": "3e9ba384ffe0cf05d1ce4d78392451ab6f2c5b727c474c4b0eb90d27c255cbe8"
+    },
+    {
+      "path": "pure-checks-first.json",
+      "bytes": 667,
+      "sha256": "87e7d9b82e2535dd21af5b3dab19338b5ae9d1db7b082896607a2cbebc628c47"
+    },
+    {
+      "path": "pure-compile-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pure-compile-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pure-tests-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pure-tests-first.stdout.log",
+      "bytes": 836,
+      "sha256": "d187274e2432c79373069d7938e98d37ef63ac7b267d724450ed6af9939435bb"
+    },
+    {
+      "path": "run-final-checks-first.py",
+      "bytes": 1982,
+      "sha256": "37e5813e8e7502e77a7d8bc803b266cc301710ce7476ca3b558f1f1c13d2e6f2"
+    },
+    {
+      "path": "run-final-checks-second.py",
+      "bytes": 1983,
+      "sha256": "a12eacdac4a342292408f45be32f45b401d9bfa48559f43ea8381c3e6b12c3e3"
+    },
+    {
+      "path": "run-pure-tests-first.py",
+      "bytes": 1098,
+      "sha256": "995dc38ab9f394e91f0d2aeed8854fe32f9bc2408d3789019ee7c05725945ab8"
+    },
+    {
+      "path": "source-clippy-first/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database.rs",
+      "bytes": 18083,
+      "sha256": "1aa6e3744bdba72eeaf657179bda213a390d8028028d8aa176641a65db040ec2"
+    },
+    {
+      "path": "source-clippy-first/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release.rs",
+      "bytes": 14288,
+      "sha256": "18b22d9241e1525839146c3dd27166772ac5b3ad14a149a4d2ccb604dd953536"
+    },
+    {
+      "path": "source-final/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database.rs",
+      "bytes": 18093,
+      "sha256": "d72ecb16e3e09543e6bd46c807b4afc9ffb0ce0e0aaf6944c8fa7da86497bc27"
+    },
+    {
+      "path": "source-final/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/database_rules.rs",
+      "bytes": 3403,
+      "sha256": "b7a4a67ef44c43a6a8b57ff33c82db2b9c092ca234ee48c0e972734a9de77f8d"
+    },
+    {
+      "path": "source-final/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/format.rs",
+      "bytes": 5341,
+      "sha256": "3f98688a6efc6e9eca0c2d347ddeda3959fcf6528fef1ab392b754435412f0a5"
+    },
+    {
+      "path": "source-final/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release.rs",
+      "bytes": 14288,
+      "sha256": "18b22d9241e1525839146c3dd27166772ac5b3ad14a149a4d2ccb604dd953536"
+    },
+    {
+      "path": "source-final/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 51213,
+      "sha256": "6fdc1c54fc91b83fd2f0ec556d687a9764192f2139771393f5fb925a00b6e2d1"
+    },
+    {
+      "path": "source-first/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database.rs",
+      "bytes": 17737,
+      "sha256": "4201652b06e2a21c72daff13c62c578fd334123314e79d9e96c28d0dc23d2a55"
+    },
+    {
+      "path": "source-first/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/database_rules.rs",
+      "bytes": 3403,
+      "sha256": "b7a4a67ef44c43a6a8b57ff33c82db2b9c092ca234ee48c0e972734a9de77f8d"
+    },
+    {
+      "path": "source-first/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/format.rs",
+      "bytes": 5341,
+      "sha256": "3f98688a6efc6e9eca0c2d347ddeda3959fcf6528fef1ab392b754435412f0a5"
+    },
+    {
+      "path": "source-first/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release.rs",
+      "bytes": 13965,
+      "sha256": "580410a11953c4ca244f719d2cfe4041674a36f0273f8e1a21274349e6fddae7"
+    },
+    {
+      "path": "source-first/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 51213,
+      "sha256": "6fdc1c54fc91b83fd2f0ec556d687a9764192f2139771393f5fb925a00b6e2d1"
+    },
+    {
+      "path": "worktree-status-final.txt",
+      "bytes": 420,
+      "sha256": "b8ee4d976de3367c37efa52108755213017bec1f0936bc5be065bc4f2092d48a"
+    }
+  ],
+  "completePatch": {
+    "path": "complete.patch",
+    "bytes": 44155,
+    "sha256": "8aa2dfb2977e51e0b8927ba556917b33951045c680b5fd7121b741315dff8326"
+  },
+  "incrementalFromFrozenFirst": {
+    "path": "incremental-from-first.patch",
+    "bytes": 28294,
+    "sha256": "2a0e300de7664e5465fdc0ee30aa21afa801492db25e7a0fc4c396211785e783"
+  },
+  "implementationReport": {
+    "path": "implementation-first.json",
+    "bytes": 8078,
+    "sha256": "b217ba6215ad0673f5fb4a0dd6c4a674cd61aab6a677af57ea92236feadec2ac"
+  },
+  "firstClippyFailurePreserved": true,
+  "finalGnuCheckActualExit": 0,
+  "strictClippyActualExit": 0,
+  "pureTestsActualPassed": 8,
+  "architecture": "12crates33edges actual0",
+  "Windows": "NOT_RUN",
+  "noGitCommitPush": true,
+  "freezeSelfExcluded": true
+}

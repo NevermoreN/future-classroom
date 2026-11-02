@@ -28,11 +28,11 @@
 cargo fmt --all -- --check
 python3 scripts/check-architecture.py
 cargo clippy --workspace --all-targets --locked -- -D warnings
-cargo test --workspace --locked
+cargo test --workspace --locked -- --test-threads=2
 cargo run -p fc-bootstrap --locked -- --self-check
 ```
 
-`scripts/verify.sh` 使用独立临时构建目录并在结束时清理。核心和SQLite测试可在Linux运行，原生Windows能力必须在Windows验证。
+`scripts/verify.sh` 使用独立临时构建目录并在结束时清理。登录验证只有两个进程级 KDF 工作槽，测试并发沿用脚本的两线程上限，避免独立夹具互相触发容量拒绝；容量及竞态用例仍在各自内部验证真实并发。需要串行核对发布配置时，可运行 `cargo test --workspace --release --locked -- --test-threads=1`。核心和SQLite测试可在Linux运行，原生Windows能力必须在Windows验证。
 
 登录自启动已接入本机主管理员工作台：分开展示期望与实际状态，开启、关闭或移动路径修复均需明确核对；变更意图和实际结果持久留痕，启动时只读取并核对中断状态。实现范围与未完成验收见[自启动契约](开发计划/22-自启动与系统变更核对.md)。`--autostart-probe` 使用合成数据库、隐藏窗口及本轮独立临时注册表项，不改真实登录启动项。
 

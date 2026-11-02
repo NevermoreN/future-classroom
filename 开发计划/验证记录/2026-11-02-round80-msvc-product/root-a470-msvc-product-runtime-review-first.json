@@ -1,0 +1,76 @@
+{
+  "status": "PASS_ROOT_OFFICIAL_MSVC_PRODUCT_THREE_PHASE_AND_EXACT_CLEANUP_REVIEW",
+  "report": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-msvc-product-runtime-second/report.json",
+    "bytes": 128305,
+    "sha256": "4a1dd14e32be5c8c4519876a5aee534712870dc344fd889291733c48f41c7d7f"
+  },
+  "sourceSha": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "target": "i686-win7-windows-msvc",
+  "runtimeOS": "WIN11_ONLY",
+  "nativeElapsedMilliseconds": 5997,
+  "outerElapsedSeconds": 8.200375734999398,
+  "originalProcessInstances": [
+    {
+      "verb": "install",
+      "role": "setup-install",
+      "pid": 26076,
+      "creation": 134380514749516102,
+      "wait": 0,
+      "exit": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "verb": "install",
+      "role": "owned-guardian",
+      "pid": 23636,
+      "creation": 134380514749923012,
+      "wait": 0,
+      "exit": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "verb": "repair",
+      "role": "setup-repair",
+      "pid": 2412,
+      "creation": 134380514764181724,
+      "wait": 0,
+      "exit": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "verb": "repair",
+      "role": "owned-guardian",
+      "pid": 25672,
+      "creation": 134380514764583915,
+      "wait": 0,
+      "exit": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "verb": "uninstall",
+      "role": "setup-uninstall",
+      "pid": 41572,
+      "creation": 134380514777957170,
+      "wait": 0,
+      "exit": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "verb": "uninstall",
+      "role": "owned-guardian",
+      "pid": 31996,
+      "creation": 134380514778354748,
+      "wait": 0,
+      "exit": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    }
+  ],
+  "downloadedFiles": 30,
+  "downloadedDirectories": 4,
+  "nonce": "7d637e3a8b5e41988b27b50934d3ee4e",
+  "knownAbsentNonce": true,
+  "beginEndObservationScope": "NOT_ASSERTED_FROM_LOGS_OR_EXTERNAL_PROCESS_OBSERVER",
+  "windows7Actual": "NOT_RUN",
+  "windows10Actual": "NOT_RUN"
+}

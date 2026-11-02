@@ -1,0 +1,125 @@
+{
+  "schema": "future-classroom-host-platform-cfg-validation/v1",
+  "status": "PASS_EXISTING8_HOST_RUNTIME_TESTS_AND_ISOLATED_SELF_CHECK",
+  "sourceBaseGit": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "worktree": "/tmp/fc-round80-controlled-repair/checkout-host-cfg-first",
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "bytes": 4124,
+      "sha256": "6eed2e681f9580343e0c18e2dc3b635c62c35aa0fcd7898f044e3c98341713b0",
+      "baseBytes": 4108,
+      "baseSha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 46801,
+      "sha256": "2e8b94f640c400c3e35d22261d3db5ff7da4d68507625577ad4f99371ef02043",
+      "baseBytes": 46785,
+      "baseSha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "bytes": 10113,
+      "sha256": "1ec0c01a52b614547f1a1defead6e85e297ce51a1593b954b81589b93e5c0d07",
+      "baseBytes": 9910,
+      "baseSha256": "5bb04d3585f895381daa0ef3e28ef851d7304c0584cebf40a615a91468716e39"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer.rs",
+      "bytes": 10917,
+      "sha256": "6065f1df8269a23bfeb3fee9670a77dea3798a756a86954c2b796214373bf498",
+      "baseBytes": 10897,
+      "baseSha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76"
+    }
+  ],
+  "sourcesMatchFrozenImplementation": true,
+  "frozenImplementation": {
+    "path": "/tmp/fc-round80-controlled-repair/host-platform-cfg-implementation-first/freeze-first.json",
+    "sha256": "436f3e8aec248117665b5416b66d19e0de3d604036aa2147eb2275be1672c06c"
+  },
+  "runtimeTestsPassed": 8,
+  "runtimeTestsFailed": 0,
+  "runtimeTestsFiltered": 208,
+  "actualRuntimeTestNames": [
+    "backend::web::tests::runtime_tests::delayed_old_negative_stop_cannot_revoke_new_running_generation",
+    "backend::web::tests::runtime_tests::independent_stop_cannot_be_adopted_by_late_native_ready_cas",
+    "backend::web::tests::runtime_tests::negative_stop_while_ledger_held_rejects_original_sql_write_at_real_precommit",
+    "backend::web::tests::runtime_tests::queued_sql_write_is_negative_before_ledger_after_original_runtime_stop",
+    "backend::web::tests::runtime_tests::restarting_runtime_revokes_old_exact_web_lease_before_new_epoch_is_positive",
+    "backend::web::tests::runtime_tests::returned_old_reservation_cannot_clear_new_starting_or_stopping_exact_claim",
+    "backend::web::tests::runtime_tests::runtime_readiness_requires_original_exact_local_lease_after_lock",
+    "backend::web::tests::runtime_tests::runtime_start_reservation_excludes_configuration_and_legacy_enable_until_return"
+  ],
+  "runtimeTestActualExit": 0,
+  "selfCheckActualExit": 0,
+  "selfCheckReadback": "sqlite_commit=PASS authority_publish=PASS idempotency=PASS\nsystem_csprng=NOT_RUN directory_lock=NOT_RUN (Windows required)\nisolated_test_cleanup=PASS\n",
+  "checks": [
+    {
+      "name": "runtime-tests",
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "fc-bootstrap",
+        "--lib",
+        "--release",
+        "--locked",
+        "--offline",
+        "backend::web::tests::runtime_tests::",
+        "--",
+        "--test-threads=1"
+      ],
+      "actualExit": 0,
+      "elapsedSeconds": 141.67944035300025,
+      "budgetSeconds": 600,
+      "timedOut": false,
+      "signals": [],
+      "originalPid": 11842,
+      "reaped": true,
+      "remainingGroup": [],
+      "tmpRoot": "/tmp/fc-round80-controlled-repair/host-platform-cfg-validation-first/tmp-runtime-tests-cb350bb2819c4a129a9eb45639242e93",
+      "tmpFilesBeforeCleanup": [],
+      "tmpKnownAbsent": true,
+      "targetDir": "/tmp/fc-round80-controlled-repair/target-a470-host-first"
+    },
+    {
+      "name": "self-check",
+      "argv": [
+        "cargo",
+        "run",
+        "-p",
+        "fc-bootstrap",
+        "--release",
+        "--locked",
+        "--offline",
+        "--",
+        "--self-check"
+      ],
+      "actualExit": 0,
+      "elapsedSeconds": 34.426490911002475,
+      "budgetSeconds": 600,
+      "timedOut": false,
+      "signals": [],
+      "originalPid": 13301,
+      "reaped": true,
+      "remainingGroup": [],
+      "tmpRoot": "/tmp/fc-round80-controlled-repair/host-platform-cfg-validation-first/tmp-self-check-e0d44ab86f024f6f9e795415bdd61585",
+      "tmpFilesBeforeCleanup": [],
+      "tmpKnownAbsent": true,
+      "targetDir": "/tmp/fc-round80-controlled-repair/target-a470-host-first"
+    }
+  ],
+  "sourceBeforeAfterUnchanged": true,
+  "sourceCopies": "../host-platform-cfg-implementation-first/source (four frozen complete source files, individually verified byte-identical to the worktree and these actual checks)",
+  "incrementalPatch": {
+    "path": "incremental.patch",
+    "bytes": 3762,
+    "sha256": "343cccc8870934841c3bb43bfb5a29d3af43ffb6733a28dd50e38fec9ed8bd84"
+  },
+  "scope": "New4file cfg candidate host release/serial8 existing runtime tests plus host self-check only. Prior989 wholeworkspace pass belongs to baselinea470; not rerun or attributed to newcfg candidate. Host self-check Windows CSPRNG/directory lock explicitly NOT_RUN.",
+  "cleanup": "Both original processgroups empty/reaped, own TMPDIR/TEMP/TMP roots fully inventoried then removed; no Windows or school data touched.",
+  "productionFunctionBodiesChanged": false,
+  "allowAdded": false,
+  "GitCommitPushWindows": "NOT_RUN"
+}

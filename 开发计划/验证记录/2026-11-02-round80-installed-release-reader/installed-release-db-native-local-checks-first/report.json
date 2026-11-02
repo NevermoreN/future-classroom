@@ -1,0 +1,24 @@
+{
+  "status": "FAIL_LOCAL_INPUT_QUALIFICATION_NO_WINDOWS",
+  "argv": [
+    "python3",
+    "/tmp/fc-round80-controlled-repair/installed-release-db-native-preparation-first/run-native.py",
+    "--validate-inputs-only",
+    "--producer",
+    "/tmp/fc-round80-controlled-repair/installed-release-db-implementation-second/build-report-second.json",
+    "--producer-sha256",
+    "9ec7ae275f74f7f44414ee70445db98970459f83c05e1869f208801f2f8ea10b",
+    "--inventory",
+    "/tmp/fc-round80-controlled-repair/installed-release-db-implementation-second/compiler-inputs-after-second.json",
+    "--inventory-sha256",
+    "3f7112dfe5d77a8cd3be0b3610ba75d8bce2e1c3fca559b8f61e92c8585ecdb9",
+    "--preparation-freeze-sha256",
+    "4efc6186b8d195c557f1faa596b678ea080380482f5287acb4b36711f6670df1"
+  ],
+  "actualExit": 1,
+  "parentReaped": true,
+  "seconds": 0.20693979999850853,
+  "preparationFreeze": "4efc6186b8d195c557f1faa596b678ea080380482f5287acb4b36711f6670df1",
+  "Windows": false,
+  "Cargo": false
+}

@@ -1,0 +1,98 @@
+diff --git a/crates/fc-bootstrap/src/backend/https_settings.rs b/crates/fc-bootstrap/src/backend/https_settings.rs
+index d123ff6..e81578b 100644
+--- a/crates/fc-bootstrap/src/backend/https_settings.rs
++++ b/crates/fc-bootstrap/src/backend/https_settings.rs
+@@ -86,6 +86,7 @@ impl Backend {
+     }
+ }
+ 
++#[cfg(windows)]
+ impl Backend {
+     pub(crate) fn https_data_root(&self) -> Result<std::path::PathBuf> {
+         self.database_path
+diff --git a/crates/fc-bootstrap/src/backend/web.rs b/crates/fc-bootstrap/src/backend/web.rs
+index ac4325c..2609e44 100644
+--- a/crates/fc-bootstrap/src/backend/web.rs
++++ b/crates/fc-bootstrap/src/backend/web.rs
+@@ -9,6 +9,7 @@ use fc_runtime::{
+     health::{GateError, Health},
+ };
+ use fc_security::web::{PairingCode, SecretText, SecretVerifier, WebSecret};
++#[cfg(windows)]
+ pub(crate) use runtime::WebRuntimeReservation;
+ 
+ pub const PAIR_WINDOW_MILLIS: u64 = 120_000;
+diff --git a/crates/fc-bootstrap/src/backend/web/runtime.rs b/crates/fc-bootstrap/src/backend/web/runtime.rs
+index e1a6904..97ac94e 100644
+--- a/crates/fc-bootstrap/src/backend/web/runtime.rs
++++ b/crates/fc-bootstrap/src/backend/web/runtime.rs
+@@ -2,6 +2,7 @@
+ //! HTTPS domain. Neither cancellation nor a UI ticket releases this claim.
+ use super::*;
+ 
++#[cfg(any(windows, test))]
+ pub(crate) struct WebRuntimeReservation {
+     service: WebService,
+     snapshot: Arc<AuthoritySnapshot<IdentityState>>,
+@@ -12,6 +13,7 @@ pub(crate) struct WebRuntimeReservation {
+     returned: AtomicBool,
+ }
+ impl WebService {
++    #[cfg(any(windows, test))]
+     pub(crate) fn reserve_runtime(
+         &self,
+         lease: SessionLease,
+@@ -69,6 +71,7 @@ impl WebService {
+     pub fn runtime_execution_current(&self) -> bool {
+         self.inner.runtime_epoch.load(Ordering::Acquire) & 1 == 1
+     }
++    #[cfg(windows)]
+     pub(crate) fn runtime_domain_current(&self) -> bool {
+         self.runtime_execution_current()
+             && !self.inner.control.0.closed.load(Ordering::Acquire)
+@@ -98,6 +101,7 @@ impl WebService {
+         self.inner.runtime_stopping.store(true, Ordering::Release);
+         self.inner.runtime_ready.store(false, Ordering::Release);
+     }
++    #[cfg(any(windows, test))]
+     pub(crate) fn settle_runtime_stop(&self) -> bool {
+         self.negative_runtime_stop();
+         // HTTP must keep servicing cancellation/deadline/IOCP while another
+@@ -116,7 +120,9 @@ impl WebService {
+         true
+     }
+ }
++#[cfg(any(windows, test))]
+ impl WebRuntimeReservation {
++    #[cfg(windows)]
+     pub(crate) fn identity_revision(&self) -> Revision {
+         self.snapshot.data.revision
+     }
+@@ -128,6 +134,7 @@ impl WebRuntimeReservation {
+             .admin_current(&self.snapshot, &mut ledger, self.lease, self.generation)
+             .is_ok()
+     }
++    #[cfg(windows)]
+     pub(crate) fn execution_fence(&self) -> TransactionExecutionFence {
+         let inner = self.service.inner.clone();
+         let epoch = self.epoch | 1;
+@@ -240,6 +247,7 @@ impl WebRuntimeReservation {
+         }
+     }
+ }
++#[cfg(any(windows, test))]
+ impl Drop for WebRuntimeReservation {
+     fn drop(&mut self) {
+         if !self.started.load(Ordering::Acquire) && !self.returned.load(Ordering::Acquire) {
+diff --git a/crates/fc-bootstrap/src/web_transfer.rs b/crates/fc-bootstrap/src/web_transfer.rs
+index f94c358..bd59257 100644
+--- a/crates/fc-bootstrap/src/web_transfer.rs
++++ b/crates/fc-bootstrap/src/web_transfer.rs
+@@ -153,6 +153,7 @@ impl TransferLifetime {
+             ..self.clone()
+         })
+     }
++    #[cfg(windows)]
+     pub(crate) fn with_domain_fence(mut self, fence: ExecutionFence) -> Self {
+         self.domain = Some(match self.domain.take() {
+             Some(previous) => Arc::new(move || previous() && fence()),

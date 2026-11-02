@@ -1,0 +1,283 @@
+{
+  "status": "FAIL_RETAIN_ORIGINALS",
+  "sourceSha": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "target": "i686-pc-windows-msvc",
+  "toolchain": "1.97.1-x86_64-pc-windows-msvc",
+  "runtimeOS": "WINDOWS11_ONLY",
+  "officialCiQualification": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-native-preparation-first/inputs/modern/qualification.json",
+    "bytes": 290391,
+    "sha256": "eebc3af05a0a75717fa692cb38b1f55d6ff277de60b42f9e32834e40b85efb3a"
+  },
+  "nativeInput": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-native-preparation-first/inputs/modern/candidate-tests.exe",
+    "bytes": 3434496,
+    "sha256": "3edb598e3514eb68debfb6bedd0d7cab4844cd291348cc14afc1c32cd11765a8"
+  },
+  "preparationFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/a470-native-preparation-first/freeze-first.json",
+    "bytes": 2829,
+    "sha256": "b2b15c7e61f1a981aa6bab951b1df21b37bff5005222a5cb63e313faa5e6c464"
+  },
+  "fixtureInputs": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/owned-removal-native-preparation-first/run-native.py",
+      "bytes": 18780,
+      "sha256": "aba4e0e69328b67f0eb88b775b2390645961b33c2d46cfb4ea3a319bba402169"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/native-reference-first/run-negative-msi-r79-third.py",
+      "bytes": 21961,
+      "sha256": "da74f0058deac86507b712075904556780be6b262b18acb82415da6725c6e202"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/native-reference-first/Capture.cs",
+      "bytes": 9814,
+      "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a"
+    }
+  ],
+  "expectedScopes": {
+    "controlled": 6,
+    "lifecycle": 66
+  },
+  "scopeOverlap": "66 includes controlled6; child summaries not added to parent totals",
+  "excludedScopeNames": [
+    "owned_removal_scope_never_accepts_unbound_or_runtime_authority_text",
+    "owned_removal_pending_requires_exact_original_schema_sid_and_tag5",
+    "owned_removal_scope_closes_full_manifest_receipts_and_object_identity"
+  ],
+  "feature": "DEFAULT_SCOPE_MODULE_NOT_COMPILED",
+  "productionMsi": "NOT_EXERCISED",
+  "windows7": "NOT_RUN",
+  "windows10": "NOT_RUN",
+  "operations": [
+    {
+      "name": "create",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.5061186130005808,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/create.stdout.log",
+        "bytes": 141,
+        "sha256": "e6ac65e4c7cd6497532d398d4f0221f6ce8af416a8396a5037e1599f5e7d8960"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/create.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      },
+      "stdin": {
+        "bytes": 3701,
+        "sha256": "131950690571d1c8607b8f5c19bc258f71a1e90d12579744b5776f999128734d"
+      }
+    },
+    {
+      "name": "upload-Capture.cs",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/upload/Capture.cs",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb/"
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.23368284700336517,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/upload-Capture.cs.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/upload-Capture.cs.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "upload-candidate-tests.exe",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/upload/candidate-tests.exe",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb/"
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 0.2704586760009988,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/upload-candidate-tests.exe.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/upload-candidate-tests.exe.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "run",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualReturnCode": 0,
+      "originalLocalReaped": true,
+      "remoteOriginalReturnUnknown": false,
+      "budgetExceeded": false,
+      "elapsedSeconds": 1.768904617998487,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/run.stdout.log",
+        "bytes": 12496,
+        "sha256": "97a90a69ee5e5ea6249a674f2ed01407dbb05abbae8a35e4a74feae875c8af30"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/a470-modern-native-runtime-first/run.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      },
+      "stdin": {
+        "bytes": 6753,
+        "sha256": "2bd71d4500dc66be5c168efec345d57385cbe1f57a46d2a5d7998029b54bf156"
+      }
+    }
+  ],
+  "cleanup": "NOT_RUN",
+  "nativeWholeSeconds": 600,
+  "outerSeconds": 900,
+  "windowsRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb",
+  "native": {
+    "elapsedMilliseconds": 1232,
+    "productionMsiAdapter": "NOT_EXERCISED",
+    "newGuardTests": "PURE_CONTRACT_BRIDGE_PRESENT_INTENT_AND_TYPED_SCRIPT_REPLAY_ONLY",
+    "ownedRemovalAuthority": "DEFAULT_FEATURE_SCOPE_MODULE_NOT_COMPILED_NO_RECOVERY_AUTHORITY",
+    "originalParentReturned": true,
+    "cases": [
+      {
+        "stdout": "\nrunning 6 tests\ntest installer_lifecycle::tests::controlled_arm_uses_original_tag5_and_cannot_settle_with_synthetic_join0 ... ok\ntest installer_lifecycle::tests::controlled_begin_draft_expiry_requires_real_empty_end_observation_and_actual_exit ... ok\ntest installer_lifecycle::tests::controlled_draft_blocks_startup_without_creating_pending_and_checked_aborts ... ok\ntest installer_lifecycle::tests::controlled_draft_checked_close_failure_has_no_pending_and_no_release_until_exit ... ok\ntest installer_lifecycle::tests::controlled_failed_begin_requires_original_guardian_exit_before_draft_abort ... ok\ntest installer_lifecycle::tests::controlled_unknown_original_draft_owner_retains_gate_until_actual_process_exit ... ok\n\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 293 filtered out; finished in 0.17s\n\n",
+        "originalDeadlineWholeMilliseconds": 150117,
+        "name": "controlled",
+        "pid": 37876,
+        "stderr": "",
+        "startedWholeMilliseconds": 117,
+        "originalSeconds": 150,
+        "endedWholeMilliseconds": 375,
+        "actualExit": true,
+        "argv": "installer_lifecycle::tests::controlled_ --test-threads=1 --nocapture",
+        "original": {
+          "Pid": 37876,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380504268956712,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb\\candidate-tests.exe",
+          "Sha256": "3edb598e3514eb68debfb6bedd0d7cab4844cd291348cc14afc1c32cd11765a8",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true
+        },
+        "exitCode": 0,
+        "creation": 134380504268956712
+      },
+      {
+        "stdout": "\nrunning 66 tests\ntest installer_lifecycle::broker::manifest::tests::actual_closed_format_accepts_full_set_and_rejects_truncation_tail_and_aliases ... ok\ntest installer_lifecycle::broker::manifest::tests::paths_cannot_escape_or_create_win32_aliases ... ok\ntest installer_lifecycle::broker::tests::role_grammar_has_no_external_authority_fields ... ok\ntest installer_lifecycle::broker::tests::setup_requests_have_only_three_exact_intents_and_no_authority_fields ... ok\ntest installer_lifecycle::broker::tests::unsealed_original_test_image_cannot_enter_any_setup_route ... ok\ntest installer_lifecycle::guard_contract::tests::bridge_is_closed_and_failure_return_cannot_be_acknowledgement ... ok\ntest installer_lifecycle::guard_contract::tests::grant_has_fixed_offsets_and_original_absolute_deadline ... ok\ntest installer_lifecycle::guard_contract::tests::info_is_exact_lower_hex_with_no_zero_or_path_authority ... ok\ntest installer_lifecycle::native::broker::context_probe::engine_parent_context_observer ... ok\ntest installer_lifecycle::native::broker::context_probe::observer_carrier_has_no_path_alias_or_normal_role ... ok\ntest installer_lifecycle::native::broker::controlled_owner::guard_context::tests::script_replay_does_not_return_original_guard_twice ... ok\ntest installer_lifecycle::native::broker::controlled_owner::setup_entry::tests::setup_dialog_values_only_select_closed_requests_or_cancel ... ok\ntest installer_lifecycle::native::broker::controlled_owner::tests::guard_bridge_ack_or_other_nonce_cannot_complete_run ... ok\ntest installer_lifecycle::native::broker::controlled_owner::tests::guard_bridge_needs_one_original_transaction_request_and_successor ... ok\ntest installer_lifecycle::native::broker::controlled_owner::tests::owned_messages_do_not_accept_legacy_join_or_unknown_fields ... ok\ntest installer_lifecycle::native::broker::controlled_owner::tests::setup_operation_requires_native_admission_and_closed_run_tags ... ok\ntest installer_lifecycle::native::broker::controlled_owner::tests::setup_seal_is_optional_for_legacy_but_never_zero_digest_authority ... ok\ntest installer_lifecycle::native::broker::effects::preimage::tests::rollback_requires_original_bad_bytes_and_absence_but_not_old_object_ids ... ok\ntest installer_lifecycle::native::broker::effects::preimage::tests::traversal_requires_every_expected_original_ancestor_pin ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_closed_file_effects_pin_bytes_and_reject_extra_changed_and_linked_files ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_damaged_preimage_pins_zero_and_bad_bytes_and_requires_exact_rollback ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_preimage_distinguishes_missing_tree_and_rejects_foreign_link_locked_and_large ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_preimage_rejects_missing_ancestor_created_after_directory_snapshot ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_run_absence_guard_never_changes_any_present_value ... ok\ntest installer_lifecycle::native::broker::effects::tests::actual_target_fact_cannot_select_directory_or_alias ... ok\ntest installer_lifecycle::native::broker::effects::tests::enum_absence_and_x86_registry_component_paths_are_exact ... ok\ntest installer_lifecycle::native::broker::effects::tests::maintenance_decision_preserves_original_preimage_and_pending_tags ... ok\ntest installer_lifecycle::native::broker::effects::tests::registered_product_and_user_sid_must_match_exact_native_identity ... ok\ntest installer_lifecycle::native::broker::effects::tests::setup_repair_cannot_commit_an_absent_payload_as_success ... ok\ntest installer_lifecycle::native::broker::effects::tests::setup_uninstall_requires_same_manifest_and_absence_not_present_or_partial ... ok\ntest installer_lifecycle::native::broker::retirement::tests::namespace_replacement_is_rejected_while_original_read_cap_stays_held ... ok\ntest installer_lifecycle::native::broker::retirement::tests::only_exact_os_installer_temp_namespace_is_eligible ... ok\ntest installer_lifecycle::native::broker::retirement::tests::original_read_cap_survives_strict_pin_then_retires_same_file ... ok\ntest installer_lifecycle::native::broker::retirement::tests::replacement_even_with_same_size_or_hash_cannot_match_original_object ... ok\ntest installer_lifecycle::native::broker::supervisor::tests::child_image_comparison_is_exact_path_not_leaf_or_prefix ... ok\ntest installer_lifecycle::native::broker::tests::actual_local_pipe_binds_original_process_sid_image_and_returns_controls ... \nrunning 1 test\ntest installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 298 filtered out; finished in 0.02s\n\nok\ntest installer_lifecycle::native::broker::tests::empty_control_packets_have_no_transaction_or_settlement_fields ... ok\ntest installer_lifecycle::native::broker::tests::engine_parent_sid_policy_accepts_only_same_user_or_exact_local_system ... ok\ntest installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok\ntest installer_lifecycle::native::broker::tests::real_pipe_cleanup_fault_retains_original_and_faults_only_subprocess ... \nrunning 1 test\ntest installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 298 filtered out; finished in 0.00s\n\nok\ntest installer_lifecycle::native::broker::tests::supervisor_hello_is_transaction_only_and_old_notices_are_rejected ... ok\ntest installer_lifecycle::native::broker::tests::unconnected_pipe_timeout_has_no_outstanding_io_or_replacement ... ok\ntest installer_lifecycle::native::broker::tests::unknown_short_peer_close_never_grants_released_ack ... \nrunning 1 test\ntest installer_lifecycle::native::broker::tests::pipe_process_fixture_child ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 298 filtered out; finished in 0.01s\n\nok\ntest installer_lifecycle::tests::close_failure_retains_physical_owner_in_child_without_replacement ... ok\ntest installer_lifecycle::tests::common_startup_helper_does_not_enter_body_under_maintenance ... ok\ntest installer_lifecycle::tests::common_startup_helper_holds_during_success_body_until_checked_return ... ok\ntest installer_lifecycle::tests::common_startup_helper_retains_after_caught_panic_until_actual_process_exit ... ok\ntest installer_lifecycle::tests::common_startup_helper_retains_after_error_until_actual_process_exit ... ok\ntest installer_lifecycle::tests::controlled_arm_uses_original_tag5_and_cannot_settle_with_synthetic_join0 ... ok\ntest installer_lifecycle::tests::controlled_begin_draft_expiry_requires_real_empty_end_observation_and_actual_exit ... ok\ntest installer_lifecycle::tests::controlled_draft_blocks_startup_without_creating_pending_and_checked_aborts ... ok\ntest installer_lifecycle::tests::controlled_draft_checked_close_failure_has_no_pending_and_no_release_until_exit ... ok\ntest installer_lifecycle::tests::controlled_failed_begin_requires_original_guardian_exit_before_draft_abort ... ok\ntest installer_lifecycle::tests::controlled_unknown_original_draft_owner_retains_gate_until_actual_process_exit ... ok\ntest installer_lifecycle::tests::coordination_rejects_gate_hardlink_alias_before_pending_or_school_data ... ok\ntest installer_lifecycle::tests::existing_broad_gate_dacl_is_rejected_without_repair_or_pending ... ok\ntest installer_lifecycle::tests::isolated_parent_delete_child_grant_is_rejected ... ok\ntest installer_lifecycle::tests::malformed_or_torn_pending_is_negative_not_dead_owner_recovery ... ok\ntest installer_lifecycle::tests::native_child ... ok\ntest installer_lifecycle::tests::original_expiry_never_renews_or_clears_negative_state ... ok\ntest installer_lifecycle::tests::os_parent_owner_trust_does_not_relax_exact_private_owner ... ok\ntest installer_lifecycle::tests::physical_maintenance_blocks_child_and_owner_loss_keeps_pending ... ok\ntest installer_lifecycle::tests::physical_shared_child_blocks_maintenance_until_actual_return ... ok\ntest installer_lifecycle::tests::producer_close_failure_remains_negative_after_original_process_exit ... ok\ntest installer_lifecycle::tests::receipt_before_actual_guardian_exit_cannot_clear_pending ... ok\ntest installer_lifecycle::tests::settled_control_close_failure_never_releases_but_actual_exit_returns_same_gate ... ok\n\ntest result: ok. 66 passed; 0 failed; 0 ignored; 0 measured; 233 filtered out; finished in 0.83s\n\n",
+        "originalDeadlineWholeMilliseconds": 300377,
+        "name": "lifecycle",
+        "pid": 38092,
+        "stderr": "",
+        "startedWholeMilliseconds": 377,
+        "originalSeconds": 300,
+        "endedWholeMilliseconds": 1229,
+        "actualExit": true,
+        "argv": "installer_lifecycle:: --test-threads=1 --nocapture",
+        "original": {
+          "Pid": 38092,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380504271087480,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb\\candidate-tests.exe",
+          "Sha256": "3edb598e3514eb68debfb6bedd0d7cab4844cd291348cc14afc1c32cd11765a8",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true
+        },
+        "exitCode": 0,
+        "creation": 134380504271087480
+      }
+    ],
+    "controlledNativeReturns": "CFG_TEST_SYNTHETIC_BEGIN_END_OBSERVATIONS_ONLY",
+    "captureSourceOnlyProcessMethods": true,
+    "newSetupTests": "PURE_INTENT_AND_UNSEALED_CURRENT_IMAGE_REJECTION_ONLY",
+    "cleanup": "ROOT_DOWNLOAD_THEN_EXACT_DELETE_REQUIRED",
+    "originalObjects": [
+      {
+        "Pid": 37876,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380504268956712,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb\\candidate-tests.exe",
+        "Sha256": "3edb598e3514eb68debfb6bedd0d7cab4844cd291348cc14afc1c32cd11765a8",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true
+      },
+      {
+        "Pid": 38092,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380504271087480,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-a470-msvc-native-120c495e90a98bbcb628e9f6c31df2bb\\candidate-tests.exe",
+        "Sha256": "3edb598e3514eb68debfb6bedd0d7cab4844cd291348cc14afc1c32cd11765a8",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true
+      }
+    ],
+    "status": "PASS_SETUP_COMPONENTS_AND_FULL_LIFECYCLE_NATIVE_TESTS_WIN11_ONLY",
+    "originalWholeSeconds": 600
+  },
+  "qualifiedCases": [],
+  "errorType": "NameError",
+  "error": "name 're' is not defined",
+  "elapsedSeconds": 4.778575168998941,
+  "officialZipSourcesAndNativeUnchanged": true
+}

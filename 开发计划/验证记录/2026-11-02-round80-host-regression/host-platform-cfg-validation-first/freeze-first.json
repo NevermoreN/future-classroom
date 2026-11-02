@@ -1,0 +1,94 @@
+{
+  "schema": "future-classroom-host-platform-cfg-validation-freeze/v1",
+  "status": "FROZEN_STOPPED_WRITING",
+  "files": [
+    {
+      "path": ".owner",
+      "bytes": 55,
+      "sha256": "7959883bde55dd454830036f6080e70170eb2c205680593f709f1de2f46a51bf"
+    },
+    {
+      "path": "checks-first.json",
+      "bytes": 170573,
+      "sha256": "3664715d1a0425e4462b98c39c67877f4255f62697eb83497d3f2a94889c097e"
+    },
+    {
+      "path": "incremental.patch",
+      "bytes": 3762,
+      "sha256": "343cccc8870934841c3bb43bfb5a29d3af43ffb6733a28dd50e38fec9ed8bd84"
+    },
+    {
+      "path": "live.json",
+      "bytes": 282,
+      "sha256": "79a79e3e606fc15d99eeaa88b6bf35318a67cb5e91b26aadfb8445440b90c493"
+    },
+    {
+      "path": "run-checks.py",
+      "bytes": 3654,
+      "sha256": "be819d119ea0326897832a258c7e486d951b07fb8c35dbae4740052d1a489c02"
+    },
+    {
+      "path": "runtime-tests.stderr.log",
+      "bytes": 1527,
+      "sha256": "b1242423b6d487b13d6bacb2ca011a9e75fbab15a2a320527473e90e82a4d385"
+    },
+    {
+      "path": "runtime-tests.stdout.log",
+      "bytes": 1066,
+      "sha256": "938d4695b98d726d1d0c41f98021b66c7c8d66a4731d3ec2120c6fd216dcbb1d"
+    },
+    {
+      "path": "self-check.stderr.log",
+      "bytes": 282,
+      "sha256": "dd53c88965dd497d6392da39eddb3e33075f28ebee9a3af1c06b0cbeeaab9b3c"
+    },
+    {
+      "path": "self-check.stdout.log",
+      "bytes": 150,
+      "sha256": "fe12a4f345dae24afefe2f3dceb90dbb6ea92c841feee0bc6113d674e8ffd9d3"
+    },
+    {
+      "path": "validation-first.json",
+      "bytes": 5472,
+      "sha256": "cca909b6499d54f173b37dfcccd9b7416df0e3718ce3d3d5a5bdeb3693785c68"
+    }
+  ],
+  "validation": {
+    "path": "validation-first.json",
+    "bytes": 5472,
+    "sha256": "cca909b6499d54f173b37dfcccd9b7416df0e3718ce3d3d5a5bdeb3693785c68"
+  },
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/https_settings.rs",
+      "bytes": 4124,
+      "sha256": "6eed2e681f9580343e0c18e2dc3b635c62c35aa0fcd7898f044e3c98341713b0",
+      "baseBytes": 4108,
+      "baseSha256": "5b7244c28a481fd2e61d108328860fba9c9de5e39447127b594028be19e651bf"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 46801,
+      "sha256": "2e8b94f640c400c3e35d22261d3db5ff7da4d68507625577ad4f99371ef02043",
+      "baseBytes": 46785,
+      "baseSha256": "928c0b920a963ca25e1c9de937b280d88ebd5f27278e1ff8bf3f09677f8dd7fe"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime.rs",
+      "bytes": 10113,
+      "sha256": "1ec0c01a52b614547f1a1defead6e85e297ce51a1593b954b81589b93e5c0d07",
+      "baseBytes": 9910,
+      "baseSha256": "5bb04d3585f895381daa0ef3e28ef851d7304c0584cebf40a615a91468716e39"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer.rs",
+      "bytes": 10917,
+      "sha256": "6065f1df8269a23bfeb3fee9670a77dea3798a756a86954c2b796214373bf498",
+      "baseBytes": 10897,
+      "baseSha256": "49a43e2fc8b19bead4a1d6e7beaab08fd6333f195e8d7e6a0559c672ca5f6e76"
+    }
+  ],
+  "bothActualExits": 0,
+  "runtimeTestsPassed": 8,
+  "allOwnedGroupsAndTmpReturned": true
+}

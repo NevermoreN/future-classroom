@@ -1,0 +1,20 @@
+--- archive-controller-first.py
++++ archive-controller-second.py
+@@ -19,7 +19,7 @@
+  ns['TEXT_FORMS']={f['path']:f for f in forms};need(ns['TEXT_DERIVED_VIEWS']=={},'NO_GENERIC_CONTROL_TOLERANCE')
+  original_review=ns['reviewed_control_views']
+  def reviewed(data,label):
+-  relative=next((label[len(p):] for p in ('source:','stored-tar-gzip-decoded:','promoted:') if label.startswith(p)),None);f=ns['TEXT_FORMS'].get(relative)
++  relative=next((label[len(p):] for p in ('source:','stored-tar-gzip-decoded:','promoted:') if isinstance(label,str) and label.startswith(p)),None);f=ns['TEXT_FORMS'].get(relative)
+   if f is None or f['textForm']=='EXACT_UTF16_MSI_DIGITAL_SIGNATURE_STREAM_NOTE':return original_review(data,label)
+   need(len(data)==f['bytes'] and sha(data)==f['sha256'],'EXACT_BOUND_STRUCTURAL_BYTES');text=data.decode('utf-8');need(text.encode()==data,'EXACT_UTF8_ROUNDTRIP')
+   kind=f['textForm']
+@@ -55,7 +55,7 @@
+ def main():
+  ap=argparse.ArgumentParser();ap.add_argument('--execute',action='store_true');ap.add_argument('--replay-only',action='store_true');a=ap.parse_args()
+  if not a.execute and not a.replay_only:print(json.dumps(dict(status='PREPARED_NOT_EXECUTED',Windows=False,Cargo=False,Git=False)));return
+- need(not(a.execute and a.replay_only),'ONE_MODE');need(Path(__file__).resolve()==D/'archive-controller-first.py','EXACT_CONTROLLER')
++ need(not(a.execute and a.replay_only),'ONE_MODE');need(Path(__file__).resolve()==D/'archive-controller-second.py','EXACT_CONTROLLER')
+  manifest=json.loads((D/'source-manifest-first.json').read_bytes());rows=manifest['originals'];ids=manifest['identityOnly'];need(len(rows)==278 and sum(r['bytes'] for r in rows)==3013146 and len(ids)==23,'FIXED_FINITE_SELECTION')
+  scan,stats,jsonl,ns=scanner(rows)
+  if a.replay_only:
