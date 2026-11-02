@@ -1,0 +1,52 @@
+{
+  "status": "PASS_FINITE_ABF_OFFICIAL_DUAL_MSVC_BUILD_EVIDENCE",
+  "sourceSha": "abf71f4b387616f8b83c4c5af8622898e594f60d",
+  "builds": [
+    {
+      "label": "modern",
+      "runId": 41368780507,
+      "artifactId": 13108153431,
+      "target": "i686-pc-windows-msvc",
+      "toolchain": "1.97.1-x86_64-pc-windows-msvc",
+      "commandsActual0": 51,
+      "originalInputRows": 623,
+      "originalPEIdentities": 25,
+      "runtime": "NOT_RUN",
+      "zipIdentity": {
+        "path": "abf-modern-download-first/artifact.zip",
+        "bytes": 45849551,
+        "sha256": "4a6155ee63cb6f31515f72cc72ff51b2594ff88a187361477459b41382d7f4d4",
+        "runId": 41368780507,
+        "artifactId": 13108153431
+      }
+    },
+    {
+      "label": "win7",
+      "runId": 41368783471,
+      "artifactId": 13109042999,
+      "target": "i686-win7-windows-msvc",
+      "toolchain": "nightly-2026-10-29-x86_64-pc-windows-msvc",
+      "commandsActual0": 53,
+      "originalInputRows": 623,
+      "originalPEIdentities": 25,
+      "runtime": "NOT_RUN",
+      "zipIdentity": {
+        "path": "abf-win7-download-first/artifact.zip",
+        "bytes": 46671485,
+        "sha256": "9a7a2f9ba54ac9dbbe3465e4fdc6051faae792355cad81b226f90868c20619ff",
+        "runId": 41368783471,
+        "artifactId": 13109042999
+      }
+    }
+  ],
+  "sourceProof": "Frozen original qualification records each623 committed Gitblob and LF/CRLF materialization against actual CI checkout SHA. Archive readback crosschecks all623 proof rows with original before/after CI ledgers. No new Git query or source materialization is run by this archive.",
+  "historicalMetadata": "19638 tracked paths include19015 historical archive entries. Their tree/domain metadata is preserved; historical checkout content is not claimed as SHA256 productsource-read.",
+  "downloadProof": "Actual ZIP identities and original receipts preserved. Original download script was not persisted; no download source or temporary signed URL is invented.",
+  "scope": "Official MSVC compile evidence for immutable abf only. Neither local Windows nor Win7/Win10/Win11/Seewo runtime was performed by these jobs or this archive. Later d9/f953/Fresh/upgrade/Published/product release not covered.",
+  "actions": {
+    "Windows": false,
+    "Git": false,
+    "Cargo": false,
+    "sourceDeletion": false
+  }
+}

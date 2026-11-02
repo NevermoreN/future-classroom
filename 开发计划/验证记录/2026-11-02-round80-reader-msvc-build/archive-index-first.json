@@ -1,0 +1,691 @@
+{
+  "status": "PASS_FINITE_ABF_READER_MSVC_BUILD_ARCHIVE",
+  "archive": {
+    "path": "evidence-originals-first.tar.gz",
+    "bytes": 6908580,
+    "sha256": "4819a8f2a7163c8157a99a98637bdb8ab79665983146d3f8053fb4c41fc0ece1",
+    "members": 473
+  },
+  "originalTextBytes": 77758944,
+  "originalZipIdentities": [
+    {
+      "path": "abf-modern-download-first/artifact.zip",
+      "bytes": 45849551,
+      "sha256": "4a6155ee63cb6f31515f72cc72ff51b2594ff88a187361477459b41382d7f4d4",
+      "runId": 41368780507,
+      "artifactId": 13108153431
+    },
+    {
+      "path": "abf-win7-download-first/artifact.zip",
+      "bytes": 46671485,
+      "sha256": "9a7a2f9ba54ac9dbbe3465e4fdc6051faae792355cad81b226f90868c20619ff",
+      "runId": 41368783471,
+      "artifactId": 13109042999
+    }
+  ],
+  "binaryIdentities": [
+    {
+      "path": "abf-modern-download-first/artifact-text/custom_action_library/fc-windows/fc_windows.dll",
+      "bytes": 237568,
+      "sha256": "ce9224c6e2282abcb78d442a85c3116a27180037eb13ebc2915a29face15d7d2",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "custom_action_library/fc-windows/fc_windows.dll"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/product/fc-bootstrap/fc-bootstrap.exe",
+      "bytes": 10703360,
+      "sha256": "8346be9dce28ccd1adb53ed68d09234b32a3fa169360da923dca5de961d24ec9",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "product/fc-bootstrap/fc-bootstrap.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/product/fc-bootstrap/fc-installer-lifecycle.exe",
+      "bytes": 440320,
+      "sha256": "b86b50a08bea6715bef0cae4d6eecd14f32e5316e419e5b532552591f1ecadce",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "product/fc-bootstrap/fc-installer-lifecycle.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-application/fc_application-5d6d0b981294d764.exe",
+      "bytes": 844800,
+      "sha256": "01a7a87a4ae94dfe034790486b25bf71570ff5abcf301593e790d1ce592ba974",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-application/fc_application-5d6d0b981294d764.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-audio/fc_audio-4fcdba47c53f6057.exe",
+      "bytes": 828928,
+      "sha256": "2f811d4338300819f17d29ff9d63d346ab2179b7ee7922ee83132e3d9fd8730a",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-audio/fc_audio-4fcdba47c53f6057.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/autostart_coordinator-fdbaa4e7bfb49979.exe",
+      "bytes": 3982848,
+      "sha256": "6646ac2d4a397fb1105e57b5810bb7c50e8945a7394652304ce04fe3faef3e70",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/autostart_coordinator-fdbaa4e7bfb49979.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/business_storage-fa9f869b7f66420c.exe",
+      "bytes": 4622336,
+      "sha256": "a720b5a76e9dc7de3e3674006242f55b0578132a5d2c63bebf41a04c36bc3969",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/business_storage-fa9f869b7f66420c.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/calendar_execution_fence-d3fabc5ab2a5f11c.exe",
+      "bytes": 4040704,
+      "sha256": "cfe5fbd91943ca56e83c5d6a264f1c17a1daa8fda9749a16176cdb4f39ca3c80",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/calendar_execution_fence-d3fabc5ab2a5f11c.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/fc_bootstrap-4dc699d173e1597c.exe",
+      "bytes": 10315264,
+      "sha256": "e6c7e78c6c762b46d727b917168a18108a1acef7aaa52a415e62f98f7ef683a3",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/fc_bootstrap-4dc699d173e1597c.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/fc_bootstrap-7d29979816971492.exe",
+      "bytes": 10888192,
+      "sha256": "4c063e96d0dd7d5c0324f22fe274823a77e974d646a6693d35a2f6f84aaaa895",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/fc_bootstrap-7d29979816971492.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/fc_installer_lifecycle-375877ea859d7d2b.exe",
+      "bytes": 905728,
+      "sha256": "0b13f9c3174bab7e31497fbb11467dad4716a16487682acb1a333690a3432ab4",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/fc_installer_lifecycle-375877ea859d7d2b.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/runtime_storage-d700f07577d74c0f.exe",
+      "bytes": 3566080,
+      "sha256": "297fa96067555e4a24fc6f0e361b88697ec66dbd70110b38232961881c81b40a",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/runtime_storage-d700f07577d74c0f.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/schedule_operations-0f9aeb5848076552.exe",
+      "bytes": 4173312,
+      "sha256": "d9d8d95e1d835927fc6dfb0a69b5b843e16480d5e50425ec7f7da09eb916aa4d",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/schedule_operations-0f9aeb5848076552.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/verify_web_assets-d5c9b1ecf58addd4.exe",
+      "bytes": 696320,
+      "sha256": "9c3975326d5eba1279f8d612293c616d93c9c4e4685bf3416895f577205728d4",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/verify_web_assets-d5c9b1ecf58addd4.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/voice_limits_storage-a74e2c166d959361.exe",
+      "bytes": 3714048,
+      "sha256": "b65fd924bef3082b0de3b6e6c796169d1f4d92c106523b90953e231fa1c32eb4",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/voice_limits_storage-a74e2c166d959361.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-bootstrap/voice_storage-84549f089aa17687.exe",
+      "bytes": 3760640,
+      "sha256": "6d541462cc7af64e0ae5ff6a6f1d33ac0c5a8bb0cb46810d83d701eac478ae4b",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/voice_storage-84549f089aa17687.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-domain/fc_domain-7c20761d03caf301.exe",
+      "bytes": 1783296,
+      "sha256": "a08b7189c3145c81c42a474c6fdd8829196fc01076489d949a533407bdc35f51",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-domain/fc_domain-7c20761d03caf301.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-materials/fc_materials-e7d24db82b4aa092.exe",
+      "bytes": 1793536,
+      "sha256": "aed6c07d9220a304f119f201ca2d8762d27de4ffa7e20c0a067ac5f77aa9ed33",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-materials/fc_materials-e7d24db82b4aa092.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-ports/fc_ports-082cdcbc09581414.exe",
+      "bytes": 765440,
+      "sha256": "71b0122057b333d3f6a8dd36ae56ba3686504334edec623c622e6ad9e14f44ca",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-ports/fc_ports-082cdcbc09581414.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-presentation/fc_presentation-ac3bd02a4649dc06.exe",
+      "bytes": 1305088,
+      "sha256": "5fa96cf7d0c00360ca3a945c6428ffd8691984696815530e1c169bfdaef5b10f",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-presentation/fc_presentation-ac3bd02a4649dc06.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-protocol/fc_protocol-b4eb917bdf061cd3.exe",
+      "bytes": 1449472,
+      "sha256": "13d9ff9152d3c03ddbd3e0e51a374324dd8d7d7aadf0aa929a6dbbdd6a07591b",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-protocol/fc_protocol-b4eb917bdf061cd3.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-runtime/fc_runtime-be9dbaf2840e21e2.exe",
+      "bytes": 991232,
+      "sha256": "3832267adf709c79c948d188361bb38b309d3da4c296caf8975888dac73d4b86",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-runtime/fc_runtime-be9dbaf2840e21e2.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-security/fc_security-72588a729a83c20c.exe",
+      "bytes": 806400,
+      "sha256": "fcfa16359b168a3f6ec3b6caf692e07dc4ec970000c35cf167bb6a600cc59e0b",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-security/fc_security-72588a729a83c20c.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-storage/fc_storage-c96791f7ea9a89c8.exe",
+      "bytes": 6800384,
+      "sha256": "0e0583af146d26ab771d908c1a61f8df5c4c32b50590f8d60ab23c3095d2409c",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-storage/fc_storage-c96791f7ea9a89c8.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/tests/fc-windows/fc_windows-ef7db952e7d3daf0.exe",
+      "bytes": 3509760,
+      "sha256": "a9f9fd49dc12ab7f51ec4e909f6999519ae83fd7f699769458283cf8fe961fb7",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "tests/fc-windows/fc_windows-ef7db952e7d3daf0.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/custom_action_library/fc-windows/fc_windows.dll",
+      "bytes": 260608,
+      "sha256": "eed1560bf9dee0a38ee21d5b5e8f9d73d133fb6b3b04a4d2dd634525c45569bc",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "custom_action_library/fc-windows/fc_windows.dll"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/product/fc-bootstrap/fc-bootstrap.exe",
+      "bytes": 10873856,
+      "sha256": "f5f3007df8f91651e70742007d797125ecde029d9a8447c3a84d1c0ae8f1a20d",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "product/fc-bootstrap/fc-bootstrap.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/product/fc-bootstrap/fc-installer-lifecycle.exe",
+      "bytes": 482304,
+      "sha256": "4d040732408a6e35f3ab3be00ac0d9ee2bc4c7299a6914fd4d258e5ce9ddad7a",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "product/fc-bootstrap/fc-installer-lifecycle.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-application/fc_application-ac39e659b19a54ca.exe",
+      "bytes": 878080,
+      "sha256": "5cec42bfd1c2fdd7044037d3ea34564de21cbfc73b4d1a61f4310accde19ccb0",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-application/fc_application-ac39e659b19a54ca.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-audio/fc_audio-a11ff92d3604e8b2.exe",
+      "bytes": 862208,
+      "sha256": "6fc9e642f79be8f8e843e0521cafbfffb328557e5b7eef4caf5db196e7cff48b",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-audio/fc_audio-a11ff92d3604e8b2.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/autostart_coordinator-a2545a836a5683b7.exe",
+      "bytes": 4024832,
+      "sha256": "f1331b509caceb5ea4945da1180ce7570a61f8f60057399cc0870c45cb46b1fe",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/autostart_coordinator-a2545a836a5683b7.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/business_storage-53b156560bfbccc2.exe",
+      "bytes": 4641792,
+      "sha256": "95333877835492fd62e6595e843ac909ddc9ab58c9f414d11b2c9e2e04dc7be9",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/business_storage-53b156560bfbccc2.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/calendar_execution_fence-67695cc8d5f0f150.exe",
+      "bytes": 4083200,
+      "sha256": "22ddeaeb26e95be560e9cfbe3a11fe4854a099d8ffe0179c648ce550aab708ce",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/calendar_execution_fence-67695cc8d5f0f150.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/fc_bootstrap-088f029765f73464.exe",
+      "bytes": 10407424,
+      "sha256": "dd56b6f74b9dd623120e1dc131ba8e97489ad30acb8db7098a11149ad94775d6",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/fc_bootstrap-088f029765f73464.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/fc_bootstrap-3a865db5fe6facc2.exe",
+      "bytes": 10966528,
+      "sha256": "57c0ddfd8ff1684d4d95edb213e5bed0c92ac754ec932d5dfe663a4f896a6a00",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/fc_bootstrap-3a865db5fe6facc2.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/fc_installer_lifecycle-3a46c2b0e0865f93.exe",
+      "bytes": 952320,
+      "sha256": "6e915fc3e7183a07aaf621e938a65429d5aeb73084a0cfe5e88b444f8cad4ee5",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/fc_installer_lifecycle-3a46c2b0e0865f93.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/runtime_storage-4d666dfdfe122876.exe",
+      "bytes": 3619328,
+      "sha256": "d992326995594f13a6a528df4a7fea2238d16dab35126665f8011cd31daf8881",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/runtime_storage-4d666dfdfe122876.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/schedule_operations-7a5a54d1c44bfa41.exe",
+      "bytes": 4203008,
+      "sha256": "acaf01cf7395148b8460aed58fff93d6b1cd1151b2029cf9437b590599e648c6",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/schedule_operations-7a5a54d1c44bfa41.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/verify_web_assets-1d7424dae65c5f63.exe",
+      "bytes": 730624,
+      "sha256": "29fe2dde1cbcf677f4aeb7c3d33425e6be1041a4fa53f53974bdb0afbaf6ea14",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/verify_web_assets-1d7424dae65c5f63.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/voice_limits_storage-510854ad821f6ad7.exe",
+      "bytes": 3764224,
+      "sha256": "a0ca15779f2b6b674221ed47aae23e90d4e1b656ccb4322d045d6b4d1809a7da",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/voice_limits_storage-510854ad821f6ad7.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-bootstrap/voice_storage-a8b4295dd13bd49e.exe",
+      "bytes": 3811328,
+      "sha256": "c01ce8230e89cbd8b098adb80990a9caa07fee15779e060b9c86c373e2aa2237",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-bootstrap/voice_storage-a8b4295dd13bd49e.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-domain/fc_domain-0e034a920b0bc011.exe",
+      "bytes": 1807872,
+      "sha256": "528138df25d02226f4236e52d56c51513f4eedb9e41f229218325a3e4fbb1c34",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-domain/fc_domain-0e034a920b0bc011.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-materials/fc_materials-d0d002b094ecaae0.exe",
+      "bytes": 1859072,
+      "sha256": "8aa763d450e995ef3bb49fefda48b9d61c81c0e3db990458ce431c36f585840a",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-materials/fc_materials-d0d002b094ecaae0.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-ports/fc_ports-6691e889c826dde2.exe",
+      "bytes": 800768,
+      "sha256": "db65932188b0598ec3080a16c989f86379684d8208b7a673aff752a454f27901",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-ports/fc_ports-6691e889c826dde2.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-presentation/fc_presentation-c39d30d80bca4811.exe",
+      "bytes": 1343488,
+      "sha256": "ed04d8007d761571b2392244c1863172090ec90be27f8988a723107ce4504771",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-presentation/fc_presentation-c39d30d80bca4811.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-protocol/fc_protocol-8bdf47f2d0ef16ff.exe",
+      "bytes": 1486848,
+      "sha256": "b175201b6142fd904998f48c653d0a5f657d8ee68c2bd50a2101a7b7fc853a16",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-protocol/fc_protocol-8bdf47f2d0ef16ff.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-runtime/fc_runtime-59c57af9dd929ece.exe",
+      "bytes": 1050624,
+      "sha256": "5c62fa1f00897310535bdd0f9e4a179effa5005111e882d1cbb74ff30f185feb",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-runtime/fc_runtime-59c57af9dd929ece.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-security/fc_security-bd33bc824b6c6abb.exe",
+      "bytes": 837632,
+      "sha256": "a5c7984c4a8c59c99228d353881e7adf3c40bca62dad1b0b7b24cd13a505ff6f",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-security/fc_security-bd33bc824b6c6abb.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-storage/fc_storage-84c81407f01781aa.exe",
+      "bytes": 6806016,
+      "sha256": "db0b00a799f7a1c9aa49a7d437045d6c33f73ac19cbe6db5cb28b7ad5ec333c4",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-storage/fc_storage-84c81407f01781aa.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/tests/fc-windows/fc_windows-31bbbe137f78164a.exe",
+      "bytes": 3611648,
+      "sha256": "bddc42f08068e03aedd8f085c4e852756f1f55eea7a1e421f5a3c9617864e714",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "tests/fc-windows/fc_windows-31bbbe137f78164a.exe"
+      },
+      "binaryKind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    }
+  ],
+  "promotedOriginals": [
+    {
+      "path": "abf-ci-qualification-first/freeze-first.json",
+      "bytes": 1464,
+      "sha256": "878cad53e84e695dfcfb7f5698e71b31e8692f02598a32ce43593fb33d66051e",
+      "source": {
+        "file": "abf-ci-qualification-first/freeze-first.json"
+      }
+    },
+    {
+      "path": "abf-ci-qualification-first/modern-report.json",
+      "bytes": 286927,
+      "sha256": "668972348a00049748ff013f41965ac157289339f5bdb090f1c206c06933b6c1",
+      "source": {
+        "file": "abf-ci-qualification-first/modern-report.json"
+      }
+    },
+    {
+      "path": "abf-ci-qualification-first/win7-report.json",
+      "bytes": 287064,
+      "sha256": "e6ef3a42c0a24a72c3e20a262ebbc857bbda05a7769818c6bc672a6c2b8a5b25",
+      "source": {
+        "file": "abf-ci-qualification-first/win7-report.json"
+      }
+    },
+    {
+      "path": "abf-ci-qualification-first/modern-all-commands.json",
+      "bytes": 4766,
+      "sha256": "76f3ca9fc88890c7c313915af4bf5042590f02ec4c1651a218bdd0234dbfffdd",
+      "source": {
+        "file": "abf-ci-qualification-first/modern-all-commands.json"
+      }
+    },
+    {
+      "path": "abf-ci-qualification-first/win7-all-commands.json",
+      "bytes": 4947,
+      "sha256": "5f393974bfc2294300e37892821580c4f788ecf9175f9f625a7b3492cb48ff19",
+      "source": {
+        "file": "abf-ci-qualification-first/win7-all-commands.json"
+      }
+    },
+    {
+      "path": "abf-ci-qualification-first/run-41368780507-terminal.json",
+      "bytes": 326,
+      "sha256": "8acf6291801e3ce97435de3353f638a5ffd4032030f5dac3977d315e886eeceb",
+      "source": {
+        "file": "abf-ci-qualification-first/run-41368780507-terminal.json"
+      }
+    },
+    {
+      "path": "abf-ci-qualification-first/run-41368783471-terminal.json",
+      "bytes": 326,
+      "sha256": "f5f7a40f375c34288c17a7f03b522d93ed91d975d11e11328bf335f2b7ca7d91",
+      "source": {
+        "file": "abf-ci-qualification-first/run-41368783471-terminal.json"
+      }
+    },
+    {
+      "path": "abf-modern-download-first/download-report.json",
+      "bytes": 20891,
+      "sha256": "34bb5b3fe0435d75b9ca8b7b21532ed7d0025755aa414f426ab9f1c7db678cfb",
+      "source": {
+        "file": "abf-modern-download-first/download-report.json"
+      }
+    },
+    {
+      "path": "abf-modern-download-first/zip-inventory.json",
+      "bytes": 18610,
+      "sha256": "0cdb536d494dae8967ff0d994f5a28c940ee8a9792f7a984be975d9e5be436e0",
+      "source": {
+        "file": "abf-modern-download-first/zip-inventory.json"
+      }
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/result.json",
+      "bytes": 48303,
+      "sha256": "d97e6ac4f76f200c130d547aa0e195365d77dc539e6c589fe96a7c378ce322fd",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "result.json"
+      }
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/host.json",
+      "bytes": 673,
+      "sha256": "79ea0f4932e9732f8f396a17d1516d8af1d85fcbc0743d6708d486b8217402c0",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "host.json"
+      }
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/cleanup.json",
+      "bytes": 530,
+      "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "cleanup.json"
+      }
+    },
+    {
+      "path": "abf-modern-download-first/artifact-text/executables.json",
+      "bytes": 13945,
+      "sha256": "58f10f5bb8297d0b03b03bf2de9882f51a9b48c6a7ee48541b5833df0a4371bf",
+      "source": {
+        "zip": "abf-modern-download-first/artifact.zip",
+        "member": "executables.json"
+      }
+    },
+    {
+      "path": "abf-win7-download-first/download-report.json",
+      "bytes": 21627,
+      "sha256": "da40618d76acb2caecf110f58524754219918a91f67a1e61a719a3766686f59c",
+      "source": {
+        "file": "abf-win7-download-first/download-report.json"
+      }
+    },
+    {
+      "path": "abf-win7-download-first/zip-inventory.json",
+      "bytes": 19274,
+      "sha256": "48b3f227bbf8778283de4bdb4b8fe10a9aeea0df16ea32c3ab89d19ab8223e85",
+      "source": {
+        "file": "abf-win7-download-first/zip-inventory.json"
+      }
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/result.json",
+      "bytes": 50568,
+      "sha256": "364769dc09d9c0e974d7821f0de7dd55f6103ef224974ee838657431eb85fc30",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "result.json"
+      }
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/host.json",
+      "bytes": 673,
+      "sha256": "79ea0f4932e9732f8f396a17d1516d8af1d85fcbc0743d6708d486b8217402c0",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "host.json"
+      }
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/cleanup.json",
+      "bytes": 530,
+      "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "cleanup.json"
+      }
+    },
+    {
+      "path": "abf-win7-download-first/artifact-text/executables.json",
+      "bytes": 13971,
+      "sha256": "bd911b2a72280b1b25a2194cd57c1a45bc6e66bf27265b14124302a865596bd5",
+      "source": {
+        "zip": "abf-win7-download-first/artifact.zip",
+        "member": "executables.json"
+      }
+    }
+  ],
+  "sourceDeletion": false
+}
