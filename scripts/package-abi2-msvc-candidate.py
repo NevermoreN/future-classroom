@@ -8,6 +8,7 @@ Win7/Win10 runtime compatibility, or a Web source-build certification.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 from pathlib import Path
@@ -150,9 +151,27 @@ def validate_predecessor_runtime(runtime: dict, manifest: dict, package: dict) -
         NEED(p[key].get('knownAbsent') is True and p[key].get('runAbsent') is True
              and p[key].get('status') == 'PASS_READONLY_EXPECTED_ABSENT', 'Original absent product boundaries')
     for key in ('installed', 'repaired'):
-        NEED(p[key].get('healthyPresent') is True and p[key].get('runAbsent') is True
-             and p[key].get('status') == 'PASS_READONLY_EXPECTED_PRESENT', 'Installed and repaired complete14 state')
         state = p[key]
+        if state.get('runAbsent') is not True:
+            expected_run = ('"' + state['observations']['files']['root']
+                            + '\\fc-bootstrap.exe" --autostart\0').encode('utf-16-le')
+            run = dict(view='Registry32', value='FutureClassroom', queryCode=0,
+                       type=1, bytes=len(expected_run),
+                       base64=base64.b64encode(expected_run).decode('ascii'),
+                       absent=False, contentsRead=True, matchesExpected=True)
+            removed = p.get('uninstallRemovedEnabledRun', {})
+            NEED(manifest.get('enableRunDuringMaintenance') is True
+                 and state.get('runExact') is True
+                 and state['observations']['run'] == run
+                 and p.get('originalEnabledRunMaintenance') == run
+                 and p.get('runRepairPreserved') is True
+                 and p.get('enabledRunUpgrade') == 'PASS_REPAIR_EXACT_RUN_PRESERVED'
+                 and removed.get('view') == 'Registry32'
+                 and removed.get('value') == 'FutureClassroom'
+                 and removed.get('queryCode') == 2 and removed.get('absent') is True,
+                 'Actual exact owned Run preserved by repair and removed by uninstall')
+        NEED(state.get('healthyPresent') is True
+             and p[key].get('status') == 'PASS_READONLY_EXPECTED_PRESENT', 'Installed and repaired complete14 state')
         files = state['observations']['files']['files']
         NEED(state.get('sourceGit') == manifest['sourceGit'] and state.get('currentUserSid') == manifest['expectedUserSid']
              and state.get('phaseErrors') == [] and len(files) == len(package['payloads']) == 14
