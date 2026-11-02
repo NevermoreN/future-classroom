@@ -14,12 +14,291 @@ from pathlib import Path
 import re
 import runpy
 import struct
+from types import SimpleNamespace
 
 HERE = Path(__file__).resolve().parent
 ABI2 = runpy.run_path(str(HERE / 'package-abi2-upgrade-dev.py'))
 B = ABI2['B']
 NEED = ABI2['NEED']
 TARGET = 'i686-win7-windows-msvc'
+PUBLICATION = runpy.run_path(str(HERE / 'installer-upgrade-publication.py'))
+ARG_PATHS = {'source_root', 'input_zip', 'lifecycle_helper', 'guard_library',
+             'build_evidence', 'candidate_instructions'}
+ARG_HASHES = {'input_sha256', 'lifecycle_helper_sha256', 'guard_library_sha256',
+              'build_result_sha256', 'candidate_instructions_sha256'}
+
+
+def original_file(path: Path, limit: int = 64 * 1024 * 1024) -> bytes:
+    NEED(path.is_absolute() and path == path.resolve(), 'Canonical absolute original evidence path')
+    B['PROBE']['real_directory'](path.parent)
+    return B['PROBE']['bounded_regular_file'](path, limit)
+
+
+def bound_fact(fact: dict, limit: int = 64 * 1024 * 1024) -> bytes:
+    NEED(isinstance(fact, dict) and set(fact) == {'path', 'bytes', 'sha256'}
+         and isinstance(fact['path'], str) and type(fact['bytes']) is int
+         and 0 <= fact['bytes'] <= limit and isinstance(fact['sha256'], str)
+         and re.fullmatch('[0-9a-f]{64}', fact['sha256']), 'Closed original evidence fact')
+    raw = original_file(Path(fact['path']), limit)
+    NEED(len(raw) == fact['bytes'] and B['digest'](raw) == fact['sha256'], 'Exact original evidence bytes/SHA')
+    return raw
+
+
+def decode_predecessor(record: bytes) -> dict:
+    NEED(type(record) is bytes, 'Immutable formal predecessor record required')
+    ABI2['predecessor_bytes'](record)
+    NEED(record[12] == 1, 'Formal predecessor must derive from original MSVC target, never GNU')
+    meta = dict(target=record[12], source_commit=record[16:36].hex(),
+                template_bytes=struct.unpack_from('<I', record, 228)[0])
+    meta.update({key: record[36+32*n:68+32*n].hex()
+                 for n, key in enumerate(PUBLICATION['DIGEST_KEYS'])})
+    NEED(PUBLICATION['encode_format'](meta, record[248:], ABI2['C']['parse_payload_manifest']) == record,
+         'Exact predecessor encode/decode roundtrip without tail or reserved bytes')
+    return meta
+
+
+def validate_predecessor_cache(cache: dict, manifest: dict, package: dict) -> None:
+    NEED(cache.get('status') == 'KNOWN_PRESENT_EXACT_API_LOCALPACKAGE_READONLY'
+         and type(cache.get('apiCode')) is int and cache['apiCode'] == 0
+         and type(cache.get('context')) is int and cache['context'] == 2
+         and cache.get('property') == 'LocalPackage' and cache.get('mutations') is False
+         and cache.get('productCode') == manifest['productCode'] and cache.get('userSid') == manifest['expectedUserSid']
+         and cache.get('sha256') == package['msi']['sha256']
+         and type(cache.get('bytes')) is int and cache['bytes'] == package['msi']['bytes']
+         and isinstance(cache.get('path'), str) and re.fullmatch(r'[A-Za-z]:\\Windows\\Installer\\[0-9a-fA-F]{1,16}\.msi', cache['path'])
+         and all(type(cache.get(n)) is int and 0 <= cache[n] <= 0xffffffff for n in ('volume', 'indexHigh', 'indexLow')),
+         'Direct API-selected stable whole-cache bytes equal the actual predecessor source MSI')
+
+
+def validate_successor_identity(package: dict, new_version: str, streams: dict, artifacts: dict) -> None:
+    NEED(B['version_parts'](package['version']) < B['version_parts'](new_version)
+         and package['productCode'] != B['product_code'](new_version), 'Strictly newer actual MSI/product identity')
+    NEED(streams[B['TEMPLATE_BINARY']] == ABI2['C']['make_carrier_template'](artifacts['lifecycle-compile'][1])
+         and streams[B['GUARD_BINARY']] == artifacts['guard-library-compile'][1],
+         'Existing native protocol requires actual identical old/new normal helper template and DLL')
+
+
+def validate_predecessor_runtime(runtime: dict, manifest: dict, package: dict) -> None:
+    """Check original physical receipts and direct whole-cache observations."""
+    NEED(runtime.get('status') == 'PASS_ORIGINAL_WIN7_MSVC_ABI2_WIN11_CONTROLLED_PRODUCT_CLOSURE_AND_EXACT_SCRATCH_CLEANUP'
+         and runtime.get('downloadVerified') is True and type(runtime.get('runtimeActualExit')) is int
+         and runtime['runtimeActualExit'] == 0 and runtime.get('originalWholeBudgetExceeded') is False,
+         'Actual original MSVC runtime and complete download, not a GNU or shell-only PASS')
+    p = runtime['phase']
+    NEED(p.get('status') == 'PASS_ORIGINAL_WIN7_MSVC_ABI2_WIN11_CONTROLLED_PRODUCT_INSTALL_LICENSE_REPAIR_UNINSTALL'
+         and all(p.get(key) is False for key in ('ownerUnknown', 'instrumentUnknown', 'originalBudgetExceeded'))
+         and p.get('allSetupBusinessSucceeded') is True
+         and p.get('wholeMilliseconds') == 600000 and p.get('eachClientMaximumMilliseconds') == 150000
+         and p.get('setupInternalSeconds') == 120 and p.get('cleanupReserveMilliseconds') == 180000,
+         'Original bounded three-phase MSVC physical qualification')
+    NEED(manifest.get('formalCI') is True and manifest.get('target') == TARGET
+         and manifest.get('normalProfileTest') is False and manifest.get('guardABI') == 2
+         and manifest.get('sourceGit') == package['sourceBase']
+         and manifest.get('sourceEvidenceSha256') == package['sourceEvidenceSha256']
+         and manifest.get('productCode') == '{' + package['productCode'] + '}'
+         and manifest.get('version') == package['version'] and manifest.get('artifactVersion') == package['artifactVersion']
+         and manifest.get('packageCode') == package['packageCode'] and manifest.get('payloads') == package['payloads'],
+         'Same actual original MSVC source, product, version and complete14 runtime ledger')
+    for key in ('msi', 'setup'):
+        NEED(all(manifest[key][n] == package[key][n] for n in ('bytes', 'sha256')),
+             'Actual runtime bundle equals original static package')
+    rows = p['phases']
+    NEED(len(rows) == 3 and [x['verb'] for x in rows] == ['install', 'repair', 'uninstall'],
+         'Exactly three serial original maintenance phases')
+    for row in rows:
+        client, observer, caps = row['client'], row['observerFinal'], row['directOriginalFinal']
+        NEED(client.get('started') is True and client.get('actualExit') is True
+             and type(client.get('exitCode')) is int and client['exitCode'] == 0
+             and client.get('pipesComplete') is True and client.get('timedOut') is False
+             and row.get('knownControlsReturned') is True and row.get('nativeBusinessSucceeded') is True
+             and row['postPhaseProcesses'].get('knownZero') is True
+             and observer.get('Closed') is True and observer.get('Errors') == []
+             and isinstance(caps, list) and len(caps) == 1, 'Original process return and observer completeness')
+        cap = caps[0]
+        NEED(cap.get('Status') == 'HELD_ORIGINAL_IDENTITY' and type(cap.get('Wait')) is int and cap['Wait'] == 0
+             and cap.get('ExitKnown') is True and type(cap.get('ExitCode')) is int and cap['ExitCode'] == 0
+             and cap.get('CloseAttempted') is True and cap.get('CheckedClose') is True
+             and cap.get('Pid') == client.get('pid') and cap.get('Creation') == client.get('creationFiletime'),
+             'Original B object actual wait/exit and checked close')
+        processes = observer['Processes']
+        NEED(len(processes) == 2 and sorted(x['Role'] for x in processes) == sorted(['setup-' + row['verb'], 'owned-guardian']),
+             'Exactly the original B and one owned guardian')
+        setup_process = next(x for x in processes if x['Role'] == 'setup-' + row['verb'])
+        guardian = next(x for x in processes if x['Role'] == 'owned-guardian')
+        NEED(setup_process.get('Pid') == client['pid'] and setup_process.get('CreationFiletime') == client['creationFiletime']
+             and guardian.get('ParentPid') == client['pid'] and guardian.get('ParentCreationFiletime') == client['creationFiletime'],
+             'Observed original B instance and exact owned guardian parent instance')
+        for process in [cap, *processes]:
+            NEED(process.get('Sha256') == manifest['setup']['sha256']
+                 and process.get('Sid') == manifest['expectedUserSid'], 'Original exact Setup bytes and actual user')
+        for process in processes:
+            NEED(process.get('IdentityStatus') == 'ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER'
+                 and type(process.get('ActualWait')) is int and process['ActualWait'] == 0
+                 and type(process.get('ActualExitCode')) is int and process['ActualExitCode'] == 0
+                 and process.get('CloseStatus') == 'CHECKED_CLOSE_SUCCESS', 'Original B/G physical return receipts')
+    for key in ('initial', 'uninstalled', 'finallyProduct'):
+        NEED(p[key].get('knownAbsent') is True and p[key].get('runAbsent') is True
+             and p[key].get('status') == 'PASS_READONLY_EXPECTED_ABSENT', 'Original absent product boundaries')
+    for key in ('installed', 'repaired'):
+        NEED(p[key].get('healthyPresent') is True and p[key].get('runAbsent') is True
+             and p[key].get('status') == 'PASS_READONLY_EXPECTED_PRESENT', 'Installed and repaired complete14 state')
+        state = p[key]
+        files = state['observations']['files']['files']
+        NEED(state.get('sourceGit') == manifest['sourceGit'] and state.get('currentUserSid') == manifest['expectedUserSid']
+             and state.get('phaseErrors') == [] and len(files) == len(package['payloads']) == 14
+             and sorted((x['path'], x['bytes'], x['sha256']) for x in files)
+                 == sorted((x['path'], x['size'], x['sha256']) for x in package['payloads'])
+             and all(x.get('status') == 'EXACT' and x.get('links') == 1 for x in files),
+             'Actual independent installed/repaired14 file observations match the original package')
+    NEED(p['licenseDamage'].get('status') == 'DELETED_ONLY_EXACT_NEW_INSTALL_LICENSE_BY_ORIGINAL_HANDLE'
+         and p['licenseDamage'].get('checkedClose') is True and p['damaged'].get('healthyPresent') is False,
+         'Actual original-handle LICENSE damage followed by successful repair')
+    license_row = next(x for x in package['payloads'] if x['path'] == 'LICENSE')
+    NEED(p['licenseDamage'].get('bytes') == license_row['size']
+         and p['licenseDamage'].get('sha256') == license_row['sha256'], 'Damage receipt binds the actual installed original LICENSE')
+    for key in ('installedCache', 'repairedCache'):
+        validate_predecessor_cache(p[key]['actualApi'], manifest, package)
+    NEED(p['uninstalledCache'].get('allObservedAbsent') is True
+         and p['uninstalledCache']['actualApi'].get('apiCode') == 1605
+         and p['finallyCoordination'].get('pendingKnownAbsent') is True
+         and p['finallyCoordination'].get('namespaceKnownAbsent') is True
+         and runtime['cleanup'].get('knownAbsent') is True,
+         'Original cache, Pending, gate and exact runtime scratch returned')
+    paths = p['uninstalledCache']['paths']
+    NEED({x['path'] for x in paths} == {p[key]['actualApi']['path'] for key in ('installedCache', 'repairedCache')}
+         and all(x.get('status') == 'KNOWN_ABSENT' for x in paths), 'Both actually observed old cache paths are retired')
+
+
+def predecessor_package(q: dict, old_args, original: tuple) -> tuple[dict, bytes, dict]:
+    """Replay a qualified old package from real original logs and normal bytes."""
+    _, artifact, payloads, artifacts, normal, guard = original
+    raw = bound_fact(q['packageReport'], B['MAX_LOG'])
+    package = B['json_document'](raw)
+    root = Path(q['packageReport']['path']).parent
+    instructions, instruction_fact = read_candidate_instructions(old_args)
+    NEED(package.get('status') == 'PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_STATIC_CANDIDATE_NATIVE_NOT_RUN'
+         and package.get('formalCI') is True and package.get('normalProfileTest') is False
+         and package.get('target') == TARGET and package.get('normalProvenance') == normal
+         and package.get('normalGuardProvenance') == guard and package.get('sourceBase') == normal['source_sha']
+         and package.get('sourceEvidenceSha256') == normal['result_sha256']
+         and package.get('sourceRoot') == str(old_args.source_root)
+         and package.get('candidateInstructions') == instruction_fact
+         and package.get('artifactVersion') == artifact['version'], 'Original same-CI MSVC3 admission and old builder inputs')
+    NEED(bound_fact(package['sourceZip'], B['MAX_ZIP']) == original[0], 'Exact old original ZIP')
+    payloads = dict(payloads, **{'MSI-CANDIDATE.txt': instructions})
+    ledger = [dict(path=n, size=len(data), sha256=B['digest'](data), component_guid=B['component_code'](n))
+              for n, data in sorted(payloads.items())]
+    NEED(len(payloads) == 14 and package['payloads'] == ledger, 'Original complete14 static ledger')
+    for name, data in payloads.items():
+        NEED(original_file(root / 'payload' / name, B['MAX_INSTALLED']) == data, 'Exact old payload bytes')
+    helper, dll = artifacts['lifecycle-compile'][1], artifacts['guard-library-compile'][1]
+    template = ABI2['C']['make_carrier_template'](helper)
+    msi, setup = (original_file(root / name, B['MAX_INSTALLED']) for name in ('FutureClassroom.msi', 'Setup.exe'))
+    for key, data, leaf in (('msi', msi, 'FutureClassroom.msi'), ('setup', setup, 'Setup.exe')):
+        NEED(package[key] == dict(path=leaf, bytes=len(data), sha256=B['digest'](data)), 'Actual old sealed bundle fact')
+    NEED(ABI2['C']['verify_carrier_binding'](template, setup, msi) == helper, 'Full old MSI seal and immutable normal helper')
+    body = B['lifecycle_manifest'](package['version'], payloads)
+    envelope = ABI2['C']['make_payload_manifest'](package['packageCode'], body)
+    NEED(package['productCode'] == B['product_code'](package['version'])
+         and package['binaryReadback'] == 'ALL_THREE_EXACT' and package['payloadReadback'] == 'ALL_FOURTEEN_EXACT'
+         and package['onlyExternal32HoleFilled'] is True, 'Initial old3 stream package, not a chained or legacy package')
+    def log(label):
+        rows = [row for row in package['commands'] if row['name'] == label]
+        NEED(len(rows) == 1 and type(rows[0]['exit_code']) is int and rows[0]['exit_code'] == 0, 'One original successful package command')
+        row = rows[0]
+        for stream in ('stdout', 'stderr'):
+            fact = row[stream]
+            NEED(set(fact) == {'path', 'size', 'sha256'} and fact['path'] == label + '.' + stream + '.log', 'Fixed original log path')
+            data = original_file(root / fact['path'], B['MAX_LOG'])
+            NEED(len(data) == fact['size'] and B['digest'](data) == fact['sha256'], 'Original full package log bytes')
+            if stream == 'stdout': result = data
+        return result
+    NEED(isinstance(package['commands'], list) and 1 <= len(package['commands']) <= 160, 'Bounded original package command ledger')
+    for row in package['commands']: log(row['name'])
+    streams = dict(zip(ABI2['BINARY_NAMES'], (dll, template, envelope)))
+    for name, data in streams.items(): NEED(log('binary-' + name) == data, 'Original exact MSI Binary extraction')
+    names = log('tables').decode('ascii').splitlines()
+    tables = {n: log('table-' + n) for n in set(names) & (B['CONTROLLED_REQUIRED_TABLES'] | B['FORBIDDEN_TABLES'])}
+    summary = log('summary')
+    NEED(summary == log('intermediate-summary'), 'Actual complete old Summary unchanged')
+    _, legacy = ABI2['upgrade_sequence'](log('intermediate-sequence'))
+    NEED(ABI2['validate_contract'](summary, tables, package['version'], payloads, package['packageCode'], legacy) == package['msiContract'],
+         'Replay exact original closed3 ABI2 table contract')
+    return package, msi, streams
+
+
+def prepare_predecessor(a, current: tuple) -> tuple[bytes, dict] | None:
+    spec_path, pin = getattr(a, 'predecessor_spec', None), getattr(a, 'predecessor_spec_sha256', None)
+    NEED(bool(spec_path) == bool(pin), 'Predecessor spec path and SHA must be supplied together')
+    if spec_path is None:
+        return None
+    raw = original_file(Path(spec_path).absolute(), B['MAX_LOG'])
+    NEED(isinstance(pin, str) and re.fullmatch('[0-9a-f]{64}', pin) and B['digest'](raw) == pin, 'Pinned explicit predecessor spec')
+    spec = B['json_document'](raw)
+    NEED(set(spec) == {'qualification', 'runtime', 'downloadRoot'}, 'Closed predecessor original-evidence spec; no caller permit fields')
+    q = B['json_document'](bound_fact(spec['qualification'], B['MAX_LOG']))
+    NEED(set(q) == {'status', 'sourceGit', 'expectedUserSid', 'formalArguments', 'packageReport'}
+         and q['status'] == 'ROOT_SELECTED_ORIGINAL_MSVC_ABI2_FOR_WIN11_THREE_PHASE', 'Original MSVC qualification config')
+    args = q['formalArguments']
+    NEED(set(args) == ARG_PATHS | ARG_HASHES, 'Original closed3 normal MSVC argument set')
+    for name in ARG_PATHS:
+        NEED(isinstance(args[name], str) and Path(args[name]).is_absolute(), 'Absolute original source and CI argument')
+    old_args = SimpleNamespace(**{name: Path(value) if name in ARG_PATHS else value for name, value in args.items()})
+    # A fresh module owns its own B/configure_source_root; old admission must not
+    # mutate the current package's source domain or rely on old executable code.
+    old_admit = runpy.run_path(str(HERE / 'package-abi2-msvc-candidate.py'))['admit']
+    original = old_admit(old_args)
+    NEED(original[4]['source_sha'] == q['sourceGit'], 'Original predecessor source commit')
+    package, msi, streams = predecessor_package(q, old_args, original)
+    new_version = a.product_version or current[1]['version']
+    validate_successor_identity(package, new_version, streams, current[3])
+    runtime = B['json_document'](bound_fact(spec['runtime'], B['MAX_LOG']))
+    manifest = B['json_document'](bound_fact(runtime['artifactManifest'], B['MAX_LOG']))
+    NEED(manifest['qualificationInput'] == spec['qualification'] and manifest['packageReport'] == q['packageReport']
+         and manifest['expectedUserSid'] == q['expectedUserSid'], 'Actual runtime bound to selected old qualification')
+    validate_predecessor_runtime(runtime, manifest, package)
+    source = B['json_document'](bound_fact(runtime['sourceManifest'], B['MAX_LOG']))
+    inventory_raw = original_file(old_args.build_evidence / 'input-sha256.json', B['MAX_LOG'])
+    result = B['json_document'](original_file(old_args.build_evidence / 'result.json', B['MAX_LOG']))
+    NEED(manifest['sourceManifest'] == runtime['sourceManifest']
+         and source == dict(sourceBase=q['sourceGit'], sources=B['json_document'](inventory_raw))
+         and B['digest'](inventory_raw) == result['input_manifest_sha256'], 'Actual complete old raw CI source manifest')
+    download = Path(spec['downloadRoot'])
+    NEED(download.is_absolute() and download == download.resolve(), 'Exact original download root')
+    B['PROBE']['real_directory'](download)
+    files = runtime['inventory']['files']
+    NEED(isinstance(files, list) and 1 <= len(files) <= 160, 'Finite original complete download inventory')
+    downloaded = {}
+    for fact in files:
+        name = fact['path']
+        NEED(isinstance(name, str) and '\\' not in name and all(x not in ('', '.', '..') for x in name.split('/'))
+             and not Path(name).is_absolute() and name not in downloaded, 'Unique closed downloaded relative path')
+        downloaded[name] = bound_fact(dict(fact, path=str(download / name)))
+    NEED(B['json_document'](downloaded['product-result.json']) == runtime['phase']
+         and downloaded['FutureClassroom.msi'] == msi
+         and downloaded['Setup.exe'] == original_file(Path(q['packageReport']['path']).parent / 'Setup.exe')
+         and downloaded['artifact-manifest.json'] == bound_fact(runtime['artifactManifest'])
+         and downloaded['source-manifest.json'] == bound_fact(runtime['sourceManifest']), 'Actual downloaded phase/source/bundle bytes')
+    schema = PUBLICATION['schema_from_rust'](original_file(old_args.source_root / 'crates/fc-windows/src/installer_lifecycle/native/broker/maintenance/schema.rs').decode('utf-8'))
+    source_msi = Path(q['packageReport']['path']).parent / 'FutureClassroom.msi'
+    tables = PUBLICATION['capture'](source_msi, B['digest'](msi), schema)
+    captured_streams = dict(next(rows for name, _, rows in tables if name == 'Binary'))
+    NEED(captured_streams == streams, 'Actual readonly old MSI fixed3 Binary bytes, not report assertions')
+    meta = dict(target=1, source_commit=q['sourceGit'], source_manifest_sha=B['digest'](inventory_raw),
+                producer_sha=old_args.build_result_sha256, source_msi_sha=B['digest'](msi),
+                template_sha=B['digest'](streams[B['TEMPLATE_BINARY']]), template_bytes=len(streams[B['TEMPLATE_BINARY']]),
+                guard_sha=B['digest'](streams[B['GUARD_BINARY']]), logical_sha=PUBLICATION['signature'](tables)[0])
+    record = PUBLICATION['encode_format'](meta, streams[ABI2['MANIFEST_BINARY']], ABI2['C']['parse_payload_manifest'])
+    NEED(decode_predecessor(record) == meta and old_admit(old_args) == original, 'Final original old source/admission and record replay')
+    return record, dict(status='BOUND_ORIGINAL_MSVC_PREDECESSOR_STATIC_NOT_NATIVE_UPGRADE_PASS',
+        spec=dict(path=str(spec_path), bytes=len(raw), sha256=pin), qualification=spec['qualification'],
+        package=q['packageReport'], runtime=spec['runtime'], meta=meta,
+        previousNormalProvenance=original[4], previousNormalGuardProvenance=original[5],
+        cacheEvidence=dict(method='DIRECT_STABLE_API_LOCALPACKAGE_WHOLE_FILE_EQUAL_TO_SOURCE',
+            nativeCacheLogicalDigestSerialized=False, installed=runtime['phase']['installedCache']['actualApi'],
+            repaired=runtime['phase']['repairedCache']['actualApi']),
+        record=dict(bytes=len(record), sha256=B['digest'](record)),
+        upgrade='NOT_RUN; native recaptures current actual old registration/cache before Begin')
 
 
 def check_compile_result(result: dict) -> None:
@@ -83,7 +362,8 @@ def admit(a):
 def builder_sources() -> list[dict]:
     names = ('package-abi2-msvc-candidate.py', 'package-abi2-upgrade-dev.py',
         'package-controlled-dev.py', 'package-msi-candidate.py',
-        'installer-carrier-format.py', 'package-probe.py', 'audit-pe.py')
+        'installer-carrier-format.py', 'package-probe.py', 'audit-pe.py',
+        'installer-upgrade-publication.py')
     return [{'path': 'scripts/' + name,
         'bytes': (HERE / name).stat().st_size,
         'sha256': B['file_digest'](HERE / name)} for name in names]
@@ -112,6 +392,8 @@ def build(a) -> dict:
     raw, manifest, payloads, artifacts, provenance, guard_provenance = admit(a)
     original_builders = builder_sources()
     original_instructions, instructions_fact = read_candidate_instructions(a)
+    admitted = (raw, manifest, payloads, artifacts, provenance, guard_provenance)
+    predecessor = prepare_predecessor(a, admitted)
     identity = {
         'scope': 'ORIGINAL_WIN7_MSVC_CI_ABI2_UPGRADE_STATIC_CANDIDATE_RUNTIME_NOT_RUN',
         'formalCI': True, 'target': TARGET, 'sourceBase': provenance['source_sha'],
@@ -122,6 +404,8 @@ def build(a) -> dict:
         'sourceZip': {'path': str(a.input_zip), 'bytes': len(raw), 'sha256': B['digest'](raw)},
         'candidateInstructions': instructions_fact,
     }
+    if predecessor is not None:
+        identity['predecessorPublication'] = predecessor[1]
     def verify_source():
         current = admit(a)
         NEED(current == (raw, manifest, payloads_before, artifacts, provenance, guard_provenance),
@@ -129,12 +413,15 @@ def build(a) -> dict:
         NEED(builder_sources() == original_builders, 'Exact reviewed assembly dependencies unchanged')
         NEED(read_candidate_instructions(a) == (original_instructions, instructions_fact),
              'Exact separately reviewed candidate instructions unchanged')
+        NEED(prepare_predecessor(a, current) == predecessor, 'Original predecessor package/source/cache evidence unchanged')
     # Assembly adds its fixed instructions payload; preserve the admitted ZIP set
     # separately so final re-admission compares the original namespace, not it.
     payloads_before = dict(payloads)
+    status = ('PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_STATIC_CANDIDATE_NATIVE_NOT_RUN' if predecessor is None else
+              'PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_SUCCESSOR_STATIC_CANDIDATE_NATIVE_NOT_RUN')
     return ABI2['assemble_admitted'](a, manifest, payloads, artifacts, identity,
-        'PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_STATIC_CANDIDATE_NATIVE_NOT_RUN', verify_source,
-        instructions=original_instructions)
+        status, verify_source, instructions=original_instructions,
+        predecessor=None if predecessor is None else predecessor[0])
 
 
 def main() -> int:
@@ -143,6 +430,9 @@ def main() -> int:
     parser.add_argument('--source-root', type=Path, default=HERE.parent,
         help='Exact original CI checkout bytes; builder identity is recorded separately')
     parser.add_argument('--product-version', help='Separate MSI identity; never rewrites original compiler bytes or artifact version')
+    parser.add_argument('--predecessor-spec', type=Path,
+        help='Pinned original qualification/runtime/download evidence for first formal3-to4 successor')
+    parser.add_argument('--predecessor-spec-sha256')
     for name in ('input-zip', 'lifecycle-helper', 'guard-library', 'build-evidence', 'candidate-instructions',
             'output-dir', 'wixl', 'msibuild', 'msiinfo', 'msiextract', 'objdump'):
         parser.add_argument('--' + name, type=Path)

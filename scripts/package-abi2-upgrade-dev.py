@@ -23,6 +23,26 @@ C = runpy.run_path(str(HERE / 'installer-carrier-format.py'))
 NEED = DEV['need']
 MANIFEST_BINARY = 'FcPayloadManifest'
 BINARY_NAMES = (B['GUARD_BINARY'], B['TEMPLATE_BINARY'], MANIFEST_BINARY)
+PREDECESSOR_BINARY = 'FcPublishedPredecessor'
+
+
+def predecessor_bytes(record: bytes | None) -> bytes | None:
+    """Closed wire grammar only; publication/source admission belongs to caller."""
+    if record is None:
+        return None
+    NEED(type(record) is bytes and 248 < len(record) <= 248 + 88 + 32768,
+         'Bounded immutable predecessor record')
+    NEED(record[:8] == b'FCPRED2\0' and record[8:12] == struct.pack('<HH', 1, 2)
+         and record[12] in (1, 2) and record[13:16] == bytes(3)
+         and record[236:248] == bytes(12), 'Exact predecessor header and reserved bytes')
+    NEED(record[16:36] != bytes(20)
+         and all(record[n:n+32] != bytes(32) for n in range(36, 228, 32)),
+         'Nonzero predecessor source and six digest identities')
+    size, envelope_size = struct.unpack_from('<II', record, 228)
+    NEED(196 <= size <= 64 * 1024 * 1024 and envelope_size == len(record) - 248,
+         'Exact predecessor template and envelope bounds')
+    C['parse_payload_manifest'](record[248:])
+    return record
 
 
 def extent(raw: bytes, dll: bool = False) -> dict:
@@ -114,25 +134,30 @@ def verify_upgrade_sequence(raw: bytes) -> dict:
     return {n:actions[n]for n in ['CostFinalize','InstallValidate',B['GUARD_ACTION'],'InstallInitialize','RemoveExistingProducts','InstallExecute','InstallFinalize']}
 
 
-def authoring(version: str, names: list[str]) -> bytes:
+def authoring(version: str, names: list[str], predecessor: bytes | None = None) -> bytes:
     xml = ET.fromstring(B['authoring'](version, names, True))
     ns = '{' + B['WIX_NS'] + '}'
     product = xml.find(ns + 'Product')
     ET.SubElement(product, ns + 'Binary', Id=MANIFEST_BINARY, SourceFile='lifecycle/payload-manifest.bin')
+    if predecessor_bytes(predecessor) is not None:
+        ET.SubElement(product, ns + 'Binary', Id=PREDECESSOR_BINARY, SourceFile='lifecycle/published-predecessor.bin')
     ET.indent(xml)
     return ET.tostring(xml, encoding='utf-8', xml_declaration=True) + b'\n'
 
 
-def validate_contract(summary: bytes, tables: dict, version: str, payloads: dict, package: str, legacy_sequence: bytes) -> dict:
+def validate_contract(summary: bytes, tables: dict, version: str, payloads: dict, package: str, legacy_sequence: bytes,
+        predecessor: bytes | None = None) -> dict:
+    predecessor_bytes(predecessor)
+    binary_names = BINARY_NAMES + ((PREDECESSOR_BINARY,) if predecessor is not None else ())
     rows = B['idt_rows'](tables['Binary'], 'Binary')
-    expected = [{'Name': name, 'Data': 'Binary.' + name} for name in BINARY_NAMES]
-    NEED(sorted(rows, key=lambda x: x['Name']) == sorted(expected, key=lambda x: x['Name']), 'Exactly three fixed ABI2 Binary streams')
+    expected = [{'Name': name, 'Data': 'Binary.' + name} for name in binary_names]
+    NEED(sorted(rows, key=lambda x: x['Name']) == sorted(expected, key=lambda x: x['Name']), 'Exactly the admitted fixed ABI2 Binary streams')
     # The complete legacy-controlled structural checker remains strict for the
     # unchanged two Binary rows and every other table. The third row is closed
     # above and its actual envelope bytes/package/payload identities below.
     structural = dict(tables)
     lines = tables['Binary'].decode('ascii').splitlines()
-    structural['Binary'] = ('\r\n'.join(lines[:3] + ['\t'.join((r['Name'], r['Data'])) for r in rows if r['Name'] != MANIFEST_BINARY]) + '\r\n').encode('ascii')
+    structural['Binary'] = ('\r\n'.join(lines[:3] + ['\t'.join((r['Name'], r['Data'])) for r in rows if r['Name'] not in (MANIFEST_BINARY, PREDECESSOR_BINARY)]) + '\r\n').encode('ascii')
     actual_transaction=verify_upgrade_sequence(tables['InstallExecuteSequence'])
     actual_rows=B['idt_rows'](tables['InstallExecuteSequence'],'InstallExecuteSequence')
     legacy_rows=B['idt_rows'](legacy_sequence,'InstallExecuteSequence')
@@ -151,7 +176,7 @@ def validate_contract(summary: bytes, tables: dict, version: str, payloads: dict
     matches = re.findall(rb'^Revision number \(UUID\): \{([0-9A-F-]{36})\}\r?$', summary, re.M)
     NEED(matches == [package.encode('ascii')], 'Actual summary PackageCode equals envelope identity')
     result['guardABI'] = 2
-    result['binaryStreams'] = list(BINARY_NAMES)
+    result['binaryStreams'] = list(binary_names)
     result['packageCode'] = package
     return result
 
@@ -189,18 +214,20 @@ def instructions_bytes(source: Path, explicit: bytes | None = None) -> bytes:
 
 
 def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
-        identity: dict, pass_status: str, verify_source, instructions: bytes | None = None) -> dict:
+        identity: dict, pass_status: str, verify_source, instructions: bytes | None = None,
+        predecessor: bytes | None = None) -> dict:
     """Shared ABI2 byte assembly after caller-specific source admission.
 
     No DEV or CI proof is created here. Each closed CLI admits its own originals
     before calling and revalidates those exact originals before returning PASS.
     """
+    predecessor_bytes(predecessor)
     source = a.source_root.absolute()
     NEED(set(artifacts) == {'product-compile', 'lifecycle-compile', 'guard-library-compile'}, 'Exactly three admitted normal artifacts')
     NEED(set(identity) <= {'scope', 'formalCI', 'sourceBase', 'sourceEvidenceSha256',
         'normalProvenance', 'upgradeSourceBinding', 'webReportSha256', 'lifecycleMode',
         'normalGuardProvenance', 'builderSources', 'sourceZip', 'target',
-        'candidateInstructions'}, 'Closed assembly qualification fields')
+        'candidateInstructions', 'predecessorPublication'}, 'Closed assembly qualification fields')
     NEED({'scope', 'formalCI', 'sourceBase', 'sourceEvidenceSha256', 'normalProvenance',
         'lifecycleMode'} <= set(identity), 'Original caller qualification required')
     NEED(callable(verify_source), 'Caller must supply original source revalidation')
@@ -239,6 +266,8 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
         (lifecycle / 'guard-client-template.exe').write_bytes(template)
         (lifecycle / 'fc_windows.dll').write_bytes(dll)
         (lifecycle / 'payload-manifest.bin').write_bytes(envelope)
+        if predecessor is not None:
+            (lifecycle / 'published-predecessor.bin').write_bytes(predecessor)
         for name, data in payloads.items():
             destination = output / 'payload' / name; destination.parent.mkdir(parents=True, exist_ok=True); destination.write_bytes(data)
         for role, leaf in [('product', 'payload/fc-bootstrap.exe'), ('helper', 'lifecycle/guard-client-template.exe'), ('guard', 'lifecycle/fc_windows.dll')]:
@@ -248,13 +277,18 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
             audit = B['PE']['parse_objdump'](inspected.decode('utf-8', 'strict'), 'gui' if subsystem == 2 else 'console')
             NEED(not audit['structural_errors'] and not any(r['kind'] == 'RUNTIME_DEPLOYMENT' for r in audit['risks']), 'Actual normal PE static runtime audit')
             report[role + 'PEAudit'] = audit
-        (output / 'candidate.wxs').write_bytes(authoring(product_version, list(payloads)))
+        (output / 'candidate.wxs').write_bytes(authoring(product_version, list(payloads), predecessor))
         msi = output / 'FutureClassroom.msi'
         tool('wixl-build', [tools['wixl'], '-a', 'x86', '-o', msi.name, 'candidate.wxs'])
         initial_summary = tool('intermediate-summary', [tools['msiinfo'], 'suminfo', msi.name])
         actual_packages = re.findall(rb'^Revision number \(UUID\): \{([0-9A-F-]{36})\}\r?$', initial_summary, re.M)
         NEED(len(actual_packages) == 1, 'One canonical actual compiler Summary PackageCode')
         package = actual_packages[0].decode('ascii')
+        if predecessor is not None:
+            old = C['parse_payload_manifest'](predecessor[248:])
+            NEED(old['package'] != package and old['product'] != decoded['product']
+                 and B['version_parts'](old['version']) < B['version_parts'](product_version),
+                 'Actual new compiler PackageCode/product/version differs from its older predecessor')
         envelope = C['make_payload_manifest'](package, body)
         decoded = C['parse_payload_manifest'](envelope)
         NEED(decoded['package'] == package, 'Actual Summary identity encoded without caller package permission')
@@ -274,10 +308,13 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
         names = tool('tables', [tools['msiinfo'], 'tables', msi.name]).decode('ascii').splitlines()
         NEED('MsiEmbeddedChainer' not in names and B['CONTROLLED_REQUIRED_TABLES'] <= set(names), 'ABI2 Upgrade required tables and no legacy chainer')
         tables = {n: tool('table-' + n, [tools['msiinfo'], 'export', msi.name, n]) for n in sorted(set(names) & (B['CONTROLLED_REQUIRED_TABLES'] | B['FORBIDDEN_TABLES']))}
-        report['msiContract'] = validate_contract(summary, tables, product_version, payloads, package, legacy_sequence)
+        report['msiContract'] = validate_contract(summary, tables, product_version, payloads, package, legacy_sequence, predecessor)
         actual_seq = B['idt_rows'](tables['InstallExecuteSequence'], 'InstallExecuteSequence')
         NEED(sorted(actual_seq, key=lambda r: r['Action']) == sorted(B['idt_rows']((output / 'InstallExecuteSequence.idt').read_bytes(), 'InstallExecuteSequence'), key=lambda r: r['Action']), 'Exact standard sequence plus guard1499/condition1 and only REP1501 relocation')
-        for name, expected in zip(BINARY_NAMES, (dll, template, envelope)):
+        streams = list(zip(BINARY_NAMES, (dll, template, envelope)))
+        if predecessor is not None:
+            streams.append((PREDECESSOR_BINARY, predecessor))
+        for name, expected in streams:
             actual = tool('binary-' + name, [tools['msiinfo'], 'extract', msi.name, 'Binary.' + name])
             NEED(actual == expected, 'Exact same-source Binary readback ' + name)
         complete = B['PROBE']['bounded_regular_file'](msi, B['MAX_INSTALLED'])
@@ -300,7 +337,9 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
             setup={'path': 'Setup.exe', 'bytes': len(setup), 'sha256': B['digest'](setup)},
             template={'bytes': len(template), 'sha256': B['digest'](template), 'hole': hole, 'canonicalZero32': True, 'normalPrefixExact': True},
             payloadManifest={'bytes': len(envelope), 'sha256': B['digest'](envelope), 'rawBodySha256': B['digest'](body), 'payloads': 14},
-            binaryReadback='ALL_THREE_EXACT', payloadReadback='ALL_FOURTEEN_EXACT', onlyExternal32HoleFilled=True)
+            binaryReadback='ALL_THREE_EXACT' if predecessor is None else 'ALL_FOUR_EXACT', payloadReadback='ALL_FOURTEEN_EXACT', onlyExternal32HoleFilled=True)
+        if predecessor is not None:
+            report['publishedPredecessor'] = {'bytes': len(predecessor), 'sha256': B['digest'](predecessor)}
     except BaseException as error:
         report['error'] = type(error).__name__ + ': ' + str(error); raise
     finally: (output / 'report.json').write_text(json.dumps(report, indent=2) + '\n')

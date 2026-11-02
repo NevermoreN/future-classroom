@@ -1176,30 +1176,12 @@ impl<S: Send> TransactionTask<S> for IdentityTask<S> {
         }
         let request = &self.request;
         let journal = format!("business/receipt/identity/{}", request.command_id.get());
-        let mut digest = Sha256::new();
-        digest.update(format!("{:?}", request));
-        if matches!(request.command, IdentityCommand::FirstAdministrator { .. }) {
-            if let Some(id) = self.initial_installation_identity {
-                digest.update(b"installation/v1\0");
-                digest.update(id);
-            }
-        }
-        digest.update(codec::bytes(
-            &self.actor.as_ref().map(codec::actor).unwrap_or(Value::Null),
-        )?);
-        if let Some(c) = &self.credentials {
-            digest.update(c.principal_id.get().to_be_bytes());
-            for pair in [&c.password, &c.recovery] {
-                if let Some((version, record)) = pair {
-                    digest.update(version.to_be_bytes());
-                    digest.update((record.len() as u64).to_be_bytes());
-                    digest.update(record);
-                } else {
-                    digest.update([0]);
-                }
-            }
-        }
-        let fingerprint = digest.finalize().to_vec();
+        let fingerprint = identity_fingerprint(
+            request,
+            self.actor.as_ref(),
+            self.initial_installation_identity,
+            self.credentials.as_ref(),
+        )?;
         if let Some(receipt) = d.get(&journal)? {
             let v = codec::value(&receipt.value)?;
             codec::object_fields(&v, &["fingerprint", "outcome"])?;
@@ -1423,5 +1405,685 @@ impl<S: Send + 'static> CredentialIdentityRepository<Vec<u8>, Vec<u8>> for Busin
                 recovery: recovery.map(|v| (rv, v)),
             },
         )
+    }
+}
+
+// Account result lookup deliberately shares the existing identity receipt and
+// fingerprint grammar. No credential schema, command-window permission or TTL
+// changes. Keep here to avoid another module/file in the bounded source tree.
+fn identity_fingerprint_seed(
+    request: &IdentityRequest,
+    actor: Option<&ActorContext>,
+    installation: Option<[u8; 32]>,
+) -> Result<Sha256, StorageError> {
+    let mut digest = Sha256::new();
+    digest.update(format!("{:?}", request));
+    if matches!(request.command, IdentityCommand::FirstAdministrator { .. }) {
+        if let Some(id) = installation {
+            digest.update(b"installation/v1\0");
+            digest.update(id);
+        }
+    }
+    digest.update(codec::bytes(
+        &actor.map(codec::actor).unwrap_or(Value::Null),
+    )?);
+    Ok(digest)
+}
+fn fingerprint_record(digest: &mut Sha256, version: u64, record: &[u8]) {
+    digest.update(version.to_be_bytes());
+    digest.update((record.len() as u64).to_be_bytes());
+    digest.update(record);
+}
+fn identity_fingerprint(
+    request: &IdentityRequest,
+    actor: Option<&ActorContext>,
+    installation: Option<[u8; 32]>,
+    credentials: Option<&PreparedCredentials>,
+) -> Result<Vec<u8>, StorageError> {
+    let mut digest = identity_fingerprint_seed(request, actor, installation)?;
+    if let Some(c) = credentials {
+        digest.update(c.principal_id.get().to_be_bytes());
+        for pair in [&c.password, &c.recovery] {
+            if let Some((version, record)) = pair {
+                fingerprint_record(&mut digest, *version, record);
+            } else {
+                digest.update([0]);
+            }
+        }
+    }
+    Ok(digest.finalize().to_vec())
+}
+fn account_request_bytes(request: &IdentityRequest) -> usize {
+    match &request.command {
+        IdentityCommand::CreateAccount(a) => a
+            .login_name
+            .capacity()
+            .saturating_add(a.display_name.capacity())
+            .saturating_add(
+                a.scopes
+                    .capacity()
+                    .saturating_mul(std::mem::size_of::<AssignmentScope>()),
+            ),
+        IdentityCommand::UpdateAccount {
+            display_name,
+            scopes,
+            ..
+        } => display_name.capacity().saturating_add(
+            scopes
+                .capacity()
+                .saturating_mul(std::mem::size_of::<AssignmentScope>()),
+        ),
+        _ => 0,
+    }
+}
+/// Non-secret evidence from the original prepared request, before Writer admission.
+/// No Deserialize/public constructor: callers cannot manufacture or replace the
+/// digest. It cannot authorize a write or regenerate an initial recovery code.
+#[derive(PartialEq, Eq)]
+pub struct AccountReceiptProof {
+    issued: fc_ports::command_window::IssuedCommand,
+    request: IdentityRequest,
+    fingerprint: [u8; 32],
+}
+/// The unchanged prepared credential payload and its original result proof.
+pub type PreparedAccountWithReceipt = (
+    PreparedCredentialChange<Vec<u8>, Vec<u8>>,
+    AccountReceiptProof,
+);
+impl std::fmt::Debug for AccountReceiptProof {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AccountReceiptProof")
+            .field("issued", &self.issued)
+            .field("request", &self.request)
+            .finish_non_exhaustive()
+    }
+}
+impl AccountReceiptProof {
+    pub fn issued(&self) -> fc_ports::command_window::IssuedCommand {
+        self.issued
+    }
+    pub fn request(&self) -> &IdentityRequest {
+        &self.request
+    }
+}
+/// Historical public data only. Never feed this result to authority publication,
+/// login, session renewal or Backend::apply. Current identity is read separately.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct OriginalAccountResult {
+    pub revision: Revision,
+    pub account: UserAccount,
+    pub scopes: Vec<AssignmentScope>,
+}
+impl OriginalAccountResult {
+    pub fn matches(&self, expected: Revision, command: &IdentityCommand) -> bool {
+        if expected.next().ok() != Some(self.revision) {
+            return false;
+        }
+        let a = &self.account;
+        match command {
+            IdentityCommand::CreateAccount(spec) => {
+                a.principal.id == spec.id
+                    && a.login_name == spec.login_name
+                    && a.display_name == spec.display_name
+                    && a.principal.role == spec.role
+                    && a.principal.enabled
+                    && a.principal.auth_epoch == AuthEpoch::new(1)
+                    && a.must_change_password
+                    && a.credential_version == 1
+                    && a.recovery_version == 1
+                    && self.scopes == spec.scopes
+            }
+            IdentityCommand::UpdateAccount {
+                id,
+                display_name,
+                role,
+                enabled,
+                scopes,
+            } => {
+                a.principal.id == *id
+                    && a.display_name == *display_name
+                    && a.principal.role == *role
+                    && a.principal.enabled == *enabled
+                    && self.scopes == *scopes
+            }
+            _ => false,
+        }
+    }
+}
+fn account_result_value(result: &OriginalAccountResult) -> Value {
+    let a = &result.account;
+    json!({"revision":result.revision.get(),"account":{
+        "principal":codec::principal(&a.principal),"login":a.login_name,"display":a.display_name,
+        "change":a.must_change_password,"credential":a.credential_version,"recovery":a.recovery_version},
+        "scopes":result.scopes.iter().map(|s|json!([s.class_id.get(),s.subject_id.get()])).collect::<Vec<_>>()})
+}
+fn read_account_result(value: &Value) -> Result<OriginalAccountResult, StorageError> {
+    codec::object_fields(value, &["revision", "account", "scopes"])?;
+    let a = &value["account"];
+    codec::object_fields(
+        a,
+        &[
+            "principal",
+            "login",
+            "display",
+            "change",
+            "credential",
+            "recovery",
+        ],
+    )?;
+    let scopes = value["scopes"].as_array().ok_or(StorageError::Database)?;
+    if scopes.len() > MAX_ASSIGNMENTS {
+        return Err(StorageError::Database);
+    }
+    Ok(OriginalAccountResult {
+        revision: Revision::new(codec::number(value, "revision")?),
+        account: UserAccount {
+            principal: codec::read_principal(&a["principal"])?,
+            login_name: codec::text(a, "login")?,
+            display_name: codec::text(a, "display")?,
+            must_change_password: codec::boolean(a, "change")?,
+            credential_version: codec::number(a, "credential")?,
+            recovery_version: codec::number(a, "recovery")?,
+        },
+        scopes: scopes
+            .iter()
+            .map(|v| {
+                let pair = v.as_array().ok_or(StorageError::Database)?;
+                if pair.len() != 2 {
+                    return Err(StorageError::Database);
+                }
+                Ok(AssignmentScope {
+                    class_id: ClassId::new(pair[0].as_u64().ok_or(StorageError::Database)?)
+                        .map_err(|_| StorageError::Database)?,
+                    subject_id: SubjectId::new(pair[1].as_u64().ok_or(StorageError::Database)?)
+                        .map_err(|_| StorageError::Database)?,
+                })
+            })
+            .collect::<Result<_, StorageError>>()?,
+    })
+}
+impl<S: Send + 'static> BusinessRepository<S> {
+    fn account_proof_context(
+        &self,
+        request: &IdentityRequest,
+        actor: &ActorContext,
+    ) -> Result<fc_ports::command_window::IssuedCommand, StorageError> {
+        let issued = self
+            .handle
+            .command_window
+            .ok_or(StorageError::CommandNotIssued)?;
+        check_account_proof_binding(issued, request, actor)?;
+        Ok(issued)
+    }
+    /// Consume/map the exact encoded prepared records back into the same
+    /// immutable payload. No clone, lookup of current credentials, or second KDF.
+    /// The caller must bind the returned proof before submitting returned change.
+    pub fn prepare_account_creation_receipt(
+        &self,
+        change: PreparedCredentialChange<Vec<u8>, Vec<u8>>,
+        actor: &ActorContext,
+    ) -> Result<PreparedAccountWithReceipt, StorageError> {
+        let request = change.request().clone();
+        if !matches!(request.command, IdentityCommand::CreateAccount(_)) {
+            return Err(StorageError::InvalidCommand);
+        }
+        let issued = self.account_proof_context(&request, actor)?;
+        prepared_account_creation_proof(change, request, actor, issued)
+    }
+    pub fn prepare_account_update_receipt(
+        &self,
+        request: &IdentityRequest,
+        actor: &ActorContext,
+    ) -> Result<AccountReceiptProof, StorageError> {
+        if !matches!(request.command, IdentityCommand::UpdateAccount { .. }) {
+            return Err(StorageError::InvalidCommand);
+        }
+        let issued = self.account_proof_context(request, actor)?;
+        let fingerprint = identity_fingerprint_seed(request, Some(actor), None)?
+            .finalize()
+            .into();
+        Ok(AccountReceiptProof {
+            issued,
+            request: request.clone(),
+            fingerprint,
+        })
+    }
+    /// Only query the original identity receipt. Missing means unknown, never
+    /// execute/write. The exact lease and latest management authority are checked
+    /// in this read-only Writer transaction and again by the composition.
+    pub fn account_outcome(
+        &self,
+        proof: Arc<AccountReceiptProof>,
+        actor: &ActorContext,
+    ) -> Result<Option<OriginalAccountResult>, IdentityRepositoryError> {
+        if self
+            .account_proof_context(&proof.request, actor)
+            .map_err(identity_error)?
+            != proof.issued
+        {
+            return Err(identity_error(StorageError::CommandNotIssued));
+        }
+        let bytes = self
+            .handle
+            .try_transaction(AccountOutcomeTask {
+                proof,
+                actor: actor.clone(),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+            })
+            .map_err(identity_error)?
+            .wait()
+            .map_err(identity_error)?;
+        let value = codec::value(&bytes).map_err(identity_error)?;
+        if value.is_null() {
+            Ok(None)
+        } else {
+            read_account_result(&value)
+                .map(Some)
+                .map_err(identity_error)
+        }
+    }
+}
+fn check_account_proof_binding(
+    issued: fc_ports::command_window::IssuedCommand,
+    request: &IdentityRequest,
+    actor: &ActorContext,
+) -> Result<(), StorageError> {
+    use fc_ports::command_window::{CommandFamily, CommandOwner};
+    if issued.family != CommandFamily::Identity
+        || issued.command_id != request.command_id
+        || issued.owner != CommandOwner::authenticated(actor)
+        || actor.origin != TrustedOrigin::Local
+        || !matches!(
+            request.command,
+            IdentityCommand::CreateAccount(_) | IdentityCommand::UpdateAccount { .. }
+        )
+    {
+        return Err(StorageError::CommandNotIssued);
+    }
+    Ok(())
+}
+fn prepared_account_creation_proof(
+    change: PreparedCredentialChange<Vec<u8>, Vec<u8>>,
+    request: IdentityRequest,
+    actor: &ActorContext,
+    issued: fc_ports::command_window::IssuedCommand,
+) -> Result<PreparedAccountWithReceipt, StorageError> {
+    check_account_proof_binding(issued, &request, actor)?;
+    if change.request() != &request {
+        return Err(StorageError::InvalidCommand);
+    }
+    let IdentityCommand::CreateAccount(spec) = &request.command else {
+        return Err(StorageError::InvalidCommand);
+    };
+    let mut seed = identity_fingerprint_seed(&request, Some(actor), None)?;
+    seed.update(spec.id.get().to_be_bytes());
+    let digest = std::cell::RefCell::new(seed);
+    let password_seen = std::cell::Cell::new(false);
+    let recovery_seen = std::cell::Cell::new(false);
+    let change = change.try_map(
+        |record| -> Result<_, StorageError> {
+            fingerprint_record(&mut digest.borrow_mut(), 1, &record);
+            password_seen.set(true);
+            Ok(record)
+        },
+        |record| -> Result<_, StorageError> {
+            fingerprint_record(&mut digest.borrow_mut(), 1, &record);
+            recovery_seen.set(true);
+            Ok(record)
+        },
+    )?;
+    if !password_seen.get() || !recovery_seen.get() {
+        return Err(StorageError::InvalidCommand);
+    }
+    let fingerprint = digest.into_inner().finalize().into();
+    Ok((
+        change,
+        AccountReceiptProof {
+            issued,
+            request,
+            fingerprint,
+        },
+    ))
+}
+struct AccountOutcomeTask {
+    proof: Arc<AccountReceiptProof>,
+    actor: ActorContext,
+    clock: Arc<dyn Clock + Send + Sync>,
+    session: SessionGuard,
+}
+impl<S> TransactionTask<S> for AccountOutcomeTask {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Identity,
+            self.proof.request.command_id,
+        ))
+    }
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>().saturating_add(account_request_bytes(&self.proof.request))
+    }
+    fn evaluate(
+        self: Box<Self>,
+        d: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        let state = load_identity(d)?;
+        let check = || -> Result<(), StorageError> {
+            if self.proof.issued.owner
+                != fc_ports::command_window::CommandOwner::authenticated(&self.actor)
+            {
+                return Err(StorageError::CommandNotIssued);
+            }
+            (self.session)(&state, &self.actor)?;
+            state
+                .authorize_management(&self.actor, self.clock.now())
+                .map_err(StorageError::Identity)
+        };
+        check()?;
+        let request = &self.proof.request;
+        let value = match d.get(&format!(
+            "business/receipt/identity/{}",
+            request.command_id.get()
+        ))? {
+            None => Value::Null,
+            Some(receipt) => {
+                let v = codec::value(&receipt.value)?;
+                codec::object_fields(&v, &["fingerprint", "outcome"])?;
+                codec::object_fields(&v["outcome"], &["state", "events"])?;
+                let original: Vec<u8> = serde_json::from_value(v["fingerprint"].clone())
+                    .map_err(|_| StorageError::Database)?;
+                if original.len() != 32 {
+                    return Err(StorageError::Database);
+                }
+                if original.as_slice() != self.proof.fingerprint.as_slice() {
+                    return Err(StorageError::CommandIdReused);
+                }
+                let historical = codec::read_identity(&v["outcome"]["state"])?;
+                let (id, expected_events) = match &request.command {
+                    IdentityCommand::CreateAccount(a) => {
+                        (a.id, vec![IdentityEvent::AccountChanged(a.id)])
+                    }
+                    IdentityCommand::UpdateAccount { id, .. } => (
+                        *id,
+                        vec![
+                            IdentityEvent::AuthorizationRevoked(*id),
+                            IdentityEvent::AccountChanged(*id),
+                        ],
+                    ),
+                    _ => return Err(StorageError::InvalidCommand),
+                };
+                if decode_events(&v["outcome"]["events"])? != expected_events {
+                    return Err(StorageError::Database);
+                }
+                let account = historical
+                    .account(id)
+                    .map_err(|_| StorageError::Database)?
+                    .clone();
+                let scopes = historical
+                    .assignments
+                    .iter()
+                    .filter(|a| a.teacher_id == id)
+                    .map(|a| {
+                        if !a.enabled {
+                            return Err(StorageError::Database);
+                        }
+                        Ok(AssignmentScope {
+                            class_id: a.class_id,
+                            subject_id: a.subject_id,
+                        })
+                    })
+                    .collect::<Result<Vec<_>, StorageError>>()?;
+                let result = OriginalAccountResult {
+                    revision: historical.revision,
+                    account,
+                    scopes,
+                };
+                if result.account.principal.school_id != self.actor.school_id
+                    || !result.matches(request.expected_revision, &request.command)
+                {
+                    return Err(StorageError::Database);
+                }
+                account_result_value(&result)
+            }
+        };
+        check()?;
+        let outcome = codec::bytes(&value)?;
+        if outcome.len() > 64 * 1024 {
+            return Err(StorageError::DocumentTooLarge);
+        }
+        Ok(TransactionDecision {
+            outcome,
+            commit: None,
+            precommit: None,
+        })
+    }
+}
+
+#[cfg(test)]
+mod account_receipt_proof_tests {
+    use super::*;
+    use fc_ports::command_window::{CommandFamily, CommandOwner, CommandTicket, IssuedCommand};
+    // Verify original credential-payload ownership and receipt fingerprints.
+    struct FakeCrypto(u8);
+    impl fc_ports::CredentialCrypto for FakeCrypto {
+        type Secret = ();
+        type PasswordRecord = Vec<u8>;
+        type RecoveryCode = ();
+        type RecoveryRecord = Vec<u8>;
+        fn password_record(&mut self, _: &()) -> Result<Vec<u8>, fc_ports::CredentialError> {
+            self.0 += 1;
+            Ok(vec![self.0; 17])
+        }
+        fn verify_password(
+            &mut self,
+            _: &(),
+            _: &Vec<u8>,
+        ) -> Result<bool, fc_ports::CredentialError> {
+            Ok(false)
+        }
+        fn recovery_record(&mut self) -> Result<((), Vec<u8>), fc_ports::CredentialError> {
+            Ok(((), vec![self.0 + 100; 19]))
+        }
+        fn verify_recovery(
+            &mut self,
+            _: &(),
+            _: &Vec<u8>,
+        ) -> Result<bool, fc_ports::CredentialError> {
+            Ok(false)
+        }
+    }
+    fn request() -> IdentityRequest {
+        IdentityRequest {
+            command_id: CommandId::new(9).unwrap(),
+            expected_revision: Revision::new(12),
+            command: IdentityCommand::CreateAccount(NewAccount {
+                id: PrincipalId::new(4).unwrap(),
+                login_name: "teacher4".into(),
+                display_name: "原姓名".into(),
+                role: Role::TeacherAdmin,
+                scopes: vec![AssignmentScope {
+                    class_id: ClassId::new(2).unwrap(),
+                    subject_id: SubjectId::new(3).unwrap(),
+                }],
+            }),
+        }
+    }
+    fn actor() -> ActorContext {
+        ActorContext {
+            principal_id: PrincipalId::new(1).unwrap(),
+            school_id: SchoolId::new(1).unwrap(),
+            auth_epoch: AuthEpoch::new(7),
+            origin: TrustedOrigin::Local,
+            expires_at: fc_domain::time::LocalDateTime::new(
+                fc_domain::time::LocalDate::new(2026, 11, 3).unwrap(),
+                3600,
+            )
+            .unwrap(),
+        }
+    }
+    fn issued(request: &IdentityRequest, actor: &ActorContext) -> IssuedCommand {
+        IssuedCommand {
+            ticket: CommandTicket::new([7; 16], 4).unwrap(),
+            command_id: request.command_id,
+            family: CommandFamily::Identity,
+            owner: CommandOwner::authenticated(actor),
+            window_millis: 86_400_000,
+        }
+    }
+    #[test]
+    fn proof_hashes_the_same_owned_records_handed_to_writer_without_preparing_again() {
+        let request = request();
+        let actor = actor();
+        let issued = issued(&request, &actor);
+        let mut crypto = FakeCrypto(0);
+        let (change, _) =
+            fc_ports::prepare_initial_credentials(&mut crypto, &(), request.clone()).unwrap();
+        let password_ptr = std::cell::Cell::new(std::ptr::null());
+        let recovery_ptr = std::cell::Cell::new(std::ptr::null());
+        let change = change
+            .try_map(
+                |v| {
+                    password_ptr.set(v.as_ptr());
+                    Ok::<_, StorageError>(v)
+                },
+                |v| {
+                    recovery_ptr.set(v.as_ptr());
+                    Ok::<_, StorageError>(v)
+                },
+            )
+            .unwrap();
+        let (change, proof) =
+            prepared_account_creation_proof(change, request.clone(), &actor, issued).unwrap();
+        assert_eq!(crypto.0, 1, "metadata handoff must not rerun preparation");
+        let (actual, password, recovery) = change.into_parts();
+        let password = password.unwrap();
+        let recovery = recovery.unwrap();
+        assert_eq!(password.as_ptr(), password_ptr.get());
+        assert_eq!(recovery.as_ptr(), recovery_ptr.get());
+        assert_eq!(actual, request);
+        assert_eq!(proof.issued(), issued);
+        let credentials = PreparedCredentials {
+            principal_id: PrincipalId::new(4).unwrap(),
+            password: Some((1, password)),
+            recovery: Some((1, recovery)),
+        };
+        assert_eq!(
+            proof.fingerprint.as_slice(),
+            identity_fingerprint(&actual, Some(&actor), None, Some(&credentials))
+                .unwrap()
+                .as_slice()
+        );
+        let (other, _) =
+            fc_ports::prepare_initial_credentials(&mut crypto, &(), request.clone()).unwrap();
+        let (_, other_proof) =
+            prepared_account_creation_proof(other, request, &actor, issued).unwrap();
+        assert_ne!(
+            proof.fingerprint, other_proof.fingerprint,
+            "new randomized records cannot replace the original proof"
+        );
+    }
+    #[test]
+    fn proof_owner_binding_ignores_expiry_metadata_but_rejects_epoch_or_family_changes() {
+        let request = request();
+        let actor = actor();
+        let original = issued(&request, &actor);
+        let mut later_lease = actor.clone();
+        later_lease.expires_at =
+            fc_domain::time::LocalDateTime::new(actor.expires_at.date, 7200).unwrap();
+        assert!(check_account_proof_binding(original, &request, &later_lease).is_ok());
+        later_lease.auth_epoch = AuthEpoch::new(8);
+        assert_eq!(
+            check_account_proof_binding(original, &request, &later_lease),
+            Err(StorageError::CommandNotIssued)
+        );
+        let mut wrong = original;
+        wrong.family = CommandFamily::Display;
+        assert_eq!(
+            check_account_proof_binding(wrong, &request, &actor),
+            Err(StorageError::CommandNotIssued)
+        );
+        let mut request2 = request;
+        request2.command_id = CommandId::new(10).unwrap();
+        assert_eq!(
+            check_account_proof_binding(original, &request2, &actor),
+            Err(StorageError::CommandNotIssued)
+        );
+    }
+    #[test]
+    fn extracted_historical_account_is_compared_to_original_not_current_directory() {
+        let request = request();
+        let IdentityCommand::CreateAccount(spec) = &request.command else {
+            unreachable!()
+        };
+        let original = OriginalAccountResult {
+            revision: Revision::new(13),
+            account: UserAccount {
+                principal: Principal {
+                    id: spec.id,
+                    school_id: SchoolId::new(1).unwrap(),
+                    role: spec.role,
+                    enabled: true,
+                    auth_epoch: AuthEpoch::new(1),
+                },
+                login_name: spec.login_name.clone(),
+                display_name: spec.display_name.clone(),
+                must_change_password: true,
+                credential_version: 1,
+                recovery_version: 1,
+            },
+            scopes: spec.scopes.clone(),
+        };
+        assert!(original.matches(request.expected_revision, &request.command));
+        let mut later = original.clone();
+        later.account.display_name = "后来修改".into();
+        later.account.credential_version = 2;
+        assert!(!later.matches(request.expected_revision, &request.command));
+        assert_eq!(
+            read_account_result(&account_result_value(&original)).unwrap(),
+            original
+        );
+    }
+    #[test]
+    fn shared_fingerprint_preserves_legacy_byte_order_and_initial_installation_binding() {
+        let request = request();
+        let actor = actor();
+        let records = PreparedCredentials {
+            principal_id: PrincipalId::new(4).unwrap(),
+            password: Some((1, vec![1, 2, 3])),
+            recovery: Some((1, vec![4, 5, 6])),
+        };
+        // Literal old grammar, independent of the new seed/record helper.
+        let mut old = Sha256::new();
+        old.update(format!("{:?}", request));
+        old.update(codec::bytes(&codec::actor(&actor)).unwrap());
+        old.update(4_u64.to_be_bytes());
+        for record in [[1_u8, 2, 3], [4_u8, 5, 6]] {
+            old.update(1_u64.to_be_bytes());
+            old.update(3_u64.to_be_bytes());
+            old.update(record);
+        }
+        assert_eq!(
+            old.finalize().to_vec(),
+            identity_fingerprint(&request, Some(&actor), None, Some(&records)).unwrap()
+        );
+        let first = IdentityRequest {
+            command_id: request.command_id,
+            expected_revision: Revision::default(),
+            command: IdentityCommand::FirstAdministrator {
+                school_id: SchoolId::new(1).unwrap(),
+                school_name: "学校".into(),
+                id: PrincipalId::new(1).unwrap(),
+                login_name: "admin".into(),
+                display_name: "管理员".into(),
+            },
+        };
+        let mut old = Sha256::new();
+        old.update(format!("{:?}", first));
+        old.update(b"installation/v1\0");
+        old.update([9; 32]);
+        old.update(codec::bytes(&Value::Null).unwrap());
+        assert_eq!(
+            old.finalize().to_vec(),
+            identity_fingerprint(&first, None, Some([9; 32]), None).unwrap()
+        );
     }
 }

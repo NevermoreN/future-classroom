@@ -54,6 +54,24 @@ pub(super) fn manifest(database: &[u8]) -> BackupManifest {
     }
 }
 #[test]
+fn startup_without_recovery_does_not_create_namespace_or_owner() {
+    let f = Fixture::new();
+    let namespace = f.paths.root().join("recovery");
+    assert!(!namespace.exists());
+    assert_eq!(
+        f.f().reconcile_startup(&|| true).unwrap(),
+        StartupRecovery::default()
+    );
+    assert!(!namespace.exists());
+    // Preparing an actual export still creates the original owned namespace.
+    let workspace = f.f().workspace().unwrap();
+    assert_eq!(
+        read_small(&namespace.join(".future-classroom-owner"), OWNER.len()).unwrap(),
+        OWNER
+    );
+    drop(workspace);
+}
+#[test]
 fn complete_package_roundtrip_pins_ordinary_and_removes_only_cancelled_work_area() {
     let f = Fixture::new();
     let workspace = f.f().workspace().unwrap();

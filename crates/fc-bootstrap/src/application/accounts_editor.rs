@@ -32,6 +32,7 @@ pub(super) const CLEAR_SCOPES: ActionId = ActionId(615);
 pub(super) const APPLY_ROLE: ActionId = ActionId(616);
 pub(super) const DEFAULTS: ActionId = ActionId(617);
 pub(super) const DEFAULT_SELECT: ActionId = ActionId(618);
+pub(super) const END_RESULT_QUERY: ActionId = ActionId(619);
 const PAGE_SIZE: usize = 20;
 
 #[derive(Debug)]
@@ -1981,5 +1982,165 @@ mod tests {
             Command::Reload
         ));
         assert!(!editor.has_unsaved_changes());
+    }
+}
+
+/// Cached public history is still owner-scoped. A replacement login must query
+/// again under its real exact lease rather than inherit another session's view.
+pub(super) struct HistoryNotice {
+    lease: fc_application::identity::SessionLease,
+    owner: fc_ports::command_window::CommandOwner,
+    text: String,
+}
+impl HistoryNotice {
+    pub(super) fn new(
+        lease: fc_application::identity::SessionLease,
+        owner: fc_ports::command_window::CommandOwner,
+        text: String,
+    ) -> Self {
+        Self { lease, owner, text }
+    }
+    pub(super) fn text_for(
+        &self,
+        lease: fc_application::identity::SessionLease,
+        owner: fc_ports::command_window::CommandOwner,
+    ) -> Option<&str> {
+        (self.lease == lease && self.owner == owner).then_some(self.text.as_str())
+    }
+}
+/// Result notices live outside a draft: refreshing the current directory must
+/// neither confirm an earlier write nor discard its unresolved history notice.
+pub(super) fn decorate_history(view: &mut View, note: Option<&str>, unresolved: bool, ready: bool) {
+    if let Some(note) = note {
+        if !view.status.is_empty() {
+            view.status.push('\n');
+        }
+        view.status.push_str(note);
+    }
+    if unresolved {
+        if !view.status.is_empty() {
+            view.status.push('\n');
+        }
+        view.status.push_str("原账号操作结果仍未知。重新加载只会核对原保存结果并另列当前目录，不会重新保存。结束这次核对后，新操作仍需重新确认。");
+        view.actions.push(action(
+            END_RESULT_QUERY,
+            "结束这次核对（原结果仍未知）",
+            ready,
+        ));
+    }
+}
+/// Bounded, explicitly historical public summary. Full scopes were compared to
+/// the original request by storage; rendering uses stable IDs and a visible cap.
+/// Neither this string nor OriginalAccountResult contains a recoverable code.
+pub(super) fn history_summary(
+    message: &str,
+    result: Option<&fc_bootstrap::backend::OriginalAccountResult>,
+) -> String {
+    let Some(result) = result else {
+        return message.into();
+    };
+    let a = &result.account;
+    let scopes = result
+        .scopes
+        .iter()
+        .take(20)
+        .map(|s| format!("班级#{}／科目#{}", s.class_id.get(), s.subject_id.get()))
+        .collect::<Vec<_>>()
+        .join("；");
+    format!("{message}\n原保存结果：目录修订{}；账号#{}；登录名{}；姓名{}；{}；{}；任教范围{}条{}。{}\n以下账号列表来自当前目录。",
+        result.revision.get(), a.principal.id.get(), a.login_name, a.display_name,
+        role_name(a.principal.role), if a.principal.enabled { "启用" } else { "停用" },
+        result.scopes.len(), if result.scopes.len() > 20 { "（此摘要仅列前20条）" } else { "" }, scopes)
+}
+
+#[cfg(test)]
+mod account_history_notice_tests {
+    use super::*;
+    // Historical summaries remain bound to the current authorized reader.
+    fn empty_view() -> View {
+        View {
+            title: String::new(),
+            description: String::new(),
+            status: String::new(),
+            fields: Vec::new(),
+            actions: Vec::new(),
+            busy: false,
+            grid: None,
+        }
+    }
+    #[test]
+    fn unknown_notice_and_explicit_end_are_separate_from_current_directory() {
+        let mut view = empty_view();
+        decorate_history(&mut view, Some("当前目录读取成功。"), true, true);
+        assert!(view.status.contains("原账号操作结果仍未知"));
+        assert!(view
+            .actions
+            .iter()
+            .any(|a| a.id == END_RESULT_QUERY && a.enabled));
+        let mut ended = empty_view();
+        decorate_history(
+            &mut ended,
+            Some("原账号操作的历史结果仍未知；你已结束这次核对。"),
+            false,
+            true,
+        );
+        assert!(ended.status.contains("历史结果仍未知"));
+        assert!(!ended.actions.iter().any(|a| a.id == END_RESULT_QUERY));
+    }
+    #[test]
+    fn cached_history_requires_exact_reading_lease_and_complete_owner() {
+        use fc_application::identity::IdentitySessions;
+        use fc_ports::command_window::CommandOwner;
+        let account = UserAccount {
+            principal: Principal {
+                id: PrincipalId::new(1).unwrap(),
+                school_id: SchoolId::new(1).unwrap(),
+                role: Role::GlobalAdmin,
+                enabled: true,
+                auth_epoch: AuthEpoch::new(4),
+            },
+            login_name: "admin".into(),
+            display_name: "管理员".into(),
+            must_change_password: false,
+            credential_version: 1,
+            recovery_version: 1,
+        };
+        let owner = CommandOwner::Principal {
+            principal: account.principal.id,
+            school: account.principal.school_id,
+            epoch: account.principal.auth_epoch,
+            origin: TrustedOrigin::Local,
+        };
+        let until = LocalDateTime::new(LocalDate::new(2026, 11, 3).unwrap(), 3600).unwrap();
+        let mut sessions = IdentitySessions::default();
+        let first = sessions
+            .issue_verified(&account, TrustedOrigin::Local, 0, 1000, until)
+            .unwrap();
+        let notice = HistoryNotice::new(first, owner, "原保存姓名".into());
+        assert_eq!(notice.text_for(first, owner), Some("原保存姓名"));
+        let other_owner = CommandOwner::Principal {
+            principal: account.principal.id,
+            school: account.principal.school_id,
+            epoch: AuthEpoch::new(5),
+            origin: TrustedOrigin::Local,
+        };
+        assert_eq!(notice.text_for(first, other_owner), None);
+        let next = sessions
+            .issue_verified(&account, TrustedOrigin::Local, 1, 1000, until)
+            .unwrap();
+        assert_eq!(
+            notice.text_for(next, owner),
+            None,
+            "new lease must authorize and query again"
+        );
+    }
+    #[test]
+    fn query_end_is_unavailable_while_original_worker_has_not_returned() {
+        let mut view = empty_view();
+        decorate_history(&mut view, None, true, false);
+        assert!(view
+            .actions
+            .iter()
+            .any(|a| a.id == END_RESULT_QUERY && !a.enabled));
     }
 }

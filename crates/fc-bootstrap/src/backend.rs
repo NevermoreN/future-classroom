@@ -62,6 +62,7 @@ use fc_security::{
 pub use fc_storage::business::materials::{
     ResourceInventory, ResourceInventoryPage, ResourceRetirement, ResourceState,
 };
+pub use fc_storage::business::{AccountReceiptProof, OriginalAccountResult};
 use fc_storage::{
     business::{startup_state, BusinessRepository},
     login::*,
@@ -1278,6 +1279,19 @@ impl Backend {
         account: NewAccount,
         password: Password,
     ) -> Result<RecoveryCode> {
+        self.create_account_at_tracked(lease, expected_revision, account, password, |_| Ok(()))
+    }
+    /// Publish only immutable non-secret receipt metadata before the original
+    /// prepared payload is handed to Writer. The callback must only bind a short
+    /// memory slot; it must never do SQL, file IO, KDF or another queue wait.
+    pub fn create_account_at_tracked(
+        &mut self,
+        lease: SessionLease,
+        expected_revision: Revision,
+        account: NewAccount,
+        password: Password,
+        publish: impl FnOnce(AccountReceiptProof) -> Result<()>,
+    ) -> Result<RecoveryCode> {
         let state = self.state()?;
         let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
         let id = account.id;
@@ -1287,13 +1301,64 @@ impl Backend {
         let (change, code) = prepare_initial_credentials(&mut self.crypto, &password, request)
             .map_err(|_| BackendError::CryptoUnavailable)?;
         let mut repository = self.guarded(lease, generation, SessionPurpose::Manage);
-        let transition = repository.execute_credentials(
-            self.encode(change, id, 1, 1)?,
-            Some(&actor),
-            self.clock.as_ref(),
-        )?;
+        let encoded = self.encode(change, id, 1, 1)?;
+        let (encoded, proof) = repository.prepare_account_creation_receipt(encoded, &actor)?;
+        publish(proof)?;
+        // The exact immutable value returned by try_map is consumed once here.
+        // No password or RecoveryCode is retained in the proof or callback slot.
+        let transition =
+            repository.execute_credentials(encoded, Some(&actor), self.clock.as_ref())?;
         self.apply(&transition)?;
         Ok(code)
+    }
+    pub fn update_account_at_tracked(
+        &mut self,
+        lease: SessionLease,
+        expected_revision: Revision,
+        command: IdentityCommand,
+        publish: impl FnOnce(AccountReceiptProof) -> Result<()>,
+    ) -> Result<IdentityState> {
+        if !matches!(command, IdentityCommand::UpdateAccount { .. }) {
+            return Err(BackendError::InvalidInput);
+        }
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        let mut request = self.request(&state, command)?;
+        request.expected_revision = expected_revision;
+        self.validate_identity(&state, &request, Some(&actor))?;
+        let mut repository = self.guarded(lease, generation, SessionPurpose::Manage);
+        let proof = repository.prepare_account_update_receipt(&request, &actor)?;
+        publish(proof)?;
+        let transition = fc_application::identity::execute_identity(
+            &mut repository,
+            self.clock.as_ref(),
+            Some(&actor),
+            request,
+        )?;
+        self.apply(&transition)?;
+        Ok(transition.next)
+    }
+    /// Read the original result under CURRENT authority. Historical identity is
+    /// never passed to apply or returned as the current management directory.
+    pub fn account_outcome(
+        &mut self,
+        lease: SessionLease,
+        proof: Arc<AccountReceiptProof>,
+    ) -> Result<Option<OriginalAccountResult>> {
+        if self.current_command != Some(proof.issued()) {
+            return Err(BackendError::Storage(StorageError::CommandNotIssued));
+        }
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        state
+            .authorize_management(&actor, self.clock.now())
+            .map_err(|error| BackendError::Identity(IdentityRepositoryError::Domain(error)))?;
+        let result = self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .account_outcome(proof, &actor)?;
+        self.actor(&self.state()?, lease, SessionPurpose::Manage)?;
+        self.check_open()?;
+        Ok(result)
     }
     pub fn change_password(
         &mut self,

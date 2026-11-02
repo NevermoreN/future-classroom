@@ -36,9 +36,10 @@ impl Admission {
 pub(super) struct Admitted {
     kind: Admission,
     snapshot: Option<preimage::Snapshot>,
-    // Only Upgrade may retain a pre-existing exact owned Run command. This is
-    // volatile read-only evidence, never an intent to create/restore a value.
-    upgrade_run: Option<RunPreimage>,
+    // Existing same-package repair and upgrade retain the exact owned Run
+    // preimage. This is volatile read-only evidence, never a create/restore or
+    // deletion permit. Fresh install and committed removal still require absent.
+    retained_run: Option<RunPreimage>,
 }
 impl Admitted {
     pub(super) fn operation(&self) -> MaintenanceOperation {
@@ -106,6 +107,23 @@ impl Decision {
                 outcome: SettledOutcome::Rollback,
                 expected: admission.preimage(),
             }
+        }
+    }
+    fn preserve_run(self, admission: Admission, original: Option<&RunPreimage>) -> Self {
+        if self.outcome == SettledOutcome::Commit
+            && self.expected == ExpectedState::Absent
+            && matches!(original, Some(RunPreimage::ExactCommand { .. }))
+        {
+            // SameManifest admission also serves uninstall. Read-only repair
+            // preservation must not let that route leave a live Run command
+            // pointing at an absent installation. No registry compare-delete
+            // or rollback capability is implied by this captured preimage.
+            Self {
+                outcome: SettledOutcome::Rollback,
+                expected: admission.preimage(),
+            }
+        } else {
+            self
         }
     }
 }
@@ -402,19 +420,25 @@ fn match_run_preimage_at(
     }
     Ok(())
 }
+fn require_absent_run_preimage(original: Option<&RunPreimage>) -> Result<()> {
+    if matches!(original, Some(RunPreimage::ExactCommand { .. })) {
+        return Err(LifecycleError::Unsettled);
+    }
+    Ok(())
+}
 fn check_admitted_run(admission: &Admitted) -> Result<()> {
-    if admission.kind == Admission::Upgrade {
+    if matches!(admission.kind, Admission::SameManifest | Admission::Upgrade) {
         let original = admission
-            .upgrade_run
+            .retained_run
             .as_ref()
             .ok_or(LifecycleError::Invalid)?;
         match_run_preimage_at(RUN_KEY, original, expected_installed_run_command)
     } else {
-        if admission.upgrade_run.is_some() {
+        if admission.retained_run.is_some() {
             return Err(LifecycleError::Invalid);
         }
-        // Fresh install, same-package repair and uninstall keep their original
-        // strict absent-only rule. Upgrade preservation grants no cleanup right.
+        // A fresh install cannot adopt an existing Run value. Preservation of
+        // an existing installation grants no cleanup right.
         run_absent_at(RUN_KEY)
     }
 }
@@ -527,24 +551,54 @@ pub(super) fn admit_upgrade(session: &mut Session) -> Result<Admitted> {
     upgrade::admit(session)
 }
 pub(super) fn admit(session: &mut Session) -> Result<Admitted> {
+    // Legacy/general maintenance and removal have no Run deletion protocol.
+    // Refuse a present value before admission and any installer mutation. The
+    // captured check also rejects an exact owned value inserted between reads.
     current(session.deadline)?;
     run_absent_at(RUN_KEY)?;
+    let admitted = admit_preserving_run(session)?;
+    require_absent_run_preimage(admitted.retained_run.as_ref())?;
+    run_absent_at(RUN_KEY)?;
+    current(session.deadline)?;
+    Ok(admitted)
+}
+/// Only the closed Setup Operation::Repair branch calls this entry. General
+/// maintenance/removal cannot opt into preservation using caller properties.
+pub(super) fn admit_repair(session: &mut Session) -> Result<Admitted> {
+    let admitted = admit_preserving_run(session)?;
+    if admitted.kind != Admission::SameManifest {
+        return Err(LifecycleError::Invalid);
+    }
+    Ok(admitted)
+}
+fn admit_preserving_run(session: &mut Session) -> Result<Admitted> {
+    current(session.deadline)?;
     if product(&session.manifest, "VersionString")?.is_some() {
+        let run = read_run_preimage_at(RUN_KEY, expected_installed_run_command)?;
         let mut proof = Proof::new(session.deadline);
         let captured = registered_preimage(session, &mut proof);
         // Return pins even on an invalid preimage. Unknown close remains fatal.
         proof.release()?;
+        let snapshot = captured?;
+        // No Run HKEY owner overlaps the payload pin groups. A same-package
+        // repair admits only absence or this installation's exact existing
+        // command, and never compensates an external change with a write.
+        match_run_preimage_at(RUN_KEY, &run, expected_installed_run_command)?;
+        current(session.deadline)?;
         Ok(Admitted {
             kind: Admission::SameManifest,
-            snapshot: Some(captured?),
-            upgrade_run: None,
+            snapshot: Some(snapshot),
+            retained_run: Some(run),
         })
     } else {
+        run_absent_at(RUN_KEY)?;
         fresh(session)?;
+        run_absent_at(RUN_KEY)?;
+        current(session.deadline)?;
         Ok(Admitted {
             kind: Admission::Fresh,
             snapshot: None,
-            upgrade_run: None,
+            retained_run: None,
         })
     }
 }
@@ -579,10 +633,8 @@ pub(super) fn revalidate(session: &mut Session, admission: &Admitted) -> Result<
         }
     }
     current(session.deadline)?;
-    if admission.kind == Admission::Upgrade {
-        check_admitted_run(admission)?;
-    }
-    Ok(())
+    check_admitted_run(admission)?;
+    current(session.deadline)
 }
 
 /// Each group uses the existing checked native ledger (64 resources/8 owners),
@@ -944,10 +996,10 @@ pub(super) fn staged(session: &mut Session, admission: &Admitted) -> Result<Deci
         Observation::Other
     };
     current(session.deadline)?;
-    if admission.kind == Admission::Upgrade {
-        check_admitted_run(admission)?;
-    }
-    Ok(Decision::observed(admission.kind, observed))
+    check_admitted_run(admission)?;
+    current(session.deadline)?;
+    Ok(Decision::observed(admission.kind, observed)
+        .preserve_run(admission.kind, admission.retained_run.as_ref()))
 }
 pub(super) fn failed_install(admission: &Admitted) -> Decision {
     Decision {
@@ -982,10 +1034,9 @@ pub(super) fn reconcile(
         proof.check()?;
         return Ok(proof);
     }
-    if decision.expected == ExpectedState::Present {
-        return present(session);
-    }
-    if decision.expected == ExpectedState::CapturedPreimage {
+    let proof = if decision.expected == ExpectedState::Present {
+        present(session)?
+    } else if decision.expected == ExpectedState::CapturedPreimage {
         // Caller reaches this only after the original guardian's successful
         // Join/EndRollback and checked original process exit. A bad original
         // payload is compared with its actual bad bytes, never the manifest.
@@ -998,13 +1049,24 @@ pub(super) fn reconcile(
         {
             return Err(LifecycleError::Unsettled);
         }
-        return Ok(proof);
-    }
-    let proof = Proof::new(session.deadline);
-    let base = root()?;
-    no_product(&session.manifest)?;
-    absent(&base)?;
-    marker_absent()?;
+        proof
+    } else {
+        // A retained owned command authorizes read-only repair, not deletion.
+        // Uninstall with autostart still needs a separate atomic ownership /
+        // rollback protocol; never delete after a racy read or restore Run over
+        // an external change. Absence remains mandatory for committed removal.
+        require_absent_run_preimage(admission.retained_run.as_ref())?;
+        run_absent_at(RUN_KEY)?;
+        let proof = Proof::new(session.deadline);
+        let base = root()?;
+        no_product(&session.manifest)?;
+        absent(&base)?;
+        marker_absent()?;
+        proof
+    };
+    // Hashing, registration enumeration and rollback comparison may take time.
+    // Recheck the original Run type/bytes at the same final boundary as upgrade.
+    check_admitted_run(admission)?;
     proof.check()?;
     Ok(proof)
 }
@@ -1059,6 +1121,43 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn repair_run_preservation_cannot_grant_general_admission_or_commit_removal() {
+        let owned = RunPreimage::ExactCommand {
+            kind: REG_SZ.0,
+            bytes: run_command_bytes("\"C:\\Owned\\fc-bootstrap.exe\" --autostart").unwrap(),
+        };
+        assert!(require_absent_run_preimage(None).is_ok());
+        assert!(require_absent_run_preimage(Some(&RunPreimage::Absent)).is_ok());
+        assert_eq!(
+            require_absent_run_preimage(Some(&owned)),
+            Err(LifecycleError::Unsettled),
+            "general maintenance and uninstall still refuse Run before writes"
+        );
+        let admission = Admission::SameManifest;
+        let repaired = Decision::observed(admission, Observation::Present)
+            .preserve_run(admission, Some(&owned))
+            .require_present(admission);
+        assert_eq!(repaired.outcome(), SettledOutcome::Commit);
+        assert_eq!(repaired.expected, ExpectedState::Present);
+        for observation in [Observation::Absent, Observation::Other] {
+            let refused =
+                Decision::observed(admission, observation).preserve_run(admission, Some(&owned));
+            assert_eq!(refused.outcome(), SettledOutcome::Rollback);
+            assert_eq!(refused.expected, ExpectedState::CapturedPreimage);
+            assert_eq!(
+                refused.require_absent(admission).outcome(),
+                SettledOutcome::Rollback,
+                "preserving an owned command never authorizes a removal commit"
+            );
+        }
+        let removed = Decision::observed(admission, Observation::Absent)
+            .preserve_run(admission, Some(&RunPreimage::Absent))
+            .require_absent(admission);
+        assert_eq!(removed.outcome(), SettledOutcome::Commit);
+        assert_eq!(removed.expected, ExpectedState::Absent);
     }
 
     #[test]
@@ -1417,6 +1516,11 @@ mod tests {
         );
         assert!(match_run_preimage_at(&path, &original, || Ok(command.clone())).is_ok());
         assert_eq!(
+            require_absent_run_preimage(Some(&original)),
+            Err(LifecycleError::Unsettled),
+            "repair/upgrade preservation does not change ordinary admission"
+        );
+        assert_eq!(
             match_run_preimage_at(&path, &absent, || Ok(command.clone())),
             Err(LifecycleError::Unsettled)
         );
@@ -1428,7 +1532,7 @@ mod tests {
         assert_eq!(
             fixture.read(),
             before,
-            "successful read-only upgrade admission never rewrites Run"
+            "successful read-only upgrade/repair preservation never rewrites Run"
         );
         let foreign = "\"C:\\Other\\application.exe\" --autostart\0"
             .encode_utf16()

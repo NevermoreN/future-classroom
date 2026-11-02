@@ -30,13 +30,37 @@ const CHILDREN: &[&str] = &[
 #[derive(Clone, Debug)]
 pub struct DataPaths {
     root: PathBuf,
+    origin: RootOrigin,
+}
+#[derive(Clone, Copy, Debug)]
+enum RootOrigin {
+    Canonical,
+    ExistingLegacy { identity: (u32, u64) },
 }
 impl DataPaths {
     pub fn program_data() -> Result<Self> {
         // The native KnownFolder adapter already appends the application name.
-        let root = crate::program_data()?;
-        reject_nested_legacy_root(&root)?;
-        Ok(Self { root })
+        Self::discover_program_data_at(crate::program_data()?)
+    }
+    fn discover_program_data_at(canonical: PathBuf) -> Result<Self> {
+        let legacy = canonical.join("FutureClassroom");
+        match std::fs::symlink_metadata(&legacy) {
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(Self {
+                root: canonical,
+                origin: RootOrigin::Canonical,
+            }),
+            Err(_) => Err(Error::new(
+                E_ACCESSDENIED,
+                "无法确认旧版资料目录；未创建或修改资料。",
+            )),
+            Ok(_) => {
+                let identity = verify_legacy_envelope(&legacy)?;
+                Ok(Self {
+                    root: legacy,
+                    origin: RootOrigin::ExistingLegacy { identity },
+                })
+            }
+        }
     }
     /// Test harness must explicitly choose an isolated direct child of an existing
     /// local directory. The prefix prevents accidentally selecting production data.
@@ -49,10 +73,19 @@ impl DataPaths {
         {
             return Err(Error::from_hresult(E_INVALIDARG));
         }
-        Ok(Self { root })
+        Ok(Self {
+            root,
+            origin: RootOrigin::Canonical,
+        })
     }
     pub fn root(&self) -> &Path {
         &self.root
+    }
+    /// A selected old root can only open an existing deployment or run its
+    /// original cold recovery. Missing credentials never authorize fresh setup.
+    /// Bootstrap must enforce this before opening/creating any database or key.
+    pub fn requires_existing_deployment(&self) -> bool {
+        matches!(self.origin, RootOrigin::ExistingLegacy { .. })
     }
     pub fn database(&self) -> PathBuf {
         self.root.join("state").join("classroom.sqlite3")
@@ -70,7 +103,16 @@ impl DataPaths {
     /// deployment root without creating or silently repairing any directory.
     pub fn verify_root_for_current_user(&self) -> Result<()> {
         check_local_ancestors(&self.root)?;
-        verify_acl(&self.root, &Descriptor::for_user(&current_user_sid()?)?)
+        verify_acl(&self.root, &Descriptor::for_user(&current_user_sid()?)?)?;
+        if let RootOrigin::ExistingLegacy { identity } = self.origin {
+            if verify_legacy_envelope(&self.root)? != identity {
+                return Err(Error::new(
+                    E_ACCESSDENIED,
+                    "旧版资料目录已改变；未创建或修改资料。",
+                ));
+            }
+        }
+        Ok(())
     }
     /// Verify or create only the fixed instance-lock parent before acquiring the
     /// lock. A pre-existing junction or mismatching ACL is never followed/fixed.
@@ -222,12 +264,15 @@ impl DataPaths {
     /// Hidden update verification owns a fresh synthetic production deployment.
     /// Never adopt an existing root, even if its ACL would otherwise be valid.
     pub fn prepare_fresh_for_current_user(&self) -> Result<DeploymentDirectory> {
-        if self.root != Self::program_data()?.root {
+        if self.requires_existing_deployment() || self.root != crate::program_data()? {
             return Err(Error::from_hresult(E_ACCESSDENIED));
         }
         self.prepare_fresh_root()
     }
     fn prepare_fresh_root(&self) -> Result<DeploymentDirectory> {
+        if self.requires_existing_deployment() {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
         check_local_ancestors(&self.root)?;
         let user_sid = current_user_sid()?;
         let expected = Descriptor::for_user(&user_sid)?;
@@ -277,6 +322,11 @@ impl DataPaths {
     /// a protected DACL present at creation: SYSTEM, Administrators, deployment user.
     /// Existing roots are verified, never silently repaired or widened.
     pub fn prepare_for_current_user(&self) -> Result<DeploymentDirectory> {
+        if self.requires_existing_deployment() {
+            // A vanished selected old root must not become a new empty school.
+            // Cold recovery runs before bootstrap asks to fill missing children.
+            self.verify_root_for_current_user()?;
+        }
         check_local_ancestors(&self.root)?;
         let user_sid = current_user_sid()?;
         let expected = Descriptor::for_user(&user_sid)?;
@@ -292,21 +342,78 @@ impl DataPaths {
     }
 }
 
-fn reject_nested_legacy_root(root: &Path) -> Result<()> {
-    // Earlier development builds appended the application name twice. Never
-    // silently create a new empty deployment beside that known old layout.
-    // Discovery neither opens its contents nor moves, repairs or deletes it.
-    match std::fs::symlink_metadata(root.join("FutureClassroom")) {
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
-        Ok(_) => Err(Error::new(
+fn verify_legacy_envelope(legacy: &Path) -> Result<(u32, u64)> {
+    use crate::materials::files::PinnedDirectory;
+    let canonical = legacy
+        .parent()
+        .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+    check_local_ancestors(legacy)?;
+    let _parent = PinnedDirectory::open(canonical)?;
+    let root = PinnedDirectory::open(legacy)?;
+    let expected = Descriptor::for_user(&current_user_sid()?)?;
+    verify_acl(legacy, &expected)?;
+    // The outer directory is only a pinned ancestor. Never repair its inherited
+    // ACL, adopt it as a second teaching root, or choose between two deployments.
+    let outside = legacy_directory_entries(canonical, 2)?;
+    if outside.len() != 1 || outside[0] != legacy {
+        return Err(Error::new(
             E_INVALIDARG,
-            "检测到旧版双层资料目录，需要迁移；未创建或修改资料。",
-        )),
-        Err(_) => Err(Error::new(
-            E_ACCESSDENIED,
-            "无法确认旧版资料目录；未创建或修改资料。",
-        )),
+            "发现并存或未知资料目录；未选择或修改资料。",
+        ));
     }
+    // Physical namespaces only. A torn reset can have moved config/state away;
+    // only bootstrap's original journal reconcilers may interpret that state.
+    const NAMESPACES: &[&str] = &[
+        "state",
+        "config",
+        "runtime",
+        "teachers",
+        "open-copies",
+        "quarantine",
+        "cache",
+        "exports",
+        "profile-content",
+        "voice",
+        "staging",
+        "launch-copies",
+        "web-material-staging",
+        "recovery",
+        "reinitialization",
+    ];
+    for entry in legacy_directory_entries(legacy, NAMESPACES.len())? {
+        let name = entry
+            .file_name()
+            .and_then(|value| value.to_str())
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        if !NAMESPACES.contains(&name) {
+            return Err(Error::new(
+                E_INVALIDARG,
+                "旧版资料目录含未知对象；原件已保留。",
+            ));
+        }
+        let _directory = PinnedDirectory::open(&entry)?;
+        if CHILDREN.contains(&name) {
+            verify_acl(&entry, &expected)?;
+        }
+    }
+    root.identity()
+}
+fn legacy_directory_entries(path: &Path, limit: usize) -> Result<Vec<PathBuf>> {
+    let _pin = crate::materials::files::PinnedDirectory::open(path)?;
+    let mut entries = Vec::new();
+    for entry in std::fs::read_dir(path)? {
+        if entries.len() == limit {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let entry = entry?.path();
+        if std::fs::symlink_metadata(&entry)?.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT.0
+            != 0
+        {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        entries.push(entry);
+    }
+    Ok(entries)
 }
 
 pub struct DeploymentDirectory {
@@ -612,39 +719,100 @@ mod tests {
             let _ = std::fs::remove_dir_all(&self.0);
         }
     }
-    #[test]
-    fn default_program_data_uses_the_native_application_root_once() {
-        assert_eq!(
-            DataPaths::program_data().unwrap().root(),
-            crate::program_data().unwrap()
-        );
-    }
-    #[test]
-    fn legacy_nested_root_is_refused_without_creating_or_modifying_data() {
+    fn scratch(label: &str) -> Scratch {
         let nonce = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        let scratch = Scratch(std::env::temp_dir().join(format!(
-            "FutureClassroom-Test-Legacy-{}-{nonce}",
+        Scratch(std::env::temp_dir().join(format!(
+            "FutureClassroom-Test-{label}-{}-{nonce}",
             std::process::id()
-        )));
-        reject_nested_legacy_root(&scratch.0).unwrap();
+        )))
+    }
+    fn legacy_fixture() -> (Scratch, PathBuf, PathBuf) {
+        let scratch = scratch("LegacyLayout");
+        let canonical = scratch.0.join("canonical");
+        std::fs::create_dir_all(&canonical).unwrap();
+        let legacy = canonical.join("FutureClassroom");
+        DataPaths {
+            root: legacy.clone(),
+            origin: RootOrigin::Canonical,
+        }
+        .prepare_for_current_user()
+        .unwrap()
+        .read_back()
+        .unwrap();
+        (scratch, canonical, legacy)
+    }
+    #[test]
+    fn absent_application_root_discovery_is_canonical_and_read_only() {
+        let scratch = scratch("CanonicalDiscovery");
+        let paths = DataPaths::discover_program_data_at(scratch.0.clone()).unwrap();
+        assert_eq!(paths.root(), scratch.0);
+        assert!(!paths.requires_existing_deployment());
         assert!(!scratch.0.exists());
+    }
+    #[test]
+    fn unknown_nested_root_is_refused_without_modifying_or_repairing_data() {
+        let scratch = scratch("UnknownLegacy");
         let legacy = scratch.0.join("FutureClassroom");
         std::fs::create_dir_all(&legacy).unwrap();
         let sentinel = legacy.join("sentinel.txt");
         std::fs::write(&sentinel, b"preserved synthetic old deployment").unwrap();
-        assert_eq!(
-            reject_nested_legacy_root(&scratch.0).unwrap_err().code(),
-            E_INVALIDARG
-        );
+        assert!(DataPaths::discover_program_data_at(scratch.0.clone()).is_err());
         assert_eq!(
             std::fs::read(&sentinel).unwrap(),
             b"preserved synthetic old deployment"
         );
         assert_eq!(std::fs::read_dir(&scratch.0).unwrap().count(), 1);
         assert!(!scratch.0.join("state").exists());
+    }
+    #[test]
+    fn existing_legacy_keeps_original_lock_and_missing_cold_trees_are_not_created() {
+        let (_scratch, canonical, legacy) = legacy_fixture();
+        for name in ["config", "state", "teachers"] {
+            std::fs::remove_dir(legacy.join(name)).unwrap();
+        }
+        let expected = Descriptor::for_user(&current_user_sid().unwrap()).unwrap();
+        assert!(verify_acl(&canonical, &expected).is_err());
+        let paths = DataPaths::discover_program_data_at(canonical.clone()).unwrap();
+        assert_eq!(paths.root(), legacy);
+        assert!(paths.requires_existing_deployment());
+        assert!(paths.prepare_fresh_root().is_err());
+        assert!(paths.prepare_fresh_for_current_user().is_err());
+        let original = crate::InstanceGuard::acquire(&legacy).unwrap();
+        assert!(crate::InstanceGuard::acquire(paths.root()).is_err());
+        drop(original);
+        drop(crate::InstanceGuard::acquire(paths.root()).unwrap());
+        for name in ["config", "state", "teachers"] {
+            assert!(!legacy.join(name).exists());
+            assert!(!canonical.join(name).exists());
+        }
+        assert!(verify_acl(&canonical, &expected).is_err());
+    }
+    #[test]
+    fn ambiguous_or_replaced_legacy_root_is_not_chosen_or_recreated() {
+        let (scratch, canonical, legacy) = legacy_fixture();
+        let conflict = canonical.join("state");
+        std::fs::create_dir(&conflict).unwrap();
+        assert!(DataPaths::discover_program_data_at(canonical.clone()).is_err());
+        assert!(conflict.is_dir());
+        std::fs::remove_dir(conflict).unwrap();
+        let paths = DataPaths::discover_program_data_at(canonical.clone()).unwrap();
+        std::fs::rename(&legacy, scratch.0.join("preserved-original")).unwrap();
+        assert!(paths.prepare_for_current_user().is_err());
+        assert!(!legacy.exists());
+        DataPaths {
+            root: legacy.clone(),
+            origin: RootOrigin::Canonical,
+        }
+        .prepare_for_current_user()
+        .unwrap();
+        let sentinel = legacy.join("config/sentinel");
+        std::fs::write(&sentinel, b"replacement survives").unwrap();
+        assert!(paths.verify_root_for_current_user().is_err());
+        assert!(paths.prepare_for_current_user().is_err());
+        assert_eq!(std::fs::read(sentinel).unwrap(), b"replacement survives");
     }
     #[test]
     fn fresh_protected_root_refuses_existing_sentinel_without_repair() {

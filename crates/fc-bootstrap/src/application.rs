@@ -424,26 +424,46 @@ fn error_text(error: &Failure) -> String {
 
 /// The deployment marker makes missing key/database evidence fail closed. A
 /// partially prepared directory is never mistaken for a brand-new installation.
-fn open_backend(root: &Path, clock: Arc<CurrentClock>) -> Result<Backend> {
+#[derive(Clone, Copy)]
+enum OpenPolicy {
+    AllowInitialization,
+    ExistingOnly,
+}
+fn verify_existing_deployment(root: &Path) -> Result<()> {
+    if read_bounded(&root.join("config/deployment.marker"), 128)?.as_slice() != MANIFEST {
+        return Err(Failure::Deployment(
+            "部署标记损坏，需要修复；不会创建新学校。",
+        ));
+    }
+    // These pins reject junctions and hard links, without reading school data or
+    // allowing the missing files to be recreated before the normal open checks.
+    for name in ["config/credential-key.dpapi", "state/classroom.sqlite3"] {
+        let pin = fc_windows::materials::files::OwnedObjectPin::file_allow_empty(&root.join(name))
+            .map_err(|_| Failure::Deployment("部署数据不完整，需要修复；不会创建新学校。"))?;
+        if pin
+            .file()
+            .metadata()
+            .map_err(|_| Failure::Deployment("部署文件无法读取。"))?
+            .len()
+            == 0
+        {
+            return Err(Failure::Deployment(
+                "部署数据不完整，需要修复；不会创建新学校。",
+            ));
+        }
+    }
+    Ok(())
+}
+fn open_backend(root: &Path, clock: Arc<CurrentClock>, policy: OpenPolicy) -> Result<Backend> {
     let key_path = root.join("config/credential-key.dpapi");
     let database = root.join("state/classroom.sqlite3");
     let marker = root.join("config/deployment.marker");
-    let key_exists = key_path
-        .try_exists()
-        .map_err(|_| Failure::Deployment("无法读取部署状态。"))?;
-    let db_exists = database
-        .try_exists()
-        .map_err(|_| Failure::Deployment("无法读取部署状态。"))?;
-    let marker_exists = marker
-        .try_exists()
-        .map_err(|_| Failure::Deployment("无法读取部署状态。"))?;
+    let key_exists = deployment_object_exists(&key_path)?;
+    let db_exists = deployment_object_exists(&database)?;
+    let marker_exists = deployment_object_exists(&marker)?;
     let dpapi = CurrentUserDpapi::default();
     let codec = if marker_exists {
-        if !key_exists || !db_exists || read_bounded(&marker, 128)?.as_slice() != MANIFEST {
-            return Err(Failure::Deployment(
-                "部署数据不完整，需要修复；不会创建新管理员。",
-            ));
-        }
+        verify_existing_deployment(root)?;
         let encrypted = read_bounded(&key_path, 4096)?;
         let secret = dpapi.unprotect(&encrypted).map_err(|_| {
             Failure::Deployment("当前Windows账号无法解密部署凭据，请使用原部署账号或受控恢复。")
@@ -453,6 +473,11 @@ fn open_backend(root: &Path, clock: Arc<CurrentClock>) -> Result<Backend> {
         CredentialRecordCodec::from_key(key)
             .map_err(|_| Failure::Deployment("部署密钥格式损坏。"))?
     } else {
+        if matches!(policy, OpenPolicy::ExistingOnly) {
+            return Err(Failure::Deployment(
+                "旧部署缺少完整资料，需要修复；不会在旧目录新建学校。",
+            ));
+        }
         if key_exists || db_exists {
             return Err(Failure::Deployment(
                 "发现未完成或损坏的部署，需要修复；不会覆盖已有数据。",
@@ -474,17 +499,29 @@ fn open_backend(root: &Path, clock: Arc<CurrentClock>) -> Result<Backend> {
     };
     Backend::open(database, codec, clock.clone(), clock).map_err(Failure::from)
 }
+fn deployment_object_exists(path: &Path) -> Result<bool> {
+    // A broken link is still an existing object; following it must not turn a
+    // damaged deployment into permission to create a new key or database.
+    match fs::symlink_metadata(path) {
+        Ok(_) => Ok(true),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(false),
+        Err(_) => Err(Failure::Deployment("无法读取部署状态。")),
+    }
+}
 fn read_bounded(path: &Path, max: usize) -> Result<Vec<u8>> {
-    let metadata =
-        fs::symlink_metadata(path).map_err(|_| Failure::Deployment("部署文件无法读取。"))?;
-    use std::os::windows::fs::MetadataExt;
-    if !metadata.is_file() || metadata.file_attributes() & 0x400 != 0 || metadata.len() > max as u64
-    {
+    let mut pin = fc_windows::materials::files::OwnedObjectPin::file_allow_empty(path)
+        .map_err(|_| Failure::Deployment("部署文件无法读取。"))?;
+    let metadata = pin
+        .file()
+        .metadata()
+        .map_err(|_| Failure::Deployment("部署文件无法读取。"))?;
+    if metadata.len() > max as u64 {
         return Err(Failure::Deployment("部署文件大小或类型无效。"));
     }
     let mut data = Vec::with_capacity(max.min(4096));
-    File::open(path)
-        .and_then(|f| f.take(max as u64 + 1).read_to_end(&mut data))
+    pin.file_mut()
+        .take(max as u64 + 1)
+        .read_to_end(&mut data)
         .map_err(|_| Failure::Deployment("部署文件无法读取。"))?;
     if data.len() > max {
         return Err(Failure::Deployment("部署文件过大。"));
@@ -524,6 +561,11 @@ enum Outcome {
         record: Option<ContentRecord>,
     },
     AccountsLoaded(IdentityState),
+    AccountHistoryLoaded {
+        lease: SessionLease,
+        current: IdentityState,
+        history: Box<NativeHistory>,
+    },
     SubjectsLoaded {
         facts: settings_registry::SubjectFacts,
         history: Option<Box<NativeHistory>>,
@@ -604,6 +646,11 @@ struct Request {
 /// view. It is metadata only; only the backend can hash/admit this typed intent.
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum NativeIntent {
+    Account {
+        expected: Revision,
+        // Shared public metadata: NativeCommand clones never clone scope arrays.
+        command: Arc<IdentityCommand>,
+    },
     Subject {
         expected: Revision,
         command: IdentityCommand,
@@ -626,6 +673,7 @@ enum NativeIntent {
 struct NativeCommand(
     Arc<Mutex<Option<fc_ports::command_window::IssuedCommand>>>,
     Option<NativeIntent>,
+    Arc<Mutex<Option<Arc<fc_bootstrap::backend::AccountReceiptProof>>>>,
 );
 impl PartialEq for NativeCommand {
     fn eq(&self, other: &Self) -> bool {
@@ -638,10 +686,43 @@ impl NativeCommand {
         Self::with_intent(None)
     }
     fn with_intent(intent: Option<NativeIntent>) -> Self {
-        Self(Arc::new(Mutex::new(None)), intent)
+        Self(
+            Arc::new(Mutex::new(None)),
+            intent,
+            Arc::new(Mutex::new(None)),
+        )
     }
     fn intent(&self) -> Option<&NativeIntent> {
         self.1.as_ref()
+    }
+    fn bind_account_proof(&self, proof: fc_bootstrap::backend::AccountReceiptProof) -> Result<()> {
+        let Some(NativeIntent::Account { expected, command }) = self.intent() else {
+            return Err(Failure::Stopped);
+        };
+        if self.original()? != proof.issued()
+            || proof.request().expected_revision != *expected
+            || &proof.request().command != command.as_ref()
+        {
+            return Err(Failure::Stopped);
+        }
+        let mut slot = self.2.lock().map_err(|_| Failure::Stopped)?;
+        if slot
+            .as_ref()
+            .is_some_and(|original| original.as_ref() != &proof)
+        {
+            return Err(Failure::Stopped);
+        }
+        *slot = Some(Arc::new(proof));
+        Ok(())
+    }
+    fn account_proof(&self) -> Result<Option<Arc<fc_bootstrap::backend::AccountReceiptProof>>> {
+        Ok(self.2.lock().map_err(|_| Failure::Stopped)?.clone())
+    }
+    fn is_account(&self) -> bool {
+        matches!(self.intent(), Some(NativeIntent::Account { .. }))
+    }
+    fn permits_current_read_confirmation(&self) -> bool {
+        self.intent().is_none()
     }
     fn snapshot(&self) -> Option<fc_ports::command_window::IssuedCommand> {
         self.0.try_lock().ok().and_then(|value| *value)
@@ -724,6 +805,10 @@ struct NativeHistory {
     resolution: NativeResolution,
 }
 enum NativeResolution {
+    Account(Option<fc_bootstrap::backend::OriginalAccountResult>),
+    // An inaccessible original owner or missing local preparation proof is NOT
+    // proof of failure/success. A current directory may still be shown separately.
+    AccountUnavailable,
     SubjectRejected(IdentityError),
     Subject(Option<(Revision, fc_domain::identity::SchoolSubject)>),
     DefaultTeacherRejected(IdentityError),
@@ -750,6 +835,17 @@ impl NativeHistory {
     fn valid_result(&self) -> bool {
         use fc_ports::command_window::{TypedCommandOutcome as O, TypedCommandResult as R};
         match (&self.resolution, self.command.intent()) {
+            (
+                NativeResolution::Account(saved),
+                Some(NativeIntent::Account { expected, command }),
+            ) => saved
+                .as_ref()
+                .is_none_or(|result| result.matches(*expected, command)),
+            (NativeResolution::Account(_), _) => false,
+            (NativeResolution::AccountUnavailable, Some(NativeIntent::Account { .. })) => true,
+            (NativeResolution::AccountUnavailable, _) => false,
+            (NativeResolution::Expired, Some(NativeIntent::Account { .. })) => true,
+            (_, Some(NativeIntent::Account { .. })) => false,
             (
                 NativeResolution::SubjectRejected(
                     IdentityError::RevisionConflict
@@ -822,6 +918,32 @@ impl NativeHistory {
             (_, Some(_)) => true,
             (_, None) => false,
         }
+    }
+    fn account(
+        command: NativeCommand,
+        issued: fc_ports::command_window::IssuedCommand,
+        result: fc_bootstrap::backend::Result<Option<fc_bootstrap::backend::OriginalAccountResult>>,
+    ) -> Result<Self> {
+        use fc_ports::command_window::CommandWindowError;
+        let resolution = match result {
+            Ok(value) => NativeResolution::Account(value),
+            Err(error) if error.command_window_error() == Some(CommandWindowError::Expired) => {
+                NativeResolution::Expired
+            }
+            Err(error) if error.command_window_error() == Some(CommandWindowError::NotIssued) => {
+                NativeResolution::AccountUnavailable
+            }
+            Err(error) => return Err(error.into()),
+        };
+        let history = Self {
+            command,
+            issued,
+            resolution,
+        };
+        if !history.valid_result() {
+            return Err(Failure::Stopped);
+        }
+        Ok(history)
     }
     fn subject(
         command: NativeCommand,
@@ -928,15 +1050,23 @@ impl NativeHistory {
         }
     }
     fn pending(&self) -> bool {
-        matches!(
-            self.resolution,
-            NativeResolution::Outcome(fc_ports::command_window::TypedCommandOutcome::Pending)
-                | NativeResolution::DefaultTeacher(None)
-                | NativeResolution::Subject(None)
-        )
+        // An expired account query cannot resolve whether its original write
+        // committed. Only explicit end-query may unblock a new intent.
+        (self.command.is_account() && matches!(self.resolution, NativeResolution::Expired))
+            || matches!(
+                self.resolution,
+                NativeResolution::Outcome(fc_ports::command_window::TypedCommandOutcome::Pending)
+                    | NativeResolution::DefaultTeacher(None)
+                    | NativeResolution::Subject(None)
+                    | NativeResolution::Account(None)
+                    | NativeResolution::AccountUnavailable
+            )
     }
     fn message(&self) -> &'static str {
         match &self.resolution {
+            NativeResolution::Account(None) => "尚未查到原账号操作结果；原结果仍未知，不会重新保存。当前目录另列。",
+            NativeResolution::Account(Some(_)) => "已查到原账号保存结果；当前目录另列。创建时的恢复码不能再次读取。",
+            NativeResolution::AccountUnavailable => "原账号操作结果仍未知，当前无法核对。可明确结束这次核对，再按当前目录发起新操作；结束核对不会重发或证明原操作失败。",
             NativeResolution::SubjectRejected(IdentityError::InvalidScope) => "本次保存已被拒绝，未修改科目。请先调整课表中的相关课程和保留双表引用，再重新读取核对。",
             NativeResolution::SubjectRejected(_) => "本次科目保存已被明确拒绝，未修改设置。草稿保留，请重新读取后核对。",
             NativeResolution::Subject(None) => "尚未查到原科目保存结果，请重新读取核对；不会重复保存。当前目录另行显示。",
@@ -973,7 +1103,8 @@ impl Outcome {
         match self {
             Self::VoiceLoaded(_, loaded) => loaded.history.as_ref(),
             Self::Calendar(loaded) => loaded.history.as_ref(),
-            Self::DefaultTeacherLoaded { history, .. } => Some(history),
+            Self::DefaultTeacherLoaded { history, .. }
+            | Self::AccountHistoryLoaded { history, .. } => Some(history),
             Self::SubjectsLoaded { history, .. } => history.as_deref(),
             Self::SubjectSelfRevoked { history, .. } => Some(history),
             _ => None,
@@ -1203,7 +1334,8 @@ impl Task for Work {
                 };
                 strings
                     .checked_add(scopes.checked_mul(std::mem::size_of::<AssignmentScope>())?)?
-                    .checked_add(2048)
+                    .checked_mul(3)?
+                    .checked_add(4096)
             }
             Self::Profile(_, _, operation, _, root) => profile_flow::allocation(operation)?
                 .checked_add(root.as_os_str().len().checked_mul(2)?),
@@ -1290,6 +1422,19 @@ impl Work {
                 command: command.clone(),
             }),
             Self::SaveAccount(_, _, operation) => match operation.as_ref() {
+                accounts_editor::Command::Create {
+                    expected, account, ..
+                } => Some(NativeIntent::Account {
+                    expected: *expected,
+                    command: Arc::new(IdentityCommand::CreateAccount(account.clone())),
+                }),
+                accounts_editor::Command::Update {
+                    expected,
+                    command: account @ IdentityCommand::UpdateAccount { .. },
+                } => Some(NativeIntent::Account {
+                    expected: *expected,
+                    command: Arc::new(account.clone()),
+                }),
                 accounts_editor::Command::Update {
                     expected,
                     command: IdentityCommand::SetDefaultTeacher(default),
@@ -1466,11 +1611,20 @@ impl Work {
                     .and_then(|files| files.reconcile_startup(&|| context.checkpoint().is_ok()))
                     .map_err(|_| Failure::Deployment("备份恢复状态需要修复；原数据已保留。"))?;
                 context.checkpoint().map_err(|_| Failure::Stopped)?;
+                let policy = if paths.requires_existing_deployment() {
+                    // Original reset/restore journals get the first opportunity
+                    // to restore a torn switch. Only then inspect the live set,
+                    // before preparing any missing teaching directories.
+                    verify_existing_deployment(&root)?;
+                    OpenPolicy::ExistingOnly
+                } else {
+                    OpenPolicy::AllowInitialization
+                };
                 paths
                     .prepare_for_current_user()
                     .and_then(|deployment| deployment.read_back())
                     .map_err(|_| Failure::Deployment("数据目录权限读回失败，需要修复。"))?;
-                let mut backend = open_backend(&root, clock)?;
+                let mut backend = open_backend(&root, clock, policy)?;
                 if context.checkpoint().is_err() {
                     backend.close()?;
                     return Err(Failure::Stopped);
@@ -1619,6 +1773,36 @@ impl Work {
                         history: Box::new(history),
                         saved: false,
                     })
+                } else if command.is_account() {
+                    let issued = command.original()?;
+                    let history = if let Some(proof) = command.account_proof()? {
+                        let result = command.query(&mut backend, context, |backend| {
+                            Ok(backend.account_outcome(lease, proof)?)
+                        });
+                        match result {
+                            Ok(result) => {
+                                NativeHistory::account(command.clone(), issued, Ok(result))?
+                            }
+                            Err(Failure::Backend(error)) => {
+                                NativeHistory::account(command.clone(), issued, Err(error))?
+                            }
+                            Err(error) => return Err(error),
+                        }
+                    } else {
+                        // The original write may not have reached preparation.
+                        // Absence of this local metadata proves no COMMIT fact.
+                        NativeHistory {
+                            command: command.clone(),
+                            issued,
+                            resolution: NativeResolution::AccountUnavailable,
+                        }
+                    };
+                    let current = backend.management_identity(lease)?;
+                    Ok(Outcome::AccountHistoryLoaded {
+                        lease,
+                        current,
+                        history: Box::new(history),
+                    })
                 } else {
                     Ok(Outcome::AccountsLoaded(backend.management_identity(lease)?))
                 }
@@ -1743,8 +1927,17 @@ impl Work {
                             account,
                             password,
                         } => {
-                            let code =
-                                backend.create_account_at(lease, expected, account, password)?;
+                            let code = backend.create_account_at_tracked(
+                                lease,
+                                expected,
+                                account,
+                                password,
+                                |proof| {
+                                    command
+                                        .bind_account_proof(proof)
+                                        .map_err(|_| BackendError::InvalidInput)
+                                },
+                            )?;
                             Ok(Outcome::Updated {
                                 state: backend.state()?,
                                 lease: Some(lease),
@@ -1764,7 +1957,7 @@ impl Work {
                                 },
                         } => {
                             let self_changed = id == lease.principal_id();
-                            let state = backend.identity_at(
+                            let state = backend.update_account_at_tracked(
                                 lease,
                                 expected,
                                 IdentityCommand::UpdateAccount {
@@ -1773,6 +1966,11 @@ impl Work {
                                     role,
                                     enabled,
                                     scopes,
+                                },
+                                |proof| {
+                                    command
+                                        .bind_account_proof(proof)
+                                        .map_err(|_| BackendError::InvalidInput)
                                 },
                             )?;
                             Ok(Outcome::AccountSaved {
@@ -2143,6 +2341,9 @@ struct App {
     https_unadmitted: Option<(Work, Instant)>,
     native_command: Option<NativeCommand>,
     native_unknown: bool,
+    // A single bounded public summary survives explicit end-query. It never
+    // claims a matched result and does not retain credentials or old authority.
+    account_history_note: Option<accounts_editor::HistoryNotice>,
     native_target: Option<NativeTarget>,
     native_mutation_pending: bool,
     native_readback_pending: bool,
@@ -2170,6 +2371,27 @@ struct App {
     content_gc: Arc<Mutex<profile_content_flow::GcCursor>>,
 }
 impl App {
+    fn account_notice_owner(&self) -> Option<fc_ports::command_window::CommandOwner> {
+        let lease = self.lease?;
+        if lease.origin() != TrustedOrigin::Local
+            || self
+                .control
+                .as_ref()
+                .is_none_or(SessionControl::is_local_locked)
+        {
+            return None;
+        }
+        let a = self.state.account(lease.principal_id()).ok()?;
+        if !a.principal.enabled || a.principal.role != Role::GlobalAdmin || a.must_change_password {
+            return None;
+        }
+        Some(fc_ports::command_window::CommandOwner::Principal {
+            principal: a.principal.id,
+            school: a.principal.school_id,
+            epoch: a.principal.auth_epoch,
+            origin: lease.origin(),
+        })
+    }
     fn shutdown_complete(&self) -> bool {
         self.stopping && module_registry::shutdown_complete(self) && !self.terminate_required
     }
@@ -2186,7 +2408,34 @@ impl App {
         } else {
             status
         };
-        settings_registry::view(self, &status)
+        let mut view = settings_registry::view(self, &status);
+        if self.screen == Screen::Accounts {
+            let unresolved = self.native_unknown
+                && self
+                    .native_command
+                    .as_ref()
+                    .is_some_and(NativeCommand::is_account);
+            if unresolved {
+                if let Some(issued) = self
+                    .native_command
+                    .as_ref()
+                    .and_then(NativeCommand::snapshot)
+                    .filter(|issued| self.account_notice_owner() == Some(issued.owner))
+                {
+                    view.status
+                        .push_str(&format!("\n待核对账号操作编号：{}。", issued.ticket));
+                }
+            }
+            accounts_editor::decorate_history(
+                &mut view,
+                self.account_history_note
+                    .as_ref()
+                    .and_then(|notice| notice.text_for(self.lease?, self.account_notice_owner()?)),
+                unresolved,
+                self.pending.is_none() && !self.stopping,
+            );
+        }
+        view
     }
     fn render(&self) -> std::result::Result<(), String> {
         window_registry::render(&self.window, self.screen, &self.view())
@@ -2446,7 +2695,12 @@ impl App {
                 if readback
                     && self.native_unknown
                     && self.native_command.as_ref().is_some_and(|original| {
-                        matches!(original.intent(), Some(NativeIntent::DefaultTeacher { .. }))
+                        matches!(
+                            original.intent(),
+                            Some(
+                                NativeIntent::DefaultTeacher { .. } | NativeIntent::Account { .. }
+                            )
+                        )
                     }) =>
             {
                 self.native_command
@@ -3320,6 +3574,37 @@ impl App {
             || action == LOCK
         {
             self.lock();
+            return self.render();
+        }
+        if action == accounts_editor::END_RESULT_QUERY {
+            if self.pending.is_none()
+                && !self.stopping
+                && self.native_unknown
+                && self
+                    .native_command
+                    .as_ref()
+                    .is_some_and(NativeCommand::is_account)
+            {
+                let original = self
+                    .native_command
+                    .as_ref()
+                    .and_then(NativeCommand::snapshot)
+                    .filter(|issued| self.account_notice_owner() == Some(issued.owner))
+                    .map(|issued| format!("（操作编号{}）", issued.ticket))
+                    .unwrap_or_default();
+                let Some(owner) = self.account_notice_owner() else {
+                    return self.render();
+                };
+                self.account_history_note = Some(accounts_editor::HistoryNotice::new(lease, owner,
+                    format!("原账号操作{original}的历史结果仍未知；你已结束这次核对。此动作不会重新保存，也不证明原操作成功或失败。新操作需按当前目录重新确认。")));
+                self.native_unknown = false;
+                self.native_command = None;
+                self.native_target = None;
+                self.accounts = None;
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::LoadAccounts(backend.clone(), lease))?;
+                }
+            }
             return self.render();
         }
         let Some(editor) = &mut self.accounts else {
@@ -4460,7 +4745,7 @@ impl App {
                     } else {
                         self.native_command
                             .as_ref()
-                            .is_none_or(|command| command.intent().is_none())
+                            .is_none_or(NativeCommand::permits_current_read_confirmation)
                             && self
                                 .native_target
                                 .as_ref()
@@ -4687,6 +4972,41 @@ impl App {
                     history,
                     saved,
                 }) => self.subjects_loaded(facts, history, saved)?,
+                Ok(Outcome::AccountHistoryLoaded {
+                    lease,
+                    current,
+                    history,
+                }) => {
+                    self.account_history_note = Some(accounts_editor::HistoryNotice::new(
+                        lease,
+                        history.issued.owner,
+                        format!(
+                            "历史记录（操作编号{}）：\n{}",
+                            history.issued.ticket,
+                            accounts_editor::history_summary(
+                                history.message(),
+                                match &history.resolution {
+                                    NativeResolution::Account(Some(result)) => Some(result),
+                                    _ => None,
+                                }
+                            )
+                        ),
+                    ));
+                    // Only the independently authenticated CURRENT directory is
+                    // published to the editor. Original result remains a label.
+                    self.state = Arc::new(current);
+                    if let Some(owner) = self.current_global_owner() {
+                        if self
+                            .accounts
+                            .as_ref()
+                            .is_none_or(|e| e.owner() != owner || !e.has_unsaved_changes())
+                        {
+                            self.accounts = Some(accounts_editor::Editor::new(&self.state, owner)?);
+                        }
+                        self.screen = Screen::Accounts;
+                        self.status.clear();
+                    }
+                }
                 Ok(Outcome::AccountsLoaded(state)) => {
                     self.state = Arc::new(state);
                     if let Some(owner) = self.current_global_owner() {
@@ -5394,6 +5714,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         https_unadmitted: None,
         native_command: None,
         native_unknown: false,
+        account_history_note: None,
         native_target: None,
         native_mutation_pending: false,
         native_readback_pending: false,
@@ -6441,6 +6762,47 @@ mod tests {
                 result.unwrap();
             }
         }
+    }
+    #[test]
+    fn existing_only_open_never_initializes_empty_or_incomplete_deployment() {
+        let root = std::env::temp_dir().join(format!(
+            "FutureClassroom-Test-ExistingOnly-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let paths = DataPaths::isolated_test(root.clone()).unwrap();
+        paths.prepare_for_current_user().unwrap();
+        let _scratch = Scratch(root.clone());
+        for marker in [false, true] {
+            if marker {
+                create_file(&root.join("config/deployment.marker"), MANIFEST).unwrap();
+            }
+            assert!(open_backend(
+                &root,
+                Arc::new(CurrentClock::new()),
+                OpenPolicy::ExistingOnly
+            )
+            .is_err());
+            assert!(!root.join("config/credential-key.dpapi").exists());
+            assert!(!paths.database().exists());
+            assert_eq!(root.join("config/deployment.marker").exists(), marker);
+        }
+        fs::remove_file(root.join("config/deployment.marker")).unwrap();
+        let clock = Arc::new(CurrentClock::new());
+        let mut first =
+            open_backend(&root, clock.clone(), OpenPolicy::AllowInitialization).unwrap();
+        first.close().unwrap();
+        let encrypted = fs::read(root.join("config/credential-key.dpapi")).unwrap();
+        let mut reopened = open_backend(&root, clock, OpenPolicy::ExistingOnly).unwrap();
+        assert!(reopened.state().unwrap().installation.is_none());
+        reopened.close().unwrap();
+        assert_eq!(
+            fs::read(root.join("config/credential-key.dpapi")).unwrap(),
+            encrypted
+        );
     }
     pub(super) fn fixture() -> (Scratch, App) {
         let root = std::env::temp_dir().join(format!(
@@ -8323,5 +8685,112 @@ mod tests {
         drain(app);
         drop(backend);
         drop(scratch);
+    }
+}
+
+#[cfg(test)]
+mod account_unknown_state_tests {
+    use super::*;
+    use fc_ports::command_window::{CommandFamily, CommandOwner, CommandTicket, IssuedCommand};
+    // Verify unknown account results cannot be replaced by a current read.
+    fn command() -> NativeCommand {
+        let command = NativeCommand::with_intent(Some(NativeIntent::Account {
+            expected: Revision::new(4),
+            command: Arc::new(IdentityCommand::UpdateAccount {
+                id: PrincipalId::new(2).unwrap(),
+                display_name: "原姓名".into(),
+                role: Role::User,
+                enabled: true,
+                scopes: Vec::new(),
+            }),
+        }));
+        command
+            .bind(IssuedCommand {
+                ticket: CommandTicket::new([3; 16], 8).unwrap(),
+                command_id: CommandId::new(8).unwrap(),
+                family: CommandFamily::Identity,
+                owner: CommandOwner::Principal {
+                    principal: PrincipalId::new(1).unwrap(),
+                    school: SchoolId::new(1).unwrap(),
+                    epoch: AuthEpoch::new(1),
+                    origin: TrustedOrigin::Local,
+                },
+                window_millis: 86_400_000,
+            })
+            .unwrap();
+        command
+    }
+    #[test]
+    fn account_current_read_never_confirms_original_unknown_write() {
+        let original = command();
+        assert!(!original.permits_current_read_confirmation());
+        assert!(NativeCommand::new().permits_current_read_confirmation());
+        let history =
+            NativeHistory::account(original.clone(), original.original().unwrap(), Ok(None))
+                .unwrap();
+        assert!(history.matches(&original));
+        assert!(history.pending());
+        assert!(
+            !history.matches(&command()),
+            "a new UI intent cannot consume the original result"
+        );
+        assert!(
+            original.account_proof().unwrap().is_none(),
+            "missing proof cannot be invented from current data"
+        );
+    }
+    #[test]
+    fn inaccessible_or_expired_account_history_stays_unknown_until_explicit_end() {
+        for error in [
+            fc_ports::command_window::CommandWindowError::NotIssued,
+            fc_ports::command_window::CommandWindowError::Expired,
+        ] {
+            let original = command();
+            let history = NativeHistory::account(
+                original.clone(),
+                original.original().unwrap(),
+                Err(BackendError::Identity(
+                    fc_ports::IdentityRepositoryError::CommandWindow(error),
+                )),
+            )
+            .unwrap();
+            assert!(history.valid_result());
+            assert!(history.pending());
+        }
+    }
+    #[test]
+    fn a_later_account_name_cannot_match_the_original_result() {
+        let original = command();
+        let mut result = fc_bootstrap::backend::OriginalAccountResult {
+            revision: Revision::new(5),
+            account: UserAccount {
+                principal: Principal {
+                    id: PrincipalId::new(2).unwrap(),
+                    school_id: SchoolId::new(1).unwrap(),
+                    role: Role::User,
+                    enabled: true,
+                    auth_epoch: AuthEpoch::new(2),
+                },
+                login_name: "teacher2".into(),
+                display_name: "原姓名".into(),
+                must_change_password: false,
+                credential_version: 1,
+                recovery_version: 1,
+            },
+            scopes: Vec::new(),
+        };
+        assert!(NativeHistory::account(
+            original.clone(),
+            original.original().unwrap(),
+            Ok(Some(result.clone()))
+        )
+        .is_ok());
+        result.account.display_name = "后来的姓名".into();
+        assert!(NativeHistory::account(
+            original.clone(),
+            original.original().unwrap(),
+            Ok(Some(result))
+        )
+        .is_err());
     }
 }

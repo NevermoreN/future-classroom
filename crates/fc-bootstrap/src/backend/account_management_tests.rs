@@ -1387,3 +1387,492 @@ fn accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_ato
     assert_eq!(fixture.backend.state().unwrap(), next);
     fixture.assert_credentials(2);
 }
+
+// Account UNKNOWN regressions through the real SQLite writer.
+// These cases use the existing real SQLite/Backend fixture and real issued C2
+// tickets. Dropping a committed Backend return deliberately models lost output;
+// it does not claim to execute the Windows native completion-message loss path.
+mod account_unknown_sqlite_tests {
+    use super::*;
+    use fc_ports::command_window::{CommandFamily, CommandWindowError, IssuedCommand};
+
+    type Proof = Arc<AccountReceiptProof>;
+    const INITIAL_PASSWORD: &str = "Synthetic lost-output create 2026!";
+    const CHANGED_PASSWORD: &str = "Synthetic explicit later password 2026!";
+
+    fn issue_identity(
+        fixture: &Fixture,
+        lease: SessionLease,
+        purpose: SessionPurpose,
+    ) -> IssuedCommand {
+        fixture
+            .backend
+            .issue_native_command(CommandFamily::Identity, Some(lease), purpose)
+            .unwrap()
+    }
+    fn row(fixture: &Fixture, key: String) -> Option<fc_storage::Document> {
+        fixture.backend.handle.try_get(key).unwrap().wait().unwrap()
+    }
+    fn receipt_key(issued: IssuedCommand) -> String {
+        let epoch = issued
+            .ticket
+            .epoch()
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect::<String>();
+        format!(
+            "business/receipt/identity/v2/{epoch}/{}",
+            issued.ticket.serial()
+        )
+    }
+    fn credentials(fixture: &Fixture, principal: u64) -> Vec<Option<fc_storage::Document>> {
+        ["password", "recovery"]
+            .iter()
+            .flat_map(|kind| (1..=2).map(move |version| (*kind, version)))
+            .map(|(kind, version)| {
+                row(
+                    fixture,
+                    format!("business/credential/{principal}/{kind}/{version}"),
+                )
+            })
+            .collect()
+    }
+    fn query(
+        fixture: &mut Fixture,
+        lease: SessionLease,
+        issued: IssuedCommand,
+        proof: Proof,
+    ) -> Result<Option<OriginalAccountResult>> {
+        fixture
+            .backend
+            .begin_command_scope(issued)?
+            .account_outcome(lease, proof)
+    }
+    fn tracked_update(
+        fixture: &mut Fixture,
+        lease: SessionLease,
+        command: IdentityCommand,
+    ) -> (IssuedCommand, Proof, IdentityState) {
+        let expected = fixture.backend.state().unwrap().revision;
+        let issued = issue_identity(fixture, lease, SessionPurpose::Manage);
+        let mut proof = None;
+        let current = fixture
+            .backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .update_account_at_tracked(lease, expected, command, |value| {
+                proof = Some(Arc::new(value));
+                Ok(())
+            })
+            .unwrap();
+        let proof =
+            proof.expect("original request proof must be published before writer submission");
+        assert_eq!(proof.issued(), issued);
+        assert_eq!(proof.request().expected_revision, expected);
+        (issued, proof, current)
+    }
+    fn assert_read_only(fixture: &Fixture, expected: &IdentityState, global: Revision) {
+        assert_eq!(
+            &fixture.backend.state().unwrap(),
+            expected,
+            "query must not publish historical identity"
+        );
+        assert_eq!(
+            fixture.backend.global_revision().unwrap(),
+            global,
+            "query must not commit business mutations"
+        );
+    }
+
+    #[test]
+    fn create_lost_output_original_receipt_survives_later_edits_deleted_credentials_and_backend_reopen(
+    ) {
+        let mut fixture = Fixture::new();
+        let admin = fixture.admin();
+        let expected = fixture.backend.state().unwrap().revision;
+        let issued = issue_identity(&fixture, admin, SessionPurpose::Manage);
+        let original = NewAccount {
+            id: id(5),
+            login_name: "lost-create".into(),
+            display_name: "Original created teacher".into(),
+            role: Role::TeacherAdmin,
+            scopes: vec![scope(1, 1), scope(2, 2)],
+        };
+        let mut published = None;
+        let code = fixture
+            .backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .create_account_at_tracked(
+                admin,
+                expected,
+                original.clone(),
+                Password::new(INITIAL_PASSWORD.into()).unwrap(),
+                |proof| {
+                    published = Some(Arc::new(proof));
+                    Ok(())
+                },
+            )
+            .unwrap();
+        // Neither revealing nor keeping the original one-time result is needed
+        // to query the committed public account facts later.
+        drop(code);
+        let proof =
+            published.expect("original prepared fingerprint survives discarded completion output");
+        assert_eq!(proof.issued(), issued);
+        assert_eq!(
+            proof.request().command,
+            IdentityCommand::CreateAccount(original.clone())
+        );
+        let receipt = row(&fixture, receipt_key(issued)).unwrap();
+        let receipt_text = std::str::from_utf8(&receipt.value).unwrap();
+        assert!(receipt_text.contains("\"fingerprint\""));
+        assert!(!receipt_text.contains(INITIAL_PASSWORD));
+        assert!(!receipt_text.contains("recovery_code"));
+        assert!(!receipt_text.contains("\"password\""));
+        fixture.assert_credentials(5);
+
+        fixture
+            .backend
+            .test_native_command(
+                CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        update(
+                            5,
+                            "Later edited current teacher",
+                            Role::TeacherAdmin,
+                            true,
+                            vec![scope(1, 2)],
+                        ),
+                    )
+                },
+            )
+            .unwrap();
+        let first_login = fixture.issue(5, TrustedOrigin::Local);
+        let password_command =
+            issue_identity(&fixture, first_login, SessionPurpose::ChangeInitialPassword);
+        fixture
+            .backend
+            .begin_command_scope(password_command)
+            .unwrap()
+            .change_password(
+                first_login,
+                Password::new(INITIAL_PASSWORD.into()).unwrap(),
+                Password::new(CHANGED_PASSWORD.into()).unwrap(),
+            )
+            .unwrap();
+        let changed_login = fixture.issue(5, TrustedOrigin::Local);
+        let rotation = issue_identity(&fixture, changed_login, SessionPurpose::Manage);
+        let replacement_code = fixture
+            .backend
+            .begin_command_scope(rotation)
+            .unwrap()
+            .rotate_recovery(
+                changed_login,
+                Password::new(CHANGED_PASSWORD.into()).unwrap(),
+            )
+            .unwrap();
+        drop(replacement_code);
+        assert!(row(&fixture, "business/credential/5/password/1".into()).is_none());
+        assert!(row(&fixture, "business/credential/5/recovery/1".into()).is_none());
+        fixture.assert_credentials(5);
+        let before_reopen = fixture.backend.state().unwrap();
+        assert_eq!(before_reopen.account(id(5)).unwrap().credential_version, 2);
+        assert_eq!(before_reopen.account(id(5)).unwrap().recovery_version, 2);
+        fixture.reopen();
+        let fresh_admin = fixture.admin();
+        assert_ne!(
+            fresh_admin, admin,
+            "a genuinely new exact local lease is required after reopen"
+        );
+        let current = fixture.backend.management_identity(fresh_admin).unwrap();
+        assert_eq!(current, before_reopen);
+        let global = fixture.backend.global_revision().unwrap();
+        let credential_rows = credentials(&fixture, 5);
+        let anchor = issue_identity(&fixture, fresh_admin, SessionPurpose::Manage);
+        let historical = query(&mut fixture, fresh_admin, issued, proof.clone())
+            .unwrap()
+            .unwrap();
+        assert!(historical.matches(expected, &IdentityCommand::CreateAccount(original.clone())));
+        assert_eq!(historical.account.display_name, original.display_name);
+        assert_eq!(historical.scopes, original.scopes);
+        assert!(historical.account.must_change_password);
+        assert_eq!(historical.account.credential_version, 1);
+        assert_eq!(historical.account.recovery_version, 1);
+        assert_eq!(
+            fixture
+                .backend
+                .management_identity(fresh_admin)
+                .unwrap()
+                .account(id(5))
+                .unwrap()
+                .display_name,
+            "Later edited current teacher"
+        );
+        assert_eq!(
+            query(&mut fixture, fresh_admin, issued, proof).unwrap(),
+            Some(historical)
+        );
+        assert_read_only(&fixture, &current, global);
+        assert_eq!(credentials(&fixture, 5), credential_rows);
+        assert_eq!(row(&fixture, receipt_key(issued)), Some(receipt));
+        let after = issue_identity(&fixture, fresh_admin, SessionPurpose::Manage);
+        assert_eq!(after.ticket.epoch(), anchor.ticket.epoch());
+        assert_eq!(
+            after.ticket.serial(),
+            anchor.ticket.serial() + 1,
+            "history lookup must not issue replacement commands"
+        );
+        assert_read_only(&fixture, &current, global);
+    }
+
+    #[test]
+    fn update_lost_output_returns_original_public_role_and_scopes_without_overwriting_current_or_reusing_old_lease(
+    ) {
+        let mut fixture = Fixture::new();
+        let admin = fixture.admin();
+        let original_command = update(
+            2,
+            "Original updated teacher",
+            Role::TeacherAdmin,
+            true,
+            vec![scope(1, 1), scope(2, 2)],
+        );
+        let expected = fixture.backend.state().unwrap().revision;
+        let (issued, proof, discarded_completion) =
+            tracked_update(&mut fixture, admin, original_command.clone());
+        drop(discarded_completion);
+        let receipt = row(&fixture, receipt_key(issued)).unwrap();
+        fixture
+            .backend
+            .test_native_command(
+                CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        update(2, "Later current user", Role::User, true, vec![]),
+                    )
+                },
+            )
+            .unwrap();
+        let current = fixture.backend.management_identity(admin).unwrap();
+        let global = fixture.backend.global_revision().unwrap();
+        let credential_rows = credentials(&fixture, 2);
+        let original = query(&mut fixture, admin, issued, proof.clone())
+            .unwrap()
+            .unwrap();
+        assert!(original.matches(expected, &original_command));
+        assert_eq!(original.account.principal.role, Role::TeacherAdmin);
+        assert_eq!(original.scopes, vec![scope(1, 1), scope(2, 2)]);
+        assert_eq!(current.account(id(2)).unwrap().principal.role, Role::User);
+        assert_read_only(&fixture, &current, global);
+
+        fixture.backend.session_control().lock_local();
+        assert!(
+            query(&mut fixture, admin, issued, proof.clone()).is_err(),
+            "locked original lease cannot query"
+        );
+        let new_admin = fixture.admin();
+        assert_ne!(new_admin, admin);
+        assert!(fixture.backend.management_identity(admin).is_err());
+        assert_eq!(
+            query(&mut fixture, new_admin, issued, proof).unwrap(),
+            Some(original)
+        );
+        assert_read_only(&fixture, &current, global);
+        assert_eq!(credentials(&fixture, 2), credential_rows);
+        assert_eq!(row(&fixture, receipt_key(issued)), Some(receipt));
+    }
+
+    #[test]
+    fn account_history_missing_receipt_stays_missing_and_wrong_pair_or_full_payload_is_rejected_read_only(
+    ) {
+        let mut fixture = Fixture::new();
+        let admin = fixture.admin();
+        let current = fixture.backend.management_identity(admin).unwrap();
+        let missing = issue_identity(&fixture, admin, SessionPurpose::Manage);
+        let mut captured = None;
+        let refused = fixture
+            .backend
+            .begin_command_scope(missing)
+            .unwrap()
+            .update_account_at_tracked(
+                admin,
+                current.revision,
+                update(
+                    2,
+                    "Prepared but never submitted",
+                    Role::TeacherAdmin,
+                    true,
+                    vec![scope(1, 1)],
+                ),
+                |proof| {
+                    captured = Some(Arc::new(proof));
+                    Err(BackendError::Closed)
+                },
+            );
+        assert_eq!(refused, Err(BackendError::Closed));
+        let missing_proof = captured.expect("writer is not invoked after failed metadata handoff");
+        let global = fixture.backend.global_revision().unwrap();
+        assert!(row(&fixture, receipt_key(missing)).is_none());
+        assert_eq!(
+            query(&mut fixture, admin, missing, missing_proof.clone()).unwrap(),
+            None
+        );
+        assert_eq!(
+            query(&mut fixture, admin, missing, missing_proof.clone()).unwrap(),
+            None
+        );
+        assert!(
+            row(&fixture, receipt_key(missing)).is_none(),
+            "query cannot manufacture a refusal or success receipt"
+        );
+        assert_read_only(&fixture, &current, global);
+
+        let (committed, proof, _) = tracked_update(
+            &mut fixture,
+            admin,
+            update(
+                2,
+                "Actual committed result",
+                Role::TeacherAdmin,
+                true,
+                vec![scope(2, 2)],
+            ),
+        );
+        let current = fixture.backend.management_identity(admin).unwrap();
+        let global = fixture.backend.global_revision().unwrap();
+        let receipt = row(&fixture, receipt_key(committed)).unwrap();
+        assert_eq!(
+            query(&mut fixture, admin, committed, missing_proof)
+                .unwrap_err()
+                .command_window_error(),
+            Some(CommandWindowError::NotIssued)
+        );
+        assert_eq!(
+            query(&mut fixture, admin, missing, proof.clone())
+                .unwrap_err()
+                .command_window_error(),
+            Some(CommandWindowError::NotIssued)
+        );
+        // A real alternate typed request under the original scoped ticket has
+        // a different complete digest; no private proof fields are forged.
+        let mut wrong_request = proof.request().clone();
+        wrong_request.command = update(
+            2,
+            "Different original payload",
+            Role::TeacherAdmin,
+            true,
+            vec![scope(2, 2)],
+        );
+        let wrong_proof = {
+            let backend = fixture.backend.begin_command_scope(committed).unwrap();
+            let actor = backend
+                .check_session(admin, SessionPurpose::Manage)
+                .unwrap();
+            Arc::new(
+                backend
+                    .repository
+                    .prepare_account_update_receipt(&wrong_request, &actor)
+                    .unwrap(),
+            )
+        };
+        assert_eq!(
+            query(&mut fixture, admin, committed, wrong_proof),
+            Err(BackendError::Identity(
+                IdentityRepositoryError::IdempotencyConflict
+            ))
+        );
+        assert_eq!(row(&fixture, receipt_key(committed)), Some(receipt));
+        assert!(query(&mut fixture, admin, committed, proof)
+            .unwrap()
+            .is_some());
+        assert_read_only(&fixture, &current, global);
+    }
+
+    #[test]
+    fn account_history_self_update_new_epoch_and_other_owner_cannot_disclose_original_result() {
+        let mut fixture = Fixture::new();
+        let admin = fixture.admin();
+        let (issued, proof, discarded_completion) = tracked_update(
+            &mut fixture,
+            admin,
+            update(
+                1,
+                "Committed self rename with lost output",
+                Role::GlobalAdmin,
+                true,
+                vec![],
+            ),
+        );
+        drop(discarded_completion);
+        let current = fixture.backend.state().unwrap();
+        let global = fixture.backend.global_revision().unwrap();
+        let receipt = row(&fixture, receipt_key(issued)).unwrap();
+        assert!(
+            query(&mut fixture, admin, issued, proof.clone()).is_err(),
+            "the real self write revokes its original exact lease"
+        );
+        let reauthenticated = fixture.admin();
+        assert_eq!(
+            fixture
+                .backend
+                .management_identity(reauthenticated)
+                .unwrap(),
+            current
+        );
+        assert_eq!(
+            query(&mut fixture, reauthenticated, issued, proof.clone())
+                .unwrap_err()
+                .command_window_error(),
+            Some(CommandWindowError::NotIssued),
+            "same principal with a new auth epoch cannot assume the old command owner"
+        );
+        assert_read_only(&fixture, &current, global);
+        let second_admin = fixture.issue(3, TrustedOrigin::Local);
+        assert_eq!(
+            fixture.backend.management_identity(second_admin).unwrap(),
+            current
+        );
+        assert_eq!(
+            query(&mut fixture, second_admin, issued, proof.clone())
+                .unwrap_err()
+                .command_window_error(),
+            Some(CommandWindowError::NotIssued),
+            "another global administrator cannot read another owner's receipt"
+        );
+        assert_eq!(row(&fixture, receipt_key(issued)), Some(receipt));
+        assert_read_only(&fixture, &current, global);
+
+        fixture
+            .backend
+            .test_native_command(
+                CommandFamily::Identity,
+                Some(second_admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        second_admin,
+                        update(1, "Now demoted current user", Role::User, true, vec![]),
+                    )
+                },
+            )
+            .unwrap();
+        let demoted_state = fixture.backend.state().unwrap();
+        let demoted_global = fixture.backend.global_revision().unwrap();
+        assert!(query(&mut fixture, reauthenticated, issued, proof.clone()).is_err());
+        let demoted_lease = fixture.issue(1, TrustedOrigin::Local);
+        assert!(fixture.backend.management_identity(demoted_lease).is_err());
+        assert!(
+            query(&mut fixture, demoted_lease, issued, proof).is_err(),
+            "the ticket is not a substitute for current management permission"
+        );
+        assert_read_only(&fixture, &demoted_state, demoted_global);
+    }
+}

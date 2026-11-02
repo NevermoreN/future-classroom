@@ -52,7 +52,7 @@ pub(super) fn admit(session: &mut Session) -> Result<Admitted> {
     Ok(Admitted {
         kind: Admission::Upgrade,
         snapshot: Some(snapshot),
-        upgrade_run: Some(run),
+        retained_run: Some(run),
     })
 }
 pub(super) fn revalidate(session: &mut Session, admission: &Admitted) -> Result<()> {

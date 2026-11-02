@@ -546,7 +546,12 @@ pub(super) fn reconcile(
     files: &RecoveryFiles,
     check: &dyn Fn() -> bool,
 ) -> Result<StartupRecovery> {
-    let namespace = files.namespace()?;
+    ensure(check)?;
+    // A startup read must not manufacture a namespace/owner as evidence of a
+    // previous deployment, particularly while opening an existing legacy root.
+    let Some(namespace) = files.namespace(false)? else {
+        return Ok(StartupRecovery::default());
+    };
     let marker = namespace.join(".future-classroom-owner");
     let mut operations = files.files.entries(&namespace, 34).map_err(repair)?;
     operations.sort();

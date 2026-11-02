@@ -138,4 +138,62 @@ class FormalMsvcAbi2Contract(unittest.TestCase):
             args.candidate_instructions_sha256=hashlib.sha256(raw).hexdigest()
             with self.assertRaises(ValueError):FORMAL['read_candidate_instructions'](args)
 
+
+class FormalSuccessorContract(unittest.TestCase):
+    """Synthetic boundary checks only; never publication or native evidence."""
+    def record(self, target=1):
+        payloads={n:n.encode() for n in FORMAL['B']['LIFECYCLE_REQUIRED']}
+        body=FORMAL['B']['lifecycle_manifest']('0.1.0',payloads)
+        envelope=FORMAL['ABI2']['C']['make_payload_manifest'](F['PACKAGE'],body)
+        meta=dict(target=target,source_commit='1'*40,template_bytes=1156)
+        meta.update({n:'2'*64 for n in FORMAL['PUBLICATION']['DIGEST_KEYS']})
+        return FORMAL['PUBLICATION']['encode_format'](meta,envelope,FORMAL['ABI2']['C']['parse_payload_manifest']),meta
+
+    def test_default_has_no_predecessor_and_spec_arguments_are_paired(self):
+        from types import SimpleNamespace
+        self.assertIsNone(FORMAL['prepare_predecessor'](SimpleNamespace(),()))
+        for a in (SimpleNamespace(predecessor_spec=Path('/not-read')),SimpleNamespace(predecessor_spec_sha256='a'*64)):
+            with self.assertRaises(ValueError):FORMAL['prepare_predecessor'](a,())
+
+    def test_record_roundtrip_rejects_gnu_reserved_tail_and_zero_digest(self):
+        record,meta=self.record()
+        self.assertEqual(FORMAL['decode_predecessor'](record),meta)
+        mutations=[self.record(2)[0],record+b'x',bytearray(record)]
+        for start,end in ((13,14),(236,237),(36,68)):
+            raw=bytearray(record);raw[start:end]=b'\1'*(end-start) if end-start==1 else bytes(end-start);mutations.append(bytes(raw))
+        for raw in mutations:
+            with self.subTest(raw_type=type(raw)),self.assertRaises(ValueError):FORMAL['decode_predecessor'](raw)
+
+    def test_fourth_stream_is_explicit_and_default_three_stays_closed(self):
+        u=FORMAL['ABI2'];record,_=self.record();ns='{'+u['B']['WIX_NS']+'}'
+        for blob,expected in ((None,set(u['BINARY_NAMES'])),(record,set(u['BINARY_NAMES'])|{u['PREDECESSOR_BINARY']})):
+            xml=ET.fromstring(u['authoring']('0.2.0',[],blob));p=xml.find(ns+'Product')
+            self.assertEqual({r.get('Id')for r in p.findall(ns+'Binary')},expected)
+        def binary(names):return ('Name\tData\r\ns72\tv0\r\nBinary\tName\r\n'+''.join(n+'\tBinary.'+n+'\r\n'for n in names)).encode()
+        for names,blob in ((list(u['BINARY_NAMES']),record),(list(u['BINARY_NAMES'])+[u['PREDECESSOR_BINARY']],None),(list(u['BINARY_NAMES'])+[u['PREDECESSOR_BINARY'],'Extra'],record)):
+            with self.assertRaises(ValueError):u['validate_contract'](b'',{'Binary':binary(names)},'0.2.0',{},F['PACKAGE'],b'',blob)
+
+    def test_successor_rejects_same_version_downgrade_or_changed_aux(self):
+        b=FORMAL['B'];helper=F['structural_pe']();template=FORMAL['ABI2']['C']['make_carrier_template'](helper)
+        package=dict(version='0.1.0',productCode=b['product_code']('0.1.0'))
+        artifacts={'lifecycle-compile':(None,helper),'guard-library-compile':(None,b'original DLL bytes')}
+        streams={b['TEMPLATE_BINARY']:template,b['GUARD_BINARY']:b'original DLL bytes'}
+        FORMAL['validate_successor_identity'](package,'0.2.0',streams,artifacts)
+        for version,old in (('0.1.0',streams),('0.0.9',streams),('0.2.0',dict(streams,**{b['TEMPLATE_BINARY']:template+b'x'})),('0.2.0',dict(streams,**{b['GUARD_BINARY']:b'other DLL'}))):
+            with self.assertRaises(ValueError):FORMAL['validate_successor_identity'](package,version,old,artifacts)
+
+    def test_cache_binding_requires_actual_api_product_user_full_hash_and_object(self):
+        manifest=dict(productCode='{'+F['PACKAGE']+'}',expectedUserSid='S-1-5-21-1-2-3-1001')
+        package=dict(msi=dict(sha256='a'*64,bytes=4096))
+        cache=dict(status='KNOWN_PRESENT_EXACT_API_LOCALPACKAGE_READONLY',apiCode=0,context=2,property='LocalPackage',mutations=False,
+                   productCode=manifest['productCode'],userSid=manifest['expectedUserSid'],sha256='a'*64,bytes=4096,
+                   path='C:\\Windows\\Installer\\abc123.msi',volume=123,indexHigh=0,indexLow=456)
+        FORMAL['validate_predecessor_cache'](cache,manifest,package)
+        for key,value in [('apiCode',False),('context',True),('sha256','b'*64),('bytes',4095),('userSid','another'),('productCode','another'),('indexLow',None),('path','C:\\Temp\\abc123.msi')]:
+            with self.subTest(key=key),self.assertRaises(ValueError):FORMAL['validate_predecessor_cache'](dict(cache,**{key:value}),manifest,package)
+
+    def test_runtime_rejects_gnu_or_exit_only_without_touching_originals(self):
+        for r in ({'status':'PASS_GNU_ABI2_SAME_PACKAGE_MAINTENANCE_WIN11_DEV_CONTROLLED_PRODUCT_CLOSURE_AND_EXACT_SCRATCH_CLEANUP'}, {'runtimeActualExit':0}, {}):
+            with self.assertRaises(ValueError):FORMAL['validate_predecessor_runtime'](r,{}, {})
+
 if __name__=='__main__':unittest.main()

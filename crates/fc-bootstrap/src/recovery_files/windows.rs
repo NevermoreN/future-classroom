@@ -266,18 +266,25 @@ impl RecoveryFiles {
             _root: root,
         })
     }
-    fn namespace(&self) -> Result<PathBuf> {
-        let dir = self
-            .files
-            .directory(&["recovery".into()])
-            .map_err(unavailable)?;
+    fn namespace(&self, create: bool) -> Result<Option<PathBuf>> {
+        let dir = self.paths.root().join("recovery");
+        if !checked_directory(&self.files, &dir)? {
+            if !create {
+                return Ok(None);
+            }
+            self.files
+                .directory(&["recovery".into()])
+                .map_err(unavailable)?;
+        }
         let marker = dir.join(".future-classroom-owner");
         let entries = self.files.entries(&dir, 34).map_err(unavailable)?;
         if !entries.contains(&marker) {
             if !entries.is_empty() {
                 return Err(RecoveryFileError::RepairRequired);
             }
-            write_new(&self.files, &marker, OWNER)?;
+            if create {
+                write_new(&self.files, &marker, OWNER)?;
+            }
         } else if read_small(&marker, OWNER.len())? != OWNER {
             return Err(RecoveryFileError::RepairRequired);
         }
@@ -290,12 +297,15 @@ impl RecoveryFiles {
                 return Err(RecoveryFileError::RepairRequired);
             }
         }
-        Ok(dir)
+        Ok(Some(dir))
     }
     /// Creates a fresh confidential work area for the writer's ordinary export.
     /// Dropping an unarmed workspace removes only its bounded owned tree.
     pub fn workspace(&self) -> Result<RecoveryWorkspace> {
-        let operation = self.namespace()?.join(format!("op-{}", nonce()?));
+        let operation = self
+            .namespace(true)?
+            .ok_or(RecoveryFileError::Unavailable)?
+            .join(format!("op-{}", nonce()?));
         let pin = self
             .files
             .create_directory_new(&operation)

@@ -837,7 +837,10 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
         .and_then(|()| upgrade::revalidate(&mut s))
         .and_then(|()| match pre_admission.take() {
             Some(v) => Ok(v),
-            None => effects::admit(&mut s),
+            None => match operation {
+                Operation::Repair => effects::admit_repair(&mut s),
+                _ => effects::admit(&mut s),
+            },
         })
         .and_then(|admission| {
             effects::revalidate(&mut s, &admission)?;
