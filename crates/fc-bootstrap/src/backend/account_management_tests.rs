@@ -513,6 +513,341 @@ impl Drop for Fixture {
     }
 }
 
+mod administrator_transfer_sqlite_tests {
+    use super::*;
+    use fc_ports::command_window::CommandFamily;
+
+    const PASSWORD: &str = "Synthetic administrator handover 2026!";
+
+    fn authenticated_admin(fixture: &mut Fixture) -> SessionLease {
+        // The existing fixture's recovery verifier is real and reproducible.
+        // Use production recovery to install a real password verifier, then
+        // production login/re-verification; no synthetic password is accepted.
+        let (code, _) = SyntheticCredentials.recovery_record().unwrap();
+        drop(
+            fixture
+                .backend
+                .recover("admin", code, Password::new(PASSWORD.into()).unwrap())
+                .unwrap(),
+        );
+        fixture
+            .backend
+            .login("admin", Password::new(PASSWORD.into()).unwrap())
+            .unwrap()
+    }
+    fn credential_rows(fixture: &Fixture, principal: PrincipalId) -> Vec<(u64, Vec<u8>)> {
+        [false, true]
+            .into_iter()
+            .map(|recovery| {
+                fixture
+                    .backend
+                    .repository
+                    .credential_record(principal, recovery)
+                    .unwrap()
+            })
+            .collect()
+    }
+
+    #[test]
+    fn handover_reverifies_and_commits_both_roles_epochs_refs_and_query_without_directory_rights() {
+        let mut fixture = Fixture::new();
+        let admin = authenticated_admin(&mut fixture);
+        fixture
+            .backend
+            .test_native_command(
+                CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |b| {
+                    b.identity(
+                        admin,
+                        update(1, "Admin", Role::GlobalAdmin, true, vec![scope(1, 1)]),
+                    )
+                },
+            )
+            .unwrap();
+        let admin = fixture
+            .backend
+            .login("admin", Password::new(PASSWORD.into()).unwrap())
+            .unwrap();
+        fixture
+            .backend
+            .test_native_command(
+                CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |b| {
+                    b.identity(
+                        admin,
+                        IdentityCommand::SetDefaultTeacher(DefaultTeacher {
+                            class_id: ClassId::new(1).unwrap(),
+                            subject_id: SubjectId::new(1).unwrap(),
+                            teacher_id: id(1),
+                        }),
+                    )
+                },
+            )
+            .unwrap();
+        let schedule = fixture
+            .backend
+            .test_native_command(
+                CommandFamily::Schedule,
+                Some(admin),
+                SessionPurpose::Manage,
+                |b| b.save_schedule(admin, Revision::default(), timetable("default")),
+            )
+            .unwrap();
+        let admin_device = fixture.pair(admin, "admin");
+        let teacher_device = fixture.pair(admin, "teacher");
+        let admin_web = fixture.actor_of(&admin_device);
+        let teacher_web = fixture.actor_of(&teacher_device);
+        let before = fixture.backend.state().unwrap();
+        let records = [
+            credential_rows(&fixture, id(1)),
+            credential_rows(&fixture, id(2)),
+        ];
+        let issued = fixture
+            .backend
+            .issue_native_command(CommandFamily::Identity, Some(admin), SessionPurpose::Manage)
+            .unwrap();
+        let mut proof = None;
+        let saved = fixture
+            .backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .transfer_administrator_at_tracked(
+                admin,
+                before.revision,
+                id(2),
+                Password::new(PASSWORD.into()).unwrap(),
+                |p| {
+                    proof = Some(Arc::new(p));
+                    Ok(())
+                },
+            )
+            .unwrap();
+        let proof = proof.unwrap();
+        assert!(saved
+            .accounts
+            .iter()
+            .any(|a| a.principal.id == id(3) && a.principal.role == Role::GlobalAdmin));
+        assert_eq!(saved.revision, before.revision.next().unwrap());
+        assert_eq!(saved.assignments, before.assignments);
+        assert_eq!(saved.default_teachers, before.default_teachers);
+        assert_eq!(
+            saved.account(id(1)).unwrap().principal.role,
+            Role::TeacherAdmin
+        );
+        assert_eq!(
+            saved.account(id(2)).unwrap().principal.role,
+            Role::GlobalAdmin
+        );
+        for principal in [id(1), id(2)] {
+            assert_eq!(
+                saved.account(principal).unwrap().principal.auth_epoch,
+                before
+                    .account(principal)
+                    .unwrap()
+                    .principal
+                    .auth_epoch
+                    .next()
+                    .unwrap()
+            );
+        }
+        assert_eq!(
+            records,
+            [
+                credential_rows(&fixture, id(1)),
+                credential_rows(&fixture, id(2))
+            ]
+        );
+        for old in [admin, admin_web, teacher_web] {
+            assert!(fixture
+                .backend
+                .check_session(old, SessionPurpose::Manage)
+                .is_err());
+        }
+        // Query the actual original receipt after dropping the original result
+        // and reopening SQLite. This never installs its historical state.
+        drop(saved);
+        fixture.reopen();
+        let former = fixture
+            .backend
+            .login("admin", Password::new(PASSWORD.into()).unwrap())
+            .unwrap();
+        assert!(fixture.backend.management_identity(former).is_err());
+        let current = fixture.backend.state().unwrap();
+        let revision = fixture.backend.global_revision().unwrap();
+        let original = fixture
+            .backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .account_outcome(former, proof.clone())
+            .unwrap()
+            .unwrap();
+        assert!(original.matches(proof.request().expected_revision, &proof.request().command));
+        assert_eq!(original.account.principal.id, id(2));
+        assert_eq!(fixture.backend.state().unwrap(), current);
+        assert_eq!(fixture.backend.global_revision().unwrap(), revision);
+        let other = fixture.issue(3, TrustedOrigin::Local);
+        assert!(fixture
+            .backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .account_outcome(other, proof.clone())
+            .is_err());
+        assert_eq!(fixture.backend.read_schedule(other).unwrap(), schedule);
+        // A later distinct identity mutation is not adopted as the handover's
+        // own epoch transition, even for the same principal and unchanged password.
+        fixture
+            .backend
+            .test_native_command(
+                CommandFamily::Identity,
+                Some(other),
+                SessionPurpose::Manage,
+                |b| {
+                    b.identity(
+                        other,
+                        update(
+                            1,
+                            "Later former administrator",
+                            Role::TeacherAdmin,
+                            true,
+                            vec![scope(1, 1)],
+                        ),
+                    )
+                },
+            )
+            .unwrap();
+        let former = fixture.issue(1, TrustedOrigin::Local);
+        assert!(fixture
+            .backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .account_outcome(former, proof)
+            .is_err());
+    }
+
+    #[test]
+    fn transfer_wrong_password_is_persistently_counted_and_plain_command_cas_and_late_lock_cannot_write(
+    ) {
+        let mut fixture = Fixture::new();
+        let admin = authenticated_admin(&mut fixture);
+        let before = fixture.backend.state().unwrap();
+        let command = IdentityCommand::TransferAdministrator {
+            from: id(1),
+            target: id(2),
+            expected_credential_version: before.account(id(1)).unwrap().credential_version,
+        };
+        assert!(fixture
+            .backend
+            .test_native_command(
+                CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |b| b.identity(admin, command)
+            )
+            .is_err());
+        assert!(matches!(
+            fixture.backend.test_native_command(
+                CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |b| {
+                    b.transfer_administrator_at_tracked(
+                        admin,
+                        Revision::default(),
+                        id(2),
+                        Password::new(PASSWORD.into()).unwrap(),
+                        |_| panic!("CAS conflict must precede publish"),
+                    )
+                }
+            ),
+            Err(BackendError::Identity(IdentityRepositoryError::Domain(
+                IdentityError::RevisionConflict
+            )))
+        ));
+        assert!(matches!(
+            fixture.backend.test_native_command(
+                CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |b| {
+                    b.transfer_administrator_at_tracked(
+                        admin,
+                        before.revision,
+                        id(2),
+                        Password::new("Synthetic incorrect handover password!".into()).unwrap(),
+                        |_| panic!("invalid password cannot publish"),
+                    )
+                }
+            ),
+            Err(BackendError::InvalidCredentials)
+        ));
+        let penalty = fixture
+            .backend
+            .handle
+            .try_get("business/security/login/1".into())
+            .unwrap()
+            .wait()
+            .unwrap()
+            .unwrap();
+        assert!(!penalty.value.is_empty());
+        let admitted = fixture
+            .backend
+            .admission(id(1), CredentialKind::Password)
+            .unwrap();
+        assert_eq!(
+            fixture
+                .backend
+                .finish(admitted.reservation, Verification::Rejected)
+                .unwrap(),
+            Completion::Rejected {
+                failures: 2,
+                wait_seconds: 0
+            }
+        );
+        assert_eq!(fixture.backend.state().unwrap(), before);
+        let issued = fixture
+            .backend
+            .issue_native_command(CommandFamily::Identity, Some(admin), SessionPurpose::Manage)
+            .unwrap();
+        let control = fixture.backend.session_control();
+        let mut proof = None;
+        assert!(fixture
+            .backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .transfer_administrator_at_tracked(
+                admin,
+                before.revision,
+                id(2),
+                Password::new(PASSWORD.into()).unwrap(),
+                |p| {
+                    proof = Some(Arc::new(p));
+                    control.lock_local();
+                    Ok(())
+                }
+            )
+            .is_err());
+        assert_eq!(fixture.backend.state().unwrap(), before);
+        let admin = fixture
+            .backend
+            .login("admin", Password::new(PASSWORD.into()).unwrap())
+            .unwrap();
+        let revision = fixture.backend.global_revision().unwrap();
+        assert!(fixture
+            .backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .account_outcome(admin, proof.unwrap())
+            .unwrap()
+            .is_none());
+        assert_eq!(fixture.backend.state().unwrap(), before);
+        assert_eq!(fixture.backend.global_revision().unwrap(), revision);
+    }
+}
+
 #[test]
 fn accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected_records() {
     let mut fixture = Fixture::new();

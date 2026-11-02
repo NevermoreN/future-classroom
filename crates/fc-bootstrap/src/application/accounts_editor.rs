@@ -33,6 +33,8 @@ pub(super) const APPLY_ROLE: ActionId = ActionId(616);
 pub(super) const DEFAULTS: ActionId = ActionId(617);
 pub(super) const DEFAULT_SELECT: ActionId = ActionId(618);
 pub(super) const END_RESULT_QUERY: ActionId = ActionId(619);
+pub(super) const TRANSFER: ActionId = ActionId(620);
+pub(super) const QUERY_TRANSFER: ActionId = ActionId(621);
 const PAGE_SIZE: usize = 20;
 
 #[derive(Debug)]
@@ -49,6 +51,13 @@ pub(super) enum Command {
         expected: Revision,
         command: IdentityCommand,
     },
+    Transfer {
+        expected: Revision,
+        from: PrincipalId,
+        target: PrincipalId,
+        expected_credential_version: u64,
+        password: Password,
+    },
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Page {
@@ -62,6 +71,7 @@ enum Page {
     DefaultScope,
     DefaultEdit,
     DefaultConfirm,
+    Transfer,
 }
 #[derive(Clone, Copy)]
 enum Destination {
@@ -236,6 +246,12 @@ impl Editor {
         self.owner
     }
     pub(super) fn has_unsaved_changes(&self) -> bool {
+        if (self.page == Page::Transfer
+            || self.page == Page::Discard && self.discard_return == Page::Transfer)
+            && !self.submitted
+        {
+            return true;
+        }
         if self
             .default_draft
             .as_ref()
@@ -425,6 +441,32 @@ impl Editor {
     }
     pub(super) fn suspend(&mut self, data: FormData) {
         let _ = self.capture(&data);
+        if self.page == Page::Transfer
+            || self.page == Page::Discard && self.discard_return == Page::Transfer
+        {
+            self.page = Page::List;
+            self.selected_account = None;
+            self.submitted = false;
+        }
+    }
+    pub(super) fn transfer_rejected(&mut self) {
+        if self.page == Page::Transfer {
+            self.submitted = false;
+        }
+    }
+    fn transfer_target<'a>(&self, state: &'a IdentityState) -> Result<&'a UserAccount, String> {
+        self.fresh(state)?;
+        let target = state
+            .account(self.selected_account.ok_or("请先选择接任账号。")?)
+            .map_err(problem)?;
+        if target.principal.id == self.owner
+            || !target.principal.enabled
+            || target.principal.role == Role::GlobalAdmin
+            || target.must_change_password
+        {
+            return Err("接任账号须为另一位已启用、已完成首次改密的教师或用户。".into());
+        }
+        Ok(target)
     }
     fn apply_role(&mut self) -> bool {
         let Some(draft) = &mut self.draft else {
@@ -597,6 +639,32 @@ impl Editor {
             return self.depart(Destination::Reload, state);
         }
         match (self.page, action) {
+            (Page::List, TRANSFER) => {
+                self.transfer_target(state)?;
+                self.submitted = false;
+                self.page = Page::Transfer;
+            }
+            (Page::Transfer, RETURN) if !self.submitted => {
+                self.page = Page::List;
+            }
+            (Page::Transfer, CONFIRM) if !self.submitted => {
+                let target = self.transfer_target(state)?.principal.id;
+                let expected_credential_version = state
+                    .account(self.owner)
+                    .map_err(problem)?
+                    .credential_version;
+                let password =
+                    Password::new(data.take(PASSWORD).ok_or("请输入你当前账号的口令。")?)
+                        .map_err(|_| "当前口令须为12至128字。")?;
+                self.submitted = true;
+                return Ok(Command::Transfer {
+                    expected: self.expected,
+                    from: self.owner,
+                    target,
+                    expected_credential_version,
+                    password,
+                });
+            }
             (Page::List, DEFAULTS) => {
                 self.fresh(state)?;
                 self.default_draft = None;
@@ -880,7 +948,55 @@ impl Editor {
                 action(PREVIOUS, "上一页", self.account_page > 0),
                 action(NEXT, "下一页", start + PAGE_SIZE < self.accounts.len()),
                 action(DEFAULTS, "班级／科目默认老师", true),
+                action(
+                    TRANSFER,
+                    "交接主管理员给选中账号",
+                    self.transfer_target(state).is_ok(),
+                ),
                 action(RELOAD, "重新加载", true),
+                action(CLOSE, "返回", true),
+            ];
+            return view;
+        }
+        if self.page == Page::Transfer {
+            view.title = "主管理员交接 · 再次验证".into();
+            match (state.account(self.owner), self.transfer_target(state)) {
+                (Ok(from), Ok(target)) => {
+                    let after = if state.assignments.iter().any(|a| a.teacher_id == self.owner) {
+                        "教师管理员"
+                    } else {
+                        "普通用户"
+                    };
+                    view.description = format!(
+                        "你正在把主管理员权限从{}（{}，#{}）交给{}（{}，#{}）。\n接任账号将成为主管理员；你的账号将变为{after}。双方任教范围、登录名、口令和恢复码保留，课表与默认老师不变。\n交接会一次生效，并使双方原有本地和教师网页会话失效；完成后须重新登录。其他主管理员不受影响。请核对接任人，再输入你当前账号的口令确认。",
+                        from.display_name, from.login_name, self.owner.get(),
+                        target.display_name, target.login_name, target.principal.id.get()
+                    );
+                    if !self.submitted {
+                        view.fields.push(field(
+                            PASSWORD,
+                            "你当前账号的口令",
+                            FieldKind::Password,
+                            String::new(),
+                            256,
+                        ));
+                    } else {
+                        view.description.push_str(
+                            "\n本次已送交后台。若结果不确定，请查询原交接记录，不要重复确认。",
+                        );
+                    }
+                }
+                (_, Err(message)) => view.status = message,
+                _ => view.status = "当前账号已变化，请重新登录。".into(),
+            }
+            view.actions = vec![
+                action(
+                    CONFIRM,
+                    "验证口令并交接",
+                    !self.submitted && self.transfer_target(state).is_ok(),
+                ),
+                action(RETURN, "取消交接", !self.submitted),
+                action(RELOAD, "重新读取并核对原结果", true),
                 action(CLOSE, "返回", true),
             ];
             return view;
@@ -899,6 +1015,15 @@ impl Editor {
             view.actions = vec![
                 action(DISCARD, "确认离开此草稿", true),
                 action(KEEP, "保留并继续", true),
+            ];
+            return view;
+        }
+        if self.page == Page::Discard && self.discard_return == Page::Transfer {
+            view.title = "取消主管理员交接复核".into();
+            view.description = "尚未确认交接；离开将丢弃这次复核，双方权限不变。".into();
+            view.actions = vec![
+                action(DISCARD, "确认离开", true),
+                action(KEEP, "继续核对", true),
             ];
             return view;
         }
@@ -1162,7 +1287,11 @@ impl Editor {
                     action(KEEP, "保留并继续编辑", true),
                 ];
             }
-            Page::List | Page::DefaultScope | Page::DefaultEdit | Page::DefaultConfirm => {}
+            Page::List
+            | Page::DefaultScope
+            | Page::DefaultEdit
+            | Page::DefaultConfirm
+            | Page::Transfer => {}
         }
         view
     }
@@ -1309,6 +1438,56 @@ impl Editor {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn administrator_transfer_review_clears_secrets_and_expires_on_lock() {
+        let state = state();
+        let mut editor = Editor::new(&state, id(1)).unwrap();
+        editor.select(1, 0, &state).unwrap();
+        editor.handle(TRANSFER, FormData::new(), &state).unwrap();
+        let review = editor.view(&state);
+        review.validate().unwrap();
+        assert!(review.description.contains("双方任教范围"));
+        assert_eq!(review.fields.len(), 1);
+        assert_eq!(review.fields[0].kind, FieldKind::Password);
+        assert!(review.fields[0].value.is_empty());
+        let command = editor
+            .handle(
+                CONFIRM,
+                form(&[(PASSWORD, "synthetic-transfer-password")]),
+                &state,
+            )
+            .unwrap();
+        assert!(
+            matches!(command, Command::Transfer { expected, from, target, expected_credential_version: 1, .. }
+            if expected == state.revision && from == id(1) && target == id(2))
+        );
+        assert!(editor.view(&state).fields.is_empty());
+        assert!(editor.handle(CONFIRM, FormData::new(), &state).is_err());
+        editor.suspend(form(&[(PASSWORD, "synthetic-transfer-password")]));
+        assert_eq!(editor.page, Page::List);
+        assert!(editor.selected_account.is_none());
+        editor.select(2, 0, &state).unwrap();
+        editor.handle(TRANSFER, FormData::new(), &state).unwrap();
+        editor.handle(CLOSE, FormData::new(), &state).unwrap();
+        assert_eq!(editor.page, Page::Discard);
+        editor.view(&state).validate().unwrap();
+        editor.handle(KEEP, FormData::new(), &state).unwrap();
+        assert_eq!(editor.page, Page::Transfer);
+        let mut changed = state.clone();
+        changed.revision = changed.revision.next().unwrap();
+        assert!(editor
+            .handle(
+                CONFIRM,
+                form(&[(PASSWORD, "synthetic-transfer-password")]),
+                &changed
+            )
+            .is_err());
+        assert!(editor
+            .view(&changed)
+            .fields
+            .iter()
+            .all(|f| f.value.is_empty()));
+    }
     fn id(n: u64) -> PrincipalId {
         PrincipalId::new(n).unwrap()
     }

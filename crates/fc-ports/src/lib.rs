@@ -258,6 +258,30 @@ pub fn prepare_recovery<C: CredentialCrypto>(
         code,
     ))
 }
+/// Re-verification without credential replacement. The immutable prepared
+/// request is the same private capability used by the credential writer; no
+/// password, replacement record or recovery code is persisted by this command.
+pub fn prepare_administrator_transfer<C: CredentialCrypto>(
+    crypto: &mut C,
+    password: &C::Secret,
+    existing: &C::PasswordRecord,
+    request: IdentityRequest,
+) -> Result<PreparedCredentialChange<C::PasswordRecord, C::RecoveryRecord>, CredentialError> {
+    if !matches!(
+        request.command,
+        fc_domain::identity::IdentityCommand::TransferAdministrator { .. }
+    ) {
+        return Err(CredentialError::InvalidSecret);
+    }
+    if !crypto.verify_password(password, existing)? {
+        return Err(CredentialError::VerificationFailed);
+    }
+    Ok(PreparedCredentialChange {
+        request,
+        password: None,
+        recovery: None,
+    })
+}
 pub fn prepare_recovery_rotation<C: CredentialCrypto>(
     crypto: &mut C,
     password: &C::Secret,

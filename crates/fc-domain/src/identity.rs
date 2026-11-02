@@ -118,6 +118,13 @@ pub enum IdentityCommand {
         enabled: bool,
         scopes: Vec<AssignmentScope>,
     },
+    /// Trusted credential processor only after verifying the current local
+    /// administrator's password against this exact credential version.
+    TransferAdministrator {
+        from: PrincipalId,
+        target: PrincipalId,
+        expected_credential_version: u64,
+    },
     SetDefaultTeacher(DefaultTeacher),
     /// Trusted credential processor only: password verification/preparation and this
     /// command must be bound to the same version and persisted in one transaction.
@@ -372,7 +379,15 @@ impl IdentityState {
             if a.principal.role == Role::User && !scopes.is_empty() {
                 return Err(IdentityError::InvalidScope);
             }
-            if a.principal.role == Role::TeacherAdmin && scopes.is_empty() {
+            // Retain inactive teaching history after handover. Effective teaching
+            // still requires an enabled assignment; Create/Update separately
+            // validate newly selected active scopes.
+            if a.principal.role == Role::TeacherAdmin
+                && !self
+                    .assignments
+                    .iter()
+                    .any(|s| s.teacher_id == a.principal.id)
+            {
                 return Err(IdentityError::ScopeRequired);
             }
         }
@@ -753,6 +768,46 @@ impl IdentityState {
                                 .any(|s| s.class_id == d.class_id && s.subject_id == d.subject_id))
                 });
                 events.push(IdentityEvent::AccountChanged(*id));
+            }
+            IdentityCommand::TransferAdministrator {
+                from,
+                target,
+                expected_credential_version,
+            } => {
+                let actor = actor.ok_or(IdentityError::Permission(PermissionError::RoleDenied))?;
+                if *from != actor.principal_id || from == target {
+                    return Err(IdentityError::Permission(PermissionError::WrongOwner));
+                }
+                let original = self.account(*from)?;
+                let recipient = self.account(*target)?;
+                if !original.principal.enabled
+                    || !recipient.principal.enabled
+                    || recipient.principal.role == Role::GlobalAdmin
+                    || original.credential_version != *expected_credential_version
+                {
+                    return Err(IdentityError::InvalidState);
+                }
+                if original.must_change_password || recipient.must_change_password {
+                    return Err(IdentityError::PasswordChangeRequired);
+                }
+                // Keep the exact teaching relationships, including retained
+                // inactive catalog references, and all credential references.
+                let teaching = self.assignments.iter().any(|a| a.teacher_id == *from);
+                for account in &mut next.accounts {
+                    if account.principal.id == *from {
+                        account.principal.role = if teaching {
+                            Role::TeacherAdmin
+                        } else {
+                            Role::User
+                        };
+                    } else if account.principal.id == *target {
+                        account.principal.role = Role::GlobalAdmin;
+                    }
+                }
+                next.revoke(*from, &mut events)?;
+                next.revoke(*target, &mut events)?;
+                events.push(IdentityEvent::AccountChanged(*from));
+                events.push(IdentityEvent::AccountChanged(*target));
             }
             IdentityCommand::SetDefaultTeacher(default) => {
                 if !self.is_teacher(default.teacher_id, default.class_id, default.subject_id) {

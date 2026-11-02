@@ -17,6 +17,7 @@ pub fn execute_identity<R: IdentityRepository>(
             | IdentityCommand::PasswordChanged { .. }
             | IdentityCommand::RecoveryConsumed { .. }
             | IdentityCommand::RecoveryRotated { .. }
+            | IdentityCommand::TransferAdministrator { .. }
     ) {
         return Err(IdentityRepositoryError::Domain(IdentityError::Permission(
             PermissionError::RoleDenied,

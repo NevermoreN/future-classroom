@@ -667,7 +667,9 @@ enum Outcome {
     AccountSaved {
         state: IdentityState,
         self_changed: bool,
+        transferred: bool,
     },
+    AccountTransferRejected,
     ScheduleLoaded(ScheduleDocument),
     ScheduleSaved(ScheduleDocument),
     Calendar(Box<calendar_flow::Loaded>),
@@ -804,6 +806,15 @@ impl NativeCommand {
     }
     fn is_account(&self) -> bool {
         matches!(self.intent(), Some(NativeIntent::Account { .. }))
+    }
+    fn transfer_from(&self) -> Option<PrincipalId> {
+        match self.intent() {
+            Some(NativeIntent::Account { command, .. }) => match command.as_ref() {
+                IdentityCommand::TransferAdministrator { from, .. } => Some(*from),
+                _ => None,
+            },
+            _ => None,
+        }
     }
     fn permits_current_read_confirmation(&self) -> bool {
         self.intent().is_none()
@@ -1414,6 +1425,7 @@ impl Task for Work {
                         command: IdentityCommand::SetDefaultTeacher(_),
                         ..
                     } => (0, 0),
+                    accounts_editor::Command::Transfer { .. } => (0, 0),
                     _ => return None,
                 };
                 strings
@@ -1506,6 +1518,20 @@ impl Work {
                 command: command.clone(),
             }),
             Self::SaveAccount(_, _, operation) => match operation.as_ref() {
+                accounts_editor::Command::Transfer {
+                    expected,
+                    from,
+                    target,
+                    expected_credential_version,
+                    ..
+                } => Some(NativeIntent::Account {
+                    expected: *expected,
+                    command: Arc::new(IdentityCommand::TransferAdministrator {
+                        from: *from,
+                        target: *target,
+                        expected_credential_version: *expected_credential_version,
+                    }),
+                }),
                 accounts_editor::Command::Create {
                     expected, account, ..
                 } => Some(NativeIntent::Account {
@@ -1865,7 +1891,13 @@ impl Work {
                             resolution: NativeResolution::AccountUnavailable,
                         }
                     };
-                    let current = backend.management_identity(lease)?;
+                    let current = if command.transfer_from().is_some() {
+                        // Only the exact original receipt query above grants this
+                        // read; non-admins never enter the account directory UI.
+                        backend.state()?
+                    } else {
+                        backend.management_identity(lease)?
+                    };
                     Ok(Outcome::AccountHistoryLoaded {
                         lease,
                         current,
@@ -2044,7 +2076,39 @@ impl Work {
                             Ok(Outcome::AccountSaved {
                                 state,
                                 self_changed,
+                                transferred: false,
                             })
+                        }
+                        accounts_editor::Command::Transfer {
+                            expected,
+                            target,
+                            password,
+                            ..
+                        } => {
+                            match backend.transfer_administrator_at_tracked(
+                                lease,
+                                expected,
+                                target,
+                                password,
+                                |proof| {
+                                    command
+                                        .bind_account_proof(proof)
+                                        .map_err(|_| BackendError::InvalidInput)
+                                },
+                            ) {
+                                Ok(state) => Ok(Outcome::AccountSaved {
+                                    state,
+                                    self_changed: true,
+                                    transferred: true,
+                                }),
+                                Err(BackendError::InvalidCredentials)
+                                    if command.account_proof()?.is_none() =>
+                                {
+                                    // The password was rejected before preparing any write.
+                                    Ok(Outcome::AccountTransferRejected)
+                                }
+                                Err(error) => Err(error.into()),
+                            }
                         }
                         accounts_editor::Command::Update {
                             expected,
@@ -2597,6 +2661,25 @@ impl App {
             origin: lease.origin(),
         })
     }
+    fn transfer_notice_owner(&self) -> Option<fc_ports::command_window::CommandOwner> {
+        let lease = self.lease?;
+        if self.native_command.as_ref()?.transfer_from() != Some(lease.principal_id())
+            || lease.origin() != TrustedOrigin::Local
+            || !self.profiles_memory_gate()
+        {
+            return None;
+        }
+        let account = self.state.account(lease.principal_id()).ok()?;
+        if !account.principal.enabled || account.must_change_password {
+            return None;
+        }
+        Some(fc_ports::command_window::CommandOwner::Principal {
+            principal: account.principal.id,
+            school: account.principal.school_id,
+            epoch: account.principal.auth_epoch,
+            origin: lease.origin(),
+        })
+    }
     fn shutdown_complete(&self) -> bool {
         self.stopping && module_registry::shutdown_complete(self) && !self.terminate_required
     }
@@ -2639,6 +2722,34 @@ impl App {
                 unresolved,
                 self.pending.is_none() && !self.stopping,
             );
+        }
+        if self.screen == Screen::Home {
+            if let Some(owner) = self.transfer_notice_owner() {
+                if let Some(text) = self
+                    .account_history_note
+                    .as_ref()
+                    .and_then(|note| note.text_for(self.lease?, owner))
+                {
+                    if !view.status.is_empty() {
+                        view.status.push('\n');
+                    }
+                    view.status.push_str(text);
+                }
+                if self.native_unknown {
+                    view.status
+                        .push_str("\n原交接结果尚未确认，请查询原记录，勿重复交接。");
+                    view.actions.push(Action {
+                        id: accounts_editor::END_RESULT_QUERY,
+                        label: "结束这次交接核对".into(),
+                        enabled: self.pending.is_none() && !self.stopping,
+                    });
+                }
+                view.actions.push(Action {
+                    id: accounts_editor::QUERY_TRANSFER,
+                    label: "查询本人原交接结果".into(),
+                    enabled: self.pending.is_none() && !self.stopping,
+                });
+            }
         }
         view
     }
@@ -2907,6 +3018,7 @@ impl App {
         // WTS/explicit lock still wins immediately; the heartbeat must allow this
         // particular completion to be consumed rather than cancel its own success.
         let self_revokes = matches!(&work,Work::Request(r) if r.action==EXIT||r.action==SAVE&&matches!(r.screen,Screen::Password|Screen::Rotate))
+            || matches!(&work, Work::SaveAccount(_, _, operation) if matches!(operation.as_ref(), accounts_editor::Command::Transfer { .. }))
             || matches!(&work, Work::SaveAccount(_, lease, operation) if matches!(operation.as_ref(), accounts_editor::Command::Update { command: IdentityCommand::UpdateAccount { id, .. }, .. } if *id == lease.principal_id()))
             || matches!(&work, Work::SaveSubject(_, lease, _, IdentityCommand::PutSubject { id, enabled, .. })
                 if self.state.subjects.iter().any(|s| s.id == *id && s.enabled != *enabled)
@@ -2926,7 +3038,11 @@ impl App {
             }
             Work::LoadAccounts(..)
                 if readback
-                    && self.native_unknown
+                    && (self.native_unknown
+                        || self
+                            .native_command
+                            .as_ref()
+                            .is_some_and(|original| original.transfer_from().is_some()))
                     && self.native_command.as_ref().is_some_and(|original| {
                         matches!(
                             original.intent(),
@@ -3095,6 +3211,21 @@ impl App {
                 }
                 if self.pending.is_some() || self.autostart_job.is_some() || self.stopping {
                     return Ok(());
+                }
+                if self.screen == Screen::Home && self.transfer_notice_owner().is_some() {
+                    if action == accounts_editor::QUERY_TRANSFER {
+                        if let (Some(backend), Some(lease)) = (&self.backend, self.lease) {
+                            return self.submit(Work::LoadAccounts(backend.clone(), lease));
+                        }
+                    }
+                    if action == accounts_editor::END_RESULT_QUERY && self.native_unknown {
+                        self.native_unknown = false;
+                        self.native_command = None;
+                        self.native_target = None;
+                        self.account_history_note = None;
+                        self.status = "已结束原交接核对，原结果仍未知；没有重新提交交接。请与接任人核对当前权限。".into();
+                        return self.render();
+                    }
                 }
                 if action == TO_REINITIALIZE {
                     if matches!(
@@ -3875,7 +4006,8 @@ impl App {
             }
             Ok(
                 operation @ (accounts_editor::Command::Create { .. }
-                | accounts_editor::Command::Update { .. }),
+                | accounts_editor::Command::Update { .. }
+                | accounts_editor::Command::Transfer { .. }),
             ) => {
                 if let Some(backend) = &self.backend {
                     self.submit(Work::SaveAccount(
@@ -5273,9 +5405,23 @@ impl App {
                     current,
                     history,
                 }) => {
+                    let notice_owner =
+                        if history.command.transfer_from() == Some(lease.principal_id()) {
+                            let account = current
+                                .account(lease.principal_id())
+                                .map_err(|_| "交接查询的当前账号不可用。".to_owned())?;
+                            fc_ports::command_window::CommandOwner::Principal {
+                                principal: account.principal.id,
+                                school: account.principal.school_id,
+                                epoch: account.principal.auth_epoch,
+                                origin: lease.origin(),
+                            }
+                        } else {
+                            history.issued.owner
+                        };
                     self.account_history_note = Some(accounts_editor::HistoryNotice::new(
                         lease,
-                        history.issued.owner,
+                        notice_owner,
                         format!(
                             "历史记录（操作编号{}）：\n{}",
                             history.issued.ticket,
@@ -5301,6 +5447,10 @@ impl App {
                         }
                         self.screen = Screen::Accounts;
                         self.status.clear();
+                    } else if self.transfer_notice_owner().is_some() {
+                        self.accounts = None;
+                        self.screen = Screen::Home;
+                        self.status.clear();
                     }
                 }
                 Ok(Outcome::AccountsLoaded(state)) => {
@@ -5320,6 +5470,7 @@ impl App {
                 Ok(Outcome::AccountSaved {
                     state,
                     self_changed,
+                    transferred,
                 }) => {
                     self.state = Arc::new(state);
                     self.accounts = None;
@@ -5328,13 +5479,26 @@ impl App {
                         // successful completion does not issue replacement authority.
                         self.lease = None;
                         self.screen = Screen::Login;
-                        self.status =
-                            "账号变更已保存，本地会话已失效；请使用当前权限重新登录。".into();
+                        self.status = if transferred {
+                            "主管理员交接已保存，双方原会话已失效；请按当前权限重新登录。"
+                        } else {
+                            "账号变更已保存，本地会话已失效；请使用当前权限重新登录。"
+                        }
+                        .into();
                     } else if let Some(owner) = self.current_global_owner() {
                         self.accounts = Some(accounts_editor::Editor::new(&self.state, owner)?);
                         self.screen = Screen::Accounts;
                         self.status = "账号与任教范围已保存，该账号原有会话已失效。".into();
                     }
+                }
+                Ok(Outcome::AccountTransferRejected) => {
+                    self.native_unknown = false;
+                    self.native_command = None;
+                    self.native_target = None;
+                    if let Some(editor) = &mut self.accounts {
+                        editor.transfer_rejected();
+                    }
+                    self.status = "当前口令不正确，本次未交接；请重新输入。".into();
                 }
                 Ok(Outcome::Autostart(..)) => {}
                 Ok(Outcome::Backup(..)) => return Err("备份结果进入了普通请求通道".into()),
@@ -7076,6 +7240,145 @@ fn schedule_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(),
 mod tests {
     use super::*;
     pub(super) static SERIAL: Mutex<()> = Mutex::new(());
+    #[test]
+    fn administrator_transfer_native_review_and_lost_result_query_do_not_restore_management() {
+        let _serial = SERIAL.lock().unwrap();
+        let (scratch, mut app) = ready_management();
+        let backend = app.backend.clone().unwrap();
+        let recipient = PrincipalId::new(2).unwrap();
+        {
+            let mut backend = backend.lock().unwrap();
+            let admin = app.lease.unwrap();
+            let issued = backend
+                .issue_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    SessionPurpose::Manage,
+                )
+                .unwrap();
+            let code = backend
+                .begin_command_scope(issued)
+                .unwrap()
+                .create_account(
+                    admin,
+                    NewAccount {
+                        id: recipient,
+                        login_name: "synthetic-handover-recipient".into(),
+                        display_name: "Synthetic recipient".into(),
+                        role: Role::User,
+                        scopes: vec![],
+                    },
+                    Password::new("Synthetic recipient initial 2026!".into()).unwrap(),
+                )
+                .unwrap();
+            // Complete the recipient's initial credential setup through the
+            // existing real recovery path, then authenticate the outgoing admin.
+            drop(
+                backend
+                    .recover(
+                        "synthetic-handover-recipient",
+                        code,
+                        Password::new("Synthetic recipient ready 2026!".into()).unwrap(),
+                    )
+                    .unwrap(),
+            );
+            app.lease = Some(
+                backend
+                    .login(
+                        voice_management_probe::LOGIN_NAME,
+                        Password::new(voice_management_probe::PASSWORD_VALUE.into()).unwrap(),
+                    )
+                    .unwrap(),
+            );
+            app.state = Arc::new(backend.state().unwrap());
+        }
+        let before = app.state.clone();
+        let until = Instant::now() + Duration::from_secs(90);
+        app.open_accounts().unwrap();
+        wait_for(&mut app, |app| app.pending.is_none());
+        app.event(Event::GridCell { row: 1, column: 0 }).unwrap();
+        voice_management_probe::submit(&mut app, accounts_editor::TRANSFER, &[], until).unwrap();
+        app.view().validate().unwrap();
+        voice_management_probe::submit(
+            &mut app,
+            accounts_editor::CONFIRM,
+            &[(
+                accounts_editor::PASSWORD,
+                "Synthetic wrong handover password!",
+            )],
+            until,
+        )
+        .unwrap();
+        assert!(app.status.contains("口令"));
+        assert!(!app.native_unknown);
+        assert_eq!(*app.state, *before);
+        assert!(app.view().fields.iter().all(|f| f.value.is_empty()));
+        let mut data = FormData::new();
+        data.insert(
+            accounts_editor::PASSWORD,
+            voice_management_probe::PASSWORD_VALUE.into(),
+        )
+        .unwrap();
+        app.event(Event::Submit(accounts_editor::CONFIRM, data))
+            .unwrap();
+        let original = app.native_command.clone().unwrap();
+        let pending = app.pending.take().unwrap();
+        assert!(pending.self_revokes);
+        assert!(matches!(
+            pending.ticket.wait().unwrap().unwrap(),
+            Outcome::AccountSaved {
+                self_changed: true,
+                transferred: true,
+                ..
+            }
+        ));
+        // Simulate only the lost completion handoff; retain the original private
+        // proof/ticket and never resubmit the already committed transfer.
+        app.native_mutation_pending = false;
+        app.native_readback_pending = false;
+        app.native_unknown = true;
+        app.lock();
+        app.render().unwrap();
+        voice_management_probe::submit(
+            &mut app,
+            LOG_IN,
+            &[
+                (LOGIN, voice_management_probe::LOGIN_NAME),
+                (PASSWORD, voice_management_probe::PASSWORD_VALUE),
+            ],
+            until,
+        )
+        .unwrap();
+        assert!(app.screen == Screen::Home);
+        assert_eq!(
+            app.state
+                .account(app.lease.unwrap().principal_id())
+                .unwrap()
+                .principal
+                .role,
+            Role::User
+        );
+        assert!(!app.diagnostics_allowed());
+        assert!(!app.view().actions.iter().any(|a| a.id == TO_ACCOUNTS));
+        let committed = app.state.revision;
+        voice_management_probe::submit(&mut app, accounts_editor::QUERY_TRANSFER, &[], until)
+            .unwrap();
+        assert!(!app.native_unknown);
+        assert!(app.screen == Screen::Home);
+        assert!(app.view().status.contains("历史记录"));
+        assert!(app.view().status.contains("主管理员"));
+        assert_eq!(app.state.revision, committed);
+        assert_eq!(app.native_command.as_ref(), Some(&original));
+        assert!(app.accounts.is_none());
+        assert!(backend
+            .lock()
+            .unwrap()
+            .management_identity(app.lease.unwrap())
+            .is_err());
+        assert!(!app.window.is_visible());
+        drain(app);
+        drop(scratch);
+    }
     #[test]
     fn diagnostics_are_bounded_manual_redacted_and_require_local_admin() {
         let _serial = SERIAL.lock().unwrap();

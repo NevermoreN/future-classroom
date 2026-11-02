@@ -210,6 +210,154 @@ fn last_admin_is_protected_and_handover_needs_existing_admin() {
         AuthEpoch::new(2)
     );
 }
+
+#[test]
+fn explicit_administrator_transfer_preserves_both_teaching_and_credential_references() {
+    let state = apply(
+        catalog(),
+        IdentityCommand::UpdateAccount {
+            id: admin(),
+            display_name: "主管理员".into(),
+            role: Role::GlobalAdmin,
+            enabled: true,
+            scopes: vec![AssignmentScope {
+                class_id: class(),
+                subject_id: subject(),
+            }],
+        },
+    );
+    let mut state = apply(state, IdentityCommand::CreateAccount(teacher(2)));
+    state.accounts[1].must_change_password = false;
+    state = apply(
+        state,
+        IdentityCommand::SetDefaultTeacher(DefaultTeacher {
+            class_id: class(),
+            subject_id: subject(),
+            teacher_id: admin(),
+        }),
+    );
+    let before = state.clone();
+    let command = IdentityCommand::TransferAdministrator {
+        from: admin(),
+        target: PrincipalId::new(2).unwrap(),
+        expected_credential_version: 1,
+    };
+    let result = state
+        .transition(&command, Some(&actor(&state)), now())
+        .unwrap();
+    let next = result.next;
+    assert_eq!(next.revision, before.revision.next().unwrap());
+    assert_eq!(next.assignments, before.assignments);
+    assert_eq!(next.default_teachers, before.default_teachers);
+    for original in &before.accounts {
+        let mut expected = original.clone();
+        expected.principal.role = if expected.principal.id == admin() {
+            Role::TeacherAdmin
+        } else {
+            Role::GlobalAdmin
+        };
+        expected.principal.auth_epoch = expected.principal.auth_epoch.next().unwrap();
+        assert_eq!(next.account(original.principal.id).unwrap(), &expected);
+    }
+    assert_eq!(
+        result.events,
+        vec![
+            IdentityEvent::AuthorizationRevoked(admin()),
+            IdentityEvent::AuthorizationRevoked(PrincipalId::new(2).unwrap()),
+            IdentityEvent::AccountChanged(admin()),
+            IdentityEvent::AccountChanged(PrincipalId::new(2).unwrap())
+        ]
+    );
+    assert_eq!(state, before);
+    let mut retained = before.clone();
+    retained.default_teachers.clear();
+    for assignment in retained
+        .assignments
+        .iter_mut()
+        .filter(|a| a.teacher_id == admin())
+    {
+        assignment.enabled = false;
+    }
+    retained.validate().unwrap();
+    let inactive = retained
+        .transition(&command, Some(&actor(&retained)), now())
+        .unwrap()
+        .next;
+    assert_eq!(
+        inactive.account(admin()).unwrap().principal.role,
+        Role::TeacherAdmin
+    );
+    assert_eq!(inactive.assignments, retained.assignments);
+    assert!(!inactive.is_teacher(admin(), class(), subject()));
+}
+
+#[test]
+fn transfer_requires_distinct_ready_accounts_current_version_and_local_authority() {
+    let mut state = apply(
+        initial(),
+        IdentityCommand::CreateAccount(NewAccount {
+            id: PrincipalId::new(2).unwrap(),
+            login_name: "recipient".into(),
+            display_name: "接任者".into(),
+            role: Role::User,
+            scopes: vec![],
+        }),
+    );
+    let command = IdentityCommand::TransferAdministrator {
+        from: admin(),
+        target: PrincipalId::new(2).unwrap(),
+        expected_credential_version: 1,
+    };
+    let before = state.clone();
+    assert_eq!(
+        state.transition(&command, Some(&actor(&state)), now()),
+        Err(IdentityError::PasswordChangeRequired)
+    );
+    assert_eq!(state, before);
+    state.accounts[1].must_change_password = false;
+    for variant in 0..6 {
+        let mut candidate = state.clone();
+        let mut request = command.clone();
+        let mut authority = actor(&state);
+        match variant {
+            0 => candidate.accounts[1].principal.enabled = false,
+            1 => candidate.accounts[1].principal.role = Role::GlobalAdmin,
+            2 => candidate.accounts[0].must_change_password = true,
+            3 => authority.origin = TrustedOrigin::Web,
+            4 => {
+                request = IdentityCommand::TransferAdministrator {
+                    from: admin(),
+                    target: admin(),
+                    expected_credential_version: 1,
+                }
+            }
+            _ => {
+                request = IdentityCommand::TransferAdministrator {
+                    from: admin(),
+                    target: PrincipalId::new(2).unwrap(),
+                    expected_credential_version: 2,
+                }
+            }
+        }
+        let original = candidate.clone();
+        assert!(candidate
+            .transition(&request, Some(&authority), now())
+            .is_err());
+        assert_eq!(candidate, original);
+    }
+    let next = state
+        .transition(&command, Some(&actor(&state)), now())
+        .unwrap()
+        .next;
+    assert_eq!(next.account(admin()).unwrap().principal.role, Role::User);
+    assert_eq!(
+        next.account(PrincipalId::new(2).unwrap())
+            .unwrap()
+            .principal
+            .role,
+        Role::GlobalAdmin
+    );
+}
 #[test]
 fn rename_preserves_subject_id_and_cas_disabling_revokes_all_affected_teachers() {
     let state = apply(catalog(), IdentityCommand::CreateAccount(teacher(2)));

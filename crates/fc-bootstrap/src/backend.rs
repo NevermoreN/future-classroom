@@ -1338,6 +1338,73 @@ impl Backend {
         self.apply(&transition)?;
         Ok(transition.next)
     }
+    /// Explicit local handover. Reuses the persisted login admission/limiter and
+    /// bounded credential worker; neither account's credential records change.
+    pub fn transfer_administrator_at_tracked(
+        &mut self,
+        lease: SessionLease,
+        expected_revision: Revision,
+        target: PrincipalId,
+        password: Password,
+        publish: impl FnOnce(AccountReceiptProof) -> Result<()>,
+    ) -> Result<IdentityState> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        let from = actor.principal_id;
+        let version = state
+            .account(from)
+            .map_err(|_| BackendError::InvalidCredentials)?
+            .credential_version;
+        let mut request = self.request(
+            &state,
+            IdentityCommand::TransferAdministrator {
+                from,
+                target,
+                expected_credential_version: version,
+            },
+        )?;
+        request.expected_revision = expected_revision;
+        self.validate_identity(&state, &request, Some(&actor))?;
+        let admission = self.admission(from, CredentialKind::Password)?;
+        if admission.credential_version != version {
+            return Err(BackendError::InvalidCredentials);
+        }
+        let record = match self
+            .codec
+            .decode_password(from, version, &admission.protected_record)
+        {
+            Ok(record) => record,
+            Err(_) => {
+                let _ = self.finish(admission.reservation, Verification::CorruptRecord);
+                return Err(BackendError::CorruptCredential);
+            }
+        };
+        let change = match fc_ports::prepare_administrator_transfer(
+            &mut self.crypto,
+            &password,
+            &record,
+            request,
+        ) {
+            Ok(change) => change,
+            Err(fc_ports::CredentialError::VerificationFailed) => {
+                self.finish(admission.reservation, Verification::Rejected)?;
+                return Err(BackendError::InvalidCredentials);
+            }
+            Err(_) => return Err(BackendError::CryptoUnavailable),
+        };
+        let completion = self.finish(admission.reservation, Verification::Verified)?;
+        self.authenticated(completion, &self.state()?, from)?;
+        let mut repository = self.guarded(lease, generation, SessionPurpose::Manage);
+        let (change, proof) = repository.prepare_account_transfer_receipt(
+            self.encode(change, from, version, admission.recovery_version)?,
+            &actor,
+        )?;
+        publish(proof)?;
+        let transition =
+            repository.execute_credentials(change, Some(&actor), self.clock.as_ref())?;
+        self.apply(&transition)?;
+        Ok(transition.next)
+    }
     /// Read the original result under CURRENT authority. Historical identity is
     /// never passed to apply or returned as the current management directory.
     pub fn account_outcome(
@@ -1350,12 +1417,39 @@ impl Backend {
         }
         let state = self.state()?;
         let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
-        state
-            .authorize_management(&actor, self.clock.now())
-            .map_err(|error| BackendError::Identity(IdentityRepositoryError::Domain(error)))?;
-        let result = self
-            .guarded(lease, generation, SessionPurpose::Manage)
-            .account_outcome(proof, &actor)?;
+        let transfer = matches!(
+            proof.request().command,
+            IdentityCommand::TransferAdministrator { .. }
+        );
+        if transfer {
+            // Only this private proof can query the caller's own handover after
+            // it revoked their management role. Writer binds the old issuance,
+            // exact permitted epoch and current credential version; no directory
+            // or other account result permission is granted here.
+            state
+                .authority(actor.principal_id)
+                .map_err(|error| BackendError::Identity(IdentityRepositoryError::Domain(error)))?
+                .validate_actor(&actor, self.clock.now())
+                .map_err(|error| {
+                    BackendError::Identity(IdentityRepositoryError::Domain(
+                        IdentityError::Permission(error),
+                    ))
+                })?;
+        } else {
+            state
+                .authorize_management(&actor, self.clock.now())
+                .map_err(|error| BackendError::Identity(IdentityRepositoryError::Domain(error)))?;
+        }
+        let result = if transfer {
+            self.repository.administrator_transfer_outcome(
+                proof,
+                &actor,
+                self.session_guard(lease, generation, SessionPurpose::Manage),
+            )?
+        } else {
+            self.guarded(lease, generation, SessionPurpose::Manage)
+                .account_outcome(proof, &actor)?
+        };
         self.actor(&self.state()?, lease, SessionPurpose::Manage)?;
         self.check_open()?;
         Ok(result)

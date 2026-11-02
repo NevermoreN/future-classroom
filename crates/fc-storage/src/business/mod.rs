@@ -1216,6 +1216,7 @@ impl<S: Send> TransactionTask<S> for IdentityTask<S> {
             IdentityCommand::PasswordChanged { id, .. } => Some((*id, true, false)),
             IdentityCommand::RecoveryConsumed { id, .. } => Some((*id, true, true)),
             IdentityCommand::RecoveryRotated { id, .. } => Some((*id, false, true)),
+            IdentityCommand::TransferAdministrator { from, .. } => Some((*from, false, false)),
             _ => None,
         };
         if required.is_some() && self.credentials.is_none() {
@@ -1394,6 +1395,7 @@ impl<S: Send + 'static> CredentialIdentityRepository<Vec<u8>, Vec<u8>> for Busin
                         IdentityRepositoryError::Domain(IdentityError::VersionOverflow),
                     )?,
                 ),
+                IdentityCommand::TransferAdministrator { from, .. } => (*from, 0, 0),
                 _ => return Err(IdentityRepositoryError::Domain(IdentityError::InvalidState)),
             };
         self.execute_identity_with_credentials(
@@ -1546,6 +1548,13 @@ impl OriginalAccountResult {
                     && a.principal.enabled == *enabled
                     && self.scopes == *scopes
             }
+            IdentityCommand::TransferAdministrator { from, target, .. } => {
+                from != target
+                    && a.principal.id == *target
+                    && a.principal.role == Role::GlobalAdmin
+                    && a.principal.enabled
+                    && !a.must_change_password
+            }
             _ => false,
         }
     }
@@ -1648,6 +1657,34 @@ impl<S: Send + 'static> BusinessRepository<S> {
             fingerprint,
         })
     }
+    /// Bind the original verified transfer without changing either credential
+    /// record. The empty prepared payload is consumed once by execute_credentials.
+    pub fn prepare_account_transfer_receipt(
+        &self,
+        change: PreparedCredentialChange<Vec<u8>, Vec<u8>>,
+        actor: &ActorContext,
+    ) -> Result<PreparedAccountWithReceipt, StorageError> {
+        let request = change.request().clone();
+        let IdentityCommand::TransferAdministrator { from, .. } = request.command else {
+            return Err(StorageError::InvalidCommand);
+        };
+        let issued = self.account_proof_context(&request, actor)?;
+        let change = change.try_map(
+            |_| -> Result<Vec<u8>, StorageError> { Err(StorageError::InvalidCommand) },
+            |_| -> Result<Vec<u8>, StorageError> { Err(StorageError::InvalidCommand) },
+        )?;
+        let mut digest = identity_fingerprint_seed(&request, Some(actor), None)?;
+        digest.update(from.get().to_be_bytes());
+        digest.update([0, 0]);
+        Ok((
+            change,
+            AccountReceiptProof {
+                issued,
+                request,
+                fingerprint: digest.finalize().into(),
+            },
+        ))
+    }
     /// Only query the original identity receipt. Missing means unknown, never
     /// execute/write. The exact lease and latest management authority are checked
     /// in this read-only Writer transaction and again by the composition.
@@ -1656,11 +1693,42 @@ impl<S: Send + 'static> BusinessRepository<S> {
         proof: Arc<AccountReceiptProof>,
         actor: &ActorContext,
     ) -> Result<Option<OriginalAccountResult>, IdentityRepositoryError> {
-        if self
-            .account_proof_context(&proof.request, actor)
-            .map_err(identity_error)?
-            != proof.issued
-        {
+        self.read_account_outcome(proof, actor, self.session.clone())
+    }
+    /// Only the original handover's read-only task may use a fresh lease after
+    /// self-revocation. Keep the ordinary owner-bound mutation guard unchanged.
+    pub fn administrator_transfer_outcome(
+        &self,
+        proof: Arc<AccountReceiptProof>,
+        actor: &ActorContext,
+        fresh_session: SessionGuard,
+    ) -> Result<Option<OriginalAccountResult>, IdentityRepositoryError> {
+        if !matches!(
+            proof.request.command,
+            IdentityCommand::TransferAdministrator { .. }
+        ) {
+            return Err(identity_error(StorageError::InvalidCommand));
+        }
+        self.read_account_outcome(proof, actor, fresh_session)
+    }
+    fn read_account_outcome(
+        &self,
+        proof: Arc<AccountReceiptProof>,
+        actor: &ActorContext,
+        session: SessionGuard,
+    ) -> Result<Option<OriginalAccountResult>, IdentityRepositoryError> {
+        let issued = if matches!(
+            proof.request.command,
+            IdentityCommand::TransferAdministrator { .. }
+        ) {
+            self.handle
+                .command_window
+                .ok_or_else(|| identity_error(StorageError::CommandNotIssued))?
+        } else {
+            self.account_proof_context(&proof.request, actor)
+                .map_err(identity_error)?
+        };
+        if issued != proof.issued {
             return Err(identity_error(StorageError::CommandNotIssued));
         }
         let bytes = self
@@ -1669,7 +1737,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
                 proof,
                 actor: actor.clone(),
                 clock: self.clock.clone(),
-                session: self.session.clone(),
+                session,
             })
             .map_err(identity_error)?
             .wait()
@@ -1696,7 +1764,9 @@ fn check_account_proof_binding(
         || actor.origin != TrustedOrigin::Local
         || !matches!(
             request.command,
-            IdentityCommand::CreateAccount(_) | IdentityCommand::UpdateAccount { .. }
+            IdentityCommand::CreateAccount(_)
+                | IdentityCommand::UpdateAccount { .. }
+                | IdentityCommand::TransferAdministrator { .. }
         )
     {
         return Err(StorageError::CommandNotIssued);
@@ -1768,6 +1838,44 @@ impl<S> TransactionTask<S> for AccountOutcomeTask {
     ) -> Result<TransactionDecision<S>, StorageError> {
         let state = load_identity(d)?;
         let check = || -> Result<(), StorageError> {
+            if let IdentityCommand::TransferAdministrator {
+                from,
+                expected_credential_version,
+                ..
+            } = &self.proof.request.command
+            {
+                use fc_ports::command_window::{CommandFamily, CommandOwner};
+                let CommandOwner::Principal {
+                    principal,
+                    school,
+                    epoch,
+                    origin,
+                } = self.proof.issued.owner
+                else {
+                    return Err(StorageError::CommandNotIssued);
+                };
+                let account = state.account(*from).map_err(StorageError::Identity)?;
+                if self.proof.issued.family != CommandFamily::Identity
+                    || self.proof.issued.command_id != self.proof.request.command_id
+                    || principal != *from
+                    || principal != self.actor.principal_id
+                    || school != self.actor.school_id
+                    || origin != TrustedOrigin::Local
+                    || self.actor.origin != TrustedOrigin::Local
+                    || (self.actor.auth_epoch != epoch
+                        && epoch.next().ok() != Some(self.actor.auth_epoch))
+                    || account.must_change_password
+                    || account.credential_version != *expected_credential_version
+                {
+                    return Err(StorageError::CommandNotIssued);
+                }
+                (self.session)(&state, &self.actor)?;
+                return state
+                    .authority(*from)
+                    .map_err(StorageError::Identity)?
+                    .validate_actor(&self.actor, self.clock.now())
+                    .map_err(|e| StorageError::Identity(IdentityError::Permission(e)));
+            }
             if self.proof.issued.owner
                 != fc_ports::command_window::CommandOwner::authenticated(&self.actor)
             {
@@ -1809,6 +1917,43 @@ impl<S> TransactionTask<S> for AccountOutcomeTask {
                             IdentityEvent::AccountChanged(*id),
                         ],
                     ),
+                    IdentityCommand::TransferAdministrator {
+                        from,
+                        target,
+                        expected_credential_version,
+                    } => {
+                        let original = historical
+                            .account(*from)
+                            .map_err(|_| StorageError::Database)?;
+                        let fc_ports::command_window::CommandOwner::Principal { epoch, .. } =
+                            self.proof.issued.owner
+                        else {
+                            return Err(StorageError::Database);
+                        };
+                        let teaching = historical.assignments.iter().any(|a| a.teacher_id == *from);
+                        if original.principal.role
+                            != if teaching {
+                                Role::TeacherAdmin
+                            } else {
+                                Role::User
+                            }
+                            || !original.principal.enabled
+                            || original.must_change_password
+                            || original.credential_version != *expected_credential_version
+                            || epoch.next().ok() != Some(original.principal.auth_epoch)
+                        {
+                            return Err(StorageError::Database);
+                        }
+                        (
+                            *target,
+                            vec![
+                                IdentityEvent::AuthorizationRevoked(*from),
+                                IdentityEvent::AuthorizationRevoked(*target),
+                                IdentityEvent::AccountChanged(*from),
+                                IdentityEvent::AccountChanged(*target),
+                            ],
+                        )
+                    }
                     _ => return Err(StorageError::InvalidCommand),
                 };
                 if decode_events(&v["outcome"]["events"])? != expected_events {
@@ -1823,7 +1968,12 @@ impl<S> TransactionTask<S> for AccountOutcomeTask {
                     .iter()
                     .filter(|a| a.teacher_id == id)
                     .map(|a| {
-                        if !a.enabled {
+                        if !a.enabled
+                            && !matches!(
+                                request.command,
+                                IdentityCommand::TransferAdministrator { .. }
+                            )
+                        {
                             return Err(StorageError::Database);
                         }
                         Ok(AssignmentScope {
