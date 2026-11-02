@@ -26,6 +26,14 @@ BINARY_NAMES = (B['GUARD_BINARY'], B['TEMPLATE_BINARY'], MANIFEST_BINARY)
 PREDECESSOR_BINARY = 'FcPublishedPredecessor'
 
 
+def require_source_protocol(source: Path) -> None:
+    raw = B['PROBE']['bounded_regular_file'](
+        source / 'crates/fc-windows/src/installer_lifecycle/broker/carrier.rs', 65536)
+    versions = re.findall(rb'(?m)^\s*pub\(crate\) const GUARD_PROTOCOL:\s*u16\s*=\s*(\d+);', raw)
+    NEED(versions == [str(C['GUARD_PROTOCOL']).encode('ascii')],
+         'Compiled source must support this guard protocol; rebuild the normal components before packaging')
+
+
 def predecessor_bytes(record: bytes | None) -> bytes | None:
     """Closed wire grammar only; publication/source admission belongs to caller."""
     if record is None:
@@ -234,7 +242,7 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
     """
     predecessor_bytes(predecessor)
     source = a.source_root.absolute()
-    DEV['require_source_protocol'](source)
+    require_source_protocol(source)
     NEED(set(artifacts) == {'product-compile', 'lifecycle-compile', 'guard-library-compile'}, 'Exactly three admitted normal artifacts')
     NEED(set(identity) <= {'scope', 'formalCI', 'sourceBase', 'sourceEvidenceSha256',
         'normalProvenance', 'upgradeSourceBinding', 'webReportSha256', 'lifecycleMode',
