@@ -306,6 +306,7 @@ fn make_card(
         image: content::frame(&renderer.raster, card)?,
         source,
         tone: scene.text_tone,
+        subject_backdrop: SubjectBackdrop::planar(card.surface_alpha, scene.text_tone),
         calendar_unverified: scene.public_calendar_unverified,
         render_pending: true,
         input,
@@ -327,6 +328,35 @@ fn parent_index(tree: &ScenePaintTree, index: usize) -> Result<Option<usize>> {
                 .ok_or_else(invalid)
         })
         .transpose()
+}
+fn subject_backdrop(tree: &ScenePaintTree, leaf: usize, tone: TextTone) -> Result<SubjectBackdrop> {
+    // Two grayscale basis samples suffice because each known layer is white
+    // source-over followed by the existing subtree's single local opacity.
+    let glass = tree.nodes[leaf].glass.map_or(0., |g| g.surface_alpha);
+    let (mut base, mut base_alpha) = (glass, glass);
+    let (mut black, mut black_alpha) = (0., 1.);
+    let mut current = Some(leaf);
+    while let Some(index) = current {
+        let node = &tree.nodes[index];
+        if index != leaf {
+            let glass = node.glass.map_or(0., |g| g.surface_alpha);
+            base += glass * (1. - base_alpha);
+            base_alpha += glass * (1. - base_alpha);
+            black += glass * (1. - black_alpha);
+            black_alpha += glass * (1. - black_alpha);
+        }
+        base *= node.local_opacity;
+        base_alpha *= node.local_opacity;
+        black *= node.local_opacity;
+        black_alpha *= node.local_opacity;
+        current = parent_index(tree, index)?;
+    }
+    let theme = theme_backdrop(tone);
+    Ok(SubjectBackdrop {
+        base: base + theme * (1. - base_alpha),
+        filled_black: black + theme * (1. - black_alpha),
+        opacity: tree.nodes[leaf].effective_opacity,
+    })
 }
 fn descendant(tree: &ScenePaintTree, index: usize, ancestor: usize) -> bool {
     let mut p = Some(index);
@@ -795,6 +825,12 @@ pub(super) fn present(
                 special.push(i);
             }
             let mut c = make_card(renderer, card, scene, !recess, &mut total)?;
+            let leaf = source
+                .nodes
+                .iter()
+                .position(|n| n.card_index == Some(i))
+                .ok_or_else(invalid)?;
+            c.subject_backdrop = subject_backdrop(source, leaf, scene.text_tone)?;
             target_reserve = target_reserve.max(render_reserve(&c)?);
             if total + target_reserve > DIB_BUDGET {
                 return Err(oom());
@@ -1667,6 +1703,147 @@ mod tests {
         assert!(r
             .export_preview_bgra(rect(0., 0., 1920., 1080.), 961, 540)
             .is_err());
+    }
+    #[test]
+    fn subject_fill_foreground_follows_known_layers_without_changing_alpha_or_theme_mode() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let foreground = unsafe { GetForegroundWindow() };
+        let (_publisher, gate) = authority();
+        let mut renderer = DesktopRenderer::new_hidden().unwrap();
+        let mut scene = sample();
+        scene.cards[0].kind = ComponentKind::Homework;
+        scene.cards[0].surface_alpha = 0.;
+        scene.cards[0].content =
+            CardContent::Homework(vec![fc_presentation::scene::HomeworkEntry {
+                display_ref: fc_domain::content::ContentDisplayRef {
+                    key: fc_domain::content::ContentKey::Homework(
+                        fc_domain::content::HomeworkKey {
+                            class_id: ClassId::new(1).unwrap(),
+                            actual_date: now().date,
+                            subject_id: SubjectId::new(1).unwrap(),
+                            owner_teacher_id: PrincipalId::new(1).unwrap(),
+                        },
+                    ),
+                    revision: Revision::new(1),
+                },
+                subject_id: SubjectId::new(1).unwrap(),
+                teacher_id: PrincipalId::new(1).unwrap(),
+                subject_name: "MMMM".into(),
+                teacher_name: "T".into(),
+                text: "MMMM".into(),
+                color: Rgb {
+                    red: 201,
+                    green: 164,
+                    blue: 164,
+                },
+                fill_alpha: 1.,
+            }]);
+        {
+            let tree = scene.paint_tree.as_mut().unwrap();
+            tree.nodes[1].local_opacity = 1.;
+            tree.nodes[1].effective_opacity = 1.;
+            // Homework's subject capsule is already the second allowed glass
+            // layer; retain the parent opacity group without another glass.
+            tree.nodes[1].glass = None;
+            tree.nodes[2].effective_opacity = 1.;
+            tree.nodes[2].glass.as_mut().unwrap().surface_alpha = 0.;
+            tree.nodes[2].widget_kind = Some(fc_domain::layout::WidgetKind::Homework);
+        }
+        let mut generation = 0;
+        let mut draw = |tone, fill, stroke, leaf_glass, parent_opacity, leaf_opacity| {
+            generation += 1;
+            scene.generation = SceneGeneration::new(generation);
+            scene.text_tone = tone;
+            scene.cards[0].component_alpha = leaf_opacity;
+            scene.cards[0].surface_alpha = leaf_glass;
+            let tree = scene.paint_tree.as_mut().unwrap();
+            tree.nodes[1].local_opacity = parent_opacity;
+            tree.nodes[1].effective_opacity = parent_opacity;
+            tree.nodes[2].glass.as_mut().unwrap().surface_alpha = leaf_glass;
+            tree.nodes[2].local_opacity = leaf_opacity;
+            tree.nodes[2].effective_opacity = parent_opacity * leaf_opacity;
+            renderer
+                .present(&scene, now(), &guard(&gate, scene.generation))
+                .unwrap();
+            let card = &mut renderer.cards[0];
+            let header = card
+                .body
+                .blocks
+                .iter()
+                .position(|b| b.fill.is_some())
+                .unwrap();
+            card.body.blocks[header].fill = Some((
+                Rgb {
+                    red: 201,
+                    green: 164,
+                    blue: 164,
+                },
+                fill,
+                stroke,
+            ));
+            render_card(&renderer.graphics, card).unwrap();
+            // Read only our completed native DWrite/D2D top-down DIB. Count
+            // solid glyph interiors, excluding the surrounding pastel fill.
+            let glyphs = |block: &Block| {
+                let dib = &card.surface.dib;
+                let top =
+                    (card.body.top_inset + block.top + CARD_BODY_TEXT_PADDING).ceil() as usize;
+                let bottom = ((card.body.top_inset + block.top + block.height).floor() as usize)
+                    .min(dib.height as usize);
+                let mut dark = 0;
+                let mut light = 0;
+                for y in top..bottom {
+                    for x in CARD_BODY_TEXT_INSET.ceil() as usize..dib.width as usize - 24 {
+                        let p = &dib.pixels()[(y * dib.width as usize + x) * 4..][..4];
+                        if p[3] >= 220 {
+                            dark += usize::from(p[..3].iter().all(|v| *v <= 24));
+                            light += usize::from(p[..3].iter().all(|v| *v >= 232));
+                        }
+                    }
+                }
+                (dark, light)
+            };
+            let header_glyphs = glyphs(&card.body.blocks[header]);
+            let body = card
+                .body
+                .blocks
+                .iter()
+                .skip(header + 1)
+                .find(|b| b.fill.is_none())
+                .unwrap();
+            let body_glyphs = glyphs(body);
+            assert_eq!(card.source.component_alpha, 1.);
+            assert_eq!(card.tone, tone);
+            let mut tree = renderer.tree.take().unwrap();
+            let area = Area::rect(tree.groups[0].input.surface.rect);
+            compose_group(&mut tree, 0, &renderer.cards, area).unwrap();
+            let dib = &tree.groups[0].input.surface.dib;
+            let center = (100 * dib.width as usize + 100) * 4;
+            let alpha = dib.pixels()[center + 3];
+            renderer.tree = Some(tree);
+            assert_eq!(renderer.metrics.visible_windows, 0);
+            (header_glyphs, body_glyphs, alpha)
+        };
+        let (pastel, body, _) = draw(TextTone::Light, 1., 0., 0., 1., 1.);
+        assert!(pastel.0 > 8 && body.1 > 8);
+        let (thin, _, _) = draw(TextTone::Light, 0.01, 0., 0., 1., 1.);
+        assert!(thin.1 > 8 && thin.0 == 0);
+        let (over_white, _, _) = draw(TextTone::Light, 0.01, 0., 1., 1., 1.);
+        // The white background also satisfies the light-pixel predicate;
+        // solid dark interiors prove that the glyph itself uses black ink.
+        assert!(over_white.0 > 8, "opaque white: {over_white:?}");
+        let (attenuated_white, _, alpha) = draw(TextTone::Light, 0.01, 0., 1., 0.5, 0.5);
+        assert!(attenuated_white.0 > 8, "faded white: {attenuated_white:?}");
+        assert_eq!(alpha, 64); // Leaf and parent each apply their own 0.5 once.
+        let (dark_theme, dark_body, _) = draw(TextTone::Dark, 0.01, 0., 0., 1., 1.);
+        assert!(dark_theme.0 > 8 && dark_body.0 > 8);
+        let (transparent, _, _) = draw(TextTone::Light, 0., 0., 0., 1., 1.);
+        assert!(transparent.1 > 8 && transparent.0 == 0);
+        let (outline, _, _) = draw(TextTone::Light, 1., 1.5, 0., 1., 1.);
+        assert!(outline.1 > 8 && outline.0 == 0);
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
     }
     #[test]
     fn native_tree_page_is_bound_to_exact_node_when_component_kind_repeats() {

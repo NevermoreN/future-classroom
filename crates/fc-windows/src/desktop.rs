@@ -659,10 +659,73 @@ struct Surface {
     rect: Rect,
     dirty: bool,
 }
+#[derive(Clone, Copy)]
+struct SubjectBackdrop {
+    base: f32,
+    filled_black: f32,
+    opacity: f32,
+}
+impl SubjectBackdrop {
+    fn planar(surface_alpha: f32, tone: TextTone) -> Self {
+        Self {
+            base: surface_alpha + (1. - surface_alpha) * theme_backdrop(tone),
+            filled_black: 0.,
+            opacity: 1.,
+        }
+    }
+    fn foreground(self, rgb: Rgb, alpha: f32, glyph_alpha: f32) -> D2D1_COLOR_F {
+        let linear = |s: f32| {
+            let s = s.clamp(0., 1.);
+            if s <= 0.04045 {
+                s / 12.92
+            } else {
+                ((s + 0.055) / 1.055).powf(2.4)
+            }
+        };
+        let mut background = 0.;
+        let mut black = 0.;
+        let mut white = 0.;
+        for (channel, weight) in [(rgb.red, 0.2126), (rgb.green, 0.7152), (rgb.blue, 0.0722)] {
+            let b = self.base
+                + alpha
+                    * (self.filled_black - self.base + f32::from(channel) / 255. * self.opacity);
+            background += weight * linear(b);
+            black += weight * linear(b * (1. - glyph_alpha) + self.filled_black * glyph_alpha);
+            white += weight
+                * linear(b * (1. - glyph_alpha) + (self.filled_black + self.opacity) * glyph_alpha);
+        }
+        // Compare the actually composited glyph candidates. Group opacity can
+        // attenuate white text and its white glass to the same final shade.
+        let contrast = |candidate: f32| {
+            (background.max(candidate) + 0.05) / (background.min(candidate) + 0.05)
+        };
+        let v = if contrast(black) >= contrast(white) {
+            0.
+        } else {
+            1.
+        };
+        D2D1_COLOR_F {
+            r: v,
+            g: v,
+            b: v,
+            a: 1.,
+        }
+    }
+}
+fn theme_backdrop(tone: TextTone) -> f32 {
+    // Unknown desktop pixels are never sampled. Use the opposite theme pole
+    // only underneath the application's known premultiplied glass/fill layers.
+    if tone == TextTone::Light {
+        0.
+    } else {
+        1.
+    }
+}
 struct Card {
     image: Option<Arc<RasterFrame>>,
     source: SceneCard,
     tone: TextTone,
+    subject_backdrop: SubjectBackdrop,
     calendar_unverified: bool,
     render_pending: bool,
     input: Option<InputStrip>,
@@ -1218,6 +1281,7 @@ impl DesktopRenderer {
                     image: content::frame(&self.raster, card)?,
                     source: card.clone(),
                     tone: scene.text_tone,
+                    subject_backdrop: SubjectBackdrop::planar(card.surface_alpha, scene.text_tone),
                     calendar_unverified: scene.public_calendar_unverified,
                     render_pending: true,
                     input,
@@ -2183,10 +2247,22 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
                         target.DrawRoundedRectangle(&pill, &brush, stroke, None);
                     }
                 }
+                let foreground = if let Some((rgb, alpha, _)) = block
+                    .fill
+                    .filter(|(_, alpha, stroke)| *alpha > 0. && *stroke == 0.)
+                {
+                    let mut foreground =
+                        c.subject_backdrop
+                            .foreground(rgb, alpha, c.source.component_alpha);
+                    foreground.a = c.source.component_alpha;
+                    Some(target.CreateSolidColorBrush(&foreground, None)?)
+                } else {
+                    None
+                };
                 target.DrawTextLayout(
                     xy(CARD_BODY_TEXT_INSET, y + CARD_BODY_TEXT_PADDING).point,
                     &block.layout,
-                    &text,
+                    foreground.as_ref().unwrap_or(&text),
                     D2D1_DRAW_TEXT_OPTIONS_NONE,
                 );
             }
