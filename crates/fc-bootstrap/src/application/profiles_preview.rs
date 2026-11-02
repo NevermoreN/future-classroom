@@ -276,6 +276,7 @@ fn prepare_scene(
             .ok_or("预览组件样例缺失。")?;
         node.card_index = Some(cards.len());
         cards.push(SceneCard {
+            content_display_ref: None,
             content_identity: sample.content_identity,
             kind: sample.component.kind,
             rect: node.rect,
@@ -606,6 +607,17 @@ fn samples(
         (
             WidgetKind::Homework,
             CardContent::Homework(vec![HomeworkEntry {
+                display_ref: fc_domain::content::ContentDisplayRef {
+                    key: fc_domain::content::ContentKey::Homework(
+                        fc_domain::content::HomeworkKey {
+                            class_id: fc_domain::ids::ClassId::new(1).unwrap(),
+                            actual_date: now.date,
+                            subject_id,
+                            owner_teacher_id: teacher_id,
+                        },
+                    ),
+                    revision: Revision::new(1),
+                },
                 subject_id,
                 teacher_id,
                 subject_name: format!("示例 · {subject_name}"),

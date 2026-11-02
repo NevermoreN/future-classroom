@@ -316,6 +316,108 @@ pub fn command_result(
     })
 }
 
+/// A current desktop observation is separate from the immutable command result.
+/// This response intentionally contains no teacher text or rendering handles.
+pub struct Presentation<'a> {
+    pub key: &'a ContentKey,
+    pub now: LocalDateTime,
+    pub expires_at: LocalDateTime,
+    pub committed_revision: Revision,
+    pub current_revision: Revision,
+    pub displayed_revision: Option<Revision>,
+    pub view_state: &'static str,
+    pub observed_at: Option<LocalDateTime>,
+    pub cleared: bool,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PresentationDto {
+    key: KeyDto,
+    now: String,
+    expires_at: String,
+    committed_revision: String,
+    current_revision: String,
+    displayed_revision: Option<String>,
+    view_state: &'static str,
+    observed_at: Option<String>,
+    cleared: bool,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PresentationResult {
+    schema_version: u16,
+    status: &'static str,
+    command_id: String,
+    command_ticket: String,
+    state: &'static str,
+    presentation: Option<PresentationDto>,
+}
+pub fn presentation(
+    command: super::command_window::CommandReference,
+    observation: Option<Presentation<'_>>,
+) -> Result<Vec<u8>, ProtocolError> {
+    let metadata = observation
+        .map(|p| {
+            let date = match p.key {
+                ContentKey::Homework(k) => k.actual_date,
+                ContentKey::SharedReminder(k) => k.actual_date,
+            };
+            if p.committed_revision.get() == 0
+                || date.days_since(p.now.date) > 0
+                || (date.days_since(p.now.date) < 0) != (p.view_state == "EXPIRED")
+                || p.expires_at.second_of_day() != 0
+                || p.expires_at.date.days_since(date) != 1
+                || p.displayed_revision
+                    .is_some_and(|r| r.get() == 0 || r != p.current_revision)
+                || p.observed_at.is_some_and(|at| at > p.now)
+                || p.view_state == "VISIBLE"
+                    && (p.displayed_revision != Some(p.committed_revision)
+                        || p.observed_at.is_none()
+                        || p.current_revision != p.committed_revision
+                        || p.cleared)
+                || p.view_state == "REPLACED" && p.current_revision == p.committed_revision
+                || !matches!(
+                    p.view_state,
+                    "VISIBLE"
+                        | "HIDDEN_BY_APP"
+                        | "HIDDEN_BY_SESSION"
+                        | "RENDER_FAILED"
+                        | "PENDING_RENDER"
+                        | "REPLACED"
+                        | "INACTIVE_SUBJECT"
+                        | "HIDDEN_BY_COMPONENT"
+                        | "EXPIRED"
+                )
+            {
+                return Err(ProtocolError::InvalidCommand);
+            }
+            Ok(PresentationDto {
+                key: key_dto(p.key),
+                now: datetime(p.now),
+                expires_at: datetime(p.expires_at),
+                committed_revision: p.committed_revision.get().to_string(),
+                current_revision: p.current_revision.get().to_string(),
+                displayed_revision: p.displayed_revision.map(|r| r.get().to_string()),
+                view_state: p.view_state,
+                observed_at: p.observed_at.map(datetime),
+                cleared: p.cleared,
+            })
+        })
+        .transpose()?;
+    encode(&PresentationResult {
+        schema_version: 2,
+        status: "CONTENT_PRESENTATION",
+        command_id: command.command_id.get().to_string(),
+        command_ticket: command.ticket.to_string(),
+        state: if metadata.is_some() {
+            "COMMITTED"
+        } else {
+            "NOT_FOUND"
+        },
+        presentation: metadata,
+    })
+}
+
 pub enum Scope<'a> {
     Homework {
         class_id: ClassId,

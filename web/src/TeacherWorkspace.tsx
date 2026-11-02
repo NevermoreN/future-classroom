@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { trustedApiBase } from './api/client'
 import { ContentController, draftValid, type ContentState, type EditorState } from './api/content-controller'
-import type { ContentKind, ScopeItem } from './api/content-protocol'
+import type { ContentKind, ContentViewState, ScopeItem } from './api/content-protocol'
 import MaterialsPane from './MaterialsPane'
 import { VoiceHttpApi } from './api/voice-client'
 import { VoiceController, emptyVoice, type VoiceState } from './api/voice-controller'
@@ -16,6 +16,17 @@ import { MaterialController, emptyMaterials, type MaterialState } from './api/ma
 import type { Role, Session } from './api/protocol'
 const roles: Record<Role, string> = { GLOBAL_ADMIN: '全局主管理员', TEACHER_ADMIN: '教师管理员', USER: '普通用户' }
 const empty: ContentState = { kind: 'HOMEWORK', page: null, editor: null, busy: false, pageBlocked: false, notice: '', previousOffset: null }
+const presentationLabels: Record<ContentViewState, string> = {
+  VISIBLE: '最近一次成功桌面观察中，这次提交的修订已显示。',
+  HIDDEN_BY_APP: '桌面被其他应用遮挡，或工作台已打开，当前未显示这次提交。',
+  HIDDEN_BY_SESSION: 'Windows 会话当前不可显示桌面内容。',
+  RENDER_FAILED: '最近一次桌面呈现失败，不能确认这次提交已显示。',
+  PENDING_RENDER: '尚未观察到这次提交显示；可能尚未完成呈现，或该条目不在当前显示的分页。',
+  REPLACED: '当前槽位已经变化，这次原提交已被替换；当前显示的其他修订不代表原提交正在显示。',
+  INACTIVE_SUBJECT: '这次提交所属的班级或科目当前未处于有效桌面范围。',
+  HIDDEN_BY_COMPONENT: '对应组件当前不显示这条内容。',
+  EXPIRED: '这次提交所属日期已过期，不再作为当天桌面内容显示。',
+}
 function Editor({ editor: e, busy, controller, api, onRevoked }: { editor: EditorState; busy: boolean; controller: ContentController | undefined; api: SubjectVisualApi; onRevoked: () => void }) {
   const bytes = new TextEncoder().encode(e.draft).byteLength
   const editable = !busy && !e.expired && ['ready', 'conflict', 'merge'].includes(e.phase)
@@ -28,6 +39,7 @@ function Editor({ editor: e, busy, controller, api, onRevoked }: { editor: Edito
     <p id="content-text-help" className="editor-help">以白板日期为准；仅支持纯文本和正常换行。保存表示持久化成功，不代表内容此刻正在白板上显示。</p>
     {e.pending && <section className="command-receipt" aria-label="原提交命令"><strong>原命令 {e.pending.command.commandId}</strong><p>原日期 {e.pending.key.date} · 原修订 {e.pending.command.expectedRevision}</p><p>原正文只保留在本页内存，离页可能丢失查询入口；未确认的命令不会重新发送。</p><Button variant="outline" disabled={busy || !['unknown', 'result'].includes(e.phase)} onClick={() => { void controller?.query() }}><History />手动查询原命令</Button></section>}
     {e.history && <section className="historical-result"><h3><Check size={17} />原命令已保存的结果（不代表当前最新）</h3><p>修订 {e.history.revision} · {e.history.updatedAt?.replace('T', ' ')}</p><pre>{e.history.text || '（原结果为空内容）'}</pre><Button variant="outline" disabled={busy || e.expired} onClick={() => { void controller?.loadLatest() }}><RefreshCw />读取当前内容核对</Button></section>}
+    {e.saved && <section className="command-receipt" aria-label="桌面显示状态"><h3>已保存命令 {e.saved.command.commandId} · 桌面显示状态</h3><p>这次提交修订 {e.saved.revision}{e.saved.cleared ? ' · 这次提交已清空正文，成功保存不意味着有文字可显示。' : ''}</p><Button variant="outline" disabled={busy || e.saved.retired || !!e.pending && e.phase !== 'result'} onClick={() => { void controller?.queryPresentation() }}><RefreshCw />查询桌面显示状态</Button><p role="status">{e.presentationNotice}</p>{e.presentation && <><p>{presentationLabels[e.presentation.viewState]}</p><p>原命令已保存修订：{e.presentation.committedRevision}；当前槽位修订：{e.presentation.currentRevision === '0' ? '无当前槽位' : e.presentation.currentRevision}；最近桌面实际显示修订：{e.presentation.displayedRevision ?? '未观察到'}。</p><p>桌面观察时间：{e.presentation.observedAt?.replace('T', ' ') ?? '暂无有效观察'}；此次查询的白板时间：{e.presentation.now.replace('T', ' ')}。</p><p>原命令修订用于确认此次保存，当前槽位修订用于核对是否被替换，显示修订仅描述标注时间的桌面观察；这些结果不会覆盖上方草稿。</p></>}</section>}
     {e.latest && <section className="merge-panel"><h3>当前服务器内容 · 修订 {e.latest.revision}</h3><pre>{e.latest.text || '（当前为空内容）'}</pre><p>请对照上方草稿，明确选择。这里只更新编辑基线，不会提交。</p><div><Button variant="outline" disabled={busy || e.expired} onClick={() => controller?.acknowledgeMerge(true)}>采用服务器内容，放弃草稿</Button><Button disabled={busy || e.expired} onClick={() => controller?.acknowledgeMerge(false)}>已核对合并，保留我的草稿</Button></div></section>}
     <div className="editor-actions"><Button disabled={!canSave} onClick={() => { void controller?.save() }}>{busy && e.phase === 'saving' ? <LoaderCircle className="spinner" /> : <Save />}保存当天内容</Button><Button variant="outline" disabled={busy || e.expired || e.phase !== 'ready'} onClick={() => { if (window.confirm('将以当前修订提交空内容，并替换本页草稿。确认清空今天的这个槽位？')) void controller?.save(true) }}><Trash2 />清空当天内容</Button>{['ready', 'conflict'].includes(e.phase) && <Button variant="ghost" disabled={busy || e.expired} onClick={() => { void controller?.loadLatest() }}><RefreshCw />{e.phase === 'conflict' ? '载入最新修订（保留草稿）' : '读取当前内容'}</Button>}</div>
   </CardContent></Card>

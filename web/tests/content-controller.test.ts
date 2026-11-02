@@ -7,7 +7,7 @@ import { content, normalizedBodyText, type ContentDocument } from '../src/api/co
 import { document, homeworkKey, page, wireDocument } from './content-fixtures'
 function fixture() {
   let id = 76
-  const api = { issueCommand: vi.fn<ContentApi['issueCommand']>().mockImplementation(async () => identity(String(++id))), scopes: vi.fn<ContentApi['scopes']>().mockResolvedValue(page()), content: vi.fn<ContentApi['content']>().mockResolvedValue(document()), saveContent: vi.fn<ContentApi['saveContent']>().mockImplementation(async (key, command) => ({ commandId: command.commandId, commandTicket: ticket, content: document(key, (BigInt(command.expectedRevision) + 1n).toString(), normalizedBodyText(command.text)) })), commandResult: vi.fn<ContentApi['commandResult']>().mockResolvedValue({ commandId: '77', commandTicket: ticket, state: 'NOT_FOUND', content: null }) }
+  const api = { issueCommand: vi.fn<ContentApi['issueCommand']>().mockImplementation(async () => identity(String(++id))), scopes: vi.fn<ContentApi['scopes']>().mockResolvedValue(page()), content: vi.fn<ContentApi['content']>().mockResolvedValue(document()), saveContent: vi.fn<ContentApi['saveContent']>().mockImplementation(async (key, command) => ({ commandId: command.commandId, commandTicket: ticket, content: document(key, (BigInt(command.expectedRevision) + 1n).toString(), normalizedBodyText(command.text)) })), commandResult: vi.fn<ContentApi['commandResult']>().mockResolvedValue({ commandId: '77', commandTicket: ticket, state: 'NOT_FOUND', content: null }), contentPresentation: vi.fn<ContentApi['contentPresentation']>().mockResolvedValue({ ...identity('77'), state: 'COMMITTED', presentation: { key: homeworkKey, now: '2026-10-30T10:00:01', expiresAt: '2026-10-31T00:00:00', committedRevision: '1', currentRevision: '1', displayedRevision: '1', viewState: 'VISIBLE', observedAt: '2026-10-30T10:00:00', cleared: false } }) }
   const states: ContentState[] = [], revoked = vi.fn(), controller = new ContentController(api, 'b'.repeat(64), state => states.push(state), revoked)
   return { api, controller, states, revoked, state: () => states.at(-1)!, editor: () => states.at(-1)!.editor! }
 }
@@ -15,6 +15,26 @@ async function open(f: ReturnType<typeof fixture>) { await f.controller.loadScop
 beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(new Date('2040-12-29T00:00:00Z')) })
 afterEach(() => { vi.useRealTimers() })
 describe('content draft and command lifecycle', () => {
+  it('manually observes the saved C2 identity without resaving or changing a later draft and stops on retirement', async () => {
+    const f = fixture(); await open(f); f.controller.edit('已保存正文'); await f.controller.save()
+    expect(f.editor().saved?.command).toEqual(identity('77')); expect(f.api.contentPresentation).not.toHaveBeenCalled()
+    f.controller.edit('尚未提交的新草稿'); const loaded = f.editor().loaded
+    await f.controller.queryPresentation()
+    expect(f.api.contentPresentation).toHaveBeenCalledWith(identity('77'), expect.any(AbortSignal)); expect(f.editor().presentation?.viewState).toBe('VISIBLE')
+    expect(f.editor().draft).toBe('尚未提交的新草稿'); expect(f.editor().loaded).toBe(loaded); expect(f.editor().phase).toBe('ready')
+    await vi.advanceTimersByTimeAsync(2000); expect(f.api.contentPresentation).toHaveBeenCalledOnce(); expect(f.api.saveContent).toHaveBeenCalledOnce()
+    f.api.contentPresentation.mockRejectedValueOnce(new ApiError(409, 'COMMAND_EXPIRED')); await f.controller.queryPresentation()
+    expect(f.editor().presentation).toBeNull(); expect(f.editor().saved?.retired).toBe(true)
+    await f.controller.queryPresentation(); expect(f.api.contentPresentation).toHaveBeenCalledTimes(2); f.controller.dispose()
+  })
+  it('keeps unknown writes on original-result query then enables presentation and clears all content on revocation', async () => {
+    const f = fixture(); await open(f); f.controller.edit('原正文'); f.api.saveContent.mockRejectedValueOnce(new NetworkFault()); await f.controller.save()
+    await f.controller.queryPresentation(); expect(f.api.contentPresentation).not.toHaveBeenCalled()
+    f.api.commandResult.mockResolvedValueOnce({ ...identity('77'), state: 'COMMITTED', content: document(homeworkKey, '1', '原正文') }); await f.controller.query()
+    await f.controller.queryPresentation(); expect(f.editor().presentation?.viewState).toBe('VISIBLE'); expect(f.editor().history?.text).toBe('原正文'); expect(f.editor().draft).toBe('原正文')
+    f.api.contentPresentation.mockRejectedValueOnce(new ApiError(403, 'FORBIDDEN')); await f.controller.queryPresentation()
+    expect(f.state().editor).toBeNull(); expect(f.revoked).toHaveBeenCalledOnce(); expect(f.api.saveContent).toHaveBeenCalledOnce(); f.controller.dispose()
+  })
   it('rejects duplicated/rewound continuation scope keys and requires page reload', async () => {
     const f = fixture(); f.api.scopes.mockResolvedValueOnce(page('HOMEWORK', 0, 21)); await f.controller.loadScopes('HOMEWORK')
     const bad = page('HOMEWORK', 20, 21); bad.items = [page().items[0]!]; f.api.scopes.mockResolvedValueOnce(bad)

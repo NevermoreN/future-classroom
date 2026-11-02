@@ -1,7 +1,9 @@
 //! Teacher-content adaptation owns no authority: each operation revalidates the
 //! original authenticated Web lease in Backend, including the writer guard.
 use super::*;
-use crate::backend::{BackendError, WebContentDocument, WebContentKind, WebContentScopes};
+use crate::backend::{
+    BackendError, ContentViewState, WebContentDocument, WebContentKind, WebContentScopes,
+};
 use fc_application::identity::SessionLease;
 use fc_domain::content::{ContentCommand, ContentError};
 use fc_ports::RepositoryError;
@@ -92,6 +94,52 @@ pub(super) fn dispatch(
                 perform_save(&mut scope, lease, key, input, command)
             } else {
                 perform_save(backend, lease, key, input, command)
+            }
+        }
+        Route::ContentPresentation { command } => {
+            let issued = match backend.resolve_web_command(
+                lease,
+                fc_ports::command_window::CommandFamily::Content,
+                command.ticket,
+                command.command_id,
+            ) {
+                Ok(issued) => issued,
+                Err(error) => return backend_error(error, false),
+            };
+            let scope = match backend.begin_command_scope(issued) {
+                Ok(scope) => scope,
+                Err(error) => return backend_error(error, false),
+            };
+            match scope.web_content_presentation(lease, command.command_id) {
+                Ok(result) => response(
+                    200,
+                    wire::presentation(
+                        command,
+                        result.as_ref().map(|p| wire::Presentation {
+                            key: &p.key,
+                            now: p.now,
+                            expires_at: p.expires_at,
+                            committed_revision: p.committed_revision,
+                            current_revision: p.current_revision,
+                            displayed_revision: p.displayed_revision,
+                            view_state: match p.state {
+                                ContentViewState::Visible => "VISIBLE",
+                                ContentViewState::HiddenByApp => "HIDDEN_BY_APP",
+                                ContentViewState::HiddenBySession => "HIDDEN_BY_SESSION",
+                                ContentViewState::RenderFailed => "RENDER_FAILED",
+                                ContentViewState::PendingRender => "PENDING_RENDER",
+                                ContentViewState::Replaced => "REPLACED",
+                                ContentViewState::InactiveSubject => "INACTIVE_SUBJECT",
+                                ContentViewState::HiddenByComponent => "HIDDEN_BY_COMPONENT",
+                                ContentViewState::Expired => "EXPIRED",
+                            },
+                            observed_at: p.observed_at,
+                            cleared: p.cleared,
+                        }),
+                    ),
+                    None,
+                ),
+                Err(error) => backend_error(error, false),
             }
         }
         Route::ContentWindowCommand { command } => {

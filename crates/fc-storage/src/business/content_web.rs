@@ -175,6 +175,7 @@ impl<S: Send> TransactionTask<S> for ObserveContentDay<S> {
 }
 struct ReadOutcome {
     command_id: CommandId,
+    presentation: bool,
     actor: ActorContext,
     clock: Arc<dyn Clock + Send + Sync>,
     session: SessionGuard,
@@ -210,10 +211,21 @@ impl<S> TransactionTask<S> for ReadOutcome {
         let owned = record
             .as_ref()
             .filter(|record| record.last_actor_id == self.actor.principal_id);
-        if let Some(record) = owned {
-            require_current_day(documents, &identity, &record.key, self.clock.now())?;
+        let authorize_result = |record: &ContentRecord, now: LocalDateTime| {
+            if self.presentation {
+                // Metadata queries may report expiration, but never return old
+                // text to HTTP. Ordinary body-result reads keep their day gate.
+                if key_date(&record.key) > now.date {
+                    return Err(StorageError::Content(ContentError::WrongDate));
+                }
+            } else {
+                require_current_day(documents, &identity, &record.key, now)?;
+            }
             validate_homework_reference(&identity, &record.key)?;
-            authorize_key(&record.key, &authority, &self.actor, self.clock.now())?;
+            authorize_key(&record.key, &authority, &self.actor, now)
+        };
+        if let Some(record) = owned {
+            authorize_result(record, self.clock.now())?;
         }
         // This final check also gates None: reads must not renew or outlive the
         // captured exact lease while disk/SQLite was slow.
@@ -224,10 +236,27 @@ impl<S> TransactionTask<S> for ReadOutcome {
             .map_err(|e| StorageError::Content(ContentError::Permission(e)))?;
         let value = match owned {
             Some(record) => {
-                require_current_day(documents, &identity, &record.key, now)?;
-                validate_homework_reference(&identity, &record.key)?;
-                authorize_key(&record.key, &authority, &self.actor, now)?;
-                codec::record(record)
+                authorize_result(record, now)?;
+                if self.presentation {
+                    let current = documents
+                        .get(&content_key(&record.key))?
+                        .map(|row| codec::value(&row.value).and_then(|v| codec::read_record(&v)))
+                        .transpose()?;
+                    if current.as_ref().is_some_and(|r| r.key != record.key) {
+                        return Err(StorageError::Database);
+                    }
+                    (self.session)(&identity, &self.actor)?;
+                    authorize_result(record, self.clock.now())?;
+                    json!({
+                        "key": codec::key(&record.key),
+                        "committedRevision": record.revision.get(),
+                        "currentRevision": current.as_ref().map_or(0, |r| r.revision.get()),
+                        "cleared": record.text.is_empty(),
+                        "globalRevision": documents.revision()?.get()
+                    })
+                } else {
+                    codec::record(record)
+                }
             }
             _ => Value::Null,
         };
@@ -342,6 +371,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
             .handle
             .try_transaction(ReadOutcome {
                 command_id,
+                presentation: false,
                 actor: actor.clone(),
                 clock: self.clock.clone(),
                 session: self.session.clone(),
@@ -357,6 +387,64 @@ impl<S: Send + 'static> BusinessRepository<S> {
                 .map(Some)
                 .map_err(repository_error)
         }
+    }
+    /// Original receipt and current slot share one read-only writer snapshot.
+    /// Only the original submitter, current scope and original C2 may read it.
+    pub fn content_presentation_metadata(
+        &self,
+        command_id: CommandId,
+        actor: &ActorContext,
+    ) -> Result<Option<(ContentDisplayRef, Revision, bool, Revision)>, RepositoryError> {
+        self.observe_content_day(actor)?;
+        let bytes = self
+            .handle
+            .try_transaction(ReadOutcome {
+                command_id,
+                presentation: true,
+                actor: actor.clone(),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+            })
+            .map_err(repository_error)?
+            .wait()
+            .map_err(repository_error)?;
+        let value = codec::value(&bytes).map_err(repository_error)?;
+        if value.is_null() {
+            return Ok(None);
+        }
+        codec::object_fields(
+            &value,
+            &[
+                "key",
+                "committedRevision",
+                "currentRevision",
+                "cleared",
+                "globalRevision",
+            ],
+        )
+        .map_err(repository_error)?;
+        let committed = ContentDisplayRef {
+            key: codec::read_key(&value["key"]).map_err(repository_error)?,
+            revision: Revision::new(
+                value["committedRevision"]
+                    .as_u64()
+                    .ok_or(RepositoryError::Unavailable)?,
+            ),
+        };
+        let current = Revision::new(
+            value["currentRevision"]
+                .as_u64()
+                .ok_or(RepositoryError::Unavailable)?,
+        );
+        let cleared = value["cleared"]
+            .as_bool()
+            .ok_or(RepositoryError::Unavailable)?;
+        let revision = Revision::new(
+            value["globalRevision"]
+                .as_u64()
+                .ok_or(RepositoryError::Unavailable)?,
+        );
+        Ok(Some((committed, current, cleared, revision)))
     }
 }
 impl<S: Send + 'static> ContentOutcomeRepository for BusinessRepository<S> {

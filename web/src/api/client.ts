@@ -1,6 +1,6 @@
 import { issued, commandIdentity, type CommandApi, type CommandFamily, type CommandIdentity } from './command-protocol'
 import { subjectVisual, type HomeworkTarget } from "./subject-visual-protocol"
-import { bodyText, commandResult, committed, content, contentPath, revision, sameKey, scopes, type CommandResult, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type ScopePage } from './content-protocol'
+import { bodyText, commandResult, committed, content, contentPath, presentationResult, revision, sameKey, scopes, type CommandResult, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type PresentationResult, type ScopePage } from './content-protocol'
 import { decimal, errorCode, loggedOut, MAX_JSON_BYTES, pairingReceipt, pollResult, ProtocolFault, publicStatus, secret, session, strictJson, validateForm, type ErrorCode, type PairingForm, type PairingReceipt, type PollResult, type PublicStatus, type Session } from './protocol'
 export class ApiError extends Error {
   constructor(public readonly status: number, public readonly code: ErrorCode) { super('白板未能完成此次请求。'); this.name = 'ApiError' }
@@ -63,6 +63,7 @@ export interface ContentApi extends CommandApi {
   content(key: ContentKey, signal: AbortSignal): Promise<ContentDocument>
   saveContent(key: ContentKey, command: ContentCommand, csrf: string, signal: AbortSignal): Promise<Committed>
   commandResult(command: CommandIdentity, signal: AbortSignal): Promise<CommandResult>
+  contentPresentation(command: CommandIdentity, signal: AbortSignal): Promise<PresentationResult>
 }
 export class HttpApi implements ServerApi, ContentApi {
   constructor(protected readonly base: URL, protected readonly fetcher: typeof fetch = globalThis.fetch.bind(globalThis)) {}
@@ -146,6 +147,11 @@ export class HttpApi implements ServerApi, ContentApi {
     const pair = commandIdentity(command), r = await this.request(`content/commands/${pair.commandTicket}/${pair.commandId}`, signal)
     if (r.status !== 200) throw new ProtocolFault()
     return commandResult(r.value, command)
+  }
+  async contentPresentation(command: CommandIdentity, signal: AbortSignal) {
+    const pair = commandIdentity(command), r = await this.request(`content/commands/${pair.commandTicket}/${pair.commandId}/presentation`, signal)
+    if (r.status !== 200) throw new ProtocolFault()
+    return presentationResult(r.value, command)
   }
 
 }

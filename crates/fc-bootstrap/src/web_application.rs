@@ -356,6 +356,7 @@ impl WebApplication {
             | Route::ContentRead { .. }
             | Route::ContentSave { .. }
             | Route::ContentCommand { .. }
+            | Route::ContentPresentation { .. }
             | Route::ContentWindowCommand { .. } => {
                 let Some(session) = authenticated else {
                     return failure(401, responses::ErrorCode::Unauthorized);

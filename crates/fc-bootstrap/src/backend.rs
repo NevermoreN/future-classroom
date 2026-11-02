@@ -28,7 +28,10 @@ pub use recovery::{
 };
 mod voice;
 pub mod web;
-pub use content_web::{WebContentDocument, WebContentKind, WebContentScope, WebContentScopes};
+pub use content_web::{
+    ContentPresentationObservation, ContentViewState, WebContentDocument, WebContentKind,
+    WebContentPresentation, WebContentScope, WebContentScopes,
+};
 use fc_application::identity::{IdentitySessions, SessionError, SessionLease, SessionPurpose};
 use fc_domain::{
     auth::*,
@@ -217,6 +220,7 @@ struct Control {
     input_last: AtomicU64,
     material_scene: Mutex<Option<PublishedMaterialScene>>,
     profile_content_scene: Mutex<profile_content::PublishedProfileContentScene>,
+    content_presentation: Mutex<content_web::ContentPresentationMemory>,
     desktop_lesson: desktop_lesson::DesktopLessonControl,
 }
 #[derive(Clone)]
@@ -654,6 +658,9 @@ impl Backend {
             input_last: AtomicU64::new(0),
             material_scene: Mutex::new(None),
             profile_content_scene: Mutex::new(Default::default()),
+            content_presentation: Mutex::new(content_web::ContentPresentationMemory::new(
+                clock.clone(),
+            )),
             desktop_lesson: desktop_lesson::DesktopLessonControl::new(
                 clock.clone(),
                 monotonic.clone(),

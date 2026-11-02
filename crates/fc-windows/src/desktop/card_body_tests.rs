@@ -277,6 +277,15 @@ fn shared_body_materials_actual_compositor_one_page_with_gaps_rows_note_and_full
 fn homework(count: usize, body: &str) -> Vec<HomeworkEntry> {
     (0..count)
         .map(|i| HomeworkEntry {
+            display_ref: fc_domain::content::ContentDisplayRef {
+                key: fc_domain::content::ContentKey::Homework(fc_domain::content::HomeworkKey {
+                    class_id: fc_domain::ids::ClassId::new(1).unwrap(),
+                    actual_date: fc_domain::time::LocalDate::new(2026, 11, 3).unwrap(),
+                    subject_id: fc_domain::ids::SubjectId::new(1).unwrap(),
+                    owner_teacher_id: fc_domain::ids::PrincipalId::new(1).unwrap(),
+                }),
+                revision: fc_domain::ids::Revision::new(1),
+            },
             subject_id: SubjectId::new(i as u64 + 1).unwrap(),
             teacher_id: PrincipalId::new(i as u64 + 1).unwrap(),
             subject_name: format!("长学科名称第{i}组 {}", "综合实践学习内容".repeat(4)),

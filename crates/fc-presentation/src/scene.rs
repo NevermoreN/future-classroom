@@ -9,7 +9,7 @@ use crate::{ClockStyle, LayoutError, Rect};
 use fc_domain::layout::{LayoutScope, LayoutTree, NodeKind, WidgetKind};
 use fc_domain::profile_content::{ContentSlotKey, MediaReference, PublishedContentDescriptor};
 use fc_domain::{
-    content::ContentKey,
+    content::{ContentDisplayRef, ContentKey},
     desktop::*,
     identity::Rgb,
     ids::*,
@@ -51,6 +51,7 @@ pub struct CourseCapsule {
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct HomeworkEntry {
+    pub display_ref: ContentDisplayRef,
     pub subject_id: SubjectId,
     pub teacher_id: PrincipalId,
     pub subject_name: String,
@@ -129,6 +130,7 @@ pub struct LessonControlContent {
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct SceneCard {
+    pub content_display_ref: Option<ContentDisplayRef>,
     pub content_identity: Option<SceneContentIdentity>,
     pub kind: ComponentKind,
     pub rect: Rect,
@@ -308,6 +310,7 @@ fn card(
     let c = component;
     let alpha = f32::from(c.opacity_percent) / 100.;
     Ok(SceneCard {
+        content_display_ref: None,
         content_identity: None,
         kind: k,
         rect,
@@ -482,6 +485,10 @@ pub fn build_scene_with_content(
             .find(|a| a.principal.id == k.owner_teacher_id)
             .ok_or(SceneError::Schedule)?;
         homework.push(HomeworkEntry {
+            display_ref: ContentDisplayRef {
+                key: r.key.clone(),
+                revision: r.revision,
+            },
             subject_id: subject.id,
             teacher_id: teacher.principal.id,
             subject_name: subject.name.clone(),
@@ -836,6 +843,13 @@ pub fn build_scene_with_content(
         node.card_index = Some(cards.len());
         cards.push(card(settings, k, node.rect, content, page, style)?);
         cards.last_mut().expect("just pushed").content_identity = *identity;
+        if k == ComponentKind::Reminder {
+            cards.last_mut().expect("just pushed").content_display_ref =
+                facts.reminder.as_ref().map(|r| ContentDisplayRef {
+                    key: r.key.clone(),
+                    revision: r.revision,
+                });
+        }
     }
     if cards.len() > 64 {
         return Err(SceneError::Capacity);

@@ -9,6 +9,9 @@ export interface ContentDocument { today: string; serverNow: string; expiresAt: 
 export interface ContentCommand extends CommandIdentity { expectedRevision: string; text: string }
 export interface Committed extends CommandIdentity { content: ContentDocument }
 export type CommandResult = { commandId: string; commandTicket: string; state: 'COMMITTED'; content: ContentDocument } | { commandId: string; commandTicket: string; state: 'NOT_FOUND'; content: null }
+export type ContentViewState = 'VISIBLE' | 'HIDDEN_BY_APP' | 'HIDDEN_BY_SESSION' | 'RENDER_FAILED' | 'PENDING_RENDER' | 'REPLACED' | 'INACTIVE_SUBJECT' | 'HIDDEN_BY_COMPONENT' | 'EXPIRED'
+export interface ContentPresentation { key: ContentKey; now: string; expiresAt: string; committedRevision: string; currentRevision: string; displayedRevision: string | null; viewState: ContentViewState; observedAt: string | null; cleared: boolean }
+export type PresentationResult = CommandIdentity & ({ state: 'NOT_FOUND'; presentation: null } | { state: 'COMMITTED'; presentation: ContentPresentation })
 function object(value: unknown, fields: readonly string[]): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value) || Object.keys(value).length !== fields.length || Object.keys(value).some(k => !fields.includes(k))) return fail()
   return value as Record<string, unknown>
@@ -109,6 +112,21 @@ export function commandResult(value: unknown, original: CommandIdentity): Comman
   if (v.state === 'NOT_FOUND' && v.content === null) return { ...commandIdentity(original), state: 'NOT_FOUND', content: null }
   if (v.state !== 'COMMITTED' || v.content === null) return fail()
   return { ...commandIdentity(original), state: 'COMMITTED', content: content(v.content) }
+}
+export function presentationResult(value: unknown, original: CommandIdentity): PresentationResult {
+  const v = object(value, ['schemaVersion', 'status', 'commandId', 'commandTicket', 'state', 'presentation']); commandVersion(v.schemaVersion)
+  if (v.status !== 'CONTENT_PRESENTATION' || !sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, commandIdentity(original))) return fail()
+  if (v.state === 'NOT_FOUND' && v.presentation === null) return { ...commandIdentity(original), state: 'NOT_FOUND', presentation: null }
+  if (v.state !== 'COMMITTED' || v.presentation === null) return fail()
+  const p = object(v.presentation, ['key', 'now', 'expiresAt', 'committedRevision', 'currentRevision', 'displayedRevision', 'viewState', 'observedAt', 'cleared'])
+  const target = key(p.key), now = civilTime(p.now), expiresAt = civilTime(p.expiresAt), committedRevision = decimal(p.committedRevision), currentRevision = revision(p.currentRevision)
+  const displayedRevision = p.displayedRevision === null ? null : decimal(p.displayedRevision), observedAt = p.observedAt === null ? null : civilTime(p.observedAt)
+  const states: readonly unknown[] = ['VISIBLE', 'HIDDEN_BY_APP', 'HIDDEN_BY_SESSION', 'RENDER_FAILED', 'PENDING_RENDER', 'REPLACED', 'INACTIVE_SUBJECT', 'HIDDEN_BY_COMPONENT', 'EXPIRED']
+  if (!states.includes(p.viewState) || typeof p.cleared !== 'boolean' || target.date > now.slice(0, 10) || expiresAt !== `${nextDay(target.date)}T00:00:00` || displayedRevision !== null && displayedRevision !== currentRevision || observedAt !== null && observedAt > now
+    || p.viewState === 'VISIBLE' && (displayedRevision !== committedRevision || observedAt === null || p.cleared || currentRevision !== committedRevision)
+    || p.viewState === 'EXPIRED' && target.date >= now.slice(0, 10) || target.date < now.slice(0, 10) && p.viewState !== 'EXPIRED'
+    || p.viewState === 'REPLACED' && currentRevision === committedRevision) return fail()
+  return { ...commandIdentity(original), state: 'COMMITTED', presentation: { key: target, now, expiresAt, committedRevision, currentRevision, displayedRevision, viewState: p.viewState as ContentViewState, observedAt, cleared: p.cleared } }
 }
 /** Uses only the already validated server civil date/time, never the teacher's
  * wall clock/timezone. The midnight timer subsequently uses monotonic time. */

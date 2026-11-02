@@ -41,6 +41,7 @@ fn reference(id: u64) -> MediaReference {
 }
 fn card(id: u64, image: bool) -> SceneCard {
     SceneCard {
+        content_display_ref: None,
         content_identity: Some(identity(id)),
         kind: if image {
             ComponentKind::SubjectImage

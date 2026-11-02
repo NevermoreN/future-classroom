@@ -3,6 +3,7 @@
 use crate::materials::raster::{RasterCache, RasterFrame};
 use crate::native::{Apartment, Dib};
 use fc_domain::{
+    content::ContentDisplayRef,
     desktop::{ClockMode, ComponentKind, TextTone},
     identity::Rgb,
     ids::{FolderId, MaterialId, ResourceVersionId, Revision, SceneGeneration},
@@ -518,7 +519,87 @@ pub struct DesktopRenderer {
     metrics: DesktopMetrics,
     _thread: PhantomData<Rc<()>>,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ContentHiddenReason {
+    App,
+    Session,
+}
 impl DesktopRenderer {
+    /// Only the current physically published page may contribute displayed revisions.
+    /// Diagnostic offscreen DIBs and a prepared-but-unpublished page are excluded.
+    pub fn displayed_content(&self, scene: &SceneSnapshot) -> Vec<ContentDisplayRef> {
+        if self.hidden
+            || self.hidden_probe
+            || self.last_scene != Some(scene.generation)
+            || self.last_revision != Some(scene.source_revision)
+        {
+            return Vec::new();
+        }
+        self.collect_content(scene)
+    }
+    fn collect_content(&self, scene: &SceneSnapshot) -> Vec<ContentDisplayRef> {
+        let mut displayed = Vec::with_capacity(64);
+        for (index, card) in self.cards.iter().take(scene.cards.len()).enumerate() {
+            if card.render_pending {
+                continue;
+            }
+            let (opacity, clip) = if let Some(tree) = &self.tree {
+                let Some(node) = tree.tree.nodes.iter().find(|n| n.card_index == Some(index))
+                else {
+                    continue;
+                };
+                (node.effective_opacity, node.clip)
+            } else {
+                (card.source.component_alpha, card.source.rect)
+            };
+            if (opacity * 255.).round() <= 0. {
+                continue;
+            }
+            let Some(offset) = card.body.pages.get(card.page).copied() else {
+                continue;
+            };
+            let span = card.body.pages.get(card.page + 1).map_or(
+                card.source.rect.height - card.body.top_inset - card.body.bottom_inset,
+                |next| *next - offset,
+            );
+            let source = card.source.rect;
+            let left = (source.x + CARD_BODY_TEXT_INSET).max(clip.x);
+            let right = (source.x + source.width - CARD_BODY_TEXT_INSET).min(clip.x + clip.width);
+            let top = (source.y + card.body.top_inset).max(clip.y);
+            let bottom = (source.y + card.body.top_inset + span).min(clip.y + clip.height);
+            if right <= left || bottom <= top {
+                continue;
+            }
+            for block in &card.body.blocks {
+                if !block.lines.iter().any(|(y, height)| {
+                    let y = source.y + card.body.top_inset + *y - offset;
+                    y < bottom && y + *height > top
+                }) {
+                    continue;
+                }
+                let identity = match &card.source.content {
+                    CardContent::Homework(rows) => block
+                        .leaf
+                        .and_then(|leaf| rows.get(leaf))
+                        .map(|row| &row.display_ref),
+                    CardContent::Text(_) => card.source.content_display_ref.as_ref(),
+                    _ => None,
+                };
+                if let Some(identity) = identity {
+                    if !displayed.contains(identity) {
+                        if displayed.len() == 64 {
+                            return displayed;
+                        }
+                        displayed.push(identity.clone());
+                    }
+                }
+            }
+        }
+        displayed
+    }
+    pub fn hidden_content_state() -> Result<Option<ContentHiddenReason>> {
+        system_hidden_reason()
+    }
     fn input_strip(&self, rect: Rect) -> Result<InputStrip> {
         let state = Box::new(InputState {
             context: RefCell::new(None),
@@ -788,6 +869,7 @@ impl DesktopRenderer {
             self.last_scene = None;
         }
         let control_card = scene.lesson_control.as_ref().map(|control| SceneCard {
+            content_display_ref: None,
             content_identity: None,
             kind: ComponentKind::Schedule,
             rect: control.rect,
@@ -1480,10 +1562,11 @@ fn publication_allowed(scene: &SceneSnapshot, g: &PublicationGuard<'_>) -> Resul
     Ok(system_allows()? && scene_allowed(scene, crate::native::local_now()?, g))
 }
 fn system_allows() -> Result<bool> {
-    if crate::native::desktop_foreground() != fc_presentation::Foreground::Desktop
-        || !crate::native::input_desktop_available()
-    {
-        return Ok(false);
+    Ok(system_hidden_reason()?.is_none())
+}
+fn system_hidden_reason() -> Result<Option<ContentHiddenReason>> {
+    if !crate::native::input_desktop_available() {
+        return Ok(Some(ContentHiddenReason::Session));
     }
     // The active process session must be interactive; service/session-0 and
     // disconnected remote sessions cannot publish through an accessible desktop.
@@ -1493,7 +1576,7 @@ fn system_allows() -> Result<bool> {
         let mut ptr = windows::core::PWSTR::null();
         let mut bytes = 0;
         if WTSQuerySessionInformationW(None, sid, WTSConnectState, &mut ptr, &mut bytes).is_err() {
-            return Ok(false);
+            return Ok(Some(ContentHiddenReason::Session));
         }
         struct Buffer(windows::core::PWSTR);
         impl Drop for Buffer {
@@ -1503,12 +1586,12 @@ fn system_allows() -> Result<bool> {
         }
         let b = Buffer(ptr);
         if bytes < std::mem::size_of::<WTS_CONNECTSTATE_CLASS>() as u32 || b.0.is_null() {
-            return Ok(false);
+            return Ok(Some(ContentHiddenReason::Session));
         }
         let active = *(b.0 .0.cast::<WTS_CONNECTSTATE_CLASS>()) == WTSActive;
         let desktop = match OpenInputDesktop(DF_ALLOWOTHERACCOUNTHOOK, false, DESKTOP_READOBJECTS) {
             Ok(v) => v,
-            Err(_) => return Ok(false),
+            Err(_) => return Ok(Some(ContentHiddenReason::Session)),
         };
         let mut name = [0u16; 64];
         let mut needed = 0;
@@ -1521,11 +1604,18 @@ fn system_allows() -> Result<bool> {
         )
         .is_ok();
         let _ = CloseDesktop(desktop);
-        Ok(active
+        let session_allows = active
             && good
             && needed <= 128
             && String::from_utf16_lossy(&name[..name.iter().position(|c| *c == 0).unwrap_or(64)])
-                == "Default")
+                == "Default";
+        Ok(if !session_allows {
+            Some(ContentHiddenReason::Session)
+        } else if crate::native::desktop_foreground() != fc_presentation::Foreground::Desktop {
+            Some(ContentHiddenReason::App)
+        } else {
+            None
+        })
     }
 }
 fn upload(s: &Surface) -> Result<()> {
@@ -2422,7 +2512,8 @@ mod tests {
         for (index, kind) in ComponentKind::ALL.into_iter().enumerate() {
             let content=match kind {
                 ComponentKind::Clock=>CardContent::Clock(ClockContent{mode:ClockMode::Digital24,show_seconds:true}),
-                ComponentKind::Homework=>CardContent::Homework(vec![HomeworkEntry{subject_id:SubjectId::new(1).unwrap(),teacher_id:PrincipalId::new(1).unwrap(),subject_name:"合成语文".into(),teacher_name:"合成教师".into(),text:"独立离屏验证：阅读并复述课文，练习汉字。\n保留全部长正文，通过只读按钮逐页阅读。".repeat(12),color:Rgb{red:201,green:164,blue:164},fill_alpha:0.03}]),
+                ComponentKind::Homework=>CardContent::Homework(vec![HomeworkEntry{display_ref: fc_domain::content::ContentDisplayRef { key: fc_domain::content::ContentKey::Homework(fc_domain::content::HomeworkKey { class_id: fc_domain::ids::ClassId::new(1).unwrap(), actual_date: fc_domain::time::LocalDate::new(2026, 11, 3).unwrap(), subject_id: fc_domain::ids::SubjectId::new(1).unwrap(), owner_teacher_id: fc_domain::ids::PrincipalId::new(1).unwrap() }), revision: fc_domain::ids::Revision::new(1) },
+                    subject_id:SubjectId::new(1).unwrap(),teacher_id:PrincipalId::new(1).unwrap(),subject_name:"合成语文".into(),teacher_name:"合成教师".into(),text:"独立离屏验证：阅读并复述课文，练习汉字。\n保留全部长正文，通过只读按钮逐页阅读。".repeat(12),color:Rgb{red:201,green:164,blue:164},fill_alpha:0.03}]),
                 ComponentKind::Materials=>CardContent::MaterialsUnavailable,
                 ComponentKind::Recess=>CardContent::Recess{deadline:LocalDateTime::new(now.date,(now.second_of_day()+120).min(86399)).unwrap()},
                 ComponentKind::Schedule=>{
@@ -2436,6 +2527,7 @@ mod tests {
                 ComponentKind::SubjectText | ComponentKind::SubjectImage => unreachable!("builtin fixture"),
             };
             cards.push(SceneCard {
+                content_display_ref: None,
                 content_identity: None,
                 kind,
                 rect: Rect {

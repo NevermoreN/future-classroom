@@ -1,9 +1,23 @@
 import { identity, ticket } from './command-fixtures'
 import { describe, expect, it } from 'vitest'
-import { bodyText, civilDate, civilTime, commandResult, committed, content, contentPath, nextDay, normalizedBodyText, revision, scopes } from '../src/api/content-protocol'
+import { bodyText, civilDate, civilTime, commandResult, committed, content, contentPath, nextDay, normalizedBodyText, presentationResult, revision, scopes } from '../src/api/content-protocol'
 import { ProtocolFault, ProtocolVersionFault } from '../src/api/protocol'
 import { homeworkKey, wireDocument, wireScopes } from './content-fixtures'
 describe('teacher content strict wire contract', () => {
+  it('strictly correlates separate presentation metadata, replacement, clear and expiry without admitting body fields', () => {
+    const p = { key: homeworkKey, now: '2026-10-30T10:00:01', expiresAt: '2026-10-31T00:00:00', committedRevision: '7', currentRevision: '8', displayedRevision: '8', viewState: 'REPLACED', observedAt: '2026-10-30T10:00:00', cleared: false }
+    const wire = { schemaVersion: 2, status: 'CONTENT_PRESENTATION', ...identity('77'), state: 'COMMITTED', presentation: p }
+    expect(presentationResult(wire, identity('77'))).toMatchObject({ state: 'COMMITTED', presentation: { committedRevision: '7', currentRevision: '8', viewState: 'REPLACED' } })
+    expect(presentationResult({ ...wire, presentation: { ...p, now: '2026-10-31T10:00:00', currentRevision: '0', displayedRevision: null, viewState: 'EXPIRED', cleared: true } }, identity('77'))).toMatchObject({ presentation: { viewState: 'EXPIRED', cleared: true, currentRevision: '0' } })
+    for (const bad of [
+      { ...wire, commandId: '78' }, { ...wire, status: 'COMMAND_RESULT' }, { ...wire, state: 'NOT_FOUND' },
+      { ...wire, presentation: { ...p, text: '不能披露正文' } }, { ...wire, presentation: { ...p, viewState: 'VISIBLE' } },
+      { ...wire, presentation: { ...p, viewState: 'UNRECOGNIZED' } }, { ...wire, presentation: { ...p, displayedRevision: '9' } },
+      { ...wire, presentation: { ...p, observedAt: '2026-10-30T10:00:02' } },
+      { ...wire, presentation: { ...p, viewState: 'EXPIRED' } }, { ...wire, presentation: { ...p, expiresAt: '2026-11-01T00:00:00' } },
+    ]) expect(() => presentationResult(bad, identity('77'))).toThrow(ProtocolFault)
+    expect(presentationResult({ ...wire, state: 'NOT_FOUND', presentation: null }, identity('77')).state).toBe('NOT_FOUND')
+  })
   it('classifies only positive integer schema changes as refreshable, including nested committed content', () => {
     const readers: ((version: unknown) => unknown)[] = [
       version => scopes({ ...wireScopes(), schemaVersion: version }, 'HOMEWORK', 0),

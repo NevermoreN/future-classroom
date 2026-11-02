@@ -1,13 +1,15 @@
-import { commandIdentity, sameCommand } from './command-protocol'
+import { commandIdentity, sameCommand, type CommandIdentity } from './command-protocol'
 import { ApiError, commandRejected, commandRetired, isAborted, type ContentApi } from './client'
 import { ProtocolFault, ProtocolVersionFault } from './protocol'
-import { bodyText, compareScopes, keyFor, normalizedBodyText, remainingToday, sameKey, scopeKey, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type ScopeItem, type ScopePage } from './content-protocol'
+import { bodyText, compareScopes, keyFor, normalizedBodyText, remainingToday, sameKey, scopeKey, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type ContentPresentation, type ScopeItem, type ScopePage } from './content-protocol'
 
 export type EditorPhase = 'ready' | 'saving' | 'conflict' | 'merge' | 'unknown' | 'querying' | 'result' | 'expired' | 'scope-changed'
 export interface PendingCommand { readonly retired?: boolean; readonly key: ContentKey; readonly command: ContentCommand }
+export interface SavedCommand { readonly command: CommandIdentity; readonly key: ContentKey; readonly revision: string; readonly cleared: boolean; readonly retired?: boolean }
 export interface EditorState {
   scope: ScopeItem; loaded: ContentDocument; draft: string; phase: EditorPhase; expired: boolean
   pending: PendingCommand | null; history: ContentDocument | null; latest: ContentDocument | null; notice: string
+  saved: SavedCommand | null; presentation: ContentPresentation | null; presentationNotice: string
 }
 export interface ContentState {
   kind: ContentKind; page: ScopePage | null; editor: EditorState | null; busy: boolean; pageBlocked: boolean; notice: string; previousOffset: number | null
@@ -92,7 +94,7 @@ export class ContentController {
       const document = await this.api.content(key, controller.signal)
       if (!this.current(id)) return
       if (!sameKey(document.key, key)) throw new ProtocolFault()
-      this.publish({ busy: false, editor: { scope, loaded: document, draft: document.text, phase: 'ready', expired: false, pending: null, latest: null, history: null, notice: '' } }); this.arm(document)
+      this.publish({ busy: false, editor: { scope, loaded: document, draft: document.text, phase: 'ready', expired: false, pending: null, latest: null, history: null, notice: '', saved: null, presentation: null, presentationNotice: '' } }); this.arm(document)
     } catch (error) {
       if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
       this.publish({ busy: false, notice: error instanceof ApiError && error.code === 'DAY_CHANGED' ? '白板日期已经变化。请重新加载当天范围，旧日期不会自动更改。' : error instanceof ProtocolFault ? error.message : '读取内容失败，请重新选择或核对连接。', pageBlocked: error instanceof ProtocolFault || error instanceof ApiError && error.code === 'DAY_CHANGED', editor: error instanceof ProtocolFault && this.state.editor ? { ...this.state.editor, phase: 'scope-changed' } : this.state.editor })
@@ -122,7 +124,7 @@ export class ContentController {
       if (!this.current(id)) return
       this.verify(result, pending)
       const current = this.state.editor!
-      this.publish({ busy: false, editor: { ...current, loaded: result.content, draft: result.content.text, phase: current.expired ? 'expired' : 'ready', pending: null, notice: '白板已确认持久保存。此结果不代表内容此刻正在屏幕上显示。' } })
+      this.publish({ busy: false, editor: { ...current, loaded: result.content, draft: result.content.text, phase: current.expired ? 'expired' : 'ready', pending: null, saved: { command: commandIdentity(pending.command), key: pending.key, revision: result.content.revision, cleared: result.content.text === '' }, presentation: null, presentationNotice: '', notice: '白板已确认持久保存。此结果不代表内容此刻正在屏幕上显示。' } })
       if (!current.expired) this.arm(result.content)
     } catch (error) {
       if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
@@ -152,12 +154,34 @@ export class ContentController {
       const current = this.state.editor!
       if (result.state === 'NOT_FOUND') { this.publish({ busy: false, editor: { ...current, phase: 'unknown', notice: '当前未查到原命令结果。这不证明从未写入，排队中的提交可能尚未完成；不会因此重发。' } }); return }
       this.verify({ commandId: result.commandId, commandTicket: result.commandTicket, content: result.content }, pending)
-      this.publish({ busy: false, editor: { ...current, phase: 'result', history: result.content, notice: '已查到原命令的持久结果。这是提交时的结果，不代表当前最新内容；请明确读取当前内容核对。' } })
+      this.publish({ busy: false, editor: { ...current, phase: 'result', history: result.content, saved: { command: commandIdentity(pending.command), key: pending.key, revision: result.content.revision, cleared: result.content.text === '' }, presentation: null, presentationNotice: '', notice: '已查到原命令的持久结果。这是提交时的结果，不代表当前最新内容；请明确读取当前内容核对。' } })
     } catch (error) {
       if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
       const current = this.state.editor!
       if (commandRetired(error)) { this.publish({ busy: false, editor: { ...current, pending: { ...pending, retired: true }, phase: 'conflict', notice: '原票据已过期或未获发行，已停止查询与重试。历史草稿保留，请明确读取当前内容核对。' } }); return }
       this.publish({ busy: false, editor: { ...current, phase: 'unknown', expired: current.expired || error instanceof ApiError && error.code === 'DAY_CHANGED', notice: error instanceof ApiError && error.code === 'DAY_CHANGED' ? '原命令所属日期已过期，服务器不会返回旧日正文。旧草稿保留供审阅，不会发送到新日。' : error instanceof ProtocolFault ? '命令结果与原提交不匹配，已停止使用；原命令仍保留供核对。' : '查询尚未完成。原命令仍保留，请稍后主动查询；不会重发。' } })
+    }
+  }
+  async queryPresentation(): Promise<void> {
+    const e = this.state.editor
+    if (this.disposed || this.incompatible || !e?.saved || e.saved.retired || this.state.busy || e.pending && e.phase !== 'result') return
+    const saved = e.saved, { controller, id } = this.begin()
+    this.publish({ busy: true, editor: { ...e, presentation: null, presentationNotice: '正在手动读取桌面的最新观察，不会重新提交正文。' } })
+    try {
+      const result = await this.api.contentPresentation(saved.command, controller.signal)
+      if (!this.current(id)) return
+      if (!sameCommand(result, saved.command)) throw new ProtocolFault()
+      const current = this.state.editor!
+      if (result.state === 'NOT_FOUND') {
+        this.publish({ busy: false, editor: { ...current, presentationNotice: '当前未查到这条原命令的呈现元数据；此前已确认的保存结果不因此撤销。不会重发。' } }); return
+      }
+      const p = result.presentation
+      if (!sameKey(p.key, saved.key) || p.committedRevision !== saved.revision || p.cleared !== saved.cleared) throw new ProtocolFault()
+      this.publish({ busy: false, editor: { ...current, presentation: p, presentationNotice: '以下是此次查询取得的桌面观察；不会自动刷新，也不会修改你的草稿。' } })
+    } catch (error) {
+      if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
+      const current = this.state.editor!
+      this.publish({ busy: false, editor: { ...current, saved: commandRetired(error) ? { ...saved, retired: true } : saved, presentation: null, presentationNotice: commandRetired(error) ? '原命令票据已退役，已停止呈现查询。保存结果不会因此撤销；不会重新提交。' : error instanceof ProtocolFault ? '呈现元数据与原命令不匹配，已停止使用该响应；草稿和保存结果保持不变。' : '此次呈现查询未完成，请稍后主动查询；不会重新提交。' } })
     }
   }
   async loadLatest(): Promise<void> {

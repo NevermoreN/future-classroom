@@ -17,6 +17,12 @@ pub enum ContentKey {
     Homework(HomeworkKey),
     SharedReminder(ReminderKey),
 }
+/// Stable identity of one committed classroom item, without its text or owner state.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ContentDisplayRef {
+    pub key: ContentKey,
+    pub revision: Revision,
+}
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ContentRecord {
     pub key: ContentKey,

@@ -15,6 +15,7 @@
 | GET / POST | `content/homework/{classId}/{subjectId}/{ownerTeacherId}/{date}` | 读取/提交该老师当天作业 |
 | GET / POST | `content/reminders/{classId}/{date}` | 读取/提交班级共同提醒 |
 | GET | `content/commands/{commandId}` | 原提交者查询持久结果，不产生或重发写入 |
+| GET | `content/commands/{commandTicket}/{commandId}/presentation` | 当前C2原提交者手动查询原命令与实际桌面观察的纯元数据 |
 
 所有 ID 为非零规范 u64 十进制字符串；修订允许 `"0"`，不能转为 JavaScript Number。offset 为规范十进制 0..4096，线上的 offset/total/nextOffset 为安全 JSON 整数。路径不接受编码别名、额外查询、尾斜线、actor/origin 或文件路径。GET 无正文；POST 必须同源 JSON、已认证 Cookie 和精确 `X-FC-CSRF`。
 
@@ -49,6 +50,16 @@ POST 仅接受 `{schemaVersion:1,commandId,expectedRevision,text}`。commandId �
 查询为 `{schemaVersion:1,status:"COMMAND_RESULT",commandId,state:"COMMITTED"|"NOT_FOUND",content:CONTENT|null}`。仅原提交账户在当前有效 Web 权限/任教/日期下可查；主管理员也不能用此端口查看他人的 receipt。foreign 与不存在统一 NOT_FOUND，不泄露存在性。NOT_FOUND 只说明当前未找到，排队中的写入可能尚未完成，不能据此自动重发。
 
 查询 COMMITTED 是同日较早原结果，不表示当前槽仍是该版本；页面单独展示并提供显式 GET 核对最新内容，不自动塞回当前草稿。昨日 receipt 返回 DAY_CHANGED，不再返回正文。查询不会刷新会话或赋予新权限。
+
+### 实际呈现查询（2026-11-03）
+
+独立C2只读路由返回 `{schemaVersion:2,status:"CONTENT_PRESENTATION",commandId,commandTicket,state:"COMMITTED"|"NOT_FOUND",presentation:null|{key,now,expiresAt,committedRevision,currentRevision,displayedRevision,viewState,observedAt,cleared}}`。原保存及原命令结果DTO不增加字段。`committedRevision`是原命令的持久结果，`currentRevision`是同一次writer只读事务内的当前槽位（无槽为`"0"`）；`displayedRevision`只来自当前有效native观察，可为null。`cleared`说明原提交为空正文；此接口从不返回正文。票据、原提交者、当前精确Web会话及范围均重新校验，退役票据停止查询。
+
+桌面观察最多64条纯内容键/修订，只取真实当前发布页中有文本、通过裁剪且有效透明度非零的条目，不把整批作业、准备好的下一页或Offscreen诊断当成上屏。观察绑定scene/source/health/visibility代次及场景日期、有效期，另受现有2秒发布许可长度约束；隐藏、失败或失效立即清除，迟到旧代次不能恢复可见。查询只描述注明时间的最近观察，不宣称无限持续可见。
+
+`viewState`为D11九种状态：VISIBLE、HIDDEN_BY_APP、HIDDEN_BY_SESSION、RENDER_FAILED、PENDING_RENDER、REPLACED、INACTIVE_SUBJECT、HIDDEN_BY_COMPONENT、EXPIRED。原命令被替换时保持其COMMITTED事实并标REPLACED；即便新修订实际显示，也不称旧命令可见。PENDING_RENDER还包括当前分页没有该条目，页面明确说明；清空单独说明无文字可显示。作业为跨科目聚合，不因当前课程不同就误标其他作业不可见；非当前展示班级使用INACTIVE_SUBJECT说明范围不匹配。旧日仅此元数据接口可在当前授权及原未退役票据下标EXPIRED，旧正文接口仍返回DAY_CHANGED。
+
+教师正常保存或原结果核对成功后在本页内存保留对应C2，可明确点击“查询桌面显示状态”。不轮询、不重发、不改草稿/编辑基线或历史结果；界面分别说明三种修订、桌面观察时间与查询白板时间。离页丢失此内存入口，不增加浏览器持久存储。实际有限验证见实施记录。
 
 ## 错误与草稿
 

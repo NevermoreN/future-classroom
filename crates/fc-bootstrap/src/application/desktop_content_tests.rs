@@ -70,6 +70,7 @@ fn image_scene() -> (SceneSnapshot, PublishedContentSnapshot) {
         lesson_control: None,
     };
     scene.cards.push(SceneCard {
+        content_display_ref: None,
         kind: ComponentKind::SubjectImage,
         rect,
         font_dip: 18.,

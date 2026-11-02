@@ -212,6 +212,175 @@ fn content_http_clear_keeps_cas_and_receipts_keep_original_result_without_automa
 }
 
 #[test]
+fn content_presentation_http_joins_original_receipt_current_slot_and_invalidatable_observation() {
+    use crate::backend::{ContentPresentationObservation, ContentViewState};
+    use fc_domain::{
+        content::{ContentDisplayRef, ContentKey, HomeworkKey},
+        ids::{Revision, SceneGeneration},
+    };
+
+    let mut f = BackendFixture::new();
+    f.catalog(1);
+    let cookie = f.pair("presentation-browser", false);
+    let csrf = f.csrf(&cookie);
+    let original = f.issue(&cookie, "content");
+    let replacement = f.issue(&cookie, "content");
+    let route = "content/homework/1/1/1/2026-10-30";
+    let query = format!("{}/presentation", original.history("content"));
+    assert!(ok(&f.get_content(&cookie, &query)).contains("\"state\":\"NOT_FOUND\""));
+    let saved = f.save_content(
+        &cookie,
+        &csrf,
+        route,
+        // A legal maximum body whose JSON escaping would fill two-record
+        // replies. Presentation reads carry only metadata through the writer.
+        &save(original, 0, &format!("\"{}\"", "\\\"".repeat(16384))),
+    );
+    assert!(ok(&saved).contains("\"status\":\"COMMITTED\""));
+    assert!(ok(&f.get_content(&cookie, &query)).contains("\"viewState\":\"PENDING_RENDER\""));
+    let historical = f.get_content(&cookie, &original.history("content")).body;
+    let control = f.backend.session_control();
+    let health = control.health_gate().status();
+    // Deliberate boundary-input injection, not native renderer/TLS/browser proof.
+    // Actual page/opacity publication is covered by the separate native case.
+    let observation = ContentPresentationObservation {
+        generation: SceneGeneration::new(1),
+        source_revision: health.revision,
+        captured_at: f.clock.now(),
+        valid_until: Some(LocalDateTime::new(LocalDate::new(2026, 10, 31).unwrap(), 0).unwrap()),
+        observed_at: f.clock.now(),
+        health_epoch: health.health_epoch,
+        visibility_generation: control.content_presentation_generation(),
+        class_id: Some(ClassId::new(1).unwrap()),
+        homework_enabled: true,
+        reminder_enabled: true,
+        displayed: vec![ContentDisplayRef {
+            key: ContentKey::Homework(HomeworkKey {
+                class_id: ClassId::new(1).unwrap(),
+                subject_id: SubjectId::new(1).unwrap(),
+                owner_teacher_id: PrincipalId::new(1).unwrap(),
+                actual_date: f.clock.now().date,
+            }),
+            revision: Revision::new(1),
+        }],
+    };
+    assert!(control.publish_content_presentation(observation.clone()));
+    let visible = f.get_content(&cookie, &query);
+    assert!(ok(&visible).contains("\"viewState\":\"VISIBLE\""));
+    assert!(ok(&visible).contains("\"displayedRevision\":\"1\""));
+    assert!(!ok(&visible).contains("\"text\""));
+    control.clear_content_presentation(ContentViewState::HiddenByApp);
+    assert!(!control.publish_content_presentation(observation.clone()));
+    let mut stale_scene = observation;
+    stale_scene.visibility_generation = control.content_presentation_generation();
+    assert!(!control.publish_content_presentation(stale_scene));
+    let hidden = f.get_content(&cookie, &query);
+    assert!(ok(&hidden).contains("\"viewState\":\"HIDDEN_BY_APP\""));
+    assert!(ok(&hidden).contains("\"displayedRevision\":null"));
+    let updated = f.save_content(&cookie, &csrf, route, &save(replacement, 1, "\"\""));
+    assert!(ok(&updated).contains("\"revision\":\"2\""));
+    let replaced = f.get_content(&cookie, &query);
+    assert!(ok(&replaced).contains("\"viewState\":\"REPLACED\""));
+    assert!(ok(&replaced).contains("\"committedRevision\":\"1\",\"currentRevision\":\"2\""));
+    assert_eq!(
+        f.get_content(&cookie, &original.history("content")).body,
+        historical
+    );
+    let clear = f.get_content(
+        &cookie,
+        &format!("{}/presentation", replacement.history("content")),
+    );
+    assert!(ok(&clear).contains("\"cleared\":true"));
+    assert!(ok(&clear).contains("\"viewState\":\"HIDDEN_BY_COMPONENT\""));
+    // Cross midnight within the original C2's 24-hour lifetime. Crossing a
+    // complete 24 hours would correctly retire the ticket before any query.
+    f.clock.1.store(86_400 + 1, Ordering::Release);
+    f.admin = f
+        .backend
+        .login("admin", Password::new(PASSWORD.into()).unwrap())
+        .unwrap();
+    let cookie = f.pair("presentation-next-day", false);
+    let expired = f.get_content(&cookie, &query);
+    assert!(ok(&expired).contains("\"viewState\":\"EXPIRED\""));
+    assert!(!ok(&expired).contains("\"text\""));
+    error(
+        f.get_content(&cookie, &original.history("content")),
+        409,
+        "DAY_CHANGED",
+    );
+    error(
+        f.get_content("fc_session=foreign", &query),
+        401,
+        "UNAUTHORIZED",
+    );
+
+    drop(
+        f.backend
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(f.admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.create_account(
+                        f.admin,
+                        NewAccount {
+                            id: PrincipalId::new(2).unwrap(),
+                            login_name: "presentation-teacher".into(),
+                            display_name: "Synthetic presentation teacher".into(),
+                            role: Role::TeacherAdmin,
+                            scopes: vec![AssignmentScope {
+                                class_id: ClassId::new(1).unwrap(),
+                                subject_id: SubjectId::new(1).unwrap(),
+                            }],
+                        },
+                        Password::new("Synthetic-Presentation-Initial-Password-2026".into())
+                            .unwrap(),
+                    )
+                },
+            )
+            .unwrap(),
+    );
+    let initial = f
+        .backend
+        .login(
+            "presentation-teacher",
+            Password::new("Synthetic-Presentation-Initial-Password-2026".into()).unwrap(),
+        )
+        .unwrap();
+    f.backend
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(initial),
+            SessionPurpose::ChangeInitialPassword,
+            |backend| {
+                backend.change_password(
+                    initial,
+                    Password::new("Synthetic-Presentation-Initial-Password-2026".into()).unwrap(),
+                    Password::new("Synthetic-Presentation-Changed-Password-2026".into()).unwrap(),
+                )
+            },
+        )
+        .unwrap();
+    f.admin = f
+        .backend
+        .login("admin", Password::new(PASSWORD.into()).unwrap())
+        .unwrap();
+    let foreign = f.pair_login("presentation-teacher", "foreign-presentation", false);
+    error(f.get_content(&foreign, &query), 404, "COMMAND_NOT_ISSUED");
+
+    f.clock.0.fetch_add(
+        fc_ports::command_window::COMMAND_WINDOW_MILLIS + 1,
+        Ordering::AcqRel,
+    );
+    f.admin = f
+        .backend
+        .login("admin", Password::new(PASSWORD.into()).unwrap())
+        .unwrap();
+    let renewed = f.pair("renewed-presentation", false);
+    error(f.get_content(&renewed, &query), 410, "COMMAND_EXPIRED");
+}
+
+#[test]
 fn content_http_authority_and_csrf_injection_fail_before_durable_mutation() {
     let mut f = BackendFixture::new();
     f.catalog(1);

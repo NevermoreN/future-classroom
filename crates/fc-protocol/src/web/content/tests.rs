@@ -148,6 +148,92 @@ fn exact_content_committed_and_command_result_disclosures_keep_revisions_after_c
 }
 
 #[test]
+fn presentation_uses_readonly_c2_route_and_separate_text_free_current_observation() {
+    let command = crate::web::command_window::CommandReference {
+        ticket: fc_ports::command_window::CommandTicket::new([7; 16], 1).unwrap(),
+        command_id: CommandId::new(u64::MAX).unwrap(),
+    };
+    let boundary =
+        WebBoundary::new(&ListenPrefix::https("https://board.school:443/fc/").unwrap()).unwrap();
+    let path = format!(
+        "/fc/api/v1/content/commands/{}/{}/presentation",
+        command.ticket,
+        command.command_id.get()
+    );
+    assert_eq!(
+        boundary.route("GET", &path),
+        Ok(Route::ContentPresentation { command })
+    );
+    assert!(boundary.route("POST", &path).is_err());
+    assert!(boundary
+        .route("GET", "/fc/api/v1/content/commands/1/presentation")
+        .is_err());
+    let key = key();
+    let result = value(
+        &presentation(
+            command,
+            Some(Presentation {
+                key: &key,
+                now: now(),
+                expires_at: expires(),
+                committed_revision: Revision::new(7),
+                current_revision: Revision::new(8),
+                displayed_revision: Some(Revision::new(8)),
+                view_state: "REPLACED",
+                observed_at: Some(now()),
+                cleared: false,
+            }),
+        )
+        .unwrap(),
+    );
+    assert_eq!(result["schemaVersion"], 2);
+    assert_eq!(result["status"], "CONTENT_PRESENTATION");
+    assert_eq!(result["commandTicket"], command.ticket.to_string());
+    assert_eq!(result["presentation"]["committedRevision"], "7");
+    assert_eq!(result["presentation"]["displayedRevision"], "8");
+    assert_eq!(result["presentation"]["viewState"], "REPLACED");
+    assert_eq!(result.as_object().unwrap().len(), 6);
+    assert_eq!(result["presentation"].as_object().unwrap().len(), 9);
+    assert!(presentation(
+        command,
+        Some(Presentation {
+            key: &key,
+            now: now(),
+            expires_at: expires(),
+            committed_revision: Revision::new(7),
+            current_revision: Revision::new(7),
+            displayed_revision: Some(Revision::new(7)),
+            view_state: "VISIBLE",
+            observed_at: Some(LocalDateTime::new(today(), 36_002).unwrap()),
+            cleared: false,
+        })
+    )
+    .is_err());
+    let expired = value(
+        &presentation(
+            command,
+            Some(Presentation {
+                key: &key,
+                now: expires(),
+                expires_at: expires(),
+                committed_revision: Revision::new(7),
+                current_revision: Revision::new(0),
+                displayed_revision: None,
+                view_state: "EXPIRED",
+                observed_at: None,
+                cleared: true,
+            }),
+        )
+        .unwrap(),
+    );
+    assert_eq!(expired["presentation"]["currentRevision"], "0");
+    assert_eq!(expired["presentation"]["cleared"], true);
+    let missing = value(&presentation(command, None).unwrap());
+    assert_eq!(missing["state"], "NOT_FOUND");
+    assert!(missing["presentation"].is_null());
+}
+
+#[test]
 fn response_date_record_text_and_page_bounds_fail_closed_without_truncation() {
     let key = key();
     assert!(document(&key, now(), now(), None).is_err());

@@ -14,7 +14,7 @@ pub struct DesktopPreview {
     pub scale_y: f32,
 }
 pub(super) struct TreeRenderer {
-    tree: ScenePaintTree,
+    pub(super) tree: ScenePaintTree,
     original_cards: Vec<SceneCard>,
     tone: TextTone,
     unverified: bool,
@@ -810,6 +810,7 @@ pub(super) fn present(
         if let Some(control) = &scene.lesson_control {
             special.push(renderer.cards.len());
             let card = SceneCard {
+                content_display_ref: None,
                 content_identity: None,
                 kind: ComponentKind::Schedule,
                 rect: control.rect,
@@ -1520,6 +1521,7 @@ mod tests {
             captured_at: now(),
             valid_until: None,
             cards: vec![SceneCard {
+                content_display_ref: None,
                 content_identity: None,
                 kind: ComponentKind::Materials,
                 rect: inner,
@@ -1786,6 +1788,98 @@ mod tests {
         assert!(r.tree.is_none());
     }
     #[test]
+    fn published_content_sampling_tracks_real_pages_clipping_and_zero_alpha_without_offscreen_visibility(
+    ) {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let (_publisher, gate) = authority();
+        let mut scene = sample();
+        scene.cards[0].kind = ComponentKind::Homework;
+        scene.cards[0].rect = rect(20., 20., 180., 600.);
+        scene.cards[0].content = CardContent::Homework(
+            (1..=4)
+                .map(|i| fc_presentation::scene::HomeworkEntry {
+                    display_ref: ContentDisplayRef {
+                        key: fc_domain::content::ContentKey::Homework(
+                            fc_domain::content::HomeworkKey {
+                                class_id: fc_domain::ids::ClassId::new(1).unwrap(),
+                                actual_date: now().date,
+                                subject_id: SubjectId::new(i).unwrap(),
+                                owner_teacher_id: PrincipalId::new(i).unwrap(),
+                            },
+                        ),
+                        revision: Revision::new(i),
+                    },
+                    subject_id: SubjectId::new(i).unwrap(),
+                    teacher_id: PrincipalId::new(i).unwrap(),
+                    subject_name: format!("科目{i}"),
+                    teacher_name: format!("老师{i}"),
+                    text: "完整正文".into(),
+                    color: Rgb {
+                        red: 100,
+                        green: 140,
+                        blue: 180,
+                    },
+                    fill_alpha: 0.03,
+                })
+                .collect(),
+        );
+        let tree = scene.paint_tree.as_mut().unwrap();
+        for node in &mut tree.nodes[..2] {
+            node.rect = rect(0., 0., 240., 680.);
+            node.clip = node.rect;
+        }
+        // Homework leaf fill consumes one glass layer; keep its ancestor an
+        // opacity-only group within the production two-layer glass budget.
+        tree.nodes[1].glass = None;
+        tree.nodes[2].rect = scene.cards[0].rect;
+        tree.nodes[2].clip = scene.cards[0].rect;
+        tree.nodes[2].widget_kind = Some(fc_domain::layout::WidgetKind::Homework);
+        assert!(validate(tree, &scene.cards).is_ok());
+        let mut renderer = DesktopRenderer::new_hidden().unwrap();
+        assert_eq!(
+            renderer
+                .present(&scene, now(), &guard(&gate, scene.generation))
+                .unwrap(),
+            PresentOutcome::Offscreen
+        );
+        assert!(renderer.displayed_content(&scene).is_empty());
+        assert_eq!(renderer.cards[0].body.pages.len(), 4);
+        let first = renderer.collect_content(&scene);
+        assert_eq!(first.len(), 1);
+        assert_eq!(first[0].revision, Revision::new(1));
+        assert!(renderer.next_page(ComponentKind::Homework).unwrap());
+        assert!(renderer.collect_content(&scene).is_empty()); // Changed page is not rendered yet.
+        renderer
+            .present(&scene, now(), &guard(&gate, scene.generation))
+            .unwrap();
+        assert_eq!(
+            renderer.collect_content(&scene)[0].revision,
+            Revision::new(2)
+        );
+        assert!(renderer.displayed_content(&scene).is_empty());
+        // The actual published clip excludes every text line, despite a nonzero card alpha.
+        scene.paint_tree.as_mut().unwrap().nodes[2].clip = rect(20., 20., 180., 10.);
+        renderer
+            .present(&scene, now(), &guard(&gate, scene.generation))
+            .unwrap();
+        assert!(renderer.collect_content(&scene).is_empty());
+        let tree = scene.paint_tree.as_mut().unwrap();
+        tree.nodes[2].clip = scene.cards[0].rect;
+        tree.nodes[1].local_opacity = 0.;
+        tree.nodes[1].effective_opacity = 0.;
+        tree.nodes[2].effective_opacity = 0.;
+        renderer
+            .present(&scene, now(), &guard(&gate, scene.generation))
+            .unwrap();
+        assert!(renderer.collect_content(&scene).is_empty());
+        renderer.hide();
+        assert!(renderer.displayed_content(&scene).is_empty());
+        renderer.release_surfaces();
+        assert_eq!(renderer.metrics.dib_bytes, 0);
+    }
+    #[test]
     fn native_homework_title_and_body_share_one_leaf_and_real_pages() {
         let _serial = crate::NATIVE_TEST_SERIAL
             .lock()
@@ -1801,6 +1895,17 @@ mod tests {
         c.content = CardContent::Homework(
             (1..=4)
                 .map(|i| fc_presentation::scene::HomeworkEntry {
+                    display_ref: fc_domain::content::ContentDisplayRef {
+                        key: fc_domain::content::ContentKey::Homework(
+                            fc_domain::content::HomeworkKey {
+                                class_id: fc_domain::ids::ClassId::new(1).unwrap(),
+                                actual_date: fc_domain::time::LocalDate::new(2026, 11, 3).unwrap(),
+                                subject_id: fc_domain::ids::SubjectId::new(1).unwrap(),
+                                owner_teacher_id: fc_domain::ids::PrincipalId::new(1).unwrap(),
+                            },
+                        ),
+                        revision: fc_domain::ids::Revision::new(1),
+                    },
                     subject_id: SubjectId::new(i).unwrap(),
                     teacher_id: PrincipalId::new(i).unwrap(),
                     subject_name: format!("科目{i}"),

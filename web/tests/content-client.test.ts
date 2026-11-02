@@ -6,6 +6,13 @@ import { homeworkKey, wireDocument, wireScopes } from './content-fixtures'
 const signal = () => new AbortController().signal
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 describe('content request transport and result correlation', () => {
+  it('queries presentation with the original C2 namespace using GET and no write payload', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json({ schemaVersion: 2, status: 'CONTENT_PRESENTATION', ...identity('77'), state: 'NOT_FOUND', presentation: null }))
+    const api = new HttpApi(new URL('https://board.school/fc/api/v1/'), fetcher)
+    expect((await api.contentPresentation(identity('77'), signal())).state).toBe('NOT_FOUND')
+    expect(String(fetcher.mock.calls[0]![0])).toBe(`https://board.school/fc/api/v1/content/commands/${ticket}/77/presentation`)
+    expect(fetcher.mock.calls[0]![1]!.body).toBeUndefined(); expect(fetcher.mock.calls[0]![1]!.method).not.toBe('POST')
+  })
   it('uses same-origin exact resource paths, real scope fields, CSRF and only strict write payload', async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json(wireScopes())).mockResolvedValueOnce(json(wireDocument())).mockResolvedValueOnce(json({ schemaVersion: 2, status: 'COMMITTED', commandId: '18446744073709551615', commandTicket: ticket, content: wireDocument(homeworkKey, '1', '正文') })).mockResolvedValueOnce(json({ schemaVersion: 2, status: 'COMMAND_RESULT', commandId: '18446744073709551615', commandTicket: ticket, state: 'COMMITTED', content: wireDocument(homeworkKey, '1', '正文') }))
     const api = new HttpApi(new URL('https://board.school/fc/api/v1/'), fetcher)

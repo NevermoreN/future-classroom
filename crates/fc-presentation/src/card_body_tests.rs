@@ -28,6 +28,15 @@ fn color() -> Rgb {
 }
 fn homework() -> CardContent {
     CardContent::Homework(vec![HomeworkEntry {
+        display_ref: fc_domain::content::ContentDisplayRef {
+            key: fc_domain::content::ContentKey::Homework(fc_domain::content::HomeworkKey {
+                class_id: fc_domain::ids::ClassId::new(1).unwrap(),
+                actual_date: fc_domain::time::LocalDate::new(2026, 11, 3).unwrap(),
+                subject_id: fc_domain::ids::SubjectId::new(1).unwrap(),
+                owner_teacher_id: fc_domain::ids::PrincipalId::new(1).unwrap(),
+            }),
+            revision: fc_domain::ids::Revision::new(1),
+        },
         subject_id: SubjectId::new(1).unwrap(),
         teacher_id: PrincipalId::new(2).unwrap(),
         subject_name: "多行科目名称\n第二行".into(),

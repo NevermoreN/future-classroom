@@ -36,6 +36,7 @@ fn passive_facts_have_no_flat_input_or_queued_page_route_but_lesson_control_does
     .enumerate()
     {
         scene.cards.push(SceneCard {
+            content_display_ref: None,
             kind,
             content_identity: None,
             rect: Rect {
@@ -109,6 +110,7 @@ fn passive_overflow_is_explicit_capacity_error_after_complete_measurement() {
     let renderer = DesktopRenderer::new_hidden().unwrap();
     let graphics = &renderer.graphics;
     let card = SceneCard {
+        content_display_ref: None,
         kind: ComponentKind::Schedule,
         content_identity: None,
         rect: Rect {

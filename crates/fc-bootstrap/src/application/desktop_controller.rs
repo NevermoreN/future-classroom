@@ -1,7 +1,9 @@
 //! UI-thread resident desktop orchestration. SQLite runs only through the shared
 //! Work pool; the UI never takes Backend's mutex or refreshes a manager lease.
 use super::{fatal, profile_content_flow, CurrentClock, Outcome, Work};
-use fc_bootstrap::backend::{Backend, DesktopLessonStamp, SessionControl};
+use fc_bootstrap::backend::{
+    Backend, ContentPresentationObservation, ContentViewState, DesktopLessonStamp, SessionControl,
+};
 use fc_bootstrap::profile_content_cache::TextFrame;
 use fc_domain::{
     desktop::{ComponentKind, DesktopFacts},
@@ -22,8 +24,8 @@ use fc_runtime::{
 };
 use fc_windows::{
     desktop::{
-        DesktopEvent, DesktopMetrics, DesktopRenderer, NativeTextMeasure, PresentOutcome,
-        PublicationGuard, DESKTOP_SCOPE,
+        ContentHiddenReason, DesktopEvent, DesktopMetrics, DesktopRenderer, NativeTextMeasure,
+        PresentOutcome, PublicationGuard, DESKTOP_SCOPE,
     },
     host::HostHints,
     materials::raster::{RasterCache, RasterFrame},
@@ -521,6 +523,11 @@ impl Controller {
         }
     }
     pub(super) fn hide(&mut self) {
+        self.clear_content_observation(if self.notice.failed {
+            ContentViewState::RenderFailed
+        } else {
+            ContentViewState::PendingRender
+        });
         self.clear_content_capability();
         self.cancel_content_jobs();
         self.needs_scene = true;
@@ -532,6 +539,11 @@ impl Controller {
         self.lesson_event = None;
         self.renderer.hide();
         self.probe_presented = false;
+    }
+    fn clear_content_observation(&self, state: ContentViewState) {
+        if let Some(control) = &self.control {
+            control.clear_content_presentation(state);
+        }
     }
     /// The layout editor renders a separate synthetic scene. Release the hidden
     /// classroom surfaces first so its preview cannot coexist with that cache.
@@ -584,6 +596,7 @@ impl Controller {
     }
     fn render_unavailable(&mut self, message: &str) {
         self.invalidate();
+        self.clear_content_observation(ContentViewState::RenderFailed);
         self.cancel_pending();
         self.notice.failed(message);
         self.next_render = Instant::now() + RETRY;
@@ -613,7 +626,13 @@ impl Controller {
             },
         })
     }
-    fn rendered(&mut self, outcome: PresentOutcome) {
+    fn rendered(
+        &mut self,
+        outcome: PresentOutcome,
+        now: LocalDateTime,
+        health_epoch: u64,
+        visibility_generation: u64,
+    ) {
         let visible = matches!(
             outcome,
             PresentOutcome::Published | PresentOutcome::Unchanged
@@ -681,6 +700,62 @@ impl Controller {
             self.next_images = Instant::now();
         } else {
             self.hide();
+        }
+        if matches!(
+            outcome,
+            PresentOutcome::Published | PresentOutcome::Unchanged
+        ) {
+            if let (Some(control), Some(scene), Some(facts)) =
+                (&self.control, &self.scene, &self.facts)
+            {
+                let enabled = |kind| {
+                    scene.cards.iter().enumerate().any(|(index, card)| {
+                        card.kind == kind
+                            && scene
+                                .paint_tree
+                                .as_ref()
+                                .map_or(card.component_alpha, |tree| {
+                                    tree.nodes
+                                        .iter()
+                                        .find(|node| node.card_index == Some(index))
+                                        .map_or(0., |node| node.effective_opacity)
+                                })
+                                * 255.
+                                >= 0.5
+                    })
+                };
+                if !control.publish_content_presentation(ContentPresentationObservation {
+                    generation: scene.generation,
+                    source_revision: scene.source_revision,
+                    captured_at: scene.captured_at,
+                    valid_until: scene.valid_until,
+                    observed_at: now,
+                    health_epoch,
+                    visibility_generation,
+                    class_id: facts
+                        .identity
+                        .installation
+                        .as_ref()
+                        .and_then(|i| i.current_class),
+                    homework_enabled: enabled(ComponentKind::Homework),
+                    reminder_enabled: enabled(ComponentKind::Reminder),
+                    displayed: self.renderer.displayed_content(scene),
+                }) {
+                    self.hide();
+                    return;
+                }
+            }
+        } else {
+            let state = if outcome == PresentOutcome::Hidden {
+                match DesktopRenderer::hidden_content_state() {
+                    Ok(Some(ContentHiddenReason::App)) => ContentViewState::HiddenByApp,
+                    Ok(Some(ContentHiddenReason::Session)) => ContentViewState::HiddenBySession,
+                    _ => ContentViewState::PendingRender,
+                }
+            } else {
+                ContentViewState::PendingRender
+            };
+            self.clear_content_observation(state);
         }
         self.probe_presented = outcome == PresentOutcome::Offscreen;
         self.notice.rendered(outcome);
@@ -1078,6 +1153,7 @@ impl Controller {
             || hints.contains(HostHints::POWER_CHANGED)
         {
             self.hide();
+            self.clear_content_observation(ContentViewState::HiddenBySession);
             self.cancel_pending();
             return Ok(());
         }
@@ -1095,6 +1171,7 @@ impl Controller {
                 // Keep the exact page writer's capability during its own guarded
                 // transaction; hide native input without cancelling that writer.
                 self.renderer.hide();
+                self.clear_content_observation(ContentViewState::PendingRender);
                 self.material_events.clear();
                 self.lesson_event = None;
                 self.probe_presented = false;
@@ -1141,6 +1218,7 @@ impl Controller {
         }
         if settings_open {
             self.hide();
+            self.clear_content_observation(ContentViewState::HiddenByApp);
             return Ok(());
         }
         if self.facts.is_none() {
@@ -1210,6 +1288,7 @@ impl Controller {
             Ok(true) => (),
             Ok(false) => {
                 self.renderer.hide();
+                self.clear_content_observation(ContentViewState::PendingRender);
                 self.clear_content_capability();
                 self.probe_presented = false;
                 return Ok(());
@@ -1232,6 +1311,8 @@ impl Controller {
             current_generation: self.generation,
             settings_open,
         };
+        let health_epoch = gate.status().health_epoch;
+        let visibility_generation = control.content_presentation_generation();
         let outcome = match self.renderer.present(scene, now, &guard) {
             Ok(outcome) => outcome,
             Err(error) => {
@@ -1243,7 +1324,7 @@ impl Controller {
                 return Ok(());
             }
         };
-        self.rendered(outcome);
+        self.rendered(outcome, now, health_epoch, visibility_generation);
         if outcome == PresentOutcome::ContentPending {
             return Ok(());
         }
@@ -1402,6 +1483,7 @@ mod tests {
         assert_eq!(history.previous.last(), Some(&57));
         let mut scene = scene();
         scene.cards.push(fc_presentation::scene::SceneCard {
+            content_display_ref: None,
             content_identity: None,
             kind: ComponentKind::Homework,
             rect: Rect {
@@ -1548,6 +1630,7 @@ mod tests {
             offset: 5,
         };
         scene.cards.push(fc_presentation::scene::SceneCard {
+            content_display_ref: None,
             content_identity: None,
             kind: ComponentKind::Materials,
             rect: Rect {

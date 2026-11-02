@@ -74,6 +74,9 @@ pub enum Route {
     ContentWindowCommand {
         command: command_window::CommandReference,
     },
+    ContentPresentation {
+        command: command_window::CommandReference,
+    },
     Materials {
         route: materials::MaterialRoute,
     },
@@ -275,7 +278,12 @@ impl WebBoundary {
                         Route::ContentRead { key }
                     }
                 } else if let Some(id) = path.strip_prefix("content/commands/") {
-                    if id.contains('/') {
+                    if let Some(reference) = id.strip_suffix("/presentation") {
+                        Route::ContentPresentation {
+                            command: command_window::CommandReference::path(reference)
+                                .ok_or(WebError::NotFound)?,
+                        }
+                    } else if id.contains('/') {
                         Route::ContentWindowCommand {
                             command: command_window::CommandReference::path(id)
                                 .ok_or(WebError::NotFound)?,
