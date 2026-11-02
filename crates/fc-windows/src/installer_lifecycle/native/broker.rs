@@ -21,6 +21,8 @@ mod context_probe;
 #[allow(dead_code)] // Fixed Setup entry/inner guard are not released by this slice.
 pub(crate) mod controlled_owner;
 mod effects;
+#[allow(dead_code)] // Read-only capture foundation; not wired to an upgrade permit.
+mod installed_release;
 mod retirement;
 mod supervisor;
 
