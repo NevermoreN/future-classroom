@@ -1,0 +1,124 @@
+{
+  "status": "PASS_LOCAL_W6_CAPTURED_LAYOUT_IMPLEMENTATION_AND_GNU_CHECKS_NATIVE_NOT_RUN",
+  "baseCommit": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "worktree": "/tmp/fc-round80-controlled-repair/checkout-installed-release-layout-first",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database/native_probe.rs",
+      "bytes": 12611,
+      "sha256": "f34f35a050c94036641a704cd6ea5b51e8242904ed525df939cfd52602e582f9"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database.rs",
+      "bytes": 22582,
+      "sha256": "cd817300ab076056cf0f8f29919774516c18bb864c0ff636df9f0559689bb048"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/database_rules.rs",
+      "bytes": 14750,
+      "sha256": "1485f6d981801c3f7131dc0835906d34f47d9c00d5b8c09ce6957d43e1fecdf7"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/format.rs",
+      "bytes": 5341,
+      "sha256": "3f98688a6efc6e9eca0c2d347ddeda3959fcf6528fef1ab392b754435412f0a5"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release.rs",
+      "bytes": 14288,
+      "sha256": "18b22d9241e1525839146c3dd27166772ac5b3ad14a149a4d2ccb604dd953536"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 51213,
+      "sha256": "6fdc1c54fc91b83fd2f0ec556d687a9764192f2139771393f5fb925a00b6e2d1"
+    }
+  ],
+  "changedFromW5": [
+    "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database/native_probe.rs",
+    "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database.rs",
+    "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/database_rules.rs"
+  ],
+  "inheritedByteExact": [
+    "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/format.rs",
+    "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release.rs",
+    "crates/fc-windows/src/installer_lifecycle/native/broker.rs"
+  ],
+  "sourceScope": "Only3changed files;6file fullpatch reconstructs basea470+W5+rawlayout;broker/installed_release/format inherited unchanged",
+  "observations": {
+    "Directory": "Fixed full-table SELECT Directory,Directory_Parent,DefaultDir;unique bounded rawrows and fixed per-user root graph;all component directories resolve beneath FcInstallDir",
+    "CustomAction": "Fixed full-table SELECT Action,Type,Source,Target;fixed Type1/Binary/Target tuple retained",
+    "InstallExecuteSequence": "Fixed full-table SELECT Action,Condition,Sequence;nullable raw fields;guard condition1 sequence1499 plus real Initialize1500",
+    "authorization": "Captured only;no VerifiedInstalledRelease,no ordinary maintenance caller,no runtime SQL/path/manifest parameters"
+  },
+  "bounds": {
+    "files": 72,
+    "components": 72,
+    "directories": 72,
+    "customActions": 16,
+    "executeSequence": 64,
+    "totalCloseReceipts": 256,
+    "combinedLiveMSIKernel": 64,
+    "ownerSlots": 8,
+    "originalSeconds": 120,
+    "reservation": "Before MSI acquisition closed+liveMSI+incoming<=256;known enumeration failure can still close all original live objects",
+    "supportedManifest": "Current fixed builder72 files/components fit totalledger190 with canonical6Directory/1CA/23sequence;extra tables that exceed256 are explicitly negative,not budget increase"
+  },
+  "pureRules": {
+    "crateRuleTests": 7,
+    "standaloneTotal": 8,
+    "standaloneIncludes": "7crate rules+1Unicode alias property against same actual source;not additive native lifecycle",
+    "actualExit": 0
+  },
+  "compile": {
+    "producer": {
+      "path": "/tmp/fc-round80-controlled-repair/installed-release-layout-implementation-first/build-report-second.json",
+      "bytes": 175526,
+      "sha256": "1d9ad02210c39f98d1d6afbaa5b1da94f929fbc3538d13f7a65f6a2e10a5513f"
+    },
+    "actualExit": 0,
+    "inputRows": 467,
+    "sourceBeforeAfterEqual": true,
+    "executable": {
+      "path": "/tmp/fc-round80-controlled-repair/installed-release-layout-implementation-first/probe-artifact-second/db-reader-tests.exe",
+      "bytes": 4428076,
+      "sha256": "7ff23691903222ff7d1dce3e592aa12db6e9236cf42c72ec26252b91d439659c"
+    },
+    "target": "i686-pc-windows-gnu",
+    "profileTest": true,
+    "features": [
+      "default"
+    ]
+  },
+  "strictClippy": {
+    "actualExit": 0,
+    "release": true,
+    "tests": true,
+    "denyWarnings": true
+  },
+  "architecture": "12crates33edges actual0",
+  "nativeProbe": {
+    "status": "NOT_RUN",
+    "fixedProduct": "a470 official Win7MSVC normal fixture;unchanged product",
+    "expectedDirectoryRows": 6,
+    "expectedCustomActionRows": 1,
+    "expectedExecuteRows": 23,
+    "expectedMsiCloseReceipts": 74,
+    "expectedViewCloses": 8,
+    "expectedRecordCloses": 64,
+    "oldW5Actual41": "Unchanged separate evidence;new74 is assertion pending actual Windows",
+    "realMeaning": "Source fixed native API ledger and tests;no runtime PASS invented"
+  },
+  "firstProducerPreserved": {
+    "path": "/tmp/fc-round80-controlled-repair/installed-release-layout-implementation-first/build-report-first.json",
+    "bytes": 175518,
+    "sha256": "7422042566ab9f23dc874a08b9580ad2d6a3dec5f61a1b72c5eab3eb1aba6a50"
+  },
+  "ASCIIRefinement": "Final minimal segment ASCII gate aligns wireASCII path domain;first source/producer retained;second compiled finalsource;standalone Unicode test passed",
+  "Windows": "NOT_RUN",
+  "newMSVC": "NOT_VALIDATED",
+  "Win7OS": "NOT_RUN",
+  "Win10OS": "NOT_RUN",
+  "Upgrade": "NOT_AUTHORIZED_NOT_EXERCISED",
+  "GitCommitPush": false
+}

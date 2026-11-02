@@ -1,0 +1,26 @@
+[
+  {
+    "name": "pure-compile-first",
+    "argv": [
+      "rustc",
+      "--edition=2021",
+      "--test",
+      "/tmp/fc-round80-controlled-repair/carrier-abi2-implementation-first/pure-first.rs",
+      "-o",
+      "/tmp/fc-round80-controlled-repair/carrier-abi2-implementation-first/pure-first"
+    ],
+    "actualExit": 0,
+    "parentReaped": true,
+    "seconds": 0.5531592639999872
+  },
+  {
+    "name": "pure-tests-first",
+    "argv": [
+      "/tmp/fc-round80-controlled-repair/carrier-abi2-implementation-first/pure-first",
+      "--nocapture"
+    ],
+    "actualExit": 101,
+    "parentReaped": true,
+    "seconds": 0.03643385599934845
+  }
+]

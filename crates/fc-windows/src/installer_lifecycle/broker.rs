@@ -5,6 +5,13 @@ use super::{native, LifecycleError, Result};
 use std::time::{Duration, Instant};
 
 pub(super) mod manifest;
+// ABI2 format/publication foundation only; native execution remains unconnected.
+#[allow(dead_code)]
+pub(super) mod carrier;
+#[allow(dead_code)]
+pub(super) mod payload_manifest;
+#[allow(dead_code)]
+pub(super) mod published_host;
 
 /// One original budget for startup, authenticated IPC, transaction observation,
 /// effect verification and cleanup. A timeout never grants a replacement owner.

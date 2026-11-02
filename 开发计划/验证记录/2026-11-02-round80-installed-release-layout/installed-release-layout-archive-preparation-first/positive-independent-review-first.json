@@ -1,0 +1,97 @@
+{
+  "status": "PASS_INDEPENDENT_W6_SOURCE_AND_ACTUAL_WIN11_LAYOUT_PROBE_FULL_DOWNLOAD_CLOSE_ASSERTIONS",
+  "report": {
+    "path": "/tmp/fc-round80-controlled-repair/installed-release-layout-runtime-first/report.json",
+    "bytes": 102082,
+    "sha256": "f86ce1ef275fa92f5ebee1d2d10b62c84d3ff62ec2247df86b60ba0e397e8c90"
+  },
+  "sourceBase": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "sourceState": "Independent W6 dirtyworktree+frozen6files;notclaimedmainmerged",
+  "sourceInputs": 467,
+  "sourceAndPreparationFreezeBytesVerified": true,
+  "product": "Fixed a470 official Win7MSVC normal product unchanged",
+  "reader": "New W6GNU cfgtest distinctsource+profiletesttrue;newMSVCreaderNOT_VALIDATED",
+  "native": {
+    "expectedAndActualDirectoryRows": 6,
+    "customActions": 1,
+    "executeSequence": 23,
+    "internalCloseAssertions": 74,
+    "debugTextReceiptCount": 74,
+    "debugViewClose0": 8,
+    "scope": "Actual Rust assertions/debugstdout;not per-API serializedJSON receiptledger",
+    "casePassed": 1,
+    "processExit": 0
+  },
+  "originalInstances": [
+    {
+      "role": "setup-install",
+      "pid": 32376,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "role": "owned-guardian",
+      "pid": 36608,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "role": "setup-uninstall",
+      "pid": 14308,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "role": "owned-guardian",
+      "pid": 41116,
+      "exit": 0,
+      "wait": 0,
+      "close": "CHECKED_CLOSE_SUCCESS"
+    }
+  ],
+  "readerOriginalCap": {
+    "wait": 0,
+    "exit": 0,
+    "checkedClose": true
+  },
+  "download": {
+    "files": 31,
+    "dirs": 3,
+    "allRawBytesVerified": true
+  },
+  "cleanup": {
+    "nonce": "cd622349969e4a1daf47725300c5dee5",
+    "status": "REMOVED_EXACT_DOWNLOADED_MSVC_WIN7_TARGET_PRODUCT_ROOT",
+    "knownAbsent": true
+  },
+  "nativeMilliseconds": 4797,
+  "outerSeconds": 7.176938598000561,
+  "futureRegression": {
+    "rawDeclarations": 81,
+    "featureNotCompiled": [
+      "owned_removal_scope_never_accepts_unbound_or_runtime_authority_text",
+      "owned_removal_pending_requires_exact_original_schema_sid_and_tag5",
+      "owned_removal_scope_closes_full_manifest_receipts_and_object_identity"
+    ],
+    "explicitPreviouslyPassedIgnored": [
+      {
+        "name": "captures_real_installed_a470_cache_and_returns_every_owned_handle",
+        "attributes": "#[ignore = \"Requires root-installed exact a470 MSVC package; run exact with --ignored\"]",
+        "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database/native_probe.rs"
+      }
+    ],
+    "expectedParent77": 77,
+    "controlledIncluded": 6,
+    "status": "PREPARED_ONLY_NOT_RUN"
+  },
+  "BeginEnd": "NOT_SERIALIZED_SOURCE_AND_ORIGINAL_G0_EFFECTS_INFERENCE_ONLY",
+  "Upgrade": "NOT_AUTHORIZED",
+  "Win7OS": "NOT_RUN",
+  "Win10OS": "NOT_RUN",
+  "WindowsContacted": false,
+  "Cargo": false,
+  "Git": false
+}

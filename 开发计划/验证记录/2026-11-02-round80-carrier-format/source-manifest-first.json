@@ -1,0 +1,584 @@
+{
+  "schema": "future-classroom-finite-carrier-format-source-manifest/v1",
+  "originalCount": 113,
+  "originalBytes": 727051,
+  "selectedFrozenTrees": [
+    "carrier-abi2-implementation-first",
+    "carrier-python-codec-first",
+    "carrier-combined-checks-first"
+  ],
+  "freezePins": {
+    "carrier-abi2-implementation-first/freeze-first.json": "44eef26f5f4668687275cb89faec33d1524cdd517d30137c26edafbc2a62709c",
+    "carrier-python-codec-first/freeze-first.json": "67c8e4e2040b60ce8cd86867e2626c355398f5b27ef320852628ab2cec710a15",
+    "carrier-combined-checks-first/freeze-first.json": "6e7082ed857eaed169f4a23272ac37274565e8664b3c4bba085128a012b7f46f"
+  },
+  "originals": [
+    {
+      "path": "carrier-abi2-implementation-first/.owner",
+      "bytes": 54,
+      "sha256": "6ac87cd90acbaea141d8ef0370db2cff5109b917f7b3f005e4c09eee6632f3cd"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/architecture-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/architecture-first.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/clippy-first.stderr.log",
+      "bytes": 1324,
+      "sha256": "1d5ebdb21b58f6e152e87dff5d2505e35fa9d1163bd49da363e20e0a7838266f"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/clippy-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/clippy-second.stderr.log",
+      "bytes": 186,
+      "sha256": "ec12705ab2d7659812638f1d76352faa795d19f38a333d6cd984a5f1b730b273"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/clippy-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/codec-fixture-first.json",
+      "bytes": 12195,
+      "sha256": "31229a5222990587aa4e588f5af7b566ef3733f0cb4573cd3d061bdbde0a7c8d"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/compiler-inputs-final.json",
+      "bytes": 86269,
+      "sha256": "d4ef26a30324919f184e64342e8438cf2717cd7d98451e672bb6a7acff76c659"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/complete.patch",
+      "bytes": 82279,
+      "sha256": "02167280374eab0720ddb9de185d15454d1d2bcdafcf161d482e5355ddb9a0c3"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/diff-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/diff-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/fmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/fmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/freeze-first.json",
+      "bytes": 13145,
+      "sha256": "44eef26f5f4668687275cb89faec33d1524cdd517d30137c26edafbc2a62709c"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/gnu-check-first.stderr.log",
+      "bytes": 1789,
+      "sha256": "d46e68a269843663957c9e1bcd493414989afc10b021b490d0d65dca1b6c9b38"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/gnu-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/gnu-check-second.stderr.log",
+      "bytes": 185,
+      "sha256": "f5b61801df2faead2d00bedd984aa86b33184b2624db7ca84d09c3eaf16997fd"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/gnu-check-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/implementation-first.json",
+      "bytes": 8650,
+      "sha256": "52d82bfd8ce62df8da67cd6b5c1e65706a07f95e446fa34222ee55656d4339a5"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/incremental-from-reader-second.patch",
+      "bytes": 27939,
+      "sha256": "3c90909ebe40a4711fac1013b489d5fae9d1ad2c607809d8d2f3b952f5ddb36a"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/native-checks-first.json",
+      "bytes": 2551,
+      "sha256": "93bfbeb28eaa6d225e0b867414525c83bb87994aaf2bd406570a84495e431d0a"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/native-checks-second.json",
+      "bytes": 3789,
+      "sha256": "d8a0e2a11bf108e62d55b9e752a562766550b04cf092f0c2913cc1ed6e72aedc"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/patch-reverse-check.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/patch-reverse-check.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-checks-first.json",
+      "bytes": 647,
+      "sha256": "817f795c96b8f1ee60d679acbe628db9a94cf2edfa735186932ac1504050775b"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-checks-fourth.json",
+      "bytes": 651,
+      "sha256": "294d755e98fbaac13811bc9682aa695b569bf4104500d46447f10c219c828b78"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-checks-second.json",
+      "bytes": 651,
+      "sha256": "0b23b4d8fba52b9e46f1b2fd3743ca2f9c72dec46d253b7e71fd58b737aa1ed9"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-checks-third.json",
+      "bytes": 643,
+      "sha256": "56c290fcc5072cb10f4ae8a9d7fef7381de37347df47997d0cda98f35d983b0e"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-compile-first.stderr.log",
+      "bytes": 557,
+      "sha256": "ea256ce2168208762a5208827194842a4fe27defd983b10b4205c7c8bba454bf"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-compile-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-compile-fourth.stderr.log",
+      "bytes": 557,
+      "sha256": "ea256ce2168208762a5208827194842a4fe27defd983b10b4205c7c8bba454bf"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-compile-fourth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-compile-second.stderr.log",
+      "bytes": 557,
+      "sha256": "ea256ce2168208762a5208827194842a4fe27defd983b10b4205c7c8bba454bf"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-compile-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-compile-third.stderr.log",
+      "bytes": 557,
+      "sha256": "ea256ce2168208762a5208827194842a4fe27defd983b10b4205c7c8bba454bf"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-compile-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-tests-first.stderr.log",
+      "bytes": 395,
+      "sha256": "d0448212282d0e586179277aab9cba5089be65abcc4c5918ea44d795aa2fe9be"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-tests-first.stdout.log",
+      "bytes": 12474,
+      "sha256": "efdc3a37de0e77ad8bda62161004c7bad1300bd3067b432dbe1686577f6615af"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-tests-fourth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-tests-fourth.stdout.log",
+      "bytes": 12428,
+      "sha256": "dec255024a9a798262d8677ef70e7b9f7716bd2b5566fc6290abde2d17858f1c"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-tests-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-tests-second.stdout.log",
+      "bytes": 12329,
+      "sha256": "c3362ef2e407fca68d36f5679e30b6ad4c487e1457574ddeb151f8fca74cad72"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-tests-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/pure-tests-third.stdout.log",
+      "bytes": 12428,
+      "sha256": "c458252dedd31ad6e298b0212fa2cdfba83c80c3f247d9ba91641e19e5394059"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/raw-contract-first.json",
+      "bytes": 2126,
+      "sha256": "18feaf1b75048f64b2527e0ba689923908bec9860946fd7482d7bbf7b65ce385"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/run-native-checks-first.py",
+      "bytes": 1674,
+      "sha256": "e51bdb9b2f078ee3aca557aa9b979cc6b5e7e8a101ee63f99121592ebe565dc7"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/run-native-checks-second.py",
+      "bytes": 1677,
+      "sha256": "5f5b25de09bcd4218d4c560bd750042b19cd161e69be2a29ec8dbb529b176e2e"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/run-pure-first.py",
+      "bytes": 1323,
+      "sha256": "811b16da7cef6a8a59051156345e9799345d3632d143c268be87a3e0f2eeabb9"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/run-pure-fourth.py",
+      "bytes": 1328,
+      "sha256": "f9ac547988465cdf3e5cd93e2c034b4086a4a6e66692d4373f8815c68f2fe5b0"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/run-pure-second.py",
+      "bytes": 1328,
+      "sha256": "21e8f398956e1e4f46eb2215952c66f462d54c58e4aad2e4a8d305819abcec14"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/run-pure-third.py",
+      "bytes": 1322,
+      "sha256": "8707fb0716f63d0b20d5db4654d12632e0985559d035865b27bd0e5d0d900775"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-clippy-first/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7600,
+      "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-clippy-first/crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+      "bytes": 12144,
+      "sha256": "0a679a07ccccab0e51dc0ba087c883860264b4933b2fa90eb79bda1dd1dcb33f"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-clippy-first/crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+      "bytes": 8701,
+      "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-clippy-first/crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-final/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7600,
+      "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-final/crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+      "bytes": 12154,
+      "sha256": "e354f1e8b5bf08a9137f91fa6abc483ae120093c45516c586915d725fe6acd1b"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-final/crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+      "bytes": 8701,
+      "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-final/crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-final/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 51213,
+      "sha256": "6fdc1c54fc91b83fd2f0ec556d687a9764192f2139771393f5fb925a00b6e2d1"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-final/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release.rs",
+      "bytes": 14288,
+      "sha256": "18b22d9241e1525839146c3dd27166772ac5b3ad14a149a4d2ccb604dd953536"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-final/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database.rs",
+      "bytes": 18155,
+      "sha256": "673bc3028ce509affe0a63286c4a055fb6f10cd9ede77dd94ad222492248a15b"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-final/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database/native_probe.rs",
+      "bytes": 9409,
+      "sha256": "6030ca6d5e980d00ce6eead98c591ea4f0a5a4aba64b6e8c4c0c256b8b105309"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-final/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/database_rules.rs",
+      "bytes": 3403,
+      "sha256": "b7a4a67ef44c43a6a8b57ff33c82db2b9c092ca234ee48c0e972734a9de77f8d"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-final/crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/format.rs",
+      "bytes": 5341,
+      "sha256": "3f98688a6efc6e9eca0c2d347ddeda3959fcf6528fef1ab392b754435412f0a5"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-first/carrier.rs",
+      "bytes": 11309,
+      "sha256": "a182c5e2f0d0395aaf860679dd980748167520f07c76df4d62bc47fa2c02715f"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-first/payload_manifest.rs",
+      "bytes": 8091,
+      "sha256": "b89f422cbf3e79f940dfa44ea2ede6d6910dcd20f4608c6115c95ee39690fe64"
+    },
+    {
+      "path": "carrier-abi2-implementation-first/source-first/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    },
+    {
+      "path": "carrier-combined-checks-first/.owner",
+      "bytes": 54,
+      "sha256": "2f4fc97f5535669f0013c9d631538c5f499ab545d41c90c1e37c18710d4fd1d5"
+    },
+    {
+      "path": "carrier-combined-checks-first/architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "carrier-combined-checks-first/commit-message-first.txt",
+      "bytes": 502,
+      "sha256": "25711e348054df6a094063305405cec64492335f4c2c6071da74d2a1d6556870"
+    },
+    {
+      "path": "carrier-combined-checks-first/commit.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/commit.stdout.log",
+      "bytes": 516,
+      "sha256": "1a1a0a2adddea3faf17d7008954ed16b82d94eb31dec4e2bbb628047ed63a1e6"
+    },
+    {
+      "path": "carrier-combined-checks-first/diff.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/diff.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/freeze-first.json",
+      "bytes": 4103,
+      "sha256": "6e7082ed857eaed169f4a23272ac37274565e8664b3c4bba085128a012b7f46f"
+    },
+    {
+      "path": "carrier-combined-checks-first/gnu-check.stderr.log",
+      "bytes": 781,
+      "sha256": "a4fe60f17811fe48d57b0f64525f2717ff15a3efe88183225b39306b6fd8a50e"
+    },
+    {
+      "path": "carrier-combined-checks-first/gnu-check.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/gnu-clippy.stderr.log",
+      "bytes": 781,
+      "sha256": "89e0331a6abf7488f775d8263b31847d3f7b8fc7f97d3f1d600f5a635713551a"
+    },
+    {
+      "path": "carrier-combined-checks-first/gnu-clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/legacy-seal.stderr.log",
+      "bytes": 112,
+      "sha256": "8724d3e0c64b046ecef4953c65c4b80cccd71195d8a89e18281f781c63053860"
+    },
+    {
+      "path": "carrier-combined-checks-first/legacy-seal.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/live.json",
+      "bytes": 82,
+      "sha256": "8fef2afc1bfaa0118f4cf5c44d300a3225515bca3f0f1e6c96b1508d1ab1a9e1"
+    },
+    {
+      "path": "carrier-combined-checks-first/ls-remote.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/ls-remote.stdout.log",
+      "bytes": 86,
+      "sha256": "2b40a2fc558199085f68f2bbd0bf70e92ac335a779c4a9a3302a2b47d8b43838"
+    },
+    {
+      "path": "carrier-combined-checks-first/push.stderr.log",
+      "bytes": 347,
+      "sha256": "46ee8462c05cd8536578301df7191a40394f534674bd82876b829832b725e13b"
+    },
+    {
+      "path": "carrier-combined-checks-first/push.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/python-codec.stderr.log",
+      "bytes": 109,
+      "sha256": "40e6a3053d86436d6aa245501343227a2e81436f4f14da71a21257468605aff6"
+    },
+    {
+      "path": "carrier-combined-checks-first/python-codec.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-combined-checks-first/report-first.json",
+      "bytes": 176244,
+      "sha256": "0f9dd001f86e90f1b72f404d1df2aad2d17a47448949ac11e55c207951e977f9"
+    },
+    {
+      "path": "carrier-combined-checks-first/run-first.py",
+      "bytes": 2732,
+      "sha256": "1726df4cb8d04b8bc49b34c63018b00df9fd74ae7a97c3c76f3baa0c13e23e58"
+    },
+    {
+      "path": "carrier-combined-checks-first/source-preservation-first.json",
+      "bytes": 1780,
+      "sha256": "8410ae993af47a4f90a575a724d64da223c148457f7d3660d780d86bac9ce3ae"
+    },
+    {
+      "path": "carrier-python-codec-first/.owner",
+      "bytes": 51,
+      "sha256": "93541b6cb973206d03eaabe5375e455ffd88d4d57c071045638ad683c558f31b"
+    },
+    {
+      "path": "carrier-python-codec-first/complete.patch",
+      "bytes": 17037,
+      "sha256": "e68b3a46a25a85bd1279bddd343aac6458b19b9454cfb49583b6d8d6aee39f8f"
+    },
+    {
+      "path": "carrier-python-codec-first/freeze-first.json",
+      "bytes": 2741,
+      "sha256": "67c8e4e2040b60ce8cd86867e2626c355398f5b27ef320852628ab2cec710a15"
+    },
+    {
+      "path": "carrier-python-codec-first/implementation-first.json",
+      "bytes": 856,
+      "sha256": "410bc3f2085d71906072b45c7d4b9f9c5f065ae2da507a11feff81b11a021d69"
+    },
+    {
+      "path": "carrier-python-codec-first/rust-interop-first.json",
+      "bytes": 756,
+      "sha256": "72a839fbafab90d78653d0dc760160527a4c43338e16c016302f0e450769fdc4"
+    },
+    {
+      "path": "carrier-python-codec-first/source-final/installer-carrier-format.py",
+      "bytes": 9175,
+      "sha256": "e6af659783695e42f25ad83c6dad45d2af62257cd42ec4a6566cc8d7d52fd897"
+    },
+    {
+      "path": "carrier-python-codec-first/source-final/test-installer-carrier-format.py",
+      "bytes": 7086,
+      "sha256": "ed1bd8d6290b09b4d35cfd6b58326dea6949e26d36bc446f70dc3b917f889b46"
+    },
+    {
+      "path": "carrier-python-codec-first/test-controlled-setup-seal.py.second.stderr.log",
+      "bytes": 112,
+      "sha256": "010ea5daee34720f040c4925176dddf3120d7999c54ba1b4fcf1865503e3bb94"
+    },
+    {
+      "path": "carrier-python-codec-first/test-controlled-setup-seal.py.second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-python-codec-first/test-controlled-setup-seal.py.stderr.log",
+      "bytes": 112,
+      "sha256": "4f5aa0a4d1ae7554de3471f33fdd5fbc56634e6b1f2cbba3c1f3937ae029c4fe"
+    },
+    {
+      "path": "carrier-python-codec-first/test-controlled-setup-seal.py.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-python-codec-first/test-installer-carrier-format.py.second.stderr.log",
+      "bytes": 109,
+      "sha256": "85bdb3d23316195a7aad16b696a688d839cd6f3a8ddf856daed46f675b993098"
+    },
+    {
+      "path": "carrier-python-codec-first/test-installer-carrier-format.py.second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-python-codec-first/test-installer-carrier-format.py.stderr.log",
+      "bytes": 107,
+      "sha256": "7c758af7411e05fc2e6c4fb89045f7a03d9a5957d5305092903a23a66373d034"
+    },
+    {
+      "path": "carrier-python-codec-first/test-installer-carrier-format.py.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-python-codec-first/tests-first.json",
+      "bytes": 667,
+      "sha256": "d3cae41efe448bafcef571f16a294c54990e9243a35583f21988f0a951fec1cd"
+    },
+    {
+      "path": "carrier-python-codec-first/tests-second.json",
+      "bytes": 1142,
+      "sha256": "0c20090c7c3209e030abeff40f62c86f43d4603f82ee82d2ee25be338416a611"
+    }
+  ],
+  "binaryFilesSelected": "NONE; synthetic Rust codec JSON/hex fixture is preserved as an original textual test container, not executable PE/MSI or an authorization record. No actual PE/MSI/ELF/ZIP/tool/cache/activeworktree files selected.",
+  "sourceDeletion": false
+}

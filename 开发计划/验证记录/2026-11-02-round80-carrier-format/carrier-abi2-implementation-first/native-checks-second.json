@@ -1,0 +1,130 @@
+{
+  "sourceBefore": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7600,
+      "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+      "bytes": 12154,
+      "sha256": "e354f1e8b5bf08a9137f91fa6abc483ae120093c45516c586915d725fe6acd1b"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+      "bytes": 8701,
+      "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    }
+  ],
+  "checks": [
+    {
+      "name": "gnu-check-second",
+      "argv": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "-p",
+        "fc-windows",
+        "--tests"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 2.620464878000348,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    },
+    {
+      "name": "clippy-second",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "-p",
+        "fc-windows",
+        "--tests",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 11.95456257800106,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    },
+    {
+      "name": "fmt-first",
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "--config",
+        "skip_children=true",
+        "crates/fc-windows/src/installer_lifecycle/broker.rs",
+        "crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+        "crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+        "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.06466218399873469,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    },
+    {
+      "name": "architecture-first",
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.11456451200137963,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    },
+    {
+      "name": "diff-first",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.8161059970007045,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7600,
+      "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+      "bytes": 12154,
+      "sha256": "e354f1e8b5bf08a9137f91fa6abc483ae120093c45516c586915d725fe6acd1b"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+      "bytes": 8701,
+      "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    }
+  ],
+  "sourceUnchanged": true
+}

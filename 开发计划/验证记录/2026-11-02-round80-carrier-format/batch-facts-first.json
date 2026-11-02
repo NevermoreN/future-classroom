@@ -1,0 +1,180 @@
+{
+  "status": "FINITE_ABI2_CARRIER_AND_PAYLOAD_CODEC_FORMAT_FOUNDATION_EVIDENCE",
+  "sourceOrigins": {
+    "originalRustPythonBase": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+    "actualIntegratedParent": "abf71f4b387616f8b83c4c5af8622898e594f60d",
+    "actualRecordedCommit": "73aea81edbf6683da14e6cb5650c5ca0d1029db1",
+    "recordedRemoteReadback": "73aea81edbf6683da14e6cb5650c5ca0d1029db1",
+    "sixSources": [
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+        "bytes": 7600,
+        "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+        "bytes": 12154,
+        "sha256": "e354f1e8b5bf08a9137f91fa6abc483ae120093c45516c586915d725fe6acd1b"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+        "bytes": 8701,
+        "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+      },
+      {
+        "path": "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+        "bytes": 4871,
+        "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+      },
+      {
+        "path": "scripts/installer-carrier-format.py",
+        "bytes": 9175,
+        "sha256": "e6af659783695e42f25ad83c6dad45d2af62257cd42ec4a6566cc8d7d52fd897"
+      },
+      {
+        "path": "scripts/test-installer-carrier-format.py",
+        "bytes": 7086,
+        "sha256": "ed1bd8d6290b09b4d35cfd6b58326dea6949e26d36bc446f70dc3b917f889b46"
+      }
+    ],
+    "inputLedgerCount": 475,
+    "originalRustCompilerInputs": 470,
+    "currentBranchHead": "Not queried; actual immutable73aea recorded commit is distinguished from raw frozen source comparison. Old producers requiring originala470 were not rerun."
+  },
+  "RustFormat": {
+    "pureTestsPassed": 13,
+    "GNUCheck": 0,
+    "strictClippy": 0,
+    "architecture": "12crates33edges",
+    "firstPureNegativeActualExit": 101,
+    "firstClippyActualExit": 101,
+    "historyPreserved": true
+  },
+  "PythonFormat": {
+    "finalSourceBoundTests": 10,
+    "legacySealTests": 13,
+    "original9": "Historical command outcome only; original complete source snapshot unavailable. Not source-bound final acceptance.",
+    "RustInteroperability": "Actual Rust cfgtest-emitted synthetic fixture; all7 declared fields compared byte-for-byte by Python",
+    "syntheticFieldsCompared": {
+      "normal_pe": 1024,
+      "descriptor": 64,
+      "template": 1156,
+      "sealed": 1156,
+      "body": 871,
+      "envelope": 959,
+      "inner_msi": 44
+    },
+    "fixtureIsRealMSI": false
+  },
+  "FinalIntegratedChecks": {
+    "sourceBase": "abf71f4b387616f8b83c4c5af8622898e594f60d",
+    "sourceInputCount": 475,
+    "allOperations": [
+      {
+        "name": "gnu-check",
+        "argv": [
+          "cargo",
+          "check",
+          "--locked",
+          "--offline",
+          "--target",
+          "i686-pc-windows-gnu",
+          "-p",
+          "fc-windows",
+          "--tests"
+        ],
+        "actualExit": 0,
+        "reaped": true,
+        "seconds": 11.903961719999643
+      },
+      {
+        "name": "gnu-clippy",
+        "argv": [
+          "cargo",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--target",
+          "i686-pc-windows-gnu",
+          "-p",
+          "fc-windows",
+          "--tests",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "actualExit": 0,
+        "reaped": true,
+        "seconds": 16.576489955001307
+      },
+      {
+        "name": "fmt",
+        "argv": [
+          "cargo",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "actualExit": 0,
+        "reaped": true,
+        "seconds": 3.523007161998976
+      },
+      {
+        "name": "architecture",
+        "argv": [
+          "python3",
+          "scripts/check-architecture.py"
+        ],
+        "actualExit": 0,
+        "reaped": true,
+        "seconds": 0.11462070400011726
+      },
+      {
+        "name": "python-codec",
+        "argv": [
+          "python3",
+          "-B",
+          "scripts/test-installer-carrier-format.py"
+        ],
+        "actualExit": 0,
+        "reaped": true,
+        "seconds": 0.16476805299680564
+      },
+      {
+        "name": "legacy-seal",
+        "argv": [
+          "python3",
+          "-B",
+          "scripts/test-controlled-setup-seal.py"
+        ],
+        "actualExit": 0,
+        "reaped": true,
+        "seconds": 1.0664829739980632
+      },
+      {
+        "name": "diff",
+        "argv": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "actualExit": 0,
+        "reaped": true,
+        "seconds": 0.16522729200005415
+      }
+    ],
+    "sixSourceBytesMatchBothPriorFreezes": true,
+    "commitAndPushActual0": true
+  },
+  "publicationRegistryEmpty": true,
+  "nativeUpgrade": "NOT_IMPLEMENTED_NOT_AUTHORIZED",
+  "scope": "Only carrier/payload byte formats, bounded parsers and synthetic cross-language codec foundation. No native CA hookup, carrier launch, PublishedHost record, MSI execution, finalSetup, actual native memory, new-source MSVC/Win7/Win10/Seewo evidence or atomic upgrade pass. Active layout/newCA andMSVC-abf excluded; that MSVC source does not contain these6 new sources.",
+  "actions": {
+    "Windows": false,
+    "Cargo": false,
+    "activeWorktreeRead": false,
+    "sourceDeletion": false,
+    "otherDocsCodeGitWritten": false
+  }
+}

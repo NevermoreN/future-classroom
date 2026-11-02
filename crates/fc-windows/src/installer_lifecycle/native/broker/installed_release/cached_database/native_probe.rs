@@ -73,7 +73,49 @@ fn captures_real_installed_a470_cache_and_returns_every_owned_handle() {
         assert_eq!(row.attributes, 512);
         assert_eq!(row.sequence, expected.4);
     }
-    assert_eq!(db.close_receipts.len(), 41);
+    assert_eq!(db.directories.len(), DIRECTORIES_EXPECTED.len());
+    for (name, parent, default) in DIRECTORIES_EXPECTED {
+        let row = db
+            .directories
+            .iter()
+            .find(|r| r.directory == *name)
+            .expect("complete raw Directory table");
+        assert_eq!(row.parent.as_deref(), *parent);
+        assert_eq!(row.default_dir, *default);
+    }
+    assert_eq!(db.custom_actions.len(), 1);
+    let guard = &db.custom_actions[0];
+    assert_eq!(guard.action, "FcControlledInnerGuard");
+    assert_eq!(guard.kind, 1);
+    assert_eq!(guard.source.as_deref(), Some("FcControlledGuardDll"));
+    assert_eq!(guard.target.as_deref(), Some("FcControlledInnerGuard"));
+    assert_eq!(db.execute_sequence.len(), EXECUTE_EXPECTED.len());
+    for (action, condition, sequence) in EXECUTE_EXPECTED {
+        let row = db
+            .execute_sequence
+            .iter()
+            .find(|r| r.action == *action)
+            .expect("complete raw InstallExecuteSequence table");
+        assert_eq!(row.condition.as_deref(), *condition);
+        assert_eq!(row.sequence, Some(*sequence));
+    }
+    let paths = database_rules::declared_directory_paths(&db.directories)
+        .expect("closed per-user directory graph");
+    assert_eq!(paths["FcInstallDir"], "");
+    assert_eq!(paths["D4b5e57f6eb2f42b9039b3d1e"], "web");
+    assert_eq!(paths["D7b144e7d5cf5146fdc8a96c4"], "web/assets");
+    assert!(db
+        .components
+        .iter()
+        .all(|r| paths.contains_key(&r.directory)));
+    assert!(database_rules::fixed_guard_shape(
+        &db.custom_actions,
+        &db.execute_sequence,
+        &db.binary_names
+    ));
+    // Original W5 asserted41. This revision adds three views and30 records;
+    // every count here must be witnessed by this new actual native probe.
+    assert_eq!(db.close_receipts.len(), 74);
     assert_eq!(
         db.close_receipts
             .iter()
@@ -93,14 +135,14 @@ fn captures_real_installed_a470_cache_and_returns_every_owned_handle() {
             .iter()
             .filter(|r| matches!(r.kind, MsiKind::View))
             .count(),
-        5
+        8
     );
     assert_eq!(
         db.close_receipts
             .iter()
             .filter(|r| matches!(r.kind, MsiKind::Record))
             .count(),
-        34
+        64
     );
     for receipt in &db.close_receipts {
         assert_ne!(receipt.handle, 0);
@@ -316,4 +358,42 @@ const FILES_EXPECTED: &[(&str, &str, &str, i32, i32)] = &[
         1232,
         14,
     ),
+];
+
+const DIRECTORIES_EXPECTED: &[(&str, Option<&str>, &str)] = &[
+    (
+        "D7b144e7d5cf5146fdc8a96c4",
+        Some("D4b5e57f6eb2f42b9039b3d1e"),
+        "assets",
+    ),
+    ("D4b5e57f6eb2f42b9039b3d1e", Some("FcInstallDir"), "web"),
+    ("FcInstallDir", Some("UserPrograms"), "FutureClassroom"),
+    ("UserPrograms", Some("LocalAppDataFolder"), "Programs"),
+    ("LocalAppDataFolder", Some("TARGETDIR"), "."),
+    ("TARGETDIR", None, "SourceDir"),
+];
+const EXECUTE_EXPECTED: &[(&str, Option<&str>, i32)] = &[
+    ("CostInitialize", None, 800),
+    ("FileCost", None, 900),
+    ("CostFinalize", None, 1000),
+    ("FindRelatedProducts", None, 25),
+    ("LaunchConditions", None, 100),
+    ("ValidateProductID", None, 700),
+    ("MigrateFeatureStates", None, 1200),
+    ("InstallValidate", None, 1400),
+    ("InstallInitialize", None, 1500),
+    ("ProcessComponents", None, 1600),
+    ("UnpublishFeatures", None, 1800),
+    ("RemoveRegistryValues", None, 2600),
+    ("RemoveFiles", None, 3500),
+    ("InstallFiles", None, 4000),
+    ("WriteRegistryValues", None, 5000),
+    ("RegisterUser", None, 6000),
+    ("RegisterProduct", None, 6100),
+    ("PublishFeatures", None, 6300),
+    ("PublishProduct", None, 6400),
+    ("InstallExecute", None, 6500),
+    ("RemoveExistingProducts", None, 6501),
+    ("InstallFinalize", None, 6600),
+    ("FcControlledInnerGuard", Some("1"), 1499),
 ];

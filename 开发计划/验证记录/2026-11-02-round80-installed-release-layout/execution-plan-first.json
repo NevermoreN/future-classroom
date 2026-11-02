@@ -1,0 +1,8 @@
+{
+  "default": "python3 archive-controller-second.py",
+  "archiveActual": "python3 archive-controller-second.py --execute (already actual0;do not recreate)",
+  "replay": "python3 archive-controller-second.py --replay-only",
+  "freeze": "python3 finalize-first.py --execute (once)",
+  "independentFrozenVerification": "python3 finalize-first.py --verify-only",
+  "scope": "Completed local raw evidence only;no Windows/PE/Cargo/Git/source/deletions/upstream writes"
+}

@@ -102,3 +102,20 @@ scoped `RUSTFLAGS=-C target-feature=+crt-static -C link-arg=-Wl,--major-subsyste
 for all three actual normal builds. This is PE metadata, not Win7 certification.
 The DLL may declare GUI2 or CUI3; its actual DLL characteristic is mandatory,
 and the static import auditor checks the declared subsystem. Normal EXEs remain GUI2.
+
+## ABI2 format foundation
+
+`broker/carrier.rs` and `scripts/installer-carrier-format.py` define the new
+immutable carrier descriptor. The full PE prefix, descriptor and footer remain
+identical across packages; the complete final MSI fills exactly one 32-byte
+SHA256 slot in the external Setup. `Binary.FcPayloadManifest` has a separate
+version2 envelope binding family, PackageCode and the bounded payload ledger.
+Its PackageCode must be fixed before MSI creation; the envelope contains no
+whole-MSI hash. This avoids a package or carrier hash referring to itself.
+
+Rust/Python synthetic fixtures match byte for byte. The published-host registry
+is empty and these formats grant no install or upgrade authority. The existing
+CLI above continues to build its legacy manifest-overlay candidate. Actual ABI2
+package authoring, before-Begin source capture and package-bound guard tickets
+remain separate implementation steps. A completed upgrade requires two different
+product versions, one original transaction and verified old/new file effects.

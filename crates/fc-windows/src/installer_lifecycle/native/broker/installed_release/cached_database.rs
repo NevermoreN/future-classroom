@@ -1,12 +1,20 @@
 //! Before-Begin readonly database facts. No SQL/path/identity is caller supplied.
 //! Every owned MSI object is closed on its creating thread, in its own namespace.
 use super::*;
-use database_rules::{CloseState, BINARY_LIMIT, RECEIPT_LIMIT, ROW_LIMIT, TEXT_LIMIT};
+use database_rules::{
+    CloseState, CustomActionRow, DirectoryRow, ExecuteSequenceRow, BINARY_LIMIT,
+    CUSTOM_ACTION_LIMIT, DIRECTORY_LIMIT, EXECUTE_SEQUENCE_LIMIT, RECEIPT_LIMIT, ROW_LIMIT,
+    TEXT_LIMIT,
+};
 use windows::core::{PCWSTR, PSTR, PWSTR};
 
 const PROPERTIES: &str = "SELECT `Property`, `Value` FROM `Property` WHERE `Property` = 'ProductCode' OR `Property` = 'UpgradeCode' OR `Property` = 'ProductVersion'";
 const COMPONENTS: &str = "SELECT `Component`, `ComponentId`, `Directory_`, `Attributes`, `Condition`, `KeyPath` FROM `Component`";
 const FILES: &str = "SELECT `File`, `Component_`, `FileName`, `FileSize`, `Version`, `Language`, `Attributes`, `Sequence` FROM `File`";
+const DIRECTORIES: &str = "SELECT `Directory`, `Directory_Parent`, `DefaultDir` FROM `Directory`";
+const CUSTOM_ACTIONS: &str = "SELECT `Action`, `Type`, `Source`, `Target` FROM `CustomAction`";
+const EXECUTE_SEQUENCE: &str =
+    "SELECT `Action`, `Condition`, `Sequence` FROM `InstallExecuteSequence`";
 const BINARIES: &str = "SELECT `Name` FROM `Binary`";
 const TEMPLATE: &str = "SELECT `Data` FROM `Binary` WHERE `Name` = 'FcGuardClientTemplate'";
 const PAYLOAD: &str = "SELECT `Data` FROM `Binary` WHERE `Name` = 'FcPayloadManifest'";
@@ -73,6 +81,9 @@ pub(in super::super) struct CapturedCachedDatabase {
     pub(super) binary_names: Vec<String>,
     pub(super) components: Vec<ComponentRow>,
     pub(super) files: Vec<FileRow>,
+    pub(super) directories: Vec<DirectoryRow>,
+    pub(super) custom_actions: Vec<CustomActionRow>,
+    pub(super) execute_sequence: Vec<ExecuteSequenceRow>,
     pub(super) close_receipts: Vec<CloseReceipt>,
 }
 impl InstalledReleaseReader {
@@ -80,6 +91,13 @@ impl InstalledReleaseReader {
         self.check()?;
         if !database_rules::room(self.resources.handles.len(), self.msi.len(), incoming) {
             return Err(ReadError::Lifecycle(LifecycleError::Invalid));
+        }
+        Ok(())
+    }
+    fn msi_room(&self, incoming: usize) -> ReadResult<()> {
+        self.room(incoming)?;
+        if !database_rules::receipt_room(self.close_receipts.len(), self.msi.len(), incoming) {
+            return Err(ReadError::EnumerationBound);
         }
         Ok(())
     }
@@ -107,7 +125,7 @@ impl InstalledReleaseReader {
         Ok(())
     }
     fn open_view(&mut self, db: MSIHANDLE, query: &'static str) -> ReadResult<MSIHANDLE> {
-        self.room(1)?;
+        self.msi_room(1)?;
         let mut view = MSIHANDLE(0);
         let code = unsafe { MsiDatabaseOpenViewW(db, &HSTRING::from(query), &mut view) };
         let view = self.acquired(code, view, MsiKind::View)?;
@@ -124,7 +142,7 @@ impl InstalledReleaseReader {
         Ok(view)
     }
     fn fetch(&mut self, view: MSIHANDLE) -> ReadResult<Option<MSIHANDLE>> {
-        self.room(1)?;
+        self.msi_room(1)?;
         let mut record = MSIHANDLE(0);
         let code = unsafe { MsiViewFetch(view, &mut record) };
         if code == ERROR_NO_MORE_ITEMS.0 && record.0 == 0 {
@@ -222,6 +240,13 @@ impl InstalledReleaseReader {
         }
         Ok(n)
     }
+    fn optional_integer(&self, record: MSIHANDLE, field: u32) -> ReadResult<Option<i32>> {
+        self.check()?;
+        if unsafe { MsiRecordIsNull(record, field) }.as_bool() {
+            return Ok(None);
+        }
+        self.integer(record, field).map(Some)
+    }
     fn properties(&mut self, db: MSIHANDLE) -> ReadResult<(String, String, [u32; 3])> {
         let view = self.open_view(db, PROPERTIES)?;
         let mut values = std::collections::BTreeMap::new();
@@ -258,7 +283,7 @@ impl InstalledReleaseReader {
         Ok((product, upgrade, version))
     }
     fn package_code(&mut self, db: MSIHANDLE) -> ReadResult<String> {
-        self.room(1)?;
+        self.msi_room(1)?;
         let mut summary = MSIHANDLE(0);
         let code = unsafe { MsiGetSummaryInformationW(db, PCWSTR::null(), 0, &mut summary) };
         let summary = self.acquired(code, summary, MsiKind::Summary)?;
@@ -431,11 +456,78 @@ impl InstalledReleaseReader {
         self.close_msi(view)?;
         Ok(result)
     }
+    fn directories(&mut self, db: MSIHANDLE) -> ReadResult<Vec<DirectoryRow>> {
+        let view = self.open_view(db, DIRECTORIES)?;
+        let mut result = Vec::new();
+        let mut ids = BTreeSet::new();
+        while let Some(row) = self.fetch(view)? {
+            if result.len() >= DIRECTORY_LIMIT {
+                return Err(ReadError::EnumerationBound);
+            }
+            let value = DirectoryRow {
+                directory: self.required(row, 1)?,
+                parent: self.string(row, 2)?,
+                default_dir: self.required(row, 3)?,
+            };
+            if !ids.insert(value.directory.clone()) {
+                return Err(ReadError::MalformedNativeMetadata);
+            }
+            result.push(value);
+            self.close_msi(row)?;
+        }
+        self.close_msi(view)?;
+        Ok(result)
+    }
+    fn custom_actions(&mut self, db: MSIHANDLE) -> ReadResult<Vec<CustomActionRow>> {
+        let view = self.open_view(db, CUSTOM_ACTIONS)?;
+        let mut result = Vec::new();
+        let mut ids = BTreeSet::new();
+        while let Some(row) = self.fetch(view)? {
+            if result.len() >= CUSTOM_ACTION_LIMIT {
+                return Err(ReadError::EnumerationBound);
+            }
+            let value = CustomActionRow {
+                action: self.required(row, 1)?,
+                kind: self.integer(row, 2)?,
+                source: self.string(row, 3)?,
+                target: self.string(row, 4)?,
+            };
+            if !ids.insert(value.action.clone()) {
+                return Err(ReadError::MalformedNativeMetadata);
+            }
+            result.push(value);
+            self.close_msi(row)?;
+        }
+        self.close_msi(view)?;
+        Ok(result)
+    }
+    fn execute_sequence(&mut self, db: MSIHANDLE) -> ReadResult<Vec<ExecuteSequenceRow>> {
+        let view = self.open_view(db, EXECUTE_SEQUENCE)?;
+        let mut result = Vec::new();
+        let mut ids = BTreeSet::new();
+        while let Some(row) = self.fetch(view)? {
+            if result.len() >= EXECUTE_SEQUENCE_LIMIT {
+                return Err(ReadError::EnumerationBound);
+            }
+            let value = ExecuteSequenceRow {
+                action: self.required(row, 1)?,
+                condition: self.string(row, 2)?,
+                sequence: self.optional_integer(row, 3)?,
+            };
+            if !ids.insert(value.action.clone()) {
+                return Err(ReadError::MalformedNativeMetadata);
+            }
+            result.push(value);
+            self.close_msi(row)?;
+        }
+        self.close_msi(view)?;
+        Ok(result)
+    }
     pub(super) fn cached_database(
         &mut self,
         before: &Registration,
     ) -> ReadResult<CapturedCachedDatabase> {
-        self.room(1)?;
+        self.msi_room(1)?;
         let path = native_path(&before.local_package)?;
         let mut db = MSIHANDLE(0);
         let code = unsafe { MsiOpenDatabaseW(&path, MSIDBOPEN_READONLY, &mut db) };
@@ -457,6 +549,18 @@ impl InstalledReleaseReader {
         };
         let components = self.components(db)?;
         let files = self.files(db)?;
+        let directories = self.directories(db)?;
+        let custom_actions = self.custom_actions(db)?;
+        let execute_sequence = self.execute_sequence(db)?;
+        let paths = database_rules::declared_directory_paths(&directories)
+            .ok_or(ReadError::MalformedNativeMetadata)?;
+        if components
+            .iter()
+            .any(|row| !paths.contains_key(&row.directory))
+            || !database_rules::fixed_guard_shape(&custom_actions, &execute_sequence, &binary_names)
+        {
+            return Err(ReadError::MalformedNativeMetadata);
+        }
         self.close_msi(db)?;
         self.check()?;
         Ok(CapturedCachedDatabase {
@@ -469,6 +573,9 @@ impl InstalledReleaseReader {
             binary_names,
             components,
             files,
+            directories,
+            custom_actions,
+            execute_sequence,
             close_receipts: std::mem::take(&mut self.close_receipts),
         })
     }

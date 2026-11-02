@@ -1,0 +1,88 @@
+{
+  "sourceBefore": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7600,
+      "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+      "bytes": 12144,
+      "sha256": "0a679a07ccccab0e51dc0ba087c883860264b4933b2fa90eb79bda1dd1dcb33f"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+      "bytes": 8701,
+      "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    }
+  ],
+  "checks": [
+    {
+      "name": "gnu-check-first",
+      "argv": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "-p",
+        "fc-windows",
+        "--tests"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 71.29744912699971,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    },
+    {
+      "name": "clippy-first",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "-p",
+        "fc-windows",
+        "--tests",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "actualExit": 101,
+      "parentReaped": true,
+      "seconds": 16.30227199000001,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7600,
+      "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+      "bytes": 12144,
+      "sha256": "0a679a07ccccab0e51dc0ba087c883860264b4933b2fa90eb79bda1dd1dcb33f"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+      "bytes": 8701,
+      "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    }
+  ],
+  "sourceUnchanged": true
+}

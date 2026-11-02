@@ -1,0 +1,20 @@
+--- archive-controller-first.py
++++ archive-controller-second.py
+@@ -39,7 +39,7 @@
+ def main():
+  ap=argparse.ArgumentParser();ap.add_argument('--execute',action='store_true');ap.add_argument('--replay-only',action='store_true');a=ap.parse_args()
+  if not(a.execute or a.replay_only):print(json.dumps(dict(status='PREPARED_NOT_EXECUTED',Windows=False,Cargo=False,Git=False)));return
+- need(a.execute!=a.replay_only,'ONE_MODE');need(Path(__file__).resolve()==D/'archive-controller-first.py','EXACT_CONTROLLER')
++ need(a.execute!=a.replay_only,'ONE_MODE');need(Path(__file__).resolve()==D/'archive-controller-second.py','EXACT_CONTROLLER')
+  manifest=json.loads((D/'source-manifest-first.json').read_bytes());rows=manifest['originals'];ids=manifest['identityOnly'];need(len(rows)==252 and sum(r['bytes']for r in rows)==4163284 and len(ids)==13,'FINITE_EXACT_SOURCE_SELECTION')
+  scan,stats,jsonl,ns=scanner(rows)
+  if a.replay_only:
+@@ -48,7 +48,7 @@
+    need(not p.is_symlink(),'NO_SYMLINK')
+    if p.is_file() and p!=archive:scan(p.read_bytes(),('promoted:'if str(p.relative_to(D))in PROMOTE else 'destination:')+str(p.relative_to(D)))
+   print(json.dumps(dict(status='PASS_FULL_STORED_TAR_PROMOTIONS_STRICT_SCAN',members=len(rows),originalBytes=sum(r['bytes']for r in rows),archiveSha256=sha(b),findings=[],statistics=stats,jsonlRecords=jsonl[0],Windows=False,Cargo=False,Git=False)));return
+- sn={'__name__':'selector_only'};exec(compile((D/'select-first.py').read_bytes(),'<finite-selector>','exec'),sn);need(sn['collect'](manifest['expectedNativeReportSha256'])==manifest,'EXACT_UNCHANGED_CURRENT_SOURCE_SELECTION')
++ sn={'__name__':'selector_only','__file__':str(D/'select-first.py')};exec(compile((D/'select-first.py').read_bytes(),'<finite-selector>','exec'),sn);need(sn['collect'](manifest['expectedNativeReportSha256'])==manifest,'EXACT_UNCHANGED_CURRENT_SOURCE_SELECTION')
+  by={r['path']:r for r in rows+ids}
+  def original(r):
+   b=sn['regular'](R/r['path']).read_bytes();need(len(b)==r['bytes'] and sha(b)==r['sha256'],'ORIGINAL_UNCHANGED '+r['path']);return b

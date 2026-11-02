@@ -1,0 +1,219 @@
+{
+  "status": "ABI2_INDEPENDENT_FORMAT_PARSING_PACKAGING_FOUNDATION_CHECKED_NO_NATIVE_UPGRADE",
+  "worktree": "/tmp/fc-round80-controlled-repair/checkout-carrier-abi2-first",
+  "branch": "implementation/r80-carrier-abi2-foundation",
+  "sourceBase": "a4702b56bff66da5f5cbe74551d8751eb33fa520",
+  "parentFrozenReaderSource": {
+    "path": "/tmp/fc-round80-controlled-repair/installed-release-db-implementation-second/freeze-first.json",
+    "bytes": 10406,
+    "sha256": "706931ddb5b6bb92c747a7c495513a4143f8f4f7d261fe68d210727cb7be7030"
+  },
+  "ownedSourceFiles": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7600,
+      "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+      "bytes": 12154,
+      "sha256": "e354f1e8b5bf08a9137f91fa6abc483ae120093c45516c586915d725fe6acd1b"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+      "bytes": 8701,
+      "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    }
+  ],
+  "combinedSourceFiles": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database/native_probe.rs",
+      "bytes": 9409,
+      "sha256": "6030ca6d5e980d00ce6eead98c591ea4f0a5a4aba64b6e8c4c0c256b8b105309"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database.rs",
+      "bytes": 18155,
+      "sha256": "673bc3028ce509affe0a63286c4a055fb6f10cd9ede77dd94ad222492248a15b"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/database_rules.rs",
+      "bytes": 3403,
+      "sha256": "b7a4a67ef44c43a6a8b57ff33c82db2b9c092ca234ee48c0e972734a9de77f8d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/format.rs",
+      "bytes": 5341,
+      "sha256": "3f98688a6efc6e9eca0c2d347ddeda3959fcf6528fef1ab392b754435412f0a5"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release.rs",
+      "bytes": 14288,
+      "sha256": "18b22d9241e1525839146c3dd27166772ac5b3ad14a149a4d2ccb604dd953536"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 51213,
+      "sha256": "6fdc1c54fc91b83fd2f0ec556d687a9764192f2139771393f5fb925a00b6e2d1"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7600,
+      "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+      "bytes": 12154,
+      "sha256": "e354f1e8b5bf08a9137f91fa6abc483ae120093c45516c586915d725fe6acd1b"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+      "bytes": 8701,
+      "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    }
+  ],
+  "compilerInputs": {
+    "path": "/tmp/fc-round80-controlled-repair/carrier-abi2-implementation-first/compiler-inputs-final.json",
+    "bytes": 86269,
+    "sha256": "d4ef26a30324919f184e64342e8438cf2717cd7d98451e672bb6a7acff76c659"
+  },
+  "compilerInputCount": 470,
+  "actualChecks": [
+    {
+      "name": "gnu-check-second",
+      "argv": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "-p",
+        "fc-windows",
+        "--tests"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 2.620464878000348,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    },
+    {
+      "name": "clippy-second",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--target",
+        "i686-pc-windows-gnu",
+        "-p",
+        "fc-windows",
+        "--tests",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 11.95456257800106,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    },
+    {
+      "name": "fmt-first",
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "--config",
+        "skip_children=true",
+        "crates/fc-windows/src/installer_lifecycle/broker.rs",
+        "crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+        "crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+        "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.06466218399873469,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    },
+    {
+      "name": "architecture-first",
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.11456451200137963,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    },
+    {
+      "name": "diff-first",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.8161059970007045,
+      "targetDir": "/tmp/fc-round80-controlled-repair/carrier-abi2-target-first"
+    }
+  ],
+  "actualHostPureTests": 13,
+  "hostPureOriginals": "pure-checks-fourth.json/pure-tests-fourth.* unmodified",
+  "formatFixture": {
+    "path": "/tmp/fc-round80-controlled-repair/carrier-abi2-implementation-first/codec-fixture-first.json",
+    "bytes": 12195,
+    "sha256": "31229a5222990587aa4e588f5af7b566ef3733f0cb4573cd3d061bdbde0a7c8d"
+  },
+  "finalFixtureReemitByteEqual": true,
+  "rootCrossLanguageOriginal": {
+    "path": "/tmp/fc-round80-controlled-repair/carrier-python-codec-first/rust-interop-first.json",
+    "bytes": 756,
+    "sha256": "72a839fbafab90d78653d0dc760160527a4c43338e16c016302f0e450769fdc4"
+  },
+  "legacyFclm73ParserUnchanged": true,
+  "CargoAndLockUnchanged": true,
+  "publicationRegistry": "EMPTY; closed enum id lookup only; zero provenance/test-profile/wrongABI refused; no CLI/path/hash factory or fixture authorization",
+  "carrier": "NormalPE + exact48seal + independentfixed64descriptor + u32LE64 + new16footer; single32hole only; no Product/Version/Package/hash selfreference in descriptor",
+  "payloadEnvelope": "Fixed Binary.FcPayloadManifest/new88Bheader/version2/guardABI2/family/PackageCode + old strict FCLM73 rawbody; new strict nonzeroidentities/digests/canonicalversion; no completeMSI hash",
+  "hashing": "fill_digest_format_value is explicitly a pure byte format value, not authority; no new SHA dependency. Native use still owes pinned wholeMSI CNG proof and published source; unconnected.",
+  "productionConnection": "None: Session/native guard/two-ticket bridge/VerifiedInstalledRelease/UpgradePlan/standardMSI builder unchanged",
+  "limits": "12crates33edges; old120s/64handles/8slots/30MiB72payloads unchanged; producer byte routines permit existing64MiB format image bound, not a nativeworking-set guarantee",
+  "failureHistory": [
+    {
+      "original": "pure-checks-first.json/source-first",
+      "actualExit": 101,
+      "cause": "One negative test changed valid Package GUID to another valid GUID; corrected expectation/invalid separator, parser not widened"
+    },
+    {
+      "original": "native-checks-first.json/source-clippy-first",
+      "actualExit": 101,
+      "cause": "strict Clippy manual_is_multiple_of, exact equivalent replacement; no lint exemption"
+    }
+  ],
+  "notRun": [
+    "New carrier native execution",
+    "ABI2 normal product package/dualguard/atomicupgrade",
+    "MSVC newrevision builds",
+    "actualWin7/Win10/Seewo",
+    "native30MiBmeasurement"
+  ],
+  "testCleanup": "Temporary host wrapper/executable removed after each run; independenttarget retained for root whole-round integration; no Windowsprocess/fixture/MSI/database created",
+  "Windows": false,
+  "GitCommitPush": false,
+  "mainW5OtherWorktreesChanged": false,
+  "patchReverseCheckActualExit": 0
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "pure-compile-fourth",
+    "argv": [
+      "rustc",
+      "--edition=2021",
+      "--test",
+      "/tmp/fc-round80-controlled-repair/carrier-abi2-implementation-first/pure-fourth.rs",
+      "-o",
+      "/tmp/fc-round80-controlled-repair/carrier-abi2-implementation-first/pure-fourth"
+    ],
+    "actualExit": 0,
+    "parentReaped": true,
+    "seconds": 0.44870866700148326
+  },
+  {
+    "name": "pure-tests-fourth",
+    "argv": [
+      "/tmp/fc-round80-controlled-repair/carrier-abi2-implementation-first/pure-fourth",
+      "--nocapture"
+    ],
+    "actualExit": 0,
+    "parentReaped": true,
+    "seconds": 0.02691702499942039
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "status": "PASS_ALL_ORIGINALS_FULL_TAR_REPLAY_AND_STRICT_CREDENTIAL_SCAN",
+  "archiveSha256": "03b481ec6d78d22f83c9100050146ce860b802c5f545d38ee86bb21c6d334e9e",
+  "originalsChecked": 252,
+  "identityOnlyChecked": 13,
+  "fullTarMembersReplayed": 252,
+  "promotedRawFiles": 15,
+  "credentialScan": {
+    "findings": [],
+    "statistics": {
+      "textViews": 64560,
+      "utf16Views": 116,
+      "cp936Views": 20,
+      "clixmlDecodedViews": 22,
+      "decodedBase64Views": 54,
+      "jsonContainers": 378,
+      "decodedJsonStringViews": 63877
+    },
+    "jsonlRecords": 16,
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "coverage": "All selected rawtext/full decompressed tar/rawpromotions/controller/manifests/index;UTF8/UTF16/CP936/CLIXML/JSON/JSONL/nestedbase64;only1exactMSIcontrol"
+  },
+  "originalReportsAndFailuresPreserved": true,
+  "Windows": false,
+  "Cargo": false,
+  "Git": false
+}

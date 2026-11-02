@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "sourceSha256": {
+    "scripts/installer-carrier-format.py": "e6af659783695e42f25ad83c6dad45d2af62257cd42ec4a6566cc8d7d52fd897",
+    "scripts/test-installer-carrier-format.py": "ed1bd8d6290b09b4d35cfd6b58326dea6949e26d36bc446f70dc3b917f889b46"
+  },
+  "sourceUnchanged": true,
+  "scope": "Pure synthetic byte codec only; Rust interoperability pending; no package/authority or Windows run",
+  "changesFromFirst": "Match Rust bounded complete PE raw sections and optional certificate extent; original9 pass used weaker normal PE shape; this revision uses full1024 structural fixture",
+  "operations": [
+    {
+      "name": "test-installer-carrier-format.py",
+      "actualExit": 0,
+      "seconds": 0.22604617799879634,
+      "stderr": "..........\n----------------------------------------------------------------------\nRan 10 tests in 0.008s\n\nOK\n"
+    },
+    {
+      "name": "test-controlled-setup-seal.py",
+      "actualExit": 0,
+      "seconds": 1.2611874959984561,
+      "stderr": ".............\n----------------------------------------------------------------------\nRan 13 tests in 1.077s\n\nOK\n"
+    }
+  ]
+}

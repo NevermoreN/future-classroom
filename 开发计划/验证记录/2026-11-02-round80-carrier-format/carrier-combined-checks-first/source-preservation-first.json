@@ -1,0 +1,58 @@
+{
+  "status": "PASS_SIX_TESTED_FORMAT_SOURCES_COMMITTED_SYNCED",
+  "parent": "abf71f4b387616f8b83c4c5af8622898e594f60d",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7600,
+      "sha256": "076eb65b0eed9bf8f27cc0067dd7a5cba2404ac3fd6b3a00c30df313e8137dea"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/carrier.rs",
+      "bytes": 12154,
+      "sha256": "e354f1e8b5bf08a9137f91fa6abc483ae120093c45516c586915d725fe6acd1b"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/payload_manifest.rs",
+      "bytes": 8701,
+      "sha256": "4faa66385cf98bd0b021167291f7a9f9b9ce79a86c5594098019c1892283bc2c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 4871,
+      "sha256": "71da30aadefb593db25ba04ecccb0ffb7dba136b957adf308c186edad8fef431"
+    },
+    {
+      "path": "scripts/installer-carrier-format.py",
+      "bytes": 9175,
+      "sha256": "e6af659783695e42f25ad83c6dad45d2af62257cd42ec4a6566cc8d7d52fd897"
+    },
+    {
+      "path": "scripts/test-installer-carrier-format.py",
+      "bytes": 7086,
+      "sha256": "ed1bd8d6290b09b4d35cfd6b58326dea6949e26d36bc446f70dc3b917f889b46"
+    }
+  ],
+  "operations": [
+    {
+      "name": "commit",
+      "actualExit": 0,
+      "seconds": 0.1569982440014428
+    },
+    {
+      "name": "push",
+      "actualExit": 0,
+      "seconds": 1.9839302899999893
+    },
+    {
+      "name": "ls-remote",
+      "actualExit": 0,
+      "seconds": 0.6539656220011238
+    }
+  ],
+  "commit": "73aea81edbf6683da14e6cb5650c5ca0d1029db1",
+  "remote": "73aea81edbf6683da14e6cb5650c5ca0d1029db1",
+  "worktreeClean": true,
+  "mainUnchanged": true,
+  "nativeUpgrade": "NOT_IMPLEMENTED"
+}

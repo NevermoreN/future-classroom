@@ -1,0 +1,50 @@
+{
+  "status": "FROZEN_ABI2_FORMAT_CONTRACT_NO_PUBLICATION_OR_NATIVE_PERMISSION",
+  "carrier": {
+    "magicHex": "4643434152320000",
+    "footerHex": "46434352322d454e442d763200000000",
+    "descriptorBytes": 64,
+    "descriptorHex": "46434341523200000200400039393337383830372d303938442d354630342d384434442d46313831444641323138443578004000080048000000e00100000000",
+    "imageLayout": [
+      "complete normalPEprefix",
+      "16B oldSEAL_MAGIC",
+      "32Bzero template or captured wholeMSIdigest formatvalue",
+      "64B descriptor",
+      "u32LE64",
+      "16BnewFOOTER"
+    ],
+    "addedBytes": 132,
+    "onlyNormalizedBytes": "[normalprefixlen+16,normalprefixlen+48)",
+    "descriptorOffsets": {
+      "0:8": "FCCAR2 NUL NUL",
+      "8:10": "u16LE2 ABI",
+      "10:12": "u16LE64",
+      "12:48": "ASCII36fixedfamilyunbraceduppercase",
+      "48:50": "u16LE120",
+      "50:52": "u16LE64",
+      "52:54": "u16LE8",
+      "54:56": "u16LE72",
+      "56:60": "u32LE31457280",
+      "60:64": "zero4"
+    }
+  },
+  "payloadEnvelope": {
+    "magicHex": "4643504d32000000",
+    "headerBytes": 88,
+    "maxBytes": 32856,
+    "binaryName": "FcPayloadManifest",
+    "offsets": {
+      "0:8": "FCPM2 NUL NUL NUL",
+      "8:10": "u16LEformat2",
+      "10:12": "u16LEguardABI2",
+      "12:48": "ASCII36fixedfamily",
+      "48:84": "ASCII36canonicalunbracednonzeroPackageCode",
+      "84:88": "u32LErawbodylength",
+      "88:end": "oldstrictFCLM73body with new nonzeroProduct/Component/digest/canonicalversion requirements"
+    },
+    "selfReference": "PackageCode preselected independently for Summary9; stream includes no complete MSI hash; complete MSI hash only external32seal slot"
+  },
+  "publishedHost": "Compile-only closedID→reviewed records, current empty; no runtime constructor/CLI/SHA/path authorizer. Record is expected consumer-side identity, not proof of current artifact or its own complete self-hash. Never create self-referential containing-image hash authority.",
+  "nativeConnection": "NONE",
+  "fixture": "codec-fixture-first.json synthetic structural bytes, cfgtest-only emit, cannot enter publication registry"
+}
