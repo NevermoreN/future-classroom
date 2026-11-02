@@ -36,6 +36,7 @@ pub struct DataPaths {
 enum RootOrigin {
     Canonical,
     ExistingLegacy { identity: (u32, u64) },
+    ExistingLocal { identity: (u32, u64) },
 }
 impl DataPaths {
     pub fn program_data() -> Result<Self> {
@@ -85,7 +86,10 @@ impl DataPaths {
     /// original cold recovery. Missing credentials never authorize fresh setup.
     /// Bootstrap must enforce this before opening/creating any database or key.
     pub fn requires_existing_deployment(&self) -> bool {
-        matches!(self.origin, RootOrigin::ExistingLegacy { .. })
+        matches!(
+            self.origin,
+            RootOrigin::ExistingLegacy { .. } | RootOrigin::ExistingLocal { .. }
+        )
     }
     pub fn database(&self) -> PathBuf {
         self.root.join("state").join("classroom.sqlite3")
@@ -102,6 +106,10 @@ impl DataPaths {
     /// Before recovery may inspect missing/moved children, verify the existing
     /// deployment root without creating or silently repairing any directory.
     pub fn verify_root_for_current_user(&self) -> Result<()> {
+        if matches!(self.origin, RootOrigin::ExistingLocal { .. }) {
+            self.local_migration_retired()?;
+            return Ok(());
+        }
         check_local_ancestors(&self.root)?;
         verify_acl(&self.root, &Descriptor::for_user(&current_user_sid()?)?)?;
         if let RootOrigin::ExistingLegacy { identity } = self.origin {
@@ -322,6 +330,9 @@ impl DataPaths {
     /// a protected DACL present at creation: SYSTEM, Administrators, deployment user.
     /// Existing roots are verified, never silently repaired or widened.
     pub fn prepare_for_current_user(&self) -> Result<DeploymentDirectory> {
+        if matches!(self.origin, RootOrigin::ExistingLocal { .. }) {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
         if self.requires_existing_deployment() {
             // A vanished selected old root must not become a new empty school.
             // Cold recovery runs before bootstrap asks to fill missing children.
@@ -339,6 +350,113 @@ impl DataPaths {
             user_sid,
             _thread: PhantomData,
         })
+    }
+
+    /// Fixed current-user legacy location only; no environment/path argument.
+    /// A known LocalAppData deployment is never opened as a second live writer.
+    pub fn local_migration_source() -> Result<Option<Self>> {
+        use windows::Win32::UI::Shell::{
+            FOLDERID_LocalAppData, SHGetKnownFolderPath, KF_FLAG_DEFAULT,
+        };
+        let root = crate::com_task::with_task_memory(|memory| unsafe {
+            let raw = SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, None)?;
+            let value = raw.to_string();
+            memory.free(raw.0.cast());
+            Ok(PathBuf::from(value?).join("FutureClassroom"))
+        })?;
+        match std::fs::symlink_metadata(&root) {
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+            Err(e) => return Err(e.into()),
+            Ok(_) => {}
+        }
+        check_local_ancestors(&root)?;
+        let pin = crate::materials::files::PinnedDirectory::open(&root)?;
+        let paths = Self {
+            root,
+            origin: RootOrigin::ExistingLocal {
+                identity: pin.identity()?,
+            },
+        };
+        paths.local_migration_retired()?;
+        Ok(Some(paths))
+    }
+    /// The exact original writable DACL or this migration's read-only DACL.
+    /// Unknown ACLs/objects are not repaired or adopted.
+    pub fn local_migration_retired(&self) -> Result<bool> {
+        let RootOrigin::ExistingLocal { identity } = self.origin else {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        };
+        check_local_ancestors(&self.root)?;
+        let pin = crate::materials::files::PinnedDirectory::open(&self.root)?;
+        if pin.identity()? != identity {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let sid = current_user_sid()?;
+        if verify_acl(&self.root, &Descriptor::for_user(&sid)?).is_ok() {
+            return Ok(false);
+        }
+        verify_acl(&self.root, &Descriptor::for_retired_user(&sid)?)?;
+        Ok(true)
+    }
+    /// Existing isolated-test constructor's controlled namespace only. Capture
+    /// the original object identity exactly as KnownFolder discovery does;
+    /// ordinary canonical ProgramData can never become a local source here.
+    pub fn isolated_migration_source(&self) -> Result<Self> {
+        if !matches!(self.origin, RootOrigin::Canonical)
+            || self
+                .root
+                .file_name()
+                .and_then(|n| n.to_str())
+                .is_none_or(|n| !n.starts_with("FutureClassroom-Test-"))
+        {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let pin = crate::materials::files::PinnedDirectory::open(&self.root)?;
+        let selected = Self {
+            root: self.root.clone(),
+            origin: RootOrigin::ExistingLocal {
+                identity: pin.identity()?,
+            },
+        };
+        selected.local_migration_retired()?;
+        Ok(selected)
+    }
+    /// Only the recognized project root changes. Known old startup requires its
+    /// exact writable root ACL before it can acquire/open the deployment; the
+    /// retired ACL fails that contract, including elevated launches. A root DACL
+    /// is not a recursive write revocation: protected descendants keep their own
+    /// DACL. The original instance lock and known application's root check are
+    /// the contract, not an OS sandbox against programs bypassing that check.
+    pub fn set_local_migration_retired(&self, retired: bool) -> Result<()> {
+        self.local_migration_retired()?;
+        let _root = crate::materials::files::PinnedDirectory::open(&self.root)?;
+        let sid = current_user_sid()?;
+        let descriptor = if retired {
+            Descriptor::for_retired_user(&sid)?
+        } else {
+            Descriptor::for_user(&sid)?
+        };
+        set_exact_dacl(&self.root, &descriptor)?;
+        verify_acl(&self.root, &descriptor)
+    }
+    /// Fresh controlled migration outputs only. The caller creates every file
+    /// with create_new and retains its owner; existing teaching files are never
+    /// repaired by this operation.
+    pub fn protect_migration_object(&self, path: &Path, directory: bool) -> Result<()> {
+        if !matches!(self.origin, RootOrigin::Canonical)
+            || !path.starts_with(&self.root)
+            || path == self.root
+        {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let _pin = if directory {
+            crate::materials::files::OwnedObjectPin::directory(path)?
+        } else {
+            crate::materials::files::OwnedObjectPin::file_allow_empty(path)?
+        };
+        let descriptor = Descriptor::for_user_object(&current_user_sid()?, directory)?;
+        set_exact_dacl(path, &descriptor)?;
+        verify_acl_contents(path, &descriptor, &HSTRING::from(path.as_os_str()))
     }
 }
 
@@ -451,10 +569,31 @@ pub struct DirectoryAclReadback {
 
 struct Descriptor(PSECURITY_DESCRIPTOR);
 impl Descriptor {
-    fn for_user(sid: &str) -> Result<Self> {
-        // SID came from the process token, never from user-controlled SDDL text.
+    fn for_retired_user(sid: &str) -> Result<Self> {
         let sddl = HSTRING::from(format!(
-            "D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FA;;;{sid})"
+            "D:P(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;OICI;FRFX;;;{sid})"
+        ));
+        let mut descriptor = Self(PSECURITY_DESCRIPTOR::default());
+        unsafe {
+            ConvertStringSecurityDescriptorToSecurityDescriptorW(
+                &sddl,
+                SDDL_REVISION_1,
+                &mut descriptor.0,
+                None,
+            )?;
+        }
+        Ok(descriptor)
+    }
+    fn for_user(sid: &str) -> Result<Self> {
+        Self::for_user_object(sid, true)
+    }
+    fn for_user_object(sid: &str, directory: bool) -> Result<Self> {
+        // SID came from the process token, never from user-controlled SDDL text.
+        // Windows removes directory inheritance flags from regular-file ACEs;
+        // verify files against their actual closed file descriptor instead.
+        let inherit = if directory { "OICI" } else { "" };
+        let sddl = HSTRING::from(format!(
+            "D:P(A;{inherit};FA;;;SY)(A;{inherit};FA;;;BA)(A;{inherit};FA;;;{sid})"
         ));
         let mut descriptor = Self(PSECURITY_DESCRIPTOR::default());
         // SAFETY: bounded NUL-terminated owned string, allocated output is uniquely
@@ -622,6 +761,24 @@ fn verify_acl(path: &Path, expected: &Descriptor) -> Result<()> {
 }
 fn verify_acl_named(path: &Path, expected: &Descriptor, name: &HSTRING) -> Result<()> {
     no_reparse_directory(path)?;
+    verify_acl_contents(path, expected, name)
+}
+fn set_exact_dacl(path: &Path, expected: &Descriptor) -> Result<()> {
+    unsafe {
+        SetNamedSecurityInfoW(
+            &HSTRING::from(path.as_os_str()),
+            SE_FILE_OBJECT,
+            DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
+            None,
+            None,
+            Some(acl(expected.0)?),
+            None,
+        )
+        .ok()?;
+    }
+    Ok(())
+}
+fn verify_acl_contents(_path: &Path, expected: &Descriptor, name: &HSTRING) -> Result<()> {
     let mut actual = Descriptor(PSECURITY_DESCRIPTOR::default());
     let mut owner = PSID::default();
     // SAFETY: synchronous query; OS returns a valid LocalAlloc descriptor with

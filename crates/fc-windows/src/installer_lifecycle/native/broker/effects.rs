@@ -16,19 +16,31 @@ pub(super) enum Admission {
     Fresh,
     SameManifest,
     Upgrade,
+    Uninstall(UninstallRun),
+}
+// Private to the native broker. Only closed Setup::Uninstall constructs Armed.
+// The original preimage always remains in the same Admitted owner.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum UninstallRun {
+    Armed,
+    WriteAttempted,
+    Deleted,
+    OriginalVerified,
 }
 impl Admission {
     pub(super) fn operation(self) -> MaintenanceOperation {
         match self {
             Self::Fresh => MaintenanceOperation::Install,
-            Self::SameManifest => MaintenanceOperation::SameManifest,
+            Self::SameManifest | Self::Uninstall(_) => MaintenanceOperation::SameManifest,
             Self::Upgrade => MaintenanceOperation::Upgrade,
         }
     }
     fn preimage(self) -> ExpectedState {
         match self {
             Self::Fresh => ExpectedState::Absent,
-            Self::SameManifest | Self::Upgrade => ExpectedState::CapturedPreimage,
+            Self::SameManifest | Self::Upgrade | Self::Uninstall(_) => {
+                ExpectedState::CapturedPreimage
+            }
         }
     }
 }
@@ -36,9 +48,9 @@ impl Admission {
 pub(super) struct Admitted {
     kind: Admission,
     snapshot: Option<preimage::Snapshot>,
-    // Existing same-package repair and upgrade retain the exact owned Run
-    // preimage. This is volatile read-only evidence, never a create/restore or
-    // deletion permit. Fresh install and committed removal still require absent.
+    // Exact original bytes stay with this admission through known settlement.
+    // Only the closed Uninstall kind grants this transaction a delete/rollback
+    // obligation; Repair and Upgrade continue to preserve them read-only.
     retained_run: Option<RunPreimage>,
 }
 impl Admitted {
@@ -69,7 +81,9 @@ impl Decision {
     fn observed(admission: Admission, observed: Observation) -> Self {
         let expected = match (admission, observed) {
             (_, Observation::Present) => Some(ExpectedState::Present),
-            (Admission::SameManifest, Observation::Absent) => Some(ExpectedState::Absent),
+            (Admission::SameManifest | Admission::Uninstall(_), Observation::Absent) => {
+                Some(ExpectedState::Absent)
+            }
             _ => None,
         };
         match expected {
@@ -97,7 +111,7 @@ impl Decision {
         }
     }
     fn require_absent(self, admission: Admission) -> Self {
-        if admission == Admission::SameManifest
+        if matches!(admission, Admission::SameManifest | Admission::Uninstall(_))
             && self.outcome == SettledOutcome::Commit
             && self.expected == ExpectedState::Absent
         {
@@ -114,7 +128,7 @@ impl Decision {
             && self.expected == ExpectedState::Absent
             && matches!(original, Some(RunPreimage::ExactCommand { .. }))
         {
-            // SameManifest admission also serves uninstall. Read-only repair
+            // Generic SameManifest can serve legacy removal. Read-only repair
             // preservation must not let that route leave a live Run command
             // pointing at an absent installation. No registry compare-delete
             // or rollback capability is implied by this captured preimage.
@@ -382,10 +396,18 @@ fn read_run_preimage_at(
         return Err(windows::core::Error::from_hresult(opened.to_hresult()).into());
     }
     owner.add(HANDLE(key.0), Role::Registry);
+    let read = query_run_preimage(key, expected_command);
+    // The same checked HKEY return precedes every result, including parse errors.
+    owner.release()?;
+    read
+}
+fn query_run_preimage(
+    key: HKEY,
+    expected_command: impl FnOnce() -> Result<String>,
+) -> Result<RunPreimage> {
     let mut kind = REG_VALUE_TYPE::default();
     let mut raw = [0u8; MAX_RUN_COMMAND_BYTES];
     let mut bytes = raw.len() as u32;
-    // Fixed stack capacity: a value's reported size never controls allocation.
     let queried = unsafe {
         RegQueryValueExW(
             key,
@@ -396,13 +418,9 @@ fn read_run_preimage_at(
             Some(&mut bytes),
         )
     };
-    // Checked HKEY return precedes parsing and every error/result publication.
-    owner.release()?;
     match queried {
         ERROR_FILE_NOT_FOUND => Ok(RunPreimage::Absent),
         ERROR_SUCCESS if bytes as usize <= raw.len() => {
-            // A long installation path may legitimately have no Run value.
-            // Format/length restrictions apply only to a present command.
             let expected = run_command_bytes(&expected_command()?)?;
             exact_run_value(kind.0, &raw[..bytes as usize], &expected)
         }
@@ -410,6 +428,7 @@ fn read_run_preimage_at(
         error => Err(windows::core::Error::from_hresult(error.to_hresult()).into()),
     }
 }
+
 fn match_run_preimage_at(
     path: &str,
     original: &RunPreimage,
@@ -427,7 +446,17 @@ fn require_absent_run_preimage(original: Option<&RunPreimage>) -> Result<()> {
     Ok(())
 }
 fn check_admitted_run(admission: &Admitted) -> Result<()> {
-    if matches!(admission.kind, Admission::SameManifest | Admission::Upgrade) {
+    if let Admission::Uninstall(state) = admission.kind {
+        match state {
+            UninstallRun::Deleted => return run_absent_at(RUN_KEY),
+            UninstallRun::WriteAttempted => return Err(LifecycleError::Unsettled),
+            UninstallRun::Armed | UninstallRun::OriginalVerified => {}
+        }
+    }
+    if matches!(
+        admission.kind,
+        Admission::SameManifest | Admission::Upgrade | Admission::Uninstall(_)
+    ) {
         let original = admission
             .retained_run
             .as_ref()
@@ -441,6 +470,177 @@ fn check_admitted_run(admission: &Admitted) -> Result<()> {
         // an existing installation grants no cleanup right.
         run_absent_at(RUN_KEY)
     }
+}
+// A registry handle used for mutation belongs to the ORIGINAL maintenance
+// Resources, not a replacement claim. No path/value comes from MSI properties.
+fn mutation_run_key(owner: &mut Resources, path: &str, create: bool) -> Result<Option<HKEY>> {
+    owner.check_live()?;
+    if owner.handles.len() >= HANDLE_LIMIT {
+        return Err(LifecycleError::Invalid);
+    }
+    let mut key = HKEY::default();
+    let code = if create {
+        unsafe {
+            RegCreateKeyExW(
+                HKEY_CURRENT_USER,
+                &HSTRING::from(path),
+                None,
+                None,
+                REG_OPTION_NON_VOLATILE,
+                KEY_QUERY_VALUE | KEY_SET_VALUE | KEY_WOW64_32KEY,
+                None,
+                &mut key,
+                None,
+            )
+        }
+    } else {
+        unsafe {
+            RegOpenKeyExW(
+                HKEY_CURRENT_USER,
+                &HSTRING::from(path),
+                Some(0),
+                KEY_QUERY_VALUE | KEY_SET_VALUE | KEY_WOW64_32KEY,
+                &mut key,
+            )
+        }
+    };
+    if !key.0.is_null() {
+        owner.add(HANDLE(key.0), Role::Registry);
+    }
+    if code != ERROR_SUCCESS {
+        if !key.0.is_null() {
+            owner.close_handle(HANDLE(key.0))?;
+        }
+        if !create && code == ERROR_FILE_NOT_FOUND {
+            return Ok(None);
+        }
+        return Err(windows::core::Error::from_hresult(code.to_hresult()).into());
+    }
+    if key.0.is_null() {
+        return Err(LifecycleError::Unsettled);
+    }
+    Ok(Some(key))
+}
+fn require_uninstall_run_absent(state: UninstallRun, original: Option<&RunPreimage>) -> Result<()> {
+    match (state, original) {
+        (UninstallRun::Armed, Some(RunPreimage::Absent))
+        | (UninstallRun::Deleted, Some(RunPreimage::ExactCommand { .. })) => Ok(()),
+        _ => Err(LifecycleError::Unsettled),
+    }
+}
+fn delete_uninstall_run_at(
+    owner: &mut Resources,
+    admission: &mut Admitted,
+    path: &str,
+    command: &str,
+    deadline: Instant,
+) -> Result<()> {
+    if admission.kind != Admission::Uninstall(UninstallRun::Armed) {
+        return Err(LifecycleError::Invalid);
+    }
+    let original = admission
+        .retained_run
+        .as_ref()
+        .ok_or(LifecycleError::Invalid)?
+        .clone();
+    if original == RunPreimage::Absent {
+        return run_absent_at(path);
+    }
+    let key = mutation_run_key(owner, path, false)?.ok_or(LifecycleError::Unsettled)?;
+    let observed = (|| {
+        if query_run_preimage(key, || Ok(command.to_owned()))? != original {
+            return Err(LifecycleError::Unsettled);
+        }
+        current(deadline)?;
+        owner.check_live()?;
+        // Responsibility is already stored beside the original maintenance
+        // owner before this first write. The adjacent check/write is NOT CAS;
+        // internal callers follow the maintenance contract, and an observed
+        // external replacement is never adopted or deliberately overwritten.
+        admission.kind = Admission::Uninstall(UninstallRun::WriteAttempted);
+        let code = unsafe { RegDeleteValueW(key, windows::core::w!("FutureClassroom")) };
+        if code == ERROR_SUCCESS {
+            admission.kind = Admission::Uninstall(UninstallRun::Deleted);
+            if query_run_preimage(key, || Ok(command.to_owned()))? != RunPreimage::Absent {
+                return Err(LifecycleError::Unsettled);
+            }
+            Ok(())
+        } else {
+            // A failed delete with the original still present can take the
+            // existing known rollback route. Otherwise preserve uncertainty.
+            if query_run_preimage(key, || Ok(command.to_owned()))
+                .ok()
+                .as_ref()
+                == Some(&original)
+            {
+                admission.kind = Admission::Uninstall(UninstallRun::Armed);
+            }
+            Err(windows::core::Error::from_hresult(code.to_hresult()).into())
+        }
+    })();
+    owner.close_handle(HANDLE(key.0))?;
+    observed
+}
+fn restore_uninstall_run_at(
+    owner: &mut Resources,
+    admission: &mut Admitted,
+    path: &str,
+    command: &str,
+    deadline: Instant,
+) -> Result<()> {
+    if admission.kind != Admission::Uninstall(UninstallRun::Deleted) {
+        return Err(LifecycleError::Invalid);
+    }
+    let original = admission
+        .retained_run
+        .as_ref()
+        .ok_or(LifecycleError::Invalid)?
+        .clone();
+    let RunPreimage::ExactCommand { kind, bytes } = &original else {
+        return Err(LifecycleError::Invalid);
+    };
+    let current_run = read_run_preimage_at(path, || Ok(command.to_owned()))?;
+    if current_run == original {
+        admission.kind = Admission::Uninstall(UninstallRun::OriginalVerified);
+        return Ok(());
+    }
+    if current_run != RunPreimage::Absent {
+        return Err(LifecycleError::Unsettled);
+    }
+    current(deadline)?;
+    // RegCreateKey may recreate the fixed Run key only when it is absent; its
+    // rollback obligation is in this same original owner before that call too.
+    admission.kind = Admission::Uninstall(UninstallRun::WriteAttempted);
+    let key = mutation_run_key(owner, path, true)?.ok_or(LifecycleError::Unsettled)?;
+    let restored = (|| {
+        let current_run = query_run_preimage(key, || Ok(command.to_owned()))?;
+        if current_run == original {
+            admission.kind = Admission::Uninstall(UninstallRun::OriginalVerified);
+            return Ok(());
+        }
+        if current_run != RunPreimage::Absent {
+            return Err(LifecycleError::Unsettled);
+        }
+        current(deadline)?;
+        owner.check_live()?;
+        unsafe {
+            RegSetValueExW(
+                key,
+                windows::core::w!("FutureClassroom"),
+                None,
+                REG_VALUE_TYPE(*kind),
+                Some(bytes),
+            )
+            .ok()?;
+        }
+        admission.kind = Admission::Uninstall(UninstallRun::OriginalVerified);
+        if query_run_preimage(key, || Ok(command.to_owned()))? != original {
+            return Err(LifecycleError::Unsettled);
+        }
+        Ok(())
+    })();
+    owner.close_handle(HANDLE(key.0))?;
+    restored
 }
 fn run_absent_at(path: &str) -> Result<()> {
     let mut owner = Resources::empty()?;
@@ -551,7 +751,7 @@ pub(super) fn admit_upgrade(session: &mut Session) -> Result<Admitted> {
     upgrade::admit(session)
 }
 pub(super) fn admit(session: &mut Session) -> Result<Admitted> {
-    // Legacy/general maintenance and removal have no Run deletion protocol.
+    // Legacy/general maintenance has no closed Run deletion permission.
     // Refuse a present value before admission and any installer mutation. The
     // captured check also rejects an exact owned value inserted between reads.
     current(session.deadline)?;
@@ -569,6 +769,16 @@ pub(super) fn admit_repair(session: &mut Session) -> Result<Admitted> {
     if admitted.kind != Admission::SameManifest {
         return Err(LifecycleError::Invalid);
     }
+    Ok(admitted)
+}
+/// Only closed Setup::Uninstall may arm removal of this installation's exact
+/// Run value. The bytes and rollback responsibility are captured before writes.
+pub(super) fn admit_uninstall(session: &mut Session) -> Result<Admitted> {
+    let mut admitted = admit_preserving_run(session)?;
+    if admitted.kind != Admission::SameManifest {
+        return Err(LifecycleError::Invalid);
+    }
+    admitted.kind = Admission::Uninstall(UninstallRun::Armed);
     Ok(admitted)
 }
 fn admit_preserving_run(session: &mut Session) -> Result<Admitted> {
@@ -615,7 +825,7 @@ pub(super) fn revalidate(session: &mut Session, admission: &Admitted) -> Result<
     match admission.kind {
         Admission::Upgrade => upgrade::revalidate(session, admission)?,
         Admission::Fresh => fresh(session)?,
-        Admission::SameManifest => {
+        Admission::SameManifest | Admission::Uninstall(_) => {
             let mut proof = Proof::new(session.deadline);
             let observed = registered_preimage(session, &mut proof);
             let matches = observed.as_ref().is_ok_and(|actual| {
@@ -998,8 +1208,12 @@ pub(super) fn staged(session: &mut Session, admission: &Admitted) -> Result<Deci
     current(session.deadline)?;
     check_admitted_run(admission)?;
     current(session.deadline)?;
-    Ok(Decision::observed(admission.kind, observed)
-        .preserve_run(admission.kind, admission.retained_run.as_ref()))
+    let decision = Decision::observed(admission.kind, observed);
+    Ok(if matches!(admission.kind, Admission::Uninstall(_)) {
+        decision
+    } else {
+        decision.preserve_run(admission.kind, admission.retained_run.as_ref())
+    })
 }
 pub(super) fn failed_install(admission: &Admitted) -> Decision {
     Decision {
@@ -1019,12 +1233,96 @@ pub(super) fn staged_present(session: &mut Session, admission: &Admitted) -> Res
 pub(super) fn staged_absent(session: &mut Session, admission: &Admitted) -> Result<Decision> {
     Ok(staged(session, admission)?.require_absent(admission.kind))
 }
+/// The original maintenance owner already holds this admission before RUN.
+/// A known registry failure requests the same MSI EndRollback; a close or write
+/// uncertainty keeps the owner and its exact original bytes pending instead.
+pub(super) fn staged_uninstall(
+    session: &mut Session,
+    admission: &mut Admitted,
+    owner: &mut Resources,
+) -> Result<Decision> {
+    if admission.kind != Admission::Uninstall(UninstallRun::Armed)
+        || owner.sid != session.resources.sid
+    {
+        return Err(LifecycleError::Invalid);
+    }
+    let decision = staged_absent(session, admission)?;
+    if decision.outcome != SettledOutcome::Commit {
+        return Ok(decision);
+    }
+    let command = if matches!(
+        admission.retained_run,
+        Some(RunPreimage::ExactCommand { .. })
+    ) {
+        expected_installed_run_command()?
+    } else {
+        String::new()
+    };
+    match delete_uninstall_run_at(owner, admission, RUN_KEY, &command, session.deadline) {
+        Ok(()) => Ok(decision),
+        Err(error) => {
+            owner.check_live()?;
+            if admission.kind == Admission::Uninstall(UninstallRun::WriteAttempted) {
+                return Err(error);
+            }
+            Ok(failed_install(admission))
+        }
+    }
+}
+/// Called ONLY after authenticated ENDED/End0 for this decision, the original
+/// guardian exit0, and that maintenance owner's guardian_returned(). A missing
+/// receipt, lost process or timeout never authorizes registry compensation.
+pub(super) fn settle_uninstall_run(
+    session: &Session,
+    admission: &mut Admitted,
+    decision: Decision,
+    owner: &mut Resources,
+) -> Result<()> {
+    current(session.deadline)?;
+    owner.check_live()?;
+    if owner.sid != session.resources.sid {
+        return Err(LifecycleError::Invalid);
+    }
+    let Admission::Uninstall(state) = admission.kind else {
+        return Err(LifecycleError::Invalid);
+    };
+    if decision.outcome == SettledOutcome::Commit {
+        if decision.expected != ExpectedState::Absent {
+            return Err(LifecycleError::Invalid);
+        }
+        require_uninstall_run_absent(state, admission.retained_run.as_ref())?;
+        return run_absent_at(RUN_KEY);
+    }
+    if decision.expected != ExpectedState::CapturedPreimage {
+        return Err(LifecycleError::Invalid);
+    }
+    match state {
+        UninstallRun::Deleted => restore_uninstall_run_at(
+            owner,
+            admission,
+            RUN_KEY,
+            &expected_installed_run_command()?,
+            session.deadline,
+        )?,
+        UninstallRun::Armed | UninstallRun::OriginalVerified => check_admitted_run(admission)?,
+        UninstallRun::WriteAttempted => return Err(LifecycleError::Unsettled),
+    }
+    check_admitted_run(admission)
+}
 pub(super) fn reconcile(
     session: &mut Session,
     admission: &Admitted,
     decision: Decision,
 ) -> Result<Proof> {
     current(session.deadline)?;
+    if let Admission::Uninstall(state) = admission.kind {
+        if decision.expected == ExpectedState::Present
+            || (decision.expected == ExpectedState::CapturedPreimage
+                && !matches!(state, UninstallRun::Armed | UninstallRun::OriginalVerified))
+        {
+            return Err(LifecycleError::Unsettled);
+        }
+    }
     check_admitted_run(admission)?;
     if admission.kind == Admission::Upgrade {
         let proof = upgrade::reconcile(session, admission, decision)?;
@@ -1051,11 +1349,12 @@ pub(super) fn reconcile(
         }
         proof
     } else {
-        // A retained owned command authorizes read-only repair, not deletion.
-        // Uninstall with autostart still needs a separate atomic ownership /
-        // rollback protocol; never delete after a racy read or restore Run over
-        // an external change. Absence remains mandatory for committed removal.
-        require_absent_run_preimage(admission.retained_run.as_ref())?;
+        if let Admission::Uninstall(state) = admission.kind {
+            require_uninstall_run_absent(state, admission.retained_run.as_ref())?;
+        } else {
+            // Legacy/general maintenance has no closed removal permission.
+            require_absent_run_preimage(admission.retained_run.as_ref())?;
+        }
         run_absent_at(RUN_KEY)?;
         let proof = Proof::new(session.deadline);
         let base = root()?;
@@ -1134,7 +1433,7 @@ mod tests {
         assert_eq!(
             require_absent_run_preimage(Some(&owned)),
             Err(LifecycleError::Unsettled),
-            "general maintenance and uninstall still refuse Run before writes"
+            "general maintenance without closed Uninstall permission still refuses Run"
         );
         let admission = Admission::SameManifest;
         let repaired = Decision::observed(admission, Observation::Present)
@@ -1387,6 +1686,236 @@ mod tests {
         }
         drop(fixture);
         assert!(run_absent_at(&path).is_ok());
+    }
+
+    fn uninstall_fixture(original: RunPreimage) -> Admitted {
+        // Registry adapter only: this never constructs a Session/Begin ticket
+        // and does not pretend to run the actual MSI rollback integration.
+        Admitted {
+            kind: Admission::Uninstall(UninstallRun::Armed),
+            snapshot: None,
+            retained_run: Some(original),
+        }
+    }
+    #[test]
+    fn closed_uninstall_commit_requires_known_delete_or_original_absence() {
+        let exact = RunPreimage::ExactCommand {
+            kind: REG_SZ.0,
+            bytes: run_command_bytes("owned").unwrap(),
+        };
+        for state in [
+            UninstallRun::Armed,
+            UninstallRun::WriteAttempted,
+            UninstallRun::Deleted,
+            UninstallRun::OriginalVerified,
+        ] {
+            assert_eq!(
+                require_uninstall_run_absent(state, Some(&exact)).is_ok(),
+                state == UninstallRun::Deleted
+            );
+            assert_eq!(
+                require_uninstall_run_absent(state, Some(&RunPreimage::Absent)).is_ok(),
+                state == UninstallRun::Armed
+            );
+            assert!(require_uninstall_run_absent(state, None).is_err());
+            let kind = Admission::Uninstall(state);
+            assert_eq!(kind.operation(), MaintenanceOperation::SameManifest);
+            assert_eq!(
+                failed_install(&uninstall_fixture(exact.clone())).expected,
+                ExpectedState::CapturedPreimage
+            );
+            assert_eq!(
+                Decision::observed(kind, Observation::Absent)
+                    .require_absent(kind)
+                    .outcome(),
+                SettledOutcome::Commit
+            );
+        }
+    }
+    #[test]
+    fn actual_uninstall_registry_adapter_deletes_exact_value_and_restores_original_bytes() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let mut fixture = RegistryFixture::new();
+        let path = fixture.path.as_ref().unwrap().clone();
+        let command = expected_installed_run_command().unwrap();
+        let bytes = run_command_bytes(&command).unwrap();
+        unsafe {
+            RegSetValueExW(
+                fixture.key,
+                windows::core::w!("FutureClassroom"),
+                None,
+                REG_SZ,
+                Some(&bytes),
+            )
+            .ok()
+            .unwrap();
+            RegSetValueExW(
+                fixture.key,
+                windows::core::w!("Unrelated"),
+                None,
+                REG_DWORD,
+                Some(&7u32.to_le_bytes()),
+            )
+            .ok()
+            .unwrap();
+        }
+        let original = query_run_preimage(fixture.key, || Ok(command.clone())).unwrap();
+        let mut admission = uninstall_fixture(original.clone());
+        let count = fixture.owner.handles.len();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        delete_uninstall_run_at(
+            &mut fixture.owner,
+            &mut admission,
+            &path,
+            &command,
+            deadline,
+        )
+        .unwrap();
+        assert_eq!(admission.kind, Admission::Uninstall(UninstallRun::Deleted));
+        assert_eq!(
+            read_run_preimage_at(&path, || Ok(command.clone())).unwrap(),
+            RunPreimage::Absent
+        );
+        assert_eq!(
+            fixture.owner.handles.len(),
+            count,
+            "original owner checked returned the mutation key"
+        );
+        // Adapter invoked at the production known-rollback boundary; this unit
+        // checks actual registry bytes, not an invented native End observation.
+        restore_uninstall_run_at(
+            &mut fixture.owner,
+            &mut admission,
+            &path,
+            &command,
+            deadline,
+        )
+        .unwrap();
+        assert_eq!(
+            admission.kind,
+            Admission::Uninstall(UninstallRun::OriginalVerified)
+        );
+        assert_eq!(
+            query_run_preimage(fixture.key, || Ok(command.clone())).unwrap(),
+            original
+        );
+        assert_eq!(fixture.owner.handles.len(), count);
+        let mut other = [0u8; 4];
+        let mut n = 4;
+        let mut kind = REG_VALUE_TYPE::default();
+        unsafe {
+            RegQueryValueExW(
+                fixture.key,
+                windows::core::w!("Unrelated"),
+                None,
+                Some(&mut kind),
+                Some(other.as_mut_ptr()),
+                Some(&mut n),
+            )
+            .ok()
+            .unwrap();
+        }
+        assert_eq!((kind, other, n), (REG_DWORD, 7u32.to_le_bytes(), 4));
+        let mut absent = uninstall_fixture(RunPreimage::Absent);
+        let missing = format!(r"{path}\NeverCreated");
+        delete_uninstall_run_at(&mut fixture.owner, &mut absent, &missing, "", deadline).unwrap();
+        assert_eq!(absent.kind, Admission::Uninstall(UninstallRun::Armed));
+        assert!(
+            mutation_run_key(&mut fixture.owner, &missing, false)
+                .unwrap()
+                .is_none(),
+            "absent original never creates a registry key"
+        );
+    }
+    #[test]
+    fn actual_uninstall_registry_adapter_never_deletes_or_restores_over_external_value() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let mut fixture = RegistryFixture::new();
+        let path = fixture.path.as_ref().unwrap().clone();
+        let command = expected_installed_run_command().unwrap();
+        let bytes = run_command_bytes(&command).unwrap();
+        let original = RunPreimage::ExactCommand {
+            kind: REG_SZ.0,
+            bytes: bytes.clone(),
+        };
+        let deadline = Instant::now() + Duration::from_secs(10);
+        for foreign_kind in [REG_EXPAND_SZ, REG_BINARY] {
+            unsafe {
+                RegSetValueExW(
+                    fixture.key,
+                    windows::core::w!("FutureClassroom"),
+                    None,
+                    foreign_kind,
+                    Some(&bytes),
+                )
+                .ok()
+                .unwrap();
+            }
+            let mut admission = uninstall_fixture(original.clone());
+            let before = fixture.read();
+            assert!(delete_uninstall_run_at(
+                &mut fixture.owner,
+                &mut admission,
+                &path,
+                &command,
+                deadline
+            )
+            .is_err());
+            assert_eq!(fixture.read(), before);
+            assert_eq!(admission.kind, Admission::Uninstall(UninstallRun::Armed));
+        }
+        unsafe {
+            RegSetValueExW(
+                fixture.key,
+                windows::core::w!("FutureClassroom"),
+                None,
+                REG_SZ,
+                Some(&bytes),
+            )
+            .ok()
+            .unwrap();
+        }
+        let mut admission = uninstall_fixture(original.clone());
+        delete_uninstall_run_at(
+            &mut fixture.owner,
+            &mut admission,
+            &path,
+            &command,
+            deadline,
+        )
+        .unwrap();
+        let foreign = run_command_bytes("external command").unwrap();
+        unsafe {
+            RegSetValueExW(
+                fixture.key,
+                windows::core::w!("FutureClassroom"),
+                None,
+                REG_SZ,
+                Some(&foreign),
+            )
+            .ok()
+            .unwrap();
+        }
+        let before = fixture.read();
+        assert!(restore_uninstall_run_at(
+            &mut fixture.owner,
+            &mut admission,
+            &path,
+            &command,
+            deadline
+        )
+        .is_err());
+        assert_eq!(fixture.read(), before);
+        assert_eq!(
+            admission.retained_run.as_ref(),
+            Some(&original),
+            "original responsibility survives refused compensation"
+        );
+        assert_eq!(admission.kind, Admission::Uninstall(UninstallRun::Deleted));
     }
 
     #[test]

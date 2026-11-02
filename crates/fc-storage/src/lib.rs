@@ -1240,6 +1240,15 @@ fn backup_database(
     destination: &Path,
     stop: &AtomicBool,
 ) -> Result<BackupReceipt, StorageError> {
+    backup_database_with_policy(db, destination, &|| !stop.load(Ordering::Acquire), false)
+}
+
+fn backup_database_with_policy(
+    db: &Connection,
+    destination: &Path,
+    check: &dyn Fn() -> bool,
+    preserve_all: bool,
+) -> Result<BackupReceipt, StorageError> {
     if !db.is_autocommit() {
         return Err(StorageError::Database);
     }
@@ -1269,7 +1278,7 @@ fn backup_database(
             rusqlite::backup::Backup::new(db, &mut output).map_err(|_| StorageError::Database)?;
         let started = Instant::now();
         loop {
-            if stop.load(Ordering::Acquire) {
+            if !check() {
                 return Err(StorageError::Stopping);
             }
             if started.elapsed() >= Duration::from_secs(30) {
@@ -1285,7 +1294,9 @@ fn backup_database(
             }
         }
     }
-    business::voice::sanitize_backup(&mut output)?;
+    if !preserve_all {
+        business::voice::sanitize_backup(&mut output)?;
+    }
     let revision = read_revision(&output)?;
     let schema_version = output
         .pragma_query_value(None, "user_version", |row| row.get(0))
@@ -1307,6 +1318,157 @@ fn backup_database(
         revision,
         schema_version,
     })
+}
+
+/// Deployment-only complete snapshot facts, not an ordinary .fcbak projection.
+/// Caller holds both deployment instance locks and controls/pins all paths.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LocalDeploymentSnapshot {
+    pub revision: Revision,
+    pub school_id: fc_domain::ids::SchoolId,
+    pub media: Vec<fc_domain::recovery::BackupEntry>,
+}
+
+fn readonly_local_deployment(path: &Path) -> Result<Connection, StorageError> {
+    let db = Connection::open_with_flags(path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|_| StorageError::Database)?;
+    let schema: i64 = db
+        .pragma_query_value(None, "user_version", |r| r.get(0))
+        .map_err(|_| StorageError::Database)?;
+    if schema != SCHEMA_VERSION {
+        return Err(StorageError::UnsupportedSchema);
+    }
+    let known = [
+        "state_meta",
+        "documents",
+        "command_journal",
+        "command_window_clock",
+        "command_window_meta",
+        "command_window_entries",
+        "command_window_documents",
+        "command_window_profile_owners",
+        "command_journal_v2",
+        "command_window_journals",
+        "command_window_consumption",
+        "command_window_legacy_meta",
+        "command_window_legacy_docs",
+        "command_window_legacy_journals",
+    ];
+    {
+        let mut query = db.prepare("SELECT type,name FROM sqlite_master WHERE type IN ('table','view','trigger') AND name NOT LIKE 'sqlite_%'")
+            .map_err(|_| StorageError::Database)?;
+        let rows = query
+            .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))
+            .map_err(|_| StorageError::Database)?;
+        let mut names = std::collections::BTreeSet::new();
+        for row in rows {
+            let (kind, name) = row.map_err(|_| StorageError::Database)?;
+            if kind != "table" || !known.contains(&name.as_str()) {
+                return Err(StorageError::UnsupportedSchema);
+            }
+            names.insert(name);
+        }
+        if !["state_meta", "documents", "command_journal"]
+            .iter()
+            .all(|n| names.contains(*n))
+        {
+            return Err(StorageError::Database);
+        }
+    }
+    let integrity: String = db
+        .query_row("PRAGMA integrity_check", [], |r| r.get(0))
+        .map_err(|_| StorageError::Database)?;
+    if integrity != "ok" {
+        return Err(StorageError::Database);
+    }
+    Ok(db)
+}
+
+pub fn inspect_local_deployment(path: &Path) -> Result<LocalDeploymentSnapshot, StorageError> {
+    let db = readonly_local_deployment(path)?;
+    let view = TransactionView(&db);
+    let identity = business::load_identity(&view)?;
+    business::validate_documents(&view, &identity)?;
+    let school_id = identity
+        .installation
+        .as_ref()
+        .ok_or(StorageError::Database)?
+        .school_id;
+    Ok(LocalDeploymentSnapshot {
+        revision: read_revision(&db)?,
+        school_id,
+        media: business::recovery::media(&view)?,
+    })
+}
+
+pub fn snapshot_local_deployment(
+    source: &Path,
+    destination: &Path,
+    check: &dyn Fn() -> bool,
+) -> Result<LocalDeploymentSnapshot, StorageError> {
+    if !check() {
+        return Err(StorageError::Stopping);
+    }
+    let facts = inspect_local_deployment(source)?;
+    let db = readonly_local_deployment(source)?;
+    // The existing SQLite Backup loop copies every page/table, including opaque
+    // credentials, rate limits, legacy journal and C2 history. No sanitization.
+    backup_database_with_policy(&db, destination, check, true)?;
+    if !check() {
+        return Err(StorageError::Stopping);
+    }
+    if inspect_local_deployment(destination)? != facts || inspect_local_deployment(source)? != facts
+    {
+        return Err(StorageError::Database);
+    }
+    Ok(facts)
+}
+
+#[cfg(test)]
+#[test]
+fn deployment_page_snapshot_preserves_opaque_credentials_and_both_command_journals() {
+    // Backup-loop regression only; synthetic rows do not qualify a deployment.
+    let db = Connection::open_in_memory().unwrap();
+    db.execute_batch("CREATE TABLE state_meta(singleton INTEGER PRIMARY KEY,revision INTEGER);
+        INSERT INTO state_meta VALUES(1,7);
+        CREATE TABLE documents(key TEXT PRIMARY KEY,value BLOB,revision INTEGER);
+        INSERT INTO documents VALUES('credential/synthetic',X'0001FEFF',7);
+        INSERT INTO documents VALUES('business/voice/v1',X'ABCDEF',7);
+        CREATE TABLE command_journal(command_id TEXT PRIMARY KEY,fingerprint BLOB,revision INTEGER);
+        INSERT INTO command_journal VALUES('original',zeroblob(32),6);
+        CREATE TABLE command_journal_v2(command_id TEXT PRIMARY KEY,fingerprint BLOB,revision INTEGER);
+        INSERT INTO command_journal_v2 VALUES('original-v2',zeroblob(32),7);
+        PRAGMA user_version=1;").unwrap();
+    let nonce = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let path = std::env::temp_dir().join(format!(
+        "FutureClassroom-Test-LocalSnapshot-{}-{nonce}.sqlite3",
+        std::process::id()
+    ));
+    backup_database_with_policy(&db, &path, &|| true, true).unwrap();
+    let copied =
+        Connection::open_with_flags(&path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
+    for (key, expected) in [
+        ("credential/synthetic", vec![0, 1, 254, 255]),
+        ("business/voice/v1", vec![171, 205, 239]),
+    ] {
+        let actual: Vec<u8> = copied
+            .query_row("SELECT value FROM documents WHERE key=?1", [key], |r| {
+                r.get(0)
+            })
+            .unwrap();
+        assert_eq!(actual, expected);
+    }
+    for table in ["command_journal", "command_journal_v2"] {
+        let count: u64 = copied
+            .query_row(&format!("SELECT COUNT(*) FROM {table}"), [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(count, 1);
+    }
+    copied.close().unwrap();
+    std::fs::remove_file(path).unwrap();
 }
 
 fn mark_fault<P: AuthorityPublisher>(publisher: &mut P, faulted: &mut bool) {

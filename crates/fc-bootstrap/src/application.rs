@@ -555,7 +555,10 @@ fn open_reconciled_backend(
     };
     let policy = if let ResetOpen::Initialize(permit) = &opening {
         OpenPolicy::AfterVerifiedReset { permit, check }
-    } else if paths.requires_existing_deployment() {
+    } else if paths.requires_existing_deployment()
+        || fc_bootstrap::local_data_migration::has_deployment_receipt(paths)
+            .map_err(|_| Failure::Deployment("无法确认旧资料迁移状态，原件已保留。"))?
+    {
         verify_existing_deployment(root)?;
         OpenPolicy::ExistingOnly
     } else {
@@ -1677,6 +1680,11 @@ impl Work {
             Self::Backup(job) => job.run_with_command(context, &command),
             Self::Open(paths, clock) => {
                 let root = paths.root().to_owned();
+                fc_bootstrap::local_data_migration::migrate_before_open(
+                    &paths, &|| context.checkpoint().is_ok(),
+                ).map_err(|_| Failure::Deployment(
+                    "旧资料迁移未完成或存在并存资料，原件和迁移记录已保留；不会新建学校，请先核对迁移状态。",
+                ))?;
                 // The first frame is already visible. Recovery owns the same
                 // worker deadline/cancellation and precedes full child creation,
                 // SQLite, ordinary GC, audio and every network capability.

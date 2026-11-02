@@ -4,6 +4,8 @@ pub mod autostart;
 pub mod backend;
 #[cfg(windows)]
 pub mod https_runtime;
+#[cfg(windows)]
+pub mod local_data_migration;
 mod physical_thread;
 pub mod profile_content_cache;
 #[cfg(windows)]

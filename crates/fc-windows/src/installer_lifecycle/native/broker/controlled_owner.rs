@@ -770,6 +770,14 @@ fn abort(
     }))
 }
 
+// The preimage/registry compensation obligation and ORIGINAL MaintenanceOwner
+// have one stable lifetime before any Run write. On an unknown outcome this
+// same allocation is retained; no replacement owner or automatic replay exists.
+struct ControlledEffectsOwner {
+    owner: MaintenanceOwner,
+    admission: effects::Admitted,
+}
+
 /// Actual closed Setup adapter. Only a separately sealed image with its fixed
 /// source can enter; the request supplies no authority or caller-selected path.
 pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
@@ -839,7 +847,8 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
             Some(v) => Ok(v),
             None => match operation {
                 Operation::Repair => effects::admit_repair(&mut s),
-                _ => effects::admit(&mut s),
+                Operation::Uninstall => effects::admit_uninstall(&mut s),
+                Operation::Install => effects::admit(&mut s),
             },
         })
         .and_then(|admission| {
@@ -874,122 +883,136 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
         )?;
         return Err(LifecycleError::Invalid);
     }
-    let mut owner = if s.verified_upgrade.is_some() {
+    let owner = if s.verified_upgrade.is_some() {
         draft.arm_upgrade(&identity)?
     } else {
         draft.arm(&identity)?
     };
-    let result = (|| -> Result<SetupResult> {
-        let mut run = Message::new(RUN);
-        run.transaction = began.transaction;
-        run.outcome = if s.verified_upgrade.is_some() {
-            4
-        } else {
-            operation.tag()
-        };
-        send(&s, pipe, run)?;
-        let mut guard = if let Some(plan) = &s.verified_upgrade {
-            GuardAssociation::upgrade(began.transaction, plan.packages(&s)?)
-        } else {
-            match admitted_source(&s, operation, admission.operation())? {
-                Some(source) => GuardAssociation::package(began.transaction, source),
-                None => GuardAssociation::new(began.transaction),
-            }
-        };
-        let installed = loop {
-            match receive_guard_frame(s.deadline, pipe)? {
-                GuardFrame::Package(frame) => {
-                    live(child.process)?;
-                    if let Some(ack) = guard.observe_package(v2::Bridge::parse(&frame)?)? {
-                        send_guard_bytes(s.deadline, pipe, &ack.encode())?;
+    let mut original_owner = Box::new(ControlledEffectsOwner { owner, admission });
+    let result = {
+        let ControlledEffectsOwner { owner, admission } = &mut *original_owner;
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<SetupResult> {
+            let mut run = Message::new(RUN);
+            run.transaction = began.transaction;
+            run.outcome = if s.verified_upgrade.is_some() {
+                4
+            } else {
+                operation.tag()
+            };
+            send(&s, pipe, run)?;
+            let mut guard = if let Some(plan) = &s.verified_upgrade {
+                GuardAssociation::upgrade(began.transaction, plan.packages(&s)?)
+            } else {
+                match admitted_source(&s, operation, admission.operation())? {
+                    Some(source) => GuardAssociation::package(began.transaction, source),
+                    None => GuardAssociation::new(began.transaction),
+                }
+            };
+            let installed = loop {
+                match receive_guard_frame(s.deadline, pipe)? {
+                    GuardFrame::Package(frame) => {
+                        live(child.process)?;
+                        if let Some(ack) = guard.observe_package(v2::Bridge::parse(&frame)?)? {
+                            send_guard_bytes(s.deadline, pipe, &ack.encode())?;
+                        }
+                    }
+                    GuardFrame::Legacy(frame) if &frame[..4] == b"FCGB" => {
+                        live(child.process)?;
+                        if let Some(ack) = guard.observe(Bridge::parse(&frame)?)? {
+                            send_frame(s.deadline, pipe, &ack.encode())?;
+                        }
+                    }
+                    GuardFrame::Legacy(frame) => {
+                        let installed = Message::parse(frame)?;
+                        if installed.kind != INSTALLED {
+                            return Err(LifecycleError::Invalid);
+                        }
+                        if installed.code == 0 {
+                            guard.require_returned()?;
+                        } else {
+                            guard.require_prefix_returned()?;
+                        }
+                        break installed;
                     }
                 }
-                GuardFrame::Legacy(frame) if &frame[..4] == b"FCGB" => {
-                    live(child.process)?;
-                    if let Some(ack) = guard.observe(Bridge::parse(&frame)?)? {
-                        send_frame(s.deadline, pipe, &ack.encode())?;
+            };
+            if installed.kind != INSTALLED || installed.transaction != began.transaction {
+                return Err(LifecycleError::Invalid);
+            }
+            let decision = if installed.code == 0 {
+                match operation {
+                    Operation::Install | Operation::Repair => {
+                        effects::staged_present(&mut s, admission)?
+                    }
+                    Operation::Uninstall => {
+                        effects::staged_uninstall(&mut s, admission, &mut owner.resources)?
                     }
                 }
-                GuardFrame::Legacy(frame) => {
-                    let installed = Message::parse(frame)?;
-                    if installed.kind != INSTALLED {
-                        return Err(LifecycleError::Invalid);
-                    }
-                    if installed.code == 0 {
-                        guard.require_returned()?;
-                    } else {
-                        guard.require_prefix_returned()?;
-                    }
-                    break installed;
+            } else {
+                effects::failed_install(admission)
+            };
+            let mut reply = Message::new(DECIDE);
+            reply.transaction = began.transaction;
+            reply.outcome = if decision.outcome() == SettledOutcome::Commit {
+                1
+            } else {
+                2
+            };
+            send(&s, pipe, reply)?;
+            let ended = receive(&s, pipe)?;
+            if ended.kind != ENDED
+                || ended.transaction != began.transaction
+                || ended.outcome != reply.outcome
+                || ended.code != 0
+            {
+                return Err(LifecycleError::Unsettled);
+            }
+            s.release_connection(pipe, peer)?;
+            s.resources.close_handle(pipe)?;
+            returned_zero(child.process, deadline)?;
+            loop {
+                match owner.resources.guardian_returned() {
+                    Ok(()) => break,
+                    Err(LifecycleError::GuardianRunning) => pause(deadline)?,
+                    Err(e) => return Err(e),
                 }
             }
-        };
-        if installed.kind != INSTALLED || installed.transaction != began.transaction {
-            return Err(LifecycleError::Invalid);
-        }
-        let decision = if installed.code == 0 {
-            match operation {
-                Operation::Install | Operation::Repair => {
-                    effects::staged_present(&mut s, &admission)?
-                }
-                Operation::Uninstall => effects::staged_absent(&mut s, &admission)?,
+            if operation == Operation::Uninstall {
+                effects::settle_uninstall_run(&s, admission, decision, &mut owner.resources)?;
             }
-        } else {
-            effects::failed_install(&admission)
-        };
-        let mut reply = Message::new(DECIDE);
-        reply.transaction = began.transaction;
-        reply.outcome = if decision.outcome() == SettledOutcome::Commit {
-            1
-        } else {
-            2
-        };
-        send(&s, pipe, reply)?;
-        let ended = receive(&s, pipe)?;
-        if ended.kind != ENDED
-            || ended.transaction != began.transaction
-            || ended.outcome != reply.outcome
-            || ended.code != 0
-        {
-            return Err(LifecycleError::Unsettled);
-        }
-        s.release_connection(pipe, peer)?;
-        s.resources.close_handle(pipe)?;
-        returned_zero(child.process, deadline)?;
-        loop {
-            match owner.resources.guardian_returned() {
-                Ok(()) => break,
-                Err(LifecycleError::GuardianRunning) => pause(deadline)?,
-                Err(e) => return Err(e),
-            }
-        }
-        let mut proof = effects::reconcile(&mut s, &admission, decision)?;
-        proof.check()?;
-        owner.record_controlled_settlement(TransactionObservation {
-            operation_id: owner.operation_id(),
-            guardian: original,
-            ownership: TransactionOwnership::OwnedByBegin {
-                begin_return: began.code,
-                transaction_id: began.transaction,
-            },
-            outcome: decision.outcome(),
-            install_return: installed.code,
-            end_return: ended.code,
-            control_return: 0,
-            effects_reconciled: true,
-        })?;
-        proof.check()?;
-        proof.release()?;
-        s.resources.release()?;
-        owner.try_release()?;
-        Ok(SetupResult {
-            install_return: installed.code,
-            outcome: decision.outcome(),
-        })
-    })();
+            let mut proof = effects::reconcile(&mut s, admission, decision)?;
+            proof.check()?;
+            owner.record_controlled_settlement(TransactionObservation {
+                operation_id: owner.operation_id(),
+                guardian: original,
+                ownership: TransactionOwnership::OwnedByBegin {
+                    begin_return: began.code,
+                    transaction_id: began.transaction,
+                },
+                outcome: decision.outcome(),
+                install_return: installed.code,
+                end_return: ended.code,
+                control_return: 0,
+                effects_reconciled: true,
+            })?;
+            proof.check()?;
+            proof.release()?;
+            s.resources.release()?;
+            owner.try_release()?;
+            Ok(SetupResult {
+                install_return: installed.code,
+                outcome: decision.outcome(),
+            })
+        }))
+        .unwrap_or(Err(LifecycleError::Faulted))
+    };
     if result.is_err() {
-        owner.resources.retain_until_exit();
+        original_owner.owner.resources.retain_until_exit();
         s.resources.retain_until_exit();
+        // Keep exact preimage and attempted-write state beside the SAME owner.
+        // No error path can discard a registry rollback obligation while its
+        // transaction/close result is still unknown.
+        let _retained_original = Box::into_raw(original_owner);
     }
     result
 }
