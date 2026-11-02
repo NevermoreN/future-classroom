@@ -24,6 +24,8 @@ mod effects;
 #[allow(dead_code)] // Read-only capture foundation; not wired to an upgrade permit.
 mod installed_release;
 mod retirement;
+#[allow(dead_code)] // Captured ABI2 source facts do not yet create a private Plan.
+mod source_package;
 mod supervisor;
 
 const FRAME: usize = 32;
@@ -358,6 +360,7 @@ struct Session {
     deadline: Instant,
     peer_images: Vec<(HANDLE, HANDLE)>,
     sealed_package_sha: Option<[u8; 32]>,
+    captured_source: Option<source_package::CapturedSource>,
 }
 impl Session {
     fn new(deadline: Instant) -> Result<Self> {
@@ -401,32 +404,46 @@ impl Session {
         }
         let mut footer = [0u8; 20];
         resources.read_at(h, size - 20, &mut footer)?;
-        if &footer[4..] != manifest::FOOTER {
-            return Err(LifecycleError::Invalid);
-        }
-        let n = u32::from_le_bytes(footer[..4].try_into().unwrap()) as usize;
-        if n == 0 || n > manifest::MAX_MANIFEST || n as i64 + 20 >= size {
-            return Err(LifecycleError::Invalid);
-        }
-        let mut raw = vec![0; n];
-        resources.read_at(h, size - 20 - n as i64, &mut raw)?;
-        let manifest = manifest::parse(&raw)?;
-        let sealed_package_sha = if size - 20 - n as i64 >= 48 {
-            let mut seal = [0; 48];
-            resources.read_at(h, size - 20 - n as i64 - 48, &mut seal)?;
-            let package = controlled_owner::package_seal(seal)?;
-            if package.is_some() && size - 20 - n as i64 >= 96 {
-                let mut prior = [0; 16];
-                resources.read_at(h, size - 20 - n as i64 - 96, &mut prior)?;
-                if &prior == controlled_owner::PACKAGE_SEAL_MAGIC {
+        let (mut resources, manifest, sealed_package_sha, captured_source) =
+            if &footer[4..] == super::super::broker::carrier::FOOTER {
+                let (resources, source) =
+                    source_package::SourceReader::capture(resources, h, deadline)?;
+                let manifest = source.session_manifest();
+                let seal = source.source_sha256;
+                (resources, manifest, Some(seal), Some(source))
+            } else {
+                if &footer[4..] != manifest::FOOTER {
                     return Err(LifecycleError::Invalid);
                 }
-            }
-            package
+                let n = u32::from_le_bytes(footer[..4].try_into().unwrap()) as usize;
+                if n == 0 || n > manifest::MAX_MANIFEST || n as i64 + 20 >= size {
+                    return Err(LifecycleError::Invalid);
+                }
+                let mut raw = vec![0; n];
+                resources.read_at(h, size - 20 - n as i64, &mut raw)?;
+                let manifest = manifest::parse(&raw)?;
+                let sealed_package_sha = if size - 20 - n as i64 >= 48 {
+                    let mut seal = [0; 48];
+                    resources.read_at(h, size - 20 - n as i64 - 48, &mut seal)?;
+                    let package = controlled_owner::package_seal(seal)?;
+                    if package.is_some() && size - 20 - n as i64 >= 96 {
+                        let mut prior = [0; 16];
+                        resources.read_at(h, size - 20 - n as i64 - 96, &mut prior)?;
+                        if &prior == controlled_owner::PACKAGE_SEAL_MAGIC {
+                            return Err(LifecycleError::Invalid);
+                        }
+                    }
+                    package
+                } else {
+                    None
+                };
+                (resources, manifest, sealed_package_sha, None)
+            };
+        let image_sha = if let Some(source) = &captured_source {
+            source.image_sha256
         } else {
-            None
+            resources.digest(h, 64 * 1024 * 1024, deadline)?
         };
-        let image_sha = resources.digest(h, 64 * 1024 * 1024, deadline)?;
         let sid_hex: String = resources.sid.iter().map(|b| format!("{b:02X}")).collect();
         let pipe_name = HSTRING::from(format!(
             r"\\.\pipe\FutureClassroom-Installer-{}-{}",
@@ -441,9 +458,18 @@ impl Session {
             deadline,
             peer_images: Vec::new(),
             sealed_package_sha,
+            captured_source,
         })
     }
     fn authenticate_image(&mut self, process: HANDLE) -> Result<(GuardianIdentity, HANDLE)> {
+        // Keep captured source facts tied to this original image/session. This
+        // consistency check creates no package role or maintenance permission.
+        if self.captured_source.as_ref().is_some_and(|source| {
+            source.image_sha256 != self.image_sha
+                || Some(source.source_sha256) != self.sealed_package_sha
+        }) {
+            return Err(LifecycleError::Invalid);
+        }
         live(process)?;
         let sid = self.resources.token_sid(process)?;
         if sid != self.resources.sid {
@@ -1097,6 +1123,7 @@ mod tests {
             deadline,
             peer_images: Vec::new(),
             sealed_package_sha: None,
+            captured_source: None,
         }
     }
     fn fixture_name() -> String {

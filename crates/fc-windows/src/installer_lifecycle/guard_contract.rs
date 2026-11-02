@@ -3,6 +3,8 @@
 //! pipe creation. Parsing alone proves neither entropy nor native identity.
 use super::{LifecycleError, Result};
 
+pub(crate) mod v2;
+
 pub(crate) const INFO_PREFIX: &str = "FCGI1:";
 pub(crate) const PIPE_PREFIX: &str = r"\\.\pipe\FutureClassroom-ControlledGuard-";
 pub(crate) const GUARD_TEMPLATE_QUERY: &str =
