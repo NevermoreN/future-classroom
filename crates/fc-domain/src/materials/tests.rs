@@ -822,3 +822,233 @@ fn batch_sequence_bound_preserves_invalid_state_checks_and_atomic_delete_revisio
     assert_eq!(final_revision.folder.last_added_sequence, 3);
     final_revision.validate().unwrap();
 }
+
+fn delete_target(n: u64) -> MaterialDeleteTarget {
+    MaterialDeleteTarget {
+        material_id: MaterialId::new(n).unwrap(),
+        resource_version_id: ResourceVersionId::new(n).unwrap(),
+        expected_material_revision: Revision::new(1),
+    }
+}
+
+#[test]
+fn batch_delete_uses_fixed_ids_and_one_revision_without_changing_sequence_or_metadata() {
+    let identity = identity();
+    let owner = actor(&identity, 2);
+    let initial = empty()
+        .append_batch(
+            &[append(7), append(3), append(9)],
+            &identity,
+            &owner,
+            now(30000),
+        )
+        .unwrap();
+    // An unrelated append after selection must not invalidate the target CAS.
+    let before = initial
+        .append(&append(11), &identity, &owner, now(31000))
+        .unwrap();
+    let next = before
+        .delete_batch(
+            &[delete_target(9), delete_target(7)],
+            &identity,
+            &owner,
+            now(32000),
+        )
+        .unwrap();
+    assert_eq!(next.folder.revision, before.folder.revision.next().unwrap());
+    assert_eq!(
+        next.folder.last_added_sequence,
+        before.folder.last_added_sequence
+    );
+    assert_eq!(
+        next.records
+            .iter()
+            .map(|record| record.id.get())
+            .collect::<Vec<_>>(),
+        vec![7, 3, 9, 11]
+    );
+    for (old, result) in before.records.iter().zip(&next.records) {
+        let mut expected = old.clone();
+        if [7, 9].contains(&old.id.get()) {
+            expected.status = MaterialStatus::Deleted;
+            expected.revision = old.revision.next().unwrap();
+        }
+        assert_eq!(result, &expected);
+    }
+    assert!(before
+        .records
+        .iter()
+        .all(|record| record.status == MaterialStatus::Published));
+    assert_eq!(
+        next.management_page(&identity, &owner, now(32000), None)
+            .unwrap()
+            .items
+            .iter()
+            .map(|record| record.id.get())
+            .collect::<Vec<_>>(),
+        vec![11, 3]
+    );
+    next.validate().unwrap();
+}
+
+#[test]
+fn batch_delete_rejects_a_bad_last_target_without_a_partial_candidate() {
+    let identity = identity();
+    let owner = actor(&identity, 2);
+    let state = empty()
+        .append_batch(&[append(1), append(2)], &identity, &owner, now(30000))
+        .unwrap();
+    let before = state.clone();
+    let mut wrong_version = delete_target(2);
+    wrong_version.resource_version_id = ResourceVersionId::new(99).unwrap();
+    let mut stale_revision = delete_target(2);
+    stale_revision.expected_material_revision = Revision::new(2);
+    for (target, expected) in [
+        (delete_target(99), MaterialError::NotFound),
+        (wrong_version, MaterialError::NotFound),
+        (
+            stale_revision,
+            MaterialError::RevisionConflict {
+                current: Revision::new(1),
+            },
+        ),
+    ] {
+        assert_eq!(
+            state.delete_batch(&[delete_target(1), target], &identity, &owner, now(31000)),
+            Err(expected)
+        );
+        assert_eq!(state, before);
+    }
+    let once = state
+        .delete(
+            MaterialId::new(2).unwrap(),
+            Revision::new(1),
+            &identity,
+            &owner,
+            now(31000),
+        )
+        .unwrap();
+    let retained = once.clone();
+    assert_eq!(
+        once.delete_batch(
+            &[delete_target(1), delete_target(2)],
+            &identity,
+            &owner,
+            now(32000)
+        ),
+        Err(MaterialError::NotFound)
+    );
+    assert_eq!(once, retained);
+}
+
+#[test]
+fn batch_delete_checks_each_class_after_revocation_and_keeps_global_cleanup() {
+    let mut identity = identity();
+    let mut second = append(2);
+    second.allowed_class_ids = vec![class(2)];
+    let state = empty()
+        .append_batch(
+            &[append(1), second],
+            &identity,
+            &actor(&identity, 2),
+            now(30000),
+        )
+        .unwrap();
+    let before = state.clone();
+    let targets = [delete_target(1), delete_target(2)];
+    assert!(matches!(
+        state.delete_batch(&targets, &identity, &actor(&identity, 3), now(31000)),
+        Err(MaterialError::Permission(PermissionError::WrongOwner))
+    ));
+    assert!(matches!(
+        state.delete_batch(&targets, &identity, &actor(&identity, 4), now(31000)),
+        Err(MaterialError::Permission(PermissionError::RoleDenied))
+    ));
+    let old_owner = actor(&identity, 2);
+    identity = identity
+        .transition(
+            &IdentityCommand::UpdateAccount {
+                id: id(2),
+                display_name: "二老师".into(),
+                role: Role::TeacherAdmin,
+                enabled: true,
+                scopes: vec![AssignmentScope {
+                    class_id: class(1),
+                    subject_id: subject(),
+                }],
+            },
+            Some(&actor(&identity, 1)),
+            now(31000),
+        )
+        .unwrap()
+        .next;
+    assert!(state
+        .delete_batch(&targets, &identity, &old_owner, now(32000))
+        .is_err());
+    assert_eq!(
+        state.delete_batch(&targets, &identity, &actor(&identity, 2), now(32000)),
+        Err(MaterialError::InvalidScope)
+    );
+    assert_eq!(state, before);
+    let cleaned = state
+        .delete_batch(&targets, &identity, &actor(&identity, 1), now(32000))
+        .unwrap();
+    assert!(cleaned
+        .records
+        .iter()
+        .all(|record| record.status == MaterialStatus::Deleted));
+}
+
+#[test]
+fn batch_delete_count_duplicates_and_revision_overflow_are_bounded_and_atomic() {
+    let identity = identity();
+    let owner = actor(&identity, 2);
+    let appends = (1..=20).map(append).collect::<Vec<_>>();
+    let state = empty()
+        .append_batch(&appends, &identity, &owner, now(30000))
+        .unwrap();
+    assert_eq!(
+        state.delete_batch(&[], &identity, &owner, now(31000)),
+        Err(MaterialError::Capacity)
+    );
+    assert_eq!(
+        state.delete_batch(
+            &(1..=21).map(delete_target).collect::<Vec<_>>(),
+            &identity,
+            &owner,
+            now(31000)
+        ),
+        Err(MaterialError::Capacity)
+    );
+    let mut repeated_version = delete_target(2);
+    repeated_version.resource_version_id = ResourceVersionId::new(1).unwrap();
+    for targets in [
+        [delete_target(1), delete_target(1)],
+        [delete_target(1), repeated_version],
+    ] {
+        assert_eq!(
+            state.delete_batch(&targets, &identity, &owner, now(31000)),
+            Err(MaterialError::AlreadyExists)
+        );
+    }
+    let targets = (1..=20).rev().map(delete_target).collect::<Vec<_>>();
+    let next = state
+        .delete_batch(&targets, &identity, &owner, now(31000))
+        .unwrap();
+    assert_eq!(next.folder.revision, Revision::new(2));
+    assert_eq!(next.folder.last_added_sequence, 20);
+    assert!(next
+        .records
+        .iter()
+        .all(|record| record.status == MaterialStatus::Deleted
+            && record.revision == Revision::new(2)));
+    next.validate().unwrap();
+    let mut saturated = state.clone();
+    saturated.folder.revision = Revision::new(u64::MAX);
+    let before = saturated.clone();
+    assert_eq!(
+        saturated.delete_batch(&targets, &identity, &owner, now(31000)),
+        Err(MaterialError::VersionOverflow)
+    );
+    assert_eq!(saturated, before);
+}

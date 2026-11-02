@@ -13,7 +13,9 @@ pub mod profiles;
 pub use content_web::ContentOutcomeRepository;
 pub use material_batch::{
     prepare_material_batch_append, MaterialBatchAppendRequest, MaterialBatchCommandOutcome,
-    MaterialBatchOutcomeRepository, MaterialBatchRepository, PreparedMaterialBatchAppend,
+    MaterialBatchDeleteCommandOutcome, MaterialBatchDeleteOutcomeRepository,
+    MaterialBatchDeleteRepository, MaterialBatchDeleteRequest, MaterialBatchOutcomeRepository,
+    MaterialBatchRepository, PreparedMaterialBatchAppend,
 };
 pub use material_outcome::{
     MaterialCommandKind, MaterialCommandOutcome, MaterialOutcomeRepository,

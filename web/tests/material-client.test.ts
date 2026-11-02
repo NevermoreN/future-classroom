@@ -136,3 +136,26 @@ it('retains the original 120s member request budget without retry or successful 
   await vi.advanceTimersByTimeAsync(119999); expect(fetcher.mock.calls[0]![1]?.signal?.aborted).toBe(false)
   await vi.advanceTimersByTimeAsync(1); await rejected; expect(fetcher).toHaveBeenCalledOnce(); expect(vi.getTimerCount()).toBe(0)
 })
+
+describe('batch-delete HTTP destinations and full command binding', () => {
+  const targets = [{ materialId: '9', resourceVersionId: '10', expectedMaterialRevision: '1' }]
+  const wire = () => ({ schemaVersion: 2, status: 'BATCH_DELETE_COMMITTED', ...identity(), scope: target, records: [{ ...record(), status: 'DELETED', revision: '2' }] })
+  it('posts exactly one fixed manifest with CSRF and reads only its original result route', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json(wire())).mockResolvedValueOnce(json({ ...wire(), status: 'COMMAND_BATCH_DELETE_RESULT', state: 'COMMITTED' }))
+    const api = new MaterialHttpApi(new URL('https://board.school/fc/api/v1/'), fetcher)
+    await api.deleteBatch(target, { ...identity(), targets }, csrf, signal()); await api.deleteBatchOutcome(target, identity(), signal())
+    expect(String(fetcher.mock.calls[0]![0])).toBe(`https://board.school/fc/api/v1/materials/folders/${target.ownerTeacherId}/${target.subjectId}/delete-batch`)
+    expect(JSON.parse(fetcher.mock.calls[0]![1]!.body as string)).toEqual({ schemaVersion: 2, ...identity(), targets })
+    expect(fetcher.mock.calls[0]![1]?.method).toBe('POST'); expect(new Headers(fetcher.mock.calls[0]![1]?.headers).get('x-fc-csrf')).toBe(csrf)
+    expect(String(fetcher.mock.calls[1]![0])).toBe(`https://board.school/fc/api/v1/materials/delete-batch-commands/${target.ownerTeacherId}/${target.subjectId}/${ticket}/${identity().commandId}`)
+    expect(fetcher.mock.calls[1]![1]?.method).toBe('GET'); expect(fetcher).toHaveBeenCalledTimes(2)
+  })
+  it('rejects malformed manifests locally and does not retry unknown writes or accept wrong pairs', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockRejectedValueOnce(new TypeError('offline')).mockResolvedValueOnce(json({ ...wire(), commandId: '999' }))
+    const api = new MaterialHttpApi(new URL('https://board.school/fc/api/v1/'), fetcher)
+    for (const invalid of [[], [targets[0]!, targets[0]!], Array(21).fill(targets[0])]) await expect(api.deleteBatch(target, { ...identity(), targets: invalid }, csrf, signal())).rejects.toThrow(ProtocolFault)
+    expect(fetcher).not.toHaveBeenCalled()
+    await expect(api.deleteBatch(target, { ...identity(), targets }, csrf, signal())).rejects.toThrow(NetworkFault); expect(fetcher).toHaveBeenCalledOnce()
+    await expect(api.deleteBatch(target, { ...identity(), targets }, csrf, signal())).rejects.toThrow(ProtocolFault); expect(fetcher).toHaveBeenCalledTimes(2)
+  })
+})

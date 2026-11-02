@@ -3,7 +3,7 @@
 import argparse, hashlib, json, re
 from datetime import date, timedelta
 from pathlib import Path
-CHECKS=frozenset(('actualPairUiOrdinaryTeacher','materialsUnpublishedUploadCancelNoAppend','homeworkPersistentCurrent','reminderPersistentBottomShortcut','unknownOriginalPairReadbackNoReplay','offlineDraftRetainedNoReplay','materialsAppendDownloadDeleteReadback','voiceSyntheticCaptureSubmitCurrentAndPhysicalReturn','isolatedMidnightRejectsOldDraft','sameOriginDistinctBundleEntryAndLazyChunk','revokedTeacherClearsWorkspaceNoReplay','batchTwentyReviewRemoveAndConfirmedOrder','batchTwentySerialPreparedNoEarlyCommit','batchOneAtomicCommitAndOriginalHistory','batchCurrentDirectoryTwentyNewestLastConfirmed'))
+CHECKS=frozenset(('actualPairUiOrdinaryTeacher','materialsUnpublishedUploadCancelNoAppend','homeworkPersistentCurrent','reminderPersistentBottomShortcut','unknownOriginalPairReadbackNoReplay','offlineDraftRetainedNoReplay','materialsAppendDownloadDeleteReadback','voiceSyntheticCaptureSubmitCurrentAndPhysicalReturn','isolatedMidnightRejectsOldDraft','sameOriginDistinctBundleEntryAndLazyChunk','revokedTeacherClearsWorkspaceNoReplay','batchTwentyReviewRemoveAndConfirmedOrder','batchTwentySerialPreparedNoEarlyCommit','batchOneAtomicCommitAndOriginalHistory','batchCurrentDirectoryTwentyNewestLastConfirmed','batchDeleteTwentyReviewFixedSelection','batchDeleteOneAtomicCommitAndOriginalHistory','batchDeleteCurrentDirectoryEmptyOneRevision'))
 ACTIONS=['CACHE_UPGRADE','VOICE_SETTLED','MIDNIGHT','REVOKE','COMPLETE']
 
 def require(ok,code):
@@ -15,7 +15,7 @@ def pair(v):
     return v['commandId'],v['commandTicket']
 
 def validate(report,old,new):
-    require(type(report) is dict and set(report)=={'schemaVersion','status','marker','scope','checks','ledger','assets','nativeActions','pairingCycles','download','batchObservation','midnightObservation','droppedResponse','observedRequestCount','elapsedMillis','maxMillis','contextDisposed','cdpDisconnected','physicalBrowserCleanup','voiceScope','windows7','windows10','phase'},'REPORT_EXACT_KEYS_NO_PRIVATE_APPEND')
+    require(type(report) is dict and set(report)=={'schemaVersion','status','marker','scope','checks','ledger','assets','nativeActions','pairingCycles','download','batchObservation','batchDeleteObservation','midnightObservation','droppedResponse','observedRequestCount','elapsedMillis','maxMillis','contextDisposed','cdpDisconnected','physicalBrowserCleanup','voiceScope','windows7','windows10','phase'},'REPORT_EXACT_KEYS_NO_PRIVATE_APPEND')
     require(type(report) is dict and report.get('schemaVersion')==1 and report.get('status')=='PASS_TEACHER_DOM_FINITE_WIN11_ONLY','NOT_FINITE_DOM_PASS')
     require(re.fullmatch(r'FutureClassroom-Test-TLS-[0-9a-f]{32}',report.get('marker','')),'MARKER')
     require(type(report.get('checks')) is dict and set(report['checks'])==CHECKS and all(v is True for v in report['checks'].values()),'INCOMPLETE_ACTUAL_CHECKS')
@@ -34,10 +34,20 @@ def validate(report,old,new):
     ledger=report.get('ledger');require(type(ledger) is list and len(ledger)<=128,'LEDGER_BOUND')
     ordinals=set();issued={};writes=[]
     for row in ledger:
-        require(type(row) is dict and set(row)<= {'ordinal','path','method','status','commandId','commandTicket','input','family'},'LEDGER_SHAPE')
+        require(type(row) is dict and set(row)<= {'ordinal','path','method','status','commandId','commandTicket','input','family','materialEvidence'},'LEDGER_SHAPE')
         require(type(row.get('ordinal')) is int and 0<row['ordinal']<=report['observedRequestCount'] and row['ordinal'] not in ordinals,'LEDGER_ORDINAL');ordinals.add(row['ordinal'])
         require(row.get('method') in ('GET','POST') and isinstance(row.get('path'),str) and row['path'].startswith('/fc/api/v1/') and '?' not in row['path'] and '\n' not in row['path'],'SAFE_PATH')
         require(type(row.get('status')) is int and row['status'] in (200,201),'RESPONSE_STATUS')
+        if 'materialEvidence' in row:
+            observation=row['materialEvidence']
+            fields={'value','startedAtEvent','originalReplyObservedAtEvent','finishedAtEvent'}|({'input'} if row['method']=='POST' else set())
+            require(type(observation) is dict and set(observation)==fields,'MATERIAL_EVIDENCE_CLOSED')
+            require(all(type(observation[k]) is int and 0<observation[k]<=65536 for k in ('startedAtEvent','originalReplyObservedAtEvent','finishedAtEvent')) and observation['startedAtEvent']<observation['originalReplyObservedAtEvent']<observation['finishedAtEvent'],'MATERIAL_ORIGINAL_REPLY_NETWORK_ORDER')
+            require(type(observation['value']) is dict and row['status']==200,'MATERIAL_ORIGINAL_BODY')
+            if row['method']=='POST':
+                require(row['path'].endswith(('/append-batch','/delete-batch')) and type(observation['input']) is dict and pair(observation['input'])==pair(row['input']) and pair(observation['value'])==pair(row),'MATERIAL_ORIGINAL_POST_PAIR_BINDING')
+            else:
+                require(bool(re.fullmatch(r'/fc/api/v1/materials/folders(?:/[1-9][0-9]{0,19}){2}',row['path'])) or row['path'].startswith('/fc/api/v1/materials/delete-batch-commands/'),'MATERIAL_ORIGINAL_GET_ROUTE')
         if 'commandTicket' in row:
             p=pair(row)
             if row['path']=='/fc/api/v1/commands':
@@ -84,6 +94,55 @@ def validate(report,old,new):
         # A later loadingFinished delivery may follow the next renderer request.
         if index:
             require(order[index-1]['requestOrdinal']<observation['requestOrdinal'] and order[index-1]['originalReplyObservedAtEvent']<observation['startedAtEvent'],'BATCH_SERIAL_ORIGINAL_REPLY_BEFORE_NEXT_START')
+    deletion=report.get('batchDeleteObservation')
+    require(type(deletion) is dict and set(deletion)=={'commandId','commandTicket','memberCount','removedBeforeReselect','removedMaterialId','confirmedMaterialIds','sourceCurrentOrdinal','reselectionOrdinal','issueOrdinal','commitOrdinal','historyOrdinal','currentOrdinal','folderRevisionBefore','folderRevisionAfter'},'BATCH_DELETE_OBSERVATION_CLOSED')
+    require(deletion['memberCount']==20 and deletion['removedBeforeReselect']==1,'BATCH_DELETE_ACTUAL_REVIEW')
+    dp=pair(deletion);require(dp in issued and issued[dp][1]=='materials' and dp!=bp,'BATCH_DELETE_ORIGINAL_ISSUANCE')
+    ordinal_keys=('sourceCurrentOrdinal','reselectionOrdinal','issueOrdinal','commitOrdinal','historyOrdinal','currentOrdinal')
+    require(all(type(deletion[k]) is int and 0<deletion[k]<=report['observedRequestCount'] for k in ordinal_keys) and all(deletion[a]<deletion[b] for a,b in zip(ordinal_keys,ordinal_keys[1:])),'BATCH_DELETE_ORIGINAL_NETWORK_SEQUENCE')
+    require(deletion['sourceCurrentOrdinal']==batch['currentOrdinal'] and deletion['issueOrdinal']==issued[dp][0] and deletion['currentOrdinal']-deletion['sourceCurrentOrdinal']<=8,'BATCH_DELETE_BOUNDED_ADDED_REQUESTS')
+    by_ordinal={r['ordinal']:r for r in ledger}
+    def original_body(ordinal,method,path,status):
+        row=by_ordinal.get(ordinal)
+        require(row is not None and row['method']==method and row['path']==path and row['status']==200 and 'materialEvidence' in row,'BATCH_DELETE_ACTUAL_LEDGER_BODY')
+        body=row['materialEvidence']['value']
+        require(body.get('status')==status,'BATCH_DELETE_ORIGINAL_RESPONSE_STATUS')
+        return row,body
+    def record_shape(r):
+        require(type(r) is dict and set(r)=={'materialId','folderId','displayName','resourceVersionId','kind','bytes','sha256','allowedClassIds','addedAt','addedSequence','status','revision'},'BATCH_DELETE_RECORD_CLOSED')
+        require(all(type(r[k]) is str and re.fullmatch(r'[1-9][0-9]{0,19}',r[k]) and int(r[k])<=2**64-1 for k in ('materialId','folderId','resourceVersionId','addedSequence','revision')),'BATCH_DELETE_RECORD_CANONICAL_IDS')
+        require(type(r['displayName']) is str and type(r['bytes']) is int and r['bytes']>0 and r['kind']=='TXT' and type(r['sha256']) is str and re.fullmatch(r'[0-9a-f]{64}',r['sha256']) and r['allowedClassIds']==['1'] and type(r['addedAt']) is str and re.fullmatch(r'[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}',r['addedAt']),'BATCH_DELETE_ORIGINAL_SYNTHETIC_METADATA')
+    owner_scope={'ownerTeacherId':cycles[1]['principalId'],'subjectId':'1'}
+    directory_path='/fc/api/v1/materials/folders/'+cycles[1]['principalId']+'/1'
+    _,import_reply=original_body(batch['commitOrdinal'],'POST',batch_path,'BATCH_COMMITTED')
+    require(set(import_reply)=={'schemaVersion','status','commandId','commandTicket','scope','records'} and import_reply['schemaVersion']==2 and pair(import_reply)==bp and import_reply['scope']==owner_scope and type(import_reply['records']) is list and len(import_reply['records'])==20,'BATCH_DELETE_SOURCE_IMPORT_PAIR')
+    originals=import_reply['records']
+    for index,record in enumerate(originals):
+        record_shape(record)
+        require(record['materialId']==batch['materialIds'][index] and record['resourceVersionId']==batch['uploadIds'][index] and record['displayName']==batch['confirmedNames'][index] and record['sha256']==batch['sha256s'][index] and record['bytes']==len(f'Synthetic future classroom batch member {int(record["displayName"][10:12]):02d}.\n'.encode('ascii')) and record['status']=='PUBLISHED' and record['revision']=='1' and int(record['addedSequence'])==int(batch['firstAddedSequence'])+index,'BATCH_DELETE_SOURCE_ORIGINAL_TWENTY')
+    _,before=original_body(deletion['sourceCurrentOrdinal'],'GET',directory_path,'MATERIALS')
+    _,reselected=original_body(deletion['reselectionOrdinal'],'GET',directory_path,'MATERIALS')
+    page_keys={'schemaVersion','status','scope','folderId','folderRevision','offset','total','items','nextCursor'}
+    require(set(before)==page_keys and before==reselected and before['schemaVersion']==1 and before['scope']==owner_scope and before['offset']==0 and before['total']==20 and before['nextCursor'] is None and before['items']==list(reversed(originals)) and before['folderRevision']==batch['folderRevisionAfter'],'BATCH_DELETE_EXPLICIT_SAME_DIRECTORY_CURRENT')
+    selected=before['items'][1:]+before['items'][:1]
+    require(deletion['removedMaterialId']==before['items'][0]['materialId'] and deletion['confirmedMaterialIds']==[r['materialId'] for r in selected],'BATCH_DELETE_RESELECT_ORDER_FIXED_IDS')
+    expected_targets=[{'materialId':r['materialId'],'resourceVersionId':r['resourceVersionId'],'expectedMaterialRevision':r['revision']} for r in selected]
+    expected_deleted=[dict(r,status='DELETED',revision=str(int(r['revision'])+1)) for r in selected]
+    delete_path=directory_path+'/delete-batch'
+    delete_rows=[r for r in ledger if r['path']==delete_path]
+    require(len(delete_rows)==1 and delete_rows[0]['ordinal']==deletion['commitOrdinal'],'BATCH_DELETE_ONE_ORIGINAL_POST')
+    post,reply=original_body(deletion['commitOrdinal'],'POST',delete_path,'BATCH_DELETE_COMMITTED')
+    sent=post['materialEvidence']['input']
+    require(set(sent)=={'schemaVersion','commandId','commandTicket','targets'} and sent['schemaVersion']==2 and pair(sent)==dp and sent['targets']==expected_targets,'BATCH_DELETE_ORIGINAL_TARGET_MANIFEST')
+    require(set(reply)=={'schemaVersion','status','commandId','commandTicket','scope','records'} and reply['schemaVersion']==2 and pair(reply)==dp and reply['scope']==owner_scope and reply['records']==expected_deleted,'BATCH_DELETE_ONLY_STATUS_AND_REVISION_CHANGED')
+    delete_history_path='/fc/api/v1/materials/delete-batch-commands/'+cycles[1]['principalId']+'/1/'+dp[1]+'/'+dp[0]
+    require(len([r for r in ledger if r['path']==delete_history_path])==1,'BATCH_DELETE_ONE_ORIGINAL_MANUAL_QUERY')
+    _,delete_history=original_body(deletion['historyOrdinal'],'GET',delete_history_path,'COMMAND_BATCH_DELETE_RESULT')
+    require(set(delete_history)=={'schemaVersion','status','commandId','commandTicket','state','scope','records'} and delete_history['schemaVersion']==2 and delete_history['state']=='COMMITTED' and pair(delete_history)==dp and delete_history['scope']==owner_scope and delete_history['records']==expected_deleted,'BATCH_DELETE_ORIGINAL_IMMUTABLE_HISTORY')
+    _,after=original_body(deletion['currentOrdinal'],'GET',directory_path,'MATERIALS')
+    require(set(after)==page_keys and after['schemaVersion']==1 and after['scope']==owner_scope and after['folderId']==before['folderId'] and after['offset']==0 and after['total']==0 and after['items']==[] and after['nextCursor'] is None and type(after['folderRevision']) is str and re.fullmatch(r'[1-9][0-9]{0,19}',after['folderRevision']) and int(after['folderRevision'])==int(before['folderRevision'])+1,'BATCH_DELETE_EMPTY_CURRENT_ONE_DIRECTORY_REVISION')
+    require(deletion['folderRevisionBefore']==before['folderRevision'] and deletion['folderRevisionAfter']==after['folderRevision'],'BATCH_DELETE_REVISION_OBSERVATION_BINDING')
+    require(len([r for r in ledger if r['ordinal']>deletion['reselectionOrdinal'] and r['path'].startswith('/fc/api/v1/materials/') and r['method']=='POST'])==1,'BATCH_DELETE_NO_SINGLE_OR_AUTOREPLAY')
     return {'status':'PASS_G03_DOM_REPORT_ONLY','native':'SEPARATE_ORIGINAL_REPORT_REQUIRED','edge':'SEPARATE_ORIGINAL_JOB_REQUIRED'}
 
 if __name__=='__main__':

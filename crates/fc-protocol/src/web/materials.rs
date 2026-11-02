@@ -6,9 +6,10 @@ use fc_ports::command_window::CommandTicket;
 use serde::{Deserialize, Serialize};
 mod batch;
 pub use batch::{
-    batch_append, batch_cancelled, batch_command_window, batch_committed, batch_member_uploaded,
-    batch_ready, batch_result_fits, batch_upload, BatchAppendInput, BatchFileInput,
-    BatchReadyMember, BatchUploadInput,
+    batch_append, batch_cancelled, batch_command_window, batch_committed, batch_delete,
+    batch_delete_command_window, batch_delete_committed, batch_delete_result_fits,
+    batch_member_uploaded, batch_ready, batch_result_fits, batch_upload, BatchAppendInput,
+    BatchDeleteInput, BatchFileInput, BatchReadyMember, BatchUploadInput,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -58,6 +59,13 @@ pub enum MaterialRoute {
     BatchAppend {
         scope: MaterialScope,
     },
+    BatchDelete {
+        scope: MaterialScope,
+    },
+    BatchDeleteWindowCommand {
+        scope: MaterialScope,
+        command: CommandReference,
+    },
     BatchWindowCommand {
         scope: MaterialScope,
         command: CommandReference,
@@ -88,6 +96,7 @@ impl MaterialRoute {
                 | Self::BatchUploadBytes { .. }
                 | Self::BatchUploadCancel { .. }
                 | Self::BatchAppend { .. }
+                | Self::BatchDelete { .. }
         )
     }
     pub fn body_limit(self) -> u64 {
@@ -171,6 +180,18 @@ pub(super) fn route(path: &str) -> Option<MaterialRoute> {
         ["folders", a, b, "append-batch"] => MaterialRoute::BatchAppend {
             scope: scope(a, b)?,
         },
+        ["folders", a, b, "delete-batch"] => MaterialRoute::BatchDelete {
+            scope: scope(a, b)?,
+        },
+        ["delete-batch-commands", a, b, ticket, command] => {
+            MaterialRoute::BatchDeleteWindowCommand {
+                scope: scope(a, b)?,
+                command: CommandReference {
+                    ticket: CommandTicket::parse(ticket).ok()?,
+                    command_id: CommandId::new(id(command)?).ok()?,
+                },
+            }
+        }
         ["batch-commands", a, b, ticket, command] => MaterialRoute::BatchWindowCommand {
             scope: scope(a, b)?,
             command: CommandReference {

@@ -74,3 +74,17 @@ Writer一次校验全批权限、配额和指纹，并在同一SQLite事务保�
 网页区分本地File、已上传、校验提交、结果未知和原历史结果。取消/导航/注销不会自动追加；未知C2命令只能手动查询原commandId与commandTicket，不能用新ID重发；当前目录读取不代替原结果。所有业务页保留底部今日提醒入口。
 
 以下保留早期同步适配的边界；正常HTTPS生产接线与新批次当前状态分别见上文及实施记录。同步`Read`工作适配只接受已到达、受控的本地File/Cursor或合成有界reader；read前后检查120秒不能使任意阻塞网络Read物理取消。真实HTTP完成事件到受控staging的有界调度、取消完成归属及生产路由须按正常HTTPS宿主的实际实现与运行另行验收，不能将本工作端口的通过扩张为网络上传120秒硬期限通过。长校验经无Backend锁的prepare，随后短commit；通用slice dispatch拒绝大二进制，不能为方便测试收集50MiB。
+
+
+## P3-08批量删除（当前实现契约）
+
+教师管理页按当前页固定资料记录选择1–20件，显示确认清单后整批删除。每件目标为`{materialId,resourceVersionId,expectedMaterialRevision}`；空、超限、重复ID/资源版本、非规范数值和未知字段拒绝。不能用页码、可见行号或文件名作为删除目标；不以目录修订作整批CAS，无关新增不使原选择自动失效。当前页全选只选择实际已加载的这一页，换页或重读目录清空未提交选择。
+
+| 方法 | 路径（相对api/v1/） | 请求与成功响应 |
+| --- | --- | --- |
+| POST | `materials/folders/{ownerTeacherId}/{subjectId}/delete-batch` | `{schemaVersion:2,commandId,commandTicket,targets:[{materialId,resourceVersionId,expectedMaterialRevision}]}`；200 `{schemaVersion:2,status:"BATCH_DELETE_COMMITTED",commandId,commandTicket,scope,records}` |
+| GET | `materials/delete-batch-commands/{ownerTeacherId}/{subjectId}/{commandTicket}/{commandId}` | 200 `{schemaVersion:2,status:"COMMAND_BATCH_DELETE_RESULT",commandId,commandTicket,state,scope,records}`；NOT_FOUND时scope/records为null |
+
+沿用同源HTTPS、精确Web设备lease、CSRF、当前角色及老师/科目权限。每件必须仍为PUBLISHED、固定资源版本与预期条目修订一致，并满足该条目的班级权限。唯一Writer先验证完整清单和库存，再在一次事务中删除所有有效索引、标记DELETED、逐条推进条目修订、整批推进目录/全局修订各一次，并写独立原回执。任何一件校验失败均不产生部分删除。结果按确认顺序保留原文件名、资源、班级、加入时间及加入序号，只改变状态与条目修订；允许不同加入时间/序号/班级，不套用批量加入的连续新序号规则。
+
+批量删除有独立receipt种类，与单件、批量加入互斥复用原命令；原完整C2和提交人/epoch绑定。原结果与当前目录分开，后续添加和物理原件回收不改变历史；UNKNOWN/NOT_FOUND只允许明确查询原票据，不自动再次删除。实际POST及历史编码在提交前均受64KiB预算。资源先置Unreferenced，仍占原件库存；沿用持久Retiring→受控原件物理删除→成功或确认不存在后释放配额的回收链，不强关已打开的外部软件副本。

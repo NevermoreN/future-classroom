@@ -67,7 +67,14 @@ pub(super) enum Job {
         selected: Vec<SelectedFile>,
         command: NativeCommand,
     },
+    DeleteBatch {
+        lease: SessionLease,
+        scope: MaterialScope,
+        records: Vec<MaterialRecord>,
+        command: NativeCommand,
+    },
     QueryBatch {
+        kind: BatchKind,
         lease: SessionLease,
         scope: MaterialScope,
         command: NativeCommand,
@@ -82,7 +89,13 @@ pub(super) enum Job {
         clean: bool,
     },
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum BatchKind {
+    Import,
+    Delete,
+}
 pub(super) struct BatchResult {
+    pub kind: BatchKind,
     pub scope: MaterialScope,
     pub command: NativeCommand,
     pub issued: Option<fc_ports::command_window::IssuedCommand>,
@@ -369,6 +382,21 @@ impl MaterialJob {
                                 .map(SelectedFile::allocation_bytes)
                                 .sum::<usize>()
                     }
+                    Job::DeleteBatch { records, .. } => records.iter().try_fold(
+                        records
+                            .capacity()
+                            .checked_mul(std::mem::size_of::<MaterialRecord>())?,
+                        |bytes, record| {
+                            bytes
+                                .checked_add(record.display_name.capacity())?
+                                .checked_add(
+                                    record
+                                        .allowed_class_ids
+                                        .capacity()
+                                        .checked_mul(std::mem::size_of::<ClassId>())?,
+                                )
+                        },
+                    )?,
                     Job::Open(OpenRequest::Scene { .. }) => 1024,
                     _ => 512,
                 },
@@ -433,23 +461,152 @@ impl MaterialJob {
                         )?,
                 )))
             }
+            Job::DeleteBatch {
+                lease,
+                scope,
+                records,
+                command,
+            } => {
+                let prepared = (|| -> Result<_> {
+                    if records.is_empty() || records.len() > MAX_MATERIAL_BATCH_FILES {
+                        return Err(invalid("每批只允许删除1至20项资料。"));
+                    }
+                    context.checkpoint().map_err(|_| Failure::Stopped)?;
+                    let mut predicted = records.clone();
+                    for record in &mut predicted {
+                        if record.status != MaterialStatus::Published || record.validate().is_err()
+                        {
+                            return Err(invalid("原删除清单无效，请重新载入目录。"));
+                        }
+                        record.revision = record.revision.next().map_err(|_| Failure::Stopped)?;
+                        record.status = MaterialStatus::Deleted;
+                    }
+                    fc_protocol::web::materials::batch_delete_result_fits(scope, &predicted)
+                        .map_err(|_| invalid("本批删除结果超过容量，请缩小本批清单。"))?;
+                    Ok(predicted)
+                })();
+                let predicted = match prepared {
+                    Ok(predicted) => predicted,
+                    Err(error) if !fatal(&error) => {
+                        return Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                            kind: BatchKind::Delete,
+                            scope,
+                            issued: command.read_worker()?,
+                            command,
+                            outcome: BatchOutcome::NotSubmitted(super::error_text(&error)),
+                        })))
+                    }
+                    Err(error) => return Err(error),
+                };
+                let mut backend = match self.backend.try_lock() {
+                    Ok(backend) => backend,
+                    Err(std::sync::TryLockError::WouldBlock) => {
+                        return Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                            kind: BatchKind::Delete,
+                            scope,
+                            issued: command.read_worker()?,
+                            command,
+                            outcome: BatchOutcome::NotSubmitted(
+                                "后台繁忙，整批删除尚未送交目录写入。".into(),
+                            ),
+                        })))
+                    }
+                    Err(error) => return Err(backend_lock_error(error)),
+                };
+                #[cfg(test)]
+                let extra_fence = super::material_batch_tests::delete_execution_fence();
+                let fence: fc_storage::TransactionExecutionFence = Arc::new(move || {
+                    if fc_protocol::web::materials::batch_delete_result_fits(scope, &predicted)
+                        .is_err()
+                    {
+                        return false;
+                    }
+                    #[cfg(test)]
+                    if extra_fence.as_ref().is_some_and(|fence| !fence()) {
+                        return false;
+                    }
+                    true
+                });
+                let result = command.run(
+                    &mut backend.begin_execution_scope(fence),
+                    fc_ports::command_window::CommandFamily::Materials,
+                    Some(lease),
+                    fc_application::identity::SessionPurpose::Manage,
+                    context,
+                    |backend| {
+                        Ok(backend.delete_material_batch(
+                            lease,
+                            fc_ports::MaterialBatchDeleteRequest {
+                                command_id: backend.issued_command_id()?,
+                                scope,
+                                targets: records
+                                    .iter()
+                                    .map(|record| MaterialDeleteTarget {
+                                        material_id: record.id,
+                                        resource_version_id: record.resource.version_id,
+                                        expected_material_revision: record.revision,
+                                    })
+                                    .collect(),
+                            },
+                        )?)
+                    },
+                );
+                drop(backend);
+                let outcome = match result {
+                    Ok(records) => {
+                        // COMMIT is already authoritative. Retirement follows the
+                        // existing pinned-reader reconciliation and cannot erase it.
+                        let _ = reconcile(&files, &self.backend, context);
+                        BatchOutcome::Saved(records)
+                    }
+                    Err(Failure::Backend(fc_bootstrap::backend::BackendError::Material(
+                        MaterialRepositoryError::Unavailable,
+                    ))) => BatchOutcome::Unknown,
+                    Err(error) if !fatal(&error) => {
+                        BatchOutcome::Rejected(super::error_text(&error))
+                    }
+                    Err(error) => return Err(error),
+                };
+                Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                    kind: BatchKind::Delete,
+                    scope,
+                    issued: command.read_worker()?,
+                    command,
+                    outcome,
+                })))
+            }
             Job::QueryBatch {
+                kind,
                 lease,
                 scope,
                 command,
             } => {
                 context.checkpoint().map_err(|_| Failure::Stopped)?;
                 let issued = command.original()?;
-                let query = self
-                    .backend
-                    .try_lock()
-                    .map_err(backend_lock_error)?
-                    .material_batch_outcome(lease, scope, issued);
+                let mut locked = self.backend.try_lock().map_err(backend_lock_error)?;
+                let mut execution =
+                    locked.begin_execution_scope(Arc::new(context.execution_fence()));
+                let backend = execution.begin_command_scope(issued)?;
+                let query = match kind {
+                    BatchKind::Import => {
+                        backend
+                            .material_batch_outcome(lease, scope, issued)
+                            .map(|result| {
+                                result
+                                    .map(|result| (result.command_id, result.scope, result.records))
+                            })
+                    }
+                    BatchKind::Delete => backend
+                        .material_batch_delete_outcome(lease, scope, issued)
+                        .map(|result| {
+                            result.map(|result| (result.command_id, result.scope, result.records))
+                        }),
+                };
                 let outcome = match query {
-                    Ok(Some(result))
-                        if result.command_id == issued.command_id && result.scope == scope =>
+                    Ok(Some((id, original_scope, records)))
+                        if id == issued.command_id && original_scope == scope =>
                     {
-                        BatchOutcome::Saved(result.records)
+                        BatchOutcome::Saved(records)
                     }
                     Ok(Some(_)) => return Err(invalid("原批次结果与请求不一致。")),
                     Ok(None) => BatchOutcome::Unknown,
@@ -462,6 +619,7 @@ impl MaterialJob {
                     Err(error) => return Err(error.into()),
                 };
                 Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                    kind,
                     scope,
                     command,
                     issued: Some(issued),
@@ -572,6 +730,7 @@ impl MaterialJob {
                     Ok(prepared) => prepared,
                     Err(error) if !fatal(&error) => {
                         return Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                            kind: BatchKind::Import,
                             scope,
                             issued: command.read_worker()?,
                             command,
@@ -587,6 +746,7 @@ impl MaterialJob {
                             // No Writer call occurred. All prepared guards still
                             // have retain=false and reclaim this uncommitted batch.
                             return Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                                kind: BatchKind::Import,
                                 scope,
                                 issued: Some(command.original()?),
                                 command,
@@ -644,6 +804,7 @@ impl MaterialJob {
                     Ok(records) => records,
                     Err(error) if !fatal(&error) => {
                         return Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                            kind: BatchKind::Import,
                             scope,
                             issued: Some(command.original()?),
                             command,
@@ -654,6 +815,7 @@ impl MaterialJob {
                 };
                 drop(pending);
                 Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                    kind: BatchKind::Import,
                     scope,
                     issued: Some(command.original()?),
                     command,

@@ -1072,6 +1072,7 @@ impl Work {
                 material_flow::Job::Import { .. }
                     | material_flow::Job::ImportBatch { .. }
                     | material_flow::Job::Delete { .. }
+                    | material_flow::Job::DeleteBatch { .. }
             ),
             Self::ProfileContent(job) => matches!(
                 job.operation,
@@ -1142,7 +1143,8 @@ impl Work {
                 material_flow::Job::Import { lease, scope, .. } => {
                     NativeTarget::Materials(*lease, *scope)
                 }
-                material_flow::Job::ImportBatch { lease, scope, .. } => {
+                material_flow::Job::ImportBatch { lease, scope, .. }
+                | material_flow::Job::DeleteBatch { lease, scope, .. } => {
                     NativeTarget::MaterialsBatch(*lease, *scope)
                 }
                 material_flow::Job::Delete { lease, request } => {
@@ -2040,6 +2042,7 @@ impl App {
         let command = match &work {
             Work::Material(job) => match &job.job {
                 material_flow::Job::ImportBatch { command, .. }
+                | material_flow::Job::DeleteBatch { command, .. }
                 | material_flow::Job::QueryBatch { command, .. } => command.clone(),
                 _ => NativeCommand::with_intent(work.native_intent()),
             },
@@ -3312,7 +3315,10 @@ impl App {
     fn submit_material(&mut self, job: material_flow::Job) -> std::result::Result<(), String> {
         let original_batch = match &job {
             material_flow::Job::ImportBatch { scope, command, .. } => {
-                Some((*scope, command.clone()))
+                Some((material_flow::BatchKind::Import, *scope, command.clone()))
+            }
+            material_flow::Job::DeleteBatch { scope, command, .. } => {
+                Some((material_flow::BatchKind::Delete, *scope, command.clone()))
             }
             _ => None,
         };
@@ -3325,10 +3331,11 @@ impl App {
             })))?;
         }
         if self.pending.is_none() {
-            if let (Some(editor), Some((scope, command))) =
+            if let (Some(editor), Some((kind, scope, command))) =
                 (&mut self.material_editor, original_batch)
             {
                 editor.batch_result(material_flow::BatchResult {
+                    kind,
                     scope,
                     issued: command.snapshot(),
                     command,
@@ -3395,8 +3402,25 @@ impl App {
                     command,
                 })?;
             }
-            Ok(Command::QueryBatch { scope, command }) => {
+            Ok(Command::DeleteBatch {
+                scope,
+                records,
+                command,
+            }) => {
+                self.submit_material(material_flow::Job::DeleteBatch {
+                    lease,
+                    scope,
+                    records,
+                    command,
+                })?;
+            }
+            Ok(Command::QueryBatch {
+                kind,
+                scope,
+                command,
+            }) => {
                 self.submit_material(material_flow::Job::QueryBatch {
+                    kind,
                     lease,
                     scope,
                     command,
@@ -3951,6 +3975,9 @@ impl App {
                 {
                     Some(Ok(Outcome::MaterialBatch(Box::new(
                         material_flow::BatchResult {
+                            kind: editor
+                                .original_batch_kind(command, *scope)
+                                .expect("checked original batch"),
                             scope: *scope,
                             command: command.clone(),
                             issued: None,
@@ -4055,6 +4082,7 @@ impl App {
                     if let material_flow::BatchOutcome::NotSubmitted(reason) = &result.outcome {
                         if let Some(editor) = &mut self.material_editor {
                             let _ = editor.batch_result(material_flow::BatchResult {
+                                kind: result.kind,
                                 scope: result.scope,
                                 command: result.command.clone(),
                                 issued: result.issued,
@@ -4264,12 +4292,34 @@ impl App {
                 }
                 Ok(Outcome::MaterialBatch(result)) => {
                     use material_flow::BatchOutcome;
-                    let message = match &result.outcome {
+                    let message = if result.kind == material_flow::BatchKind::Delete {
+                        match &result.outcome {
+                            BatchOutcome::Saved(_) => {
+                                "原批次已一次删除。可单独刷新当前目录；原票据继续保留删除结果。"
+                                    .to_owned()
+                            }
+                            BatchOutcome::Unknown => {
+                                "原删除票据尚无确定结果；保留原清单查询，不重新删除。".to_owned()
+                            }
+                            BatchOutcome::NotSubmitted(reason) => {
+                                format!("整批删除未送交目录写入：{reason} 未执行删除。")
+                            }
+                            BatchOutcome::Rejected(reason) => {
+                                format!("整批删除已被明确拒绝：{reason} 没有删除部分资料。")
+                            }
+                            BatchOutcome::Expired => {
+                                "原删除查询窗口已过期；请明确刷新当前目录核对，不会重执行原票据。"
+                                    .to_owned()
+                            }
+                        }
+                    } else {
+                        match &result.outcome {
                         BatchOutcome::Saved(_) => "原批次已一次保存。请单独刷新目录查看当前状态；结束本次操作后可开始新批次。".to_owned(),
                         BatchOutcome::Unknown => "原票据当前没有确定批次结果；保留原票据，不会重新导入。".to_owned(),
                         BatchOutcome::NotSubmitted(reason) => format!("整批未送交目录写入：{reason} 原文件未变；结束本次操作后可重新选择。"),
                         BatchOutcome::Rejected(reason) => format!("本批目录写入已被明确拒绝：{reason} 整批没有加入；请核对权限或容量后重新选择。"),
                         BatchOutcome::Expired => "原批次查询窗口已过期，无法据此确定原保存结果；请明确刷新当前目录核对。不会重执行原票据。".to_owned(),
+                    }
                     };
                     let target_matches = matches!(&self.native_target,
                         Some(NativeTarget::MaterialsBatch(original, scope))
@@ -4280,9 +4330,8 @@ impl App {
                         .as_mut()
                         .ok_or("资料页面已关闭")?
                         .batch_result(*result)?;
-                    if settled && self.native_command.as_ref() == Some(&original) && target_matches
-                    {
-                        self.native_unknown = false;
+                    if self.native_command.as_ref() == Some(&original) && target_matches {
+                        self.native_unknown = !settled;
                     }
                     self.status = message;
                 }

@@ -101,6 +101,13 @@ pub struct MaterialAppend {
     pub resource: MaterialResource,
     pub allowed_class_ids: Vec<ClassId>,
 }
+/// A fixed deletion selection, independent of visible row order or later appends.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MaterialDeleteTarget {
+    pub material_id: MaterialId,
+    pub resource_version_id: ResourceVersionId,
+    pub expected_material_revision: Revision,
+}
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MaterialFolderState {
     pub folder: TeacherMaterialFolder,
@@ -417,6 +424,73 @@ impl MaterialFolderState {
         }
         next.folder.last_added_sequence = last_sequence;
         next.folder.revision = revision;
+        Ok(next)
+    }
+    /// Validate the entire selection before producing one atomic candidate.
+    /// Original metadata and added sequences survive in the deleted records.
+    pub fn delete_batch(
+        &self,
+        targets: &[MaterialDeleteTarget],
+        identity: &IdentityState,
+        actor: &ActorContext,
+        now: LocalDateTime,
+    ) -> Result<Self, MaterialError> {
+        self.validate()?;
+        if targets.is_empty() || targets.len() > MAX_MATERIAL_BATCH_FILES {
+            return Err(MaterialError::Capacity);
+        }
+        authorize_material_folder(identity, actor, self.folder.scope, now)?;
+        let role = identity.account(actor.principal_id)?.principal.role;
+        let mut ids = HashSet::with_capacity(targets.len());
+        let mut versions = HashSet::with_capacity(targets.len());
+        let mut changes = Vec::with_capacity(targets.len());
+        for target in targets {
+            if !ids.insert(target.material_id) || !versions.insert(target.resource_version_id) {
+                return Err(MaterialError::AlreadyExists);
+            }
+            let index = self
+                .records
+                .iter()
+                .position(|record| record.id == target.material_id)
+                .ok_or(MaterialError::NotFound)?;
+            let record = &self.records[index];
+            if record.status != MaterialStatus::Published
+                || record.resource.version_id != target.resource_version_id
+            {
+                return Err(MaterialError::NotFound);
+            }
+            if record.revision != target.expected_material_revision {
+                return Err(MaterialError::RevisionConflict {
+                    current: record.revision,
+                });
+            }
+            if actor.principal_id != self.folder.scope.teacher_id && role != Role::GlobalAdmin {
+                return Err(MaterialError::Permission(PermissionError::WrongOwner));
+            }
+            if role == Role::TeacherAdmin
+                && record.allowed_class_ids.iter().any(|class| {
+                    !identity.is_teacher(actor.principal_id, *class, self.folder.scope.subject_id)
+                })
+            {
+                return Err(MaterialError::InvalidScope);
+            }
+            let revision = record
+                .revision
+                .next()
+                .map_err(|_| MaterialError::VersionOverflow)?;
+            changes.push((index, revision));
+        }
+        let revision = self
+            .folder
+            .revision
+            .next()
+            .map_err(|_| MaterialError::VersionOverflow)?;
+        let mut next = self.clone();
+        next.folder.revision = revision;
+        for (index, revision) in changes {
+            next.records[index].revision = revision;
+            next.records[index].status = MaterialStatus::Deleted;
+        }
         Ok(next)
     }
     pub fn delete(

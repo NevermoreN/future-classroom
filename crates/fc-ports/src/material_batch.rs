@@ -6,7 +6,8 @@ use fc_domain::{
     auth::ActorContext,
     ids::CommandId,
     materials::{
-        MaterialAppend, MaterialError, MaterialRecord, MaterialScope, MAX_MATERIAL_BATCH_FILES,
+        MaterialAppend, MaterialDeleteTarget, MaterialError, MaterialRecord, MaterialScope,
+        MAX_MATERIAL_BATCH_FILES,
     },
 };
 use std::collections::HashSet;
@@ -31,6 +32,44 @@ impl MaterialBatchAppendRequest {
         self.appends.iter().try_fold(base, |bytes, append| {
             bytes.checked_add(append.allocation_bytes()?)
         })
+    }
+}
+
+/// Metadata only: the Writer resolves every fixed item and resource version.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MaterialBatchDeleteRequest {
+    pub command_id: CommandId,
+    pub scope: MaterialScope,
+    pub targets: Vec<MaterialDeleteTarget>,
+}
+impl MaterialBatchDeleteRequest {
+    pub fn allocation_bytes(&self) -> Option<usize> {
+        std::mem::size_of::<Self>().checked_add(
+            self.targets
+                .capacity()
+                .checked_mul(std::mem::size_of::<MaterialDeleteTarget>())?,
+        )
+    }
+    pub fn validate(&self) -> Result<(), MaterialRepositoryError> {
+        if self.targets.is_empty() || self.targets.len() > MAX_MATERIAL_BATCH_FILES {
+            return Err(MaterialRepositoryError::Domain(MaterialError::Capacity));
+        }
+        if self
+            .allocation_bytes()
+            .is_none_or(|bytes| bytes > MAX_MATERIAL_BATCH_ALLOCATION_BYTES)
+        {
+            return Err(MaterialRepositoryError::DocumentTooLarge);
+        }
+        let mut ids = HashSet::with_capacity(self.targets.len());
+        let mut versions = HashSet::with_capacity(self.targets.len());
+        for target in &self.targets {
+            if !ids.insert(target.material_id) || !versions.insert(target.resource_version_id) {
+                return Err(MaterialRepositoryError::Domain(
+                    MaterialError::AlreadyExists,
+                ));
+            }
+        }
+        Ok(())
     }
 }
 
@@ -144,6 +183,30 @@ pub trait MaterialBatchOutcomeRepository {
         command_id: CommandId,
         actor: &ActorContext,
     ) -> Result<Option<MaterialBatchCommandOutcome>, MaterialRepositoryError>;
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MaterialBatchDeleteCommandOutcome {
+    pub command_id: CommandId,
+    pub scope: MaterialScope,
+    pub records: Vec<MaterialRecord>,
+}
+
+/// Deletion uses its own receipt kind and one transaction for the whole list.
+pub trait MaterialBatchDeleteRepository {
+    fn delete_material_batch(
+        &mut self,
+        request: MaterialBatchDeleteRequest,
+        actor: &ActorContext,
+        clock: &dyn Clock,
+    ) -> Result<Vec<MaterialRecord>, MaterialRepositoryError>;
+}
+pub trait MaterialBatchDeleteOutcomeRepository {
+    fn material_batch_delete_outcome(
+        &self,
+        command_id: CommandId,
+        actor: &ActorContext,
+    ) -> Result<Option<MaterialBatchDeleteCommandOutcome>, MaterialRepositoryError>;
 }
 
 #[cfg(test)]
@@ -329,5 +392,73 @@ mod tests {
             prepare_material_batch_append(overallocated),
             Err(MaterialRepositoryError::DocumentTooLarge)
         ));
+    }
+
+    fn delete_request(targets: Vec<MaterialDeleteTarget>) -> MaterialBatchDeleteRequest {
+        MaterialBatchDeleteRequest {
+            command_id: CommandId::new(8).unwrap(),
+            scope: MaterialScope {
+                teacher_id: PrincipalId::new(2).unwrap(),
+                subject_id: SubjectId::new(1).unwrap(),
+            },
+            targets,
+        }
+    }
+    fn target(n: u64) -> MaterialDeleteTarget {
+        MaterialDeleteTarget {
+            material_id: MaterialId::new(n).unwrap(),
+            resource_version_id: ResourceVersionId::new(n).unwrap(),
+            expected_material_revision: Revision::new(1),
+        }
+    }
+    #[test]
+    fn delete_manifest_preserves_fixed_order_and_bounds_count_and_allocation_capacity() {
+        let request = delete_request((1..=20).rev().map(target).collect());
+        request.validate().unwrap();
+        assert_eq!(
+            request
+                .targets
+                .iter()
+                .map(|target| target.material_id.get())
+                .collect::<Vec<_>>(),
+            (1..=20).rev().collect::<Vec<_>>()
+        );
+        assert_eq!(
+            request.allocation_bytes(),
+            Some(
+                std::mem::size_of::<MaterialBatchDeleteRequest>()
+                    + request.targets.capacity() * std::mem::size_of::<MaterialDeleteTarget>()
+            )
+        );
+        assert!(matches!(
+            delete_request(vec![]).validate(),
+            Err(MaterialRepositoryError::Domain(MaterialError::Capacity))
+        ));
+        assert!(matches!(
+            delete_request((1..=21).map(target).collect()).validate(),
+            Err(MaterialRepositoryError::Domain(MaterialError::Capacity))
+        ));
+        let mut oversized = Vec::with_capacity(MAX_MATERIAL_BATCH_ALLOCATION_BYTES);
+        oversized.push(target(1));
+        assert!(matches!(
+            delete_request(oversized).validate(),
+            Err(MaterialRepositoryError::DocumentTooLarge)
+        ));
+    }
+    #[test]
+    fn delete_manifest_rejects_duplicate_material_or_resource_version() {
+        let mut repeated_version = target(2);
+        repeated_version.resource_version_id = target(1).resource_version_id;
+        for targets in [
+            vec![target(1), target(1)],
+            vec![target(1), repeated_version],
+        ] {
+            assert!(matches!(
+                delete_request(targets).validate(),
+                Err(MaterialRepositoryError::Domain(
+                    MaterialError::AlreadyExists
+                ))
+            ));
+        }
     }
 }

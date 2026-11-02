@@ -20,6 +20,66 @@ pub struct BatchAppendInput {
     pub upload_ids: Vec<u64>,
     pub allowed_class_ids: Vec<ClassId>,
 }
+#[derive(Debug, PartialEq, Eq)]
+pub struct BatchDeleteInput {
+    pub command: CommandReference,
+    pub targets: Vec<MaterialDeleteTarget>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct DeleteTargetDto {
+    material_id: String,
+    resource_version_id: String,
+    expected_material_revision: String,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct DeleteBatchDto {
+    schema_version: u16,
+    command_id: String,
+    command_ticket: String,
+    targets: Vec<DeleteTargetDto>,
+}
+
+/// The reviewed stable IDs and versions are the complete mutation input. A
+/// page number, current row position or folder revision is never a delete key.
+pub fn batch_delete(body: &[u8]) -> Result<BatchDeleteInput, ProtocolError> {
+    let dto: DeleteBatchDto = parse(body)?;
+    if dto.schema_version != 2 {
+        return Err(ProtocolError::UnsupportedSchema);
+    }
+    count(dto.targets.len())?;
+    let command = CommandReference {
+        command_id: CommandId::new(id(&dto.command_id).ok_or(ProtocolError::InvalidCommand)?)
+            .map_err(|_| ProtocolError::InvalidCommand)?,
+        ticket: CommandTicket::parse(&dto.command_ticket)
+            .map_err(|_| ProtocolError::InvalidCommand)?,
+    };
+    let mut targets: Vec<MaterialDeleteTarget> = Vec::with_capacity(dto.targets.len());
+    for dto in dto.targets {
+        let target = MaterialDeleteTarget {
+            material_id: MaterialId::new(
+                id(&dto.material_id).ok_or(ProtocolError::InvalidCommand)?,
+            )
+            .map_err(|_| ProtocolError::InvalidCommand)?,
+            resource_version_id: ResourceVersionId::new(
+                id(&dto.resource_version_id).ok_or(ProtocolError::InvalidCommand)?,
+            )
+            .map_err(|_| ProtocolError::InvalidCommand)?,
+            expected_material_revision: Revision::new(
+                id(&dto.expected_material_revision).ok_or(ProtocolError::InvalidCommand)?,
+            ),
+        };
+        if targets.iter().any(|prior| {
+            prior.material_id == target.material_id
+                || prior.resource_version_id == target.resource_version_id
+        }) {
+            return Err(ProtocolError::InvalidCommand);
+        }
+        targets.push(target);
+    }
+    Ok(BatchDeleteInput { command, targets })
+}
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 struct FileDto {
@@ -320,6 +380,74 @@ pub fn batch_command_window(
     )
 }
 
+fn valid_deleted_records(records: &[MaterialRecord]) -> Result<(), ProtocolError> {
+    count(records.len())?;
+    for (index, item) in records.iter().enumerate() {
+        item.validate().map_err(|_| ProtocolError::InvalidCommand)?;
+        if item.status != MaterialStatus::Deleted
+            || item.revision.get() < 2
+            || item.folder_id != records[0].folder_id
+            || records[..index].iter().any(|prior| {
+                prior.id == item.id || prior.resource.version_id == item.resource.version_id
+            })
+        {
+            return Err(ProtocolError::InvalidCommand);
+        }
+    }
+    Ok(())
+}
+pub fn batch_delete_committed(
+    command: CommandReference,
+    scope: MaterialScope,
+    records: &[MaterialRecord],
+) -> Result<Vec<u8>, ProtocolError> {
+    valid_deleted_records(records)?;
+    super::super::responses::encode(&Committed {
+        schema_version: 2,
+        status: "BATCH_DELETE_COMMITTED",
+        command_id: command.command_id.get().to_string(),
+        command_ticket: command.ticket.to_string(),
+        scope: scope.into(),
+        records: records.iter().map(record).collect(),
+    })
+}
+pub fn batch_delete_command_window(
+    command: CommandReference,
+    result: Option<(MaterialScope, &[MaterialRecord])>,
+) -> Result<Vec<u8>, ProtocolError> {
+    if let Some((_, records)) = result {
+        valid_deleted_records(records)?;
+    }
+    super::super::responses::encode(&History {
+        schema_version: 2,
+        status: "COMMAND_BATCH_DELETE_RESULT",
+        command_id: command.command_id.get().to_string(),
+        command_ticket: command.ticket.to_string(),
+        state: if result.is_some() {
+            "COMMITTED"
+        } else {
+            "NOT_FOUND"
+        },
+        scope: result.map(|(scope, _)| scope.into()),
+        records: result.map(|(_, records)| records.iter().map(record).collect()),
+    })
+}
+/// Check both actual serialized forms before mutation, allowing the largest
+/// command identity. Deletion preserves the reviewed record metadata exactly.
+pub fn batch_delete_result_fits(
+    scope: MaterialScope,
+    records: &[MaterialRecord],
+) -> Result<(), ProtocolError> {
+    let command = CommandReference {
+        command_id: CommandId::new(u64::MAX).map_err(|_| ProtocolError::InvalidCommand)?,
+        ticket: CommandTicket::new([0xff; 16], i64::MAX as u64)
+            .map_err(|_| ProtocolError::InvalidCommand)?,
+    };
+    batch_delete_committed(command, scope, records)?;
+    batch_delete_command_window(command, Some((scope, records)))?;
+    Ok(())
+}
+
 /// Conservative, pre-COMMIT response/history budget. This checks bytes that are
 /// already prepared; it does no file I/O, auth, issuance, or Writer admission.
 /// Unknown IDs/folder/sequence/ticket width use maximum legal decimal lengths.
@@ -410,6 +538,155 @@ mod tests {
     fn request() -> Value {
         json!({"schemaVersion":2,"commandId":u64::MAX.to_string(),"commandTicket":reference().ticket.to_string(),
                "batchId":u64::MAX.to_string(),"uploadIds":["9","3"],"allowedClassIds":["7","2"]})
+    }
+    fn delete_request() -> Value {
+        json!({"schemaVersion":2,"commandId":reference().command_id.get().to_string(),
+            "commandTicket":reference().ticket.to_string(),
+            "targets":[{"materialId":"9","resourceVersionId":"109","expectedMaterialRevision":"1"},
+                       {"materialId":"3","resourceVersionId":"103","expectedMaterialRevision":"4"}]})
+    }
+    #[test]
+    fn delete_batch_binds_ordered_fixed_versions_and_requires_complete_c2() {
+        let original = delete_request();
+        let decoded = batch_delete(&serde_json::to_vec(&original).unwrap()).unwrap();
+        assert_eq!(decoded.command, reference());
+        assert_eq!(
+            decoded
+                .targets
+                .iter()
+                .map(|x| x.material_id.get())
+                .collect::<Vec<_>>(),
+            [9, 3]
+        );
+        assert_eq!(decoded.targets[1].expected_material_revision.get(), 4);
+        for change in [
+            "schema",
+            "missing-ticket",
+            "null-ticket",
+            "duplicate-id",
+            "duplicate-version",
+            "empty",
+            "zero-revision",
+            "leading-zero",
+            "numeric-id",
+            "unknown-item",
+            "unknown-top",
+        ] {
+            let mut bad = original.clone();
+            match change {
+                "schema" => bad["schemaVersion"] = json!(1),
+                "missing-ticket" => {
+                    bad.as_object_mut().unwrap().remove("commandTicket");
+                }
+                "null-ticket" => bad["commandTicket"] = Value::Null,
+                "duplicate-id" => bad["targets"][1]["materialId"] = json!("9"),
+                "duplicate-version" => bad["targets"][1]["resourceVersionId"] = json!("109"),
+                "empty" => bad["targets"] = json!([]),
+                "zero-revision" => bad["targets"][1]["expectedMaterialRevision"] = json!("0"),
+                "leading-zero" => bad["targets"][1]["materialId"] = json!("03"),
+                "numeric-id" => bad["targets"][1]["materialId"] = json!(3),
+                "unknown-item" => bad["targets"][0]["folderRevision"] = json!("1"),
+                "unknown-top" => bad["force"] = json!(true),
+                _ => unreachable!(),
+            }
+            assert!(
+                batch_delete(&serde_json::to_vec(&bad).unwrap()).is_err(),
+                "{change}"
+            );
+        }
+        let mut max = original;
+        max["targets"] = json!((1..=20).map(|id| json!({"materialId":id.to_string(),"resourceVersionId":(id+100).to_string(),"expectedMaterialRevision":"1"})).collect::<Vec<_>>());
+        assert_eq!(
+            batch_delete(&serde_json::to_vec(&max).unwrap())
+                .unwrap()
+                .targets
+                .len(),
+            20
+        );
+        max["targets"].as_array_mut().unwrap().push(
+            json!({"materialId":"21","resourceVersionId":"121","expectedMaterialRevision":"1"}),
+        );
+        assert!(batch_delete(&serde_json::to_vec(&max).unwrap()).is_err());
+    }
+    #[test]
+    fn delete_batch_routes_have_distinct_history_and_methods() {
+        let path = format!(
+            "delete-batch-commands/1/2/{}/{}",
+            reference().ticket,
+            reference().command_id.get()
+        );
+        assert!(matches!(
+            super::super::route("folders/1/2/delete-batch"),
+            Some(MaterialRoute::BatchDelete { .. })
+        ));
+        let route = super::super::route(&path).unwrap();
+        assert!(
+            matches!(route, MaterialRoute::BatchDeleteWindowCommand { command, .. } if command == reference())
+        );
+        assert_eq!(route.allowed_methods(), AllowedMethods::Get);
+        assert_eq!(route.body_limit(), 0);
+        let route = super::super::route("folders/1/2/delete-batch").unwrap();
+        assert_eq!(route.allowed_methods(), AllowedMethods::Post);
+        assert_eq!(route.body_limit(), crate::MAX_JSON_BYTES as u64);
+        for path in [
+            "folders/01/2/delete-batch",
+            "delete-batch-commands/1/2/3",
+            "folders/1/2/delete-batch/extra",
+        ] {
+            assert!(super::super::route(path).is_none());
+        }
+    }
+    #[test]
+    fn deleted_history_keeps_review_order_and_varied_original_metadata_with_bounded_replies() {
+        let mut records = vec![record(9), record(3)];
+        records[0].status = MaterialStatus::Deleted;
+        records[0].revision = Revision::new(2);
+        records[1].status = MaterialStatus::Deleted;
+        records[1].revision = Revision::new(5);
+        records[1].allowed_class_ids = vec![ClassId::new(2).unwrap()];
+        records[1].added_at = LocalDateTime::new(LocalDate::new(2026, 11, 1).unwrap(), 1).unwrap();
+        batch_delete_result_fits(scope(), &records).unwrap();
+        let saved: Value = serde_json::from_slice(
+            &batch_delete_committed(reference(), scope(), &records).unwrap(),
+        )
+        .unwrap();
+        let history: Value = serde_json::from_slice(
+            &batch_delete_command_window(reference(), Some((scope(), &records))).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(saved["status"], "BATCH_DELETE_COMMITTED");
+        assert_eq!(history["status"], "COMMAND_BATCH_DELETE_RESULT");
+        assert_eq!(history["records"], saved["records"]);
+        assert_eq!(saved["records"][0]["materialId"], "9");
+        assert_eq!(saved["records"][1]["revision"], "5");
+        assert!(batch_committed(reference(), scope(), &records).is_err());
+        let absent: Value =
+            serde_json::from_slice(&batch_delete_command_window(reference(), None).unwrap())
+                .unwrap();
+        assert_eq!(absent["state"], "NOT_FOUND");
+        assert!(absent["records"].is_null() && absent["scope"].is_null());
+        let mut invalid = records.clone();
+        invalid[1] = invalid[0].clone();
+        assert!(batch_delete_committed(reference(), scope(), &invalid).is_err());
+        records[0].status = MaterialStatus::Published;
+        assert!(batch_delete_result_fits(scope(), &records).is_err());
+        let large = (1..=20)
+            .map(|id| {
+                let mut r = record(id);
+                r.status = MaterialStatus::Deleted;
+                r.revision = Revision::new(u64::MAX);
+                r.display_name = "资".repeat(176) + ".txt";
+                r.allowed_class_ids = (0..128)
+                    .map(|n| ClassId::new(u64::MAX - n).unwrap())
+                    .collect();
+                r
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            batch_delete_result_fits(scope(), &large),
+            Err(ProtocolError::TooLarge)
+        );
+        batch_delete_result_fits(scope(), &large[..1]).unwrap();
     }
     fn record(id: u64) -> MaterialRecord {
         MaterialRecord {

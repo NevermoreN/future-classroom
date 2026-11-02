@@ -296,6 +296,90 @@ impl Backend {
             .map_err(|_| BackendError::Material(MaterialRepositoryError::Unavailable))?;
         Ok(record)
     }
+    pub fn web_material_delete_batch(
+        &mut self,
+        lease: SessionLease,
+        request: fc_ports::MaterialBatchDeleteRequest,
+    ) -> Result<Vec<MaterialRecord>> {
+        request.validate()?;
+        self.web_material_authorize(lease, request.scope, &[])?;
+        let issued = self
+            .current_command
+            .filter(|issued| issued.command_id == request.command_id)
+            .ok_or(BackendError::Storage(StorageError::CommandNotIssued))?;
+        if let Some(prior) = self.material_batch_delete_outcome(lease, request.scope, issued)? {
+            if prior.records.len() == request.targets.len()
+                && prior
+                    .records
+                    .iter()
+                    .zip(&request.targets)
+                    .all(|(record, target)| {
+                        record.id == target.material_id
+                            && record.resource.version_id == target.resource_version_id
+                            && record.status == MaterialStatus::Deleted
+                            && Some(record.revision)
+                                == target.expected_material_revision.next().ok()
+                    })
+            {
+                return Ok(prior.records);
+            }
+            return Err(BackendError::Material(
+                MaterialRepositoryError::IdempotencyConflict,
+            ));
+        }
+        let state = self.state()?;
+        let (actor, generation) = self.web_material_actor(&state, lease)?;
+        let repository = self.guarded(lease, generation, SessionPurpose::Manage);
+        let mut predicted = Vec::with_capacity(request.targets.len());
+        for target in &request.targets {
+            let mut record = repository.managed_material(
+                request.scope,
+                target.material_id,
+                target.resource_version_id,
+                &actor,
+            )?;
+            if record.revision != target.expected_material_revision {
+                return Err(invalid(MaterialError::RevisionConflict {
+                    current: record.revision,
+                }));
+            }
+            record.revision = record.revision.next().map_err(|_| BackendError::Overflow)?;
+            record.status = MaterialStatus::Deleted;
+            predicted.push(record);
+        }
+        let scope = request.scope;
+        fc_protocol::web::materials::batch_delete_result_fits(scope, &predicted)
+            .map_err(|_| BackendError::Material(MaterialRepositoryError::DocumentTooLarge))?;
+        // Fixed resource versions and material revisions bind these immutable
+        // metadata records to Writer's actual CAS. Recheck both output budgets
+        // in the original execution fence without requesting a published
+        // authority snapshot while Writer itself is AuthorityUpdating.
+        let fence: TransactionExecutionFence = Arc::new(move || {
+            fc_protocol::web::materials::batch_delete_result_fits(scope, &predicted).is_ok()
+        });
+        let records = self
+            .begin_execution_scope(fence)
+            .delete_material_batch(lease, request)?;
+        self.web_material_authorize(lease, scope, &[])
+            .map_err(|_| BackendError::Material(MaterialRepositoryError::Unavailable))?;
+        Ok(records)
+    }
+    pub fn web_material_batch_delete_outcome_window(
+        &self,
+        lease: SessionLease,
+        scope: MaterialScope,
+        command: CommandId,
+        ticket: fc_ports::command_window::CommandTicket,
+    ) -> Result<Option<fc_ports::MaterialBatchDeleteCommandOutcome>> {
+        self.web_material_authorize(lease, scope, &[])?;
+        let issued = self.resolve_web_command(
+            lease,
+            fc_ports::command_window::CommandFamily::Materials,
+            ticket,
+            command,
+        )?;
+        self.material_batch_delete_outcome(lease, scope, issued)
+    }
     pub fn web_material_outcome(
         &self,
         lease: SessionLease,

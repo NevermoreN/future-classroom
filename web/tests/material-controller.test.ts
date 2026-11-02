@@ -14,6 +14,8 @@ function fixture() {
   let next = 76
   let batchFiles: { displayName: string; bytes: number }[] = []
   const api = {
+    deleteBatch: vi.fn<MaterialApi['deleteBatch']>().mockImplementation(async (scope, command) => ({ ...identity(command.commandId), scope, records: command.targets.map(t => ({ ...row(), materialId: t.materialId, resourceVersionId: t.resourceVersionId, status: 'DELETED' as const, revision: (BigInt(t.expectedMaterialRevision) + 1n).toString() })) })),
+    deleteBatchOutcome: vi.fn<MaterialApi['deleteBatchOutcome']>().mockResolvedValue({ ...identity('77'), state: 'NOT_FOUND', scope: null, records: null }),
     createBatch: vi.fn<MaterialApi['createBatch']>().mockImplementation(async (_scope, files) => { batchFiles = files.map(f => ({ ...f })); return { batchId: '50', expiresInSeconds: 300, maxChunkBytes: 65536, items: batchFiles.map((f, i) => ({ ...f, uploadId: String(600 + i) })) } }),
     uploadBatchMember: vi.fn<MaterialApi['uploadBatchMember']>().mockResolvedValue(undefined),
     cancelBatch: vi.fn<MaterialApi['cancelBatch']>().mockResolvedValue(undefined),
@@ -282,4 +284,56 @@ it.each([401, 403])('single-file blocked original-query authentication failure %
   f.api.materialScopes.mockRejectedValueOnce(new NetworkFault()); await f.controller.loadScopes(0, true)
   f.api.materialOutcome.mockRejectedValueOnce(new ApiError(status, status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN')); await f.controller.query()
   expect(f.revoked).toHaveBeenCalledOnce(); expect(f.state().selected).toBeNull(); expect(f.state().pending).toBeNull(); expect(f.controller.hasRiskyDraft()).toBe(false); expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.append).toHaveBeenCalledOnce(); f.controller.dispose()
+})
+
+describe('bounded fixed-record batch deletion', () => {
+  function second(): MaterialRecord { return { ...row(), materialId: '8', resourceVersionId: '9', displayName: '同名课件.txt', addedAt: '2026-10-30T09:00:00', addedSequence: '2', revision: '3' } }
+  async function deletionFixture() {
+    const f = fixture(), originals = [row(), second()]
+    f.api.materials.mockResolvedValue({ ...page(), folderRevision: '3', total: 2, items: originals })
+    f.api.deleteBatch.mockImplementation(async (scope, command) => ({ ...identity(command.commandId), scope, records: command.targets.map(t => ({ ...originals.find(r => r.materialId === t.materialId)!, status: 'DELETED', revision: (BigInt(t.expectedMaterialRevision) + 1n).toString() })) }))
+    await open(f); return { ...f, originals }
+  }
+  it('captures selected fixed records in order and submits one batch only after explicit confirmation', async () => {
+    const f = await deletionFixture()
+    f.controller.toggleDelete(f.originals[1]!, true); f.controller.toggleDelete(f.originals[0]!, true)
+    expect(f.state().deleteSelection.map(r => r.materialId)).toEqual(['8', '5'])
+    expect(f.api.issueCommand).not.toHaveBeenCalled(); expect(f.controller.hasRiskyDraft()).toBe(true)
+    await f.controller.deleteBatch()
+    expect(f.api.deleteBatch).toHaveBeenCalledExactlyOnceWith(target, { ...identity('77'), targets: [{ materialId: '8', resourceVersionId: '9', expectedMaterialRevision: '3' }, { materialId: '5', resourceVersionId: '6', expectedMaterialRevision: '1' }] }, 'b'.repeat(64), expect.any(AbortSignal))
+    expect(f.state().deleteBatchHistory?.map(r => [r.materialId, r.revision, r.status])).toEqual([['8', '4', 'DELETED'], ['5', '2', 'DELETED']])
+    expect(f.state().page?.items).toEqual(f.originals); expect(f.api.deleteMaterial).not.toHaveBeenCalled(); expect(f.api.materials).toHaveBeenCalledOnce()
+    await f.controller.deleteBatch(); expect(f.api.issueCommand).toHaveBeenCalledOnce(); f.controller.dispose()
+  })
+  it('selects at most the current twenty records, can remove one, and requires consent to clear on directory read', async () => {
+    const f = fixture(), rows = Array.from({ length: 20 }, (_, i) => ({ ...row(), materialId: String(i + 1), resourceVersionId: String(i + 101), addedSequence: String(20 - i) }))
+    f.api.materials.mockResolvedValue({ ...page(), total: 20, items: rows }); await open(f)
+    f.controller.selectPageForDeletion(); expect(f.state().deleteSelection).toHaveLength(20)
+    f.controller.toggleDelete(rows[4]!, false); expect(f.state().deleteSelection).toHaveLength(19)
+    f.controller.toggleDelete({ ...rows[0]!, materialId: '999' }, true); expect(f.state().deleteSelection).toHaveLength(19)
+    await f.controller.loadPage(); expect(f.api.materials).toHaveBeenCalledOnce()
+    await f.controller.loadPage(null, true); expect(f.state().deleteSelection).toEqual([])
+    f.controller.selectPageForDeletion(); f.controller.clearDeleteSelection(); expect(f.controller.hasRiskyDraft()).toBe(false); expect(f.api.deleteBatch).not.toHaveBeenCalled(); f.controller.dispose()
+  })
+  it('retains unknown deletion and queries the original pair after a current-directory read without replay', async () => {
+    const f = await deletionFixture(); f.controller.selectPageForDeletion(); f.api.deleteBatch.mockRejectedValueOnce(new NetworkFault()); await f.controller.deleteBatch()
+    const pending = f.state().pendingDeleteBatch; expect(f.state().phase).toBe('unknown')
+    await f.controller.loadPage(null, true); expect(f.state().pendingDeleteBatch).toBe(pending); expect(f.state().phase).toBe('unknown'); expect(f.state().deleteBatchHistory).toBeNull()
+    f.controller.selectPageForDeletion(); f.controller.pickFiles([new File(['x'], 'x.txt')]); await f.controller.deleteBatch(); await f.controller.delete(row())
+    await f.controller.queryDeleteBatch(); expect(f.state().phase).toBe('unknown')
+    f.api.deleteBatchOutcome.mockResolvedValueOnce({ ...identity('77'), state: 'COMMITTED', scope: target, records: f.originals.map(r => ({ ...r, status: 'DELETED', revision: (BigInt(r.revision) + 1n).toString() })) })
+    await f.controller.queryDeleteBatch(); expect(f.state().phase).toBe('result'); expect(f.state().deleteBatchHistory).toHaveLength(2)
+    expect(f.api.deleteBatchOutcome).toHaveBeenLastCalledWith(target, identity('77'), expect.any(AbortSignal)); expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.deleteBatch).toHaveBeenCalledOnce(); expect(f.api.deleteMaterial).not.toHaveBeenCalled(); f.controller.dispose()
+  })
+  it.each(['displayName', 'sha256', 'addedSequence', 'allowedClassIds', 'revision', 'materialId'])('treats changed original %s in a reply as unknown', async field => {
+    const f = await deletionFixture(); f.controller.selectPageForDeletion()
+    const changed = { ...f.originals[0]!, status: 'DELETED' as const, revision: '2', [field]: field === 'allowedClassIds' ? ['2'] : field === 'sha256' ? 'b'.repeat(64) : field === 'displayName' ? 'wrong.txt' : '99' }
+    f.api.deleteBatch.mockResolvedValueOnce({ ...identity('77'), scope: target, records: [changed as MaterialRecord, { ...f.originals[1]!, status: 'DELETED', revision: '4' }] })
+    await f.controller.deleteBatch(); expect(f.state().phase).toBe('unknown'); expect(f.state().deleteBatchHistory).toBeNull(); expect(f.state().pendingDeleteBatch?.originals).toEqual(f.originals); f.controller.dispose()
+  })
+  it.each([401, 403])('clears deletion mirrors on query revocation %i', async status => {
+    const f = await deletionFixture(); f.controller.selectPageForDeletion(); f.api.deleteBatch.mockRejectedValueOnce(new NetworkFault()); await f.controller.deleteBatch()
+    f.api.deleteBatchOutcome.mockRejectedValueOnce(new ApiError(status, status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN')); await f.controller.queryDeleteBatch()
+    expect(f.revoked).toHaveBeenCalledOnce(); expect(f.state().pendingDeleteBatch).toBeNull(); expect(f.state().deleteSelection).toEqual([]); f.controller.dispose()
+  })
 })

@@ -386,3 +386,200 @@ fn locked_or_poisoned_command_metadata_never_proves_issuance_absent() {
     .is_err());
     assert!(!original.unissued_after_return());
 }
+
+// Test-only composition retains the production budget fence and the actual
+// Writer boundary; it creates no synthetic outcome or alternate repository.
+static DELETE_EXECUTION_FENCE: Mutex<Option<fc_storage::TransactionExecutionFence>> =
+    Mutex::new(None);
+pub(super) fn delete_execution_fence() -> Option<fc_storage::TransactionExecutionFence> {
+    DELETE_EXECUTION_FENCE.lock().unwrap().clone()
+}
+fn material_form(scope: MaterialScope) -> FormData {
+    let mut form = FormData::new();
+    form.insert(
+        materials_editor::TEACHER,
+        scope.teacher_id.get().to_string(),
+    )
+    .unwrap();
+    form.insert(
+        materials_editor::SUBJECT,
+        scope.subject_id.get().to_string(),
+    )
+    .unwrap();
+    form
+}
+fn confirm_delete_page(app: &mut App, scope: MaterialScope) {
+    for action in [
+        materials_editor::DELETE_BATCH,
+        materials_editor::SELECT_DELETE_PAGE,
+        materials_editor::DELETE_BATCH,
+    ] {
+        app.material_event(action, material_form(scope)).unwrap();
+    }
+    let view = app.view();
+    assert_eq!(view.title, "确认批量删除课堂资料");
+    view.validate().unwrap();
+    app.material_event(materials_editor::CONFIRM_DELETE_BATCH, FormData::new())
+        .unwrap();
+}
+#[test]
+fn twenty_native_deletions_hold_actual_writer_then_lost_reply_requires_original_delete_receipt() {
+    use std::sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc, Condvar,
+    };
+    struct FenceCleanup(Arc<(Mutex<bool>, Condvar)>);
+    impl FenceCleanup {
+        fn release(&self) {
+            let (released, wake) = &*self.0;
+            *released.lock().unwrap_or_else(|poison| poison.into_inner()) = true;
+            wake.notify_all();
+        }
+    }
+    impl Drop for FenceCleanup {
+        fn drop(&mut self) {
+            self.release();
+            *DELETE_EXECUTION_FENCE
+                .lock()
+                .unwrap_or_else(|poison| poison.into_inner()) = None;
+        }
+    }
+    let _serial = SERIAL.lock().unwrap();
+    let (_scratch, mut app, scope) = initialized();
+    let files = (1..=20)
+        .map(|index| {
+            selection(
+                &app,
+                &format!("delete-original-{index:02}.txt"),
+                format!("synthetic fixed delete record {index}").as_bytes(),
+            )
+        })
+        .collect();
+    confirm(&mut app, scope, files);
+    wait_for(&mut app, |app| app.pending.is_none());
+    assert!(!app.native_unknown);
+    app.material_event(materials_editor::DISMISS_BATCH, FormData::new())
+        .unwrap();
+    app.material_event(materials_editor::LOAD, material_form(scope))
+        .unwrap();
+    wait_for(&mut app, |app| app.pending.is_none());
+    let before = current(&app, scope);
+    assert_eq!(before.total, 20);
+    let backend = app.backend.as_ref().unwrap().clone();
+    let revision = backend.lock().unwrap().global_revision().unwrap();
+    let lease = app.lease.unwrap();
+    let generation = app.generation;
+    let control = app.control.as_ref().unwrap().clone();
+    let gate = control.health_gate();
+    let released = Arc::new((Mutex::new(false), Condvar::new()));
+    let cleanup = FenceCleanup(released.clone());
+    let once = AtomicBool::new(false);
+    let (entered, arrived) = mpsc::channel();
+    *DELETE_EXECUTION_FENCE.lock().unwrap() = Some(Arc::new(move || {
+        if gate.status().health == fc_runtime::health::Health::AuthorityUpdating
+            && !once.swap(true, Ordering::AcqRel)
+        {
+            if entered.send(()).is_err() {
+                return false;
+            }
+            let (released, wake) = &*released;
+            let Ok(released) = released.lock() else {
+                return false;
+            };
+            return wake
+                .wait_timeout_while(released, Duration::from_secs(2), |released| !*released)
+                .is_ok_and(|(released, _)| *released);
+        }
+        true
+    }));
+    confirm_delete_page(&mut app, scope);
+    let original = app.native_command.clone().unwrap();
+    arrived
+        .recv_timeout(Duration::from_secs(5))
+        .expect("actual delete Writer precommit");
+    let pair = original
+        .snapshot()
+        .expect("actual original delete pair issued once");
+    assert_eq!(
+        control.health_gate().status().health,
+        fc_runtime::health::Health::AuthorityUpdating
+    );
+    app.poll().unwrap();
+    assert_eq!(app.lease, Some(lease));
+    assert_eq!(app.generation, generation);
+    assert!(!control.is_local_locked());
+    assert!(app
+        .pending
+        .as_ref()
+        .is_some_and(|pending| !pending.ticket.is_finished()));
+    assert_eq!(original.snapshot(), Some(pair));
+    app.material_event(materials_editor::CONFIRM_DELETE_BATCH, FormData::new())
+        .unwrap();
+    assert_eq!(app.native_command.as_ref(), Some(&original));
+    cleanup.release();
+    lose_worker_reply(&mut app);
+    assert!(app.native_unknown);
+    let empty = current(&app, scope);
+    assert_eq!(empty.total, 0);
+    // The batch is one business COMMIT; the worker then durably retires and
+    // finalizes each of the twenty physical originals in separate GC commits.
+    let inventory = backend.lock().unwrap().resource_inventory(None).unwrap();
+    assert!(inventory.next_cursor.is_none());
+    assert_eq!(inventory.entries.len(), before.items.len());
+    assert_eq!(inventory.original_bytes, 0);
+    assert!(inventory.entries.iter().all(|entry| {
+        entry.state == fc_bootstrap::backend::ResourceState::Removed
+            && entry.references == 0
+            && before
+                .items
+                .iter()
+                .any(|record| record.id == entry.material_id && record.resource == entry.resource)
+    }));
+    let expected_after_reconciliation =
+        (0..1 + 2 * inventory.entries.len()).fold(revision, |value, _| value.next().unwrap());
+
+    assert_eq!(
+        empty.folder.revision,
+        before.folder.revision.next().unwrap()
+    );
+    assert_eq!(
+        backend.lock().unwrap().global_revision().unwrap(),
+        expected_after_reconciliation
+    );
+    app.material_event(materials_editor::LOAD, material_form(scope))
+        .unwrap();
+    wait_for(&mut app, |app| app.pending.is_none());
+    assert!(
+        app.native_unknown,
+        "current empty folder is not the original deletion receipt"
+    );
+    app.material_event(materials_editor::QUERY_BATCH, FormData::new())
+        .unwrap();
+    wait_for(&mut app, |app| app.pending.is_none());
+    assert!(!app.native_unknown);
+    assert_eq!(app.native_command.as_ref(), Some(&original));
+    assert_eq!(original.snapshot(), Some(pair));
+    let outcome = backend
+        .lock()
+        .unwrap()
+        .material_batch_delete_outcome(lease, scope, pair)
+        .unwrap()
+        .unwrap();
+    let mut expected = before.items;
+    for record in &mut expected {
+        record.status = MaterialStatus::Deleted;
+        record.revision = record.revision.next().unwrap();
+    }
+    assert_eq!(outcome.records, expected);
+    assert_eq!(
+        backend.lock().unwrap().global_revision().unwrap(),
+        expected_after_reconciliation
+    );
+    assert!(app
+        .view()
+        .actions
+        .iter()
+        .any(|action| action.id == materials_editor::DISMISS_BATCH && action.enabled));
+    drop(cleanup);
+    drain(app);
+}

@@ -186,6 +186,59 @@ pub(super) fn dispatch(
                 Err(cause) => error(cause, false),
             }
         }
+        MaterialRoute::BatchDelete { scope } => {
+            let input = match wire::batch_delete(body) {
+                Ok(input) => input,
+                Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+            };
+            let issued = match backend.resolve_web_command(
+                lease,
+                CommandFamily::Materials,
+                input.command.ticket,
+                input.command.command_id,
+            ) {
+                Ok(issued) => issued,
+                Err(cause) => return error(cause, true),
+            };
+            let mut scoped = match backend.begin_command_scope(issued) {
+                Ok(scoped) => scoped,
+                Err(cause) => return error(cause, true),
+            };
+            match scoped.web_material_delete_batch(
+                lease,
+                fc_ports::MaterialBatchDeleteRequest {
+                    command_id: input.command.command_id,
+                    scope,
+                    targets: input.targets,
+                },
+            ) {
+                Ok(records) => match wire::batch_delete_committed(input.command, scope, &records) {
+                    Ok(bytes) => response(200, Ok(bytes), None),
+                    Err(_) => failure(503, responses::ErrorCode::ResultUnknown),
+                },
+                Err(cause) => error(cause, true),
+            }
+        }
+        MaterialRoute::BatchDeleteWindowCommand { scope, command } => {
+            match backend.web_material_batch_delete_outcome_window(
+                lease,
+                scope,
+                command.command_id,
+                command.ticket,
+            ) {
+                Ok(outcome) => response(
+                    200,
+                    wire::batch_delete_command_window(
+                        command,
+                        outcome
+                            .as_ref()
+                            .map(|value| (value.scope, value.records.as_slice())),
+                    ),
+                    None,
+                ),
+                Err(cause) => error(cause, false),
+            }
+        }
         MaterialRoute::BatchUploadCreate { scope } => {
             let input = match wire::batch_upload(body) {
                 Ok(input) => input,
@@ -355,6 +408,9 @@ pub(super) fn error(e: BackendError, mutating: bool) -> WebResponse {
         }
         BackendError::Material(MaterialRepositoryError::QuotaExceeded) => {
             failure(429, responses::ErrorCode::Capacity)
+        }
+        BackendError::Material(MaterialRepositoryError::DocumentTooLarge) => {
+            failure(413, responses::ErrorCode::InvalidRequest)
         }
         BackendError::Session(_) if !mutating => failure(403, responses::ErrorCode::Forbidden),
         BackendError::InvalidInput if !mutating => {

@@ -45,7 +45,8 @@ use fc_ports::{
     prepare_initial_credentials, prepare_password_change, prepare_recovery_rotation, Clock,
     CredentialCrypto, CredentialIdentityRepository, DisplayRepository, DisplayRepositoryError,
     DisplayRequest, IdentityRepositoryError, IdentityRequest, LessonRepository,
-    LessonRepositoryError, LessonRequest, MaterialBatchOutcomeRepository, MaterialBatchRepository,
+    LessonRepositoryError, LessonRequest, MaterialBatchDeleteOutcomeRepository,
+    MaterialBatchDeleteRepository, MaterialBatchOutcomeRepository, MaterialBatchRepository,
     MaterialDeleteRequest, MaterialListRequest, MaterialRepository, MaterialRepositoryError,
     MonotonicClock, PreparedCredentialChange, PreparedMaterialAppend, RandomSource,
     RepositoryError, ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
@@ -1583,6 +1584,63 @@ impl Backend {
         Ok(self
             .guarded(lease, generation, SessionPurpose::Manage)
             .delete_material(request, &actor, self.clock.as_ref())?)
+    }
+    /// Fixed targets are removed by one Writer transaction, retaining the
+    /// request's original command pair, execution fence and session guard.
+    pub fn delete_material_batch(
+        &mut self,
+        lease: SessionLease,
+        request: fc_ports::MaterialBatchDeleteRequest,
+    ) -> Result<Vec<MaterialRecord>> {
+        request.validate()?;
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        Ok(self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .delete_material_batch(request, &actor, self.clock.as_ref())?)
+    }
+    /// Read the immutable original deletion receipt, never infer a commit
+    /// from the current folder contents.
+    pub fn material_batch_delete_outcome(
+        &self,
+        lease: SessionLease,
+        scope: MaterialScope,
+        issued: fc_ports::command_window::IssuedCommand,
+    ) -> Result<Option<fc_ports::MaterialBatchDeleteCommandOutcome>> {
+        use fc_ports::command_window::{CommandFamily, CommandOwner};
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        if issued.family != CommandFamily::Materials
+            || issued.owner != CommandOwner::authenticated(&actor)
+            || self
+                .current_command
+                .is_some_and(|original| original != issued)
+        {
+            return Err(BackendError::Storage(StorageError::CommandNotIssued));
+        }
+        authorize_material_folder(&state, &actor, scope, self.clock.now())
+            .map_err(|e| BackendError::Material(MaterialRepositoryError::Domain(e)))?;
+        self.handle.try_check_command(issued)?.wait()?;
+        let result = self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .with_command_window(issued)
+            .material_batch_delete_outcome(issued.command_id, &actor)?;
+        if result
+            .as_ref()
+            .is_some_and(|result| result.command_id != issued.command_id || result.scope != scope)
+        {
+            return Err(BackendError::Material(
+                MaterialRepositoryError::IdempotencyConflict,
+            ));
+        }
+        let fresh = self.state()?;
+        let (current, current_generation) = self.actor(&fresh, lease, SessionPurpose::Manage)?;
+        if current != actor || current_generation != generation {
+            return Err(BackendError::Material(MaterialRepositoryError::Unavailable));
+        }
+        authorize_material_folder(&fresh, &current, scope, self.clock.now())
+            .map_err(|e| BackendError::Material(MaterialRepositoryError::Domain(e)))?;
+        Ok(result)
     }
     pub fn resource_inventory(
         &self,

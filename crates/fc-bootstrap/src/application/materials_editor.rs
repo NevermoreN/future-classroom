@@ -1,6 +1,6 @@
 //! Path-free material workbench. Every selection captures immutable record IDs;
 //! the backend rechecks the live lease, scope and revision in its writer transaction.
-use super::NativeCommand;
+use super::{material_flow::BatchKind, NativeCommand};
 use fc_domain::{auth::Role, identity::IdentityState, ids::*, materials::*};
 use fc_ports::MaterialListRequest;
 use fc_presentation::workbench::*;
@@ -29,6 +29,12 @@ pub(super) const BATCH_DOWN: ActionId = ActionId(314);
 pub(super) const BATCH_REMOVE: ActionId = ActionId(315);
 pub(super) const QUERY_BATCH: ActionId = ActionId(316);
 pub(super) const DISMISS_BATCH: ActionId = ActionId(317);
+pub(super) const TOGGLE_DELETE: ActionId = ActionId(318);
+pub(super) const SELECT_DELETE_PAGE: ActionId = ActionId(319);
+pub(super) const CLEAR_DELETE: ActionId = ActionId(320);
+pub(super) const DELETE_BATCH: ActionId = ActionId(321);
+pub(super) const CONFIRM_DELETE_BATCH: ActionId = ActionId(322);
+pub(super) const CANCEL_DELETE_BATCH: ActionId = ActionId(323);
 const BACK: ActionId = ActionId(2);
 const LOCK: ActionId = ActionId(6);
 
@@ -48,7 +54,13 @@ pub(super) enum Command {
         selected: Vec<SelectedFile>,
         command: NativeCommand,
     },
+    DeleteBatch {
+        scope: MaterialScope,
+        records: Vec<MaterialRecord>,
+        command: NativeCommand,
+    },
     QueryBatch {
+        kind: BatchKind,
         scope: MaterialScope,
         command: NativeCommand,
     },
@@ -74,6 +86,8 @@ struct BatchDraft {
     selected: usize,
 }
 struct BatchHistory {
+    kind: BatchKind,
+    delete_originals: Vec<MaterialRecord>,
     scope: MaterialScope,
     names: Vec<String>,
     command: NativeCommand,
@@ -87,6 +101,9 @@ pub(super) struct Editor {
     pending: Option<MaterialListRequest>,
     selected: Option<MaterialRecord>,
     confirmation: bool,
+    delete_selection: Vec<MaterialRecord>,
+    delete_confirmation: bool,
+    delete_mode: bool,
     copies: Option<super::material_flow::LaunchCopyReport>,
     batch: Option<BatchDraft>,
     history: Option<BatchHistory>,
@@ -208,6 +225,9 @@ impl Editor {
             pending: None,
             selected: None,
             confirmation: false,
+            delete_selection: Vec::new(),
+            delete_confirmation: false,
+            delete_mode: false,
             copies: None,
             batch: None,
             history: None,
@@ -329,9 +349,46 @@ impl Editor {
             };
             view.fields.push(Field {
                 id: BATCH_RESULT, label: state.into(), kind: FieldKind::ReadOnly,
-                value: format!("{}个文件；本批最新：{}。当前目录刷新不代表原命令结果；查询使用原票据，不重新导入。", history.names.len(), history.names.last().map_or("", String::as_str)),
+                value: match history.kind {
+                    BatchKind::Import => format!("{}个文件；本批最新：{}。当前目录刷新不代表原命令结果；查询使用原票据，不重新导入。", history.names.len(), history.names.last().map_or("", String::as_str)),
+                    BatchKind::Delete => format!("原批次删除{}项固定资料。当前目录刷新不代表原命令结果；查询使用原票据，不重新删除。", history.names.len()),
+                },
                 max_utf16: 1024,
             });
+        }
+        if self.delete_confirmation {
+            view.title = "确认批量删除课堂资料".into();
+            view.description = format!("将一次删除以下{}项固定资料。任一资料版本已变，整批不删除；打开副本按原有规则安全回收。", self.delete_selection.len());
+            view.grid = Some(Grid {
+                columns: vec!["完整文件名".into(), "固定资料 / 资源版本 / 修订".into()],
+                rows: self
+                    .delete_selection
+                    .iter()
+                    .map(|record| GridRow {
+                        group: String::new(),
+                        label: record.display_name.clone(),
+                        cells: vec![format!(
+                            "{} / {} / {}",
+                            record.id.get(),
+                            record.resource.version_id.get(),
+                            record.revision.get()
+                        )],
+                        merged: false,
+                    })
+                    .collect(),
+                selected: None,
+                enabled: false,
+            });
+            view.actions = vec![
+                action(
+                    CONFIRM_DELETE_BATCH,
+                    "确认一次删除整批",
+                    !busy && !self.delete_selection.is_empty(),
+                ),
+                action(CANCEL_DELETE_BATCH, "保留本批资料", !busy),
+                action(LOCK, "锁定", true),
+            ];
+            return view;
         }
         if self.confirmation {
             if let Some(record) = &self.selected {
@@ -399,20 +456,36 @@ impl Editor {
         }
         if let Some(page) = page {
             view.description = format!(
-                "资料按成功加入顺序从新到旧排列。本页{}项，共{}项（从第{}项起）。",
+                "资料按成功加入顺序从新到旧排列。本页{}项，共{}项（从第{}项起）。已勾选{}项；刷新、翻页或切换目录会清空勾选。",
                 page.items.len(),
                 page.total,
-                if page.total == 0 { 0 } else { page.offset + 1 }
+                if page.total == 0 { 0 } else { page.offset + 1 },
+                self.delete_selection.len()
             );
             view.grid = Some(Grid {
-                columns: vec!["文件名".into(), "加入时间".into(), "大小".into()],
+                columns: vec![
+                    "文件名".into(),
+                    "加入时间".into(),
+                    "大小 / 批量删除勾选".into(),
+                ],
                 rows: page
                     .items
                     .iter()
                     .map(|r| GridRow {
                         group: String::new(),
                         label: r.display_name.clone(),
-                        cells: vec![time_text(r.added_at), format!("{} 字节", r.resource.bytes)],
+                        cells: vec![
+                            time_text(r.added_at),
+                            format!(
+                                "{} 字节 {}",
+                                r.resource.bytes,
+                                if self.delete_selection.iter().any(|selected| selected == r) {
+                                    "☑ 已勾选"
+                                } else {
+                                    "☐ 未勾选"
+                                }
+                            ),
+                        ],
                         merged: false,
                     })
                     .collect(),
@@ -440,6 +513,45 @@ impl Editor {
             action(BACK, "返回", !busy),
             action(LOCK, "锁定", true),
         ];
+        if self.delete_mode {
+            view.actions = vec![
+                action(
+                    TOGGLE_DELETE,
+                    "勾选 / 取消当前资料",
+                    !busy && selected.is_some(),
+                ),
+                action(
+                    SELECT_DELETE_PAGE,
+                    "勾选本页（最多20项）",
+                    !busy && page.is_some_and(|page| !page.items.is_empty()),
+                ),
+                action(
+                    CLEAR_DELETE,
+                    "清空勾选",
+                    !busy && !self.delete_selection.is_empty(),
+                ),
+                action(
+                    DELETE_BATCH,
+                    "核对已勾选删除清单…",
+                    !busy && !self.delete_selection.is_empty(),
+                ),
+                action(CANCEL_DELETE_BATCH, "退出批量删除", !busy),
+                action(LOAD, "刷新并清空勾选", !busy),
+                action(
+                    NEXT,
+                    "下一页并清空勾选",
+                    !busy && page.is_some_and(|page| page.next_cursor.is_some()),
+                ),
+                action(BACK, "返回", !busy),
+                action(LOCK, "锁定", true),
+            ];
+        } else {
+            view.actions.push(action(
+                DELETE_BATCH,
+                "批量删除…",
+                !busy && page.is_some_and(|page| !page.items.is_empty()) && self.history.is_none(),
+            ));
+        }
         if let Some(history) = &self.history {
             view.actions
                 .push(action(QUERY_BATCH, "查询原批次结果（不重发）", !busy));
@@ -462,6 +574,9 @@ impl Editor {
     fn clear_selection(&mut self) {
         self.selected = None;
         self.confirmation = false;
+        self.delete_selection.clear();
+        self.delete_confirmation = false;
+        self.delete_mode = false;
     }
     fn request(&mut self, scope: MaterialScope, cursor: Option<MaterialCursor>) -> Command {
         self.scope = Some(scope);
@@ -510,7 +625,7 @@ impl Editor {
             batch.selected = row;
             return Ok(());
         }
-        if self.confirmation || column >= 3 {
+        if self.confirmation || self.delete_confirmation || column >= 3 {
             return Err("当前不能改变资料选择。".into());
         }
         let record = self
@@ -562,6 +677,16 @@ impl Editor {
             .as_ref()
             .is_some_and(|history| &history.command == command && history.scope == scope)
     }
+    pub(super) fn original_batch_kind(
+        &self,
+        command: &NativeCommand,
+        scope: MaterialScope,
+    ) -> Option<BatchKind> {
+        self.history
+            .as_ref()
+            .filter(|history| &history.command == command && history.scope == scope)
+            .map(|history| history.kind)
+    }
     pub(super) fn owned_by(&self, owner: PrincipalId) -> bool {
         self.owner == owner
     }
@@ -575,7 +700,8 @@ impl Editor {
     ) -> Result<(), String> {
         use super::material_flow::BatchOutcome;
         let history = self.history.as_mut().ok_or("原批次页面已关闭。")?;
-        if history.command != result.command
+        if history.kind != result.kind
+            || history.command != result.command
             || history.scope != result.scope
             || history.command.snapshot() != result.issued
         {
@@ -586,13 +712,32 @@ impl Editor {
                 || records.len() != history.names.len()
                 || records.iter().zip(&history.names).any(|(record, name)| {
                     record.display_name != *name
-                        || record.allowed_class_ids != history.classes
-                        || record.status != MaterialStatus::Published
                         || record.validate().is_err()
+                        || match history.kind {
+                            BatchKind::Import => {
+                                record.allowed_class_ids != history.classes
+                                    || record.status != MaterialStatus::Published
+                            }
+                            BatchKind::Delete => record.status != MaterialStatus::Deleted,
+                        }
                 })
-                || records.windows(2).any(|pair| {
-                    pair[1].added_sequence != pair[0].added_sequence.checked_add(1).unwrap_or(0)
-                })
+                || history.kind == BatchKind::Import
+                    && records.windows(2).any(|pair| {
+                        pair[1].added_sequence != pair[0].added_sequence.checked_add(1).unwrap_or(0)
+                    })
+                || history.kind == BatchKind::Delete
+                    && (records.len() != history.delete_originals.len()
+                        || records.iter().zip(&history.delete_originals).any(
+                            |(record, original)| {
+                                let mut expected = original.clone();
+                                let Ok(revision) = expected.revision.next() else {
+                                    return true;
+                                };
+                                expected.revision = revision;
+                                expected.status = MaterialStatus::Deleted;
+                                *record != expected
+                            },
+                        ))
                 || records.iter().enumerate().any(|(index, record)| {
                     records[..index].iter().any(|prior| {
                         prior.id == record.id
@@ -708,6 +853,8 @@ impl Editor {
                     let batch = self.batch.take().ok_or("本批已失效。")?;
                     let command = NativeCommand::new();
                     self.history = Some(BatchHistory {
+                        kind: BatchKind::Import,
+                        delete_originals: Vec::new(),
                         scope: batch.scope,
                         names: batch.names,
                         command: command.clone(),
@@ -727,6 +874,7 @@ impl Editor {
         if action == QUERY_BATCH {
             let history = self.history.as_ref().ok_or("没有原批次可查询。")?;
             return Ok(Command::QueryBatch {
+                kind: history.kind,
                 scope: history.scope,
                 command: history.command.clone(),
             });
@@ -741,6 +889,51 @@ impl Editor {
             }
             self.history = None;
             return Ok(Command::Stay);
+        }
+        if action == CANCEL_DELETE_BATCH {
+            if self.delete_confirmation {
+                self.delete_confirmation = false;
+            } else {
+                self.delete_selection.clear();
+                self.delete_mode = false;
+            }
+            return Ok(Command::Stay);
+        }
+        if action == CONFIRM_DELETE_BATCH {
+            if !self.delete_confirmation
+                || self.history.is_some()
+                || self.delete_selection.is_empty()
+            {
+                return Err("请先核对固定删除清单。".into());
+            }
+            let scope = self.scope.ok_or("资料目录已经失效。")?;
+            if !allowed_scope(identity, self.owner, scope) {
+                self.clear_selection();
+                return Err("原删除目录权限已失效，请重新选择。".into());
+            }
+            let records = std::mem::take(&mut self.delete_selection);
+            let command = NativeCommand::new();
+            self.history = Some(BatchHistory {
+                kind: BatchKind::Delete,
+                scope,
+                names: records
+                    .iter()
+                    .map(|record| record.display_name.clone())
+                    .collect(),
+                delete_originals: records.clone(),
+                classes: Vec::new(),
+                command: command.clone(),
+                outcome: super::material_flow::BatchOutcome::Unknown,
+            });
+            self.clear_selection();
+            return Ok(Command::DeleteBatch {
+                scope,
+                records,
+                command,
+            });
+        }
+        if self.delete_confirmation {
+            return Err("请先确认整批删除或保留本批资料。".into());
         }
         if action == CANCEL_DELETE {
             self.confirmation = false;
@@ -810,6 +1003,58 @@ impl Editor {
             self.pending = None;
             self.clear_selection();
             return Err("目录已切换，请先载入目录并重新选择资料。".into());
+        }
+        if matches!(
+            action,
+            TOGGLE_DELETE | SELECT_DELETE_PAGE | CLEAR_DELETE | DELETE_BATCH
+        ) {
+            if self.history.is_some() {
+                return Err("请先核对原批次结果，不会重复删除。".into());
+            }
+            let page = self.page.as_ref().ok_or("请先载入当前目录。")?;
+            if action == DELETE_BATCH && !self.delete_mode {
+                self.delete_mode = true;
+                return Ok(Command::Stay);
+            }
+            if !self.delete_mode {
+                return Err("请先进入批量删除并核对本页资料。".into());
+            }
+            match action {
+                CLEAR_DELETE => self.delete_selection.clear(),
+                SELECT_DELETE_PAGE => self.delete_selection = page.items.clone(),
+                TOGGLE_DELETE => {
+                    let record = self
+                        .selected
+                        .as_ref()
+                        .filter(|record| page.items.contains(record))
+                        .ok_or("请先选择当前页的资料。")?;
+                    if let Some(index) = self
+                        .delete_selection
+                        .iter()
+                        .position(|selected| selected == record)
+                    {
+                        self.delete_selection.remove(index);
+                    } else if self.delete_selection.len() < MAX_MATERIAL_BATCH_FILES {
+                        self.delete_selection.push(record.clone());
+                    } else {
+                        return Err("每批最多勾选20项资料。".into());
+                    }
+                }
+                DELETE_BATCH => {
+                    if self.delete_selection.is_empty()
+                        || self.delete_selection.len() > MAX_MATERIAL_BATCH_FILES
+                        || self
+                            .delete_selection
+                            .iter()
+                            .any(|record| !page.items.contains(record))
+                    {
+                        return Err("勾选资料已失效，请刷新后重新选择。".into());
+                    }
+                    self.delete_confirmation = true;
+                }
+                _ => unreachable!(),
+            }
+            return Ok(Command::Stay);
         }
         if action == NEXT {
             let cursor = self
@@ -1231,6 +1476,7 @@ mod tests {
         };
         assert!(editor
             .batch_result(super::super::material_flow::BatchResult {
+                kind: BatchKind::Import,
                 scope: scope(2),
                 command: NativeCommand::new(),
                 issued: None,
@@ -1255,6 +1501,7 @@ mod tests {
         assert_eq!(queried, command);
         editor
             .batch_result(super::super::material_flow::BatchResult {
+                kind: BatchKind::Import,
                 scope: scope(2),
                 command,
                 issued: None,
@@ -1297,5 +1544,109 @@ mod tests {
             .is_err());
         assert!(editor.batch.is_none());
         assert!(editor.history.is_none());
+    }
+    #[test]
+    fn bulk_delete_selection_is_fixed_and_clears_when_page_or_scope_changes() {
+        let state = identity();
+        let mut editor = Editor::new(principal(1));
+        load(&mut editor, &state, 2, page(2, 0, 23));
+        editor.handle(DELETE_BATCH, form(2, "all"), &state).unwrap();
+        editor.select(1, 0).unwrap();
+        editor
+            .handle(TOGGLE_DELETE, form(2, "all"), &state)
+            .unwrap();
+        assert_eq!(editor.delete_selection[0].id, MaterialId::new(101).unwrap());
+        editor
+            .handle(TOGGLE_DELETE, form(2, "all"), &state)
+            .unwrap();
+        assert!(editor.delete_selection.is_empty());
+        editor
+            .handle(SELECT_DELETE_PAGE, form(2, "all"), &state)
+            .unwrap();
+        assert_eq!(editor.delete_selection.len(), 20);
+        editor.view(&state, "", false).validate().unwrap();
+        assert!(matches!(
+            editor.handle(NEXT, form(2, "all"), &state).unwrap(),
+            Command::Load(_)
+        ));
+        assert!(editor.delete_selection.is_empty());
+        editor.loaded(page(2, 20, 23)).unwrap();
+        editor.handle(DELETE_BATCH, form(2, "all"), &state).unwrap();
+        editor
+            .handle(SELECT_DELETE_PAGE, form(2, "all"), &state)
+            .unwrap();
+        assert_eq!(editor.delete_selection[0].id, MaterialId::new(120).unwrap());
+        assert!(editor
+            .handle(TOGGLE_DELETE, form(3, "all"), &state)
+            .is_err());
+        assert!(editor.delete_selection.is_empty());
+        assert!(!editor.delete_confirmation);
+    }
+    #[test]
+    fn bulk_delete_confirmation_keeps_versions_and_uses_distinct_history_kind() {
+        use super::super::material_flow::{BatchOutcome, BatchResult};
+        let state = identity();
+        let mut editor = Editor::new(principal(1));
+        let original = page(2, 0, 3);
+        let expected = original.items.clone();
+        load(&mut editor, &state, 2, original);
+        editor.handle(DELETE_BATCH, form(2, "all"), &state).unwrap();
+        editor
+            .handle(SELECT_DELETE_PAGE, form(2, "all"), &state)
+            .unwrap();
+        editor.handle(DELETE_BATCH, form(2, "all"), &state).unwrap();
+        editor.view(&state, "", false).validate().unwrap();
+        assert!(editor.select(0, 0).is_err());
+        assert!(editor.handle(NEXT, form(2, "all"), &state).is_err());
+        let Command::DeleteBatch {
+            scope: captured,
+            records,
+            command,
+        } = editor
+            .handle(CONFIRM_DELETE_BATCH, form(3, "all"), &state)
+            .unwrap()
+        else {
+            panic!()
+        };
+        assert_eq!(captured, scope(2));
+        assert_eq!(records, expected);
+        assert!(command.snapshot().is_none());
+        assert!(editor
+            .handle(CONFIRM_DELETE_BATCH, FormData::new(), &state)
+            .is_err());
+        assert!(editor
+            .batch_result(BatchResult {
+                kind: BatchKind::Import,
+                scope: captured,
+                command: command.clone(),
+                issued: None,
+                outcome: BatchOutcome::NotSubmitted("wrong kind".into())
+            })
+            .is_err());
+        let Command::QueryBatch {
+            kind,
+            command: queried,
+            ..
+        } = editor.handle(QUERY_BATCH, FormData::new(), &state).unwrap()
+        else {
+            panic!()
+        };
+        assert_eq!(kind, BatchKind::Delete);
+        assert_eq!(queried, command);
+        editor
+            .batch_result(BatchResult {
+                kind: BatchKind::Delete,
+                scope: captured,
+                command,
+                issued: None,
+                outcome: BatchOutcome::NotSubmitted(
+                    "actual worker returned before issuance".into(),
+                ),
+            })
+            .unwrap();
+        editor
+            .handle(DISMISS_BATCH, FormData::new(), &state)
+            .unwrap();
+        editor.view(&state, "", false).validate().unwrap();
     }
 }

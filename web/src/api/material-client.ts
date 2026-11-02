@@ -5,7 +5,10 @@ import * as m from './material-protocol'
 export interface AppendMaterial extends CommandIdentity { uploadId: string; allowedClassIds: string[] }
 export interface AppendMaterialBatch extends CommandIdentity { batchId: string; uploadIds: string[]; allowedClassIds: string[] }
 export interface DeleteMaterial extends CommandIdentity { materialId: string; resourceVersionId: string; expectedMaterialRevision: string }
+export interface DeleteMaterialBatch extends CommandIdentity { targets: m.MaterialDeleteTarget[] }
 export interface MaterialApi extends CommandApi {
+  deleteBatch(scope: m.MaterialScope, input: DeleteMaterialBatch, csrf: string, signal: AbortSignal): Promise<m.BatchDeleteCommitted>
+  deleteBatchOutcome(scope: m.MaterialScope, command: CommandIdentity, signal: AbortSignal): Promise<m.BatchDeleteOutcome>
   createBatch(scope: m.MaterialScope, files: readonly m.BatchFile[], classes: readonly string[], csrf: string, signal: AbortSignal): Promise<m.BatchReady>
   uploadBatchMember(batchId: string, uploadId: string, file: File, csrf: string, signal: AbortSignal): Promise<void>
   cancelBatch(batchId: string, csrf: string, signal: AbortSignal): Promise<void>
@@ -23,6 +26,15 @@ export interface MaterialApi extends CommandApi {
   download(scope: m.MaterialScope, record: m.MaterialRecord, signal: AbortSignal): Promise<Blob>
 }
 export class MaterialHttpApi extends HttpApi implements MaterialApi {
+  async deleteBatch(scope: m.MaterialScope, input: DeleteMaterialBatch, csrf: string, signal: AbortSignal) {
+    const pair = commandIdentity(input), targets = m.deleteTargets(input.targets)
+    const r = await this.request(m.folderPath(scope) + '/delete-batch', signal, { schemaVersion: 2, ...pair, targets }, csrf)
+    if (r.status !== 200) throw new ProtocolFault(); return m.batchDeleteCommitted(r.value, pair, scope)
+  }
+  async deleteBatchOutcome(scope: m.MaterialScope, command: CommandIdentity, signal: AbortSignal) {
+    const pair = commandIdentity(command), r = await this.request('materials/delete-batch-commands/' + decimal(scope.ownerTeacherId) + '/' + decimal(scope.subjectId) + '/' + pair.commandTicket + '/' + pair.commandId, signal)
+    if (r.status !== 200) throw new ProtocolFault(); return m.batchDeleteOutcome(r.value, pair, scope)
+  }
   private batchClasses(classes: readonly string[]) {
     const ids = classes.map(decimal); if (!ids.length || ids.length > 128 || new Set(ids).size !== ids.length) throw new ProtocolFault(); return ids
   }

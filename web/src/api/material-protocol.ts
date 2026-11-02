@@ -136,3 +136,40 @@ export function batchOutcome(x: unknown, original: CommandIdentity, target: Mate
   const s = scope(v.scope); if (!sameScope(s, target)) return fail()
   return { ...commandIdentity(original), state: 'COMMITTED', scope: s, records: batchRecords(v.records) }
 }
+
+export interface MaterialDeleteTarget { materialId: string; resourceVersionId: string; expectedMaterialRevision: string }
+export interface BatchDeleteCommitted extends CommandIdentity { scope: MaterialScope; records: MaterialRecord[] }
+export type BatchDeleteOutcome = (BatchDeleteCommitted & { state: 'COMMITTED' }) | (CommandIdentity & { state: 'NOT_FOUND'; scope: null; records: null })
+export function deleteTargets(x: unknown): MaterialDeleteTarget[] {
+  if (!Array.isArray(x) || !x.length || x.length > MAX_BATCH_FILES) return fail()
+  const ids = new Set<string>(), versions = new Set<string>()
+  return x.map(raw => {
+    const v = object(raw, ['materialId', 'resourceVersionId', 'expectedMaterialRevision'])
+    const target = { materialId: decimal(v.materialId), resourceVersionId: decimal(v.resourceVersionId), expectedMaterialRevision: decimal(v.expectedMaterialRevision) }
+    if (ids.has(target.materialId) || versions.has(target.resourceVersionId)) return fail()
+    ids.add(target.materialId); versions.add(target.resourceVersionId); return target
+  })
+}
+export function batchDeleteRecords(x: unknown): MaterialRecord[] {
+  if (!Array.isArray(x) || !x.length || x.length > MAX_BATCH_FILES) return fail()
+  const records = x.map(record), first = records[0]!, ids = new Set<string>(), versions = new Set<string>()
+  for (const r of records) {
+    if (r.status !== 'DELETED' || BigInt(r.revision) < 2n || r.folderId !== first.folderId || ids.has(r.materialId) || versions.has(r.resourceVersionId)) return fail()
+    ids.add(r.materialId); versions.add(r.resourceVersionId)
+  }
+  return records
+}
+export function batchDeleteCommitted(x: unknown, original: CommandIdentity, target: MaterialScope): BatchDeleteCommitted {
+  const v = object(x, ['schemaVersion', 'status', 'commandId', 'commandTicket', 'scope', 'records']); commandVersion(v.schemaVersion)
+  if (v.status !== 'BATCH_DELETE_COMMITTED' || !sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, original)) return fail()
+  const s = scope(v.scope); if (!sameScope(s, target)) return fail()
+  return { ...commandIdentity(original), scope: s, records: batchDeleteRecords(v.records) }
+}
+export function batchDeleteOutcome(x: unknown, original: CommandIdentity, target: MaterialScope): BatchDeleteOutcome {
+  const v = object(x, ['schemaVersion', 'status', 'commandId', 'commandTicket', 'state', 'scope', 'records']); commandVersion(v.schemaVersion)
+  if (v.status !== 'COMMAND_BATCH_DELETE_RESULT' || !sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, original)) return fail()
+  if (v.state === 'NOT_FOUND' && v.scope === null && v.records === null) return { ...commandIdentity(original), state: 'NOT_FOUND', scope: null, records: null }
+  if (v.state !== 'COMMITTED') return fail()
+  const s = scope(v.scope); if (!sameScope(s, target)) return fail()
+  return { ...commandIdentity(original), state: 'COMMITTED', scope: s, records: batchDeleteRecords(v.records) }
+}

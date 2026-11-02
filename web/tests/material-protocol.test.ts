@@ -160,3 +160,29 @@ describe('strict ordered material batch envelopes', () => {
     expect(m.batchOutcome({ ...wire, status: 'COMMAND_BATCH_RESULT', state: 'COMMITTED' }, identity(), target).state).toBe('COMMITTED')
   })
 })
+
+describe('independent batch-delete wire contract', () => {
+  const deleted = () => [{ ...row(), status: 'DELETED', revision: '2' }, { ...row(), materialId: '9', resourceVersionId: '10', addedSequence: '3', addedAt: '2026-10-29T09:00:00', allowedClassIds: ['2'], status: 'DELETED', revision: '5' }]
+  const committed = () => ({ schemaVersion: 2, status: 'BATCH_DELETE_COMMITTED', ...identity(), scope: target, records: deleted() })
+  it('accepts existing records in selection order without requiring shared time, classes, revision or consecutive sequence', () => {
+    expect(m.batchDeleteCommitted(committed(), identity(), target).records.map(r => r.materialId)).toEqual([row().materialId, '9'])
+    const history = { ...committed(), status: 'COMMAND_BATCH_DELETE_RESULT', state: 'COMMITTED' }
+    expect(m.batchDeleteOutcome(history, identity(), target).state).toBe('COMMITTED')
+    expect(() => m.batchRecords(deleted())).toThrow(ProtocolFault)
+    expect(() => m.batchCommitted(committed(), identity(), target)).toThrow(ProtocolFault)
+  })
+  it('validates bounded fixed targets and rejects duplicate IDs, versions, unknown fields and unsafe numbers', () => {
+    const first = { materialId: '1', resourceVersionId: '2', expectedMaterialRevision: '3' }
+    expect(m.deleteTargets(Array.from({ length: 20 }, (_, i) => ({ ...first, materialId: String(i + 1), resourceVersionId: String(i + 101) })))).toHaveLength(20)
+    for (const targets of [[], Array(21).fill(first), [first, first], [first, { ...first, materialId: '3' }], [{ ...first, extra: true }], [{ ...first, expectedMaterialRevision: '0' }], [{ ...first, resourceVersionId: 2 }]]) expect(() => m.deleteTargets(targets)).toThrow(ProtocolFault)
+  })
+  it('rejects wrong envelope, pair, scope, count, published state, duplicate resources and initial revision', () => {
+    for (const patch of [{ status: 'BATCH_COMMITTED' }, { commandId: '999' }, { scope: { ...target, subjectId: '1' } }, { records: [] }, { records: Array(21).fill(deleted()[0]) }, { records: [deleted()[0], deleted()[0]] }, { records: [{ ...deleted()[0], status: 'PUBLISHED' }] }, { records: [{ ...deleted()[0], revision: '1' }] }, { records: [{ ...deleted()[0], folderId: '9' }, deleted()[1]] }, { records: [deleted()[0], { ...deleted()[1], resourceVersionId: deleted()[0]!.resourceVersionId }] }, { extra: true }]) expect(() => m.batchDeleteCommitted({ ...committed(), ...patch }, identity(), target)).toThrow(ProtocolFault)
+    expect(() => m.batchDeleteCommitted({ ...committed(), schemaVersion: 1 }, identity(), target)).toThrow(ProtocolVersionFault)
+  })
+  it('accepts NOT_FOUND only with null scope and records under the original pair', () => {
+    const wire = { schemaVersion: 2, status: 'COMMAND_BATCH_DELETE_RESULT', ...identity(), state: 'NOT_FOUND', scope: null, records: null }
+    expect(m.batchDeleteOutcome(wire, identity(), target).state).toBe('NOT_FOUND')
+    for (const patch of [{ records: [] }, { scope: target }, { commandId: '999' }, { status: 'COMMAND_BATCH_RESULT' }]) expect(() => m.batchDeleteOutcome({ ...wire, ...patch }, identity(), target)).toThrow(ProtocolFault)
+  })
+})

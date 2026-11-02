@@ -132,6 +132,12 @@ const SLOTS: &[Slot] = &[
         counted: false,
     },
     Slot {
+        prefix: "business/material/v1/delete-batch-receipts/",
+        family: Family::Materials,
+        padded: true,
+        counted: false,
+    },
+    Slot {
         prefix: "business/material/v1/web-outcomes/",
         family: Family::Materials,
         padded: true,

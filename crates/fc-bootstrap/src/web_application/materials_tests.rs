@@ -1065,3 +1065,196 @@ fn material_batch_file_operations_are_explicitly_unavailable_on_non_windows() {
         "SERVICE_UNAVAILABLE",
     );
 }
+
+fn batch_delete_body(command: TestCommand, records: &[MaterialRecord]) -> String {
+    let targets = records
+        .iter()
+        .map(|record| {
+            format!(
+                r#"{{"materialId":"{}","resourceVersionId":"{}","expectedMaterialRevision":"{}"}}"#,
+                record.id.get(),
+                record.resource.version_id.get(),
+                record.revision.get()
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(",");
+    format!(r#"{{{},"targets":[{targets}]}}"#, command.fields())
+}
+#[test]
+fn material_batch_delete_twenty_is_one_commit_with_original_ordered_history() {
+    let mut f = BackendFixture::new();
+    catalog(&mut f, 1);
+    let (cookie, csrf, lease) = auth(&mut f, "batch-delete-twenty");
+    let mut records = Vec::new();
+    for id in (92001..=92020).rev() {
+        let command = f.issue(&cookie, "materials");
+        records.push(append(&mut f, lease, command, id));
+    }
+    let command = f.issue(&cookie, "materials");
+    let body = batch_delete_body(command, &records);
+    let history = format!(
+        "materials/delete-batch-commands/1/1/{}/{}",
+        command.ticket,
+        command.id.get()
+    );
+    let absent = get(&mut f, &cookie, &history);
+    expect(&absent, 200, "COMMAND_BATCH_DELETE_RESULT");
+    expect(&absent, 200, "NOT_FOUND");
+    let before = f.backend.global_revision().unwrap();
+    let folder_before = get(&mut f, &cookie, "materials/folders/1/1");
+    let folder_revision = field(&folder_before.body, "folderRevision")
+        .parse::<u64>()
+        .unwrap();
+    let removed = post(
+        &mut f,
+        &cookie,
+        &csrf,
+        "materials/folders/1/1/delete-batch",
+        &body,
+    );
+    expect(&removed, 200, "BATCH_DELETE_COMMITTED");
+    assert_eq!(f.backend.global_revision().unwrap(), before.next().unwrap());
+    let mut expected_records = records.clone();
+    for record in &mut expected_records {
+        record.status = MaterialStatus::Deleted;
+        record.revision = record.revision.next().unwrap();
+    }
+    let reference = fc_protocol::web::command_window::CommandReference {
+        ticket: command.ticket,
+        command_id: command.id,
+    };
+    assert_eq!(
+        removed.body,
+        fc_protocol::web::materials::batch_delete_committed(reference, scope(), &expected_records)
+            .unwrap()
+    );
+    let empty = get(&mut f, &cookie, "materials/folders/1/1");
+    expect(&empty, 200, "\"total\":0");
+    assert_eq!(
+        field(&empty.body, "folderRevision").parse::<u64>().unwrap(),
+        folder_revision + 1
+    );
+    let original = get(&mut f, &cookie, &history);
+    assert_eq!(original.head.status, 200);
+    assert_eq!(
+        original.body,
+        fc_protocol::web::materials::batch_delete_command_window(
+            reference,
+            Some((scope(), expected_records.as_slice()))
+        )
+        .unwrap()
+    );
+    let retry = post(
+        &mut f,
+        &cookie,
+        &csrf,
+        "materials/folders/1/1/delete-batch",
+        &body,
+    );
+    assert_eq!(retry.head.status, 200);
+    assert_eq!(retry.body, removed.body);
+    assert_eq!(f.backend.global_revision().unwrap(), before.next().unwrap());
+    records.swap(0, 1);
+    let changed = batch_delete_body(command, &records);
+    expect(
+        &post(
+            &mut f,
+            &cookie,
+            &csrf,
+            "materials/folders/1/1/delete-batch",
+            &changed,
+        ),
+        409,
+        "IDEMPOTENCY_CONFLICT",
+    );
+    // A later append changes the current folder, but cannot rewrite the receipt.
+    let later = f.issue(&cookie, "materials");
+    append(&mut f, lease, later, 92021);
+    assert_eq!(get(&mut f, &cookie, &history).body, original.body);
+    let wrong_pair = format!(
+        "materials/delete-batch-commands/1/1/{}/{}",
+        later.ticket,
+        command.id.get()
+    );
+    expect(
+        &get(&mut f, &cookie, &wrong_pair),
+        404,
+        "COMMAND_NOT_ISSUED",
+    );
+    // Revocation invalidates the original session for historical reads as well.
+    f.backend.logout_account(lease).unwrap();
+    assert_ne!(get(&mut f, &cookie, &history).head.status, 200);
+}
+#[test]
+fn material_batch_delete_rejects_any_stale_target_without_partial_deletion_and_keeps_c2_gates() {
+    let mut f = BackendFixture::new();
+    catalog(&mut f, 1);
+    let (cookie, csrf, lease) = auth(&mut f, "batch-delete-atomic");
+    let first = f.issue(&cookie, "materials");
+    let second = f.issue(&cookie, "materials");
+    let records = vec![
+        append(&mut f, lease, first, 93001),
+        append(&mut f, lease, second, 93002),
+    ];
+    let command = f.issue(&cookie, "materials");
+    let valid = batch_delete_body(command, &records);
+    let route = "materials/folders/1/1/delete-batch";
+    let before = f.backend.global_revision().unwrap();
+    let original_page = get(&mut f, &cookie, "materials/folders/1/1").body;
+    let request = head("POST", route, valid.len(), None, None);
+    expect(&f.dispatch(&request, valid.as_bytes()), 401, "UNAUTHORIZED");
+    expect(
+        &post(&mut f, &cookie, "wrong-csrf", route, &valid),
+        403,
+        "FORBIDDEN",
+    );
+    let legacy = valid.replace("\"schemaVersion\":2", "\"schemaVersion\":1");
+    expect(
+        &post(&mut f, &cookie, &csrf, route, &legacy),
+        400,
+        "INVALID_REQUEST",
+    );
+    let mut stale = records.clone();
+    stale[1].revision = Revision::new(9);
+    expect(
+        &post(
+            &mut f,
+            &cookie,
+            &csrf,
+            route,
+            &batch_delete_body(command, &stale),
+        ),
+        409,
+        "REVISION_CONFLICT",
+    );
+    let mut wrong_version = records.clone();
+    wrong_version[1].resource.version_id = ResourceVersionId::new(999999).unwrap();
+    expect(
+        &post(
+            &mut f,
+            &cookie,
+            &csrf,
+            route,
+            &batch_delete_body(command, &wrong_version),
+        ),
+        404,
+        "NOT_FOUND",
+    );
+    assert_eq!(f.backend.global_revision().unwrap(), before);
+    assert_eq!(
+        get(&mut f, &cookie, "materials/folders/1/1").body,
+        original_page
+    );
+    let history = format!(
+        "materials/delete-batch-commands/1/1/{}/{}",
+        command.ticket,
+        command.id.get()
+    );
+    expect(&get(&mut f, &cookie, &history), 200, "NOT_FOUND");
+    expect(
+        &post(&mut f, &cookie, &csrf, route, &valid),
+        200,
+        "BATCH_DELETE_COMMITTED",
+    );
+}

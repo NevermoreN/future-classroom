@@ -3,8 +3,9 @@
 use super::*;
 use fc_ports::{
     command_window::{CommandWindowError, IssuedCommand, COMMAND_WINDOW_MILLIS},
-    prepare_material_batch_append, MaterialBatchOutcomeRepository, MaterialBatchRepository,
-    PreparedMaterialBatchAppend,
+    prepare_material_batch_append, MaterialBatchDeleteOutcomeRepository,
+    MaterialBatchDeleteRepository, MaterialBatchDeleteRequest, MaterialBatchOutcomeRepository,
+    MaterialBatchRepository, PreparedMaterialBatchAppend,
 };
 struct ResourcePreparation;
 impl MaterialPreparation for ResourcePreparation {
@@ -708,4 +709,314 @@ fn low_global_revision_twenty_file_batch_remains_visible_in_real_desktop_facts_a
             .value,
         receipt_before
     );
+}
+
+fn delete_request(issued: IssuedCommand, records: &[MaterialRecord]) -> MaterialBatchDeleteRequest {
+    MaterialBatchDeleteRequest {
+        command_id: issued.command_id,
+        scope: scope(),
+        targets: records
+            .iter()
+            .map(|r| MaterialDeleteTarget {
+                material_id: r.id,
+                resource_version_id: r.resource.version_id,
+                expected_material_revision: r.revision,
+            })
+            .collect(),
+    }
+}
+fn delete_batch(
+    f: &Fixture,
+    issued: IssuedCommand,
+    a: &ActorContext,
+    records: &[MaterialRecord],
+) -> Result<Vec<MaterialRecord>, MaterialRepositoryError> {
+    f.repo(a.clone())
+        .with_command_window(issued)
+        .delete_material_batch(delete_request(issued, records), a, &Time)
+}
+fn delete_outcome(
+    f: &Fixture,
+    issued: IssuedCommand,
+    a: &ActorContext,
+) -> Result<Option<fc_ports::MaterialBatchDeleteCommandOutcome>, MaterialRepositoryError> {
+    f.repo(a.clone())
+        .with_command_window(issued)
+        .material_batch_delete_outcome(issued.command_id, a)
+}
+#[test]
+fn twenty_deletes_commit_once_preserve_order_and_charge_bytes_until_physical_gc_finalizes() {
+    let mut f = Fixture::new();
+    let a = actor(2, TrustedOrigin::Web);
+    let append = issue(&f, "delete-twenty-source", &a);
+    let mut original = append_batch(&f, append, &a, &(1..=20).collect::<Vec<_>>()).unwrap();
+    original.reverse();
+    let issued = issue(&f, "delete-twenty", &a);
+    let before = f.revision();
+    let deleted = delete_batch(&f, issued, &a, &original).unwrap();
+    assert_eq!(f.revision(), before.next().unwrap());
+    assert_eq!(
+        deleted.iter().map(|r| r.id).collect::<Vec<_>>(),
+        original.iter().map(|r| r.id).collect::<Vec<_>>()
+    );
+    let folder =
+        dto::read_folder(&f.value(key("folders", deleted[0].folder_id.get())).unwrap()).unwrap();
+    assert_eq!(folder.revision, Revision::new(2));
+    assert_eq!(folder.last_added_sequence, 20);
+    assert_eq!(f.value(CATALOG.into()).unwrap()["bytes"], json!(140));
+    for (record, prior) in deleted.iter().zip(&original) {
+        assert_eq!(record.status, MaterialStatus::Deleted);
+        assert_eq!(record.revision, prior.revision.next().unwrap());
+        assert_eq!(record.added_sequence, prior.added_sequence);
+        assert_eq!(record.resource, prior.resource);
+        assert!(f.value(index_key(record)).is_none());
+        let entry = read_inventory(
+            &f.value(key("resources", record.resource.version_id.get()))
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(entry.references, 0);
+        assert_eq!(entry.state, ResourceState::Unreferenced);
+        let ticket = f
+            .repo(a.clone())
+            .retire_resource(entry.resource.version_id, entry.revision)
+            .unwrap();
+        assert_eq!(f.value(CATALOG.into()).unwrap()["bytes"], json!(140));
+        // This fixture has metadata only: physical worker has confirmed absence.
+        // Finalization is exercised after all retire transitions below.
+        assert_eq!(ticket.resource, entry.resource);
+    }
+    assert_eq!(f.value(CATALOG.into()).unwrap()["bytes"], json!(140));
+    for (index, record) in deleted.iter().enumerate() {
+        let entry = read_inventory(
+            &f.value(key("resources", record.resource.version_id.get()))
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(entry.state, ResourceState::Retiring);
+        f.repo(a.clone())
+            .finalize_resource_removal(ResourceRetirement {
+                resource: entry.resource,
+                scope: entry.scope,
+                material_id: entry.material_id,
+                revision: entry.revision,
+            })
+            .unwrap();
+        assert_eq!(
+            f.value(CATALOG.into()).unwrap()["bytes"],
+            json!(140 - (index as u64 + 1) * 7)
+        );
+    }
+    let committed = f.revision();
+    assert_eq!(delete_batch(&f, issued, &a, &original).unwrap(), deleted);
+    assert_eq!(
+        delete_outcome(&f, issued, &a).unwrap().unwrap().records,
+        deleted
+    );
+    assert_eq!(f.revision(), committed);
+    let later = issue(&f, "later-after-deletion", &a);
+    append_batch(&f, later, &a, &[100]).unwrap();
+    f.reopen();
+    let before = f.revision();
+    assert_eq!(
+        delete_outcome(&f, issued, &a).unwrap().unwrap().records,
+        deleted
+    );
+    assert_eq!(delete_batch(&f, issued, &a, &original).unwrap(), deleted);
+    assert_eq!(f.revision(), before);
+}
+#[test]
+fn delete_batch_late_cas_resource_mismatch_and_precommit_revocation_publish_nothing() {
+    let f = Fixture::new();
+    let a = actor(2, TrustedOrigin::Web);
+    let append = issue(&f, "delete-atomic-source", &a);
+    let original = append_batch(&f, append, &a, &[1, 2, 3]).unwrap();
+    let issued = issue(&f, "delete-atomic-cas", &a);
+    let mut request = delete_request(issued, &original);
+    request.targets[2].expected_material_revision = Revision::new(9);
+    let before = f.revision();
+    assert_eq!(
+        f.repo(a.clone())
+            .with_command_window(issued)
+            .delete_material_batch(request, &a, &Time),
+        Err(MaterialRepositoryError::Domain(
+            MaterialError::RevisionConflict {
+                current: Revision::new(1)
+            }
+        ))
+    );
+    assert_eq!(f.revision(), before);
+    assert!(f
+        .value(f.receipt_key(&key("delete-batch-receipts", issued.command_id.get())))
+        .is_none());
+    assert_eq!(delete_outcome(&f, issued, &a).unwrap(), None);
+    for r in &original {
+        assert_eq!(
+            dto::read_record(&f.value(key("items", r.id.get())).unwrap()).unwrap(),
+            *r
+        );
+    }
+    let wrong = issue(&f, "delete-atomic-version", &a);
+    let mut request = delete_request(wrong, &original);
+    request.targets[2].resource_version_id = ResourceVersionId::new(9999).unwrap();
+    assert_eq!(
+        f.repo(a.clone())
+            .with_command_window(wrong)
+            .delete_material_batch(request, &a, &Time),
+        Err(MaterialRepositoryError::Domain(MaterialError::NotFound))
+    );
+    assert_eq!(f.revision(), before);
+    let revoked = issue(&f, "delete-atomic-revoked", &a);
+    f.revoke.store(true, Ordering::Release);
+    assert!(delete_batch(&f, revoked, &a, &original).is_err());
+    assert_eq!(f.revision(), before);
+    f.live.store(true, Ordering::Release);
+    assert_eq!(delete_outcome(&f, revoked, &a).unwrap(), None);
+    for r in &original {
+        assert_eq!(
+            dto::read_record(&f.value(key("items", r.id.get())).unwrap()).unwrap(),
+            *r
+        );
+        assert!(f.value(index_key(r)).is_some());
+        let entry = read_inventory(
+            &f.value(key("resources", r.resource.version_id.get()))
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(entry.references, 1);
+        assert_eq!(entry.state, ResourceState::Referenced);
+    }
+}
+#[test]
+fn delete_batch_failure_on_last_inventory_leaves_first_two_records_and_receipt_unchanged() {
+    let f = Fixture::new();
+    let a = actor(2, TrustedOrigin::Web);
+    let append = issue(&f, "delete-inventory-source", &a);
+    let original = append_batch(&f, append, &a, &[1, 2, 3]).unwrap();
+    let resource_key = key("resources", original[2].resource.version_id.get());
+    let mut entry = read_inventory(&f.value(resource_key.clone()).unwrap()).unwrap();
+    entry.references = 0;
+    entry.state = ResourceState::Unreferenced;
+    f.replace(resource_key, inventory(&entry));
+    let issued = issue(&f, "delete-late-inventory", &a);
+    let before = f.revision();
+    assert!(delete_batch(&f, issued, &a, &original).is_err());
+    assert_eq!(f.revision(), before);
+    assert!(f
+        .value(f.receipt_key(&key("delete-batch-receipts", issued.command_id.get())))
+        .is_none());
+    for r in &original {
+        assert_eq!(
+            dto::read_record(&f.value(key("items", r.id.get())).unwrap()).unwrap(),
+            *r
+        );
+        assert!(f.value(index_key(r)).is_some());
+    }
+}
+#[test]
+fn delete_batch_original_pair_rejects_payload_reordering_other_actor_origin_and_other_receipt_kinds(
+) {
+    let f = Fixture::new();
+    let a = actor(2, TrustedOrigin::Web);
+    let append = issue(&f, "delete-cross-source", &a);
+    let original = append_batch(&f, append, &a, &[1, 2]).unwrap();
+    assert_eq!(
+        delete_batch(&f, append, &a, &original),
+        Err(MaterialRepositoryError::IdempotencyConflict)
+    );
+    assert_eq!(
+        delete_outcome(&f, append, &a),
+        Err(MaterialRepositoryError::IdempotencyConflict)
+    );
+    let single_id = f.command_id(CommandFamily::Materials, 990);
+    super::append(&f, 990);
+    let single = f.commands.original(single_id).unwrap();
+    assert_eq!(
+        delete_batch(&f, single, &a, &original),
+        Err(MaterialRepositoryError::IdempotencyConflict)
+    );
+    assert_eq!(
+        delete_outcome(&f, single, &a),
+        Err(MaterialRepositoryError::IdempotencyConflict)
+    );
+    let issued = issue(&f, "delete-cross", &a);
+    let deleted = delete_batch(&f, issued, &a, &original).unwrap();
+    let before = f.revision();
+    let mut reversed = original.clone();
+    reversed.reverse();
+    assert_eq!(
+        delete_batch(&f, issued, &a, &reversed),
+        Err(MaterialRepositoryError::IdempotencyConflict)
+    );
+    assert_eq!(
+        append_batch(&f, issued, &a, &[4, 5]),
+        Err(MaterialRepositoryError::IdempotencyConflict)
+    );
+    assert_eq!(
+        batch_outcome(&f, issued, &a),
+        Err(MaterialRepositoryError::IdempotencyConflict)
+    );
+    assert_eq!(
+        f.repo(a.clone())
+            .with_command_window(issued)
+            .material_outcome(issued.command_id, &a),
+        Err(MaterialRepositoryError::IdempotencyConflict)
+    );
+    assert_eq!(
+        f.repo(a.clone())
+            .with_command_window(issued)
+            .delete_material(
+                MaterialDeleteRequest {
+                    command_id: issued.command_id,
+                    scope: scope(),
+                    material_id: original[0].id,
+                    expected_material_revision: original[0].revision
+                },
+                &a,
+                &Time
+            ),
+        Err(MaterialRepositoryError::IdempotencyConflict)
+    );
+    for foreign in [actor(3, TrustedOrigin::Web), actor(2, TrustedOrigin::Local)] {
+        assert_eq!(
+            delete_outcome(&f, issued, &foreign),
+            Err(MaterialRepositoryError::CommandWindow(
+                CommandWindowError::NotIssued
+            ))
+        );
+    }
+    assert_eq!(
+        delete_outcome(&f, issued, &a).unwrap().unwrap().records,
+        deleted
+    );
+    assert_eq!(f.revision(), before);
+}
+#[test]
+fn delete_batch_postcommit_unknown_recovers_exact_original_deleted_records_after_reopen() {
+    let mut f = Fixture::new();
+    let a = actor(2, TrustedOrigin::Web);
+    let append = issue(&f, "delete-unknown-source", &a);
+    let original = append_batch(&f, append, &a, &[1, 2, 3]).unwrap();
+    let issued = issue(&f, "delete-unknown", &a);
+    let before = f.revision();
+    f.fail.store(true, Ordering::Release);
+    assert_eq!(
+        delete_batch(&f, issued, &a, &original),
+        Err(MaterialRepositoryError::Faulted)
+    );
+    assert!(delete_outcome(&f, issued, &a).is_err());
+    f.reopen();
+    assert_eq!(f.revision(), before.next().unwrap());
+    let result = delete_outcome(&f, issued, &a).unwrap().unwrap();
+    assert_eq!(result.records.len(), 3);
+    assert!(result
+        .records
+        .iter()
+        .all(|r| r.status == MaterialStatus::Deleted));
+    let committed = f.revision();
+    assert_eq!(
+        delete_batch(&f, issued, &a, &original).unwrap(),
+        result.records
+    );
+    assert_eq!(f.revision(), committed);
 }
