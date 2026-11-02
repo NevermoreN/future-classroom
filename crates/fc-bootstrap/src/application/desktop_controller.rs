@@ -570,7 +570,7 @@ impl Controller {
             .probe_lesson_control()
             .map_err(|_| "Hidden native lesson button unavailable".into())
     }
-    pub(super) fn probe_metrics(&self) -> DesktopMetrics {
+    pub(super) fn metrics(&self) -> DesktopMetrics {
         self.renderer.diagnostics()
     }
     pub(super) fn take_lesson_event(&mut self) -> Option<DesktopLessonStamp> {

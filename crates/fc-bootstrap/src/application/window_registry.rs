@@ -31,6 +31,10 @@ static WINDOWS: &[Registration<Screen, WindowRole>] = &[
         implementation: WindowRole::Workbench,
     },
     Registration {
+        key: Screen::Diagnostics,
+        implementation: WindowRole::Workbench,
+    },
+    Registration {
         key: Screen::School,
         implementation: WindowRole::Workbench,
     },

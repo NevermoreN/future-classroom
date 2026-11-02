@@ -297,6 +297,7 @@ impl App {
                     self_revokes: false,
                     public_lesson: false,
                     desktop_material_open: false,
+                    diagnostic: None,
                 });
                 self.status = match kind {
                     Kind::Save => "正在保存配置；取消等待不等于撤销保存。",

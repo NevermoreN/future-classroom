@@ -200,6 +200,7 @@ const TO_PROFILES: ActionId = ActionId(24);
 const TO_AUTOSTART: ActionId = ActionId(25);
 const TO_REINITIALIZE: ActionId = ActionId(27);
 const TO_VOICE: ActionId = ActionId(28);
+const TO_DIAGNOSTICS: ActionId = ActionId(29);
 const RETURN_DRAFT: ActionId = ActionId(19);
 const DISCARD_EXIT: ActionId = ActionId(20);
 const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
@@ -216,6 +217,7 @@ enum Screen {
     Recovery,
     Code,
     Home,
+    Diagnostics,
     School,
     Subjects,
     Accounts,
@@ -247,6 +249,7 @@ impl Screen {
         Self::Recovery,
         Self::Code,
         Self::Home,
+        Self::Diagnostics,
         Self::School,
         Self::Subjects,
         Self::Accounts,
@@ -2342,7 +2345,20 @@ struct Pending {
     self_revokes: bool,
     public_lesson: bool,
     desktop_material_open: bool,
+    diagnostic: Option<DiagnosticTiming>,
 }
+#[derive(Clone, Copy)]
+struct DiagnosticTiming {
+    operation: &'static str,
+    started: Instant,
+}
+struct DiagnosticEvent {
+    after_ms: u128,
+    operation: &'static str,
+    phase: &'static str,
+    elapsed_ms: u128,
+}
+const DIAGNOSTIC_EVENT_LIMIT: usize = 16;
 struct PendingLaunch {
     copy_path: PathBuf,
     from_scene: bool,
@@ -2364,6 +2380,9 @@ struct App {
     status: String,
     desktop_notice: String,
     public_material_notice: Option<&'static str>,
+    diagnostics_started: Instant,
+    diagnostic_events: VecDeque<DiagnosticEvent>,
+    diagnostic_grid: Option<Grid>,
     pending: Option<Pending>,
     generation: u64,
     key: Option<ContentKey>,
@@ -2442,6 +2461,121 @@ struct App {
     content_gc: Arc<Mutex<profile_content_flow::GcCursor>>,
 }
 impl App {
+    fn diagnostics_allowed(&self) -> bool {
+        self.account_notice_owner().is_some() && self.profiles_memory_gate()
+    }
+    fn record_diagnostic(&mut self, timing: DiagnosticTiming, phase: &'static str) {
+        if self.diagnostic_events.len() == DIAGNOSTIC_EVENT_LIMIT {
+            self.diagnostic_events.pop_front();
+        }
+        self.diagnostic_events.push_back(DiagnosticEvent {
+            after_ms: self.diagnostics_started.elapsed().as_millis(),
+            operation: timing.operation,
+            phase,
+            elapsed_ms: timing.started.elapsed().as_millis(),
+        });
+    }
+    fn refresh_diagnostics(&mut self) {
+        let workers = self.pool.handle().try_stats().map_or_else(
+            || "共享后台队列：当前统计不可用，请手动重试。".into(),
+            |s| {
+                format!(
+                    "共享后台队列：排队 {} 项 / {} 字节；执行或释放中 {} 项。",
+                    s.queued, s.queued_bytes, s.running
+                )
+            },
+        );
+        let m = self.desktop.metrics();
+        let row = |group: &str, label: &str, value: String| GridRow {
+            group: group.into(),
+            label: label.into(),
+            cells: vec![value],
+            merged: false,
+        };
+        let mut rows = vec![
+            row(
+                "当前读数",
+                "手动刷新时刻",
+                format!(
+                    "本次运行第 {} 毫秒",
+                    self.diagnostics_started.elapsed().as_millis()
+                ),
+            ),
+            row("当前读数", "共享后台队列", workers),
+            row(
+                "当前读数",
+                "渲染器组件及表面",
+                format!("组件 {}；绘图表面 {}", m.components, m.surfaces),
+            ),
+            row(
+                "当前读数",
+                "渲染器应用 DIB",
+                format!("{} 字节", m.dib_bytes),
+            ),
+            row(
+                "当前读数",
+                "渲染器暂存峰值",
+                format!("{} 字节", m.scratch_peak_bytes),
+            ),
+            row(
+                "当前读数",
+                "渲染器累计帧数",
+                format!("绘制 {}；上传 {}", m.drawn_frames, m.uploaded_frames),
+            ),
+            row(
+                "当前读数",
+                "当前窗口及输入区",
+                format!(
+                    "可见窗口 {}；输入区域 {}",
+                    m.visible_windows, m.input_regions
+                ),
+            ),
+        ];
+        for (label, value) in [
+            ("刷新方式", "仅手动刷新，不自动轮询。"),
+            ("资源范围", "DIB及渲染器暂存不是全进程内存。"),
+            ("性能范围", "未测量CPU，不能据此认定性能达标。"),
+            ("显示策略", "打开工作台隐藏桌面；窗口为0不代表故障。"),
+            ("记录范围", "最多16条，仅本进程内存，非持久审计。"),
+            ("耗时范围", "耗时包含排队、执行和界面取回等待。"),
+            ("结果含义", "后台返回不等于业务已提交或效果已完成。"),
+            ("效果核对", "内容显示和声音播放须在相应业务页核对。"),
+        ] {
+            rows.push(row("范围说明", label, value.into()));
+        }
+        if self.diagnostic_events.is_empty() {
+            rows.push(row("共享后台事件", "本次运行", "暂无记录。".into()));
+        }
+        for e in &self.diagnostic_events {
+            rows.push(row(
+                "共享后台事件",
+                &format!("+{}ms / 耗时{}ms", e.after_ms, e.elapsed_ms),
+                format!("{} · {}", e.operation, e.phase),
+            ));
+        }
+        self.diagnostic_grid = Some(Grid {
+            columns: vec!["项目 / 事件时间".into(), "本次观察（只读）".into()],
+            rows,
+            selected: None,
+            enabled: false,
+        });
+    }
+    fn diagnostics_event(
+        &mut self,
+        action: ActionId,
+        _: FormData,
+    ) -> std::result::Result<(), String> {
+        if !self.diagnostics_allowed() {
+            self.lock();
+            return self.render();
+        }
+        match action {
+            LOAD => self.refresh_diagnostics(),
+            BACK => self.screen = Screen::Home,
+            _ => return Ok(()),
+        }
+        self.render()
+    }
     fn account_notice_owner(&self) -> Option<fc_ports::command_window::CommandOwner> {
         let lease = self.lease?;
         if lease.origin() != TrustedOrigin::Local
@@ -2696,6 +2830,29 @@ impl App {
         if self.pending.is_some() {
             return Ok(());
         }
+        let diagnostic = DiagnosticTiming {
+            operation: match &work {
+                Work::Open(..) => "打开数据",
+                Work::Refresh(..) => "读取状态",
+                Work::Request(..) => "工作台操作",
+                Work::LoadAccounts(..) | Work::SaveAccount(..) => "账号与任教",
+                Work::LoadSubjects(..) | Work::SaveSubject(..) => "基础科目",
+                Work::LoadSchedule(..) | Work::SaveSchedule(..) => "课表",
+                Work::LoadDisplay(..) | Work::SaveDisplay(..) | Work::DisplayPreview(..) => {
+                    "显示设置"
+                }
+                Work::LoadPublicLesson(..)
+                | Work::ChangePublicLesson(..)
+                | Work::LoadLesson(..)
+                | Work::ChangeLesson(..) => "课堂切换",
+                Work::Profile(..) | Work::ProfileContent(..) => "布局内容",
+                Work::Material(..) => "资料准备",
+                Work::Voice(..) => "语音管理",
+                Work::OpenWeb(..) | Work::Web(..) => "教师连接",
+                _ => "后台任务",
+            },
+            started: Instant::now(),
+        };
         let public_lesson = matches!(
             &work,
             Work::LoadPublicLesson(..) | Work::ChangePublicLesson(..)
@@ -2815,10 +2972,15 @@ impl App {
                     self_revokes,
                     public_lesson,
                     desktop_material_open,
+                    diagnostic: Some(diagnostic),
                 });
+                self.record_diagnostic(diagnostic, "后台已接纳");
                 self.status = "正在处理，请稍候。".into();
             }
-            Err(_) => self.status = "后台任务繁忙，请稍后重试。".into(),
+            Err(_) => {
+                self.record_diagnostic(diagnostic, "后台未接纳");
+                self.status = "后台任务繁忙，请稍后重试。".into();
+            }
         }
         self.render()
     }
@@ -2923,6 +3085,13 @@ impl App {
                     if let Some(handler) = settings_registry::submit_handler(self.screen, true)? {
                         return handler(self, action, data);
                     }
+                }
+                if action == TO_DIAGNOSTICS {
+                    if !self.stopping && self.screen == Screen::Home && self.diagnostics_allowed() {
+                        self.refresh_diagnostics();
+                        self.screen = Screen::Diagnostics;
+                    }
+                    return self.render();
                 }
                 if self.pending.is_some() || self.autostart_job.is_some() || self.stopping {
                     return Ok(());
@@ -4816,6 +4985,16 @@ impl App {
         #[cfg(test)]
         let completed = tests::drop_completed_history_for_test(self, completed);
         if let Some(outcome) = completed {
+            if let Some(timing) = self.pending.as_ref().and_then(|p| p.diagnostic) {
+                self.record_diagnostic(
+                    timing,
+                    match &outcome {
+                        Ok(_) => "后台已返回",
+                        Err(Failure::Stopped) => "后台取消或停止",
+                        Err(_) => "后台返回失败",
+                    },
+                );
+            }
             if self.offscreen_probe && self.probe_trace {
                 let kind = match &outcome {
                     Ok(Outcome::Updated { .. }) => "updated",
@@ -5804,6 +5983,9 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         status: String::new(),
         desktop_notice: String::new(),
         public_material_notice: None,
+        diagnostics_started: Instant::now(),
+        diagnostic_events: VecDeque::with_capacity(DIAGNOSTIC_EVENT_LIMIT),
+        diagnostic_grid: None,
         pending: None,
         generation: 0,
         key: None,
@@ -6570,7 +6752,7 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
                 return Ok(());
             }
             let scene = app.desktop.probe_scene().ok_or("常驻桌面没有生成场景")?;
-            let metrics = app.desktop.probe_metrics();
+            let metrics = app.desktop.metrics();
             let display = app.display.as_ref().ok_or("显示草稿缺失")?;
             let tree = scene.paint_tree.as_ref().ok_or("常驻桌面没有发布布局树")?;
             // The profile flow first committed display 3 / layout 1; the
@@ -6880,6 +7062,77 @@ fn schedule_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(),
 mod tests {
     use super::*;
     pub(super) static SERIAL: Mutex<()> = Mutex::new(());
+    #[test]
+    fn diagnostics_are_bounded_manual_redacted_and_require_local_admin() {
+        let _serial = SERIAL.lock().unwrap();
+        let (scratch, mut app) = ready_management();
+        app.diagnostic_events.clear();
+        let timing = DiagnosticTiming {
+            operation: "工作台操作",
+            started: Instant::now(),
+        };
+        app.record_diagnostic(timing, "后台已接纳");
+        for _ in 0..DIAGNOSTIC_EVENT_LIMIT {
+            app.record_diagnostic(timing, "后台已返回");
+        }
+        assert_eq!(app.diagnostic_events.len(), DIAGNOSTIC_EVENT_LIMIT);
+        assert!(app
+            .diagnostic_events
+            .iter()
+            .all(|e| e.phase == "后台已返回"));
+        app.status = "Synthetic secret/password/token C:\\synthetic-private-file.txt".into();
+        app.screen = Screen::Home;
+        app.view().validate().unwrap();
+        app.event(Event::Submit(TO_DIAGNOSTICS, FormData::new()))
+            .unwrap();
+        assert!(app.screen == Screen::Diagnostics);
+        let view = app.view();
+        assert!(view.fields.is_empty());
+        assert!(view.status.is_empty());
+        assert!(view.description.chars().count() < 50);
+        let grid = view.grid.unwrap();
+        grid.validate().unwrap();
+        assert!(!grid.enabled && grid.selected.is_none());
+        assert!(grid.rows.iter().all(|r| !r.merged && r.cells.len() == 1));
+        assert_eq!(
+            grid.rows
+                .iter()
+                .filter(|r| r.group == "共享后台事件")
+                .count(),
+            DIAGNOSTIC_EVENT_LIMIT
+        );
+        let text = |grid: &Grid| {
+            grid.rows
+                .iter()
+                .map(|r| format!("{} {}", r.label, r.cells.join(" ")))
+                .collect::<Vec<_>>()
+                .join("\n")
+        };
+        let contents = text(&grid);
+        assert!(!contents.contains("Synthetic secret"));
+        assert!(!contents.contains("synthetic-private-file"));
+        assert!(contents.contains("后台返回不等于业务已提交"));
+        assert!(contents.contains("不是全进程内存"));
+        assert!(contents.contains("未测量CPU"));
+        assert!(contents.contains("窗口为0不代表故障"));
+        assert!(contents.contains("非持久审计"));
+        app.record_diagnostic(timing, "后台未接纳");
+        assert_eq!(app.view().grid, Some(grid), "refresh is explicit");
+        app.event(Event::Submit(LOAD, FormData::new())).unwrap();
+        assert!(text(app.view().grid.as_ref().unwrap()).contains("后台未接纳"));
+        assert!(
+            app.pending.is_none(),
+            "reading diagnostics does not enqueue work"
+        );
+        app.lease = None;
+        assert!(app.view().grid.is_none());
+        assert!(!app.view().actions.iter().any(|a| a.id == LOAD));
+        app.event(Event::Submit(LOAD, FormData::new())).unwrap();
+        assert!(app.screen == Screen::Login);
+        assert!(!app.window.is_visible());
+        drain(app);
+        drop(scratch);
+    }
     #[test]
     fn material_failure_feedback_uses_original_origin_after_workbench_navigation() {
         use fc_windows::materials::shell::{LaunchOutcome, LaunchResult};

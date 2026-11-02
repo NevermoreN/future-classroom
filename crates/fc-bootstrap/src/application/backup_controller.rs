@@ -365,6 +365,7 @@ impl App {
                     self_revokes: false,
                     public_lesson: false,
                     desktop_material_open: false,
+                    diagnostic: None,
                 });
                 self.backup.job_owner = Some(owner);
                 self.backup.job_sequence = sequence;

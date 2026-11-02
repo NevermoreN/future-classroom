@@ -93,7 +93,7 @@ pub enum FormError {
 impl View {
     pub fn validate(&self) -> Result<(), FormError> {
         if self.fields.len() > 16
-            || self.actions.len() > 12
+            || self.actions.len() > 16
             || self.title.len() > 512
             || self.description.len() > 8192
             || self.status.len() > 8192

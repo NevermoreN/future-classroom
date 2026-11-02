@@ -79,6 +79,17 @@ static PAGES: &[Registration<Screen, Page>] = &[
         },
     },
     Registration {
+        key: Screen::Diagnostics,
+        implementation: Page {
+            render: page_diagnostics,
+            submit: Some(App::diagnostics_event),
+            early_submit: true,
+            input: no_input,
+            grid: no_grid,
+            suspend: no_suspend,
+        },
+    },
+    Registration {
         key: Screen::School,
         implementation: Page {
             render: page_school,
@@ -535,6 +546,7 @@ fn page_home(app: &App, status: &str) -> View {
             action(TO_DISPLAY, "桌面与系统设置"),
             action(TO_LESSON, "本节临时换课"),
             action(TO_WEB, "教师设备与配对"),
+            action(TO_DIAGNOSTICS, "运行诊断（只读）"),
         ]);
     }
     if account.is_some_and(|a| a.principal.role != Role::User) {
@@ -547,6 +559,22 @@ fn page_home(app: &App, status: &str) -> View {
     ]);
     if account.is_some_and(|a| a.principal.role == Role::GlobalAdmin) {
         view.actions.push(action(EXIT, "退出未来教室"));
+    }
+    view
+}
+
+fn page_diagnostics(app: &App, _: &str) -> View {
+    // Do not carry arbitrary prior status/error strings into the diagnostics.
+    let mut view = frame(app, "");
+    view.title = "运行诊断 · 只读".into();
+    view.busy = app.stopping;
+    view.actions = vec![action(BACK, "返回工作台"), action(LOCK, "锁定工作台")];
+    if app.diagnostics_allowed() {
+        view.description = "手动读取本次运行的资源计数和脱敏后台事件；详情可向下滚动。".into();
+        view.grid = app.diagnostic_grid.clone();
+        view.actions.insert(0, action(LOAD, "手动刷新"));
+    } else {
+        view.description = "仅已解锁的本地主管理员可查看运行诊断。".into();
     }
     view
 }
@@ -1086,6 +1114,10 @@ static REQUESTS: &[Registration<(Screen, ActionId), RequestHandler>] = &[
     },
     Registration {
         key: (Screen::Home, EXIT),
+        implementation: request_any_exit,
+    },
+    Registration {
+        key: (Screen::Diagnostics, EXIT),
         implementation: request_any_exit,
     },
     Registration {
