@@ -164,9 +164,49 @@ def assemble(a, evidence: dict, artifacts: dict, provenance: dict, web: dict) ->
     B['PROBE']['build_package'](artifacts['product-compile'][0], zip_path, DEV['TARGET'], str(a.objdump), 'Frozen normal GNU ABI2 DEV compiler ' + a.evidence_sha256, a.web_dist)
     raw = zip_path.read_bytes()
     manifest, payloads = B['validate_zip'](raw, DEV['TARGET'], 'modern-GNU-development-only')
+    identity = {
+        'scope': 'NORMAL_GNU_ABI2_UPGRADE_CAPABLE_STATIC_BUNDLE_ONLY_NOT_FORMAL_MSVC',
+        'formalCI': False, 'sourceBase': evidence['source_head'],
+        'sourceEvidenceSha256': a.evidence_sha256, 'normalProvenance': provenance,
+        'upgradeSourceBinding': upgrade_source_binding(source, a.evidence.absolute(), evidence),
+        'webReportSha256': a.web_report_sha256,
+        'lifecycleMode': 'ABI2_UPGRADE_CAPABLE_NORMAL_GNU_DEV',
+    }
+    def verify_source():
+        NEED(DEV['source_inventory'](source) == B['json_document'](DEV['bound'](a.evidence.parent, evidence['inputs_after']).read_bytes()), 'Full frozen source inventory unchanged')
+    return assemble_admitted(a, manifest, payloads, artifacts, identity,
+        'PASS_NORMAL_GNU_ABI2_UPGRADE_CAPABLE_DEV_STATIC_BUNDLE_NATIVE_NOT_RUN', verify_source)
+
+
+def instructions_bytes(source: Path, explicit: bytes | None = None) -> bytes:
+    """GNU keeps its source document; reviewed builders may pin a new document."""
+    if explicit is None:
+        return B['PROBE']['bounded_regular_file'](source / 'packaging/CONTROLLED-MSI-CANDIDATE.md', 65536)
+    NEED(type(explicit) is bytes and 1 <= len(explicit) <= 65536,
+         'Explicit candidate instructions must be nonempty immutable bounded bytes')
+    explicit.decode('utf-8', 'strict')
+    return explicit
+
+
+def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
+        identity: dict, pass_status: str, verify_source, instructions: bytes | None = None) -> dict:
+    """Shared ABI2 byte assembly after caller-specific source admission.
+
+    No DEV or CI proof is created here. Each closed CLI admits its own originals
+    before calling and revalidates those exact originals before returning PASS.
+    """
+    source = a.source_root.absolute()
+    NEED(set(artifacts) == {'product-compile', 'lifecycle-compile', 'guard-library-compile'}, 'Exactly three admitted normal artifacts')
+    NEED(set(identity) <= {'scope', 'formalCI', 'sourceBase', 'sourceEvidenceSha256',
+        'normalProvenance', 'upgradeSourceBinding', 'webReportSha256', 'lifecycleMode',
+        'normalGuardProvenance', 'builderSources', 'sourceZip', 'target',
+        'candidateInstructions'}, 'Closed assembly qualification fields')
+    NEED({'scope', 'formalCI', 'sourceBase', 'sourceEvidenceSha256', 'normalProvenance',
+        'lifecycleMode'} <= set(identity), 'Original caller qualification required')
+    NEED(callable(verify_source), 'Caller must supply original source revalidation')
     product_version = a.product_version or manifest['version']
     B['version_parts'](product_version)
-    payloads['MSI-CANDIDATE.txt'] = B['PROBE']['bounded_regular_file'](source / 'packaging/CONTROLLED-MSI-CANDIDATE.md', 65536)
+    payloads['MSI-CANDIDATE.txt'] = instructions_bytes(source, instructions)
     NEED(len(payloads) == 14 and sum(map(len, payloads.values())) <= B['MAX_INSTALLED'], 'Complete14 payloads within30MiB')
     helper = artifacts['lifecycle-compile'][1]
     dll = artifacts['guard-library-compile'][1]
@@ -181,16 +221,15 @@ def assemble(a, evidence: dict, artifacts: dict, provenance: dict, web: dict) ->
     tools = {name: B['tool_file'](getattr(a, name)) for name in ('wixl', 'msibuild', 'msiinfo', 'msiextract', 'objdump')}
     NEED(B['file_digest'](tools['msibuild']) == a.msibuild_sha256, 'Pinned msibuild actual bytes')
     output = B['fresh_output'](a.output_dir)
-    report = {'status': 'FAIL_RETAIN_ORIGINALS', 'scope': 'NORMAL_GNU_ABI2_UPGRADE_CAPABLE_STATIC_BUNDLE_ONLY_NOT_FORMAL_MSVC',
-        'formalCI': False, 'normalProfileTest': False, 'installation': 'NOT_RUN', 'productionReadiness': 'NOT_GRANTED',
-        'sourceRoot': str(source), 'sourceBase': evidence['source_head'], 'sourceEvidenceSha256': a.evidence_sha256,
-        'normalProvenance': provenance, 'upgradeSourceBinding': upgrade_source_binding(source, a.evidence.absolute(), evidence), 'normalPEExtents': normal_extents, 'webReportSha256': a.web_report_sha256,
+    report = {'status': 'FAIL_RETAIN_ORIGINALS',
+        'normalProfileTest': False, 'installation': 'NOT_RUN', 'productionReadiness': 'NOT_GRANTED',
+        'sourceRoot': str(source), 'normalPEExtents': normal_extents,
         'productCode': decoded['product'], 'packageCode': package, 'version': product_version, 'artifactVersion': manifest['version'], 'payloadVersionPolicy': 'Actual artifact/manifest.json compiler version preserved; MSI release identity is an explicit separate build input',
         'productCodeGeneration': 'Existing fixed UUIDv5 per version; unchanged authoring policy', 'packageCodeGeneration': 'Actual unexecuted compiler Summary UUID, then manifest stream replacement and exact full Summary re-read before seal', 'intermediateEnvelopePackageCode': package, 'authoringPackageId': 'OMITTED_PINNED_WIXL_0_103_IGNORES_ATTRIBUTE',
         'commands': [], 'tools': {name: {'path': str(p), 'sha256': B['file_digest'](p)} for name, p in tools.items()},
         'payloads': [{'path': n, 'size': len(d), 'sha256': B['digest'](d), 'component_guid': B['component_code'](n)} for n, d in sorted(payloads.items())],
-        'lifecycleMode': 'ABI2_UPGRADE_CAPABLE_NORMAL_GNU_DEV',
         'builderSha256': B['digest'](Path(__file__).read_bytes()), 'codecSha256': B['file_digest'](HERE / 'installer-carrier-format.py')}
+    report.update(identity)
     def tool(label, argv): return B['run_tool'](output, label, [str(x) for x in argv], report['commands'])
     try:
         for name in ('wixl', 'msiinfo', 'msiextract', 'objdump'):
@@ -255,8 +294,8 @@ def assemble(a, evidence: dict, artifacts: dict, provenance: dict, web: dict) ->
             if p.is_dir(): B['PROBE']['real_directory'](p); continue
             NEED(p.is_relative_to(matches[0].parent), 'No extraction escape'); actual[p.relative_to(matches[0].parent).as_posix()] = B['PROBE']['bounded_regular_file'](p, B['MAX_INSTALLED'])
         NEED(actual == payloads, 'Actual extracted14 payload exact bytes')
-        NEED(DEV['source_inventory'](source) == B['json_document'](DEV['bound'](a.evidence.parent, evidence['inputs_after']).read_bytes()), 'Full frozen source inventory unchanged')
-        report.update(status='PASS_NORMAL_GNU_ABI2_UPGRADE_CAPABLE_DEV_STATIC_BUNDLE_NATIVE_NOT_RUN',
+        verify_source()
+        report.update(status=pass_status,
             msi={'path': msi.name, 'bytes': len(complete), 'sha256': B['digest'](complete)},
             setup={'path': 'Setup.exe', 'bytes': len(setup), 'sha256': B['digest'](setup)},
             template={'bytes': len(template), 'sha256': B['digest'](template), 'hole': hole, 'canonicalZero32': True, 'normalPrefixExact': True},

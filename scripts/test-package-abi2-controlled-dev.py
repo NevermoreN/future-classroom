@@ -64,4 +64,78 @@ class Abi2DevTests(unittest.TestCase):
             raw=('Name\tData\r\ns72\tv0\r\nBinary\tName\r\n'+''.join(x+'\tBinary.'+x+'\r\n'for x in rows)).encode()
             with self.assertRaises(ValueError):D['validate_contract'](b'',{'Binary':raw},'0.1.0',{},'12345678-1234-1234-1234-123456789ABC')
 
+
+
+# These are synthetic metadata contract tests, never original CI provenance.
+import copy
+FORMAL = runpy.run_path(str(HERE/'package-abi2-msvc-candidate.py'))
+TARGET = FORMAL['TARGET']
+
+def formal_result_fixture():
+    r=dict(status='COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN',baseline='Win7',target=TARGET,
+        toolchain='nightly-2026-10-29-x86_64-pc-windows-msvc',
+        rustflags='-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01',
+        product_rustflags='-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:WINDOWS,6.01',commands=[])
+    for name, package, target in [('product-compile','fc-bootstrap','fc-bootstrap'),('lifecycle-compile','fc-bootstrap','fc-installer-lifecycle'),('guard-library-compile','fc-windows',None)]:
+        args=['-Z','build-std','build' if target is None else 'rustc','-vv','--release','--locked','--target',TARGET,'-p',package]
+        args+=['--lib']if target is None else['--bin',target]
+        args+=['--message-format=json']
+        r['commands'].append(dict(name=name,arguments=args,passed=True,exit_code=0,parent_exited=True,timed_out_or_pipe_stalled=False,log_truncated=False))
+    return r
+
+class FormalMsvcAbi2Contract(unittest.TestCase):
+    def test_closed_normal_command_matrix(self):
+        FORMAL['check_compile_result'](formal_result_fixture())
+        for index in range(3):
+            for token in ('--tests','--features','--all-targets','--all-features','--no-default-features','--bin','test'):
+                bad=formal_result_fixture();bad['commands'][index]['arguments'].append(token)
+                with self.subTest(phase=index,token=token),self.assertRaises(ValueError):FORMAL['check_compile_result'](bad)
+    def test_each_original_phase_required_once(self):
+        for index in range(3):
+            bad=formal_result_fixture();del bad['commands'][index]
+            with self.assertRaises(ValueError):FORMAL['check_compile_result'](bad)
+            bad=formal_result_fixture();bad['commands'].append(copy.deepcopy(bad['commands'][index]))
+            with self.assertRaises(ValueError):FORMAL['check_compile_result'](bad)
+    def test_original_parent_success_and_log_completeness(self):
+        for index in range(3):
+            for key,value in [('exit_code',False),('exit_code',1),('parent_exited',False),('timed_out_or_pipe_stalled',True),('log_truncated',True),('passed',False)]:
+                bad=formal_result_fixture();bad['commands'][index][key]=value
+                with self.subTest(phase=index,key=key),self.assertRaises(ValueError):FORMAL['check_compile_result'](bad)
+    def test_other_target_toolchain_or_crt_scope_cannot_be_relabelled(self):
+        for key,value in [('target','i686-pc-windows-gnu'),('target','i686-pc-windows-msvc'),('baseline','Modern'),('toolchain','stable'),('rustflags','-C target-feature=-crt-static'),('product_rustflags','-C target-feature=+crt-static'),('status','DEV_FROZEN_NORMAL_BUILD_ONLY')]:
+            bad=formal_result_fixture();bad[key]=value
+            with self.subTest(key=key,value=value),self.assertRaises(ValueError):FORMAL['check_compile_result'](bad)
+    def test_other_ci_command_failure_not_hidden_by_normal_phases(self):
+        bad=formal_result_fixture();bad['commands'].append(dict(name='clippy',passed=False))
+        with self.assertRaises(ValueError):FORMAL['check_compile_result'](bad)
+
+    def test_instructions_default_source_and_explicit_builder_bytes_are_separate(self):
+        with tempfile.TemporaryDirectory(prefix='fc-instructions-pure-') as directory:
+            source=Path(directory)/'original'; path=source/'packaging/CONTROLLED-MSI-CANDIDATE.md'
+            path.parent.mkdir(parents=True); path.write_bytes(b'original compiler-source document\n')
+            shared=FORMAL['ABI2']['instructions_bytes']
+            self.assertEqual(shared(source),path.read_bytes())
+            reviewed='ABI2 three Binary streams; Win7/10 untested.\n'.encode()
+            self.assertEqual(shared(source,reviewed),reviewed)
+            self.assertEqual(path.read_bytes(),b'original compiler-source document\n')
+            for invalid in (b'',bytearray(reviewed),b'\xff',bytes(65537)):
+                with self.assertRaises((ValueError,UnicodeError)): shared(source,invalid)
+    def test_reviewed_instructions_pin_exact_raw_bytes_and_canonical_name(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory(prefix='fc-instructions-pin-') as directory:
+            root=Path(directory); path=root/'CONTROLLED-MSI-CANDIDATE.md'
+            path.write_bytes(b'reviewed ABI2 instructions\n')
+            args=SimpleNamespace(source_root=root/'untouched-ci-source',candidate_instructions=path,
+                candidate_instructions_sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+            raw,fact=FORMAL['read_candidate_instructions'](args)
+            self.assertEqual(raw,path.read_bytes());self.assertEqual(fact['sha256'],args.candidate_instructions_sha256)
+            self.assertEqual(fact['scope'],'REVIEWED_BUILDER_DOCUMENT_NOT_ORIGINAL_CI_SOURCE')
+            path.write_bytes(raw.replace(b'\n',b'\r\n'))
+            with self.assertRaises(ValueError):FORMAL['read_candidate_instructions'](args)
+            path.write_bytes(raw);args.candidate_instructions_sha256='0'*64
+            with self.assertRaises(ValueError):FORMAL['read_candidate_instructions'](args)
+            other=root/'other.md';other.write_bytes(raw);args.candidate_instructions=other
+            args.candidate_instructions_sha256=hashlib.sha256(raw).hexdigest()
+            with self.assertRaises(ValueError):FORMAL['read_candidate_instructions'](args)
+
 if __name__=='__main__':unittest.main()

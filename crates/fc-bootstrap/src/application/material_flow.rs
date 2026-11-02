@@ -515,17 +515,14 @@ impl MaterialJob {
                 };
                 #[cfg(test)]
                 let extra_fence = super::material_batch_tests::delete_execution_fence();
+                #[cfg(not(test))]
                 let fence: fc_storage::TransactionExecutionFence = Arc::new(move || {
-                    if fc_protocol::web::materials::batch_delete_result_fits(scope, &predicted)
-                        .is_err()
-                    {
-                        return false;
-                    }
-                    #[cfg(test)]
-                    if extra_fence.as_ref().is_some_and(|fence| !fence()) {
-                        return false;
-                    }
-                    true
+                    fc_protocol::web::materials::batch_delete_result_fits(scope, &predicted).is_ok()
+                });
+                #[cfg(test)]
+                let fence: fc_storage::TransactionExecutionFence = Arc::new(move || {
+                    fc_protocol::web::materials::batch_delete_result_fits(scope, &predicted).is_ok()
+                        && extra_fence.as_ref().is_none_or(|fence| fence())
                 });
                 let result = command.run(
                     &mut backend.begin_execution_scope(fence),

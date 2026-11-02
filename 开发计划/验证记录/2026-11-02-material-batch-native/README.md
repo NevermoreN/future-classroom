@@ -36,3 +36,14 @@
 本地收口：本轮七个已完成且owner核同的候选／Host与GNU目标／正常构建／MSI与测试副本／npm与合成数据目录已全部删除，三个仓库外草稿及两个生成的Python缓存已清理；持续SSH服务、公钥与仓库外0600私钥保留。其它工作所属的旧round80目录未作整体删除。归档准备目录在复制及复核完成后另行删除。
 
 归档准备目录亦已删除；最终两份文本元数据复扫0命中。上述清理不删除任何持久SSH授权或私钥。
+
+
+## Formal MSVC ABI2 / ca45 finite slice
+
+Modern original CI passed; Win7-target original CI failed only strict Clippy. The failed result remains failed and cannot enter formal packaging. Current builder wiring and the equivalent boolean lint fix have local format/admission/Clippy checks; actual formal MSI execution remains NOT_RUN. Modern same-source normal GUI and four test PEs ran on Win11: the first combined library run hit the default60s harness budget and stays FAIL; isolated359 tests passed in69.97s under the explicit existing120s CLI bound, with hidden workbench and cleanup PASS. Other parent suites passed1/347/255 (4ignored); child process cases are not added again.
+
+The existing1432 members are preserved byte-for-byte. The appended selection is finite original text with frozen-scanner0 findings and no new allowances. Full official ZIP/PE bytes, complete Git-tree/domain inventories and omitted logs are NOT stored here; their original identities and independent full-byte verification are recorded. New final code is identified by complete patch and SHA, separately from original ca45 compile/runtime evidence. Windows7/10 physical testing remains NOT_RUN at the user's request, not a release prerequisite. This is code-development evidence, not a published release.
+
+Completed local targets, npm/dist, old CI PE/ZIP copies and frozen checkout were removed after exact selected-original replay; unfinished preparation and persistent Windows SSH access remain. See formal-msvc-ca45/local-cleanup.json.
+
+Six exact external candidate/initial pure-failure originals were preserved before removing the completed formal draft; two exact owned npm debug logs were removed. The final archive remains within1500 members/30MiB.

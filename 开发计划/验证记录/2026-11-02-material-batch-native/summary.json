@@ -269,15 +269,15 @@
   ],
   "archive": {
     "file": "results.zip",
-    "bytes": 5174181,
-    "sha256": "ba4345bc38c57a177fa0f7072b935c23f5fd80a723ed32403aa65b8f2850011f",
-    "members": 1432,
-    "uncompressedBytes": 25855194,
+    "bytes": 5733046,
+    "sha256": "5656dc6e665d26711b03af11b3e5447d30b582b7fbb0c8ddd3d64ecb2369048f",
+    "members": 1490,
+    "uncompressedBytes": 30240231,
     "limits": {
       "members": 1500,
       "uncompressedBytes": 31457280
     },
-    "fullReplay": "PASS_ALL_966_HISTORICAL_AND_EXPLICIT_NEW_ORIGINAL_BYTES"
+    "fullReplay": "PASS_PREVIOUS_1432_AND_ALL_SELECTED_ORIGINAL_BYTES"
   },
   "originals": [
     {
@@ -11860,6 +11860,454 @@
       "seconds": 4.784454459004337,
       "evidencePreparationRootRemoved": "/tmp/fc-update-evidence-candidate",
       "evidencePreparationKnownAbsent": true
+    }
+  },
+  "formalMsvcAbi2Round": {
+    "status": "PASS_FINITE_COMPLETED_TEXT_REPLAY_AND_SCAN_ONLY",
+    "compiledSource": "ca45c461a2f5217ae5efb075f3868d6696786c44",
+    "modernRun": {
+      "id": 41480553209,
+      "status": "success",
+      "originalCommands": 51
+    },
+    "win7TargetRun": {
+      "id": 41480562137,
+      "status": "failure",
+      "originalCommands": 53,
+      "failedPhase": "clippy",
+      "failedExit": 101
+    },
+    "runtime": {
+      "OS": "Windows11",
+      "firstCombined": "FAIL_LIBRARY_DEFAULT60S_TIMEOUT_CLEANUP_PASS",
+      "secondLibrary": "PASS_359_TESTS_69_97S_EXPLICIT120S_BOUND_CLEANUP_PASS",
+      "separateOtherSuites": "installer1/windows347/application255; Windows4ignored",
+      "normalGUI": "PASS_SELF_CHECK_SYSTEM_HIDDEN_HOST_AND_APPLICATION",
+      "foreground": "UNTOUCHED"
+    },
+    "formalMsi": "NOT_RUN_FAILED_CI_NOT_ADMITTED",
+    "newSource": "Five-file complete implementation/fix patch and SHA frozen; new official MSVC build required",
+    "previousArchiveSha256": "ba4345bc38c57a177fa0f7072b935c23f5fd80a723ed32403aa65b8f2850011f",
+    "selectionSha256": "0403c8d920860b97c16959d705f733e2664ae9fe18b82c645cdd08e4e349285d",
+    "originals": [
+      {
+        "path": "dispatch.json",
+        "member": "formal-msvc-ca45/dispatch.json",
+        "bytes": 492,
+        "sha256": "5eaa3b66f257961a042034634e737751b87358031c40f0c2ae9021af86a62144"
+      },
+      {
+        "path": "original-terminal-runs.json",
+        "member": "formal-msvc-ca45/original-terminal-runs.json",
+        "bytes": 36504,
+        "sha256": "d0dd3418dea43263b084d5f429ec4d46cce53aa79df93a6e70b628e44d0b2fcf"
+      },
+      {
+        "path": "modern-download-report.json",
+        "member": "formal-msvc-ca45/modern-download-report.json",
+        "bytes": 41820,
+        "sha256": "b5fd7aecdbdc694d0cd37f382d2c83859d3af532327ac49c5d1ed14a1d08cca9"
+      },
+      {
+        "path": "win7-download-report.json",
+        "member": "formal-msvc-ca45/win7-download-report.json",
+        "bytes": 43473,
+        "sha256": "2de84ce70f223c4c015f62f2732fd1517512df79916fdbd1bdf13fcdf0d5cc0c"
+      },
+      {
+        "path": "modern-ci-verification.json",
+        "member": "formal-msvc-ca45/modern-ci-verification.json",
+        "bytes": 1811,
+        "sha256": "8a7465369761f3c20abc188c672448a3d6e0b2dcae023db449f571d3388b0e05"
+      },
+      {
+        "path": "win7-ci-verification.json",
+        "member": "formal-msvc-ca45/win7-ci-verification.json",
+        "bytes": 1935,
+        "sha256": "329467508d467e2e4d0c20c45d6be38333bfc818b733d84e67be4553d54fa4bb"
+      },
+      {
+        "path": "modern-source-ci-binding.json",
+        "member": "formal-msvc-ca45/modern-source-ci-binding.json",
+        "bytes": 243386,
+        "sha256": "b27ba22d662a51a499f56dcfc1d5b72eaa6fe9fd213311429348aa2da2fede82"
+      },
+      {
+        "path": "source-ci-binding.json",
+        "member": "formal-msvc-ca45/source-ci-binding.json",
+        "bytes": 243386,
+        "sha256": "b27ba22d662a51a499f56dcfc1d5b72eaa6fe9fd213311429348aa2da2fede82"
+      },
+      {
+        "path": "modern-formal-rejection.json",
+        "member": "formal-msvc-ca45/modern-formal-rejection.json",
+        "bytes": 274,
+        "sha256": "6fa514c83eb2d6934279a22119cdf4e14d23659c630bf75f7a6b08e31a34d3bf"
+      },
+      {
+        "path": "web-build-report.json",
+        "member": "formal-msvc-ca45/web-build-report.json",
+        "bytes": 1932,
+        "sha256": "9cd1572f40a0f7ff3d7e1ff0e0fb1bbaad5fb2b3ddd10242a3029d3fbb7fecd6"
+      },
+      {
+        "path": "main-builder-freeze-final.json",
+        "member": "formal-msvc-ca45/main-builder-freeze-final.json",
+        "bytes": 1062,
+        "sha256": "e0e7ebb7faf62265cc61bc5d877ffa05d0c424ceb80dda9cb3875f7149a4abfb"
+      },
+      {
+        "path": "modern-win11-application-report.json",
+        "member": "formal-msvc-ca45/modern-win11-application-report.json",
+        "bytes": 141729,
+        "sha256": "7b2296048eda2fc7a03083e0ef18ef8bb6cd6d730f4f6112fec23fcfdded121e"
+      },
+      {
+        "path": "modern-win11-library-isolated-report.json",
+        "member": "formal-msvc-ca45/modern-win11-library-isolated-report.json",
+        "bytes": 101364,
+        "sha256": "bf472d138989e17faec27aaf8ec1f3be2dcd926cf1c91c5a1c2d49515971acc6"
+      },
+      {
+        "path": "modern-four-tests-selection.json",
+        "member": "formal-msvc-ca45/modern-four-tests-selection.json",
+        "bytes": 3636,
+        "sha256": "e7aac964c1849eeda45dab848cda5168abd168d3b291fed6a5ab14d7bd99eb12"
+      },
+      {
+        "path": "modern-library-recheck-scope.json",
+        "member": "formal-msvc-ca45/modern-library-recheck-scope.json",
+        "bytes": 540,
+        "sha256": "b002901020f859ecca8c196ed6d1e919eced960b2c830187cc21e9a63182548a"
+      },
+      {
+        "path": "windows-readonly.json",
+        "member": "formal-msvc-ca45/windows-readonly.json",
+        "bytes": 548,
+        "sha256": "bb1fa24961f6fa5ee4b3170b1769b9208d3e585e67608ddd75593ec74458be23"
+      },
+      {
+        "path": "root-validation/report.json",
+        "member": "formal-msvc-ca45/root-validation/report.json",
+        "bytes": 1158,
+        "sha256": "c4742bd3a3a36825084e061947bb225a677a8cf48ed062a8190074a71e460ff3"
+      },
+      {
+        "path": "root-validation/common-admission-report.json",
+        "member": "formal-msvc-ca45/root-validation/common-admission-report.json",
+        "bytes": 760,
+        "sha256": "12746c023f8d78d0e9194597846c87fab0d83205a77afd0f2574d3ad9b0f951d"
+      },
+      {
+        "path": "lint-fix-validation/report.json",
+        "member": "formal-msvc-ca45/lint-fix-validation/report.json",
+        "bytes": 2635,
+        "sha256": "da72bd2b2ec6b2c9bf7f6db12e1cc4218c2a399a4fe4bdbabdebcfd0172895fa"
+      },
+      {
+        "path": "lint-fix-validation/original-win7-clippy-error-excerpt.txt",
+        "member": "formal-msvc-ca45/lint-fix-validation/original-win7-clippy-error-excerpt.txt",
+        "bytes": 879,
+        "sha256": "0af1d0ecba00181f2ed8da56f1744f72bab789ec45c295004a159bf08a2c5368"
+      },
+      {
+        "path": "modern-ci/result.json",
+        "member": "formal-msvc-ca45/modern-ci/result.json",
+        "bytes": 48298,
+        "sha256": "18b09c054c3ec6fdb589ce046408fde370ec0ce09f70d63b4ebd457e105253f4"
+      },
+      {
+        "path": "modern-ci/executables.json",
+        "member": "formal-msvc-ca45/modern-ci/executables.json",
+        "bytes": 13946,
+        "sha256": "7addab67f14e6ff372bce92de816355b60b87a50e4989e0b8e978f64ff6d75de"
+      },
+      {
+        "path": "modern-ci/input-sha256.json",
+        "member": "formal-msvc-ca45/modern-ci/input-sha256.json",
+        "bytes": 120676,
+        "sha256": "586ff2e9c0b6562076094fe7f67953c9d668823d5c146cdafe3fe07da4697125"
+      },
+      {
+        "path": "modern-ci/logs/cargo-metadata.stdout.log",
+        "member": "formal-msvc-ca45/modern-ci/logs/cargo-metadata.stdout.log",
+        "bytes": 26876,
+        "sha256": "4299697f1f4b56879d38e9efa327269133ebcc259f21780d4c45193b337c2c28"
+      },
+      {
+        "path": "modern-ci/logs/product-compile.stdout.log",
+        "member": "formal-msvc-ca45/modern-ci/logs/product-compile.stdout.log",
+        "bytes": 623169,
+        "sha256": "75ea10964548cf554b9ea30447158a6acbf7d72155aa4130ea4763e2966269cb"
+      },
+      {
+        "path": "modern-ci/logs/lifecycle-compile.stdout.log",
+        "member": "formal-msvc-ca45/modern-ci/logs/lifecycle-compile.stdout.log",
+        "bytes": 623232,
+        "sha256": "7c45e832caa15907e19fa3afbe0108f2d671bc2fe927dc80cc68fd317c275d44"
+      },
+      {
+        "path": "modern-ci/logs/guard-library-compile.stdout.log",
+        "member": "formal-msvc-ca45/modern-ci/logs/guard-library-compile.stdout.log",
+        "bytes": 86272,
+        "sha256": "9914e976479f834d97c52fcbafdd262ce87898e7e6b5be1e1cdfdefc95b47ee7"
+      },
+      {
+        "path": "win7-ci/result.json",
+        "member": "formal-msvc-ca45/win7-ci/result.json",
+        "bytes": 50555,
+        "sha256": "ccbb975b9fa227b7798eca9a21da86d1b8a7b965339d2a21f01083f9e0cfd128"
+      },
+      {
+        "path": "win7-ci/executables.json",
+        "member": "formal-msvc-ca45/win7-ci/executables.json",
+        "bytes": 13972,
+        "sha256": "3cce3b4d96fae8dc909ef503a3352ab07d66f85c6b6177fe923b6f9b3031c9d6"
+      },
+      {
+        "path": "win7-ci/input-sha256.json",
+        "member": "formal-msvc-ca45/win7-ci/input-sha256.json",
+        "bytes": 120676,
+        "sha256": "586ff2e9c0b6562076094fe7f67953c9d668823d5c146cdafe3fe07da4697125"
+      },
+      {
+        "path": "win7-ci/logs/cargo-metadata.stdout.log",
+        "member": "formal-msvc-ca45/win7-ci/logs/cargo-metadata.stdout.log",
+        "bytes": 26886,
+        "sha256": "25ec0856a0928fa2a8bdd853c3371054020bba1f7f59deabb9b60446747c6b54"
+      },
+      {
+        "path": "win7-ci/logs/product-compile.stdout.log",
+        "member": "formal-msvc-ca45/win7-ci/logs/product-compile.stdout.log",
+        "bytes": 761461,
+        "sha256": "b6ad46afaf79246fa6fbebd8677335807fb61ab36f44dc9e723156aa602e4e1d"
+      },
+      {
+        "path": "win7-ci/logs/lifecycle-compile.stdout.log",
+        "member": "formal-msvc-ca45/win7-ci/logs/lifecycle-compile.stdout.log",
+        "bytes": 716867,
+        "sha256": "93c00c2f42b6e81defbcf996f543f8402410e23abc30382b41f177455bd146f6"
+      },
+      {
+        "path": "win7-ci/logs/guard-library-compile.stdout.log",
+        "member": "formal-msvc-ca45/win7-ci/logs/guard-library-compile.stdout.log",
+        "bytes": 164866,
+        "sha256": "1736d13976f541efdf745ad13051543fdd76488e4ae2f458a14ea758892b1e10"
+      },
+      {
+        "path": "prepare-frozen-source.py",
+        "member": "formal-msvc-ca45/prepare-frozen-source.py",
+        "bytes": 1875,
+        "sha256": "07846fb17c308d6f75661510984c7080825882de1864caa959cd13defd4467d9"
+      },
+      {
+        "path": "build-web.py",
+        "member": "formal-msvc-ca45/build-web.py",
+        "bytes": 2348,
+        "sha256": "984c7eb3fbc1837098ae149e21a95c62d3531413d5f43930033529101f716479"
+      },
+      {
+        "path": "download-ci.py",
+        "member": "formal-msvc-ca45/download-ci.py",
+        "bytes": 3099,
+        "sha256": "f572ca06d18fa636fa2d6d9ef10713f3aaef2ebe681bc1d0789103edba22ced7"
+      },
+      {
+        "path": "verify-original-ci.py",
+        "member": "formal-msvc-ca45/verify-original-ci.py",
+        "bytes": 5845,
+        "sha256": "43c7071d390cb88911a6623d644e11b88917af842f8ccf7786b40744c467fea2"
+      },
+      {
+        "path": "bind-ci-source.py",
+        "member": "formal-msvc-ca45/bind-ci-source.py",
+        "bytes": 2918,
+        "sha256": "43d18a48806535b83fb2f55e85c213ed1813d6fd5420c75bf9ef5b577b0afe8a"
+      },
+      {
+        "path": "implemented-code.patch",
+        "member": "formal-msvc-ca45/implemented-code.patch",
+        "bytes": 29135,
+        "sha256": "13ca11679b776e1e216bc200f4073f8b5d91122f0bf7ba0334657293145770aa"
+      },
+      {
+        "path": "implemented-source-final.json",
+        "member": "formal-msvc-ca45/implemented-source-final.json",
+        "bytes": 1212,
+        "sha256": "08afd80b1717a9b61146f846eaa1509595f4d4b82f0f115c54313fa2171e1e36"
+      },
+      {
+        "path": "append-finite-evidence.py",
+        "member": "formal-msvc-ca45/append-finite-evidence.py",
+        "bytes": 8060,
+        "sha256": "9ebcf91c9d2e64b51990204d0ab44efdd1164b733ea895916371c2c09b761b29"
+      },
+      {
+        "path": "lint-fix-validation/nightly-gnu.stderr.log",
+        "member": "formal-msvc-ca45/lint-fix-validation/nightly-gnu.stderr.log",
+        "bytes": 3724,
+        "sha256": "4e306d435625593fc8980b87728b4bc9b729c9f04f642c82a245f2623603b484"
+      },
+      {
+        "path": "lint-fix-validation/stable-gnu.stderr.log",
+        "member": "formal-msvc-ca45/lint-fix-validation/stable-gnu.stderr.log",
+        "bytes": 3413,
+        "sha256": "18922eed28b41b478b487a14402674c606bc2a1599a81c364c216e4a1758858e"
+      },
+      {
+        "path": "root-validation/test-installer-carrier-format.py.stderr.log",
+        "member": "formal-msvc-ca45/root-validation/test-installer-carrier-format.py.stderr.log",
+        "bytes": 109,
+        "sha256": "b3422b145032ac3a56ce40c0e8bbe6f04030fe26a1ce1f5388afec7a5b7cbee0"
+      },
+      {
+        "path": "root-validation/test-package-abi2-controlled-dev.py.stderr.log",
+        "member": "formal-msvc-ca45/root-validation/test-package-abi2-controlled-dev.py.stderr.log",
+        "bytes": 112,
+        "sha256": "c429da3bc1701a81e712cef2bcd1ddd3aa5c126576b967245f67132c8c24026d"
+      },
+      {
+        "path": "root-validation/test-controlled-setup-seal.py.stderr.log",
+        "member": "formal-msvc-ca45/root-validation/test-controlled-setup-seal.py.stderr.log",
+        "bytes": 112,
+        "sha256": "be2c77d59032d94869dcf48af5dd4d67eab27be254d122cba0180d0b2231ad35"
+      },
+      {
+        "path": "root-validation/check-msi-candidate.py.stderr.log",
+        "member": "formal-msvc-ca45/root-validation/check-msi-candidate.py.stderr.log",
+        "bytes": 4029,
+        "sha256": "c92c315ce16ca4c3fc9a11a5502433a10c9c412751937eda21d525a1ed935e3d"
+      },
+      {
+        "path": "root-validation/check-controlled-msi.py.stderr.log",
+        "member": "formal-msvc-ca45/root-validation/check-controlled-msi.py.stderr.log",
+        "bytes": 813,
+        "sha256": "7d906049c54cdbbb252f0c39abfb33320117e8b9be76e33777d155e0735d0962"
+      }
+    ],
+    "omitted": "Full original official ZIPs/binaries and omitted Git-tree/domain/log files were fully verified before selection; this archive preserves only identities and explicit selected originals, not their complete omitted bytes",
+    "scanner": {
+      "sha256": "da2906c450ea8c2ac7d18e358507023f519dbcc6faf1a9ac1abb1ae16af8c30f",
+      "findings": 0,
+      "statistics": {
+        "textViews": 35097,
+        "utf16Views": 0,
+        "cp936Views": 0,
+        "clixmlDecodedViews": 0,
+        "decodedBase64Views": 0,
+        "jsonContainers": 276,
+        "decodedJsonStringViews": 34995
+      },
+      "additionalAllowances": "NONE"
+    },
+    "localCleanup": {
+      "status": "PASS_COMPLETED_OWNED_LOCAL_TEST_BUILD_INPUTS_REMOVED",
+      "removed": [
+        {
+          "path": "lint-fix-validation/target-nightly-gnu",
+          "files": 934,
+          "directories": 510,
+          "bytes": 213953480,
+          "knownAbsent": true
+        },
+        {
+          "path": "lint-fix-validation/target-stable-gnu",
+          "files": 828,
+          "directories": 186,
+          "bytes": 223002474,
+          "knownAbsent": true
+        },
+        {
+          "path": "web-build",
+          "files": 6450,
+          "directories": 215,
+          "bytes": 185075508,
+          "knownAbsent": true
+        },
+        {
+          "path": "modern-ci",
+          "files": 249,
+          "directories": 19,
+          "bytes": 128742440,
+          "knownAbsent": true
+        },
+        {
+          "path": "win7-ci",
+          "files": 259,
+          "directories": 19,
+          "bytes": 132911455,
+          "knownAbsent": true
+        },
+        {
+          "path": "source-git",
+          "files": 712,
+          "directories": 178,
+          "bytes": 28137723,
+          "knownAbsent": true
+        },
+        {
+          "path": "modern-original.zip",
+          "files": 1,
+          "directories": 0,
+          "bytes": 49690183,
+          "knownAbsent": true
+        },
+        {
+          "path": "win7-original.zip",
+          "files": 1,
+          "directories": 0,
+          "bytes": 50546294,
+          "knownAbsent": true
+        }
+      ],
+      "ownedLiveBuildProcesses": 0,
+      "windows": "Both original probe cleanup PASS; no current Windows test controller",
+      "persistentAccess": "Windows SSH/public keys and external private key preserved; key previously stat only",
+      "unfinished": "runtime-prepare, external legacy-root candidate and root report/staging retained for next source build; unrelated round80 retained"
+    },
+    "cleanupMember": {
+      "member": "formal-msvc-ca45/local-cleanup.json",
+      "bytes": 1633,
+      "sha256": "298cc7b92c4158b7847050d739699cdc9c19fc8c49f529f15016986909a27dc1"
+    },
+    "finalDraftCleanup": {
+      "status": "PASS_COMPLETED_EXTERNAL_FORMAL_DRAFT_REMOVED_AFTER_EXACT_SELECTION",
+      "removedRoot": "/tmp/fc-formal-abi2-candidate",
+      "selectedOriginals": [
+        {
+          "member": "formal-msvc-ca45/agent-original/validation.json",
+          "bytes": 2077,
+          "sha256": "32a7af44626eb8d682b7b3bc044b955a5a00fab0b4fa9cd9ed3dba22dd886d74"
+        },
+        {
+          "member": "formal-msvc-ca45/agent-original/implementation.patch",
+          "bytes": 22579,
+          "sha256": "7fdee15058bfe07b6160760e86506fec430e55c035430cd42c654fef39404c05"
+        },
+        {
+          "member": "formal-msvc-ca45/agent-original/validate-candidate.py",
+          "bytes": 5780,
+          "sha256": "db803d81ac50ebf2d5404495f7e1e8add7afd4fc0c6413c8d2726bd0be0f5ab2"
+        },
+        {
+          "member": "formal-msvc-ca45/agent-original/pure-contract-first.stderr.log",
+          "bytes": 2804,
+          "sha256": "6c64695b2419ae63f81fe85ed0f1e34f543dcc9dec48da0fa6afd98fc8fe35ec"
+        },
+        {
+          "member": "formal-msvc-ca45/agent-original/dev-formal-first.stderr.log",
+          "bytes": 1428,
+          "sha256": "08bfefc72b337daa47a3f11a8abf8ea790c5205575a3b013f2bf42053ddfb180"
+        },
+        {
+          "member": "formal-msvc-ca45/agent-original/pure-final-instructions.stderr.log",
+          "bytes": 1441,
+          "sha256": "e2300c64060c0794b3217a937825dff71ea3b916b7d910af2c2bdeaf9c927b63"
+        }
+      ],
+      "ownedNpmDebugLogsRemoved": 2,
+      "unfinishedCandidates": "Legacy root and runtime preparation retained; no current compilation or Windows test process",
+      "persistentSSH": "UNCHANGED"
     }
   }
 }
