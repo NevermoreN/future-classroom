@@ -1685,6 +1685,46 @@ impl Window {
     }
 }
 
+fn static_text_height(hwnd: HWND, text: &str, width: i32) -> Result<i32> {
+    if text.is_empty() {
+        return Ok(58);
+    }
+    let mut text: Vec<u16> = text.encode_utf16().collect();
+    let mut bounds = RECT {
+        right: width,
+        ..Default::default()
+    };
+    // SAFETY: this owned Static control and its font remain live on this UI
+    // thread. Match SS_LEFT/SS_NOPREFIX wrapping without painting or activation.
+    // Restore the selected object and release the DC before returning any error.
+    let height = unsafe {
+        let dc = GetDC(Some(hwnd));
+        if dc.is_invalid() {
+            return Err(Error::from_thread());
+        }
+        let font = SendMessageW(hwnd, WM_GETFONT, None, None);
+        let old = SelectObject(dc, HGDIOBJ(font.0 as *mut _));
+        if old.is_invalid() {
+            let error = Error::from_hresult(E_FAIL);
+            let _ = ReleaseDC(Some(hwnd), dc);
+            return Err(error);
+        }
+        let height = DrawTextW(
+            dc,
+            &mut text,
+            &mut bounds,
+            DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX,
+        );
+        let _ = SelectObject(dc, old);
+        let _ = ReleaseDC(Some(hwnd), dc);
+        height
+    };
+    if height == 0 {
+        return Err(Error::from_hresult(E_FAIL));
+    }
+    Ok((height + 4).max(58))
+}
+
 fn layout(hwnd: HWND, state: &State) -> Result<()> {
     let Some(view) = state
         .view
@@ -1713,8 +1753,9 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
         GetClientRect(hwnd, &mut client)?;
     }
     let width = (client.right - client.left - 40).max(160);
-    let mut positions = vec![(description, 20, 16, width, 58)];
-    let mut y = 82;
+    let description_height = static_text_height(description, &view.description, width)?;
+    let mut positions = vec![(description, 20, 16, width, description_height)];
+    let mut y = description_height + 24;
     if let Some(canvas) = state
         .preview
         .try_borrow()
@@ -1757,8 +1798,9 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
         ));
         y += height + 42;
     }
-    positions.push((status, 20, y + 4, width, 58));
-    y += 76;
+    let status_height = static_text_height(status, &view.status, width)?;
+    positions.push((status, 20, y + 4, width, status_height));
+    y += status_height + 18;
     let columns = (width / 200).max(1);
     let button_width = (width / columns - 10).max(80);
     for (index, action) in actions.iter().enumerate() {
@@ -1976,6 +2018,72 @@ mod tests {
                 enabled: true,
             }],
         }
+    }
+    #[test]
+    fn long_restore_explanations_and_statuses_expand_with_scrollable_actions() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        let foreground = unsafe { GetForegroundWindow() };
+        let window = Window::new().unwrap();
+        let mut model = view();
+        model.description = "恢复会替换课表、校历、布局和教学资料，保留当前账号安全设置。确认前可取消，确认后须等待程序关闭，再重新启动并登录。\n".repeat(8);
+        model.status = "合成恢复核对状态：仍须等待后台归还。\n".repeat(6);
+        window.render(&model).unwrap();
+        let rect = |hwnd| {
+            let mut r = RECT::default();
+            unsafe { GetWindowRect(hwnd, &mut r).unwrap() };
+            r
+        };
+        // Resize only our hidden owned window; never send global input or focus.
+        unsafe { MoveWindow(window.hwnd, 0, 0, 820, 500, false).unwrap() };
+        let wide = rect(window.state.controls.borrow().description);
+        assert!(wide.bottom - wide.top > 58);
+        unsafe { MoveWindow(window.hwnd, 0, 0, 360, 300, false).unwrap() };
+        let (description, status, label) = {
+            let controls = window.state.controls.borrow();
+            (controls.description, controls.status, controls.labels[0])
+        };
+        let description = rect(description);
+        let status = rect(status);
+        assert!(description.bottom - description.top > wide.bottom - wide.top);
+        assert!(rect(label).top >= description.bottom + 8);
+        assert!(status.bottom - status.top > 58);
+        assert!(rect(button(&window).hwnd).top >= status.bottom + 14);
+        let mut info = SCROLLINFO {
+            cbSize: std::mem::size_of::<SCROLLINFO>() as u32,
+            fMask: SIF_ALL,
+            ..Default::default()
+        };
+        unsafe { GetScrollInfo(window.hwnd, SB_VERT, &mut info).unwrap() };
+        assert!(info.nMax > info.nPage as i32);
+        unsafe {
+            let _ = SendMessageW(
+                window.hwnd,
+                WM_VSCROLL,
+                Some(WPARAM(SB_BOTTOM.0 as usize)),
+                None,
+            );
+        }
+        assert!(window.state.scroll.get() > 0);
+        let mut client = RECT::default();
+        let mut origin = POINT::default();
+        unsafe {
+            GetClientRect(window.hwnd, &mut client).unwrap();
+            assert!(ClientToScreen(window.hwnd, &mut origin).as_bool());
+        }
+        let action = rect(button(&window).hwnd);
+        assert!(action.top >= origin.y && action.bottom <= origin.y + client.bottom);
+        model.description = "短说明".into();
+        model.status.clear();
+        window.render(&model).unwrap();
+        for hwnd in [
+            window.state.controls.borrow().description,
+            window.state.controls.borrow().status,
+        ] {
+            let r = rect(hwnd);
+            assert_eq!(r.bottom - r.top, 58);
+        }
+        assert!(!window.is_visible());
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
     }
     fn field(window: &Window, id: u16) -> FieldBinding {
         *window
