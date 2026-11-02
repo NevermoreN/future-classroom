@@ -142,7 +142,7 @@ fn rollback_itself_is_reentrant_after_each_reverse_move() {
     }
 }
 #[test]
-fn commit_removes_old_accounts_audio_exports_keys_and_does_not_reject_later_fresh_writes() {
+fn installed_terminal_survives_reopen_and_only_retires_metadata_after_initialization() {
     let fixture = Fixture::new();
     let (prepared, _) = committed(&fixture);
     let operation = prepared.operation.clone();
@@ -163,8 +163,32 @@ fn commit_removes_old_accounts_audio_exports_keys_and_does_not_reject_later_fres
             0
         );
     }
-    assert!(!operation.exists());
+    assert_eq!(fs::read_dir(&operation).unwrap().count(), 2);
+    assert!(operation.join("journal").exists());
+    assert!(operation.join("cleanup-complete").exists());
     fixture.assert_runtime();
+    // A new service reconstructs authority solely from the persisted original
+    // journal and positive terminal marker, never ResetStartup.installed.
+    let files = fixture.files();
+    assert_eq!(
+        files.reconcile_startup(&|| true).unwrap(),
+        ResetStartup::default()
+    );
+    let repeat = files.review(43, &|| true).unwrap();
+    let deferred = files.prepare(repeat, &|| true).unwrap();
+    assert!(deferred.deferred.is_some());
+    assert_eq!(deferred.sequence(), 43);
+    deferred.discard(&|| true).unwrap();
+    assert_eq!(
+        fs::read_dir(operation.parent().unwrap()).unwrap().count(),
+        2
+    );
+    let handoff = files.initialization_handoff(&|| true).unwrap().unwrap();
+    let permit = handoff.authorize_initialization(&files, &|| true).unwrap();
+    permit
+        .verify_before_initialization(fixture.paths.root(), &|| true)
+        .unwrap();
+    drop(permit);
     fixture.write(
         &fixture
             .paths
@@ -173,10 +197,20 @@ fn commit_removes_old_accounts_audio_exports_keys_and_does_not_reject_later_fres
             .join("new-key-placeholder"),
         b"subsequent fresh deployment write",
     );
+    let handoff = files.initialization_handoff(&|| true).unwrap().unwrap();
+    assert!(handoff.authorize_initialization(&files, &|| true).is_err());
+    let handoff = files.initialization_handoff(&|| true).unwrap().unwrap();
+    // This filesystem-unit test exercises metadata retirement only. Actual
+    // marker/DPAPI/SQLite success is the normal bootstrap caller's gate.
+    handoff
+        .complete_after_backend_open(&files, &|| true)
+        .unwrap();
+    assert!(!operation.exists());
     assert_eq!(
-        fixture.files().reconcile_startup(&|| true).unwrap(),
-        ResetStartup::default()
+        fs::read(fixture.paths.root().join("config/new-key-placeholder")).unwrap(),
+        b"subsequent fresh deployment write"
     );
+    assert!(files.initialization_handoff(&|| true).unwrap().is_none());
 }
 #[test]
 fn cleanup_resumes_after_some_exact_recorded_objects_have_already_disappeared() {
@@ -201,7 +235,8 @@ fn cleanup_resumes_after_some_exact_recorded_objects_have_already_disappeared() 
     let operation = prepared.operation.clone();
     drop(prepared);
     fixture.files().reconcile_startup(&|| true).unwrap();
-    assert!(!operation.exists());
+    assert!(operation.join("cleanup-complete").exists());
+    assert!(operation.join("journal").exists());
     fixture.assert_runtime();
 }
 #[test]
@@ -317,7 +352,7 @@ fn cancellation_inside_rollback_preserves_recoverable_journal_for_next_start() {
 }
 
 #[test]
-fn metadata_cleanup_restarts_after_journal_and_owner_are_removed_without_touching_fresh_writes() {
+fn interrupted_retirement_cannot_reauthorize_initialization_or_touch_later_data() {
     let fixture = Fixture::new();
     let (mut prepared, meta) = committed(&fixture);
     write_new(
@@ -328,21 +363,201 @@ fn metadata_cleanup_restarts_after_journal_and_owner_are_removed_without_touchin
     .unwrap();
     prepared.operation_pin.take();
     let operation = prepared.operation.clone();
-    let result = cleanup(&prepared.service, &operation, &|| {
-        !(operation.join("cleanup-complete").exists() && !operation.join("journal").exists())
-    });
+    cleanup(&prepared.service, &operation, &|| true).unwrap();
+    drop(prepared);
+    let files = fixture.files();
+    let handoff = files.initialization_handoff(&|| true).unwrap().unwrap();
+    let result =
+        handoff.complete_after_backend_open(&files, &|| operation.join("journal").exists());
     assert_eq!(result, Err(ReinitializationFileError::Cancelled));
     assert!(operation.join("cleanup-complete").exists());
-    drop(prepared);
+    assert!(!operation.join("journal").exists());
+    files.reconcile_startup(&|| true).unwrap();
+    let handoff = files.initialization_handoff(&|| true).unwrap().unwrap();
+    assert!(handoff.authorize_initialization(&files, &|| true).is_err());
     fixture.write(
         &fixture.paths.root().join("config").join("fresh.bin"),
         b"fresh generation survives metadata cleanup",
     );
-    fixture.files().reconcile_startup(&|| true).unwrap();
+    let handoff = files.initialization_handoff(&|| true).unwrap().unwrap();
+    handoff
+        .complete_after_backend_open(&files, &|| true)
+        .unwrap();
     assert!(!operation.exists());
     assert_eq!(
         fs::read(fixture.paths.root().join("config").join("fresh.bin")).unwrap(),
         b"fresh generation survives metadata cleanup"
+    );
+    fixture.assert_runtime();
+}
+#[test]
+fn invalid_terminal_conflict_or_replaced_empty_tree_never_mints_permission() {
+    for fault in 0..3 {
+        let fixture = Fixture::new();
+        let (mut prepared, meta) = committed(&fixture);
+        write_new(
+            &prepared.service.files,
+            &prepared.operation.join("cleanup"),
+            &phase_bytes(meta.owner, CLEAN_INSTALLED),
+        )
+        .unwrap();
+        prepared.operation_pin.take();
+        let operation = prepared.operation.clone();
+        cleanup(&prepared.service, &operation, &|| true).unwrap();
+        drop(prepared);
+        if fault == 0 {
+            let terminal = operation.join("cleanup-complete");
+            fs::remove_file(&terminal).unwrap();
+            fixture.write(&terminal, b"damaged positive receipt");
+        } else if fault == 1 {
+            fs::create_dir(
+                operation
+                    .parent()
+                    .unwrap()
+                    .join("op-00000000000000000000000000000000"),
+            )
+            .unwrap();
+        } else {
+            fs::rename(
+                fixture.paths.root().join("state"),
+                fixture.outside.join("preserved-state"),
+            )
+            .unwrap();
+            fixture.paths.prepare_for_current_user().unwrap();
+            fixture.write(
+                &fixture.paths.root().join("state/replacement"),
+                b"replacement preserved",
+            );
+        }
+        let files = fixture.files();
+        assert!(files.initialization_handoff(&|| true).is_err());
+        assert!(operation.join("journal").exists());
+        assert!(operation.join("cleanup-complete").exists());
+        if fault < 2 {
+            assert!(files.reconcile_startup(&|| true).is_err());
+            let review = files.review(43, &|| true).unwrap();
+            assert!(files.prepare(review, &|| true).is_err());
+        } else {
+            assert_eq!(
+                fs::read(fixture.paths.root().join("state/replacement")).unwrap(),
+                b"replacement preserved"
+            );
+        }
+        fixture.assert_runtime();
+    }
+}
+fn actual_cold_permit(
+    fixture: &Fixture,
+    sequence: u64,
+) -> crate::reinitialization::ColdReinitializationPermit {
+    use crate::reinitialization::{
+        ColdReinitialization, NeverOpenedProof, ReinitializationBackend,
+    };
+    let proof = NeverOpenedProof::claim_repair_startup(&fixture.paths, sequence).unwrap();
+    let mut drain = ColdReinitialization::begin(
+        fixture.paths.root().to_owned(),
+        sequence,
+        ReinitializationBackend::NeverOpened(proof),
+        fc_runtime::worker::WorkerPool::<crate::recovery::test_support::QuietTask>::start()
+            .unwrap(),
+        None,
+    );
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+    loop {
+        if let Some(permit) = drain.poll().unwrap() {
+            return permit;
+        }
+        assert!(std::time::Instant::now() < deadline);
+        std::thread::sleep(std::time::Duration::from_millis(1));
+    }
+}
+#[test]
+fn repeated_explicit_reset_waits_for_actual_cold_permit_then_clears_partial_initialization() {
+    let fixture = Fixture::new();
+    let (prepared, _) = committed(&fixture);
+    let old_operation = prepared.operation.clone();
+    drop(prepared);
+    let files = fixture.files();
+    // An active journal is not completed metadata, even if all moves finished.
+    let active_review = files.review(43, &|| true).unwrap();
+    assert!(files.prepare(active_review, &|| true).is_err());
+    files.reconcile_startup(&|| true).unwrap();
+    fixture.write(
+        &fixture.paths.root().join("config/credential-key.dpapi"),
+        b"partial key survives until clear",
+    );
+    fs::remove_dir(fixture.paths.root().join("state")).unwrap();
+    fs::remove_dir(fixture.paths.root().join("teachers")).unwrap();
+    let review = files.review(43, &|| true).unwrap();
+    let deferred = files.prepare(review, &|| true).unwrap();
+    assert!(deferred.deferred.is_some());
+    assert_eq!(deferred.root(), fixture.paths.root());
+    assert_eq!(deferred.sequence(), 43);
+    assert_eq!(
+        fs::read_dir(old_operation.parent().unwrap())
+            .unwrap()
+            .count(),
+        2
+    );
+    assert_eq!(
+        fs::read(fixture.paths.root().join("config/credential-key.dpapi")).unwrap(),
+        b"partial key survives until clear"
+    );
+    let permit = actual_cold_permit(&fixture, 43);
+    let receipt = deferred.commit_cold(permit, &|| true).unwrap();
+    assert_eq!(receipt.sequence, 43);
+    assert!(!old_operation.exists());
+    for name in OWNED_TREES {
+        assert_eq!(
+            fs::read_dir(fixture.paths.root().join(name))
+                .unwrap()
+                .count(),
+            0
+        );
+    }
+    assert_eq!(
+        fs::read_dir(fixture.paths.root().join(NAMESPACE))
+            .unwrap()
+            .count(),
+        2
+    );
+    assert!(files.initialization_handoff(&|| true).unwrap().is_some());
+    fixture.assert_runtime();
+}
+#[test]
+fn interrupted_explicit_metadata_retirement_preserves_partial_data_and_can_prepare_again() {
+    let fixture = Fixture::new();
+    let (prepared, _) = committed(&fixture);
+    let operation = prepared.operation.clone();
+    drop(prepared);
+    let files = fixture.files();
+    files.reconcile_startup(&|| true).unwrap();
+    fixture.write(
+        &fixture.paths.root().join("config/partial.bin"),
+        b"not yet cleared",
+    );
+    let terminal = replacement_terminal(&files, &|| true).unwrap().unwrap();
+    // Exercise the private metadata port cut; public production access is only
+    // through commit_cold, whose actual permit is covered above.
+    assert_eq!(
+        retire_for_repeat(&files, terminal, &|| operation.join("journal").exists()),
+        Err(ReinitializationFileError::Cancelled)
+    );
+    assert!(!operation.join("journal").exists());
+    assert!(operation.join("cleanup-complete").exists());
+    assert_eq!(
+        fs::read(fixture.paths.root().join("config/partial.bin")).unwrap(),
+        b"not yet cleared"
+    );
+    files.reconcile_startup(&|| true).unwrap();
+    let review = files.review(44, &|| true).unwrap();
+    let deferred = files.prepare(review, &|| true).unwrap();
+    assert!(deferred.deferred.is_some());
+    deferred.discard(&|| true).unwrap();
+    assert!(operation.join("cleanup-complete").exists());
+    assert_eq!(
+        fs::read(fixture.paths.root().join("config/partial.bin")).unwrap(),
+        b"not yet cleared"
     );
     fixture.assert_runtime();
 }

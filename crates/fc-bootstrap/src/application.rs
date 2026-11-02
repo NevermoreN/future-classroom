@@ -425,9 +425,13 @@ fn error_text(error: &Failure) -> String {
 /// The deployment marker makes missing key/database evidence fail closed. A
 /// partially prepared directory is never mistaken for a brand-new installation.
 #[derive(Clone, Copy)]
-enum OpenPolicy {
+enum OpenPolicy<'a> {
     AllowInitialization,
     ExistingOnly,
+    AfterVerifiedReset {
+        permit: &'a fc_bootstrap::reinitialization_files::ResetInitializationPermit,
+        check: &'a dyn Fn() -> bool,
+    },
 }
 fn verify_existing_deployment(root: &Path) -> Result<()> {
     if read_bounded(&root.join("config/deployment.marker"), 128)?.as_slice() != MANIFEST {
@@ -454,7 +458,7 @@ fn verify_existing_deployment(root: &Path) -> Result<()> {
     }
     Ok(())
 }
-fn open_backend(root: &Path, clock: Arc<CurrentClock>, policy: OpenPolicy) -> Result<Backend> {
+fn open_backend(root: &Path, clock: Arc<CurrentClock>, policy: OpenPolicy<'_>) -> Result<Backend> {
     let key_path = root.join("config/credential-key.dpapi");
     let database = root.join("state/classroom.sqlite3");
     let marker = root.join("config/deployment.marker");
@@ -483,6 +487,11 @@ fn open_backend(root: &Path, clock: Arc<CurrentClock>, policy: OpenPolicy) -> Re
                 "发现未完成或损坏的部署，需要修复；不会覆盖已有数据。",
             ));
         }
+        if let OpenPolicy::AfterVerifiedReset { permit, check } = policy {
+            permit
+                .verify_before_initialization(root, check)
+                .map_err(reset_startup_error)?;
+        }
         fc_storage::business::startup_state(&database)
             .map_err(|_| Failure::Deployment("无法创建受控数据文件。"))?;
         let codec = CredentialRecordCodec::generate(&mut SystemRandom)
@@ -498,6 +507,75 @@ fn open_backend(root: &Path, clock: Arc<CurrentClock>, policy: OpenPolicy) -> Re
         codec
     };
     Backend::open(database, codec, clock.clone(), clock).map_err(Failure::from)
+}
+fn reset_startup_error(
+    _: fc_bootstrap::reinitialization_files::ReinitializationFileError,
+) -> Failure {
+    Failure::Deployment("资料重新初始化状态需要修复；现有文件已保留。")
+}
+/// The caller retains the original instance lock. No backend is published until
+/// both cold-switch recovery and any initialization handoff have finished.
+fn open_reconciled_backend(
+    paths: &DataPaths,
+    clock: Arc<CurrentClock>,
+    check: &dyn Fn() -> bool,
+) -> Result<Backend> {
+    use fc_bootstrap::reinitialization_files::{
+        ResetInitializationHandoff, ResetInitializationPermit,
+    };
+    enum ResetOpen {
+        None,
+        Initialize(ResetInitializationPermit),
+        Retire(ResetInitializationHandoff),
+    }
+    let root = paths.root();
+    let reset = fc_bootstrap::reinitialization_files::ReinitializationFiles::new(paths)
+        .map_err(reset_startup_error)?;
+    reset
+        .reconcile_startup(check)
+        .map_err(reset_startup_error)?;
+    let handoff = reset
+        .initialization_handoff(check)
+        .map_err(reset_startup_error)?;
+    fc_bootstrap::recovery_files::RecoveryFiles::new(paths)
+        .and_then(|files| files.reconcile_startup(check))
+        .map_err(|_| Failure::Deployment("备份恢复状态需要修复；原数据已保留。"))?;
+    if !check() {
+        return Err(Failure::Stopped);
+    }
+    let opening = match handoff {
+        Some(h) if !deployment_object_exists(&root.join("config/deployment.marker"))? => {
+            ResetOpen::Initialize(
+                h.authorize_initialization(&reset, check)
+                    .map_err(reset_startup_error)?,
+            )
+        }
+        Some(h) => ResetOpen::Retire(h),
+        None => ResetOpen::None,
+    };
+    let policy = if let ResetOpen::Initialize(permit) = &opening {
+        OpenPolicy::AfterVerifiedReset { permit, check }
+    } else if paths.requires_existing_deployment() {
+        verify_existing_deployment(root)?;
+        OpenPolicy::ExistingOnly
+    } else {
+        OpenPolicy::AllowInitialization
+    };
+    paths
+        .prepare_for_current_user()
+        .and_then(|deployment| deployment.read_back())
+        .map_err(|_| Failure::Deployment("数据目录权限读回失败，需要修复。"))?;
+    let mut backend = open_backend(root, clock, policy)?;
+    let completion = match opening {
+        ResetOpen::Initialize(p) => p.complete_after_backend_open(&reset, check),
+        ResetOpen::Retire(h) => h.complete_after_backend_open(&reset, check),
+        ResetOpen::None => Ok(()),
+    };
+    if let Err(error) = completion {
+        backend.close()?;
+        return Err(reset_startup_error(error));
+    }
+    Ok(backend)
 }
 fn deployment_object_exists(path: &Path) -> Result<bool> {
     // A broken link is still an existing object; following it must not turn a
@@ -1602,29 +1680,8 @@ impl Work {
                 // The first frame is already visible. Recovery owns the same
                 // worker deadline/cancellation and precedes full child creation,
                 // SQLite, ordinary GC, audio and every network capability.
-                fc_bootstrap::reinitialization_files::ReinitializationFiles::new(&paths)
-                    .and_then(|files| files.reconcile_startup(&|| context.checkpoint().is_ok()))
-                    .map_err(|_| {
-                        Failure::Deployment("资料重新初始化状态需要修复；现有文件已保留。")
-                    })?;
-                fc_bootstrap::recovery_files::RecoveryFiles::new(&paths)
-                    .and_then(|files| files.reconcile_startup(&|| context.checkpoint().is_ok()))
-                    .map_err(|_| Failure::Deployment("备份恢复状态需要修复；原数据已保留。"))?;
-                context.checkpoint().map_err(|_| Failure::Stopped)?;
-                let policy = if paths.requires_existing_deployment() {
-                    // Original reset/restore journals get the first opportunity
-                    // to restore a torn switch. Only then inspect the live set,
-                    // before preparing any missing teaching directories.
-                    verify_existing_deployment(&root)?;
-                    OpenPolicy::ExistingOnly
-                } else {
-                    OpenPolicy::AllowInitialization
-                };
-                paths
-                    .prepare_for_current_user()
-                    .and_then(|deployment| deployment.read_back())
-                    .map_err(|_| Failure::Deployment("数据目录权限读回失败，需要修复。"))?;
-                let mut backend = open_backend(&root, clock, policy)?;
+                let mut backend =
+                    open_reconciled_backend(&paths, clock, &|| context.checkpoint().is_ok())?;
                 if context.checkpoint().is_err() {
                     backend.close()?;
                     return Err(Failure::Stopped);
@@ -6776,6 +6833,7 @@ mod tests {
         let paths = DataPaths::isolated_test(root.clone()).unwrap();
         paths.prepare_for_current_user().unwrap();
         let _scratch = Scratch(root.clone());
+        let _instance = InstanceGuard::acquire(paths.root()).unwrap();
         for marker in [false, true] {
             if marker {
                 create_file(&root.join("config/deployment.marker"), MANIFEST).unwrap();
@@ -6792,11 +6850,10 @@ mod tests {
         }
         fs::remove_file(root.join("config/deployment.marker")).unwrap();
         let clock = Arc::new(CurrentClock::new());
-        let mut first =
-            open_backend(&root, clock.clone(), OpenPolicy::AllowInitialization).unwrap();
+        let mut first = open_reconciled_backend(&paths, clock.clone(), &|| true).unwrap();
         first.close().unwrap();
         let encrypted = fs::read(root.join("config/credential-key.dpapi")).unwrap();
-        let mut reopened = open_backend(&root, clock, OpenPolicy::ExistingOnly).unwrap();
+        let mut reopened = open_reconciled_backend(&paths, clock, &|| true).unwrap();
         assert!(reopened.state().unwrap().installation.is_none());
         reopened.close().unwrap();
         assert_eq!(

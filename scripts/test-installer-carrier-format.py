@@ -52,7 +52,7 @@ class CarrierFormatTests(unittest.TestCase):
         self.assertEqual(descriptor[:12], b"FCCAR2\0\0\x02\0\x40\0")
         self.assertEqual(descriptor[12:48], b"99378807-098D-5F04-8D4D-F181DFA218D5")
         self.assertEqual(struct.unpack("<HHHHI", descriptor[48:60]), (120, 64, 8, 72, 31457280))
-        self.assertEqual(descriptor[60:], bytes(4))
+        self.assertEqual(descriptor[60:], b"\x03\x00\x00\x00")
         offset = len(self.pe) + 16
         self.assertEqual(self.image[:offset], self.template[:offset])
         self.assertEqual(self.image[offset:offset + 32], hashlib.sha256(self.msi).digest())

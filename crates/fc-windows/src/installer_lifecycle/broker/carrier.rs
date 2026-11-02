@@ -1,4 +1,4 @@
-//! ABI2 carrier byte format only; not yet wired to Session/CA/Setup execution.
+//! ABI2 carrier byte format with capability3; native admission remains separate.
 //! Parsing or filling a digest grants no host provenance or installation right.
 //! Native callers must hash the complete pinned MSI with the existing owner and
 //! independently match a compiled PublishedInstallerHost; no client digest input.
@@ -9,6 +9,34 @@ pub(crate) const MAGIC: &[u8; 8] = b"FCCAR2\0\0";
 pub(crate) const FOOTER: &[u8; 16] = b"FCCR2-END-v2\0\0\0\0";
 pub(crate) const SEAL_MAGIC: &[u8; 16] = b"FC-SETUP-MSI\0v1\0";
 pub(crate) const ABI: u16 = 2;
+/// Versioned guard capability within the unchanged ABI2 carrier layout. Old
+/// zero-capability helpers/DLLs cannot participate in a changed-aux upgrade.
+pub(crate) const GUARD_PROTOCOL: u16 = 3;
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct AuxiliaryIdentity {
+    pub(crate) template_bytes: usize,
+    pub(crate) template_sha: [u8; 32],
+    pub(crate) guard_sha: [u8; 32],
+}
+impl AuxiliaryIdentity {
+    pub(crate) fn observed(
+        template_bytes: usize,
+        template_sha: [u8; 32],
+        guard_sha: [u8; 32],
+    ) -> Result<Self> {
+        if !(MIN_IMAGE_BYTES..=MAX_IMAGE_BYTES).contains(&template_bytes)
+            || template_sha == [0; 32]
+            || guard_sha == [0; 32]
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        Ok(Self {
+            template_bytes,
+            template_sha,
+            guard_sha,
+        })
+    }
+}
 pub(crate) const DESCRIPTOR_BYTES: usize = 64;
 pub(crate) const MAX_IMAGE_BYTES: usize = 64 * 1024 * 1024;
 const TRAILER_BYTES: usize = 48 + DESCRIPTOR_BYTES + 4 + FOOTER.len();
@@ -48,7 +76,7 @@ fn u32_at(b: &[u8], at: usize) -> Result<u32> {
             .map_err(|_| LifecycleError::Invalid)?,
     ))
 }
-/// All64 descriptor bytes are fixed within ABI2; no product/version or digest.
+/// All64 descriptor bytes are fixed within this capability; no product or digest.
 pub(crate) fn descriptor() -> [u8; DESCRIPTOR_BYTES] {
     let mut b = [0u8; DESCRIPTOR_BYTES];
     b[..8].copy_from_slice(MAGIC);
@@ -59,6 +87,7 @@ pub(crate) fn descriptor() -> [u8; DESCRIPTOR_BYTES] {
         b[offset..offset + 2].copy_from_slice(&value.to_le_bytes());
     }
     b[56..60].copy_from_slice(&(30u32 * 1024 * 1024).to_le_bytes());
+    b[60..64].copy_from_slice(&u32::from(GUARD_PROTOCOL).to_le_bytes());
     b
 }
 /// Structural PE32/I386 GUI closure, not publisher/compiler provenance. The

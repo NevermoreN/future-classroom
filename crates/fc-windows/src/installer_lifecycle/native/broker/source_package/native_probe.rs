@@ -160,6 +160,7 @@ fn actual_fixed_source_capture_closes_all_msi_before_begin() {
 
     assert_ne!(source.source_sha256, [0; 32]);
     assert_ne!(source.template_sha256, [0; 32]);
+    assert_ne!(source.guard_sha256, [0; 32]);
     assert_eq!(session.image_sha, source.image_sha256);
     assert!(source.source_bytes > 0 && source.source_bytes <= MAX_SOURCE);
     assert_ne!(source.source_object, (0, 0));
@@ -172,8 +173,8 @@ fn actual_fixed_source_capture_closes_all_msi_before_begin() {
     assert_eq!(decoded.payload().version, VERSION);
     assert_eq!(
         source.close_receipts.len(),
-        10,
-        "db+summary+3views+5records actually closed"
+        13,
+        "db+summary+5views+6records actually closed"
     );
     assert!(source
         .close_receipts
@@ -185,7 +186,7 @@ fn actual_fixed_source_capture_closes_all_msi_before_begin() {
             .iter()
             .filter(|v| v.view_return == Some(0))
             .count(),
-        3
+        5
     );
     let source_sha = hex(&source.source_sha256);
     let template_sha = hex(&source.template_sha256);
@@ -195,12 +196,14 @@ fn actual_fixed_source_capture_closes_all_msi_before_begin() {
         "same Session Resources claim only"
     );
     assert!(!session.resources.failed);
-    // Resources contains no MSI namespace: these10 actual close receipts are
+    // Resources contains no MSI namespace: these13 actual close receipts are
     // required BEFORE this kernel/CNG/pin release, not inferred from process exit.
     session.resources.release().unwrap();
     assert!(session.resources.released());
     pristine_owned_state();
-    println!("SOURCE_PACKAGE_NATIVE_CAPTURE_OK abi=2 payloads=14 msiCloses=10 sourceSha={source_sha} templateSha={template_sha} claims=0");
+    println!(
+        "SOURCE_PACKAGE_NATIVE_CAPTURE_OK abi=2 payloads=14 guardProtocol=3 msiCloses=13 sourceSha={source_sha} templateSha={template_sha} claims=0"
+    );
 }
 fn rejects_known_invalid_source() {
     pristine_owned_state();

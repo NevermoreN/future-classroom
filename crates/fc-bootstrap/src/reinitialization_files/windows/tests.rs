@@ -9,7 +9,7 @@ static NEXT: AtomicU64 = AtomicU64::new(0);
 pub(super) struct Fixture {
     pub paths: DataPaths,
     instance: Option<InstanceGuard>,
-    outside: PathBuf,
+    pub(super) outside: PathBuf,
 }
 impl Fixture {
     pub fn new() -> Self {

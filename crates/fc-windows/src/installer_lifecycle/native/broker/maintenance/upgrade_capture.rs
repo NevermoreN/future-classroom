@@ -1,5 +1,6 @@
 //! Additional capture in the SAME Reader/Resources/claim; never a second owner.
 use super::*;
+use crate::installer_lifecycle::broker::published_host::predecessor;
 const TEMPLATE: &str = "SELECT `Data` FROM `Binary` WHERE `Name` = 'FcGuardClientTemplate'";
 const GUARD: &str = "SELECT `Data` FROM `Binary` WHERE `Name` = 'FcControlledGuardDll'";
 const PAYLOAD: &str = "SELECT `Data` FROM `Binary` WHERE `Name` = 'FcPayloadManifest'";
@@ -8,11 +9,6 @@ impl Reader {
         &mut self,
         source: &source_package::CapturedSource,
     ) -> Result<Option<upgrade::VerifiedUpgradePlan>> {
-        let Some(record) = &source.predecessor else {
-            return Ok(None);
-        };
-        let published = record.payload()?;
-        let old = published.payload();
         let mut found = [0u16; 39];
         self.time()?;
         let rc = unsafe {
@@ -40,6 +36,15 @@ impl Reader {
         if related == source.manifest.product {
             return Ok(None);
         }
+        // A source without a qualified capability3 predecessor may install
+        // afresh or maintain itself, but cannot enter an older endpoint. This
+        // is observed before Begin and every business write.
+        let record = source
+            .predecessor
+            .as_ref()
+            .ok_or(LifecycleError::UpgradeProtocolUnsupported)?;
+        let published = record.payload()?;
+        let old = published.payload();
         let new_version =
             format::version(&source.manifest.version).ok_or(LifecycleError::Invalid)?;
         let old_version = format::version(&old.version).ok_or(LifecycleError::Invalid)?;
@@ -47,8 +52,6 @@ impl Reader {
             || old.product == source.manifest.product
             || old_version >= new_version
             || published.package() == source.package
-            || record.template_sha != source.template_sha256
-            || record.template_bytes as usize != source.template_bytes
         {
             return Err(LifecycleError::Invalid);
         }
@@ -71,7 +74,7 @@ impl Reader {
             &source.package,
             &source.envelope,
             source.template_sha256,
-            record.guard_sha,
+            source.guard_sha256,
             true,
         )?;
         // This also rejects every unknown/missing table/schema in the new MSI.
@@ -118,6 +121,8 @@ impl Reader {
         }
         Ok(Some(upgrade::VerifiedUpgradePlan {
             old: upgrade::clone_manifest(old),
+            current_auxiliary: source.auxiliary()?,
+            predecessor_auxiliary: record.auxiliary()?,
             union,
             registration,
             cache_object,
@@ -140,6 +145,11 @@ impl Reader {
         if size == 0 || size as u64 > LIMIT || exact.is_some_and(|v| v.len() != size) {
             return Err(LifecycleError::Invalid);
         }
+        if query == TEMPLATE && size < crate::installer_lifecycle::broker::carrier::MIN_IMAGE_BYTES
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        let mut tail = [0u8; 132];
         let hash = self.hash_new()?;
         let mut offset = 0;
         let mut bytes = [0; 16384];
@@ -154,6 +164,14 @@ impl Reader {
             {
                 return Err(LifecycleError::Invalid);
             }
+            if query == TEMPLATE {
+                let start = size.saturating_sub(tail.len()).max(offset);
+                if start < offset + n {
+                    let destination = start - size.saturating_sub(tail.len());
+                    tail[destination..destination + offset + n - start]
+                        .copy_from_slice(&bytes[start - offset..n]);
+                }
+            }
             self.hash_add(&hash, &bytes[..n])?;
             offset += n;
         }
@@ -161,6 +179,20 @@ impl Reader {
         let rc = unsafe { MsiRecordReadStream(row, 1, Some(PSTR(bytes.as_mut_ptr())), &mut end) };
         if rc != 0 || end != 0 || self.fetch(view)?.is_some() {
             return Err(LifecycleError::Invalid);
+        }
+        if query == TEMPLATE {
+            use crate::installer_lifecycle::broker::carrier;
+            if &tail[..16] != carrier::SEAL_MAGIC
+                || tail[16..48] != [0; 32]
+                || tail[112..116] != 64u32.to_le_bytes()
+                || &tail[116..] != carrier::FOOTER
+                || tail[48..108] != carrier::descriptor()[..60]
+            {
+                return Err(LifecycleError::Invalid);
+            }
+            if tail[108..112] != u32::from(carrier::GUARD_PROTOCOL).to_le_bytes() {
+                return Err(LifecycleError::UpgradeProtocolUnsupported);
+            }
         }
         self.close_msi(row)?;
         self.close_msi(view)?;
@@ -180,9 +212,9 @@ impl Reader {
         let rc = unsafe { MsiOpenDatabaseW(&native_path(path)?, MSIDBOPEN_READONLY, &mut db) };
         let db = self.acquired(rc, db)?;
         self.package(db, package)?;
-        // This initial Upgrade ABI supports a three-Binary predecessor and a
-        // four-Binary successor. Unknown payload streams are not an extension
-        // point or silently excluded from the logical signature.
+        // Closed old3/old4 -> new4 grammar. Every present fourth stream is
+        // bounded wire data, and remains in database()'s whole fixed31 digest.
+        // Parsing does not authorize or recursively inspect that older release.
         let binary_view = self.view(db, "SELECT `Name` FROM `Binary`")?;
         let mut binary_names = BTreeSet::new();
         while let Some(row) = self.fetch(binary_view)? {
@@ -195,6 +227,9 @@ impl Reader {
         self.close_msi(binary_view)?;
         if !upgrade::binary_names(new, &binary_names) {
             return Err(LifecycleError::Invalid);
+        }
+        if binary_names.contains("FcPublishedPredecessor") {
+            self.predecessor_wire(db)?;
         }
         let expected = crate::installer_lifecycle::broker::payload_manifest::parse(envelope)?;
         let view=self.view(db,"SELECT `Property`, `Value` FROM `Property` WHERE `Property` = 'ProductCode' OR `Property` = 'UpgradeCode' OR `Property` = 'ProductVersion'")?;
@@ -256,5 +291,38 @@ impl Reader {
             self.close_msi(view)?;
         }
         self.close_msi(db)
+    }
+    fn predecessor_wire(&mut self, db: MSIHANDLE) -> Result<()> {
+        let view = self.view(db, predecessor::QUERY)?;
+        let row = self.fetch(view)?.ok_or(LifecycleError::Invalid)?;
+        self.time()?;
+        let size = unsafe { MsiRecordDataSize(row, 1) } as usize;
+        if !(predecessor::HEADER_BYTES + 1..=predecessor::MAX_BYTES).contains(&size) {
+            return Err(LifecycleError::Invalid);
+        }
+        let mut bytes = vec![0; size];
+        for chunk in bytes.chunks_mut(16384) {
+            self.time()?;
+            let mut got = chunk.len() as u32;
+            let rc =
+                unsafe { MsiRecordReadStream(row, 1, Some(PSTR(chunk.as_mut_ptr())), &mut got) };
+            self.time()?;
+            if rc != 0 || got as usize != chunk.len() {
+                return Err(LifecycleError::Invalid);
+            }
+        }
+        let mut tail = [0u8; 1];
+        let mut got = 1;
+        self.time()?;
+        let rc = unsafe { MsiRecordReadStream(row, 1, Some(PSTR(tail.as_mut_ptr())), &mut got) };
+        self.time()?;
+        if rc != 0 || got != 0 || self.fetch(view)?.is_some() {
+            return Err(LifecycleError::Invalid);
+        }
+        self.close_msi(row)?;
+        self.close_msi(view)?;
+        self.time()?;
+        predecessor::parse(&bytes)?;
+        self.time()
     }
 }

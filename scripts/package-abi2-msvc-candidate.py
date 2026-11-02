@@ -73,9 +73,19 @@ def validate_predecessor_cache(cache: dict, manifest: dict, package: dict) -> No
 def validate_successor_identity(package: dict, new_version: str, streams: dict, artifacts: dict) -> None:
     NEED(B['version_parts'](package['version']) < B['version_parts'](new_version)
          and package['productCode'] != B['product_code'](new_version), 'Strictly newer actual MSI/product identity')
-    NEED(streams[B['TEMPLATE_BINARY']] == ABI2['C']['make_carrier_template'](artifacts['lifecycle-compile'][1])
-         and streams[B['GUARD_BINARY']] == artifacts['guard-library-compile'][1],
-         'Existing native protocol requires actual identical old/new normal helper template and DLL')
+    NEED(package.get('guardProtocol') == ABI2['C']['GUARD_PROTOCOL'],
+         'Installed release does not support this upgrade; retain its data and use a compatible installer')
+    # predecessor_package already replays these old bytes against their OWN
+    # original CI. Never substitute them for the successor's genuine artifacts.
+    old_helper = ABI2['C']['parse_carrier_template'](streams[B['TEMPLATE_BINARY']])
+    NEED(B['digest'](old_helper) == package['normalProvenance']['normal_helper_sha256']
+         and B['digest'](streams[B['GUARD_BINARY']]) == package['normalGuardProvenance']['dll_sha256'],
+         'Old auxiliary bytes belong to original old normal helper and guard admissions')
+    helper, guard = artifacts['lifecycle-compile'][1], artifacts['guard-library-compile'][1]
+    ABI2['C']['_normal'](helper)
+    B['pe_dll_header'](guard)
+    NEED(ABI2['C']['parse_carrier_template'](ABI2['C']['make_carrier_template'](helper)) == helper,
+         'New auxiliary bytes are the actual separately admitted current normal artifacts')
 
 
 def validate_predecessor_runtime(runtime: dict, manifest: dict, package: dict) -> None:
@@ -169,6 +179,34 @@ def validate_predecessor_runtime(runtime: dict, manifest: dict, package: dict) -
          and all(x.get('status') == 'KNOWN_ABSENT' for x in paths), 'Both actually observed old cache paths are retired')
 
 
+def validate_old_publication(package: dict, record: bytes | None, streams: dict) -> None:
+    """Validate one old fourth-stream record as data, never re-run its history."""
+    if record is None:
+        NEED(package.get('status') == 'PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_STATIC_CANDIDATE_NATIVE_NOT_RUN'
+             and package.get('binaryReadback') == 'ALL_THREE_EXACT'
+             and 'publishedPredecessor' not in package and 'predecessorPublication' not in package,
+             'Initial old3 package has no fourth-stream publication claim')
+        return
+    meta = decode_predecessor(record)
+    receipt = dict(bytes=len(record), sha256=B['digest'](record))
+    publication = package['predecessorPublication']
+    NEED(package.get('status') == 'PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_SUCCESSOR_STATIC_CANDIDATE_NATIVE_NOT_RUN'
+         and package.get('binaryReadback') == 'ALL_FOUR_EXACT'
+         and package.get('publishedPredecessor') == receipt and publication.get('record') == receipt
+         and publication.get('status') == 'BOUND_ORIGINAL_MSVC_PREDECESSOR_STATIC_NOT_NATIVE_UPGRADE_PASS'
+         and publication.get('meta') == meta, 'Old4 original record/readback and publication metadata agree')
+    prior = ABI2['C']['parse_payload_manifest'](record[248:])
+    NEED(prior['package'] != package['packageCode'] and prior['product'] != package['productCode']
+         and B['version_parts'](prior['version']) < B['version_parts'](package['version']),
+         'Old4 retains its sealed older publication as bounded data, independently of its own current auxiliary bytes')
+    normal, guard = publication['previousNormalProvenance'], publication['previousNormalGuardProvenance']
+    NEED(normal.get('source_sha') == guard.get('source_sha') == meta['source_commit']
+         and normal.get('result_sha256') == guard.get('result_sha256') == meta['producer_sha']
+         and guard.get('dll_sha256') == meta['guard_sha']
+         and normal.get('profile_test') is False and guard.get('profile_test') is False,
+         'Old4 serialized original MSVC provenance agrees with its sealed record')
+
+
 def predecessor_package(q: dict, old_args, original: tuple) -> tuple[dict, bytes, dict]:
     """Replay a qualified old package from real original logs and normal bytes."""
     _, artifact, payloads, artifacts, normal, guard = original
@@ -176,8 +214,10 @@ def predecessor_package(q: dict, old_args, original: tuple) -> tuple[dict, bytes
     package = B['json_document'](raw)
     root = Path(q['packageReport']['path']).parent
     instructions, instruction_fact = read_candidate_instructions(old_args)
-    NEED(package.get('status') == 'PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_STATIC_CANDIDATE_NATIVE_NOT_RUN'
+    NEED(package.get('status') in ('PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_STATIC_CANDIDATE_NATIVE_NOT_RUN',
+                                  'PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_SUCCESSOR_STATIC_CANDIDATE_NATIVE_NOT_RUN')
          and package.get('formalCI') is True and package.get('normalProfileTest') is False
+         and package.get('guardProtocol') == ABI2['C']['GUARD_PROTOCOL']
          and package.get('target') == TARGET and package.get('normalProvenance') == normal
          and package.get('normalGuardProvenance') == guard and package.get('sourceBase') == normal['source_sha']
          and package.get('sourceEvidenceSha256') == normal['result_sha256']
@@ -200,8 +240,11 @@ def predecessor_package(q: dict, old_args, original: tuple) -> tuple[dict, bytes
     body = B['lifecycle_manifest'](package['version'], payloads)
     envelope = ABI2['C']['make_payload_manifest'](package['packageCode'], body)
     NEED(package['productCode'] == B['product_code'](package['version'])
-         and package['binaryReadback'] == 'ALL_THREE_EXACT' and package['payloadReadback'] == 'ALL_FOURTEEN_EXACT'
-         and package['onlyExternal32HoleFilled'] is True, 'Initial old3 stream package, not a chained or legacy package')
+         and package['payloadReadback'] == 'ALL_FOURTEEN_EXACT'
+         and package['onlyExternal32HoleFilled'] is True, 'Actual old ABI2 sealed complete14 package')
+    prior_record = None
+    if package['status'] == 'PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_SUCCESSOR_STATIC_CANDIDATE_NATIVE_NOT_RUN':
+        prior_record = original_file(root / 'lifecycle/published-predecessor.bin', PUBLICATION['HEADER'] + PUBLICATION['MAX_ENVELOPE'])
     def log(label):
         rows = [row for row in package['commands'] if row['name'] == label]
         NEED(len(rows) == 1 and type(rows[0]['exit_code']) is int and rows[0]['exit_code'] == 0, 'One original successful package command')
@@ -215,15 +258,16 @@ def predecessor_package(q: dict, old_args, original: tuple) -> tuple[dict, bytes
         return result
     NEED(isinstance(package['commands'], list) and 1 <= len(package['commands']) <= 160, 'Bounded original package command ledger')
     for row in package['commands']: log(row['name'])
-    streams = dict(zip(ABI2['BINARY_NAMES'], (dll, template, envelope)))
+    streams = ABI2['published_streams'](dict(zip(ABI2['BINARY_NAMES'], (dll, template, envelope))), prior_record)
+    validate_old_publication(package, prior_record, streams)
     for name, data in streams.items(): NEED(log('binary-' + name) == data, 'Original exact MSI Binary extraction')
     names = log('tables').decode('ascii').splitlines()
     tables = {n: log('table-' + n) for n in set(names) & (B['CONTROLLED_REQUIRED_TABLES'] | B['FORBIDDEN_TABLES'])}
     summary = log('summary')
     NEED(summary == log('intermediate-summary'), 'Actual complete old Summary unchanged')
     _, legacy = ABI2['upgrade_sequence'](log('intermediate-sequence'))
-    NEED(ABI2['validate_contract'](summary, tables, package['version'], payloads, package['packageCode'], legacy) == package['msiContract'],
-         'Replay exact original closed3 ABI2 table contract')
+    NEED(ABI2['validate_contract'](summary, tables, package['version'], payloads, package['packageCode'], legacy, prior_record) == package['msiContract'],
+         'Replay exact original closed3 or closed4 ABI2 table contract')
     return package, msi, streams
 
 
@@ -283,7 +327,7 @@ def prepare_predecessor(a, current: tuple) -> tuple[bytes, dict] | None:
     source_msi = Path(q['packageReport']['path']).parent / 'FutureClassroom.msi'
     tables = PUBLICATION['capture'](source_msi, B['digest'](msi), schema)
     captured_streams = dict(next(rows for name, _, rows in tables if name == 'Binary'))
-    NEED(captured_streams == streams, 'Actual readonly old MSI fixed3 Binary bytes, not report assertions')
+    NEED(captured_streams == streams, 'Actual readonly old MSI closed3/closed4 Binary bytes including old record, not report assertions')
     meta = dict(target=1, source_commit=q['sourceGit'], source_manifest_sha=B['digest'](inventory_raw),
                 producer_sha=old_args.build_result_sha256, source_msi_sha=B['digest'](msi),
                 template_sha=B['digest'](streams[B['TEMPLATE_BINARY']]), template_bytes=len(streams[B['TEMPLATE_BINARY']]),
@@ -431,7 +475,7 @@ def main() -> int:
         help='Exact original CI checkout bytes; builder identity is recorded separately')
     parser.add_argument('--product-version', help='Separate MSI identity; never rewrites original compiler bytes or artifact version')
     parser.add_argument('--predecessor-spec', type=Path,
-        help='Pinned original qualification/runtime/download evidence for first formal3-to4 successor')
+        help='Pinned original qualification/runtime/download evidence for capability3 formal3-or4-to4 successor')
     parser.add_argument('--predecessor-spec-sha256')
     for name in ('input-zip', 'lifecycle-helper', 'guard-library', 'build-evidence', 'candidate-instructions',
             'output-dir', 'wixl', 'msibuild', 'msiinfo', 'msiextract', 'objdump'):

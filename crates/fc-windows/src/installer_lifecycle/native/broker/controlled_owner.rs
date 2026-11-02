@@ -211,7 +211,7 @@ fn receive_guard_frame(deadline: Instant, pipe: HANDLE) -> Result<GuardFrame> {
     // Session::server/connect use PIPE_TYPE_BYTE/PIPE_READMODE_BYTE, with the
     // original4096-byte buffers. This is not a message-mode partial read.
     let first = receive_frame(deadline, pipe)?;
-    if &first[..4] != b"FCB2" {
+    if &first[..4] != b"FCB3" {
         return Ok(GuardFrame::Legacy(first));
     }
     let mut bytes = [0; v2::FRAME_BYTES];
@@ -516,7 +516,7 @@ impl ApiOwner {
             windows::core::w!("REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown");
         Ok(unsafe {
             match operation {
-                1|4 => MsiInstallProductW(&HSTRING::from(path.as_os_str()), quiet),
+                1 | 4 => MsiInstallProductW(&HSTRING::from(path.as_os_str()), quiet),
                 2 => MsiInstallProductW(
                     &HSTRING::from(path.as_os_str()),
                     windows::core::w!(

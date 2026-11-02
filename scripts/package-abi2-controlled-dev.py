@@ -25,6 +25,14 @@ MANIFEST_BINARY = 'FcPayloadManifest'
 BINARY_NAMES = (B['GUARD_BINARY'], B['TEMPLATE_BINARY'], MANIFEST_BINARY)
 
 
+def require_source_protocol(source: Path) -> None:
+    raw = B['PROBE']['bounded_regular_file'](
+        source / 'crates/fc-windows/src/installer_lifecycle/broker/carrier.rs', 65536)
+    versions = re.findall(rb'(?m)^\s*pub\(crate\) const GUARD_PROTOCOL:\s*u16\s*=\s*(\d+);', raw)
+    NEED(versions == [str(C['GUARD_PROTOCOL']).encode('ascii')],
+         'Compiled source must support this guard protocol; rebuild the normal components before packaging')
+
+
 def extent(raw: bytes, dll: bool = False) -> dict:
     """Prove actual compiler bytes end at PE raw extent; never trim or patch."""
     if dll:
@@ -126,6 +134,7 @@ def validate_contract(summary: bytes, tables: dict, version: str, payloads: dict
     matches = re.findall(rb'^Revision number \(UUID\): \{([0-9A-F-]{36})\}\r?$', summary, re.M)
     NEED(matches == [package.encode('ascii')], 'Actual summary PackageCode equals envelope identity')
     result['guardABI'] = 2
+    result['guardProtocol'] = C['GUARD_PROTOCOL']
     result['binaryStreams'] = list(BINARY_NAMES)
     result['packageCode'] = package
     return result
@@ -133,6 +142,7 @@ def validate_contract(summary: bytes, tables: dict, version: str, payloads: dict
 
 def assemble(a, evidence: dict, artifacts: dict, provenance: dict, web: dict) -> dict:
     source = a.source_root.absolute()
+    require_source_protocol(source)
     inputs = B['fresh_output'](a.input_dir)
     (inputs / '.owner').write_text('future-classroom-owned-abi2-dev-input/v1\n')
     zip_path = inputs / 'FutureClassroom-GNU-ABI2-DEV.zip'
@@ -157,7 +167,7 @@ def assemble(a, evidence: dict, artifacts: dict, provenance: dict, web: dict) ->
     NEED(B['file_digest'](tools['msibuild']) == a.msibuild_sha256, 'Pinned msibuild actual bytes')
     output = B['fresh_output'](a.output_dir)
     report = {'status': 'FAIL_RETAIN_ORIGINALS', 'scope': 'NORMAL_GNU_ABI2_DEV_STATIC_BUNDLE_ONLY_NOT_FORMAL_MSVC',
-        'formalCI': False, 'normalProfileTest': False, 'installation': 'NOT_RUN', 'productionReadiness': 'NOT_GRANTED',
+        'formalCI': False, 'normalProfileTest': False, 'guardABI': 2, 'guardProtocol': C['GUARD_PROTOCOL'], 'installation': 'NOT_RUN', 'productionReadiness': 'NOT_GRANTED',
         'sourceRoot': str(source), 'sourceBase': evidence['source_head'], 'sourceEvidenceSha256': a.evidence_sha256,
         'normalProvenance': provenance, 'maintenanceSourceBinding': maintenance_source_binding(source, a.evidence.absolute(), evidence), 'normalPEExtents': normal_extents, 'webReportSha256': a.web_report_sha256,
         'productCode': decoded['product'], 'packageCode': package, 'version': product_version, 'artifactVersion': manifest['version'], 'payloadVersionPolicy': 'Actual artifact/manifest.json compiler version preserved; MSI release identity is an explicit separate build input',

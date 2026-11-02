@@ -29,7 +29,7 @@ mod maintenance;
 mod retirement;
 #[allow(dead_code)]
 // Captured ABI2 facts alone grant no permission; native Plan checks stay separate.
-mod source_package;
+pub(super) mod source_package;
 mod supervisor;
 mod upgrade;
 
@@ -206,7 +206,7 @@ fn image_path(process: HANDLE) -> Result<PathBuf> {
 }
 
 impl Resources {
-    fn close_handle(&mut self, h: HANDLE) -> Result<()> {
+    pub(super) fn close_handle(&mut self, h: HANDLE) -> Result<()> {
         let index = self
             .handles
             .iter()
@@ -271,7 +271,7 @@ impl Resources {
         }
         Ok(())
     }
-    fn digest(&mut self, h: HANDLE, limit: u64, deadline: Instant) -> Result<[u8; 32]> {
+    pub(super) fn digest(&mut self, h: HANDLE, limit: u64, deadline: Instant) -> Result<[u8; 32]> {
         self.digest_file(h, limit, deadline, false)
     }
     // Only the private damaged-preimage reader accepts an actually zero-byte
@@ -1034,6 +1034,12 @@ fn server(session: &mut Session) -> Result<()> {
         owner.resources.retain_until_exit();
     }
     result
+}
+
+// A moved original claim leaves only this already-released, ownerless sentinel.
+// It cannot acquire authority or a second native-owner slot.
+pub(super) fn guard_resources_placeholder() -> Resources {
+    maintenance::released_placeholder()
 }
 
 #[cfg(test)]

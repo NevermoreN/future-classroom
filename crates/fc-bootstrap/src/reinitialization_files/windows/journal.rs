@@ -438,8 +438,18 @@ fn cleanup(
     {
         return Err(ReinitializationFileError::RepairRequired);
     }
-    // Every confidential/data object is gone. Keep both terminal receipts until
-    // metadata-only cleanup is complete, and never traverse an unexpected tree.
+    if mode == CLEAN_INSTALLED && exists(&operation.join("journal"))? {
+        let meta = Metadata::decode(&read_small(&operation.join("journal"), MAX_META)?)?;
+        if meta.owner != owner {
+            return Err(ReinitializationFileError::RepairRequired);
+        }
+        for installed in meta.new {
+            let _ = empty_snapshot(installed)?;
+        }
+    }
+    // Every confidential/data object is gone. Keep the positive terminal marker
+    // and original journal until normal initialization succeeds. The journal's
+    // new empty tree identities are the cross-process initialization authority.
     validate_manifest_names(&files.files, operation, None)?;
     if exists(&operation.join("manifests"))? {
         let meta = Metadata::decode(&read_small(&operation.join("journal"), MAX_META)?)?;
@@ -473,7 +483,7 @@ fn cleanup(
     let pin = PinnedDirectory::open(operation).map_err(repair)?;
     for child in entries(&files.files, operation, 34)? {
         ensure(check)?;
-        if child == complete {
+        if child == complete || mode == CLEAN_INSTALLED && child == operation.join("journal") {
             continue;
         }
         if child == operation.join("owner") {
@@ -502,6 +512,9 @@ fn cleanup(
         remove_metadata(&files.files, &child, check)?;
     }
     ensure(check)?;
+    if mode == CLEAN_INSTALLED {
+        return Ok(());
+    }
     // This independent terminal marker is always the last receipt removed.
     remove_metadata(&files.files, &complete, check)?;
     drop(pin);
@@ -509,6 +522,296 @@ fn cleanup(
         .files
         .remove_empty_directory(operation)
         .map_err(repair)
+}
+
+fn receipt(path: &Path) -> Result<(Vec<u8>, Stamp)> {
+    let mut pin = OwnedObjectPin::file_allow_empty(path).map_err(repair)?;
+    if pin.file().metadata().map_err(repair)?.len() > MAX_META as u64 {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    let mut bytes = Vec::new();
+    pin.file_mut()
+        .take(MAX_META as u64 + 1)
+        .read_to_end(&mut bytes)
+        .map_err(repair)?;
+    if bytes.len() > MAX_META {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    let stamp = Stamp {
+        identity: pin.identity(),
+        digest: fc_security::sha256(&bytes),
+    };
+    Ok((bytes, stamp))
+}
+fn terminal_names(files: &ReinitializationFiles, operation: &Path) -> Result<bool> {
+    let children = entries(&files.files, operation, 3)?;
+    let complete = operation.join("cleanup-complete");
+    let journal = operation.join("journal");
+    if !children.contains(&complete) || children.iter().any(|p| *p != complete && *p != journal) {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    Ok(children.contains(&journal))
+}
+/// Metadata-only proof for another explicitly authorized reset. It deliberately
+/// grants no initialization authority and pins none of the current live trees.
+pub(super) struct CompletedResetMetadata {
+    paths: DataPaths,
+    pub(super) operation: PathBuf,
+    owner: OperationOwner,
+    operation_pin: PinnedDirectory,
+    complete: Stamp,
+    journal: Option<Stamp>,
+    installed: Option<[Stamp; 13]>,
+}
+pub(super) fn replacement_terminal(
+    files: &ReinitializationFiles,
+    check: &dyn Fn() -> bool,
+) -> Result<Option<CompletedResetMetadata>> {
+    ensure(check)?;
+    let Some(namespace) = files.namespace(false)? else {
+        return Ok(None);
+    };
+    let marker = namespace.join(".future-classroom-owner");
+    let operations: Vec<_> = entries(&files.files, &namespace, 34)?
+        .into_iter()
+        .filter(|p| *p != marker)
+        .collect();
+    if operations.is_empty() {
+        return Ok(None);
+    }
+    if operations.len() != 1 {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    let _ = files.check_scope(check)?;
+    let operation = operations
+        .into_iter()
+        .next()
+        .ok_or(ReinitializationFileError::RepairRequired)?;
+    let operation_pin = PinnedDirectory::open(&operation).map_err(repair)?;
+    let has_journal = terminal_names(files, &operation)?;
+    let (complete_bytes, complete) = receipt(&operation.join("cleanup-complete"))?;
+    let (owner, mode) = decode_phase(&complete_bytes)?;
+    owner.verify(files)?;
+    if mode != CLEAN_DONE_INSTALLED {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    let (journal, installed) = if has_journal {
+        let (bytes, journal) = receipt(&operation.join("journal"))?;
+        let meta = Metadata::decode(&bytes)?;
+        if meta.owner != owner {
+            return Err(ReinitializationFileError::RepairRequired);
+        }
+        for installed in meta.new {
+            ensure(check)?;
+            let _ = empty_snapshot(installed)?;
+        }
+        (Some(journal), Some(meta.new))
+    } else {
+        // Interrupted retirement (or an old binary's terminal cleanup). Missing
+        // identity evidence can never be reconstructed from empty directories.
+        (None, None)
+    };
+    Ok(Some(CompletedResetMetadata {
+        paths: files.paths.clone(),
+        operation,
+        owner,
+        operation_pin,
+        complete,
+        journal,
+        installed,
+    }))
+}
+pub(super) fn initialization_handoff(
+    files: &ReinitializationFiles,
+    check: &dyn Fn() -> bool,
+) -> Result<Option<ResetInitializationHandoff>> {
+    let Some(terminal) = replacement_terminal(files, check)? else {
+        return Ok(None);
+    };
+    let mut live = Vec::new();
+    if let Some(installed) = terminal.installed {
+        for (n, name) in OWNED_TREES.iter().enumerate() {
+            ensure(check)?;
+            let pin = PinnedDirectory::open(&files.paths.root().join(name)).map_err(repair)?;
+            if pin.identity().map_err(repair)? != installed[n].identity {
+                return Err(ReinitializationFileError::RepairRequired);
+            }
+            live.push(pin);
+        }
+    }
+    Ok(Some(ResetInitializationHandoff {
+        paths: terminal.paths,
+        operation: terminal.operation,
+        owner: terminal.owner,
+        operation_pin: terminal.operation_pin,
+        complete: terminal.complete,
+        journal: terminal.journal,
+        installed: terminal.installed,
+        _live: live,
+    }))
+}
+fn remove_receipt_expected(
+    files: &ControlledFiles,
+    path: &Path,
+    expected: Stamp,
+    check: &dyn Fn() -> bool,
+) -> Result<()> {
+    use std::io::{Seek, SeekFrom};
+    ensure(check)?;
+    let mut failure = None;
+    let removed = files
+        .remove_object_expected(path, false, expected.identity, |file| {
+            let read = (|| {
+                ensure(check)?;
+                file.seek(SeekFrom::Start(0)).map_err(repair)?;
+                let mut bytes = Vec::new();
+                file.take(MAX_META as u64 + 1)
+                    .read_to_end(&mut bytes)
+                    .map_err(repair)?;
+                ensure(check)?;
+                if bytes.len() > MAX_META || fc_security::sha256(&bytes) != expected.digest {
+                    return Err(ReinitializationFileError::RepairRequired);
+                }
+                Ok(())
+            })();
+            match read {
+                Ok(()) => true,
+                Err(error) => {
+                    failure = Some(error);
+                    false
+                }
+            }
+        })
+        .map_err(repair)?;
+    if let Some(error) = failure {
+        return Err(error);
+    }
+    if !removed {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    Ok(())
+}
+/// Private file-port action. Its only production caller is commit_cold after
+/// matching the current real ColdReinitializationPermit, never normal open.
+pub(super) fn retire_for_repeat(
+    files: &ReinitializationFiles,
+    terminal: CompletedResetMetadata,
+    check: &dyn Fn() -> bool,
+) -> Result<()> {
+    ensure(check)?;
+    let current =
+        replacement_terminal(files, check)?.ok_or(ReinitializationFileError::RepairRequired)?;
+    if terminal.paths.root() != files.paths.root()
+        || current.operation != terminal.operation
+        || current.owner != terminal.owner
+        || current.operation_pin.identity().map_err(repair)?
+            != terminal.operation_pin.identity().map_err(repair)?
+        || current.complete != terminal.complete
+        || current.journal != terminal.journal
+        || current.installed != terminal.installed
+    {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    drop(current);
+    if let Some(journal) = terminal.journal {
+        remove_receipt_expected(
+            &files.files,
+            &terminal.operation.join("journal"),
+            journal,
+            check,
+        )?;
+    }
+    remove_receipt_expected(
+        &files.files,
+        &terminal.operation.join("cleanup-complete"),
+        terminal.complete,
+        check,
+    )?;
+    let identity = terminal.operation_pin.identity().map_err(repair)?;
+    let operation = terminal.operation.clone();
+    drop(terminal);
+    // No cancellation checkpoint between the last receipt and empty-container
+    // removal. An OS/process failure still leaves only an empty op, which the
+    // original repair-startup reconciler already retires before the next review.
+    if !files
+        .files
+        .remove_object_expected(&operation, true, identity, |_| true)
+        .map_err(repair)?
+    {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    Ok(())
+}
+pub(super) fn verify_handoff(
+    files: &ReinitializationFiles,
+    handoff: &ResetInitializationHandoff,
+    require_empty: bool,
+    check: &dyn Fn() -> bool,
+) -> Result<()> {
+    ensure(check)?;
+    if files.paths.root() != handoff.paths.root() {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    handoff.owner.verify(files)?;
+    let current =
+        initialization_handoff(files, check)?.ok_or(ReinitializationFileError::RepairRequired)?;
+    if current.operation != handoff.operation
+        || current.owner != handoff.owner
+        || current.operation_pin.identity().map_err(repair)?
+            != handoff.operation_pin.identity().map_err(repair)?
+        || current.complete != handoff.complete
+        || current.journal != handoff.journal
+        || current.installed != handoff.installed
+    {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    if require_empty {
+        let installed = handoff
+            .installed
+            .ok_or(ReinitializationFileError::RepairRequired)?;
+        for (n, name) in OWNED_TREES.iter().enumerate() {
+            let path = files.paths.root().join(name);
+            // Avoid walking later school data merely to reject initialization.
+            if !entries(&files.files, &path, 1)?.is_empty()
+                || stamp(&files.files, &path, check)? != Some(installed[n])
+            {
+                return Err(ReinitializationFileError::RepairRequired);
+            }
+        }
+    }
+    Ok(())
+}
+pub(super) fn consume_handoff(
+    files: &ReinitializationFiles,
+    handoff: ResetInitializationHandoff,
+    check: &dyn Fn() -> bool,
+) -> Result<()> {
+    verify_handoff(files, &handoff, false, check)?;
+    // Normal bootstrap has already validated the marker/key, decoded DPAPI and
+    // opened the database. Do not reopen its writable SQLite handle here.
+    // Delete only the two checked receipts; no traversal of any live namespace.
+    if handoff.journal.is_some() {
+        remove_metadata(&files.files, &handoff.operation.join("journal"), check)?;
+    }
+    // If interrupted above, only the positive terminal marker remains. A later
+    // normal open can retire it, but it has no authority to initialize again.
+    remove_metadata(
+        &files.files,
+        &handoff.operation.join("cleanup-complete"),
+        check,
+    )?;
+    let identity = handoff.operation_pin.identity().map_err(repair)?;
+    let operation = handoff.operation.clone();
+    drop(handoff);
+    ensure(check)?;
+    if !files
+        .files
+        .remove_object_expected(&operation, true, identity, |_| true)
+        .map_err(repair)?
+    {
+        return Err(ReinitializationFileError::RepairRequired);
+    }
+    Ok(())
 }
 
 fn owner(files: &ReinitializationFiles, operation: &Path) -> Result<OperationOwner> {
@@ -649,6 +952,9 @@ fn candidate(
     Ok(stamps)
 }
 fn arm(prepared: &PreparedReinitialization, check: &dyn Fn() -> bool) -> Result<Metadata> {
+    if prepared.deferred.is_some() {
+        return Err(ReinitializationFileError::InvalidReview);
+    }
     let files = &prepared.service;
     prepared.owner.verify(files)?;
     // This is called only AFTER the real drain capability was consumed. These
@@ -930,6 +1236,12 @@ pub(super) fn reconcile(
     operations.sort();
     if operations.iter().all(|p| *p == marker) {
         return Ok(ResetStartup::default());
+    }
+    // prepare never creates a second operation beside an unfinished one. Refuse
+    // coexistence before any cleanup; never select a winner or partially erase
+    // a conflicting initialization receipt.
+    if operations.iter().filter(|p| **p != marker).count() != 1 {
+        return Err(ReinitializationFileError::RepairRequired);
     }
     let _ = files.check_scope(check)?;
     let mut armed = 0;

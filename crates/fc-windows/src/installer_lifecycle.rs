@@ -24,6 +24,7 @@ pub enum LifecycleError {
     Busy,
     Pending,
     Invalid,
+    UpgradeProtocolUnsupported,
     Expired,
     GuardianRunning,
     Unsettled,
@@ -32,6 +33,11 @@ pub enum LifecycleError {
 }
 impl std::fmt::Display for LifecycleError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if *self == Self::UpgradeProtocolUnsupported {
+            return formatter.write_str(
+                "当前安装版本不支持这次更新，现有资料已保留。请使用与当前版本兼容的安装程序。",
+            );
+        }
         write!(formatter, "installation lifecycle: {self:?}")
     }
 }

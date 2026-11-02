@@ -1,5 +1,5 @@
-//! Readonly facts from this CA's active database. No package-opening API and no
-//! caller property, path, hash or role participates in this observation.
+//! Readonly facts from this CA's active database and its original pinned G's
+//! fixed sealed source. No caller property, path, hash or role grants admission.
 use super::*;
 use crate::installer_lifecycle::{
     broker::{carrier, payload_manifest},
@@ -237,4 +237,220 @@ fn unbrace(value: &str) -> Result<String> {
         .filter(|s| manifest::uuid(s))
         .ok_or(LifecycleError::Invalid)?;
     Ok(value.into())
+}
+
+impl GuardState {
+    // Convert only the ORIGINAL remaining entry/grant budget. Source capture
+    // never starts a second installation or grants another 120 seconds.
+    fn source_deadline(&self) -> Result<Instant> {
+        self.time()?;
+        let now = unsafe { GetTickCount64() };
+        let left = 120_000u64.saturating_sub(now.saturating_sub(self.entry_tick));
+        let left = left.min(
+            self.grant_deadline
+                .ok_or(LifecycleError::Invalid)?
+                .saturating_sub(now),
+        );
+        if left == 0 {
+            return Err(LifecycleError::Expired);
+        }
+        Instant::now()
+            .checked_add(Duration::from_millis(left))
+            .ok_or(LifecycleError::Expired)
+    }
+    fn active_stream_hash(
+        &mut self,
+        db: MSIHANDLE,
+        query: &'static str,
+    ) -> Result<(usize, [u8; 32])> {
+        use windows::Win32::Security::Cryptography::*;
+        let (view, row) = self.abi2_one(db, query)?;
+        let length = unsafe { MsiRecordDataSize(row, 1) } as usize;
+        if length == 0 || length > MAX_IMAGE {
+            return Err(LifecycleError::Invalid);
+        }
+        self.room(2)?;
+        let mut algorithm = BCRYPT_ALG_HANDLE::default();
+        unsafe {
+            BCryptOpenAlgorithmProvider(
+                &mut algorithm,
+                BCRYPT_SHA256_ALGORITHM,
+                None,
+                BCRYPT_OPEN_ALGORITHM_PROVIDER_FLAGS(0),
+            )
+            .ok()?;
+        }
+        let algorithm_handle = self.resources.add(HANDLE(algorithm.0), Role::Algorithm);
+        let mut hash = BCRYPT_HASH_HANDLE::default();
+        unsafe {
+            BCryptCreateHash(algorithm, &mut hash, None, None, 0).ok()?;
+        }
+        let hash_handle = self.resources.add(HANDLE(hash.0), Role::Hash);
+        let mut chunk = [0u8; 16384];
+        let mut offset = 0;
+        while offset < length {
+            let n = chunk.len().min(length - offset);
+            self.abi2_stream_read(row, &mut chunk[..n])?;
+            unsafe {
+                BCryptHashData(hash, &chunk[..n], 0).ok()?;
+            }
+            offset += n;
+        }
+        self.abi2_stream_end(row)?;
+        let mut digest = [0; 32];
+        unsafe {
+            BCryptFinishHash(hash, &mut digest, 0).ok()?;
+        }
+        self.resources.close_handle(hash_handle)?;
+        self.resources.close_handle(algorithm_handle)?;
+        self.abi2_end(view, row)?;
+        Ok((length, digest))
+    }
+    fn active_evidence(
+        &mut self,
+        install: MSIHANDLE,
+        expected: &ObservedPackage,
+    ) -> Result<(carrier::AuxiliaryIdentity, Vec<u8>)> {
+        self.room(1)?;
+        let db = self.register_msi(unsafe { MsiGetActiveDatabase(install) }, false)?;
+        let (product, family, version) = self.abi2_properties(db)?;
+        let package = self.abi2_package(db)?;
+        if family != INSTALL_FAMILY
+            || ObservedPackage::new(&product, &package, &version)? != *expected
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        let (view, row) = self.abi2_one(db, payload_manifest::QUERY)?;
+        let length = unsafe { MsiRecordDataSize(row, 1) } as usize;
+        if !(payload_manifest::HEADER_BYTES..=payload_manifest::MAX_BYTES).contains(&length) {
+            return Err(LifecycleError::Invalid);
+        }
+        let mut envelope = vec![0; length];
+        self.abi2_stream_read(row, &mut envelope)?;
+        self.abi2_stream_end(row)?;
+        self.abi2_end(view, row)?;
+        let parsed = payload_manifest::parse(&envelope)?;
+        if parsed.package() != package
+            || parsed.payload().product != product
+            || parsed.payload().version != version
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        let (template_bytes, template_sha) = self.active_stream_hash(db, GUARD_TEMPLATE_QUERY)?;
+        let (_, guard_sha) = self.active_stream_hash(
+            db,
+            "SELECT `Data` FROM `Binary` WHERE `Name` = 'FcControlledGuardDll'",
+        )?;
+        self.close_msi(db)?;
+        Ok((
+            carrier::AuxiliaryIdentity::observed(template_bytes, template_sha, guard_sha)?,
+            envelope,
+        ))
+    }
+    fn loaded_guard_matches(&mut self, auxiliary: carrier::AuxiliaryIdentity) -> Result<()> {
+        let module = self.module.ok_or(LifecycleError::Invalid)?;
+        let mut path = [0u16; PATH_LIMIT];
+        let count = unsafe {
+            windows::Win32::System::LibraryLoader::GetModuleFileNameW(Some(module), &mut path)
+        } as usize;
+        if count == 0 || count >= path.len() {
+            return Err(LifecycleError::Invalid);
+        }
+        let path = PathBuf::from(OsString::from_wide(&path[..count]));
+        valid_path(&path)?;
+        self.room(1)?;
+        let file = self.resources.open_file(
+            &path,
+            GENERIC_READ.0,
+            FILE_SHARE_READ,
+            OPEN_EXISTING,
+            false,
+            false,
+        )?;
+        self.resources.add(file, Role::Parent);
+        verify_info(file, false)?;
+        self.room(2)?;
+        let deadline = self.source_deadline()?;
+        if self.resources.digest(file, MAX_IMAGE as u64, deadline)? != auxiliary.guard_sha {
+            return Err(LifecycleError::Invalid);
+        }
+        Ok(())
+    }
+    pub(super) fn dual_source_matches(
+        &mut self,
+        install: MSIHANDLE,
+        image: HANDLE,
+        package: &ObservedPackage,
+    ) -> Result<()> {
+        let (active_auxiliary, active_envelope) = self.active_evidence(install, package)?;
+        self.loaded_guard_matches(active_auxiliary)?;
+        self.time()?;
+        // No MSI or asynchronous IO is transferred. The only external native
+        // resource is this CA's one loader reference, counted by the reader.
+        if !self.msi.is_empty() || self.io != Io::None || self.module.is_none() {
+            return Err(LifecycleError::Unsettled);
+        }
+        let process = self.resources.handle(Role::Guardian)?;
+        let deadline = self.source_deadline()?;
+        self.source_capture_returned = false;
+        let original = std::mem::replace(
+            &mut self.resources,
+            super::super::broker::guard_resources_placeholder(),
+        );
+        let (resources, captured) =
+            super::super::broker::source_package::SourceReader::capture_peer(
+                original, image, process, deadline,
+            )?;
+        self.resources = resources;
+        self.source_capture_returned = true;
+        let source = captured?;
+        if source.abi != carrier::ABI
+            || source.family != INSTALL_FAMILY
+            || source.close_receipts.is_empty()
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        let current = ObservedPackage::new(
+            &source.manifest.product,
+            &source.package,
+            &source.manifest.version,
+        )?;
+        let current_auxiliary = source.auxiliary()?;
+        if current == *package {
+            if source.envelope != active_envelope || current_auxiliary != active_auxiliary {
+                return Err(LifecycleError::Invalid);
+            }
+        } else {
+            let previous = source
+                .predecessor
+                .as_ref()
+                .ok_or(LifecycleError::UpgradeProtocolUnsupported)?;
+            let old = previous.payload()?;
+            let old_package = ObservedPackage::new(
+                &old.payload().product,
+                old.package(),
+                &old.payload().version,
+            )?;
+            let version = |s: &str| -> Result<[u32; 3]> {
+                s.split('.')
+                    .map(str::parse::<u32>)
+                    .collect::<std::result::Result<Vec<_>, _>>()
+                    .map_err(|_| LifecycleError::Invalid)?
+                    .try_into()
+                    .map_err(|_| LifecycleError::Invalid)
+            };
+            if old_package != *package
+                || !previous.matches_active(&active_envelope, active_auxiliary)?
+                || old.payload().product == source.manifest.product
+                || old.package() == source.package
+                || version(&old.payload().version)? >= version(&source.manifest.version)?
+                || previous.source_msi_sha == source.source_sha256
+            {
+                return Err(LifecycleError::Invalid);
+            }
+            // Deliberately no equality between current_auxiliary and the old
+            // record. Each was independently measured from its own source.
+        }
+        self.time()
+    }
 }

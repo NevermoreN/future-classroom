@@ -23,7 +23,7 @@ struct MsiOwned {
     close_return: Option<u32>,
 }
 #[derive(Debug)]
-pub(super) struct MsiCloseReceipt {
+pub(in crate::installer_lifecycle::native) struct MsiCloseReceipt {
     pub(super) handle: u32,
     pub(super) view_return: Option<u32>,
     pub(super) close_return: u32,
@@ -31,22 +31,34 @@ pub(super) struct MsiCloseReceipt {
 /// Synchronous observations with all owned MSI objects checked closed. The
 /// original source/image/ancestor pins stay in the returned Resources owner.
 #[derive(Debug)]
-pub(super) struct CapturedSource {
-    pub(super) abi: u16,
-    pub(super) package: String,
-    pub(super) family: String,
-    pub(super) manifest: Manifest,
-    pub(super) envelope: Vec<u8>,
-    pub(super) predecessor: Option<predecessor::PublishedPredecessor>,
-    pub(super) template_bytes: usize,
-    pub(super) template_sha256: [u8; 32],
-    pub(super) source_object: (u32, u64),
-    pub(super) source_bytes: u64,
-    pub(super) source_sha256: [u8; 32],
-    pub(super) image_sha256: [u8; 32],
-    pub(super) close_receipts: Vec<MsiCloseReceipt>,
+pub(in crate::installer_lifecycle::native) struct CapturedSource {
+    pub(in crate::installer_lifecycle::native) abi: u16,
+    pub(in crate::installer_lifecycle::native) package: String,
+    pub(in crate::installer_lifecycle::native) family: String,
+    pub(in crate::installer_lifecycle::native) manifest: Manifest,
+    pub(in crate::installer_lifecycle::native) envelope: Vec<u8>,
+    pub(in crate::installer_lifecycle::native) predecessor:
+        Option<predecessor::PublishedPredecessor>,
+    pub(in crate::installer_lifecycle::native) template_bytes: usize,
+    pub(in crate::installer_lifecycle::native) template_sha256: [u8; 32],
+    pub(in crate::installer_lifecycle::native) guard_sha256: [u8; 32],
+    pub(in crate::installer_lifecycle::native) source_object: (u32, u64),
+    pub(in crate::installer_lifecycle::native) source_bytes: u64,
+    pub(in crate::installer_lifecycle::native) source_sha256: [u8; 32],
+    pub(in crate::installer_lifecycle::native) image_sha256: [u8; 32],
+    pub(in crate::installer_lifecycle::native) close_receipts: Vec<MsiCloseReceipt>,
 }
 impl CapturedSource {
+    pub(in crate::installer_lifecycle::native) fn auxiliary(
+        &self,
+    ) -> Result<carrier::AuxiliaryIdentity> {
+        carrier::AuxiliaryIdentity::observed(
+            self.template_bytes,
+            self.template_sha256,
+            self.guard_sha256,
+        )
+    }
+
     pub(super) fn session_manifest(&self) -> Manifest {
         Manifest {
             product: self.manifest.product.clone(),
@@ -65,11 +77,12 @@ impl CapturedSource {
         }
     }
 }
-pub(super) struct SourceReader {
+pub(in crate::installer_lifecycle::native) struct SourceReader {
     resources: Resources,
     deadline: Instant,
     msi: Vec<MsiOwned>,
     close_receipts: Vec<MsiCloseReceipt>,
+    external_slots: usize,
 }
 impl SourceReader {
     /// No path/hash/manifest arguments: the OS image and fixed MSI leaf supply
@@ -84,9 +97,12 @@ impl SourceReader {
             deadline,
             msi: Vec::with_capacity(8),
             close_receipts: Vec::with_capacity(CLOSE_LIMIT),
+            external_slots: 0,
         });
-        let observed = catch_unwind(AssertUnwindSafe(|| reader.read(image)))
-            .unwrap_or(Err(LifecycleError::Faulted));
+        let observed = catch_unwind(AssertUnwindSafe(|| {
+            reader.read(image, unsafe { GetCurrentProcess() })
+        }))
+        .unwrap_or(Err(LifecycleError::Faulted));
         let closed = if reader.resources.failed {
             Err(LifecycleError::Faulted)
         } else {
@@ -117,13 +133,47 @@ impl SourceReader {
             }
         }
     }
+    pub(in crate::installer_lifecycle::native) fn capture_peer(
+        resources: Resources,
+        image: HANDLE,
+        process: HANDLE,
+        deadline: Instant,
+    ) -> Result<(Resources, Result<CapturedSource>)> {
+        let mut reader = Box::new(Self {
+            resources,
+            deadline,
+            msi: Vec::with_capacity(8),
+            close_receipts: Vec::with_capacity(CLOSE_LIMIT),
+            external_slots: 1,
+        });
+        let observed = catch_unwind(AssertUnwindSafe(|| reader.read(image, process)))
+            .unwrap_or(Err(LifecycleError::Faulted));
+        let closed = if reader.resources.failed {
+            Err(LifecycleError::Faulted)
+        } else {
+            reader.close_all_msi()
+        };
+        if let Err(error) = closed {
+            reader.resources.retain_until_exit();
+            let _original = Box::into_raw(reader);
+            return Err(error);
+        }
+        let observed = observed.map(|mut source| {
+            source.close_receipts = std::mem::take(&mut reader.close_receipts);
+            source
+        });
+        let Self { resources, .. } = *reader;
+        Ok((resources, observed))
+    }
     fn time(&self) -> Result<()> {
         current(self.deadline)?;
         self.resources.check_live()
     }
     fn room(&self, incoming: usize) -> Result<()> {
         self.time()?;
-        if self.resources.handles.len() + self.msi.len() + incoming > HANDLE_LIMIT {
+        if self.resources.handles.len() + self.msi.len() + self.external_slots + incoming
+            > HANDLE_LIMIT
+        {
             return Err(LifecycleError::Invalid);
         }
         Ok(())
@@ -191,7 +241,7 @@ impl SourceReader {
         }
         Ok(size as u64)
     }
-    fn read(&mut self, image: HANDLE) -> Result<CapturedSource> {
+    fn read(&mut self, image: HANDLE, source_process: HANDLE) -> Result<CapturedSource> {
         self.time()?;
         let image_object = verify_info(image, false)?;
         let image_size = self.size(image)? as usize;
@@ -205,7 +255,7 @@ impl SourceReader {
         // original MSI has actually been hashed by the existing CNG path.
         self.room(2)?;
         let image_sha = self.resources.digest(image, MAX_SOURCE, self.deadline)?;
-        let path = image_path(unsafe { GetCurrentProcess() })?
+        let path = image_path(source_process)?
             .parent()
             .ok_or(LifecycleError::Invalid)?
             .join(INNER_MSI);
@@ -250,6 +300,7 @@ impl SourceReader {
             return Err(LifecycleError::Invalid);
         }
         let (template_bytes, template_sha) = self.template(db, image, image_size, hole)?;
+        let guard_sha256 = self.guard_stream(db)?;
         let predecessor = self.predecessor(db)?;
         self.close_msi(db)?;
         // Every MSI object has returned before rehash/CNG, Session or Begin.
@@ -284,12 +335,59 @@ impl SourceReader {
             predecessor,
             template_bytes,
             template_sha256: template_sha,
+            guard_sha256,
             source_object: object,
             source_bytes: size,
             source_sha256: sha,
             image_sha256: image_sha,
             close_receipts: Vec::new(),
         })
+    }
+    fn guard_stream(&mut self, db: MSIHANDLE) -> Result<[u8; 32]> {
+        let (view, row) = self.abi2_one(
+            db,
+            "SELECT `Data` FROM `Binary` WHERE `Name` = 'FcControlledGuardDll'",
+        )?;
+        let length = unsafe { MsiRecordDataSize(row, 1) } as usize;
+        if length == 0 || length as u64 > MAX_SOURCE {
+            return Err(LifecycleError::Invalid);
+        }
+        self.room(2)?;
+        let mut algorithm = BCRYPT_ALG_HANDLE::default();
+        unsafe {
+            BCryptOpenAlgorithmProvider(
+                &mut algorithm,
+                BCRYPT_SHA256_ALGORITHM,
+                None,
+                BCRYPT_OPEN_ALGORITHM_PROVIDER_FLAGS(0),
+            )
+            .ok()?;
+        }
+        let algorithm_handle = self.resources.add(HANDLE(algorithm.0), Role::Algorithm);
+        let mut hash = BCRYPT_HASH_HANDLE::default();
+        unsafe {
+            BCryptCreateHash(algorithm, &mut hash, None, None, 0).ok()?;
+        }
+        let hash_handle = self.resources.add(HANDLE(hash.0), Role::Hash);
+        let mut bytes = [0; 16384];
+        let mut offset = 0;
+        while offset < length {
+            let count = bytes.len().min(length - offset);
+            self.abi2_stream_read(row, &mut bytes[..count])?;
+            unsafe {
+                BCryptHashData(hash, &bytes[..count], 0).ok()?;
+            }
+            offset += count;
+        }
+        self.abi2_stream_end(row)?;
+        let mut digest = [0; 32];
+        unsafe {
+            BCryptFinishHash(hash, &mut digest, 0).ok()?;
+        }
+        self.resources.close_handle(hash_handle)?;
+        self.resources.close_handle(algorithm_handle)?;
+        self.abi2_end(view, row)?;
+        Ok(digest)
     }
     fn template(
         &mut self,

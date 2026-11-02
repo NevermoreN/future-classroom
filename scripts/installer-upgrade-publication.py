@@ -136,9 +136,9 @@ def encode_format(meta,envelope,validate_envelope):
  assert type(meta['template_bytes'])is int and 196<=meta['template_bytes']<=64*1024*1024
  assert type(envelope)is bytes and 1<=len(envelope)<=MAX_ENVELOPE
  validate_envelope(envelope)
- h=bytearray(HEADER);h[:8]=MAGIC;h[8:10]=struct.pack('<H',1);h[10:12]=struct.pack('<H',2);h[12]=meta['target']
+ h=bytearray(HEADER);h[:8]=MAGIC;h[8:10]=struct.pack('<H',2);h[10:12]=struct.pack('<H',2);h[12]=meta['target']
  commit=meta['source_commit'];assert re.fullmatch('[0-9a-f]{40}',commit) and bytes.fromhex(commit)!=bytes(20);h[16:36]=bytes.fromhex(commit)
  for n,key in enumerate(DIGEST_KEYS):
   value=meta[key];assert re.fullmatch('[0-9a-f]{64}',value) and bytes.fromhex(value)!=bytes(32);h[36+32*n:68+32*n]=bytes.fromhex(value)
- h[228:232]=struct.pack('<I',meta['template_bytes']);h[232:236]=struct.pack('<I',len(envelope))
+ h[228:232]=struct.pack('<I',meta['template_bytes']);h[232:236]=struct.pack('<I',len(envelope));h[236:240]=struct.pack('<I',3)
  return bytes(h)+envelope

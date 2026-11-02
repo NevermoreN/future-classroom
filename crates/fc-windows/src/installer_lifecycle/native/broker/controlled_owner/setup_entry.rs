@@ -140,6 +140,11 @@ pub(crate) fn interactive() -> Result<u32> {
     let (message, icon) = match &result {
         Ok(0) => ("操作已完成。".to_owned(), MB_ICONINFORMATION),
         Ok(code) => (format!("操作未完成（返回代码 {code}）。"), MB_ICONERROR),
+        Err(LifecycleError::UpgradeProtocolUnsupported) => (
+            "当前安装版本不支持这次更新，现有资料已保留。请使用与当前版本兼容的安装程序。"
+                .to_owned(),
+            MB_ICONERROR,
+        ),
         Err(_) => (
             "操作未完成。请检查当前安装状态，或联系管理员。".to_owned(),
             MB_ICONERROR,

@@ -13,7 +13,7 @@ use std::{
     ffi::OsString,
     os::windows::ffi::OsStringExt,
     panic::{catch_unwind, AssertUnwindSafe},
-    time::Duration,
+    time::{Duration, Instant},
 };
 use windows::{
     core::{PCWSTR, PSTR, PWSTR},
@@ -50,6 +50,7 @@ struct MsiOwned {
 }
 struct GuardState {
     resources: Resources,
+    source_capture_returned: bool,
     module: Option<HMODULE>,
     module_close_attempted: bool,
     msi: Vec<MsiOwned>,
@@ -68,6 +69,7 @@ impl GuardState {
         let resources = Resources::empty()?;
         Ok(Box::new(Self {
             resources,
+            source_capture_returned: true,
             module: None,
             module_close_attempted: false,
             msi: Vec::with_capacity(8),
@@ -614,6 +616,11 @@ impl GuardState {
         }
     }
     fn finish(&mut self) -> Result<()> {
+        // An uncertain reader close retained this same claim, including all
+        // original pipe/process/image pins. Retain our loader reference too.
+        if !self.source_capture_returned {
+            return Err(LifecycleError::Faulted);
+        }
         self.cancel_and_drain()?;
         while let Some(item) = self.msi.last() {
             self.close_msi(item.handle)?;
@@ -666,7 +673,12 @@ impl GuardState {
         // the actual peer query does not depend on a closed client's metadata.
         self.receive(nonce, &format)?;
         let image = self.peer_image()?;
-        self.template_matches(install, image, &format)?;
+        match &format {
+            abi2::PackageFormat::Legacy => self.template_matches(install, image, &format)?,
+            abi2::PackageFormat::Abi2(package) => {
+                self.dual_source_matches(install, image, package)?
+            }
+        }
         let process = self.resources.handle(Role::Guardian)?;
         let peer = self.peer.ok_or(LifecycleError::Invalid)?;
         if unsafe { GetProcessId(process) } != peer.process_id

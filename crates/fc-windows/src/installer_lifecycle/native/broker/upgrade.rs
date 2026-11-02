@@ -4,6 +4,8 @@ use crate::installer_lifecycle::guard_contract::v2::ObservedPackage;
 #[derive(Debug)]
 pub(super) struct VerifiedUpgradePlan {
     pub(super) old: Manifest,
+    pub(super) current_auxiliary: super::super::super::broker::carrier::AuxiliaryIdentity,
+    pub(super) predecessor_auxiliary: super::super::super::broker::carrier::AuxiliaryIdentity,
     pub(super) union: Manifest,
     pub(super) registration: maintenance::Registration,
     pub(super) cache_object: (u32, u64),
@@ -22,6 +24,9 @@ impl VerifiedUpgradePlan {
                     .zip(version(&v.manifest.version))
                     .is_some_and(|(a, b)| a < b)
                 && self.checked_msi_closes != 0
+                && v.auxiliary().ok() == Some(self.current_auxiliary)
+                && v.predecessor.as_ref().and_then(|p| p.auxiliary().ok())
+                    == Some(self.predecessor_auxiliary)
         })
     }
     pub(super) fn packages(&self, s: &Session) -> Result<[ObservedPackage; 2]> {
@@ -94,7 +99,9 @@ pub(super) fn union(old: &Manifest, new: &Manifest) -> Result<Manifest> {
         entries: entries.into_values().collect(),
     })
 }
-// Closed Binary table grammar for this initial 3->4 stream Upgrade ABI.
+// Closed ABI2 grammar: an initial three-stream or published four-stream old
+// package, and exactly four streams for the new package. The old fourth stream
+// is parsed as bounded data by the same Reader, never executed recursively.
 pub(super) fn binary_names(new: bool, names: &BTreeSet<String>) -> bool {
     let mut expected: BTreeSet<String> = [
         "FcControlledGuardDll",
@@ -104,9 +111,10 @@ pub(super) fn binary_names(new: bool, names: &BTreeSet<String>) -> bool {
     .into_iter()
     .map(str::to_owned)
     .collect();
-    if new {
-        expected.insert("FcPublishedPredecessor".into());
+    if !new && names == &expected {
+        return true;
     }
+    expected.insert("FcPublishedPredecessor".into());
     names == &expected
 }
 pub(super) fn revalidate(s: &mut Session) -> Result<()> {
@@ -148,9 +156,10 @@ mod tests {
         let mut new = old.clone();
         new.insert("FcPublishedPredecessor".into());
         assert!(binary_names(true, &new));
-        assert!(!binary_names(false, &new));
+        assert!(binary_names(false, &new));
         new.insert("Other".into());
         assert!(!binary_names(true, &new));
+        assert!(!binary_names(false, &new));
         let mut missing = old;
         missing.remove("FcControlledGuardDll");
         assert!(!binary_names(false, &missing));

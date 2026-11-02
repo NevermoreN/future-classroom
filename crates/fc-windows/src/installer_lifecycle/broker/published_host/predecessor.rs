@@ -18,9 +18,29 @@ pub(crate) struct PublishedPredecessor {
     pub(crate) guard_sha: [u8; 32],
     pub(crate) logical_sha: [u8; 32],
     pub(crate) template_bytes: u32,
+    pub(crate) guard_protocol: u16,
     envelope: Vec<u8>,
 }
 impl PublishedPredecessor {
+    pub(crate) fn auxiliary(&self) -> Result<carrier::AuxiliaryIdentity> {
+        if self.guard_protocol != carrier::GUARD_PROTOCOL {
+            return Err(LifecycleError::UpgradeProtocolUnsupported);
+        }
+        carrier::AuxiliaryIdentity::observed(
+            self.template_bytes as usize,
+            self.template_sha,
+            self.guard_sha,
+        )
+    }
+    // Both arguments are observations of the invoking CA's own active DB.
+    // This only compares immutable facts; native grant/owner checks stay separate.
+    pub(crate) fn matches_active(
+        &self,
+        envelope: &[u8],
+        auxiliary: carrier::AuxiliaryIdentity,
+    ) -> Result<bool> {
+        Ok(self.envelope == envelope && self.auxiliary()? == auxiliary)
+    }
     pub(crate) fn envelope(&self) -> &[u8] {
         &self.envelope
     }
@@ -29,13 +49,17 @@ impl PublishedPredecessor {
     }
 }
 pub(crate) fn parse(b: &[u8]) -> Result<PublishedPredecessor> {
+    if b.len() >= HEADER_BYTES && &b[..8] == MAGIC && b[8..12] == [1, 0, 2, 0] {
+        return Err(LifecycleError::UpgradeProtocolUnsupported);
+    }
     if !(HEADER_BYTES + 1..=MAX_BYTES).contains(&b.len())
         || &b[..8] != MAGIC
-        || b[8..10] != 1u16.to_le_bytes()
+        || b[8..10] != 2u16.to_le_bytes()
         || b[10..12] != carrier::ABI.to_le_bytes()
         || !matches!(b[12], 1 | 2)
         || b[13..16] != [0; 3]
-        || b[236..248] != [0; 12]
+        || b[236..240] != u32::from(carrier::GUARD_PROTOCOL).to_le_bytes()
+        || b[240..248] != [0; 8]
     {
         return Err(LifecycleError::Invalid);
     }
@@ -60,6 +84,7 @@ pub(crate) fn parse(b: &[u8]) -> Result<PublishedPredecessor> {
         guard_sha: b[164..196].try_into().unwrap(),
         logical_sha: b[196..228].try_into().unwrap(),
         template_bytes,
+        guard_protocol: carrier::GUARD_PROTOCOL,
         envelope: b[HEADER_BYTES..].to_vec(),
     })
 }
@@ -96,12 +121,13 @@ mod tests {
             payload_manifest::encode_format("99378807-098D-5F04-8D4D-F181DFA218D7", &body).unwrap();
         let mut b = vec![0; HEADER_BYTES];
         b[..8].copy_from_slice(MAGIC);
-        b[8..10].copy_from_slice(&1u16.to_le_bytes());
+        b[8..10].copy_from_slice(&2u16.to_le_bytes());
         b[10..12].copy_from_slice(&2u16.to_le_bytes());
         b[12] = 2;
         b[16..228].fill(1);
         b[228..232].copy_from_slice(&1156u32.to_le_bytes());
         b[232..236].copy_from_slice(&(envelope.len() as u32).to_le_bytes());
+        b[236..240].copy_from_slice(&u32::from(carrier::GUARD_PROTOCOL).to_le_bytes());
         b.extend(envelope);
         b
     }
@@ -132,11 +158,35 @@ mod tests {
         assert!(parse(&bad).is_err());
     }
     #[test]
+    fn versioned_predecessor_matches_its_own_auxiliary_without_reusing_successor_bytes() {
+        let b = valid();
+        let record = parse(&b).unwrap();
+        let old = record.auxiliary().unwrap();
+        let new =
+            carrier::AuxiliaryIdentity::observed(old.template_bytes + 1, [7; 32], [8; 32]).unwrap();
+        assert_ne!(old, new);
+        assert!(record.matches_active(record.envelope(), old).unwrap());
+        assert!(!record.matches_active(record.envelope(), new).unwrap());
+        let mut changed = record.envelope().to_vec();
+        changed[48] ^= 1;
+        assert!(!record.matches_active(&changed, old).unwrap());
+        let mut legacy = b.clone();
+        legacy[8..10].copy_from_slice(&1u16.to_le_bytes());
+        legacy[236..248].fill(0);
+        assert_eq!(
+            parse(&legacy).unwrap_err(),
+            LifecycleError::UpgradeProtocolUnsupported
+        );
+        let mut unsupported = b;
+        unsupported[236..240].fill(0);
+        assert!(parse(&unsupported).is_err());
+    }
+    #[test]
     fn predecessor_rejects_empty_unknown_profile_and_zero_provenance_before_authority() {
         assert!(parse(&[]).is_err());
         let mut b = vec![0; HEADER_BYTES + 1];
         b[..8].copy_from_slice(MAGIC);
-        b[8..10].copy_from_slice(&1u16.to_le_bytes());
+        b[8..10].copy_from_slice(&2u16.to_le_bytes());
         b[10..12].copy_from_slice(&2u16.to_le_bytes());
         for target in [0, 1, 2, 3] {
             b[12] = target;

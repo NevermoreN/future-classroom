@@ -12,6 +12,17 @@ D = runpy.run_path(str(HERE/'package-abi2-controlled-dev.py'))
 F = runpy.run_path(str(HERE/'test-installer-carrier-format.py'))
 
 class Abi2DevTests(unittest.TestCase):
+    def test_builder_rejects_old_compiled_protocol_instead_of_relabeling_it(self):
+        with tempfile.TemporaryDirectory(prefix='fc-abi2-protocol-') as directory:
+            root=Path(directory)
+            p=root/'crates/fc-windows/src/installer_lifecycle/broker/carrier.rs'
+            p.parent.mkdir(parents=True)
+            for old in (b'pub(crate) const ABI: u16 = 2;', b'pub(crate) const GUARD_PROTOCOL: u16 = 0;'):
+                p.write_bytes(old)
+                with self.assertRaises(ValueError):D['require_source_protocol'](root)
+            p.write_bytes(b'pub(crate) const GUARD_PROTOCOL: u16 = 3;')
+            D['require_source_protocol'](root)
+
     def test_authoring_adds_exact_third_binary_without_ignored_package_attribute(self):
         raw = D['authoring']('0.1.0', sorted(D['B']['LIFECYCLE_REQUIRED']))
         root = ET.fromstring(raw); ns = '{'+D['B']['WIX_NS']+'}'; p=root.find(ns+'Product')
@@ -173,14 +184,20 @@ class FormalSuccessorContract(unittest.TestCase):
         for names,blob in ((list(u['BINARY_NAMES']),record),(list(u['BINARY_NAMES'])+[u['PREDECESSOR_BINARY']],None),(list(u['BINARY_NAMES'])+[u['PREDECESSOR_BINARY'],'Extra'],record)):
             with self.assertRaises(ValueError):u['validate_contract'](b'',{'Binary':binary(names)},'0.2.0',{},F['PACKAGE'],b'',blob)
 
-    def test_successor_rejects_same_version_downgrade_or_changed_aux(self):
+    def test_successor_binds_each_aux_to_its_release_and_requires_newer_identity(self):
         b=FORMAL['B'];helper=F['structural_pe']();template=FORMAL['ABI2']['C']['make_carrier_template'](helper)
-        package=dict(version='0.1.0',productCode=b['product_code']('0.1.0'))
-        artifacts={'lifecycle-compile':(None,helper),'guard-library-compile':(None,b'original DLL bytes')}
-        streams={b['TEMPLATE_BINARY']:template,b['GUARD_BINARY']:b'original DLL bytes'}
+        dll=bytearray(helper);struct.pack_into('<H',dll,150,0x2000);dll=bytes(dll)
+        new_helper=bytearray(helper);new_helper[-1]=7
+        new_dll=bytearray(dll);new_dll[-1]=8
+        package=dict(version='0.1.0',productCode=b['product_code']('0.1.0'),guardProtocol=3,
+                     normalProvenance=dict(normal_helper_sha256=hashlib.sha256(helper).hexdigest()),
+                     normalGuardProvenance=dict(dll_sha256=hashlib.sha256(dll).hexdigest()))
+        artifacts={'lifecycle-compile':(None,bytes(new_helper)),'guard-library-compile':(None,bytes(new_dll))}
+        streams={b['TEMPLATE_BINARY']:template,b['GUARD_BINARY']:dll}
         FORMAL['validate_successor_identity'](package,'0.2.0',streams,artifacts)
         for version,old in (('0.1.0',streams),('0.0.9',streams),('0.2.0',dict(streams,**{b['TEMPLATE_BINARY']:template+b'x'})),('0.2.0',dict(streams,**{b['GUARD_BINARY']:b'other DLL'}))):
             with self.assertRaises(ValueError):FORMAL['validate_successor_identity'](package,version,old,artifacts)
+        with self.assertRaises(ValueError):FORMAL['validate_successor_identity'](dict(package,guardProtocol=0),'0.2.0',streams,artifacts)
 
     def test_cache_binding_requires_actual_api_product_user_full_hash_and_object(self):
         manifest=dict(productCode='{'+F['PACKAGE']+'}',expectedUserSid='S-1-5-21-1-2-3-1001')
@@ -195,5 +212,42 @@ class FormalSuccessorContract(unittest.TestCase):
     def test_runtime_rejects_gnu_or_exit_only_without_touching_originals(self):
         for r in ({'status':'PASS_GNU_ABI2_SAME_PACKAGE_MAINTENANCE_WIN11_DEV_CONTROLLED_PRODUCT_CLOSURE_AND_EXACT_SCRATCH_CLEANUP'}, {'runtimeActualExit':0}, {}):
             with self.assertRaises(ValueError):FORMAL['validate_predecessor_runtime'](r,{}, {})
+
+    def test_old_four_record_remains_bound_to_prior_publication_metadata(self):
+        u=FORMAL['ABI2'];b=FORMAL['B'];record,meta=self.record()
+        template=u['C']['make_carrier_template'](F['structural_pe']());dll=b'unchanged guard fixture'
+        meta.update(template_sha=hashlib.sha256(template).hexdigest(),template_bytes=len(template),guard_sha=hashlib.sha256(dll).hexdigest())
+        record=FORMAL['PUBLICATION']['encode_format'](meta,record[248:],u['C']['parse_payload_manifest'])
+        fact=dict(bytes=len(record),sha256=hashlib.sha256(record).hexdigest())
+        normal=dict(source_sha=meta['source_commit'],result_sha256=meta['producer_sha'],profile_test=False)
+        guard=dict(normal,dll_sha256=meta['guard_sha'])
+        package=dict(status='PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_SUCCESSOR_STATIC_CANDIDATE_NATIVE_NOT_RUN',
+                     binaryReadback='ALL_FOUR_EXACT',publishedPredecessor=fact,version='0.2.0',
+                     productCode=b['product_code']('0.2.0'),packageCode='12345678-1234-1234-1234-123456789ABD',
+                     predecessorPublication=dict(status='BOUND_ORIGINAL_MSVC_PREDECESSOR_STATIC_NOT_NATIVE_UPGRADE_PASS',
+                                                meta=meta,record=fact,previousNormalProvenance=normal,previousNormalGuardProvenance=guard))
+        streams={b['TEMPLATE_BINARY']:template,b['GUARD_BINARY']:dll}
+        FORMAL['validate_old_publication'](package,record,streams)
+        FORMAL['validate_old_publication'](package,record,dict(streams,**{b['GUARD_BINARY']:b'current old release differs from its predecessor'}))
+        for mutation in ('missing-record','changed-record-fact','same-version','changed-provenance'):
+            bad=copy.deepcopy(package);old=dict(streams);blob=record
+            if mutation=='missing-record':blob=None
+            elif mutation=='changed-record-fact':bad['publishedPredecessor']['sha256']='f'*64
+            elif mutation=='same-version':bad['version']='0.1.0'
+            else:bad['predecessorPublication']['previousNormalGuardProvenance']['dll_sha256']='f'*64
+            with self.subTest(mutation=mutation),self.assertRaises(ValueError):FORMAL['validate_old_publication'](bad,blob,old)
+
+    def test_shared_closed_streams_and_fixed_table_digest_include_old_fourth_bytes(self):
+        u=FORMAL['ABI2'];record,_=self.record();base=dict(zip(u['BINARY_NAMES'],(b'DLL',b'template',b'envelope')))
+        old=u['published_streams'](base,record)
+        self.assertEqual(set(old),set(base)|{u['PREDECESSOR_BINARY']})
+        self.assertEqual(u['published_streams'](base),base)
+        for bad in (dict(base,Other=b'x'),old):
+            with self.assertRaises(ValueError):u['published_streams'](bad,record)
+        cols=[('Name','s72'),('Data','v0')]
+        tables=[('Binary',cols,[[n,value]for n,value in old.items()])]
+        first=FORMAL['PUBLICATION']['signature'](tables)[0]
+        changed=[('Binary',cols,[[n,value+b'x'if n==u['PREDECESSOR_BINARY']else value]for n,value in old.items()])]
+        self.assertNotEqual(FORMAL['PUBLICATION']['signature'](changed)[0],first)
 
 if __name__=='__main__':unittest.main()

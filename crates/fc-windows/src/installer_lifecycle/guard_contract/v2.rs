@@ -3,7 +3,10 @@
 use super::{LifecycleError, Nonce, Result};
 use crate::installer_lifecycle::{broker::manifest, INSTALL_FAMILY};
 
-pub(crate) const INFO_PREFIX: &str = "FCGI2:";
+// ABI2 package identity, capability3 guard association. Keep the Rust module
+// path stable; wire magic and version reject every older endpoint explicitly.
+const PROTOCOL: u8 = super::super::broker::carrier::GUARD_PROTOCOL as u8;
+pub(crate) const INFO_PREFIX: &str = "FCGI3:";
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct ObservedPackage {
     product: String,
@@ -34,7 +37,7 @@ impl ObservedPackage {
     }
     pub(crate) fn info(&self, nonce: Nonce) -> String {
         format!(
-            "{INFO_PREFIX}{}:{}:{}:{INSTALL_FAMILY}:{}:2",
+            "{INFO_PREFIX}{}:{}:{}:{INSTALL_FAMILY}:{}:2:3",
             nonce.hex(),
             self.product,
             self.package,
@@ -56,7 +59,11 @@ impl ObservedPackage {
         let package = parts.next().ok_or(LifecycleError::Invalid)?;
         let family = parts.next().ok_or(LifecycleError::Invalid)?;
         let version = parts.next().ok_or(LifecycleError::Invalid)?;
-        if family != INSTALL_FAMILY || parts.next() != Some("2") || parts.next().is_some() {
+        if family != INSTALL_FAMILY
+            || parts.next() != Some("2")
+            || parts.next() != Some("3")
+            || parts.next().is_some()
+        {
             return Err(LifecycleError::Invalid);
         }
         Ok((Self::new(product, package, version)?, nonce))
@@ -81,13 +88,14 @@ impl ObservedPackage {
         b[109] = parts[1] as u8;
         b[110..112].copy_from_slice(&(parts[2] as u16).to_le_bytes());
         b[112..114].copy_from_slice(&2u16.to_le_bytes());
+        b[114..116].copy_from_slice(&u16::from(PROTOCOL).to_le_bytes());
         b
     }
     fn parse_identity(b: &[u8]) -> Result<Self> {
         if b.len() != IDENTITY_BYTES
             || &b[72..108] != INSTALL_FAMILY.as_bytes()
             || b[112..114] != 2u16.to_le_bytes()
-            || b[114..116] != [0; 2]
+            || b[114..116] != u16::from(PROTOCOL).to_le_bytes()
         {
             return Err(LifecycleError::Invalid);
         }
@@ -132,8 +140,8 @@ impl Grant {
     }
     pub(crate) fn encode(&self) -> [u8; FRAME_BYTES] {
         let mut b = [0; FRAME_BYTES];
-        b[..4].copy_from_slice(b"FCG2");
-        b[4] = 2;
+        b[..4].copy_from_slice(b"FCG3");
+        b[4] = PROTOCOL;
         b[5] = 1;
         b[8..24].copy_from_slice(&self.nonce.0);
         b[24..32].copy_from_slice(&self.deadline.to_le_bytes());
@@ -143,8 +151,8 @@ impl Grant {
     }
     pub(crate) fn parse(b: &[u8]) -> Result<Self> {
         if b.len() != FRAME_BYTES
-            || &b[..4] != b"FCG2"
-            || b[4] != 2
+            || &b[..4] != b"FCG3"
+            || b[4] != PROTOCOL
             || b[5] != 1
             || b[6..8] != [0; 2]
             || b[36..40] != [0; 4]
@@ -208,8 +216,8 @@ impl Bridge {
     }
     pub(crate) fn encode(&self) -> [u8; FRAME_BYTES] {
         let mut b = [0; FRAME_BYTES];
-        b[..4].copy_from_slice(b"FCB2");
-        b[4] = 2;
+        b[..4].copy_from_slice(b"FCB3");
+        b[4] = PROTOCOL;
         b[5] = self.kind.byte();
         b[8..12].copy_from_slice(&self.transaction.to_le_bytes());
         b[12..28].copy_from_slice(&self.nonce.0);
@@ -218,8 +226,8 @@ impl Bridge {
     }
     pub(crate) fn parse(b: &[u8]) -> Result<Self> {
         if b.len() != FRAME_BYTES
-            || &b[..4] != b"FCB2"
-            || b[4] != 2
+            || &b[..4] != b"FCB3"
+            || b[4] != PROTOCOL
             || b[6..8] != [0; 2]
             || b[28..32] != [0; 4]
             || b[148..160] != [0; 12]
@@ -262,7 +270,7 @@ mod tests {
         for bad in [
             format!("{text}:old"),
             text.replace(INSTALL_FAMILY, PRODUCT),
-            text.strip_suffix('2').unwrap().to_owned() + "1",
+            text.strip_suffix('3').unwrap().to_owned() + "2",
             text.replace(":1.2.3:", ":01.2.3:"),
             text.replace(PACKAGE, "00000000-0000-0000-0000-000000000000"),
         ] {
@@ -295,6 +303,19 @@ mod tests {
             assert_eq!(Bridge::parse(&bridge.encode()).unwrap(), bridge);
             assert!(super::super::Bridge::parse(&bridge.encode()).is_err());
         }
+    }
+    #[test]
+    fn capability3_rejects_old_wire_magic_and_zero_capability_without_normalizing() {
+        let p = ObservedPackage::new(PRODUCT, PACKAGE, "1.2.3").unwrap();
+        let n = Nonce::from_bytes([1; 16]).unwrap();
+        assert!(ObservedPackage::parse_info(&p.info(n).replace("FCGI3:", "FCGI2:")).is_err());
+        let mut old = Grant::new(p.clone(), n, 2000, 42).unwrap().encode();
+        old[..4].copy_from_slice(b"FCG2");
+        old[4] = 2;
+        assert!(Grant::parse(&old).is_err());
+        let mut zero = Grant::new(p, n, 2000, 42).unwrap().encode();
+        zero[154..156].fill(0);
+        assert!(Grant::parse(&zero).is_err());
     }
     #[test]
     fn v2_ticket_exact_headers_identity_and_reserved_regions_are_closed() {

@@ -32,9 +32,10 @@ def predecessor_bytes(record: bytes | None) -> bytes | None:
         return None
     NEED(type(record) is bytes and 248 < len(record) <= 248 + 88 + 32768,
          'Bounded immutable predecessor record')
-    NEED(record[:8] == b'FCPRED2\0' and record[8:12] == struct.pack('<HH', 1, 2)
+    NEED(record[:8] == b'FCPRED2\0' and record[8:12] == struct.pack('<HH', 2, 2)
          and record[12] in (1, 2) and record[13:16] == bytes(3)
-         and record[236:248] == bytes(12), 'Exact predecessor header and reserved bytes')
+         and record[236:240] == struct.pack('<I', C['GUARD_PROTOCOL'])
+         and record[240:248] == bytes(8), 'Exact versioned predecessor header and guard capability; older releases need a compatible installer and retain their data')
     NEED(record[16:36] != bytes(20)
          and all(record[n:n+32] != bytes(32) for n in range(36, 228, 32)),
          'Nonzero predecessor source and six digest identities')
@@ -43,6 +44,15 @@ def predecessor_bytes(record: bytes | None) -> bytes | None:
          'Exact predecessor template and envelope bounds')
     C['parse_payload_manifest'](record[248:])
     return record
+
+
+def published_streams(base: dict, predecessor: bytes | None = None) -> dict:
+    """Closed actual stream set shared by new assembly and old-package replay."""
+    NEED(set(base) == set(BINARY_NAMES), 'Exactly the three fixed base ABI2 streams')
+    result = dict(base)
+    if predecessor_bytes(predecessor) is not None:
+        result[PREDECESSOR_BINARY] = predecessor
+    return result
 
 
 def extent(raw: bytes, dll: bool = False) -> dict:
@@ -176,6 +186,7 @@ def validate_contract(summary: bytes, tables: dict, version: str, payloads: dict
     matches = re.findall(rb'^Revision number \(UUID\): \{([0-9A-F-]{36})\}\r?$', summary, re.M)
     NEED(matches == [package.encode('ascii')], 'Actual summary PackageCode equals envelope identity')
     result['guardABI'] = 2
+    result['guardProtocol'] = C['GUARD_PROTOCOL']
     result['binaryStreams'] = list(binary_names)
     result['packageCode'] = package
     return result
@@ -223,6 +234,7 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
     """
     predecessor_bytes(predecessor)
     source = a.source_root.absolute()
+    DEV['require_source_protocol'](source)
     NEED(set(artifacts) == {'product-compile', 'lifecycle-compile', 'guard-library-compile'}, 'Exactly three admitted normal artifacts')
     NEED(set(identity) <= {'scope', 'formalCI', 'sourceBase', 'sourceEvidenceSha256',
         'normalProvenance', 'upgradeSourceBinding', 'webReportSha256', 'lifecycleMode',
@@ -249,7 +261,7 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
     NEED(B['file_digest'](tools['msibuild']) == a.msibuild_sha256, 'Pinned msibuild actual bytes')
     output = B['fresh_output'](a.output_dir)
     report = {'status': 'FAIL_RETAIN_ORIGINALS',
-        'normalProfileTest': False, 'installation': 'NOT_RUN', 'productionReadiness': 'NOT_GRANTED',
+        'normalProfileTest': False, 'guardABI': 2, 'guardProtocol': C['GUARD_PROTOCOL'], 'installation': 'NOT_RUN', 'productionReadiness': 'NOT_GRANTED',
         'sourceRoot': str(source), 'normalPEExtents': normal_extents,
         'productCode': decoded['product'], 'packageCode': package, 'version': product_version, 'artifactVersion': manifest['version'], 'payloadVersionPolicy': 'Actual artifact/manifest.json compiler version preserved; MSI release identity is an explicit separate build input',
         'productCodeGeneration': 'Existing fixed UUIDv5 per version; unchanged authoring policy', 'packageCodeGeneration': 'Actual unexecuted compiler Summary UUID, then manifest stream replacement and exact full Summary re-read before seal', 'intermediateEnvelopePackageCode': package, 'authoringPackageId': 'OMITTED_PINNED_WIXL_0_103_IGNORES_ATTRIBUTE',
@@ -311,10 +323,8 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
         report['msiContract'] = validate_contract(summary, tables, product_version, payloads, package, legacy_sequence, predecessor)
         actual_seq = B['idt_rows'](tables['InstallExecuteSequence'], 'InstallExecuteSequence')
         NEED(sorted(actual_seq, key=lambda r: r['Action']) == sorted(B['idt_rows']((output / 'InstallExecuteSequence.idt').read_bytes(), 'InstallExecuteSequence'), key=lambda r: r['Action']), 'Exact standard sequence plus guard1499/condition1 and only REP1501 relocation')
-        streams = list(zip(BINARY_NAMES, (dll, template, envelope)))
-        if predecessor is not None:
-            streams.append((PREDECESSOR_BINARY, predecessor))
-        for name, expected in streams:
+        streams = published_streams(dict(zip(BINARY_NAMES, (dll, template, envelope))), predecessor)
+        for name, expected in streams.items():
             actual = tool('binary-' + name, [tools['msiinfo'], 'extract', msi.name, 'Binary.' + name])
             NEED(actual == expected, 'Exact same-source Binary readback ' + name)
         complete = B['PROBE']['bounded_regular_file'](msi, B['MAX_INSTALLED'])
