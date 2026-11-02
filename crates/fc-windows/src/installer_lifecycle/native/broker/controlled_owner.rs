@@ -216,7 +216,7 @@ fn receive_guard_frame(deadline: Instant, pipe: HANDLE) -> Result<GuardFrame> {
     }
     let mut bytes = [0; v2::FRAME_BYTES];
     bytes[..FRAME].copy_from_slice(&first);
-    for chunk in bytes[FRAME..].chunks_exact_mut(FRAME) {
+    for chunk in bytes[FRAME..].as_chunks_mut::<FRAME>().0 {
         chunk.copy_from_slice(&receive_frame(deadline, pipe)?);
     }
     Ok(GuardFrame::Package(bytes))

@@ -45,7 +45,7 @@ pub(crate) fn parse(b: &[u8]) -> Result<PublishedPredecessor> {
         || !(carrier::MIN_IMAGE_BYTES..=carrier::MAX_IMAGE_BYTES)
             .contains(&(template_bytes as usize))
         || b[16..36] == [0; 20]
-        || b[36..228].chunks_exact(32).any(|v| v == [0; 32])
+        || b[36..228].as_chunks::<32>().0.iter().any(|v| v == &[0; 32])
     {
         return Err(LifecycleError::Invalid);
     }
