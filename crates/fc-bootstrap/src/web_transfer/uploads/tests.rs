@@ -1383,3 +1383,412 @@ fn live_stop_drains_material_ready_and_live_download_pin_without_joining_shared_
     drop(next_owner);
     pool.join().unwrap();
 }
+
+// Batch helpers keep all file/Hub operations on the actual shared worker. The
+// returned control is the original request control, not a physical owner.
+// This fixture extracts only server-generated IDs, then validates the ENTIRE
+// canonical response against the production typed serializer. It is not a new
+// permissive JSON parser and needs no undeclared test dependency.
+fn batch_ready_fields(response: &WebResponse, names: &[String]) -> (u64, Vec<u64>) {
+    let id = field(&response.body, "batchId").parse::<u64>().unwrap();
+    let text = std::str::from_utf8(&response.body).unwrap();
+    let ids = text
+        .split("\"uploadId\":\"")
+        .skip(1)
+        .map(|part| part.split('"').next().unwrap().parse::<u64>().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(ids.len(), names.len());
+    let members = ids
+        .iter()
+        .zip(names)
+        .map(|(id, name)| fc_protocol::web::materials::BatchReadyMember {
+            upload_id: *id,
+            display_name: name,
+            bytes: 4,
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        response.body,
+        fc_protocol::web::materials::batch_ready(id, &members).unwrap()
+    );
+    (id, ids)
+}
+fn batch_web_lease(f: &Fixture) -> fc_application::identity::SessionLease {
+    let cookie = crate::backend::web::cookie_secret(f.cookie.as_bytes()).unwrap();
+    f.backend
+        .lock()
+        .unwrap()
+        .web_service()
+        .authenticate(&cookie)
+        .unwrap()
+        .lease()
+}
+fn batch_scope() -> fc_domain::materials::MaterialScope {
+    fc_domain::materials::MaterialScope {
+        teacher_id: PrincipalId::new(1).unwrap(),
+        subject_id: SubjectId::new(1).unwrap(),
+    }
+}
+fn batch_create(pool: &Pool, hub: &UploadHub, f: &Fixture, count: usize) -> (u64, Vec<u64>) {
+    let files = (0..count)
+        .map(|n| format!(r#"{{"displayName":"member-{n}.txt","bytes":4}}"#))
+        .collect::<Vec<_>>()
+        .join(",");
+    let body =
+        format!(r#"{{"schemaVersion":1,"files":[{files}],"allowedClassIds":["1"]}}"#).into_bytes();
+    let head = f.head("materials/batches/1/1", body.len());
+    let (control, life) = TransferControl::new(head.token, Instant::now()).unwrap();
+    let worker = hub.clone();
+    let app = f.app.clone();
+    let backend = f.backend.clone();
+    let finished = pool.call(move |context| {
+        success(worker.create_batch(&app, &backend, &head, &body, control, life, context))
+    });
+    assert!(finished.network_control.is_some());
+    assert_eq!(
+        finished.response.head.status,
+        201,
+        "{}",
+        String::from_utf8_lossy(&finished.response.body)
+    );
+    let names = (0..count)
+        .map(|n| format!("member-{n}.txt"))
+        .collect::<Vec<_>>();
+    let (id, ids) = batch_ready_fields(&finished.response, &names);
+    drop(finished);
+    (id, ids)
+}
+fn batch_member(
+    pool: &Pool,
+    hub: &UploadHub,
+    f: &Fixture,
+    id: u64,
+    member: u64,
+    bytes: &[u8],
+) -> UploadKey {
+    let mut head = f.head(
+        &format!("materials/batches/{id}/files/{member}/bytes"),
+        bytes.len(),
+    );
+    head.headers
+        .iter_mut()
+        .find(|h| h.name == "Content-Type")
+        .unwrap()
+        .value = b"application/octet-stream".to_vec();
+    let (admission, _) = begin(pool, hub, f, head);
+    write(pool, hub, admission.key, bytes);
+    let worker = hub.clone();
+    let app = f.app.clone();
+    let key = admission.key;
+    let finished = pool.call(move |context| success(worker.finish(key, &app, context)));
+    assert_eq!(
+        finished.response.head.status,
+        200,
+        "{}",
+        String::from_utf8_lossy(&finished.response.body)
+    );
+    assert!(
+        finished.network_control.is_some(),
+        "member control returns, group slot must remain"
+    );
+    drop(finished);
+    admission.key
+}
+#[test]
+fn batch_twenty_members_keep_one_original_hub_slot_and_one_commit_then_history() {
+    let _physical = crate::web_application::upload_test_guard();
+    let f = Fixture::new();
+    let mut pool = Pool::new();
+    let (mut owner, hub) = UploadHubOwner::new().unwrap();
+    let (id, members) = batch_create(&pool, &hub, &f, 20);
+    assert_eq!(
+        owner.shared.as_ref().unwrap().pending(),
+        1,
+        "create already owns the Hub slot"
+    );
+    let mut previous: Option<UploadKey> = None;
+    for member in &members {
+        let key = batch_member(&pool, &hub, &f, id, *member, b"data");
+        if let Some(old) = previous {
+            assert_eq!(key.slot, old.slot);
+            assert!(key.serial > old.serial);
+            let worker = hub.clone();
+            let app = f.app.clone();
+            assert_eq!(
+                pool.call(move |ctx| worker.cleanup(old, &app, ctx)),
+                Err(UploadHubError::Stale)
+            );
+        }
+        previous = Some(key);
+        assert_eq!(owner.shared.as_ref().unwrap().pending(), 1);
+        assert!(
+            !owner.confirm_live_drained(),
+            "a Ready group forbids replacement/drain"
+        );
+    }
+    let body = format!(
+        r#"{{{},"batchId":"{id}","uploadIds":[{}],"allowedClassIds":["1"]}}"#,
+        f.command_fields(901),
+        members
+            .iter()
+            .map(|id| format!("\"{id}\""))
+            .collect::<Vec<_>>()
+            .join(",")
+    )
+    .into_bytes();
+    let head = f.head("materials/folders/1/1/append-batch", body.len());
+    let (control, life) = TransferControl::new(head.token, Instant::now()).unwrap();
+    let before = f.backend.lock().unwrap().global_revision().unwrap();
+    let worker = hub.clone();
+    let app = f.app.clone();
+    let backend = f.backend.clone();
+    let retry_head = head.clone();
+    let retry_body = body.clone();
+    let retry_life = life.clone();
+    let response = pool.call(move |ctx| {
+        success(worker.append_batch_ready(&app, &backend, &head, &body, &life, ctx))
+    });
+    assert_eq!(
+        response.head.status,
+        200,
+        "{}",
+        String::from_utf8_lossy(&response.body)
+    );
+    let original = *f.commands.lock().unwrap().get(&901).unwrap();
+    let lease = batch_web_lease(&f);
+    let saved = f
+        .backend
+        .lock()
+        .unwrap()
+        .web_material_batch_outcome_window(
+            lease,
+            batch_scope(),
+            original.command_id,
+            original.ticket,
+        )
+        .unwrap()
+        .unwrap();
+    assert_eq!(saved.command_id, original.command_id);
+    assert_eq!(saved.scope, batch_scope());
+    assert_eq!(saved.records.len(), 20);
+    for (index, record) in saved.records.iter().enumerate() {
+        assert_eq!(record.resource.version_id.get(), members[index]);
+        assert_eq!(record.display_name, format!("member-{index}.txt"));
+        assert_eq!(record.resource.bytes, 4);
+        assert_eq!(record.allowed_class_ids, vec![ClassId::new(1).unwrap()]);
+    }
+    assert_eq!(
+        response.body,
+        fc_protocol::web::materials::batch_committed(original, batch_scope(), &saved.records)
+            .unwrap()
+    );
+    assert_eq!(
+        f.backend.lock().unwrap().global_revision().unwrap(),
+        before.next().unwrap()
+    );
+    assert_eq!(owner.shared.as_ref().unwrap().pending(), 0);
+    let worker = hub.clone();
+    let app = f.app.clone();
+    let backend = f.backend.clone();
+    let repeat = pool.call(move |ctx| {
+        success(worker.append_batch_ready(
+            &app,
+            &backend,
+            &retry_head,
+            &retry_body,
+            &retry_life,
+            ctx,
+        ))
+    });
+    assert_eq!(repeat.body, response.body);
+    assert_eq!(
+        f.backend.lock().unwrap().global_revision().unwrap(),
+        before.next().unwrap()
+    );
+    drop(control);
+    pool.join().unwrap();
+    assert!(owner.drain_after_join(&f.app).is_drained());
+    drop(owner);
+}
+#[test]
+fn batch_cancel_during_current_member_waits_for_original_worker_and_cleans_whole_group() {
+    let _physical = crate::web_application::upload_test_guard();
+    let f = Fixture::new();
+    let mut pool = Pool::new();
+    let (mut owner, hub) = UploadHubOwner::new().unwrap();
+    let (id, members) = batch_create(&pool, &hub, &f, 3);
+    batch_member(&pool, &hub, &f, id, members[0], b"data");
+    let mut head = f.head(
+        &format!("materials/batches/{id}/files/{}/bytes", members[1]),
+        4,
+    );
+    head.headers
+        .iter_mut()
+        .find(|h| h.name == "Content-Type")
+        .unwrap()
+        .value = b"application/octet-stream".to_vec();
+    let (admission, _) = begin(&pool, &hub, &f, head);
+    write(&pool, &hub, admission.key, b"da");
+    let body = br#"{"schemaVersion":1}"#;
+    let response = f.app.dispatch(
+        &mut f.backend.lock().unwrap(),
+        &f.head(&format!("materials/batches/{id}/cancel"), body.len()),
+        body,
+    );
+    assert_eq!(
+        response.head.status, 503,
+        "a current receiver still owns its original file"
+    );
+    assert_eq!(owner.shared.as_ref().unwrap().pending(), 1);
+    let worker = hub.clone();
+    let app = f.app.clone();
+    pool.call(move |ctx| worker.cleanup(admission.key, &app, ctx))
+        .unwrap();
+    assert_eq!(owner.shared.as_ref().unwrap().pending(), 0);
+    let entries = std::fs::read_dir(f.directory.0.join("web-material-staging"))
+        .unwrap()
+        .map(|p| p.unwrap().file_name())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        entries,
+        vec![std::ffi::OsString::from(".future-classroom-owner")]
+    );
+    pool.join().unwrap();
+    assert!(owner.drain_after_join(&f.app).is_drained());
+    drop(owner);
+}
+#[test]
+fn batch_bad_second_format_has_no_partial_directory_and_returns_all_owners_after_cleanup() {
+    let _physical = crate::web_application::upload_test_guard();
+    let f = Fixture::new();
+    let mut pool = Pool::new();
+    let (mut owner, hub) = UploadHubOwner::new().unwrap();
+    let body=br#"{"schemaVersion":1,"files":[{"displayName":"valid.txt","bytes":4},{"displayName":"invalid.png","bytes":4}],"allowedClassIds":["1"]}"#.to_vec();
+    let head = f.head("materials/batches/1/1", body.len());
+    let (control, life) = TransferControl::new(head.token, Instant::now()).unwrap();
+    let worker = hub.clone();
+    let app = f.app.clone();
+    let backend = f.backend.clone();
+    let created = pool.call(move |ctx| {
+        success(worker.create_batch(&app, &backend, &head, &body, control, life, ctx))
+    });
+    assert_eq!(created.response.head.status, 201);
+    let (id, ids) = batch_ready_fields(
+        &created.response,
+        &["valid.txt".into(), "invalid.png".into()],
+    );
+    drop(created);
+    batch_member(&pool, &hub, &f, id, ids[0], b"data");
+    let mut head = f.head(&format!("materials/batches/{id}/files/{}/bytes", ids[1]), 4);
+    head.headers
+        .iter_mut()
+        .find(|h| h.name == "Content-Type")
+        .unwrap()
+        .value = b"application/octet-stream".to_vec();
+    let (admission, _) = begin(&pool, &hub, &f, head);
+    write(&pool, &hub, admission.key, b"nope");
+    let worker = hub.clone();
+    let app = f.app.clone();
+    let key = admission.key;
+    let result = pool.call(move |ctx| success(worker.finish(key, &app, ctx)));
+    assert_ne!(result.response.head.status, 200);
+    drop(result);
+    let worker = hub.clone();
+    let app = f.app.clone();
+    pool.call(move |ctx| worker.cleanup(key, &app, ctx))
+        .unwrap();
+    let page = f.app.dispatch(
+        &mut f.backend.lock().unwrap(),
+        &request("GET", "materials/folders/1/1", 0, Some(&f.cookie), None),
+        b"",
+    );
+    assert_eq!(page.head.status, 200);
+    let lease = batch_web_lease(&f);
+    let observed = f
+        .backend
+        .lock()
+        .unwrap()
+        .materials(
+            lease,
+            fc_ports::MaterialListRequest {
+                scope: batch_scope(),
+                cursor: None,
+            },
+        )
+        .unwrap();
+    assert_eq!(observed.total, 0);
+    assert!(observed.items.is_empty());
+    assert_eq!(
+        page.body,
+        fc_protocol::web::materials::page(&observed).unwrap()
+    );
+    pool.join().unwrap();
+    assert!(owner.drain_after_join(&f.app).is_drained());
+    drop(owner);
+}
+#[test]
+fn batch_failed_exact_cleanup_keeps_original_charge_and_two_group_capacity() {
+    let _physical = crate::web_application::upload_test_guard();
+    let f = Fixture::new();
+    let mut pool = Pool::new();
+    let (mut owner, hub) = UploadHubOwner::new().unwrap();
+    let (id, members) = batch_create(&pool, &hub, &f, 2);
+    let blocked = f
+        .directory
+        .0
+        .join("web-material-staging")
+        .join(format!("web-material-batch-{id}-{}.part", members[0]));
+    let mut permissions = std::fs::metadata(&blocked).unwrap().permissions();
+    permissions.set_readonly(true);
+    std::fs::set_permissions(&blocked, permissions).unwrap();
+    let cancel = br#"{"schemaVersion":1}"#;
+    let response = f.app.dispatch(
+        &mut f.backend.lock().unwrap(),
+        &f.head(&format!("materials/batches/{id}/cancel"), cancel.len()),
+        cancel,
+    );
+    assert_eq!(
+        response.head.status, 503,
+        "failed native deletion must retain the group"
+    );
+    let (second, _) = batch_create(&pool, &hub, &f, 1);
+    assert_eq!(owner.shared.as_ref().unwrap().pending(), 2);
+    let body=br#"{"schemaVersion":1,"files":[{"displayName":"third.txt","bytes":4}],"allowedClassIds":["1"]}"#.to_vec();
+    let head = f.head("materials/batches/1/1", body.len());
+    let (control, life) = TransferControl::new(head.token, Instant::now()).unwrap();
+    let worker = hub.clone();
+    let app = f.app.clone();
+    let backend = f.backend.clone();
+    let denied =
+        pool.call(move |ctx| worker.create_batch(&app, &backend, &head, &body, control, life, ctx));
+    assert!(matches!(
+        denied,
+        Err(UploadHubFailure::Hub(UploadHubError::Busy))
+    ));
+    restore_readonly(&blocked).unwrap();
+    expect(
+        f.app.dispatch(
+            &mut f.backend.lock().unwrap(),
+            &f.head(&format!("materials/batches/{id}/cancel"), cancel.len()),
+            cancel,
+        ),
+        200,
+    );
+    expect(
+        f.app.dispatch(
+            &mut f.backend.lock().unwrap(),
+            &f.head(&format!("materials/batches/{second}/cancel"), cancel.len()),
+            cancel,
+        ),
+        200,
+    );
+    let worker = hub.clone();
+    let app = f.app.clone();
+    let status = pool
+        .call(move |ctx| worker.reap_expired(&app, ctx))
+        .unwrap();
+    assert!(status.is_drained());
+    pool.join().unwrap();
+    assert!(owner.drain_after_join(&f.app).is_drained());
+    drop(owner);
+}

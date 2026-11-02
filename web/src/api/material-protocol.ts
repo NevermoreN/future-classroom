@@ -90,3 +90,49 @@ export function classPage(x: unknown, target: MaterialScope, offset: number): Ma
   const nextOffset = offset + items.length < total ? offset + items.length : null; if (v.nextOffset !== nextOffset) fail()
   return { identityRevision: decimal(v.identityRevision), scope: s, offset, total, nextOffset, items }
 }
+
+export const MAX_BATCH_FILES = 20
+export interface BatchFile { displayName: string; bytes: number }
+export interface BatchReady { batchId: string; expiresInSeconds: 300; maxChunkBytes: 65536; items: (BatchFile & { uploadId: string })[] }
+export interface BatchCommitted extends CommandIdentity { scope: MaterialScope; records: MaterialRecord[] }
+export type BatchOutcome = (BatchCommitted & { state: 'COMMITTED' }) | (CommandIdentity & { state: 'NOT_FOUND'; scope: null; records: null })
+export function batchFiles(files: readonly BatchFile[]): BatchFile[] {
+  if (!files.length || files.length > MAX_BATCH_FILES) return fail()
+  return files.map(file => { const displayName = fileName(file.displayName), bytes = count(file.bytes, fileLimit(displayName)); if (!bytes) return fail(); return { displayName, bytes } })
+}
+export function batchReady(x: unknown, original: readonly BatchFile[]): BatchReady {
+  const expected = batchFiles(original), v = object(x, ['schemaVersion', 'status', 'batchId', 'expiresInSeconds', 'maxChunkBytes', 'items']); schema(v, 'MATERIAL_BATCH_READY')
+  if (v.expiresInSeconds !== 300 || v.maxChunkBytes !== 65536 || !Array.isArray(v.items) || v.items.length !== expected.length) return fail()
+  const ids = new Set<string>()
+  const items = v.items.map((raw, i) => { const item = object(raw, ['uploadId', 'displayName', 'bytes']), uploadId = decimal(item.uploadId), file = expected[i]!; if (ids.has(uploadId) || item.displayName !== file.displayName || item.bytes !== file.bytes) return fail(); ids.add(uploadId); return { uploadId, ...file } })
+  return { batchId: decimal(v.batchId), expiresInSeconds: 300, maxChunkBytes: 65536, items }
+}
+export function batchUploaded(x: unknown, batchId: string, uploadId: string, bytes: number): void {
+  const v = object(x, ['schemaVersion', 'status', 'batchId', 'uploadId', 'bytes']); schema(v, 'MATERIAL_BATCH_MEMBER_UPLOADED'); if (v.batchId !== decimal(batchId) || v.uploadId !== decimal(uploadId) || v.bytes !== bytes) fail()
+}
+export function batchCancelled(x: unknown, batchId: string): void {
+  const v = object(x, ['schemaVersion', 'status', 'batchId']); schema(v, 'MATERIAL_BATCH_CANCELLED'); if (v.batchId !== decimal(batchId)) fail()
+}
+export function batchRecords(x: unknown): MaterialRecord[] {
+  if (!Array.isArray(x) || !x.length || x.length > MAX_BATCH_FILES) return fail()
+  const records = x.map(record), first = records[0]!, ids = new Set<string>(), versions = new Set<string>()
+  for (const [i, r] of records.entries()) {
+    if (r.status !== 'PUBLISHED' || r.revision !== '1' || r.folderId !== first.folderId || r.addedAt !== first.addedAt || BigInt(r.addedSequence) !== BigInt(first.addedSequence) + BigInt(i) || ids.has(r.materialId) || versions.has(r.resourceVersionId)) return fail()
+    ids.add(r.materialId); versions.add(r.resourceVersionId)
+  }
+  return records
+}
+export function batchCommitted(x: unknown, original: CommandIdentity, target: MaterialScope): BatchCommitted {
+  const v = object(x, ['schemaVersion', 'status', 'commandId', 'commandTicket', 'scope', 'records']); commandVersion(v.schemaVersion)
+  if (v.status !== 'BATCH_COMMITTED' || !sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, original)) return fail()
+  const s = scope(v.scope); if (!sameScope(s, target)) return fail()
+  return { ...commandIdentity(original), scope: s, records: batchRecords(v.records) }
+}
+export function batchOutcome(x: unknown, original: CommandIdentity, target: MaterialScope): BatchOutcome {
+  const v = object(x, ['schemaVersion', 'status', 'commandId', 'commandTicket', 'state', 'scope', 'records']); commandVersion(v.schemaVersion)
+  if (v.status !== 'COMMAND_BATCH_RESULT' || !sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, original)) return fail()
+  if (v.state === 'NOT_FOUND' && v.scope === null && v.records === null) return { ...commandIdentity(original), state: 'NOT_FOUND', scope: null, records: null }
+  if (v.state !== 'COMMITTED') return fail()
+  const s = scope(v.scope); if (!sameScope(s, target)) return fail()
+  return { ...commandIdentity(original), state: 'COMMITTED', scope: s, records: batchRecords(v.records) }
+}

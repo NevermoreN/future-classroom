@@ -816,3 +816,252 @@ fn material_class_pages_preserve_all_classes_under_the_same_identity_revision() 
         "FORBIDDEN",
     );
 }
+
+#[test]
+fn material_batch_history_is_original_ordered_atomic_receipt_without_a_live_upload_group() {
+    let mut f = BackendFixture::new();
+    catalog(&mut f, 1);
+    let (cookie, csrf, lease) = auth(&mut f, "batch-history");
+    let command = f.issue(&cookie, "materials");
+    let mut proofs = Vec::new();
+    for id in [91002, 91001] {
+        let path = f.directory.0.join(format!("batch-actual-{id}.txt"));
+        std::fs::write(&path, b"Real bounded synthetic batch text\n").unwrap();
+        proofs.push(
+            fc_ports::prepare_material_append(
+                &mut TxtPreparation {
+                    version: ResourceVersionId::new(id + 10000).unwrap(),
+                },
+                std::fs::File::open(path).unwrap(),
+                MaterialAppendMetadata {
+                    command_id: command.id,
+                    scope: scope(),
+                    material_id: MaterialId::new(id).unwrap(),
+                    display_name: format!("confirmed-{id}.txt"),
+                    allowed_class_ids: vec![ClassId::new(1).unwrap()],
+                },
+            )
+            .unwrap(),
+        );
+    }
+    let prepared = fc_ports::prepare_material_batch_append(proofs).unwrap();
+    fc_protocol::web::materials::batch_result_fits(scope(), &prepared.request().appends).unwrap();
+    let issued = f
+        .backend
+        .resolve_web_command(
+            lease,
+            fc_ports::command_window::CommandFamily::Materials,
+            command.ticket,
+            command.id,
+        )
+        .unwrap();
+    let before = f.backend.global_revision().unwrap();
+    let records = f
+        .backend
+        .begin_command_scope(issued)
+        .unwrap()
+        .web_material_append_batch(lease, prepared)
+        .unwrap();
+    assert_eq!(f.backend.global_revision().unwrap(), before.next().unwrap());
+    assert_eq!(
+        records
+            .iter()
+            .map(|record| record.id.get())
+            .collect::<Vec<_>>(),
+        [91002, 91001]
+    );
+    let history_path = format!(
+        "materials/batch-commands/1/1/{}/{}",
+        command.ticket,
+        command.id.get()
+    );
+    let original = get(&mut f, &cookie, &history_path);
+    expect(&original, 200, "COMMAND_BATCH_RESULT");
+    let expected = fc_protocol::web::materials::batch_command_window(
+        fc_protocol::web::command_window::CommandReference {
+            ticket: command.ticket,
+            command_id: command.id,
+        },
+        Some((scope(), records.as_slice())),
+    )
+    .unwrap();
+    assert_eq!(
+        original.body, expected,
+        "history encodes the complete original pair, scope and ordered records"
+    );
+    let current = get(&mut f, &cookie, "materials/folders/1/1");
+    expect(&current, 200, "MATERIALS");
+    let current_page = f
+        .backend
+        .web_materials(
+            lease,
+            fc_ports::MaterialListRequest {
+                scope: scope(),
+                cursor: None,
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        current.body,
+        fc_protocol::web::materials::page(&current_page).unwrap()
+    );
+    assert_eq!(current_page.total, 2);
+    assert_eq!(
+        current_page
+            .items
+            .iter()
+            .map(|record| record.id.get())
+            .collect::<Vec<_>>(),
+        [91001, 91002],
+        "current list is newest first, unlike original confirmation order"
+    );
+    let remove = f.issue(&cookie, "materials");
+    let body = format!(
+        r#"{{{},"materialId":"{}","resourceVersionId":"{}","expectedMaterialRevision":"1"}}"#,
+        remove.fields(),
+        records[0].id.get(),
+        records[0].resource.version_id.get()
+    );
+    expect(
+        &post(
+            &mut f,
+            &cookie,
+            &csrf,
+            "materials/folders/1/1/delete",
+            &body,
+        ),
+        200,
+        "COMMITTED",
+    );
+    let after_delete = f
+        .backend
+        .web_materials(
+            lease,
+            fc_ports::MaterialListRequest {
+                scope: scope(),
+                cursor: None,
+            },
+        )
+        .unwrap();
+    assert_eq!(after_delete.total, 1);
+    assert_eq!(after_delete.items, vec![records[1].clone()]);
+    let replay = get(&mut f, &cookie, &history_path);
+    assert_eq!(replay.head.status, 200);
+    assert_eq!(
+        replay.body, original.body,
+        "history survives later deletion without consulting temporary files"
+    );
+    let wrong_pair = format!(
+        "materials/batch-commands/1/1/{}/{}",
+        remove.ticket,
+        command.id.get()
+    );
+    expect(
+        &get(&mut f, &cookie, &wrong_pair),
+        404,
+        "COMMAND_NOT_ISSUED",
+    );
+}
+#[test]
+fn material_batch_routes_keep_existing_auth_csrf_and_never_fall_back_to_legacy_submission() {
+    let mut f = BackendFixture::new();
+    catalog(&mut f, 1);
+    let (cookie, csrf, _) = auth(&mut f, "batch-route-gates");
+    let command = f.issue(&cookie, "materials");
+    let before = f.backend.global_revision().unwrap();
+    let original_path = format!(
+        "materials/batch-commands/1/1/{}/{}",
+        command.ticket,
+        command.id.get()
+    );
+    let absent = get(&mut f, &cookie, &original_path);
+    expect(&absent, 200, "NOT_FOUND");
+    assert_eq!(
+        absent.body,
+        fc_protocol::web::materials::batch_command_window(
+            fc_protocol::web::command_window::CommandReference {
+                ticket: command.ticket,
+                command_id: command.id,
+            },
+            None,
+        )
+        .unwrap(),
+        "missing history keeps the original pair and null scope/records"
+    );
+    assert_eq!(
+        f.backend.global_revision().unwrap(),
+        before,
+        "NOT_FOUND does not admit or replay a mutation"
+    );
+    let create = r#"{"schemaVersion":1,"files":[{"displayName":"x.txt","bytes":1}],"allowedClassIds":["1"]}"#;
+    let request = head("POST", "materials/batches/1/1", create.len(), None, None);
+    expect(
+        &f.dispatch(&request, create.as_bytes()),
+        401,
+        "UNAUTHORIZED",
+    );
+    expect(
+        &post(
+            &mut f,
+            &cookie,
+            "wrong-csrf",
+            "materials/batches/1/1",
+            create,
+        ),
+        403,
+        "FORBIDDEN",
+    );
+    let legacy = r#"{"schemaVersion":1,"commandId":"1","batchId":"2","uploadIds":["3"],"allowedClassIds":["1"]}"#;
+    expect(
+        &post(
+            &mut f,
+            &cookie,
+            &csrf,
+            "materials/folders/1/1/append-batch",
+            legacy,
+        ),
+        400,
+        "INVALID_REQUEST",
+    );
+    expect(
+        &post(
+            &mut f,
+            &cookie,
+            &csrf,
+            "materials/batches/2/cancel",
+            r#"{"schemaVersion":1,"commandId":"1"}"#,
+        ),
+        400,
+        "INVALID_REQUEST",
+    );
+    expect(
+        &get(&mut f, &cookie, "materials/folders/1/1/append-batch"),
+        405,
+        "METHOD_NOT_ALLOWED",
+    );
+    assert_eq!(f.backend.global_revision().unwrap(), before);
+}
+#[cfg(not(windows))]
+#[test]
+fn material_batch_file_operations_are_explicitly_unavailable_on_non_windows() {
+    let mut f = BackendFixture::new();
+    catalog(&mut f, 1);
+    let (cookie, csrf, _) = auth(&mut f, "batch-non-windows");
+    let create = r#"{"schemaVersion":1,"files":[{"displayName":"x.txt","bytes":1}],"allowedClassIds":["1"]}"#;
+    expect(
+        &post(&mut f, &cookie, &csrf, "materials/batches/1/1", create),
+        503,
+        "SERVICE_UNAVAILABLE",
+    );
+    expect(
+        &post(
+            &mut f,
+            &cookie,
+            &csrf,
+            "materials/batches/2/cancel",
+            r#"{"schemaVersion":1}"#,
+        ),
+        503,
+        "SERVICE_UNAVAILABLE",
+    );
+}

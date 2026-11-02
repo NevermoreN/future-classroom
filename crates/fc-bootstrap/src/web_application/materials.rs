@@ -150,6 +150,86 @@ pub(super) fn dispatch(
                 Err(e) => error(e, false),
             }
         }
+        MaterialRoute::BatchWindowCommand { scope, command } => {
+            // Query the original C2 receipt before consulting any temporary group.
+            // A saved result remains readable after its physical group is gone.
+            match backend.web_material_batch_outcome_window(
+                lease,
+                scope,
+                command.command_id,
+                command.ticket,
+            ) {
+                Ok(outcome) => {
+                    if outcome.as_ref().is_some_and(|value| {
+                        value.command_id != command.command_id || value.scope != scope
+                    }) {
+                        return failure(503, responses::ErrorCode::ServiceUnavailable);
+                    }
+                    // A known COMMIT remains historical proof even when local
+                    // negative cleanup is busy. Failed retirement retains the
+                    // original group and its physical charge.
+                    #[cfg(windows)]
+                    if let Some(value) = outcome.as_ref() {
+                        let _ = app.retire_material_batch_receipt(command, scope, &value.records);
+                    }
+                    response(
+                        200,
+                        wire::batch_command_window(
+                            command,
+                            outcome
+                                .as_ref()
+                                .map(|value| (value.scope, value.records.as_slice())),
+                        ),
+                        None,
+                    )
+                }
+                Err(cause) => error(cause, false),
+            }
+        }
+        MaterialRoute::BatchUploadCreate { scope } => {
+            let input = match wire::batch_upload(body) {
+                Ok(input) => input,
+                Err(_) => return failure(400, responses::ErrorCode::InvalidResource),
+            };
+            #[cfg(windows)]
+            {
+                app.material_batch_create(backend, lease, scope, input)
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (app, backend, lease, scope, input);
+                failure(503, responses::ErrorCode::ServiceUnavailable)
+            }
+        }
+        MaterialRoute::BatchUploadCancel { batch_id } => {
+            if wire::cancel(body).is_err() {
+                return failure(400, responses::ErrorCode::InvalidRequest);
+            }
+            #[cfg(windows)]
+            {
+                app.material_batch_cancel(lease, batch_id)
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (app, lease, batch_id);
+                failure(503, responses::ErrorCode::ServiceUnavailable)
+            }
+        }
+        MaterialRoute::BatchAppend { scope } => {
+            let input = match wire::batch_append(body) {
+                Ok(input) => input,
+                Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+            };
+            #[cfg(windows)]
+            {
+                app.material_batch_append(backend, lease, scope, input)
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (app, backend, lease, scope, input);
+                failure(503, responses::ErrorCode::ServiceUnavailable)
+            }
+        }
         MaterialRoute::UploadCreate { scope } => {
             let input = match wire::upload(body) {
                 Ok(i) => i,

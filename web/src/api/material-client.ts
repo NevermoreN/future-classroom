@@ -3,8 +3,14 @@ import { ApiError, abortError, HttpApi, NetworkFault, readJson } from './client'
 import { decimal, errorCode, ProtocolFault, secret } from './protocol'
 import * as m from './material-protocol'
 export interface AppendMaterial extends CommandIdentity { uploadId: string; allowedClassIds: string[] }
+export interface AppendMaterialBatch extends CommandIdentity { batchId: string; uploadIds: string[]; allowedClassIds: string[] }
 export interface DeleteMaterial extends CommandIdentity { materialId: string; resourceVersionId: string; expectedMaterialRevision: string }
 export interface MaterialApi extends CommandApi {
+  createBatch(scope: m.MaterialScope, files: readonly m.BatchFile[], classes: readonly string[], csrf: string, signal: AbortSignal): Promise<m.BatchReady>
+  uploadBatchMember(batchId: string, uploadId: string, file: File, csrf: string, signal: AbortSignal): Promise<void>
+  cancelBatch(batchId: string, csrf: string, signal: AbortSignal): Promise<void>
+  appendBatch(scope: m.MaterialScope, input: AppendMaterialBatch, csrf: string, signal: AbortSignal): Promise<m.BatchCommitted>
+  batchOutcome(scope: m.MaterialScope, command: CommandIdentity, signal: AbortSignal): Promise<m.BatchOutcome>
   materialScopes(offset: number, signal: AbortSignal): Promise<m.MaterialScopes>
   materialClasses(scope: m.MaterialScope, offset: number, signal: AbortSignal): Promise<m.MaterialClasses>
   materials(scope: m.MaterialScope, cursor: m.MaterialCursor | null, signal: AbortSignal): Promise<m.MaterialPage>
@@ -17,6 +23,30 @@ export interface MaterialApi extends CommandApi {
   download(scope: m.MaterialScope, record: m.MaterialRecord, signal: AbortSignal): Promise<Blob>
 }
 export class MaterialHttpApi extends HttpApi implements MaterialApi {
+  private batchClasses(classes: readonly string[]) {
+    const ids = classes.map(decimal); if (!ids.length || ids.length > 128 || new Set(ids).size !== ids.length) throw new ProtocolFault(); return ids
+  }
+  async createBatch(scope: m.MaterialScope, files: readonly m.BatchFile[], classes: readonly string[], csrf: string, signal: AbortSignal) {
+    const manifest = m.batchFiles(files), allowedClassIds = this.batchClasses(classes)
+    const r = await this.request('materials/batches/' + decimal(scope.ownerTeacherId) + '/' + decimal(scope.subjectId), signal, { schemaVersion: 1, files: manifest, allowedClassIds }, csrf)
+    if (r.status !== 201) throw new ProtocolFault(); return m.batchReady(r.value, manifest)
+  }
+  async uploadBatchMember(batchId: string, uploadId: string, file: File, csrf: string, signal: AbortSignal) {
+    m.batchFiles([{ displayName: file.name, bytes: file.size }])
+    await this.binary('materials/batches/' + decimal(batchId) + '/files/' + decimal(uploadId) + '/bytes', signal, async (r, s) => { if (r.status !== 200) throw new ProtocolFault(); m.batchUploaded(await readJson(r, s), batchId, uploadId, file.size) }, file, csrf)
+  }
+  async cancelBatch(batchId: string, csrf: string, signal: AbortSignal) {
+    const r = await this.request('materials/batches/' + decimal(batchId) + '/cancel', signal, { schemaVersion: 1 }, csrf); if (r.status !== 200) throw new ProtocolFault(); m.batchCancelled(r.value, batchId)
+  }
+  async appendBatch(scope: m.MaterialScope, input: AppendMaterialBatch, csrf: string, signal: AbortSignal) {
+    const uploadIds = input.uploadIds.map(decimal); if (!uploadIds.length || uploadIds.length > m.MAX_BATCH_FILES || new Set(uploadIds).size !== uploadIds.length) throw new ProtocolFault()
+    const r = await this.request(m.folderPath(scope) + '/append-batch', signal, { schemaVersion: 2, ...commandIdentity(input), batchId: decimal(input.batchId), uploadIds, allowedClassIds: this.batchClasses(input.allowedClassIds) }, csrf)
+    if (r.status !== 200) throw new ProtocolFault(); return m.batchCommitted(r.value, input, scope)
+  }
+  async batchOutcome(scope: m.MaterialScope, command: CommandIdentity, signal: AbortSignal) {
+    const pair = commandIdentity(command), r = await this.request('materials/batch-commands/' + decimal(scope.ownerTeacherId) + '/' + decimal(scope.subjectId) + '/' + pair.commandTicket + '/' + pair.commandId, signal)
+    if (r.status !== 200) throw new ProtocolFault(); return m.batchOutcome(r.value, pair, scope)
+  }
   async materialScopes(offset: number, signal: AbortSignal) {
     if (!Number.isSafeInteger(offset) || offset < 0 || offset > 4096) throw new ProtocolFault()
     const r = await this.request('materials/scopes/' + offset, signal); if (r.status !== 200) throw new ProtocolFault(); return m.scopes(r.value, offset)

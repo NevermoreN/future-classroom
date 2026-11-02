@@ -3,7 +3,7 @@
 import argparse, hashlib, json, re
 from datetime import date, timedelta
 from pathlib import Path
-CHECKS=frozenset(('actualPairUiOrdinaryTeacher','materialsUnpublishedUploadCancelNoAppend','homeworkPersistentCurrent','reminderPersistentBottomShortcut','unknownOriginalPairReadbackNoReplay','offlineDraftRetainedNoReplay','materialsAppendDownloadDeleteReadback','voiceSyntheticCaptureSubmitCurrentAndPhysicalReturn','isolatedMidnightRejectsOldDraft','sameOriginDistinctBundleEntryAndLazyChunk','revokedTeacherClearsWorkspaceNoReplay'))
+CHECKS=frozenset(('actualPairUiOrdinaryTeacher','materialsUnpublishedUploadCancelNoAppend','homeworkPersistentCurrent','reminderPersistentBottomShortcut','unknownOriginalPairReadbackNoReplay','offlineDraftRetainedNoReplay','materialsAppendDownloadDeleteReadback','voiceSyntheticCaptureSubmitCurrentAndPhysicalReturn','isolatedMidnightRejectsOldDraft','sameOriginDistinctBundleEntryAndLazyChunk','revokedTeacherClearsWorkspaceNoReplay','batchTwentyReviewRemoveAndConfirmedOrder','batchTwentySerialPreparedNoEarlyCommit','batchOneAtomicCommitAndOriginalHistory','batchCurrentDirectoryTwentyNewestLastConfirmed'))
 ACTIONS=['CACHE_UPGRADE','VOICE_SETTLED','MIDNIGHT','REVOKE','COMPLETE']
 
 def require(ok,code):
@@ -15,7 +15,7 @@ def pair(v):
     return v['commandId'],v['commandTicket']
 
 def validate(report,old,new):
-    require(type(report) is dict and set(report)=={'schemaVersion','status','marker','scope','checks','ledger','assets','nativeActions','pairingCycles','download','midnightObservation','droppedResponse','observedRequestCount','elapsedMillis','maxMillis','contextDisposed','cdpDisconnected','physicalBrowserCleanup','voiceScope','windows7','windows10','phase'},'REPORT_EXACT_KEYS_NO_PRIVATE_APPEND')
+    require(type(report) is dict and set(report)=={'schemaVersion','status','marker','scope','checks','ledger','assets','nativeActions','pairingCycles','download','batchObservation','midnightObservation','droppedResponse','observedRequestCount','elapsedMillis','maxMillis','contextDisposed','cdpDisconnected','physicalBrowserCleanup','voiceScope','windows7','windows10','phase'},'REPORT_EXACT_KEYS_NO_PRIVATE_APPEND')
     require(type(report) is dict and report.get('schemaVersion')==1 and report.get('status')=='PASS_TEACHER_DOM_FINITE_WIN11_ONLY','NOT_FINITE_DOM_PASS')
     require(re.fullmatch(r'FutureClassroom-Test-TLS-[0-9a-f]{32}',report.get('marker','')),'MARKER')
     require(type(report.get('checks')) is dict and set(report['checks'])==CHECKS and all(v is True for v in report['checks'].values()),'INCOMPLETE_ACTUAL_CHECKS')
@@ -56,6 +56,34 @@ def validate(report,old,new):
         require(any(x['path']==a['path'] and x['sizeBytes']==a['sizeBytes'] and x['sha256']==a['sha256'] for x in source['assets']),'REAL_ASSET_BYTES')
     for generation in ('old','new'):
         require(any(a['bundle']==generation and a['path']=='index.html' for a in assets) and any(a['bundle']==generation and a['path'].endswith('.js') for a in assets),'ACTUAL_BOTH_BUNDLES')
+    batch=report.get('batchObservation')
+    require(type(batch) is dict and set(batch)=={'batchId','commandId','commandTicket','confirmedNames','uploadIds','materialIds','sha256s','memberCount','removedBeforeReselect','uploadOrder','firstAddedSequence','lastAddedSequence','folderRevisionBefore','folderRevisionAfter','historyOrdinal','commitOrdinal','currentOrdinal'},'BATCH_OBSERVATION_CLOSED')
+    expected=[f'g03-batch-{n:02d}.txt' for n in (2,3,1,*range(4,21))]
+    require(batch['confirmedNames']==expected and batch['memberCount']==20 and batch['removedBeforeReselect']==1,'BATCH_ACTUAL_REVIEW_ORDER')
+    require(batch['sha256s']==[hashlib.sha256(f'Synthetic future classroom batch member {int(n[10:12]):02d}.\n'.encode('ascii')).hexdigest() for n in expected],'BATCH_SYNTHETIC_HASHES')
+    for key in ('uploadIds','materialIds'):
+        require(type(batch[key]) is list and len(batch[key])==20 and len(set(batch[key]))==20 and all(type(v) is str and re.fullmatch(r'[1-9][0-9]{0,19}',v) and int(v)<=2**64-1 for v in batch[key]),'BATCH_UNIQUE_CANONICAL_IDS')
+    require(type(batch['batchId']) is str and re.fullmatch(r'[1-9][0-9]{0,19}',batch['batchId']) and int(batch['batchId'])<=2**64-1,'BATCH_CANONICAL_GROUP')
+    require(all(type(batch[k]) is str and re.fullmatch(r'[1-9][0-9]{0,19}',batch[k]) and int(batch[k])<=2**64-1 for k in ('folderRevisionBefore','folderRevisionAfter')) and int(batch['folderRevisionAfter'])==int(batch['folderRevisionBefore'])+1,'BATCH_ONE_FOLDER_OPERATION')
+    require(all(type(batch[k]) is str and re.fullmatch(r'[1-9][0-9]{0,19}',batch[k]) and int(batch[k])<=2**64-1 for k in ('firstAddedSequence','lastAddedSequence')) and int(batch['lastAddedSequence'])==int(batch['firstAddedSequence'])+19,'BATCH_CONTINUOUS_ACTUAL_SEQUENCE_NOT_RESET')
+    bp=pair(batch);require(bp in issued and issued[bp][1]=='materials','BATCH_ACTUAL_MATERIALS_ISSUANCE')
+    require(all(type(batch[k]) is int and 0<batch[k]<=report['observedRequestCount'] for k in ('commitOrdinal','historyOrdinal','currentOrdinal')) and batch['commitOrdinal']<batch['historyOrdinal']<batch['currentOrdinal'],'BATCH_COMMIT_HISTORY_CURRENT_ORDER')
+    batch_path='/fc/api/v1/materials/folders/'+cycles[1]['principalId']+'/1/append-batch'
+    batch_writes=[r for r in ledger if r['path']==batch_path]
+    history_path='/fc/api/v1/materials/batch-commands/'+cycles[1]['principalId']+'/1/'+bp[1]+'/'+bp[0]
+    require(len(batch_writes)==1 and batch_writes[0]['ordinal']==batch['commitOrdinal'] and pair(batch_writes[0]['input'])==bp and len([r for r in ledger if r['path']==history_path and r['ordinal']==batch['historyOrdinal']])==1,'BATCH_ONE_WRITE_ORIGINAL_QUERY')
+    upload_rows=[r for r in ledger if r['path'].startswith('/fc/api/v1/materials/batches/'+batch['batchId']+'/files/') and r['method']=='POST' and r['status']==200]
+    require(len(upload_rows)==20,'BATCH_TWENTY_UPLOAD_RECEIPTS')
+    upload_rows.sort(key=lambda r:r['ordinal'])
+    order=batch['uploadOrder'];require(type(order) is list and len(order)==20,'BATCH_TWENTY_ORIGINAL_REPLY_OBSERVATIONS')
+    for index,(row,observation) in enumerate(zip(upload_rows,order)):
+        require(type(observation) is dict and set(observation)=={'requestOrdinal','startedAtEvent','originalReplyObservedAtEvent','finishedAtEvent'},'BATCH_UPLOAD_ORDER_CLOSED')
+        require(type(observation['requestOrdinal']) is int and observation['requestOrdinal']==row['ordinal'] and row['path']=='/fc/api/v1/materials/batches/'+batch['batchId']+'/files/'+batch['uploadIds'][index]+'/bytes','BATCH_UPLOAD_ORDER_ORIGINAL_TWENTY_ORDINALS')
+        require(all(type(observation[k]) is int and 0<observation[k]<=65536 for k in ('startedAtEvent','originalReplyObservedAtEvent','finishedAtEvent')) and observation['startedAtEvent']<observation['originalReplyObservedAtEvent']<observation['finishedAtEvent'],'BATCH_ORIGINAL_REPLY_THEN_FINISHED')
+        # The original reply is observed while paused before unmodified release.
+        # A later loadingFinished delivery may follow the next renderer request.
+        if index:
+            require(order[index-1]['requestOrdinal']<observation['requestOrdinal'] and order[index-1]['originalReplyObservedAtEvent']<observation['startedAtEvent'],'BATCH_SERIAL_ORIGINAL_REPLY_BEFORE_NEXT_START')
     return {'status':'PASS_G03_DOM_REPORT_ONLY','native':'SEPARATE_ORIGINAL_REPORT_REQUIRED','edge':'SEPARATE_ORIGINAL_JOB_REQUIRED'}
 
 if __name__=='__main__':

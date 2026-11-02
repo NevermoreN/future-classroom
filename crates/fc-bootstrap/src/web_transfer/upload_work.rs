@@ -22,6 +22,13 @@ use std::{
 mod tests;
 
 enum Operation {
+    CreateBatch {
+        backend: Weak<Mutex<Backend>>,
+        head: RequestHead,
+        body: Vec<u8>,
+        control: TransferControl,
+        life: TransferLifetime,
+    },
     Begin {
         kind: UploadKind,
         head: RequestHead,
@@ -37,6 +44,12 @@ enum Operation {
     Finish(UploadKey),
     Append {
         key: Option<UploadKey>,
+        backend: Weak<Mutex<Backend>>,
+        head: RequestHead,
+        body: Vec<u8>,
+        life: TransferLifetime,
+    },
+    AppendBatch {
         backend: Weak<Mutex<Backend>>,
         head: RequestHead,
         body: Vec<u8>,
@@ -206,6 +219,65 @@ impl UploadTask {
             },
         })
     }
+    pub fn create_batch_request(
+        hub: UploadHub,
+        application: &Arc<WebApplication>,
+        backend: &Arc<Mutex<Backend>>,
+        head: RequestHead,
+        body: Vec<u8>,
+        control: TransferControl,
+        life: TransferLifetime,
+    ) -> Result<Self, TransferError> {
+        if head.token != life.token()
+            || !Arc::ptr_eq(&control.cancelled, &life.cancelled)
+            || body.len() > fc_protocol::MAX_JSON_BYTES
+            || body.len() as u64 != head.content_length.unwrap_or(0)
+            || fc_ports::http::validate_headers(&head.headers).is_err()
+        {
+            return Err(TransferError::InvalidAdmission);
+        }
+        Ok(Self {
+            hub,
+            application: Arc::downgrade(application),
+            token: head.token,
+            deadline: life.deadline(),
+            operation: Operation::CreateBatch {
+                backend: Arc::downgrade(backend),
+                head,
+                body,
+                control,
+                life,
+            },
+        })
+    }
+    pub fn append_batch_request(
+        hub: UploadHub,
+        application: &Arc<WebApplication>,
+        backend: &Arc<Mutex<Backend>>,
+        head: RequestHead,
+        body: Vec<u8>,
+        life: TransferLifetime,
+    ) -> Result<Self, TransferError> {
+        if head.token != life.token()
+            || body.len() > fc_protocol::MAX_JSON_BYTES
+            || body.len() as u64 != head.content_length.unwrap_or(0)
+            || fc_ports::http::validate_headers(&head.headers).is_err()
+        {
+            return Err(TransferError::InvalidAdmission);
+        }
+        Ok(Self {
+            hub,
+            application: Arc::downgrade(application),
+            token: head.token,
+            deadline: life.deadline(),
+            operation: Operation::AppendBatch {
+                backend: Arc::downgrade(backend),
+                head,
+                body,
+                life,
+            },
+        })
+    }
     /// A fresh cleanup deadline grants only negative cleanup of the exact key.
     /// It never renews the expired upload's admission or SQL execution lifetime.
     pub fn cleanup(
@@ -262,6 +334,18 @@ impl UploadTask {
         }
         let application = self.application.upgrade().ok_or(UploadHubError::Closed)?;
         match self.operation {
+            Operation::CreateBatch {
+                backend,
+                head,
+                body,
+                control,
+                life,
+            } => {
+                let backend = backend.upgrade().ok_or(UploadHubError::Closed)?;
+                self.hub
+                    .create_batch(&application, &backend, &head, &body, control, life, context)
+                    .map(UploadOperationResult::Finished)
+            }
             Operation::Begin {
                 kind,
                 head,
@@ -313,6 +397,17 @@ impl UploadTask {
                     .append_ready(key, &application, &backend, &head, &body, &life, context)
                     .map(UploadOperationResult::Appended)
             }
+            Operation::AppendBatch {
+                backend,
+                head,
+                body,
+                life,
+            } => {
+                let backend = backend.upgrade().ok_or(UploadHubError::Closed)?;
+                self.hub
+                    .append_batch_ready(&application, &backend, &head, &body, &life, context)
+                    .map(UploadOperationResult::Appended)
+            }
             Operation::Cleanup(key) => {
                 self.hub.cleanup(key, &application, context)?;
                 Ok(UploadOperationResult::Cleaned(key))
@@ -332,7 +427,9 @@ impl Task for UploadTask {
         match &self.operation {
             Operation::Begin { head, .. } => head_allocation(head),
             Operation::Write { bytes, .. } => Some(bytes.capacity()),
-            Operation::Append { head, body, .. } => {
+            Operation::Append { head, body, .. }
+            | Operation::AppendBatch { head, body, .. }
+            | Operation::CreateBatch { head, body, .. } => {
                 head_allocation(head)?.checked_add(body.capacity())
             }
             Operation::Finish(_) | Operation::Cleanup(_) | Operation::CleanupRequest => Some(0),

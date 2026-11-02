@@ -131,3 +131,32 @@ describe('materials wire values and immutable directory snapshots', () => {
     expect(() => m.outcome({ schemaVersion: 2, status: 'COMMAND_RESULT', commandId: '8', commandTicket: ticket, state: 'NOT_FOUND', scope: target, record: row() }, identity('8'))).toThrow(ProtocolFault)
   })
 })
+
+describe('strict ordered material batch envelopes', () => {
+  const files = [{ displayName: 'first.pdf', bytes: 17 }, { displayName: 'last.pdf', bytes: 17 }]
+  const ready = () => ({ schemaVersion: 1, status: 'MATERIAL_BATCH_READY', batchId: '18446744073709551615', expiresInSeconds: 300, maxChunkBytes: 65536, items: files.map((f, i) => ({ uploadId: String(100 + i), ...f })) })
+  const records = () => files.map((f, i) => ({ ...row(), materialId: String(200 + i), resourceVersionId: String(100 + i), displayName: f.displayName, bytes: f.bytes, addedSequence: String(10 + i) }))
+  it('binds READY to all ordered names/sizes with distinct canonical member identities', () => {
+    expect(m.batchReady(ready(), files).items.map(i => i.uploadId)).toEqual(['100', '101'])
+    for (const changed of [{ items: ready().items.slice(0, 1) }, { items: ready().items.slice().reverse() }, { items: ready().items.map(i => ({ ...i, uploadId: '100' })) }, { extra: true }, { expiresInSeconds: 301 }, { batchId: '0' }]) expect(() => m.batchReady({ ...ready(), ...changed }, files)).toThrow(ProtocolFault)
+    for (const input of [[], Array.from({ length: 21 }, () => files[0]!), [{ displayName: 'x.png', bytes: 10 * 1024 * 1024 + 1 }]]) expect(() => m.batchFiles(input)).toThrow(ProtocolFault)
+    expect(() => m.batchReady({ ...ready(), schemaVersion: 2 }, files)).toThrow(ProtocolVersionFault)
+  })
+  it('checks member/cancellation acknowledgements against both original group and member', () => {
+    const ack = { schemaVersion: 1, status: 'MATERIAL_BATCH_MEMBER_UPLOADED', batchId: '8', uploadId: '9', bytes: 17 }
+    expect(() => m.batchUploaded(ack, '8', '9', 17)).not.toThrow()
+    for (const changed of [{ batchId: '7' }, { uploadId: '10' }, { bytes: 18 }, { extra: true }]) expect(() => m.batchUploaded({ ...ack, ...changed }, '8', '9', 17)).toThrow(ProtocolFault)
+    expect(() => m.batchCancelled({ schemaVersion: 1, status: 'MATERIAL_BATCH_CANCELLED', batchId: '8' }, '8')).not.toThrow()
+    expect(() => m.batchCancelled({ schemaVersion: 1, status: 'MATERIAL_BATCH_CANCELLED', batchId: '7' }, '8')).toThrow(ProtocolFault)
+  })
+  it('requires a complete ordered initial publication under the original scope and full command pair', () => {
+    const wire = { schemaVersion: 2, status: 'BATCH_COMMITTED', ...identity(), scope: target, records: records() }
+    expect(m.batchCommitted(wire, identity(), target).records).toHaveLength(2)
+    for (const changed of [{ records: records().reverse() }, { records: [records()[0], records()[0]] }, { records: [] }, { records: records().map(r => ({ ...r, resourceVersionId: '100' })) }, { records: records().map(r => ({ ...r, status: 'DELETED' })) }, { records: [{ ...records()[0], revision: '2' }] }, { commandTicket: ticket.replace('12', '34') }, { scope: { ...target, subjectId: '1' } }, { extra: true }]) expect(() => m.batchCommitted({ ...wire, ...changed }, identity(), target)).toThrow(ProtocolFault)
+    const unknown = { schemaVersion: 2, status: 'COMMAND_BATCH_RESULT', ...identity(), state: 'NOT_FOUND', scope: null, records: null }
+    expect(m.batchOutcome(unknown, identity(), target).state).toBe('NOT_FOUND')
+    expect(() => m.batchOutcome({ ...unknown, records: [] }, identity(), target)).toThrow(ProtocolFault)
+    expect(() => m.batchOutcome({ ...unknown, commandId: '999' }, identity(), target)).toThrow(ProtocolFault)
+    expect(m.batchOutcome({ ...wire, status: 'COMMAND_BATCH_RESULT', state: 'COMMITTED' }, identity(), target).state).toBe('COMMITTED')
+  })
+})

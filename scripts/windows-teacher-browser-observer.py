@@ -138,7 +138,7 @@ class _TeacherMethods:
         state=json.loads(self.control_file.read_bytes())
         self.material_expected={'bytes':init['materialBytes'],'sha256':init['materialSha256']}
         message={**init,'browserOwnerMarker':state['marker'],'downloadPath':state['remoteRoot']+'\\downloads','type':'INIT','cdpUrl':self.cdp_url,'marker':self.marker,'oldManifest':self.manifest,'newManifest':self.new_manifest,'expectedCsp':self.expected_csp,'maxMillis':maximum}
-        require(set(message)=={'type','cdpUrl','marker','origin','maxMillis','pairingCode','loginName','materialPath','materialName','materialBytes','materialSha256','browserOwnerMarker','downloadPath','oldManifest','newManifest','expectedCsp'},'PRIVATE_INPUT_SHAPE')
+        require(set(message)=={'type','cdpUrl','marker','origin','maxMillis','pairingCode','loginName','materialPath','materialName','materialBytes','materialSha256','batchFiles','browserOwnerMarker','downloadPath','oldManifest','newManifest','expectedCsp'},'PRIVATE_INPUT_SHAPE')
         require(re.fullmatch(r'[0-9]{8}',message['pairingCode']) is not None,'PAIR_CODE')
         # Do not log raw code even on a failed helper. It is never persisted in the report.
         self._secrets.append(message['pairingCode'].encode())

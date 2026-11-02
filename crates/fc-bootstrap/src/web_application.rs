@@ -27,7 +27,8 @@ mod voice_capabilities;
 mod voice_files;
 #[cfg(windows)]
 pub use material_files::{
-    MaterialDownload, MaterialTransferBinding, PreparedWebMaterial, ReceivingMaterialUpload,
+    MaterialDownload, MaterialTransferBinding, PreparedWebMaterial, ReceivingMaterialBatchUpload,
+    ReceivingMaterialUpload,
 };
 #[cfg(all(windows, test))]
 pub(crate) use shared_upload::test_guard as upload_test_guard;
@@ -218,6 +219,7 @@ impl WebApplication {
             route,
             Route::Materials {
                 route: fc_protocol::web::materials::MaterialRoute::UploadBytes { .. }
+                    | fc_protocol::web::materials::MaterialRoute::BatchUploadBytes { .. }
             } | Route::VoiceUpload { .. }
         ) {
             return failure(400, responses::ErrorCode::InvalidRequest);

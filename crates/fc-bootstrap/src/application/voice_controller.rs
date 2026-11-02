@@ -149,14 +149,20 @@ fn voice_issue(
 }
 
 impl App {
-    fn voice_management_allowed(&self, lease: SessionLease) -> bool {
+    fn voice_management_identity_allowed(&self, lease: SessionLease) -> bool {
         lease.origin() == TrustedOrigin::Local
             && self.current_global_owner() == Some(lease.principal_id())
-            && self.profiles_memory_gate()
+            && self
+                .control
+                .as_ref()
+                .is_some_and(|control| !control.is_local_locked())
             && self
                 .state
                 .account(lease.principal_id())
                 .is_ok_and(|account| !account.must_change_password && account.principal.enabled)
+    }
+    fn voice_management_allowed(&self, lease: SessionLease) -> bool {
+        self.voice_management_identity_allowed(lease) && self.profiles_memory_gate()
     }
 
     pub(super) fn submit_voice_management(
@@ -359,18 +365,39 @@ impl App {
         }
         let Some(lease) = self
             .lease
-            .filter(|lease| self.voice_management_allowed(*lease))
+            .filter(|lease| self.voice_management_identity_allowed(*lease))
         else {
             self.lock();
             return self.render();
         };
-        let Some(editor) = self.voice_editor.as_ref() else {
-            return Ok(());
-        };
-        if editor.owner() != lease.principal_id() {
+        if self
+            .voice_editor
+            .as_ref()
+            .is_some_and(|editor| editor.owner() != lease.principal_id())
+        {
             self.lock();
             return self.render();
         }
+        let health = self
+            .control
+            .as_ref()
+            .map(|control| control.health_gate().status().health);
+        if health == Some(fc_runtime::health::Health::AuthorityUpdating) {
+            // The original Writer may be committing this very policy change.
+            // Stale UI is not loss of identity or proof the worker has returned.
+            if let Some(editor) = self.voice_editor.as_mut() {
+                editor.invalidate();
+            }
+            self.status = "正在保存状态，请等待本次操作完成后重新核对。".into();
+            return self.render();
+        }
+        if health != Some(fc_runtime::health::Health::Healthy) {
+            self.lock();
+            return self.render();
+        }
+        let Some(editor) = self.voice_editor.as_ref() else {
+            return Ok(());
+        };
         let (publication, runtime) = editor.loaded_versions();
         let current = self.control.as_ref().is_some_and(|control| {
             let status = control.health_gate().status();

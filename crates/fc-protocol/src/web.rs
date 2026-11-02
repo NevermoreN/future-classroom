@@ -446,6 +446,7 @@ impl WebBoundary {
                 route,
                 Route::Materials {
                     route: materials::MaterialRoute::UploadBytes { .. }
+                        | materials::MaterialRoute::BatchUploadBytes { .. }
                 }
             ) {
                 b"application/octet-stream".as_slice()
@@ -727,6 +728,10 @@ mod tests {
             ("content/commands/1", AllowedMethods::Get),
             ("materials/folders/1/2", AllowedMethods::Get),
             ("materials/uploads/1/2", AllowedMethods::Post),
+            ("materials/batches/1/2", AllowedMethods::Post),
+            ("materials/batches/1/files/2/bytes", AllowedMethods::Post),
+            ("materials/batches/1/cancel", AllowedMethods::Post),
+            ("materials/folders/1/2/append-batch", AllowedMethods::Post),
             ("voice/capabilities", AllowedMethods::Get),
             ("voice/broadcasts", AllowedMethods::GetPost),
             ("voice/uploads?classId=1", AllowedMethods::Post),
@@ -960,6 +965,43 @@ mod tests {
             name: "Sec-Fetch-Site".into(),
             value: b"cross-site".to_vec(),
         });
+        assert_eq!(b.check(&h, Some(&csrf)), Err(WebError::Origin));
+    }
+    #[test]
+    fn batch_member_stream_requires_binary_framing_and_keeps_csrf_origin_and_byte_limits() {
+        let b = boundary();
+        let csrf = "a".repeat(64);
+        let mut h = head();
+        h.target = "/fc/api/v1/materials/batches/1/files/2/bytes".into();
+        assert_eq!(b.check(&h, Some(&csrf)), Err(WebError::Body));
+        h.headers
+            .iter_mut()
+            .find(|header| header.name == "Content-Type")
+            .unwrap()
+            .value = b"application/octet-stream".to_vec();
+        assert!(matches!(
+            b.check(&h, Some(&csrf)),
+            Ok(Route::Materials {
+                route: materials::MaterialRoute::BatchUploadBytes {
+                    batch_id: 1,
+                    upload_id: 2
+                }
+            })
+        ));
+        assert_eq!(b.check(&h, Some(&"b".repeat(64))), Err(WebError::Csrf));
+        let length = fc_domain::materials::MAX_MATERIAL_BYTES + 1;
+        h.content_length = Some(length);
+        h.headers
+            .iter_mut()
+            .find(|header| header.name == "Content-Length")
+            .unwrap()
+            .value = length.to_string().into_bytes();
+        assert_eq!(b.check(&h, Some(&csrf)), Err(WebError::Body));
+        h.headers
+            .iter_mut()
+            .find(|header| header.name == "Origin")
+            .unwrap()
+            .value = b"https://other.school".to_vec();
         assert_eq!(b.check(&h, Some(&csrf)), Err(WebError::Origin));
     }
     #[test]

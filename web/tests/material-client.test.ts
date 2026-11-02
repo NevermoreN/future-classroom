@@ -104,3 +104,35 @@ describe('material HTTP transport has bounded bodies and fixed-version destinati
     expect(cancel).toHaveBeenCalledOnce(); expect(body.locked).toBe(false); expect(fetcher).toHaveBeenCalledOnce(); expect(vi.getTimerCount()).toBe(0)
   })
 })
+
+describe('fixed batch HTTP routes preserve one original command (synthetic responses)', () => {
+  it('keeps the ordered manifest, raw member bytes, one append and historical GET distinct', async () => {
+    const f = file(), files = [{ displayName: f.name, bytes: f.size }], batchId = '18446744073709551615', uploadId = '10'
+    const fetcher = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(json({ schemaVersion: 1, status: 'MATERIAL_BATCH_READY', batchId, expiresInSeconds: 300, maxChunkBytes: 65536, items: [{ uploadId, ...files[0] }] }, 201))
+      .mockResolvedValueOnce(json({ schemaVersion: 1, status: 'MATERIAL_BATCH_MEMBER_UPLOADED', batchId, uploadId, bytes: f.size }))
+      .mockResolvedValueOnce(json({ schemaVersion: 2, status: 'BATCH_COMMITTED', ...identity(), scope: target, records: [record()] }))
+      .mockResolvedValueOnce(json({ schemaVersion: 2, status: 'COMMAND_BATCH_RESULT', ...identity(), state: 'NOT_FOUND', scope: null, records: null }))
+      .mockResolvedValueOnce(json({ schemaVersion: 1, status: 'MATERIAL_BATCH_CANCELLED', batchId }))
+    const api = new MaterialHttpApi(new URL('https://board.school/fc/api/v1/'), fetcher)
+    await api.createBatch(target, files, ['1'], csrf, signal()); await api.uploadBatchMember(batchId, uploadId, f, csrf, signal()); await api.appendBatch(target, { ...identity(), batchId, uploadIds: [uploadId], allowedClassIds: ['1'] }, csrf, signal()); await api.batchOutcome(target, identity(), signal()); await api.cancelBatch(batchId, csrf, signal())
+    expect(fetcher.mock.calls.map(c => new URL(String(c[0])).pathname)).toEqual([`/fc/api/v1/materials/batches/${target.ownerTeacherId}/${target.subjectId}`, `/fc/api/v1/materials/batches/${batchId}/files/${uploadId}/bytes`, `/fc/api/v1/materials/folders/${target.ownerTeacherId}/${target.subjectId}/append-batch`, `/fc/api/v1/materials/batch-commands/${target.ownerTeacherId}/${target.subjectId}/${ticket}/${identity().commandId}`, `/fc/api/v1/materials/batches/${batchId}/cancel`])
+    expect(JSON.parse(fetcher.mock.calls[0]![1]!.body as string)).toEqual({ schemaVersion: 1, files, allowedClassIds: ['1'] }); expect(fetcher.mock.calls[1]![1]?.body).toBe(f)
+    expect(JSON.parse(fetcher.mock.calls[2]![1]!.body as string)).toEqual({ schemaVersion: 2, ...identity(), batchId, uploadIds: [uploadId], allowedClassIds: ['1'] }); expect(fetcher.mock.calls[3]![1]?.method).toBe('GET')
+    expect(fetcher.mock.calls.every(c => c[1]?.credentials === 'same-origin' && c[1]?.cache === 'no-store' && c[1]?.redirect === 'error')).toBe(true)
+  })
+  it('rejects duplicate IDs/classes before sending and never retries an uncertain batch response', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockRejectedValue(new Error('lost response')), api = new MaterialHttpApi(new URL('https://board.school/fc/api/v1/'), fetcher)
+    await expect(api.appendBatch(target, { ...identity(), batchId: '1', uploadIds: ['2', '2'], allowedClassIds: ['1'] }, csrf, signal())).rejects.toThrow(ProtocolFault)
+    await expect(api.createBatch(target, [{ displayName: 'one.txt', bytes: 1 }], ['1', '1'], csrf, signal())).rejects.toThrow(ProtocolFault); expect(fetcher).not.toHaveBeenCalled()
+    await expect(api.appendBatch(target, { ...identity(), batchId: '1', uploadIds: ['2'], allowedClassIds: ['1'] }, csrf, signal())).rejects.toThrow(NetworkFault); expect(fetcher).toHaveBeenCalledOnce()
+  })
+})
+
+it('retains the original 120s member request budget without retry or successful acknowledgement', async () => {
+  vi.useFakeTimers()
+  const fetcher = vi.fn<typeof fetch>().mockImplementation((_url, init) => new Promise((_resolve, reject) => init?.signal?.addEventListener('abort', () => reject(new DOMException('stopped', 'AbortError')), { once: true })))
+  const api = new MaterialHttpApi(new URL('https://board.school/fc/api/v1/'), fetcher), operation = api.uploadBatchMember('8', '9', file(), csrf, signal()), rejected = expect(operation).rejects.toThrow(NetworkFault)
+  await vi.advanceTimersByTimeAsync(119999); expect(fetcher.mock.calls[0]![1]?.signal?.aborted).toBe(false)
+  await vi.advanceTimersByTimeAsync(1); await rejected; expect(fetcher).toHaveBeenCalledOnce(); expect(vi.getTimerCount()).toBe(0)
+})

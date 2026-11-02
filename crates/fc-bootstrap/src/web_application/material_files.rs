@@ -10,6 +10,8 @@ use fc_runtime::worker::JobContext;
 #[cfg(test)]
 #[path = "material_download_stream_tests.rs"]
 mod download_stream_tests;
+#[path = "material_batch_files.rs"]
+mod material_batch_files;
 #[cfg(test)]
 #[path = "material_stream_tests.rs"]
 mod stream_tests;
@@ -25,6 +27,7 @@ use fc_windows::materials::{
     files::{ControlledFiles, LockedFile, NewFile},
     helper, image,
 };
+pub use material_batch_files::ReceivingMaterialBatchUpload;
 use std::{
     io::{self, Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
@@ -88,6 +91,7 @@ enum Phase {
     Ready(LockedFile),
     Receiving,
     Consuming,
+    BatchPrepared(MaterialResource, LockedFile),
 }
 struct Slot {
     _permit: Option<PhysicalUploadPermit>,
@@ -133,6 +137,7 @@ impl Drop for Slot {
 pub(super) struct MaterialFiles {
     files: Arc<ControlledFiles>,
     slots: Vec<(u64, Arc<Mutex<Slot>>)>,
+    batches: Vec<(u64, Arc<Mutex<material_batch_files::BatchGroup>>)>,
 }
 impl MaterialFiles {
     fn new(root: &Path) -> io::Result<Self> {
@@ -145,7 +150,7 @@ impl MaterialFiles {
             .map_err(io_error)?;
         let marker = staging.join(".future-classroom-owner");
         const OWNER: &[u8] = b"FUTURE_CLASSROOM_WEB_MATERIAL_STAGE_V1\n";
-        let entries = files.entries(&staging, 3).map_err(io_error)?;
+        let entries = files.entries(&staging, 41).map_err(io_error)?;
         if !entries.contains(&marker) {
             if !entries.is_empty() {
                 return Err(denied());
@@ -170,15 +175,17 @@ impl MaterialFiles {
                 .file_name()
                 .and_then(|n| n.to_str())
                 .ok_or_else(denied)?;
-            let id = name
-                .strip_prefix("web-material-")
-                .and_then(|n| n.strip_suffix(".part"))
-                .and_then(|n| n.parse::<u64>().ok())
-                .filter(|id| *id != 0)
-                .ok_or_else(denied)?;
-            if name != format!("web-material-{id}.part") {
+            if !material_batch_files::valid_stage_name(name) {
                 return Err(denied());
             }
+        }
+        if !material_batch_files::valid_stage_set(
+            entries
+                .iter()
+                .filter(|p| **p != marker)
+                .filter_map(|p| p.file_name().and_then(|n| n.to_str())),
+        ) {
+            return Err(denied());
         }
         for path in entries.iter().filter(|p| **p != marker) {
             files.remove(path).map_err(io_error)?;
@@ -186,6 +193,7 @@ impl MaterialFiles {
         Ok(Self {
             files,
             slots: Vec::with_capacity(2),
+            batches: Vec::with_capacity(2),
         })
     }
     fn find(&self, id: u64) -> Option<Arc<Mutex<Slot>>> {
@@ -577,6 +585,7 @@ impl WebApplication {
             }
             // Retired files/permits are destroyed only after both locks end.
         }
+        self.sweep_material_batches()?;
         Ok(())
     }
     fn material_authenticate(
@@ -630,7 +639,7 @@ impl WebApplication {
             let Some(files) = guard.as_ref() else {
                 return unavailable();
             };
-            if files.slots.len() >= 2 {
+            if files.slots.len() + files.batches.len() >= 2 {
                 return failure(429, responses::ErrorCode::Capacity);
             }
             files.files.clone()
@@ -711,7 +720,7 @@ impl WebApplication {
             let Some(files) = guard.as_mut() else {
                 return unavailable();
             };
-            if files.slots.len() >= 2 {
+            if files.slots.len() + files.batches.len() >= 2 {
                 false
             } else {
                 files.slots.push((id, slot.clone()));

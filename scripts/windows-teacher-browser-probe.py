@@ -19,10 +19,11 @@ import uuid
 
 sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
+SUPPORT = HERE
 
 
 def load(name):
-    spec = importlib.util.spec_from_file_location(name.replace("-", "_"), HERE / (name + ".py"))
+    spec = importlib.util.spec_from_file_location(name.replace("-", "_"), (HERE if name == "windows-teacher-browser-observer" else SUPPORT) / (name + ".py"))
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -43,9 +44,10 @@ LAUNCH = "$teacherPort=__PORT__\n" + tls.LAUNCH.replace(OLD_ARGS, NEW_ARGS).repl
     "90000", "120000").replace("90-second", "120-second")
 STOP = tls.STOP.replace("--tls-lifecycle-probe", FLAG)
 # ACK 0 and pairing leaves are private and removed before evidence capture.
+BATCH_NAMES = tuple(f"g03-batch-{i:02d}.txt" for i in range(1, 21))
 PUBLIC_NAMES = tuple(f"teacher-action-{i}.request" for i in range(5)) + tuple(
     f"teacher-action-{i}.ack" for i in range(1, 5)) + tuple(
-    f"teacher-action-{i}.request.pending" for i in range(5)) + ("g03-teacher-material.txt",)
+    f"teacher-action-{i}.request.pending" for i in range(5)) + ("g03-teacher-material.txt", *BATCH_NAMES)
 OLD_RAW_LOOP = "'tls.stdout','tls.stderr','.tls-process.json','.tls-supervisor.json','.tls-setup-process.json','.tls-fixture.json','tls-public.pem'"
 require(tls.CAPTURE.count(OLD_RAW_LOOP) == 1, "ORIGINAL_CAPTURE_TRANSFORM")
 CAPTURE = tls.CAPTURE.replace(OLD_RAW_LOOP, OLD_RAW_LOOP + "," + ",".join(
@@ -232,6 +234,15 @@ def main():
         material = Path(local.name) / "g03-teacher-material.txt"
         material.write_bytes(b"Synthetic future classroom teacher material.\n")
         remote.upload(material, directory)
+        batch_files = []
+        for index, name in enumerate(BATCH_NAMES, 1):
+            member = Path(local.name) / name
+            raw_member = f"Synthetic future classroom batch member {index:02d}.\n".encode("ascii")
+            member.write_bytes(raw_member)
+            remote.upload(member, directory)
+            batch_files.append({"path": directory + "\\" + name, "displayName": name,
+                                "bytes": len(raw_member), "sha256": b.digest(raw_member)})
+        report["batchFixture"] = [{k: v for k, v in item.items() if k != "path"} for item in batch_files]
         remote.upload(args.exe, directory)
         require(remote.powershell("(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path " + b.ps_literal(directory) + " " + b.ps_literal(args.exe.name) + ")).Hash.ToLowerInvariant()") == report["exeSha256"] == b.digest(args.exe.read_bytes()), "UPLOADED_EXECUTABLE_IDENTITY")
         # This conservative deadline includes SSH startup; it can never renew
@@ -242,7 +253,7 @@ def main():
         native = Native(launcher, logs, marker, port, deadline)
         checkpoint("ORIGINAL_NATIVE_LAUNCHED")
         native.wait_ready()
-        observer = teacher.make_observer(HERE, remote, Path(local.name), args.report, marker, manifests[0], manifests[1], CSP, args.identity, args.ssh_target)
+        observer = teacher.make_observer(SUPPORT, remote, Path(local.name), args.report, marker, manifests[0], manifests[1], CSP, args.identity, args.ssh_target)
         observer.prepare(fixture["publicPem"], deadline)
         raw = private_read(remote, directory, marker, "teacher-pairing-1.secret", 256, deadline, remove=True)
         code = teacher.decode_pairing(raw, marker, 1)
@@ -286,7 +297,7 @@ def main():
         dom = observer.run_teacher({"origin": f"https://127.0.0.1:{port}", "pairingCode": code,
             "loginName": "synthetic-ordinary-teacher", "materialPath": directory + "\\" + material.name,
             "materialName": material.name, "materialBytes": material.stat().st_size,
-            "materialSha256": b.digest(material.read_bytes())}, phase, deadline)
+            "materialSha256": b.digest(material.read_bytes()), "batchFiles": batch_files}, phase, deadline)
         del code, raw
         native.finish(dom)
         report.update(status="PASS", nativeApprovals=native.approvals, nativeActions=native.actions,

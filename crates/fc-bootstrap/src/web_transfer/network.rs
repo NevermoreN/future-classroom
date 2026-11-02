@@ -86,6 +86,7 @@ enum Purpose {
     Finish,
     Json,
     Append,
+    BatchCreate,
     DownloadBegin,
     DownloadRead { sequence: u64, offset: u64 },
     Cleanup,
@@ -669,7 +670,7 @@ impl<E: HttpExecutor> Core<E> {
         let kind = match route {
             Route::VoiceUpload { .. } => Some(UploadKind::Voice),
             Route::Materials {
-                route: MaterialRoute::UploadBytes { .. },
+                route: MaterialRoute::UploadBytes { .. } | MaterialRoute::BatchUploadBytes { .. },
             } => Some(UploadKind::Material),
             _ => None,
         };
@@ -849,6 +850,43 @@ impl<E: HttpExecutor> Core<E> {
                         record.download_request = true;
                         record.phase = Phase::DownloadBegin;
                         record.queue(Purpose::DownloadBegin, HttpJob::Download(Box::new(task)))?;
+                    } else if matches!(
+                        record.route,
+                        Some(Route::Materials {
+                            route: MaterialRoute::BatchUploadCreate { .. }
+                        })
+                    ) {
+                        let control = record
+                            .control
+                            .take()
+                            .ok_or("original batch create control")?;
+                        let task = UploadTask::create_batch_request(
+                            self.hub.clone(),
+                            &app,
+                            &backend,
+                            head,
+                            body,
+                            control,
+                            life,
+                        )
+                        .map_err(|_| "bounded material batch create")?;
+                        record.queue(Purpose::BatchCreate, HttpJob::Upload(Box::new(task)))?;
+                    } else if matches!(
+                        record.route,
+                        Some(Route::Materials {
+                            route: MaterialRoute::BatchAppend { .. }
+                        })
+                    ) {
+                        let task = UploadTask::append_batch_request(
+                            self.hub.clone(),
+                            &app,
+                            &backend,
+                            head,
+                            body,
+                            life,
+                        )
+                        .map_err(|_| "bounded material batch append")?;
+                        record.queue(Purpose::Append, HttpJob::Upload(Box::new(task)))?;
                     } else if matches!(
                         record.route,
                         Some(Route::Materials {
@@ -1132,7 +1170,9 @@ impl<E: HttpExecutor> Core<E> {
                             record.phase = Phase::UploadBody;
                         }
                     }
-                    Ok(UploadOperationResult::Finished(finished)) if purpose == Purpose::Finish => {
+                    Ok(UploadOperationResult::Finished(finished))
+                        if matches!(purpose, Purpose::Finish | Purpose::BatchCreate) =>
+                    {
                         if let Some(control) = finished.network_control {
                             if record.control.is_some()
                                 || !Arc::ptr_eq(
@@ -1186,7 +1226,10 @@ impl<E: HttpExecutor> Core<E> {
                     Ok(ticket) => {
                         if matches!(
                             work.purpose,
-                            Purpose::Begin | Purpose::Append | Purpose::DownloadBegin
+                            Purpose::Begin
+                                | Purpose::Append
+                                | Purpose::BatchCreate
+                                | Purpose::DownloadBegin
                         ) {
                             record.hub_touched = true;
                             record.cleanup_done = false;

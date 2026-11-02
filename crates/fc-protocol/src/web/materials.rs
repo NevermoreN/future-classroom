@@ -4,6 +4,12 @@ use crate::{parse, ProtocolError, SCHEMA_VERSION};
 use fc_domain::{ids::*, materials::*};
 use fc_ports::command_window::CommandTicket;
 use serde::{Deserialize, Serialize};
+mod batch;
+pub use batch::{
+    batch_append, batch_cancelled, batch_command_window, batch_committed, batch_member_uploaded,
+    batch_ready, batch_result_fits, batch_upload, BatchAppendInput, BatchFileInput,
+    BatchReadyMember, BatchUploadInput,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MaterialRoute {
@@ -39,6 +45,23 @@ pub enum MaterialRoute {
     WindowCommand {
         command: CommandReference,
     },
+    BatchUploadCreate {
+        scope: MaterialScope,
+    },
+    BatchUploadBytes {
+        batch_id: u64,
+        upload_id: u64,
+    },
+    BatchUploadCancel {
+        batch_id: u64,
+    },
+    BatchAppend {
+        scope: MaterialScope,
+    },
+    BatchWindowCommand {
+        scope: MaterialScope,
+        command: CommandReference,
+    },
     Download {
         scope: MaterialScope,
         material_id: MaterialId,
@@ -61,10 +84,17 @@ impl MaterialRoute {
                 | Self::UploadCancel { .. }
                 | Self::Append { .. }
                 | Self::Delete { .. }
+                | Self::BatchUploadCreate { .. }
+                | Self::BatchUploadBytes { .. }
+                | Self::BatchUploadCancel { .. }
+                | Self::BatchAppend { .. }
         )
     }
     pub fn body_limit(self) -> u64 {
-        if matches!(self, Self::UploadBytes { .. }) {
+        if matches!(
+            self,
+            Self::UploadBytes { .. } | Self::BatchUploadBytes { .. }
+        ) {
             MAX_MATERIAL_BYTES
         } else if self.post() {
             crate::MAX_JSON_BYTES as u64
@@ -127,6 +157,26 @@ pub(super) fn route(path: &str) -> Option<MaterialRoute> {
         },
         ["commands", i] => MaterialRoute::Command {
             command_id: CommandId::new(id(i)?).ok()?,
+        },
+        ["batches", batch, "files", upload, "bytes"] => MaterialRoute::BatchUploadBytes {
+            batch_id: id(batch)?,
+            upload_id: id(upload)?,
+        },
+        ["batches", batch, "cancel"] => MaterialRoute::BatchUploadCancel {
+            batch_id: id(batch)?,
+        },
+        ["batches", a, b] => MaterialRoute::BatchUploadCreate {
+            scope: scope(a, b)?,
+        },
+        ["folders", a, b, "append-batch"] => MaterialRoute::BatchAppend {
+            scope: scope(a, b)?,
+        },
+        ["batch-commands", a, b, ticket, command] => MaterialRoute::BatchWindowCommand {
+            scope: scope(a, b)?,
+            command: CommandReference {
+                ticket: CommandTicket::parse(ticket).ok()?,
+                command_id: CommandId::new(id(command)?).ok()?,
+            },
         },
         ["download", a, b, i, v] => MaterialRoute::Download {
             scope: scope(a, b)?,

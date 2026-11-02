@@ -12,7 +12,14 @@ const page = (): MaterialPage => ({ scope: { ownerTeacherId: '9', subjectId: '2'
 const ready: UploadReady = { uploadId: '6', expiresInSeconds: 300, maxChunkBytes: 65536 }
 function fixture() {
   let next = 76
-  const api = { issueCommand: vi.fn<MaterialApi['issueCommand']>().mockImplementation(async () => identity(String(++next))), materialScopes: vi.fn<MaterialApi['materialScopes']>().mockResolvedValue(scopes()), materialClasses: vi.fn<MaterialApi['materialClasses']>().mockResolvedValue({ identityRevision: '1', scope: target, offset: 2, total: 2, nextOffset: null, items: [] }), materials: vi.fn<MaterialApi['materials']>().mockResolvedValue(page()), createUpload: vi.fn<MaterialApi['createUpload']>().mockResolvedValue(ready), upload: vi.fn<MaterialApi['upload']>().mockResolvedValue(undefined), cancelUpload: vi.fn<MaterialApi['cancelUpload']>().mockResolvedValue(undefined), append: vi.fn<MaterialApi['append']>().mockImplementation(async (scope, command) => ({ commandId: command.commandId, commandTicket: ticket, scope, record: row() })), deleteMaterial: vi.fn<MaterialApi['deleteMaterial']>().mockImplementation(async (scope, command) => ({ commandId: command.commandId, commandTicket: ticket, scope, record: { ...row(), status: 'DELETED', revision: (BigInt(command.expectedMaterialRevision) + 1n).toString() } })), materialOutcome: vi.fn<MaterialApi['materialOutcome']>().mockResolvedValue({ commandId: '77', commandTicket: ticket, state: 'NOT_FOUND', scope: null, record: null }), download: vi.fn<MaterialApi['download']>().mockResolvedValue(new Blob(['sample'])) }
+  let batchFiles: { displayName: string; bytes: number }[] = []
+  const api = {
+    createBatch: vi.fn<MaterialApi['createBatch']>().mockImplementation(async (_scope, files) => { batchFiles = files.map(f => ({ ...f })); return { batchId: '50', expiresInSeconds: 300, maxChunkBytes: 65536, items: batchFiles.map((f, i) => ({ ...f, uploadId: String(600 + i) })) } }),
+    uploadBatchMember: vi.fn<MaterialApi['uploadBatchMember']>().mockResolvedValue(undefined),
+    cancelBatch: vi.fn<MaterialApi['cancelBatch']>().mockResolvedValue(undefined),
+    appendBatch: vi.fn<MaterialApi['appendBatch']>().mockImplementation(async (scope, command) => ({ ...identity(command.commandId), scope, records: batchFiles.map((f, i) => ({ ...row(), materialId: String(500 + i), resourceVersionId: command.uploadIds[i]!, displayName: f.displayName, bytes: f.bytes, addedSequence: String(i + 1), allowedClassIds: command.allowedClassIds.slice() })) })),
+    batchOutcome: vi.fn<MaterialApi['batchOutcome']>().mockResolvedValue({ ...identity('77'), state: 'NOT_FOUND', scope: null, records: null }),
+    issueCommand: vi.fn<MaterialApi['issueCommand']>().mockImplementation(async () => identity(String(++next))), materialScopes: vi.fn<MaterialApi['materialScopes']>().mockResolvedValue(scopes()), materialClasses: vi.fn<MaterialApi['materialClasses']>().mockResolvedValue({ identityRevision: '1', scope: target, offset: 2, total: 2, nextOffset: null, items: [] }), materials: vi.fn<MaterialApi['materials']>().mockResolvedValue(page()), createUpload: vi.fn<MaterialApi['createUpload']>().mockResolvedValue(ready), upload: vi.fn<MaterialApi['upload']>().mockResolvedValue(undefined), cancelUpload: vi.fn<MaterialApi['cancelUpload']>().mockResolvedValue(undefined), append: vi.fn<MaterialApi['append']>().mockImplementation(async (scope, command) => ({ commandId: command.commandId, commandTicket: ticket, scope, record: row() })), deleteMaterial: vi.fn<MaterialApi['deleteMaterial']>().mockImplementation(async (scope, command) => ({ commandId: command.commandId, commandTicket: ticket, scope, record: { ...row(), status: 'DELETED', revision: (BigInt(command.expectedMaterialRevision) + 1n).toString() } })), materialOutcome: vi.fn<MaterialApi['materialOutcome']>().mockResolvedValue({ commandId: '77', commandTicket: ticket, state: 'NOT_FOUND', scope: null, record: null }), download: vi.fn<MaterialApi['download']>().mockResolvedValue(new Blob(['sample'])) }
   const changed = vi.fn<(state: MaterialState) => void>(), revoked = vi.fn(), controller = new MaterialController(api, 'b'.repeat(64), changed, revoked)
   return { api, controller, changed, revoked, state: () => controller.snapshot() }
 }
@@ -184,4 +191,95 @@ describe('material server ticket generation boundary', () => {
     f.api.materialOutcome.mockResolvedValueOnce({ ...identity(), commandTicket: ticket.replace('12', '34'), state: 'NOT_FOUND', scope: null, record: null }); await f.controller.query()
     expect(f.state().phase).toBe('unknown'); expect(f.state().pending?.command.commandTicket).toBe(ticket); expect(f.api.issueCommand).toHaveBeenCalledOnce(); f.controller.dispose()
   })
+})
+
+
+async function transferBatch(f: ReturnType<typeof fixture>, files = [new File(['one'], 'first.txt'), new File(['second'], 'last.txt')]) {
+  f.controller.pickFiles(files); f.controller.setClasses(['1']); await f.controller.uploadBatch()
+}
+function historicalBatch(f: ReturnType<typeof fixture>) {
+  const p = f.state().pendingBatch!
+  return { ...identity(p.command.commandId), state: 'COMMITTED' as const, scope: p.scope, records: p.files.map((file, i) => ({ ...row(), materialId: String(500 + i), resourceVersionId: file.uploadId, displayName: file.displayName, bytes: file.bytes, addedSequence: String(i + 1), allowedClassIds: p.command.allowedClassIds.slice() })) }
+}
+describe('ordered atomic material batch workflow (synthetic API, not server execution)', () => {
+  it('reviews, reorders and removes before capturing one immutable group and one explicit command', async () => {
+    const f = fixture(); await open(f)
+    const first = new File(['one'], 'first.txt'), last = new File(['last'], 'last.txt'), removed = new File(['x'], 'remove.txt')
+    f.controller.pickFiles([first, removed, last]); f.controller.moveFile(2, -1); f.controller.removeFile(2); f.controller.moveFile(0, 1); f.controller.setClasses(['2', '1'])
+    expect(f.state().files).toEqual([last, first]); await f.controller.uploadBatch()
+    expect(f.api.createBatch).toHaveBeenCalledExactlyOnceWith(expect.objectContaining(target), [{ displayName: 'last.txt', bytes: 4 }, { displayName: 'first.txt', bytes: 3 }], ['1', '2'], 'b'.repeat(64), expect.any(AbortSignal))
+    f.controller.moveFile(0, 1); f.controller.removeFile(0); f.controller.setClasses(['2'])
+    expect(f.state().files).toEqual([last, first]); expect(f.state().batchClasses).toEqual(['1', '2']); expect(f.api.issueCommand).not.toHaveBeenCalled(); expect(f.api.appendBatch).not.toHaveBeenCalled()
+    await f.controller.appendBatch(); await f.controller.appendBatch()
+    expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.appendBatch).toHaveBeenCalledExactlyOnceWith(expect.objectContaining(target), { ...identity('77'), batchId: '50', uploadIds: ['600', '601'], allowedClassIds: ['1', '2'] }, 'b'.repeat(64), expect.any(AbortSignal)); expect(f.api.append).not.toHaveBeenCalled()
+    expect(f.state().batchHistory?.map(r => r.displayName)).toEqual(['last.txt', 'first.txt']); expect(f.state().page?.items).toEqual([row()]); f.controller.dispose()
+  })
+  it('uploads at most twenty files strictly serially and never auto-commits the ready group', async () => {
+    const f = fixture(); await open(f); const files = Array.from({ length: 20 }, (_, i) => new File(['x'], `file-${i}.txt`))
+    f.controller.pickFiles(files); f.controller.setClasses(['1'])
+    let release!: () => void; f.api.uploadBatchMember.mockImplementationOnce(() => new Promise(resolve => { release = resolve }))
+    const operation = f.controller.uploadBatch(); await vi.waitFor(() => expect(f.api.uploadBatchMember).toHaveBeenCalledOnce())
+    expect(f.state().batchUploaded).toBe(0); expect(f.api.appendBatch).not.toHaveBeenCalled(); release(); await operation
+    expect(f.api.uploadBatchMember.mock.calls.map(c => c[2])).toEqual(files); expect(f.state().batchUploaded).toBe(20); expect(f.state().phase).toBe('uploaded'); expect(f.api.issueCommand).not.toHaveBeenCalled(); await f.controller.appendBatch(); expect(f.state().batchHistory).toHaveLength(20); f.controller.dispose()
+  })
+  it('rejects zero, twenty-one or a bad member together while keeping the original draft', async () => {
+    const f = fixture(); await open(f); const original = [new File(['x'], 'ok.txt')]; f.controller.pickFiles(original)
+    for (const files of [[], Array.from({ length: 21 }, () => new File(['x'], 'same.txt')), [new File(['x'], 'bad.exe')], [new File([], 'zero.txt')]]) { f.controller.pickFiles(files); expect(f.state().files).toEqual(original) }
+    expect(f.api.createBatch).not.toHaveBeenCalled(); expect(f.api.issueCommand).not.toHaveBeenCalled(); f.controller.dispose()
+  })
+  it('keeps a failed whole group until explicit cleanup and never retries a member or sends a command', async () => {
+    const f = fixture(); await open(f); f.api.uploadBatchMember.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new NetworkFault()); await transferBatch(f)
+    expect(f.state().phase).toBe('upload-failed'); expect(f.state().batchUploaded).toBe(1); await f.controller.uploadBatch(); await f.controller.appendBatch(); expect(f.api.createBatch).toHaveBeenCalledOnce(); expect(f.api.issueCommand).not.toHaveBeenCalled()
+    f.api.cancelBatch.mockRejectedValueOnce(new NetworkFault()); await f.controller.cancelBatch(); expect(f.state().batch?.batchId).toBe('50'); await f.controller.uploadBatch(); expect(f.api.createBatch).toHaveBeenCalledOnce()
+    await f.controller.cancelBatch(); expect(f.state().batch).toBeNull(); expect(f.state().files).toHaveLength(2); expect(f.api.cancelBatch.mock.calls.map(c => c[0])).toEqual(['50', '50']); f.controller.dispose()
+  })
+  it('does not guess a batch ID or send late bytes after cancellation before READY', async () => {
+    const f = fixture(); await open(f); let ready!: (value: Awaited<ReturnType<MaterialApi['createBatch']>>) => void
+    f.api.createBatch.mockImplementationOnce(() => new Promise(resolve => { ready = resolve })); f.controller.pickFiles([new File(['x'], 'one.txt')]); f.controller.setClasses(['1']); const uploading = f.controller.uploadBatch(); await f.controller.cancelBatch()
+    ready({ batchId: '51', expiresInSeconds: 300, maxChunkBytes: 65536, items: [{ uploadId: '601', displayName: 'one.txt', bytes: 1 }] }); await uploading
+    expect(f.api.uploadBatchMember).not.toHaveBeenCalled(); expect(f.api.cancelBatch).not.toHaveBeenCalled(); expect(f.state().batch).toBeNull(); expect(f.api.issueCommand).not.toHaveBeenCalled(); f.controller.dispose()
+  })
+  it('keeps the original pair through UNKNOWN, NOT_FOUND and current reads, then shows its separate history', async () => {
+    const f = fixture(); await open(f); await transferBatch(f); f.api.appendBatch.mockRejectedValueOnce(new ApiError(503, 'RESULT_UNKNOWN')); await f.controller.appendBatch(); const p = f.state().pendingBatch
+    await f.controller.appendBatch(); await f.controller.append(); await f.controller.uploadBatch(); await f.controller.cancelBatch(); await f.controller.queryBatch()
+    expect(f.state().pendingBatch).toBe(p); expect(f.state().phase).toBe('unknown'); expect(f.api.appendBatch).toHaveBeenCalledOnce(); expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.cancelBatch).not.toHaveBeenCalled()
+    await f.controller.loadPage(null, true); expect(f.state().pendingBatch).toBe(p); expect(f.state().phase).toBe('unknown'); expect(f.state().batchHistory).toBeNull()
+    expect(f.state().classes).toEqual(['1']); f.api.materials.mockRejectedValueOnce(new NetworkFault()); await f.controller.loadPage(null, true); expect(f.state().pendingBatch).toBe(p); expect(f.state().phase).toBe('unknown')
+    f.api.batchOutcome.mockResolvedValueOnce(historicalBatch(f)); await f.controller.queryBatch(); expect(f.state().batchHistory).toHaveLength(2); expect(f.state().page).toBeNull(); expect(f.api.batchOutcome.mock.calls.map(c => c[1])).toEqual([identity('77'), identity('77')]); f.controller.dispose()
+  })
+  it.each(['order', 'classes', 'version', 'count', 'sequence', 'folder', 'time'])('cannot accept a malformed whole historical result: %s', async fault => {
+    const f = fixture(); await open(f); await transferBatch(f); f.api.appendBatch.mockRejectedValueOnce(new NetworkFault()); await f.controller.appendBatch(); const result = historicalBatch(f)
+    if (fault === 'order') result.records.reverse(); if (fault === 'classes') result.records[1]!.allowedClassIds = ['2']; if (fault === 'version') result.records[1]!.resourceVersionId = '999'; if (fault === 'count') result.records.pop(); if (fault === 'sequence') result.records[1]!.addedSequence = '4'; if (fault === 'folder') result.records[1]!.folderId = '99'; if (fault === 'time') result.records[1]!.addedAt = '2026-10-30T11:00:00'
+    f.api.batchOutcome.mockResolvedValueOnce(result); await f.controller.queryBatch(); expect(f.state().phase).toBe('unknown'); expect(f.state().batchHistory).toBeNull(); expect(f.api.appendBatch).toHaveBeenCalledOnce(); f.controller.dispose()
+  })
+  it('expires the original batch without replacing its ticket and ignores late issuance after leave', async () => {
+    const f = fixture(); await open(f); await transferBatch(f); f.api.appendBatch.mockRejectedValueOnce(new NetworkFault()); await f.controller.appendBatch(); f.api.batchOutcome.mockRejectedValueOnce(new ApiError(410, 'COMMAND_EXPIRED')); await f.controller.queryBatch(); await f.controller.queryBatch(); await f.controller.appendBatch()
+    expect(f.state().pendingBatch?.retired).toBe(true); expect(f.api.batchOutcome).toHaveBeenCalledOnce(); expect(f.api.issueCommand).toHaveBeenCalledOnce(); f.controller.dispose()
+    const late = fixture(); await open(late); await transferBatch(late); let issue!: (value: ReturnType<typeof identity>) => void; late.api.issueCommand.mockImplementationOnce(() => new Promise(resolve => { issue = resolve })); const op = late.controller.appendBatch(); late.controller.leave(true); issue(identity()); await op; expect(late.api.appendBatch).not.toHaveBeenCalled(); late.controller.dispose()
+  })
+})
+
+
+it('a failed current-scope read cannot disable manual lookup of the original unknown batch', async () => {
+  const f = fixture(); await open(f); await transferBatch(f); f.api.appendBatch.mockRejectedValueOnce(new NetworkFault()); await f.controller.appendBatch(); const pending = f.state().pendingBatch
+  f.api.materialScopes.mockRejectedValueOnce(new NetworkFault()); await f.controller.loadScopes(0, true)
+  expect(f.state().phase).toBe('blocked'); expect(f.state().pendingBatch).toBe(pending)
+  f.api.batchOutcome.mockResolvedValueOnce(historicalBatch(f)); await f.controller.queryBatch()
+  expect(f.state().phase).toBe('result'); expect(f.state().batchHistory).toHaveLength(2); expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.appendBatch).toHaveBeenCalledOnce(); f.controller.dispose()
+})
+
+it('single-file UNKNOWN remains manually queryable by its original pair after a failed scope GET', async () => {
+  const f = fixture(); await open(f); await transfer(f); f.api.append.mockRejectedValueOnce(new NetworkFault()); await f.controller.append(); const pending = f.state().pending
+  f.api.materialScopes.mockRejectedValueOnce(new NetworkFault()); await f.controller.loadScopes(0, true)
+  expect(f.state().phase).toBe('blocked'); expect(f.state().pending).toBe(pending)
+  await f.controller.append(); await f.controller.uploadFile(); await f.controller.delete(row())
+  expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.append).toHaveBeenCalledOnce(); expect(f.api.deleteMaterial).not.toHaveBeenCalled()
+  f.api.materialOutcome.mockResolvedValueOnce({ ...identity('77'), state: 'COMMITTED', scope: target, record: row() }); await f.controller.query()
+  expect(f.api.materialOutcome).toHaveBeenCalledExactlyOnceWith(identity('77'), expect.any(AbortSignal)); expect(f.state().phase).toBe('result'); expect(f.state().pending).toBe(pending); expect(f.state().history).toEqual(row()); expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.append).toHaveBeenCalledOnce(); f.controller.dispose()
+})
+it.each([401, 403])('single-file blocked original-query authentication failure %i still revokes all mirrors', async status => {
+  const f = fixture(); await open(f); await transfer(f); f.api.append.mockRejectedValueOnce(new NetworkFault()); await f.controller.append()
+  f.api.materialScopes.mockRejectedValueOnce(new NetworkFault()); await f.controller.loadScopes(0, true)
+  f.api.materialOutcome.mockRejectedValueOnce(new ApiError(status, status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN')); await f.controller.query()
+  expect(f.revoked).toHaveBeenCalledOnce(); expect(f.state().selected).toBeNull(); expect(f.state().pending).toBeNull(); expect(f.controller.hasRiskyDraft()).toBe(false); expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.append).toHaveBeenCalledOnce(); f.controller.dispose()
 })

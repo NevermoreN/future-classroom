@@ -52,7 +52,7 @@ impl Commands {
             }
         }
         let raw = NEXT
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .unwrap();
         let mut entropy = [83; 24];
         entropy[16..].copy_from_slice(&raw.to_be_bytes());

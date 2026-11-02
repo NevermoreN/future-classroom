@@ -7,7 +7,8 @@ use crate::{
     backend::{web::WebService, Backend},
     web_application::{
         quarantined_uploads, retry_quarantined_uploads, MaterialTransferBinding,
-        ReceivingMaterialUpload, ReceivingWebVoiceUpload, WebApplication, WebResponse,
+        ReceivingMaterialBatchUpload, ReceivingMaterialUpload, ReceivingWebVoiceUpload,
+        WebApplication, WebResponse,
     },
 };
 use fc_ports::http::{RequestHead, RequestToken, CHUNK_BYTES};
@@ -99,6 +100,8 @@ impl UploadHubCleanup {
 enum Stage {
     Starting,
     Material(ReceivingMaterialUpload),
+    MaterialBatch(ReceivingMaterialBatchUpload),
+    BatchReady,
     Voice(ReceivingWebVoiceUpload),
     MaterialReady,
     // The worker unwound, or a consuming operation could not prove clean
@@ -112,6 +115,8 @@ struct Entry {
     // then fail before Backend admission. Only that successful preparation can
     // bind its complete request token to this original negative-cleanup owner.
     cleanup_alias: Option<RequestToken>,
+    batch_id: Option<u64>,
+    batch_prior: Option<(UploadKey, TransferLifetime)>,
     control: Option<TransferControl>,
     life: TransferLifetime,
     expected: u64,
@@ -129,6 +134,7 @@ enum Slot {
 struct Binding {
     service: WebService,
     application: Weak<()>,
+    batch_owners: Arc<dyn Fn() -> usize + Send + Sync>,
 }
 struct Shared {
     accepting: AtomicBool,
@@ -156,6 +162,7 @@ impl Shared {
                 *binding = Some(Binding {
                     service,
                     application,
+                    batch_owners: app.material_batch_owner_witness(),
                 });
                 Ok(())
             }
@@ -192,8 +199,10 @@ impl Shared {
             Slot::Owned(entry) => entry
                 .control
                 .as_ref()
-                .expect("live upload control")
-                .cancellation_handle(),
+                .map(TransferControl::cancellation_handle)
+                .unwrap_or_else(|| TransferCancellation {
+                    cancelled: Arc::downgrade(&entry.life.cancelled),
+                }),
             _ => unreachable!(),
         };
         let Slot::Owned(entry) = std::mem::replace(slot, Slot::Busy { key, cancellation }) else {
@@ -254,6 +263,8 @@ impl Shared {
             entry: Some(Entry {
                 key,
                 cleanup_alias: None,
+                batch_id: None,
+                batch_prior: None,
                 control: Some(control),
                 life,
                 expected,
@@ -262,13 +273,97 @@ impl Shared {
         })
     }
     fn pending(&self) -> usize {
-        self.slots
+        let slots = self
+            .slots
             .lock()
             .unwrap_or_else(|p| p.into_inner())
             .iter()
             .filter(|s| !matches!(s, Slot::Vacant))
-            .count()
+            .count();
+        // Groups created before their first stream still own real files and a
+        // permit. Conservatively include their bounded registry witness in the
+        // drain gate; this does not create extra physical Hub slots.
+        let groups = self
+            .binding
+            .lock()
+            .unwrap_or_else(|p| p.into_inner())
+            .as_ref()
+            .map_or(0, |b| (b.batch_owners)());
+        slots.max(groups)
     }
+    fn batch_key(&self, id: u64) -> Result<Option<UploadKey>, UploadHubError> {
+        let slots = self.slots.try_lock().map_err(|_| UploadHubError::Busy)?;
+        for slot in slots.iter() {
+            match slot {
+                Slot::Owned(e) if e.batch_id == Some(id) => {
+                    return if matches!(e.stage, Stage::BatchReady) {
+                        Ok(Some(e.key))
+                    } else {
+                        Err(UploadHubError::Busy)
+                    }
+                }
+                // Active members have the same upload id only once. Group.active
+                // independently refuses any concurrent second begin.
+                _ => {}
+            }
+        }
+        Ok(None)
+    }
+    fn resume_batch(
+        self: &Arc<Self>,
+        key: UploadKey,
+        control: TransferControl,
+        life: TransferLifetime,
+        expected: u64,
+    ) -> Result<Lease, UploadHubError> {
+        {
+            let slots = self.slots.try_lock().map_err(|_| UploadHubError::Busy)?;
+            if slots.iter().any(|slot| match slot {
+                Slot::Owned(e) if e.key != key => {
+                    e.key.token == life.token() || e.cleanup_alias == Some(life.token())
+                }
+                Slot::Busy { key: other, .. } if *other != key => other.token == life.token(),
+                _ => false,
+            }) {
+                return Err(UploadHubError::Invalid);
+            }
+        }
+        let mut lease = self.take(key)?;
+        let (next, cancellation) = {
+            let entry = lease.entry();
+            if !matches!(entry.stage, Stage::BatchReady) || entry.control.is_some() {
+                return Err(UploadHubError::Invalid);
+            }
+            let serial = self
+                .serial
+                .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+                .map_err(|_| UploadHubError::SerialExhausted)?
+                + 1;
+            entry.batch_prior = Some((entry.key, entry.life.clone()));
+            entry.key.serial = serial;
+            entry.key.token = life.token();
+            entry.cleanup_alias = None;
+            let cancellation = control.cancellation_handle();
+            entry.control = Some(control);
+            entry.life = life;
+            entry.expected = expected;
+            (entry.key, cancellation)
+        };
+        {
+            let mut slots = self.slots.lock().map_err(|_| UploadHubError::Retained)?;
+            let slot = &mut slots[usize::from(key.slot)];
+            if !matches!(slot,Slot::Busy{key:saved,..} if *saved==key) {
+                return Err(UploadHubError::Stale);
+            }
+            *slot = Slot::Busy {
+                key: next,
+                cancellation,
+            };
+        }
+        lease.reserved = next;
+        Ok(lease)
+    }
+
     fn bind_cleanup_alias(
         &self,
         entry: &mut Entry,
@@ -400,6 +495,7 @@ impl UploadHubOwner {
         let shared = self.shared.as_ref().expect("live upload owner");
         shared.cancel_all();
         if shared.check_application(app).is_ok() {
+            app.cancel_all_material_batches_in_cleanup();
             let keys: [Option<UploadKey>; SLOTS] = {
                 let slots = shared.slots.lock().unwrap_or_else(|p| p.into_inner());
                 std::array::from_fn(|i| match &slots[i] {
@@ -476,7 +572,7 @@ fn active_entry(entry: &Entry, context: &JobContext) -> Result<(), UploadHubErro
     }
 }
 fn finished_response(entry: &mut Entry, response: WebResponse) -> UploadFinished {
-    let network_control = if matches!(entry.stage, Stage::Complete) {
+    let network_control = if matches!(entry.stage, Stage::Complete | Stage::BatchReady) {
         entry.control.take()
     } else {
         None
@@ -492,6 +588,13 @@ fn cleanup_entry(entry: &mut Entry, app: &WebApplication) -> bool {
     }
     let cleaned = match &mut entry.stage {
         Stage::Material(owner) => owner.abort(),
+        Stage::MaterialBatch(owner) => owner.abort(),
+        Stage::BatchReady => entry
+            .batch_id
+            .is_some_and(|id| app.discard_material_batch_in_cleanup(id, &entry.life)),
+        Stage::Retained if entry.batch_id.is_some() => {
+            app.discard_material_batch_in_cleanup(entry.batch_id.expect("batch owner"), &entry.life)
+        }
         Stage::Voice(owner) => owner.abort(),
         Stage::MaterialReady => {
             app.discard_material_transfer_in_cleanup(entry.key.token, entry.key.upload_id)
@@ -532,7 +635,14 @@ fn cleanup_entry(entry: &mut Entry, app: &WebApplication) -> bool {
     // and complete domain retirement still requires actual shared-pool join.
     drop(std::mem::replace(&mut entry.stage, Stage::Retained));
     if quarantined_uploads() != 0
-        || (entry.key.kind == UploadKind::Material
+        || entry.batch_id.is_some_and(|id| {
+            matches!(
+                app.material_batch_transfer_binding(id, &entry.life),
+                MaterialTransferBinding::Exact | MaterialTransferBinding::Busy
+            )
+        })
+        || (entry.batch_id.is_none()
+            && entry.key.kind == UploadKind::Material
             && entry.key.upload_id != 0
             && matches!(
                 app.material_transfer_binding(entry.key.upload_id, &entry.life),
@@ -545,7 +655,8 @@ fn cleanup_entry(entry: &mut Entry, app: &WebApplication) -> bool {
     true
 }
 fn material_absence_candidate(entry: &Entry) -> bool {
-    entry.key.kind == UploadKind::Material
+    entry.batch_id.is_none()
+        && entry.key.kind == UploadKind::Material
         && entry.key.upload_id != 0
         && matches!(entry.stage, Stage::MaterialReady | Stage::Retained)
 }
@@ -554,6 +665,22 @@ fn reap_inactive(
     app: &WebApplication,
     context: &JobContext,
 ) -> Result<(), UploadHubError> {
+    let groups: [Option<(UploadKey, u64)>; SLOTS] = {
+        let slots = shared.slots.try_lock().map_err(|_| UploadHubError::Busy)?;
+        std::array::from_fn(|i| match &slots[i] {
+            Slot::Owned(e) if matches!(e.stage, Stage::BatchReady) => {
+                e.batch_id.map(|id| (e.key, id))
+            }
+            _ => None,
+        })
+    };
+    for (key, id) in groups.into_iter().flatten() {
+        if !app.material_batch_live(id) {
+            if let Ok(mut lease) = shared.take(key) {
+                cleanup_entry(lease.entry(), app);
+            }
+        }
+    }
     // Snapshot at most two metadata-only candidates, including live lifetimes
     // whose Ready/Retained App descriptor may already have been cancelled or
     // consumed. Never query the App registry while holding the Hub mutex.
@@ -563,7 +690,10 @@ fn reap_inactive(
             std::sync::TryLockError::Poisoned(_) => UploadHubError::Retained,
         })?;
         std::array::from_fn(|i| match &slots[i] {
-            Slot::Owned(entry) if !entry.life.is_active() || material_absence_candidate(entry) => {
+            Slot::Owned(entry)
+                if !matches!(entry.stage, Stage::BatchReady)
+                    && (!entry.life.is_active() || material_absence_candidate(entry)) =>
+            {
                 Some((
                     entry.key,
                     entry.life.clone(),
@@ -628,6 +758,7 @@ impl UploadHub {
         let shared = self.shared.upgrade().ok_or(UploadHubError::Closed)?;
         shared.cancel_all();
         shared.check_application(app)?;
+        app.cancel_all_material_batches_in_cleanup();
         let keys: [Option<UploadKey>; SLOTS] = {
             let slots = shared.slots.try_lock().map_err(|_| UploadHubError::Busy)?;
             std::array::from_fn(|i| match &slots[i] {
@@ -778,6 +909,60 @@ impl UploadHub {
         let shared = worker_shared(self, context, true)?;
         shared.check_application(app)?;
         reap_inactive(&shared, app, context)?;
+        if kind == UploadKind::Material
+            && matches!(
+                app.route_hint(head),
+                Ok(fc_protocol::web::Route::Materials {
+                    route: fc_protocol::web::materials::MaterialRoute::BatchUploadBytes { .. }
+                })
+            )
+        {
+            let (id, _) = app.authorize_material_batch_stream(head)?;
+            let mut lease = if let Some(key) = shared.batch_key(id)? {
+                shared.resume_batch(key, control, life, expected)?
+            } else {
+                shared.reserve(control, life, kind, expected)?
+            };
+            let entry = lease.entry();
+            entry.batch_id = Some(id);
+            match app.begin_material_batch_upload(head, entry.life.clone(), context) {
+                Ok(owner) => {
+                    entry.key.upload_id = owner.upload_id();
+                    entry.life.deadline = entry.life.deadline.min(owner.deadline());
+                    entry.stage = Stage::MaterialBatch(owner);
+                    entry.batch_prior = None;
+                }
+                Err(response) => {
+                    if let Some((old_key, old_life)) = entry.batch_prior.take() {
+                        drop(entry.control.take());
+                        entry.key = old_key;
+                        entry.life = old_life;
+                        entry.stage = Stage::BatchReady;
+                    } else if matches!(
+                        app.material_batch_transfer_binding(id, &entry.life),
+                        MaterialTransferBinding::Absent
+                            | MaterialTransferBinding::Unbound
+                            | MaterialTransferBinding::BoundElsewhere
+                    ) {
+                        entry.stage = Stage::Complete;
+                    } else {
+                        entry.stage = Stage::Retained;
+                    }
+                    return Err(response.into());
+                }
+            }
+            active_entry(entry, context)?;
+            return Ok(UploadAdmission {
+                key: entry.key,
+                expected_bytes: entry.expected,
+                deadline: entry.life.deadline(),
+                cancellation: entry
+                    .control
+                    .as_ref()
+                    .expect("batch stream control")
+                    .cancellation_handle(),
+            });
+        }
         let mut lease = shared.reserve(control, life, kind, expected)?;
         let entry = lease.entry();
         if kind == UploadKind::Material {
@@ -873,6 +1058,7 @@ impl UploadHub {
         active_entry(entry, context)?;
         let ack = match &mut entry.stage {
             Stage::Material(owner) => owner.write(key.token, sequence, offset, bytes, context),
+            Stage::MaterialBatch(owner) => owner.write(key.token, sequence, offset, bytes, context),
             Stage::Voice(owner) => owner.write_chunk(key.token, sequence, offset, bytes, context),
             _ => return Err(UploadHubError::Invalid.into()),
         }?;
@@ -892,6 +1078,13 @@ impl UploadHub {
         active_entry(entry, context)?;
         let stage = std::mem::replace(&mut entry.stage, Stage::Retained);
         let response = match stage {
+            Stage::MaterialBatch(owner) => {
+                let response = owner.finish(key.token, context);
+                if response.head.status == 200 {
+                    entry.stage = Stage::BatchReady;
+                }
+                response
+            }
             Stage::Material(owner) => {
                 let response = owner.finish(key.token, context);
                 if response.head.status == 200 {
@@ -974,6 +1167,95 @@ impl UploadHub {
         // A prepared proof stays local to this same worker call through SQL.
         let response = app.commit_material_append_with_context(&mut scoped, prepared, context);
         if !app.material_transfer_pending(key.token, key.upload_id) && quarantined_uploads() == 0 {
+            entry.stage = Stage::Complete;
+        }
+        Ok(response)
+    }
+    #[allow(clippy::too_many_arguments)] // Same original HTTP control/lifetime and worker stay together.
+    pub fn create_batch(
+        &self,
+        app: &WebApplication,
+        backend: &Arc<Mutex<Backend>>,
+        head: &RequestHead,
+        body: &[u8],
+        control: TransferControl,
+        life: TransferLifetime,
+        context: &JobContext,
+    ) -> Result<UploadFinished, UploadHubFailure> {
+        if head.token != life.token()
+            || !Arc::ptr_eq(&control.cancelled, &life.cancelled)
+            || !life.is_active()
+        {
+            return Err(UploadHubError::Invalid.into());
+        }
+        let shared = worker_shared(self, context, true)?;
+        shared.check_application(app)?;
+        reap_inactive(&shared, app, context)?;
+        let mut lease = shared.reserve(control, life, UploadKind::Material, 0)?;
+        let entry = lease.entry();
+        match app.material_batch_create_in_job(backend, head, body, &entry.life, context) {
+            Ok((id, response)) => {
+                entry.batch_id = Some(id);
+                entry.stage = Stage::BatchReady;
+                Ok(finished_response(entry, response))
+            }
+            Err(response) => {
+                entry.stage = if quarantined_uploads() == 0 {
+                    Stage::Complete
+                } else {
+                    Stage::Retained
+                };
+                Ok(finished_response(entry, response))
+            }
+        }
+    }
+    pub fn append_batch_ready(
+        &self,
+        app: &WebApplication,
+        backend: &Arc<Mutex<Backend>>,
+        head: &RequestHead,
+        body: &[u8],
+        life: &TransferLifetime,
+        context: &JobContext,
+    ) -> Result<WebResponse, UploadHubFailure> {
+        let shared = worker_shared(self, context, true)?;
+        shared.check_application(app)?;
+        // Receipt first, independently of any ephemeral group or Ready key.
+        if let Some(prior) =
+            app.material_batch_receipt_in_job(backend, head, body, life, context)?
+        {
+            return Ok(prior);
+        }
+        let id = app.authorize_material_batch_append(head, body, life)?;
+        let key = shared.batch_key(id)?.ok_or(UploadHubError::Stale)?;
+        let mut lease = shared.take(key)?;
+        let entry = lease.entry();
+        if !matches!(entry.stage, Stage::BatchReady) {
+            return Err(UploadHubError::Invalid.into());
+        }
+        shared.bind_cleanup_alias(entry, head.token)?;
+        // Guard the request as negative cleanup before preparation/SQL. Its
+        // successful native bind replaces the prior member token in the group.
+        entry.stage = Stage::Retained;
+        let prior = entry.life.clone();
+        entry.life = life.clone();
+        {
+            let mut slots = shared.slots.lock().map_err(|_| UploadHubError::Retained)?;
+            if let Slot::Busy { cancellation, .. } = &mut slots[usize::from(key.slot)] {
+                *cancellation = TransferCancellation {
+                    cancelled: Arc::downgrade(&life.cancelled),
+                };
+            }
+        }
+        let response = app.material_batch_append_in_job(backend, head, body, life, context);
+        if matches!(
+            app.material_batch_transfer_binding(id, &entry.life),
+            MaterialTransferBinding::Unbound | MaterialTransferBinding::BoundElsewhere
+        ) {
+            entry.life = prior;
+        }
+        let response = response?;
+        if app.material_batch_transfer_binding(id, &entry.life) == MaterialTransferBinding::Absent {
             entry.stage = Stage::Complete;
         }
         Ok(response)

@@ -46,7 +46,7 @@ impl FixtureCommands {
         // Deterministic, nonzero trusted test entropy. Production backend callers
         // continue using their CSPRNG; no test-only path is installed in Writer.
         let raw = NEXT_RAW
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .map_err(|_| StorageError::InvalidCommand)?;
         let mut entropy = [83; 24];
         entropy[16..].copy_from_slice(&raw.to_be_bytes());
