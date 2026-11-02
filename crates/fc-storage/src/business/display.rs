@@ -191,10 +191,8 @@ impl<S: Send> TransactionTask<S> for SaveDisplay<S> {
     fn allocation_bytes(&self) -> usize {
         self.request
             .candidate
-            .components
-            .capacity()
-            .saturating_mul(std::mem::size_of::<ComponentSettings>())
-            .saturating_add(self.request.candidate.countdown.label.capacity())
+            .allocation_bytes()
+            .unwrap_or(usize::MAX)
             .saturating_add(std::mem::size_of::<Self>())
     }
     fn evaluate(

@@ -24,8 +24,8 @@ use fc_runtime::{
 };
 use fc_windows::{
     desktop::{
-        ContentHiddenReason, DesktopEvent, DesktopMetrics, DesktopRenderer, NativeTextMeasure,
-        PresentOutcome, PublicationGuard, DESKTOP_SCOPE,
+        ContentHiddenReason, DesktopEvent, DesktopMetrics, DesktopRenderer, MonitorWorkArea,
+        NativeTextMeasure, PresentOutcome, PublicationGuard, DESKTOP_SCOPE,
     },
     host::HostHints,
     materials::raster::{RasterCache, RasterFrame},
@@ -322,6 +322,9 @@ pub(super) struct Controller {
     scene: Option<SceneSnapshot>,
     generation: SceneGeneration,
     work: Option<Rect>,
+    monitor: Option<MonitorWorkArea>,
+    monitor_target: Option<String>,
+    monitor_notice_changed: bool,
     pending: Option<Pending>,
     requested: Option<Request>,
     control: Option<SessionControl>,
@@ -466,6 +469,9 @@ impl Controller {
             scene: None,
             generation: SceneGeneration::default(),
             work: None,
+            monitor: None,
+            monitor_target: None,
+            monitor_notice_changed: false,
             pending: None,
             requested: None,
             control: None,
@@ -592,7 +598,21 @@ impl Controller {
         std::mem::take(&mut self.material_events)
     }
     pub(super) fn take_notice(&mut self) -> Option<String> {
-        self.notice.take()
+        let render = self.notice.take();
+        if render.is_none() && (self.notice.failed || !self.monitor_notice_changed) {
+            return None;
+        }
+        self.monitor_notice_changed = false;
+        let fallback = self.monitor.as_ref().filter(|m| m.fallback).map(|m| {
+            format!("已选展示屏幕目前不可用，桌面临时回退到主屏“{}”；原选择和布局锚点保留，重新连接后自动恢复。", m.name)
+        });
+        match (render, fallback) {
+            (Some(render), Some(fallback)) if !render.is_empty() => {
+                Some(format!("{render}\n{fallback}"))
+            }
+            (_, Some(fallback)) => Some(fallback),
+            (render, None) => Some(render.unwrap_or_default()),
+        }
     }
     fn render_unavailable(&mut self, message: &str) {
         self.invalidate();
@@ -1143,6 +1163,14 @@ impl Controller {
         if let Some(control) = control {
             self.control = Some(control.clone());
         }
+        // Display notifications can arrive while settings keep the desktop
+        // hidden. Retire the cached area now, before those early returns.
+        if hints.contains(HostHints::DISPLAY_CHANGED)
+            || hints.contains(HostHints::POWER_CHANGED)
+            || hints.contains(HostHints::SESSION_CHANGED)
+        {
+            self.monitor = None;
+        }
         self.expire_content_jobs();
         if hints.contains(HostHints::SHUTDOWN) {
             self.stop();
@@ -1236,13 +1264,30 @@ impl Controller {
             self.hide();
             return Ok(());
         }
-        let work = match self.renderer.work_area() {
-            Ok(work) => work,
-            Err(_) => {
-                self.render_unavailable("桌面工作区域不可用，已隐藏并稍后重试。");
-                return Ok(());
-            }
-        };
+        let target = self
+            .facts
+            .as_ref()
+            .expect("facts checked above")
+            .display
+            .target_monitor
+            .as_deref();
+        if self.monitor.is_none()
+            || self.monitor_target.as_deref() != target
+            || hints.contains(HostHints::DISPLAY_CHANGED)
+        {
+            let monitor = match self.renderer.work_area_for(target) {
+                Ok(monitor) => monitor,
+                Err(_) => {
+                    self.monitor = None;
+                    self.render_unavailable("展示屏幕工作区暂不可用，已隐藏并稍后重试。请在桌面显示设置中核对屏幕选择。");
+                    return Ok(());
+                }
+            };
+            self.monitor_target = target.map(str::to_owned);
+            self.monitor_notice_changed |= self.monitor.as_ref() != Some(&monitor);
+            self.monitor = Some(monitor);
+        }
+        let work = self.monitor.as_ref().expect("monitor selected above").work;
         let recompose = self.needs_scene
             || received
             || self.work != Some(work)

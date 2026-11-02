@@ -1514,7 +1514,8 @@ impl Editor {
         };
         match style.handle(action, data)? {
             display_editor::Command::PickColor { .. }
-            | display_editor::Command::VisualPreview { .. } => {
+            | display_editor::Command::VisualPreview { .. }
+            | display_editor::Command::RefreshMonitors => {
                 return Err("科目配色请从工作台的桌面显示设置进入。".into());
             }
             display_editor::Command::Save { settings, .. } => {

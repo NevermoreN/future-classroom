@@ -71,6 +71,8 @@ pub struct DateCountdownSettings {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DisplaySettings {
     pub revision: Revision,
+    /// Opaque platform monitor identity. None follows the current primary screen.
+    pub target_monitor: Option<String>,
     pub clock_mode: ClockMode,
     pub clock_seconds: bool,
     pub recess_enabled: bool,
@@ -87,6 +89,7 @@ impl Default for DisplaySettings {
     fn default() -> Self {
         Self {
             revision: Revision::default(),
+            target_monitor: None,
             clock_mode: ClockMode::Digital24,
             clock_seconds: false,
             recess_enabled: true,
@@ -131,6 +134,15 @@ impl DisplaySettings {
         self.components.iter().find(|c| c.kind == kind)
     }
     pub fn validate(&self) -> Result<(), DisplayError> {
+        if let Some(target) = &self.target_monitor {
+            if target.len() > 512 {
+                return Err(DisplayError::Capacity);
+            }
+            if target.is_empty() || target.trim() != target || target.chars().any(char::is_control)
+            {
+                return Err(DisplayError::InvalidSettings);
+            }
+        }
         if self.components.len() != 8
             || [
                 self.course_fill_percent,
@@ -200,7 +212,8 @@ impl DisplaySettings {
         self.components
             .capacity()
             .checked_mul(std::mem::size_of::<ComponentSettings>())?
-            .checked_add(self.countdown.label.capacity())
+            .checked_add(self.countdown.label.capacity())?
+            .checked_add(self.target_monitor.as_ref().map_or(0, String::capacity))
     }
 }
 /// Repository must read every field under one writer transaction. Paging bounds full

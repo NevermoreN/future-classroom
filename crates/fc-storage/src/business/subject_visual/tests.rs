@@ -435,6 +435,86 @@ fn joint_save_is_atomic_published_from_updated_identity_and_durable_idempotent()
     assert_eq!(f.identity().revision, before.revision.next().unwrap());
 }
 #[test]
+fn monitor_settings_keep_legacy_receipts_and_persist_opaque_selection_after_reopen() {
+    let mut f = Fixture::new();
+    let admin = actor(1, TrustedOrigin::Local);
+    let base = f.read();
+    let legacy = display_codec::settings(&base.display);
+    assert_eq!(legacy["format"], json!(1));
+    assert!(legacy.get("target_monitor").is_none());
+    assert_eq!(display_codec::read_settings(&legacy).unwrap(), base.display);
+    let display_request = DisplayRequest {
+        command_id: f.command_id(CommandFamily::Display, 81),
+        expected_revision: base.display.revision,
+        candidate: base.display.clone(),
+    };
+    let save_display = |f: &Fixture, request: DisplayRequest| {
+        f.repository(admin.clone())
+            .with_command_window(f.commands.original(request.command_id).unwrap())
+            .execute_display(request, &admin, f.clock.as_ref())
+            .unwrap()
+    };
+    let legacy_display = save_display(&f, display_request.clone());
+    let before_visual = f.read();
+    let legacy_visual = f.save(82, &before_visual, 170).unwrap();
+    let mut selected_request = request(&f, 83, &legacy_visual, 171);
+    selected_request.display.target_monitor = Some(
+        r"\\?\DISPLAY#SYNTHETIC#classroom-screen#{00000000-0000-0000-0000-000000000000}".into(),
+    );
+    let save_visual = |f: &Fixture, request: SubjectVisualRequest| {
+        f.repository(admin.clone())
+            .with_command_window(f.commands.original(request.command_id).unwrap())
+            .execute_subject_visuals(request, &admin, f.clock.as_ref())
+            .unwrap()
+    };
+    let selected = save_visual(&f, selected_request.clone());
+    let wire = display_codec::settings(&selected.display);
+    assert_eq!(wire["format"], json!(2));
+    assert_eq!(
+        display_codec::read_settings(&wire).unwrap(),
+        selected.display
+    );
+    let mut mixed = wire.clone();
+    mixed["format"] = json!(1);
+    assert!(display_codec::read_settings(&mixed).is_err());
+    let mut partial = wire.clone();
+    partial.as_object_mut().unwrap().remove("target_monitor");
+    assert!(display_codec::read_settings(&partial).is_err());
+    for target in [
+        "".into(),
+        " padded".into(),
+        "bad\nidentity".into(),
+        "x".repeat(513),
+    ] {
+        let mut bad = wire.clone();
+        bad["target_monitor"] = json!(target);
+        assert!(display_codec::read_settings(&bad).is_err());
+    }
+    let mut unknown = wire.clone();
+    unknown["target_monitor"] = Value::Null;
+    assert!(display_codec::read_settings(&unknown).is_err());
+    f.reopen();
+    let revision = f.revision();
+    assert_eq!(f.read(), selected);
+    assert_eq!(save_display(&f, display_request), legacy_display);
+    assert_eq!(f.save(82, &before_visual, 170).unwrap(), legacy_visual);
+    assert_eq!(save_visual(&f, selected_request), selected);
+    assert_eq!(f.revision(), revision);
+    assert_eq!(f.read(), selected); // Historical retries must not restore the old primary-screen policy.
+    let follow_primary = DisplayRequest {
+        command_id: f.command_id(CommandFamily::Display, 84),
+        expected_revision: selected.display.revision,
+        candidate: DisplaySettings {
+            target_monitor: None,
+            ..selected.display
+        },
+    };
+    let following = save_display(&f, follow_primary);
+    assert_eq!(display_codec::settings(&following)["format"], json!(1));
+    f.reopen();
+    assert_eq!(f.read().display, following);
+}
+#[test]
 fn each_cas_conflict_leaves_the_other_document_and_receipt_untouched() {
     let f = Fixture::new();
     let base = f.read();

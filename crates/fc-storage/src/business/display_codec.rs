@@ -38,7 +38,7 @@ fn small<T: TryFrom<u64>>(v: &Value, name: &str) -> Result<T, StorageError> {
     T::try_from(number(v, name)?).map_err(|_| StorageError::Database)
 }
 pub(super) fn settings(d: &DisplaySettings) -> Value {
-    json!({
+    let mut value = json!({
         "format":1,"revision":d.revision.get(),
         "clock_mode":match d.clock_mode {ClockMode::Digital24=>"digital24",ClockMode::Digital12=>"digital12",ClockMode::Analog=>"analog"},
         "clock_seconds":d.clock_seconds,"recess_enabled":d.recess_enabled,
@@ -51,30 +51,37 @@ pub(super) fn settings(d: &DisplaySettings) -> Value {
             "max_width":c.max_width,"min_height":c.min_height,"max_height":c.max_height})).collect::<Vec<_>>(),
         "countdown":{"target":d.countdown.target.map(date),"label":d.countdown.label,
             "expired":match d.countdown.expired {CountdownExpired::Hide=>"hide",CountdownExpired::ShowCompleted=>"show_completed"}}
-    })
+    });
+    // Keep the legacy None encoding byte-for-byte stable for command receipts.
+    if let Some(target) = &d.target_monitor {
+        value["format"] = json!(2);
+        value["target_monitor"] = json!(target);
+    }
+    value
 }
 pub(super) fn read_settings(v: &Value) -> Result<DisplaySettings, StorageError> {
-    object_fields(
-        v,
-        &[
-            "format",
-            "revision",
-            "clock_mode",
-            "clock_seconds",
-            "recess_enabled",
-            "subject_fill",
-            "course_fill_percent",
-            "homework_fill_percent",
-            "text_tone",
-            "glass_surface_percent",
-            "edge_reflection_percent",
-            "components",
-            "countdown",
-        ],
-    )?;
-    if number(v, "format")? != 1 {
+    let format = number(v, "format")?;
+    let mut fields = vec![
+        "format",
+        "revision",
+        "clock_mode",
+        "clock_seconds",
+        "recess_enabled",
+        "subject_fill",
+        "course_fill_percent",
+        "homework_fill_percent",
+        "text_tone",
+        "glass_surface_percent",
+        "edge_reflection_percent",
+        "components",
+        "countdown",
+    ];
+    if format == 2 {
+        fields.push("target_monitor");
+    } else if format != 1 {
         return Err(StorageError::Database);
     }
+    object_fields(v, &fields)?;
     let components = array(v, "components")?;
     if components.len() > 8 {
         return Err(StorageError::Database);
@@ -111,6 +118,11 @@ pub(super) fn read_settings(v: &Value) -> Result<DisplaySettings, StorageError> 
     object_fields(c, &["target", "label", "expired"])?;
     let result = DisplaySettings {
         revision: Revision::new(number(v, "revision")?),
+        target_monitor: if format == 2 {
+            Some(text(v, "target_monitor")?)
+        } else {
+            None
+        },
         clock_mode: match v["clock_mode"].as_str() {
             Some("digital24") => ClockMode::Digital24,
             Some("digital12") => ClockMode::Digital12,

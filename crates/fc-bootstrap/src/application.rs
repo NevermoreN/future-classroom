@@ -4716,6 +4716,21 @@ impl App {
             .filter(|a| a.principal.enabled && a.principal.role == Role::GlobalAdmin)
             .map(|_| id)
     }
+    fn refresh_display_monitors(&mut self) {
+        let Some(editor) = &mut self.display else {
+            return;
+        };
+        match fc_windows::desktop::display_monitors() {
+            Ok(monitors) => {
+                editor.monitors_loaded(Some(monitors));
+                self.status.clear();
+            }
+            Err(_) => {
+                editor.monitors_loaded(None);
+                self.status = "当前屏幕列表暂不可用，原选择与草稿已保留；请稍后刷新。".into();
+            }
+        }
+    }
     fn display_event(
         &mut self,
         action: ActionId,
@@ -4758,6 +4773,9 @@ impl App {
             .handle(action, data)
         {
             Ok(display_editor::Command::Stay) => self.status.clear(),
+            Ok(display_editor::Command::RefreshMonitors) => {
+                self.refresh_display_monitors();
+            }
             Ok(display_editor::Command::Close) => {
                 self.screen = Screen::Home;
                 self.status.clear();
@@ -5615,8 +5633,8 @@ impl App {
                             settings,
                             lease.principal_id(),
                         ));
+                        self.refresh_display_monitors();
                         self.screen = Screen::Display;
-                        self.status.clear();
                     }
                 }
                 Ok(Outcome::DisplayPreview {

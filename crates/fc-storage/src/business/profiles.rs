@@ -599,11 +599,9 @@ impl<S: Send> TransactionTask<S> for SavePublic<S> {
             .saturating_add(
                 self.request
                     .display
-                    .components
-                    .capacity()
-                    .saturating_mul(std::mem::size_of::<fc_domain::desktop::ComponentSettings>()),
+                    .allocation_bytes()
+                    .unwrap_or(usize::MAX),
             )
-            .saturating_add(self.request.display.countdown.label.capacity())
             .saturating_add(std::mem::size_of::<Self>())
     }
     fn evaluate(

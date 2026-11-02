@@ -27,7 +27,7 @@ use std::{
     sync::Arc,
 };
 use windows::{
-    core::{w, Error, Result},
+    core::{w, Error, Result, BOOL},
     Win32::{
         Foundation::*,
         Graphics::{Direct2D::Common::*, Direct2D::*, DirectWrite::*, Dxgi::Common::*, Gdi::*},
@@ -55,6 +55,201 @@ pub use tree::DesktopPreview;
 pub const DESKTOP_SCOPE: u64 = 0xfc00_0001;
 pub const DIB_BUDGET: u64 = 16 * 1024 * 1024;
 const MAX_TEXT_UNITS: usize = fc_presentation::card_body::MAX_CARD_TEXT_UNITS;
+const MAX_MONITORS: usize = 32;
+
+/// A current output, identified by its monitor interface when unambiguous.
+/// `gdi:` IDs explicitly identify an output rather than a hardware serial number.
+#[derive(Clone, Debug, PartialEq)]
+pub struct DesktopMonitor {
+    pub id: String,
+    pub name: String,
+    pub work: Rect,
+    pub primary: bool,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct MonitorWorkArea {
+    pub work: Rect,
+    pub monitor_id: String,
+    pub name: String,
+    pub fallback: bool,
+}
+
+/// Selects an output without changing the saved preference when it is absent.
+pub fn select_monitor(
+    monitors: &[DesktopMonitor],
+    preferred: Option<&str>,
+) -> Result<MonitorWorkArea> {
+    if monitors.is_empty() || monitors.len() > MAX_MONITORS {
+        return Err(Error::from_hresult(E_INVALIDARG));
+    }
+    let mut primary = None;
+    for (index, monitor) in monitors.iter().enumerate() {
+        let r = monitor.work;
+        if monitor.id.is_empty()
+            || monitor.name.is_empty()
+            || ![r.x, r.y, r.width, r.height, r.x + r.width, r.y + r.height]
+                .iter()
+                .all(|value| value.is_finite())
+            || r.width <= 0.
+            || r.height <= 0.
+            || monitors[..index]
+                .iter()
+                .any(|other| other.id.eq_ignore_ascii_case(&monitor.id))
+        {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        if monitor.primary && primary.replace(monitor).is_some() {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+    }
+    let primary = primary.ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+    let selected = preferred.and_then(|id| {
+        monitors
+            .iter()
+            .find(|monitor| monitor.id.eq_ignore_ascii_case(id))
+    });
+    let monitor = selected.unwrap_or(primary);
+    Ok(MonitorWorkArea {
+        work: monitor.work,
+        monitor_id: monitor.id.clone(),
+        name: monitor.name.clone(),
+        fallback: preferred.is_some() && selected.is_none(),
+    })
+}
+
+/// Read-only enumeration; native monitor handles do not leave the callback.
+pub fn display_monitors() -> Result<Vec<DesktopMonitor>> {
+    struct Enumeration {
+        monitors: Vec<DesktopMonitor>,
+        error: Option<Error>,
+    }
+    unsafe extern "system" fn collect(
+        monitor: HMONITOR,
+        _: HDC,
+        _: *mut RECT,
+        data: LPARAM,
+    ) -> BOOL {
+        // SAFETY: EnumDisplayMonitors invokes this callback synchronously while
+        // the exclusive stack-owned context is alive. No HWND or HMONITOR escapes.
+        let state = unsafe { &mut *(data.0 as *mut Enumeration) };
+        let result = if state.monitors.len() >= MAX_MONITORS {
+            Err(Error::from_hresult(E_INVALIDARG))
+        } else {
+            monitor_details(monitor)
+        };
+        match result {
+            Ok(details) => {
+                state.monitors.push(details);
+                BOOL(1)
+            }
+            Err(error) => {
+                state.error = Some(error);
+                BOOL(0)
+            }
+        }
+    }
+    let mut state = Enumeration {
+        monitors: Vec::with_capacity(MAX_MONITORS),
+        error: None,
+    };
+    // SAFETY: callback and context remain alive for this synchronous enumeration.
+    let succeeded = unsafe {
+        EnumDisplayMonitors(None, None, Some(collect), LPARAM((&raw mut state) as isize))
+    };
+    if let Some(error) = state.error {
+        return Err(error);
+    }
+    if !succeeded.as_bool() {
+        return Err(Error::from_thread());
+    }
+    select_monitor(&state.monitors, None)?;
+    Ok(state.monitors)
+}
+
+fn monitor_text(units: &[u16]) -> Result<String> {
+    let end = units
+        .iter()
+        .position(|unit| *unit == 0)
+        .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+    String::from_utf16(&units[..end]).map_err(|_| Error::from_hresult(E_INVALIDARG))
+}
+
+fn monitor_details(monitor: HMONITOR) -> Result<DesktopMonitor> {
+    let mut info = MONITORINFOEXW::default();
+    info.monitorInfo.cbSize = std::mem::size_of::<MONITORINFOEXW>() as u32;
+    // SAFETY: the extended structure advertises its full size and is valid for
+    // the duration of GetMonitorInfoW. The callback supplies a current handle.
+    if !unsafe { GetMonitorInfoW(monitor, &raw mut info.monitorInfo) }.as_bool() {
+        return Err(Error::from_thread());
+    }
+    let adapter = monitor_text(&info.szDevice)?;
+    if adapter.is_empty() {
+        return Err(Error::from_hresult(E_INVALIDARG));
+    }
+    let mut devices = Vec::new();
+    for index in 0..=MAX_MONITORS {
+        let mut device = DISPLAY_DEVICEW {
+            cb: std::mem::size_of::<DISPLAY_DEVICEW>() as u32,
+            ..Default::default()
+        };
+        // SAFETY: the GDI output name is NUL-terminated by GetMonitorInfoW;
+        // EnumDisplayDevicesW only fills this stack-owned structure.
+        if !unsafe {
+            EnumDisplayDevicesW(
+                windows::core::PCWSTR(info.szDevice.as_ptr()),
+                index as u32,
+                &raw mut device,
+                EDD_GET_DEVICE_INTERFACE_NAME,
+            )
+        }
+        .as_bool()
+        {
+            break;
+        }
+        if index == MAX_MONITORS {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        devices.push(device);
+    }
+    let mut active = devices
+        .iter()
+        .filter(|device| device.StateFlags.contains(DISPLAY_DEVICE_ACTIVE));
+    let first_active = active.next();
+    let selected = if first_active.is_some() && active.next().is_none() {
+        first_active
+    } else if first_active.is_none() && devices.len() == 1 {
+        devices.first()
+    } else {
+        // Cloned outputs may list several physical monitors for one HMONITOR.
+        // The GDI output remains identifiable; selecting a hardware ID would guess.
+        None
+    };
+    let interface = selected
+        .map(|device| monitor_text(&device.DeviceID))
+        .transpose()?
+        .unwrap_or_default();
+    let name = selected
+        .map(|device| monitor_text(&device.DeviceString))
+        .transpose()?
+        .filter(|name| !name.is_empty())
+        .unwrap_or_else(|| adapter.clone());
+    let work = info.monitorInfo.rcWork;
+    Ok(DesktopMonitor {
+        id: if interface.is_empty() {
+            format!("gdi:{adapter}")
+        } else {
+            format!("monitor:{interface}")
+        },
+        name,
+        work: Rect {
+            x: work.left as f32,
+            y: work.top as f32,
+            width: (i64::from(work.right) - i64::from(work.left)) as f32,
+            height: (i64::from(work.bottom) - i64::from(work.top)) as f32,
+        },
+        primary: info.monitorInfo.dwFlags & MONITORINFOF_PRIMARY != 0,
+    })
+}
 
 pub struct PublicationGuard<'a> {
     pub gate: &'a HealthGate,
@@ -763,6 +958,9 @@ impl DesktopRenderer {
     }
     pub fn work_area(&self) -> Result<Rect> {
         work_area()
+    }
+    pub fn work_area_for(&self, preferred: Option<&str>) -> Result<MonitorWorkArea> {
+        select_monitor(&display_monitors()?, preferred)
     }
     pub fn last_metrics(&self) -> DesktopMetrics {
         self.metrics.clone()
@@ -1500,21 +1698,7 @@ fn make_surface(window: NativeWindow, rect: Rect) -> Result<Surface> {
 }
 
 fn work_area() -> Result<Rect> {
-    let mut r = RECT::default();
-    unsafe {
-        SystemParametersInfoW(
-            SPI_GETWORKAREA,
-            0,
-            Some((&raw mut r).cast()),
-            SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS(0),
-        )?;
-    }
-    Ok(Rect {
-        x: r.left as f32,
-        y: r.top as f32,
-        width: (r.right - r.left) as f32,
-        height: (r.bottom - r.top) as f32,
-    })
+    Ok(select_monitor(&display_monitors()?, None)?.work)
 }
 fn surface_bytes(r: Rect) -> Result<u64> {
     if ![r.x, r.y, r.width, r.height].iter().all(|v| v.is_finite())
@@ -2561,6 +2745,96 @@ mod tests {
             public_calendar_unverified: true,
             lesson_control: None,
         }
+    }
+    #[test]
+    fn monitor_preference_primary_fallback_and_negative_geometry_remain_hidden() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let actual = display_monitors().unwrap();
+        let primary = actual.iter().find(|monitor| monitor.primary).unwrap();
+        let mut renderer = DesktopRenderer::new_hidden().unwrap();
+        assert_eq!(renderer.work_area().unwrap(), primary.work);
+        assert_eq!(renderer.work_area_for(None).unwrap().monitor_id, primary.id);
+        assert!(
+            !renderer
+                .work_area_for(Some(&primary.id.to_ascii_uppercase()))
+                .unwrap()
+                .fallback
+        );
+
+        let monitors = vec![
+            DesktopMonitor {
+                id: "gdi:primary-synthetic".into(),
+                name: "合成主屏".into(),
+                work: Rect {
+                    x: 0.,
+                    y: 0.,
+                    width: 1920.,
+                    height: 1040.,
+                },
+                primary: true,
+            },
+            DesktopMonitor {
+                id: "monitor:synthetic-left".into(),
+                name: "合成左屏".into(),
+                work: Rect {
+                    x: -1600.,
+                    y: -180.,
+                    width: 1600.,
+                    height: 860.,
+                },
+                primary: false,
+            },
+        ];
+        let saved_choice = monitors[1].id.clone();
+        let chosen = select_monitor(&monitors, Some(&saved_choice)).unwrap();
+        assert_eq!(chosen.work, monitors[1].work);
+        assert!(!chosen.fallback);
+        let missing = select_monitor(&monitors[..1], Some(&saved_choice)).unwrap();
+        assert!(missing.fallback);
+        assert_eq!(missing.monitor_id, monitors[0].id);
+        assert_eq!(saved_choice, "monitor:synthetic-left");
+        assert!(!select_monitor(&monitors[..1], None).unwrap().fallback);
+        let mut invalid = monitors.clone();
+        invalid[1].id = invalid[0].id.to_ascii_uppercase();
+        assert!(select_monitor(&invalid, None).is_err());
+        invalid = monitors.clone();
+        invalid[0].primary = false;
+        assert!(select_monitor(&invalid, None).is_err());
+        invalid = monitors.clone();
+        invalid[1].work.width = 0.;
+        assert!(select_monitor(&invalid, None).is_err());
+
+        let (_publisher, gate) = authority();
+        let now = crate::native::local_now().unwrap();
+        let mut sample = scene(now);
+        sample.cards.retain(|card| card.kind == ComponentKind::Date);
+        sample.cards[0].content = CardContent::Text("合成屏幕定位".into());
+        sample.cards[0].rect = Rect {
+            x: chosen.work.x + chosen.work.width - 246.,
+            y: chosen.work.y + chosen.work.height - 100.,
+            width: 230.,
+            height: 84.,
+        };
+        assert_eq!(
+            renderer
+                .present(&sample, now, &guard(&gate, sample.generation))
+                .unwrap(),
+            PresentOutcome::Offscreen
+        );
+        let surface = &renderer.cards[0].surface;
+        let mut window_rect = RECT::default();
+        // SAFETY: this test owns the still-hidden renderer and its live HWND.
+        unsafe {
+            GetWindowRect(surface.window.0, &raw mut window_rect).unwrap();
+            assert!(!IsWindowVisible(surface.window.0).as_bool());
+        }
+        assert_eq!(window_rect.left, -246);
+        assert_eq!(window_rect.top, 580);
+        assert_eq!(window_rect.right, -16);
+        assert_eq!(window_rect.bottom, 664);
+        assert_eq!(renderer.last_metrics().visible_windows, 0);
     }
     #[test]
     fn real_com_dib_text_pages_and_three_clocks_remain_offscreen() {

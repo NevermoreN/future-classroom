@@ -6,6 +6,7 @@ use fc_domain::{
     time::LocalDate,
 };
 use fc_ports::SubjectVisualState;
+use fc_windows::desktop::DesktopMonitor;
 mod visuals;
 #[cfg(test)]
 pub(super) use visuals::PALETTE_SUBJECT;
@@ -32,6 +33,8 @@ pub(super) const MIN_HEIGHT: FieldId = FieldId(216);
 pub(super) const MAX_HEIGHT: FieldId = FieldId(217);
 pub(super) const GLASS: FieldId = FieldId(218);
 pub(super) const REFLECTION: FieldId = FieldId(219);
+pub(super) const MONITOR: FieldId = FieldId(223);
+pub(super) const REFRESH_MONITORS: ActionId = ActionId(213);
 pub(super) const APPLY: ActionId = ActionId(200);
 pub(super) const SAVE_ALL: ActionId = ActionId(201);
 pub(super) const COMPONENTS: ActionId = ActionId(202);
@@ -53,6 +56,7 @@ pub(super) enum Command {
     Stay,
     Close,
     Reload,
+    RefreshMonitors,
     PickColor {
         subject_id: SubjectId,
         initial: Rgb,
@@ -80,6 +84,8 @@ pub(super) struct Editor {
     discard_return: Page,
     component: usize,
     suspended: Option<FormData>,
+    monitors: Vec<DesktopMonitor>,
+    monitors_available: bool,
 }
 fn field(id: FieldId, label: &str, kind: FieldKind, value: String, max: usize) -> Field {
     Field {
@@ -241,6 +247,36 @@ impl Editor {
             discard_return: Page::Main,
             component: 0,
             suspended: None,
+            monitors: Vec::new(),
+            monitors_available: false,
+        }
+    }
+    pub(super) fn monitors_loaded(&mut self, monitors: Option<Vec<DesktopMonitor>>) {
+        self.monitors_available = monitors.is_some();
+        self.monitors = monitors.unwrap_or_default();
+    }
+    fn monitor_value(&self) -> String {
+        self.settings.target_monitor.as_ref().map_or_else(
+            || "primary".into(),
+            |id| {
+                self.monitors
+                    .iter()
+                    .position(|m| m.id.eq_ignore_ascii_case(id))
+                    .map_or_else(|| "saved".into(), |index| index.to_string())
+            },
+        )
+    }
+    fn monitor_target(&self, value: &str) -> std::result::Result<Option<String>, String> {
+        match value {
+            "primary" => Ok(None),
+            "saved" if self.monitor_value() == "saved" => Ok(self.settings.target_monitor.clone()),
+            _ => value
+                .parse::<usize>()
+                .ok()
+                .filter(|i| i.to_string() == value)
+                .and_then(|i| self.monitors.get(i))
+                .map(|m| Some(m.id.clone()))
+                .ok_or_else(|| "请选择当前屏幕列表中的有效条目。".into()),
         }
     }
     pub(super) fn owner(&self) -> PrincipalId {
@@ -366,6 +402,54 @@ impl Editor {
                         &[("hide", "隐藏倒计时"), ("completed", "显示已结束")],
                     ),
                 ];
+                if self.joint_visuals {
+                    let mut monitors = vec![Choice {
+                        value: "primary".into(),
+                        label: "跟随系统主屏（默认）".into(),
+                    }];
+                    monitors.extend(self.monitors.iter().enumerate().map(|(index, monitor)| {
+                        Choice {
+                            value: index.to_string(),
+                            label: format!(
+                                "{}{} · {:.0}×{:.0} · ({:.0}, {:.0})",
+                                monitor.name,
+                                if monitor.primary {
+                                    "（当前主屏）"
+                                } else {
+                                    ""
+                                },
+                                monitor.work.width,
+                                monitor.work.height,
+                                monitor.work.x,
+                                monitor.work.y
+                            ),
+                        }
+                    }));
+                    if self.monitor_value() == "saved" {
+                        monitors.push(Choice {
+                            value: "saved".into(),
+                            label: "保留已选屏幕（目前不可用，临时回退主屏）".into(),
+                        });
+                    }
+                    v.fields.insert(
+                        0,
+                        field(
+                            MONITOR,
+                            "展示屏幕",
+                            FieldKind::Choice(monitors),
+                            self.monitor_value(),
+                            16,
+                        ),
+                    );
+                    v.description.push_str("\n屏幕选择与布局锚点分别保留；选定屏幕断开时临时迁到主屏并重新布局，重连后恢复原选择。不修改Windows显示器、分辨率或缩放设置。");
+                    if !self.monitors_available {
+                        v.description.push_str(
+                            "\n暂未取得当前屏幕列表，已保存选择保留；可点“刷新屏幕列表”重新读取。",
+                        );
+                    } else if self.monitor_value() == "saved" {
+                        v.description.push_str("\n已选屏幕当前不在列表中，桌面临时回退主屏；保存其他设置不会替换这个屏幕选择。");
+                    }
+                }
                 v.actions = vec![
                     action(APPLY, "应用到草稿"),
                     action(COMPONENTS, "应用并编辑逐组件显示"),
@@ -374,6 +458,10 @@ impl Editor {
                     action(EDIT_BACK, "保留草稿并返回"),
                     action(CANCEL, "取消全部修改"),
                 ];
+                if self.joint_visuals {
+                    v.actions
+                        .push(action(REFRESH_MONITORS, "刷新屏幕列表（保留草稿）"));
+                }
             }
             Page::SubjectVisuals => self.visuals_view(&mut v),
             Page::Components => {
@@ -478,10 +566,21 @@ impl Editor {
         action: ActionId,
         data: FormData,
     ) -> std::result::Result<Command, String> {
+        if self.joint_visuals && action == REFRESH_MONITORS && self.page == Page::Main {
+            let target = self.monitor_target(raw(&data, MONITOR))?;
+            self.capture(data);
+            // Choice indices belong to the old enumeration. Preserve the exact
+            // identity before refreshing, while unfinished other text stays put.
+            if let Some(pending) = &mut self.suspended {
+                pending.take(MONITOR);
+            }
+            self.settings.target_monitor = target;
+            return Ok(Command::RefreshMonitors);
+        }
         if !self.joint_visuals
             && matches!(
                 action,
-                VISUALS | SWITCH_SUBJECT | PICK_COLOR | VISUAL_PREVIEW
+                VISUALS | SWITCH_SUBJECT | PICK_COLOR | VISUAL_PREVIEW | REFRESH_MONITORS
             )
         {
             return Err("科目配色请从工作台的桌面显示设置进入。".into());
@@ -602,6 +701,9 @@ impl Editor {
     }
     fn apply_main(&mut self, data: &FormData) -> std::result::Result<(), String> {
         let mut next = self.settings.clone();
+        if self.joint_visuals {
+            next.target_monitor = self.monitor_target(raw(data, MONITOR))?;
+        }
         next.clock_mode = match raw(data, CLOCK) {
             "24" => ClockMode::Digital24,
             "12" => ClockMode::Digital12,
@@ -676,6 +778,78 @@ mod tests {
             .find(|f| f.id == id)
             .unwrap()
             .value
+    }
+    #[test]
+    fn monitor_draft_refresh_keeps_identity_unfinished_fields_and_missing_selection() {
+        let monitor = |id: &str, primary| DesktopMonitor {
+            id: id.into(),
+            name: id.into(),
+            primary,
+            work: fc_presentation::Rect {
+                x: if primary { 0. } else { -1600. },
+                y: 0.,
+                width: 1600.,
+                height: 900.,
+            },
+        };
+        let primary = monitor("gdi:synthetic-primary", true);
+        let board = monitor("monitor:synthetic-board", false);
+        let mut e = editor();
+        e.joint_visuals = true;
+        e.monitors_loaded(Some(vec![primary.clone(), board.clone()]));
+        let mut data = form(&e);
+        set(&mut data, MONITOR, "1");
+        set(&mut data, TARGET, "2026-");
+        assert!(matches!(
+            e.handle(REFRESH_MONITORS, data).unwrap(),
+            Command::RefreshMonitors
+        ));
+        assert_eq!(
+            e.settings.target_monitor.as_deref(),
+            Some(board.id.as_str())
+        );
+        assert_eq!(e.settings.revision, Revision::new(7));
+        e.monitors_loaded(Some(vec![board.clone(), primary.clone()]));
+        assert_eq!(value(&e, MONITOR), "0");
+        assert_eq!(value(&e, TARGET), "2026-");
+        e.view("", false).validate().unwrap();
+        // Enumeration order cannot rebind the draft to another output, nor can
+        // disappearance silently replace a saved device with the primary.
+        e.monitors_loaded(Some(vec![primary]));
+        assert_eq!(value(&e, MONITOR), "saved");
+        let mut data = form(&e);
+        assert!(e.handle(APPLY, data).is_err());
+        data = form(&e);
+        set(&mut data, TARGET, "");
+        let Command::Save {
+            settings, expected, ..
+        } = e.handle(SAVE_ALL, data).unwrap()
+        else {
+            panic!("expected original display save");
+        };
+        assert_eq!(expected, Revision::new(7));
+        assert_eq!(settings.target_monitor.as_deref(), Some(board.id.as_str()));
+        e.monitors_loaded(None);
+        e.view("", false).validate().unwrap();
+        assert_eq!(value(&e, MONITOR), "saved");
+        let mut invalid = form(&e);
+        set(&mut invalid, MONITOR, "0");
+        assert!(e.handle(APPLY, invalid).is_err());
+        assert_eq!(e.settings.target_monitor, settings.target_monitor);
+        let mut data = form(&e);
+        set(&mut data, MONITOR, "primary");
+        e.handle(APPLY, data).unwrap();
+        assert!(e.settings.target_monitor.is_none());
+        // The embedded layout style editor keeps the stored target, but exposes
+        // no second monitor-selection or refresh route.
+        let mut embedded = Editor::new(settings.clone(), PrincipalId::new(1).unwrap());
+        assert!(!embedded
+            .view("", false)
+            .fields
+            .iter()
+            .any(|f| f.id == MONITOR));
+        embedded.handle(APPLY, form(&embedded)).unwrap();
+        assert_eq!(embedded.settings.target_monitor, settings.target_monitor);
     }
     #[test]
     fn material_controls_are_atomic_bounded_drafts_and_preserve_captured_revision() {
