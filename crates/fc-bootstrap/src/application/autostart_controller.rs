@@ -56,6 +56,7 @@ impl App {
                     generation: self.generation,
                     self_revokes: false,
                     public_lesson: false,
+                    desktop_material_open: false,
                 });
                 self.status = "正在核对启动项；锁定可取消后续操作。".into();
             }

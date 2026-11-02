@@ -94,6 +94,7 @@ impl App {
                     generation: self.generation,
                     self_revokes: false,
                     public_lesson: false,
+                    desktop_material_open: false,
                 });
                 self.status = "正在下载公共校历候选；可以锁定工作台取消本次请求。".into();
             }
@@ -284,6 +285,7 @@ impl App {
                         generation: self.generation,
                         self_revokes: false,
                         public_lesson: false,
+                        desktop_material_open: false,
                     });
                 }
             }

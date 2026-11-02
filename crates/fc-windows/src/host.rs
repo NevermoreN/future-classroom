@@ -282,6 +282,13 @@ impl HiddenHost {
     /// Callback runs on UI thread after dispatch, must remain bounded/nonblocking.
     /// Background shutdown is coordinated by bootstrap, never joined by this loop.
     pub fn run(self, mut on_hints: impl FnMut(HostHints) -> Result<()>) -> Result<()> {
+        self.run_with_host(|hints, _| on_hints(hints))
+    }
+    /// The callback may use this host's tray without retaining a native handle.
+    pub fn run_with_host(
+        self,
+        mut on_hints: impl FnMut(HostHints, &Self) -> Result<()>,
+    ) -> Result<()> {
         let mut message = MSG::default();
         loop {
             let control = self.state.control.0.load(Ordering::Acquire);
@@ -320,7 +327,7 @@ impl HiddenHost {
             }
             // Child workbench commands can produce no host hints. Always let the
             // composition drain its bounded UI events immediately after dispatch.
-            match catch_unwind(AssertUnwindSafe(|| on_hints(hints))) {
+            match catch_unwind(AssertUnwindSafe(|| on_hints(hints, &self))) {
                 Ok(result) => result?,
                 Err(_) => {
                     self.state.control.fault();
@@ -356,6 +363,32 @@ impl HiddenHost {
         let data = self.icon_data()?;
         // SAFETY: valid window and icon; Shell copies data; NIM_DELETE pairs in Drop.
         if !unsafe { Shell_NotifyIconW(NIM_ADD, &data) }.as_bool() {
+            return Err(Error::from_hresult(E_FAIL));
+        }
+        Ok(())
+    }
+    /// Reuse the single tray icon for public, nonsecret feedback. Shell owns the
+    /// notification UI; this does not activate a window, play sound or open login.
+    pub fn show_public_notice(&self, message: &str) -> Result<()> {
+        if !self.tray {
+            return Ok(());
+        }
+        let mut data = self.icon_data()?;
+        data.uFlags = NIF_INFO;
+        data.dwInfoFlags = NIIF_INFO | NIIF_NOSOUND;
+        let mut title = [0u16; 64];
+        for (slot, unit) in title.iter_mut().zip("未来教室 · 打开资料".encode_utf16()) {
+            *slot = unit;
+        }
+        let mut body = [0u16; 256];
+        for (slot, unit) in body.iter_mut().take(255).zip(message.encode_utf16()) {
+            *slot = unit;
+        }
+        data.szInfoTitle = title;
+        data.szInfo = body;
+        // SAFETY: the registered icon belongs to this live host; Shell copies
+        // the bounded, terminated text before returning. No focus API is used.
+        if !unsafe { Shell_NotifyIconW(NIM_MODIFY, &data) }.as_bool() {
             return Err(Error::from_hresult(E_FAIL));
         }
         Ok(())

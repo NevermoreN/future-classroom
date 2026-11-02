@@ -2341,6 +2341,11 @@ struct Pending {
     generation: u64,
     self_revokes: bool,
     public_lesson: bool,
+    desktop_material_open: bool,
+}
+struct PendingLaunch {
+    copy_path: PathBuf,
+    from_scene: bool,
 }
 struct App {
     window: Window,
@@ -2358,6 +2363,7 @@ struct App {
     screen: Screen,
     status: String,
     desktop_notice: String,
+    public_material_notice: Option<&'static str>,
     pending: Option<Pending>,
     generation: u64,
     key: Option<ContentKey>,
@@ -2426,7 +2432,7 @@ struct App {
     probe_trace: bool,
     shell: fc_windows::materials::shell::ShellLauncher,
     control_slot: Arc<OnceLock<SessionControl>>,
-    launch_paths: HashMap<u64, PathBuf>,
+    launch_paths: HashMap<u64, PendingLaunch>,
     cleanup_paths: VecDeque<PathBuf>,
     cleanup_jobs: Vec<JobTicket<Result<Outcome>>>,
     voice_maintenance: Option<JobTicket<Result<Outcome>>>,
@@ -2694,6 +2700,11 @@ impl App {
             &work,
             Work::LoadPublicLesson(..) | Work::ChangePublicLesson(..)
         );
+        let desktop_material_open = matches!(
+            &work,
+            Work::Material(job)
+                if matches!(job.job, material_flow::Job::Open(material_flow::OpenRequest::Scene { .. }))
+        );
         let mutation = work.native_mutation();
         let readback = if public_lesson {
             self.public_lesson_command.is_some()
@@ -2803,6 +2814,7 @@ impl App {
                     generation: self.generation,
                     self_revokes,
                     public_lesson,
+                    desktop_material_open,
                 });
                 self.status = "正在处理，请稍候。".into();
             }
@@ -4080,6 +4092,14 @@ impl App {
         self.render()
     }
     fn submit_material(&mut self, job: material_flow::Job) -> std::result::Result<(), String> {
+        let from_scene = matches!(
+            job,
+            material_flow::Job::Open(material_flow::OpenRequest::Scene { .. })
+        );
+        if from_scene && self.pending.is_some() {
+            self.material_open_feedback(from_scene, "后台任务繁忙，请稍后重新点击资料。");
+            return Ok(());
+        }
         let original_batch = match &job {
             material_flow::Job::ImportBatch { scope, command, .. } => {
                 Some((material_flow::BatchKind::Import, *scope, command.clone()))
@@ -4098,6 +4118,9 @@ impl App {
             })))?;
         }
         if self.pending.is_none() {
+            if from_scene {
+                self.material_open_feedback(true, "后台任务繁忙，请稍后重新点击资料。");
+            }
             if let (Some(editor), Some((kind, scope, command))) =
                 (&mut self.material_editor, original_batch)
             {
@@ -4257,6 +4280,7 @@ impl App {
         launch: material_flow::PreparedLaunch,
     ) -> std::result::Result<(), String> {
         use fc_windows::materials::shell::*;
+        let from_scene = launch.from_scene;
         let Some(control) = &self.control else {
             return Ok(());
         };
@@ -4267,7 +4291,7 @@ impl App {
             gate.lease_for_authorized_scope(MATERIAL_OPEN_SCOPE, launch.guard.expires_at)
         else {
             self.cleanup_paths.push_back(copy_path);
-            self.status = "打开权限已失效，请重新选择。".into();
+            self.material_open_feedback(from_scene, "打开权限已失效，请重新选择。");
             return Ok(());
         };
         let guard = launch.guard;
@@ -4284,35 +4308,60 @@ impl App {
             },
             recheck: Arc::new(move || guard.is_valid()),
         };
-        self.status = match self.shell.submit(request) {
+        match self.shell.submit(request) {
             Ok(()) => {
-                self.launch_paths.insert(request_id, copy_path);
-                "正在请求系统打开资料。".into()
+                self.launch_paths.insert(
+                    request_id,
+                    PendingLaunch {
+                        copy_path,
+                        from_scene,
+                    },
+                );
+                self.status = "正在请求系统打开资料。".into();
             }
             Err(_) => {
                 self.cleanup_paths.push_back(copy_path);
-                "打开队列繁忙，请稍后重试。".into()
+                self.material_open_feedback(from_scene, "打开队列繁忙，请稍后重试。");
             }
-        };
+        }
         Ok(())
     }
+    fn material_open_feedback(&mut self, from_scene: bool, message: &'static str) {
+        self.status = message.into();
+        if from_scene {
+            self.public_material_notice = Some(message);
+        }
+    }
     fn poll_shell(&mut self) {
-        use fc_windows::materials::shell::LaunchOutcome;
         for result in self.shell.take_results() {
-            if let Some(path) = self.launch_paths.remove(&result.request_id) {
-                if result.outcome != LaunchOutcome::Requested {
-                    self.cleanup_paths.push_back(path);
-                }
+            self.complete_material_launch(result);
+        }
+    }
+    fn complete_material_launch(&mut self, result: fc_windows::materials::shell::LaunchResult) {
+        use fc_windows::materials::shell::LaunchOutcome;
+        let mut from_scene = false;
+        if let Some(launch) = self.launch_paths.remove(&result.request_id) {
+            from_scene = launch.from_scene;
+            if result.outcome != LaunchOutcome::Requested {
+                self.cleanup_paths.push_back(launch.copy_path);
             }
-            self.status = match result.outcome {
-                LaunchOutcome::Requested => "已请求系统打开资料副本。".into(),
-                LaunchOutcome::AssociationMissing => "本机尚未设置此类文件的打开程序。".into(),
-                LaunchOutcome::Canceled => "打开已取消，或资料/会话/桌面状态已改变。".into(),
-                LaunchOutcome::Failed(_) => "系统未能打开资料，请检查关联程序后重试。".into(),
-            };
-            if self.screen == Screen::Materials {
-                let _ = self.render();
-            }
+        }
+        let message = match result.outcome {
+            LaunchOutcome::Requested => "已请求系统打开资料副本。",
+            LaunchOutcome::AssociationMissing => "本机尚未设置此类文件的打开程序。",
+            LaunchOutcome::Canceled => "打开已取消，或资料/会话/桌面状态已改变。",
+            LaunchOutcome::Failed(_) => "系统未能打开资料，请检查关联程序后重试。",
+        };
+        self.material_open_feedback(
+            from_scene
+                && matches!(
+                    result.outcome,
+                    LaunchOutcome::AssociationMissing | LaunchOutcome::Failed(_)
+                ),
+            message,
+        );
+        if self.screen == Screen::Materials {
+            let _ = self.render();
         }
     }
     fn has_unsaved_changes(&self) -> bool {
@@ -4840,6 +4889,9 @@ impl App {
             self.native_readback_pending = false;
             let completed_pending = self.pending.take();
             let public_lesson = completed_pending.as_ref().is_some_and(|p| p.public_lesson);
+            let desktop_material_open = completed_pending
+                .as_ref()
+                .is_some_and(|p| p.desktop_material_open);
             let generation = completed_pending.map_or(self.generation, |p| p.generation);
             if let Some(https) = self.https_pending.take() {
                 return self.https_completed(https, generation, outcome);
@@ -5265,6 +5317,10 @@ impl App {
                     | Outcome::MaterialCleaned,
                 ) => return Err("后台结果类型不匹配".into()),
                 Err(error) => {
+                    if desktop_material_open {
+                        self.public_material_notice =
+                            Some("未能准备资料副本，请稍后重新点击；详细结果可在工作台查看。");
+                    }
                     if self.public_lesson_flow.is_some() {
                         let fatal_error = fatal(&error);
                         self.close_public_lesson();
@@ -5475,7 +5531,7 @@ fn run_at_inner(
     } else {
         None
     };
-    let result = host.run(|hints| {
+    let result = host.run_with_host(|hints, host| {
         if app.pool.is_faulted() && !app.terminate_required {
             if let Some(control) = &app.control {
                 control.fault();
@@ -5570,17 +5626,16 @@ fn run_at_inner(
                     ..
                 } = event
                 {
-                    if app.pending.is_none()
-                        && app
-                            .submit_material(material_flow::Job::Open(
-                                material_flow::OpenRequest::Scene {
-                                    source,
-                                    generation,
-                                    id: material_id,
-                                    version: resource_version,
-                                },
-                            ))
-                            .is_err()
+                    if app
+                        .submit_material(material_flow::Job::Open(
+                            material_flow::OpenRequest::Scene {
+                                source,
+                                generation,
+                                id: material_id,
+                                version: resource_version,
+                            },
+                        ))
+                        .is_err()
                     {
                         stop.fault();
                         return Ok(());
@@ -5588,6 +5643,11 @@ fn run_at_inner(
                 }
             }
             app.poll_shell();
+            if let Some(message) = app.public_material_notice.take() {
+                // System notification settings may suppress the balloon; the
+                // same result remains available in the workbench status.
+                let _ = host.show_public_notice(message);
+            }
         }
         if let Some(ticket) = &mut office {
             match ticket.try_result() {
@@ -5743,6 +5803,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         screen: Screen::Starting,
         status: String::new(),
         desktop_notice: String::new(),
+        public_material_notice: None,
         pending: None,
         generation: 0,
         key: None,
@@ -6819,6 +6880,57 @@ fn schedule_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(),
 mod tests {
     use super::*;
     pub(super) static SERIAL: Mutex<()> = Mutex::new(());
+    #[test]
+    fn material_failure_feedback_uses_original_origin_after_workbench_navigation() {
+        use fc_windows::materials::shell::{LaunchOutcome, LaunchResult};
+        let _serial = SERIAL.lock().unwrap();
+        let mut app = create_app(Arc::new(CurrentClock::new()), true).unwrap();
+        let desktop_copy = PathBuf::from("synthetic-desktop-copy.pdf");
+        let management_copy = PathBuf::from("synthetic-management-copy.pdf");
+        app.launch_paths.insert(
+            1,
+            PendingLaunch {
+                copy_path: desktop_copy.clone(),
+                from_scene: true,
+            },
+        );
+        app.launch_paths.insert(
+            2,
+            PendingLaunch {
+                copy_path: management_copy.clone(),
+                from_scene: false,
+            },
+        );
+        // The user has opened a different settings page since the public click.
+        app.screen = Screen::Home;
+        app.complete_material_launch(LaunchResult {
+            request_id: 1,
+            outcome: LaunchOutcome::AssociationMissing,
+        });
+        assert_eq!(
+            app.public_material_notice.take(),
+            Some("本机尚未设置此类文件的打开程序。")
+        );
+        assert_eq!(app.status, "本机尚未设置此类文件的打开程序。");
+        // Conversely, closing/locking management must not turn its old request
+        // into public desktop feedback.
+        app.screen = Screen::Login;
+        app.complete_material_launch(LaunchResult {
+            request_id: 2,
+            outcome: LaunchOutcome::Failed(-1),
+        });
+        assert!(app.public_material_notice.is_none());
+        assert_eq!(app.status, "系统未能打开资料，请检查关联程序后重试。");
+        assert!(app.launch_paths.is_empty());
+        assert_eq!(
+            app.cleanup_paths,
+            VecDeque::from([desktop_copy, management_copy])
+        );
+        assert!(!app.window.is_visible());
+        assert!(app.lease.is_none());
+        app.cleanup_paths.clear(); // Synthetic path values never denote files.
+        drain(app);
+    }
     pub(super) struct Scratch(PathBuf);
     impl Drop for Scratch {
         fn drop(&mut self) {
