@@ -681,6 +681,46 @@ impl<S: Send + 'static> BusinessRepository<S> {
             events,
         })
     }
+    /// Read only the original default-teacher receipt. Absence never executes
+    /// the request, and the caller's current identity is not the saved result.
+    pub fn default_teacher_outcome(
+        &self,
+        request: IdentityRequest,
+        actor: &ActorContext,
+    ) -> Result<Option<(Revision, DefaultTeacher)>, IdentityRepositoryError> {
+        if !matches!(request.command, IdentityCommand::SetDefaultTeacher(_)) {
+            return Err(IdentityRepositoryError::Domain(IdentityError::InvalidState));
+        }
+        let bytes = self
+            .handle
+            .try_transaction(DefaultTeacherOutcomeTask {
+                request,
+                actor: actor.clone(),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+            })
+            .map_err(identity_error)?
+            .wait()
+            .map_err(identity_error)?;
+        let value = codec::value(&bytes).map_err(identity_error)?;
+        if value.is_null() {
+            return Ok(None);
+        }
+        codec::object_fields(&value, &["revision", "class", "subject", "teacher"])
+            .map_err(identity_error)?;
+        let number = |name| codec::number(&value, name).map_err(identity_error);
+        Ok(Some((
+            Revision::new(number("revision")?),
+            DefaultTeacher {
+                class_id: ClassId::new(number("class")?)
+                    .map_err(|_| IdentityRepositoryError::Unavailable)?,
+                subject_id: SubjectId::new(number("subject")?)
+                    .map_err(|_| IdentityRepositoryError::Unavailable)?,
+                teacher_id: PrincipalId::new(number("teacher")?)
+                    .map_err(|_| IdentityRepositoryError::Unavailable)?,
+            },
+        )))
+    }
     /// Trusted credential worker only; records are never authority/UI snapshots.
     pub fn credential_record(
         &self,
@@ -746,6 +786,79 @@ impl<S> TransactionTask<S> for ReadCredential {
             precommit: None,
             outcome: codec::bytes(&json!({"version":version,"record":r.value}))?,
             commit: None,
+        })
+    }
+}
+struct DefaultTeacherOutcomeTask {
+    request: IdentityRequest,
+    actor: ActorContext,
+    clock: Arc<dyn Clock + Send + Sync>,
+    session: SessionGuard,
+}
+impl<S> TransactionTask<S> for DefaultTeacherOutcomeTask {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Identity,
+            self.request.command_id,
+        ))
+    }
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+    }
+    fn evaluate(
+        self: Box<Self>,
+        d: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        let state = load_identity(d)?;
+        let check = || -> Result<(), StorageError> {
+            (self.session)(&state, &self.actor)?;
+            state
+                .authorize_management(&self.actor, self.clock.now())
+                .map_err(StorageError::Identity)
+        };
+        check()?;
+        let IdentityCommand::SetDefaultTeacher(expected) = &self.request.command else {
+            return Err(StorageError::InvalidCommand);
+        };
+        let mut digest = Sha256::new();
+        digest.update(format!("{:?}", self.request));
+        digest.update(codec::bytes(&codec::actor(&self.actor))?);
+        let fingerprint = digest.finalize().to_vec();
+        let value = match d.get(&format!(
+            "business/receipt/identity/{}",
+            self.request.command_id.get()
+        ))? {
+            None => Value::Null,
+            Some(receipt) => {
+                let value = codec::value(&receipt.value)?;
+                codec::object_fields(&value, &["fingerprint", "outcome"])?;
+                codec::object_fields(&value["outcome"], &["state", "events"])?;
+                let original: Vec<u8> = serde_json::from_value(value["fingerprint"].clone())
+                    .map_err(|_| StorageError::Database)?;
+                if original.len() != 32 || original != fingerprint {
+                    return Err(StorageError::CommandIdReused);
+                }
+                let historical = codec::read_identity(&value["outcome"]["state"])?;
+                let events = decode_events(&value["outcome"]["events"])?;
+                if historical.revision
+                    != self
+                        .request
+                        .expected_revision
+                        .next()
+                        .map_err(|_| StorageError::Database)?
+                    || events != [IdentityEvent::CatalogChanged]
+                    || !historical.default_teachers.contains(expected)
+                {
+                    return Err(StorageError::Database);
+                }
+                json!({"revision":historical.revision.get(),"class":expected.class_id.get(),"subject":expected.subject_id.get(),"teacher":expected.teacher_id.get()})
+            }
+        };
+        check()?;
+        Ok(TransactionDecision {
+            outcome: codec::bytes(&value)?,
+            commit: None,
+            precommit: None,
         })
     }
 }

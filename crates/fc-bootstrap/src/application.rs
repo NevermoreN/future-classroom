@@ -518,6 +518,11 @@ enum Outcome {
         record: Option<ContentRecord>,
     },
     AccountsLoaded(IdentityState),
+    DefaultTeacherLoaded {
+        current: IdentityState,
+        history: Box<NativeHistory>,
+        saved: bool,
+    },
     AccountSaved {
         state: IdentityState,
         self_changed: bool,
@@ -584,6 +589,10 @@ struct Request {
 /// view. It is metadata only; only the backend can hash/admit this typed intent.
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum NativeIntent {
+    DefaultTeacher {
+        expected: Revision,
+        default: fc_domain::identity::DefaultTeacher,
+    },
     VoicePolicy(voice_controller::PolicyIntent),
     CalendarPolicy {
         year: i32,
@@ -696,6 +705,8 @@ struct NativeHistory {
     resolution: NativeResolution,
 }
 enum NativeResolution {
+    DefaultTeacherRejected(IdentityError),
+    DefaultTeacher(Option<(Revision, fc_domain::identity::DefaultTeacher)>),
     Outcome(fc_ports::command_window::TypedCommandOutcome),
     Expired,
 }
@@ -719,6 +730,24 @@ impl NativeHistory {
         use fc_ports::command_window::{TypedCommandOutcome as O, TypedCommandResult as R};
         match (&self.resolution, self.command.intent()) {
             (
+                NativeResolution::DefaultTeacherRejected(
+                    IdentityError::RevisionConflict
+                    | IdentityError::InvalidScope
+                    | IdentityError::Capacity,
+                ),
+                Some(NativeIntent::DefaultTeacher { .. }),
+            ) => true,
+            (NativeResolution::DefaultTeacherRejected(_), _) => false,
+            (
+                NativeResolution::DefaultTeacher(saved),
+                Some(NativeIntent::DefaultTeacher { expected, default }),
+            ) => saved.is_none_or(|(revision, result)| {
+                expected.next().ok() == Some(revision) && result == *default
+            }),
+            (NativeResolution::DefaultTeacher(_), _) => false,
+            (NativeResolution::Expired, Some(NativeIntent::DefaultTeacher { .. })) => true,
+            (_, Some(NativeIntent::DefaultTeacher { .. })) => false,
+            (
                 NativeResolution::Outcome(O::Completed(R::VoicePolicy(_))),
                 Some(NativeIntent::VoicePolicy(_)),
             ) => true,
@@ -734,6 +763,48 @@ impl NativeHistory {
             (_, Some(_)) => true,
             (_, None) => false,
         }
+    }
+    fn default_teacher_rejection(
+        command: NativeCommand,
+        issued: fc_ports::command_window::IssuedCommand,
+        error: IdentityError,
+    ) -> Result<Self> {
+        let history = Self {
+            command,
+            issued,
+            resolution: NativeResolution::DefaultTeacherRejected(error),
+        };
+        if !history.valid_result() {
+            return Err(Failure::Stopped);
+        }
+        Ok(history)
+    }
+    fn default_teacher(
+        command: NativeCommand,
+        issued: fc_ports::command_window::IssuedCommand,
+        result: fc_bootstrap::backend::Result<
+            Option<(Revision, fc_domain::identity::DefaultTeacher)>,
+        >,
+    ) -> Result<Self> {
+        let resolution = match result {
+            Ok(value) => NativeResolution::DefaultTeacher(value),
+            Err(error)
+                if error.command_window_error()
+                    == Some(fc_ports::command_window::CommandWindowError::Expired) =>
+            {
+                NativeResolution::Expired
+            }
+            Err(error) => return Err(error.into()),
+        };
+        let history = Self {
+            command,
+            issued,
+            resolution,
+        };
+        if !history.valid_result() {
+            return Err(Failure::Stopped);
+        }
+        Ok(history)
     }
     fn from_query(
         command: NativeCommand,
@@ -759,10 +830,18 @@ impl NativeHistory {
         matches!(
             self.resolution,
             NativeResolution::Outcome(fc_ports::command_window::TypedCommandOutcome::Pending)
+                | NativeResolution::DefaultTeacher(None)
         )
     }
     fn message(&self) -> &'static str {
         match &self.resolution {
+            NativeResolution::DefaultTeacherRejected(_) => "本次默认老师保存已被明确拒绝，未修改目录。草稿和原修订已保留；请重新加载后核对，不会自动重发。",
+            NativeResolution::DefaultTeacher(None) => {
+                "原默认老师操作仍未查到持久结果；保留原票据，不会重新保存。当前目录另列。"
+            }
+            NativeResolution::DefaultTeacher(Some(_)) => {
+                "已查到原默认老师操作的持久结果；当前目录另列，不重放原操作。"
+            }
             NativeResolution::Expired => {
                 "原操作的查询窗口已过期，未重新执行。请核对当前状态后，再明确发起新的操作。"
             }
@@ -788,6 +867,7 @@ impl Outcome {
         match self {
             Self::VoiceLoaded(_, loaded) => loaded.history.as_ref(),
             Self::Calendar(loaded) => loaded.history.as_ref(),
+            Self::DefaultTeacherLoaded { history, .. } => Some(history),
             _ => None,
         }
     }
@@ -998,6 +1078,10 @@ impl Task for Work {
                             },
                         ..
                     } => (display_name.capacity(), scopes.capacity()),
+                    accounts_editor::Command::Update {
+                        command: IdentityCommand::SetDefaultTeacher(_),
+                        ..
+                    } => (0, 0),
                     _ => return None,
                 };
                 strings
@@ -1084,6 +1168,16 @@ impl Work {
     fn native_intent(&self) -> Option<NativeIntent> {
         match self {
             Self::Tracked(work, _) => work.native_intent(),
+            Self::SaveAccount(_, _, operation) => match operation.as_ref() {
+                accounts_editor::Command::Update {
+                    expected,
+                    command: IdentityCommand::SetDefaultTeacher(default),
+                } => Some(NativeIntent::DefaultTeacher {
+                    expected: *expected,
+                    default: *default,
+                }),
+                _ => None,
+            },
             Self::Voice(_, _, operation) => {
                 operation.policy_intent().map(NativeIntent::VoicePolicy)
             }
@@ -1381,11 +1475,30 @@ impl Work {
                 Ok(Outcome::Closed)
             }
             Self::LoadAccounts(backend, lease) => {
-                let state = backend
-                    .lock()
-                    .map_err(|_| Failure::Stopped)?
-                    .management_identity(lease)?;
-                Ok(Outcome::AccountsLoaded(state))
+                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
+                if let Some(NativeIntent::DefaultTeacher { expected, default }) = command.intent() {
+                    let issued = command.original()?;
+                    let result = command.query(&mut backend, context, |backend| {
+                        Ok(backend.default_teacher_outcome(lease, *expected, *default)?)
+                    });
+                    let history = match result {
+                        Ok(value) => {
+                            NativeHistory::default_teacher(command.clone(), issued, Ok(value))?
+                        }
+                        Err(Failure::Backend(error)) => {
+                            NativeHistory::default_teacher(command.clone(), issued, Err(error))?
+                        }
+                        Err(error) => return Err(error),
+                    };
+                    let current = backend.management_identity(lease)?;
+                    Ok(Outcome::DefaultTeacherLoaded {
+                        current,
+                        history: Box::new(history),
+                        saved: false,
+                    })
+                } else {
+                    Ok(Outcome::AccountsLoaded(backend.management_identity(lease)?))
+                }
             }
             Self::SaveAccount(backend, lease, operation) => {
                 let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
@@ -1436,6 +1549,49 @@ impl Work {
                             Ok(Outcome::AccountSaved {
                                 state,
                                 self_changed,
+                            })
+                        }
+                        accounts_editor::Command::Update {
+                            expected,
+                            command: IdentityCommand::SetDefaultTeacher(default),
+                        } => {
+                            let state = match backend.identity_at(
+                                lease,
+                                expected,
+                                IdentityCommand::SetDefaultTeacher(default),
+                            ) {
+                                Ok(state) => state,
+                                Err(BackendError::Identity(
+                                    fc_ports::IdentityRepositoryError::Domain(
+                                        error @ (IdentityError::RevisionConflict
+                                        | IdentityError::InvalidScope
+                                        | IdentityError::Capacity),
+                                    ),
+                                )) => {
+                                    // These exact errors are returned before COMMIT. Storage
+                                    // publication/unknown/closed errors never enter this branch.
+                                    let history = NativeHistory::default_teacher_rejection(
+                                        command.clone(),
+                                        command.original()?,
+                                        error,
+                                    )?;
+                                    return Ok(Outcome::DefaultTeacherLoaded {
+                                        current: backend.management_identity(lease)?,
+                                        history: Box::new(history),
+                                        saved: false,
+                                    });
+                                }
+                                Err(error) => return Err(error.into()),
+                            };
+                            let history = NativeHistory::default_teacher(
+                                command.clone(),
+                                command.original()?,
+                                Ok(Some((state.revision, default))),
+                            )?;
+                            Ok(Outcome::DefaultTeacherLoaded {
+                                current: state,
+                                history: Box::new(history),
+                                saved: true,
                             })
                         }
                         _ => Err(invalid("账号操作在当前页面不可用。")),
@@ -2040,6 +2196,18 @@ impl App {
         let self_revokes = matches!(&work,Work::Request(r) if r.action==EXIT||r.action==SAVE&&matches!(r.screen,Screen::Password|Screen::Rotate))
             || matches!(&work, Work::SaveAccount(_, lease, operation) if matches!(operation.as_ref(), accounts_editor::Command::Update { command: IdentityCommand::UpdateAccount { id, .. }, .. } if *id == lease.principal_id()));
         let command = match &work {
+            Work::LoadAccounts(..)
+                if readback
+                    && self.native_unknown
+                    && self.native_command.as_ref().is_some_and(|original| {
+                        matches!(original.intent(), Some(NativeIntent::DefaultTeacher { .. }))
+                    }) =>
+            {
+                self.native_command
+                    .as_ref()
+                    .ok_or("原默认老师票据不可用。")?
+                    .clone()
+            }
             Work::Material(job) => match &job.job {
                 material_flow::Job::ImportBatch { command, .. }
                 | material_flow::Job::DeleteBatch { command, .. }
@@ -4215,6 +4383,45 @@ impl App {
                         };
                     }
                 }
+                Ok(Outcome::DefaultTeacherLoaded {
+                    current,
+                    history,
+                    saved,
+                }) => {
+                    let original = match &history.resolution {
+                        NativeResolution::DefaultTeacher(Some((_, default))) => format!(
+                            "原操作结果：班级#{}／科目#{}的默认老师为#{}。",
+                            default.class_id.get(),
+                            default.subject_id.get(),
+                            default.teacher_id.get()
+                        ),
+                        _ => history.message().into(),
+                    };
+                    let pending = history.pending();
+                    let rejected = matches!(
+                        history.resolution,
+                        NativeResolution::DefaultTeacherRejected(_)
+                    );
+                    self.state = Arc::new(current);
+                    if let Some(owner) = self.current_global_owner() {
+                        if rejected {
+                            if let Some(editor) = &mut self.accounts {
+                                editor.default_rejected();
+                            }
+                        } else if saved
+                            || !pending
+                            || self
+                                .accounts
+                                .as_ref()
+                                .is_none_or(|editor| !editor.has_unsaved_changes())
+                        {
+                            self.accounts = Some(accounts_editor::Editor::new(&self.state, owner)?);
+                        }
+                        self.screen = Screen::Accounts;
+                        self.status =
+                            format!("{original} 当前目录已单独读取；历史结果不会覆盖当前设置。");
+                    }
+                }
                 Ok(Outcome::AccountsLoaded(state)) => {
                     self.state = Arc::new(state);
                     if let Some(owner) = self.current_global_owner() {
@@ -6009,7 +6216,7 @@ mod tests {
                 history.resolution,
                 NativeResolution::Outcome(
                     fc_ports::command_window::TypedCommandOutcome::Completed(_)
-                )
+                ) | NativeResolution::DefaultTeacher(Some(_))
             ));
         }
         // Historical outputs contain metadata only; physical owners
@@ -6669,6 +6876,303 @@ mod tests {
         assert!(app.screen == Screen::Home);
         assert!(app.display.as_ref().unwrap().has_unsaved_changes());
         drain(app);
+    }
+
+    #[test]
+    fn default_teacher_native_confirm_original_receipt_after_reply_loss_and_later_change() {
+        use fc_domain::identity::DefaultTeacher;
+        use fc_ports::command_window::CommandFamily;
+        let _serial = SERIAL.lock().unwrap();
+        let (scratch, mut app) = ready_management();
+        let lease = app.lease.unwrap();
+        let backend = app.backend.as_ref().unwrap().clone();
+        let class = ClassId::new(1).unwrap();
+        let subject = SubjectId::new(1).unwrap();
+        {
+            let mut backend = backend.lock().unwrap();
+            for operation in [
+                IdentityCommand::CreateClass {
+                    id: class,
+                    name: "合成默认老师班级".into(),
+                },
+                IdentityCommand::PutSubject {
+                    id: subject,
+                    name: "合成默认老师科目".into(),
+                    enabled: true,
+                    color: Rgb {
+                        red: 20,
+                        green: 30,
+                        blue: 40,
+                    },
+                    expected_revision: None,
+                },
+            ] {
+                let expected = backend.state().unwrap().revision;
+                let issued = backend
+                    .issue_native_command(
+                        CommandFamily::Identity,
+                        Some(lease),
+                        SessionPurpose::Manage,
+                    )
+                    .unwrap();
+                backend
+                    .begin_command_scope(issued)
+                    .unwrap()
+                    .identity_at(lease, expected, operation)
+                    .unwrap();
+            }
+            for id in [2, 3] {
+                let expected = backend.state().unwrap().revision;
+                let issued = backend
+                    .issue_native_command(
+                        CommandFamily::Identity,
+                        Some(lease),
+                        SessionPurpose::Manage,
+                    )
+                    .unwrap();
+                drop(
+                    backend
+                        .begin_command_scope(issued)
+                        .unwrap()
+                        .create_account_at(
+                            lease,
+                            expected,
+                            NewAccount {
+                                id: PrincipalId::new(id).unwrap(),
+                                login_name: format!("default-teacher-{id}"),
+                                display_name: "同名合成教师".into(),
+                                role: Role::TeacherAdmin,
+                                scopes: vec![AssignmentScope {
+                                    class_id: class,
+                                    subject_id: subject,
+                                }],
+                            },
+                            Password::new("Synthetic default teacher password 2026!".into())
+                                .unwrap(),
+                        )
+                        .unwrap(),
+                );
+            }
+        }
+        app.open_accounts().unwrap();
+        wait_for(&mut app, |app| app.pending.is_none());
+        let before = backend.lock().unwrap().state().unwrap().revision;
+        let deadline = Instant::now() + Duration::from_secs(60);
+        voice_management_probe::submit(&mut app, accounts_editor::DEFAULTS, &[], deadline).unwrap();
+        voice_management_probe::submit(
+            &mut app,
+            accounts_editor::DEFAULT_SELECT,
+            &[
+                (accounts_editor::CLASS, "1"),
+                (accounts_editor::SUBJECT, "1"),
+            ],
+            deadline,
+        )
+        .unwrap();
+        voice_management_probe::submit(
+            &mut app,
+            accounts_editor::REVIEW,
+            &[(accounts_editor::DEFAULT_TEACHER, "2")],
+            deadline,
+        )
+        .unwrap();
+        assert_eq!(
+            backend.lock().unwrap().state().unwrap().revision,
+            before,
+            "scope and review cannot write"
+        );
+        app.window
+            .probe_submit(accounts_editor::CONFIRM, FormData::new())
+            .unwrap();
+        for event in app.window.take_events().unwrap() {
+            app.event(event).unwrap();
+        }
+        lose_worker_reply(&mut app);
+        let original = app.native_command.as_ref().unwrap().clone();
+        let original_pair = original.snapshot().unwrap();
+        let original_default = DefaultTeacher {
+            class_id: class,
+            subject_id: subject,
+            teacher_id: PrincipalId::new(2).unwrap(),
+        };
+        assert_eq!(
+            backend.lock().unwrap().state().unwrap().default_teachers,
+            [original_default]
+        );
+        assert_eq!(
+            backend.lock().unwrap().state().unwrap().revision,
+            before.next().unwrap()
+        );
+        let later = DefaultTeacher {
+            teacher_id: PrincipalId::new(3).unwrap(),
+            ..original_default
+        };
+        {
+            let mut backend = backend.lock().unwrap();
+            let expected = backend.state().unwrap().revision;
+            let issued = backend
+                .issue_native_command(CommandFamily::Identity, Some(lease), SessionPurpose::Manage)
+                .unwrap();
+            backend
+                .begin_command_scope(issued)
+                .unwrap()
+                .identity_at(lease, expected, IdentityCommand::SetDefaultTeacher(later))
+                .unwrap();
+        }
+        let after_later = backend.lock().unwrap().state().unwrap().revision;
+        voice_management_probe::submit(&mut app, accounts_editor::RELOAD, &[], deadline).unwrap();
+        assert!(
+            app.native_unknown,
+            "leaving the draft is not original result confirmation"
+        );
+        voice_management_probe::submit(&mut app, accounts_editor::DISCARD, &[], deadline).unwrap();
+        assert!(!app.native_unknown);
+        assert!(app.native_command.as_ref() == Some(&original));
+        assert_eq!(
+            app.native_command.as_ref().unwrap().snapshot(),
+            Some(original_pair)
+        );
+        assert_eq!(
+            app.state.default_teachers,
+            [later],
+            "historical state must never replace current authority"
+        );
+        assert!(
+            app.status.contains("默认老师为#2"),
+            "must show original result independently: {}",
+            app.status
+        );
+        assert_eq!(
+            backend.lock().unwrap().state().unwrap().revision,
+            after_later
+        );
+        {
+            let mut backend = backend.lock().unwrap();
+            let mut scoped = backend.begin_command_scope(original_pair).unwrap();
+            assert_eq!(
+                scoped
+                    .default_teacher_outcome(lease, before, original_default)
+                    .unwrap(),
+                Some((before.next().unwrap(), original_default))
+            );
+            assert!(matches!(
+                scoped.default_teacher_outcome(lease, before, later),
+                Err(BackendError::Identity(
+                    fc_ports::IdentityRepositoryError::IdempotencyConflict
+                ))
+            ));
+        }
+        {
+            let mut backend = backend.lock().unwrap();
+            let expected = backend.state().unwrap().revision;
+            let issued = backend
+                .issue_native_command(CommandFamily::Identity, Some(lease), SessionPurpose::Manage)
+                .unwrap();
+            assert_eq!(
+                backend
+                    .begin_command_scope(issued)
+                    .unwrap()
+                    .default_teacher_outcome(lease, expected, original_default)
+                    .unwrap(),
+                None
+            );
+            assert_eq!(
+                backend.state().unwrap().revision,
+                expected,
+                "missing receipt cannot execute the requested write"
+            );
+            assert_eq!(backend.state().unwrap().default_teachers, [later]);
+        }
+
+        // An actual concurrent identity write makes this captured UI CAS stale.
+        // Its definite rejection preserves the draft without claiming UNKNOWN.
+        voice_management_probe::submit(&mut app, accounts_editor::DEFAULTS, &[], deadline).unwrap();
+        voice_management_probe::submit(
+            &mut app,
+            accounts_editor::DEFAULT_SELECT,
+            &[
+                (accounts_editor::CLASS, "1"),
+                (accounts_editor::SUBJECT, "1"),
+            ],
+            deadline,
+        )
+        .unwrap();
+        voice_management_probe::submit(
+            &mut app,
+            accounts_editor::REVIEW,
+            &[(accounts_editor::DEFAULT_TEACHER, "2")],
+            deadline,
+        )
+        .unwrap();
+        let after_concurrent = {
+            let mut backend = backend.lock().unwrap();
+            let expected = backend.state().unwrap().revision;
+            let issued = backend
+                .issue_native_command(CommandFamily::Identity, Some(lease), SessionPurpose::Manage)
+                .unwrap();
+            let changed = backend
+                .begin_command_scope(issued)
+                .unwrap()
+                .identity_at(
+                    lease,
+                    expected,
+                    IdentityCommand::RenameSchool {
+                        name: "Synthetic concurrent catalog change".into(),
+                    },
+                )
+                .unwrap();
+            changed.revision
+        };
+        voice_management_probe::submit(&mut app, accounts_editor::CONFIRM, &[], deadline).unwrap();
+        assert!(
+            !app.native_unknown,
+            "an actual pre-COMMIT CAS refusal is a known rejection"
+        );
+        assert!(app.accounts.as_ref().unwrap().has_unsaved_changes());
+        assert!(app.status.contains("明确拒绝"));
+        assert_eq!(
+            backend.lock().unwrap().state().unwrap().default_teachers,
+            [later]
+        );
+        assert_eq!(
+            backend.lock().unwrap().state().unwrap().revision,
+            after_concurrent
+        );
+        voice_management_probe::submit(&mut app, accounts_editor::RELOAD, &[], deadline).unwrap();
+        voice_management_probe::submit(&mut app, accounts_editor::DISCARD, &[], deadline).unwrap();
+        assert!(!app.native_unknown);
+        assert_eq!(
+            backend.lock().unwrap().state().unwrap().revision,
+            after_concurrent
+        );
+        drain(app);
+        // Independent normal Open and actual login retain the original receipt;
+        // no historical IdentityState is applied to the new authority.
+        let paths = DataPaths::isolated_test(scratch.0.clone()).unwrap();
+        let mut reopened = create_app(Arc::new(CurrentClock::new()), true).unwrap();
+        reopened.root = scratch.0.clone();
+        reopened.desktop.set_root(scratch.0.clone());
+        reopened
+            .submit(Work::Open(paths, reopened.clock.clone()))
+            .unwrap();
+        wait_for(&mut reopened, |app| app.pending.is_none());
+        voice_management_probe::login(&mut reopened, Instant::now() + Duration::from_secs(60))
+            .unwrap();
+        {
+            let mut backend = reopened.backend.as_ref().unwrap().lock().unwrap();
+            let current = reopened.lease.unwrap();
+            assert_eq!(
+                backend
+                    .begin_command_scope(original_pair)
+                    .unwrap()
+                    .default_teacher_outcome(current, before, original_default)
+                    .unwrap(),
+                Some((before.next().unwrap(), original_default))
+            );
+            assert_eq!(backend.state().unwrap().default_teachers, [later]);
+            assert_eq!(backend.state().unwrap().revision, after_concurrent);
+        }
+        drain(reopened);
     }
     #[test]
     fn account_draft_exit_guard_is_owner_bound_and_native_lock_supersedes_pending_work() {

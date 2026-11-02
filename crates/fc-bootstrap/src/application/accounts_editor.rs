@@ -12,6 +12,7 @@ pub(super) const CLASS: FieldId = FieldId(604);
 pub(super) const SUBJECT: FieldId = FieldId(605);
 pub(super) const PASSWORD: FieldId = FieldId(606);
 pub(super) const CONFIRM_PASSWORD: FieldId = FieldId(607);
+pub(super) const DEFAULT_TEACHER: FieldId = FieldId(608);
 pub(super) const NEW: ActionId = ActionId(600);
 pub(super) const EDIT: ActionId = ActionId(601);
 pub(super) const NEXT: ActionId = ActionId(602);
@@ -29,6 +30,8 @@ pub(super) const DISCARD: ActionId = ActionId(613);
 pub(super) const KEEP: ActionId = ActionId(614);
 pub(super) const CLEAR_SCOPES: ActionId = ActionId(615);
 pub(super) const APPLY_ROLE: ActionId = ActionId(616);
+pub(super) const DEFAULTS: ActionId = ActionId(617);
+pub(super) const DEFAULT_SELECT: ActionId = ActionId(618);
 const PAGE_SIZE: usize = 20;
 
 #[derive(Debug)]
@@ -55,6 +58,9 @@ enum Page {
     Password,
     Discard,
     ClearScopes,
+    DefaultScope,
+    DefaultEdit,
+    DefaultConfirm,
 }
 #[derive(Clone, Copy)]
 enum Destination {
@@ -71,6 +77,13 @@ struct Draft {
     role: Role,
     enabled: bool,
     scopes: Vec<AssignmentScope>,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct DefaultDraft {
+    class_id: ClassId,
+    subject_id: SubjectId,
+    original: Option<PrincipalId>,
+    selected: Option<PrincipalId>,
 }
 pub(super) struct Editor {
     owner: PrincipalId,
@@ -89,6 +102,7 @@ pub(super) struct Editor {
     discard_return: Page,
     destination: Destination,
     submitted: bool,
+    default_draft: Option<DefaultDraft>,
 }
 fn action(id: ActionId, label: &str, enabled: bool) -> Action {
     Action {
@@ -209,12 +223,25 @@ impl Editor {
             discard_return: Page::Edit,
             destination: Destination::List,
             submitted: false,
+            default_draft: None,
         })
+    }
+    pub(super) fn default_rejected(&mut self) {
+        if self.page == Page::DefaultConfirm {
+            self.submitted = false;
+        }
     }
     pub(super) fn owner(&self) -> PrincipalId {
         self.owner
     }
     pub(super) fn has_unsaved_changes(&self) -> bool {
+        if self
+            .default_draft
+            .as_ref()
+            .is_some_and(|draft| draft.selected != draft.original)
+        {
+            return true;
+        }
         match (&self.draft, &self.original) {
             (Some(d), Some(o)) => !same_draft(d, o) || self.pending_role != o.role,
             _ => false,
@@ -285,6 +312,46 @@ impl Editor {
     /// White-list capture. Passwords and confirmation values remain in FormData's
     /// zeroizing storage and are dropped on navigation, lock and suspension.
     fn capture(&mut self, data: &FormData) -> Result<(), String> {
+        if self.page == Page::DefaultScope {
+            if let Some(value) = data.get(CLASS) {
+                self.selected_class = if value.is_empty() {
+                    None
+                } else {
+                    Some(
+                        ClassId::new(value.parse::<u64>().map_err(|_| "请选择有效班级。")?)
+                            .map_err(|_| "请选择有效班级。")?,
+                    )
+                };
+            }
+            if let Some(value) = data.get(SUBJECT) {
+                self.selected_subject = if value.is_empty() {
+                    None
+                } else {
+                    Some(
+                        SubjectId::new(value.parse::<u64>().map_err(|_| "请选择有效科目。")?)
+                            .map_err(|_| "请选择有效科目。")?,
+                    )
+                };
+            }
+            return Ok(());
+        }
+        if self.page == Page::DefaultEdit {
+            if let Some(value) = data.get(DEFAULT_TEACHER) {
+                let selected = if value.is_empty() {
+                    None
+                } else {
+                    Some(
+                        PrincipalId::new(value.parse::<u64>().map_err(|_| "请选择有效任课教师。")?)
+                            .map_err(|_| "请选择有效任课教师。")?,
+                    )
+                };
+                self.default_draft
+                    .as_mut()
+                    .ok_or("请先选择班级和科目。")?
+                    .selected = selected;
+            }
+            return Ok(());
+        }
         if !matches!(self.page, Page::Edit | Page::Scopes) {
             return Ok(());
         }
@@ -390,6 +457,23 @@ impl Editor {
         }
     }
     fn preflight(&self, state: &IdentityState) -> Result<(), String> {
+        self.preflight_command(state, &self.command()?)
+    }
+    fn default_command(&self) -> Result<IdentityCommand, String> {
+        let draft = self.default_draft.as_ref().ok_or("请先选择班级和科目。")?;
+        Ok(IdentityCommand::SetDefaultTeacher(DefaultTeacher {
+            class_id: draft.class_id,
+            subject_id: draft.subject_id,
+            teacher_id: draft
+                .selected
+                .ok_or("此班此科目没有选定的有效任课教师；请先在账号管理配置任教范围。")?,
+        }))
+    }
+    fn preflight_command(
+        &self,
+        state: &IdentityState,
+        command: &IdentityCommand,
+    ) -> Result<(), String> {
         self.fresh(state)?;
         // Preview only: fixed civil instants remove time/transport concerns from
         // this pure rule check. This context never leaves the editor and is never
@@ -406,7 +490,7 @@ impl Editor {
             origin: TrustedOrigin::Local,
         };
         state
-            .transition(&self.command()?, Some(&actor), now)
+            .transition(command, Some(&actor), now)
             .map_err(problem)?;
         Ok(())
     }
@@ -432,6 +516,7 @@ impl Editor {
             Destination::Close | Destination::Reload => {
                 self.draft = None;
                 self.original = None;
+                self.default_draft = None;
                 self.page = Page::List;
                 self.submitted = false;
                 Ok(if matches!(destination, Destination::Close) {
@@ -443,6 +528,7 @@ impl Editor {
             Destination::List => {
                 self.draft = None;
                 self.original = None;
+                self.default_draft = None;
                 self.page = Page::List;
                 Ok(Command::Stay)
             }
@@ -510,6 +596,61 @@ impl Editor {
             return self.depart(Destination::Reload, state);
         }
         match (self.page, action) {
+            (Page::List, DEFAULTS) => {
+                self.fresh(state)?;
+                self.default_draft = None;
+                self.selected_class = state.classes.iter().find(|c| c.enabled).map(|c| c.id);
+                self.selected_subject = state.subjects.iter().find(|s| s.enabled).map(|s| s.id);
+                self.page = Page::DefaultScope;
+                self.submitted = false;
+            }
+            (Page::DefaultScope, DEFAULT_SELECT) => {
+                self.fresh(state)?;
+                let class_id = self.selected_class.ok_or("请选择已启用班级。")?;
+                let subject_id = self.selected_subject.ok_or("请选择已启用科目。")?;
+                if !state.classes.iter().any(|c| c.id == class_id && c.enabled)
+                    || !state
+                        .subjects
+                        .iter()
+                        .any(|s| s.id == subject_id && s.enabled)
+                {
+                    return Err("默认老师只能配置到已启用的班级和科目。".into());
+                }
+                let original = state
+                    .default_teachers
+                    .iter()
+                    .find(|d| d.class_id == class_id && d.subject_id == subject_id)
+                    .map(|d| d.teacher_id);
+                self.default_draft = Some(DefaultDraft {
+                    class_id,
+                    subject_id,
+                    original,
+                    selected: original,
+                });
+                self.page = Page::DefaultEdit;
+            }
+            (Page::DefaultScope, CANCEL) | (Page::DefaultEdit, CANCEL) => {
+                return self.depart(Destination::List, state)
+            }
+            (Page::DefaultEdit, REVIEW) => {
+                let command = self.default_command()?;
+                self.preflight_command(state, &command)?;
+                if !self.has_unsaved_changes() {
+                    return Err("默认老师没有变化，无需保存。".into());
+                }
+                self.page = Page::DefaultConfirm;
+                self.submitted = false;
+            }
+            (Page::DefaultConfirm, RETURN) if !self.submitted => self.page = Page::DefaultEdit,
+            (Page::DefaultConfirm, CONFIRM) if !self.submitted => {
+                let command = self.default_command()?;
+                self.preflight_command(state, &command)?;
+                self.submitted = true;
+                return Ok(Command::Update {
+                    expected: self.expected,
+                    command,
+                });
+            }
             (Page::List, NEW) => {
                 self.begin(state, None)?;
             }
@@ -737,8 +878,26 @@ impl Editor {
                 action(EDIT, "编辑选中账号", self.selected_account.is_some()),
                 action(PREVIOUS, "上一页", self.account_page > 0),
                 action(NEXT, "下一页", start + PAGE_SIZE < self.accounts.len()),
+                action(DEFAULTS, "班级／科目默认老师", true),
                 action(RELOAD, "重新加载", true),
                 action(CLOSE, "返回", true),
+            ];
+            return view;
+        }
+        if matches!(
+            self.page,
+            Page::DefaultScope | Page::DefaultEdit | Page::DefaultConfirm
+        ) {
+            return self.default_view(state, view);
+        }
+        if self.page == Page::Discard && self.default_draft.is_some() {
+            view.title = "默认老师草稿".into();
+            view.description = if self.submitted {
+                "本次已经提交。离开只丢弃本页选择，不撤销已提交操作，也不证明它未保存；原票据仍由工作台保留，重新加载时核对原操作结果。"
+            } else { "默认老师选择尚未保存。确认丢弃后返回；保留则继续当前选择。" }.into();
+            view.actions = vec![
+                action(DISCARD, "确认离开此草稿", true),
+                action(KEEP, "保留并继续", true),
             ];
             return view;
         }
@@ -1002,7 +1161,145 @@ impl Editor {
                     action(KEEP, "保留并继续编辑", true),
                 ];
             }
-            Page::List => {}
+            Page::List | Page::DefaultScope | Page::DefaultEdit | Page::DefaultConfirm => {}
+        }
+        view
+    }
+    fn default_view(&self, state: &IdentityState, mut view: View) -> View {
+        view.title = "班级／科目默认老师".into();
+        if self.page == Page::DefaultScope {
+            let classes: Vec<_> = state
+                .classes
+                .iter()
+                .filter(|c| c.enabled)
+                .map(|c| Choice {
+                    value: c.id.get().to_string(),
+                    label: caption(&c.name, c.id.get(), true),
+                })
+                .collect();
+            let subjects: Vec<_> = state
+                .subjects
+                .iter()
+                .filter(|s| s.enabled)
+                .map(|s| Choice {
+                    value: s.id.get().to_string(),
+                    label: caption(&s.name, s.id.get(), true),
+                })
+                .collect();
+            view.description = "先选择班级和科目，再核对当前默认老师。此设置只用于课表明确选择“默认老师”的课程；显式老师不变，临时换课不改此设置。".into();
+            let class_value = self
+                .selected_class
+                .map(|id| id.get().to_string())
+                .filter(|id| classes.iter().any(|c| c.value == *id))
+                .unwrap_or_default();
+            let subject_value = self
+                .selected_subject
+                .map(|id| id.get().to_string())
+                .filter(|id| subjects.iter().any(|s| s.value == *id))
+                .unwrap_or_default();
+            view.fields = vec![
+                choice(CLASS, "班级", class_value, classes),
+                choice(SUBJECT, "科目", subject_value, subjects),
+            ];
+            view.actions = vec![
+                action(
+                    DEFAULT_SELECT,
+                    "查看当前默认老师",
+                    self.selected_class.is_some() && self.selected_subject.is_some(),
+                ),
+                action(CANCEL, "返回账号列表", true),
+            ];
+            return view;
+        }
+        let Some(draft) = &self.default_draft else {
+            view.status = "请重新加载后选择班级和科目。".into();
+            return view;
+        };
+        let class = state
+            .classes
+            .iter()
+            .find(|c| c.id == draft.class_id)
+            .map_or_else(
+                || format!("#{}", draft.class_id.get()),
+                |c| caption(&c.name, c.id.get(), c.enabled),
+            );
+        let subject = state
+            .subjects
+            .iter()
+            .find(|s| s.id == draft.subject_id)
+            .map_or_else(
+                || format!("#{}", draft.subject_id.get()),
+                |s| caption(&s.name, s.id.get(), s.enabled),
+            );
+        let teacher = |id: Option<PrincipalId>| {
+            id.map_or_else(
+                || "未设置默认老师".into(),
+                |id| {
+                    state.account(id).map_or_else(
+                        |_| format!("#{}, 当前不可用", id.get()),
+                        |a| {
+                            format!(
+                                "{}（{}）",
+                                caption(&a.display_name, id.get(), a.principal.enabled),
+                                a.login_name
+                            )
+                        },
+                    )
+                },
+            )
+        };
+        view.description = format!(
+            "班级：{class}\n科目：{subject}\n进入本页时的默认老师：{}",
+            teacher(draft.original)
+        );
+        if self.page == Page::DefaultEdit {
+            let candidates: Vec<_> = state
+                .accounts
+                .iter()
+                .filter(|a| state.is_teacher(a.principal.id, draft.class_id, draft.subject_id))
+                .map(|a| Choice {
+                    value: a.principal.id.get().to_string(),
+                    label: shorten(&teacher(Some(a.principal.id)), 500),
+                })
+                .collect();
+            let selected = draft
+                .selected
+                .map(|id| id.get().to_string())
+                .filter(|id| candidates.iter().any(|c| c.value == *id))
+                .unwrap_or_default();
+            let available = !candidates.is_empty();
+            if !available {
+                view.description.push_str(
+                    "\n此班此科目没有有效任课教师。请取消后在账号与任教管理添加或启用相应范围。",
+                );
+            }
+            view.description.push_str("\n只显示有效任课教师，编号区分同名账号。选择和取消不会写入；保存须再次确认。可设置或更换默认老师。");
+            view.fields = vec![choice(
+                DEFAULT_TEACHER,
+                "选定默认老师",
+                selected,
+                candidates,
+            )];
+            view.actions = vec![
+                action(REVIEW, "查看变更摘要", available),
+                action(CANCEL, "取消并返回账号列表", true),
+                action(RELOAD, "重新加载", true),
+            ];
+        } else {
+            view.description.push_str(&format!(
+                "\n拟设默认老师：{}\n确认后保存以上更改。如果设置已被更新，请重新读取后核对。",
+                teacher(draft.selected)
+            ));
+            if self.submitted {
+                view.description
+                    .push_str("\n本次已经提交；结果不确定时，请核对原操作与当前状态，不重复保存。");
+            }
+            view.actions = vec![
+                action(CONFIRM, "确认保存默认老师", !self.submitted),
+                action(RETURN, "返回继续编辑", !self.submitted),
+                action(RELOAD, "核对原操作与当前状态", true),
+                action(CLOSE, "返回", true),
+            ];
         }
         view
     }
@@ -1497,5 +1794,192 @@ mod tests {
         assert_eq!(editor.selected_class, Some(class(2)));
         assert_eq!(editor.selected_subject, Some(subject(2)));
         validate(&editor, &state);
+    }
+    fn default_scope(editor: &mut Editor, state: &IdentityState, class_id: &str, subject_id: &str) {
+        assert!(matches!(
+            act(editor, DEFAULTS, FormData::new(), state),
+            Command::Stay
+        ));
+        assert!(matches!(
+            act(
+                editor,
+                DEFAULT_SELECT,
+                form(&[(CLASS, class_id), (SUBJECT, subject_id)]),
+                state
+            ),
+            Command::Stay
+        ));
+    }
+    #[test]
+    fn defaults_selection_cancel_and_explicit_confirm_keep_stable_scope_and_expected_revision() {
+        let state = state();
+        let before = state.clone();
+        let mut editor = Editor::new(&state, id(1)).unwrap();
+        default_scope(&mut editor, &state, "1", "1");
+        validate(&editor, &state);
+        assert!(editor.view(&state).description.contains("未设置默认老师"));
+        assert!(matches!(
+            act(&mut editor, REVIEW, form(&[(DEFAULT_TEACHER, "2")]), &state),
+            Command::Stay
+        ));
+        assert_eq!(editor.page, Page::DefaultConfirm);
+        assert_eq!(state, before);
+        assert!(matches!(
+            act(&mut editor, RETURN, FormData::new(), &state),
+            Command::Stay
+        ));
+        assert!(matches!(
+            act(&mut editor, CANCEL, FormData::new(), &state),
+            Command::Stay
+        ));
+        assert_eq!(editor.page, Page::Discard);
+        validate(&editor, &state);
+        act(&mut editor, KEEP, FormData::new(), &state);
+        assert_eq!(editor.page, Page::DefaultEdit);
+        act(&mut editor, REVIEW, FormData::new(), &state);
+        let result = act(&mut editor, CONFIRM, FormData::new(), &state);
+        assert!(
+            matches!(result,Command::Update{expected,command:IdentityCommand::SetDefaultTeacher(DefaultTeacher{class_id,subject_id,teacher_id})} if expected==before.revision && class_id==class(1) && subject_id==subject(1) && teacher_id==id(2))
+        );
+        assert!(editor.handle(CONFIRM, FormData::new(), &state).is_err());
+        assert!(
+            !editor
+                .view(&state)
+                .actions
+                .iter()
+                .find(|a| a.id == CONFIRM)
+                .unwrap()
+                .enabled
+        );
+        assert_eq!(state, before);
+    }
+    #[test]
+    fn defaults_current_choice_same_name_teachers_and_replacement_are_unambiguous() {
+        let mut state = state();
+        let mut second = state.accounts[1].clone();
+        second.principal.id = id(4);
+        second.login_name = "other-teacher".into();
+        state.accounts.push(second);
+        state.assignments.push(TeachingAssignment {
+            teacher_id: id(4),
+            class_id: class(1),
+            subject_id: subject(1),
+            enabled: true,
+        });
+        state.default_teachers.push(DefaultTeacher {
+            class_id: class(1),
+            subject_id: subject(1),
+            teacher_id: id(2),
+        });
+        state.validate().unwrap();
+        let mut editor = Editor::new(&state, id(1)).unwrap();
+        default_scope(&mut editor, &state, "1", "1");
+        let view = editor.view(&state);
+        view.validate().unwrap();
+        assert!(view.description.contains("#2"));
+        let field = view
+            .fields
+            .iter()
+            .find(|f| f.id == DEFAULT_TEACHER)
+            .unwrap();
+        assert_eq!(field.value, "2");
+        let FieldKind::Choice(choices) = &field.kind else {
+            panic!("teacher choices")
+        };
+        assert_eq!(
+            choices.iter().map(|c| c.value.as_str()).collect::<Vec<_>>(),
+            ["2", "4"]
+        );
+        assert_ne!(choices[0].label, choices[1].label);
+        assert!(editor
+            .handle(REVIEW, FormData::new(), &state)
+            .unwrap_err()
+            .contains("没有变化"));
+        act(&mut editor, REVIEW, form(&[(DEFAULT_TEACHER, "4")]), &state);
+        assert!(
+            matches!(act(&mut editor,CONFIRM,FormData::new(),&state),Command::Update{command:IdentityCommand::SetDefaultTeacher(d),..} if d.teacher_id==id(4))
+        );
+        assert_eq!(state.default_teachers[0].teacher_id, id(2));
+    }
+    #[test]
+    fn defaults_no_candidates_and_forged_teacher_or_scope_never_make_a_command() {
+        let state = state();
+        let mut editor = Editor::new(&state, id(1)).unwrap();
+        default_scope(&mut editor, &state, "2", "2");
+        let view = editor.view(&state);
+        view.validate().unwrap();
+        assert!(view.description.contains("没有有效任课教师"));
+        assert!(
+            !view
+                .actions
+                .iter()
+                .find(|a| a.id == REVIEW)
+                .unwrap()
+                .enabled
+        );
+        assert!(editor
+            .handle(REVIEW, form(&[(DEFAULT_TEACHER, "2")]), &state)
+            .is_err());
+        act(&mut editor, CANCEL, FormData::new(), &state);
+        act(&mut editor, DISCARD, FormData::new(), &state);
+        default_scope(&mut editor, &state, "1", "1");
+        assert!(editor
+            .handle(REVIEW, form(&[(DEFAULT_TEACHER, "3")]), &state)
+            .is_err());
+        assert!(!editor.submitted);
+        let mut invalid = Editor::new(&state, id(1)).unwrap();
+        act(&mut invalid, DEFAULTS, FormData::new(), &state);
+        assert!(invalid
+            .handle(
+                DEFAULT_SELECT,
+                form(&[(CLASS, "999"), (SUBJECT, "1")]),
+                &state
+            )
+            .is_err());
+    }
+    #[test]
+    fn defaults_revocation_and_cas_conflict_keep_the_original_nonsecret_draft() {
+        let state = state();
+        let mut editor = Editor::new(&state, id(1)).unwrap();
+        default_scope(&mut editor, &state, "1", "1");
+        act(&mut editor, REVIEW, form(&[(DEFAULT_TEACHER, "2")]), &state);
+        let original = editor.default_draft.clone();
+        let mut changed = state.clone();
+        changed.revision = changed.revision.next().unwrap();
+        assert!(editor
+            .handle(CONFIRM, FormData::new(), &changed)
+            .unwrap_err()
+            .contains("目录已更新"));
+        assert_eq!(editor.default_draft, original);
+        assert!(!editor.submitted);
+        validate(&editor, &changed);
+        changed = state.clone();
+        changed.accounts[0].principal.enabled = false;
+        assert!(editor.handle(CONFIRM, FormData::new(), &changed).is_err());
+        assert!(editor.view(&changed).fields.is_empty());
+        changed = state.clone();
+        changed.assignments.clear();
+        assert!(editor.handle(CONFIRM, FormData::new(), &changed).is_err());
+        assert!(!editor.submitted);
+    }
+    #[test]
+    fn defaults_unknown_reload_is_explicit_and_never_returns_another_update() {
+        let state = state();
+        let mut editor = Editor::new(&state, id(1)).unwrap();
+        default_scope(&mut editor, &state, "1", "1");
+        act(&mut editor, REVIEW, form(&[(DEFAULT_TEACHER, "2")]), &state);
+        act(&mut editor, CONFIRM, FormData::new(), &state);
+        assert!(editor.handle(RETURN, FormData::new(), &state).is_err());
+        assert!(matches!(
+            act(&mut editor, RELOAD, FormData::new(), &state),
+            Command::Stay
+        ));
+        validate(&editor, &state);
+        assert!(editor.view(&state).description.contains("不证明它未保存"));
+        assert!(matches!(
+            act(&mut editor, DISCARD, FormData::new(), &state),
+            Command::Reload
+        ));
+        assert!(!editor.has_unsaved_changes());
     }
 }

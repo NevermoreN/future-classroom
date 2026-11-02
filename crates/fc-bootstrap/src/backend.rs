@@ -1215,6 +1215,28 @@ impl Backend {
         self.apply(&transition)?;
         Ok(transition.next)
     }
+    /// Current authority is rechecked, but only the original C2-bound receipt
+    /// proves this default-teacher write. Missing history cannot become a write.
+    pub fn default_teacher_outcome(
+        &mut self,
+        lease: SessionLease,
+        expected_revision: Revision,
+        default: fc_domain::identity::DefaultTeacher,
+    ) -> Result<Option<(Revision, fc_domain::identity::DefaultTeacher)>> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        state
+            .authorize_management(&actor, self.clock.now())
+            .map_err(|e| BackendError::Identity(IdentityRepositoryError::Domain(e)))?;
+        let mut request = self.request(&state, IdentityCommand::SetDefaultTeacher(default))?;
+        request.expected_revision = expected_revision;
+        let result = self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .default_teacher_outcome(request, &actor)?;
+        self.actor(&self.state()?, lease, SessionPurpose::Manage)?;
+        self.check_open()?;
+        Ok(result)
+    }
     pub fn create_account(
         &mut self,
         lease: SessionLease,
