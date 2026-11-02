@@ -171,6 +171,9 @@ fn field(id: FieldId, label: &str, kind: FieldKind, value: String, max: usize) -
 fn text(id: FieldId, label: &str, value: impl ToString) -> Field {
     field(id, label, FieldKind::Text, value.to_string(), 16)
 }
+fn percentage(id: FieldId, label: &str, value: u8) -> Field {
+    field(id, label, FieldKind::Percent, value.to_string(), 3)
+}
 fn choices(id: FieldId, label: &str, value: String, items: Vec<Choice>) -> Field {
     field(id, label, FieldKind::Choice(items), value, 64)
 }
@@ -589,6 +592,96 @@ impl Editor {
             }
         }
     }
+    pub(super) fn percent_input(&mut self, data: FormData) -> bool {
+        if self.page == Page::PublicStyle {
+            let Some(style) = &mut self.style else {
+                return false;
+            };
+            let ready = style.percent_input(data);
+            if let Some(Draft::Public(s)) = &mut self.draft {
+                s.display = style.settings.clone();
+            }
+            return ready;
+        }
+        self.suspend(data);
+        match self.page {
+            Page::Appearance => {
+                let group = self.percent(GROUP_ALPHA).ok();
+                let surface = self.percent(SURFACE).ok();
+                let edge = self.percent(EDGE).ok();
+                let selected = self.selected;
+                if let Some(LayoutNode {
+                    kind: NodeKind::Container(c),
+                    ..
+                }) = self
+                    .tree_mut()
+                    .and_then(|t| t.nodes.iter_mut().find(|n| Some(n.id) == selected))
+                {
+                    if let Some(value) = group {
+                        c.group_opacity_percent = value;
+                    }
+                    if let Some(material) = &mut c.material {
+                        if let Some(value) = surface {
+                            material.surface_percent = value;
+                        }
+                        if let Some(value) = edge {
+                            material.edge_percent = value;
+                        }
+                    }
+                }
+            }
+            Page::ContentStyle => {
+                let alpha = self.percent(ALPHA).ok();
+                let selected = self.selected;
+                if let (Some(value), Some(style)) = (
+                    alpha,
+                    self.content_styles_mut()
+                        .and_then(|s| s.iter_mut().find(|s| Some(s.node_id) == selected)),
+                ) {
+                    style.component.opacity_percent = value;
+                }
+            }
+            Page::Materials => {
+                let alpha = self.percent(ALPHA).ok();
+                if let (Some(value), Some(Draft::Subject(s))) = (alpha, &mut self.draft) {
+                    s.materials.component.opacity_percent = value;
+                }
+            }
+            _ => return false,
+        }
+        self.percent_fields_valid()
+    }
+    fn percent_fields_valid(&self) -> bool {
+        match self.page {
+            Page::PublicStyle => self
+                .style
+                .as_ref()
+                .is_some_and(|s| s.percent_preview_available()),
+            Page::Appearance => [GROUP_ALPHA, SURFACE, EDGE]
+                .iter()
+                .all(|id| self.percent(*id).is_ok()),
+            Page::ContentStyle | Page::Materials => self.percent(ALPHA).is_ok(),
+            _ => false,
+        }
+    }
+    pub(super) fn percent_preview(&self) -> Result<Option<Command>, String> {
+        authorized(&self.identity, self.owner)?;
+        if !self.percent_fields_valid() {
+            return Ok(None);
+        }
+        self.preflight()?;
+        Ok(match self.draft.as_ref() {
+            Some(Draft::Public(s)) => Some(Command::Preview {
+                public: Some(s.clone()),
+                subject: None,
+            }),
+            Some(Draft::Subject(s)) => Some(Command::Preview {
+                public: None,
+                subject: Some(s.clone()),
+            }),
+            None => None,
+        })
+    }
     fn value(&self, id: FieldId) -> String {
         let field = self.fields().into_iter().find(|f| f.id == id);
         if let Some(raw) = self.raw.get(&id) {
@@ -893,10 +986,10 @@ impl Editor {
                 };
                 let material = c.material.unwrap_or_default();
                 vec![
-                    text(GROUP_ALPHA, "父组整体Alpha 0..100", c.group_opacity_percent),
+                    percentage(GROUP_ALPHA, "父组整体Alpha 0..100", c.group_opacity_percent),
                     toggle(GLASS, "绘制容器玻璃", c.material.is_some()),
-                    text(SURFACE, "容器玻璃填充 0..100", material.surface_percent),
-                    text(EDGE, "容器边缘反射 0..100", material.edge_percent),
+                    percentage(SURFACE, "容器玻璃填充 0..100", material.surface_percent),
+                    percentage(EDGE, "容器边缘反射 0..100", material.edge_percent),
                 ]
             }
             Page::ContentStyle => {
@@ -906,7 +999,7 @@ impl Editor {
                 let c = &style.component;
                 vec![
                     toggle(VISIBLE, "显示此节点", c.visible),
-                    text(ALPHA, "节点整体Alpha 0..100", c.opacity_percent),
+                    percentage(ALPHA, "节点整体Alpha 0..100", c.opacity_percent),
                     text(FONT, "字号DIP（10..72）", c.font_dip),
                     text(MIN_WIDTH, "节点最小宽DIP", c.min_width),
                     text(MAX_WIDTH, "节点最大宽DIP", c.max_width),
@@ -922,7 +1015,7 @@ impl Editor {
                 vec![
                     toggle(ENABLED, "启用本科目配置", s.enabled),
                     toggle(VISIBLE, "显示资料磁贴", c.visible),
-                    text(ALPHA, "资料整体Alpha 0..100", c.opacity_percent),
+                    percentage(ALPHA, "资料整体Alpha 0..100", c.opacity_percent),
                     text(FONT, "资料字号DIP（10..72）", c.font_dip),
                     text(MIN_WIDTH, "资料最小宽DIP", c.min_width),
                     text(MAX_WIDTH, "资料最大宽DIP", c.max_width),
@@ -2056,6 +2149,116 @@ mod tests {
     }
     fn tree(e: &Editor) -> LayoutTree {
         e.tree().unwrap().clone()
+    }
+    #[test]
+    fn percent_live_profile_drafts_preserve_unfinished_fields_selection_and_cas() {
+        let mut e = editor();
+        e.loaded_subject(key(), Some(subject())).unwrap();
+        act(&mut e, ADD_CONTAINER, &[]);
+        act(&mut e, BACK, &[]);
+        let selected = e.selected;
+        act(&mut e, NODE_APPEARANCE, &[]);
+        act(&mut e, APPLY, &[(GLASS, "1")]);
+        let data = form(&e, &[(GROUP_ALPHA, "0"), (SURFACE, "100"), (EDGE, "0")]);
+        assert!(e.percent_input(data));
+        let Some(Command::Preview {
+            subject: Some(candidate),
+            ..
+        }) = e.percent_preview().unwrap()
+        else {
+            panic!()
+        };
+        assert_eq!(candidate.revision, Revision::new(5));
+        assert_eq!(e.selected, selected);
+        let NodeKind::Container(c) = &candidate.tree.node(selected.unwrap()).unwrap().kind else {
+            panic!()
+        };
+        assert_eq!(c.group_opacity_percent, 0);
+        assert_eq!(
+            c.material,
+            Some(GlassMaterial {
+                surface_percent: 100,
+                edge_percent: 0
+            })
+        );
+        assert!(e
+            .view("", false)
+            .fields
+            .iter()
+            .filter(|f| [GROUP_ALPHA, SURFACE, EDGE].contains(&f.id))
+            .all(|f| f.kind == FieldKind::Percent && f.max_utf16 == 3));
+        let data = form(&e, &[(EDGE, "101")]);
+        assert!(!e.percent_input(data));
+        assert!(e.percent_preview().unwrap().is_none());
+        assert_eq!(e.value(EDGE), "101");
+        assert!(e.handle(APPLY, form(&e, &[]), &identity()).is_err());
+        act(&mut e, CANCEL, &[]);
+        act(&mut e, KEEP, &[]);
+        assert_eq!(e.value(EDGE), "101");
+
+        let mut e = editor();
+        e.loaded_subject(key(), Some(subject())).unwrap();
+        act(&mut e, ADD_WIDGET, &[(ADD_KIND, "text")]);
+        let selected = e.selected;
+        act(&mut e, NODE_APPEARANCE, &[]);
+        let data = form(&e, &[(ALPHA, "0"), (FONT, "")]);
+        assert!(e.percent_input(data));
+        assert_eq!(e.selected, selected);
+        assert_eq!(e.value(FONT), "");
+        assert_eq!(
+            e.selected_content_style()
+                .unwrap()
+                .component
+                .opacity_percent,
+            0
+        );
+        assert!(e.percent_preview().unwrap().is_some());
+        assert!(e
+            .view("", false)
+            .fields
+            .iter()
+            .find(|f| f.id == FONT)
+            .is_some_and(|f| f.kind == FieldKind::Text));
+        assert!(e.handle(APPLY, form(&e, &[]), &identity()).is_err());
+
+        let mut e = editor();
+        e.loaded_subject(key(), Some(subject())).unwrap();
+        act(&mut e, MATERIALS, &[]);
+        let data = form(&e, &[(ALPHA, "100"), (ROWS, "")]);
+        assert!(e.percent_input(data));
+        assert_eq!(e.value(ROWS), "");
+        assert!(e.percent_preview().unwrap().is_some());
+        assert!(e.handle(APPLY, form(&e, &[]), &identity()).is_err());
+
+        let mut e = editor();
+        e.loaded_public(public()).unwrap();
+        act(&mut e, PUBLIC_STYLE, &[]);
+        let data = form(
+            &e,
+            &[
+                (display_editor::GLASS, "0"),
+                (display_editor::TARGET, "2026-"),
+            ],
+        );
+        assert!(e.percent_input(data));
+        let Some(Command::Preview {
+            public: Some(candidate),
+            ..
+        }) = e.percent_preview().unwrap()
+        else {
+            panic!()
+        };
+        assert_eq!(candidate.display.revision, Revision::new(4));
+        assert_eq!(candidate.display.glass_surface_percent, 0);
+        assert!(e
+            .view("", false)
+            .fields
+            .iter()
+            .find(|f| f.id == display_editor::TARGET)
+            .is_some_and(|f| f.value == "2026-"));
+        assert!(e
+            .handle(display_editor::SAVE_ALL, form(&e, &[]), &identity())
+            .is_err());
     }
     #[test]
     fn exact_owner_and_scope_keys_are_required_without_caching_secrets() {

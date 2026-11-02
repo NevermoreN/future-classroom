@@ -15,6 +15,8 @@ pub enum FieldKind {
     ReadOnly,
     Choice(Vec<Choice>),
     TimeRange,
+    /// A 0..=100 slider paired with an editable, possibly unfinished value.
+    Percent,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Choice {
@@ -120,6 +122,7 @@ impl View {
                 return Err(FormError::InvalidView);
             }
             match &f.kind {
+                FieldKind::Percent if f.max_utf16 != 3 => return Err(FormError::InvalidView),
                 FieldKind::Choice(choices) => {
                     if choices.len() > 1024
                         || choices.iter().enumerate().any(|(i, c)| {
@@ -214,6 +217,11 @@ impl fmt::Debug for FormData {
 #[derive(Debug)]
 pub enum Event {
     Submit(ActionId, FormData),
+    /// Non-secret draft snapshot, never an instruction to persist settings.
+    PercentChanged {
+        generation: u64,
+        form: FormData,
+    },
     Input,
     Close,
     GridCell {

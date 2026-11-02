@@ -99,6 +99,9 @@ fn field(id: FieldId, label: &str, kind: FieldKind, value: String, max: usize) -
 fn plain(id: FieldId, label: &str, value: String, max: usize) -> Field {
     field(id, label, FieldKind::Text, value, max)
 }
+fn percentage(id: FieldId, label: &str, value: u8) -> Field {
+    field(id, label, FieldKind::Percent, value.to_string(), 3)
+}
 fn choose(id: FieldId, label: &str, value: &str, options: &[(&str, &str)]) -> Field {
     field(
         id,
@@ -324,6 +327,56 @@ impl Editor {
             }
         }
     }
+    /// Keep the complete form, but preview only valid percentages on the
+    /// already selected target. Unfinished unrelated fields are never applied.
+    pub(super) fn percent_input(&mut self, data: FormData) -> bool {
+        self.capture(data);
+        let view = self.view("", false);
+        for f in view.fields.iter().filter(|f| f.kind == FieldKind::Percent) {
+            let mut one = FormData::new();
+            let _ = one.insert(f.id, f.value.clone());
+            let Ok(value) = percent(&one, f.id) else {
+                continue;
+            };
+            match (self.page, f.id) {
+                (Page::Main | Page::SubjectVisuals, COURSE_ALPHA) => {
+                    self.settings.course_fill_percent = value
+                }
+                (Page::Main | Page::SubjectVisuals, HOMEWORK_ALPHA) => {
+                    self.settings.homework_fill_percent = value
+                }
+                (Page::Main, GLASS) => self.settings.glass_surface_percent = value,
+                (Page::Main, REFLECTION) => self.settings.edge_reflection_percent = value,
+                (Page::Components, ALPHA) => {
+                    self.settings.components[self.component].opacity_percent = value
+                }
+                _ => {}
+            }
+        }
+        self.percent_preview_available()
+    }
+    pub(super) fn percent_preview_available(&self) -> bool {
+        if !matches!(
+            self.page,
+            Page::Main | Page::Components | Page::SubjectVisuals
+        ) {
+            return false;
+        }
+        let view = self.view("", false);
+        let mut found = false;
+        for f in view.fields.iter().filter(|f| f.kind == FieldKind::Percent) {
+            found = true;
+            let mut one = FormData::new();
+            if one.insert(f.id, f.value.clone()).is_err() || percent(&one, f.id).is_err() {
+                return false;
+            }
+        }
+        found
+    }
+    pub(super) fn percent_preview_subject(&self) -> Option<Option<SubjectId>> {
+        self.percent_preview_available()
+            .then_some(self.selected_subject)
+    }
     pub(super) fn view(&self, status: &str, busy: bool) -> View {
         let mut v=View{title:"桌面显示设置".into(),description:"修改先保留为草稿，点击“保存全部”才生效。草稿仅在本次运行保留，退出前请保存。0%完全透明，100%不透明；玻璃填充、边缘反射和组件整体Alpha分别设置，文字不乘玻璃填充。".into(),status:status.into(),fields:vec![],actions:vec![],busy,grid:None};
         match self.page {
@@ -347,29 +400,25 @@ impl Editor {
                     toggle(SECONDS, "显示秒数 / 逐秒秒针", s.clock_seconds),
                     toggle(RECESS, "自动显示有效课间大卡", s.recess_enabled),
                     toggle(FILL, "显示科目底色", s.subject_fill),
-                    plain(
+                    percentage(
                         COURSE_ALPHA,
                         "课程胶囊填充不透明度（0–100%）",
-                        s.course_fill_percent.to_string(),
-                        3,
+                        s.course_fill_percent,
                     ),
-                    plain(
+                    percentage(
                         HOMEWORK_ALPHA,
                         "作业科目标记不透明度（0–100%）",
-                        s.homework_fill_percent.to_string(),
-                        3,
+                        s.homework_fill_percent,
                     ),
-                    plain(
+                    percentage(
                         GLASS,
                         "玻璃填充不透明度（0–100%，默认3%）",
-                        s.glass_surface_percent.to_string(),
-                        3,
+                        s.glass_surface_percent,
                     ),
-                    plain(
+                    percentage(
                         REFLECTION,
                         "边缘反射强度（0–100%，默认50%）",
-                        s.edge_reflection_percent.to_string(),
-                        3,
+                        s.edge_reflection_percent,
                     ),
                     choose(
                         TONE,
@@ -487,12 +536,7 @@ impl Editor {
                         4,
                     ),
                     toggle(VISIBLE, "显示组件", c.visible),
-                    plain(
-                        ALPHA,
-                        "组件整体透明度（0–100）",
-                        c.opacity_percent.to_string(),
-                        3,
-                    ),
+                    percentage(ALPHA, "组件整体透明度（0–100）", c.opacity_percent),
                     plain(FONT, "字号（10–72 DIP）", c.font_dip.to_string(), 2),
                     plain(
                         MIN_WIDTH,

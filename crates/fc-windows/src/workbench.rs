@@ -63,6 +63,8 @@ fn lesson_foreground_process_allowed(observed_pid: u32, current_pid: u32) -> boo
 
 const MAX_SUBMITS: usize = 8;
 const MAX_EVENT_BYTES: usize = 4 * 1024 * 1024;
+// TBM_GETPOS is WM_USER in the Win32 SDK; windows 0.62 omits this alias.
+const TBM_GETPOS: u32 = WM_USER;
 const FIELD_ID_BASE: u16 = 2000;
 const ACTION_ID_BASE: u16 = 3000;
 static CLASSES: Mutex<usize> = Mutex::new(0);
@@ -196,6 +198,7 @@ enum NativeKind {
     ReadOnly,
     Choice,
     TimeRange,
+    Percent,
 }
 impl From<&FieldKind> for NativeKind {
     fn from(kind: &FieldKind) -> Self {
@@ -206,6 +209,7 @@ impl From<&FieldKind> for NativeKind {
             FieldKind::ReadOnly => Self::ReadOnly,
             FieldKind::Choice(_) => Self::Choice,
             FieldKind::TimeRange => Self::TimeRange,
+            FieldKind::Percent => Self::Percent,
         }
     }
 }
@@ -216,6 +220,7 @@ struct FieldBinding {
     hwnd: HWND,
     native_id: u16,
     max_utf16: usize,
+    slider: Option<HWND>,
 }
 #[derive(Clone, Copy)]
 struct ActionBinding {
@@ -259,6 +264,7 @@ struct State {
     lock_action: Cell<Option<ActionId>>,
     empty_form_action: Cell<Option<ActionId>>,
     preview: RefCell<Option<preview::Canvas>>,
+    form_generation: Cell<Option<u64>>,
 }
 impl State {
     fn new() -> Self {
@@ -278,6 +284,7 @@ impl State {
             lock_action: Cell::new(None),
             empty_form_action: Cell::new(None),
             preview: RefCell::new(None),
+            form_generation: Cell::new(Some(0)),
         }
     }
     fn fail(&self, error: Error) {
@@ -319,6 +326,7 @@ impl State {
         drop(suppress);
     }
     fn discard_forms(&self) {
+        self.advance_form_generation();
         self.clear_layout_preview();
         self.grid_cell.set(None);
         if let Ok(mut events) = self.events.try_borrow_mut() {
@@ -348,7 +356,7 @@ impl State {
                 events
                     .iter()
                     .map(|e| match e {
-                        Event::Submit(_, form) => {
+                        Event::Submit(_, form) | Event::PercentChanged { form, .. } => {
                             form.allocation_bytes().unwrap_or(MAX_EVENT_BYTES)
                         }
                         _ => std::mem::size_of::<Event>(),
@@ -498,6 +506,96 @@ impl State {
         self.grid_cell.set(Some((row, column)));
         self.input.set(true);
     }
+    fn advance_form_generation(&self) {
+        let next = self.form_generation.get().and_then(|n| n.checked_add(1));
+        self.form_generation.set(next);
+        if next.is_none() {
+            self.error.set(E_UNEXPECTED.0);
+        }
+    }
+    fn percent_changed(&self, field: FieldBinding, from_slider: bool) -> Result<()> {
+        if self.suppress.get()
+            || self.capturing.get()
+            || self.view.borrow().as_ref().is_none_or(|v| v.busy)
+        {
+            return Ok(());
+        }
+        let generation = self
+            .form_generation
+            .get()
+            .filter(|g| *g != 0)
+            .ok_or_else(|| Error::from_hresult(E_UNEXPECTED))?;
+        let slider = field
+            .slider
+            .ok_or_else(|| Error::from_hresult(E_UNEXPECTED))?;
+        {
+            let _suppress = Suppress::new(self);
+            // SAFETY: the two controls belong to this current UI-thread binding.
+            unsafe {
+                if from_slider {
+                    let value = SendMessageW(slider, TBM_GETPOS, None, None).0;
+                    SetWindowTextW(field.hwnd, &HSTRING::from(value.to_string()))?;
+                } else {
+                    let text = read_edit(field)?;
+                    if let Some(value) = percent_value(&text) {
+                        let _ = SendMessageW(
+                            slider,
+                            TBM_SETPOS,
+                            Some(WPARAM(1)),
+                            Some(LPARAM(value as isize)),
+                        );
+                    }
+                }
+            }
+        }
+        let fields = self.controls.borrow().fields.clone();
+        let mut form = FormData::new();
+        for binding in fields {
+            if !matches!(binding.kind, NativeKind::Password | NativeKind::ReadOnly) {
+                form.insert(binding.id, self.read_field(binding)?)
+                    .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
+            }
+        }
+        let bytes = form
+            .allocation_bytes()
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        let mut events = self.events.borrow_mut();
+        // Only replace the tail notification: a Submit (or other event) is an
+        // ordering barrier and its earlier snapshot must remain before it.
+        let replaced = match events.back() {
+            Some(Event::PercentChanged {
+                generation: old,
+                form,
+            }) if *old == generation => Some(
+                form.allocation_bytes()
+                    .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?,
+            ),
+            _ => None,
+        };
+        let next = self
+            .event_bytes
+            .get()
+            .saturating_sub(replaced.unwrap_or(0))
+            .checked_add(bytes)
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        if (replaced.is_none() && events.len() >= MAX_SUBMITS) || next > MAX_EVENT_BYTES {
+            return Err(Error::from_hresult(E_OUTOFMEMORY));
+        }
+        if replaced.is_some() {
+            events.pop_back();
+        }
+        events.push_back(Event::PercentChanged { generation, form });
+        self.event_bytes.set(next);
+        self.input.set(true);
+        Ok(())
+    }
+}
+
+fn percent_value(text: &str) -> Option<u8> {
+    if text.is_empty() || !text.bytes().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    text.parse::<u8>().ok().filter(|v| *v <= 100)
 }
 struct Suppress<'a> {
     state: &'a State,
@@ -804,6 +902,7 @@ impl Window {
         if old.as_ref() == Some(view) {
             return Ok(false);
         }
+        self.state.advance_form_generation();
         let _suppress = Suppress::new(&self.state);
         if old.as_ref().is_some_and(|old| old.grid != view.grid) {
             self.state.grid_cell.set(None);
@@ -895,6 +994,23 @@ impl Window {
                     }
                 }
                 let _ = EnableWindow(binding.hwnd, !view.busy);
+                if let Some(slider) = binding.slider {
+                    if !same_structure
+                        || old
+                            .as_ref()
+                            .is_some_and(|v| v.fields[index].value != field.value)
+                    {
+                        if let Some(value) = percent_value(&field.value) {
+                            let _ = SendMessageW(
+                                slider,
+                                TBM_SETPOS,
+                                Some(WPARAM(1)),
+                                Some(LPARAM(value as isize)),
+                            );
+                        }
+                    }
+                    let _ = EnableWindow(slider, !view.busy);
+                }
             }
             for (binding, action) in actions.iter().zip(&view.actions) {
                 SetWindowTextW(binding.hwnd, &HSTRING::from(action.label.as_str()))?;
@@ -953,6 +1069,7 @@ impl Window {
                 FieldKind::ReadOnly => ES_AUTOHSCROLL | ES_READONLY,
                 FieldKind::Choice(_) => 0,
                 FieldKind::TimeRange => ES_AUTOHSCROLL,
+                FieldKind::Percent => ES_AUTOHSCROLL,
             };
             let mut style = WS_BORDER | WS_TABSTOP | WINDOW_STYLE(kind as u32);
             if field.kind == FieldKind::Multiline {
@@ -988,12 +1105,47 @@ impl Window {
             unsafe {
                 let _ = SendMessageW(hwnd, EM_SETLIMITTEXT, Some(WPARAM(field.max_utf16)), None);
             }
+            let slider = if field.kind == FieldKind::Percent {
+                // SAFETY: common-controls initialization and standard Trackbar
+                // messages are available on Windows 7; no newer runtime API.
+                unsafe {
+                    let init = INITCOMMONCONTROLSEX {
+                        dwSize: std::mem::size_of::<INITCOMMONCONTROLSEX>() as u32,
+                        dwICC: ICC_BAR_CLASSES,
+                    };
+                    if !InitCommonControlsEx(&init).as_bool() {
+                        return Err(Error::from_thread());
+                    }
+                }
+                let slider = self.child(
+                    &mut controls,
+                    TRACKBAR_CLASSW,
+                    "",
+                    WS_TABSTOP | WINDOW_STYLE(TBS_NOTICKS),
+                    5000 + index as u16,
+                )?;
+                unsafe {
+                    let _ = SendMessageW(slider, TBM_SETRANGEMIN, Some(WPARAM(0)), Some(LPARAM(0)));
+                    let _ =
+                        SendMessageW(slider, TBM_SETRANGEMAX, Some(WPARAM(1)), Some(LPARAM(100)));
+                    let _ = SendMessageW(
+                        slider,
+                        TBM_SETPOS,
+                        Some(WPARAM(1)),
+                        Some(LPARAM(percent_value(&field.value).unwrap_or(0) as isize)),
+                    );
+                }
+                Some(slider)
+            } else {
+                None
+            };
             controls.fields.push(FieldBinding {
                 id: field.id,
                 kind: NativeKind::from(&field.kind),
                 hwnd,
                 native_id,
                 max_utf16: field.max_utf16,
+                slider,
             });
             if field.kind == FieldKind::TimeRange {
                 controls
@@ -1081,6 +1233,10 @@ impl Window {
     pub fn take_events(&self) -> Result<Vec<Event>> {
         (registry::hooks(self.role.get())?.input)(self)
     }
+    /// Zero denotes an invalid or exhausted form generation and is never emitted.
+    pub fn form_generation(&self) -> u64 {
+        self.state.form_generation.get().unwrap_or(0)
+    }
     fn input_native(&self) -> Result<Vec<Event>> {
         let error = self.state.error.replace(0);
         if error != 0 {
@@ -1124,6 +1280,9 @@ impl Window {
             let current = match &event {
                 Event::LayoutSelect { generation: g, .. }
                 | Event::LayoutDrop { generation: g, .. } => enabled && generation == Some(*g),
+                Event::PercentChanged { generation, .. } => {
+                    enabled && self.state.form_generation.get() == Some(*generation)
+                }
                 _ => true,
             };
             if current {
@@ -1454,13 +1613,20 @@ impl Window {
             self.state.discard_forms();
             return Err(Error::from_hresult(windows::core::HRESULT(error)));
         }
-        if self
+        let events = self
             .state
             .events
             .try_borrow()
-            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
-            .len()
-            != before + 1
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+        // Filling a Percent Edit also emits one coalesced non-secret snapshot
+        // before this Submit, following the same order as real input.
+        if !(before + 1..=before + 2).contains(&events.len())
+            || !matches!(events.back(), Some(Event::Submit(action, _)) if *action == id)
+            || events
+                .iter()
+                .skip(before)
+                .take(events.len() - before - 1)
+                .any(|event| !matches!(event, Event::PercentChanged { .. }))
         {
             return Err(Error::from_hresult(E_UNEXPECTED));
         }
@@ -1534,7 +1700,7 @@ impl Window {
         let model = view
             .fields
             .iter()
-            .find(|f| f.id == id && f.kind == FieldKind::Text)
+            .find(|f| f.id == id && matches!(f.kind, FieldKind::Text | FieldKind::Percent))
             .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
         if value.contains('\0') || value.encode_utf16().count() > model.max_utf16 {
             return Err(Error::from_hresult(E_INVALIDARG));
@@ -1546,7 +1712,7 @@ impl Window {
             .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
             .fields
             .iter()
-            .find(|f| f.id == id && f.kind == NativeKind::Text)
+            .find(|f| f.id == id && matches!(f.kind, NativeKind::Text | NativeKind::Percent))
             .copied()
             .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
         // Release the immutable View borrow before the synchronous native edit
@@ -1559,6 +1725,46 @@ impl Window {
                 return Err(Error::from_hresult(E_ACCESSDENIED));
             }
             SetWindowTextW(field.hwnd, &HSTRING::from(value))?;
+        }
+        Ok(())
+    }
+    /// Hidden diagnostic selection through the native ComboBox notification path.
+    pub fn probe_percent(&self, id: FieldId, value: u8) -> Result<()> {
+        if self.is_visible()
+            || self.state.suppress.get()
+            || self.state.capturing.get()
+            || value > 100
+        {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let field = self
+            .state
+            .controls
+            .borrow()
+            .fields
+            .iter()
+            .find(|f| f.id == id && f.kind == NativeKind::Percent)
+            .copied()
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        let slider = field
+            .slider
+            .ok_or_else(|| Error::from_hresult(E_UNEXPECTED))?;
+        unsafe {
+            if !IsWindowEnabled(slider).as_bool() {
+                return Err(Error::from_hresult(E_ACCESSDENIED));
+            }
+            let _ = SendMessageW(
+                slider,
+                TBM_SETPOS,
+                Some(WPARAM(1)),
+                Some(LPARAM(value as isize)),
+            );
+            let _ = SendMessageW(
+                self.hwnd,
+                WM_HSCROLL,
+                Some(WPARAM(TB_THUMBTRACK as usize | ((value as usize) << 16))),
+                Some(LPARAM(slider.0 as isize)),
+            );
         }
         Ok(())
     }
@@ -1785,17 +1991,22 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
         } else {
             30
         };
-        positions.push((
-            binding.hwnd,
-            20,
-            y + 28,
-            width,
-            if matches!(field.kind, FieldKind::Choice(_)) {
-                240
-            } else {
-                height
-            },
-        ));
+        if let Some(slider) = binding.slider {
+            positions.push((slider, 20, y + 28, width - 76, height));
+            positions.push((binding.hwnd, 20 + width - 68, y + 28, 68, height));
+        } else {
+            positions.push((
+                binding.hwnd,
+                20,
+                y + 28,
+                width,
+                if matches!(field.kind, FieldKind::Choice(_)) {
+                    240
+                } else {
+                    height
+                },
+            ));
+        }
         y += height + 42;
     }
     let status_height = static_text_height(status, &view.status, width)?;
@@ -1874,6 +2085,24 @@ unsafe extern "system" fn window_proc(
                         }
                         return LRESULT(0);
                     }
+                    WM_HSCROLL if !state.suppress.get() => {
+                        let source = HWND(lparam.0 as *mut _);
+                        let field = state
+                            .controls
+                            .borrow()
+                            .fields
+                            .iter()
+                            .find(|f| f.slider == Some(source))
+                            .copied();
+                        if let Some(field) = field {
+                            if IsWindowEnabled(source).as_bool() {
+                                if let Err(error) = state.percent_changed(field, true) {
+                                    state.fail(error);
+                                }
+                            }
+                        }
+                        return LRESULT(0);
+                    }
                     WM_VSCROLL => {
                         let request = wparam.0 as u16 as u32;
                         let mut info = SCROLLINFO {
@@ -1933,6 +2162,13 @@ unsafe extern "system" fn window_proc(
                             && (notification == EN_CHANGE || notification == CBN_SELCHANGE)
                         {
                             state.input.set(true);
+                        }
+                        if let Some(field) = field.filter(|f| f.kind == NativeKind::Percent) {
+                            if notification == EN_CHANGE && IsWindowEnabled(field.hwnd).as_bool() {
+                                if let Err(error) = state.percent_changed(field, false) {
+                                    state.fail(error);
+                                }
+                            }
                         }
                         if let Some(action) = action {
                             if notification == BN_CLICKED
@@ -2097,6 +2333,95 @@ mod tests {
     }
     fn button(window: &Window) -> ActionBinding {
         window.state.controls.borrow().actions[0]
+    }
+    #[test]
+    fn percent_native_slider_edit_snapshot_barriers_and_generation_cleanup() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        let foreground = unsafe { GetForegroundWindow() };
+        let window = Window::new().unwrap();
+        let mut model = view();
+        model.fields[0].kind = FieldKind::Percent;
+        model.fields[0].max_utf16 = 3;
+        model.fields[0].value = "50".into();
+        window.render(&model).unwrap();
+        let generation = window.form_generation();
+        let binding = field(&window, 1);
+        let slider = binding.slider.unwrap();
+        let position = || unsafe { SendMessageW(slider, TBM_GETPOS, None, None).0 };
+        assert_eq!(position(), 50);
+        set(field(&window, 2), "SyntheticSecret");
+        for value in 0..=100 {
+            window.probe_percent(FieldId(1), value).unwrap();
+        }
+        assert_eq!(
+            window.draft_nonsecret().unwrap().get(FieldId(1)),
+            Some("100")
+        );
+        assert_eq!(position(), 100);
+        let events = window.take_events().unwrap();
+        let snapshots: Vec<_> = events
+            .iter()
+            .filter_map(|e| match e {
+                Event::PercentChanged { generation, form } => Some((*generation, form)),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(snapshots.len(), 1);
+        assert_eq!(snapshots[0].0, generation);
+        assert_eq!(snapshots[0].1.get(FieldId(1)), Some("100"));
+        assert!(snapshots[0].1.get(FieldId(2)).is_none());
+        assert!(snapshots[0].1.get(FieldId(4)).is_none());
+        for text in ["0", "100", "", "101", "abc"] {
+            window.probe_edit(FieldId(1), text).unwrap();
+            assert_eq!(
+                window.draft_nonsecret().unwrap().get(FieldId(1)),
+                Some(text)
+            );
+            assert_eq!(position(), if text == "0" { 0 } else { 100 });
+        }
+        click(&window);
+        window.probe_percent(FieldId(1), 0).unwrap();
+        let events = window.take_events().unwrap();
+        let sequence: Vec<_> = events
+            .iter()
+            .filter(|e| matches!(e, Event::PercentChanged { .. } | Event::Submit(..)))
+            .collect();
+        assert!(
+            matches!(sequence.as_slice(), [Event::PercentChanged { form: before, .. }, Event::Submit(_, submitted), Event::PercentChanged { form: after, .. }]
+            if before.get(FieldId(1)) == Some("abc") && submitted.get(FieldId(1)) == Some("abc") && after.get(FieldId(1)) == Some("0"))
+        );
+        window.probe_percent(FieldId(1), 63).unwrap();
+        window.render(&model).unwrap();
+        assert_eq!(window.form_generation(), generation);
+        model.fields[0].value = "42".into();
+        window.render(&model).unwrap();
+        assert!(window.form_generation() > generation);
+        assert!(window
+            .take_events()
+            .unwrap()
+            .iter()
+            .all(|e| !matches!(e, Event::PercentChanged { .. })));
+        model.busy = true;
+        window.render(&model).unwrap();
+        assert!(!unsafe { IsWindowEnabled(slider) }.as_bool());
+        assert!(!unsafe { IsWindowEnabled(binding.hwnd) }.as_bool());
+        assert!(window.probe_percent(FieldId(1), 1).is_err());
+        assert!(window.probe_edit(FieldId(1), "1").is_err());
+        model.busy = false;
+        window.render(&model).unwrap();
+        window.probe_percent(FieldId(1), 30).unwrap();
+        window.hide();
+        assert!(window
+            .take_events()
+            .unwrap()
+            .iter()
+            .all(|event| !matches!(event, Event::PercentChanged { .. } | Event::Submit(..))));
+        model.fields.clear();
+        window.render(&model).unwrap();
+        assert!(!unsafe { IsWindow(Some(slider)) }.as_bool());
+        assert!(!unsafe { IsWindow(Some(binding.hwnd)) }.as_bool());
+        assert!(!window.is_visible());
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
     }
     fn set(field: FieldBinding, text: &str) {
         let text = HSTRING::from(text); // synthetic, never production credential data

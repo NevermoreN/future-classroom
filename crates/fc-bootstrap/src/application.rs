@@ -2479,6 +2479,7 @@ struct App {
     profile_content_owner: Option<PrincipalId>,
     preview_sequence: u64,
     preview_active: bool,
+    percent_preview_due: Option<(Instant, Screen)>,
     desktop: desktop_controller::Controller,
     root: PathBuf,
     material_editor: Option<materials_editor::Editor>,
@@ -3143,6 +3144,9 @@ impl App {
             };
         }
         match event {
+            Event::PercentChanged { generation, form } => {
+                self.percent_input(generation, form)?;
+            }
             Event::Input => {
                 self.last_input = Instant::now();
                 if let (Some(c), Some(l)) = (&self.control, self.lease) {
@@ -3447,9 +3451,118 @@ impl App {
         Ok(())
     }
     fn clear_profile_preview(&mut self) {
+        self.percent_preview_due = None;
         self.window.clear_layout_preview();
         self.preview_active = false;
         self.preview_sequence = self.preview_sequence.saturating_add(1);
+    }
+    fn percent_input(
+        &mut self,
+        generation: u64,
+        form: FormData,
+    ) -> std::result::Result<(), String> {
+        if generation != self.window.form_generation()
+            || self.pending.is_some()
+            || self.stopping
+            || !self.profiles_memory_gate()
+        {
+            return Ok(());
+        }
+        let Some(owner) = self.current_global_owner() else {
+            return Ok(());
+        };
+        let valid = match self.screen {
+            Screen::Display => self
+                .display
+                .as_mut()
+                .filter(|e| e.owner() == owner)
+                .map(|e| e.percent_input(form)),
+            Screen::Profiles => self
+                .profiles
+                .as_mut()
+                .filter(|e| e.owner() == owner)
+                .map(|e| e.percent_input(form)),
+            _ => None,
+        };
+        let Some(valid) = valid else { return Ok(()) };
+        self.last_input = Instant::now();
+        if let (Some(control), Some(lease)) = (&self.control, self.lease) {
+            let _ = control.note_input(lease, self.clock.monotonic_millis());
+        }
+        self.clear_profile_preview();
+        if valid && !self.native_unknown && !self.native_mutation_pending {
+            self.percent_preview_due =
+                Some((Instant::now() + Duration::from_millis(150), self.screen));
+        }
+        self.status = "透明度草稿已更新；停止调整后预览，尚未保存。".into();
+        self.render()
+    }
+    fn poll_percent_preview(&mut self) -> std::result::Result<(), String> {
+        let Some((due, screen)) = self.percent_preview_due else {
+            return Ok(());
+        };
+        if self.pending.is_some() || Instant::now() < due {
+            return Ok(());
+        }
+        self.percent_preview_due = None;
+        if self.screen != screen
+            || self.stopping
+            || self.native_unknown
+            || self.native_mutation_pending
+            || !self.profiles_memory_gate()
+        {
+            return Ok(());
+        }
+        let Some(lease) = self.lease else {
+            return Ok(());
+        };
+        if self.current_global_owner() != Some(lease.principal_id()) {
+            return Ok(());
+        }
+        match screen {
+            Screen::Display => {
+                if let (Some(backend), Some(editor)) = (
+                    &self.backend,
+                    self.display
+                        .as_ref()
+                        .filter(|e| e.owner() == lease.principal_id()),
+                ) {
+                    if let Some(subject) = editor.percent_preview_subject() {
+                        let (palette, settings) = editor.visual_preview_input();
+                        self.submit(Work::DisplayPreview(Box::new(display_flow::PreviewJob {
+                            backend: backend.clone(),
+                            lease,
+                            palette,
+                            settings,
+                            subject,
+                            sequence: self.preview_sequence,
+                        })))?;
+                        self.render()?;
+                    }
+                }
+            }
+            Screen::Profiles => {
+                if let Some(editor) = self
+                    .profiles
+                    .as_ref()
+                    .filter(|e| e.owner() == lease.principal_id())
+                {
+                    match editor.percent_preview() {
+                        Ok(Some(command)) => {
+                            self.dispatch_profile_command(command)?;
+                            self.render()?;
+                        }
+                        Ok(None) => {}
+                        Err(message) => {
+                            self.status = message;
+                            self.render()?;
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+        Ok(())
     }
     fn sync_layout_selection(&self) -> std::result::Result<(), String> {
         if self.preview_active && self.screen == Screen::Profiles {
@@ -4810,7 +4923,7 @@ impl App {
                         lease,
                         palette,
                         settings,
-                        subject: subject_id,
+                        subject: Some(subject_id),
                         sequence: self.preview_sequence,
                     })))?;
                 }
@@ -5649,7 +5762,10 @@ impl App {
                             .control
                             .as_ref()
                             .is_some_and(|c| c.health_gate().status().revision == source_revision)
-                        && self.display.as_ref().is_some_and(|e| e.visual_page())
+                        && self
+                            .display
+                            .as_ref()
+                            .is_some_and(|e| e.percent_preview_available())
                     {
                         self.window
                             .set_layout_preview(Some(image))
@@ -5745,6 +5861,7 @@ impl App {
             }
             self.render()?;
         }
+        self.poll_percent_preview()?;
         Ok(())
     }
 }
@@ -6242,6 +6359,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         profile_content_owner: None,
         preview_sequence: 0,
         preview_active: false,
+        percent_preview_due: None,
         desktop: module_registry::create_desktop(probe)?,
         root: PathBuf::new(),
         material_editor: None,
@@ -7625,6 +7743,75 @@ mod tests {
             voice_management_probe::login(&mut app, until).unwrap();
         }
         (scratch, app)
+    }
+    #[test]
+    fn percent_native_draft_debounce_preview_save_and_lock_remain_separate() {
+        let _serial = SERIAL.lock().unwrap();
+        let (scratch, mut app) = ready_management();
+        let until = Instant::now() + Duration::from_secs(30);
+        voice_management_probe::submit(&mut app, TO_DISPLAY, &[], until).unwrap();
+        let backend = app.backend.as_ref().unwrap().clone();
+        let lease = app.lease.unwrap();
+        let before = backend.lock().unwrap().read_subject_visuals(lease).unwrap();
+        for value in [0, 100, 37] {
+            app.window
+                .probe_percent(display_editor::COURSE_ALPHA, value)
+                .unwrap();
+        }
+        let events = app.window.take_events().unwrap();
+        assert_eq!(
+            events
+                .iter()
+                .filter(|e| matches!(e, Event::PercentChanged { .. }))
+                .count(),
+            1
+        );
+        for event in events {
+            app.event(event).unwrap();
+        }
+        assert!(app.pending.is_none());
+        assert!(app.percent_preview_due.is_some());
+        assert_eq!(
+            app.display
+                .as_ref()
+                .unwrap()
+                .visual_preview_input()
+                .1
+                .course_fill_percent,
+            37
+        );
+        assert_eq!(
+            backend.lock().unwrap().read_subject_visuals(lease).unwrap(),
+            before
+        );
+        app.percent_preview_due = Some((Instant::now(), Screen::Display));
+        app.poll_percent_preview().unwrap();
+        assert!(app.percent_preview_due.is_none() && app.pending.is_some());
+        wait_for(&mut app, |a| a.pending.is_none());
+        assert!(app.preview_active, "{}", app.status);
+        assert_eq!(
+            backend.lock().unwrap().read_subject_visuals(lease).unwrap(),
+            before
+        );
+        voice_management_probe::submit(&mut app, display_editor::SAVE_ALL, &[], until).unwrap();
+        let saved = backend.lock().unwrap().read_subject_visuals(lease).unwrap();
+        assert_eq!(saved.display.course_fill_percent, 37);
+        assert_ne!(saved.display.revision, before.display.revision);
+        app.window
+            .probe_percent(display_editor::COURSE_ALPHA, 84)
+            .unwrap();
+        let generation = app.window.form_generation();
+        let old = app.window.take_events().unwrap();
+        app.event(Event::Submit(LOCK, FormData::new())).unwrap();
+        for event in old {
+            app.event(event).unwrap();
+        }
+        assert_ne!(generation, app.window.form_generation());
+        assert!(app.percent_preview_due.is_none() && !app.preview_active);
+        assert!(app.lease.is_none());
+        drain(app);
+        drop(backend);
+        drop(scratch);
     }
     /// Drop only the verified successful metadata completion at the UI delivery
     /// boundary. Keep the original JobTicket for the normal pump to consume;

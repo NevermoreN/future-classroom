@@ -271,3 +271,93 @@ fn embedded_public_layout_style_never_exposes_or_accepts_school_palette_actions(
         matches!(editor.handle(SAVE_ALL,data),Ok(Command::Save{colors,..}) if colors.is_empty())
     );
 }
+
+#[test]
+fn percent_live_draft_keeps_unfinished_fields_targets_and_original_versions() {
+    let mut e = Editor::new_visuals(state(), PrincipalId::new(1).unwrap());
+    let mut d = form(&e);
+    for (id, text) in [
+        (COURSE_ALPHA, "0"),
+        (HOMEWORK_ALPHA, "100"),
+        (GLASS, "0"),
+        (REFLECTION, "100"),
+        (TARGET, "2026-"),
+    ] {
+        set(&mut d, id, text);
+    }
+    assert!(e.percent_input(d));
+    assert_eq!(e.settings.revision, Revision::new(7));
+    assert_eq!(
+        (
+            e.settings.course_fill_percent,
+            e.settings.homework_fill_percent,
+            e.settings.glass_surface_percent,
+            e.settings.edge_reflection_percent
+        ),
+        (0, 100, 0, 100)
+    );
+    assert_eq!(value(&e, TARGET), "2026-");
+    assert!(e.settings.countdown.target.is_none());
+    assert!(e
+        .view("", false)
+        .fields
+        .iter()
+        .filter(|f| [COURSE_ALPHA, HOMEWORK_ALPHA, GLASS, REFLECTION].contains(&f.id))
+        .all(|f| f.kind == FieldKind::Percent && f.max_utf16 == 3));
+    assert!(e.handle(SAVE_ALL, form(&e)).is_err());
+    let mut d = form(&e);
+    set(&mut d, COURSE_ALPHA, "101");
+    assert!(!e.percent_input(d));
+    assert_eq!(value(&e, COURSE_ALPHA), "101");
+    assert_eq!(e.settings.course_fill_percent, 0);
+    assert!(e.percent_preview_subject().is_none());
+    e.handle(CANCEL, form(&e)).unwrap();
+    e.handle(KEEP, FormData::new()).unwrap();
+    assert_eq!(value(&e, TARGET), "2026-");
+    assert_eq!(value(&e, COURSE_ALPHA), "101");
+
+    let mut e = editor();
+    let selected = e.selected_subject;
+    let before = e.colors();
+    let mut d = form(&e);
+    set(&mut d, PALETTE_SUBJECT, "9");
+    set(&mut d, OPAQUE_RGB, "12");
+    set(&mut d, COURSE_ALPHA, "100");
+    set(&mut d, HOMEWORK_ALPHA, "0");
+    assert!(e.percent_input(d));
+    assert_eq!(e.percent_preview_subject(), Some(selected));
+    assert_eq!(e.selected_subject, selected);
+    assert_eq!(e.colors(), before);
+    assert_eq!(value(&e, OPAQUE_RGB), "12");
+    assert_eq!(
+        e.view("", false)
+            .fields
+            .iter()
+            .find(|f| f.id == OPAQUE_RGB)
+            .unwrap()
+            .kind,
+        FieldKind::Text
+    );
+    assert!(e.handle(SAVE_ALL, form(&e)).is_err());
+
+    let mut e = Editor::new(state().display, PrincipalId::new(1).unwrap());
+    e.handle(COMPONENTS, form(&e)).unwrap();
+    let selected = e.component;
+    let mut d = form(&e);
+    set(&mut d, ALPHA, "0");
+    set(&mut d, FONT, "");
+    assert!(e.percent_input(d));
+    assert_eq!(e.component, selected);
+    assert_eq!(e.settings.components[selected].opacity_percent, 0);
+    assert_eq!(value(&e, FONT), "");
+    assert!(e
+        .view("", false)
+        .fields
+        .iter()
+        .find(|f| f.id == FONT)
+        .is_some_and(|f| f.kind == FieldKind::Text));
+    let mut d = form(&e);
+    set(&mut d, ALPHA, "");
+    assert!(!e.percent_input(d));
+    assert!(e.handle(SAVE_ALL, form(&e)).is_err());
+}

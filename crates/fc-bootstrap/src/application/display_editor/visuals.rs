@@ -147,17 +147,15 @@ impl Editor {
         }
         view.fields.extend([
             toggle(FILL, "显示科目底色", self.settings.subject_fill),
-            plain(
+            percentage(
                 COURSE_ALPHA,
                 "课程胶囊填充不透明度（0–100%）",
-                self.settings.course_fill_percent.to_string(),
-                3,
+                self.settings.course_fill_percent,
             ),
-            plain(
+            percentage(
                 HOMEWORK_ALPHA,
                 "作业科目标记不透明度（0–100%）",
-                self.settings.homework_fill_percent.to_string(),
-                3,
+                self.settings.homework_fill_percent,
             ),
         ]);
         view.actions = vec![

@@ -6,7 +6,7 @@ pub(super) struct PreviewJob {
     pub lease: SessionLease,
     pub palette: SubjectVisualPalette,
     pub settings: DisplaySettings,
-    pub subject: SubjectId,
+    pub subject: Option<SubjectId>,
     pub sequence: u64,
 }
 impl PreviewJob {
@@ -42,13 +42,29 @@ impl PreviewJob {
         let now = CurrentClock::new()
             .try_now()
             .map_err(|_| invalid("系统时间不可用。"))?;
-        let image = profiles_preview::render_subject_visuals(
-            &identity,
-            &self.settings,
-            self.subject,
-            self.sequence,
-            now,
-        )
+        let image = match self.subject {
+            Some(subject) => profiles_preview::render_subject_visuals(
+                &identity,
+                &self.settings,
+                subject,
+                self.sequence,
+                now,
+            ),
+            None => profiles_preview::render(
+                &identity,
+                &fc_ports::PublicLayoutState {
+                    layout: Default::default(),
+                    display: self.settings.clone(),
+                },
+                None,
+                self.sequence,
+                now,
+            )
+            .map(|mut image| {
+                image.nodes.clear();
+                image
+            }),
+        }
         .map_err(|_| invalid("颜色示例无法完成有界绘制，请检查显示尺寸。"))?;
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         let backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
