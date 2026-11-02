@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | 实机NOT_RUN：目前无该系统测试机；R78同源Win7目标MSVC构建及在Win11运行通过，不能替代Win7实机 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | 实机NOT_RUN：用户确认目前只有已授权Win11，不重复询问 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | 实机NOT_RUN：用户确认目前只有已授权Win11，不重复询问 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：R78两套同源MSVC各1567项及公开桌面20步；R80固定GNU DEV产品Setup安装、缺失修复、卸载及实际写入后失败回滚通过。跨版本升级、Run归属、真实登录、可见希沃及长稳等仍未完成，详见实施记录R78–R80 |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：R78两套同源MSVC各1567项及公开桌面20步；R80固定GNU DEV产品Setup安装、缺失修复、卸载及实际写入后失败回滚通过。后续GNU DEV包0.2→0.3升级及升级写后失败回滚通过；完整故障矩阵、学校数据/启用Run的保留、真实登录、可见希沃及长稳仍未完成，详见实施记录R78–R80 |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -398,3 +398,8 @@ R80后续ABI2正常GNU开发包已在相同授权Win11实际完成首次安装�
 R06界面12源的61项展示层测试，以及该Win11上的5项精确原生测试/正常主程序公开桌面20步已通过，六原过程均实际退出0和checked-close，前台窗口不变、测试nonce清理通过；[界面注册证据](验证记录/2026-11-02-round80-ui-registries/archive-index-first.json)保留原编译wrapper因GCC临时文件未清的FAIL和后续独立清理收据。安装16源和界面12源的整合版本另通过GNU all-targets检查、严格Clippy、格式和12/33架构；两组分别受测的运行不能替代整合版本全量回归。
 
 较早f82d0fd的现代run41373542153/Win7目标run41373544611均实际success，各635项输入与全部51/53条原命令具证，但不覆盖上述新28源；新源码仍须独立MSVC构建及相应运行。当前实际操作系统依然只有Win11 Pro build26300 x64/WOW64；Win7 SP1 x86、Win10 x86/x64各自实机和希沃可见触控/PPT/DPI、物理音频/手机、校园P0/容量/TLS及72小时门槛均未因本批通过而放行。持续SSH授权和用户现有前台工作保持。
+
+
+R80升级补证：正常GNU开发来源的0.2→0.3在该Win11实际完成安装/跨版本升级/卸载，六原B/G均实际0及checked-close，新14份健康、旧产品/组件客户/缓存Absent。另一个Type19写后失败夹具实际恢复旧版LICENSE缺失、51字节PROBE及其余12份文件、旧注册/组件/缓存前像，随后修复/卸载通过，四B为0/1603/0/0、四G均0；测试nonce完整下载核同后清理。原观察器配置FAIL与正式清理收据保留，见[升级归档](验证记录/2026-11-02-round80-abi2-upgrade/archive-index-first.json)。该运行不含学校实际数据保留、启用Run或标准用户验收，不含新14份中间SHA见证；最终Upgrade20源加纯位置修正1源仅另有整合静态检查，不能冒充该整合版已完整native回归。
+
+71ced30的现代MSVC51条命令实际全部0；Win7目标53条恰Clippy101，其他编译/PE命令0，原失败保留于[完整文本构建归档](验证记录/2026-11-02-round80-maintenance-msvc/archive-index-first.json)。位置修正通过61项host展示测试及GNU严格检查，新源码官方CI仍待运行，不能据旧产物发布升级包。另以四组合成输入补齐生产600000轮Rust/Python与[Win11 x64 BCrypt独立对照](验证记录/2026-11-02-round80-password-cng/archive-index-first.json)，四原CNG provider实际正常关闭；该64位API探针不是x86产品全回归、Win7/Win10实际运行或目标白板性能证据。Win7 SP1 x86、Win10 x86/x64实机与其余现场门槛不变，SSH授权保留。

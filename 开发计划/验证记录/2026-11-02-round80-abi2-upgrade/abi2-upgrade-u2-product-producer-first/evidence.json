@@ -1,0 +1,135 @@
+{
+  "status": "DEV_FROZEN_NORMAL_U2_PRODUCT_ONLY_BUILD_NOT_RELEASE",
+  "source_root": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-u2-product-first",
+  "source_head": "6eb6ec099b6b14e78b280df5df526545c8e04ecc",
+  "target": "i686-pc-windows-gnu",
+  "formal_ci": false,
+  "environment": {
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_PROFILE_RELEASE_STRIP": "symbols",
+    "CARGO_TARGET_DIR": "/tmp/fc-round80-controlled-repair/abi2-upgrade-u2-product-target-first",
+    "CARGO_TARGET_I686_PC_WINDOWS_GNU_LINKER": "i686-w64-mingw32-gcc",
+    "RUSTFLAGS": "-C target-feature=+crt-static -C link-arg=-Wl,--major-subsystem-version,6,--minor-subsystem-version,1"
+  },
+  "removed_environment_keys": [
+    "CARGO_ENCODED_RUSTFLAGS",
+    "RUSTC_WRAPPER",
+    "RUSTC_WORKSPACE_WRAPPER",
+    "FC_OWNED_REMOVAL_SCOPE_HEX"
+  ],
+  "source_delta": {
+    "commonSourceBase": "6eb6ec099b6b14e78b280df5df526545c8e04ecc",
+    "u2SourceBase": "6eb6ec099b6b14e78b280df5df526545c8e04ecc",
+    "normal3Evidence": {
+      "path": "/tmp/fc-round80-controlled-repair/abi2-upgrade-u1-normal-producer-first/evidence.json",
+      "bytes": 5796,
+      "sha256": "3e60a09f3758cccecba8403fd98548b511a3acb100bc01c849f42cde4d122910"
+    },
+    "soleChangedPath": "crates/fc-bootstrap/src/main.rs",
+    "oldMain": {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-normal-first/crates/fc-bootstrap/src/main.rs",
+      "bytes": 21856,
+      "sha256": "a30233d87465baca146f1bb985f1d75a8fc51afb72e10ed9d41c6f115051330b"
+    },
+    "newMain": {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-u2-product-first/crates/fc-bootstrap/src/main.rs",
+      "bytes": 21890,
+      "sha256": "9c0a89eed512b4393068ca43b734f972d9cca6f3326f97102eb43b3920492bc7"
+    },
+    "visibleChange": {
+      "before": "let _ = fc_windows::startup::show_startup_failure(&e);",
+      "after": "let _ = fc_windows::startup::show_startup_failure(&format!(\"FutureClassroom 0.3: {e}\"));"
+    },
+    "compiledDomains": "U2 normal main artifact only; U1 normal helper and guard reused unchanged"
+  },
+  "commands": [
+    {
+      "name": "product-compile",
+      "argv": [
+        "cargo",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-bootstrap",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-u2-product-target-first",
+        "--message-format=json"
+      ],
+      "actual_exit": 0,
+      "parent_reaped": true,
+      "timed_out": false,
+      "seconds": 252.7058141420057,
+      "original_budget_seconds": 900,
+      "stdout": {
+        "path": "product-compile.stdout.jsonl",
+        "bytes": 92784,
+        "sha256": "6ee6844605179b83272a778ec5acd14f4f9cc4de03536671df4c561c7a14adf7"
+      },
+      "stderr": {
+        "path": "product-compile.stderr.log",
+        "bytes": 3761,
+        "sha256": "07f402f1f9141a724d7327d2484f46ee9cf66895fa613fa2e03a0bf9bd15b6b0"
+      },
+      "artifact": {
+        "path": "artifacts/fc-bootstrap.exe",
+        "bytes": 11420672,
+        "sha256": "b29aa1926e5c2182c191c3eed2c4ed7a94fa95eba8fbdfb42b66f33e5eb8b827"
+      }
+    }
+  ],
+  "producer_script": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-upgrade-u2-package-preparation-first/build-u2-product.py",
+    "bytes": 4778,
+    "sha256": "cf3f2df6c0ba090955439504cc51af5ae675e0e69fa7a005f3814516b4e24fc7"
+  },
+  "runtime": "NOT_RUN",
+  "publication": "NOT_GRANTED",
+  "metadata_command": {
+    "name": "metadata",
+    "argv": [
+      "cargo",
+      "metadata",
+      "--offline",
+      "--locked",
+      "--no-deps",
+      "--format-version",
+      "1"
+    ],
+    "actual_exit": 0,
+    "parent_reaped": true,
+    "timed_out": false,
+    "seconds": 0.05834426799992798,
+    "original_budget_seconds": 60,
+    "stdout": {
+      "path": "metadata.stdout.jsonl",
+      "bytes": 30035,
+      "sha256": "f533aa104073ec20f37d884713a3bb2c3f0b562978b5995061c7c330a7df06e0"
+    },
+    "stderr": {
+      "path": "metadata.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "metadata": {
+    "path": "metadata.stdout.jsonl",
+    "bytes": 30035,
+    "sha256": "f533aa104073ec20f37d884713a3bb2c3f0b562978b5995061c7c330a7df06e0"
+  },
+  "inputs_before": {
+    "path": "inputs-before.json",
+    "bytes": 101657,
+    "sha256": "b20ccacca76a17ea7c5399dbcf41f40e5df660e87a5d380eaa4f8504e4ce913c"
+  },
+  "inputs_after": {
+    "path": "inputs-after.json",
+    "bytes": 101657,
+    "sha256": "b20ccacca76a17ea7c5399dbcf41f40e5df660e87a5d380eaa4f8504e4ce913c"
+  }
+}

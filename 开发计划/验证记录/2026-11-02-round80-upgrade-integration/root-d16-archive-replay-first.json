@@ -1,0 +1,47 @@
+{
+  "status": "PASS_ROOT_FULL_ORIGINAL_EQUALITY_FROZEN_MEMBERS_AND_STRICT_SCAN",
+  "archive": "D16",
+  "stagingRoot": "/tmp/fc-round80-controlled-repair/password-cng-archive-staged-first",
+  "freezeSha256": "d62e95105aabf2716bcca57411326807f0c6a4ac10eeacaccddaf282e491819c",
+  "freezeFiles": 13,
+  "members": 151,
+  "textBytes": 627299,
+  "binaryIdentities": 8,
+  "zipInputs": 0,
+  "tar": {
+    "path": "/tmp/fc-round80-controlled-repair/password-cng-archive-staged-first/evidence-originals-first.tar.gz",
+    "bytes": 114677,
+    "sha256": "26c2bc3561bb600067cf4286d78a753fbf30d4f5d06cfd5faabb9e5c7772c5ce"
+  },
+  "strictVerify": {
+    "argv": [
+      "python3",
+      "-B",
+      "/tmp/fc-round80-controlled-repair/password-cng-archive-staged-first/archive.py",
+      "--archive",
+      "D16",
+      "--verify-only",
+      "--directory",
+      "/tmp/fc-round80-controlled-repair/password-cng-archive-staged-first",
+      "--expected-freeze-sha256",
+      "d62e95105aabf2716bcca57411326807f0c6a4ac10eeacaccddaf282e491819c"
+    ],
+    "actualExit": 0,
+    "originalReaped": true,
+    "seconds": 1.0273023680056212,
+    "stdout": {
+      "path": "/tmp/fc-round80-controlled-repair/root-d16-strict-verify-first.stdout.log",
+      "bytes": 589,
+      "sha256": "dd51e9b43c8019b9ddc2d33718736eab701c596ea3e0c7fe4edfe8c88e8572ed"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round80-controlled-repair/root-d16-strict-verify-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "identityScope": "Eight public synthetic fixture text copies are identity-only, not retained credentials. Original host binary identity comes from report; target was deleted and not read.",
+  "sourceDeletion": false,
+  "Windows": false,
+  "Git": false
+}

@@ -1,0 +1,742 @@
+{
+  "status": "PASS_HOST_PRODUCTION_RUST_AND_PYTHON4_WINDOWS_NOT_RUN",
+  "sourceCommit": "b6b18631379e61b1971c20b361296db8671eb885",
+  "sourceBefore": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/Cargo.toml",
+      "bytes": 1173,
+      "sha256": "95d5c4a52c154ef80ae54a42dc228e081bb3956a0ede5e4260b967d723fd7de7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/Cargo.toml",
+      "bytes": 175,
+      "sha256": "79be768cf77d3e968eab4fee89e0e57a5cbe7545216a28d24503dfea39886792"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/auth.rs",
+      "bytes": 4600,
+      "sha256": "ee29aac2c7f2d157fe0c50cfbe8813c9bc3ca11a4a60c1531a0949f83e77cc9d"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/autostart.rs",
+      "bytes": 9182,
+      "sha256": "420d4e94607dee907e252b0ee7a13bb8db182dbb72bd5bea6238a54cf8d47ec4"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/calendar.rs",
+      "bytes": 14220,
+      "sha256": "6dd611c6f17974eb15694227db382ad3fe5a675520985235c8bcb0d640e1ad5e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/calendar_tests.rs",
+      "bytes": 21898,
+      "sha256": "97868e860c88b0ddd6ca6eb3806bc8f17c4ec4f749409c25eeb8af74d608bf83"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/content.rs",
+      "bytes": 3783,
+      "sha256": "250a50b370ad3d29801e935d81fb83ad05ef0d461b63376680c0b059f43ef87f"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/desktop.rs",
+      "bytes": 21094,
+      "sha256": "c8fb60a73f3f30e07fd5684a35c45fa6f0eba9a515f36597c0bcef2fbedaaf89"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/https_settings/source_networks.rs",
+      "bytes": 6518,
+      "sha256": "c22cf5e84666a02c2c8742c63a95e827d14f458fbb61bff9054eaf361438d297"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/https_settings/tests.rs",
+      "bytes": 2566,
+      "sha256": "732972b7b32b3a4cc9c6b96465d7f146572510470c88d2f578e3f6b4056340e5"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/https_settings.rs",
+      "bytes": 6829,
+      "sha256": "0f695a75dc2c8cda3bb0c0731c1bae0bf8ff1120b9a5b45ad65402b224db5999"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/identity/tests.rs",
+      "bytes": 17476,
+      "sha256": "f502a37887102dbbacb64aed9119aad6e329d5fd397b7b925c6c9d15c307ecbc"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/identity.rs",
+      "bytes": 32091,
+      "sha256": "1e53dc7a6859138725abc30b23080162c2bc4777cea5e95e2ecea490b415dafa"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/ids.rs",
+      "bytes": 1760,
+      "sha256": "44dffdbb90c86a6bc0e57a4323736c9b33089ae83897a91b0d726839e5ecf0c2"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/layout.rs",
+      "bytes": 22466,
+      "sha256": "a9ab98415f1ff2c573a553ef6ef56acb226f61e772e4cf812d3e614afef2b518"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/lesson_context/tests/public_desktop.rs",
+      "bytes": 8559,
+      "sha256": "58e56bff46e152ee7256bac99f3b38ec43acd525538fba7ebbe813281691e7e4"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/lesson_context/tests.rs",
+      "bytes": 3463,
+      "sha256": "edc4d295b815f1550fd7759188184a7bc5b7d00895047f7060db4568ecc2015a"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/lesson_context.rs",
+      "bytes": 22065,
+      "sha256": "68c5ac8d8374780da0b3018cb6fad7b7de125c3731ec31314a342105480ca5f5"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/lib.rs",
+      "bytes": 385,
+      "sha256": "b50318e013f86dc5e51b58bbe405b9bb92831347d1e7b0a461919d03c2f94d1e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/materials/tests.rs",
+      "bytes": 16338,
+      "sha256": "516ca209bb9d89efc88ad87cb249749a0688a670c7cfa5b8b1c5609837f30de2"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/materials.rs",
+      "bytes": 24453,
+      "sha256": "676dd4c7ebd4589b68a2ffa4826fdda3ce541c0de6afd35e7000df30ecbdf45d"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/profile.rs",
+      "bytes": 41234,
+      "sha256": "c3749ff5e73cd82a9da76e5014901f384658a3ae51254d4ac43ec20ca5f50ee4"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/profile_content.rs",
+      "bytes": 49812,
+      "sha256": "7f8b62e2471fccf48c991eebe316971f7f02df2f51d87c3677c84a6b67ca3590"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/recovery/migration.rs",
+      "bytes": 13000,
+      "sha256": "1771d4d380f116afd88b10fa494fd241d2307643d1ccf88b2d7a450b247544e7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/recovery.rs",
+      "bytes": 9590,
+      "sha256": "8f321972924fed1bfae2afe27b9e36e8e694c0f60e835b096c3cedb98cd08a8d"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule/tests.rs",
+      "bytes": 12357,
+      "sha256": "b257722c966df36b12277090070448dd096a549adc2c9ad6ce700ebcdaa38e5c"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule.rs",
+      "bytes": 21791,
+      "sha256": "330d4c72670fa1eeb82508c97ec2a6fe94c9b34605d8b6a3f06338fe19f7438b"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule_document/row_operations.rs",
+      "bytes": 15222,
+      "sha256": "266c4549402298dc79604a608f46156b961e50bf888f37bb6f83a522b950b7b2"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule_document/row_operations_tests.rs",
+      "bytes": 22819,
+      "sha256": "a9b2acf32806b32459a9b572c407635404156a22711d64a17eb0ea91d5eb682e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule_document/tests.rs",
+      "bytes": 28085,
+      "sha256": "3429a284637dd283dcb9143fc2b60cdabb9fa36a500f54b84bff2a9a9ccfec12"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule_document.rs",
+      "bytes": 61001,
+      "sha256": "527b62f4477863d92558f3a2755d164753bb7b0f7e28d719c28409383d0792e2"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/subject_visual/tests.rs",
+      "bytes": 8825,
+      "sha256": "27759107f9032c5b03b203a042a7f07a37e58748035cd594d459ffdea96ec943"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/subject_visual.rs",
+      "bytes": 4826,
+      "sha256": "24ce6557094c89764564b5ccd2cb0a30c9c5240e81632fc0bb93cae13d22ad19"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/time.rs",
+      "bytes": 10313,
+      "sha256": "b8763ff445240f5e91e38b77654d6d92784e21feee07e8fc051187ae9ed88f3a"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/voice.rs",
+      "bytes": 52799,
+      "sha256": "04c7c57839d2c33c9360f6e2dad93b491da660704a8051683f56df1bd3ca0cc8"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/Cargo.toml",
+      "bytes": 201,
+      "sha256": "eb4da687dda49f120d097c61d25b4fd41498045990b722108a489823661677f7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/audio.rs",
+      "bytes": 3097,
+      "sha256": "a27c7be45c22d8c49f817da3a5c6b73751002b0a0d7af2a67c3e1a7a18fa1881"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/autostart.rs",
+      "bytes": 2189,
+      "sha256": "b6b756713aa67b2576aa0be56ffaaed030759c01fe440bb00e4ee53cb627f004"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/calendar.rs",
+      "bytes": 4678,
+      "sha256": "9ace57504633429ca746151467e381a301f4699e13906399442ab32e495873ad"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/content_web.rs",
+      "bytes": 1343,
+      "sha256": "871c4ca4dfe9a008b1232fa53c16aaa0b3801036c285d942e3e3f356f37c8df6"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/desktop_lesson.rs",
+      "bytes": 1653,
+      "sha256": "f03541c029a69d740964c1d586692f9d702cc5804742154d4d74293df0a8495b"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/http.rs",
+      "bytes": 13327,
+      "sha256": "059fa91aa0217c43610914268e9305e32ef6b4eb93929004512bd4083d9b8b32"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/https_settings.rs",
+      "bytes": 1629,
+      "sha256": "ae00c7e8abfcf7edf4c160f8be747bcefe446edc3894effd6d9984c33bd5eed7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/lib.rs",
+      "bytes": 22324,
+      "sha256": "4786ac1260452ebb3315bc7633596317c878dc0818c7bf6a23fb3c3e48195afe"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/material_outcome.rs",
+      "bytes": 1310,
+      "sha256": "582f6428c0e55a9f65caee04d0df95dc9fc16dd200298a72cf048fc174596da5"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/profile_content.rs",
+      "bytes": 11002,
+      "sha256": "16671837bdd2b1ebfa27096836f4bc129cd13d02f5aecd36f6b80eb39d2e2182"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/profiles.rs",
+      "bytes": 2420,
+      "sha256": "117bdd744f1ac287aa84b2d93f9a9b35c872fddf9a4c8faad1bc74a7a8035249"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/subject_visual.rs",
+      "bytes": 2077,
+      "sha256": "0394ce2a4a0e6a7dadbe953cce0a171a4b1fa9ef4382c46fff5cfd9f6eba2a54"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/voice.rs",
+      "bytes": 3538,
+      "sha256": "4d8656e865bf85d39911b704477eba47f3b3dd7d45fc78469aa64f2bd67e1ded"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-security/Cargo.toml",
+      "bytes": 325,
+      "sha256": "4879a172c15f9cfa7503d565a191016915c829a2e4118edc3e0c2cbb2502a7ad"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-security/src/codec.rs",
+      "bytes": 11197,
+      "sha256": "af2372d6de1b714b04a607b446f815724bdcb06b091b18ab2b2757edecb9c3c2"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-security/src/lib.rs",
+      "bytes": 10947,
+      "sha256": "6b2a1329f89513116d4f10c6627f49422d2a16a27940aeef9a965138e3621bba"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-security/src/recovery.rs",
+      "bytes": 8446,
+      "sha256": "03339bff8e3a0be56b58460b0e3d81ece433ced9cb48904f762a3bc7122b681b"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-security/src/web.rs",
+      "bytes": 14000,
+      "sha256": "ad17bbe3ee8443dd1c0ea036261612027c9cb0bdbeac35876b3832c31dd0f73e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/rust-toolchain.toml",
+      "bytes": 86,
+      "sha256": "559f488c181e0e9e77cf17c29de663977f036ec7ff2e2060585714bf53c52d62"
+    }
+  ],
+  "scope": "Actual production fc-security create_password_record/verify_password with fixed synthetic RandomPort; no production changes; host is not Windows runtime",
+  "commands": [
+    {
+      "label": "lock",
+      "argv": [
+        "cargo",
+        "generate-lockfile",
+        "--offline"
+      ],
+      "actualExit": 0,
+      "originalReaped": true,
+      "seconds": 0.3646917919977568,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/lock.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/lock.stderr.log",
+        "bytes": 158,
+        "sha256": "4325a47fec7e2b0fa720a5d620a295a50987b4ad156722c2345a9809d5da5bc7"
+      }
+    },
+    {
+      "label": "metadata",
+      "argv": [
+        "cargo",
+        "metadata",
+        "--offline",
+        "--locked",
+        "--format-version",
+        "1"
+      ],
+      "actualExit": 0,
+      "originalReaped": true,
+      "seconds": 0.26546552499348763,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/metadata.stdout.log",
+        "bytes": 101566,
+        "sha256": "6b11396816c0100d87ecd20e86a656ebf7fa11080ec0070d11fa1ea937449e27"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/metadata.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "build",
+      "argv": [
+        "cargo",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "--message-format=json"
+      ],
+      "actualExit": 0,
+      "originalReaped": true,
+      "seconds": 21.509109745005844,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/build.stdout.log",
+        "bytes": 23454,
+        "sha256": "1bacd95c044f184ff2ad6c7ba2e99c75d9277e2e9706f1fd9c8c8a377258fb39"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/build.stderr.log",
+        "bytes": 1091,
+        "sha256": "48485c6adb61e4e2c272755ab00df319c7e53c4491ee06e822a0eba2da1348d6"
+      }
+    },
+    {
+      "label": "run",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/target/release/fc-password-cng-interop-probe"
+      ],
+      "actualExit": 0,
+      "originalReaped": true,
+      "seconds": 0.9802495119947707,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/run.stdout.log",
+        "bytes": 1260,
+        "sha256": "1f96fe401ac14041072540c568b2cb642155eaa637793ba968fc6f78b586c287"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/run.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/Cargo.toml",
+      "bytes": 1173,
+      "sha256": "95d5c4a52c154ef80ae54a42dc228e081bb3956a0ede5e4260b967d723fd7de7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/Cargo.toml",
+      "bytes": 175,
+      "sha256": "79be768cf77d3e968eab4fee89e0e57a5cbe7545216a28d24503dfea39886792"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/auth.rs",
+      "bytes": 4600,
+      "sha256": "ee29aac2c7f2d157fe0c50cfbe8813c9bc3ca11a4a60c1531a0949f83e77cc9d"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/autostart.rs",
+      "bytes": 9182,
+      "sha256": "420d4e94607dee907e252b0ee7a13bb8db182dbb72bd5bea6238a54cf8d47ec4"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/calendar.rs",
+      "bytes": 14220,
+      "sha256": "6dd611c6f17974eb15694227db382ad3fe5a675520985235c8bcb0d640e1ad5e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/calendar_tests.rs",
+      "bytes": 21898,
+      "sha256": "97868e860c88b0ddd6ca6eb3806bc8f17c4ec4f749409c25eeb8af74d608bf83"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/content.rs",
+      "bytes": 3783,
+      "sha256": "250a50b370ad3d29801e935d81fb83ad05ef0d461b63376680c0b059f43ef87f"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/desktop.rs",
+      "bytes": 21094,
+      "sha256": "c8fb60a73f3f30e07fd5684a35c45fa6f0eba9a515f36597c0bcef2fbedaaf89"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/https_settings/source_networks.rs",
+      "bytes": 6518,
+      "sha256": "c22cf5e84666a02c2c8742c63a95e827d14f458fbb61bff9054eaf361438d297"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/https_settings/tests.rs",
+      "bytes": 2566,
+      "sha256": "732972b7b32b3a4cc9c6b96465d7f146572510470c88d2f578e3f6b4056340e5"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/https_settings.rs",
+      "bytes": 6829,
+      "sha256": "0f695a75dc2c8cda3bb0c0731c1bae0bf8ff1120b9a5b45ad65402b224db5999"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/identity/tests.rs",
+      "bytes": 17476,
+      "sha256": "f502a37887102dbbacb64aed9119aad6e329d5fd397b7b925c6c9d15c307ecbc"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/identity.rs",
+      "bytes": 32091,
+      "sha256": "1e53dc7a6859138725abc30b23080162c2bc4777cea5e95e2ecea490b415dafa"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/ids.rs",
+      "bytes": 1760,
+      "sha256": "44dffdbb90c86a6bc0e57a4323736c9b33089ae83897a91b0d726839e5ecf0c2"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/layout.rs",
+      "bytes": 22466,
+      "sha256": "a9ab98415f1ff2c573a553ef6ef56acb226f61e772e4cf812d3e614afef2b518"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/lesson_context/tests/public_desktop.rs",
+      "bytes": 8559,
+      "sha256": "58e56bff46e152ee7256bac99f3b38ec43acd525538fba7ebbe813281691e7e4"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/lesson_context/tests.rs",
+      "bytes": 3463,
+      "sha256": "edc4d295b815f1550fd7759188184a7bc5b7d00895047f7060db4568ecc2015a"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/lesson_context.rs",
+      "bytes": 22065,
+      "sha256": "68c5ac8d8374780da0b3018cb6fad7b7de125c3731ec31314a342105480ca5f5"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/lib.rs",
+      "bytes": 385,
+      "sha256": "b50318e013f86dc5e51b58bbe405b9bb92831347d1e7b0a461919d03c2f94d1e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/materials/tests.rs",
+      "bytes": 16338,
+      "sha256": "516ca209bb9d89efc88ad87cb249749a0688a670c7cfa5b8b1c5609837f30de2"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/materials.rs",
+      "bytes": 24453,
+      "sha256": "676dd4c7ebd4589b68a2ffa4826fdda3ce541c0de6afd35e7000df30ecbdf45d"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/profile.rs",
+      "bytes": 41234,
+      "sha256": "c3749ff5e73cd82a9da76e5014901f384658a3ae51254d4ac43ec20ca5f50ee4"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/profile_content.rs",
+      "bytes": 49812,
+      "sha256": "7f8b62e2471fccf48c991eebe316971f7f02df2f51d87c3677c84a6b67ca3590"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/recovery/migration.rs",
+      "bytes": 13000,
+      "sha256": "1771d4d380f116afd88b10fa494fd241d2307643d1ccf88b2d7a450b247544e7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/recovery.rs",
+      "bytes": 9590,
+      "sha256": "8f321972924fed1bfae2afe27b9e36e8e694c0f60e835b096c3cedb98cd08a8d"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule/tests.rs",
+      "bytes": 12357,
+      "sha256": "b257722c966df36b12277090070448dd096a549adc2c9ad6ce700ebcdaa38e5c"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule.rs",
+      "bytes": 21791,
+      "sha256": "330d4c72670fa1eeb82508c97ec2a6fe94c9b34605d8b6a3f06338fe19f7438b"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule_document/row_operations.rs",
+      "bytes": 15222,
+      "sha256": "266c4549402298dc79604a608f46156b961e50bf888f37bb6f83a522b950b7b2"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule_document/row_operations_tests.rs",
+      "bytes": 22819,
+      "sha256": "a9b2acf32806b32459a9b572c407635404156a22711d64a17eb0ea91d5eb682e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule_document/tests.rs",
+      "bytes": 28085,
+      "sha256": "3429a284637dd283dcb9143fc2b60cdabb9fa36a500f54b84bff2a9a9ccfec12"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/schedule_document.rs",
+      "bytes": 61001,
+      "sha256": "527b62f4477863d92558f3a2755d164753bb7b0f7e28d719c28409383d0792e2"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/subject_visual/tests.rs",
+      "bytes": 8825,
+      "sha256": "27759107f9032c5b03b203a042a7f07a37e58748035cd594d459ffdea96ec943"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/subject_visual.rs",
+      "bytes": 4826,
+      "sha256": "24ce6557094c89764564b5ccd2cb0a30c9c5240e81632fc0bb93cae13d22ad19"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/time.rs",
+      "bytes": 10313,
+      "sha256": "b8763ff445240f5e91e38b77654d6d92784e21feee07e8fc051187ae9ed88f3a"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-domain/src/voice.rs",
+      "bytes": 52799,
+      "sha256": "04c7c57839d2c33c9360f6e2dad93b491da660704a8051683f56df1bd3ca0cc8"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/Cargo.toml",
+      "bytes": 201,
+      "sha256": "eb4da687dda49f120d097c61d25b4fd41498045990b722108a489823661677f7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/audio.rs",
+      "bytes": 3097,
+      "sha256": "a27c7be45c22d8c49f817da3a5c6b73751002b0a0d7af2a67c3e1a7a18fa1881"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/autostart.rs",
+      "bytes": 2189,
+      "sha256": "b6b756713aa67b2576aa0be56ffaaed030759c01fe440bb00e4ee53cb627f004"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/calendar.rs",
+      "bytes": 4678,
+      "sha256": "9ace57504633429ca746151467e381a301f4699e13906399442ab32e495873ad"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/content_web.rs",
+      "bytes": 1343,
+      "sha256": "871c4ca4dfe9a008b1232fa53c16aaa0b3801036c285d942e3e3f356f37c8df6"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/desktop_lesson.rs",
+      "bytes": 1653,
+      "sha256": "f03541c029a69d740964c1d586692f9d702cc5804742154d4d74293df0a8495b"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/http.rs",
+      "bytes": 13327,
+      "sha256": "059fa91aa0217c43610914268e9305e32ef6b4eb93929004512bd4083d9b8b32"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/https_settings.rs",
+      "bytes": 1629,
+      "sha256": "ae00c7e8abfcf7edf4c160f8be747bcefe446edc3894effd6d9984c33bd5eed7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/lib.rs",
+      "bytes": 22324,
+      "sha256": "4786ac1260452ebb3315bc7633596317c878dc0818c7bf6a23fb3c3e48195afe"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/material_outcome.rs",
+      "bytes": 1310,
+      "sha256": "582f6428c0e55a9f65caee04d0df95dc9fc16dd200298a72cf048fc174596da5"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/profile_content.rs",
+      "bytes": 11002,
+      "sha256": "16671837bdd2b1ebfa27096836f4bc129cd13d02f5aecd36f6b80eb39d2e2182"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/profiles.rs",
+      "bytes": 2420,
+      "sha256": "117bdd744f1ac287aa84b2d93f9a9b35c872fddf9a4c8faad1bc74a7a8035249"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/subject_visual.rs",
+      "bytes": 2077,
+      "sha256": "0394ce2a4a0e6a7dadbe953cce0a171a4b1fa9ef4382c46fff5cfd9f6eba2a54"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-ports/src/voice.rs",
+      "bytes": 3538,
+      "sha256": "4d8656e865bf85d39911b704477eba47f3b3dd7d45fc78469aa64f2bd67e1ded"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-security/Cargo.toml",
+      "bytes": 325,
+      "sha256": "4879a172c15f9cfa7503d565a191016915c829a2e4118edc3e0c2cbb2502a7ad"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-security/src/codec.rs",
+      "bytes": 11197,
+      "sha256": "af2372d6de1b714b04a607b446f815724bdcb06b091b18ab2b2757edecb9c3c2"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-security/src/lib.rs",
+      "bytes": 10947,
+      "sha256": "6b2a1329f89513116d4f10c6627f49422d2a16a27940aeef9a965138e3621bba"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-security/src/recovery.rs",
+      "bytes": 8446,
+      "sha256": "03339bff8e3a0be56b58460b0e3d81ece433ced9cb48904f762a3bc7122b681b"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/crates/fc-security/src/web.rs",
+      "bytes": 14000,
+      "sha256": "ad17bbe3ee8443dd1c0ea036261612027c9cb0bdbeac35876b3832c31dd0f73e"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-final-first/rust-toolchain.toml",
+      "bytes": 86,
+      "sha256": "559f488c181e0e9e77cf17c29de663977f036ec7ff2e2060585714bf53c52d62"
+    }
+  ],
+  "cases": [
+    {
+      "correctVerified": true,
+      "format": 1,
+      "id": "chinese-existing",
+      "iterations": 600000,
+      "randomFillCalls": 1,
+      "saltHex": "0101010101010101010101010101010101010101010101010101010101010101",
+      "unicodeScalars": 15,
+      "utf8Bytes": 45,
+      "verifierHex": "44cca2634e314a690a713b4aa3229b1bacb74941e6e44c548672e7b199e604e4",
+      "wrongVerified": false,
+      "pythonOpenSslMatches": true
+    },
+    {
+      "correctVerified": true,
+      "format": 1,
+      "id": "ascii-sequence",
+      "iterations": 600000,
+      "randomFillCalls": 1,
+      "saltHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "unicodeScalars": 19,
+      "utf8Bytes": 19,
+      "verifierHex": "d690a786a7b59e09c5777e7c7ed56811eadb19838c2411e6abc239bcdf71131c",
+      "wrongVerified": false,
+      "pythonOpenSslMatches": true
+    },
+    {
+      "correctVerified": true,
+      "format": 1,
+      "id": "unicode-max-512",
+      "iterations": 600000,
+      "randomFillCalls": 1,
+      "saltHex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "unicodeScalars": 128,
+      "utf8Bytes": 512,
+      "verifierHex": "a22f8993510bc31ced504982d28b7d2e5708df0630d2730e36ce4b42de734316",
+      "wrongVerified": false,
+      "pythonOpenSslMatches": true
+    },
+    {
+      "correctVerified": true,
+      "format": 1,
+      "id": "combining-and-nul",
+      "iterations": 600000,
+      "randomFillCalls": 1,
+      "saltHex": "800001ff800001ff800001ff800001ff800001ff800001ff800001ff800001ff",
+      "unicodeScalars": 15,
+      "utf8Bytes": 16,
+      "verifierHex": "360be3a214a0063c1271d901d09ce093b8bb72c2c8fe4860caf77eb44389cb2d",
+      "wrongVerified": false,
+      "pythonOpenSslMatches": true
+    }
+  ],
+  "pythonOpenSsl": "4 actual independent pbkdf2_hmac calls at 600000 rounds",
+  "probeBinary": {
+    "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/target/release/fc-password-cng-interop-probe",
+    "bytes": 588392,
+    "sha256": "39dd47cfa6df7e95c7c940dfc3a21406ff2926f10dc2793ce72c52d29bbe16a8"
+  },
+  "probeSources": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/probe/Cargo.toml",
+      "bytes": 351,
+      "sha256": "6a5fdb69aa2d9f60be0cf1c5423daf9eb907823c2636832b1e459dbd6c69e8f7"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/probe/Cargo.lock",
+      "bytes": 6020,
+      "sha256": "a4a4355f2c33ca0482aa983880035258c84b4f58988ab5b83fb8bf9e9416c525"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/probe/src/main.rs",
+      "bytes": 1660,
+      "sha256": "084deae47a65d8bcba0abb9ac63846fb6328c8eb6f194764c26fd5e6dcda48eb"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/password-cng-interop-preparation-first/host-first/fixtures-copy.json",
+      "bytes": 2372,
+      "sha256": "36c603da5c699a67e5211499edfafc1ae2af8c69fd591469d8895af440b50a0c"
+    }
+  ],
+  "sourceUnchanged": true
+}

@@ -1,0 +1,2038 @@
+{
+  "status": "PASS_DEV_ABI2_UPGRADE_TYPE19_POSTEXECUTE_FIXTURE_STATIC_ONLY",
+  "scope": "DEV_TYPE19_ONLY_UPGRADE_AFTER_INSTALLEXECUTE_NOT_NORMAL_RELEASE",
+  "Windows": "NOT_RUN",
+  "canonicalReport": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-upgrade-u2-dev-product-package-first/report.json",
+    "bytes": 86178,
+    "sha256": "c94aaaede740d64377865128be3f18cb0c0ead2addbe2d606b9cb3fa39ccb239"
+  },
+  "script": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-preparation-second/derive-type19.py",
+    "bytes": 10108,
+    "sha256": "b8277663524c527bc7841dd19760217295cbd6f47bcd6efb5efb44dc92964d56"
+  },
+  "toolsManifest": {
+    "path": "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/tools.json",
+    "bytes": 1110,
+    "sha256": "d82866321cc565890c38b494f7dd2ae6afa2fed8d4ae55270d7c4e931562099d"
+  },
+  "childEnvironment": {
+    "path": "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/child-environment.json",
+    "bytes": 197,
+    "sha256": "d0b2d946aba5c21d94713c6e17cfa90a5c85c74dfa00d2336d4cbf88f05b37a0"
+  },
+  "commands": [
+    {
+      "label": "original-summary",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "suminfo",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.0068127539998386055,
+      "stdout": {
+        "path": "original-summary.stdout.log",
+        "bytes": 458,
+        "sha256": "0f415848dd565a4bf1cac981ce79c00bc92429c101e2999bb52f565703959e82"
+      },
+      "stderr": {
+        "path": "original-summary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-tables",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "tables",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005525722001038957,
+      "stdout": {
+        "path": "original-tables.stdout.log",
+        "bytes": 402,
+        "sha256": "8f0a9337f8a8277a362d5d41c81ade3b54fb4739b44e52531f6327c73eb8bbc6"
+      },
+      "stderr": {
+        "path": "original-tables.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-_SummaryInformation",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "_SummaryInformation"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005154307000339031,
+      "stdout": {
+        "path": "original-table-_SummaryInformation.stdout.log",
+        "bytes": 407,
+        "sha256": "13d71f242b2bf72462d9362891b042ac31e9dc412bc74ebb4509d77262000b7f"
+      },
+      "stderr": {
+        "path": "original-table-_SummaryInformation.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-_ForceCodepage",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "_ForceCodepage"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005370726001274306,
+      "stdout": {
+        "path": "original-table-_ForceCodepage.stdout.log",
+        "bytes": 23,
+        "sha256": "756e2010bef11d89ced632638fdcf69a7d00ccce12aa5643482bfe5a28d16777"
+      },
+      "stderr": {
+        "path": "original-table-_ForceCodepage.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-AdminUISequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "AdminUISequence"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.007240250997710973,
+      "stdout": {
+        "path": "original-table-AdminUISequence.stdout.log",
+        "bytes": 141,
+        "sha256": "566f9c9710b1f128f4ff183d756546e5a78a7ac3ee66f8c3836876e0d2fe52e8"
+      },
+      "stderr": {
+        "path": "original-table-AdminUISequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Media",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Media"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005446879004011862,
+      "stdout": {
+        "path": "original-table-Media.stdout.log",
+        "bytes": 119,
+        "sha256": "93342edce9b3542c94e0ccce692496c551fa98f59dbc6d832b51b645b6bc8663"
+      },
+      "stderr": {
+        "path": "original-table-Media.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Error",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Error"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005071523999504279,
+      "stdout": {
+        "path": "original-table-Error.stdout.log",
+        "bytes": 35,
+        "sha256": "5e2d23423ce8d0ddd97885c69b67b6d208a6604a18551bfa0f5dd68b36ff7f67"
+      },
+      "stderr": {
+        "path": "original-table-Error.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-ServiceInstall",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "ServiceInstall"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005365855002310127,
+      "stdout": {
+        "path": "original-table-ServiceInstall.stdout.log",
+        "bytes": 237,
+        "sha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39"
+      },
+      "stderr": {
+        "path": "original-table-ServiceInstall.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-AppSearch",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "AppSearch"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006070493996958248,
+      "stdout": {
+        "path": "original-table-AppSearch.stdout.log",
+        "bytes": 61,
+        "sha256": "440f3a84ea50cc08e880a610578ec22dd5cbca6e2bea6bd2c59b8fabeb36628f"
+      },
+      "stderr": {
+        "path": "original-table-AppSearch.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Property",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Property"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005301313001837116,
+      "stdout": {
+        "path": "original-table-Property.stdout.log",
+        "bytes": 399,
+        "sha256": "51800fe3a7bb69b4b4e9cdeaef3689b7ce4140f2d1fa22113fab5575568bfea7"
+      },
+      "stderr": {
+        "path": "original-table-Property.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Upgrade",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Upgrade"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005914098001085222,
+      "stdout": {
+        "path": "original-table-Upgrade.stdout.log",
+        "bytes": 316,
+        "sha256": "a5127d8c1763d92dbacd1ce2e6b964a561437fcedb76196e9b0b4393d443b575"
+      },
+      "stderr": {
+        "path": "original-table-Upgrade.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Shortcut",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Shortcut"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005503181004314683,
+      "stdout": {
+        "path": "original-table-Shortcut.stdout.log",
+        "bytes": 269,
+        "sha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5"
+      },
+      "stderr": {
+        "path": "original-table-Shortcut.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-InstallExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "InstallExecuteSequence"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005387207005696837,
+      "stdout": {
+        "path": "original-table-InstallExecuteSequence.stdout.log",
+        "bytes": 613,
+        "sha256": "cec70c5ea12eaaa2f3e8be36d894206f76e1439ff515d2b384d6de8a08b894ea"
+      },
+      "stderr": {
+        "path": "original-table-InstallExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Registry",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Registry"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.0057402499951422215,
+      "stdout": {
+        "path": "original-table-Registry.stdout.log",
+        "bytes": 2059,
+        "sha256": "fbbb8cd141d95e9219ae19f8442d03c6ad28cd436444b5fed97a91b1c1dbdccb"
+      },
+      "stderr": {
+        "path": "original-table-Registry.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-AdvtExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "AdvtExecuteSequence"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005735499995353166,
+      "stdout": {
+        "path": "original-table-AdvtExecuteSequence.stdout.log",
+        "bytes": 225,
+        "sha256": "c1986ae62815d6be46e6f3e314c0a803dac5bb01633af74a5f67f8dfc37b679d"
+      },
+      "stderr": {
+        "path": "original-table-AdvtExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-ActionText",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "ActionText"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005891827000596095,
+      "stdout": {
+        "path": "original-table-ActionText.stdout.log",
+        "bytes": 63,
+        "sha256": "08aff05632a6967c81c3af4c3ac120a0cff73275d34478cfd3c964a558962874"
+      },
+      "stderr": {
+        "path": "original-table-ActionText.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-FeatureComponents",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "FeatureComponents"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005846445004863199,
+      "stdout": {
+        "path": "original-table-FeatureComponents.stdout.log",
+        "bytes": 517,
+        "sha256": "fbc9d7ca8c1018eee51f2713d7ddd78a9986ab2d0684f17ee5516ddffcd31af9"
+      },
+      "stderr": {
+        "path": "original-table-FeatureComponents.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-File",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "File"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005674016996636055,
+      "stdout": {
+        "path": "original-table-File.stdout.log",
+        "bytes": 1307,
+        "sha256": "8ebdd932ec50534c20567b2ca683fadbf92ae8896b7fe2495d351ac04adfd524"
+      },
+      "stderr": {
+        "path": "original-table-File.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Directory",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Directory"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005671606995747425,
+      "stdout": {
+        "path": "original-table-Directory.stdout.log",
+        "bytes": 317,
+        "sha256": "eb4df46d72d3097f5da595293a4751fe1ca97f652d19c62b6ac56a6e6ec9241f"
+      },
+      "stderr": {
+        "path": "original-table-Directory.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-IniFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "IniFile"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006523632000607904,
+      "stdout": {
+        "path": "original-table-IniFile.stdout.log",
+        "bytes": 119,
+        "sha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0"
+      },
+      "stderr": {
+        "path": "original-table-IniFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-RemoveFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "RemoveFile"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005334143999789376,
+      "stdout": {
+        "path": "original-table-RemoveFile.stdout.log",
+        "bytes": 94,
+        "sha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052"
+      },
+      "stderr": {
+        "path": "original-table-RemoveFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-RemoveIniFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "RemoveIniFile"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005517022000276484,
+      "stdout": {
+        "path": "original-table-RemoveIniFile.stdout.log",
+        "bytes": 137,
+        "sha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06"
+      },
+      "stderr": {
+        "path": "original-table-RemoveIniFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-LaunchCondition",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "LaunchCondition"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006425367995689157,
+      "stdout": {
+        "path": "original-table-LaunchCondition.stdout.log",
+        "bytes": 553,
+        "sha256": "021448bac17687b1cd97bb2a09b915e749ca7fc33b856553e559dc9666e8345a"
+      },
+      "stderr": {
+        "path": "original-table-LaunchCondition.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Signature",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Signature"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006179939002322499,
+      "stdout": {
+        "path": "original-table-Signature.stdout.log",
+        "bytes": 140,
+        "sha256": "6e67486347b1205abb48db183d8ace73c4514504aad2cd4507a5c3658b04db18"
+      },
+      "stderr": {
+        "path": "original-table-Signature.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-InstallUISequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "InstallUISequence"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.00569206899672281,
+      "stdout": {
+        "path": "original-table-InstallUISequence.stdout.log",
+        "bytes": 243,
+        "sha256": "216550bf1fb3b7dd26fc5a598a81443d7c6effdaaf553414762da2e0fba3a0e5"
+      },
+      "stderr": {
+        "path": "original-table-InstallUISequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Component",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Component"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005861484998604283,
+      "stdout": {
+        "path": "original-table-Component.stdout.log",
+        "bytes": 1725,
+        "sha256": "27c9893baee46e99ee7aae35fa42ffead18f1df90f77314d6bda670c0f3c3eeb"
+      },
+      "stderr": {
+        "path": "original-table-Component.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-ServiceControl",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "ServiceControl"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005917178001254797,
+      "stdout": {
+        "path": "original-table-ServiceControl.stdout.log",
+        "bytes": 109,
+        "sha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8"
+      },
+      "stderr": {
+        "path": "original-table-ServiceControl.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Feature",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Feature"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006223550000868272,
+      "stdout": {
+        "path": "original-table-Feature.stdout.log",
+        "bytes": 167,
+        "sha256": "108fd38630ae5bbe40d6e3e8f8b25038651214628f5ad45cc2260d8321f01175"
+      },
+      "stderr": {
+        "path": "original-table-Feature.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Binary",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Binary"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.009746382005687337,
+      "stdout": {
+        "path": "original-table-Binary.stdout.log",
+        "bytes": 232,
+        "sha256": "60991c0664f9c05a54f13bd997752af2d5a374559b367703cf1bf2ea6345400e"
+      },
+      "stderr": {
+        "path": "original-table-Binary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-CustomAction",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "CustomAction"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.00582322300033411,
+      "stdout": {
+        "path": "original-table-CustomAction.stdout.log",
+        "bytes": 135,
+        "sha256": "6804e84673bc4cc6152ca85034add9bd6e01fd0340c5b52fd1570d5765c2dc17"
+      },
+      "stderr": {
+        "path": "original-table-CustomAction.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-RegLocator",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "RegLocator"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005411987003753893,
+      "stdout": {
+        "path": "original-table-RegLocator.stdout.log",
+        "bytes": 75,
+        "sha256": "2176ed2976acf3a3c96198c5d568ab76827d026312af71c1011139c5ba2a6e9e"
+      },
+      "stderr": {
+        "path": "original-table-RegLocator.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-MsiFileHash",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "MsiFileHash"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.00600695100001758,
+      "stdout": {
+        "path": "original-table-MsiFileHash.stdout.log",
+        "bytes": 1111,
+        "sha256": "139cefc53aeaa05694080adc769db509ffa8758f76231a5f3f9c28fd3ff6ebc6"
+      },
+      "stderr": {
+        "path": "original-table-MsiFileHash.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-Icon",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Icon"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.0054447990041808225,
+      "stdout": {
+        "path": "original-table-Icon.stdout.log",
+        "bytes": 30,
+        "sha256": "a411636ecdd7c866a6b8c46387d24cf8471c47743fa51e2eebb018a3af5cc30c"
+      },
+      "stderr": {
+        "path": "original-table-Icon.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-AdminExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "AdminExecuteSequence"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005244660998869222,
+      "stdout": {
+        "path": "original-table-AdminExecuteSequence.stdout.log",
+        "bytes": 243,
+        "sha256": "e1aaa637f5f193084fa7733f11616d19ac61441b31bc7c9775f58d12aff4c364"
+      },
+      "stderr": {
+        "path": "original-table-AdminExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-table-CreateFolder",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "CreateFolder"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005285752005875111,
+      "stdout": {
+        "path": "original-table-CreateFolder.stdout.log",
+        "bytes": 68,
+        "sha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e"
+      },
+      "stderr": {
+        "path": "original-table-CreateFolder.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-streams",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "streams",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.0054589100036537275,
+      "stdout": {
+        "path": "original-streams.stdout.log",
+        "bytes": 144,
+        "sha256": "a7b779dca3eba4459e596a1972f40a5c2fa4b9a5f9b2c79945ab3b8c92429a79"
+      },
+      "stderr": {
+        "path": "original-streams.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-stream-0",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "payload.cab"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.01479494400700787,
+      "stdout": {
+        "path": "original-stream-0.stdout.log",
+        "bytes": 6510690,
+        "sha256": "a9bcf369f26da1aa659b5a428bcddce5d8a35d148819fbe120cb6c8377b9f8f7"
+      },
+      "stderr": {
+        "path": "original-stream-0.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-stream-1",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Binary.FcPayloadManifest"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.00553375299932668,
+      "stdout": {
+        "path": "original-stream-1.stdout.log",
+        "bytes": 1484,
+        "sha256": "90f5dfb4b092a26e2bcc67933525c54d8642a446f8c0d3f063bc5008c638fbb2"
+      },
+      "stderr": {
+        "path": "original-stream-1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-stream-2",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Binary.FcControlledGuardDll"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.01366156899894122,
+      "stdout": {
+        "path": "original-stream-2.stdout.log",
+        "bytes": 3433472,
+        "sha256": "e259cc875beb07c73cf4979ddb46e60d4247d2d1a4934be9ac58653ce1ce9659"
+      },
+      "stderr": {
+        "path": "original-stream-2.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-stream-3",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Binary.FcGuardClientTemplate"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.0059428989989100955,
+      "stdout": {
+        "path": "original-stream-3.stdout.log",
+        "bytes": 767620,
+        "sha256": "7adf3034d6f401a408543e671505dd6a406db8aa82ca04881ae641a95c08079d"
+      },
+      "stderr": {
+        "path": "original-stream-3.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-stream-4",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Binary.FcPublishedPredecessor"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005331004002073314,
+      "stdout": {
+        "path": "original-stream-4.stdout.log",
+        "bytes": 1732,
+        "sha256": "11051059c9a6b3fb988d2a4170375b2b78e7252c75be19c957765b15d6ac12aa"
+      },
+      "stderr": {
+        "path": "original-stream-4.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "original-stream-5",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "\u0005SummaryInformation"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006090315000619739,
+      "stdout": {
+        "path": "original-stream-5.stdout.log",
+        "bytes": 544,
+        "sha256": "525ab7007e3f763efa7732b01528d1e1c9ca340eb2e6d951f0381a510ca27abe"
+      },
+      "stderr": {
+        "path": "original-stream-5.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "exact-two-table-import",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msibuild",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "-q",
+        "DROP TABLE `CustomAction`",
+        "-q",
+        "DROP TABLE `InstallExecuteSequence`",
+        "-i",
+        "CustomAction.idt",
+        "-i",
+        "InstallExecuteSequence.idt"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.017807625998102594,
+      "stdout": {
+        "path": "exact-two-table-import.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "exact-two-table-import.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-summary",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "suminfo",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005846534993906971,
+      "stdout": {
+        "path": "derived-summary.stdout.log",
+        "bytes": 458,
+        "sha256": "0f415848dd565a4bf1cac981ce79c00bc92429c101e2999bb52f565703959e82"
+      },
+      "stderr": {
+        "path": "derived-summary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-tables",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "tables",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005237489996943623,
+      "stdout": {
+        "path": "derived-tables.stdout.log",
+        "bytes": 402,
+        "sha256": "8f0a9337f8a8277a362d5d41c81ade3b54fb4739b44e52531f6327c73eb8bbc6"
+      },
+      "stderr": {
+        "path": "derived-tables.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-_SummaryInformation",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "_SummaryInformation"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005371926999941934,
+      "stdout": {
+        "path": "derived-table-_SummaryInformation.stdout.log",
+        "bytes": 407,
+        "sha256": "13d71f242b2bf72462d9362891b042ac31e9dc412bc74ebb4509d77262000b7f"
+      },
+      "stderr": {
+        "path": "derived-table-_SummaryInformation.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-_ForceCodepage",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "_ForceCodepage"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005215010001847986,
+      "stdout": {
+        "path": "derived-table-_ForceCodepage.stdout.log",
+        "bytes": 23,
+        "sha256": "756e2010bef11d89ced632638fdcf69a7d00ccce12aa5643482bfe5a28d16777"
+      },
+      "stderr": {
+        "path": "derived-table-_ForceCodepage.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-AdminUISequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "AdminUISequence"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006466589999035932,
+      "stdout": {
+        "path": "derived-table-AdminUISequence.stdout.log",
+        "bytes": 141,
+        "sha256": "566f9c9710b1f128f4ff183d756546e5a78a7ac3ee66f8c3836876e0d2fe52e8"
+      },
+      "stderr": {
+        "path": "derived-table-AdminUISequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Media",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Media"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005410967001807876,
+      "stdout": {
+        "path": "derived-table-Media.stdout.log",
+        "bytes": 119,
+        "sha256": "93342edce9b3542c94e0ccce692496c551fa98f59dbc6d832b51b645b6bc8663"
+      },
+      "stderr": {
+        "path": "derived-table-Media.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Error",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Error"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005172747994947713,
+      "stdout": {
+        "path": "derived-table-Error.stdout.log",
+        "bytes": 35,
+        "sha256": "5e2d23423ce8d0ddd97885c69b67b6d208a6604a18551bfa0f5dd68b36ff7f67"
+      },
+      "stderr": {
+        "path": "derived-table-Error.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-ServiceInstall",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "ServiceInstall"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006110356000135653,
+      "stdout": {
+        "path": "derived-table-ServiceInstall.stdout.log",
+        "bytes": 237,
+        "sha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39"
+      },
+      "stderr": {
+        "path": "derived-table-ServiceInstall.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-AppSearch",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "AppSearch"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005561042999033816,
+      "stdout": {
+        "path": "derived-table-AppSearch.stdout.log",
+        "bytes": 61,
+        "sha256": "440f3a84ea50cc08e880a610578ec22dd5cbca6e2bea6bd2c59b8fabeb36628f"
+      },
+      "stderr": {
+        "path": "derived-table-AppSearch.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Property",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Property"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005624115998216439,
+      "stdout": {
+        "path": "derived-table-Property.stdout.log",
+        "bytes": 399,
+        "sha256": "51800fe3a7bb69b4b4e9cdeaef3689b7ce4140f2d1fa22113fab5575568bfea7"
+      },
+      "stderr": {
+        "path": "derived-table-Property.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Upgrade",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Upgrade"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005400657006248366,
+      "stdout": {
+        "path": "derived-table-Upgrade.stdout.log",
+        "bytes": 316,
+        "sha256": "a5127d8c1763d92dbacd1ce2e6b964a561437fcedb76196e9b0b4393d443b575"
+      },
+      "stderr": {
+        "path": "derived-table-Upgrade.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Shortcut",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Shortcut"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006359175997204147,
+      "stdout": {
+        "path": "derived-table-Shortcut.stdout.log",
+        "bytes": 269,
+        "sha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5"
+      },
+      "stderr": {
+        "path": "derived-table-Shortcut.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-InstallExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "InstallExecuteSequence"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005262081002001651,
+      "stdout": {
+        "path": "derived-table-InstallExecuteSequence.stdout.log",
+        "bytes": 667,
+        "sha256": "d79838087ea0a8392b9885182eaebfefb20439a788d0c4655a5b5ecfad579ede"
+      },
+      "stderr": {
+        "path": "derived-table-InstallExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Registry",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Registry"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.0055382630016538315,
+      "stdout": {
+        "path": "derived-table-Registry.stdout.log",
+        "bytes": 2059,
+        "sha256": "fbbb8cd141d95e9219ae19f8442d03c6ad28cd436444b5fed97a91b1c1dbdccb"
+      },
+      "stderr": {
+        "path": "derived-table-Registry.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-AdvtExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "AdvtExecuteSequence"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.0052609109989134595,
+      "stdout": {
+        "path": "derived-table-AdvtExecuteSequence.stdout.log",
+        "bytes": 225,
+        "sha256": "c1986ae62815d6be46e6f3e314c0a803dac5bb01633af74a5f67f8dfc37b679d"
+      },
+      "stderr": {
+        "path": "derived-table-AdvtExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-ActionText",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "ActionText"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005735210004786495,
+      "stdout": {
+        "path": "derived-table-ActionText.stdout.log",
+        "bytes": 63,
+        "sha256": "08aff05632a6967c81c3af4c3ac120a0cff73275d34478cfd3c964a558962874"
+      },
+      "stderr": {
+        "path": "derived-table-ActionText.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-FeatureComponents",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "FeatureComponents"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.007085414006724022,
+      "stdout": {
+        "path": "derived-table-FeatureComponents.stdout.log",
+        "bytes": 517,
+        "sha256": "fbc9d7ca8c1018eee51f2713d7ddd78a9986ab2d0684f17ee5516ddffcd31af9"
+      },
+      "stderr": {
+        "path": "derived-table-FeatureComponents.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-File",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "File"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005681588998413645,
+      "stdout": {
+        "path": "derived-table-File.stdout.log",
+        "bytes": 1307,
+        "sha256": "8ebdd932ec50534c20567b2ca683fadbf92ae8896b7fe2495d351ac04adfd524"
+      },
+      "stderr": {
+        "path": "derived-table-File.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Directory",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Directory"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006244251002499368,
+      "stdout": {
+        "path": "derived-table-Directory.stdout.log",
+        "bytes": 317,
+        "sha256": "eb4df46d72d3097f5da595293a4751fe1ca97f652d19c62b6ac56a6e6ec9241f"
+      },
+      "stderr": {
+        "path": "derived-table-Directory.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-IniFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "IniFile"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005713769998692442,
+      "stdout": {
+        "path": "derived-table-IniFile.stdout.log",
+        "bytes": 119,
+        "sha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0"
+      },
+      "stderr": {
+        "path": "derived-table-IniFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-RemoveFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "RemoveFile"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.0077975630047149025,
+      "stdout": {
+        "path": "derived-table-RemoveFile.stdout.log",
+        "bytes": 94,
+        "sha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052"
+      },
+      "stderr": {
+        "path": "derived-table-RemoveFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-RemoveIniFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "RemoveIniFile"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005983520000881981,
+      "stdout": {
+        "path": "derived-table-RemoveIniFile.stdout.log",
+        "bytes": 137,
+        "sha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06"
+      },
+      "stderr": {
+        "path": "derived-table-RemoveIniFile.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-LaunchCondition",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "LaunchCondition"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005757461003668141,
+      "stdout": {
+        "path": "derived-table-LaunchCondition.stdout.log",
+        "bytes": 553,
+        "sha256": "021448bac17687b1cd97bb2a09b915e749ca7fc33b856553e559dc9666e8345a"
+      },
+      "stderr": {
+        "path": "derived-table-LaunchCondition.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Signature",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Signature"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005389136997109745,
+      "stdout": {
+        "path": "derived-table-Signature.stdout.log",
+        "bytes": 140,
+        "sha256": "6e67486347b1205abb48db183d8ace73c4514504aad2cd4507a5c3658b04db18"
+      },
+      "stderr": {
+        "path": "derived-table-Signature.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-InstallUISequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "InstallUISequence"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006423087994335219,
+      "stdout": {
+        "path": "derived-table-InstallUISequence.stdout.log",
+        "bytes": 243,
+        "sha256": "216550bf1fb3b7dd26fc5a598a81443d7c6effdaaf553414762da2e0fba3a0e5"
+      },
+      "stderr": {
+        "path": "derived-table-InstallUISequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Component",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Component"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005811814000480808,
+      "stdout": {
+        "path": "derived-table-Component.stdout.log",
+        "bytes": 1725,
+        "sha256": "27c9893baee46e99ee7aae35fa42ffead18f1df90f77314d6bda670c0f3c3eeb"
+      },
+      "stderr": {
+        "path": "derived-table-Component.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-ServiceControl",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "ServiceControl"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.0063123029976850376,
+      "stdout": {
+        "path": "derived-table-ServiceControl.stdout.log",
+        "bytes": 109,
+        "sha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8"
+      },
+      "stderr": {
+        "path": "derived-table-ServiceControl.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Feature",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Feature"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005331294996722136,
+      "stdout": {
+        "path": "derived-table-Feature.stdout.log",
+        "bytes": 167,
+        "sha256": "108fd38630ae5bbe40d6e3e8f8b25038651214628f5ad45cc2260d8321f01175"
+      },
+      "stderr": {
+        "path": "derived-table-Feature.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Binary",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Binary"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.220572202000767,
+      "stdout": {
+        "path": "derived-table-Binary.stdout.log",
+        "bytes": 232,
+        "sha256": "60991c0664f9c05a54f13bd997752af2d5a374559b367703cf1bf2ea6345400e"
+      },
+      "stderr": {
+        "path": "derived-table-Binary.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-CustomAction",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "CustomAction"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.008811625004454982,
+      "stdout": {
+        "path": "derived-table-CustomAction.stdout.log",
+        "bytes": 240,
+        "sha256": "bc1d19266794376a7d2e52e841ca65031ffc9e3e3123e20c0a3f02d53bdf3466"
+      },
+      "stderr": {
+        "path": "derived-table-CustomAction.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-RegLocator",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "RegLocator"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005254210998828057,
+      "stdout": {
+        "path": "derived-table-RegLocator.stdout.log",
+        "bytes": 75,
+        "sha256": "2176ed2976acf3a3c96198c5d568ab76827d026312af71c1011139c5ba2a6e9e"
+      },
+      "stderr": {
+        "path": "derived-table-RegLocator.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-MsiFileHash",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "MsiFileHash"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005213038995862007,
+      "stdout": {
+        "path": "derived-table-MsiFileHash.stdout.log",
+        "bytes": 1111,
+        "sha256": "139cefc53aeaa05694080adc769db509ffa8758f76231a5f3f9c28fd3ff6ebc6"
+      },
+      "stderr": {
+        "path": "derived-table-MsiFileHash.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-Icon",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Icon"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005736189996241592,
+      "stdout": {
+        "path": "derived-table-Icon.stdout.log",
+        "bytes": 30,
+        "sha256": "a411636ecdd7c866a6b8c46387d24cf8471c47743fa51e2eebb018a3af5cc30c"
+      },
+      "stderr": {
+        "path": "derived-table-Icon.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-AdminExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "AdminExecuteSequence"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005540632999327499,
+      "stdout": {
+        "path": "derived-table-AdminExecuteSequence.stdout.log",
+        "bytes": 243,
+        "sha256": "e1aaa637f5f193084fa7733f11616d19ac61441b31bc7c9775f58d12aff4c364"
+      },
+      "stderr": {
+        "path": "derived-table-AdminExecuteSequence.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-table-CreateFolder",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "CreateFolder"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005474009994941298,
+      "stdout": {
+        "path": "derived-table-CreateFolder.stdout.log",
+        "bytes": 68,
+        "sha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e"
+      },
+      "stderr": {
+        "path": "derived-table-CreateFolder.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-streams",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "streams",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.005257541000901256,
+      "stdout": {
+        "path": "derived-streams.stdout.log",
+        "bytes": 144,
+        "sha256": "a7b779dca3eba4459e596a1972f40a5c2fa4b9a5f9b2c79945ab3b8c92429a79"
+      },
+      "stderr": {
+        "path": "derived-streams.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-stream-0",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "payload.cab"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.01625268300267635,
+      "stdout": {
+        "path": "derived-stream-0.stdout.log",
+        "bytes": 6510690,
+        "sha256": "a9bcf369f26da1aa659b5a428bcddce5d8a35d148819fbe120cb6c8377b9f8f7"
+      },
+      "stderr": {
+        "path": "derived-stream-0.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-stream-1",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Binary.FcPayloadManifest"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.04319195599964587,
+      "stdout": {
+        "path": "derived-stream-1.stdout.log",
+        "bytes": 1484,
+        "sha256": "90f5dfb4b092a26e2bcc67933525c54d8642a446f8c0d3f063bc5008c638fbb2"
+      },
+      "stderr": {
+        "path": "derived-stream-1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-stream-2",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Binary.FcControlledGuardDll"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.009891927998978645,
+      "stdout": {
+        "path": "derived-stream-2.stdout.log",
+        "bytes": 3433472,
+        "sha256": "e259cc875beb07c73cf4979ddb46e60d4247d2d1a4934be9ac58653ce1ce9659"
+      },
+      "stderr": {
+        "path": "derived-stream-2.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-stream-3",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Binary.FcGuardClientTemplate"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.007144276998587884,
+      "stdout": {
+        "path": "derived-stream-3.stdout.log",
+        "bytes": 767620,
+        "sha256": "7adf3034d6f401a408543e671505dd6a406db8aa82ca04881ae641a95c08079d"
+      },
+      "stderr": {
+        "path": "derived-stream-3.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-stream-4",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "Binary.FcPublishedPredecessor"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.006212040003447328,
+      "stdout": {
+        "path": "derived-stream-4.stdout.log",
+        "bytes": 1732,
+        "sha256": "11051059c9a6b3fb988d2a4170375b2b78e7252c75be19c957765b15d6ac12aa"
+      },
+      "stderr": {
+        "path": "derived-stream-4.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-stream-5",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+        "\u0005SummaryInformation"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.004802382994967047,
+      "stdout": {
+        "path": "derived-stream-5.stdout.log",
+        "bytes": 544,
+        "sha256": "525ab7007e3f763efa7732b01528d1e1c9ca340eb2e6d951f0381a510ca27abe"
+      },
+      "stderr": {
+        "path": "derived-stream-5.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "derived-fourteen-extract",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiextract",
+        "-C",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/extracted",
+        "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi"
+      ],
+      "actualExit": 0,
+      "originalParentReaped": true,
+      "seconds": 0.0786712909975904,
+      "stdout": {
+        "path": "derived-fourteen-extract.stdout.log",
+        "bytes": 670,
+        "sha256": "f49e59cf3298bcf04d4e4b6199f7e849bff8fac397d38ad8f66839a8ba0184e7"
+      },
+      "stderr": {
+        "path": "derived-fourteen-extract.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "fault": {
+    "action": "FcTestUpgradePostWriteFail",
+    "type": 19,
+    "condition": "NOT (REMOVE = \"ALL\")",
+    "sequence": 6502
+  },
+  "intermediateFull14ShaWitness": "NOT_AVAILABLE_NO_EXTRA_BINARY_ALLOWED",
+  "expectedRuntimeEvidence": "Actual InstallExecute Return1 then Type19 Return3 and rollback logs; exact old damaged preimage and registry/components/cache restored",
+  "packageCodePolicy": "SAME_SUMMARY_PACKAGE_ONLY_FINITE_DEV_NEGATIVE_FIXTURE_NOT_REDISTRIBUTABLE",
+  "msi": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/FutureClassroom.msi",
+    "bytes": 10817536,
+    "sha256": "975d772a5a9cbdca5a71b8ac0d1c3219ccec0a32a9c8ec07ec445ddc0c08c653"
+  },
+  "setup": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-upgrade-postwrite-package-second/Setup.exe",
+    "bytes": 767620,
+    "sha256": "d66948c033c61899df5ede676ff8347e0963918850303326c0befd98683d7c12"
+  },
+  "productCode": "9E239183-E743-5E6A-8ACE-EB4B8F7511F6",
+  "packageCode": "174CBFC7-A467-4AF1-98D5-A6700D0059A8",
+  "version": "0.3.0",
+  "payloads": [
+    {
+      "path": "LICENSE",
+      "size": 1067,
+      "sha256": "1fef5a26bc7b7bf66e38e83ac8d246a54e2e4e3d62fcfcb416d4db77603b2e40",
+      "component_guid": "BF8ECC92-DF5E-5031-AF8F-B122A05E64E6"
+    },
+    {
+      "path": "MSI-CANDIDATE.txt",
+      "size": 1784,
+      "sha256": "5995cd920d173e401a7767f2a86974d28b65b0927e866882aa39a8227d9d7634",
+      "component_guid": "00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC"
+    },
+    {
+      "path": "PROBE-README.txt",
+      "size": 21767,
+      "sha256": "7ebdcc9f18d6f0c1f9d2471f7b496f317e1ac5797264940b0f95be1945f64e09",
+      "component_guid": "1F2DCDC9-9F80-51BE-A10D-F294D45FDB05"
+    },
+    {
+      "path": "THIRD-PARTY-NOTICES.txt",
+      "size": 2401720,
+      "sha256": "b611a4c99e2f65d2c5c2f1618f088dec978cab792cbdef2810937cc60d7ed6b0",
+      "component_guid": "44E7E505-D3CB-5DC8-9730-50964BA3CC8C"
+    },
+    {
+      "path": "fc-bootstrap.exe",
+      "size": 11420672,
+      "sha256": "b29aa1926e5c2182c191c3eed2c4ed7a94fa95eba8fbdfb42b66f33e5eb8b827",
+      "component_guid": "0CA01C62-B71F-5C57-905B-B6C979ACB487"
+    },
+    {
+      "path": "manifest.json",
+      "size": 34953,
+      "sha256": "6a57d4b93d5d657aef549f37e354bbb772a890212c7682a876eaa084f1a98939",
+      "component_guid": "8D7F75D1-8AD6-5097-AEE4-62389B788737"
+    },
+    {
+      "path": "web/THIRD-PARTY-NOTICES.txt",
+      "size": 25543,
+      "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7",
+      "component_guid": "51201E26-0CF3-5876-A591-91F68B3A94DB"
+    },
+    {
+      "path": "web/assets/favicon-CXuYoSfB.svg",
+      "size": 282,
+      "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+      "component_guid": "D0B2E913-0457-5E64-A66B-EC1EE7DA7138"
+    },
+    {
+      "path": "web/assets/index-BkiZ2CBl.js",
+      "size": 415401,
+      "sha256": "cdf0d8f9c8cfa259031cb22e10aacb1ffea7b1f7affb3a4235478069b2138bf3",
+      "component_guid": "18B1A37C-EE86-5233-ACC2-773B48D189BB"
+    },
+    {
+      "path": "web/assets/index-DrrJeLm9.css",
+      "size": 39554,
+      "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+      "component_guid": "B9ADCF83-BCB1-5F42-97D8-967FF84A306F"
+    },
+    {
+      "path": "web/assets/pcm-worklet-B7E4LRoP.js",
+      "size": 1724,
+      "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+      "component_guid": "28DB1C02-71DB-5DAF-8D0C-9844E24D16DC"
+    },
+    {
+      "path": "web/assets/wav-worker-LSywWbpJ.js",
+      "size": 884,
+      "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+      "component_guid": "C0EC8190-410A-52A3-895E-AD6564B75C1E"
+    },
+    {
+      "path": "web/fc-assets.json",
+      "size": 1073,
+      "sha256": "2b4034c8a0f0bfa73812a7f2853ba83b766772ff55096fc1e33c9f2ddb9e4593",
+      "component_guid": "0C6686BF-2327-51F5-89A6-4243C1FD11CF"
+    },
+    {
+      "path": "web/index.html",
+      "size": 1232,
+      "sha256": "8761e3d65d2bee4fb860e14b315eec9e634a019b1633aea627c335397f8299f2",
+      "component_guid": "58B108D4-3264-56B1-9DE5-19636D8437E2"
+    }
+  ],
+  "templateSha256": "7adf3034d6f401a408543e671505dd6a406db8aa82ca04881ae641a95c08079d",
+  "guardSha256": "e259cc875beb07c73cf4979ddb46e60d4247d2d1a4934be9ac58653ce1ce9659",
+  "predecessorSha256": "11051059c9a6b3fb988d2a4170375b2b78e7252c75be19c957765b15d6ac12aa",
+  "same31Tables": true,
+  "onlyTwoExtraRows": true,
+  "noExtraBinary": true,
+  "allOriginalStreamsExact": true,
+  "all14PayloadBytesExact": true,
+  "wholeSummaryExact": true,
+  "canonicalUnchanged": true,
+  "seconds": 0.9698725970010855
+}

@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/tmp/fc-round80-controlled-repair/abi2-upgrade-archive-staged-third/archive.py", line 215, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/tmp/fc-round80-controlled-repair/abi2-upgrade-archive-staged-third/archive.py", line 182, in main
+    fb=(d/'freeze-first.json').read_bytes();need(a.expected_freeze_sha256 and sha(fb)==a.expected_freeze_sha256,'CALLER_PINNED_FREEZE');f=json.loads(fb);actual={p.relative_to(d).as_posix() for p in d.rglob('*') if p.is_file() and p.name!='freeze-first.json'};need(actual=={r['path'] for r in f['files']},'EXACT_FROZEN_MEMBERSHIP')
+                                                                                                                                                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/fc-round80-controlled-repair/abi2-upgrade-archive-staged-third/archive.py", line 17, in need
+    if not v:raise AssertionError(m)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EXACT_FROZEN_MEMBERSHIP

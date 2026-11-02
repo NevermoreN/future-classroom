@@ -1,0 +1,46 @@
+{
+  "status": "PASS_ROOT_FULL_ORIGINAL_EQUALITY_FROZEN_MEMBERS_AND_STRICT_SCAN",
+  "archive": "D14",
+  "stagingRoot": "/tmp/fc-round80-controlled-repair/abi2-upgrade-archive-staged-fifth",
+  "freezeSha256": "edfd3e88c924bd6e4676b44dd2442799c324a847d4bb1e48a6d12dff47b982db",
+  "freezeFiles": 29,
+  "members": 1122,
+  "textBytes": 25639075,
+  "binaryIdentities": 152,
+  "zipInputs": 0,
+  "tar": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-upgrade-archive-staged-fifth/evidence-originals-first.tar.gz",
+    "bytes": 5037641,
+    "sha256": "34560da652e68d53d94e9216566ad23b7216d31edc13b6cf7d087c28b46782e1"
+  },
+  "strictVerify": {
+    "argv": [
+      "python3",
+      "-B",
+      "/tmp/fc-round80-controlled-repair/abi2-upgrade-archive-staged-fifth/archive.py",
+      "--archive",
+      "D14",
+      "--verify-only",
+      "--directory",
+      "/tmp/fc-round80-controlled-repair/abi2-upgrade-archive-staged-fifth",
+      "--expected-freeze-sha256",
+      "edfd3e88c924bd6e4676b44dd2442799c324a847d4bb1e48a6d12dff47b982db"
+    ],
+    "actualExit": 0,
+    "originalReaped": true,
+    "seconds": 14.890277008998964,
+    "stdout": {
+      "path": "/tmp/fc-round80-controlled-repair/root-d14-strict-verify-first.stdout.log",
+      "bytes": 599,
+      "sha256": "aa8e71134fb6be1e66c1bc0e7bd05d6a9d86bc976968296208539d32b4dd5da0"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round80-controlled-repair/root-d14-strict-verify-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "sourceDeletion": false,
+  "Windows": false,
+  "Git": false
+}

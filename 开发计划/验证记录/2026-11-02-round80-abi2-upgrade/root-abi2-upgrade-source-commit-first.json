@@ -1,0 +1,117 @@
+{
+  "status": "PASS_EXACT21_VALIDATED_SOURCE_COMMIT_LOCAL_ONLY",
+  "commit": "b6b18631379e61b1971c20b361296db8671eb885",
+  "parent": "71ced30e86b3d7a7ed0d1ea5458dba81f1e61045",
+  "sourceFiles": 21,
+  "sourceRows": [
+    {
+      "path": "crates/fc-presentation/src/workbench.rs",
+      "bytes": 13471,
+      "sha256": "46d867749c68ebf4d2fa1817db8ea6aaf6c069324a8d2ddd9e3846cf07795b6d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/published_host.rs",
+      "bytes": 5097,
+      "sha256": "645863fbf74003824c33b4fc3dc52beec8bb6736c92ee60e71c6a7a28f6fa88d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/published_host/predecessor.rs",
+      "bytes": 5674,
+      "sha256": "3897d224b1c21f50e1baaffd981773f81c97441adb99dfcb10a646624eab246f"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/controlled.rs",
+      "bytes": 10642,
+      "sha256": "30049a4e72352b30126db70683e5dcd9decfd8f168c24e8708fc4e4ddfbf91d0"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 53674,
+      "sha256": "e1ce3d15c20ac441f6d04c5fd8c5ffe4491baae746cedcbfb17428ab64535b04"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+      "bytes": 44562,
+      "sha256": "c136d74c13cd2e199a9a5f8b676c7b2e79cdac85cfbbcce1a92a023a3173b6c7"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/guard_context.rs",
+      "bytes": 27039,
+      "sha256": "bc8e0e71277c83b8a1c22e8e930701f655af6c046f63b7ae39331664ae3a4a37"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 54047,
+      "sha256": "39fae295f47a9ec5ec4f7b542ea673a5e38874db088f3e8e544be3fa99673691"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects/preimage.rs",
+      "bytes": 11299,
+      "sha256": "f5ae4a83d98600c10fc41152b316806d45f556c9001e52a05f7265197e4be953"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects/upgrade.rs",
+      "bytes": 3907,
+      "sha256": "5c2880b561ba90973fdedcae831bfdcf290b0425accc444ef3b8baf34e555324"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/maintenance.rs",
+      "bytes": 14344,
+      "sha256": "ee77abbd5cf0e2762706eb601479f60e5fd29c1a5c30ccf22c7ebfd1f990f0fb"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/maintenance/database.rs",
+      "bytes": 11486,
+      "sha256": "3579f86a691ead1481308ec58a604a7e2764332d17a96b36639d5d8c7b6ae6e1"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/maintenance/logical.rs",
+      "bytes": 2053,
+      "sha256": "169ce64a609db518a9ce0f25cdf64b11bf75dddf6da676548acb540fb35d1fae"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/maintenance/registration.rs",
+      "bytes": 4705,
+      "sha256": "d750e50c4573b62c309707b15bf3ce45c3dfb3088f1000819f3014726e609d95"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/maintenance/upgrade_capture.rs",
+      "bytes": 10666,
+      "sha256": "cf973c076f8d65a9b1522be29e89c93c0156bba6a7d7a7429bc6062786a9092c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/retirement.rs",
+      "bytes": 12985,
+      "sha256": "8a7705476a5642f2978c030f2b0bcced19dfd0eafbb5d0a5e993c05cf8777504"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/source_package.rs",
+      "bytes": 13169,
+      "sha256": "81abe0290220f603c64f605daf503568b3194f77c19f47d5451040aa2c32bbc8"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/source_package/database.rs",
+      "bytes": 7247,
+      "sha256": "3333439e5dcfaf15781c779b2f45ff67dc988345ead112fed3f2c469516c30dd"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/upgrade.rs",
+      "bytes": 5753,
+      "sha256": "089686ba08cbf2dc0e8275a20e9e7140e1aec616757b07995b7e788a4479066d"
+    },
+    {
+      "path": "scripts/installer-upgrade-publication.py",
+      "bytes": 7411,
+      "sha256": "27b8a8c8bc6cc044bed2d940de4be42f22d881f06c8b1f3bee681ad40d9d33e6"
+    },
+    {
+      "path": "scripts/package-abi2-upgrade-dev.py",
+      "bytes": 24471,
+      "sha256": "14502c75cae59e33ae19d74d3a40901756878d378d6e5fd4de0fe926df717c79"
+    }
+  ],
+  "sourceWorkingTreeClean": true,
+  "validationFreezeSha256": "1228fc5bfef69c29ce03c1de1eb8d337dad41eec20d3bb5b6a8360b097f28d87",
+  "windowsScopes": "U1/U2 actual GNU native independently bound; final combined source static only",
+  "sync": "NOT_PUSHED"
+}

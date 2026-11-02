@@ -1,0 +1,54 @@
+{
+  "status": "BOUND_DEV_PREDECESSOR_FROM_ACTUAL_COMPLETE_U1_CHAIN_NOT_FORMAL_CI",
+  "u1Package": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-upgrade-u1-dev-product-package-first/report.json",
+    "sha256": "fff5900354e69684c45116369f57c17e15db6a5eb563559746d8351171469d22"
+  },
+  "u1Runtime": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-upgrade-u1-product-runtime-first/report.json",
+    "sha256": "4605e523204533938dc2923d2c3d1f5c4f16d507500b868b64852fa34b876a03"
+  },
+  "meta": {
+    "target": 2,
+    "source_commit": "6eb6ec099b6b14e78b280df5df526545c8e04ecc",
+    "source_manifest_sha": "ec5c838b150ea053a5a4eba30fd62c039e5f7a8b0344886d96069db518930aa4",
+    "producer_sha": "3e60a09f3758cccecba8403fd98548b511a3acb100bc01c849f42cde4d122910",
+    "source_msi_sha": "ae0eb68bdef970cbbeb99aaf1ee7683ddbcd059d68eebed0d5953826e9d7c08e",
+    "template_sha": "7adf3034d6f401a408543e671505dd6a406db8aa82ca04881ae641a95c08079d",
+    "guard_sha": "e259cc875beb07c73cf4979ddb46e60d4247d2d1a4934be9ac58653ce1ce9659",
+    "logical_sha": "df7b8829f342437917e3d4fe313d412d6e87a05323ce02f648f1b8b6fc184f69",
+    "template_bytes": 767620
+  },
+  "cacheCompatibilityEvidence": {
+    "method": "PRODUCTION_SUCCESS_BRANCH_INFERENCE",
+    "nativeCacheDigestSerialized": false,
+    "sourceCanonicalInterop": {
+      "path": "/tmp/fc-round80-controlled-repair/abi2-upgrade-u1-publication-interop-first/report.json",
+      "bytes": 6345,
+      "sha256": "636e9b2bf718b2b7d93025b04654991497194d2e9b08c0024566d0629777b64f"
+    },
+    "frozenProductionProofSources": [
+      {
+        "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-normal-first/crates/fc-windows/src/installer_lifecycle/native/broker/maintenance.rs",
+        "bytes": 14344,
+        "sha256": "ee77abbd5cf0e2762706eb601479f60e5fd29c1a5c30ccf22c7ebfd1f990f0fb"
+      },
+      {
+        "path": "/tmp/fc-round80-controlled-repair/checkout-abi2-upgrade-normal-first/crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+        "bytes": 44562,
+        "sha256": "c136d74c13cd2e199a9a5f8b676c7b2e79cdac85cfbbcce1a92a023a3173b6c7"
+      }
+    ],
+    "directCacheDigestReceipt": "NOT_SERIALIZED",
+    "actualNativeRepairReturned0": true,
+    "sourceDigestOrigin": "LIBMSI_READONLY_FIXED31_U1_SOURCE_ONLY",
+    "sourceEqualsCacheBasis": "Frozen native maintenance.rs same_source compares CNG source_logical and cache_logical before constructing private VerifiedSameSourceMaintenance; controlled_owner requires it for Repair and Uninstall; original actual U1 Repair and Uninstall each returned0",
+    "upgradeRechecks": "Actual native old cache31 recaptured and compared to this record on every Upgrade; no whole-cache SHA equivalence"
+  },
+  "record": {
+    "bytes": 1732,
+    "sha256": "11051059c9a6b3fb988d2a4170375b2b78e7252c75be19c957765b15d6ac12aa"
+  },
+  "cacheVsSource": "Whole cache SHA NOT equated to source; actual Upgrade native captures old cache31-table logical facts against this source signature before Begin",
+  "BeginEndTelemetry": "No numeric API return synthesized from logs or exits"
+}
