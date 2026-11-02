@@ -2,6 +2,7 @@
 #![forbid(unsafe_code)]
 pub mod card_body;
 pub mod layout;
+pub mod registry;
 pub mod scene;
 pub mod workbench;
 use fc_domain::time::LocalDateTime;

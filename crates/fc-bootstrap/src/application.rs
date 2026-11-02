@@ -184,6 +184,10 @@ const RETURN_DRAFT: ActionId = ActionId(19);
 const DISCARD_EXIT: ActionId = ActionId(20);
 const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
 
+mod module_registry;
+mod settings_registry;
+mod window_registry;
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Screen {
     Starting,
@@ -215,6 +219,39 @@ enum Screen {
     ExitDraft,
     Repair,
 }
+impl Screen {
+    const ALL: &'static [Self] = &[
+        Self::Starting,
+        Self::Setup,
+        Self::Login,
+        Self::Recovery,
+        Self::Code,
+        Self::Home,
+        Self::School,
+        Self::Subjects,
+        Self::Accounts,
+        Self::Password,
+        Self::Rotate,
+        Self::Homework,
+        Self::HomeworkEdit,
+        Self::Schedule,
+        Self::Calendar,
+        Self::Autostart,
+        Self::Backup,
+        Self::Restoring,
+        Self::Display,
+        Self::Profiles,
+        Self::ProfileContent,
+        Self::Materials,
+        Self::Lesson,
+        Self::Voice,
+        Self::Web,
+        Self::HttpsSettings,
+        Self::ExitDraft,
+        Self::Repair,
+    ];
+}
+
 #[derive(Debug)]
 enum Failure {
     Backend(BackendError),
@@ -1065,202 +1102,8 @@ impl Task for Work {
         }
     }
 }
-fn execute(mut r: Request) -> Result<Outcome> {
-    let mut backend = r.backend.lock().map_err(|_| Failure::Stopped)?;
-    let lease = r.lease;
-    let require_lease = || lease.ok_or_else(|| invalid("请先登录。"));
-    let mut next = Screen::Home;
-    let mut next_lease = lease;
-    let mut code = None;
-    match (r.screen, r.action) {
-        (Screen::Setup, SAVE) => {
-            confirm(&r.data, PASSWORD)?;
-            let options = Initialize {
-                school_name: text(&r.data, SCHOOL)?,
-                login_name: text(&r.data, LOGIN)?,
-                display_name: text(&r.data, NAME)?,
-            };
-            code = Some(backend.initialize(options, password(&mut r.data, PASSWORD)?)?);
-            next_lease = None;
-            next = Screen::Code;
-        }
-        (Screen::Login, LOG_IN) => {
-            let name = text(&r.data, LOGIN)?;
-            let proof = backend.login(&name, password(&mut r.data, PASSWORD)?)?;
-            let state = backend.state()?;
-            next = if state
-                .account(proof.principal_id())
-                .map_err(|_| invalid("账号不可用。"))?
-                .must_change_password
-            {
-                Screen::Password
-            } else {
-                Screen::Home
-            };
-            next_lease = Some(proof);
-        }
-        (Screen::Recovery, SAVE) => {
-            confirm(&r.data, NEW_PASSWORD)?;
-            let login = text(&r.data, LOGIN)?;
-            let recovery =
-                RecoveryCode::parse(r.data.take(CODE).ok_or_else(|| invalid("请输入恢复码。"))?)
-                    .map_err(|_| invalid("恢复码格式不正确。"))?;
-            code = Some(backend.recover(&login, recovery, password(&mut r.data, NEW_PASSWORD)?)?);
-            next_lease = None;
-            next = Screen::Code;
-        }
-        (Screen::Password, SAVE) => {
-            confirm(&r.data, NEW_PASSWORD)?;
-            let proof = require_lease()?;
-            let old = password(&mut r.data, PASSWORD)?;
-            let new = password(&mut r.data, NEW_PASSWORD)?;
-            backend.change_password(proof, old, new)?;
-            next_lease = None;
-            next = Screen::Login;
-        }
-        (Screen::Rotate, SAVE) => {
-            code =
-                Some(backend.rotate_recovery(require_lease()?, password(&mut r.data, PASSWORD)?)?);
-            next_lease = None;
-            next = Screen::Code;
-        }
-        (Screen::School, SAVE) => {
-            backend.identity_at(
-                require_lease()?,
-                r.state.revision,
-                IdentityCommand::RenameSchool {
-                    name: text(&r.data, SCHOOL)?,
-                },
-            )?;
-        }
-        (Screen::School, ADD_CLASS) => {
-            let id = ClassId::new(
-                r.state
-                    .classes
-                    .iter()
-                    .map(|c| c.id.get())
-                    .max()
-                    .unwrap_or(0)
-                    .checked_add(1)
-                    .ok_or_else(|| invalid("班级数量已达上限。"))?,
-            )
-            .map_err(|_| invalid("班级编号不可用。"))?;
-            backend.identity_at(
-                require_lease()?,
-                r.state.revision,
-                IdentityCommand::CreateClass {
-                    id,
-                    name: text(&r.data, CLASS)?,
-                },
-            )?;
-        }
-        (Screen::School, BIND_CLASS) => {
-            let class = find_class(&r.state, &text(&r.data, CLASS)?)?;
-            backend.identity_at(
-                require_lease()?,
-                r.state.revision,
-                IdentityCommand::BindCurrentClass { id: class },
-            )?;
-        }
-        (Screen::Subjects, SAVE) => {
-            let old = r.data.get(OLD_NAME).unwrap_or("").trim();
-            let existing = if old.is_empty() {
-                None
-            } else {
-                Some(find_subject(&r.state, old)?)
-            };
-            let id = match existing {
-                Some(id) => id,
-                None => SubjectId::new(
-                    r.state
-                        .subjects
-                        .iter()
-                        .map(|s| s.id.get())
-                        .max()
-                        .unwrap_or(0)
-                        .checked_add(1)
-                        .ok_or_else(|| invalid("科目数量已达上限。"))?,
-                )
-                .map_err(|_| invalid("科目编号不可用。"))?,
-            };
-            let expected_revision = existing.and_then(|id| {
-                r.state
-                    .subjects
-                    .iter()
-                    .find(|s| s.id == id)
-                    .map(|s| s.revision)
-            });
-            let color = if let Some(id) = existing {
-                r.state
-                    .subjects
-                    .iter()
-                    .find(|s| s.id == id)
-                    .ok_or_else(|| invalid("科目已变化。"))?
-                    .color
-            } else {
-                parse_color(r.data.get(COLOR).unwrap_or(""))?
-            };
-            backend.identity_at(
-                require_lease()?,
-                r.state.revision,
-                IdentityCommand::PutSubject {
-                    id,
-                    name: text(&r.data, SUBJECT)?,
-                    enabled: true,
-                    color,
-                    expected_revision,
-                },
-            )?;
-        }
-        (Screen::Homework, LOAD) => {
-            let proof = require_lease()?;
-            let class = find_class(&r.state, &text(&r.data, CLASS)?)?;
-            let subject = find_subject(&r.state, &text(&r.data, SUBJECT)?)?;
-            let owner = r
-                .state
-                .account_by_login(&text(&r.data, OWNER)?)
-                .map_err(|_| invalid("请选择已有任课教师的登录名。"))?
-                .principal
-                .id;
-            if !r.state.is_teacher(owner, class, subject) {
-                return Err(invalid("该教师没有此班级和科目的有效任教关系。"));
-            }
-            let key = ContentKey::Homework(HomeworkKey {
-                class_id: class,
-                subject_id: subject,
-                owner_teacher_id: owner,
-                actual_date: r
-                    .clock
-                    .try_now()
-                    .map_err(|_| invalid("系统时间不可用。"))?
-                    .date,
-            });
-            let record = backend.read_content(proof, key.clone())?;
-            return Ok(Outcome::Loaded { key, record });
-        }
-        (Screen::HomeworkEdit, SAVE) => {
-            backend.content(
-                require_lease()?,
-                ContentCommand {
-                    command_id: command_id()?,
-                    key: r.key.ok_or_else(|| invalid("请重新加载作业。"))?,
-                    expected_revision: r.revision,
-                    text: r.data.get(CONTENT).unwrap_or("").to_owned(),
-                },
-            )?;
-        }
-        (_, EXIT) => {
-            backend.authorize_exit(require_lease()?)?;
-            return Ok(Outcome::ExitAuthorized);
-        }
-        _ => return Err(invalid("此操作在当前页面不可用。")),
-    }
-    Ok(Outcome::Updated {
-        state: backend.state()?,
-        lease: next_lease,
-        code,
-        next,
-    })
+fn execute(r: Request) -> Result<Outcome> {
+    settings_registry::execute(r)
 }
 fn find_class(state: &IdentityState, name: &str) -> Result<ClassId> {
     let key = normalized_name(name, 128).map_err(|_| invalid("请选择已有班级。"))?;
@@ -1375,18 +1218,7 @@ struct App {
 }
 impl App {
     fn shutdown_complete(&self) -> bool {
-        self.stopping
-            && (self.backup.irreversible() || self.backend.is_none() || self.writer_closed)
-            && self.backup.exit_ready()
-            && self.teacher_https_quiescent()
-            && self.pool.is_finished()
-            && self.shell.is_finished()
-            && self.audio.as_ref().is_none_or(|audio| {
-                audio
-                    .status()
-                    .is_ok_and(|s| s.phase == RuntimePhase::Closed && !s.physical_thread_running)
-            })
-            && !self.terminate_required
+        self.stopping && module_registry::shutdown_complete(self) && !self.terminate_required
     }
     fn view(&self) -> View {
         let status = match (self.status.is_empty(), self.desktop_notice.is_empty()) {
@@ -1401,503 +1233,10 @@ impl App {
         } else {
             status
         };
-        if matches!(self.screen, Screen::Backup | Screen::Restoring) {
-            if let Some(view) = self.backup.view(&status) {
-                return view;
-            }
-        }
-        if self.screen == Screen::Profiles {
-            if let Some(editor) = &self.profiles {
-                let mut view = editor.view(&status, self.pending.is_some() || self.stopping);
-                if !view.actions.iter().any(|action| action.id == LOCK) {
-                    view.actions.push(Action {
-                        id: LOCK,
-                        label: "锁定并保留草稿".into(),
-                        enabled: true,
-                    });
-                }
-                return view;
-            }
-        }
-        if self.screen == Screen::ProfileContent {
-            if let Some(editor) = &self.profile_content {
-                let mut view = editor.view(self.pending.is_some() || self.stopping);
-                if !status.is_empty() {
-                    if !view.status.is_empty() {
-                        view.status.push('\n');
-                    }
-                    view.status.push_str(&status);
-                }
-                view.actions.push(Action {
-                    id: LOCK,
-                    label: "锁定并保留草稿".into(),
-                    enabled: true,
-                });
-                return view;
-            }
-        }
-        if self.screen == Screen::Accounts {
-            if let Some(editor) = &self.accounts {
-                let mut view = editor.view(&self.state);
-                if !status.is_empty() {
-                    if !view.status.is_empty() {
-                        view.status.push('\n');
-                    }
-                    view.status.push_str(&status);
-                }
-                view.actions.push(Action {
-                    id: LOCK,
-                    label: "锁定".into(),
-                    enabled: true,
-                });
-                view.busy = self.pending.is_some() || self.stopping;
-                return view;
-            }
-        }
-        if self.public_lesson_flow.is_some() {
-            if let Some(editor) = &self.public_lesson_editor {
-                return editor.view(
-                    &status,
-                    self.pending.is_some()
-                        || self.stopping
-                        || self
-                            .public_lesson_flow
-                            .as_ref()
-                            .is_some_and(|flow| flow.guard().is_waiting_for_authority()),
-                );
-            }
-            return View {
-                title: "正在读取本节课程".into(),
-                description: "本节临时换课仅影响当前这一节。".into(),
-                status,
-                fields: vec![],
-                actions: vec![Action {
-                    id: public_lesson_editor::CLOSE,
-                    label: "关闭".into(),
-                    enabled: true,
-                }],
-                busy: self.pending.is_some() || self.stopping,
-                grid: None,
-            };
-        }
-        if self.screen == Screen::Lesson {
-            if let Some(editor) = &self.lesson_editor {
-                return editor.view(
-                    &self.state,
-                    &status,
-                    self.pending.is_some() || self.stopping,
-                );
-            }
-        }
-        if self.screen == Screen::Voice {
-            if let Some(editor) = &self.voice_editor {
-                let mut view = editor.view(&status, self.pending.is_some() || self.stopping);
-                view.actions.push(Action {
-                    id: LOCK,
-                    label: "锁定".into(),
-                    enabled: true,
-                });
-                return view;
-            }
-        }
-        if self.screen == Screen::HttpsSettings {
-            if let Some(view) = self.https_view(&status, self.pending.is_some() || self.stopping) {
-                return view;
-            }
-        }
-        if self.screen == Screen::Web {
-            if let Some(editor) = &self.web_editor {
-                return editor.view(
-                    &self.state,
-                    &status,
-                    self.pending.is_some() || self.stopping,
-                );
-            }
-        }
-        if self.screen == Screen::Materials {
-            if let Some(editor) = &self.material_editor {
-                return editor.view(
-                    &self.state,
-                    &status,
-                    self.pending.is_some() || self.stopping,
-                );
-            }
-        }
-        if self.screen == Screen::Display {
-            if let Some(editor) = &self.display {
-                let mut view = editor.view(&status, self.pending.is_some() || self.stopping);
-                if view
-                    .fields
-                    .iter()
-                    .any(|field| field.id == display_editor::CLOCK)
-                {
-                    view.actions.push(Action {
-                        id: TO_PROFILES,
-                        label: "公共布局与科目配置".into(),
-                        enabled: true,
-                    });
-                    view.actions.push(Action {
-                        id: TO_AUTOSTART,
-                        label: "登录自启动".into(),
-                        enabled: true,
-                    });
-                    view.actions.push(Action {
-                        id: TO_BACKUP,
-                        label: "完整备份与恢复".into(),
-                        enabled: true,
-                    });
-                    view.actions.push(Action {
-                        id: TO_VOICE,
-                        label: "远程语音设置".into(),
-                        enabled: true,
-                    });
-                }
-                return view;
-            }
-        }
-        if self.screen == Screen::Autostart {
-            if let Some(editor) = &self.autostart {
-                let mut view = editor.view(&status, self.autostart_job.is_some() || self.stopping);
-                view.actions.push(Action {
-                    id: LOCK,
-                    label: "锁定".into(),
-                    enabled: true,
-                });
-                return view;
-            }
-        }
-        if self.screen == Screen::Calendar {
-            if let Some(editor) = &self.calendar {
-                let mut view = editor.view(
-                    self.pending.is_some() || self.calendar_job.is_some() || self.stopping,
-                    if status.is_empty() {
-                        None
-                    } else {
-                        Some(status.clone())
-                    },
-                );
-                view.actions.push(Action {
-                    id: LOCK,
-                    label: "锁定".into(),
-                    enabled: true,
-                });
-                return view;
-            }
-        }
-        if self.screen == Screen::Schedule {
-            if let Some(editor) = &self.schedule {
-                return editor.view(
-                    &self.state,
-                    &status,
-                    self.pending.is_some() || self.stopping,
-                );
-            }
-        }
-        let mut view = View {
-            title: "未来教室".into(),
-            description: String::new(),
-            status: status.clone(),
-            fields: Vec::new(),
-            actions: Vec::new(),
-            busy: self.pending.is_some() || self.stopping,
-            grid: None,
-        };
-        let field = |id, label: &str, kind, value: String, max_utf16| Field {
-            id,
-            label: label.into(),
-            kind,
-            value,
-            max_utf16,
-        };
-        let action = |id, label: &str| Action {
-            id,
-            label: label.into(),
-            enabled: true,
-        };
-        let plain = |id, label: &str, value: String| field(id, label, FieldKind::Text, value, 128);
-        let secret = |id, label: &str| field(id, label, FieldKind::Password, String::new(), 256);
-        let school = self
-            .state
-            .installation
-            .as_ref()
-            .map(|i| i.school_name.as_str())
-            .unwrap_or("未配置学校");
-        match self.screen {
-            Screen::Starting => {
-                view.title = "正在打开未来教室".into();
-                view.description = "正在核对数据和本机凭据，请稍候。".into();
-            }
-            Screen::Setup => {
-                view.title = "首次设置 · 创建主管理员".into();
-                view.description =
-                    "主管理员管理学校与账号。创建后将展示一次恢复码，请妥善保存。".into();
-                view.fields = vec![
-                    plain(SCHOOL, "学校名称", String::new()),
-                    plain(LOGIN, "主管理员登录名", String::new()),
-                    plain(NAME, "姓名", String::new()),
-                    secret(PASSWORD, "设置口令（12–128字符）"),
-                    secret(CONFIRM, "再次输入口令"),
-                ];
-                view.actions = vec![action(SAVE, "创建主管理员")];
-            }
-            Screen::Login => {
-                view.title = format!("{school} · 登录工作台");
-                view.fields = vec![
-                    plain(LOGIN, "登录名", String::new()),
-                    secret(PASSWORD, "口令"),
-                ];
-                view.actions = vec![
-                    action(LOG_IN, "登录"),
-                    action(TO_RECOVERY, "使用恢复码"),
-                    action(TO_REINITIALIZE, "无恢复码：进入全部资料清除向导"),
-                ];
-            }
-            Screen::Recovery => {
-                view.title = "使用恢复码重设口令".into();
-                view.description =
-                    "恢复成功后，旧恢复码和所有账号会话失效，并展示新的恢复码。".into();
-                view.fields = vec![
-                    plain(LOGIN, "登录名", String::new()),
-                    field(CODE, "恢复码", FieldKind::Password, String::new(), 128),
-                    secret(NEW_PASSWORD, "新口令"),
-                    secret(CONFIRM, "再次输入新口令"),
-                ];
-                view.actions = vec![
-                    action(SAVE, "恢复账号"),
-                    action(BACK, "返回登录"),
-                    action(TO_REINITIALIZE, "无恢复码：进入全部资料清除向导"),
-                ];
-            }
-            Screen::Code => {
-                view.title = "请保存恢复码".into();
-                view.description="此恢复码只展示一次。关闭窗口后将不再显示；可登录后重新生成。请将恢复码交给对应账号本人妥善保管。".into();
-                view.fields = vec![field(
-                    CODE,
-                    "一次性恢复码",
-                    FieldKind::ReadOnly,
-                    String::new(),
-                    128,
-                )];
-                view.actions = vec![action(ACK, "我已妥善保存")];
-            }
-            Screen::Home => {
-                view.title = format!("{school} · 工作台");
-                let account = self
-                    .lease
-                    .and_then(|l| self.state.account(l.principal_id()).ok());
-                view.description = account
-                    .map(|a| {
-                        format!(
-                            "{}（{}）\n关闭工作台会锁定本地会话；今日提醒请在教师网页管理。",
-                            a.display_name,
-                            match a.principal.role {
-                                Role::GlobalAdmin => "主管理员",
-                                Role::TeacherAdmin => "教师管理员",
-                                Role::User => "普通用户",
-                            }
-                        )
-                    })
-                    .unwrap_or_default();
-                if account.is_some_and(|a| a.principal.role == Role::GlobalAdmin) {
-                    view.actions.extend([
-                        action(TO_SCHOOL, "学校与班级"),
-                        action(TO_SUBJECTS, "基础科目"),
-                        action(TO_ACCOUNTS, "账号与任教管理"),
-                        action(TO_SCHEDULE, "课表、作息与校历"),
-                        action(TO_DISPLAY, "桌面与系统设置"),
-                        action(TO_LESSON, "本节临时换课"),
-                        action(TO_WEB, "教师设备与配对"),
-                    ]);
-                }
-                if account.is_some_and(|a| a.principal.role != Role::User) {
-                    view.actions.push(action(TO_HOMEWORK, "今天的作业"));
-                    view.actions.push(action(TO_MATERIALS, "课堂资料"));
-                }
-                view.actions.extend([
-                    action(TO_PASSWORD, "修改本人口令"),
-                    action(LOCK, "锁定工作台"),
-                ]);
-                if account.is_some_and(|a| a.principal.role == Role::GlobalAdmin) {
-                    view.actions.push(action(EXIT, "退出未来教室"));
-                }
-            }
-            Screen::School => {
-                view.title = "学校与班级".into();
-                view.description = format!(
-                    "已有班级：{}",
-                    self.state
-                        .classes
-                        .iter()
-                        .filter(|c| c.enabled)
-                        .map(|c| c.name.as_str())
-                        .collect::<Vec<_>>()
-                        .join("、")
-                );
-                view.fields = vec![
-                    plain(SCHOOL, "学校名称", school.into()),
-                    plain(CLASS, "班级名称", String::new()),
-                ];
-                view.actions = vec![
-                    action(SAVE, "保存学校名称"),
-                    action(ADD_CLASS, "添加班级"),
-                    action(BIND_CLASS, "将本白板绑定此班级"),
-                    action(BACK, "返回"),
-                ];
-            }
-            Screen::Subjects => {
-                view.title = "学校基础科目".into();
-                view.description = format!(
-                    "已有科目：{}。修改时填写现有名称；改名保留原颜色及引用，颜色请在桌面显示设置的“科目颜色与显示”中修改。",
-                    self.state
-                        .subjects
-                        .iter()
-                        .map(|s| s.name.as_str())
-                        .collect::<Vec<_>>()
-                        .join("、")
-                );
-                view.fields = vec![
-                    plain(OLD_NAME, "现有科目（新建时留空）", String::new()),
-                    plain(SUBJECT, "科目名称", String::new()),
-                    plain(COLOR, "新建科目颜色（改名时保留原色）", "70A5D8".into()),
-                ];
-                view.actions = vec![action(SAVE, "保存科目"), action(BACK, "返回")];
-            }
-            Screen::Accounts => {
-                view.title = "账号与任教管理".into();
-                view.description = "正在读取当前账号目录与权限，请稍候。".into();
-                view.actions = vec![action(LOCK, "锁定")];
-            }
-            Screen::Password => {
-                view.title = "修改本人口令".into();
-                view.description = "首次登录须先修改初始口令。成功后请使用新口令重新登录。".into();
-                view.fields = vec![
-                    secret(PASSWORD, "原口令"),
-                    secret(NEW_PASSWORD, "新口令"),
-                    secret(CONFIRM, "再次输入新口令"),
-                ];
-                view.actions = vec![action(SAVE, "修改口令")];
-                if self
-                    .lease
-                    .and_then(|lease| self.state.account(lease.principal_id()).ok())
-                    .is_some_and(|account| !account.must_change_password)
-                {
-                    view.actions.extend([
-                        action(TO_ROTATE, "重新生成恢复码"),
-                        action(BACK, "返回工作台"),
-                    ]);
-                }
-                view.actions.push(action(LOCK, "锁定并返回登录"));
-            }
-            Screen::Rotate => {
-                view.title = "重新生成恢复码".into();
-                view.description =
-                    "请输入本人当前口令。保存成功后旧恢复码失效，新码仅展示一次。".into();
-                view.fields = vec![secret(PASSWORD, "当前口令")];
-                view.actions = vec![action(SAVE, "生成新恢复码"), action(BACK, "返回")];
-            }
-            Screen::Homework => {
-                view.title = "选择今天的作业".into();
-                view.description =
-                    "请输入已有班级、科目和任课教师登录名。教师仅能编辑本人任教范围内的作业。"
-                        .into();
-                let login = self
-                    .lease
-                    .and_then(|l| self.state.account(l.principal_id()).ok())
-                    .map(|a| a.login_name.clone())
-                    .unwrap_or_default();
-                view.fields = vec![
-                    plain(CLASS, "班级", String::new()),
-                    plain(SUBJECT, "科目", String::new()),
-                    plain(OWNER, "任课教师登录名", login),
-                ];
-                view.actions = vec![action(LOAD, "加载今日作业"), action(BACK, "返回")];
-            }
-            Screen::HomeworkEdit => {
-                view.title = "编辑今天的作业".into();
-                view.description =
-                    "保存空正文即可清空。其他人修改或跨日后，旧草稿不能覆盖新版本。".into();
-                view.fields = vec![field(
-                    CONTENT,
-                    "作业正文",
-                    FieldKind::Multiline,
-                    self.record
-                        .as_ref()
-                        .map(|r| r.text.clone())
-                        .unwrap_or_default(),
-                    16384,
-                )];
-                view.actions = vec![action(SAVE, "保存作业"), action(BACK, "返回选择")];
-            }
-            Screen::Materials => {
-                view.title = "课堂资料".into();
-            }
-            Screen::Lesson => {
-                view.title = "正在加载本节课程".into();
-            }
-            Screen::Voice => {
-                view.title = "远程语音设置".into();
-                view.description =
-                    "尚未取得当前语音设置。后台繁忙或状态已变化时，请重新读取；也可返回工作台。"
-                        .into();
-                view.actions = vec![
-                    action(voice_editor::REFRESH, "重新读取状态"),
-                    action(voice_editor::CLOSE, "返回工作台"),
-                    action(LOCK, "锁定"),
-                ];
-            }
-            Screen::HttpsSettings => {
-                view.title = "本机 HTTPS 连接配置".into();
-                view.description = "正在读取配置；这里不会启动或启用教师连接。".into();
-                view.actions = vec![action(LOCK, "锁定工作台")];
-            }
-            Screen::Web => {
-                view.title = "正在加载教师设备".into();
-                view.description = web_editor::NOT_READY.into();
-            }
-            Screen::Schedule => {
-                view.title = "正在加载课表".into();
-            }
-            Screen::Backup | Screen::Restoring => {
-                view.title = "完整备份与恢复".into();
-                view.description = "正在核对备份服务，请稍候。".into();
-            }
-            Screen::Autostart => {
-                view.title = "正在读取登录自启动".into();
-            }
-            Screen::Calendar => {
-                view.title = "正在加载公共校历候选".into();
-            }
-            Screen::Display => {
-                view.title = "正在加载显示设置".into();
-            }
-            Screen::Profiles => {
-                view.title = "正在加载布局与科目配置".into();
-            }
-            Screen::ProfileContent => {
-                view.title = "正在读取独立节点内容".into();
-            }
-            Screen::ExitDraft => {
-                view.title = "退出前处理未保存草稿".into();
-                view.description =
-                    "课表、显示设置、账号、布局或独立内容有未保存修改。退出后，本次运行中的草稿将丢失。"
-                        .into();
-                view.actions = vec![
-                    action(RETURN_DRAFT, "返回草稿"),
-                    action(DISCARD_EXIT, "丢弃草稿并退出"),
-                    action(LOCK, "锁定并保留草稿"),
-                ];
-            }
-            Screen::Repair => {
-                view.title = "未来教室需要修复".into();
-                view.description="数据暂不可用。请保留现有文件，使用原部署Windows账号或受控备份修复；不会重新开放首次管理员注册。".into();
-                view.actions = vec![action(TO_REINITIALIZE, "放弃全部本机资料：进入清除向导")];
-            }
-        }
-        view
+        settings_registry::view(self, &status)
     }
     fn render(&self) -> std::result::Result<(), String> {
-        self.window
-            .render(&self.view())
+        window_registry::render(&self.window, self.screen, &self.view())
             .map_err(|_| "工作台渲染失败".to_owned())?;
         if self.screen == Screen::Web {
             if let Some(code) = self
@@ -1947,34 +1286,7 @@ impl App {
         if let Some(c) = &self.control {
             c.lock_local();
         }
-        if self.screen == Screen::Accounts {
-            if let (Some(editor), Ok(data)) = (&mut self.accounts, self.window.draft_nonsecret()) {
-                editor.suspend(data);
-            }
-        }
-        if self.screen == Screen::Profiles {
-            if let (Some(editor), Ok(data)) = (&mut self.profiles, self.window.draft_nonsecret()) {
-                editor.suspend(data);
-            }
-        }
-        if self.screen == Screen::ProfileContent {
-            if let Some(editor) = &mut self.profile_content {
-                if let Ok(data) = self.window.draft_nonsecret() {
-                    let _ = editor.capture(&data);
-                }
-                editor.cancel_review();
-            }
-        }
-        if self.screen == Screen::Schedule {
-            if let (Some(editor), Ok(data)) = (&mut self.schedule, self.window.draft_nonsecret()) {
-                editor.capture(data, &self.state);
-            }
-        }
-        if self.screen == Screen::Display {
-            if let (Some(editor), Ok(data)) = (&mut self.display, self.window.draft_nonsecret()) {
-                editor.capture(data);
-            }
-        }
+        settings_registry::suspend(self);
         // A locked review is discarded; a later session must read current
         // candidates and revisions again. The physical download ticket remains.
         self.calendar = None;
@@ -2004,7 +1316,7 @@ impl App {
         self.status.clear();
     }
     fn begin_shutdown(&mut self) {
-        self.stop_teacher_https();
+        module_registry::stop(module_registry::Kind::TeacherHttps, self);
         self.close_public_lesson();
         if self
             .control
@@ -2021,7 +1333,7 @@ impl App {
         {
             self.close_backup();
             self.shutdown_deadline = Some(Instant::now() + Duration::from_secs(5));
-            self.shell.stop();
+            module_registry::stop(module_registry::Kind::MaterialOpen, self);
             return;
         }
         if self.stopping {
@@ -2037,15 +1349,13 @@ impl App {
         if let Some(job) = &self.calendar_job {
             job.ticket.cancel();
         }
-        if let Some(audio) = &self.audio {
-            audio.shutdown();
-        }
-        self.desktop.stop();
-        self.shell.stop();
+        module_registry::stop(module_registry::Kind::VoicePlayback, self);
+        module_registry::stop(module_registry::Kind::ClassroomDisplay, self);
+        module_registry::stop(module_registry::Kind::MaterialOpen, self);
         self.shutdown_deadline = Some(Instant::now() + Duration::from_secs(5));
         self.lock();
         self.window.hide();
-        self.schedule_shutdown();
+        module_registry::stop(module_registry::Kind::AuthorityWriter, self);
     }
     fn schedule_shutdown(&mut self) {
         // Network workers may still need the original Writer for negative
@@ -2082,12 +1392,12 @@ impl App {
                     | fc_runtime::worker::Rejection::Deadline => {}
                     _ => {
                         self.terminate_required = true;
-                        self.pool.request_stop();
+                        module_registry::stop(module_registry::Kind::SharedWorkers, self);
                     }
                 },
             }
         } else if self.pending.is_none() {
-            self.pool.request_stop();
+            module_registry::stop(module_registry::Kind::SharedWorkers, self);
         }
     }
     fn submit(&mut self, work: Work) -> std::result::Result<(), String> {
@@ -2190,55 +1500,7 @@ impl App {
                 if let (Some(c), Some(l)) = (&self.control, self.lease) {
                     let _ = c.note_input(l, self.clock.monotonic_millis());
                 }
-                if self.screen == Screen::Schedule && self.pending.is_none() {
-                    if let (Some(editor), Ok(data)) =
-                        (&mut self.schedule, self.window.draft_nonsecret())
-                    {
-                        if editor.input(data, &self.state) {
-                            self.render()?;
-                        }
-                    }
-                }
-                if self.screen == Screen::Lesson && self.pending.is_none() {
-                    if let (Some(editor), Ok(data)) =
-                        (&mut self.lesson_editor, self.window.draft_nonsecret())
-                    {
-                        if editor.input(data, &self.state) {
-                            self.render()?;
-                        }
-                    }
-                }
-                if self.screen == Screen::HttpsSettings && self.pending.is_none() {
-                    if let Ok(data) = self.window.draft_nonsecret() {
-                        self.https_capture(data);
-                    }
-                }
-                if self.screen == Screen::Web && self.pending.is_none() {
-                    if let (Some(editor), Ok(data)) =
-                        (&mut self.web_editor, self.window.draft_nonsecret())
-                    {
-                        editor.input(&data);
-                        self.render()?;
-                    }
-                }
-                if self.screen == Screen::ProfileContent && self.pending.is_none() {
-                    if let (Some(editor), Ok(data)) =
-                        (&mut self.profile_content, self.window.draft_nonsecret())
-                    {
-                        if let Err(message) = editor.capture(&data) {
-                            self.status = message;
-                        }
-                    }
-                }
-                if self.screen == Screen::Voice && self.pending.is_none() {
-                    if let (Some(editor), Ok(data)) =
-                        (&mut self.voice_editor, self.window.draft_nonsecret())
-                    {
-                        if let Err(message) = editor.capture(data) {
-                            self.status = message;
-                        }
-                    }
-                }
+                settings_registry::input(self)?;
             }
             Event::LayoutSelect {
                 generation,
@@ -2261,54 +1523,7 @@ impl App {
                 if let (Some(c), Some(l)) = (&self.control, self.lease) {
                     let _ = c.note_input(l, self.clock.monotonic_millis());
                 }
-                if self.screen == Screen::Accounts && self.pending.is_none() && !self.stopping {
-                    if let Some(editor) = &mut self.accounts {
-                        if let Ok(data) = self.window.draft_nonsecret() {
-                            editor.suspend(data);
-                        }
-                        if let Err(message) = editor.select(row, column, &self.state) {
-                            self.status = message;
-                        }
-                        self.render()?;
-                    }
-                }
-                if self.screen == Screen::Profiles && self.pending.is_none() && !self.stopping {
-                    if let Some(editor) = &mut self.profiles {
-                        if let Ok(data) = self.window.draft_nonsecret() {
-                            editor.suspend(data);
-                        }
-                        if let Err(message) = editor.select(row, column) {
-                            self.status = message;
-                        }
-                        self.render()?;
-                        self.sync_layout_selection()?;
-                    }
-                }
-                if self.screen == Screen::ProfileContent && self.pending.is_none() && !self.stopping
-                {
-                    if let Some(editor) = &mut self.profile_content {
-                        if let Err(message) = editor.select(row, column) {
-                            self.status = message;
-                        }
-                        self.render()?;
-                    }
-                }
-                if self.screen == Screen::Materials && self.pending.is_none() && !self.stopping {
-                    if let Some(editor) = &mut self.material_editor {
-                        if let Err(message) = editor.select(row, column) {
-                            self.status = message;
-                        }
-                        self.render()?;
-                    }
-                }
-                if self.screen == Screen::Schedule && self.pending.is_none() && !self.stopping {
-                    if let Some(editor) = &mut self.schedule {
-                        if let Err(message) = editor.select_cell(row, column, &self.state) {
-                            self.status = message;
-                        }
-                        self.render()?;
-                    }
-                }
+                settings_registry::grid(self, row, column)?;
             }
             Event::Close => {
                 self.lock();
@@ -2334,11 +1549,10 @@ impl App {
                     self.lock();
                     return self.render();
                 }
-                if self.screen == Screen::Backup && !self.stopping {
-                    return self.backup_event(action, data);
-                }
-                if self.screen == Screen::HttpsSettings && !self.stopping {
-                    return self.https_event(action, data);
+                if !self.stopping {
+                    if let Some(handler) = settings_registry::submit_handler(self.screen, true)? {
+                        return handler(self, action, data);
+                    }
                 }
                 if self.pending.is_some() || self.autostart_job.is_some() || self.stopping {
                     return Ok(());
@@ -2388,38 +1602,8 @@ impl App {
                     }
                     return self.submit_autostart(fc_bootstrap::autostart::Operation::Load);
                 }
-                if self.screen == Screen::Profiles {
-                    return self.profiles_event(action, data);
-                }
-                if self.screen == Screen::ProfileContent {
-                    return self.profile_content_event(action, data);
-                }
-                if self.screen == Screen::Accounts {
-                    return self.accounts_event(action, data);
-                }
-                if self.screen == Screen::Materials {
-                    return self.material_event(action, data);
-                }
-                if self.screen == Screen::Voice {
-                    return self.voice_management_event(action, data);
-                }
-                if self.screen == Screen::Web {
-                    return self.web_event(action, data);
-                }
-                if self.screen == Screen::Lesson {
-                    return self.lesson_event(action, data);
-                }
-                if self.screen == Screen::Autostart {
-                    return self.autostart_event(action, data);
-                }
-                if self.screen == Screen::Calendar {
-                    return self.calendar_event(action, data);
-                }
-                if self.screen == Screen::Schedule {
-                    return self.schedule_event(action, data);
-                }
-                if self.screen == Screen::Display {
-                    return self.display_event(action, data);
+                if let Some(handler) = settings_registry::submit_handler(self.screen, false)? {
+                    return handler(self, action, data);
                 }
                 if action == EXIT && self.has_unsaved_changes() {
                     self.screen = Screen::ExitDraft;
@@ -4056,13 +3240,13 @@ impl App {
                 Ok(Some(Ok(Outcome::Closed))) => {
                     self.writer_closed = true;
                     self.shutdown = None;
-                    self.pool.request_stop();
+                    module_registry::stop(module_registry::Kind::SharedWorkers, self);
                 }
                 Ok(None) => {}
                 _ => {
                     self.shutdown = None;
                     self.terminate_required = true;
-                    self.pool.request_stop();
+                    module_registry::stop(module_registry::Kind::SharedWorkers, self);
                 }
             }
         }
@@ -4122,20 +3306,7 @@ impl App {
             match outcome {
                 Ok(Outcome::Opened(backend, control, state, voice)) => {
                     self.backend = Some(backend);
-                    let audio = VoiceRuntime::new(Arc::new(NativeFactory::new(
-                        voice.clone(),
-                        self.root.clone(),
-                        self.clock.clone(),
-                    )));
-                    voice
-                        .set_waker(audio.weak_waker())
-                        .map_err(|_| "无法绑定声音执行域".to_owned())?;
-                    let _ = self.audio_slot.set(audio.clone());
-                    if self.stopping {
-                        audio.shutdown();
-                    }
-                    self.audio = Some(audio);
-                    self.voice_service = Some(voice);
+                    module_registry::bind_voice(self, voice)?;
                     let _ = self.control_slot.set(control.clone());
                     self.control = Some(control);
                     if !self.offscreen_probe {
@@ -4554,7 +3725,7 @@ fn run_at_inner(
     if !autostart {
         app.window.show(true);
     }
-    app.submit(Work::Open(paths.clone(), clock))?;
+    module_registry::start_writer(&mut app, paths.clone(), clock)?;
     let started = Instant::now();
     let mut stage = 0u8;
     let mut lesson_stage = 0u8;
@@ -4798,16 +3969,14 @@ fn run_at_inner(
             control.fault();
         }
         app.window.hide();
-        app.pool.request_stop();
+        module_registry::stop(module_registry::Kind::SharedWorkers, &mut app);
         eprintln!("未来教室宿主故障，终止当前进程；保留数据库供下次启动核对。");
         std::process::exit(2);
     }
     let reinitialize_requested = app.reinitialize_requested;
-    app.pool.request_stop();
+    module_registry::stop(module_registry::Kind::SharedWorkers, &mut app);
     if app.pool.is_finished() {
-        app.pool
-            .join()
-            .map_err(|_| "后台执行池关闭失败".to_owned())?;
+        module_registry::join_workers(app.pool)?;
     }
     result.map_err(|_| "原生宿主已因错误关闭，请核对数据后重新启动".to_owned())?;
     if let Some(error) = probe_error {
@@ -4829,7 +3998,9 @@ fn run_at_inner(
     Ok(reinitialize_requested)
 }
 fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App, String> {
-    let window = Window::new().map_err(|_| "无法创建工作台".to_owned())?;
+    module_registry::validate()?;
+    settings_registry::validate().map_err(|_| "设置页注册不完整或重复".to_owned())?;
+    let window = window_registry::create_workbench().map_err(|_| "无法创建工作台".to_owned())?;
     window
         .set_lock_action(LOCK)
         .map_err(|_| "无法注册独立锁定操作".to_owned())?;
@@ -4838,7 +4009,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         .map_err(|_| "无法注册默认输出检查操作".to_owned())?;
     Ok(App {
         window,
-        pool: shared_pool::SharedPool::start().map_err(|_| "无法启动后台执行池".to_owned())?,
+        pool: module_registry::create_workers()?,
         clock,
         backend: None,
         control: None,
@@ -4881,7 +4052,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         https_unadmitted: None,
         voice_editor: None,
         web_readiness: web_editor::Readiness::Unavailable,
-        teacher_https: https_runtime_controller::State::default(),
+        teacher_https: module_registry::create_https()?,
         next_web_refresh: Instant::now() + Duration::from_secs(1),
         close_web: None,
         web_close_job: None,
@@ -4895,11 +4066,11 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         profile_content_owner: None,
         preview_sequence: 0,
         preview_active: false,
-        desktop: desktop_controller::Controller::new(probe)?,
+        desktop: module_registry::create_desktop(probe)?,
         root: PathBuf::new(),
         material_editor: None,
         copies_loaded_sequence: 0,
-        shell: fc_windows::materials::shell::ShellLauncher::new(),
+        shell: module_registry::create_shell()?,
         control_slot: Arc::new(OnceLock::new()),
         launch_paths: HashMap::new(),
         cleanup_paths: VecDeque::new(),

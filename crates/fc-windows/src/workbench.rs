@@ -1,9 +1,11 @@
 //! Native, UI-thread-only form adapter. No browser engine or synchronous worker wait.
-use fc_presentation::workbench::{ActionId, Event, FieldId, FieldKind, FormData, View};
+use fc_presentation::workbench::{ActionId, Event, FieldId, FieldKind, FormData, View, WindowRole};
 #[path = "workbench/color_picker.rs"]
 mod color_picker;
 #[path = "workbench/preview.rs"]
 mod preview;
+#[path = "workbench/registry.rs"]
+mod registry;
 #[path = "workbench/widgets.rs"]
 mod widgets;
 pub use preview::{LayoutPreview, PreviewNode};
@@ -567,6 +569,7 @@ fn read_edit(field: FieldBinding) -> Result<String> {
 
 pub struct Window {
     hwnd: HWND,
+    role: Cell<WindowRole>,
     state: Box<State>,
     font: Font,
     class: ClassLease,
@@ -630,10 +633,14 @@ impl Window {
     }
     /// Initially hidden. Construction and hidden tests never change foreground.
     pub fn new() -> Result<Self> {
+        (registry::hooks(WindowRole::Workbench)?.create)()
+    }
+    fn create_native() -> Result<Self> {
         let class = ClassLease::acquire()?;
         let font = Font::new()?;
         let mut window = Self {
             hwnd: HWND::default(),
+            role: Cell::new(WindowRole::Workbench),
             state: Box::new(State::new()),
             font,
             class,
@@ -664,6 +671,9 @@ impl Window {
     /// Same-generation refreshes retain the existing image; owners/page changes
     /// must clear it before installing a different editing context.
     pub fn set_layout_preview(&self, image: Option<LayoutPreview>) -> Result<()> {
+        (registry::hooks(WindowRole::Preview)?.preview)(self, image)
+    }
+    fn bind_preview_native(&self, image: Option<LayoutPreview>) -> Result<()> {
         let Some(image) = image else {
             self.clear_layout_preview();
             return Ok(());
@@ -760,14 +770,31 @@ impl Window {
         Ok(())
     }
     pub fn clear_layout_preview(&self) {
+        match registry::hooks(WindowRole::Preview) {
+            Ok(hooks) => (hooks.clear_preview)(self),
+            Err(_) => self.clear_preview_native(),
+        }
+    }
+    fn clear_preview_native(&self) {
         self.state.clear_layout_preview();
         if let Err(error) = layout(self.hwnd, &self.state) {
             self.state.fail(error);
         }
     }
     pub fn render(&self, view: &View) -> Result<()> {
-        view.validate()
-            .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
+        self.render_for(WindowRole::Workbench, view)
+    }
+    pub fn render_for(&self, role: WindowRole, view: &View) -> Result<()> {
+        let hooks = registry::hooks(role)?;
+        (hooks.bind)(view)?;
+        let changed = (hooks.render)(self, view)?;
+        self.role.set(role);
+        if changed {
+            (hooks.measure)(self)?;
+        }
+        Ok(())
+    }
+    fn render_native(&self, view: &View) -> Result<bool> {
         let old = self
             .state
             .view
@@ -775,7 +802,7 @@ impl Window {
             .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
             .clone();
         if old.as_ref() == Some(view) {
-            return Ok(());
+            return Ok(false);
         }
         let _suppress = Suppress::new(&self.state);
         if old.as_ref().is_some_and(|old| old.grid != view.grid) {
@@ -889,8 +916,10 @@ impl Window {
             }
         }
         self.state.view.replace(Some(view.clone()));
-        layout(self.hwnd, &self.state)?;
-        Ok(())
+        Ok(true)
+    }
+    fn measure_native(&self) -> Result<()> {
+        layout(self.hwnd, &self.state)
     }
     fn build_controls(&self, view: &View) -> Result<Controls> {
         let mut controls = Controls::default();
@@ -1050,6 +1079,9 @@ impl Window {
     /// At most eight submissions plus coalesced Input/Close. Forms are owned and
     /// wiped on drop; native capture failures are surfaced without their contents.
     pub fn take_events(&self) -> Result<Vec<Event>> {
+        (registry::hooks(self.role.get())?.input)(self)
+    }
+    fn input_native(&self) -> Result<Vec<Event>> {
         let error = self.state.error.replace(0);
         if error != 0 {
             self.state.discard_forms();
@@ -1625,6 +1657,16 @@ fn set_choice(
 }
 impl Drop for Window {
     fn drop(&mut self) {
+        // Static validation happens before creation. Even a broken descriptor
+        // must never strand an owned HWND during unwinding.
+        match registry::hooks(self.role.get()) {
+            Ok(hooks) => (hooks.dispose)(self),
+            Err(_) => self.dispose_native(),
+        }
+    }
+}
+impl Window {
+    fn dispose_native(&mut self) {
         WORKBENCHES.with(|windows| windows.borrow_mut().retain(|hwnd| *hwnd != self.hwnd));
         self.state.suppress.set(true);
         self.state.clear_passwords();
@@ -1988,6 +2030,40 @@ mod tests {
             enabled: true,
         });
         view
+    }
+    #[test]
+    fn registered_roles_keep_identical_view_drafts_and_dispose_the_original_window() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        let foreground = unsafe { GetForegroundWindow() };
+        let count = WORKBENCHES.with(|windows| windows.borrow().len());
+        let hwnd;
+        {
+            let window = Window::new().unwrap();
+            hwnd = window.hwnd;
+            let model = view();
+            window.render_for(WindowRole::Workbench, &model).unwrap();
+            set(field(&window, 2), "synthetic-role-draft");
+            for role in WindowRole::FORMS {
+                window.render_for(role, &model).unwrap();
+                assert_eq!(
+                    read_edit(field(&window, 2)).unwrap(),
+                    "synthetic-role-draft"
+                );
+                assert_eq!(window.role.get(), role);
+                assert!(window
+                    .take_events()
+                    .unwrap()
+                    .iter()
+                    .all(|event| !matches!(event, Event::Submit(_, _))));
+            }
+            assert_eq!(
+                WORKBENCHES.with(|windows| windows.borrow().len()),
+                count + 1
+            );
+        }
+        assert!(!unsafe { IsWindow(Some(hwnd)) }.as_bool());
+        assert_eq!(WORKBENCHES.with(|windows| windows.borrow().len()), count);
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
     }
     #[test]
     fn hidden_multiline_edit_preserves_10000_astral_scalars_without_truncation() {
