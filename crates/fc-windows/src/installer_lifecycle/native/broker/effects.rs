@@ -5,6 +5,7 @@
 use super::*;
 
 mod preimage;
+mod upgrade;
 
 const MARKERS: &str = r"Software\FutureClassroom\Installer\Components";
 const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
@@ -14,18 +15,20 @@ const PIN_GROUPS: usize = 6; // + session + original Maintenance = original 8 sl
 pub(super) enum Admission {
     Fresh,
     SameManifest,
+    Upgrade,
 }
 impl Admission {
     pub(super) fn operation(self) -> MaintenanceOperation {
         match self {
             Self::Fresh => MaintenanceOperation::Install,
             Self::SameManifest => MaintenanceOperation::SameManifest,
+            Self::Upgrade => MaintenanceOperation::Upgrade,
         }
     }
     fn preimage(self) -> ExpectedState {
         match self {
             Self::Fresh => ExpectedState::Absent,
-            Self::SameManifest => ExpectedState::CapturedPreimage,
+            Self::SameManifest | Self::Upgrade => ExpectedState::CapturedPreimage,
         }
     }
 }
@@ -398,6 +401,9 @@ fn fresh(session: &mut Session) -> Result<()> {
     current(session.deadline)
 }
 
+pub(super) fn admit_upgrade(session: &mut Session) -> Result<Admitted> {
+    upgrade::admit(session)
+}
 pub(super) fn admit(session: &mut Session) -> Result<Admitted> {
     current(session.deadline)?;
     run_absent_at(RUN_KEY)?;
@@ -429,6 +435,7 @@ pub(super) fn revalidate(session: &mut Session, admission: &Admitted) -> Result<
     current(session.deadline)?;
     run_absent_at(RUN_KEY)?;
     match admission.kind {
+        Admission::Upgrade => upgrade::revalidate(session, admission)?,
         Admission::Fresh => fresh(session)?,
         Admission::SameManifest => {
             let mut proof = Proof::new(session.deadline);
@@ -836,6 +843,9 @@ pub(super) fn reconcile(
 ) -> Result<Proof> {
     current(session.deadline)?;
     run_absent_at(RUN_KEY)?;
+    if admission.kind == Admission::Upgrade {
+        return upgrade::reconcile(session, admission, decision);
+    }
     if decision.expected == ExpectedState::Present {
         return present(session);
     }

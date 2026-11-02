@@ -23,12 +23,15 @@ pub(crate) mod controlled_owner;
 mod effects;
 #[allow(dead_code)] // Read-only capture foundation; not wired to an upgrade permit.
 mod installed_release;
-#[allow(dead_code)] // Same-source maintenance proof; no published predecessor permit.
+#[allow(dead_code)]
+// Same-source and sealed-publication Upgrade capture; runtime joint tests remain.
 mod maintenance;
 mod retirement;
-#[allow(dead_code)] // Captured ABI2 source facts do not yet create a private Plan.
+#[allow(dead_code)]
+// Captured ABI2 facts alone grant no permission; native Plan checks stay separate.
 mod source_package;
 mod supervisor;
+mod upgrade;
 
 const FRAME: usize = 32;
 const BEGIN: u8 = 1;
@@ -364,6 +367,7 @@ struct Session {
     sealed_package_sha: Option<[u8; 32]>,
     captured_source: Option<source_package::CapturedSource>,
     verified_maintenance: Option<maintenance::VerifiedSameSourceMaintenance>,
+    verified_upgrade: Option<upgrade::VerifiedUpgradePlan>,
 }
 impl Session {
     fn new(deadline: Instant) -> Result<Self> {
@@ -463,6 +467,7 @@ impl Session {
             sealed_package_sha,
             captured_source,
             verified_maintenance: None,
+            verified_upgrade: None,
         })
     }
     fn capture_maintenance(&mut self) -> Result<()> {
@@ -470,9 +475,11 @@ impl Session {
             return Ok(());
         };
         let original = std::mem::replace(&mut self.resources, maintenance::released_placeholder());
-        let (resources, verified) = maintenance::Reader::capture(original, self.deadline, source)?;
+        let (resources, verified, upgrade) =
+            maintenance::Reader::capture(original, self.deadline, source)?;
         self.resources = resources;
         self.verified_maintenance = verified;
+        self.verified_upgrade = upgrade;
         Ok(())
     }
     fn authenticate_image(&mut self, process: HANDLE) -> Result<(GuardianIdentity, HANDLE)> {
@@ -1139,6 +1146,7 @@ mod tests {
             sealed_package_sha: None,
             captured_source: None,
             verified_maintenance: None,
+            verified_upgrade: None,
         }
     }
     fn fixture_name() -> String {

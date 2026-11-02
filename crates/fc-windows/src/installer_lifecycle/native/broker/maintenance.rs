@@ -5,8 +5,10 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use windows::core::{PCWSTR, PSTR, PWSTR};
 mod database;
 mod format;
+mod logical;
 mod registration;
 mod schema;
+mod upgrade_capture;
 const LIMIT: u64 = 64 * 1024 * 1024;
 const RECEIPTS: usize = 256;
 const MAX_ROWS: usize = 72;
@@ -19,7 +21,7 @@ struct MsiOwned {
     close_return: Option<u32>,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct Registration {
+pub(super) struct Registration {
     product: String,
     version: String,
     cache: PathBuf,
@@ -60,7 +62,11 @@ impl Reader {
         resources: Resources,
         deadline: Instant,
         source: &source_package::CapturedSource,
-    ) -> Result<(Resources, Option<VerifiedSameSourceMaintenance>)> {
+    ) -> Result<(
+        Resources,
+        Option<VerifiedSameSourceMaintenance>,
+        Option<upgrade::VerifiedUpgradePlan>,
+    )> {
         let mut reader = Box::new(Self {
             resources,
             deadline,
@@ -86,7 +92,7 @@ impl Reader {
         match result {
             Ok(result) => {
                 let Self { resources, .. } = *reader;
-                Ok((resources, result))
+                Ok((resources, result.0, result.1))
             }
             Err(error) => {
                 if let Err(close) = reader.resources.release() {
@@ -190,8 +196,21 @@ impl Reader {
     fn read(
         &mut self,
         source: &source_package::CapturedSource,
+    ) -> Result<(
+        Option<VerifiedSameSourceMaintenance>,
+        Option<upgrade::VerifiedUpgradePlan>,
+    )> {
+        if let Some(plan) = self.capture_upgrade(source)? {
+            return Ok((None, Some(plan)));
+        }
+        self.same_source(source).map(|v| (v, None))
+    }
+    fn same_source(
+        &mut self,
+        source: &source_package::CapturedSource,
     ) -> Result<Option<VerifiedSameSourceMaintenance>> {
-        let Some(registration) = registration::capture(&self.resources, source, self.deadline)?
+        let Some(registration) =
+            registration::capture(&self.resources, &source.manifest, self.deadline)?
         else {
             return Ok(None);
         };
@@ -234,7 +253,7 @@ impl Reader {
         {
             return Err(LifecycleError::Unsettled);
         }
-        if registration::capture(&self.resources, source, self.deadline)?.as_ref()
+        if registration::capture(&self.resources, &source.manifest, self.deadline)?.as_ref()
             != Some(&registration)
         {
             return Err(LifecycleError::Unsettled);
@@ -311,7 +330,7 @@ pub(super) fn revalidate(s: &mut Session) -> Result<()> {
         return Err(LifecycleError::Invalid);
     }
     let source = s.captured_source.as_ref().ok_or(LifecycleError::Invalid)?;
-    if registration::capture(&s.resources, source, s.deadline)?.as_ref()
+    if registration::capture(&s.resources, &source.manifest, s.deadline)?.as_ref()
         != Some(&proof.registration)
     {
         return Err(LifecycleError::Unsettled);
@@ -368,4 +387,45 @@ pub(super) fn released_placeholder() -> Resources {
         fail_close_role: None,
         _thread: std::marker::PhantomData,
     }
+}
+
+// Upgrade revalidation never reopens any database after original Begin.
+pub(super) fn revalidate_upgrade(s: &mut Session) -> Result<()> {
+    let proof = s.verified_upgrade.as_ref().ok_or(LifecycleError::Invalid)?;
+    if registration::capture(&s.resources, &proof.old, s.deadline)?.as_ref()
+        != Some(&proof.registration)
+    {
+        return Err(LifecycleError::Unsettled);
+    }
+    let baseline = s.resources.handles.len();
+    current(s.deadline)?;
+    s.resources.check_live()?;
+    if baseline + 3 > HANDLE_LIMIT {
+        return Err(LifecycleError::Invalid);
+    }
+    let h = s.resources.open_file(
+        &proof.registration.cache,
+        GENERIC_READ.0 | READ_CONTROL.0,
+        FILE_SHARE_READ,
+        OPEN_EXISTING,
+        false,
+        false,
+    )?;
+    s.resources.add(h, Role::Control);
+    let mut size = 0;
+    unsafe {
+        GetFileSizeEx(h, &mut size)?;
+    }
+    let result = if verify_info(h, false)? == proof.cache_object
+        && size as u64 == proof.cache_bytes
+        && s.resources.digest(h, LIMIT, s.deadline)? == proof.cache_sha
+    {
+        Ok(())
+    } else {
+        Err(LifecycleError::Unsettled)
+    };
+    while s.resources.handles.len() > baseline {
+        s.resources.close(s.resources.handles.len() - 1)?;
+    }
+    result
 }

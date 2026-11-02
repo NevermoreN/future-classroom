@@ -212,6 +212,7 @@ mod tests {
                 sealed_package_sha: None,
                 captured_source: None,
                 verified_maintenance: None,
+                verified_upgrade: None,
             };
             Self { root, session }
         }

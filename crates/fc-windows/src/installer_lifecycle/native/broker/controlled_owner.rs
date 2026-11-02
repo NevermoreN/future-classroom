@@ -64,11 +64,13 @@ impl Operation {
     fn admits(self, observed: MaintenanceOperation) -> bool {
         matches!(
             (self, observed),
-            (Self::Install, MaintenanceOperation::Install)
-                | (
-                    Self::Repair | Self::Uninstall,
-                    MaintenanceOperation::SameManifest
-                )
+            (
+                Self::Install,
+                MaintenanceOperation::Install | MaintenanceOperation::Upgrade
+            ) | (
+                Self::Repair | Self::Uninstall,
+                MaintenanceOperation::SameManifest
+            )
         )
     }
 }
@@ -133,7 +135,7 @@ impl Message {
             RUN => {
                 m.thread == 0
                     && m.transaction != 0
-                    && (1..=3).contains(&m.outcome)
+                    && (1..=4).contains(&m.outcome)
                     && m.code == 0
                     && m.ticks == 0
             }
@@ -265,7 +267,12 @@ fn admitted_source(
             .verified_maintenance
             .as_ref()
             .is_some_and(|proof| proof.matches(s));
-        let allowed = same_source_operation(operation, admitted, same);
+        let upgrading = s.verified_upgrade.as_ref().is_some_and(|p| p.matches(s));
+        let allowed = if upgrading {
+            operation == Operation::Install && admitted == MaintenanceOperation::Upgrade
+        } else {
+            same_source_operation(operation, admitted, same)
+        };
         if !allowed {
             return Err(LifecycleError::Invalid);
         }
@@ -289,7 +296,11 @@ fn captured_operation(s: &Session, operation: Operation) -> Result<()> {
             .verified_maintenance
             .as_ref()
             .is_some_and(|proof| proof.matches(s));
-        if (operation == Operation::Install) == same {
+        let upgrading = s.verified_upgrade.as_ref().is_some_and(|p| p.matches(s));
+        if upgrading && operation != Operation::Install {
+            return Err(LifecycleError::Invalid);
+        }
+        if !upgrading && (operation == Operation::Install) == same {
             return Err(LifecycleError::Invalid);
         }
     }
@@ -302,7 +313,9 @@ struct GuardAssociation {
     transaction: u32,
     nonce: Option<Nonce>,
     returned: bool,
-    package: Option<ObservedPackage>,
+    packages: Vec<ObservedPackage>,
+    ticket: usize,
+    previous_nonce: Option<Nonce>,
 }
 impl GuardAssociation {
     fn new(transaction: u32) -> Self {
@@ -310,14 +323,22 @@ impl GuardAssociation {
             transaction,
             nonce: None,
             returned: false,
-            package: None,
+            packages: Vec::new(),
+            ticket: 0,
+            previous_nonce: None,
         }
     }
     // Private B-only construction after native Fresh admission/revalidation,
     // exclusive Draft, actual original Begin and armed Pending all succeeded.
     fn package(transaction: u32, package: ObservedPackage) -> Self {
         Self {
-            package: Some(package),
+            packages: vec![package],
+            ..Self::new(transaction)
+        }
+    }
+    fn upgrade(transaction: u32, packages: [ObservedPackage; 2]) -> Self {
+        Self {
+            packages: packages.into(),
             ..Self::new(transaction)
         }
     }
@@ -343,7 +364,7 @@ impl GuardAssociation {
         }
     }
     fn observe(&mut self, bridge: Bridge) -> Result<Option<Bridge>> {
-        if self.package.is_some() || bridge.code() != 0 {
+        if !self.packages.is_empty() || bridge.code() != 0 {
             return Err(LifecycleError::Invalid);
         }
         let reply = self.observe_nonce(bridge.kind(), bridge.transaction_id(), bridge.nonce())?;
@@ -352,7 +373,23 @@ impl GuardAssociation {
             .transpose()
     }
     fn observe_package(&mut self, bridge: v2::Bridge) -> Result<Option<v2::Bridge>> {
-        if self.package.as_ref() != Some(bridge.package()) {
+        if self.returned
+            && bridge.kind() == BridgeKind::Request
+            && self.ticket + 1 < self.packages.len()
+        {
+            if self.packages.get(self.ticket + 1) != Some(bridge.package())
+                || self.nonce == Some(bridge.nonce())
+            {
+                return Err(LifecycleError::Invalid);
+            }
+            self.previous_nonce = self.nonce;
+            self.nonce = None;
+            self.returned = false;
+            self.ticket += 1;
+        }
+        if self.packages.get(self.ticket) != Some(bridge.package())
+            || self.previous_nonce == Some(bridge.nonce())
+        {
             return Err(LifecycleError::Invalid);
         }
         let reply = self.observe_nonce(bridge.kind(), bridge.transaction_id(), bridge.nonce())?;
@@ -367,8 +404,15 @@ impl GuardAssociation {
             })
             .transpose()
     }
-    fn require_returned(&self) -> Result<()> {
+    fn require_prefix_returned(&self) -> Result<()> {
         if self.returned {
+            Ok(())
+        } else {
+            Err(LifecycleError::Unsettled)
+        }
+    }
+    fn require_returned(&self) -> Result<()> {
+        if self.returned && self.ticket + 1 >= self.packages.len() {
             Ok(())
         } else {
             Err(LifecycleError::Unsettled)
@@ -472,7 +516,7 @@ impl ApiOwner {
             windows::core::w!("REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown");
         Ok(unsafe {
             match operation {
-                1 => MsiInstallProductW(&HSTRING::from(path.as_os_str()), quiet),
+                1|4 => MsiInstallProductW(&HSTRING::from(path.as_os_str()), quiet),
                 2 => MsiInstallProductW(
                     &HSTRING::from(path.as_os_str()),
                     windows::core::w!(
@@ -580,25 +624,35 @@ pub(super) fn guardian(s: &mut Session) -> Result<()> {
             1 => Operation::Install,
             2 => Operation::Repair,
             3 => Operation::Uninstall,
+            4 if s.verified_upgrade.as_ref().is_some_and(|p| p.matches(s)) => Operation::Install,
             _ => return Err(LifecycleError::Invalid),
         };
         captured_operation(s, operation)?;
         maintenance::revalidate(s)?;
+        upgrade::revalidate(s)?;
         current(s.deadline)?;
         // No Session/API reference is passed through FFI. During this synchronous
         // call only the independent callback context uses the original pipe.
-        let context = guard_context::Registration::new(
+        let packages = if let Some(plan) = &s.verified_upgrade {
+            plan.packages(s)?.into()
+        } else {
+            source.into_iter().collect()
+        };
+        if (run.outcome == 4) != s.verified_upgrade.is_some() {
+            return Err(LifecycleError::Invalid);
+        }
+        let context = guard_context::Registration::new_plan(
             pipe,
             s.deadline,
             ready.ticks,
             api.transaction.0,
             s.resources.sid.clone(),
-            source,
+            packages,
         )?;
         let install = api.install(&path, run.outcome);
         // Unregister/check callback controls even when the native API fails.
         // No INSTALLED receipt is sent without the real guard's successor.
-        context.finish()?;
+        context.finish_install(install.as_ref().copied().unwrap_or(u32::MAX))?;
         let rc = install?;
         let mut installed = Message::new(INSTALLED);
         installed.transaction = api.transaction.0;
@@ -727,6 +781,11 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
     s.capture_maintenance()?;
     captured_operation(&s, operation)?;
     package(&mut s)?;
+    let mut pre_admission = if s.verified_upgrade.is_some() {
+        Some(effects::admit_upgrade(&mut s)?)
+    } else {
+        None
+    };
     let own = process_identity(unsafe { GetCurrentProcess() })?;
     s.pipe_name = pipe_name(&s.pipe_name, own);
     let pipe = s.server()?;
@@ -775,7 +834,11 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
     }
     observed?;
     let admission = match maintenance::revalidate(&mut s)
-        .and_then(|()| effects::admit(&mut s))
+        .and_then(|()| upgrade::revalidate(&mut s))
+        .and_then(|()| match pre_admission.take() {
+            Some(v) => Ok(v),
+            None => effects::admit(&mut s),
+        })
         .and_then(|admission| {
             effects::revalidate(&mut s, &admission)?;
             Ok(admission)
@@ -808,15 +871,27 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
         )?;
         return Err(LifecycleError::Invalid);
     }
-    let mut owner = draft.arm(&identity)?;
+    let mut owner = if s.verified_upgrade.is_some() {
+        draft.arm_upgrade(&identity)?
+    } else {
+        draft.arm(&identity)?
+    };
     let result = (|| -> Result<SetupResult> {
         let mut run = Message::new(RUN);
         run.transaction = began.transaction;
-        run.outcome = operation.tag();
+        run.outcome = if s.verified_upgrade.is_some() {
+            4
+        } else {
+            operation.tag()
+        };
         send(&s, pipe, run)?;
-        let mut guard = match admitted_source(&s, operation, admission.operation())? {
-            Some(source) => GuardAssociation::package(began.transaction, source),
-            None => GuardAssociation::new(began.transaction),
+        let mut guard = if let Some(plan) = &s.verified_upgrade {
+            GuardAssociation::upgrade(began.transaction, plan.packages(&s)?)
+        } else {
+            match admitted_source(&s, operation, admission.operation())? {
+                Some(source) => GuardAssociation::package(began.transaction, source),
+                None => GuardAssociation::new(began.transaction),
+            }
         };
         let installed = loop {
             match receive_guard_frame(s.deadline, pipe)? {
@@ -833,8 +908,16 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
                     }
                 }
                 GuardFrame::Legacy(frame) => {
-                    guard.require_returned()?;
-                    break Message::parse(frame)?;
+                    let installed = Message::parse(frame)?;
+                    if installed.kind != INSTALLED {
+                        return Err(LifecycleError::Invalid);
+                    }
+                    if installed.code == 0 {
+                        guard.require_returned()?;
+                    } else {
+                        guard.require_prefix_returned()?;
+                    }
+                    break installed;
                 }
             }
         };
@@ -911,6 +994,54 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn upgrade_two_tickets_require_new_then_old_distinct_nonce_and_no_third() {
+        let new = ObservedPackage::new(
+            "99378807-098D-5F04-8D4D-F181DFA218D6",
+            "99378807-098D-5F04-8D4D-F181DFA218D7",
+            "0.3.0",
+        )
+        .unwrap();
+        let old = ObservedPackage::new(
+            "99378807-098D-5F04-8D4D-F181DFA218D8",
+            "99378807-098D-5F04-8D4D-F181DFA218D9",
+            "0.2.0",
+        )
+        .unwrap();
+        let a = Nonce::from_bytes([7; 16]).unwrap();
+        let b = Nonce::from_bytes([8; 16]).unwrap();
+        let msg = |kind, nonce, p| v2::Bridge::new(kind, 42, nonce, p).unwrap();
+        let mut g = GuardAssociation::upgrade(42, [new.clone(), old.clone()]);
+        assert!(g
+            .observe_package(msg(BridgeKind::Request, a, old.clone()))
+            .is_err());
+        g.observe_package(msg(BridgeKind::Request, a, new.clone()))
+            .unwrap();
+        assert!(g
+            .observe_package(msg(BridgeKind::Request, b, old.clone()))
+            .is_err());
+        g.observe_package(msg(BridgeKind::Returned, a, new.clone()))
+            .unwrap();
+        assert!(g.require_returned().is_err());
+        g.require_prefix_returned().unwrap();
+        assert!(g
+            .observe_package(msg(BridgeKind::Request, a, old.clone()))
+            .is_err());
+        assert!(g
+            .observe_package(msg(BridgeKind::Request, b, new.clone()))
+            .is_err());
+        g.observe_package(msg(BridgeKind::Request, b, old.clone()))
+            .unwrap();
+        assert!(g
+            .observe_package(msg(BridgeKind::Returned, a, old.clone()))
+            .is_err());
+        g.observe_package(msg(BridgeKind::Returned, b, old.clone()))
+            .unwrap();
+        g.require_returned().unwrap();
+        for p in [new, old] {
+            assert!(g.observe_package(msg(BridgeKind::Request, a, p)).is_err());
+        }
+    }
     #[test]
     fn same_source_maintenance_never_promotes_upgrade_or_missing_native_proof() {
         for operation in [Operation::Install, Operation::Repair, Operation::Uninstall] {
@@ -1014,14 +1145,21 @@ mod tests {
                 MaintenanceOperation::Upgrade,
                 MaintenanceOperation::Uninstall,
             ] {
-                assert!(!operation.admits(observed));
+                assert_eq!(
+                    operation.admits(observed),
+                    operation == Operation::Install && observed == MaintenanceOperation::Upgrade
+                );
             }
             let mut run = Message::new(RUN);
             run.transaction = 42;
             run.outcome = operation.tag();
             assert!(Message::parse(run.bytes()).is_ok());
         }
-        for tag in [0, 4, 5, 255] {
+        let mut upgrade = Message::new(RUN);
+        upgrade.transaction = 42;
+        upgrade.outcome = 4;
+        assert!(Message::parse(upgrade.bytes()).is_ok());
+        for tag in [0, 5, 255] {
             let mut run = Message::new(RUN);
             run.transaction = 42;
             run.outcome = tag;

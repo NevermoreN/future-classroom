@@ -40,6 +40,8 @@ struct State {
     granted: bool,
     returned: bool,
     write: Option<Box<GrantWrite>>,
+    ticket: usize,
+    prior_nonce: Option<Nonce>,
 }
 struct GrantWrite {
     overlapped: OVERLAPPED,
@@ -56,7 +58,7 @@ struct Context {
     deadline: Instant,
     deadline_ticks: u64,
     transaction: u32,
-    package: Option<ObservedPackage>,
+    packages: Vec<ObservedPackage>,
     sid: Vec<u8>,
     active: AtomicUsize,
     fault: AtomicBool,
@@ -82,6 +84,26 @@ impl Registration {
         sid: Vec<u8>,
         package: Option<ObservedPackage>,
     ) -> Result<Self> {
+        Self::new_plan(
+            broker_pipe,
+            deadline,
+            deadline_ticks,
+            transaction,
+            sid,
+            package.into_iter().collect(),
+        )
+    }
+    pub(super) fn new_plan(
+        broker_pipe: HANDLE,
+        deadline: Instant,
+        deadline_ticks: u64,
+        transaction: u32,
+        sid: Vec<u8>,
+        packages: Vec<ObservedPackage>,
+    ) -> Result<Self> {
+        if packages.len() > 2 || (packages.len() == 2 && packages[0] == packages[1]) {
+            return Err(LifecycleError::Invalid);
+        }
         current(deadline)?;
         if transaction == 0 || !CONTEXT_UNTIL_EXIT.load(Ordering::Acquire).is_null() {
             return Err(LifecycleError::Invalid);
@@ -95,12 +117,14 @@ impl Registration {
                     granted: false,
                     returned: false,
                     write: None,
+                    ticket: 0,
+                    prior_nonce: None,
                 }),
                 broker_pipe,
                 deadline,
                 deadline_ticks,
                 transaction,
-                package,
+                packages,
                 sid,
                 active: AtomicUsize::new(0),
                 fault: AtomicBool::new(false),
@@ -186,7 +210,10 @@ impl Registration {
             }
         }
     }
-    pub(super) fn finish(mut self) -> Result<()> {
+    pub(super) fn finish(self) -> Result<()> {
+        self.finish_install(0)
+    }
+    pub(super) fn finish_install(mut self, install_return: u32) -> Result<()> {
         if let Err(error) = self.remove() {
             self.retire(true);
             return Err(error);
@@ -204,7 +231,9 @@ impl Registration {
         let proven = !context.fault.load(Ordering::Acquire)
             && state.granted
             && state.returned
-            && state.pipe.is_none();
+            && state.pipe.is_none()
+            && (state.ticket + 1 >= context.packages.len()
+                || (install_return != 0 && install_return != u32::MAX));
         // Negative controls are returned only after actual Install has returned.
         // Failed Close remains sticky in Resources; it cannot be retried into a
         // successful Returned message or successful physical G exit.
@@ -339,13 +368,29 @@ impl Context {
             }
         };
         if kind == INSTALLMESSAGE_INFO.0 as u32 && text.starts_with(INFO_PREFIX) {
-            if self.package.is_some() {
+            if !self.packages.is_empty() {
                 return Err(LifecycleError::Invalid);
             }
             self.grant(&mut state, Nonce::parse_info(&text)?)?;
         } else if kind == INSTALLMESSAGE_INFO.0 as u32 && text.starts_with(v2::INFO_PREFIX) {
             let (package, nonce) = ObservedPackage::parse_info(&text)?;
-            if self.package.as_ref() != Some(&package) {
+            if state.returned {
+                if state.ticket + 1 >= self.packages.len()
+                    || self.packages.get(state.ticket + 1) != Some(&package)
+                    || state.nonce == Some(nonce)
+                    || !state.resources.handles.is_empty()
+                    || state.write.is_some()
+                {
+                    return Err(LifecycleError::Invalid);
+                }
+                state.prior_nonce = state.nonce;
+                state.nonce = None;
+                state.granted = false;
+                state.returned = false;
+                state.ticket += 1;
+            }
+            if self.packages.get(state.ticket) != Some(&package) || state.prior_nonce == Some(nonce)
+            {
                 return Err(LifecycleError::Invalid);
             }
             self.grant(&mut state, nonce)?;
@@ -361,9 +406,18 @@ impl Context {
             let pipe = state.pipe.ok_or(LifecycleError::Unsettled)?;
             state.resources.close_handle(pipe)?;
             state.pipe = None;
-            state.resources.release()?;
+            // Return ALL original ticket controls, but retain this same Context's
+            // claim for a possible second ticket. No replacement owner is made.
+            while !state.resources.handles.is_empty() {
+                let i = state.resources.handles.len() - 1;
+                state.resources.close(i)?;
+            }
+            if state.write.as_ref().is_some_and(|w| w.pending) {
+                return Err(LifecycleError::Unsettled);
+            }
+            state.write = None;
             let nonce = state.nonce.ok_or(LifecycleError::Invalid)?;
-            if let Some(package) = &self.package {
+            if let Some(package) = self.packages.get(state.ticket) {
                 let returned = v2::Bridge::new(
                     BridgeKind::Returned,
                     self.transaction,
@@ -403,7 +457,7 @@ impl Context {
         state.resources.add(pipe, Role::Control);
         state.pipe = Some(pipe);
         let server = self.authenticate_server(state, pipe)?;
-        if let Some(package) = &self.package {
+        if let Some(package) = self.packages.get(state.ticket) {
             let request = v2::Bridge::new(
                 BridgeKind::Request,
                 self.transaction,
@@ -458,7 +512,7 @@ impl Context {
         Ok(())
     }
     fn write_grant(&self, state: &mut State, pipe: HANDLE, bytes: &[u8]) -> Result<()> {
-        let expected = if self.package.is_some() {
+        let expected = if !self.packages.is_empty() {
             v2::FRAME_BYTES
         } else {
             48

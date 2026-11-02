@@ -3,7 +3,7 @@
 //! The reader takes the SAME Resources by value, never another CLAIMS slot.
 use super::*;
 use crate::installer_lifecycle::{
-    broker::{carrier, payload_manifest},
+    broker::{carrier, payload_manifest, published_host::predecessor},
     guard_contract::GUARD_TEMPLATE_QUERY,
 };
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -37,6 +37,7 @@ pub(super) struct CapturedSource {
     pub(super) family: String,
     pub(super) manifest: Manifest,
     pub(super) envelope: Vec<u8>,
+    pub(super) predecessor: Option<predecessor::PublishedPredecessor>,
     pub(super) template_bytes: usize,
     pub(super) template_sha256: [u8; 32],
     pub(super) source_object: (u32, u64),
@@ -249,6 +250,7 @@ impl SourceReader {
             return Err(LifecycleError::Invalid);
         }
         let (template_bytes, template_sha) = self.template(db, image, image_size, hole)?;
+        let predecessor = self.predecessor(db)?;
         self.close_msi(db)?;
         // Every MSI object has returned before rehash/CNG, Session or Begin.
         if !self.msi.is_empty() {
@@ -279,6 +281,7 @@ impl SourceReader {
             family,
             manifest,
             envelope,
+            predecessor,
             template_bytes,
             template_sha256: template_sha,
             source_object: object,

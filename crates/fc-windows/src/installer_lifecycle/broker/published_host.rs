@@ -1,8 +1,12 @@
+//! The compile-time legacy host registry below remains separate. Upgrade uses
+//! a reviewed builder record in the pinned sealed source, never its own SHA
+//! compiled into this immutable carrier.
 //! Compiled reviewed publication records, not runtime artifact authorization.
 //! No CLI/JSON/path/hash constructor exists. The initial registry is EMPTY:
 //! no ABI2 carrier has been published/validated yet. A fixture is never a record.
 //! Lookup returns only a trusted expected identity; native whole-image/CNG peer
 //! proof and original owner/guard/effect checks are still independently required.
+pub(crate) mod predecessor;
 use super::{
     super::{LifecycleError, Result},
     carrier,

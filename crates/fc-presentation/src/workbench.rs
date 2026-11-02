@@ -234,6 +234,26 @@ pub enum Event {
     },
 }
 
+/// Logical roles select registered UI-thread native owners; display surfaces
+/// and management forms keep separate constructors.
+/// These are compile-time roles, never persisted IDs or management capabilities.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum WindowRole {
+    Display,
+    Workbench,
+    LayoutEditor,
+    Preview,
+    Status,
+}
+impl WindowRole {
+    pub const FORMS: [Self; 4] = [
+        Self::Workbench,
+        Self::LayoutEditor,
+        Self::Preview,
+        Self::Status,
+    ];
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -376,24 +396,4 @@ mod tests {
         view.fields[0].value = "08:20-09:00".into();
         assert_eq!(view.validate(), Err(FormError::InvalidView));
     }
-}
-
-/// Logical roles select registered UI-thread native owners; display surfaces
-/// and management forms keep separate constructors.
-/// These are compile-time roles, never persisted IDs or management capabilities.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum WindowRole {
-    Display,
-    Workbench,
-    LayoutEditor,
-    Preview,
-    Status,
-}
-impl WindowRole {
-    pub const FORMS: [Self; 4] = [
-        Self::Workbench,
-        Self::LayoutEditor,
-        Self::Preview,
-        Self::Status,
-    ];
 }

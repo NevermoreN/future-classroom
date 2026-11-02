@@ -1,11 +1,11 @@
 //! Native readonly logical signatures; all SQL and schemas come from fixed code.
 use super::*;
-struct Hash {
+pub(super) struct Hash {
     algorithm: BCRYPT_ALG_HANDLE,
     hash: BCRYPT_HASH_HANDLE,
 }
 impl Reader {
-    fn hash_new(&mut self) -> Result<Hash> {
+    pub(super) fn hash_new(&mut self) -> Result<Hash> {
         self.room(2)?;
         let mut a = BCRYPT_ALG_HANDLE::default();
         let rc = unsafe {
@@ -31,14 +31,14 @@ impl Reader {
             hash: h,
         })
     }
-    fn hash_add(&self, h: &Hash, b: &[u8]) -> Result<()> {
+    pub(super) fn hash_add(&self, h: &Hash, b: &[u8]) -> Result<()> {
         self.time()?;
         unsafe {
             BCryptHashData(h.hash, b, 0).ok()?;
         }
         Ok(())
     }
-    fn hash_end(&mut self, h: Hash) -> Result<[u8; 32]> {
+    pub(super) fn hash_end(&mut self, h: Hash) -> Result<[u8; 32]> {
         let mut b = [0; 32];
         unsafe {
             BCryptFinishHash(h.hash, &mut b, 0).ok()?;
@@ -60,7 +60,7 @@ impl Reader {
         self.time()?;
         Ok(b)
     }
-    fn view(&mut self, db: MSIHANDLE, query: &'static str) -> Result<MSIHANDLE> {
+    pub(super) fn view(&mut self, db: MSIHANDLE, query: &'static str) -> Result<MSIHANDLE> {
         self.room(1)?;
         let mut v = MSIHANDLE(0);
         let rc = unsafe { MsiDatabaseOpenViewW(db, &HSTRING::from(query), &mut v) };
@@ -79,7 +79,7 @@ impl Reader {
         }
         Ok(v)
     }
-    fn fetch(&mut self, v: MSIHANDLE) -> Result<Option<MSIHANDLE>> {
+    pub(super) fn fetch(&mut self, v: MSIHANDLE) -> Result<Option<MSIHANDLE>> {
         self.room(1)?;
         let mut row = MSIHANDLE(0);
         let rc = unsafe { MsiViewFetch(v, &mut row) };
@@ -89,7 +89,7 @@ impl Reader {
         }
         self.acquired(rc, row).map(Some)
     }
-    fn text(&self, row: MSIHANDLE, field: u32) -> Result<String> {
+    pub(super) fn text(&self, row: MSIHANDLE, field: u32) -> Result<String> {
         self.time()?;
         let mut b = [0u16; 4097];
         let mut n = b.len() as u32;
@@ -145,9 +145,16 @@ impl Reader {
         let rc = unsafe { MsiOpenDatabaseW(&native_path(path)?, MSIDBOPEN_READONLY, &mut db) };
         let db = self.acquired(rc, db)?;
         self.package(db, expected_package)?;
+        // An embedded transform/substorage is not part of this closed ABI.
+        // Query only its fixed Name column, never load or execute its data.
+        let storages = self.view(db, "SELECT `Name` FROM `_Storages`")?;
+        if self.fetch(storages)?.is_some() {
+            return Err(LifecycleError::Invalid);
+        }
+        self.close_msi(storages)?;
         let tables = self.tables(db)?;
         let all = self.hash_new()?;
-        self.hash_add(&all, b"FC-SAME-SOURCE-DB-v1\0")?;
+        self.hash_add(&all, logical::DOMAIN)?;
         for table in tables {
             // Reserve the WHOLE next table's bounded receipts before opening a
             // view. Checkpoint only between fully returned record/view sets.
@@ -173,21 +180,18 @@ impl Reader {
                 for (i, (_, kind)) in table.columns.iter().enumerate() {
                     let field = i as u32 + 1;
                     let null = unsafe { MsiRecordIsNull(row, field) }.as_bool();
-                    self.hash_add(&hash, &[u8::from(null)])?;
+                    self.hash_add(&hash, &logical::null(null))?;
                     if null {
                         continue;
                     }
                     match kind.as_bytes()[0].to_ascii_lowercase() {
                         b'i' => {
                             let value = unsafe { MsiRecordGetInteger(row, field) };
-                            if value == i32::MIN {
-                                return Err(LifecycleError::Invalid);
-                            }
-                            self.hash_add(&hash, &value.to_le_bytes())?;
+                            self.hash_add(&hash, &logical::integer(value)?)?;
                         }
                         b's' | b'l' => {
                             let value = self.text(row, field)?;
-                            self.hash_add(&hash, &(value.len() as u32).to_le_bytes())?;
+                            self.hash_add(&hash, &logical::length(value.len())?)?;
                             self.hash_add(&hash, value.as_bytes())?;
                         }
                         b'v' => {
@@ -195,7 +199,7 @@ impl Reader {
                             if u64::from(size) > LIMIT {
                                 return Err(LifecycleError::Invalid);
                             }
-                            self.hash_add(&hash, &size.to_le_bytes())?;
+                            self.hash_add(&hash, &logical::length(size as usize)?)?;
                             let mut left = size as usize;
                             let mut buffer = [0; 16384];
                             while left != 0 {
@@ -236,15 +240,7 @@ impl Reader {
             }
             self.close_msi(view)?;
             rows.sort_unstable();
-            self.hash_add(&all, &(table.name.len() as u32).to_le_bytes())?;
-            self.hash_add(&all, table.name.as_bytes())?;
-            for (name, kind) in table.columns {
-                self.hash_add(&all, &(name.len() as u32).to_le_bytes())?;
-                self.hash_add(&all, name.as_bytes())?;
-                self.hash_add(&all, &(kind.len() as u32).to_le_bytes())?;
-                self.hash_add(&all, kind.as_bytes())?;
-            }
-            self.hash_add(&all, &(rows.len() as u32).to_le_bytes())?;
+            self.hash_add(&all, &logical::table_header(table, rows.len())?)?;
             for row in rows {
                 self.hash_add(&all, &row)?;
             }
@@ -253,7 +249,7 @@ impl Reader {
         self.close_msi(db)?;
         Ok(signature)
     }
-    fn package(&mut self, db: MSIHANDLE, expected: &str) -> Result<()> {
+    pub(super) fn package(&mut self, db: MSIHANDLE, expected: &str) -> Result<()> {
         self.room(1)?;
         let mut summary = MSIHANDLE(0);
         let rc = unsafe { MsiGetSummaryInformationW(db, PCWSTR::null(), 0, &mut summary) };

@@ -117,6 +117,18 @@ impl MaintenanceDraft {
     /// possible point to authorize Run. This foundation does not send Run itself.
     /// A failed/expired arm never exposes an owner or an installation permit.
     pub(crate) fn arm(&mut self, identity: &InstallIdentity) -> Result<MaintenanceOwner> {
+        self.arm_operation(identity, MaintenanceOperation::SameManifest)
+    }
+    // Only the native broker's verified two-package plan calls this after
+    // original Begin0. The existing Upgrade tag3 is not a reinterpretation of5.
+    pub(crate) fn arm_upgrade(&mut self, identity: &InstallIdentity) -> Result<MaintenanceOwner> {
+        self.arm_operation(identity, MaintenanceOperation::Upgrade)
+    }
+    fn arm_operation(
+        &mut self,
+        identity: &InstallIdentity,
+        operation: MaintenanceOperation,
+    ) -> Result<MaintenanceOwner> {
         self.current()?;
         let Some((0, transaction_id)) = self.begin else {
             return Err(LifecycleError::Unsettled);
@@ -130,8 +142,7 @@ impl MaintenanceDraft {
         let resources = self.resources.as_mut().ok_or(LifecycleError::Invalid)?;
         // Original tag5, exact original pending inode, <=4096 bytes. No new
         // durable tag, alternate family, capacity or deadline is introduced.
-        let operation_id =
-            resources.create_pending(identity, MaintenanceOperation::SameManifest)?;
+        let operation_id = resources.create_pending(identity, operation)?;
         if Instant::now() >= self.deadline {
             return Err(LifecycleError::Expired);
         }

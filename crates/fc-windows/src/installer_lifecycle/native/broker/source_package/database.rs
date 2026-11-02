@@ -3,6 +3,25 @@ use super::*;
 use windows::core::{PCWSTR, PSTR, PWSTR};
 const PROPERTIES: &str = "SELECT `Property`, `Value` FROM `Property` WHERE `Property` = 'ProductCode' OR `Property` = 'UpgradeCode' OR `Property` = 'ProductVersion'";
 impl SourceReader {
+    pub(super) fn predecessor(
+        &mut self,
+        db: MSIHANDLE,
+    ) -> Result<Option<predecessor::PublishedPredecessor>> {
+        let view = self.abi2_view(db, predecessor::QUERY)?;
+        let Some(row) = self.abi2_fetch(view)? else {
+            self.close_msi(view)?;
+            return Ok(None);
+        };
+        let n = unsafe { MsiRecordDataSize(row, 1) } as usize;
+        if !(predecessor::HEADER_BYTES + 1..=predecessor::MAX_BYTES).contains(&n) {
+            return Err(LifecycleError::Invalid);
+        }
+        let mut bytes = vec![0; n];
+        self.abi2_stream_read(row, &mut bytes)?;
+        self.abi2_stream_end(row)?;
+        self.abi2_end(view, row)?;
+        predecessor::parse(&bytes).map(Some)
+    }
     pub(super) fn abi2_acquired(&mut self, code: u32, handle: MSIHANDLE) -> Result<MSIHANDLE> {
         // Preserve even an unexpected nonzero output on API failure.
         if handle.0 != 0 {

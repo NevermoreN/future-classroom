@@ -21,6 +21,15 @@ pub(super) struct Snapshot {
     leaves: Vec<Leaf>,
 }
 impl Snapshot {
+    pub(super) fn new_only_absent(&self, old: &Manifest, union: &Manifest) -> bool {
+        let paths: BTreeSet<_> = old.entries.iter().map(|e| e.path.as_str()).collect();
+        self.leaves.len() == union.entries.len()
+            && union
+                .entries
+                .iter()
+                .zip(&self.leaves)
+                .all(|(e, v)| paths.contains(e.path.as_str()) || matches!(v, Leaf::KnownAbsent))
+    }
     pub(super) fn same_objects(&self, other: &Self) -> bool {
         self.directories == other.directories && self.leaves == other.leaves
     }

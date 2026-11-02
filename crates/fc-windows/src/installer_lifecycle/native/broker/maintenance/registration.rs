@@ -2,7 +2,7 @@
 use super::*;
 pub(super) fn capture(
     resources: &Resources,
-    source: &source_package::CapturedSource,
+    manifest: &Manifest,
     deadline: Instant,
 ) -> Result<Option<Registration>> {
     let check = || {
@@ -31,10 +31,10 @@ pub(super) fn capture(
     if found.is_empty() {
         return Ok(None);
     }
-    if found.len() != 1 || !found.contains(&source.manifest.product) {
+    if found.len() != 1 || !found.contains(&manifest.product) {
         return Err(LifecycleError::Invalid);
     }
-    let product = HSTRING::from(format!("{{{}}}", source.manifest.product));
+    let product = HSTRING::from(format!("{{{}}}", manifest.product));
     let sid = format::sid_text(&resources.sid).ok_or(LifecycleError::Invalid)?;
     for index in 0..=3 {
         check()?;
@@ -64,7 +64,7 @@ pub(super) fn capture(
         if rc != 0
             || index != 0
             || context != MSIINSTALLCONTEXT_USERUNMANAGED
-            || guid(&name)? != source.manifest.product
+            || guid(&name)? != manifest.product
             || len as usize >= actual_sid.len()
             || String::from_utf16(&actual_sid[..len as usize])
                 .map_err(|_| LifecycleError::Invalid)?
@@ -98,7 +98,7 @@ pub(super) fn capture(
         Ok(text)
     };
     if property("State")? != "5"
-        || property("VersionString")? != source.manifest.version
+        || property("VersionString")? != manifest.version
         || !property("Transforms")?.is_empty()
     {
         return Err(LifecycleError::Invalid);
@@ -134,8 +134,8 @@ pub(super) fn capture(
     }
     check()?;
     Ok(Some(Registration {
-        product: source.manifest.product.clone(),
-        version: source.manifest.version.clone(),
+        product: manifest.product.clone(),
+        version: manifest.version.clone(),
         cache: PathBuf::from(cache),
     }))
 }
