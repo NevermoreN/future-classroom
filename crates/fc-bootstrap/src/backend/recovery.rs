@@ -167,12 +167,47 @@ impl RestoreConfirmation {
     /// is durable in the ORIGINAL database before any candidate can replace it.
     /// Even a later rollback retains this advanced authorization floor.
     pub fn confirm(self, fence: ExecutionFence) -> Result<ConfirmedRestore> {
+        self.confirm_window(fence, |_| true)
+    }
+    pub fn confirm_window(
+        self,
+        fence: ExecutionFence,
+        on_issued: impl FnOnce(fc_ports::command_window::IssuedCommand) -> bool,
+    ) -> Result<ConfirmedRestore> {
         self.access.check_revision()?;
+        use fc_ports::command_window::{CommandFamily, CommandOwner};
+        let mut issued = None;
+        for _ in 0..4 {
+            let mut entropy = [0; 24];
+            PlatformRandom
+                .fill(&mut entropy)
+                .map_err(|_| BackendError::CryptoUnavailable)?;
+            if entropy[..16] == [0; 16] || entropy[16..] == [0; 8] {
+                continue;
+            }
+            match self.access.repository.issue_command_window(
+                fc_storage::command_window::IssueCommand {
+                    family: CommandFamily::Generic,
+                    owner: CommandOwner::authenticated(&self.access.actor),
+                    entropy,
+                },
+            ) {
+                Err(StorageError::CommandIdReused) => continue,
+                other => {
+                    issued = Some(other?);
+                    break;
+                }
+            }
+        }
+        let issued = issued.ok_or(BackendError::CryptoUnavailable)?;
+        self.access.check_revision()?;
+        if !on_issued(issued) {
+            return Err(StorageError::ExecutionCancelled.into());
+        }
+        let scoped_repository = self.access.repository.with_command_window(issued);
         self.web.close();
         self.voice.invalidate_runtime();
-        let result = self
-            .access
-            .repository
+        let result = scoped_repository
             .try_advance_recovery_barrier(self.access.expected_revision, &self.access.actor, fence)
             .and_then(fc_storage::Ticket::wait);
         let barrier = match result {

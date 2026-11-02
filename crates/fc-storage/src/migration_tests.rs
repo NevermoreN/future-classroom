@@ -90,7 +90,7 @@ fn inspect(r: &BusinessRepository<u64>, path: PathBuf) -> MigrationSourceReceipt
         .wait()
         .unwrap()
 }
-fn subject_image(r: &mut BusinessRepository<u64>) -> ContentSlotKey {
+fn subject_image(r: &mut TestRepository) -> ContentSlotKey {
     let key = SubjectProfileKey {
         class_id: ClassId::new(1).unwrap(),
         subject_id: SubjectId::new(1).unwrap(),
@@ -138,7 +138,13 @@ fn mapped_ordinary_rewrites_complete_teaching_references_and_preserves_target_se
         &mut MaterialPrepared,
         (),
         fc_ports::MaterialAppendMetadata {
-            command_id: CommandId::new(103).unwrap(),
+            command_id: source
+                .issue(
+                    fc_ports::command_window::CommandFamily::Materials,
+                    "material-103",
+                    Some(&actor()),
+                )
+                .command_id,
             scope,
             material_id: MaterialId::new(1).unwrap(),
             display_name: "source material.txt".into(),
@@ -496,7 +502,13 @@ fn mapped_published_history_does_not_reenable_a_disabled_target_account() {
         &mut MaterialPrepared,
         (),
         fc_ports::MaterialAppendMetadata {
-            command_id: CommandId::new(200).unwrap(),
+            command_id: source
+                .issue(
+                    fc_ports::command_window::CommandFamily::Materials,
+                    "material-200",
+                    Some(&actor()),
+                )
+                .command_id,
             scope,
             material_id: MaterialId::new(1).unwrap(),
             display_name: "history.txt".into(),

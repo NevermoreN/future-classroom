@@ -3,7 +3,7 @@
 use super::*;
 use autostart_editor as a;
 use fc_domain::autostart::{AutostartObservation, AutostartPhase, AutostartState};
-use fc_ports::autostart::AutostartSystem;
+use fc_ports::{autostart::AutostartSystem, command_window::CommandFamily};
 use fc_windows::system::RunScope;
 
 type Check<T> = std::result::Result<T, String>;
@@ -251,8 +251,20 @@ fn exercise(app: &mut App, scope: &RunScope, deadline: Instant) -> Check<usize> 
                 .lock(),
             "backend lock",
         )?;
+        let issued = checked(
+            backend.issue_native_command(
+                CommandFamily::Autostart,
+                Some(lease),
+                SessionPurpose::Manage,
+            ),
+            "issue interrupted operation",
+        )?;
+        let mut command = checked(
+            backend.begin_command_scope(issued),
+            "scope interrupted operation",
+        )?;
         let prepared = checked(
-            backend.begin_autostart_while(
+            command.begin_autostart_while(
                 lease,
                 saved.revision,
                 true,
@@ -263,9 +275,13 @@ fn exercise(app: &mut App, scope: &RunScope, deadline: Instant) -> Check<usize> 
             "prepare interrupted operation",
         )?;
         checked(
-            backend.mark_autostart_applying_while(lease, prepared.ticket, Arc::new(|| true)),
+            command.mark_autostart_applying_while(lease, prepared.ticket, Arc::new(|| true)),
             "mark interrupted operation applying",
         )?;
+        // Begin and Applying use the original issued pair. The real registry
+        // owner runs after both the command scope and Backend mutex are gone.
+        drop(command);
+        drop(backend);
         let mut external = checked(scope.open(), "scratch effect")?;
         require(
             external
@@ -297,8 +313,20 @@ fn exercise(app: &mut App, scope: &RunScope, deadline: Instant) -> Check<usize> 
                 .lock(),
             "backend lock",
         )?;
+        let issued = checked(
+            backend.issue_native_command(
+                CommandFamily::Autostart,
+                Some(lease),
+                SessionPurpose::Manage,
+            ),
+            "issue interrupted pre-effect intent",
+        )?;
+        let mut command = checked(
+            backend.begin_command_scope(issued),
+            "scope interrupted pre-effect intent",
+        )?;
         checked(
-            backend.begin_autostart_while(
+            command.begin_autostart_while(
                 lease,
                 matched.revision,
                 false,

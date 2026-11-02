@@ -5,7 +5,7 @@ use crate::profile_content_cache::{ProfileContentTextCache, TextFrame};
 use fc_domain::profile_content::*;
 use fc_ports::{ProfileContentOutcome, ProfileContentRepository, ProfileContentRepositoryError};
 pub use fc_storage::business::profile_content::{
-    MediaEntry, MediaInventory, MediaReservation, MediaRetirement, MediaState,
+    MediaEntry, MediaInventory, MediaReservation, MediaRetirement, MediaState, ProfileContentOwner,
 };
 
 fn check_content_execution(fence: &dyn Fn() -> bool) -> std::result::Result<(), StorageError> {
@@ -20,6 +20,16 @@ fn content_execution_expired(_: StorageError) -> BackendError {
     BackendError::ProfileContent(ProfileContentRepositoryError::Domain(
         ProfileContentError::Expired,
     ))
+}
+
+/// Business-only public paging intent. The worker obtains the server-issued
+/// command identity before constructing a PageContentRequest.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ProfilePageTarget {
+    pub slot: ContentSlotKey,
+    pub expected_content_revision: Revision,
+    pub expected_view_revision: Revision,
+    pub page: u8,
 }
 
 /// An admitted preparation may pause through an unrelated writer publication.
@@ -289,6 +299,22 @@ impl Backend {
             .guarded(lease, generation, SessionPurpose::Manage)
             .begin_profile_content(request, &actor, self.clock.as_ref())?)
     }
+    pub fn begin_profile_content_owned(
+        &mut self,
+        lease: SessionLease,
+        request: BeginContentRequest,
+    ) -> Result<(ContentAdmission, ProfileContentOwner)> {
+        let (actor, generation) = self.profile_content_actor(lease)?;
+        Ok(self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .begin_profile_content_owned(request, &actor, self.clock.as_ref())?)
+    }
+    pub fn fail_profile_content_owned(
+        &mut self,
+        owner: ProfileContentOwner,
+    ) -> Result<ProfileContentOutcome> {
+        Ok(self.repository.fail_profile_content_owned(owner)?)
+    }
     pub fn commit_profile_content(
         &mut self,
         lease: SessionLease,
@@ -454,6 +480,42 @@ impl Backend {
         }
         Ok(())
     }
+    /// The rendered public image-page capability, checked on the original Work
+    /// thread before and after asynchronous Writer issuance. This grants no
+    /// management/publish actor and does not widen ProfileContent/None generally.
+    pub fn issue_profile_page_command(
+        &self,
+        generation: SceneGeneration,
+        expected_global: Revision,
+        request: &ProfilePageTarget,
+        fence: Arc<dyn Fn() -> bool + Send + Sync>,
+    ) -> Result<fc_ports::command_window::IssuedCommand> {
+        let check = || -> Result<()> {
+            check_content_execution(fence.as_ref()).map_err(content_execution_expired)?;
+            self.check_open()?;
+            let expected = (
+                request.slot,
+                request.expected_content_revision,
+                request.expected_view_revision,
+                expected_global,
+                generation,
+            );
+            if !self
+                .control
+                .profile_content_scene_matches(expected, self.clock.now(), false)
+            {
+                return Err(unavailable());
+            }
+            Ok(())
+        };
+        check()?;
+        let issued = self.issue_for_owner(
+            fc_ports::command_window::CommandFamily::ProfileContent,
+            fc_ports::command_window::CommandOwner::PublicDesktop,
+        )?;
+        check()?;
+        Ok(issued)
+    }
     pub fn page_profile_content(
         &mut self,
         generation: SceneGeneration,
@@ -586,6 +648,7 @@ mod tests {
         clock: Arc<FixtureClock>,
         slot: ContentSlotKey,
         lease: SessionLease,
+        commands: std::collections::BTreeMap<u64, fc_ports::command_window::IssuedCommand>,
     }
     impl Fixture {
         fn new(kind: ContentPayloadKind) -> Self {
@@ -676,12 +739,19 @@ mod tests {
                 .content_styles
                 .push(ContentNodeStyle::new(node_id, kind));
             backend
-                .save_public_layout(
-                    lease,
-                    Revision::default(),
-                    Revision::default(),
-                    layout,
-                    DisplaySettings::default(),
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Profiles,
+                    Some(lease),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.save_public_layout(
+                            lease,
+                            Revision::default(),
+                            Revision::default(),
+                            layout,
+                            DisplaySettings::default(),
+                        )
+                    },
                 )
                 .unwrap();
             Self {
@@ -693,7 +763,18 @@ mod tests {
                     node_id,
                 },
                 lease,
+                commands: Default::default(),
             }
+        }
+        fn command(&self, label: u64) -> fc_ports::command_window::IssuedCommand {
+            self.commands[&label]
+        }
+        fn issued(&self, raw: CommandId) -> fc_ports::command_window::IssuedCommand {
+            *self
+                .commands
+                .values()
+                .find(|issued| issued.command_id == raw)
+                .expect("original issued pair")
         }
         fn begin(
             &mut self,
@@ -701,11 +782,25 @@ mod tests {
             expected: u64,
             operation: ContentOperation,
         ) -> ContentAdmission {
+            let issued = self
+                .backend
+                .issue_native_command(
+                    fc_ports::command_window::CommandFamily::ProfileContent,
+                    Some(self.lease),
+                    SessionPurpose::Manage,
+                )
+                .unwrap();
+            assert!(
+                self.commands.insert(id, issued).is_none(),
+                "label must not replace an original ticket"
+            );
             self.backend
+                .begin_command_scope(issued)
+                .unwrap()
                 .begin_profile_content(
                     self.lease,
                     BeginContentRequest {
-                        command_id: CommandId::new(id).unwrap(),
+                        command_id: issued.command_id,
                         slot: self.slot,
                         expected_revision: Revision::new(expected),
                         operation,
@@ -720,8 +815,11 @@ mod tests {
             admission: ContentAdmission,
             payload: ContentPayload,
         ) -> PublishedContentSnapshot {
+            let issued = self.issued(admission.request.command_id);
             let prepared = prepare_profile_content(&mut Preparation, admission, payload).unwrap();
             self.backend
+                .begin_command_scope(issued)
+                .unwrap()
                 .commit_profile_content(self.lease, prepared)
                 .unwrap()
         }
@@ -759,15 +857,24 @@ mod tests {
                 .layout
                 .content_styles
                 .push(ContentNodeStyle::new(node_id, ContentPayloadKind::Images));
-            self.backend
-                .save_public_layout(
-                    self.lease,
-                    expected,
-                    public.display.revision,
-                    public.layout,
-                    public.display,
+            {
+                let fixture_lease = self.lease;
+                self.backend.test_native_command(
+                    fc_ports::command_window::CommandFamily::Profiles,
+                    Some(fixture_lease),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.save_public_layout(
+                            fixture_lease,
+                            expected,
+                            public.display.revision,
+                            public.layout,
+                            public.display,
+                        )
+                    },
                 )
-                .unwrap();
+            }
+            .unwrap();
             ContentSlotKey {
                 scope: LayoutScope::Public,
                 node_id,
@@ -777,37 +884,64 @@ mod tests {
             use fc_domain::{schedule::*, schedule_document::*};
             let class_id = ClassId::new(1).unwrap();
             let subject_id = SubjectId::new(1).unwrap();
-            self.backend
-                .identity(
-                    self.lease,
-                    IdentityCommand::CreateClass {
-                        id: class_id,
-                        name: "Synthetic class".into(),
+            {
+                let fixture_lease = self.lease;
+                self.backend.test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(fixture_lease),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.identity(
+                            fixture_lease,
+                            IdentityCommand::CreateClass {
+                                id: class_id,
+                                name: "Synthetic class".into(),
+                            },
+                        )
                     },
                 )
-                .unwrap();
-            self.backend
-                .identity(
-                    self.lease,
-                    IdentityCommand::PutSubject {
-                        id: subject_id,
-                        name: "Synthetic subject".into(),
-                        enabled: true,
-                        color: Rgb {
-                            red: 20,
-                            green: 40,
-                            blue: 60,
-                        },
-                        expected_revision: None,
+            }
+            .unwrap();
+            {
+                let fixture_lease = self.lease;
+                self.backend.test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(fixture_lease),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.identity(
+                            fixture_lease,
+                            IdentityCommand::PutSubject {
+                                id: subject_id,
+                                name: "Synthetic subject".into(),
+                                enabled: true,
+                                color: Rgb {
+                                    red: 20,
+                                    green: 40,
+                                    blue: 60,
+                                },
+                                expected_revision: None,
+                            },
+                        )
                     },
                 )
-                .unwrap();
-            self.backend
-                .identity(
-                    self.lease,
-                    IdentityCommand::BindCurrentClass { id: class_id },
+            }
+            .unwrap();
+            {
+                let fixture_lease = self.lease;
+                self.backend.test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(fixture_lease),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.identity(
+                            fixture_lease,
+                            IdentityCommand::BindCurrentClass { id: class_id },
+                        )
+                    },
                 )
-                .unwrap();
+            }
+            .unwrap();
             let rows = (1..=2)
                 .map(|number| TimetableRow {
                     id: RowId::new(number).unwrap(),
@@ -852,9 +986,16 @@ mod tests {
                 }],
                 ..ScheduleDocument::default()
             };
-            self.backend
-                .save_schedule(self.lease, Revision::default(), document)
-                .unwrap();
+            {
+                let fixture_lease = self.lease;
+                self.backend.test_native_command(
+                    fc_ports::command_window::CommandFamily::Schedule,
+                    Some(fixture_lease),
+                    SessionPurpose::Manage,
+                    |backend| backend.save_schedule(fixture_lease, Revision::default(), document),
+                )
+            }
+            .unwrap();
         }
     }
     impl Drop for Fixture {
@@ -994,10 +1135,14 @@ mod tests {
             0,
             ContentOperation::Publish(ContentPayloadKind::Images),
         );
-        let reservation = f
-            .backend
-            .reserve_profile_media(f.lease, &admission, &[10, 10])
-            .unwrap();
+        let reservation = {
+            let issued = f.issued(admission.request.command_id);
+            f.backend
+                .begin_command_scope(issued)
+                .unwrap()
+                .reserve_profile_media(f.lease, &admission, &[10, 10])
+        }
+        .unwrap();
         // Trusted metadata-only preparation isolates guest paging/SQLite. It
         // does not claim actual media files/WIC; payload SHA uses real crypto.
         let published = f.commit(
@@ -1032,8 +1177,22 @@ mod tests {
                 facts.captured_at,
                 None
             ));
+            let page_command = f
+                .backend
+                .issue_profile_page_command(
+                    generation,
+                    facts.global_revision,
+                    &ProfilePageTarget {
+                        slot: f.slot,
+                        expected_content_revision: published.revision,
+                        expected_view_revision: published.view_revision,
+                        page: 1,
+                    },
+                    Arc::new(|| true),
+                )
+                .unwrap();
             let request = PageContentRequest {
-                command_id: CommandId::new(301 + index as u64).unwrap(),
+                command_id: page_command.command_id,
                 slot: f.slot,
                 expected_content_revision: published.revision,
                 expected_view_revision: published.view_revision,
@@ -1102,12 +1261,16 @@ mod tests {
                 });
                 // No ActorContext is fabricated: the repository's exact guest
                 // scene capability and the real job fence are both required.
-                let result = f.backend.page_profile_content_while(
-                    generation,
-                    facts.global_revision,
-                    request,
-                    held_fence,
-                );
+                let result = f
+                    .backend
+                    .begin_command_scope(page_command)
+                    .unwrap()
+                    .page_profile_content_while(
+                        generation,
+                        facts.global_revision,
+                        request,
+                        held_fence,
+                    );
                 owner_release.store(true, Ordering::Release);
                 (result, observer.join().unwrap())
             });
@@ -1149,20 +1312,37 @@ mod tests {
             facts.captured_at,
             None
         ));
+        let page_command = f
+            .backend
+            .issue_profile_page_command(
+                generation,
+                facts.global_revision,
+                &ProfilePageTarget {
+                    slot: f.slot,
+                    expected_content_revision: published.revision,
+                    expected_view_revision: published.view_revision,
+                    page: 1,
+                },
+                Arc::new(|| true),
+            )
+            .unwrap();
         let request = PageContentRequest {
-            command_id: CommandId::new(303).unwrap(),
+            command_id: page_command.command_id,
             slot: f.slot,
             expected_content_revision: published.revision,
             expected_view_revision: published.view_revision,
             page: 1,
         };
         assert!(matches!(
-            f.backend.page_profile_content_while(
-                generation,
-                facts.global_revision,
-                request.clone(),
-                Arc::new(|| panic!("synthetic guest fence panic"))
-            ),
+            f.backend
+                .begin_command_scope(page_command)
+                .unwrap()
+                .page_profile_content_while(
+                    generation,
+                    facts.global_revision,
+                    request.clone(),
+                    Arc::new(|| panic!("synthetic guest fence panic"))
+                ),
             Err(BackendError::ProfileContent(
                 ProfileContentRepositoryError::Domain(ProfileContentError::Expired)
             ))
@@ -1189,6 +1369,8 @@ mod tests {
         let fence = receive.recv_timeout(Duration::from_secs(5)).unwrap();
         let saved = f
             .backend
+            .begin_command_scope(page_command)
+            .unwrap()
             .page_profile_content_while(generation, facts.global_revision, request, fence)
             .unwrap();
         ticket.cancel();
@@ -1334,8 +1516,11 @@ mod tests {
                     release.store(true, Ordering::Release);
                     ticket
                 });
+                let issued = f.issued(admission.request.command_id);
                 let result = f
                     .backend
+                    .begin_command_scope(issued)
+                    .unwrap()
                     .commit_profile_content_while(f.lease, proof, held_fence);
                 worker_release.store(true, Ordering::Release);
                 (result, observer.join().unwrap())
@@ -1374,7 +1559,12 @@ mod tests {
                 current.latest_publish_sequence, sequence,
                 "durable Begin is not rolled back with the rejected finish"
             );
-            f.backend.fail_profile_content(f.lease, admission).unwrap();
+            let issued = f.issued(admission.request.command_id);
+            f.backend
+                .begin_command_scope(issued)
+                .unwrap()
+                .fail_profile_content(f.lease, admission)
+                .unwrap();
         }
 
         // Cancellation observed after a completed COMMIT is result loss, not an
@@ -1399,8 +1589,11 @@ mod tests {
             Instant::now() + Duration::from_secs(10),
         );
         let fence = receive.recv_timeout(Duration::from_secs(5)).unwrap();
+        let issued = f.command(200);
         let saved = f
             .backend
+            .begin_command_scope(issued)
+            .unwrap()
             .commit_profile_content_while(f.lease, proof, fence)
             .unwrap();
         ticket.cancel();
@@ -1414,11 +1607,16 @@ mod tests {
             ContentPayload::Text("committed before cancellation".into())
         );
         assert_eq!(
-            f.backend
-                .profile_content_outcome(f.lease, CommandId::new(200).unwrap())
-                .unwrap()
-                .unwrap()
-                .status,
+            {
+                let issued = f.command(200);
+                f.backend
+                    .begin_command_scope(issued)
+                    .unwrap()
+                    .profile_content_outcome(f.lease, issued.command_id)
+            }
+            .unwrap()
+            .unwrap()
+            .status,
             ProfileContentStatus::Committed
         );
     }
@@ -1524,11 +1722,16 @@ mod tests {
         let restored = f.commit(undo, ContentPayload::Empty);
         assert_eq!(restored.revision, Revision::new(3));
         assert_eq!(
-            f.backend
-                .profile_content_outcome(f.lease, CommandId::new(3).unwrap())
-                .unwrap()
-                .unwrap()
-                .status,
+            {
+                let issued = f.command(3);
+                f.backend
+                    .begin_command_scope(issued)
+                    .unwrap()
+                    .profile_content_outcome(f.lease, issued.command_id)
+            }
+            .unwrap()
+            .unwrap()
+            .status,
             ProfileContentStatus::Committed
         );
         let stale = f.begin(4, 3, ContentOperation::Publish(ContentPayloadKind::Text));
@@ -1561,7 +1764,17 @@ mod tests {
             .backend
             .profile_content_preparation_guard(f.lease)
             .unwrap();
+        let identity_command = f
+            .backend
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(f.lease),
+                SessionPurpose::Manage,
+            )
+            .unwrap();
         f.backend
+            .begin_command_scope(identity_command)
+            .unwrap()
             .identity(
                 f.lease,
                 IdentityCommand::UpdateAccount {
@@ -1624,10 +1837,14 @@ mod tests {
             .profile_content_preparation_guard(f.lease)
             .unwrap();
         let admission = f.begin(1, 0, ContentOperation::Publish(ContentPayloadKind::Images));
-        let reservation = f
-            .backend
-            .reserve_profile_media(f.lease, &admission, &[10, 10])
-            .unwrap();
+        let reservation = {
+            let issued = f.issued(admission.request.command_id);
+            f.backend
+                .begin_command_scope(issued)
+                .unwrap()
+                .reserve_profile_media(f.lease, &admission, &[10, 10])
+        }
+        .unwrap();
         // Metadata-only trusted adapter fixture: tests authorization/SQLite page
         // lifecycle, not image decoding or filesystem verification.
         let pages = reservation
@@ -1644,12 +1861,23 @@ mod tests {
             })
             .collect();
         let published = f.commit(admission, ContentPayload::Images(pages));
+        let second_command = f
+            .backend
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::ProfileContent,
+                Some(f.lease),
+                SessionPurpose::Manage,
+            )
+            .unwrap();
+        f.commands.insert(11, second_command);
         let second_admission = f
             .backend
+            .begin_command_scope(second_command)
+            .unwrap()
             .begin_profile_content(
                 f.lease,
                 BeginContentRequest {
-                    command_id: CommandId::new(11).unwrap(),
+                    command_id: second_command.command_id,
                     slot: second_slot,
                     expected_revision: Revision::default(),
                     operation: ContentOperation::Publish(ContentPayloadKind::Images),
@@ -1658,10 +1886,14 @@ mod tests {
                 },
             )
             .unwrap();
-        let second_reservation = f
-            .backend
-            .reserve_profile_media(f.lease, &second_admission, &[10])
-            .unwrap();
+        let second_reservation = {
+            let issued = f.issued(second_admission.request.command_id);
+            f.backend
+                .begin_command_scope(issued)
+                .unwrap()
+                .reserve_profile_media(f.lease, &second_admission, &[10])
+        }
+        .unwrap();
         f.commit(
             second_admission,
             ContentPayload::Images(vec![MediaReference {
@@ -1738,8 +1970,28 @@ mod tests {
             .backend
             .page_profile_content(SceneGeneration::new(2), facts.global_revision, page.clone())
             .is_err());
+        let page_command = f
+            .backend
+            .issue_profile_page_command(
+                SceneGeneration::new(1),
+                facts.global_revision,
+                &ProfilePageTarget {
+                    slot: f.slot,
+                    expected_content_revision: page.expected_content_revision,
+                    expected_view_revision: page.expected_view_revision,
+                    page: page.page,
+                },
+                Arc::new(|| true),
+            )
+            .unwrap();
+        let page = PageContentRequest {
+            command_id: page_command.command_id,
+            ..page
+        };
         let next = f
             .backend
+            .begin_command_scope(page_command)
+            .unwrap()
             .page_profile_content(SceneGeneration::new(1), facts.global_revision, page.clone())
             .unwrap();
         assert_eq!(next.revision, published.revision);
@@ -1796,6 +2048,65 @@ mod tests {
                 None
             ),
             "cleared same-generation capabilities cannot revive"
+        );
+    }
+    #[test]
+    fn command_window_expiry_denies_replay_but_original_owner_can_fail_after_lock() {
+        use fc_ports::command_window::{CommandFamily, CommandWindowError};
+        let mut f = Fixture::new(ContentPayloadKind::Text);
+        let issued = f
+            .backend
+            .issue_native_command(
+                CommandFamily::ProfileContent,
+                Some(f.lease),
+                SessionPurpose::Manage,
+            )
+            .unwrap();
+        let request = BeginContentRequest {
+            command_id: issued.command_id,
+            slot: f.slot,
+            expected_revision: Revision::default(),
+            operation: ContentOperation::Publish(ContentPayloadKind::Text),
+            payload_fingerprint: [17; 32],
+            expires_at: LocalDateTime::new(f.clock.now().date, 7200).unwrap(),
+        };
+        let (admission, owner) = {
+            let mut scoped = f.backend.begin_command_scope(issued).unwrap();
+            scoped
+                .begin_profile_content_owned(f.lease, request)
+                .unwrap()
+        };
+        let now = f.clock.now();
+        *f.clock.0.lock().unwrap() =
+            LocalDateTime::new(LocalDate::new(2026, 11, 2).unwrap(), now.second_of_day()).unwrap();
+        f.backend.session_control().lock_local();
+        assert_eq!(
+            f.backend
+                .begin_command_scope(issued)
+                .err()
+                .unwrap()
+                .command_window_error(),
+            Some(CommandWindowError::Expired)
+        );
+        let outcome = f.backend.fail_profile_content_owned(owner.clone()).unwrap();
+        assert_eq!(outcome.command_id, admission.request.command_id);
+        assert_eq!(outcome.status, fc_ports::ProfileContentStatus::Failed);
+        // Same original negative notification is idempotent while retained. It
+        // cannot manufacture a new admission, reopen scope or publish content.
+        let repeat = f.backend.fail_profile_content_owned(owner);
+        assert!(matches!(
+            repeat,
+            Err(BackendError::ProfileContent(
+                ProfileContentRepositoryError::Domain(ProfileContentError::AdmissionMismatch)
+            ))
+        ));
+        assert_eq!(
+            f.backend
+                .begin_command_scope(issued)
+                .err()
+                .unwrap()
+                .command_window_error(),
+            Some(CommandWindowError::Expired)
         );
     }
 }

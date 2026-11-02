@@ -161,6 +161,7 @@ ERROR_CODES = frozenset({
     "RATE_LIMITED", "SERVICE_UNAVAILABLE", "RESULT_UNKNOWN", "REVISION_CONFLICT", "DAY_CHANGED",
     "IDEMPOTENCY_CONFLICT", "STALE_CURSOR", "UPLOAD_EXPIRED", "UPLOAD_NOT_READY", "INVALID_RESOURCE",
     "CAPACITY", "VOICE_DISABLED", "TARGET_CHANGED", "INVALID_WAV", "QUEUE_FULL", "OWNER_LIMIT", "EXPIRED",
+    "COMMAND_EXPIRED", "COMMAND_NOT_ISSUED", "COMMAND_WINDOW_FULL", "COMMAND_WINDOW_UNAVAILABLE",
 })
 
 
@@ -287,20 +288,21 @@ def authenticate_and_write(client, code, login, cycle=1):
     route = "content/reminders/1/"+today
     before = client.request("ordinary-empty-reminder", "GET", route).json()
     require(before.get("status") == "CONTENT" and before.get("revision") == "0" and before.get("text") == "", "ordinary original empty reminder")
-    command, text = "68001", "Synthetic ordinary HTTPS reminder committed through the real authenticated API."
+    command = b.issue_command(client, "ordinary-reminder-command-issued", "content")
+    text = "Synthetic ordinary HTTPS reminder committed through the real authenticated API."
     committed = client.request("ordinary-authenticated-reminder-post", "POST", route,
-        {"schemaVersion": 1, "commandId": command, "expectedRevision": "0", "text": text}).json()
-    require(committed.get("status") == "COMMITTED" and committed.get("commandId") == command
+        {"schemaVersion": 2, **command, "expectedRevision": "0", "text": text}).json(expected_schema=2)
+    require(committed.get("status") == "COMMITTED" and all(committed.get(k) == v for k, v in command.items())
             and committed.get("content",{}).get("revision") == "1" and committed["content"].get("text") == text,
             "ordinary durable POST revision/text")
     actual = client.request("ordinary-authenticated-reminder-readback", "GET", route).json()
     require(actual.get("status") == "CONTENT" and actual.get("revision") == "1" and actual.get("text") == text,
             "ordinary committed reminder GET readback")
-    receipt = client.request("ordinary-durable-reminder-receipt", "GET", "content/commands/"+command).json()
+    receipt = client.request("ordinary-durable-reminder-receipt", "GET", "content/commands/"+command["commandTicket"]+"/"+command["commandId"]).json(expected_schema=2)
     require(receipt.get("status") == "COMMAND_RESULT" and receipt.get("state") == "COMMITTED"
-            and receipt.get("commandId") == command and receipt.get("content",{}).get("revision") == "1"
+            and all(receipt.get(k) == v for k, v in command.items()) and receipt.get("content",{}).get("revision") == "1"
             and receipt["content"].get("text") == text, "ordinary exact durable command receipt")
-    return {"status": "PASS", "session": "ACTUAL_NATIVE_APPROVAL", "principalId": "2", "role": "TEACHER_ADMIN", "classId": "1", "commandId": command,
+    return {"status": "PASS", "session": "ACTUAL_NATIVE_APPROVAL", "principalId": "2", "role": "TEACHER_ADMIN", "classId": "1", **command,
             "beforeRevision": "0", "committedRevision": "1", "readbackRevision": "1", "durableReceipt": "COMMITTED",
             "authenticatedGet": "PASS", "authenticatedPost": "PASS", "secretPersistence": "NONE",
             "pairingRequestId": request_id, "pollAttempts": index+1, "contentDate": today}
@@ -317,10 +319,11 @@ def validate_journey(events, ready, business, marker, port):
     validate_ready(ready[0],marker,port,1)
     validate_ready(ready[1],marker,port,2,previous=ready[0]["generation"])
     fixed = {"status":"PASS","session":"ACTUAL_NATIVE_APPROVAL","principalId":"2","role":"TEACHER_ADMIN",
-        "classId":"1","commandId":"68001","beforeRevision":"0","committedRevision":"1","readbackRevision":"1",
+        "classId":"1","beforeRevision":"0","committedRevision":"1","readbackRevision":"1",
         "durableReceipt":"COMMITTED","authenticatedGet":"PASS","authenticatedPost":"PASS","secretPersistence":"NONE"}
-    require(type(business) is dict and set(business) == set(fixed)|{"pairingRequestId","pollAttempts","contentDate"}
+    require(type(business) is dict and set(business) == set(fixed)|{"commandId","commandTicket","pairingRequestId","pollAttempts","contentDate"}
             and all(business.get(k) == v for k,v in fixed.items()), "complete actual teacher/reminder/receipt summary")
+    command = b.command_identity({k:business[k] for k in ("commandId","commandTicket")})
     polls, request_id, today = business["pollAttempts"], business["pairingRequestId"], business["contentDate"]
     require(type(polls) is int and 1 <= polls <= 8 and isinstance(request_id,str)
             and re.fullmatch(r"[1-9][0-9]{0,19}",request_id) and isinstance(today,str), "original bounded pairing polls/receipt identity")
@@ -341,9 +344,10 @@ def validate_journey(events, ready, business, marker, port):
         ("ordinary-authenticated-session","GET","session",200,True,False),
         ("ordinary-reminder-scopes","GET","content/reminders/scopes/0",200,True,False),
         ("ordinary-empty-reminder","GET",route,200,True,False),
+        ("ordinary-reminder-command-issued","POST","commands",201,True,True),
         ("ordinary-authenticated-reminder-post","POST",route,200,True,True),
         ("ordinary-authenticated-reminder-readback","GET",route,200,True,False),
-        ("ordinary-durable-reminder-receipt","GET","content/commands/68001",200,True,False),
+        ("ordinary-durable-reminder-receipt","GET","content/commands/"+command["commandTicket"]+"/"+command["commandId"],200,True,False),
         ("ordinary-public-status-cycle-2","GET","status",200,False,False),
     ]
     require(type(events) is list and len(events) == len(expected), "exact required wire operations; no omitted or extra request")
@@ -368,7 +372,7 @@ def validate_journey(events, ready, business, marker, port):
                     and 0 < event["responseBodyBytes"] <= b.BODY_LIMIT
                     and (event["requestBodyBytes"] == 0 if wanted[1] == "GET" else 0 < event["requestBodyBytes"] <= b.BODY_LIMIT),
                     "wire body bounds and exact authentication/CSRF observations")
-    return {"status":"PASS","publicStatusRequests":2,"businessRequests":8+polls,"pairingPolls":polls,
+    return {"status":"PASS","publicStatusRequests":2,"businessRequests":9+polls,"pairingPolls":polls,
             "totalRequests":len(expected),"authenticatedReminder":"COMMITTED_REVISION1_READBACK_AND_DURABLE_RECEIPT",
             "scope":"exact ordered operations; successful approval may take one to eight original bounded polls"}
 
@@ -427,10 +431,11 @@ def upload_material(client, case, upload_id):
         content_type="application/octet-stream").json(), upload_id, uploaded=True)
 
 
-def validate_material_receipt(value, upload_id, command=False):
-    keys = {"schemaVersion","status","commandId","scope","record"} | ({"state"} if command else set())
+def validate_material_receipt(value, upload_id, identity, command=False):
+    identity = b.command_identity(identity)
+    keys = {"schemaVersion","status","commandId","commandTicket","scope","record"} | ({"state"} if command else set())
     require(type(value) is dict and set(value) == keys and type(value["schemaVersion"]) is int
-            and value["schemaVersion"] == 1 and value["commandId"] == "69001"
+            and value["schemaVersion"] == 2 and all(value[k] == v for k, v in identity.items())
             and value["status"] == ("COMMAND_RESULT" if command else "COMMITTED")
             and (not command or value["state"] == "COMMITTED")
             and value["scope"] == {"ownerTeacherId":"2","subjectId":"1"}, "typed scoped material command receipt")
@@ -521,16 +526,17 @@ def second_materials(client,old_ids):
     c=create_material(client,"r70-create-c","R70-reuse-c.txt");upload_material(client,"r70-bytes-c",c)
     d=create_material(client,"r70-create-d","R70-reuse-d.txt");upload_material(client,"r70-bytes-d",d)
     require(len(set(old_ids+[c,d]))==4,"new exact upload IDs cannot alias retired generation")
-    payload={"schemaVersion":1,"commandId":"69001","uploadId":c,"allowedClassIds":["1"]}
+    identity=b.issue_command(client,"r70-material-command-issued","materials")
+    payload={"schemaVersion":2,**identity,"uploadId":c,"allowedClassIds":["1"]}
     committed=client.request("r70-append-c","POST","materials/folders/2/1/append",payload)
-    record=validate_material_receipt(committed.json(),c)
+    record=validate_material_receipt(committed.json(expected_schema=2),c,identity)
     replay=client.request("r70-append-c-exact-retry","POST","materials/folders/2/1/append",payload)
     require(replay.body==committed.body,"exact durable material receipt replay")
-    receipt=client.request("r70-material-receipt","GET","materials/commands/69001").json()
-    require(validate_material_receipt(receipt,c,command=True)==record,"typed durable material readback matches exact original commit")
+    receipt=client.request("r70-material-receipt","GET","materials/commands/"+identity["commandTicket"]+"/"+identity["commandId"]).json(expected_schema=2)
+    require(validate_material_receipt(receipt,c,identity,command=True)==record,"typed durable material readback matches exact original commit")
     cancelled=client.request("r70-cancel-d","POST",f"materials/uploads/{d}/cancel",{"schemaVersion":1}).json()
     require(cancelled=={"schemaVersion":1,"status":"UPLOAD_CANCELLED","uploadId":d},"second physical slot negative cleanup")
-    return [c,d],{"status":"PASS","reusedSlots":2,"commandId":"69001","scope":{"ownerTeacherId":"2","subjectId":"1"},"receipt":"COMMITTED","exactRetry":True,"resourceVersionId":c,"sha256":b.digest(MATERIAL),"bytes":65536}
+    return [c,d],{"status":"PASS","reusedSlots":2,**identity,"scope":{"ownerTeacherId":"2","subjectId":"1"},"receipt":"COMMITTED","exactRetry":True,"resourceVersionId":c,"sha256":b.digest(MATERIAL),"bytes":65536}
 
 
 def validate_stop(value,marker,generation,cycle):
@@ -542,7 +548,8 @@ def validate_stop(value,marker,generation,cycle):
                 for k in ("activeRecords","pendingJobs","cleanupPending","retainedCleanup")),"one original five-second physical stop receipt")
 
 
-def validate_transfer_journey(events,ready,business,pair2,ids,marker,port,stops,partial):
+def validate_transfer_journey(events,ready,business,pair2,ids,marker,port,stops,partial,material_identity):
+    material_identity=b.command_identity(material_identity)
     original=[event for event in events if not event.get("case","").startswith(("r70-","ordinary-cycle2-"))]
     summary=validate_journey(original,ready,business,marker,port)
     require(type(pair2) is dict and set(pair2)=={"status","principalId","role","pairingRequestId","pollAttempts"}
@@ -564,8 +571,9 @@ def validate_transfer_journey(events,ready,business,pair2,ids,marker,port,stops,
     latter += [("ordinary-cycle2-authenticated-session","GET","session",200,True,False),
         ("r70-create-c","POST","materials/uploads/2/1",201,True,True),("r70-bytes-c","POST",f"materials/uploads/{c}/bytes",200,True,True),
         ("r70-create-d","POST","materials/uploads/2/1",201,True,True),("r70-bytes-d","POST",f"materials/uploads/{d}/bytes",200,True,True),
+        ("r70-material-command-issued","POST","commands",201,True,True),
         ("r70-append-c","POST","materials/folders/2/1/append",200,True,True),("r70-append-c-exact-retry","POST","materials/folders/2/1/append",200,True,True),
-        ("r70-material-receipt","GET","materials/commands/69001",200,True,False),("r70-cancel-d","POST",f"materials/uploads/{d}/cancel",200,True,True)]
+        ("r70-material-receipt","GET","materials/commands/"+material_identity["commandTicket"]+"/"+material_identity["commandId"],200,True,False),("r70-cancel-d","POST",f"materials/uploads/{d}/cancel",200,True,True)]
     wanted=original[:-1]+[x[0] for x in extra]+[original[-1]]+[x[0] for x in latter]
     wanted=[item["case"] if isinstance(item,dict) else item for item in wanted]
     require([x.get("case") for x in events]==wanted,"exact full material-stop wire sequence without omitted/reordered/extra request")
@@ -664,10 +672,12 @@ def self_test():
             pass
         else:
             raise RuntimeError("wrong-role/foreign/unauthorized session accepted")
+    reminder_identity={"commandId":"68001","commandTicket":"c2:"+"a"*32+":1"}
+    material_identity={"commandId":"69001","commandTicket":"c2:"+"a"*32+":2"}
     def journey_fixture(polls):
         actual_ready = [ready,dict(ready,cycle=2,generation=18)]
         business = {"status":"PASS","session":"ACTUAL_NATIVE_APPROVAL","principalId":"2","role":"TEACHER_ADMIN","classId":"1",
-            "commandId":"68001","beforeRevision":"0","committedRevision":"1","readbackRevision":"1","durableReceipt":"COMMITTED",
+            **reminder_identity,"beforeRevision":"0","committedRevision":"1","readbackRevision":"1","durableReceipt":"COMMITTED",
             "authenticatedGet":"PASS","authenticatedPost":"PASS","secretPersistence":"NONE","pairingRequestId":"7","pollAttempts":polls,"contentDate":"2026-11-01"}
         def public(cycle,generation):
             return {"case":f"ordinary-public-status-cycle-{cycle}","method":"GET","route":"status","cycle":cycle,"generation":generation,
@@ -680,13 +690,14 @@ def self_test():
         actual += [event(f"ordinary-pairing-poll-{i}","POST","pairing/requests/7/poll",202 if i<polls else 200,False) for i in range(1,polls+1)]
         route="content/reminders/1/2026-11-01"
         actual += [event("ordinary-authenticated-session","GET","session"),event("ordinary-reminder-scopes","GET","content/reminders/scopes/0"),
-            event("ordinary-empty-reminder","GET",route),event("ordinary-authenticated-reminder-post","POST",route,csrf=True),
-            event("ordinary-authenticated-reminder-readback","GET",route),event("ordinary-durable-reminder-receipt","GET","content/commands/68001"),public(2,18)]
+            event("ordinary-empty-reminder","GET",route),event("ordinary-reminder-command-issued","POST","commands",201,csrf=True),
+            event("ordinary-authenticated-reminder-post","POST",route,csrf=True),
+            event("ordinary-authenticated-reminder-readback","GET",route),event("ordinary-durable-reminder-receipt","GET","content/commands/"+reminder_identity["commandTicket"]+"/"+reminder_identity["commandId"]),public(2,18)]
         return actual,actual_ready,business
     for polls in range(1,9):
         actual,actual_ready,business=journey_fixture(polls)
         checked=validate_journey(actual,actual_ready,business,marker,23456)
-        require(checked["totalRequests"] == 10+polls, "valid one-to-eight poll operation closure")
+        require(checked["totalRequests"] == 11+polls, "valid one-to-eight poll operation closure")
     actual,actual_ready,business=journey_fixture(1)
     negatives=[(actual[:i]+actual[i+1:],actual_ready,business) for i in range(len(actual))]
     reordered=copy.deepcopy(actual);reordered[4],reordered[5]=reordered[5],reordered[4]
@@ -730,15 +741,15 @@ def self_test():
     record={"materialId":"1","folderId":"1","displayName":"R70-reuse-c.txt","resourceVersionId":"13",
         "kind":"TXT","bytes":65536,"sha256":b.digest(MATERIAL),"allowedClassIds":["1"],"addedAt":"2026-11-01T08:00:00",
         "addedSequence":"1","status":"PUBLISHED","revision":"1"}
-    receipt={"schemaVersion":1,"status":"COMMITTED","commandId":"69001","scope":{"ownerTeacherId":"2","subjectId":"1"},"record":record}
-    validate_material_receipt(receipt,"13")
+    receipt={"schemaVersion":2,"status":"COMMITTED",**material_identity,"scope":{"ownerTeacherId":"2","subjectId":"1"},"record":record}
+    validate_material_receipt(receipt,"13",material_identity)
     durable=dict(receipt,status="COMMAND_RESULT",state="COMMITTED")
-    validate_material_receipt(durable,"13",True)
+    validate_material_receipt(durable,"13",material_identity,True)
     for change in [{"scope":{"ownerTeacherId":"1","subjectId":"1"}},{"commandId":"69002"},{"cookie":"fake-extra-field"}]:
-        rejects(lambda value=dict(receipt,**change):validate_material_receipt(value,"13"),"typed command scope/identity")
+        rejects(lambda value=dict(receipt,**change):validate_material_receipt(value,"13",material_identity),"typed command scope/identity")
     for change in [{"sha256":"0"*64},{"bytes":True},{"allowedClassIds":["2"]},{"resourceVersionId":"14"},
                    {"revision":str(2**64)},{"status":"DELETED"}]:
-        rejects(lambda value=dict(receipt,record=dict(record,**change)):validate_material_receipt(value,"13"),"published record exact payload")
+        rejects(lambda value=dict(receipt,record=dict(record,**change)):validate_material_receipt(value,"13",material_identity),"published record exact payload")
     def transfer_fixture(polls1,polls2):
         events,ready_values,business=journey_fixture(polls1)
         def event(case,method,route,status=200,auth=True,csrf=True):
@@ -753,14 +764,15 @@ def self_test():
         more += [event("ordinary-cycle2-authenticated-session","GET","session",csrf=False),
             event("r70-create-c","POST","materials/uploads/2/1",201),event("r70-bytes-c","POST","materials/uploads/13/bytes"),
             event("r70-create-d","POST","materials/uploads/2/1",201),event("r70-bytes-d","POST","materials/uploads/14/bytes"),
+            event("r70-material-command-issued","POST","commands",201),
             event("r70-append-c","POST","materials/folders/2/1/append"),event("r70-append-c-exact-retry","POST","materials/folders/2/1/append"),
-            event("r70-material-receipt","GET","materials/commands/69001",csrf=False),event("r70-cancel-d","POST","materials/uploads/14/cancel")]
+            event("r70-material-receipt","GET","materials/commands/"+material_identity["commandTicket"]+"/"+material_identity["commandId"],csrf=False),event("r70-cancel-d","POST","materials/uploads/14/cancel")]
         pair2={"status":"PASS","principalId":"2","role":"TEACHER_ADMIN","pairingRequestId":"9","pollAttempts":polls2}
         stops=[{"cycle":cycle,"marker":marker,"generation":generation,"elapsedNs":1_000_000,"activeRecords":0,"pendingJobs":0,
             "cleanupPending":0,"retainedCleanup":0,"nativeDrained":True} for cycle,generation in [(1,17),(2,18)]]
         partial={"status":"PASS","uploadId":"12","declaredBytes":1048576,"sentPrefixBytes":65536,"peerTermination":"TLS_TRUNCATED_BY_STOP",
             "successfulUploadResponse":False,"clientClosedBeforeNativeStop":False}
-        return [events[:-1]+extra+[events[-1]]+more,ready_values,business,pair2,["11","12","13","14"],marker,23456,stops,partial]
+        return [events[:-1]+extra+[events[-1]]+more,ready_values,business,pair2,["11","12","13","14"],marker,23456,stops,partial,material_identity]
     for polls1,polls2 in [(1,1),(1,8),(8,1),(8,8)]:
         args=transfer_fixture(polls1,polls2)
         validate_transfer_journey(*args)
@@ -1043,7 +1055,8 @@ def main():
         require(launcher.returncode==0 and len(exits)==1 and exits[0].get("code")==0,"actual original native and supervisor successful exit")
         require(paired==[1,2] and first_ids is not None and second_ids is not None,"both actual native approvals and transfer cycles completed")
         report["wireJourney"]=validate_transfer_journey(report["events"],ready,report["authenticatedBusiness"],
-            report["secondPairing"],first_ids+second_ids,marker,port,stops,report.get("partialUploadStop"))
+            report["secondPairing"],first_ids+second_ids,marker,port,stops,report.get("partialUploadStop"),
+            {k:report["materialReuse"][k] for k in ("commandId","commandTicket")})
         report["materialReadyStop"]="PASS"
         report["stops"]=stops
         report.update(status="PASS",ready=ready,nativeExit=exits[0])

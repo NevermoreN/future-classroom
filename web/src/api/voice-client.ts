@@ -1,14 +1,16 @@
+import { commandIdentity, commandTicket, type CommandApi, type CommandIdentity } from './command-protocol'
 import { abortError, ApiError, NetworkFault, readJson } from './client'
 import { MaterialHttpApi } from './material-client'
 import { decimal, errorCode, ProtocolFault, secret } from './protocol'
 import * as v from './voice-protocol'
 
-export interface VoiceApi {
+export interface VoiceApi extends CommandApi {
   voiceCapabilities(signal: AbortSignal): Promise<v.VoiceCapabilities>
   voiceJobs(signal: AbortSignal): Promise<v.VoiceJob[]>
   uploadVoice(classId: string, wav: Blob, csrf: string, signal: AbortSignal): Promise<v.VoiceUploaded>
   submitVoice(input: v.VoiceSubmit, csrf: string, signal: AbortSignal): Promise<v.VoiceJob>
-  voiceJob(id: string, signal: AbortSignal): Promise<v.VoiceJob>
+  voiceJob(id: string, submitTicket: string | null, signal: AbortSignal): Promise<v.VoiceJob>
+  voiceOutcome(command: CommandIdentity, signal: AbortSignal): Promise<v.VoiceOutcome>
   cancelVoice(id: string, input: v.VoiceCancel, csrf: string, signal: AbortSignal): Promise<v.VoiceJob>
 }
 export class VoiceHttpApi extends MaterialHttpApi implements VoiceApi {
@@ -34,6 +36,7 @@ export class VoiceHttpApi extends MaterialHttpApi implements VoiceApi {
     } finally { clearTimeout(timer); signal.removeEventListener('abort', abort) }
   }
   async submitVoice(input: v.VoiceSubmit, csrf: string, signal: AbortSignal) { const r = await this.request('voice/broadcasts', signal, v.submitInput(input), csrf); if (r.status !== 200) throw new ProtocolFault(); return v.committed(r.value, input) }
-  async voiceJob(id: string, signal: AbortSignal) { const r = await this.request('voice/broadcasts/' + decimal(id), signal); if (r.status !== 200) throw new ProtocolFault(); return v.currentJob(r.value, id) }
+  async voiceJob(id: string, submitTicket: string | null, signal: AbortSignal) { const r = await this.request('voice/broadcasts/' + decimal(id) + (submitTicket === null ? '' : '/commands/' + commandTicket(submitTicket)), signal); if (r.status !== 200) throw new ProtocolFault(); return v.currentJob(r.value, id, submitTicket) }
+  async voiceOutcome(command: CommandIdentity, signal: AbortSignal) { const pair = commandIdentity(command); const r = await this.request('voice/commands/' + pair.commandTicket + '/' + pair.commandId, signal); if (r.status !== 200) throw new ProtocolFault(); return v.outcome(r.value, pair) }
   async cancelVoice(id: string, input: v.VoiceCancel, csrf: string, signal: AbortSignal) { const r = await this.request('voice/broadcasts/' + decimal(id) + '/cancel', signal, v.cancelInput(input), csrf); if (r.status !== 200) throw new ProtocolFault(); return v.cancelled(r.value, id, input) }
 }

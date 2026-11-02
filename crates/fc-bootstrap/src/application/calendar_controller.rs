@@ -20,7 +20,10 @@ impl App {
             .year();
         self.submit_calendar(Operation::Load(year))
     }
-    fn submit_calendar(&mut self, operation: Operation) -> std::result::Result<(), String> {
+    pub(super) fn submit_calendar(
+        &mut self,
+        operation: Operation,
+    ) -> std::result::Result<(), String> {
         let Some(lease) = self.lease else {
             self.lock();
             return self.render();
@@ -37,6 +40,28 @@ impl App {
         let Some(backend) = self.backend.clone() else {
             return Ok(());
         };
+        let operation = match operation {
+            Operation::Load(year) => {
+                let original = if self.calendar_unknown {
+                    self.calendar_command.as_ref().filter(|command| {
+                        command.intent() == Some(&NativeIntent::CalendarDownload { year })
+                    })
+                } else if self.native_unknown {
+                    self.native_command.as_ref().filter(|command| matches!(command.intent(), Some(NativeIntent::CalendarPolicy { year: original, .. }) if *original == year))
+                } else {
+                    None
+                };
+                original.map_or(Operation::Load(year), |original| Operation::Query {
+                    year,
+                    original: original.clone(),
+                })
+            }
+            operation => operation,
+        };
+        let download_target = match &operation {
+            Operation::Download(year) => Some((lease.principal_id(), *year)),
+            _ => None,
+        };
         let job = Job {
             backend,
             lease: Some(lease),
@@ -45,15 +70,25 @@ impl App {
         if !job.is_download() {
             return self.submit(Work::Calendar(Box::new(job)));
         }
+        if self.calendar_unknown {
+            self.status = "原下载结果尚未确认，已保留原票据；请重新读取当前校历，不会重发。".into();
+            return self.render();
+        }
         if self.calendar_job.is_some() {
             self.status = "上一次校历任务仍在处理，完成后才允许再次下载。".into();
             return self.render();
         }
+        let command = NativeCommand::with_intent(match job.operation {
+            Operation::Download(year) => Some(NativeIntent::CalendarDownload { year }),
+            _ => None,
+        });
         match self.pool.handle().try_submit(
-            Work::Calendar(Box::new(job)),
+            Work::Tracked(Box::new(Work::Calendar(Box::new(job))), command.clone()),
             Instant::now() + Duration::from_secs(40),
         ) {
             Ok(ticket) => {
+                self.calendar_command = Some(command);
+                self.calendar_command_target = download_target;
                 self.calendar_job = Some(Pending {
                     ticket,
                     generation: self.generation,
@@ -138,6 +173,10 @@ impl App {
         if self.current_global_owner() != Some(loaded.owner) {
             return;
         }
+        let current_target = (loaded.owner, loaded.status.selected_year);
+        if let Some(history) = &loaded.history {
+            self.apply_native_history(history);
+        }
         // Entry required a clean schedule draft. Another foreground edit cannot
         // run during this command; later stale drafts are protected by writer CAS.
         self.schedule = Some(ScheduleEditor::new(loaded.document.clone(), loaded.owner));
@@ -155,6 +194,16 @@ impl App {
             ));
         }
         self.screen = Screen::Calendar;
+        // Current state may have been changed by another operation. A typed
+        // fetch/policy history must be resolved by its original pair instead.
+        if self.calendar_command_target == Some(current_target)
+            && self
+                .calendar_command
+                .as_ref()
+                .is_none_or(|command| command.intent().is_none())
+        {
+            self.calendar_unknown = false;
+        }
         self.status = loaded.message;
     }
     pub(super) fn poll_calendar(&mut self) -> std::result::Result<(), String> {
@@ -204,6 +253,7 @@ impl App {
                         && self.screen == Screen::Calendar
                         && !self.stopping =>
                 {
+                    self.calendar_unknown = self.calendar_command.is_some();
                     self.status = error_text(&error);
                     self.render()?;
                 }

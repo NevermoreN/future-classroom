@@ -2,8 +2,7 @@ import { useEffect, useRef } from 'react'
 import { CircleAlert, Clock3, LoaderCircle, Mic, RefreshCw, Square, Volume2, X } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
-import { newCommandId } from './api/content-protocol'
-import { mayRecord, type VoiceController, type VoiceState } from './api/voice-controller'
+import { newRecordingId, mayRecord, type VoiceController, type VoiceState } from './api/voice-controller'
 import { terminal, type VoiceStatus } from './api/voice-protocol'
 import { recordingSupport, type RecorderController, type RecorderState } from './voice/recorder'
 
@@ -21,7 +20,7 @@ export default function VoicePane({ state, controller, recorder, recording }: { 
   function start(pointerId: number | null, y = 0, key: string | null = null) {
     if (!canBegin || !controller || !recorder || gesture.current) return
     let id: string
-    try { id = newCommandId() } catch { return }
+    try { id = newRecordingId() } catch { return }
     const context = controller.beginRecording(id)
     if (!context) return
     gesture.current = { id, pointerId, y, key }; void recorder.start(id, context.capabilities.maxDurationMillis)
@@ -52,7 +51,8 @@ export default function VoicePane({ state, controller, recorder, recording }: { 
         <p className="voice-privacy">仅采集当前教师设备麦克风。切换目标、隐藏或离开页面会取消未发送录音并释放麦克风。没有云端转码或语音识别。</p>
       </CardContent></Card>
       <div className="voice-tasks"><Card><CardHeader><div className="voice-task-heading"><Clock3 size={20} /><CardTitle role="heading" aria-level={2}>白板播报任务</CardTitle></div><CardDescription>排队任务不会因网页断网自动撤回。前台有活动任务时每秒查询，后台停止查询。</CardDescription></CardHeader><CardContent>
-        {state.pending && <section className="command-receipt" aria-label="原语音命令"><strong>{state.pending.kind === 'SUBMIT' ? '原播报命令' : '原停止命令'} {state.pending.input.commandId}</strong><p>结果未确认时不补发。当前未查到任务也不证明从未提交。</p><Button variant="outline" disabled={state.busy} onClick={() => { void controller?.queryPending() }}><RefreshCw />手动查询原任务</Button></section>}
+        {state.pending && <section className="command-receipt" aria-label="原语音命令"><strong>{state.pending.kind === 'SUBMIT' ? '原播报命令' : '原停止命令'} {state.pending.input.commandId}</strong><p>{state.pending.retired ? '原票据已停止使用。只能独立核对原任务当前状态，不会重新提交或推断任务已停止。' : '结果未确认时不补发。当前未查到命令也不证明从未提交。'}</p><Button variant="outline" disabled={state.busy} onClick={() => { void controller?.queryPending() }}><RefreshCw />{state.pending.retired ? '读取原任务当前状态' : '手动查询原命令'}</Button></section>}
+        {state.history && <section className="historical-result" aria-label="原语音命令历史回执"><h3>原命令已保存的回执（不代表当前任务状态）</h3><p>命令 {state.history.command.input.commandId} · 任务 {state.history.job.jobId} · 原修订 {state.history.job.revision} · {labels[state.history.job.state]}</p><Button variant="outline" disabled={state.busy || !!state.pending} onClick={() => { void controller?.refresh() }}><RefreshCw />读取当前任务核对</Button></section>}
         {state.jobs.length === 0 && <p className="empty-scope">当前没有可见任务。上传成功与任务已排队是两个独立阶段。</p>}
         <ul className="voice-job-list">{state.jobs.map(job => <li key={job.jobId}><div className="voice-job-top"><strong>{labels[job.state]}</strong><span>{job.completedRepeats} / {job.repeatTotal} 遍完成</span></div><p>{caps?.currentClass?.classId === job.classId ? caps.currentClass.className : `原班级 ID ${job.classId}`}</p><p className="voice-job-id">任务 {job.jobId} · 修订 {job.revision}</p>{['STARTING', 'PLAYING', 'GAP'].includes(job.state) && <p>{job.state === 'GAP' ? '静音间隔' : `第 ${job.currentRepeat} 遍 / 共 ${job.repeatTotal} 遍`}</p>}{job.failure && <p className="voice-job-error">失败原因：{job.failure}</p>}{job.state === 'STOPPING' && <p>已请求终止或结束，等待设备实际归还后确认终态。</p>}{!terminal(job) && job.state !== 'STOPPING' && <Button variant="outline" disabled={state.busy || !!state.pending || recordingBusy} onClick={() => { if (window.confirm('停止这个任务，并取消它尚未播放的剩余遍数？')) void controller?.stop(job) }}><Square />{job.state === 'QUEUED' ? '取消此待播任务' : '停止此任务'}</Button>}</li>)}</ul>
         <p className="voice-privacy">“驱动播放完成”表示本机驱动报告自然结束，不保证扬声器开启或人耳听到。此页不能控制其他应用或系统音量。</p>

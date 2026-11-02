@@ -2,6 +2,7 @@
 //! synthetic fixtures; these tests do not claim KDF/DPAPI/password authentication.
 use super::*;
 use fc_domain::{layout::*, time::*};
+use fc_ports::command_window::{CommandFamily, CommandOwner};
 use fc_ports::{
     DisplayRepository, IdentityRepository, ProfileRepository, ProfileRepositoryError as E,
     ProfileRequest, PublicLayoutRequest,
@@ -163,6 +164,7 @@ impl fc_ports::AuthorityPublisher for Publisher {
     fn fault(&mut self) {}
 }
 struct Fixture {
+    commands: crate::fixture_commands::FixtureCommands,
     writer: Option<StorageWriter<Revision>>,
     clock: Arc<Time>,
     active: Arc<AtomicBool>,
@@ -173,8 +175,36 @@ struct Fixture {
     directory: Directory,
 }
 impl Fixture {
+    fn receipt_key(&self, legacy: &str) -> String {
+        let (slot, id) =
+            crate::business::command_window::legacy(legacy).expect("exact fixture receipt slot");
+        let original = self
+            .commands
+            .original(id)
+            .expect("original fixture receipt pair");
+        crate::business::command_window::namespaced(slot, original.ticket)
+    }
+
+    // Labels name fixture intents only. Request ids come from the real Writer;
+    // this cache keeps the exact original pair through retries and reopen.
+    fn command_id(&self, family: CommandFamily, label: u64) -> CommandId {
+        if let Some(original) = self.commands.labelled(family, &label.to_string()) {
+            return original.command_id;
+        }
+        self.commands
+            .issue(
+                &self.handle(),
+                family,
+                &label.to_string(),
+                CommandOwner::authenticated(&actor(1, TrustedOrigin::Local)),
+            )
+            .unwrap()
+            .command_id
+    }
+
     fn new() -> Self {
         let mut f = Self {
+            commands: crate::fixture_commands::FixtureCommands::default(),
             writer: None,
             clock: Arc::new(Time(Mutex::new(at(8, 30)))),
             active: Arc::new(AtomicBool::new(true)),
@@ -236,14 +266,19 @@ impl Fixture {
     }
     fn commit(&self, mutations: Vec<Mutation>) {
         let rev = self.revision();
-        self.handle()
-            .try_commit(
-                CommitCommand::new(format!("seed-{}", rev.get()), rev, mutations).unwrap(),
-                rev.next().unwrap(),
-            )
-            .unwrap()
-            .wait()
-            .unwrap();
+        {
+            let (fixture_handle, fixture_command) = self
+                .commands
+                .prepare_generic(
+                    &self.handle(),
+                    CommitCommand::new(format!("seed-{}", rev.get()), rev, mutations).unwrap(),
+                )
+                .unwrap();
+            fixture_handle.try_commit(fixture_command, rev.next().unwrap())
+        }
+        .unwrap()
+        .wait()
+        .unwrap();
     }
     fn repo(&self, captured: ActorContext) -> BusinessRepository<Revision> {
         let active = self.active.clone();
@@ -271,18 +306,23 @@ impl Fixture {
     }
     fn request(&self, id: u64, k: SubjectProfileKey) -> ProfileRequest {
         ProfileRequest {
-            command_id: CommandId::new(id).unwrap(),
+            command_id: self.command_id(CommandFamily::Profiles, id),
             key: k,
             expected_revision: Revision::default(),
             candidate: SubjectProfileDocument::new(ProfileId::new(999).unwrap(), k),
         }
     }
     fn save(&self, request: ProfileRequest) -> Result<SubjectProfileDocument, E> {
-        self.admin().execute_subject_profile(
-            request,
-            &actor(1, TrustedOrigin::Local),
-            self.clock.as_ref(),
-        )
+        {
+            let fixture_request = request;
+            let original_pair = self.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = self.admin().with_command_window(original_pair);
+            issued_repository.execute_subject_profile(
+                fixture_request,
+                &actor(1, TrustedOrigin::Local),
+                self.clock.as_ref(),
+            )
+        }
     }
     fn sql(&self, sql: &str) {
         Connection::open(self.directory.db())
@@ -296,9 +336,9 @@ impl Drop for Fixture {
         self.stop()
     }
 }
-fn public_request(id: u64, s: fc_ports::PublicLayoutState) -> PublicLayoutRequest {
+fn public_request(f: &Fixture, id: u64, s: fc_ports::PublicLayoutState) -> PublicLayoutRequest {
     PublicLayoutRequest {
-        command_id: CommandId::new(id).unwrap(),
+        command_id: f.command_id(CommandFamily::Profiles, id),
         expected_layout_revision: s.layout.revision,
         expected_display_revision: s.display.revision,
         layout: s.layout,
@@ -322,57 +362,79 @@ fn gap(doc: &mut LayoutDocument, n: u16) {
 fn profiles_independent_cas_joint_display_receipts_and_same_id_payload_binding() {
     let f = Fixture::new();
     let a = actor(1, TrustedOrigin::Local);
-    let mut r = f.admin();
+    let r = f.admin();
     let initial = r.public_layout(&a).unwrap();
-    let first = public_request(10, initial);
-    let saved = r
-        .execute_public_layout(first.clone(), &a, f.clock.as_ref())
-        .unwrap();
+    let first = public_request(&f, 10, initial);
+    let saved = {
+        let fixture_request = first.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_public_layout(fixture_request, &a, f.clock.as_ref())
+    }
+    .unwrap();
     assert_eq!(saved.layout.revision, Revision::new(1));
     assert_eq!(saved.display.revision, Revision::default());
     let rev = f.revision();
     assert_eq!(
-        r.execute_public_layout(first.clone(), &a, f.clock.as_ref())
-            .unwrap(),
+        {
+            let fixture_request = first.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_public_layout(fixture_request, &a, f.clock.as_ref())
+        }
+        .unwrap(),
         saved
     );
     assert_eq!(f.revision(), rev);
     let mut conflict = first;
     conflict.display.clock_seconds = true;
     assert_eq!(
-        r.execute_public_layout(conflict, &a, f.clock.as_ref()),
+        {
+            let fixture_request = conflict;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_public_layout(fixture_request, &a, f.clock.as_ref())
+        },
         Err(E::IdempotencyConflict)
     );
     let mut d = saved.display.clone();
     d.clock_seconds = true;
-    let updated = r
-        .execute_display(
-            fc_ports::DisplayRequest {
-                command_id: CommandId::new(11).unwrap(),
-                expected_revision: d.revision,
-                candidate: d,
-            },
-            &a,
-            f.clock.as_ref(),
-        )
-        .unwrap();
+    let updated = {
+        let fixture_request = fc_ports::DisplayRequest {
+            command_id: f.command_id(CommandFamily::Display, 11),
+            expected_revision: d.revision,
+            candidate: d,
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_display(fixture_request, &a, f.clock.as_ref())
+    }
+    .unwrap();
     let before = f.revision();
     assert!(
-        matches!(r.execute_public_layout(public_request(12,saved.clone()),&a,f.clock.as_ref()),Err(E::Display(fc_domain::desktop::DisplayError::RevisionConflict{current}))if current==updated.revision)
+        matches!({ let fixture_request = public_request(&f, 12,saved.clone()); let original_pair = f.commands.original(fixture_request.command_id).unwrap(); let mut issued_repository = r.with_command_window(original_pair); issued_repository.execute_public_layout(fixture_request ,&a,f.clock.as_ref()) },Err(E::Display(fc_domain::desktop::DisplayError::RevisionConflict{current}))if current==updated.revision)
     );
     assert_eq!(f.revision(), before);
     assert_eq!(r.public_layout(&a).unwrap().layout, saved.layout);
     let mut joint = r.public_layout(&a).unwrap();
     gap(&mut joint.layout, 14);
     joint.display.clock_seconds = false;
-    let next = r
-        .execute_public_layout(public_request(13, joint), &a, f.clock.as_ref())
-        .unwrap();
+    let next = {
+        let fixture_request = public_request(&f, 13, joint);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_public_layout(fixture_request, &a, f.clock.as_ref())
+    }
+    .unwrap();
     assert_eq!(next.layout.revision, Revision::new(2));
     assert_eq!(next.display.revision, Revision::new(2));
-    let noop = r
-        .execute_public_layout(public_request(14, next.clone()), &a, f.clock.as_ref())
-        .unwrap();
+    let noop = {
+        let fixture_request = public_request(&f, 14, next.clone());
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_public_layout(fixture_request, &a, f.clock.as_ref())
+    }
+    .unwrap();
     assert_eq!(noop, next);
     let req = f.request(20, key(1, 2));
     let one = f.save(req.clone()).unwrap();
@@ -384,7 +446,7 @@ fn profiles_independent_cas_joint_display_receipts_and_same_id_payload_binding()
     let before = f.revision();
     assert_eq!(
         f.save(ProfileRequest {
-            command_id: CommandId::new(24).unwrap(),
+            command_id: f.command_id(CommandFamily::Profiles, 24),
             key: one.key,
             expected_revision: one.revision,
             candidate: wrong_id
@@ -394,7 +456,7 @@ fn profiles_independent_cas_joint_display_receipts_and_same_id_payload_binding()
     assert_eq!(f.revision(), before);
 
     let mut change = ProfileRequest {
-        command_id: CommandId::new(22).unwrap(),
+        command_id: f.command_id(CommandFamily::Profiles, 22),
         key: one.key,
         expected_revision: one.revision,
         candidate: one.clone(),
@@ -405,7 +467,7 @@ fn profiles_independent_cas_joint_display_receipts_and_same_id_payload_binding()
     assert_eq!(newer.layout_revision, Revision::new(1));
     let before = f.revision();
     assert!(
-        matches!(f.save(ProfileRequest{command_id:CommandId::new(23).unwrap(),..change}),Err(E::Domain(ProfileError::RevisionConflict{current}))if current==newer.revision)
+        matches!(f.save(ProfileRequest{command_id:f.command_id(CommandFamily::Profiles, 23),..change}),Err(E::Domain(ProfileError::RevisionConflict{current}))if current==newer.revision)
     );
     assert_eq!(f.revision(), before);
     assert_eq!(f.save(req).unwrap(), one);
@@ -420,13 +482,17 @@ fn profiles_teacher_web_user_denied_and_local_lock_at_precommit_rolls_back() {
         actor(1, TrustedOrigin::Web),
         actor(4, TrustedOrigin::Local),
     ] {
-        let mut r = f.repo(a.clone());
+        let r = f.repo(a.clone());
         assert!(r.public_layout(&a).is_err());
         assert!(r.subject_profile(key(1, 2), &a).is_err());
         assert!(r.list_subject_profiles(None, &a).is_err());
-        assert!(r
-            .execute_subject_profile(f.request(1, key(1, 2)), &a, f.clock.as_ref())
-            .is_err())
+        assert!({
+            let fixture_request = f.request(1, key(1, 2));
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_subject_profile(fixture_request, &a, f.clock.as_ref())
+        }
+        .is_err())
     }
     let before = f.revision();
     f.lock_begin.store(true, Ordering::Release);
@@ -475,30 +541,30 @@ fn profiles_paged_catalog_history_disable_and_restart_do_not_block_revocation() 
             subject_id: v.subject_id,
         })
         .collect();
-    f.admin()
-        .execute_identity(
-            IdentityRequest {
-                command_id: CommandId::new(500).unwrap(),
-                expected_revision: s.revision,
-                command: IdentityCommand::UpdateAccount {
-                    id: principal(2),
-                    display_name: "Former teacher".into(),
-                    role: Role::TeacherAdmin,
-                    enabled: false,
-                    scopes,
-                },
+    {
+        let fixture_request = IdentityRequest {
+            command_id: f.command_id(CommandFamily::Identity, 500),
+            expected_revision: s.revision,
+            command: IdentityCommand::UpdateAccount {
+                id: principal(2),
+                display_name: "Former teacher".into(),
+                role: Role::TeacherAdmin,
+                enabled: false,
+                scopes,
             },
-            Some(&a),
-            f.clock.as_ref(),
-        )
-        .unwrap();
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.execute_identity(fixture_request, Some(&a), f.clock.as_ref())
+    }
+    .unwrap();
     let old = f.admin().subject_profile(key(1, 2), &a).unwrap().unwrap();
     assert!(old.enabled);
     let mut off = old.clone();
     off.enabled = false;
     let disabled = f
         .save(ProfileRequest {
-            command_id: CommandId::new(501).unwrap(),
+            command_id: f.command_id(CommandFamily::Profiles, 501),
             key: old.key,
             expected_revision: old.revision,
             candidate: off,
@@ -511,7 +577,7 @@ fn profiles_paged_catalog_history_disable_and_restart_do_not_block_revocation() 
     let before = f.revision();
     assert_eq!(
         f.save(ProfileRequest {
-            command_id: CommandId::new(502).unwrap(),
+            command_id: f.command_id(CommandFamily::Profiles, 502),
             key: old.key,
             expected_revision: disabled.revision,
             candidate: on
@@ -601,7 +667,7 @@ fn profiles_canonical_node_water_survives_delete_restart_and_rejects_retired_ids
     bare.node_id_high_water = 0;
     let second = f
         .save(ProfileRequest {
-            command_id: CommandId::new(701).unwrap(),
+            command_id: f.command_id(CommandFamily::Profiles, 701),
             key: bare.key,
             expected_revision: first.revision,
             candidate: bare,
@@ -617,7 +683,7 @@ fn profiles_canonical_node_water_survives_delete_restart_and_rejects_retired_ids
     let before = f.revision();
     assert_eq!(
         f.save(ProfileRequest {
-            command_id: CommandId::new(702).unwrap(),
+            command_id: f.command_id(CommandFamily::Profiles, 702),
             key: reuse.key,
             expected_revision: loaded.revision,
             candidate: reuse
@@ -631,7 +697,7 @@ fn profiles_canonical_node_water_survives_delete_restart_and_rejects_retired_ids
     wrap_materials(&mut next, id.get());
     assert_eq!(
         f.save(ProfileRequest {
-            command_id: CommandId::new(703).unwrap(),
+            command_id: f.command_id(CommandFamily::Profiles, 703),
             key: next.key,
             expected_revision: loaded.revision,
             candidate: next
@@ -662,7 +728,7 @@ fn add_material(f: &Fixture, owner: u64, n: u64) -> fc_domain::materials::Materi
         &mut MetadataPreparation(n),
         (),
         fc_ports::MaterialAppendMetadata {
-            command_id: CommandId::new(10_000 + n).unwrap(),
+            command_id: f.command_id(CommandFamily::Materials, 10_000 + n),
             scope: MaterialScope {
                 teacher_id: principal(owner),
                 subject_id: SubjectId::new(1).unwrap(),
@@ -673,9 +739,20 @@ fn add_material(f: &Fixture, owner: u64, n: u64) -> fc_domain::materials::Materi
         },
     )
     .unwrap();
-    f.admin()
-        .append_material(prepared, &actor(1, TrustedOrigin::Local), f.clock.as_ref())
-        .unwrap()
+    {
+        let fixture_request = prepared;
+        let original_pair = f
+            .commands
+            .original(fixture_request.request().command_id)
+            .unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.append_material(
+            fixture_request,
+            &actor(1, TrustedOrigin::Local),
+            f.clock.as_ref(),
+        )
+    }
+    .unwrap()
 }
 #[test]
 fn profiles_exact_material_folder_owner_and_corrupt_receipt_are_not_silent_defaults() {
@@ -694,7 +771,7 @@ fn profiles_exact_material_folder_owner_and_corrupt_receipt_are_not_silent_defau
     let saved = f.save(req.clone()).unwrap();
     assert_eq!(saved.folder_id, Some(own.folder_id));
     f.stop();
-    let r = receipt_keys(req.command_id).0;
+    let r = f.receipt_key(&receipt_keys(req.command_id).0);
     let db = Connection::open(f.directory.db()).unwrap();
     let bytes: Vec<u8> = db
         .query_row("SELECT value FROM documents WHERE key=?1", [&r], |row| {
@@ -794,16 +871,17 @@ fn profiles_facts_current_exact_teacher_override_break_and_real_material_paginat
     use fc_ports::{LessonRepository, ScheduleRepository};
     let f = Fixture::new();
     let a = actor(1, TrustedOrigin::Local);
-    let mut r = f.admin();
-    r.execute_schedule(
-        fc_ports::ScheduleRequest {
-            command_id: CommandId::new(900).unwrap(),
+    let r = f.admin();
+    {
+        let fixture_request = fc_ports::ScheduleRequest {
+            command_id: f.command_id(CommandFamily::Schedule, 900),
             expected_revision: Revision::default(),
             candidate: schedule(),
-        },
-        &a,
-        f.clock.as_ref(),
-    )
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_schedule(fixture_request, &a, f.clock.as_ref())
+    }
     .unwrap();
     let missing = r.desktop_facts(0, f.clock.as_ref()).unwrap();
     assert_eq!(missing.profiles.reason, ProfileSelectionReason::Missing);
@@ -825,19 +903,20 @@ fn profiles_facts_current_exact_teacher_override_break_and_real_material_paginat
         .unwrap();
     assert_eq!(last.materials_page.unwrap().items.len(), 1);
     let context = r.lesson_context(&a, f.clock.as_ref()).unwrap();
-    r.execute_lesson(
-        fc_ports::LessonRequest {
-            command_id: CommandId::new(903).unwrap(),
+    {
+        let fixture_request = fc_ports::LessonRequest {
+            command_id: f.command_id(CommandFamily::Lesson, 903),
             expected_revision: context.revision,
             lesson: context.current.unwrap().key,
             action: LessonAction::Replace(CourseCell {
                 subject_id: SubjectId::new(1).unwrap(),
                 teacher: TeacherBinding::Explicit(principal(3)),
             }),
-        },
-        &a,
-        f.clock.as_ref(),
-    )
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_lesson(fixture_request, &a, f.clock.as_ref())
+    }
     .unwrap();
     let replaced = r.desktop_facts(0, f.clock.as_ref()).unwrap();
     assert_eq!(replaced.profiles.subject_profile.as_ref(), Some(&q));
@@ -884,16 +963,20 @@ fn profiles_public_change_incompatible_current_profile_is_neutral_not_lost_or_gl
     use fc_ports::ScheduleRepository;
     let f = Fixture::new();
     let a = actor(1, TrustedOrigin::Local);
-    let mut r = f.admin();
+    let r = f.admin();
     let mut public = r.public_layout(&a).unwrap();
     for n in &mut public.layout.tree.nodes {
         if let NodeKind::Outlet { height, .. } = &mut n.kind {
             *height = AxisSize::Fixed(600)
         }
     }
-    let public = r
-        .execute_public_layout(public_request(1100, public), &a, f.clock.as_ref())
-        .unwrap();
+    let public = {
+        let fixture_request = public_request(&f, 1100, public);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_public_layout(fixture_request, &a, f.clock.as_ref())
+    }
+    .unwrap();
     let mut req = f.request(1101, key(1, 2));
     for n in &mut req.candidate.tree.nodes {
         if let NodeKind::Root { height, .. } = &mut n.kind {
@@ -905,15 +988,16 @@ fn profiles_public_change_incompatible_current_profile_is_neutral_not_lost_or_gl
         }
     }
     let p = f.save(req).unwrap();
-    r.execute_schedule(
-        fc_ports::ScheduleRequest {
-            command_id: CommandId::new(1102).unwrap(),
+    {
+        let fixture_request = fc_ports::ScheduleRequest {
+            command_id: f.command_id(CommandFamily::Schedule, 1102),
             expected_revision: Revision::default(),
             candidate: schedule(),
-        },
-        &a,
-        f.clock.as_ref(),
-    )
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_schedule(fixture_request, &a, f.clock.as_ref())
+    }
     .unwrap();
     assert_eq!(
         r.desktop_facts(0, f.clock.as_ref())
@@ -932,9 +1016,13 @@ fn profiles_public_change_incompatible_current_profile_is_neutral_not_lost_or_gl
             }
         }
     }
-    let changed = r
-        .execute_public_layout(public_request(1103, altered), &a, f.clock.as_ref())
-        .unwrap();
+    let changed = {
+        let fixture_request = public_request(&f, 1103, altered);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_public_layout(fixture_request, &a, f.clock.as_ref())
+    }
+    .unwrap();
     let facts = r.desktop_facts(0, f.clock.as_ref()).unwrap();
     assert_eq!(
         facts.profiles.reason,
@@ -948,7 +1036,7 @@ fn profiles_public_change_incompatible_current_profile_is_neutral_not_lost_or_gl
     let before = f.revision();
     assert_eq!(
         f.save(ProfileRequest {
-            command_id: CommandId::new(1104).unwrap(),
+            command_id: f.command_id(CommandFamily::Profiles, 1104),
             key: edit.key,
             expected_revision: p.revision,
             candidate: edit
@@ -960,7 +1048,7 @@ fn profiles_public_change_incompatible_current_profile_is_neutral_not_lost_or_gl
     off.enabled = false;
     assert!(
         !f.save(ProfileRequest {
-            command_id: CommandId::new(1105).unwrap(),
+            command_id: f.command_id(CommandFamily::Profiles, 1105),
             key: off.key,
             expected_revision: p.revision,
             candidate: off

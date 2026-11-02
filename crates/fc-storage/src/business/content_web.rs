@@ -180,6 +180,12 @@ struct ReadOutcome {
     session: SessionGuard,
 }
 impl<S> TransactionTask<S> for ReadOutcome {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Content,
+            self.command_id,
+        ))
+    }
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
     }

@@ -4,6 +4,7 @@
 use super::*;
 use backup_editor as b;
 use fc_bootstrap::recovery_workflow::{ConfirmationState, RecoveryWorkflow};
+use fc_ports::command_window::CommandFamily;
 use fc_windows::materials::chooser::{BackupDestination, SelectedFile};
 use fc_windows::materials::files::{LockedFile, PinnedDirectory};
 use std::{
@@ -26,6 +27,24 @@ const CHILD_OUTPUT_LIMIT: usize = 64 * 1024;
 
 fn checked<T, E: std::fmt::Debug>(value: std::result::Result<T, E>, stage: &str) -> Check<T> {
     value.map_err(|error| format!("recovery-probe: {stage}: {error:?}"))
+}
+/// Issue on the real Writer, then restore the unscoped Backend after this
+/// single database operation. Physical preparation must stay outside this call.
+fn command<T>(
+    backend: &mut Backend,
+    lease: SessionLease,
+    family: CommandFamily,
+    action: impl FnOnce(&mut Backend) -> Check<T>,
+) -> Check<T> {
+    let issued = checked(
+        backend.issue_native_command(family, Some(lease), SessionPurpose::Manage),
+        "issue native command",
+    )?;
+    let mut scoped = checked(
+        backend.begin_command_scope(issued),
+        "check native command scope",
+    )?;
+    action(&mut scoped)
 }
 fn require(value: bool, stage: &str) -> Check<()> {
     if value {
@@ -139,10 +158,12 @@ fn rename(app: &mut App, name: &str) -> Check<()> {
             .lock(),
         "backend lock",
     )?;
-    checked(
-        backend.identity(lease, IdentityCommand::RenameSchool { name: name.into() }),
-        "synthetic external teaching edit",
-    )?;
+    command(&mut backend, lease, CommandFamily::Identity, |backend| {
+        checked(
+            backend.identity(lease, IdentityCommand::RenameSchool { name: name.into() }),
+            "synthetic external teaching edit",
+        )
+    })?;
     Ok(())
 }
 fn ack(app: &App) -> Check<String> {
@@ -228,33 +249,37 @@ fn seed_roles(app: &mut App) -> Check<()> {
             .lock(),
         "seed backend lock",
     )?;
-    checked(
-        backend.identity(
-            lease,
-            IdentityCommand::CreateClass {
-                id: ClassId::new(1).unwrap(),
-                name: "Synthetic class".into(),
-            },
-        ),
-        "seed class",
-    )?;
-    checked(
-        backend.identity(
-            lease,
-            IdentityCommand::PutSubject {
-                id: SubjectId::new(1).unwrap(),
-                name: "Synthetic subject".into(),
-                enabled: true,
-                color: Rgb {
-                    red: 20,
-                    green: 80,
-                    blue: 140,
+    command(&mut backend, lease, CommandFamily::Identity, |backend| {
+        checked(
+            backend.identity(
+                lease,
+                IdentityCommand::CreateClass {
+                    id: ClassId::new(1).unwrap(),
+                    name: "Synthetic class".into(),
                 },
-                expected_revision: None,
-            },
-        ),
-        "seed subject",
-    )?;
+            ),
+            "seed class",
+        )
+    })?;
+    command(&mut backend, lease, CommandFamily::Identity, |backend| {
+        checked(
+            backend.identity(
+                lease,
+                IdentityCommand::PutSubject {
+                    id: SubjectId::new(1).unwrap(),
+                    name: "Synthetic subject".into(),
+                    enabled: true,
+                    color: Rgb {
+                        red: 20,
+                        green: 80,
+                        blue: 140,
+                    },
+                    expected_revision: None,
+                },
+            ),
+            "seed subject",
+        )
+    })?;
     for (id, login, role, scopes) in [
         (2, "recovery-probe-user", Role::User, vec![]),
         (
@@ -267,23 +292,26 @@ fn seed_roles(app: &mut App) -> Check<()> {
             }],
         ),
     ] {
-        drop(checked(
-            backend.create_account(
-                lease,
-                NewAccount {
-                    id: PrincipalId::new(id).unwrap(),
-                    login_name: login.into(),
-                    display_name: login.into(),
-                    role,
-                    scopes,
-                },
-                checked(
-                    Password::new(ACCOUNT_PASSWORD.into()),
-                    "synthetic account password",
-                )?,
-            ),
-            "seed scoped credentials",
-        )?);
+        command(&mut backend, lease, CommandFamily::Identity, |backend| {
+            drop(checked(
+                backend.create_account(
+                    lease,
+                    NewAccount {
+                        id: PrincipalId::new(id).unwrap(),
+                        login_name: login.into(),
+                        display_name: login.into(),
+                        role,
+                        scopes,
+                    },
+                    checked(
+                        Password::new(ACCOUNT_PASSWORD.into()),
+                        "synthetic account password",
+                    )?,
+                ),
+                "seed scoped credentials",
+            )?);
+            Ok(())
+        })?;
     }
     app.state = Arc::new(checked(backend.state(), "seed identity refresh")?);
     Ok(())

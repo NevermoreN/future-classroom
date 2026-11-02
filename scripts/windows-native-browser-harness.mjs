@@ -68,6 +68,13 @@ function decimal(value, zero = false) {
   return typeof value === 'string' && (zero ? /^(0|[1-9][0-9]{0,19})$/ : /^[1-9][0-9]{0,19}$/).test(value)
     && BigInt(value) <= U64_MAX;
 }
+function commandPair(value) {
+  shape(value, ['commandId', 'commandTicket'], 'COMMAND_PAIR_SHAPE');
+  const m = typeof value.commandTicket === 'string' && /^c2:([0-9a-f]{32}):([1-9][0-9]{0,18})$/.exec(value.commandTicket);
+  check(decimal(value.commandId) && m && m[1] !== '0'.repeat(32) && BigInt(m[2]) <= (1n << 63n) - 1n, 'COMMAND_PAIR_CANONICAL');
+  return { commandId: value.commandId, commandTicket: value.commandTicket };
+}
+function sameCommand(a, b) { return a.commandId === b.commandId && a.commandTicket === b.commandTicket; }
 function civilDate(value) {
   if (typeof value !== 'string' || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) return false;
   const date = new Date(value + 'T00:00:00.000Z');
@@ -123,9 +130,9 @@ function validateRun(value, init) {
 // Exact workflow: original nine API operations plus four explicit/causal
 // single-subject preview GETs. Static cache hits never contribute to this ledger.
 const API_OPERATIONS = Object.freeze({ statusGets: 2, sessionGets: 2, scopeGets: 2,
-  contentGets: 2, contentPosts: 1, visualGets: 4 });
+  contentGets: 2, contentPosts: 1, commandIssues: 1, visualGets: 4 });
 const REMINDER_API_OPERATIONS = Object.freeze({ statusGets: 2, sessionGets: 2, scopeGets: 2,
-  contentGets: 2, contentPosts: 1, visualGets: 0 });
+  contentGets: 2, contentPosts: 1, commandIssues: 1, visualGets: 0 });
 function operationsFor(kind) {
   check(['HOMEWORK', 'REMINDER'].includes(kind), 'INVALID_CONTENT_KIND');
   return kind === 'HOMEWORK' ? API_OPERATIONS : REMINDER_API_OPERATIONS;
@@ -306,13 +313,14 @@ class Harness {
     this.init = init; this.apiOperations = operationsFor(init.contentKind); this.until = performance.now() + 10000; this.phase = 'connect'; this.fault = null;
     this.contextId = null; this.sessionId = null; this.disposePromise = null; this.run = null;
     this.requests = new Map(); this.earlyExtra = new Map(); this.bodies = new Set(); this.scope = null; this.initial = null; this.committed = null;
+    this.issueRequested = false; this.commandIssues = 0; this.issued = null;
     this.reloaded = null; this.post = null; this.saveClicks = 0; this.sessionCount = 0; this.statusCount = 0;
     this.pageErrors = 0; this.consoleErrors = 0; this.scopeReads = 0; this.contentReads = 0;
     this.visualReads = 0; this.visualPayloads = []; this.visualObservations = []; this.runStartedAt = null;
     this.reminderShortcutClicks = 0; this.reminderObservations = [];
     this.report = { schemaVersion: 1, status: 'FAIL', marker: init.marker, contentKind: init.contentKind,
       scope: init.contentKind === 'REMINDER'
-        ? 'Actual isolated Win11 Edge to Rust native loopback HTTPS; approved session reused; actual bottom reminder shortcut, one synthetic shared class-day reminder save/reload, exact nine API operations and no visual reads. No pairing, microphone, playback, foreground or OS trust changes.'
+        ? 'Actual isolated Win11 Edge to Rust native loopback HTTPS; approved session reused; actual bottom reminder shortcut, one synthetic shared class-day reminder save/reload, exact ten API operations and no visual reads. No pairing, microphone, playback, foreground or OS trust changes.'
         : 'Actual isolated Win11 Edge to Rust native loopback HTTPS; approved session reused; one synthetic content save/reload and four scoped readonly visual reads with computed CSS/draft checks. No pairing, microphone, playback, foreground or OS trust changes.',
       assetManifestCanonicalSha256: hash(JSON.stringify(init.assetManifest)), expectedCspSha256: hash(init.expectedCsp),
       credentialScope: 'stdin memory only; Cookie/CSRF/Set-Cookie/response bodies and raw CDP frames omitted',
@@ -344,6 +352,7 @@ class Harness {
     if (!this.run || url.origin !== this.run.origin || url.username || url.password || url.search || url.hash) return null;
     const path = url.pathname;
     if (method === 'GET' && (path === '/fc/' || this.init.assetManifest.assets.some(a => '/fc/' + a.path === path))) return { kind: 'asset', path };
+    if (method === 'POST' && path === '/fc/api/v1/commands') return { kind: 'command-issue', path };
     const reminder = this.init.contentKind === 'REMINDER';
     const scopes = '/fc/api/v1/content/' + (reminder ? 'reminders' : 'homework') + '/scopes/0';
     if (method === 'GET' && ['/fc/api/v1/status', '/fc/api/v1/session', scopes].includes(path)) return { kind: 'api', path };
@@ -390,16 +399,25 @@ class Harness {
             dataEvents: 0, dataBytes: 0, encodedBytes: 0, countsClamped: false } };
         this.requests.set(params.requestId, record);
         if (this.earlyExtra.has(params.requestId)) { record.extraStatus = this.earlyExtra.get(params.requestId); this.earlyExtra.delete(params.requestId); }
-        if (record.method === 'POST') {
+        if (record.kind === 'command-issue') {
+          check(this.saveClicks === 1 && !this.issueRequested && !this.post && this.scope && this.initial, 'DUPLICATE_OR_UNEXPECTED_COMMAND_ISSUE');
+          check(header(request.headers, 'x-fc-csrf') === this.run.expectedCsrf, 'ISSUE_CSRF_MISMATCH');
+          check(typeof request.postData === 'string' && Buffer.byteLength(request.postData) <= 256, 'ISSUE_BODY_UNAVAILABLE');
+          let input; try { input = JSON.parse(request.postData); } catch { throw new Fault('ISSUE_JSON'); }
+          shape(input, ['schemaVersion', 'family'], 'ISSUE_SHAPE');
+          check(input.schemaVersion === 2 && input.family === 'content', 'ISSUE_FAMILY_OR_VERSION');
+          this.issueRequested = true;
+        } else if (record.method === 'POST') {
           check(this.saveClicks === 1 && !this.post && this.scope && this.initial, 'UNEXPECTED_OR_DUPLICATE_CONTENT_POST');
           check(record.path === this.contentPath(), 'POST_SCOPE_CHANGED');
           check(header(request.headers, 'x-fc-csrf') === this.run.expectedCsrf, 'POST_CSRF_MISMATCH');
           check(typeof request.postData === 'string' && Buffer.byteLength(request.postData) <= 65536, 'POST_BODY_UNAVAILABLE');
           let value; try { value = JSON.parse(request.postData); } catch { throw new Fault('POST_JSON'); }
-          shape(value, ['schemaVersion', 'commandId', 'expectedRevision', 'text'], 'POST_SHAPE');
-          check(value.schemaVersion === 1 && decimal(value.commandId) && value.expectedRevision === this.initial.revision
+          shape(value, ['schemaVersion', 'commandId', 'commandTicket', 'expectedRevision', 'text'], 'POST_SHAPE');
+          check(this.issueRequested && value.schemaVersion === 2 && value.expectedRevision === this.initial.revision
             && value.text === this.text, 'POST_ORIGINAL_COMMAND_MISMATCH');
-          this.post = { commandId: value.commandId, expectedRevision: value.expectedRevision };
+          this.post = { ...commandPair({ commandId: value.commandId, commandTicket: value.commandTicket }), expectedRevision: value.expectedRevision };
+          if (this.issued) check(sameCommand(this.post, this.issued), 'POST_ISSUED_PAIR_MISMATCH');
         }
       } else if (method === 'Network.requestServedFromCache') {
         const record = this.requests.get(params.requestId); if (record) record.servedFromCache = true;
@@ -417,10 +435,10 @@ class Harness {
           check(header(response.headers, 'content-security-policy') === this.init.expectedCsp, 'STATIC_CSP_MISMATCH');
           record.csp = this.init.expectedCsp;
           check(record.status === 200, 'STATIC_HTTP_STATUS');
-        } else check(record.status === 200 && record.mime === 'application/json', 'API_HTTP_STATUS_OR_MIME');
+        } else check(record.status === (record.kind === 'command-issue' ? 201 : 200) && record.mime === 'application/json', 'API_HTTP_STATUS_OR_MIME');
         record.response = true; record.diagnostic.responseMillis = this.diagnosticMillis();
       } else if (method === 'Network.responseReceivedExtraInfo') {
-        check(Number.isInteger(params.statusCode) && [200, 304].includes(params.statusCode), 'WIRE_HTTP_STATUS');
+        check(Number.isInteger(params.statusCode) && [200, 201, 304].includes(params.statusCode), 'WIRE_HTTP_STATUS');
         const record = this.requests.get(params.requestId);
         if (record) { check(record.extraStatus === null, 'DUPLICATE_EXTRA_RESPONSE'); record.extraStatus = params.statusCode; record.diagnostic.extraInfoMillis = this.diagnosticMillis(); }
         else { check(this.earlyExtra.size < MAX_REQUESTS && !this.earlyExtra.has(params.requestId), 'EXTRA_RESPONSE_BUDGET'); this.earlyExtra.set(params.requestId, params.statusCode); }
@@ -491,6 +509,13 @@ class Harness {
         const visual = visualPayload(value, this.scope);
         check(++this.visualReads <= this.apiOperations.visualGets, 'EXTRA_VISUAL_READ');
         this.visualPayloads.push({ visual, responseBodySha256: hash(bytes) });
+      } else if (record.kind === 'command-issue') {
+        shape(value, ['schemaVersion', 'status', 'family', 'commandId', 'commandTicket', 'expiresInMillis'], 'ISSUED_SHAPE');
+        check(value.schemaVersion === 2 && value.status === 'ISSUED' && value.family === 'content'
+          && value.expiresInMillis === 86400000 && this.issueRequested && ++this.commandIssues === 1, 'ISSUED_ENVELOPE');
+        this.issued = commandPair({ commandId: value.commandId, commandTicket: value.commandTicket });
+        // CDP body analysis may finish after the causally later POST event. Compare in either arrival order.
+        if (this.post) check(sameCommand(this.post, this.issued), 'ISSUED_POST_PAIR_MISMATCH');
       } else if (record.path.endsWith('/status')) {
         check(value.schemaVersion === 1 && value.apiVersion === 1 && value.uiCompatibilityVersion === 1 && value.online === true, 'STATUS_PAYLOAD');
         this.statusCount++;
@@ -502,9 +527,9 @@ class Harness {
         if (this.scope) check(Object.keys(scope).every(k => scope[k] === this.scope[k]), 'RELOAD_SCOPE_CHANGED');
         this.scope = scope; this.scopeReads++;
       } else if (record.method === 'POST') {
-        shape(value, ['schemaVersion', 'status', 'commandId', 'content'], 'COMMITTED_SHAPE');
-        check(value.schemaVersion === 1 && value.status === 'COMMITTED' && this.post
-          && value.commandId === this.post.commandId, 'COMMITTED_COMMAND_MISMATCH');
+        shape(value, ['schemaVersion', 'status', 'commandId', 'commandTicket', 'content'], 'COMMITTED_SHAPE');
+        check(value.schemaVersion === 2 && value.status === 'COMMITTED' && this.post
+          && sameCommand(commandPair({ commandId: value.commandId, commandTicket: value.commandTicket }), this.post), 'COMMITTED_COMMAND_MISMATCH');
         const document = this.checkDocument(value.content);
         check(document.textMatches && document.revision === (BigInt(this.post.expectedRevision) + 1n).toString(), 'COMMITTED_CONTENT_MISMATCH');
         this.committed = document;
@@ -666,11 +691,11 @@ class Harness {
       'One synthetic authorized scope and original empty content', 'Exactly one UI content POST with original CSRF/date/revision',
       'Committed receipt and post-reload durable content match',
       ...(this.init.contentKind === 'HOMEWORK' ? [
-        'Original nine plus four readonly visual GETs: exact real no-store API ledger; cache hits counted separately',
+        'Original nine plus one real command issuance and four readonly visual GETs: exact real no-store API ledger; cache hits counted separately',
         'Actual computed fill/border/whole alpha; text and controls do not inherit fill alpha',
         'Explicit visual refresh preserves dirty content draft; save and reload reread scoped preview'] : [
         'Actual bottom reminder shortcut and actual class scope button used before and after reload',
-        'Exact original nine real no-store API responses; zero visual requests/reads/observations; cache hits counted separately'])];
+        'Exact ten real no-store API responses including command issuance; zero visual requests/reads/observations; cache hits counted separately'])];
     this.report.elapsedMillis = Math.round(performance.now() - began); this.report.status = 'PASS';
     this.phase = 'complete';
   }
@@ -682,8 +707,10 @@ class Harness {
       && this.scopeReads === this.apiOperations.scopeGets && this.contentReads === this.apiOperations.contentGets
       && this.visualReads === this.apiOperations.visualGets && this.visualObservations.length === this.apiOperations.visualGets
       && this.visualPayloads.length === this.apiOperations.visualGets
-      && api.filter(r => r.method === 'POST').length === this.apiOperations.contentPosts, 'API_OPERATION_COUNT');
-    check(api.every(r => r.extraStatus === 200 && !r.servedFromCache && !r.fromDiskCache
+      && this.commandIssues === this.apiOperations.commandIssues && this.issued && this.post && sameCommand(this.issued, this.post)
+      && api.filter(r => r.method === 'POST' && r.kind === 'content').length === this.apiOperations.contentPosts
+      && api.filter(r => r.kind === 'command-issue' && r.method === 'POST').length === this.apiOperations.commandIssues, 'API_OPERATION_COUNT');
+    check(api.every(r => r.extraStatus === (r.kind === 'command-issue' ? 201 : 200) && !r.servedFromCache && !r.fromDiskCache
       && !r.fromServiceWorker && !r.fromPrefetchCache), 'API_NOT_PROVEN_NATIVE_NO_STORE');
   }
   responsesSettled() {
@@ -727,14 +754,15 @@ class Harness {
     this.report.cacheOnlyResponseCount = records.filter(r => !wire(r) && (r.servedFromCache || r.fromDiskCache)).length;
     this.report.apiResponses = records.filter(r => r.url.includes('/api/v1/')).length;
     this.report.apiOperations = { statusGets: this.statusCount, sessionGets: this.sessionCount, scopeGets: this.scopeReads,
-      contentGets: this.contentReads, contentPosts: records.filter(r => r.method === 'POST').length, visualGets: this.visualReads };
+      contentGets: this.contentReads, contentPosts: records.filter(r => r.method === 'POST' && r.url !== this.run?.origin + '/fc/api/v1/commands').length, commandIssues: this.commandIssues, visualGets: this.visualReads };
     this.report.visualReads = this.visualReads; this.report.visualObservations = this.visualObservations;
     this.report.reminderShortcutClicks = this.reminderShortcutClicks; this.report.reminderObservations = this.reminderObservations;
-    this.report.contentPosts = records.filter(r => r.method === 'POST').length;
+    this.report.contentPosts = records.filter(r => r.method === 'POST' && r.url !== this.run?.origin + '/fc/api/v1/commands').length;
+    this.report.commandIssues = this.commandIssues; this.report.issuedCommand = this.issued;
     this.report.sessionCsrfMatched = this.sessionCount === 2;
     this.report.writeOutcome = this.committed ? 'COMMITTED' : this.post ? 'UNKNOWN' : 'NOT_OBSERVED';
     if (this.committed) this.report.contentRevision = this.committed.revision;
-    if (this.post) this.report.commandId = this.post.commandId;
+    if (this.post) { this.report.commandId = this.post.commandId; this.report.commandTicket = this.post.commandTicket; }
     this.report.pageErrorCount = this.pageErrors; this.report.consoleErrorCount = this.consoleErrors;
     return this.report;
   }
@@ -809,13 +837,13 @@ async function selfTest() {
   assert.equal(h.classify(visualPath, 'GET').kind, 'visual');
   assert.equal(h.classify(visualPath, 'POST'), null);
   assert.equal(h.classify(run.origin + '/fc/api/v1/subject-visuals', 'GET'), null);
-  assert.equal(Object.values(API_OPERATIONS).reduce((a,b)=>a+b,0), 13);
+  assert.equal(Object.values(API_OPERATIONS).reduce((a,b)=>a+b,0), 14);
   const reminderInit = { ...init, contentKind: 'REMINDER' };
   assert.equal(validateInit(reminderInit), reminderInit);
   const missingKind = { ...init }; delete missingKind.contentKind;
   assert.throws(() => validateInit(missingKind), Fault);
   for (const contentKind of ['', 'reminder', 'OTHER', null]) assert.throws(() => validateInit({ ...init, contentKind }), Fault);
-  assert.equal(Object.values(operationsFor('REMINDER')).reduce((a,b)=>a+b,0), 9);
+  assert.equal(Object.values(operationsFor('REMINDER')).reduce((a,b)=>a+b,0), 10);
   assert.throws(() => operationsFor('OTHER'), Fault);
   const reminder = new Harness(reminderInit); reminder.run = { ...run }; reminder.text = 'Synthetic reminder model only';
   const reminderPath = '/fc/api/v1/content/reminders/1/2026-11-01';
@@ -868,15 +896,17 @@ async function selfTest() {
   await clicks.click('home'); assert.equal(clicks.reminderShortcutClicks,1); assert.equal(mouse.length,3);
   failRelease=true; await assert.rejects(clicks.click('home'),Fault); assert.equal(clicks.reminderShortcutClicks,1);
   reminder.statusCount=2;reminder.sessionCount=2;reminder.scopeReads=2;reminder.contentReads=2;
-  for(let i=0;i<9;i++)reminder.requests.set('reminder-api-'+i,{kind:'api',method:i===8?'POST':'GET',url:run.origin+reminderPath,
+  for(let i=0;i<9;i++)reminder.requests.set('reminder-api-'+i,{kind:i===8?'content':'api',method:i===8?'POST':'GET',url:run.origin+reminderPath,
     extraStatus:200,servedFromCache:false,fromDiskCache:false,fromServiceWorker:false,fromPrefetchCache:false});
+  reminder.issued = { commandId:'17', commandTicket:'c2:'+'a'.repeat(32)+':1' }; reminder.post = {...reminder.issued}; reminder.commandIssues=1;
+  reminder.requests.set('issue',{kind:'command-issue',method:'POST',url:run.origin+'/fc/api/v1/commands',extraStatus:201,servedFromCache:false,fromDiskCache:false,fromServiceWorker:false,fromPrefetchCache:false});
   assert.doesNotThrow(()=>reminder.checkApiLedger());
   reminder.visualReads=1;assert.throws(()=>reminder.checkApiLedger(),Fault);reminder.visualReads=0;
   reminder.visualObservations.push({});assert.throws(()=>reminder.checkApiLedger(),Fault);reminder.visualObservations.length=0;
   reminder.requests.set('forbidden-visual',{kind:'visual',method:'GET',extraStatus:200});assert.throws(()=>reminder.checkApiLedger(),Fault);reminder.requests.delete('forbidden-visual');
   const reminderApi=reminder.requests.get('reminder-api-0');reminderApi.fromDiskCache=true;assert.throws(()=>reminder.checkApiLedger(),Fault);reminderApi.fromDiskCache=false;
   const reminderPost=reminder.requests.get('reminder-api-8');reminderPost.method='GET';assert.throws(()=>reminder.checkApiLedger(),Fault);reminderPost.method='POST';
-  const reminderSummary=reminder.summary();assert.equal(reminderSummary.contentKind,'REMINDER');assert.equal(reminderSummary.apiResponses,9);
+  const reminderSummary=reminder.summary();assert.equal(reminderSummary.contentKind,'REMINDER');assert.equal(reminderSummary.apiResponses,10);
   assert.equal(reminderSummary.visualReads,0);assert.deepEqual(reminderSummary.visualObservations,[]);
   assert.equal(reminderSummary.reminderShortcutClicks,0);assert.deepEqual(reminderSummary.reminderObservations,[]);
   const scope = { classId: '1', subjectId: '1', ownerTeacherId: '1', today: '2026-11-01' };
@@ -947,6 +977,33 @@ async function selfTest() {
   await assert.rejects(owned.command('Runtime.evaluate'), error => error.code === 'RUN_DEADLINE');
   assert.equal(await owned.dispose(), true); assert.equal(calls, 1); assert.equal(owned.report.contextDisposed, true);
   await diagnosticSelfTest(init, run);
+  const issuedPair = { commandId:'18446744073709551615', commandTicket:'c2:'+'a'.repeat(32)+':9223372036854775807' };
+  assert.deepEqual(commandPair(issuedPair), issuedPair);
+  for (const bad of [{...issuedPair,commandId:'01'}, {...issuedPair,commandId:'18446744073709551616'},
+    {...issuedPair,commandTicket:'c2:'+'0'.repeat(32)+':1'}, {...issuedPair,commandTicket:'c2:'+'A'.repeat(32)+':1'},
+    {...issuedPair,commandTicket:'c2:'+'a'.repeat(32)+':01'}, {...issuedPair,commandTicket:'c2:'+'a'.repeat(32)+':9223372036854775808'}]) {
+    assert.throws(()=>commandPair(bad),Fault);
+  }
+  // The browser can submit after receiving the issuer body before local CDP body-analysis completes.
+  // Both observation orders must match the SAME original pair; never mint a replacement id.
+  for (const bodyFirst of [false,true]) {
+    const observed=new Harness(init);observed.run={...run};observed.sessionId='owned';observed.saveClicks=1;
+    observed.scope={classId:'1',subjectId:'1',ownerTeacherId:'1',today:'2026-11-01'};
+    observed.initial={revision:'0'};observed.text='Synthetic observer command only';
+    observed.event('Network.requestWillBeSent',{requestId:'issue',request:{method:'POST',url:run.origin+'/fc/api/v1/commands',
+      headers:{'X-FC-CSRF':run.expectedCsrf},postData:JSON.stringify({schemaVersion:2,family:'content'})}},'owned');
+    const issued={schemaVersion:2,status:'ISSUED',family:'content',...issuedPair,expiresInMillis:86400000};
+    observed.command=async()=>({body:JSON.stringify(issued),base64Encoded:false});
+    const post=()=>observed.event('Network.requestWillBeSent',{requestId:'content',request:{method:'POST',url:run.origin+observed.contentPath(),
+      headers:{'X-FC-CSRF':run.expectedCsrf},postData:JSON.stringify({schemaVersion:2,...issuedPair,expectedRevision:'0',text:observed.text})}},'owned');
+    if(bodyFirst)await observed.analyze('issue',observed.requests.get('issue'));
+    post();assert.equal(observed.fault,null);
+    if(!bodyFirst)await observed.analyze('issue',observed.requests.get('issue'));
+    assert.equal(observed.commandIssues,1);assert(sameCommand(observed.post,observed.issued));
+    observed.post={...observed.post,commandTicket:'c2:'+'b'.repeat(32)+':1'};
+    observed.commandIssues=0; // isolate pair mismatch from the independent duplicate-response guard
+    await assert.rejects(observed.analyze('issue',observed.requests.get('issue')),e=>e.code==='ISSUED_POST_PAIR_MISMATCH');
+  }
   await socketSelfTest();
   writeSync(1, JSON.stringify({ type: 'SELF_TEST', status: 'PASS', builtinWebSocket: typeof WebSocket,
     checks: ['synthetic scoped visual payload/DOM CSS alpha and border checks; exact HOMEWORK13-operation workflow (not browser evidence)',

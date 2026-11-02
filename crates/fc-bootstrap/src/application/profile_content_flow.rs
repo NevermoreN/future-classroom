@@ -171,7 +171,6 @@ pub(super) enum Operation {
     Publish {
         slot: ContentSlotKey,
         expected_revision: Revision,
-        command_id: CommandId,
         operation: ContentOperation,
         input: LocalContentInput,
     },
@@ -206,7 +205,7 @@ impl ContentJob {
             .checked_mul(2)?
             .checked_add(payload)
     }
-    pub fn run(self, context: &JobContext) -> Result<Outcome> {
+    pub fn run(self, context: &JobContext, command: &super::NativeCommand) -> Result<Outcome> {
         match self.operation {
             Operation::Load { slot } => {
                 let document = self
@@ -223,7 +222,6 @@ impl ContentJob {
             Operation::Publish {
                 slot,
                 expected_revision,
-                command_id,
                 operation,
                 input,
             } => {
@@ -240,27 +238,45 @@ impl ContentJob {
                 if expires_at <= now {
                     return Err(invalid("日期即将变化，请稍后重新加载内容。"));
                 }
-                let request = BeginContentRequest {
-                    command_id,
-                    slot,
-                    expected_revision,
-                    operation,
-                    payload_fingerprint: sources
-                        .intent_fingerprint(slot, operation)
-                        .map_err(fc_bootstrap::backend::BackendError::ProfileContent)?,
-                    expires_at,
+                let (admission, owner) = {
+                    let mut backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
+                    command.run(
+                        &mut backend,
+                        fc_ports::command_window::CommandFamily::ProfileContent,
+                        Some(self.lease),
+                        fc_application::identity::SessionPurpose::Manage,
+                        context,
+                        |backend| {
+                            let request = BeginContentRequest {
+                                command_id: backend.issued_command_id()?,
+                                slot,
+                                expected_revision,
+                                operation,
+                                payload_fingerprint: sources
+                                    .intent_fingerprint(slot, operation)
+                                    .map_err(fc_bootstrap::backend::BackendError::ProfileContent)?,
+                                expires_at,
+                            };
+                            Ok(backend.begin_profile_content_owned(self.lease, request)?)
+                        },
+                    )?
                 };
-                let admission = self
-                    .backend
-                    .lock()
-                    .map_err(|_| Failure::Stopped)?
-                    .begin_profile_content(self.lease, request)?;
                 let reservation = if let Some(sizes) = sizes {
-                    let reserved = self
-                        .backend
-                        .lock()
-                        .map_err(|_| Failure::Stopped)?
-                        .reserve_profile_media(self.lease, &admission, &sizes);
+                    let reserved =
+                        {
+                            let mut backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
+                            command.run(
+                                &mut backend,
+                                fc_ports::command_window::CommandFamily::ProfileContent,
+                                Some(self.lease),
+                                fc_application::identity::SessionPurpose::Manage,
+                                context,
+                                |backend| {
+                                    Ok(backend
+                                        .reserve_profile_media(self.lease, &admission, &sizes)?)
+                                },
+                            )
+                        };
                     match reserved {
                         Ok(reservation) => Some(reservation),
                         Err(error) => {
@@ -268,8 +284,8 @@ impl ContentJob {
                                 .backend
                                 .lock()
                                 .map_err(|_| Failure::Stopped)?
-                                .fail_profile_content(self.lease, admission);
-                            return Err(error.into());
+                                .fail_profile_content_owned(owner);
+                            return Err(error);
                         }
                     }
                 } else {
@@ -304,14 +320,24 @@ impl ContentJob {
                     }
                     // No backend mutex is held during byte copying/hash/WIC.
                     // The sealed original pins remain alive until COMMIT returns.
-                    self.backend
-                        .lock()
-                        .map_err(|_| Failure::Stopped)?
-                        .commit_profile_content_while(
-                            self.lease,
-                            proof,
-                            Arc::new(context.execution_fence()),
+                    {
+                        let mut backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
+                        command.run(
+                            &mut backend,
+                            fc_ports::command_window::CommandFamily::ProfileContent,
+                            Some(self.lease),
+                            fc_application::identity::SessionPurpose::Manage,
+                            context,
+                            |backend| {
+                                backend.commit_profile_content_while(
+                                    self.lease,
+                                    proof,
+                                    Arc::new(context.execution_fence()),
+                                )?;
+                                Ok(())
+                            },
                         )?;
+                    }
                     Ok(())
                 })(); // every physical preparation/source pin has now really exited
                 if let Some(reservation) = reservation {
@@ -334,7 +360,7 @@ impl ContentJob {
                         .backend
                         .lock()
                         .map_err(|_| Failure::Stopped)?
-                        .fail_profile_content(self.lease, admission);
+                        .fail_profile_content_owned(owner);
                     if let Err(failure) = failed {
                         if super::fatal(&Failure::Backend(failure.clone())) {
                             return Err(failure.into());
@@ -342,8 +368,12 @@ impl ContentJob {
                     }
                     return Err(error);
                 }
-                let backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
-                let outcome = backend.profile_content_outcome(self.lease, command_id)?;
+                let mut backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
+                let outcome =
+                    command.query(&mut backend, context, |backend| {
+                        Ok(backend
+                            .profile_content_outcome(self.lease, backend.issued_command_id()?)?)
+                    })?;
                 if !outcome
                     .as_ref()
                     .is_some_and(|outcome| outcome.status == ProfileContentStatus::Committed)

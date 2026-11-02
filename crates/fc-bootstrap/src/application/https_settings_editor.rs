@@ -101,10 +101,30 @@ impl Draft {
             .map_err(|_| "请核对域名、端口和证书引用。".into())
     }
 }
+/// Captured business payload and original asynchronous server identity slot.
+/// No fabricated command id is minted while the window pump captures a draft.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) struct Save {
+    pub expected_revision: Revision,
+    pub expected_identity_revision: Revision,
+    pub configuration: Option<HttpsConfiguration>,
+    pub command: super::NativeCommand,
+}
+impl Save {
+    pub(super) fn request(&self, id: CommandId) -> HttpsSettingsRequest {
+        HttpsSettingsRequest {
+            command_id: id,
+            expected_revision: self.expected_revision,
+            expected_identity_revision: self.expected_identity_revision,
+            configuration: self.configuration.clone(),
+        }
+    }
+}
 struct Original {
-    request: HttpsSettingsRequest,
+    request: Save,
     deadline: Instant,
     accepted: bool,
+    retired: bool,
 }
 #[derive(Clone, Copy)]
 enum Leave {
@@ -177,11 +197,7 @@ impl Editor {
     pub(super) fn has_unknown(&self) -> bool {
         self.original.as_ref().is_some_and(|o| o.accepted)
     }
-    pub(super) fn prepare_save(
-        &mut self,
-        id: CommandId,
-        now: Instant,
-    ) -> std::result::Result<HttpsSettingsRequest, String> {
+    pub(super) fn prepare_save(&mut self, now: Instant) -> std::result::Result<Save, String> {
         if self.has_unknown() {
             return Err(UNCONFIRMED.into());
         }
@@ -193,8 +209,8 @@ impl Editor {
             }
             return Ok(original.request.clone());
         }
-        let request = HttpsSettingsRequest {
-            command_id: id,
+        let request = Save {
+            command: super::NativeCommand::new(),
             expected_revision: base.settings.revision,
             expected_identity_revision: base.identity_revision,
             configuration: Some(config),
@@ -203,6 +219,7 @@ impl Editor {
             request: request.clone(),
             deadline: now + Duration::from_secs(90),
             accepted: false,
+            retired: false,
         });
         Ok(request)
     }
@@ -215,10 +232,15 @@ impl Editor {
             original.accepted = true;
         }
     }
-    pub(super) fn query_request(&self) -> Option<HttpsSettingsRequest> {
+    pub(super) fn retire_command(&mut self) {
+        if let Some(original) = &mut self.original {
+            original.retired = true;
+        }
+    }
+    pub(super) fn query_request(&self) -> Option<Save> {
         self.original
             .as_ref()
-            .filter(|o| o.accepted)
+            .filter(|o| o.accepted && !o.retired)
             .map(|o| o.request.clone())
     }
     pub(super) fn queried(&mut self, result: Option<HttpsSettingsState>) {
@@ -337,7 +359,7 @@ impl Editor {
             CHECK_CERTIFICATE => {
                 Err("请先保存并重新核对配置，完成原操作结果查询后再检查证书。".into())
             }
-            QUERY if self.has_unknown() => Ok(Command::Query),
+            QUERY if self.query_request().is_some() => Ok(Command::Query),
             QUERY => Err("当前没有需要查询的原保存操作。".into()),
             RELOAD | CLOSE | CANCEL_DRAFT if self.dirty() || self.original.is_some() => {
                 self.confirmation = Some(match action {

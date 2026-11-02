@@ -3,7 +3,7 @@
 //! it is not an assertion that WIC or SQL can be preempted by cancellation.
 use super::*;
 use fc_domain::{
-    ids::{AuthEpoch, CommandId, LayoutNodeId, MediaVersionId},
+    ids::{AuthEpoch, LayoutNodeId, MediaVersionId},
     layout::{LayoutScope, WidgetKind},
     profile_content::{ContentSlotKey, ImageFormat, MediaReference},
 };
@@ -308,8 +308,7 @@ fn hidden_controller_cancels_both_tickets_without_freeing_live_workers_or_resett
         ticket: second,
         source: Revision::new(5),
         generation: controller.generation,
-        request: PageContentRequest {
-            command_id: CommandId::new(1).unwrap(),
+        request: fc_bootstrap::backend::ProfilePageTarget {
             slot: slot(50),
             expected_content_revision: Revision::new(3),
             expected_view_revision: Revision::new(4),

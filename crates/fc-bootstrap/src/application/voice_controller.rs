@@ -2,8 +2,16 @@
 //! A saved switch is not proof that a native output has physically stopped.
 use super::*;
 
+pub(super) use fc_ports::command_window::VoicePolicyIntent as PolicyIntent;
+
+pub(super) struct Loaded {
+    pub snapshot: fc_bootstrap::backend::VoiceManagementSnapshot,
+    pub history: Option<NativeHistory>,
+}
+
 pub(super) enum Operation {
     Refresh,
+    Query(NativeCommand),
     CheckOutput {
         expected_publication: Revision,
         expected: Revision,
@@ -24,25 +32,65 @@ pub(super) enum Operation {
     },
 }
 
+impl Operation {
+    pub(super) fn policy_intent(&self) -> Option<PolicyIntent> {
+        match *self {
+            Self::SetEnabled {
+                expected,
+                expected_identity,
+                expected_runtime,
+                enabled,
+            } => Some(PolicyIntent::Enabled {
+                expected_voice: expected,
+                expected_identity,
+                expected_runtime,
+                enabled,
+            }),
+            Self::SetLimits {
+                expected,
+                expected_identity,
+                expected_runtime,
+                limits,
+            } => Some(PolicyIntent::Limits {
+                expected_voice: expected,
+                expected_identity,
+                expected_runtime,
+                limits,
+            }),
+            _ => None,
+        }
+    }
+}
+
 pub(super) fn run(
     service: VoiceService,
     lease: SessionLease,
     operation: Operation,
     context: &JobContext,
+    command: &NativeCommand,
 ) -> Result<Outcome> {
     context.checkpoint().map_err(|_| Failure::Stopped)?;
-    // Even refresh is a privileged read. Form data supplies neither the lease
-    // nor a captured revision, and no automatic retry replays a change.
+    // Current management reads remain privileged and independent of history.
     service.management_snapshot(lease)?;
-    context.checkpoint().map_err(|_| Failure::Stopped)?;
-    match operation {
-        Operation::Refresh => {}
+    let service = service.with_execution_fence(Arc::new(context.execution_fence()));
+    let history = match operation {
+        Operation::Refresh => None,
+        Operation::Query(original) => {
+            let Some(NativeIntent::VoicePolicy(intent)) = original.intent() else {
+                return Err(Failure::Stopped);
+            };
+            let issued = original.original()?;
+            let result = service.query_policy_outcome_native(lease, issued, intent.clone());
+            Some(NativeHistory::from_query(original, issued, result)?)
+        }
         Operation::CheckOutput {
             expected_publication,
             expected,
             expected_identity,
             expected_runtime,
         } => {
+            let issued = voice_issue(&service, lease, context, command)?;
+            let service = service.with_command_window(lease, issued)?;
             let loaded = service.check_default_output_reviewed(
                 lease,
                 expected_publication,
@@ -53,40 +101,51 @@ pub(super) fn run(
                 fc_windows::audio::query_default_output_format,
             )?;
             context.checkpoint().map_err(|_| Failure::Stopped)?;
-            return Ok(Outcome::VoiceLoaded(lease, Box::new(loaded)));
-        }
-        Operation::SetEnabled {
-            expected,
-            expected_identity,
-            expected_runtime,
-            enabled,
-        } => {
-            service.set_enabled_reviewed(
+            return Ok(Outcome::VoiceLoaded(
                 lease,
-                enabled,
-                expected,
-                expected_identity,
-                expected_runtime,
-            )?;
+                Box::new(Loaded {
+                    snapshot: loaded,
+                    history: None,
+                }),
+            ));
         }
-        Operation::SetLimits {
-            expected,
-            expected_identity,
-            expected_runtime,
-            limits,
-        } => {
-            service.set_limits_reviewed(
-                lease,
-                limits,
-                expected,
-                expected_identity,
-                expected_runtime,
-            )?;
+        operation => {
+            let intent = operation.policy_intent().ok_or(Failure::Stopped)?;
+            if command.intent() != Some(&NativeIntent::VoicePolicy(intent.clone())) {
+                return Err(Failure::Stopped);
+            }
+            let issued = voice_issue(&service, lease, context, command)?;
+            let service = service.with_command_window(lease, issued)?;
+            let outcome = service.apply_policy_window(lease, intent)?;
+            Some(NativeHistory::completed(command.clone(), issued, outcome)?)
         }
-    }
+    };
     let loaded = service.management_snapshot(lease)?;
     context.checkpoint().map_err(|_| Failure::Stopped)?;
-    Ok(Outcome::VoiceLoaded(lease, Box::new(loaded)))
+    Ok(Outcome::VoiceLoaded(
+        lease,
+        Box::new(Loaded {
+            snapshot: loaded,
+            history,
+        }),
+    ))
+}
+fn voice_issue(
+    service: &VoiceService,
+    lease: SessionLease,
+    context: &JobContext,
+    command: &NativeCommand,
+) -> Result<fc_ports::command_window::IssuedCommand> {
+    let issued = match command.read_worker()? {
+        Some(original) => original,
+        None => {
+            let issued = service.issue_native_command(lease)?;
+            command.bind(issued)?;
+            issued
+        }
+    };
+    context.checkpoint().map_err(|_| Failure::Stopped)?;
+    Ok(issued)
 }
 
 impl App {
@@ -117,6 +176,14 @@ impl App {
         let Some(service) = self.voice_service.clone() else {
             self.status = "语音服务尚未就绪，请稍后重新打开。".into();
             return self.render();
+        };
+        let operation = if matches!(operation, Operation::Refresh) && self.native_unknown {
+            self.native_command.as_ref().filter(|original| {
+                matches!(original.intent(), Some(NativeIntent::VoicePolicy(_)))
+                    && self.native_target.as_ref().is_some_and(|target| matches!(target, NativeTarget::Voice(owner) if NativeTarget::same_reader(lease, *owner)))
+            }).map_or(operation, |original| Operation::Query(original.clone()))
+        } else {
+            operation
         };
         self.screen = Screen::Voice;
         self.submit(Work::Voice(service, lease, operation))
@@ -329,3 +396,6 @@ impl App {
         self.render()
     }
 }
+
+#[cfg(test)]
+mod tests;

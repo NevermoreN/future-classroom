@@ -64,6 +64,9 @@ fn material_error(error: MaterialError) -> StorageError {
     StorageError::Material(error)
 }
 pub(super) fn repository_error(error: StorageError) -> MaterialRepositoryError {
+    if let Some(error) = error.command_window_error() {
+        return MaterialRepositoryError::CommandWindow(error);
+    }
     match error {
         StorageError::Material(e) => MaterialRepositoryError::Domain(e),
         StorageError::ResourceQuota => MaterialRepositoryError::QuotaExceeded,
@@ -649,6 +652,13 @@ struct MutationTask<S> {
     factory: Factory<S>,
 }
 impl<S: Send> TransactionTask<S> for MutationTask<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Materials,
+            self.operation.id(),
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         match &self.operation {
             Operation::Append(r) => r
@@ -1433,6 +1443,13 @@ struct OutcomeTask {
     session: SessionGuard,
 }
 impl<S> TransactionTask<S> for OutcomeTask {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Materials,
+            self.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
     }

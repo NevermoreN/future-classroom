@@ -9,21 +9,25 @@ use crate::{
 use fc_audio::execution::{ExecutionError, ExecutionStatus, VoiceExecutionPort, VoiceExecutor};
 use fc_domain::voice::*;
 use fc_ports::{audio::AudioAuthorization, voice::VoiceRepositoryError, Clock, MonotonicClock};
-use fc_windows::{
-    audio::{device::DefaultRenderMonitor, VerifiedWave, WinMmAudioOutput},
-    system::CurrentClock,
-};
+use fc_windows::audio::{device::DefaultRenderMonitor, VerifiedWave, WinMmAudioOutput};
+#[cfg(test)]
+use fc_windows::system::CurrentClock;
 use std::path::PathBuf;
 
+/// One shared instance supplies civil and monotonic sampling. Normal callers
+/// continue to pass the Windows CurrentClock; a protected probe may provide its
+/// closed instance-local civil source without changing the system clock.
+pub trait NativeClock: Clock + MonotonicClock + Send + Sync {}
+impl<T: Clock + MonotonicClock + Send + Sync> NativeClock for T {}
 pub struct NativeFactory {
     service: VoiceService,
     root: PathBuf,
-    clock: Arc<CurrentClock>,
+    clock: Arc<dyn NativeClock>,
 }
 impl NativeFactory {
     /// No filesystem/COM/device access on the caller. All native ownership is
     /// constructed lazily in the sole audio execution thread.
-    pub fn new(service: VoiceService, root: PathBuf, clock: Arc<CurrentClock>) -> Self {
+    pub fn new(service: VoiceService, root: PathBuf, clock: Arc<dyn NativeClock>) -> Self {
         Self {
             service,
             root,
@@ -84,7 +88,7 @@ struct Port<'a> {
     ignored_committed_serial: Option<u64>,
     handle: &'a VoiceRuntimeHandle,
     files: &'a ControlledVoiceFiles,
-    clock: &'a CurrentClock,
+    clock: &'a dyn NativeClock,
     control: &'a RuntimeControl,
     generation: u64,
     authorization: &'a mut Option<VoicePlaybackAuthorization>,
@@ -195,7 +199,7 @@ struct NativeDomain {
     service: VoiceService,
     handle: VoiceRuntimeHandle,
     files: ControlledVoiceFiles,
-    clock: Arc<CurrentClock>,
+    clock: Arc<dyn NativeClock>,
     control: RuntimeControl,
     generation: u64,
     stop_epoch: u64,
@@ -278,7 +282,7 @@ impl AudioDomain for NativeDomain {
             ignored_committed_serial: self.ignored_committed_serial,
             handle: &self.handle,
             files: &self.files,
-            clock: &self.clock,
+            clock: self.clock.as_ref(),
             control: &self.control,
             generation: self.generation,
             authorization: &mut self.authorization,

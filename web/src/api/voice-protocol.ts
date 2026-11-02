@@ -1,3 +1,4 @@
+import { commandIdentity, commandTicket, commandVersion, sameCommand, type CommandIdentity } from './command-protocol'
 import { civilTime } from './content-protocol'
 import { decimal, ProtocolFault, protocolVersions, unicodeText } from './protocol'
 
@@ -6,9 +7,9 @@ function object(value: unknown, keys: readonly string[]): Record<string, unknown
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).length !== keys.length || Object.keys(value).some(k => !keys.includes(k))) return fail()
   return value as Record<string, unknown>
 }
-function envelope(value: unknown, status: string, keys: string[]) {
+function envelope(value: unknown, status: string, keys: string[], version = 1) {
   const v = object(value, ['schemaVersion', 'status', ...keys])
-  protocolVersions(v.schemaVersion)
+  if (version === 2) commandVersion(v.schemaVersion); else protocolVersions(v.schemaVersion)
   if (v.status !== status) return fail()
   return v
 }
@@ -53,40 +54,49 @@ export const voiceStates = ['QUEUED', 'STARTING', 'PLAYING', 'GAP', 'STOPPING', 
 export type VoiceStatus = typeof voiceStates[number]
 export const voiceFailures = ['DEVICE', 'SESSION', 'REVOKED', 'DISABLED', 'TIMEOUT', 'CLOCK_REGRESSION', 'STORAGE'] as const
 export interface VoiceJob {
-  jobId: string; commandId: string; classId: string; repeatTotal: number; completedRepeats: number; currentRepeat: number
+  jobId: string; commandId: string; commandTicket: string | null; classId: string; repeatTotal: number; completedRepeats: number; currentRepeat: number
   state: VoiceStatus; revision: string; failure: typeof voiceFailures[number] | null
 }
 export const terminal = (job: VoiceJob) => ['COMPLETED', 'CANCELED', 'FAILED', 'EXPIRED', 'INTERRUPTED'].includes(job.state)
 export function job(value: unknown): VoiceJob {
-  const v = object(value, ['jobId', 'commandId', 'classId', 'repeatTotal', 'completedRepeats', 'currentRepeat', 'state', 'revision', 'failure'])
+  const v = object(value, ['jobId', 'commandId', 'commandTicket', 'classId', 'repeatTotal', 'completedRepeats', 'currentRepeat', 'state', 'revision', 'failure'])
   const jobId = decimal(v.jobId), commandId = decimal(v.commandId), repeatTotal = integer(v.repeatTotal, 1, 10)
   const completedRepeats = integer(v.completedRepeats, 0, repeatTotal), currentRepeat = integer(v.currentRepeat, 0, repeatTotal)
   if (jobId !== commandId || !voiceStates.includes(v.state as VoiceStatus) || v.failure !== null && !voiceFailures.includes(v.failure as typeof voiceFailures[number]) || currentRepeat < completedRepeats || v.state === 'COMPLETED' && completedRepeats !== repeatTotal || v.state === 'QUEUED' && (currentRepeat !== 0 || completedRepeats !== 0)) return fail()
   if (['STARTING', 'PLAYING'].includes(String(v.state)) && (currentRepeat !== completedRepeats + 1 || completedRepeats >= repeatTotal)
     || v.state === 'GAP' && (currentRepeat !== completedRepeats || completedRepeats < 1 || completedRepeats >= repeatTotal)) return fail()
-  return { jobId, commandId, classId: decimal(v.classId), repeatTotal, completedRepeats, currentRepeat, state: v.state as VoiceStatus, revision: decimal(v.revision), failure: v.failure as VoiceJob['failure'] }
+  return { jobId, commandId, commandTicket: v.commandTicket === null ? null : commandTicket(v.commandTicket), classId: decimal(v.classId), repeatTotal, completedRepeats, currentRepeat, state: v.state as VoiceStatus, revision: decimal(v.revision), failure: v.failure as VoiceJob['failure'] }
 }
-export function currentJob(value: unknown, id: string): VoiceJob { const v = envelope(value, 'VOICE_JOB', ['job']); const j = job(v.job); return j.jobId === id ? j : fail() }
+export function currentJob(value: unknown, id: string, submitTicket: string | null): VoiceJob { const v = envelope(value, 'VOICE_JOB', ['job'], 2); const j = job(v.job); return j.jobId === decimal(id) && j.commandTicket === (submitTicket === null ? null : commandTicket(submitTicket)) ? j : fail() }
 export function jobs(value: unknown): VoiceJob[] {
-  const v = envelope(value, 'VOICE_JOBS', ['jobs'])
+  const v = envelope(value, 'VOICE_JOBS', ['jobs'], 2)
   if (!Array.isArray(v.jobs) || v.jobs.length > 24) return fail()
   const result = v.jobs.map(job)
   if (new Set(result.map(j => j.jobId)).size !== result.length || result.filter(j => !terminal(j)).length > 4 || result.filter(terminal).length > 20) return fail()
   return result
 }
-export interface VoiceSubmit { commandId: string; assetId: string; expectedAssetRevision: string; classId: string; repeatTotal: number }
-export interface VoiceCancel { commandId: string; expectedRevision: string }
-export function submitInput(input: VoiceSubmit) { return { schemaVersion: 1, commandId: decimal(input.commandId), assetId: decimal(input.assetId), expectedAssetRevision: decimal(input.expectedAssetRevision), classId: decimal(input.classId), repeatTotal: integer(input.repeatTotal, 1, 10) } }
-export function cancelInput(input: VoiceCancel) { return { schemaVersion: 1, commandId: decimal(input.commandId), expectedRevision: decimal(input.expectedRevision) } }
+export interface VoiceSubmit extends CommandIdentity { assetId: string; expectedAssetRevision: string; classId: string; repeatTotal: number }
+export interface VoiceCancel extends CommandIdentity { jobCommandTicket: string | null; expectedRevision: string }
+export function submitInput(input: VoiceSubmit) { return { schemaVersion: 2, ...commandIdentity(input), assetId: decimal(input.assetId), expectedAssetRevision: decimal(input.expectedAssetRevision), classId: decimal(input.classId), repeatTotal: integer(input.repeatTotal, 1, 10) } }
+export function cancelInput(input: VoiceCancel) { return { schemaVersion: 2, ...commandIdentity(input), jobCommandTicket: input.jobCommandTicket === null ? null : commandTicket(input.jobCommandTicket), expectedRevision: decimal(input.expectedRevision) } }
 export function committed(value: unknown, input: VoiceSubmit) {
-  const v = envelope(value, 'COMMITTED', ['commandId', 'job']), j = job(v.job)
-  if (decimal(v.commandId) !== input.commandId || j.jobId !== input.commandId || j.classId !== input.classId || j.repeatTotal !== input.repeatTotal) return fail()
+  const v = envelope(value, 'COMMITTED', ['commandId', 'commandTicket', 'job'], 2), j = job(v.job)
+  if (!sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, input) || j.jobId !== input.commandId || j.commandTicket !== input.commandTicket || j.classId !== input.classId || j.repeatTotal !== input.repeatTotal) return fail()
   return j
 }
 export function cancelled(value: unknown, id: string, input: VoiceCancel) {
-  const v = envelope(value, 'CANCEL_REQUESTED', ['commandId', 'job']), j = job(v.job)
-  if (decimal(v.commandId) !== input.commandId || j.jobId !== id || BigInt(j.revision) <= BigInt(input.expectedRevision) || j.state !== 'STOPPING' && !terminal(j)) return fail()
+  const v = envelope(value, 'CANCEL_REQUESTED', ['commandId', 'commandTicket', 'job'], 2), j = job(v.job)
+  if (!sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, input) || j.jobId !== id || j.commandTicket !== input.jobCommandTicket || BigInt(j.revision) <= BigInt(input.expectedRevision) || j.state !== 'STOPPING' && !terminal(j)) return fail()
   return j
+}
+export type VoiceOutcome = (CommandIdentity & { state: 'COMMITTED'; job: VoiceJob }) | (CommandIdentity & { state: 'NOT_FOUND'; job: null })
+export function outcome(value: unknown, original: CommandIdentity): VoiceOutcome {
+  const v = envelope(value, 'COMMAND_RESULT', ['commandId', 'commandTicket', 'state', 'job'], 2)
+  const pair = { commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }
+  if (!sameCommand(pair, commandIdentity(original))) return fail()
+  if (v.state === 'NOT_FOUND' && v.job === null) return { ...pair, state: 'NOT_FOUND', job: null }
+  if (v.state !== 'COMMITTED') return fail()
+  return { ...pair, state: 'COMMITTED', job: job(v.job) }
 }
 export function sameTarget(a: VoiceCapabilities, b: VoiceCapabilities) {
   return a.currentClass?.classId === b.currentClass?.classId && a.identityRevision === b.identityRevision && a.runtimeGeneration === b.runtimeGeneration && a.maxRepeatTotal === b.maxRepeatTotal && a.maxDurationMillis === b.maxDurationMillis

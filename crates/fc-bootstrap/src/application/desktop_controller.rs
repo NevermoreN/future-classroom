@@ -1,13 +1,13 @@
 //! UI-thread resident desktop orchestration. SQLite runs only through the shared
 //! Work pool; the UI never takes Backend's mutex or refreshes a manager lease.
-use super::{fatal, profile_content_flow, Outcome, Work};
+use super::{fatal, profile_content_flow, CurrentClock, Outcome, Work};
 use fc_bootstrap::backend::{Backend, DesktopLessonStamp, SessionControl};
 use fc_bootstrap::profile_content_cache::TextFrame;
 use fc_domain::{
     desktop::{ComponentKind, DesktopFacts},
     ids::{Revision, SceneGeneration},
     materials::MaterialCursor,
-    profile_content::{PageContentRequest, PublishedContentDescriptor, PublishedContentSnapshot},
+    profile_content::{PublishedContentDescriptor, PublishedContentSnapshot},
     schedule::AcademicDay,
     time::{LocalDate, LocalDateTime},
 };
@@ -27,7 +27,6 @@ use fc_windows::{
     },
     host::HostHints,
     materials::raster::{RasterCache, RasterFrame},
-    system::CurrentClock,
 };
 use std::{
     path::PathBuf,
@@ -147,7 +146,7 @@ struct PendingPage {
     ticket: JobTicket<super::Result<Outcome>>,
     source: Revision,
     generation: SceneGeneration,
-    request: PageContentRequest,
+    request: fc_bootstrap::backend::ProfilePageTarget,
     cancelled: bool,
 }
 /// This linearization check is shared by image completion and pre-publication.
@@ -308,6 +307,7 @@ pub(super) struct Controller {
     text: TextFrame,
     images: Option<PendingImages>,
     page: Option<PendingPage>,
+    last_page_command: Option<super::NativeCommand>,
     ready_images: Vec<Arc<RasterFrame>>,
     needs_scene: bool,
     next_images: Instant,
@@ -452,6 +452,7 @@ impl Controller {
             text: TextFrame::default(),
             images: None,
             page: None,
+            last_page_command: None,
             ready_images: Vec::new(),
             needs_scene: true,
             next_images: Instant::now(),
@@ -868,6 +869,16 @@ impl Controller {
             self.invalidate();
             self.cancel_pending();
             self.next_fetch = Instant::now();
+            if !valid
+                && self
+                    .last_page_command
+                    .as_ref()
+                    .and_then(super::NativeCommand::snapshot)
+                    .is_some()
+            {
+                self.notice
+                    .failed("翻页结果尚未确认，已保留原操作并重新读取当前页面；不会重发。");
+            }
             if !valid && !pending.cancelled {
                 if let Ok(Some(Err(error))) = completion {
                     if fatal(&error) {
@@ -959,14 +970,7 @@ impl Controller {
         {
             return Ok(());
         }
-        let request = PageContentRequest {
-            command_id: match super::command_id() {
-                Ok(id) => id,
-                Err(_) => {
-                    self.notice.failed("无法生成翻页操作标识，请稍后重试。");
-                    return Ok(());
-                }
-            },
+        let request = fc_bootstrap::backend::ProfilePageTarget {
             slot: *slot,
             expected_content_revision: *content_revision,
             expected_view_revision: *view_revision,
@@ -974,15 +978,20 @@ impl Controller {
         };
         let source = scene.source_revision;
         let deadline = Instant::now() + FACTS_DEADLINE;
+        let command = super::NativeCommand::new();
         if let Ok(ticket) = pool.handle().try_submit(
-            Work::ContentPage {
-                backend: backend.clone(),
-                generation: *generation,
-                source_revision: source,
-                request: request.clone(),
-            },
+            Work::Tracked(
+                Box::new(Work::ContentPage {
+                    backend: backend.clone(),
+                    generation: *generation,
+                    source_revision: source,
+                    request: request.clone(),
+                }),
+                command.clone(),
+            ),
             deadline,
         ) {
+            self.last_page_command = Some(command);
             self.page = Some(PendingPage {
                 deadline,
                 ticket,

@@ -1,5 +1,7 @@
 //! Real SQLite + real authority publication at the composition boundary.
 //! Every test writer is joined before its host-local temporary directory is removed.
+#[path = "support/command_fixtures.rs"]
+mod command_fixtures;
 use fc_domain::ids::{AuthEpoch, Revision};
 use fc_ports::AuthorityPublisher as PublicationPort;
 use fc_runtime::{
@@ -20,7 +22,7 @@ use std::{
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 type Candidate = PreparedAuthority<Vec<u8>>;
 
-struct TestDirectory(PathBuf);
+struct TestDirectory(PathBuf, command_fixtures::FixtureCommands);
 impl TestDirectory {
     fn new() -> Self {
         let unique = format!(
@@ -35,10 +37,34 @@ impl TestDirectory {
         // Resolve on the executing host, not the cross-compilation host.
         let directory = std::env::temp_dir().join(unique);
         std::fs::create_dir(&directory).unwrap();
-        Self(directory)
+        Self(directory, Default::default())
     }
     fn database(&self) -> PathBuf {
         self.0.join("state.sqlite3")
+    }
+    fn commit(
+        &self,
+        handle: &StorageHandle<Candidate>,
+        command: PendingPut,
+        snapshot: Candidate,
+    ) -> Result<fc_storage::Ticket<fc_storage::CommitReceipt>, StorageError> {
+        let issued = self.1.issue(
+            handle,
+            fc_ports::command_window::CommandFamily::Generic,
+            &command.label,
+            fc_ports::command_window::CommandOwner::PublicDesktop,
+        )?;
+        handle.with_command_window(issued).try_commit(
+            CommitCommand::new(
+                issued.command_id.get().to_string(),
+                Revision::new(command.expected),
+                vec![Mutation::Put {
+                    key: "lesson".into(),
+                    value: command.value,
+                }],
+            )?,
+            snapshot,
+        )
     }
 }
 impl Drop for TestDirectory {
@@ -80,16 +106,17 @@ impl Drop for JoinedWriter {
     }
 }
 
-fn put(id: &str, expected: u64, value: &[u8]) -> CommitCommand {
-    CommitCommand::new(
-        id.into(),
-        Revision::new(expected),
-        vec![Mutation::Put {
-            key: "lesson".into(),
-            value: value.to_vec(),
-        }],
-    )
-    .unwrap()
+struct PendingPut {
+    label: String,
+    expected: u64,
+    value: Vec<u8>,
+}
+fn put(id: &str, expected: u64, value: &[u8]) -> PendingPut {
+    PendingPut {
+        label: id.into(),
+        expected,
+        value: value.to_vec(),
+    }
 }
 
 fn candidate(reader: &AuthorityReader<Vec<u8>>, revision: u64, value: &[u8]) -> Candidate {
@@ -130,8 +157,9 @@ fn commit_cas_journal_and_recovery_keep_database_and_authority_consistent() {
     publisher.initialize().unwrap();
     let mut writer = JoinedWriter::new(&directory, publisher);
     let handle = writer.handle();
-    let receipt = handle
-        .try_commit(
+    let receipt = directory
+        .commit(
+            &handle,
             put("first", 0, b"teacher A"),
             candidate(&reader, 1, b"teacher A"),
         )
@@ -150,8 +178,9 @@ fn commit_cas_journal_and_recovery_keep_database_and_authority_consistent() {
     assert_eq!(committed_health.auth_epoch, AuthEpoch::new(7));
 
     assert_eq!(
-        handle
-            .try_commit(
+        directory
+            .commit(
+                &handle,
                 put("stale", 0, b"wrong teacher"),
                 candidate(&reader, 2, b"wrong teacher")
             )
@@ -168,8 +197,9 @@ fn commit_cas_journal_and_recovery_keep_database_and_authority_consistent() {
     );
     assert_eq!(document(&handle).value, b"teacher A");
 
-    let replay = handle
-        .try_commit(
+    let replay = directory
+        .commit(
+            &handle,
             put("first", 0, b"teacher A"),
             candidate(&reader, 2, b"must never publish"),
         )
@@ -185,8 +215,9 @@ fn commit_cas_journal_and_recovery_keep_database_and_authority_consistent() {
     );
     assert_eq!(reader.snapshot().unwrap().data, b"teacher A");
     assert_eq!(
-        handle
-            .try_commit(
+        directory
+            .commit(
+                &handle,
                 put("first", 0, b"different payload"),
                 candidate(&reader, 2, b"wrong")
             )
@@ -196,8 +227,9 @@ fn commit_cas_journal_and_recovery_keep_database_and_authority_consistent() {
     );
     assert_eq!(reader.gate().status(), committed_health);
 
-    handle
-        .try_commit(
+    directory
+        .commit(
+            &handle,
             put("second", 1, b"teacher B"),
             candidate(&reader, 2, b"teacher B"),
         )
@@ -217,8 +249,9 @@ fn commit_cas_journal_and_recovery_keep_database_and_authority_consistent() {
     publisher.initialize().unwrap();
     let mut restored = JoinedWriter::new(&directory, publisher);
     let restored_handle = restored.handle();
-    let replay = restored_handle
-        .try_commit(
+    let replay = directory
+        .commit(
+            &restored_handle,
             put("first", 0, b"teacher A"),
             candidate(&restored_reader, 3, b"do not replay write"),
         )
@@ -309,8 +342,9 @@ fn verify_committed_fault(failure: Failure) {
     let handle = writer.handle();
     let prepared = candidate(&reader, 1, b"new committed authority");
     assert_eq!(
-        handle
-            .try_commit(
+        directory
+            .commit(
+                &handle,
                 put("committed-before-fault", 0, b"new committed authority"),
                 prepared
             )
@@ -362,9 +396,9 @@ fn verify_committed_fault(failure: Failure) {
         AuthorityStore::new(committed.value, revision, AuthEpoch::new(7));
     publisher.initialize().unwrap();
     let mut restored = JoinedWriter::new(&directory, publisher);
-    let replay = restored
-        .handle()
-        .try_commit(
+    let replay = directory
+        .commit(
+            &restored.handle(),
             put("committed-before-fault", 0, b"new committed authority"),
             candidate(&restored_reader, 2, b"never reexecute"),
         )

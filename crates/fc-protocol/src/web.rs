@@ -7,6 +7,7 @@ use fc_ports::{http::*, voice::*};
 use serde::Deserialize;
 
 pub mod assets;
+pub mod command_window;
 pub mod content;
 pub mod materials;
 pub mod pairing;
@@ -47,22 +48,54 @@ impl AllowedMethods {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Route {
     Status,
+    CommandIssue,
     PairingCreate,
-    PairingPoll { request_id: u64 },
+    PairingPoll {
+        request_id: u64,
+    },
     Session,
     SessionLogout,
-    ContentScopes { kind: content::Kind, offset: usize },
-    ContentRead { key: content::Key },
-    SubjectVisual { key: content::Key },
-    ContentSave { key: content::Key },
-    ContentCommand { command_id: CommandId },
-    Materials { route: materials::MaterialRoute },
+    ContentScopes {
+        kind: content::Kind,
+        offset: usize,
+    },
+    ContentRead {
+        key: content::Key,
+    },
+    SubjectVisual {
+        key: content::Key,
+    },
+    ContentSave {
+        key: content::Key,
+    },
+    ContentCommand {
+        command_id: CommandId,
+    },
+    ContentWindowCommand {
+        command: command_window::CommandReference,
+    },
+    Materials {
+        route: materials::MaterialRoute,
+    },
     VoiceCapabilities,
     VoiceList,
-    VoiceUpload { class_id: ClassId },
+    VoiceUpload {
+        class_id: ClassId,
+    },
     VoiceSubmit,
-    VoiceStatus { job_id: VoiceJobId },
-    VoiceCancel { job_id: VoiceJobId },
+    VoiceStatus {
+        job_id: VoiceJobId,
+    },
+    VoiceWindowCommand {
+        command: command_window::CommandReference,
+    },
+    VoiceBoundStatus {
+        job_id: VoiceJobId,
+        command_ticket: fc_ports::command_window::CommandTicket,
+    },
+    VoiceCancel {
+        job_id: VoiceJobId,
+    },
 }
 impl Route {
     pub fn allowed_methods(self) -> AllowedMethods {
@@ -91,6 +124,7 @@ impl Route {
             Self::VoiceUpload { .. } => fc_domain::voice::MAX_WAV_BYTES,
             Self::VoiceSubmit | Self::VoiceCancel { .. } => crate::MAX_JSON_BYTES as u64,
             Self::ContentSave { .. } => crate::MAX_JSON_BYTES as u64,
+            Self::CommandIssue => 128,
             _ => 0,
         }
     }
@@ -106,6 +140,7 @@ impl Route {
             Self::PairingCreate
                 | Self::PairingPoll { .. }
                 | Self::SessionLogout
+                | Self::CommandIssue
                 | Self::ContentSave { .. }
                 | Self::VoiceUpload { .. }
                 | Self::VoiceSubmit
@@ -188,6 +223,7 @@ impl WebBoundary {
         let path = target.strip_prefix(&self.base).ok_or(WebError::NotFound)?;
         let route = match path {
             "status" => Route::Status,
+            "commands" => Route::CommandIssue,
             "pairing/requests" => Route::PairingCreate,
             "session" => Route::Session,
             "session/logout" => Route::SessionLogout,
@@ -239,9 +275,18 @@ impl WebBoundary {
                         Route::ContentRead { key }
                     }
                 } else if let Some(id) = path.strip_prefix("content/commands/") {
-                    Route::ContentCommand {
-                        command_id: CommandId::new(decimal(id, false).ok_or(WebError::NotFound)?)
+                    if id.contains('/') {
+                        Route::ContentWindowCommand {
+                            command: command_window::CommandReference::path(id)
+                                .ok_or(WebError::NotFound)?,
+                        }
+                    } else {
+                        Route::ContentCommand {
+                            command_id: CommandId::new(
+                                decimal(id, false).ok_or(WebError::NotFound)?,
+                            )
                             .map_err(|_| WebError::NotFound)?,
+                        }
                     }
                 } else if let Some(id) = path
                     .strip_prefix("pairing/requests/")
@@ -253,6 +298,21 @@ impl WebBoundary {
                 } else if let Some(id) = path.strip_prefix("voice/uploads?classId=") {
                     Route::VoiceUpload {
                         class_id: ClassId::new(decimal(id, false).ok_or(WebError::NotFound)?)
+                            .map_err(|_| WebError::NotFound)?,
+                    }
+                } else if let Some(command) = path.strip_prefix("voice/commands/") {
+                    Route::VoiceWindowCommand {
+                        command: command_window::CommandReference::path(command)
+                            .ok_or(WebError::NotFound)?,
+                    }
+                } else if let Some((job, ticket)) = path
+                    .strip_prefix("voice/broadcasts/")
+                    .and_then(|p| p.split_once("/commands/"))
+                {
+                    Route::VoiceBoundStatus {
+                        job_id: VoiceJobId::new(decimal(job, false).ok_or(WebError::NotFound)?)
+                            .map_err(|_| WebError::NotFound)?,
+                        command_ticket: fc_ports::command_window::CommandTicket::parse(ticket)
                             .map_err(|_| WebError::NotFound)?,
                     }
                 } else if let Some(job) = path.strip_prefix("voice/broadcasts/") {
@@ -437,6 +497,8 @@ fn decimal(s: &str, zero: bool) -> Option<u64> {
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct VoiceSubmitDto {
     schema_version: u16,
+    #[serde(default, deserialize_with = "command_window::provided_ticket")]
+    command_ticket: Option<String>,
     command_id: String,
     asset_id: String,
     expected_asset_revision: String,
@@ -445,47 +507,112 @@ pub struct VoiceSubmitDto {
 }
 pub fn voice_submit(bytes: &[u8]) -> Result<VoiceSubmitRequest, ProtocolError> {
     let d: VoiceSubmitDto = parse(bytes)?;
-    if d.schema_version != SCHEMA_VERSION {
+    if d.schema_version != SCHEMA_VERSION || d.command_ticket.is_some() {
         return Err(ProtocolError::UnsupportedSchema);
     }
+    voice_submit_window(bytes).map(|(request, _)| request)
+}
+pub fn voice_submit_window(
+    bytes: &[u8],
+) -> Result<
+    (
+        VoiceSubmitRequest,
+        Option<fc_ports::command_window::CommandTicket>,
+    ),
+    ProtocolError,
+> {
+    let d: VoiceSubmitDto = parse(bytes)?;
+    let ticket = command_window::ticket(d.schema_version, d.command_ticket.as_deref())?;
     if !(1..=10).contains(&d.repeat_total) {
         return Err(ProtocolError::InvalidCommand);
     }
     let bad = || ProtocolError::InvalidCommand;
-    Ok(VoiceSubmitRequest {
-        command_id: CommandId::new(decimal(&d.command_id, false).ok_or_else(bad)?)
-            .map_err(|_| bad())?,
-        asset_id: VoiceAssetId::new(decimal(&d.asset_id, false).ok_or_else(bad)?)
-            .map_err(|_| bad())?,
-        expected_asset_revision: Revision::new(
-            decimal(&d.expected_asset_revision, false).ok_or_else(bad)?,
-        ),
-        class_id: ClassId::new(decimal(&d.class_id, false).ok_or_else(bad)?).map_err(|_| bad())?,
-        repeat_total: d.repeat_total,
-    })
+    Ok((
+        VoiceSubmitRequest {
+            command_id: CommandId::new(decimal(&d.command_id, false).ok_or_else(bad)?)
+                .map_err(|_| bad())?,
+            asset_id: VoiceAssetId::new(decimal(&d.asset_id, false).ok_or_else(bad)?)
+                .map_err(|_| bad())?,
+            expected_asset_revision: Revision::new(
+                decimal(&d.expected_asset_revision, false).ok_or_else(bad)?,
+            ),
+            class_id: ClassId::new(decimal(&d.class_id, false).ok_or_else(bad)?)
+                .map_err(|_| bad())?,
+            repeat_total: d.repeat_total,
+        },
+        ticket,
+    ))
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 struct VoiceCancelDto {
     schema_version: u16,
+    #[serde(default, deserialize_with = "command_window::provided_ticket")]
+    command_ticket: Option<String>,
+    #[serde(default)]
+    job_command_ticket: JobTicketField,
     command_id: String,
     expected_revision: String,
 }
+#[derive(Default)]
+enum JobTicketField {
+    #[default]
+    Missing,
+    Present(Option<fc_ports::command_window::CommandTicket>),
+}
+impl<'de> Deserialize<'de> for JobTicketField {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let text = Option::<String>::deserialize(deserializer)?;
+        text.map(|text| {
+            fc_ports::command_window::CommandTicket::parse(&text)
+                .map_err(|_| serde::de::Error::custom("invalid job command ticket"))
+        })
+        .transpose()
+        .map(Self::Present)
+    }
+}
 pub fn voice_cancel(job_id: VoiceJobId, bytes: &[u8]) -> Result<VoiceCancelRequest, ProtocolError> {
     let d: VoiceCancelDto = parse(bytes)?;
-    if d.schema_version != SCHEMA_VERSION {
+    if d.schema_version != SCHEMA_VERSION
+        || d.command_ticket.is_some()
+        || !matches!(d.job_command_ticket, JobTicketField::Missing)
+    {
         return Err(ProtocolError::UnsupportedSchema);
     }
-    Ok(VoiceCancelRequest {
-        job_id,
-        command_id: CommandId::new(
-            decimal(&d.command_id, false).ok_or(ProtocolError::InvalidCommand)?,
-        )
-        .map_err(|_| ProtocolError::InvalidCommand)?,
-        expected_revision: Revision::new(
-            decimal(&d.expected_revision, false).ok_or(ProtocolError::InvalidCommand)?,
-        ),
-    })
+    voice_cancel_window(job_id, bytes).map(|(request, _, _)| request)
+}
+pub fn voice_cancel_window(
+    job_id: VoiceJobId,
+    bytes: &[u8],
+) -> Result<
+    (
+        VoiceCancelRequest,
+        Option<fc_ports::command_window::CommandTicket>,
+        Option<fc_ports::command_window::CommandTicket>,
+    ),
+    ProtocolError,
+> {
+    let d: VoiceCancelDto = parse(bytes)?;
+    let ticket = command_window::ticket(d.schema_version, d.command_ticket.as_deref())?;
+    let target = match (d.schema_version, d.job_command_ticket) {
+        (1, JobTicketField::Missing) => None,
+        (2, JobTicketField::Present(target)) => target,
+        _ => return Err(ProtocolError::InvalidCommand),
+    };
+    Ok((
+        VoiceCancelRequest {
+            job_id,
+            command_id: CommandId::new(
+                decimal(&d.command_id, false).ok_or(ProtocolError::InvalidCommand)?,
+            )
+            .map_err(|_| ProtocolError::InvalidCommand)?,
+            expected_revision: Revision::new(
+                decimal(&d.expected_revision, false).ok_or(ProtocolError::InvalidCommand)?,
+            ),
+        },
+        ticket,
+        target,
+    ))
 }
 
 #[cfg(test)]
@@ -769,7 +896,6 @@ mod tests {
             "voice/%62roadcasts/1",
             "materials/1/open",
             "settings",
-            "commands",
             "voice/uploads?classId=1&role=global",
             "status?token=secret",
         ] {
@@ -779,6 +905,11 @@ mod tests {
                 "{path}"
             );
         }
+        assert_eq!(b.route("GET", "/fc/api/v1/commands"), Err(WebError::Method));
+        assert_eq!(
+            b.route("POST", "/fc/api/v1/commands"),
+            Ok(Route::CommandIssue)
+        );
         assert_eq!(
             b.route("POST", "/fc/api/v1/voice/uploads?classId=1"),
             Ok(Route::VoiceUpload {

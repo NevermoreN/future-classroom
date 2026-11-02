@@ -58,7 +58,7 @@ STATIC_LIMIT = 5 * 1024 * 1024
 CSP = ("default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; "
        "img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; "
        "frame-ancestors 'none'; form-action 'self'")
-MATERIAL_BYTES, COMMAND_ID = 120000, "9001001"
+MATERIAL_BYTES = 120000
 
 
 class HttpResponse:
@@ -147,13 +147,38 @@ class HttpResponse:
             raise RuntimeError("required unique response header missing/duplicated: " + name)
         return values[0]
 
-    def json(self):
+    def json(self, expected_schema=1):
         if self.binary:
             raise RuntimeError("streamed binary body has no retained JSON representation")
         value = json.loads(bytes(self.body).decode("utf-8", "strict"))
-        if not isinstance(value, dict) or value.get("schemaVersion") != 1:
+        if (not isinstance(value, dict) or type(value.get("schemaVersion")) is not int
+                or value["schemaVersion"] != expected_schema):
             raise RuntimeError("response JSON object/schema contract failed")
         return value
+
+
+
+def command_identity(value):
+    """Canonical metadata only; only the real issuer supplies a production pair."""
+    require(type(value) is dict and set(value) == {"commandId", "commandTicket"}, "command pair exact fields")
+    raw, ticket = value["commandId"], value["commandTicket"]
+    require(type(raw) is str and re.fullmatch(r"[1-9][0-9]{0,19}", raw) is not None
+            and int(raw) <= 2**64-1, "command canonical raw u64")
+    match = re.fullmatch(r"c2:([0-9a-f]{32}):([1-9][0-9]{0,18})", ticket) if type(ticket) is str else None
+    require(match is not None and match[1] != "0"*32 and int(match[2]) <= 2**63-1,
+            "command canonical epoch and sequence")
+    return {"commandId": raw, "commandTicket": ticket}
+
+
+def issue_command(client, case, family):
+    require(family in ("content", "materials", "voice"), "explicit command family")
+    value = client.request(case, "POST", "commands", json_bytes({"schemaVersion": 2, "family": family}),
+                           expected=(201,)).json(expected_schema=2)
+    require(set(value) == {"schemaVersion", "status", "family", "commandId", "commandTicket", "expiresInMillis"}
+            and value["status"] == "ISSUED" and value["family"] == family
+            and type(value["expiresInMillis"]) is int and value["expiresInMillis"] == 86400000,
+            "actual server issuance envelope")
+    return command_identity({k: value[k] for k in ("commandId", "commandTicket")})
 
 
 VISUAL_FIXTURES = ("FILLED_DEFAULT", "FILLED_ZERO", "OUTLINED")
@@ -1467,7 +1492,8 @@ def exercise_visuals(client):
         rejected = client.request("visual-write-method-" + method, method, route, expected=(405,))
         require(rejected.unique("allow") == "GET" and rejected.json().get("code") == "METHOD_NOT_ALLOWED",
                 "visual preview accepted a write method")
-    mixed = json_bytes({"schemaVersion": 1, "commandId": "9001099", "expectedRevision": before["revision"],
+    visual_command = issue_command(client, "visual-negative-command-issued", "content")
+    mixed = json_bytes({"schemaVersion": 2, **visual_command, "expectedRevision": before["revision"],
                         "text": "Synthetic rejected visual write", "effectiveRgb": "#FFFFFF"})
     require(client.request("visual-fields-cannot-write-content", "POST", content_route, mixed, expected=(400,)).json().get("code") == "INVALID_REQUEST",
             "content write schema accepted visual management input")
@@ -1530,11 +1556,12 @@ def exercise(client, browser_observer=None, continuous=None, visual_only=False, 
         require(cancelled.get("status") == "UPLOAD_CANCELLED" and cancelled.get("uploadId") == cancelled_id,
                 "actual JSON upload cancellation response mismatch")
         cancelled_ids.append(cancelled_id)
-    append_body = json_bytes({"schemaVersion": 1, "commandId": COMMAND_ID, "uploadId": upload_id, "allowedClassIds": ["1"]})
+    command = issue_command(client, "material-command-issued", "materials")
+    append_body = json_bytes({"schemaVersion": 2, **command, "uploadId": upload_id, "allowedClassIds": ["1"]})
     first = client.request("material-append", "POST", "materials/folders/1/1/append", append_body, expected=(200, 201))
-    committed = first.json()
+    committed = first.json(expected_schema=2)
     record = committed.get("record", {})
-    require(committed.get("status") == "COMMITTED" and committed.get("commandId") == COMMAND_ID
+    require(committed.get("status") == "COMMITTED" and all(committed.get(k) == v for k, v in command.items())
             and committed.get("scope") == {"ownerTeacherId": "1", "subjectId": "1"}
             and record.get("bytes") == len(material) and record.get("sha256") == digest(material)
             and record.get("allowedClassIds") == ["1"] and record.get("kind") == "TXT"
@@ -1542,7 +1569,7 @@ def exercise(client, browser_observer=None, continuous=None, visual_only=False, 
             "actual durable material receipt/content hash mismatch")
     retry = client.request("material-append-exact-retry", "POST", "materials/folders/1/1/append", append_body, expected=(200, 201))
     require(retry.body == first.body, "exact append retry did not return the identical committed receipt")
-    changed = json_bytes({"schemaVersion": 1, "commandId": COMMAND_ID, "uploadId": upload_id, "allowedClassIds": ["2"]})
+    changed = json_bytes({"schemaVersion": 2, **command, "uploadId": upload_id, "allowedClassIds": ["2"]})
     conflict = client.request("material-append-changed-classes", "POST", "materials/folders/1/1/append", changed, expected=(409,)).json()
     require(conflict.get("code") == "IDEMPOTENCY_CONFLICT", "changed append did not return idempotency conflict")
     capacity = exercise_capacity_accept(client, continuous, append_body, first.body) if continuous else None
@@ -1569,7 +1596,7 @@ def exercise(client, browser_observer=None, continuous=None, visual_only=False, 
     client.reject_certificate("wrong-ca-rejected")
     client.reject_certificate("wrong-hostname-rejected", wrong_hostname=True)
     result = {"subjectVisuals": visuals, "continuousAcceptance": capacity, "materialBytes": len(material), "materialSha256": digest(material), "uploadId": upload_id,
-            "commandId": COMMAND_ID, "receiptSha256": digest(first.body), "exactRetryReceipt": True,
+            **command, "receiptSha256": digest(first.body), "exactRetryReceipt": True,
             "downloadBytes": downloaded.body_bytes, "downloadSha256": downloaded.body_hash.hexdigest(),
             "downloadClientRetainedBodyBytes": len(downloaded.body),
             "jsonCancelledReadyIds": cancelled_ids, "subsequentBinaryBeginReusedHubSlot": True,
@@ -1668,7 +1695,7 @@ def self_test_voice_capabilities():
         def __init__(self, value):
             self.value = value
 
-        def json(self):
+        def json(self, expected_schema=1):
             return self.value
 
     class ModelClient:
@@ -1919,6 +1946,16 @@ def self_test_header_deadlines():
 
 
 def self_test():
+    # Canonical metadata checks are pure; production pairs come only from POST commands.
+    pair={"commandId":str(2**64-1),"commandTicket":"c2:"+"a"*32+":"+str(2**63-1)}
+    require(command_identity(pair)==pair,"canonical full command boundary pair")
+    for malformed in [dict(pair,commandId=True),dict(pair,commandId="01"),dict(pair,commandId=str(2**64)),
+                      dict(pair,commandTicket="c2:"+"0"*32+":1"),dict(pair,commandTicket="c2:"+"A"*32+":1"),
+                      dict(pair,commandTicket="c2:"+"a"*32+":01"),dict(pair,commandTicket="c2:"+"a"*32+":"+str(2**63)),
+                      dict(pair,extra="unexpected")]:
+        try: command_identity(malformed)
+        except RuntimeError: pass
+        else: raise RuntimeError("malformed full command pair accepted")
     """Pure local framing/fixture checks; no sockets, subprocesses or Windows IO."""
     checks = []
     progress_queue, progress_log = queue.Queue(), []

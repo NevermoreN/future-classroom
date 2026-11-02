@@ -20,6 +20,9 @@ pub type ProfileContentSceneGuard = Arc<
     dyn Fn(ContentSlotKey, Revision, Revision, Revision) -> Result<(), StorageError> + Send + Sync,
 >;
 fn err(e: StorageError) -> Error {
+    if let Some(error) = e.command_window_error() {
+        return Error::CommandWindow(error);
+    }
     match e {
         StorageError::ProfileContent(x) => Error::Domain(x),
         StorageError::Identity(x) => Error::Domain(ProfileContentError::Identity(x)),
@@ -292,7 +295,14 @@ impl Receipt {
     }
 }
 fn receipt(d: &dyn TransactionDocuments, c: CommandId) -> Result<Option<Receipt>, StorageError> {
-    let Some(v) = read(d, &receipt_key(c))? else {
+    receipt_at(d, c, &receipt_key(c))
+}
+fn receipt_at(
+    d: &dyn TransactionDocuments,
+    c: CommandId,
+    key: &str,
+) -> Result<Option<Receipt>, StorageError> {
+    let Some(v) = read(d, key)? else {
         return Ok(None);
     };
     codec::object_fields(&v, &["format", "admission", "status", "snapshot", "digest"])?;
@@ -332,6 +342,63 @@ fn receipt(d: &dyn TransactionDocuments, c: CommandId) -> Result<Option<Receipt>
     }
     Ok(Some(r))
 }
+pub(crate) fn read_owner_admission(value: &Value) -> Result<ContentAdmission, StorageError> {
+    dto::read_admission(&value["admission"])
+}
+pub(crate) fn read_admission_bytes(bytes: &[u8]) -> Result<ContentAdmission, StorageError> {
+    dto::read_admission(&codec::value(bytes)?)
+}
+pub(crate) fn owner_admission_bytes(admission: &ContentAdmission) -> Result<Vec<u8>, StorageError> {
+    codec::bytes(&dto::admission(admission))
+}
+fn owner_receipt(
+    d: &dyn TransactionDocuments,
+    admission: &ContentAdmission,
+) -> Result<Option<(String, Receipt)>, StorageError> {
+    let Some((key, _)) = d.profile_content_owner_receipt(admission)? else {
+        return Ok(None);
+    };
+    let r = receipt_at(d, admission.request.command_id, &key)?.ok_or(StorageError::Database)?;
+    if r.admission != *admission {
+        return Err(StorageError::CommandIdReused);
+    }
+    Ok(Some((key, r)))
+}
+pub(crate) fn owner_is_held(
+    d: &dyn TransactionDocuments,
+    admission: &ContentAdmission,
+    bytes: &[u8],
+) -> Result<bool, StorageError> {
+    let value = codec::value(bytes)?;
+    if read_owner_admission(&value)? != *admission {
+        return Err(StorageError::Database);
+    }
+    Ok(read_status(&value["status"])? == Status::Accepted
+        || media::admission_has_reserved(d, admission)?)
+}
+pub(crate) fn validate_negative_receipt(old: &[u8], new: &[u8]) -> Result<(), StorageError> {
+    let mut previous = codec::value(old)?;
+    let next = codec::value(new)?;
+    if read_status(&previous["status"])? != Status::Accepted
+        || !matches!(
+            read_status(&next["status"])?,
+            Status::Failed | Status::Cancelled | Status::Superseded | Status::Expired
+        )
+    {
+        return Err(StorageError::InvalidCommand);
+    }
+    previous["status"] = next["status"].clone();
+    if previous != next {
+        return Err(StorageError::InvalidCommand);
+    }
+    Ok(())
+}
+pub(crate) fn media_entry_admission(
+    d: &dyn TransactionDocuments,
+    key: &str,
+) -> Result<Option<ContentAdmission>, StorageError> {
+    media::entry_admission(d, key)
+}
 fn outcome_value(o: &ProfileContentOutcome) -> Value {
     json!({"command":o.command_id.get(),"slot":dto::slot(o.slot),"sequence":o.sequence,"status":status(o.status),"revision":o.committed_revision.map(|r|r.get())})
 }
@@ -349,6 +416,73 @@ fn read_outcome(v: &Value) -> Result<ProfileContentOutcome, StorageError> {
         },
     })
 }
+/// Negative-only capability returned after an actual sole-writer admission.
+/// No constructor, decoding or mutable access exists outside this module. It is
+/// not a lease, a new command, a publication permit or a client query handle.
+#[derive(Clone)]
+pub struct ProfileContentOwner {
+    admission: ContentAdmission,
+    receipt_key: String,
+}
+struct FailOwned<S> {
+    owner: ProfileContentOwner,
+    factory: Factory<S>,
+}
+impl<S: Send> TransactionTask<S> for FailOwned<S> {
+    fn lifetime(&self) -> TransactionLifetime {
+        TransactionLifetime::OwnerReturn
+    }
+
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>() + self.owner.receipt_key.capacity()
+    }
+    fn evaluate(
+        self: Box<Self>,
+        d: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        let owner = self.owner;
+        let mut r = receipt_at(d, owner.admission.request.command_id, &owner.receipt_key)?
+            .ok_or(pe(ProfileContentError::AdmissionMismatch))?;
+        if r.admission != owner.admission {
+            return Err(pe(ProfileContentError::AdmissionMismatch));
+        }
+        let mut writes = Vec::new();
+        if r.status == Status::Accepted {
+            let (head_before, retired, _) = load(d, owner.admission.request.slot)?;
+            if !retired && head_before.pending.as_ref() == Some(&owner.admission) {
+                writes.push(head(
+                    &head_before.fail(&owner.admission).map_err(pe)?,
+                    false,
+                )?);
+            }
+            // Failure says nothing about a live preparation/media owner. Its
+            // independent reservation remains charged until factual settlement.
+            r.status = Status::Failed;
+            writes.push(put(owner.receipt_key, r.value())?);
+        }
+        let outcome = display::encode(&outcome_value(&r.outcome()), 3 * MAX_VALUE_BYTES)?;
+        let commit = if writes.is_empty() {
+            None
+        } else {
+            let identity = load_identity(d)?;
+            Some((
+                writes,
+                (self.factory)(
+                    &identity,
+                    d.revision()?
+                        .next()
+                        .map_err(|_| StorageError::InvalidCommand)?,
+                )?,
+            ))
+        };
+        Ok(TransactionDecision {
+            outcome,
+            commit,
+            precommit: None,
+        })
+    }
+}
+
 #[derive(Clone)]
 enum Op {
     Read(ContentSlotKey),
@@ -382,8 +516,62 @@ impl<S: Send + 'static> BusinessRepository<S> {
             .and_then(|t| t.wait())
             .map_err(err)
     }
+    pub fn begin_profile_content_owned(
+        &mut self,
+        request: BeginContentRequest,
+        actor: &ActorContext,
+        clock: &dyn Clock,
+    ) -> Result<(ContentAdmission, ProfileContentOwner), Error> {
+        let admission = self.begin_profile_content(request, actor, clock)?;
+        let receipt_key = match self.handle.command_window {
+            Some(issued) => {
+                if issued.family != fc_ports::command_window::CommandFamily::ProfileContent
+                    || issued.command_id != admission.request.command_id
+                {
+                    return Err(Error::IdempotencyConflict);
+                }
+                let (slot, _) =
+                    super::command_window::legacy(&receipt_key(admission.request.command_id))
+                        .ok_or(Error::Unavailable)?;
+                super::command_window::namespaced(slot, issued.ticket)
+            }
+            None => receipt_key(admission.request.command_id),
+        };
+        let owner = ProfileContentOwner {
+            admission: admission.clone(),
+            receipt_key,
+        };
+        Ok((admission, owner))
+    }
+    pub fn fail_profile_content_owned(
+        &self,
+        owner: ProfileContentOwner,
+    ) -> Result<ProfileContentOutcome, Error> {
+        // A closed negative task only: the request's positive expiry/cancel/lease
+        // cannot suppress return of this exact admitted work. Writer stop/fault
+        // and the actual owner/receipt/head checks still apply.
+        let mut handle = self.handle.clone();
+        handle.command_window = None;
+        handle.transaction_execution = None;
+        let bytes = handle
+            .try_transaction(FailOwned {
+                owner,
+                factory: self.factory.clone(),
+            })
+            .and_then(|t| t.wait())
+            .map_err(err)?;
+        read_outcome(&codec::value(&bytes).map_err(err)?).map_err(err)
+    }
     pub fn with_profile_content_scene_guard(mut self, g: ProfileContentSceneGuard) -> Self {
-        self.profile_content_scene = g;
+        self.profile_content_scene = match self.handle.command_window {
+            Some(issued) => Arc::new(move |slot, content, view, global| {
+                if issued.owner != fc_ports::command_window::CommandOwner::PublicDesktop {
+                    return Err(StorageError::CommandNotIssued);
+                }
+                g(slot, content, view, global)
+            }),
+            None => g,
+        };
         self
     }
     pub fn read_current_profile_content_version(
@@ -505,6 +693,17 @@ fn selected(
     Ok(())
 }
 impl<S: Send> TransactionTask<S> for Task<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        match &self.op {
+            Op::Begin(r) => Some(r.command_id),
+            Op::Finish(a, _, _) | Op::Fail(a) => Some(a.request.command_id),
+            Op::Outcome(id) => Some(*id),
+            Op::Page(r) => Some(r.command_id),
+            _ => None,
+        }
+        .map(|id| (fc_ports::command_window::CommandFamily::ProfileContent, id))
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>().saturating_add(match &self.op {
             Op::Finish(_, p, _) => p.allocation_bytes().unwrap_or(usize::MAX),
@@ -612,10 +811,10 @@ impl<S: Send> TransactionTask<S> for Task<S> {
                         return Err(StorageError::DocumentTooLarge);
                     }
                     if let Some(p) = &old.pending {
-                        let mut receipt =
-                            receipt(d, p.request.command_id)?.ok_or(StorageError::Database)?;
+                        let (key, mut receipt) =
+                            owner_receipt(d, p)?.ok_or(StorageError::Database)?;
                         receipt.status = Status::Superseded;
-                        mutations.push(receipt.mutation()?)
+                        mutations.push(put(key, receipt.value())?)
                     }
                     mutations.push(head(&next, false)?);
                     if !exists {
@@ -939,9 +1138,9 @@ pub(super) fn remove_nodes(
                 });
             }
             if let Some(a) = old.pending {
-                let mut r = receipt(d, a.request.command_id)?.ok_or(StorageError::Database)?;
+                let (key, mut r) = owner_receipt(d, &a)?.ok_or(StorageError::Database)?;
                 r.status = Status::Cancelled;
-                writes.push(r.mutation()?);
+                writes.push(put(key, r.value())?);
             }
             writes.push(head(&doc, true)?);
         }
@@ -1016,7 +1215,7 @@ pub(super) fn startup_check(
                     }
                 }
                 if let Some(a) = &doc.pending {
-                    let r = receipt(d, a.request.command_id)?.ok_or(StorageError::Database)?;
+                    let (_, r) = owner_receipt(d, a)?.ok_or(StorageError::Database)?;
                     if r.admission != *a || r.status != Status::Accepted {
                         return Err(StorageError::Database);
                     }
@@ -1060,22 +1259,29 @@ pub(super) fn startup_check(
                     return Err(StorageError::Database);
                 }
                 let a = dto::read_admission(&raw["admission"])?;
-                if k != receipt_key(a.request.command_id) {
+                if k != receipt_key(a.request.command_id)
+                    && super::command_window::owned(&k)
+                        .is_none_or(|(slot, _)| slot.prefix != format!("{ROOT}receipts/"))
+                {
                     return Err(StorageError::Database);
                 }
-                receipt(d, a.request.command_id)?.ok_or(StorageError::Database)?;
+                receipt_at(d, a.request.command_id, &k)?.ok_or(StorageError::Database)?;
             } else if k.starts_with(&format!("{ROOT}page-receipts/")) {
                 receipts += 1;
                 if receipts > r {
                     return Err(StorageError::Database);
                 }
-                let id = k
-                    .strip_prefix(&format!("{ROOT}page-receipts/"))
-                    .and_then(|s| s.parse::<u64>().ok())
-                    .and_then(|n| CommandId::new(n).ok())
-                    .ok_or(StorageError::Database)?;
-                if k != format!("{ROOT}page-receipts/{:020}", id.get()) {
-                    return Err(StorageError::Database);
+                if super::command_window::owned(&k)
+                    .is_none_or(|(slot, _)| slot.prefix != format!("{ROOT}page-receipts/"))
+                {
+                    let id = k
+                        .strip_prefix(&format!("{ROOT}page-receipts/"))
+                        .and_then(|s| s.parse::<u64>().ok())
+                        .and_then(|id| CommandId::new(id).ok())
+                        .ok_or(StorageError::Database)?;
+                    if k != format!("{ROOT}page-receipts/{:020}", id.get()) {
+                        return Err(StorageError::Database);
+                    }
                 }
                 codec::object_fields(&raw, &["fingerprint", "snapshot"])?;
                 dto::hash(&raw["fingerprint"])?;
@@ -1093,4 +1299,44 @@ pub(super) fn startup_check(
         return Err(StorageError::Database);
     }
     media::startup_check(d, &expected_media)
+}
+
+/// Receipt GC is metadata maintenance, not publication of a new content head.
+/// Preserve the original document revision and atomically decrement exactly the
+/// receipt/page-receipt rows removed in the same Writer transaction.
+pub(crate) fn retire_window_receipts(
+    db: &rusqlite::Connection,
+    removed: u64,
+) -> Result<(), StorageError> {
+    use rusqlite::OptionalExtension;
+    if removed == 0 {
+        return Ok(());
+    }
+    let row: Option<Vec<u8>> = db
+        .query_row("SELECT value FROM documents WHERE key=?1", [COUNTER], |r| {
+            crate::read_limited_blob(r, 0)
+        })
+        .optional()
+        .map_err(|_| StorageError::Database)?;
+    let mut value = codec::value(&row.ok_or(StorageError::Database)?)?;
+    codec::object_fields(&value, &["format", "heads", "receipts"])?;
+    let heads = codec::number(&value, "heads")?;
+    let receipts = codec::number(&value, "receipts")?;
+    if codec::number(&value, "format")? != 1 || heads > MAX_HEADS || receipts > MAX_RECEIPTS {
+        return Err(StorageError::Database);
+    }
+    value["receipts"] = json!(receipts
+        .checked_sub(removed)
+        .ok_or(StorageError::Database)?);
+    if db
+        .execute(
+            "UPDATE documents SET value=?1 WHERE key=?2",
+            rusqlite::params![codec::bytes(&value)?, COUNTER],
+        )
+        .map_err(|_| StorageError::Database)?
+        != 1
+    {
+        return Err(StorageError::Database);
+    }
+    Ok(())
 }

@@ -69,6 +69,7 @@ pub(super) fn run(
     sequence: u64,
     root: PathBuf,
     context: &JobContext,
+    command: &NativeCommand,
 ) -> Result<Loaded> {
     context.checkpoint().map_err(|_| Failure::Stopped)?;
     let operation = match operation {
@@ -101,12 +102,21 @@ pub(super) fn run(
             layout,
             display,
         } => Loaded::Public {
-            state: backend.save_public_layout(
-                lease,
-                expected_layout_revision,
-                expected_display_revision,
-                layout,
-                display,
+            state: command.run(
+                &mut backend,
+                fc_ports::command_window::CommandFamily::Profiles,
+                Some(lease),
+                SessionPurpose::Manage,
+                context,
+                |backend| {
+                    Ok(backend.save_public_layout(
+                        lease,
+                        expected_layout_revision,
+                        expected_display_revision,
+                        layout,
+                        display,
+                    )?)
+                },
             )?,
             saved: true,
         },
@@ -116,11 +126,15 @@ pub(super) fn run(
             candidate,
         } => Loaded::Subject {
             key,
-            document: Some(backend.save_subject_profile(
-                lease,
-                key,
-                expected_revision,
-                candidate,
+            document: Some(command.run(
+                &mut backend,
+                fc_ports::command_window::CommandFamily::Profiles,
+                Some(lease),
+                SessionPurpose::Manage,
+                context,
+                |backend| {
+                    Ok(backend.save_subject_profile(lease, key, expected_revision, candidate)?)
+                },
             )?),
             saved: true,
         },

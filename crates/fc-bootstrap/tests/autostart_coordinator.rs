@@ -1,6 +1,6 @@
 //! Genuine bounded worker and SQLite; a private synthetic system port. No
 //! registry, network, machine clock or global input is touched by these tests.
-use fc_application::identity::SessionLease;
+use fc_application::identity::{SessionLease, SessionPurpose};
 use fc_bootstrap::{
     autostart::{Error, Job, Loaded, Operation},
     backend::{Backend, BackendError, Initialize},
@@ -8,6 +8,7 @@ use fc_bootstrap::{
 use fc_domain::{autostart::*, time::*};
 use fc_ports::{
     autostart::{AutostartRepositoryError, AutostartSystem},
+    command_window::{CommandFamily, IssuedCommand},
     Clock, MonotonicClock,
 };
 use fc_runtime::worker::{JobContext, JobTicket, Task, WorkerPool};
@@ -161,6 +162,7 @@ struct Work {
     job: Job,
     system: System,
     answer: Answer,
+    issued: Option<IssuedCommand>,
 }
 impl Task for Work {
     type Output = ();
@@ -168,7 +170,11 @@ impl Task for Work {
         self.job.allocation_bytes()
     }
     fn run(mut self, context: &JobContext) {
-        *self.answer.lock().unwrap() = Some(self.job.run(context, &mut self.system));
+        *self.answer.lock().unwrap() = Some(self.job.run_with_command(
+            context,
+            &mut self.system,
+            self.issued,
+        ));
     }
 }
 struct Fixture {
@@ -227,6 +233,21 @@ impl Fixture {
         let answer = Arc::new(Mutex::new(None));
         let mut system = self.system.clone();
         system.mode = mode;
+        let issued = if matches!(&operation, Operation::Change { .. }) {
+            Some(
+                self.backend
+                    .lock()
+                    .unwrap()
+                    .issue_native_command(
+                        CommandFamily::Autostart,
+                        Some(self.lease),
+                        SessionPurpose::Manage,
+                    )
+                    .unwrap(),
+            )
+        } else {
+            None
+        };
         let job = Job {
             backend: self.backend.clone(),
             lease: Some(self.lease),
@@ -242,6 +263,7 @@ impl Fixture {
                     job,
                     system,
                     answer: answer.clone(),
+                    issued,
                 },
                 Instant::now() + Duration::from_secs(15),
             )
@@ -306,7 +328,11 @@ impl Drop for Fixture {
                 r.unwrap();
             }
         }
-        let r = self.backend.lock().unwrap().close();
+        let r = self
+            .backend
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .close();
         if !std::thread::panicking() {
             r.unwrap();
         }
@@ -530,8 +556,16 @@ fn startup_prepared_record_is_interrupted_without_replaying_registry() {
         .unwrap_or_else(std::sync::PoisonError::into_inner);
     let mut f = Fixture::new();
     let current = f.load();
-    f.backend
-        .lock()
+    let mut backend = f.backend.lock().unwrap();
+    let issued = backend
+        .issue_native_command(
+            CommandFamily::Autostart,
+            Some(f.lease),
+            SessionPurpose::Manage,
+        )
+        .unwrap();
+    backend
+        .begin_command_scope(issued)
         .unwrap()
         .begin_autostart_while(
             f.lease,
@@ -542,6 +576,7 @@ fn startup_prepared_record_is_interrupted_without_replaying_registry() {
             Arc::new(|| true),
         )
         .unwrap();
+    drop(backend);
     f.backend.lock().unwrap().close().unwrap();
     f.reopen();
     let loaded = f.run(Operation::ObserveStartup, Mode::Normal).unwrap();
@@ -642,6 +677,7 @@ fn startup_before_initialization_only_reads_the_fixed_system_item() {
                 },
                 system: system.clone(),
                 answer: answer.clone(),
+                issued: None,
             },
             Instant::now() + Duration::from_secs(10),
         )

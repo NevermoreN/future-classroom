@@ -1,5 +1,6 @@
 //! Real SQLite and original sole-writer fences, not a model of configuration IO.
 use super::*;
+use fc_ports::command_window::{CommandFamily, CommandOwner};
 use fc_ports::AuthorityPublisher;
 use std::sync::atomic::{AtomicU64, Ordering};
 static NEXT: AtomicU64 = AtomicU64::new(0);
@@ -58,6 +59,7 @@ impl AuthorityPublisher for Publisher {
     fn fault(&mut self) {}
 }
 struct Fixture {
+    commands: crate::fixture_commands::FixtureCommands,
     root: PathBuf,
     writer: Option<StorageWriter<u64>>,
     active: Arc<AtomicBool>,
@@ -67,6 +69,33 @@ struct Fixture {
     late_cancel: Arc<std::sync::Mutex<Option<Arc<AtomicBool>>>>,
 }
 impl Fixture {
+    fn receipt_key(&self, legacy: &str) -> String {
+        let (slot, id) =
+            crate::business::command_window::legacy(legacy).expect("exact fixture receipt slot");
+        let original = self
+            .commands
+            .original(id)
+            .expect("original fixture receipt pair");
+        crate::business::command_window::namespaced(slot, original.ticket)
+    }
+
+    // Labels name fixture intents only. Request ids come from the real Writer;
+    // this cache keeps the exact original pair through retries and reopen.
+    fn command_id(&self, family: CommandFamily, label: u64) -> CommandId {
+        if let Some(original) = self.commands.labelled(family, &label.to_string()) {
+            return original.command_id;
+        }
+        self.commands
+            .issue(
+                &self.handle(),
+                family,
+                &label.to_string(),
+                CommandOwner::authenticated(&actor(1, TrustedOrigin::Local)),
+            )
+            .unwrap()
+            .command_id
+    }
+
     fn new() -> Self {
         let root = std::env::temp_dir().join(format!(
             "FutureClassroom-HttpsSettings-{}-{}-{}",
@@ -79,6 +108,7 @@ impl Fixture {
         ));
         std::fs::create_dir(&root).unwrap();
         let mut value = Self {
+            commands: crate::fixture_commands::FixtureCommands::default(),
             root,
             writer: None,
             active: Arc::new(AtomicBool::new(true)),
@@ -133,14 +163,20 @@ impl Fixture {
     }
     fn commit(&self, mutations: Vec<Mutation>) {
         let rev = self.revision();
-        self.handle()
-            .try_commit(
-                CommitCommand::new(format!("https-fixture-{}", rev.get()), rev, mutations).unwrap(),
-                rev.get() + 1,
-            )
-            .unwrap()
-            .wait()
-            .unwrap();
+        {
+            let (fixture_handle, fixture_command) = self
+                .commands
+                .prepare_generic(
+                    &self.handle(),
+                    CommitCommand::new(format!("https-fixture-{}", rev.get()), rev, mutations)
+                        .unwrap(),
+                )
+                .unwrap();
+            fixture_handle.try_commit(fixture_command, rev.get() + 1)
+        }
+        .unwrap()
+        .wait()
+        .unwrap();
     }
     fn base_repository(&self, captured: ActorContext) -> BusinessRepository<u64> {
         let active = self.active.clone();
@@ -171,8 +207,15 @@ impl Fixture {
         &self,
         request: HttpsSettingsRequest,
     ) -> Result<HttpsSettingsState, HttpsSettingsRepositoryError> {
-        self.repository(actor(1, TrustedOrigin::Local))
-            .execute_https_settings(request, &actor(1, TrustedOrigin::Local))
+        {
+            let fixture_request = request;
+            let original_pair = self.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = self
+                .repository(actor(1, TrustedOrigin::Local))
+                .with_command_window(original_pair);
+            issued_repository
+                .execute_https_settings(fixture_request, &actor(1, TrustedOrigin::Local))
+        }
     }
     fn replace_identity(&self, value: IdentityState) {
         self.commit(vec![Mutation::Put {
@@ -254,12 +297,13 @@ fn config(host: &str, port: u16) -> HttpsConfiguration {
     .unwrap()
 }
 fn request(
+    f: &Fixture,
     id: u64,
     base: &HttpsSettingsState,
     configuration: Option<HttpsConfiguration>,
 ) -> HttpsSettingsRequest {
     HttpsSettingsRequest {
-        command_id: CommandId::new(id).unwrap(),
+        command_id: f.command_id(CommandFamily::HttpsSettings, id),
         expected_revision: base.settings.revision,
         expected_identity_revision: base.identity_revision,
         configuration,
@@ -276,7 +320,7 @@ fn canonical_save_clear_replay_and_cold_reopen_preserve_identity_and_never_creat
         .load_identity()
         .unwrap();
     let saved = f
-        .save(request(1, &base, Some(config("Board.School.", 8443))))
+        .save(request(&f, 1, &base, Some(config("Board.School.", 8443))))
         .unwrap();
     assert_eq!(
         saved.settings.configuration.as_ref().unwrap().host.as_str(),
@@ -284,7 +328,7 @@ fn canonical_save_clear_replay_and_cold_reopen_preserve_identity_and_never_creat
     );
     let rev = f.revision();
     assert_eq!(
-        f.save(request(1, &base, Some(config("BOARD.school", 8443))))
+        f.save(request(&f, 1, &base, Some(config("BOARD.school", 8443))))
             .unwrap(),
         saved
     );
@@ -301,16 +345,16 @@ fn canonical_save_clear_replay_and_cold_reopen_preserve_identity_and_never_creat
     f.reopen();
     assert_eq!(f.read(), saved);
     assert!(matches!(
-        f.save(request(1, &base, Some(config("board.school", 443)))),
+        f.save(request(&f, 1, &base, Some(config("board.school", 443)))),
         Err(HttpsSettingsRepositoryError::IdempotencyConflict)
     ));
     assert!(matches!(
-        f.save(request(2, &base, None)),
+        f.save(request(&f, 2, &base, None)),
         Err(HttpsSettingsRepositoryError::Domain(
             HttpsSettingsError::RevisionConflict { .. }
         ))
     ));
-    let cleared = f.save(request(3, &saved, None)).unwrap();
+    let cleared = f.save(request(&f, 3, &saved, None)).unwrap();
     assert!(cleared.settings.configuration.is_none());
     assert_eq!(cleared.settings.revision.get(), 2);
 }
@@ -325,11 +369,15 @@ fn local_global_exact_session_must_change_and_default_deny_configuration_permit(
         actor(3, TrustedOrigin::Local),
         actor(4, TrustedOrigin::Local),
     ] {
-        let mut r = f.repository(a.clone());
+        let r = f.repository(a.clone());
         assert!(r.https_settings(&a).is_err());
-        assert!(r
-            .execute_https_settings(request(1, &base, Some(config("board", 8443))), &a)
-            .is_err());
+        assert!({
+            let fixture_request = request(&f, 1, &base, Some(config("board", 8443)));
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_https_settings(fixture_request, &a)
+        }
+        .is_err());
     }
     let mut wrong = actor(1, TrustedOrigin::Local);
     wrong.expires_at = now();
@@ -337,17 +385,26 @@ fn local_global_exact_session_must_change_and_default_deny_configuration_permit(
         .repository(actor(1, TrustedOrigin::Local))
         .https_settings(&wrong)
         .is_err());
-    assert!(f
-        .base_repository(actor(1, TrustedOrigin::Local))
-        .execute_https_settings(request(2, &base, None), &actor(1, TrustedOrigin::Local))
-        .is_err());
-    let mut tightened = f
+    assert!({
+        let fixture_request = request(&f, 2, &base, None);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f
+            .base_repository(actor(1, TrustedOrigin::Local))
+            .with_command_window(original_pair);
+        issued_repository.execute_https_settings(fixture_request, &actor(1, TrustedOrigin::Local))
+    }
+    .is_err());
+    let tightened = f
         .repository(actor(1, TrustedOrigin::Local))
         .with_https_configuration_guard(Arc::new(|| false))
         .with_https_configuration_guard(Arc::new(|| true));
-    assert!(tightened
-        .execute_https_settings(request(3, &base, None), &actor(1, TrustedOrigin::Local))
-        .is_err());
+    assert!({
+        let fixture_request = request(&f, 3, &base, None);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = tightened.with_command_window(original_pair);
+        issued_repository.execute_https_settings(fixture_request, &actor(1, TrustedOrigin::Local))
+    }
+    .is_err());
     assert_eq!(f.revision(), before);
 }
 #[test]
@@ -360,7 +417,7 @@ fn identity_cas_and_config_cas_are_independent_even_when_host_is_unchanged() {
     f.replace_identity(identity);
     let before = f.revision();
     assert!(matches!(
-        f.save(request(1, &base, Some(config("school", 443)))),
+        f.save(request(&f, 1, &base, Some(config("school", 443)))),
         Err(HttpsSettingsRepositoryError::Domain(
             HttpsSettingsError::IdentityRevisionConflict { .. }
         ))
@@ -369,7 +426,7 @@ fn identity_cas_and_config_cas_are_independent_even_when_host_is_unchanged() {
     let next = f.read();
     assert_eq!(next.settings, base.settings);
     assert!(f
-        .save(request(2, &next, Some(config("school", 443))))
+        .save(request(&f, 2, &next, Some(config("school", 443))))
         .is_ok());
 }
 #[test]
@@ -380,7 +437,7 @@ fn precommit_session_revocation_or_disabled_permit_loss_rolls_back_without_publi
     let publications = f.published.load(Ordering::Acquire);
     f.revoke.store(true, Ordering::Release);
     assert!(f
-        .save(request(1, &base, Some(config("school", 443))))
+        .save(request(&f, 1, &base, Some(config("school", 443))))
         .is_err());
     f.active.store(true, Ordering::Release);
     assert_eq!(f.read(), base);
@@ -392,14 +449,23 @@ fn precommit_session_revocation_or_disabled_permit_loss_rolls_back_without_publi
         permit.store(false, Ordering::Release);
         Ok(rev.get())
     });
-    assert!(r
-        .execute_https_settings(request(2, &base, None), &actor(1, TrustedOrigin::Local))
-        .is_err());
+    assert!({
+        let fixture_request = request(&f, 2, &base, None);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_https_settings(fixture_request, &actor(1, TrustedOrigin::Local))
+    }
+    .is_err());
     f.permit.store(true, Ordering::Release);
     assert_eq!(f.read(), base);
     assert_eq!(f.revision(), before);
-    assert!(f.raw("business/result/https-settings/2").is_none());
-    assert!(f.save(request(3, &base, None)).is_ok());
+    assert!(f
+        .raw(&f.receipt_key(&format!(
+            "business/result/https-settings/{}",
+            f.command_id(CommandFamily::HttpsSettings, 2).get()
+        )))
+        .is_none());
+    assert!(f.save(request(&f, 3, &base, None)).is_ok());
 }
 struct Held {
     entered: std::sync::mpsc::Sender<()>,
@@ -431,6 +497,8 @@ fn queued_execution_cancel_and_precommit_cancel_use_original_writer_fence_withou
     let before = f.revision();
     let (enter, arrived) = std::sync::mpsc::channel();
     let (release, wait) = std::sync::mpsc::channel();
+    let queued_id = f.command_id(CommandFamily::HttpsSettings, 1);
+    let queued_pair = f.commands.original(queued_id).unwrap();
     let held = f
         .handle()
         .try_transaction(Held {
@@ -445,11 +513,12 @@ fn queued_execution_cancel_and_precommit_cancel_use_original_writer_fence_withou
     let check = active.clone();
     let r = f
         .repository(actor(1, TrustedOrigin::Local))
-        .with_execution_fence(Arc::new(move || check.load(Ordering::Acquire)));
+        .with_execution_fence(Arc::new(move || check.load(Ordering::Acquire)))
+        .with_command_window(queued_pair);
     let queued = r
         .handle
         .try_transaction(SaveSettings {
-            request: request(1, &base, Some(config("school", 443))),
+            request: request(&f, 1, &base, Some(config("school", 443))),
             actor: actor(1, TrustedOrigin::Local),
             clock: r.clock.clone(),
             session: r.session.clone(),
@@ -472,12 +541,16 @@ fn queued_execution_cancel_and_precommit_cancel_use_original_writer_fence_withou
         cancel.store(false, Ordering::Release);
         Ok(rev.get())
     });
-    assert!(r
-        .execute_https_settings(request(2, &base, None), &actor(1, TrustedOrigin::Local))
-        .is_err());
+    assert!({
+        let fixture_request = request(&f, 2, &base, None);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_https_settings(fixture_request, &actor(1, TrustedOrigin::Local))
+    }
+    .is_err());
     assert_eq!(f.read(), base);
     assert_eq!(f.revision(), before);
-    assert!(f.save(request(3, &base, None)).is_ok());
+    assert!(f.save(request(&f, 3, &base, None)).is_ok());
 }
 #[test]
 fn strict_protected_document_rejects_bad_shape_store_noncanonical_values_and_corruption_on_startup()
@@ -485,7 +558,7 @@ fn strict_protected_document_rejects_bad_shape_store_noncanonical_values_and_cor
     let f = Fixture::new();
     let base = f.read();
     let saved = f
-        .save(request(1, &base, Some(config("board", 443))))
+        .save(request(&f, 1, &base, Some(config("board", 443))))
         .unwrap();
     let valid = settings(&saved.settings);
     let mut bad = valid.clone();
@@ -524,7 +597,7 @@ fn ordinary_restore_keeps_target_security_row_exact_and_export_omits_configurati
     let admin = actor(1, TrustedOrigin::Local);
     let r = f.repository(admin.clone());
     r.ensure_recovery_installation([7; 32]).unwrap();
-    f.save(request(1, &f.read(), Some(config("old.school", 8443))))
+    f.save(request(&f, 1, &f.read(), Some(config("old.school", 8443))))
         .unwrap();
     let backup = f.root.join("ordinary.sqlite3");
     r.try_export_ordinary(backup.clone(), &admin, Arc::new(|| true))
@@ -535,8 +608,13 @@ fn ordinary_restore_keeps_target_security_row_exact_and_export_omits_configurati
     let db = rusqlite::Connection::open(&backup).unwrap();
     assert!(TransactionView(&db).get(DOCUMENT).unwrap().is_none());
     drop(db);
-    f.save(request(2, &f.read(), Some(config("target.school", 443))))
-        .unwrap();
+    f.save(request(
+        &f,
+        2,
+        &f.read(),
+        Some(config("target.school", 443)),
+    ))
+    .unwrap();
     let exact = f.raw(DOCUMENT).unwrap();
     let preview = f.root.join("preview.sqlite3");
     let receipt = r
@@ -545,11 +623,26 @@ fn ordinary_restore_keeps_target_security_row_exact_and_export_omits_configurati
         .wait()
         .unwrap();
     assert_eq!(recovered_config(&preview), Some(exact.clone()));
-    let barrier = r
-        .try_advance_recovery_barrier(receipt.current_revision, &admin, Arc::new(|| true))
-        .unwrap()
-        .wait()
-        .unwrap();
+    let barrier = {
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Generic,
+                "restore-barrier",
+                CommandOwner::authenticated(&admin),
+            )
+            .unwrap();
+        let issued_repository = r.with_command_window(original_pair);
+        issued_repository.try_advance_recovery_barrier(
+            receipt.current_revision,
+            &admin,
+            Arc::new(|| true),
+        )
+    }
+    .unwrap()
+    .wait()
+    .unwrap();
     let candidate = f.root.join("candidate.sqlite3");
     r.try_prepare_ordinary_restore(backup, candidate.clone(), barrier, Arc::new(|| true))
         .unwrap()
@@ -564,6 +657,7 @@ fn mapped_case(target_has_config: bool) {
     s.ensure_recovery_installation([7; 32]).unwrap();
     source
         .save(request(
+            &source,
             1,
             &source.read(),
             Some(config("source.school", 8443)),
@@ -580,6 +674,7 @@ fn mapped_case(target_has_config: bool) {
     if target_has_config {
         target
             .save(request(
+                &target,
                 1,
                 &target.read(),
                 Some(config("target.school", 9443)),
@@ -620,11 +715,26 @@ fn mapped_case(target_has_config: bool) {
         .wait()
         .unwrap();
     assert_eq!(recovered_config(&preview), exact);
-    let barrier = t
-        .try_advance_recovery_barrier(receipt.current_revision, &admin, Arc::new(|| true))
-        .unwrap()
-        .wait()
-        .unwrap();
+    let barrier = {
+        let original_pair = target
+            .commands
+            .issue(
+                &target.handle(),
+                CommandFamily::Generic,
+                "restore-barrier",
+                CommandOwner::authenticated(&admin),
+            )
+            .unwrap();
+        let issued_repository = t.with_command_window(original_pair);
+        issued_repository.try_advance_recovery_barrier(
+            receipt.current_revision,
+            &admin,
+            Arc::new(|| true),
+        )
+    }
+    .unwrap()
+    .wait()
+    .unwrap();
     let candidate = target.root.join("candidate.sqlite3");
     t.try_prepare_ordinary_restore(mapped, candidate.clone(), barrier, Arc::new(|| true))
         .unwrap()
@@ -681,22 +791,33 @@ fn ordinary_input_injected_protected_https_configuration_is_rejected() {
 fn actual_commit_then_canceled_delivery_is_unknown_not_rollback_and_original_command_reconciles() {
     let f = Fixture::new();
     let base = f.read();
-    let original = request(1, &base, Some(config("school", 443)));
+    let original = request(&f, 1, &base, Some(config("school", 443)));
     let active = Arc::new(AtomicBool::new(true));
     *f.late_cancel.lock().unwrap() = Some(active.clone());
     let execution = active.clone();
-    let mut r = f
+    let r = f
         .repository(actor(1, TrustedOrigin::Local))
         .with_execution_fence(Arc::new(move || execution.load(Ordering::Acquire)));
     assert_eq!(
-        r.execute_https_settings(original.clone(), &actor(1, TrustedOrigin::Local)),
+        {
+            let fixture_request = original.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository
+                .execute_https_settings(fixture_request, &actor(1, TrustedOrigin::Local))
+        },
         Err(HttpsSettingsRepositoryError::Unavailable)
     );
     assert!(!active.load(Ordering::Acquire));
     let committed = f.read();
     assert_eq!(committed.settings.revision.get(), 1);
     assert!(committed.settings.configuration.is_some());
-    assert!(f.raw("business/receipt/https-settings/1").is_some());
+    assert!(f
+        .raw(&f.receipt_key(&format!(
+            "business/receipt/https-settings/{}",
+            f.command_id(CommandFamily::HttpsSettings, 1).get()
+        )))
+        .is_some());
     let revision = f.revision();
     let count = f.published.load(Ordering::Acquire);
     let mut renewed = actor(1, TrustedOrigin::Local);
@@ -709,9 +830,15 @@ fn actual_commit_then_canceled_delivery_is_unknown_not_rollback_and_original_com
     // reconciled by a read, not a retry that could write on a missing receipt.
     f.permit.store(false, Ordering::Release);
     assert_eq!(
-        f.base_repository(renewed.clone())
-            .query_https_settings_outcome(original.clone(), &renewed)
-            .unwrap(),
+        {
+            let fixture_request = original.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let issued_repository = f
+                .base_repository(renewed.clone())
+                .with_command_window(original_pair);
+            issued_repository.query_https_settings_outcome(fixture_request, &renewed)
+        }
+        .unwrap(),
         Some(committed.clone())
     );
     f.permit.store(true, Ordering::Release);
@@ -747,7 +874,7 @@ fn read_rechecks_original_exact_session_at_final_writer_guard_without_mutation()
 fn committed_command_uses_stable_actor_scope_but_every_new_lease_is_still_authorized() {
     let f = Fixture::new();
     let base = f.read();
-    let original = request(1, &base, Some(config("school", 443)));
+    let original = request(&f, 1, &base, Some(config("school", 443)));
     let saved = f.save(original.clone()).unwrap();
     let mut renewed = actor(1, TrustedOrigin::Local);
     renewed.expires_at = fc_domain::time::LocalDateTime::new(
@@ -757,16 +884,26 @@ fn committed_command_uses_stable_actor_scope_but_every_new_lease_is_still_author
     .unwrap();
     let revision = f.revision();
     assert_eq!(
-        f.repository(renewed.clone())
-            .execute_https_settings(original.clone(), &renewed)
-            .unwrap(),
+        {
+            let fixture_request = original.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f
+                .repository(renewed.clone())
+                .with_command_window(original_pair);
+            issued_repository.execute_https_settings(fixture_request, &renewed)
+        }
+        .unwrap(),
         saved
     );
-    let mut old = f.repository(actor(1, TrustedOrigin::Local));
+    let old = f.repository(actor(1, TrustedOrigin::Local));
     f.active.store(false, Ordering::Release);
-    assert!(old
-        .execute_https_settings(original.clone(), &actor(1, TrustedOrigin::Local))
-        .is_err());
+    assert!({
+        let fixture_request = original.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = old.with_command_window(original_pair);
+        issued_repository.execute_https_settings(fixture_request, &actor(1, TrustedOrigin::Local))
+    }
+    .is_err());
     f.active.store(true, Ordering::Release);
     let mut new_identity = identity();
     new_identity.accounts[3].must_change_password = false;
@@ -774,9 +911,17 @@ fn committed_command_uses_stable_actor_scope_but_every_new_lease_is_still_author
     f.replace_identity(new_identity);
     let other = actor(4, TrustedOrigin::Local);
     assert_eq!(
-        f.repository(other.clone())
-            .execute_https_settings(original.clone(), &other),
-        Err(HttpsSettingsRepositoryError::IdempotencyConflict)
+        {
+            let fixture_request = original.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f
+                .repository(other.clone())
+                .with_command_window(original_pair);
+            issued_repository.execute_https_settings(fixture_request, &other)
+        },
+        Err(HttpsSettingsRepositoryError::CommandWindow(
+            fc_ports::command_window::CommandWindowError::NotIssued
+        ))
     );
     for changed in [
         ActorContext {
@@ -789,10 +934,15 @@ fn committed_command_uses_stable_actor_scope_but_every_new_lease_is_still_author
         },
         actor(1, TrustedOrigin::Web),
     ] {
-        assert!(f
-            .repository(changed.clone())
-            .execute_https_settings(original.clone(), &changed)
-            .is_err());
+        assert!({
+            let fixture_request = original.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f
+                .repository(changed.clone())
+                .with_command_window(original_pair);
+            issued_repository.execute_https_settings(fixture_request, &changed)
+        }
+        .is_err());
     }
     assert!(f.revision() > revision);
     assert_eq!(f.read().settings, saved.settings);
@@ -802,33 +952,50 @@ fn committed_command_uses_stable_actor_scope_but_every_new_lease_is_still_author
 fn outcome_query_without_receipt_never_saves_or_publishes_and_needs_no_configuration_permit() {
     let f = Fixture::new();
     let base = f.read();
-    let original = request(900, &base, Some(config("school", 443)));
+    let original = request(&f, 900, &base, Some(config("school", 443)));
     let revision = f.revision();
     let published = f.published.load(Ordering::Acquire);
     f.permit.store(false, Ordering::Release);
     let actor = actor(1, TrustedOrigin::Local);
     assert_eq!(
-        f.base_repository(actor.clone())
-            .query_https_settings_outcome(original, &actor)
-            .unwrap(),
+        {
+            let fixture_request = original;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let issued_repository = f
+                .base_repository(actor.clone())
+                .with_command_window(original_pair);
+            issued_repository.query_https_settings_outcome(fixture_request, &actor)
+        }
+        .unwrap(),
         None
     );
     assert_eq!(f.revision(), revision);
     assert_eq!(f.published.load(Ordering::Acquire), published);
     assert!(f.raw(DOCUMENT).is_none());
-    assert!(f.raw("business/receipt/https-settings/900").is_none());
+    assert!(f
+        .raw(&f.receipt_key(&format!(
+            "business/receipt/https-settings/{}",
+            f.command_id(CommandFamily::HttpsSettings, 900).get()
+        )))
+        .is_none());
 }
 #[test]
 fn outcome_query_rejects_changed_payload_actor_digest_and_final_revoked_session_without_mutation() {
     let f = Fixture::new();
-    let original = request(1, &f.read(), Some(config("school", 443)));
+    let original = request(&f, 1, &f.read(), Some(config("school", 443)));
     let saved = f.save(original.clone()).unwrap();
     let actor = actor(1, TrustedOrigin::Local);
     let mut different = original.clone();
     different.configuration.as_mut().unwrap().port = 8443;
     assert_eq!(
-        f.base_repository(actor.clone())
-            .query_https_settings_outcome(different, &actor),
+        {
+            let fixture_request = different;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let issued_repository = f
+                .base_repository(actor.clone())
+                .with_command_window(original_pair);
+            issued_repository.query_https_settings_outcome(fixture_request, &actor)
+        },
         Err(HttpsSettingsRepositoryError::IdempotencyConflict)
     );
     let mut updated_identity = identity();
@@ -840,9 +1007,17 @@ fn outcome_query_rejects_changed_payload_actor_digest_and_final_revoked_session_
         ..actor.clone()
     };
     assert_eq!(
-        f.base_repository(other.clone())
-            .query_https_settings_outcome(original.clone(), &other),
-        Err(HttpsSettingsRepositoryError::IdempotencyConflict)
+        {
+            let fixture_request = original.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let issued_repository = f
+                .base_repository(other.clone())
+                .with_command_window(original_pair);
+            issued_repository.query_https_settings_outcome(fixture_request, &other)
+        },
+        Err(HttpsSettingsRepositoryError::CommandWindow(
+            fc_ports::command_window::CommandWindowError::NotIssued
+        ))
     );
     let revision = f.revision();
     let mut r = f.base_repository(actor.clone());
@@ -858,20 +1033,33 @@ fn outcome_query_rejects_changed_payload_actor_digest_and_final_revoked_session_
         }
     });
     assert_eq!(
-        r.query_https_settings_outcome(original.clone(), &actor),
+        {
+            let fixture_request = original.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let issued_repository = r.with_command_window(original_pair);
+            issued_repository.query_https_settings_outcome(fixture_request, &actor)
+        },
         Err(HttpsSettingsRepositoryError::Unavailable)
     );
     assert_eq!(checks.load(Ordering::Acquire), 3);
     assert_eq!(f.revision(), revision);
     assert_eq!(f.read().settings, saved.settings);
     f.commit(vec![Mutation::Put {
-        key: "business/result/https-settings/1".into(),
+        key: f.receipt_key(&format!(
+            "business/result/https-settings/{}",
+            f.command_id(CommandFamily::HttpsSettings, 1).get()
+        )),
         value: b"null".to_vec(),
     }]);
-    assert!(f
-        .base_repository(actor.clone())
-        .query_https_settings_outcome(original, &actor)
-        .is_err());
+    assert!({
+        let fixture_request = original;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let issued_repository = f
+            .base_repository(actor.clone())
+            .with_command_window(original_pair);
+        issued_repository.query_https_settings_outcome(fixture_request, &actor)
+    }
+    .is_err());
 }
 
 #[test]
@@ -881,7 +1069,7 @@ fn source_network_policy_roundtrips_current_installation_without_backup_export()
     let mut configured = config("board.school", 8443);
     configured.source_networks =
         Some(HttpsSourceNetworks::parse("192.168.10.0/24,2001:db8::/64").unwrap());
-    let original = request(501, &base, Some(configured));
+    let original = request(&f, 501, &base, Some(configured));
     let saved = f.save(original.clone()).unwrap();
     assert_eq!(f.save(original.clone()).unwrap(), saved);
     let mut changed = original;

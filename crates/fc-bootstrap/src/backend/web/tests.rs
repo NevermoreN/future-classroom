@@ -197,11 +197,18 @@ impl Fixture {
     fn create_class(&mut self, id: u64) -> ClassId {
         let id = ClassId::new(id).unwrap();
         self.backend
-            .identity(
-                self.admin,
-                IdentityCommand::CreateClass {
-                    id,
-                    name: format!("Synthetic class {}", id.get()),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(self.admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |issued_backend| {
+                    issued_backend.identity(
+                        self.admin,
+                        IdentityCommand::CreateClass {
+                            id,
+                            name: format!("Synthetic class {}", id.get()),
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -329,12 +336,17 @@ fn disabled_default_and_only_exact_local_global_administrator_manages_pairing() 
     ));
     assert!(f
         .backend
-        .identity(
-            web,
-            IdentityCommand::CreateClass {
-                id: ClassId::new(1).unwrap(),
-                name: "cannot create from browser".into(),
-            }
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(web),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.identity(
+                web,
+                IdentityCommand::CreateClass {
+                    id: ClassId::new(1).unwrap(),
+                    name: "cannot create from browser".into(),
+                }
+            )
         )
         .is_err());
     let receipt = f.request("admin", "another browser");
@@ -499,14 +511,28 @@ fn approval_captures_current_binding_and_rejects_a_different_class_before_grant(
     let a = f.create_class(1);
     let b = f.create_class(2);
     f.backend
-        .identity(f.admin, IdentityCommand::BindCurrentClass { id: a })
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(f.admin, IdentityCommand::BindCurrentClass { id: a })
+            },
+        )
         .unwrap();
     let service = f.service();
     service.set_enabled(f.admin, true).unwrap();
     let receipt = f.request("admin", "class display");
     f.approve(&receipt);
     f.backend
-        .identity(f.admin, IdentityCommand::BindCurrentClass { id: b })
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(f.admin, IdentityCommand::BindCurrentClass { id: b })
+            },
+        )
         .unwrap();
     assert!(matches!(
         service.poll(receipt.request_id, &receipt.poll_secret),
@@ -961,18 +987,25 @@ fn teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_ch
     let class = f.create_class(1);
     let subject = SubjectId::new(1).unwrap();
     f.backend
-        .identity(
-            f.admin,
-            IdentityCommand::PutSubject {
-                id: subject,
-                name: "Synthetic subject".into(),
-                enabled: true,
-                color: Rgb {
-                    red: 20,
-                    green: 40,
-                    blue: 80,
-                },
-                expected_revision: None,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    f.admin,
+                    IdentityCommand::PutSubject {
+                        id: subject,
+                        name: "Synthetic subject".into(),
+                        enabled: true,
+                        color: Rgb {
+                            red: 20,
+                            green: 40,
+                            blue: 80,
+                        },
+                        expected_revision: None,
+                    },
+                )
             },
         )
         .unwrap();
@@ -983,16 +1016,23 @@ fn teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_ch
     }];
     drop(
         f.backend
-            .create_account(
-                f.admin,
-                NewAccount {
-                    id: teacher,
-                    login_name: "teacher".into(),
-                    display_name: "Synthetic Teacher".into(),
-                    role: Role::TeacherAdmin,
-                    scopes: scopes.clone(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(f.admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |issued_backend| {
+                    issued_backend.create_account(
+                        f.admin,
+                        NewAccount {
+                            id: teacher,
+                            login_name: "teacher".into(),
+                            display_name: "Synthetic Teacher".into(),
+                            role: Role::TeacherAdmin,
+                            scopes: scopes.clone(),
+                        },
+                        password("Web-teacher-initial-password-2026"),
+                    )
                 },
-                password("Web-teacher-initial-password-2026"),
             )
             .unwrap(),
     );
@@ -1016,10 +1056,17 @@ fn teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_ch
         Err(WebServiceError::Denied)
     ));
     f.backend
-        .change_password(
-            initial,
-            password("Web-teacher-initial-password-2026"),
-            password("Web-teacher-changed-password-2026"),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(initial),
+            fc_application::identity::SessionPurpose::ChangeInitialPassword,
+            |issued_backend| {
+                issued_backend.change_password(
+                    initial,
+                    password("Web-teacher-initial-password-2026"),
+                    password("Web-teacher-changed-password-2026"),
+                )
+            },
         )
         .unwrap();
     assert!(f
@@ -1030,14 +1077,21 @@ fn teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_ch
     let receipt = f.request("teacher", "reviewed teacher device");
     f.approve(&receipt);
     f.backend
-        .identity(
-            f.admin,
-            IdentityCommand::UpdateAccount {
-                id: teacher,
-                display_name: "Teacher name changed after approval".into(),
-                role: Role::TeacherAdmin,
-                enabled: true,
-                scopes,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    f.admin,
+                    IdentityCommand::UpdateAccount {
+                        id: teacher,
+                        display_name: "Teacher name changed after approval".into(),
+                        role: Role::TeacherAdmin,
+                        enabled: true,
+                        scopes,
+                    },
+                )
             },
         )
         .unwrap();

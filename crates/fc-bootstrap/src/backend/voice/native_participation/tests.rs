@@ -5,7 +5,7 @@ use super::*;
 
 fn save(service: &VoiceService, local: SessionLease) -> Result<VoiceSnapshot> {
     let review = service.management_snapshot(local)?;
-    service.set_limits_reviewed(
+    service.test_set_limits_reviewed(
         local,
         VoiceLimits {
             max_repeat_total: 2,

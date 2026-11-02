@@ -2,7 +2,9 @@
 //! These fixtures use synthetic credentials, private databases and injected civil
 //! time only. They do not issue network requests or change machine clock/state.
 use fc_application::identity::SessionLease;
-use fc_bootstrap::backend::{Backend, BackendError, Initialize};
+use fc_bootstrap::backend::{
+    Backend, BackendError, CalendarManualStart, Initialize, ManualCalendarFetch,
+};
 use fc_domain::{calendar::*, ids::*, time::*};
 use fc_ports::{calendar::*, Clock, MonotonicClock};
 use fc_runtime::{
@@ -78,7 +80,20 @@ enum Operation {
     Reserve,
     Policy,
     Adopt,
-    Finish(CalendarFetchTicket),
+    Finish(Box<ManualCalendarFetch>),
+}
+fn command<T>(
+    backend: &mut Backend,
+    lease: SessionLease,
+    action: impl FnOnce(&mut Backend) -> fc_bootstrap::backend::Result<T>,
+) -> fc_bootstrap::backend::Result<T> {
+    let issued = backend.issue_native_command(
+        fc_ports::command_window::CommandFamily::Calendar,
+        Some(lease),
+        fc_application::identity::SessionPurpose::Manage,
+    )?;
+    let mut scoped = backend.begin_command_scope(issued)?;
+    action(&mut scoped)
 }
 struct Facts {
     calls: u64,
@@ -98,11 +113,15 @@ impl Task for Work {
     type Output = ();
     fn allocation_bytes(&self) -> Option<usize> {
         Some(match &self.operation {
-            Operation::Finish(t) => t
-                .etag
-                .as_ref()
-                .map_or(0, String::capacity)
-                .checked_add(t.last_modified.as_ref().map_or(0, String::capacity))?,
+            Operation::Finish(t) => {
+                let v = t.validators();
+                std::mem::size_of::<ManualCalendarFetch>().checked_add(
+                    v.etag
+                        .as_ref()
+                        .map_or(0, String::capacity)
+                        .checked_add(v.last_modified.as_ref().map_or(0, String::capacity))?,
+                )?
+            }
             _ => 0,
         })
     }
@@ -135,14 +154,21 @@ impl Task for Work {
         let mut backend = self.backend.lock().unwrap();
         let mut status = None;
         let result = match self.operation {
-            Operation::Reserve => backend
-                .reserve_calendar_fetch_while(self.lease, 2026, fence)
-                .map(|_| ()),
-            Operation::Policy => backend
-                .set_calendar_auto_policy_while(self.lease, Revision::default(), true, fence)
-                .map(|_| ()),
-            Operation::Adopt => backend
-                .adopt_calendar_while(
+            Operation::Reserve => command(&mut backend, self.lease, |b| {
+                b.begin_calendar_manual_fetch_while(self.lease, 2026, fence)
+            })
+            .map(|_| ()),
+            Operation::Policy => command(&mut backend, self.lease, |b| {
+                b.set_calendar_auto_policy_window_while(
+                    self.lease,
+                    Revision::default(),
+                    true,
+                    fence,
+                )
+            })
+            .map(|_| ()),
+            Operation::Adopt => command(&mut backend, self.lease, |backend| {
+                backend.adopt_calendar_while(
                     self.lease,
                     Revision::default(),
                     vec![CalendarCandidateRef {
@@ -151,15 +177,16 @@ impl Task for Work {
                     }],
                     fence,
                 )
-                .map(|_| ()),
+            })
+            .map(|_| ()),
             Operation::Finish(ticket) => backend
-                .finish_calendar_fetch_while(
-                    ticket,
+                .finish_calendar_manual_fetch_while(
+                    *ticket,
                     CalendarFetchOutcome::Downloaded(candidate(2)),
                     fence,
                 )
-                .map(|value| {
-                    status = Some(value);
+                .map(|_| {
+                    status = Some(backend.calendar_status(self.lease, 2026).unwrap());
                 }),
         };
         let cancelled = match result {
@@ -214,24 +241,26 @@ impl Fixture {
             _directory: directory,
         }
     }
-    fn reserve(&self) -> CalendarFetchTicket {
-        match self
-            .backend
-            .lock()
-            .unwrap()
-            .reserve_calendar_fetch(self.lease, 2026)
-            .unwrap()
+    fn reserve(&self) -> ManualCalendarFetch {
+        match command(&mut self.backend.lock().unwrap(), self.lease, |b| {
+            b.begin_calendar_manual_fetch_while(self.lease, 2026, Arc::new(|| true))
+        })
+        .unwrap()
         {
-            CalendarReservation::Reserved(t) => t,
-            _ => panic!("unexpected rate limit"),
+            CalendarManualStart::Fresh(p) => p,
+            _ => panic!("unexpected history/rate limit"),
         }
     }
     fn cache(&self) {
-        let ticket = self.reserve();
+        let permit = self.reserve();
         self.backend
             .lock()
             .unwrap()
-            .finish_calendar_fetch(ticket, CalendarFetchOutcome::Downloaded(candidate(1)))
+            .finish_calendar_manual_fetch_while(
+                permit,
+                CalendarFetchOutcome::Downloaded(candidate(1)),
+                Arc::new(|| true),
+            )
             .unwrap();
     }
     fn status(&self) -> CalendarStatus {
@@ -360,7 +389,7 @@ fn assert_cancelled_finish(f: &mut Fixture, trip: Trip) {
         )
         .unwrap();
     let ticket = f.reserve();
-    let facts = f.run(Operation::Finish(ticket), trip);
+    let facts = f.run(Operation::Finish(Box::new(ticket)), trip);
     assert!(
         !facts.cancelled,
         "Backend must settle a rolled-back attempt with a separate failure transaction"
@@ -419,11 +448,8 @@ fn real_worker_deadline_at_adoption_precommit_preserves_exact_original_cas() {
             .revision,
         Revision::default()
     );
-    let adopted = f
-        .backend
-        .lock()
-        .unwrap()
-        .adopt_calendar(
+    let adopted = command(&mut f.backend.lock().unwrap(), f.lease, |backend| {
+        backend.adopt_calendar(
             f.lease,
             Revision::default(),
             vec![CalendarCandidateRef {
@@ -431,7 +457,8 @@ fn real_worker_deadline_at_adoption_precommit_preserves_exact_original_cas() {
                 revision: Revision::new(1),
             }],
         )
-        .unwrap();
+    })
+    .unwrap();
     assert_eq!(adopted.revision, Revision::new(1));
     f.healthy();
 }

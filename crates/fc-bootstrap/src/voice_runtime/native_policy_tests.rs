@@ -2,10 +2,19 @@
 //! construct no output device; physical playing/release is a separate probe.
 use super::*;
 use crate::backend::{Backend, Initialize};
-use fc_application::identity::SessionLease;
+use fc_application::identity::{SessionLease, SessionPurpose};
+use fc_ports::command_window::CommandFamily;
 use fc_security::{CredentialRecordCodec, Password};
 use fc_windows::{system::DataPaths, SystemRandom};
 use std::time::{SystemTime, UNIX_EPOCH};
+
+/// Real server issuance precedes the policy's native Pending/waker or worker
+/// transfer. This immutable clone preserves the original full pair throughout
+/// the reviewed operation, including its failure/negative-retirement path.
+fn policy_command(service: &VoiceService, lease: SessionLease) -> VoiceService {
+    let issued = service.issue_native_command(lease).unwrap();
+    service.with_command_window(lease, issued).unwrap()
+}
 
 struct Fixture {
     root: PathBuf,
@@ -77,7 +86,7 @@ impl Fixture {
     fn save(&self) {
         let service = self.service();
         let review = service.management_snapshot(self.lease).unwrap();
-        let saved = service
+        let saved = policy_command(&service, self.lease)
             .set_limits_reviewed(
                 self.lease,
                 VoiceLimits {
@@ -163,7 +172,7 @@ fn disabled_committed_policy_retires_old_domain_and_keeps_admission_closed() {
     let mut old = fixture.domain();
     let service = fixture.service();
     let review = service.management_snapshot(fixture.lease).unwrap();
-    service
+    policy_command(&service, fixture.lease)
         .set_enabled_reviewed(
             fixture.lease,
             false,
@@ -186,12 +195,13 @@ fn failed_reviewed_policy_authorizes_only_negative_retirement_and_never_resume()
     let service = fixture.service();
     let control = fixture.backend.as_ref().unwrap().session_control();
     let review = service.management_snapshot(fixture.lease).unwrap();
+    let committing = policy_command(&service, fixture.lease);
     service
         .set_waker(Arc::new(move || {
             control.lock_local();
         }))
         .unwrap();
-    let result = service.set_limits_reviewed(
+    let result = committing.set_limits_reviewed(
         fixture.lease,
         VoiceLimits {
             max_repeat_total: 2,
@@ -272,8 +282,8 @@ fn pending_policy_stops_native_domain_without_sql_or_retiring_before_commit() {
     let before = service.inventory().unwrap();
     let gate = Arc::new(PendingGate::default());
     let entered = gate.clone();
+    let committing = policy_command(&service, fixture.lease);
     service.set_waker(Arc::new(move || entered.wait())).unwrap();
-    let committing = service.clone();
     let lease = fixture.lease;
     let mut worker = PolicyWorker {
         gate: gate.clone(),
@@ -347,13 +357,14 @@ fn failed_policy_supervisor_retires_physical_thread_without_self_wake_loop() {
     let review = service.management_snapshot(fixture.lease).unwrap();
     let control = fixture.backend.as_ref().unwrap().session_control();
     let wake = runtime.weak_waker();
+    let committing = policy_command(&service, fixture.lease);
     service
         .set_waker(Arc::new(move || {
             control.lock_local();
             wake();
         }))
         .unwrap();
-    let result = service.set_limits_reviewed(
+    let result = committing.set_limits_reviewed(
         fixture.lease,
         VoiceLimits {
             max_repeat_total: 2,
@@ -413,6 +424,7 @@ impl fc_ports::voice::VoicePreparation for MetadataPreparation {
     }
 }
 fn explicit_job(
+    backend: &Backend,
     service: &VoiceService,
     web: SessionLease,
     class: fc_domain::ids::ClassId,
@@ -421,38 +433,59 @@ fn explicit_job(
     let proof =
         fc_ports::voice::prepare_voice_upload(&mut MetadataPreparation, (), reservation).unwrap();
     let asset = service.publish(web, proof).unwrap();
-    service
-        .submit(
+    let issued = backend
+        .issue_web_command(web, CommandFamily::Voice)
+        .unwrap();
+    let (job, binding) = service
+        .submit_window(
             web,
             fc_ports::voice::VoiceSubmitRequest {
-                command_id: fc_domain::ids::CommandId::new(5001).unwrap(),
+                command_id: issued.command_id,
                 asset_id: asset.id,
                 expected_asset_revision: asset.revision,
                 class_id: class,
                 repeat_total: 1,
             },
+            Some(issued.ticket),
         )
-        .unwrap()
+        .unwrap();
+    assert_eq!(binding, Some(issued.ticket));
+    job
 }
 
 #[test]
 fn reviewed_idle_domain_never_strands_fresh_explicit_job_before_old_retirement() {
     let mut fixture = Fixture::new();
     let class = fc_domain::ids::ClassId::new(1).unwrap();
+    let lease = fixture.lease;
     let backend = fixture.backend.as_mut().unwrap();
     backend
-        .identity(
-            fixture.lease,
-            fc_domain::identity::IdentityCommand::CreateClass {
-                id: class,
-                name: "Synthetic policy class".into(),
+        .test_native_command(
+            CommandFamily::Identity,
+            Some(lease),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    lease,
+                    fc_domain::identity::IdentityCommand::CreateClass {
+                        id: class,
+                        name: "Synthetic policy class".into(),
+                    },
+                )
             },
         )
         .unwrap();
     backend
-        .identity(
-            fixture.lease,
-            fc_domain::identity::IdentityCommand::BindCurrentClass { id: class },
+        .test_native_command(
+            CommandFamily::Identity,
+            Some(lease),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    lease,
+                    fc_domain::identity::IdentityCommand::BindCurrentClass { id: class },
+                )
+            },
         )
         .unwrap();
     let web = backend
@@ -470,7 +503,12 @@ fn reviewed_idle_domain_never_strands_fresh_explicit_job_before_old_retirement()
     // retirement. A halted old executor may never strand that task forever.
     let admitted_early = service.is_admitting();
     let early = if admitted_early {
-        Some(explicit_job(&service, web, class))
+        Some(explicit_job(
+            fixture.backend.as_ref().unwrap(),
+            &service,
+            web,
+            class,
+        ))
     } else {
         assert!(service.reserve(web, class).is_err());
         None
@@ -483,7 +521,8 @@ fn reviewed_idle_domain_never_strands_fresh_explicit_job_before_old_retirement()
     assert!(old.finish().unwrap());
     old.resume_admission().unwrap();
     drop(old);
-    let fresh = early.unwrap_or_else(|| explicit_job(&service, web, class));
+    let fresh = early
+        .unwrap_or_else(|| explicit_job(fixture.backend.as_ref().unwrap(), &service, web, class));
     let guard = service
         .runtime_handle()
         .guard_for(

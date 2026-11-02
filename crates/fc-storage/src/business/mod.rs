@@ -1,10 +1,12 @@
 //! Typed business repositories on the existing SQLite writer. The synchronous
 //! facade is for application workers; native/HTTP event loops poll tickets.
-mod autostart;
+pub(crate) mod autostart;
 mod autostart_codec;
 mod calendar;
+pub use calendar::{ManualFetchPermit, ManualFetchStart};
 mod calendar_codec;
 pub(crate) mod codec;
+pub(crate) mod command_window;
 mod content_web;
 #[cfg(test)]
 #[path = "tests/content_web.rs"]
@@ -30,6 +32,7 @@ pub(crate) mod recovery;
 mod schedule;
 mod schedule_codec;
 mod subject_visual;
+pub(crate) mod typed_commands;
 pub mod voice;
 mod voice_codec;
 use crate::*;
@@ -190,7 +193,15 @@ impl<S: Send + 'static> BusinessRepository<S> {
     }
     /// Authenticated operations fail closed until composition binds their exact lease.
     pub fn with_session_guard(mut self, guard: SessionGuard) -> Self {
-        self.session = guard;
+        self.session = match self.handle.command_window {
+            Some(issued) => Arc::new(move |state, actor| {
+                if fc_ports::command_window::CommandOwner::authenticated(actor) != issued.owner {
+                    return Err(StorageError::CommandNotIssued);
+                }
+                guard(state, actor)
+            }),
+            None => guard,
+        };
         self
     }
     pub fn with_voice_driver_guard(mut self, guard: VoiceDriverGuard) -> Self {
@@ -230,6 +241,22 @@ impl<S: Send + 'static> BusinessRepository<S> {
     ) -> Self {
         self.voice_timeout = Some((timeout, active));
         self
+    }
+    /// Immutable command context; actor/lease validation still occurs in each
+    /// original business task under the same write transaction.
+    /// Trusted worker issuance. No UI/event thread should wait here.
+    pub fn issue_command_window(
+        &self,
+        request: crate::command_window::IssueCommand,
+    ) -> Result<fc_ports::command_window::IssuedCommand, StorageError> {
+        self.handle.try_issue_command(request)?.wait()
+    }
+    pub fn with_command_window(&self, issued: fc_ports::command_window::IssuedCommand) -> Self {
+        let mut scoped = self.clone();
+        scoped.handle = self.handle.with_command_window(issued);
+        let guard = scoped.session.clone();
+        scoped = scoped.with_session_guard(guard);
+        scoped
     }
     pub fn load_identity(&self) -> Result<IdentityState, StorageError> {
         let bytes = self.handle.try_transaction(ReadIdentity)?.wait()?;
@@ -425,6 +452,13 @@ struct ContentTask<S> {
     session: SessionGuard,
 }
 impl<S: Send> TransactionTask<S> for ContentTask<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Content,
+            self.command.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         self.command.text.capacity() + std::mem::size_of::<Self>()
     }
@@ -549,6 +583,9 @@ impl<S: Send> TransactionTask<S> for ContentTask<S> {
     }
 }
 fn repository_error(e: StorageError) -> RepositoryError {
+    if let Some(error) = e.command_window_error() {
+        return RepositoryError::CommandWindow(error);
+    }
     match e {
         StorageError::Content(e) => RepositoryError::Domain(e),
         StorageError::PublicationFailed { .. }
@@ -590,6 +627,9 @@ pub(crate) fn credential_key(id: PrincipalId, kind: &str, version: u64) -> Strin
     format!("business/credential/{}/{}/{}", id.get(), kind, version)
 }
 fn identity_error(e: StorageError) -> IdentityRepositoryError {
+    if let Some(error) = e.command_window_error() {
+        return IdentityRepositoryError::CommandWindow(error);
+    }
     match e {
         StorageError::Identity(e) => IdentityRepositoryError::Domain(e),
         StorageError::DocumentTooLarge => IdentityRepositoryError::Domain(IdentityError::Capacity),
@@ -763,6 +803,24 @@ fn decode_events(v: &Value) -> Result<Vec<IdentityEvent>, StorageError> {
         .collect()
 }
 impl<S: Send> TransactionTask<S> for IdentityTask<S> {
+    fn retirement(&self) -> CommandRetirement {
+        if matches!(
+            self.request.command,
+            IdentityCommand::RecoveryConsumed { .. }
+        ) {
+            CommandRetirement::IdentityRecovery
+        } else {
+            CommandRetirement::None
+        }
+    }
+
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Identity,
+            self.request.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         let command = match &self.request.command {
             IdentityCommand::FirstAdministrator {
@@ -812,6 +870,28 @@ impl<S: Send> TransactionTask<S> for IdentityTask<S> {
         d: &dyn TransactionDocuments,
     ) -> Result<TransactionDecision<S>, StorageError> {
         let state = load_identity(d)?;
+        if self.actor.is_none() {
+            if let Some(issued) = d.active_command() {
+                use fc_ports::command_window::CommandOwner;
+                let owner = match self.request.command {
+                    IdentityCommand::FirstAdministrator { .. } => CommandOwner::PublicDesktop,
+                    IdentityCommand::RecoveryConsumed { id, .. } => {
+                        let account = state.account(id).map_err(StorageError::Identity)?;
+                        CommandOwner::Principal {
+                            principal: id,
+                            school: account.principal.school_id,
+                            epoch: account.principal.auth_epoch,
+                            origin: TrustedOrigin::Local,
+                        }
+                    }
+                    _ => return Err(StorageError::CommandNotIssued),
+                };
+                if issued.owner != owner {
+                    return Err(StorageError::CommandNotIssued);
+                }
+            }
+        }
+
         if let Some(actor) = &self.actor {
             (self.session)(&state, actor)?;
         }

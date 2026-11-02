@@ -1,6 +1,7 @@
 //! Sole-writer SQLite receipts; the exact-channel guard is an isolated fixture.
 use super::*;
 use fc_domain::auth::Principal;
+use fc_ports::command_window::{CommandFamily, CommandOwner};
 use fc_ports::{AuthorityPublisher, MaterialAppendMetadata, MaterialPreparation};
 use std::sync::atomic::{AtomicU64, AtomicUsize};
 static NEXT: AtomicU64 = AtomicU64::new(0);
@@ -120,6 +121,7 @@ impl AuthorityPublisher for Publisher {
     fn fault(&mut self) {}
 }
 struct Fixture {
+    commands: crate::fixture_commands::FixtureCommands,
     writer: Option<StorageWriter<Revision>>,
     directory: PathBuf,
     live: Arc<AtomicBool>,
@@ -128,6 +130,33 @@ struct Fixture {
     revoke: Arc<AtomicBool>,
 }
 impl Fixture {
+    fn receipt_key(&self, legacy: &str) -> String {
+        let (slot, id) =
+            crate::business::command_window::legacy(legacy).expect("exact fixture receipt slot");
+        let original = self
+            .commands
+            .original(id)
+            .expect("original fixture receipt pair");
+        crate::business::command_window::namespaced(slot, original.ticket)
+    }
+
+    // Labels name fixture intents only. Request ids come from the real Writer;
+    // this cache keeps the exact original pair through retries and reopen.
+    fn command_id(&self, family: CommandFamily, label: u64) -> CommandId {
+        if let Some(original) = self.commands.labelled(family, &label.to_string()) {
+            return original.command_id;
+        }
+        self.commands
+            .issue(
+                &self.handle(),
+                family,
+                &label.to_string(),
+                CommandOwner::authenticated(&actor(2, TrustedOrigin::Web)),
+            )
+            .unwrap()
+            .command_id
+    }
+
     fn new() -> Self {
         let directory = std::env::temp_dir().join(format!(
             "FutureClassroom-MaterialOutcome-{}-{}",
@@ -141,6 +170,7 @@ impl Fixture {
             std::fs::set_permissions(&directory, std::fs::Permissions::from_mode(0o700)).unwrap();
         }
         let mut f = Self {
+            commands: crate::fixture_commands::FixtureCommands::default(),
             writer: None,
             directory,
             live: Arc::new(AtomicBool::new(true)),
@@ -192,14 +222,19 @@ impl Fixture {
     }
     fn commit(&self, mutations: Vec<Mutation>) {
         let r = self.revision();
-        self.handle()
-            .try_commit(
-                CommitCommand::new(format!("fixture-{}", r.get()), r, mutations).unwrap(),
-                r.next().unwrap(),
-            )
-            .unwrap()
-            .wait()
-            .unwrap();
+        {
+            let (fixture_handle, fixture_command) = self
+                .commands
+                .prepare_generic(
+                    &self.handle(),
+                    CommitCommand::new(format!("fixture-{}", r.get()), r, mutations).unwrap(),
+                )
+                .unwrap();
+            fixture_handle.try_commit(fixture_command, r.next().unwrap())
+        }
+        .unwrap()
+        .wait()
+        .unwrap();
     }
     fn replace(&self, key: String, value: Value) {
         self.commit(vec![Mutation::Put {
@@ -268,12 +303,18 @@ impl MaterialPreparation for Preparation {
         })
     }
 }
-fn prepared(id: u64) -> PreparedMaterialAppend {
+fn fixture_key(f: &Fixture, kind: &str, label: u64) -> String {
+    f.receipt_key(&key(
+        kind,
+        f.command_id(CommandFamily::Materials, label).get(),
+    ))
+}
+fn prepared(f: &Fixture, id: u64) -> PreparedMaterialAppend {
     fc_ports::prepare_material_append(
         &mut Preparation,
         (),
         MaterialAppendMetadata {
-            command_id: CommandId::new(id).unwrap(),
+            command_id: f.command_id(CommandFamily::Materials, id),
             scope: scope(),
             material_id: MaterialId::new(20).unwrap(),
             display_name: "synthetic.txt".into(),
@@ -284,17 +325,28 @@ fn prepared(id: u64) -> PreparedMaterialAppend {
 }
 fn append(f: &Fixture, id: u64) -> MaterialRecord {
     let a = actor(2, TrustedOrigin::Web);
-    f.repo(a.clone())
-        .append_material(prepared(id), &a, &Time)
-        .unwrap()
+    {
+        let fixture_request = prepared(f, id);
+        let original_pair = f
+            .commands
+            .original(fixture_request.request().command_id)
+            .unwrap();
+        let mut issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+        issued_repository.append_material(fixture_request, &a, &Time)
+    }
+    .unwrap()
 }
 fn outcome(
     f: &Fixture,
     id: u64,
 ) -> Result<Option<MaterialCommandOutcome>, MaterialRepositoryError> {
     let a = actor(2, TrustedOrigin::Web);
-    f.repo(a.clone())
-        .material_outcome(CommandId::new(id).unwrap(), &a)
+    {
+        let fixture_request = f.command_id(CommandFamily::Materials, id);
+        let original_pair = f.commands.original(fixture_request).unwrap();
+        let issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+        issued_repository.material_outcome(fixture_request, &a)
+    }
 }
 
 #[test]
@@ -302,43 +354,54 @@ fn web_append_delete_receipts_are_historical_original_sender_only_and_survive_re
     let mut f = Fixture::new();
     let a = actor(2, TrustedOrigin::Web);
     let record = append(&f, 100);
-    let receipt = f.value(key("receipts", 100)).unwrap();
+    let receipt = f.value(fixture_key(&f, "receipts", 100)).unwrap();
     let before = f.revision();
     let first = outcome(&f, 100).unwrap().unwrap();
     assert_eq!(first.kind, MaterialCommandKind::Append);
     assert_eq!(first.record, record);
     assert_eq!(f.revision(), before);
     assert_eq!(
-        f.repo(a.clone())
-            .append_material(prepared(100), &a, &Time)
-            .unwrap(),
+        {
+            let fixture_request = prepared(&f, 100);
+            let original_pair = f
+                .commands
+                .original(fixture_request.request().command_id)
+                .unwrap();
+            let mut issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+            issued_repository.append_material(fixture_request, &a, &Time)
+        }
+        .unwrap(),
         record
     );
-    assert_eq!(f.value(key("receipts", 100)), Some(receipt));
+    assert_eq!(f.value(fixture_key(&f, "receipts", 100)), Some(receipt));
     assert_eq!(f.revision(), before);
     for id in [1, 3] {
         let other = actor(id, TrustedOrigin::Web);
         assert_eq!(
-            f.repo(other.clone())
-                .material_outcome(CommandId::new(100).unwrap(), &other)
-                .unwrap(),
-            None
+            {
+                let fixture_request = f.command_id(CommandFamily::Materials, 100);
+                let original_pair = f.commands.original(fixture_request).unwrap();
+                let issued_repository = f.repo(other.clone()).with_command_window(original_pair);
+                issued_repository.material_outcome(fixture_request, &other)
+            },
+            Err(MaterialRepositoryError::CommandWindow(
+                fc_ports::command_window::CommandWindowError::NotIssued
+            ))
         );
     }
     assert_eq!(outcome(&f, 999).unwrap(), None);
-    let deleted = f
-        .repo(a.clone())
-        .delete_material(
-            MaterialDeleteRequest {
-                command_id: CommandId::new(101).unwrap(),
-                scope: scope(),
-                material_id: record.id,
-                expected_material_revision: record.revision,
-            },
-            &a,
-            &Time,
-        )
-        .unwrap();
+    let deleted = {
+        let fixture_request = MaterialDeleteRequest {
+            command_id: f.command_id(CommandFamily::Materials, 101),
+            scope: scope(),
+            material_id: record.id,
+            expected_material_revision: record.revision,
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+        issued_repository.delete_material(fixture_request, &a, &Time)
+    }
+    .unwrap();
     assert_eq!(outcome(&f, 100).unwrap().unwrap().record, record);
     let result = outcome(&f, 101).unwrap().unwrap();
     assert_eq!(result.kind, MaterialCommandKind::Delete);
@@ -354,14 +417,21 @@ fn outcome_requires_exact_live_web_and_current_authority_even_for_unknown() {
     let a = actor(2, TrustedOrigin::Web);
     let r = f.repo(a.clone());
     let local = actor(2, TrustedOrigin::Local);
-    assert!(f
-        .repo(local.clone())
-        .material_outcome(CommandId::new(110).unwrap(), &local)
-        .is_err());
+    assert!({
+        let fixture_request = f.command_id(CommandFamily::Materials, 110);
+        let original_pair = f.commands.original(fixture_request).unwrap();
+        let issued_repository = f.repo(local.clone()).with_command_window(original_pair);
+        issued_repository.material_outcome(fixture_request, &local)
+    }
+    .is_err());
     let foreign = actor(3, TrustedOrigin::Web);
-    assert!(r
-        .material_outcome(CommandId::new(110).unwrap(), &foreign)
-        .is_err());
+    assert!({
+        let fixture_request = f.command_id(CommandFamily::Materials, 110);
+        let original_pair = f.commands.original(fixture_request).unwrap();
+        let issued_repository = r.with_command_window(original_pair);
+        issued_repository.material_outcome(fixture_request, &foreign)
+    }
+    .is_err());
     f.live.store(false, Ordering::Release);
     assert!(outcome(&f, 110).is_err());
     assert!(outcome(&f, 999).is_err());
@@ -393,10 +463,13 @@ fn query_final_guard_gates_owned_foreign_and_unknown_without_writes() {
     for (id, principal_id) in [(120, 2), (120, 1), (999, 2)] {
         f.checks.store(1, Ordering::Release);
         let a = actor(principal_id, TrustedOrigin::Web);
-        assert!(f
-            .repo(a.clone())
-            .material_outcome(CommandId::new(id).unwrap(), &a)
-            .is_err());
+        assert!({
+            let fixture_request = f.command_id(CommandFamily::Materials, id);
+            let original_pair = f.commands.original(fixture_request).unwrap();
+            let issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+            issued_repository.material_outcome(fixture_request, &a)
+        }
+        .is_err());
         f.checks.store(usize::MAX, Ordering::Release);
     }
     assert_eq!(f.revision(), before);
@@ -405,28 +478,47 @@ fn query_final_guard_gates_owned_foreign_and_unknown_without_writes() {
 fn native_legacy_receipt_keeps_schema_and_never_gets_fabricated_web_sender() {
     let f = Fixture::new();
     let local = actor(1, TrustedOrigin::Local);
-    let r = f
-        .repo(local.clone())
-        .append_material(prepared(130), &local, &Time)
+    f.commands
+        .issue(
+            &f.handle(),
+            CommandFamily::Materials,
+            "130",
+            CommandOwner::authenticated(&local),
+        )
         .unwrap();
+    let r = {
+        let fixture_request = prepared(&f, 130);
+        let original_pair = f
+            .commands
+            .original(fixture_request.request().command_id)
+            .unwrap();
+        let mut issued_repository = f.repo(local.clone()).with_command_window(original_pair);
+        issued_repository.append_material(fixture_request, &local, &Time)
+    }
+    .unwrap();
     assert_eq!(r.id.get(), 20);
-    let v = f.value(key("receipts", 130)).unwrap();
+    let v = f.value(fixture_key(&f, "receipts", 130)).unwrap();
     codec::object_fields(&v, &["fingerprint", "record", "result_digest"]).unwrap();
-    assert_eq!(f.value(key("web-outcomes", 130)), None);
+    assert_eq!(f.value(fixture_key(&f, "web-outcomes", 130)), None);
     let web = actor(1, TrustedOrigin::Web);
     assert_eq!(
-        f.repo(web.clone())
-            .material_outcome(CommandId::new(130).unwrap(), &web)
-            .unwrap(),
-        None
+        {
+            let fixture_request = f.command_id(CommandFamily::Materials, 130);
+            let original_pair = f.commands.original(fixture_request).unwrap();
+            let issued_repository = f.repo(web.clone()).with_command_window(original_pair);
+            issued_repository.material_outcome(fixture_request, &web)
+        },
+        Err(MaterialRepositoryError::CommandWindow(
+            fc_ports::command_window::CommandWindowError::NotIssued
+        ))
     );
 }
 #[test]
 fn receipt_and_sidecar_digest_shape_and_kind_mismatches_fail_closed() {
     let f = Fixture::new();
     append(&f, 140);
-    let meta = f.value(key("web-outcomes", 140)).unwrap();
-    let receipt = f.value(key("receipts", 140)).unwrap();
+    let meta = f.value(fixture_key(&f, "web-outcomes", 140)).unwrap();
+    let receipt = f.value(fixture_key(&f, "receipts", 140)).unwrap();
     for changed in [
         {
             let mut v = meta.clone();
@@ -449,13 +541,13 @@ fn receipt_and_sidecar_digest_shape_and_kind_mismatches_fail_closed() {
             v
         },
     ] {
-        f.replace(key("web-outcomes", 140), changed);
+        f.replace(fixture_key(&f, "web-outcomes", 140), changed);
         assert!(outcome(&f, 140).is_err());
     }
-    f.replace(key("web-outcomes", 140), meta);
+    f.replace(fixture_key(&f, "web-outcomes", 140), meta);
     let mut changed = receipt;
     changed["record"]["name"] = json!("changed.txt");
-    f.replace(key("receipts", 140), changed);
+    f.replace(fixture_key(&f, "receipts", 140), changed);
     assert!(outcome(&f, 140).is_err());
 }
 #[test]
@@ -464,17 +556,31 @@ fn precommit_revocation_rolls_back_both_docs_but_postcommit_fault_keeps_queryabl
     let a = actor(2, TrustedOrigin::Web);
     let before = f.revision();
     f.revoke.store(true, Ordering::Release);
-    assert!(f
-        .repo(a.clone())
-        .append_material(prepared(150), &a, &Time)
-        .is_err());
+    assert!({
+        let fixture_request = prepared(&f, 150);
+        let original_pair = f
+            .commands
+            .original(fixture_request.request().command_id)
+            .unwrap();
+        let mut issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+        issued_repository.append_material(fixture_request, &a, &Time)
+    }
+    .is_err());
     assert_eq!(f.revision(), before);
-    assert!(f.value(key("receipts", 150)).is_none());
-    assert!(f.value(key("web-outcomes", 150)).is_none());
+    assert!(f.value(fixture_key(&f, "receipts", 150)).is_none());
+    assert!(f.value(fixture_key(&f, "web-outcomes", 150)).is_none());
     f.live.store(true, Ordering::Release);
     f.fail.store(true, Ordering::Release);
     assert_eq!(
-        f.repo(a.clone()).append_material(prepared(151), &a, &Time),
+        {
+            let fixture_request = prepared(&f, 151);
+            let original_pair = f
+                .commands
+                .original(fixture_request.request().command_id)
+                .unwrap();
+            let mut issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+            issued_repository.append_material(fixture_request, &a, &Time)
+        },
         Err(MaterialRepositoryError::Faulted)
     );
     assert!(outcome(&f, 151).is_err());
@@ -488,27 +594,49 @@ fn precommit_revocation_rolls_back_both_docs_but_postcommit_fault_keeps_queryabl
 fn a_new_exact_session_can_read_its_old_commit_but_old_epoch_cannot() {
     let f = Fixture::new();
     let original = append(&f, 160);
-    f.identity(|s| s.accounts[1].principal.auth_epoch = AuthEpoch::new(2));
-    assert!(outcome(&f, 160).is_err());
-    let mut fresh = actor(2, TrustedOrigin::Web);
-    fresh.auth_epoch = AuthEpoch::new(2);
+    assert_eq!(outcome(&f, 160).unwrap().unwrap().record, original);
+    let mut renewed = actor(2, TrustedOrigin::Web);
+    renewed.expires_at = LocalDateTime::new(now().date, 10800).unwrap();
+    let original_pair = f
+        .commands
+        .original(f.command_id(CommandFamily::Materials, 160))
+        .unwrap();
     assert_eq!(
-        f.repo(fresh.clone())
-            .material_outcome(CommandId::new(160).unwrap(), &fresh)
+        f.repo(renewed.clone())
+            .with_command_window(original_pair)
+            .material_outcome(original_pair.command_id, &renewed)
             .unwrap()
             .unwrap()
             .record,
         original
     );
-    let mut meta = f.value(key("web-outcomes", 160)).unwrap();
+    f.identity(|s| s.accounts[1].principal.auth_epoch = AuthEpoch::new(2));
+    assert!(outcome(&f, 160).is_err());
+    let mut fresh = actor(2, TrustedOrigin::Web);
+    fresh.auth_epoch = AuthEpoch::new(2);
+    assert_eq!(
+        {
+            let fixture_request = f.command_id(CommandFamily::Materials, 160);
+            let original_pair = f.commands.original(fixture_request).unwrap();
+            let issued_repository = f.repo(fresh.clone()).with_command_window(original_pair);
+            issued_repository.material_outcome(fixture_request, &fresh)
+        },
+        Err(MaterialRepositoryError::CommandWindow(
+            fc_ports::command_window::CommandWindowError::NotIssued
+        ))
+    );
+    let mut meta = f.value(fixture_key(&f, "web-outcomes", 160)).unwrap();
     meta["principal"] = json!(1);
     meta["actor"]["principal"] = json!(1);
-    f.replace(key("web-outcomes", 160), meta);
+    f.replace(fixture_key(&f, "web-outcomes", 160), meta);
     let global = actor(1, TrustedOrigin::Web);
-    assert!(f
-        .repo(global.clone())
-        .material_outcome(CommandId::new(160).unwrap(), &global)
-        .is_err());
+    assert!({
+        let fixture_request = f.command_id(CommandFamily::Materials, 160);
+        let original_pair = f.commands.original(fixture_request).unwrap();
+        let issued_repository = f.repo(global.clone()).with_command_window(original_pair);
+        issued_repository.material_outcome(fixture_request, &global)
+    }
+    .is_err());
 }
 
 #[test]
@@ -517,24 +645,32 @@ fn stale_delete_cas_never_creates_outcome_and_committed_delete_fault_is_recovera
     let original = append(&f, 170);
     let a = actor(2, TrustedOrigin::Web);
     let request = |id, revision| MaterialDeleteRequest {
-        command_id: CommandId::new(id).unwrap(),
+        command_id: f.command_id(CommandFamily::Materials, id),
         scope: scope(),
         material_id: original.id,
         expected_material_revision: revision,
     };
     assert!(matches!(
-        f.repo(a.clone())
-            .delete_material(request(171, Revision::default()), &a, &Time),
+        {
+            let fixture_request = request(171, Revision::default());
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+            issued_repository.delete_material(fixture_request, &a, &Time)
+        },
         Err(MaterialRepositoryError::Domain(
             MaterialError::RevisionConflict { .. }
         ))
     ));
     assert_eq!(outcome(&f, 171).unwrap(), None);
-    assert_eq!(f.value(key("receipts", 171)), None);
+    assert_eq!(f.value(fixture_key(&f, "receipts", 171)), None);
     f.fail.store(true, Ordering::Release);
     assert_eq!(
-        f.repo(a.clone())
-            .delete_material(request(172, original.revision), &a, &Time),
+        {
+            let fixture_request = request(172, original.revision);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+            issued_repository.delete_material(fixture_request, &a, &Time)
+        },
         Err(MaterialRepositoryError::Faulted)
     );
     f.reopen();
@@ -550,7 +686,7 @@ fn managed_download_missing_version_or_deleted_record_is_not_found_without_mutat
     let f = Fixture::new();
     let record = append(&f, 180);
     let a = actor(2, TrustedOrigin::Web);
-    let mut repo = f.repo(a.clone());
+    let repo = f.repo(a.clone());
     let before = f.revision();
     assert_eq!(
         repo.managed_material(scope(), record.id, ResourceVersionId::new(999).unwrap(), &a),
@@ -562,16 +698,17 @@ fn managed_download_missing_version_or_deleted_record_is_not_found_without_mutat
             .unwrap(),
         record
     );
-    repo.delete_material(
-        MaterialDeleteRequest {
-            command_id: CommandId::new(181).unwrap(),
+    {
+        let fixture_request = MaterialDeleteRequest {
+            command_id: f.command_id(CommandFamily::Materials, 181),
             scope: scope(),
             material_id: record.id,
             expected_material_revision: record.revision,
-        },
-        &a,
-        &Time,
-    )
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = repo.with_command_window(original_pair);
+        issued_repository.delete_material(fixture_request, &a, &Time)
+    }
     .unwrap();
     let deleted_revision = f.revision();
     assert_eq!(

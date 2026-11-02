@@ -109,6 +109,7 @@ pub fn datetime(value: LocalDateTime) -> String {
 
 /// Private classroom text is not a diagnostic payload or an authority claim.
 pub struct SaveInput {
+    pub command_ticket: Option<fc_ports::command_window::CommandTicket>,
     pub command_id: CommandId,
     pub expected_revision: Revision,
     pub text: String,
@@ -124,15 +125,16 @@ pub fn valid_text(text: &str) -> bool {
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 struct SaveDto {
     schema_version: u16,
+    #[serde(default, deserialize_with = "super::command_window::provided_ticket")]
+    command_ticket: Option<String>,
     command_id: String,
     expected_revision: String,
     text: String,
 }
 pub fn save(bytes: &[u8]) -> Result<SaveInput, ProtocolError> {
     let dto: SaveDto = parse(bytes)?;
-    if dto.schema_version != SCHEMA_VERSION {
-        return Err(ProtocolError::UnsupportedSchema);
-    }
+    let command_ticket =
+        super::command_window::ticket(dto.schema_version, dto.command_ticket.as_deref())?;
     if dto.text.len() > MAX_TEXT_BYTES {
         return Err(ProtocolError::TooLarge);
     }
@@ -140,6 +142,7 @@ pub fn save(bytes: &[u8]) -> Result<SaveInput, ProtocolError> {
         return Err(ProtocolError::InvalidCommand);
     }
     Ok(SaveInput {
+        command_ticket,
         command_id: CommandId::new(
             super::decimal(&dto.command_id, false).ok_or(ProtocolError::InvalidCommand)?,
         )

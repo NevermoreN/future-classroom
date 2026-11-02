@@ -103,6 +103,9 @@ pub(super) fn source(
         .map_err(StorageError::Material)
 }
 pub(super) fn error(e: StorageError) -> LessonRepositoryError {
+    if let Some(error) = e.command_window_error() {
+        return LessonRepositoryError::CommandWindow(error);
+    }
     match e {
         StorageError::Lesson(e) => LessonRepositoryError::Domain(e),
         StorageError::Identity(e) => LessonRepositoryError::Domain(LessonContextError::Identity(e)),
@@ -222,6 +225,15 @@ struct Task<S> {
     factory: Factory<S>,
 }
 impl<S: Send> TransactionTask<S> for Task<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        self.request.as_ref().map(|r| {
+            (
+                fc_ports::command_window::CommandFamily::Lesson,
+                r.command_id,
+            )
+        })
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
     }

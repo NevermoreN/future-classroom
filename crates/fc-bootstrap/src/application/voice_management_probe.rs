@@ -486,17 +486,29 @@ fn second_app(
     mark(steps, "native-disable-review-captured")?;
     // The only direct mutation: simulate a concurrent trusted administrator
     // changing the real same service with its captured, current revision.
-    checked(
-        app.voice_service
+    {
+        let lease = app.lease.ok_or("voice-settings-probe: lease absent")?;
+        let service = app
+            .voice_service
             .as_ref()
-            .ok_or("voice-settings-probe: service absent")?
-            .set_enabled(
+            .ok_or("voice-settings-probe: service absent")?;
+        let issued = checked(
+            service.issue_native_command(lease),
+            "issue concurrent voice command",
+        )?;
+        let scoped = checked(
+            service.with_command_window(lease, issued),
+            "check concurrent voice scope",
+        )?;
+        checked(
+            scoped.set_enabled(
                 app.lease.ok_or("voice-settings-probe: lease absent")?,
                 false,
                 enabled.revision,
             ),
-        "external same-service concurrent compare-and-swap",
-    )?;
+            "external same-service concurrent compare-and-swap",
+        )?;
+    }
     let concurrent = saved(app)?;
     require(
         !concurrent.enabled && concurrent.revision != enabled.revision,
@@ -543,19 +555,31 @@ fn second_app(
         max_pending_per_owner: 1,
         max_repeat_total: 4,
     };
-    checked(
-        app.voice_service
+    {
+        let lease = app.lease.ok_or("voice-settings-probe: lease absent")?;
+        let service = app
+            .voice_service
             .as_ref()
-            .ok_or("voice-settings-probe: service absent")?
-            .set_limits_reviewed(
+            .ok_or("voice-settings-probe: service absent")?;
+        let issued = checked(
+            service.issue_native_command(lease),
+            "issue concurrent voice command",
+        )?;
+        let scoped = checked(
+            service.with_command_window(lease, issued),
+            "check concurrent voice scope",
+        )?;
+        checked(
+            scoped.set_limits_reviewed(
                 app.lease.ok_or("voice-settings-probe: lease absent")?,
                 external_limits,
                 before_limits.revision,
                 before_limits.identity_revision,
                 before_limits.runtime_generation,
             ),
-        "external same-service limits compare-and-swap",
-    )?;
+            "external same-service limits compare-and-swap",
+        )?;
+    }
     let external = saved(app)?;
     require(
         external.limits == external_limits && external.revision != before_limits.revision,

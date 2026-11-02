@@ -1,9 +1,10 @@
-import { ApiError, isAborted, type ContentApi } from './client'
+import { commandIdentity, sameCommand } from './command-protocol'
+import { ApiError, commandRejected, commandRetired, isAborted, type ContentApi } from './client'
 import { ProtocolFault, ProtocolVersionFault } from './protocol'
-import { bodyText, compareScopes, keyFor, newCommandId, normalizedBodyText, remainingToday, sameKey, scopeKey, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type ScopeItem, type ScopePage } from './content-protocol'
+import { bodyText, compareScopes, keyFor, normalizedBodyText, remainingToday, sameKey, scopeKey, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type ScopeItem, type ScopePage } from './content-protocol'
 
 export type EditorPhase = 'ready' | 'saving' | 'conflict' | 'merge' | 'unknown' | 'querying' | 'result' | 'expired' | 'scope-changed'
-export interface PendingCommand { readonly key: ContentKey; readonly command: ContentCommand }
+export interface PendingCommand { readonly retired?: boolean; readonly key: ContentKey; readonly command: ContentCommand }
 export interface EditorState {
   scope: ScopeItem; loaded: ContentDocument; draft: string; phase: EditorPhase; expired: boolean
   pending: PendingCommand | null; history: ContentDocument | null; latest: ContentDocument | null; notice: string
@@ -21,8 +22,7 @@ export class ContentController {
   private incompatible = ''
   private midnight: ReturnType<typeof setTimeout> | undefined
   constructor(private readonly api: ContentApi, private csrf: string,
-    private readonly changed: (state: ContentState) => void, private readonly revoked: () => void,
-    private readonly commandId = newCommandId) {}
+    private readonly changed: (state: ContentState) => void, private readonly revoked: () => void) {}
   private publish(patch: Partial<ContentState>) {
     if (this.disposed) return
     if (this.incompatible) {
@@ -109,12 +109,15 @@ export class ContentController {
     const text = clear ? '' : e.draft
     if (!draftValid(text)) { this.publish({ editor: { ...e, notice: '正文最多 16384 个 UTF-8 字节，不能包含不可显示的控制字符。' } }); return }
     if (e.loaded.revision === '18446744073709551615') { this.publish({ editor: { ...e, notice: '内容修订已到上限，请联系管理员。' } }); return }
-    let pending: PendingCommand
-    try { pending = Object.freeze({ key: Object.freeze({ ...e.loaded.key }), command: Object.freeze({ commandId: this.commandId(), expectedRevision: e.loaded.revision, text }) }) }
-    catch { this.publish({ editor: { ...e, notice: '无法生成安全命令编号，请刷新并核对连接后重试。' } }); return }
+    const captured = Object.freeze({ key: Object.freeze({ ...e.loaded.key }), expectedRevision: e.loaded.revision, text })
     const { controller, id } = this.begin()
-    this.publish({ busy: true, editor: { ...e, draft: text, phase: 'saving', pending, latest: null, history: null, notice: '正在提交此次命令，不会自动重复发送。' } })
+    let pending: PendingCommand | null = null
+    this.publish({ busy: true, editor: { ...e, draft: text, phase: 'saving', pending: null, latest: null, history: null, notice: '正在领取此次操作的服务器票据，尚未提交正文。' } })
     try {
+      const pair = commandIdentity(await this.api.issueCommand('content', this.csrf, controller.signal))
+      if (!this.current(id)) return
+      pending = Object.freeze({ key: captured.key, command: Object.freeze({ ...pair, expectedRevision: captured.expectedRevision, text: captured.text }) })
+      this.publish({ editor: { ...this.state.editor!, pending, notice: '正在提交此次命令，不会自动重复发送。' } })
       const result = await this.api.saveContent(pending.key, pending.command, this.csrf, controller.signal)
       if (!this.current(id)) return
       this.verify(result, pending)
@@ -124,33 +127,36 @@ export class ContentController {
     } catch (error) {
       if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
       const current = this.state.editor!
+      if (!pending) { this.publish({ busy: false, editor: { ...current, phase: current.expired ? 'expired' : 'ready', notice: '未取得可用的服务器票据，正文尚未提交。草稿保留；请核对连接或容量后明确操作，不会自动重试。' } }); return }
+      if (commandRetired(error)) { this.publish({ busy: false, editor: { ...current, phase: 'conflict', pending: { ...pending, retired: true }, notice: '原票据已过期或未获发行，此操作已停止。原正文和票据保留；请明确读取当前内容后再决定新的操作。' } }); return }
       if (error instanceof ApiError && error.status === 409) {
         const expired = error.code === 'DAY_CHANGED'
         this.publish({ busy: false, editor: { ...current, phase: expired ? 'expired' : 'conflict', expired: current.expired || expired, pending: null, notice: expired ? '白板日期已经变化。旧草稿已过期，不能自动提交到新日。' : error.code === 'IDEMPOTENCY_CONFLICT' ? '命令编号与已有内容冲突。草稿已保留，请明确载入最新内容并核对后再提交。' : '其他人已更新内容。草稿已保留，请载入最新修订后明确核对合并。' } }); return
       }
-      if (error instanceof ApiError && error.status === 400) { this.publish({ busy: false, editor: { ...current, phase: 'conflict', pending: null, notice: '请求被拒绝。草稿已保留，请检查正文并载入当前内容核对。' } }); return }
+      if (commandRejected(error)) { this.publish({ busy: false, editor: { ...current, phase: 'conflict', pending: null, notice: '请求被拒绝。草稿已保留，请检查正文并载入当前内容核对。' } }); return }
       this.publish({ busy: false, editor: { ...current, phase: 'unknown', notice: '提交结果尚未确认。原命令、日期、修订和正文已保留在本页内存；只会按你的操作查询，不会重发。' } })
     }
   }
   private verify(result: Committed, pending: PendingCommand) {
-    if (result.commandId !== pending.command.commandId || !sameKey(result.content.key, pending.key) || BigInt(result.content.revision) !== BigInt(pending.command.expectedRevision) + 1n || result.content.text !== normalizedBodyText(pending.command.text)) throw new ProtocolFault()
+    if (!sameCommand(result, pending.command) || !sameKey(result.content.key, pending.key) || BigInt(result.content.revision) !== BigInt(pending.command.expectedRevision) + 1n || result.content.text !== normalizedBodyText(pending.command.text)) throw new ProtocolFault()
   }
   async query(): Promise<void> {
     const e = this.state.editor
-    if (this.disposed || !e?.pending || this.state.busy || !['unknown', 'result'].includes(e.phase)) return
+    if (this.disposed || !e?.pending || e.pending.retired || this.state.busy || !['unknown', 'result'].includes(e.phase)) return
     const pending = e.pending, { controller, id } = this.begin()
     this.publish({ busy: true, editor: { ...e, phase: 'querying' } })
     try {
-      const result = await this.api.commandResult(pending.command.commandId, controller.signal)
+      const result = await this.api.commandResult(commandIdentity(pending.command), controller.signal)
       if (!this.current(id)) return
-      if (result.commandId !== pending.command.commandId) throw new ProtocolFault()
+      if (!sameCommand(result, pending.command)) throw new ProtocolFault()
       const current = this.state.editor!
       if (result.state === 'NOT_FOUND') { this.publish({ busy: false, editor: { ...current, phase: 'unknown', notice: '当前未查到原命令结果。这不证明从未写入，排队中的提交可能尚未完成；不会因此重发。' } }); return }
-      this.verify({ commandId: result.commandId, content: result.content }, pending)
+      this.verify({ commandId: result.commandId, commandTicket: result.commandTicket, content: result.content }, pending)
       this.publish({ busy: false, editor: { ...current, phase: 'result', history: result.content, notice: '已查到原命令的持久结果。这是提交时的结果，不代表当前最新内容；请明确读取当前内容核对。' } })
     } catch (error) {
       if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
       const current = this.state.editor!
+      if (commandRetired(error)) { this.publish({ busy: false, editor: { ...current, pending: { ...pending, retired: true }, phase: 'conflict', notice: '原票据已过期或未获发行，已停止查询与重试。历史草稿保留，请明确读取当前内容核对。' } }); return }
       this.publish({ busy: false, editor: { ...current, phase: 'unknown', expired: current.expired || error instanceof ApiError && error.code === 'DAY_CHANGED', notice: error instanceof ApiError && error.code === 'DAY_CHANGED' ? '原命令所属日期已过期，服务器不会返回旧日正文。旧草稿保留供审阅，不会发送到新日。' : error instanceof ProtocolFault ? '命令结果与原提交不匹配，已停止使用；原命令仍保留供核对。' : '查询尚未完成。原命令仍保留，请稍后主动查询；不会重发。' } })
     }
   }

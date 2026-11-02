@@ -37,6 +37,8 @@ pub(super) struct State {
     pub(super) finished: bool,
     pub(super) acknowledged: bool,
     start_failed: bool,
+    confirm_command: Option<NativeCommand>,
+    confirm_unresolved: bool,
 }
 pub(super) enum Job {
     InspectMigration(
@@ -135,7 +137,11 @@ impl Job {
             _ => Some(4096),
         }
     }
-    pub fn run(self, context: &JobContext) -> Result<Outcome> {
+    pub fn run_with_command(
+        self,
+        context: &JobContext,
+        command: &NativeCommand,
+    ) -> Result<Outcome> {
         let fence: fc_storage::recovery::ExecutionFence = Arc::new(context.execution_fence());
         let result = match self {
             Self::InspectMigration(workflow, backend, lease, selected) => {
@@ -173,7 +179,9 @@ impl Job {
                 // The workflow retains the durable capability even if the
                 // generic worker discards this result after cancellation.
                 workflow
-                    .confirm(review, backend, lease, fence)
+                    .confirm_window(review, backend, lease, fence, |issued| {
+                        context.checkpoint().is_ok() && command.bind(issued).is_ok()
+                    })
                     .map_err(failure)?;
                 Completed::Confirmed
             }
@@ -330,11 +338,27 @@ impl App {
         if self.backup.job.is_some() || self.backup.cleanup.is_some() || self.stopping {
             return Ok(());
         }
+        let confirmation = matches!(&job, Job::Confirm(..));
+        if confirmation && self.backup.confirm_unresolved {
+            let issued = self
+                .backup
+                .confirm_command
+                .as_ref()
+                .and_then(NativeCommand::snapshot)
+                .is_some();
+            self.status = if issued { "原恢复确认结果尚未核对，原票据和恢复所有者仍保留；不会再次确认。请重新预检并核对当前恢复状态。" } else { "原恢复确认仍未完成，不能把暂未取得票据当作未提交；请先核对当前恢复状态。" }.into();
+            return self.render();
+        }
+        let command = NativeCommand::new();
         match self.pool.handle().try_submit(
-            Work::Backup(Box::new(job)),
+            Work::Tracked(Box::new(Work::Backup(Box::new(job))), command.clone()),
             Instant::now() + Duration::from_secs(30 * 60),
         ) {
             Ok(ticket) => {
+                if confirmation {
+                    self.backup.confirm_command = Some(command);
+                    self.backup.confirm_unresolved = true;
+                }
                 self.backup.job = Some(Pending {
                     ticket,
                     generation: self.generation,
@@ -719,6 +743,7 @@ impl App {
                         draft_revision,
                     })) => {
                         self.accept_migration_review(review, draft_revision)?;
+                        self.backup.confirm_unresolved = false;
                     }
                     Ok(Outcome::Backup(Completed::Exported(receipt))) => {
                         self.backup
@@ -763,6 +788,7 @@ impl App {
                             ) {
                             Ok(()) => {
                                 self.backup.review = Some(review);
+                                self.backup.confirm_unresolved = false;
                                 self.status = "完整预检已通过，请核对恢复影响并明确确认。".into();
                             }
                             Err(error) => self.status = error,

@@ -562,6 +562,18 @@ pub(crate) fn execute(
             };
             let mut output = sql(Connection::open(&destination))?;
             let tx = sql(output.transaction_with_behavior(TransactionBehavior::Immediate))?;
+            crate::command_window::retire_restore_candidate(
+                &tx,
+                &source_database_sha256,
+                match &authorization {
+                    PreparationAuthorization::Preview { .. } => {
+                        crate::command_window::RestoreProjection::Preview
+                    }
+                    PreparationAuthorization::Barrier(_) => {
+                        crate::command_window::RestoreProjection::Confirmed
+                    }
+                },
+            )?;
             // Persist non-replayable command identities without old results,
             // actors, credentials or request capabilities.
             visit(db, |key, _| {

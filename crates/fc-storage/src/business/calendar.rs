@@ -190,6 +190,9 @@ fn meta(c: &Cache) -> Result<Mutation, StorageError> {
     })
 }
 fn error(e: StorageError) -> CalendarRepositoryError {
+    if let Some(error) = e.command_window_error() {
+        return CalendarRepositoryError::CommandWindow(error);
+    }
     match e {
         StorageError::CalendarCancelled => CalendarRepositoryError::Cancelled,
         StorageError::Schedule(fc_domain::schedule_document::ScheduleDocumentError {
@@ -325,32 +328,11 @@ impl<S: Send + 'static> CalendarRepository for BusinessRepository<S> {
     }
     fn reserve_calendar_fetch(
         &mut self,
-        year: i32,
-        actor: &ActorContext,
+        _year: i32,
+        _actor: &ActorContext,
     ) -> Result<CalendarReservation, CalendarRepositoryError> {
-        let b = self
-            .handle
-            .try_transaction(Reserve {
-                year: Some(year),
-                actor: Some(actor.clone()),
-                clock: self.clock.clone(),
-                session: self.session.clone(),
-                execution: self.calendar_execution.clone(),
-                factory: self.factory.clone(),
-            })
-            .map_err(error)?
-            .wait()
-            .map_err(error)?;
-        let v = codec::value(&b).map_err(error)?;
-        match v["kind"].as_str() {
-            Some("reserved") => Ok(CalendarReservation::Reserved(
-                dto::read_ticket(&v["ticket"]).map_err(error)?,
-            )),
-            Some("limited") => Ok(CalendarReservation::RateLimited {
-                next_allowed: codec::read_time(&v["next_allowed"]).map_err(error)?,
-            }),
-            _ => Err(CalendarRepositoryError::Unavailable),
-        }
+        // Authenticated callers must retain the new first-only manual permit.
+        Err(CalendarRepositoryError::Invalid)
     }
     fn calendar_background_fetch(
         &mut self,
@@ -420,21 +402,15 @@ impl<S: Send + 'static> CalendarRepository for BusinessRepository<S> {
         enabled: bool,
         actor: &ActorContext,
     ) -> Result<CalendarAutoPolicy, CalendarRepositoryError> {
-        let b = self
-            .handle
-            .try_transaction(Policy {
-                expected_revision,
-                enabled,
-                actor: actor.clone(),
-                clock: self.clock.clone(),
-                session: self.session.clone(),
-                execution: self.calendar_execution.clone(),
-                factory: self.factory.clone(),
-            })
+        match self
+            .set_calendar_policy_typed(expected_revision, enabled, actor)
             .map_err(error)?
-            .wait()
-            .map_err(error)?;
-        dto::read_policy(&codec::value(&b).map_err(error)?).map_err(error)
+        {
+            fc_ports::command_window::TypedCommandOutcome::Completed(
+                fc_ports::command_window::TypedCommandResult::CalendarPolicy(policy),
+            ) => Ok(policy),
+            _ => Err(CalendarRepositoryError::Unavailable),
+        }
     }
 }
 struct Read {
@@ -473,6 +449,12 @@ struct Reserve<S> {
     execution: CalendarExecutionGuard,
 }
 impl<S: Send + 'static> TransactionTask<S> for Reserve<S> {
+    fn command_family(&self) -> Option<fc_ports::command_window::CommandFamily> {
+        self.actor
+            .as_ref()
+            .map(|_| fc_ports::command_window::CommandFamily::Calendar)
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
     }
@@ -572,6 +554,10 @@ struct Policy<S> {
     execution: CalendarExecutionGuard,
 }
 impl<S: Send + 'static> TransactionTask<S> for Policy<S> {
+    fn command_family(&self) -> Option<fc_ports::command_window::CommandFamily> {
+        Some(fc_ports::command_window::CommandFamily::Calendar)
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
     }
@@ -626,6 +612,10 @@ struct Finish<S> {
     execution: CalendarExecutionGuard,
 }
 impl<S: Send + 'static> TransactionTask<S> for Finish<S> {
+    fn lifetime(&self) -> TransactionLifetime {
+        TransactionLifetime::OwnerReturn
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
             .saturating_add(match &self.outcome {
@@ -812,6 +802,13 @@ struct Adopt<S> {
     execution: CalendarExecutionGuard,
 }
 impl<S: Send + 'static> TransactionTask<S> for Adopt<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Calendar,
+            self.request.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>().saturating_add(
             self.request
@@ -945,3 +942,164 @@ impl<S: Send + 'static> TransactionTask<S> for Adopt<S> {
 #[cfg(test)]
 #[path = "tests/calendar.rs"]
 mod tests;
+
+/// Only a first committed manual reserve can create this owner. It is never
+/// Clone/Deserialize, and the clonable FetchTicket is not exposed to callers.
+pub struct ManualFetchPermit {
+    first: crate::typed_command::FirstExecutionPermit,
+    ticket: CalendarFetchTicket,
+}
+impl ManualFetchPermit {
+    pub fn year(&self) -> i32 {
+        self.ticket.year
+    }
+    pub fn validators(&self) -> CalendarFetchValidators {
+        CalendarFetchValidators {
+            etag: self.ticket.etag.clone(),
+            last_modified: self.ticket.last_modified.clone(),
+        }
+    }
+}
+pub enum ManualFetchStart {
+    Fresh(ManualFetchPermit),
+    History(fc_ports::command_window::TypedCommandOutcome),
+}
+impl<S: Send + 'static> BusinessRepository<S> {
+    pub fn set_calendar_policy_typed(
+        &self,
+        expected_revision: Revision,
+        enabled: bool,
+        actor: &ActorContext,
+    ) -> Result<fc_ports::command_window::TypedCommandOutcome, StorageError> {
+        use crate::{
+            business::typed_commands::{outcome, read_reply, TypedTask},
+            typed_command::Mode,
+        };
+        let intent = fc_ports::command_window::TypedCommandIntent::CalendarPolicy {
+            enabled,
+            expected_policy: expected_revision,
+        };
+        let bytes = self
+            .handle
+            .try_transaction(TypedTask {
+                inner: Some(Box::new(Policy {
+                    expected_revision,
+                    enabled,
+                    actor: actor.clone(),
+                    clock: self.clock.clone(),
+                    session: self.session.clone(),
+                    execution: self.calendar_execution.clone(),
+                    factory: self.factory.clone(),
+                })),
+                intent: intent.clone(),
+                mode: Mode::Atomic,
+                original: None,
+                actor: Some(actor.clone()),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+                manual: None,
+            })?
+            .wait()?;
+        let (_, stored, _) = read_reply(&bytes)?;
+        outcome(&intent, &stored)
+    }
+    pub fn begin_calendar_manual_typed(
+        &self,
+        year: i32,
+        actor: &ActorContext,
+    ) -> Result<ManualFetchStart, StorageError> {
+        use crate::{
+            business::typed_commands::{read_reply, TypedTask},
+            typed_command::{Mode, TypedAdmission},
+        };
+        let intent = fc_ports::command_window::TypedCommandIntent::CalendarManualFetch { year };
+        let bytes = self
+            .handle
+            .try_transaction(TypedTask {
+                inner: Some(Box::new(Reserve {
+                    year: Some(year),
+                    actor: Some(actor.clone()),
+                    clock: self.clock.clone(),
+                    session: self.session.clone(),
+                    factory: self.factory.clone(),
+                    execution: self.calendar_execution.clone(),
+                })),
+                intent: intent.clone(),
+                mode: Mode::ManualReserve,
+                original: None,
+                actor: Some(actor.clone()),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+                manual: None,
+            })?
+            .wait()?;
+        match self.typed_admission(&bytes, intent)? {
+            TypedAdmission::Fresh(first) => {
+                let (_, _, raw) = read_reply(&bytes)?;
+                let value = codec::value(raw)?;
+                let ticket = dto::read_ticket(&value["ticket"])?;
+                Ok(ManualFetchStart::Fresh(ManualFetchPermit { first, ticket }))
+            }
+            TypedAdmission::History(outcome) => Ok(ManualFetchStart::History(outcome)),
+        }
+    }
+    pub fn finish_calendar_manual_typed(
+        &self,
+        permit: ManualFetchPermit,
+        fetch: CalendarFetchOutcome,
+    ) -> Result<fc_ports::command_window::TypedCommandOutcome, StorageError> {
+        use crate::{
+            business::typed_commands::{outcome, read_reply, TypedTask},
+            typed_command::Mode,
+        };
+        use fc_ports::command_window::CalendarManualResultKind;
+        let intent = permit.first.intent;
+        let issued = permit.first.issued;
+        let ticket = permit.ticket;
+        // The private original owner may settle after the client/work expires.
+        // Keep all original fences on a positive body; only the fixed failure
+        // fallback uses the negative path. No cloned context mints a permit.
+        let original_context = self.handle.transaction_execution.clone();
+        let original_execution = self.calendar_execution.clone();
+        let execution: CalendarExecutionGuard = Arc::new(move || {
+            original_execution() && original_context.as_ref().is_none_or(|check| check())
+        });
+        let mut owner_handle = self.handle.clone();
+        owner_handle.transaction_execution = None;
+        owner_handle.command_window = None;
+        let run = |fetch, execution| {
+            let kind = match &fetch {
+                CalendarFetchOutcome::Downloaded(_) => CalendarManualResultKind::Downloaded,
+                CalendarFetchOutcome::NotModified => CalendarManualResultKind::NotModified,
+                CalendarFetchOutcome::Failed(f) => CalendarManualResultKind::Failed(*f),
+            };
+            owner_handle
+                .try_transaction(TypedTask {
+                    inner: Some(Box::new(Finish {
+                        ticket: ticket.clone(),
+                        outcome: fetch,
+                        clock: self.clock.clone(),
+                        execution,
+                        factory: self.factory.clone(),
+                    })),
+                    intent: intent.clone(),
+                    mode: Mode::ManualFinish,
+                    original: Some(issued),
+                    actor: None,
+                    clock: self.clock.clone(),
+                    session: self.session.clone(),
+                    manual: Some((ticket.clone(), kind)),
+                })?
+                .wait()
+        };
+        let bytes = match run(fetch, execution) {
+            Err(StorageError::CalendarCancelled) => run(
+                CalendarFetchOutcome::Failed(CalendarFetchFailure::Cancelled),
+                Arc::new(|| true),
+            )?,
+            result => result?,
+        };
+        let (_, stored, _) = read_reply(&bytes)?;
+        outcome(&intent, &stored)
+    }
+}

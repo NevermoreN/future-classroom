@@ -12,47 +12,68 @@ fn scope() -> MaterialScope {
 }
 fn catalog(f: &mut BackendFixture, subjects: u64) {
     f.backend
-        .identity(
-            f.admin,
-            IdentityCommand::CreateClass {
-                id: ClassId::new(1).unwrap(),
-                name: "Synthetic material class".into(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    f.admin,
+                    IdentityCommand::CreateClass {
+                        id: ClassId::new(1).unwrap(),
+                        name: "Synthetic material class".into(),
+                    },
+                )
             },
         )
         .unwrap();
     for id in (1..=subjects).rev() {
         f.backend
-            .identity(
-                f.admin,
-                IdentityCommand::PutSubject {
-                    id: SubjectId::new(id).unwrap(),
-                    name: format!("Synthetic material subject {id}"),
-                    enabled: true,
-                    color: Rgb {
-                        red: 2,
-                        green: 3,
-                        blue: 4,
-                    },
-                    expected_revision: None,
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(f.admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        f.admin,
+                        IdentityCommand::PutSubject {
+                            id: SubjectId::new(id).unwrap(),
+                            name: format!("Synthetic material subject {id}"),
+                            enabled: true,
+                            color: Rgb {
+                                red: 2,
+                                green: 3,
+                                blue: 4,
+                            },
+                            expected_revision: None,
+                        },
+                    )
                 },
             )
             .unwrap();
     }
     f.backend
-        .identity(
-            f.admin,
-            IdentityCommand::UpdateAccount {
-                id: PrincipalId::new(1).unwrap(),
-                display_name: "Synthetic material global".into(),
-                role: Role::GlobalAdmin,
-                enabled: true,
-                scopes: (1..=subjects)
-                    .rev()
-                    .map(|id| AssignmentScope {
-                        class_id: ClassId::new(1).unwrap(),
-                        subject_id: SubjectId::new(id).unwrap(),
-                    })
-                    .collect(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    f.admin,
+                    IdentityCommand::UpdateAccount {
+                        id: PrincipalId::new(1).unwrap(),
+                        display_name: "Synthetic material global".into(),
+                        role: Role::GlobalAdmin,
+                        enabled: true,
+                        scopes: (1..=subjects)
+                            .rev()
+                            .map(|id| AssignmentScope {
+                                class_id: ClassId::new(1).unwrap(),
+                                subject_id: SubjectId::new(id).unwrap(),
+                            })
+                            .collect(),
+                    },
+                )
             },
         )
         .unwrap();
@@ -111,7 +132,12 @@ impl MaterialPreparation for TxtPreparation {
         })
     }
 }
-fn append(f: &mut BackendFixture, lease: SessionLease, cmd: u64, id: u64) -> MaterialRecord {
+fn append(
+    f: &mut BackendFixture,
+    lease: SessionLease,
+    command: TestCommand,
+    id: u64,
+) -> MaterialRecord {
     let fixture = f.directory.0.join(format!("actual-txt-{id}.txt"));
     std::fs::write(&fixture, b"Actual synthetic material UTF-8 bytes\n").unwrap();
     let proof = fc_ports::prepare_material_append(
@@ -120,7 +146,7 @@ fn append(f: &mut BackendFixture, lease: SessionLease, cmd: u64, id: u64) -> Mat
         },
         std::fs::File::open(fixture).unwrap(),
         MaterialAppendMetadata {
-            command_id: CommandId::new(cmd).unwrap(),
+            command_id: command.id,
             scope: scope(),
             material_id: MaterialId::new(id).unwrap(),
             display_name: "proof.txt".into(),
@@ -128,13 +154,29 @@ fn append(f: &mut BackendFixture, lease: SessionLease, cmd: u64, id: u64) -> Mat
         },
     )
     .unwrap();
-    f.backend.web_material_append(lease, proof).unwrap()
+    let issued = f
+        .backend
+        .resolve_web_command(
+            lease,
+            fc_ports::command_window::CommandFamily::Materials,
+            command.ticket,
+            command.id,
+        )
+        .unwrap();
+    f.backend
+        .begin_command_scope(issued)
+        .unwrap()
+        .web_material_append(lease, proof)
+        .unwrap()
 }
 #[test]
 fn material_http_metadata_delete_cas_fixed_version_and_historical_receipts() {
     let mut f = BackendFixture::new();
     catalog(&mut f, 1);
     let (cookie, csrf, lease) = auth(&mut f, "material-metadata");
+    let command71001 = f.issue(&cookie, "materials");
+    let command71002 = f.issue(&cookie, "materials");
+    let command71999 = f.issue(&cookie, "materials");
     assert!(f
         .backend
         .web_material_authorize(f.admin, scope(), &[])
@@ -142,31 +184,26 @@ fn material_http_metadata_delete_cas_fixed_version_and_historical_receipts() {
     let empty = get(&mut f, &cookie, "materials/folders/1/1");
     expect(&empty, 200, "\"total\":0");
     assert_ne!(field(&empty.body, "folderId"), "0");
-    let record = append(&mut f, lease, 71001, 72001);
+    let record = append(&mut f, lease, command71001, 72001);
     let page = get(&mut f, &cookie, "materials/folders/1/1");
     expect(&page, 200, "\"displayName\":\"proof.txt\"");
     expect(&page, 200, "\"kind\":\"TXT\"");
     expect(&page, 200, "\"allowedClassIds\":[\"1\"]");
-    let remove = |cmd: u64, version: u64, rev: u64| {
+    let remove = |version: u64, rev: u64| {
         format!(
-            r#"{{"schemaVersion":1,"commandId":"{cmd}","materialId":"72001","resourceVersionId":"{version}","expectedMaterialRevision":"{rev}"}}"#
+            r#"{{{},"materialId":"72001","resourceVersionId":"{version}","expectedMaterialRevision":"{rev}"}}"#,
+            command71002.fields()
         )
     };
     let route = "materials/folders/1/1/delete";
     let original = record.resource.version_id.get();
     expect(
-        &post(
-            &mut f,
-            &cookie,
-            &csrf,
-            route,
-            &remove(71002, original + 1, 1),
-        ),
+        &post(&mut f, &cookie, &csrf, route, &remove(original + 1, 1)),
         404,
         "NOT_FOUND",
     );
     expect(
-        &post(&mut f, &cookie, &csrf, route, &remove(71002, original, 2)),
+        &post(&mut f, &cookie, &csrf, route, &remove(original, 2)),
         409,
         "REVISION_CONFLICT",
     );
@@ -176,7 +213,7 @@ fn material_http_metadata_delete_cas_fixed_version_and_historical_receipts() {
             &cookie,
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
             route,
-            &remove(71002, original, 1),
+            &remove(original, 1),
         ),
         403,
         "FORBIDDEN",
@@ -188,40 +225,33 @@ fn material_http_metadata_delete_cas_fixed_version_and_historical_receipts() {
             .revision,
         Revision::new(1)
     );
-    let deleted = post(&mut f, &cookie, &csrf, route, &remove(71002, original, 1));
+    let deleted = post(&mut f, &cookie, &csrf, route, &remove(original, 1));
     expect(&deleted, 200, "\"status\":\"DELETED\"");
     expect(&deleted, 200, "\"revision\":\"2\"");
     expect(
-        &post(&mut f, &cookie, &csrf, route, &remove(71002, original, 1)),
+        &post(&mut f, &cookie, &csrf, route, &remove(original, 1)),
         200,
         "\"status\":\"DELETED\"",
     );
     expect(
-        &post(
-            &mut f,
-            &cookie,
-            &csrf,
-            route,
-            &remove(71002, original + 1, 1),
-        ),
+        &post(&mut f, &cookie, &csrf, route, &remove(original + 1, 1)),
         409,
         "IDEMPOTENCY_CONFLICT",
     );
     expect(
-        &get(&mut f, &cookie, "materials/commands/71001"),
+        &get(&mut f, &cookie, &command71001.history("materials")),
         200,
         "\"status\":\"PUBLISHED\"",
     );
     expect(
-        &get(&mut f, &cookie, "materials/commands/71002"),
+        &get(&mut f, &cookie, &command71002.history("materials")),
         200,
         "\"status\":\"DELETED\"",
     );
-    expect(
-        &get(&mut f, &cookie, "materials/commands/71999"),
-        200,
-        "\"state\":\"NOT_FOUND\",\"scope\":null,\"record\":null",
-    );
+    let missing = get(&mut f, &cookie, &command71999.history("materials"));
+    expect(&missing, 200, "\"state\":\"NOT_FOUND\"");
+    expect(&missing, 200, "\"scope\":null");
+    expect(&missing, 200, "\"record\":null");
     assert!(f
         .backend
         .web_material_download_record(lease, scope(), record.id, record.resource.version_id)
@@ -284,11 +314,13 @@ fn material_cursor_never_rebinds_to_mutated_folder_and_binary_slice_is_not_a_spo
     let mut f = BackendFixture::new();
     catalog(&mut f, 1);
     let (cookie, csrf, lease) = auth(&mut f, "material-cursor");
-    let first = append(&mut f, lease, 73001, 74001);
+    let command73001 = f.issue(&cookie, "materials");
+    let command73002 = f.issue(&cookie, "materials");
+    let first = append(&mut f, lease, command73001, 74001);
     let before = get(&mut f, &cookie, "materials/folders/1/1");
     let folder = field(&before.body, "folderId");
     let revision = field(&before.body, "folderRevision");
-    let _ = append(&mut f, lease, 73002, 74002);
+    let _ = append(&mut f, lease, command73002, 74002);
     expect(
         &get(
             &mut f,
@@ -336,6 +368,12 @@ fn material_windows_upload_device_capacity_prepared_permit_cancel_and_consumed_r
     catalog(&mut f, 1);
     let (cookie, csrf, owner_lease) = auth(&mut f, "stream-owner");
     let (foreign, foreign_csrf, _) = auth(&mut f, "stream-other-device");
+    let command75001 = f.issue(&cookie, "materials");
+    let command75002 = f.issue(&cookie, "materials");
+    let command75003 = f.issue(&cookie, "materials");
+    let command75004 = f.issue(&cookie, "materials");
+    let command75005 = f.issue(&foreign, "materials");
+    let command75006 = f.issue(&foreign, "materials");
     f.app.configure_material_files(&f.directory.0).unwrap();
     let replacement = BackendFixture::open(&replacement_directory, f.clock.clone());
     struct Shared(Arc<Mutex<Backend>>);
@@ -408,7 +446,8 @@ fn material_windows_upload_device_capacity_prepared_permit_cancel_and_consumed_r
         "UPLOAD_NOT_READY",
     );
     let append_body = format!(
-        r#"{{"schemaVersion":1,"commandId":"75001","uploadId":"{first_id}","allowedClassIds":["1"]}}"#
+        r#"{{{},"uploadId":"{first_id}","allowedClassIds":["1"]}}"#,
+        command75001.fields()
     );
     let append_head = head(
         "POST",
@@ -450,7 +489,8 @@ fn material_windows_upload_device_capacity_prepared_permit_cancel_and_consumed_r
         "COMMITTED",
     );
     let changed = format!(
-        r#"{{"schemaVersion":1,"commandId":"75001","uploadId":"{first_id}","allowedClassIds":["999"]}}"#
+        r#"{{{},"uploadId":"{first_id}","allowedClassIds":["999"]}}"#,
+        command75001.fields()
     );
     expect(
         &f.app.dispatch_material_append(
@@ -479,7 +519,8 @@ fn material_windows_upload_device_capacity_prepared_permit_cancel_and_consumed_r
     let material = field(&committed.body, "materialId");
     let version = field(&committed.body, "resourceVersionId");
     let delete = format!(
-        r#"{{"schemaVersion":1,"commandId":"75004","materialId":"{material}","resourceVersionId":"{version}","expectedMaterialRevision":"1"}}"#
+        r#"{{{},"materialId":"{material}","resourceVersionId":"{version}","expectedMaterialRevision":"1"}}"#,
+        command75004.fields()
     );
     let released = super::super::material_files::download_checkpoint(
         &control,
@@ -552,7 +593,7 @@ fn material_windows_upload_device_capacity_prepared_permit_cancel_and_consumed_r
     // Regression: revoked proofs still physically own their final inodes.
     // Sweeping their dead lease must not let a third physical owner enter.
     let mut pending_proofs = Vec::new();
-    for cmd in [75002, 75003] {
+    for command in [command75002, command75003] {
         let ready = request("POST", "materials/uploads/1/1", reservation);
         expect(&ready, 201, "UPLOAD_READY");
         let id = field(&ready.body, "uploadId");
@@ -565,7 +606,8 @@ fn material_windows_upload_device_capacity_prepared_permit_cancel_and_consumed_r
             "UPLOADED",
         );
         let body = format!(
-            r#"{{"schemaVersion":1,"commandId":"{cmd}","uploadId":"{id}","allowedClassIds":["1"]}}"#
+            r#"{{{},"uploadId":"{id}","allowedClassIds":["1"]}}"#,
+            command.fields()
         );
         let proof = match f.app.prepare_material_append(
             &head(
@@ -622,7 +664,7 @@ fn material_windows_upload_device_capacity_prepared_permit_cancel_and_consumed_r
     f.app.sweep_material_uploads().unwrap();
     // A new registry cannot forget physical owners from the old application.
     let mut old_proofs = Vec::new();
-    for cmd in [75005, 75006] {
+    for command in [command75005, command75006] {
         let ready = foreign_request("materials/uploads/1/1", reservation);
         expect(&ready, 201, "UPLOAD_READY");
         let id = field(&ready.body, "uploadId");
@@ -635,7 +677,8 @@ fn material_windows_upload_device_capacity_prepared_permit_cancel_and_consumed_r
             "UPLOADED",
         );
         let body = format!(
-            r#"{{"schemaVersion":1,"commandId":"{cmd}","uploadId":"{id}","allowedClassIds":["1"]}}"#
+            r#"{{{},"uploadId":"{id}","allowedClassIds":["1"]}}"#,
+            command.fields()
         );
         let proof = match f.app.prepare_material_append(
             &head(
@@ -699,30 +742,44 @@ fn material_class_pages_preserve_all_classes_under_the_same_identity_revision() 
     catalog(&mut f, 1);
     for id in 2..=23 {
         f.backend
-            .identity(
-                f.admin,
-                IdentityCommand::CreateClass {
-                    id: ClassId::new(id).unwrap(),
-                    name: format!("Synthetic authorized class {id}"),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(f.admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        f.admin,
+                        IdentityCommand::CreateClass {
+                            id: ClassId::new(id).unwrap(),
+                            name: format!("Synthetic authorized class {id}"),
+                        },
+                    )
                 },
             )
             .unwrap();
     }
     f.backend
-        .identity(
-            f.admin,
-            IdentityCommand::UpdateAccount {
-                id: PrincipalId::new(1).unwrap(),
-                display_name: "Synthetic material global".into(),
-                role: Role::GlobalAdmin,
-                enabled: true,
-                scopes: (1..=23)
-                    .rev()
-                    .map(|id| AssignmentScope {
-                        class_id: ClassId::new(id).unwrap(),
-                        subject_id: SubjectId::new(1).unwrap(),
-                    })
-                    .collect(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    f.admin,
+                    IdentityCommand::UpdateAccount {
+                        id: PrincipalId::new(1).unwrap(),
+                        display_name: "Synthetic material global".into(),
+                        role: Role::GlobalAdmin,
+                        enabled: true,
+                        scopes: (1..=23)
+                            .rev()
+                            .map(|id| AssignmentScope {
+                                class_id: ClassId::new(id).unwrap(),
+                                subject_id: SubjectId::new(1).unwrap(),
+                            })
+                            .collect(),
+                    },
+                )
             },
         )
         .unwrap();

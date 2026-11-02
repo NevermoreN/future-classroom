@@ -1,5 +1,6 @@
+import { identity, ticket } from './command-fixtures'
 import { describe, expect, it } from 'vitest'
-import { bodyText, civilDate, civilTime, commandResult, committed, content, contentPath, newCommandId, nextDay, normalizedBodyText, revision, scopes } from '../src/api/content-protocol'
+import { bodyText, civilDate, civilTime, commandResult, committed, content, contentPath, nextDay, normalizedBodyText, revision, scopes } from '../src/api/content-protocol'
 import { ProtocolFault, ProtocolVersionFault } from '../src/api/protocol'
 import { homeworkKey, wireDocument, wireScopes } from './content-fixtures'
 describe('teacher content strict wire contract', () => {
@@ -7,13 +8,14 @@ describe('teacher content strict wire contract', () => {
     const readers: ((version: unknown) => unknown)[] = [
       version => scopes({ ...wireScopes(), schemaVersion: version }, 'HOMEWORK', 0),
       version => content({ ...wireDocument(), schemaVersion: version }),
-      version => committed({ schemaVersion: version, status: 'COMMITTED', commandId: '7', content: wireDocument(homeworkKey, '1', '作业') }, '7', homeworkKey, '0', '作业'),
-      version => committed({ schemaVersion: 1, status: 'COMMITTED', commandId: '7', content: { ...wireDocument(homeworkKey, '1', '作业'), schemaVersion: version } }, '7', homeworkKey, '0', '作业'),
-      version => commandResult({ schemaVersion: version, status: 'COMMAND_RESULT', commandId: '7', state: 'NOT_FOUND', content: null }, '7'),
+      version => committed({ schemaVersion: version, status: 'COMMITTED', commandId: '7', commandTicket: ticket, content: wireDocument(homeworkKey, '1', '作业') }, identity('7'), homeworkKey, '0', '作业'),
+      version => committed({ schemaVersion: 2, status: 'COMMITTED', commandId: '7', commandTicket: ticket, content: { ...wireDocument(homeworkKey, '1', '作业'), schemaVersion: version } }, identity('7'), homeworkKey, '0', '作业'),
+      version => commandResult({ schemaVersion: version, status: 'COMMAND_RESULT', commandId: '7', commandTicket: ticket, state: 'NOT_FOUND', content: null }, identity('7')),
     ]
-    for (const read of readers) {
-      expect(() => read(1)).not.toThrow()
-      expect(() => read(2)).toThrow(ProtocolVersionFault)
+    for (const [index, read] of readers.entries()) {
+      const expected = [2, 4].includes(index) ? 2 : 1
+      expect(() => read(expected)).not.toThrow()
+      expect(() => read(expected === 1 ? 2 : 1)).toThrow(ProtocolVersionFault)
       for (const invalid of [undefined, '2', null, 0, -1, 1.5]) {
         expect(() => read(invalid)).toThrow(ProtocolFault)
         expect(() => read(invalid)).not.toThrow(ProtocolVersionFault)
@@ -72,18 +74,11 @@ describe('teacher content strict wire contract', () => {
     ]) expect(() => content(bad)).toThrow(ProtocolFault)
   })
   it('correlates committed ID/key/next revision and keeps result NOT_FOUND distinct from commit', () => {
-    const good = { schemaVersion: 1, status: 'COMMITTED', commandId: '18446744073709551615', content: wireDocument(homeworkKey, '1', '作业') }
-    expect(committed(good, good.commandId, homeworkKey, '0', '作业').content.text).toBe('作业')
-    for (const bad of [{ ...good, commandId: '1' }, { ...good, content: wireDocument({ ...homeworkKey, classId: '2' }, '1') }, { ...good, content: wireDocument(homeworkKey, '2') }]) expect(() => committed(bad, good.commandId, homeworkKey, '0', '作业')).toThrow(ProtocolFault)
-    expect(commandResult({ schemaVersion: 1, status: 'COMMAND_RESULT', commandId: '7', state: 'NOT_FOUND', content: null }, '7').state).toBe('NOT_FOUND')
-    expect(() => commandResult({ schemaVersion: 1, status: 'COMMAND_RESULT', commandId: '7', state: 'NOT_FOUND', content: wireDocument() }, '7')).toThrow(ProtocolFault)
-    expect(() => commandResult({ schemaVersion: 1, status: 'COMMAND_RESULT', commandId: '8', state: 'COMMITTED', content: wireDocument() }, '7')).toThrow(ProtocolFault)
-  })
-  it('uses CSPRNG 64 bits without rounding or zero fallback', () => {
-    let calls = 0
-    const random = { getRandomValues: <T extends ArrayBufferView | null>(array: T): T => { const values = array as Uint32Array; values.fill(calls++ === 0 ? 0 : 0xffffffff); return array } }
-    expect(newCommandId(random)).toBe('18446744073709551615'); expect(calls).toBe(2)
-    const zero = { getRandomValues: <T extends ArrayBufferView | null>(array: T): T => array }
-    expect(() => newCommandId(zero)).toThrow(ProtocolFault)
+    const good = { schemaVersion: 2, status: 'COMMITTED', commandId: '18446744073709551615', commandTicket: ticket, content: wireDocument(homeworkKey, '1', '作业') }
+    expect(committed(good, identity(good.commandId), homeworkKey, '0', '作业').content.text).toBe('作业')
+    for (const bad of [{ ...good, commandId: '1' }, { ...good, content: wireDocument({ ...homeworkKey, classId: '2' }, '1') }, { ...good, content: wireDocument(homeworkKey, '2') }]) expect(() => committed(bad, identity(good.commandId), homeworkKey, '0', '作业')).toThrow(ProtocolFault)
+    expect(commandResult({ schemaVersion: 2, status: 'COMMAND_RESULT', commandId: '7', commandTicket: ticket, state: 'NOT_FOUND', content: null }, identity('7')).state).toBe('NOT_FOUND')
+    expect(() => commandResult({ schemaVersion: 2, status: 'COMMAND_RESULT', commandId: '7', commandTicket: ticket, state: 'NOT_FOUND', content: wireDocument() }, identity('7'))).toThrow(ProtocolFault)
+    expect(() => commandResult({ schemaVersion: 2, status: 'COMMAND_RESULT', commandId: '8', commandTicket: ticket, state: 'COMMITTED', content: wireDocument() }, identity('7'))).toThrow(ProtocolFault)
   })
 })

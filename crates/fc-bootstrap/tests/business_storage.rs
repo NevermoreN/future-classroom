@@ -6,7 +6,10 @@ use fc_ports::{
     IdentityRepositoryError, IdentityRequest, RepositoryError,
 };
 use fc_runtime::authority::{AuthorityStore, PreparedAuthority};
-use fc_storage::{business::BusinessRepository, StorageError, StorageWriter};
+#[path = "support/business_commands.rs"]
+mod business_commands;
+use business_commands::Repository as BusinessRepository;
+use fc_storage::{StorageError, StorageWriter};
 use std::{
     path::PathBuf,
     sync::{
@@ -17,7 +20,7 @@ use std::{
 };
 type Snapshot = PreparedAuthority<IdentityState>;
 static NEXT: AtomicU64 = AtomicU64::new(0);
-struct Directory(PathBuf);
+struct Directory(PathBuf, Arc<business_commands::Commands>);
 impl Directory {
     fn new() -> Self {
         let p = std::env::temp_dir().join(format!(
@@ -30,7 +33,7 @@ impl Directory {
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir(&p).unwrap();
-        Self(p)
+        Self(p, Default::default())
     }
     fn path(&self) -> PathBuf {
         self.0.join("state.sqlite3")
@@ -130,6 +133,7 @@ impl FixturePreparation for BusinessRepository<Snapshot> {
         a: Option<&ActorContext>,
         c: PreparedCredentials,
     ) -> Result<IdentityTransition, IdentityRepositoryError> {
+        let r = self.identity_request(r, a);
         let secret = vec![c.id as u8, c.version as u8, 42];
         let mut crypto = FixtureCrypto;
         let change = if c.both {
@@ -158,7 +162,8 @@ fn open(
     });
     (
         Joined(Some(w)),
-        BusinessRepository::new(handle, clock, factory).with_session_guard(Arc::new(|_, _| Ok(()))),
+        BusinessRepository::new(handle, clock, factory, d.1.clone())
+            .with_session_guard(Arc::new(|_, _| Ok(()))),
     )
 }
 fn initialize(repo: &mut BusinessRepository<Snapshot>, clock: &Time) {
@@ -400,7 +405,15 @@ fn queued_content_rechecks_current_identity_and_midnight_in_writer() {
         )))
     );
     let web_admin = actor(1, 1, TrustedOrigin::Web);
-    repo.execute(reminder.clone(), &web_admin, &*clock).unwrap();
+    assert_eq!(
+        repo.execute(reminder.clone(), &web_admin, &*clock),
+        Err(RepositoryError::CommandWindow(
+            fc_ports::command_window::CommandWindowError::NotIssued
+        ))
+    );
+    let mut web_reminder = reminder.clone();
+    web_reminder.command_id = CommandId::new(112).unwrap();
+    repo.execute(web_reminder, &web_admin, &*clock).unwrap();
     *clock.0.lock().unwrap() = time(31);
     assert_eq!(repo.content(reminder.key, &web_admin).unwrap(), None);
 }
@@ -480,7 +493,7 @@ fn commit_rechecks_midnight_after_snapshot_preparation_and_stop_rejects_new_work
         r.prepare_update(s.clone(), revision, AuthEpoch::new(1))
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
-    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(|_, _| Ok(())));
     initialize(&mut repo, &clock);
     let before = handle.try_revision().unwrap().wait().unwrap();
@@ -564,7 +577,7 @@ fn typed_commit_then_publication_failure_is_durable_and_old_reads_fail_closed() 
         r.prepare_update(s.clone(), revision, AuthEpoch::new(1))
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
-    let mut repo = BusinessRepository::new(handle, clock.clone(), factory)
+    let mut repo = BusinessRepository::new(handle, clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(|_, _| Ok(())));
     let teacher = actor(2, 2, TrustedOrigin::Web);
     let cmd = command(300, 2, 0, "committed before publication failure");
@@ -614,7 +627,7 @@ fn exact_local_session_lock_between_admission_and_commit_revokes_local_but_keeps
         r.prepare_update(s.clone(), revision, AuthEpoch::new(1))
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
-    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(|_, _| Ok(())));
     initialize(&mut repo, &clock);
     let state = repo.load_identity().unwrap();
@@ -728,7 +741,7 @@ fn open_login(
             .prepare_update(s.clone(), r, AuthEpoch::new(1))
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
-    let repo = BusinessRepository::new(handle.clone(), wall, factory)
+    let repo = BusinessRepository::new(handle.clone(), wall, factory, d.1.clone())
         .with_session_guard(Arc::new(|_, _| Ok(())));
     (Joined(Some(writer)), repo, handle)
 }
@@ -1201,7 +1214,7 @@ fn login_kdf_capacity_is_shared_across_different_databases_in_one_process() {
 
 #[test]
 fn sqlite_content_row_or_receipt_copied_between_owners_is_rejected_before_release() {
-    use fc_storage::{CommitCommand, Mutation};
+    use fc_storage::Mutation;
     let d = Directory::new();
     let clock = Arc::new(Time(Mutex::new(time(30))));
     let (mut publisher, reader) = AuthorityStore::new(
@@ -1219,7 +1232,7 @@ fn sqlite_content_row_or_receipt_copied_between_owners_is_rejected_before_releas
             .prepare_update(s.clone(), r, AuthEpoch::new(1))
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
-    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(|_, _| Ok(())));
     initialize(&mut repo, &clock);
     let a = actor(2, 2, TrustedOrigin::Web);
@@ -1253,22 +1266,18 @@ fn sqlite_content_row_or_receipt_copied_between_owners_is_rejected_before_releas
         let snapshot = reader
             .prepare_update(state, next, AuthEpoch::new(1))
             .unwrap();
-        handle
-            .try_commit(
-                CommitCommand::new(
-                    id.into(),
-                    revision,
-                    vec![Mutation::Put {
-                        key: key.into(),
-                        value,
-                    }],
-                )
-                .unwrap(),
-                snapshot,
-            )
-            .unwrap()
-            .wait()
-            .unwrap();
+        repo.generic_commit(
+            id,
+            revision,
+            vec![Mutation::Put {
+                key: repo.stored_key(key),
+                value,
+            }],
+            snapshot,
+        )
+        .unwrap()
+        .wait()
+        .unwrap();
     };
     inject(akey, foreign, "tamper-owner-row");
     assert_eq!(
@@ -1277,7 +1286,7 @@ fn sqlite_content_row_or_receipt_copied_between_owners_is_rejected_before_releas
     );
     assert_eq!(repo.content(bcmd.key.clone(), &b).unwrap(), Some(b_record));
     let receipt = handle
-        .try_get("business/receipt/content/510".into())
+        .try_get(repo.stored_key("business/receipt/content/510"))
         .unwrap()
         .wait()
         .unwrap()
@@ -1357,13 +1366,18 @@ fn corrupt_one_credential_kind_preserves_healthy_other_kind_and_repairs_only_new
         &(),
         &vec![2, 3, 42],
         &vec![43],
-        request(
-            920,
-            7,
-            IdentityCommand::RecoveryConsumed {
-                id: principal(2),
-                expected_recovery_version: 1,
-            },
+        repo.identity_request(
+            request(
+                920,
+                7,
+                IdentityCommand::RecoveryConsumed {
+                    id: principal(2),
+                    expected_recovery_version: 1,
+                },
+            ),
+            // Bind issuance to the verified recovery principal's current epoch;
+            // execution below remains sessionless through the opaque proof.
+            Some(&actor(2, 2, TrustedOrigin::Local)),
         ),
     )
     .unwrap();
@@ -1387,13 +1401,16 @@ fn corrupt_one_credential_kind_preserves_healthy_other_kind_and_repairs_only_new
         &mut FixtureCrypto,
         &vec![3, 2, 42],
         &vec![3, 2, 42],
-        request(
-            921,
-            8,
-            IdentityCommand::RecoveryRotated {
-                id: principal(3),
-                expected_recovery_version: 1,
-            },
+        repo.identity_request(
+            request(
+                921,
+                8,
+                IdentityCommand::RecoveryRotated {
+                    id: principal(3),
+                    expected_recovery_version: 1,
+                },
+            ),
+            Some(&actor(3, 3, TrustedOrigin::Local)),
         ),
     )
     .unwrap();
@@ -1527,7 +1544,8 @@ fn open_schedule_storage(
     });
     (
         Joined(Some(writer)),
-        BusinessRepository::new(handle, clock, factory).with_session_guard(Arc::new(|_, _| Ok(()))),
+        BusinessRepository::new(handle, clock, factory, d.1.clone())
+            .with_session_guard(Arc::new(|_, _| Ok(()))),
         reader,
     )
 }
@@ -1828,7 +1846,7 @@ fn timetable_storage_rejects_invalid_references_catalog_revocation_and_silent_de
 fn timetable_codec_rejects_tampered_unknown_duplicate_revision_and_oversize_without_truncation() {
     use fc_domain::{schedule::*, schedule_document::*};
     use fc_ports::{ScheduleRepository, ScheduleRepositoryError};
-    use fc_storage::{CommitCommand, Mutation};
+    use fc_storage::Mutation;
     let d = Directory::new();
     let clock = Arc::new(Time(Mutex::new(time(30))));
     let (w, mut repo, reader) = open_schedule_storage(
@@ -1860,22 +1878,18 @@ fn timetable_codec_rejects_tampered_unknown_duplicate_revision_and_oversize_with
         let snapshot = reader
             .prepare_update(state, revision.next().unwrap(), AuthEpoch::new(1))
             .unwrap();
-        handle
-            .try_commit(
-                CommitCommand::new(
-                    id.into(),
-                    revision,
-                    vec![Mutation::Put {
-                        key: "business/schedule/v1".into(),
-                        value: bytes,
-                    }],
-                )
-                .unwrap(),
-                snapshot,
-            )
-            .unwrap()
-            .wait()
-            .unwrap();
+        repo.generic_commit(
+            id,
+            revision,
+            vec![Mutation::Put {
+                key: "business/schedule/v1".into(),
+                value: bytes,
+            }],
+            snapshot,
+        )
+        .unwrap()
+        .wait()
+        .unwrap();
     };
     for (field, id) in [
         ("\"unknown\":1,", "unknown-schedule"),
@@ -1975,22 +1989,18 @@ fn timetable_codec_rejects_tampered_unknown_duplicate_revision_and_oversize_with
             AuthEpoch::new(1),
         )
         .unwrap();
-    handle
-        .try_commit(
-            CommitCommand::new(
-                "replace-schedule-result".into(),
-                revision,
-                vec![Mutation::Put {
-                    key: "business/result/schedule/3200".into(),
-                    value: replaced_result.into_bytes(),
-                }],
-            )
-            .unwrap(),
-            snapshot,
-        )
-        .unwrap()
-        .wait()
-        .unwrap();
+    repo.generic_commit(
+        "replace-schedule-result",
+        revision,
+        vec![Mutation::Put {
+            key: repo.stored_key("business/result/schedule/3200"),
+            value: replaced_result.into_bytes(),
+        }],
+        snapshot,
+    )
+    .unwrap()
+    .wait()
+    .unwrap();
     assert_eq!(
         repo.execute_schedule(
             schedule_request(3200, 0, timetable_document(false)),
@@ -2004,7 +2014,6 @@ fn timetable_codec_rejects_tampered_unknown_duplicate_revision_and_oversize_with
 
 #[test]
 fn timetable_commit_rechecks_captured_session_after_preparation_and_rolls_back_every_row() {
-    use fc_ports::ScheduleRepository;
     use std::sync::atomic::AtomicBool;
     let d = Directory::new();
     let clock = Arc::new(Time(Mutex::new(time(30))));
@@ -2031,7 +2040,7 @@ fn timetable_commit_rechecks_captured_session_after_preparation_and_rolls_back_e
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
     let permit = allowed.clone();
-    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(move |_, _| {
             if permit.load(Ordering::Acquire) {
                 Ok(())
@@ -2054,7 +2063,14 @@ fn timetable_commit_rechecks_captured_session_after_preparation_and_rolls_back_e
         "business/receipt/schedule/3300",
         "business/result/schedule/3300",
     ] {
-        assert_eq!(handle.try_get(key.into()).unwrap().wait().unwrap(), None);
+        assert_eq!(
+            handle
+                .try_get(repo.stored_key(key))
+                .unwrap()
+                .wait()
+                .unwrap(),
+            None
+        );
     }
     armed.store(false, Ordering::Release);
     allowed.store(true, Ordering::Release);
@@ -2128,7 +2144,7 @@ fn timetable_commit_publication_failure_blocks_old_authority_and_reopens_committ
             .prepare_update(state.clone(), revision, AuthEpoch::new(1))
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
-    let mut repo = BusinessRepository::new(handle, clock.clone(), factory)
+    let mut repo = BusinessRepository::new(handle, clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(|_, _| Ok(())));
     let admin = actor(1, 1, TrustedOrigin::Local);
     let request = schedule_request(3400, 0, timetable_document(true));
@@ -2548,22 +2564,18 @@ fn replace_business_blob(
             AuthEpoch::new(1),
         )
         .unwrap();
-    handle
-        .try_commit(
-            fc_storage::CommitCommand::new(
-                id.into(),
-                revision,
-                vec![fc_storage::Mutation::Put {
-                    key: key.into(),
-                    value,
-                }],
-            )
-            .unwrap(),
-            snapshot,
-        )
-        .unwrap()
-        .wait()
-        .unwrap();
+    repo.generic_commit(
+        id,
+        revision,
+        vec![fc_storage::Mutation::Put {
+            key: repo.stored_key(key),
+            value,
+        }],
+        snapshot,
+    )
+    .unwrap()
+    .wait()
+    .unwrap();
 }
 #[test]
 fn display_and_desktop_strict_codec_rejects_tampering_without_registering_or_cross_owner_release() {
@@ -2737,7 +2749,7 @@ fn display_precommit_rechecks_exact_lease_and_desktop_midnight_floor_rolls_back_
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
     let permit = allowed.clone();
-    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(move |_, _| {
             if permit.load(Ordering::Acquire) {
                 Ok(())
@@ -2759,7 +2771,7 @@ fn display_precommit_rechecks_exact_lease_and_desktop_midnight_floor_rolls_back_
         "business/receipt/display/4600",
     ] {
         assert!(handle
-            .try_get(key.into())
+            .try_get(repo.stored_key(key))
             .unwrap()
             .wait()
             .unwrap()
@@ -2853,7 +2865,7 @@ fn display_and_desktop_postcommit_publication_fault_recover_committed_state_and_
                 .prepare_update(state.clone(), revision, AuthEpoch::new(1))
                 .map_err(|_| StorageError::AuthorityUnavailable)
         });
-        let repo = BusinessRepository::new(writer.handle(), clock.clone(), factory)
+        let repo = BusinessRepository::new(writer.handle(), clock.clone(), factory, d.1.clone())
             .with_session_guard(Arc::new(|_, _| Ok(())));
         (Joined(Some(writer)), repo, gate)
     };
@@ -2996,6 +3008,8 @@ fn material_scope(teacher: u64) -> fc_domain::materials::MaterialScope {
     }
 }
 fn prepared_material(
+    repo: &BusinessRepository<Snapshot>,
+    who: &ActorContext,
     command: u64,
     id: u64,
     teacher: u64,
@@ -3010,7 +3024,13 @@ fn prepared_material(
             bytes,
         },
         fc_ports::MaterialAppendMetadata {
-            command_id: CommandId::new(command).unwrap(),
+            command_id: repo
+                .issue(
+                    fc_ports::command_window::CommandFamily::Materials,
+                    command,
+                    Some(who),
+                )
+                .command_id,
             scope: material_scope(teacher),
             material_id: MaterialId::new(id).unwrap(),
             display_name: format!("Lesson-{id}.txt"),
@@ -3054,8 +3074,8 @@ fn material_storage_independent_appends_reverse_order_scope_cursor_and_receipts_
     let startup = fc_storage::business::startup_state(d.path()).unwrap();
     let (writer, mut repo, _) =
         open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
-    let early_prepared = prepared_material(6000, 100, 2, 10);
-    let later_prepared = prepared_material(6001, 101, 2, 10);
+    let early_prepared = prepared_material(&repo, &teacher, 6000, 100, 2, 10);
+    let later_prepared = prepared_material(&repo, &teacher, 6001, 101, 2, 10);
     let first = repo
         .append_material(later_prepared, &teacher, &*clock)
         .unwrap();
@@ -3066,12 +3086,20 @@ fn material_storage_independent_appends_reverse_order_scope_cursor_and_receipts_
     assert_eq!((first.added_sequence, second.added_sequence), (1, 2));
     assert!(second.added_at < first.added_at);
     assert_eq!(
-        repo.append_material(prepared_material(6000, 100, 2, 10), &teacher, &*clock)
-            .unwrap(),
+        repo.append_material(
+            prepared_material(&repo, &teacher, 6000, 100, 2, 10),
+            &teacher,
+            &*clock
+        )
+        .unwrap(),
         second
     );
     assert_eq!(
-        repo.append_material(prepared_material(6000, 100, 2, 11), &teacher, &*clock),
+        repo.append_material(
+            prepared_material(&repo, &teacher, 6000, 100, 2, 11),
+            &teacher,
+            &*clock
+        ),
         Err(MaterialRepositoryError::IdempotencyConflict)
     );
     assert!(repo
@@ -3085,11 +3113,19 @@ fn material_storage_independent_appends_reverse_order_scope_cursor_and_receipts_
         )
         .is_err());
     assert!(repo
-        .append_material(prepared_material(6002, 102, 3, 10), &teacher, &*clock)
+        .append_material(
+            prepared_material(&repo, &teacher, 6002, 102, 3, 10),
+            &teacher,
+            &*clock
+        )
         .is_err());
     for id in 102..123 {
-        repo.append_material(prepared_material(6100 + id, id, 2, 10), &teacher, &*clock)
-            .unwrap();
+        repo.append_material(
+            prepared_material(&repo, &teacher, 6100 + id, id, 2, 10),
+            &teacher,
+            &*clock,
+        )
+        .unwrap();
     }
     let page = repo
         .materials(
@@ -3116,8 +3152,12 @@ fn material_storage_independent_appends_reverse_order_scope_cursor_and_receipts_
         .unwrap();
     assert_eq!(tail.items.len(), 3);
     assert!(tail.next_cursor.is_none());
-    repo.append_material(prepared_material(6300, 123, 2, 10), &teacher, &*clock)
-        .unwrap();
+    repo.append_material(
+        prepared_material(&repo, &teacher, 6300, 123, 2, 10),
+        &teacher,
+        &*clock,
+    )
+    .unwrap();
     assert_eq!(
         repo.materials(
             MaterialListRequest {
@@ -3173,8 +3213,12 @@ fn material_storage_independent_appends_reverse_order_scope_cursor_and_receipts_
     let (_writer, mut repo, _) =
         open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
     assert_eq!(
-        repo.append_material(prepared_material(6000, 100, 2, 10), &teacher, &*clock)
-            .unwrap(),
+        repo.append_material(
+            prepared_material(&repo, &teacher, 6000, 100, 2, 10),
+            &teacher,
+            &*clock
+        )
+        .unwrap(),
         second
     );
     assert_eq!(repo.resource_inventory(None).unwrap().original_bytes, 240);
@@ -3194,7 +3238,7 @@ fn material_storage_independent_appends_reverse_order_scope_cursor_and_receipts_
 }
 #[test]
 fn material_storage_original_quota_retirement_and_finalization_keep_active_references_safe() {
-    use fc_ports::{MaterialRepository, MaterialRepositoryError};
+    use fc_ports::MaterialRepositoryError;
     use fc_storage::business::materials::ResourceState;
     let d = Directory::new();
     let clock = Arc::new(Time(Mutex::new(time(30))));
@@ -3208,14 +3252,14 @@ fn material_storage_original_quota_retirement_and_finalization_keep_active_refer
     let teacher = actor(2, 2, TrustedOrigin::Local);
     for id in 1..=40 {
         repo.append_material(
-            prepared_material(6500 + id, id, 2, 50 * 1024 * 1024),
+            prepared_material(&repo, &teacher, 6500 + id, id, 2, 50 * 1024 * 1024),
             &teacher,
             &*clock,
         )
         .unwrap();
     }
     repo.append_material(
-        prepared_material(6541, 41, 2, 48 * 1024 * 1024),
+        prepared_material(&repo, &teacher, 6541, 41, 2, 48 * 1024 * 1024),
         &teacher,
         &*clock,
     )
@@ -3225,7 +3269,11 @@ fn material_storage_original_quota_retirement_and_finalization_keep_active_refer
         2 * 1024 * 1024 * 1024
     );
     assert_eq!(
-        repo.append_material(prepared_material(6542, 42, 2, 1), &teacher, &*clock),
+        repo.append_material(
+            prepared_material(&repo, &teacher, 6542, 42, 2, 1),
+            &teacher,
+            &*clock
+        ),
         Err(MaterialRepositoryError::QuotaExceeded)
     );
     let entry = repo.resource_inventory(None).unwrap().entries.remove(0);
@@ -3266,7 +3314,7 @@ fn material_storage_original_quota_retirement_and_finalization_keep_active_refer
         1998 * 1024 * 1024
     );
     repo.append_material(
-        prepared_material(6544, 42, 2, 50 * 1024 * 1024),
+        prepared_material(&repo, &teacher, 6544, 42, 2, 50 * 1024 * 1024),
         &teacher,
         &*clock,
     )
@@ -3283,7 +3331,7 @@ fn material_storage_original_quota_retirement_and_finalization_keep_active_refer
 #[test]
 fn material_desktop_facts_guest_scope_and_recess_proof_are_transaction_consistent() {
     use fc_domain::{materials::*, schedule::*};
-    use fc_ports::{DisplayRepository, MaterialRepository, ScheduleRepository};
+    use fc_ports::{DisplayRepository, MaterialRepository};
     let d = Directory::new();
     let clock = Arc::new(Time(Mutex::new(
         LocalDateTime::new(date(30), 8 * 3600).unwrap(),
@@ -3339,11 +3387,19 @@ fn material_desktop_facts_guest_scope_and_recess_proof_are_transaction_consisten
         settled_revision
     );
     for id in 200..206 {
-        repo.append_material(prepared_material(6800 + id, id, 2, 10), &teacher, &*clock)
-            .unwrap();
-    }
-    repo.append_material(prepared_material(7100, 300, 3, 10), &admin, &*clock)
+        repo.append_material(
+            prepared_material(&repo, &teacher, 6800 + id, id, 2, 10),
+            &teacher,
+            &*clock,
+        )
         .unwrap();
+    }
+    repo.append_material(
+        prepared_material(&repo, &admin, 7100, 300, 3, 10),
+        &admin,
+        &*clock,
+    )
+    .unwrap();
     *clock.0.lock().unwrap() = LocalDateTime::new(date(30), 8 * 3600 + 30 * 60).unwrap();
     let facts = repo.desktop_facts(0, &*clock).unwrap();
     let source = facts.materials_source.clone().unwrap();
@@ -3399,8 +3455,12 @@ fn material_desktop_facts_guest_scope_and_recess_proof_are_transaction_consisten
             &*clock
         )
         .is_err());
-    repo.append_material(prepared_material(7101, 206, 2, 10), &teacher, &*clock)
-        .unwrap();
+    repo.append_material(
+        prepared_material(&repo, &teacher, 7101, 206, 2, 10),
+        &teacher,
+        &*clock,
+    )
+    .unwrap();
     assert!(repo
         .desktop_facts_with_material_cursor(0, page.next_cursor, &*clock)
         .is_err());
@@ -3468,7 +3528,6 @@ fn material_desktop_facts_guest_scope_and_recess_proof_are_transaction_consisten
 }
 #[test]
 fn material_precommit_exact_lease_revocation_rolls_back_index_receipt_registry_and_quota() {
-    use fc_ports::MaterialRepository;
     use std::sync::atomic::AtomicBool;
     let d = Directory::new();
     let clock = Arc::new(Time(Mutex::new(time(30))));
@@ -3495,7 +3554,7 @@ fn material_precommit_exact_lease_revocation_rolls_back_index_receipt_registry_a
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
     let permit = allowed.clone();
-    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(move |_, _| {
             if permit.load(Ordering::Acquire) {
                 Ok(())
@@ -3508,7 +3567,7 @@ fn material_precommit_exact_lease_revocation_rolls_back_index_receipt_registry_a
     armed.store(true, Ordering::Release);
     assert!(repo
         .append_material(
-            prepared_material(7200, 400, 2, 10),
+            prepared_material(&repo, &actor(2, 2, TrustedOrigin::Local), 7200, 400, 2, 10),
             &actor(2, 2, TrustedOrigin::Local),
             &*clock
         )
@@ -3520,7 +3579,7 @@ fn material_precommit_exact_lease_revocation_rolls_back_index_receipt_registry_a
         "business/material/v1/receipts/00000000000000007200",
     ] {
         assert!(handle
-            .try_get(key.into())
+            .try_get(repo.stored_key(key))
             .unwrap()
             .wait()
             .unwrap()
@@ -3532,7 +3591,7 @@ fn material_precommit_exact_lease_revocation_rolls_back_index_receipt_registry_a
     allowed.store(true, Ordering::Release);
     assert!(repo
         .append_material(
-            prepared_material(7200, 400, 2, 10),
+            prepared_material(&repo, &actor(2, 2, TrustedOrigin::Local), 7200, 400, 2, 10),
             &actor(2, 2, TrustedOrigin::Local),
             &*clock
         )
@@ -3553,8 +3612,12 @@ fn material_strict_metadata_and_receipt_tampering_fail_closed_at_read_and_startu
     );
     initialize(&mut repo, &clock);
     let teacher = actor(2, 2, TrustedOrigin::Local);
-    repo.append_material(prepared_material(7300, 500, 2, 10), &teacher, &*clock)
-        .unwrap();
+    repo.append_material(
+        prepared_material(&repo, &teacher, 7300, 500, 2, 10),
+        &teacher,
+        &*clock,
+    )
+    .unwrap();
     let handle = writer.0.as_ref().unwrap().handle();
     let item_key = "business/material/v1/items/00000000000000000500";
     let original = handle
@@ -3595,7 +3658,7 @@ fn material_strict_metadata_and_receipt_tampering_fail_closed_at_read_and_startu
     assert!(fc_storage::business::startup_state(d.path()).is_ok());
     let receipt_key = "business/material/v1/receipts/00000000000000007300";
     let receipt = handle
-        .try_get(receipt_key.into())
+        .try_get(repo.stored_key(receipt_key))
         .unwrap()
         .wait()
         .unwrap()
@@ -3613,7 +3676,11 @@ fn material_strict_metadata_and_receipt_tampering_fail_closed_at_read_and_startu
         "material-receipt-tamper",
     );
     assert!(repo
-        .append_material(prepared_material(7300, 500, 2, 10), &teacher, &*clock)
+        .append_material(
+            prepared_material(&repo, &teacher, 7300, 500, 2, 10),
+            &teacher,
+            &*clock
+        )
         .is_err());
     // A structurally valid resource moved to the wrong stable registry key is still damage.
     let registry_key = "business/material/v1/resources/00000000000000010500";
@@ -3650,7 +3717,7 @@ fn material_strict_metadata_and_receipt_tampering_fail_closed_at_read_and_startu
 
 #[test]
 fn material_postcommit_publication_fault_preserves_original_quota_and_idempotent_result() {
-    use fc_ports::{AuthorityPublisher as Port, MaterialRepository, MaterialRepositoryError};
+    use fc_ports::{AuthorityPublisher as Port, MaterialRepositoryError};
     use fc_runtime::{
         authority::{AuthorityPublisher, AuthorityUpdateToken},
         health::{GateError, Health},
@@ -3699,12 +3766,16 @@ fn material_postcommit_publication_fault_preserves_original_quota_and_idempotent
             .prepare_update(state.clone(), revision, AuthEpoch::new(1))
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
-    let mut repo = BusinessRepository::new(writer.handle(), clock.clone(), factory)
+    let mut repo = BusinessRepository::new(writer.handle(), clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(|_, _| Ok(())));
     let writer = Joined(Some(writer));
     let teacher = actor(2, 2, TrustedOrigin::Local);
     assert_eq!(
-        repo.append_material(prepared_material(7400, 600, 2, 10), &teacher, &*clock),
+        repo.append_material(
+            prepared_material(&repo, &teacher, 7400, 600, 2, 10),
+            &teacher,
+            &*clock
+        ),
         Err(MaterialRepositoryError::Faulted)
     );
     assert_eq!(gate.status().health, Health::Faulted);
@@ -3718,7 +3789,11 @@ fn material_postcommit_publication_fault_preserves_original_quota_and_idempotent
         open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
     assert_eq!(repo.resource_inventory(None).unwrap().original_bytes, 10);
     let committed = repo
-        .append_material(prepared_material(7400, 600, 2, 10), &teacher, &*clock)
+        .append_material(
+            prepared_material(&repo, &teacher, 7400, 600, 2, 10),
+            &teacher,
+            &*clock,
+        )
         .unwrap();
     assert_eq!(committed.id.get(), 600);
     assert_eq!(repo.resource_inventory(None).unwrap().original_bytes, 10);
@@ -3737,7 +3812,6 @@ fn material_postcommit_publication_fault_preserves_original_quota_and_idempotent
 }
 
 fn lesson_fixture(d: &Directory, clock: Arc<Time>) -> (Joined, BusinessRepository<Snapshot>) {
-    use fc_ports::ScheduleRepository;
     let (writer, mut repo, _) = open_schedule_storage(
         d,
         clock.clone(),
@@ -4409,7 +4483,7 @@ fn baseline_stable_scope_survives_offline_night_without_retaining_yesterdays_ove
 #[test]
 fn baseline_legacy_sqlite_document_migrates_without_promoting_observed_time_to_proof() {
     use fc_ports::DisplayRepository;
-    use fc_storage::{CommitCommand, Mutation};
+    use fc_storage::Mutation;
     let d = Directory::new();
     let clock = Arc::new(Time(Mutex::new(
         LocalDateTime::new(date(30), 8 * 3600).unwrap(),
@@ -4434,22 +4508,18 @@ fn baseline_legacy_sqlite_document_migrates_without_promoting_observed_time_to_p
             AuthEpoch::new(1),
         )
         .unwrap();
-    handle
-        .try_commit(
-            CommitCommand::new(
-                "legacy-lesson-context-fixture".into(),
-                revision,
-                vec![Mutation::Put {
-                    key: "business/lesson-context/v1".into(),
-                    value: legacy,
-                }],
-            )
-            .unwrap(),
-            snapshot,
-        )
-        .unwrap()
-        .wait()
-        .unwrap();
+    repo.generic_commit(
+        "legacy-lesson-context-fixture",
+        revision,
+        vec![Mutation::Put {
+            key: "business/lesson-context/v1".into(),
+            value: legacy,
+        }],
+        snapshot,
+    )
+    .unwrap()
+    .wait()
+    .unwrap();
     drop(repo);
     drop(writer);
     lesson_time(&clock, 9, 5, 0);
@@ -4513,7 +4583,7 @@ fn failed_desktop_facts_only_persist_actual_rollback_invalidation_not_forward_ba
             .prepare_update(state.clone(), revision, AuthEpoch::new(1))
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
-    let repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+    let repo = BusinessRepository::new(handle.clone(), clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(|_, _| Ok(())));
     let before = handle.try_revision().unwrap().wait().unwrap();
     let old_context = handle
@@ -4597,7 +4667,7 @@ fn failed_desktop_facts_only_persist_actual_rollback_invalidation_not_forward_ba
             .prepare_update(state.clone(), revision, AuthEpoch::new(1))
             .map_err(|_| StorageError::AuthorityUnavailable)
     });
-    let repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+    let repo = BusinessRepository::new(handle.clone(), clock.clone(), factory, d.1.clone())
         .with_session_guard(Arc::new(|_, _| Ok(())));
     lesson_time(&clock, 9, 5, 0);
     let before = handle.try_revision().unwrap().wait().unwrap();

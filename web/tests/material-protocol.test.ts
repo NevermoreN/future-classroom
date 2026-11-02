@@ -1,3 +1,4 @@
+import { identity, ticket } from './command-fixtures'
 import { describe, expect, it } from 'vitest'
 import * as m from '../src/api/material-protocol'
 import { ProtocolFault, ProtocolVersionFault, strictJson } from '../src/api/protocol'
@@ -13,14 +14,15 @@ describe('materials wire values and immutable directory snapshots', () => {
       version => m.page({ ...page(), schemaVersion: version }, target, null),
       version => m.ready({ schemaVersion: version, status: 'UPLOAD_READY', uploadId: '8', expiresInSeconds: 300, maxChunkBytes: 65536 }),
       version => m.uploaded({ schemaVersion: version, status: 'UPLOADED', uploadId: '8', bytes: 17 }, '8', 17),
-      version => m.committed({ schemaVersion: version, status: 'COMMITTED', commandId: '7', scope: target, record: row() }, '7', target),
-      version => m.outcome({ schemaVersion: version, status: 'COMMAND_RESULT', commandId: '7', state: 'NOT_FOUND', scope: null, record: null }, '7'),
+      version => m.committed({ schemaVersion: version, status: 'COMMITTED', commandId: '7', commandTicket: ticket, scope: target, record: row() }, identity('7'), target),
+      version => m.outcome({ schemaVersion: version, status: 'COMMAND_RESULT', commandId: '7', commandTicket: ticket, state: 'NOT_FOUND', scope: null, record: null }, identity('7')),
       version => m.cancelled({ schemaVersion: version, status: 'UPLOAD_CANCELLED', uploadId: '8' }, '8'),
       version => m.classPage({ schemaVersion: version, status: 'MATERIAL_CLASSES', identityRevision: '1', scope: target, offset: 0, total: 1, nextOffset: null, items: [{ classId: '1', className: '班级' }] }, target, 0),
     ]
-    for (const read of readers) {
-      expect(() => read(1)).not.toThrow()
-      expect(() => read(2)).toThrow(ProtocolVersionFault)
+    for (const [index, read] of readers.entries()) {
+      const expected = [4, 5].includes(index) ? 2 : 1
+      expect(() => read(expected)).not.toThrow()
+      expect(() => read(expected === 1 ? 2 : 1)).toThrow(ProtocolVersionFault)
       for (const invalid of [undefined, '2', null, 0, -1, 1.5]) {
         expect(() => read(invalid)).toThrow(ProtocolFault)
         expect(() => read(invalid)).not.toThrow(ProtocolVersionFault)
@@ -93,7 +95,7 @@ describe('materials wire values and immutable directory snapshots', () => {
     expect(m.ready(ready).uploadId).toBe('18446744073709551615')
     for (const changed of [{ expiresInSeconds: 301 }, { maxChunkBytes: 65537 }, { uploadId: '0' }]) expect(() => m.ready({ ...ready, ...changed })).toThrow(ProtocolFault)
     expect(() => m.uploaded({ schemaVersion: 1, status: 'UPLOADED', uploadId: '9', bytes: 17 }, '8', 17)).toThrow(ProtocolFault)
-    expect(() => m.outcome({ schemaVersion: 1, status: 'COMMAND_RESULT', commandId: '9', state: 'NOT_FOUND', scope: null, record: null }, '8')).toThrow(ProtocolFault)
-    expect(() => m.outcome({ schemaVersion: 1, status: 'COMMAND_RESULT', commandId: '8', state: 'NOT_FOUND', scope: target, record: row() }, '8')).toThrow(ProtocolFault)
+    expect(() => m.outcome({ schemaVersion: 2, status: 'COMMAND_RESULT', commandId: '9', commandTicket: ticket, state: 'NOT_FOUND', scope: null, record: null }, identity('8'))).toThrow(ProtocolFault)
+    expect(() => m.outcome({ schemaVersion: 2, status: 'COMMAND_RESULT', commandId: '8', commandTicket: ticket, state: 'NOT_FOUND', scope: target, record: row() }, identity('8'))).toThrow(ProtocolFault)
   })
 })

@@ -17,7 +17,7 @@ fn save(
     limits: VoiceLimits,
     review: &VoiceManagementSnapshot,
 ) -> Result<VoiceSnapshot> {
-    service.set_limits_reviewed(
+    service.test_set_limits_reviewed(
         lease,
         limits,
         review.revision,
@@ -126,7 +126,7 @@ fn limits_require_exact_local_manager_and_all_three_captured_versions_before_inv
         ),
     ] {
         assert!(service
-            .set_limits_reviewed(local, limited(), voice, identity, epoch)
+            .test_set_limits_reviewed(local, limited(), voice, identity, epoch)
             .is_err());
         assert_eq!(service.management_snapshot(local).unwrap(), before);
     }
@@ -148,10 +148,17 @@ fn limits_require_exact_local_manager_and_all_three_captured_versions_before_inv
         .0
         .lock()
         .unwrap()
-        .identity(
-            local,
-            IdentityCommand::RenameSchool {
-                name: "New reviewed policy identity".into(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(local),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    local,
+                    IdentityCommand::RenameSchool {
+                        name: "New reviewed policy identity".into(),
+                    },
+                )
             },
         )
         .unwrap();
@@ -228,7 +235,7 @@ fn saving_limits_while_disabled_does_not_reenable_the_persisted_or_runtime_switc
     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
     let before = service.management_snapshot(local).unwrap();
     service
-        .set_enabled_reviewed(
+        .test_set_enabled_reviewed(
             local,
             false,
             before.revision,
@@ -256,7 +263,7 @@ fn changed_limits_cancel_queued_and_playing_jobs_without_claiming_the_old_device
     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
     let mut first_request = fixtures::independent_request(&service, web, class, 2_801);
     first_request.repeat_total = 3;
-    let first = service.submit(web, first_request).unwrap();
+    let first = service.test_submit(web, first_request).unwrap();
     assert_eq!(first.repeat_total, 3);
     let old_runtime = service.runtime_handle();
     let starting = old_runtime
@@ -277,7 +284,7 @@ fn changed_limits_cancel_queued_and_playing_jobs_without_claiming_the_old_device
         .unwrap();
     let permission = old_runtime.guard(playing.id).unwrap();
     let queued = service
-        .submit(
+        .test_submit(
             web,
             fixtures::independent_request(&service, web, class, 2_802),
         )
@@ -308,7 +315,7 @@ fn changed_limits_cancel_queued_and_playing_jobs_without_claiming_the_old_device
     );
     assert!(service.resume_after_stop(view.runtime_generation).is_err());
     service
-        .set_enabled_reviewed(
+        .test_set_enabled_reviewed(
             local,
             true,
             view.revision,
@@ -397,6 +404,7 @@ fn committed_limits_cannot_resume_a_later_stop_or_replay_the_old_review() {
 }
 
 struct FenceClock {
+    caller: std::thread::ThreadId,
     source: Arc<dyn MonotonicClock + Send + Sync>,
     reads: AtomicU64,
     fire_at: u64,
@@ -404,7 +412,9 @@ struct FenceClock {
 }
 impl MonotonicClock for FenceClock {
     fn monotonic_millis(&self) -> u64 {
-        if self.reads.fetch_add(1, Ordering::AcqRel) + 1 == self.fire_at {
+        if std::thread::current().id() != self.caller
+            && self.reads.fetch_add(1, Ordering::AcqRel) + 1 == self.fire_at
+        {
             let action = self.action.lock().unwrap().take();
             if let Some(action) = action {
                 action();
@@ -425,6 +435,7 @@ fn limits_writer_checks_the_captured_epoch_during_evaluation_and_before_commit()
     let caller = std::thread::current().id();
     for fire_at in [3, 4] {
         let clock = Arc::new(FenceClock {
+            caller,
             source: original.inner.monotonic.clone(),
             reads: AtomicU64::new(0),
             fire_at,
@@ -438,6 +449,8 @@ fn limits_writer_checks_the_captured_epoch_during_evaluation_and_before_commit()
             original.inner.clock.clone(),
             clock.clone(),
         );
+        let issued = service.issue_native_command(local).unwrap();
+        let service = service.scoped_command(issued);
         let before = service.management_snapshot(local).unwrap();
         clock.reads.store(0, Ordering::Release);
         let stopped = service.clone();

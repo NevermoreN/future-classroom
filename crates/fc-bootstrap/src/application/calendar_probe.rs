@@ -12,7 +12,8 @@ use fc_domain::{
     schedule_document::SemesterPlan,
     time::{LocalDate, LocalDateTime},
 };
-use fc_ports::{CalendarFetchOutcome, CalendarReservation, CalendarStatus, Clock};
+use fc_ports::command_window::CommandFamily;
+use fc_ports::{CalendarFetchOutcome, CalendarStatus, Clock};
 
 type Check<T> = std::result::Result<T, String>;
 pub(super) const STEPS: usize = 30;
@@ -25,6 +26,24 @@ impl Clock for CivilClock {
 }
 fn checked<T, E>(value: std::result::Result<T, E>, stage: &str) -> Check<T> {
     value.map_err(|_| format!("calendar-probe: {stage}"))
+}
+/// Issue on the real Writer, then restore the unscoped Backend after this
+/// single database operation. Physical preparation must stay outside this call.
+fn command<T>(
+    backend: &mut Backend,
+    lease: SessionLease,
+    family: CommandFamily,
+    action: impl FnOnce(&mut Backend) -> Check<T>,
+) -> Check<T> {
+    let issued = checked(
+        backend.issue_native_command(family, Some(lease), SessionPurpose::Manage),
+        "issue native command",
+    )?;
+    let mut scoped = checked(
+        backend.begin_command_scope(issued),
+        "check native command scope",
+    )?;
+    action(&mut scoped)
 }
 fn require(value: bool, stage: &str) -> Check<()> {
     if value {
@@ -64,16 +83,33 @@ fn seed(
     lease: SessionLease,
     candidate: CalendarCandidate,
 ) -> Check<CalendarStatus> {
-    let reservation = checked(
-        backend.reserve_calendar_fetch(lease, candidate.source_year),
+    let year = candidate.source_year;
+    let issued = checked(
+        backend.issue_native_command(CommandFamily::Calendar, Some(lease), SessionPurpose::Manage),
+        "issue actual manual fetch",
+    )?;
+    let start = checked(
+        checked(
+            backend.begin_command_scope(issued),
+            "scope actual manual fetch",
+        )?
+        .begin_calendar_manual_fetch_while(lease, year, Arc::new(|| true)),
         "real writer reserve synthetic fetch",
     )?;
-    let CalendarReservation::Reserved(ticket) = reservation else {
-        return Err("calendar-probe: synthetic fetch unexpectedly rate limited".into());
+    let fc_bootstrap::backend::CalendarManualStart::Fresh(permit) = start else {
+        return Err("calendar-probe: synthetic fetch was history/rate limited".into());
     };
     checked(
-        backend.finish_calendar_fetch(ticket, CalendarFetchOutcome::Downloaded(candidate)),
+        backend.finish_calendar_manual_fetch_while(
+            permit,
+            CalendarFetchOutcome::Downloaded(candidate),
+            Arc::new(|| true),
+        ),
         "real writer finish synthetic fetch",
+    )?;
+    checked(
+        backend.calendar_status(lease, year),
+        "read current fetched candidate",
     )
 }
 fn document(app: &App) -> Check<ScheduleDocument> {
@@ -286,21 +322,28 @@ fn exercise(app: &mut App, deadline: Instant) -> Check<usize> {
     )?;
     {
         let mut backend = checked(app.backend.as_ref().unwrap().lock(), "stale check lock")?;
-        require(
-            matches!(
-                backend.adopt_calendar(
-                    app.lease.unwrap(),
-                    adopted.revision,
-                    vec![fc_ports::CalendarCandidateRef {
-                        year: 2026,
-                        revision: old
-                    }]
-                ),
-                Err(BackendError::Calendar(
-                    fc_ports::CalendarRepositoryError::Stale
-                ))
-            ),
-            "backend exact Calendar Stale",
+        command(
+            &mut backend,
+            app.lease.unwrap(),
+            CommandFamily::Calendar,
+            |backend| {
+                require(
+                    matches!(
+                        backend.adopt_calendar(
+                            app.lease.unwrap(),
+                            adopted.revision,
+                            vec![fc_ports::CalendarCandidateRef {
+                                year: 2026,
+                                revision: old
+                            }]
+                        ),
+                        Err(BackendError::Calendar(
+                            fc_ports::CalendarRepositoryError::Stale
+                        ))
+                    ),
+                    "backend exact Calendar Stale",
+                )
+            },
         )?;
     }
     mark(&mut steps, "native-old-candidate-cas-stale-no-write");
@@ -312,9 +355,16 @@ fn exercise(app: &mut App, deadline: Instant) -> Check<usize> {
         let mut next = document_without_lock(&backend, app.lease.unwrap())?;
         next.calendar_mode = CalendarMode::School;
         next.school_calendar.school_coverage = Some((date(1, 1), date(12, 31)));
-        checked(
-            backend.save_schedule(app.lease.unwrap(), next.revision, next),
-            "save isolated school mode",
+        command(
+            &mut backend,
+            app.lease.unwrap(),
+            CommandFamily::Schedule,
+            |backend| {
+                checked(
+                    backend.save_schedule(app.lease.unwrap(), next.revision, next),
+                    "save isolated school mode",
+                )
+            },
         )?
     };
     mark(&mut steps, "writer-save-school-mode");
@@ -434,16 +484,18 @@ pub(super) fn run() -> Check<()> {
             backend.login("calendar-probe", password()?),
             "initial real login",
         )?;
-        checked(
-            backend.identity(
-                lease,
-                IdentityCommand::CreateClass {
-                    id: ClassId::new(1).unwrap(),
-                    name: "Synthetic calendar class".into(),
-                },
-            ),
-            "synthetic class",
-        )?;
+        command(&mut backend, lease, CommandFamily::Identity, |backend| {
+            checked(
+                backend.identity(
+                    lease,
+                    IdentityCommand::CreateClass {
+                        id: ClassId::new(1).unwrap(),
+                        name: "Synthetic calendar class".into(),
+                    },
+                ),
+                "synthetic class",
+            )
+        })?;
         let mut doc = checked(backend.read_schedule(lease), "initial schedule")?;
         doc.semesters = vec![SemesterPlan {
             semester: Semester {
@@ -472,10 +524,12 @@ pub(super) fn run() -> Check<()> {
             date: date(11, 2),
             mapping: DayMapping::SourceDate(date(11, 4)),
         }];
-        checked(
-            backend.save_schedule(lease, doc.revision, doc),
-            "save synthetic manual mapping",
-        )?;
+        command(&mut backend, lease, CommandFamily::Schedule, |backend| {
+            checked(
+                backend.save_schedule(lease, doc.revision, doc),
+                "save synthetic manual mapping",
+            )
+        })?;
         seed(&mut backend, lease, candidate(2026, false, &clock)?)?;
         *checked(civil.0.lock(), "advance fixture civil clock")? =
             LocalDateTime::new(date(10, 31), 36000).unwrap();

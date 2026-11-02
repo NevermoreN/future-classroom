@@ -18,8 +18,13 @@ use std::{
 };
 
 pub mod business;
+pub mod command_window;
+mod command_window_legacy;
+#[cfg(test)]
+pub(crate) mod fixture_commands;
 pub mod login;
 pub mod recovery;
+pub mod typed_command;
 
 pub const SCHEMA_VERSION: i64 = 1;
 pub const MAX_COMMAND_BYTES: usize = 4 * 1024 * 1024;
@@ -64,6 +69,10 @@ pub enum StorageError {
         current: Revision,
     },
     CommandIdReused,
+    CommandExpired,
+    CommandNotIssued,
+    CommandWindowCapacity,
+    CommandWindowClock,
     AuthorityUnavailable,
     /// SQLite committed. The authority exchange failed and the process must fail closed.
     PublicationFailed {
@@ -76,6 +85,19 @@ pub enum StorageError {
     RecoveryInvalidPackage,
     RecoveryConflict,
     RecoveryCancelled,
+}
+
+impl StorageError {
+    pub fn command_window_error(&self) -> Option<fc_ports::command_window::CommandWindowError> {
+        use fc_ports::command_window::CommandWindowError as E;
+        match self {
+            Self::CommandExpired => Some(E::Expired),
+            Self::CommandNotIssued => Some(E::NotIssued),
+            Self::CommandWindowCapacity => Some(E::Capacity),
+            Self::CommandWindowClock => Some(E::Clock),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -223,7 +245,25 @@ impl<T> Ticket<T> {
 /// A bounded view valid only during one writer transaction. It exposes owned
 /// documents, never SQLite handles. Implementations must not retain the view.
 pub trait TransactionDocuments {
+    fn typed_history(&self) -> Option<&typed_command::StoredTyped> {
+        None
+    }
+    fn active_command(&self) -> Option<fc_ports::command_window::IssuedCommand> {
+        None
+    }
     fn get(&self, key: &str) -> Result<Option<Document>, StorageError>;
+    /// Internal admitted-owner lookup. The complete persisted admission must
+    /// match; this never grants client replay or a new positive command.
+    fn profile_content_owner_receipt(
+        &self,
+        admission: &fc_domain::profile_content::ContentAdmission,
+    ) -> Result<Option<(String, Document)>, StorageError> {
+        let key = format!(
+            "business/profile-content/v1/receipts/{:020}",
+            admission.request.command_id.get()
+        );
+        Ok(self.get(&key)?.map(|document| (key, document)))
+    }
     fn revision(&self) -> Result<Revision, StorageError>;
     /// Metadata-only ordered page, valid only inside the current writer transaction.
     /// At most 128 rows and 512 KiB of owned key/value capacity are returned.
@@ -242,7 +282,43 @@ pub struct DocumentPage {
 /// Trusted composition code only. Evaluate must be short, deterministic except
 /// its injected clock, and must never reenter the writer, perform file I/O or KDF.
 /// Use owned inputs; borrowed request clocks cannot cross the worker boundary.
+/// Fixed trusted task classification; no request, DTO or client can select it.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum TransactionLifetime {
+    Ordinary,
+    OwnerReturn,
+}
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum CommandRetirement {
+    None,
+    IdentityRecovery,
+    DatabaseRestoreBarrier,
+}
 pub trait TransactionTask<S>: Send {
+    fn window_action(&self) -> Option<typed_command::WindowAction> {
+        None
+    }
+    fn retirement(&self) -> CommandRetirement {
+        CommandRetirement::None
+    }
+    fn command_family(&self) -> Option<fc_ports::command_window::CommandFamily> {
+        None
+    }
+    fn lifetime(&self) -> TransactionLifetime {
+        TransactionLifetime::Ordinary
+    }
+
+    /// Exact positive request/history identity. Internal physical-return tasks
+    /// have no client request and must not manufacture a new issuance.
+    fn command_requirement(
+        &self,
+    ) -> Option<(
+        fc_ports::command_window::CommandFamily,
+        fc_domain::ids::CommandId,
+    )> {
+        None
+    }
+
     fn allocation_bytes(&self) -> usize;
     fn evaluate(
         self: Box<Self>,
@@ -264,6 +340,26 @@ struct FencedTransaction<S> {
     fence: TransactionExecutionFence,
 }
 impl<S> TransactionTask<S> for FencedTransaction<S> {
+    fn window_action(&self) -> Option<typed_command::WindowAction> {
+        self.task.window_action()
+    }
+    fn retirement(&self) -> CommandRetirement {
+        self.task.retirement()
+    }
+    fn command_family(&self) -> Option<fc_ports::command_window::CommandFamily> {
+        self.task.command_family()
+    }
+    fn lifetime(&self) -> TransactionLifetime {
+        self.task.lifetime()
+    }
+    fn command_requirement(
+        &self,
+    ) -> Option<(
+        fc_ports::command_window::CommandFamily,
+        fc_domain::ids::CommandId,
+    )> {
+        self.task.command_requirement()
+    }
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>().saturating_add(self.task.allocation_bytes())
     }
@@ -324,6 +420,13 @@ impl TransactionDocuments for TransactionView<'_> {
             )
             .optional()
             .map_err(|_| StorageError::Database)
+    }
+    fn profile_content_owner_receipt(
+        &self,
+        admission: &fc_domain::profile_content::ContentAdmission,
+    ) -> Result<Option<(String, Document)>, StorageError> {
+        let key = command_window::profile_content_owner_key(self.0, admission)?;
+        Ok(self.get(&key)?.map(|document| (key, document)))
     }
     fn revision(&self) -> Result<Revision, StorageError> {
         read_revision(self.0)
@@ -397,6 +500,49 @@ impl TransactionDocuments for TransactionView<'_> {
     }
 }
 
+struct CommandView<'a> {
+    inner: TransactionView<'a>,
+    issued: fc_ports::command_window::IssuedCommand,
+    history: Option<&'a typed_command::StoredTyped>,
+}
+impl TransactionDocuments for CommandView<'_> {
+    fn typed_history(&self) -> Option<&typed_command::StoredTyped> {
+        self.history
+    }
+    fn active_command(&self) -> Option<fc_ports::command_window::IssuedCommand> {
+        Some(self.issued)
+    }
+
+    fn profile_content_owner_receipt(
+        &self,
+        admission: &fc_domain::profile_content::ContentAdmission,
+    ) -> Result<Option<(String, Document)>, StorageError> {
+        self.inner.profile_content_owner_receipt(admission)
+    }
+    fn revision(&self) -> Result<Revision, StorageError> {
+        self.inner.revision()
+    }
+    fn get(&self, key: &str) -> Result<Option<Document>, StorageError> {
+        if let Some((slot, id)) = business::command_window::legacy(key) {
+            if id != self.issued.command_id || slot.family != self.issued.family {
+                return Err(StorageError::CommandIdReused);
+            }
+            let key = business::command_window::namespaced(slot, self.issued.ticket);
+            command_window::check_document(self.inner.0, self.issued, &key)?;
+            return self.inner.get(&key);
+        }
+        self.inner.get(key)
+    }
+    fn scan_prefix(
+        &self,
+        prefix: &str,
+        after: Option<&str>,
+        limit: usize,
+    ) -> Result<DocumentPage, StorageError> {
+        self.inner.scan_prefix(prefix, after, limit)
+    }
+}
+
 type Reply<T> = mpsc::Sender<Result<T, StorageError>>;
 enum Message<S> {
     MigrationInspect(
@@ -409,12 +555,27 @@ enum Message<S> {
     ),
     RecoveryBarrier(
         Box<dyn TransactionTask<S>>,
+        Option<fc_ports::command_window::IssuedCommand>,
         Reply<recovery::RecoveryBarrier>,
     ),
     Recovery(recovery::Job, Reply<recovery::RecoveryDatabaseReceipt>),
     Login(login::Operation, Reply<login::Response>),
-    Transaction(Box<dyn TransactionTask<S>>, Reply<Vec<u8>>),
-    Commit(CommitCommand, S, Reply<CommitReceipt>),
+    IssueCommand(
+        command_window::IssueCommand,
+        Reply<fc_ports::command_window::IssuedCommand>,
+    ),
+    CheckCommand(fc_ports::command_window::IssuedCommand, Reply<()>),
+    Transaction(
+        Box<dyn TransactionTask<S>>,
+        Option<fc_ports::command_window::IssuedCommand>,
+        Reply<Vec<u8>>,
+    ),
+    Commit(
+        CommitCommand,
+        S,
+        Option<fc_ports::command_window::IssuedCommand>,
+        Reply<CommitReceipt>,
+    ),
     Get(String, Reply<Option<Document>>),
     Revision(Reply<Revision>),
     Backup(PathBuf, Reply<BackupReceipt>),
@@ -425,11 +586,15 @@ impl<S> Message<S> {
         let allocations = match self {
             Self::MigrationInspect(job, _) => job.allocation_bytes(),
             Self::MigrationMap(job, _) => job.allocation_bytes(),
-            Self::RecoveryBarrier(task, _) => task.allocation_bytes(),
+            Self::RecoveryBarrier(task, _, _) => task.allocation_bytes(),
             Self::Recovery(job, _) => job.allocation_bytes(),
             Self::Login(_, _) => std::mem::size_of::<login::Operation>(),
-            Self::Transaction(task, _) => task.allocation_bytes(),
-            Self::Commit(command, _, _) => command.allocation_bytes()?,
+            Self::IssueCommand(_, _) => std::mem::size_of::<command_window::IssueCommand>(),
+            Self::CheckCommand(_, _) => {
+                std::mem::size_of::<fc_ports::command_window::IssuedCommand>()
+            }
+            Self::Transaction(task, _, _) => task.allocation_bytes(),
+            Self::Commit(command, _, _, _) => command.allocation_bytes()?,
             Self::Get(key, _) => key.capacity(),
             Self::Revision(_) => 0,
             Self::Backup(path, _) => path.capacity(),
@@ -468,6 +633,7 @@ pub struct StorageHandle<S> {
     stopping: Arc<AtomicBool>,
     queued_bytes: Arc<AtomicUsize>,
     transaction_execution: Option<TransactionExecutionFence>,
+    command_window: Option<fc_ports::command_window::IssuedCommand>,
 }
 impl<S> Clone for StorageHandle<S> {
     fn clone(&self) -> Self {
@@ -476,6 +642,7 @@ impl<S> Clone for StorageHandle<S> {
             stopping: self.stopping.clone(),
             queued_bytes: self.queued_bytes.clone(),
             transaction_execution: self.transaction_execution.clone(),
+            command_window: self.command_window,
         }
     }
 }
@@ -515,6 +682,20 @@ impl<S> StorageHandle<S> {
     ) -> Result<Ticket<login::Response>, StorageError> {
         self.send(|reply| Message::Login(login::Operation::Finish(reservation, outcome), reply))
     }
+    /// Issue on the sole Writer. The backend must obtain entropy from its
+    /// CSPRNG and bind the current trusted actor/family before calling this.
+    pub fn try_issue_command(
+        &self,
+        request: command_window::IssueCommand,
+    ) -> Result<Ticket<fc_ports::command_window::IssuedCommand>, StorageError> {
+        self.send(|reply| Message::IssueCommand(request, reply))
+    }
+    pub fn try_check_command(
+        &self,
+        issued: fc_ports::command_window::IssuedCommand,
+    ) -> Result<Ticket<()>, StorageError> {
+        self.send(|reply| Message::CheckCommand(issued, reply))
+    }
     pub fn try_transaction(
         &self,
         task: impl TransactionTask<S> + 'static,
@@ -530,9 +711,17 @@ impl<S> StorageHandle<S> {
         } else {
             Box::new(task)
         };
-        let mut ticket = self.send(|reply| Message::Transaction(task, reply))?;
+        let mut ticket =
+            self.send(|reply| Message::Transaction(task, self.command_window, reply))?;
         ticket.1 = self.transaction_execution.clone();
         Ok(ticket)
+    }
+    /// Bind an issuance to one immutable repository/request clone. This does not
+    /// grant authority: the Writer checks its ledger in the business transaction.
+    pub fn with_command_window(&self, issued: fc_ports::command_window::IssuedCommand) -> Self {
+        let mut scoped = self.clone();
+        scoped.command_window = Some(issued);
+        scoped
     }
     /// Create a request-scoped clone. Repeated binding can only tighten an
     /// existing fence. Generic commits/login/recovery and the base handle retain
@@ -556,7 +745,7 @@ impl<S> StorageHandle<S> {
         command: CommitCommand,
         prepared_snapshot: S,
     ) -> Result<Ticket<CommitReceipt>, StorageError> {
-        self.send(|reply| Message::Commit(command, prepared_snapshot, reply))
+        self.send(|reply| Message::Commit(command, prepared_snapshot, self.command_window, reply))
     }
     pub fn try_get(&self, key: String) -> Result<Ticket<Option<Document>>, StorageError> {
         if key.is_empty() || key.len() > 256 {
@@ -619,6 +808,23 @@ impl<S: Send + 'static> StorageWriter<S> {
     where
         P: AuthorityPublisher<Snapshot = S> + Send + 'static,
     {
+        let window_clock = Arc::new(command_window::ProcessClock {
+            monotonic: clock.clone(),
+        });
+        Self::open_with_clocks(path, capacity, publisher, clock, window_clock)
+    }
+    /// Trusted composition/test clock injection. Remote callers cannot provide a
+    /// clock sample. Both command and login state still use this one Writer.
+    pub fn open_with_clocks<P>(
+        path: impl AsRef<Path>,
+        capacity: usize,
+        publisher: P,
+        clock: Arc<dyn fc_ports::MonotonicClock + Send + Sync>,
+        window_clock: Arc<dyn command_window::WindowClock>,
+    ) -> Result<Self, StorageError>
+    where
+        P: AuthorityPublisher<Snapshot = S> + Send + 'static,
+    {
         if capacity == 0 || capacity > 128 {
             return Err(StorageError::InvalidCommand);
         }
@@ -631,7 +837,7 @@ impl<S: Send + 'static> StorageWriter<S> {
         let worker = thread::Builder::new()
             .name("fc-sqlite-writer".into())
             .spawn(move || {
-                writer_loop(path, publisher, receiver, stop, ready, clock);
+                writer_loop(path, publisher, receiver, stop, ready, clock, window_clock);
             })
             .map_err(|_| StorageError::WorkerDisconnected)?;
         match startup.recv() {
@@ -641,6 +847,7 @@ impl<S: Send + 'static> StorageWriter<S> {
                     stopping,
                     queued_bytes,
                     transaction_execution: None,
+                    command_window: None,
                 },
                 worker: Some(worker),
             }),
@@ -735,17 +942,23 @@ fn writer_loop<P: AuthorityPublisher>(
     stop: Arc<AtomicBool>,
     ready: Reply<()>,
     clock: Arc<dyn fc_ports::MonotonicClock + Send + Sync>,
+    window_clock: Arc<dyn command_window::WindowClock>,
 ) {
     let mut db = match open_connection(&path) {
-        Ok(db) => {
-            let _ = ready.send(Ok(()));
-            db
-        }
+        Ok(db) => db,
         Err(error) => {
             let _ = ready.send(Err(error));
             return;
         }
     };
+    let mut window = match command_window::Window::open(&mut db, window_clock) {
+        Ok(window) => window,
+        Err(error) => {
+            let _ = ready.send(Err(error));
+            return;
+        }
+    };
+    let _ = ready.send(Ok(()));
     let mut login = login::Limiter::new(clock);
     let mut faulted = false;
     while !stop.load(Ordering::Acquire) {
@@ -778,12 +991,64 @@ fn writer_loop<P: AuthorityPublisher>(
                 }
                 let _ = reply.send(result);
             }
-            Message::Transaction(task, reply) => {
+            Message::IssueCommand(request, reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else if stop.load(Ordering::Acquire) {
+                    Err(StorageError::Stopping)
+                } else {
+                    window.issue(&mut db, request)
+                };
+                let _ = reply.send(result);
+            }
+            Message::CheckCommand(issued, reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else if stop.load(Ordering::Acquire) {
+                    Err(StorageError::Stopping)
+                } else {
+                    window
+                        .maintain(&mut db)
+                        .and_then(|()| window.check(&db, issued))
+                };
+                let _ = reply.send(result);
+            }
+            Message::Transaction(task, issued, reply) => {
                 let result = if faulted {
                     Err(StorageError::AuthorityUnavailable)
                 } else {
                     match catch_unwind(AssertUnwindSafe(|| {
-                        execute_transaction(&mut db, &mut publisher, task, &stop, &mut faulted)
+                        let original_completion = task.window_action();
+                        match window.maintain(&mut db) {
+                            Err(StorageError::CommandWindowClock)
+                                if issued.is_none()
+                                    && task.lifetime() == TransactionLifetime::OwnerReturn => {}
+                            other => other?,
+                        }
+                        let result = execute_transaction(
+                            &mut db,
+                            &mut publisher,
+                            task,
+                            issued,
+                            &window,
+                            &stop,
+                            &mut faulted,
+                        );
+                        if !faulted {
+                            if let (Err(error), Some(action)) =
+                                (&result, original_completion.as_ref())
+                            {
+                                if let Err(record_error) =
+                                    typed_command::record_known_failure(&mut db, action, error)
+                                {
+                                    if record_error == StorageError::Indeterminate {
+                                        mark_fault(&mut publisher, &mut faulted);
+                                    }
+                                    return Err(record_error);
+                                }
+                            }
+                        }
+                        result
                     })) {
                         Ok(result) => result,
                         Err(_) => {
@@ -794,11 +1059,21 @@ fn writer_loop<P: AuthorityPublisher>(
                 };
                 let _ = reply.send(result);
             }
-            Message::Commit(command, snapshot, reply) => {
+            Message::Commit(command, snapshot, issued, reply) => {
                 let result = if faulted {
                     Err(StorageError::AuthorityUnavailable)
                 } else {
-                    execute_commit(&mut db, &mut publisher, command, snapshot, &mut faulted)
+                    window.maintain(&mut db).and_then(|()| {
+                        execute_commit(
+                            &mut db,
+                            &mut publisher,
+                            command,
+                            snapshot,
+                            issued,
+                            &window,
+                            &mut faulted,
+                        )
+                    })
                 };
                 let _ = reply.send(result);
             }
@@ -875,12 +1150,21 @@ fn writer_loop<P: AuthorityPublisher>(
                 };
                 let _ = reply.send(result);
             }
-            Message::RecoveryBarrier(task, reply) => {
+            Message::RecoveryBarrier(task, issued, reply) => {
                 let result = if faulted {
                     Err(StorageError::AuthorityUnavailable)
                 } else {
                     match catch_unwind(AssertUnwindSafe(|| {
-                        execute_transaction(&mut db, &mut publisher, task, &stop, &mut faulted)
+                        window.maintain(&mut db)?;
+                        execute_transaction(
+                            &mut db,
+                            &mut publisher,
+                            task,
+                            issued,
+                            &window,
+                            &stop,
+                            &mut faulted,
+                        )
                     })) {
                         Ok(result) => result.and_then(recovery::decode_barrier),
                         Err(_) => {
@@ -903,7 +1187,7 @@ fn writer_loop<P: AuthorityPublisher>(
             Message::MigrationMap(_, reply) => {
                 let _ = reply.send(Err(StorageError::Stopping));
             }
-            Message::RecoveryBarrier(_, reply) => {
+            Message::RecoveryBarrier(_, _, reply) => {
                 let _ = reply.send(Err(StorageError::Stopping));
             }
             Message::Recovery(_, reply) => {
@@ -912,10 +1196,16 @@ fn writer_loop<P: AuthorityPublisher>(
             Message::Login(_, reply) => {
                 let _ = reply.send(Err(StorageError::Stopping));
             }
-            Message::Transaction(_, reply) => {
+            Message::IssueCommand(_, reply) => {
                 let _ = reply.send(Err(StorageError::Stopping));
             }
-            Message::Commit(_, _, reply) => {
+            Message::CheckCommand(_, reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
+            Message::Transaction(_, _, reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
+            Message::Commit(_, _, _, reply) => {
                 let _ = reply.send(Err(StorageError::Stopping));
             }
             Message::Get(_, reply) => {
@@ -1031,6 +1321,8 @@ fn execute_transaction<P: AuthorityPublisher>(
     db: &mut Connection,
     publisher: &mut P,
     task: Box<dyn TransactionTask<P::Snapshot>>,
+    issued: Option<fc_ports::command_window::IssuedCommand>,
+    window: &command_window::Window,
     stop: &AtomicBool,
     faulted: &mut bool,
 ) -> Result<Vec<u8>, StorageError> {
@@ -1040,22 +1332,116 @@ fn execute_transaction<P: AuthorityPublisher>(
     let transaction = db
         .transaction_with_behavior(TransactionBehavior::Immediate)
         .map_err(|_| StorageError::Database)?;
+    let action = task.window_action();
+    let issued = match action.as_ref().and_then(|a| a.original) {
+        Some(original) => {
+            if issued.is_some_and(|i| i != original) {
+                return Err(StorageError::CommandIdReused);
+            }
+            Some(original)
+        }
+        None => issued,
+    };
+    let owner_return = action.as_ref().is_some_and(|a| a.owner_return());
+    if let Some(issued) = issued {
+        if !owner_return {
+            window.check(&transaction, issued)?;
+        }
+    }
+    let history = match (issued, action.as_ref()) {
+        (Some(issued), Some(action)) => typed_command::read(&transaction, issued, action)?,
+        (None, Some(_)) => return Err(StorageError::CommandNotIssued),
+        _ => None,
+    };
+    let retirement = task.retirement();
+    if let Some(family) = task.command_family() {
+        if issued.is_none_or(|issued| issued.family != family) {
+            return Err(StorageError::CommandNotIssued);
+        }
+    }
+    let requirement = task.command_requirement();
+    if let Some((family, id)) = requirement {
+        match issued {
+            Some(issued) if issued.family == family && issued.command_id == id => (),
+            Some(_) => return Err(StorageError::CommandNotIssued),
+            None => window.check_legacy(&transaction, family, id)?,
+        }
+    }
+    if action.is_none() && requirement.is_some() {
+        if let Some(issued) = issued {
+            typed_command::raw_check(&transaction, issued)?;
+        }
+    }
     let current = read_revision(&transaction)?;
-    let decision = task.evaluate(&TransactionView(&transaction))?;
+    let decision = if let Some(issued) = issued {
+        task.evaluate(&CommandView {
+            inner: TransactionView(&transaction),
+            issued,
+            history: history.as_ref(),
+        })?
+    } else {
+        task.evaluate(&TransactionView(&transaction))?
+    };
+    let (outcome, typed_write) = if let (Some(issued), Some(action)) = (issued, action.as_ref()) {
+        business::typed_commands::prepare_reply(
+            &transaction,
+            issued,
+            action,
+            history.as_ref(),
+            &decision.outcome,
+        )?
+    } else {
+        (decision.outcome, false)
+    };
     let Some((mutations, snapshot)) = decision.commit else {
         if let Some(check) = decision.precommit {
             check()?;
         }
-        transaction.rollback().map_err(|_| StorageError::Database)?;
-        return Ok(decision.outcome);
+        if let Some(issued) = issued {
+            if !owner_return {
+                window.check(&transaction, issued)?;
+            }
+        }
+        if issued.is_none() {
+            if let Some((family, id)) = requirement {
+                window.check_legacy(&transaction, family, id)?;
+            }
+        }
+        if typed_write {
+            if transaction.commit().is_err() {
+                mark_fault(publisher, faulted);
+                return Err(StorageError::Indeterminate);
+            }
+        } else {
+            transaction.rollback().map_err(|_| StorageError::Database)?;
+        }
+        return Ok(outcome);
     };
     if stop.load(Ordering::Acquire) {
         return Err(StorageError::Stopping);
     }
+    if action.is_none() && requirement.is_some() {
+        if let Some(issued) = issued {
+            typed_command::raw_claim(&transaction, issued)?;
+        }
+    }
     let next = current.next().map_err(|_| StorageError::InvalidCommand)?;
     let next_i64 = i64::try_from(next.get()).map_err(|_| StorageError::InvalidCommand)?;
     // Apply the exact same allocation/key/value bounds as generic writes.
-    let validated = CommitCommand::new("transaction-validation".into(), current, mutations)?;
+    let mut validated = CommitCommand::new("transaction-validation".into(), current, mutations)?;
+    command_window::register_profile_negative_receipts(&transaction, &validated.mutations)?;
+    if let Some(issued) = issued {
+        command_window::register_documents(&transaction, issued, &mut validated.mutations)?;
+    }
+    let changed_keys = validated
+        .mutations
+        .iter()
+        .filter_map(|m| match m {
+            Mutation::Put { key, .. } => Some(key.clone()),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    command_window::sync_owner_holds(&transaction, &validated.mutations, issued, next_i64)?;
     if publisher.snapshot_revision(&snapshot) != next {
         return Err(StorageError::InvalidCommand);
     }
@@ -1084,13 +1470,27 @@ fn execute_transaction<P: AuthorityPublisher>(
         )?;
         Ok(())
     })();
-    let checked = if written.is_err() {
-        Err(StorageError::Database)
+    let owner_checked = written
+        .map_err(|_| StorageError::Database)
+        .and_then(|()| command_window::sync_profile_content_owners(&transaction, &changed_keys));
+    let checked = if let Err(error) = owner_checked {
+        Err(error)
     } else if stop.load(Ordering::Acquire) {
         Err(StorageError::Stopping)
     } else {
         decision.precommit.map_or(Ok(()), |check| check())
     };
+    let checked = checked.and_then(|()| match issued {
+        Some(issued) if !owner_return => window.check(&transaction, issued),
+        Some(_) => Ok(()),
+        None => requirement.map_or(Ok(()), |(family, id)| {
+            window.check_legacy(&transaction, family, id)
+        }),
+    });
+    let checked = checked.and_then(|()| match retirement {
+        CommandRetirement::None => Ok(()),
+        _ => command_window::retire_epoch(&transaction, retirement, &[]),
+    });
     if let Err(error) = checked {
         if transaction.rollback().is_err() {
             mark_fault(publisher, faulted);
@@ -1109,7 +1509,7 @@ fn execute_transaction<P: AuthorityPublisher>(
         return Err(StorageError::Indeterminate);
     }
     match catch_unwind(AssertUnwindSafe(|| publisher.publish(update, snapshot))) {
-        Ok(Ok(())) => Ok(decision.outcome),
+        Ok(Ok(())) => Ok(outcome),
         _ => {
             mark_fault(publisher, faulted);
             Err(StorageError::PublicationFailed {
@@ -1122,18 +1522,38 @@ fn execute_transaction<P: AuthorityPublisher>(
 fn execute_commit<P: AuthorityPublisher>(
     db: &mut Connection,
     publisher: &mut P,
-    command: CommitCommand,
+    mut command: CommitCommand,
     snapshot: P::Snapshot,
+    issued: Option<fc_ports::command_window::IssuedCommand>,
+    window: &command_window::Window,
     faulted: &mut bool,
 ) -> Result<CommitReceipt, StorageError> {
+    if let Some(issued) = issued {
+        window.check(db, issued)?;
+        if issued.family != fc_ports::command_window::CommandFamily::Generic
+            || command.id != issued.command_id.get().to_string()
+        {
+            return Err(StorageError::CommandIdReused);
+        }
+        typed_command::raw_check(db, issued)?;
+        command.id = issued.ticket.to_string();
+    } else {
+        window.check_legacy_journal(db, &command.id)?;
+    }
+    let read_journal = if issued.is_some() {
+        "SELECT fingerprint,revision FROM command_journal_v2 WHERE command_id=?1"
+    } else {
+        "SELECT fingerprint,revision FROM command_journal WHERE command_id=?1"
+    };
     let existing: Option<(Vec<u8>, u64)> = db
-        .query_row(
-            "SELECT fingerprint, revision FROM command_journal WHERE command_id=?1",
-            [&command.id],
-            |r| Ok((read_limited_blob(r, 0)?, r.get(1)?)),
-        )
+        .query_row(read_journal, [&command.id], |r| {
+            Ok((read_limited_blob(r, 0)?, r.get(1)?))
+        })
         .optional()
         .map_err(|_| StorageError::Database)?;
+    if let Some(issued) = issued {
+        command_window::check_journal(db, issued, existing.is_some())?;
+    }
     if let Some((fingerprint, revision)) = existing {
         return if fingerprint.as_slice() == command.fingerprint {
             Ok(CommitReceipt {
@@ -1168,6 +1588,17 @@ fn execute_commit<P: AuthorityPublisher>(
         Ok(transaction) => transaction,
         Err(_) => return rollback_authority(publisher, update, faulted, StorageError::Database),
     };
+    if let Some(issued) = issued {
+        if let Err(error) = typed_command::raw_claim(&transaction, issued)
+            .and_then(|()| command_window::register_journal(&transaction, issued, &command.id))
+        {
+            if transaction.rollback().is_err() {
+                mark_fault(publisher, faulted);
+                return Err(StorageError::Indeterminate);
+            }
+            return rollback_authority(publisher, update, faulted, error);
+        }
+    }
     let written = (|| -> rusqlite::Result<()> {
         // Recheck under the SQLite write transaction, including another process.
         let actual: i64 = transaction.query_row(
@@ -1193,7 +1624,7 @@ fn execute_commit<P: AuthorityPublisher>(
             [next],
         )?;
         transaction.execute(
-            "INSERT INTO command_journal(command_id,fingerprint,revision) VALUES (?1,?2,?3)",
+            "INSERT INTO command_journal_v2(command_id,fingerprint,revision) VALUES (?1,?2,?3)",
             params![command.id, &command.fingerprint[..], next],
         )?;
         Ok(())
@@ -1204,6 +1635,15 @@ fn execute_commit<P: AuthorityPublisher>(
             return Err(StorageError::Indeterminate);
         }
         return rollback_authority(publisher, update, faulted, StorageError::Database);
+    }
+    if let Some(issued) = issued {
+        if let Err(error) = window.check(&transaction, issued) {
+            if transaction.rollback().is_err() {
+                mark_fault(publisher, faulted);
+                return Err(StorageError::Indeterminate);
+            }
+            return rollback_authority(publisher, update, faulted, error);
+        }
     }
     // COMMIT error can be ambiguous. Conservatively fault rather than resume
     // serving an authority snapshot which may no longer match the database.
@@ -1253,7 +1693,7 @@ mod tests {
     use std::sync::{atomic::AtomicU64, Barrier, Mutex};
 
     static TEMP_COUNTER: AtomicU64 = AtomicU64::new(0);
-    struct TempDatabase(PathBuf);
+    struct TempDatabase(PathBuf, crate::fixture_commands::FixtureCommands);
     impl TempDatabase {
         fn new() -> Self {
             let directory = std::env::temp_dir().join(format!(
@@ -1266,7 +1706,7 @@ mod tests {
                 TEMP_COUNTER.fetch_add(1, Ordering::Relaxed)
             ));
             std::fs::create_dir(&directory).unwrap();
-            Self(directory)
+            Self(directory, Default::default())
         }
         fn path(&self) -> PathBuf {
             self.0.join("isolated.sqlite3")
@@ -1357,15 +1797,16 @@ mod tests {
             let writer =
                 StorageWriter::open(temp.path(), 8, Publisher::new(PublishMode::Success)).unwrap();
             let handle = writer.handle();
-            let receipt = handle
-                .try_commit(put("command-1", 0, "homework", b"first"), 1)
+            let receipt = temp
+                .1
+                .commit(&handle, put("command-1", 0, "homework", b"first"), 1)
                 .unwrap()
                 .wait()
                 .unwrap();
             assert_eq!(receipt.revision, Revision::new(1));
             assert!(!receipt.replayed);
             assert!(
-                matches!(handle.try_commit(put("stale", 0, "homework", b"bad"), 2).unwrap().wait(), Err(StorageError::Conflict { current }) if current == Revision::new(1))
+                matches!(temp.1.commit(&handle,put("stale", 0, "homework", b"bad"), 2).unwrap().wait(), Err(StorageError::Conflict { current }) if current == Revision::new(1))
             );
             writer.shutdown().unwrap();
 
@@ -1382,16 +1823,17 @@ mod tests {
                     .value,
                 b"first"
             );
-            let replay = handle
-                .try_commit(put("command-1", 0, "homework", b"first"), 999)
+            let replay = temp
+                .1
+                .commit(&handle, put("command-1", 0, "homework", b"first"), 999)
                 .unwrap()
                 .wait()
                 .unwrap();
             assert!(replay.replayed);
             assert_eq!(replay.revision, Revision::new(1));
             assert_eq!(
-                handle
-                    .try_commit(put("command-1", 0, "homework", b"different"), 2)
+                temp.1
+                    .commit(&handle, put("command-1", 0, "homework", b"different"), 2)
                     .unwrap()
                     .wait(),
                 Err(StorageError::CommandIdReused)
@@ -1401,8 +1843,8 @@ mod tests {
                 Revision::new(1)
             );
             assert_eq!(
-                handle
-                    .try_commit(put("wrong-snapshot", 1, "homework", b"bad"), 99)
+                temp.1
+                    .commit(&handle, put("wrong-snapshot", 1, "homework", b"bad"), 99)
                     .unwrap()
                     .wait(),
                 Err(StorageError::InvalidCommand)
@@ -1442,7 +1884,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            handle.try_commit(command, 1).unwrap().wait(),
+            temp.1.commit(&handle, command, 1).unwrap().wait(),
             Err(StorageError::Database)
         );
         assert_eq!(
@@ -1456,8 +1898,9 @@ mod tests {
         assert!(!status.faulted);
         drop(status);
         // Failure did not retain the command ID, so a valid explicit retry can commit.
-        assert!(handle
-            .try_commit(put("failed", 0, "good", b"committed"), 1)
+        assert!(temp
+            .1
+            .commit(&handle, put("failed", 0, "good", b"committed"), 1)
             .unwrap()
             .wait()
             .is_ok());
@@ -1470,9 +1913,25 @@ mod tests {
         let state = publisher.state.clone();
         let writer = StorageWriter::open(temp.path(), 8, publisher).unwrap();
         let handle = writer.handle();
+        // Both requests are issued while the original authority is healthy.
+        // The later retry must test the original faulted Writer, not issuance.
+        for label in ["committed", "next"] {
+            temp.1
+                .issue(
+                    &handle,
+                    fc_ports::command_window::CommandFamily::Generic,
+                    label,
+                    fc_ports::command_window::CommandOwner::PublicDesktop,
+                )
+                .unwrap();
+        }
         assert_eq!(
-            handle
-                .try_commit(put("committed", 0, "protected", b"new authority"), 1)
+            temp.1
+                .commit(
+                    &handle,
+                    put("committed", 0, "protected", b"new authority"),
+                    1
+                )
                 .unwrap()
                 .wait(),
             Err(StorageError::PublicationFailed {
@@ -1485,8 +1944,8 @@ mod tests {
             Err(StorageError::AuthorityUnavailable)
         );
         assert_eq!(
-            handle
-                .try_commit(put("next", 1, "protected", b"must fail"), 2)
+            temp.1
+                .commit(&handle, put("next", 1, "protected", b"must fail"), 2)
                 .unwrap()
                 .wait(),
             Err(StorageError::AuthorityUnavailable)
@@ -1507,8 +1966,12 @@ mod tests {
             b"new authority"
         );
         assert!(
-            handle
-                .try_commit(put("committed", 0, "protected", b"new authority"), 1)
+            temp.1
+                .commit(
+                    &handle,
+                    put("committed", 0, "protected", b"new authority"),
+                    1
+                )
                 .unwrap()
                 .wait()
                 .unwrap()
@@ -1535,16 +1998,28 @@ mod tests {
         publisher.block = Some((entered.clone(), resume.clone()));
         let writer = StorageWriter::open(temp.path(), 1, publisher).unwrap();
         let handle = writer.handle();
-        let active = handle
-            .try_commit(put("active", 0, "one", b"one"), 1)
+        for label in ["active", "queued", "full"] {
+            temp.1
+                .issue(
+                    &handle,
+                    fc_ports::command_window::CommandFamily::Generic,
+                    label,
+                    fc_ports::command_window::CommandOwner::PublicDesktop,
+                )
+                .unwrap();
+        }
+        let active = temp
+            .1
+            .commit(&handle, put("active", 0, "one", b"one"), 1)
             .unwrap();
         entered.wait();
-        let queued = handle
-            .try_commit(put("queued", 1, "two", b"two"), 2)
+        let queued = temp
+            .1
+            .commit(&handle, put("queued", 1, "two", b"two"), 2)
             .unwrap();
         let reserved = handle.queued_bytes();
         assert!(matches!(
-            handle.try_commit(put("full", 2, "three", b"three"), 3),
+            temp.1.commit(&handle, put("full", 2, "three", b"three"), 3),
             Err(StorageError::Busy)
         ));
         assert_eq!(
@@ -1574,8 +2049,19 @@ mod tests {
         publisher.block = Some((entered.clone(), resume.clone()));
         let writer = StorageWriter::open(temp.path(), 128, publisher).unwrap();
         let handle = writer.handle();
-        let active = handle
-            .try_commit(put("active", 0, "one", b"one"), 1)
+        for label in ["active", "large", "saturated"] {
+            temp.1
+                .issue(
+                    &handle,
+                    fc_ports::command_window::CommandFamily::Generic,
+                    label,
+                    fc_ports::command_window::CommandOwner::PublicDesktop,
+                )
+                .unwrap();
+        }
+        let active = temp
+            .1
+            .commit(&handle, put("active", 0, "one", b"one"), 1)
             .unwrap();
         entered.wait();
         assert_eq!(
@@ -1596,12 +2082,12 @@ mod tests {
             )
             .unwrap()
         };
-        let queued = handle.try_commit(large("large"), 2).unwrap();
+        let queued = temp.1.commit(&handle, large("large"), 2).unwrap();
         let reserved = handle.queued_bytes();
         assert!(reserved > 3 * 1024 * 1024 && reserved <= MAX_QUEUED_BYTES);
         for _ in 0..32 {
             assert!(matches!(
-                handle.try_commit(large("saturated"), 2),
+                temp.1.commit(&handle, large("saturated"), 2),
                 Err(StorageError::Busy)
             ));
             assert_eq!(
@@ -1638,7 +2124,7 @@ mod tests {
         )
         .unwrap();
         assert!(matches!(
-            writer.handle().try_commit(command, 1),
+            temp.1.commit(&writer.handle(), command, 1),
             Err(StorageError::Busy)
         ));
         assert_eq!(writer.handle().queued_bytes(), 0);
@@ -1651,8 +2137,8 @@ mod tests {
         let writer =
             StorageWriter::open(temp.path(), 8, Publisher::new(PublishMode::Success)).unwrap();
         let handle = writer.handle();
-        handle
-            .try_commit(put("first", 0, "homework", b"backup contents"), 1)
+        temp.1
+            .commit(&handle, put("first", 0, "homework", b"backup contents"), 1)
             .unwrap()
             .wait()
             .unwrap();
@@ -1677,8 +2163,12 @@ mod tests {
             handle.try_backup(temp.path()).unwrap().wait(),
             Err(StorageError::BackupDestinationExists)
         );
-        handle
-            .try_commit(put("second", 1, "homework", b"later source data"), 2)
+        temp.1
+            .commit(
+                &handle,
+                put("second", 1, "homework", b"later source data"),
+                2,
+            )
             .unwrap()
             .wait()
             .unwrap();
@@ -1705,25 +2195,30 @@ mod tests {
             b"backup contents"
         );
         assert!(
-            restored_handle
-                .try_commit(put("first", 0, "homework", b"backup contents"), 1)
+            temp.1
+                .commit(
+                    &restored_handle,
+                    put("first", 0, "homework", b"backup contents"),
+                    1
+                )
                 .unwrap()
                 .wait()
                 .unwrap()
                 .replayed
         );
         assert_eq!(
-            restored_handle
-                .try_commit(put("first", 0, "homework", b"changed"), 1)
+            temp.1
+                .commit(&restored_handle, put("first", 0, "homework", b"changed"), 1)
                 .unwrap()
                 .wait(),
             Err(StorageError::CommandIdReused)
         );
         assert!(
-            matches!(restored_handle.try_commit(put("stale", 0, "homework", b"stale"), 1).unwrap().wait(), Err(StorageError::Conflict { current }) if current == Revision::new(1))
+            matches!(temp.1.commit(&restored_handle,put("stale", 0, "homework", b"stale"), 1).unwrap().wait(), Err(StorageError::Conflict { current }) if current == Revision::new(1))
         );
-        restored_handle
-            .try_commit(
+        temp.1
+            .commit(
+                &restored_handle,
                 put("new-after-restore", 1, "homework", b"explicit new write"),
                 2,
             )

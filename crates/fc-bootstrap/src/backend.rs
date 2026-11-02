@@ -5,6 +5,8 @@
 mod account_management_tests;
 mod autostart;
 mod calendar;
+pub use calendar::{CalendarManualStart, ManualCalendarFetch};
+mod command_window;
 mod content_web;
 mod desktop_lesson;
 pub use desktop_lesson::{DesktopLessonFlow, DesktopLessonGuard, DesktopLessonStamp};
@@ -40,13 +42,13 @@ use fc_domain::{
     time::*,
 };
 use fc_ports::{
-    prepare_initial_credentials, prepare_password_change, prepare_recovery,
-    prepare_recovery_rotation, Clock, CredentialCrypto, CredentialIdentityRepository,
-    DisplayRepository, DisplayRepositoryError, DisplayRequest, IdentityRepositoryError,
-    IdentityRequest, LessonRepository, LessonRepositoryError, LessonRequest, MaterialDeleteRequest,
-    MaterialListRequest, MaterialRepository, MaterialRepositoryError, MonotonicClock,
-    PreparedCredentialChange, PreparedMaterialAppend, RandomSource, RepositoryError,
-    ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
+    prepare_initial_credentials, prepare_password_change, prepare_recovery_rotation, Clock,
+    CredentialCrypto, CredentialIdentityRepository, DisplayRepository, DisplayRepositoryError,
+    DisplayRequest, IdentityRepositoryError, IdentityRequest, LessonRepository,
+    LessonRepositoryError, LessonRequest, MaterialDeleteRequest, MaterialListRequest,
+    MaterialRepository, MaterialRepositoryError, MonotonicClock, PreparedCredentialChange,
+    PreparedMaterialAppend, RandomSource, RepositoryError, ScheduleRepository,
+    ScheduleRepositoryError, ScheduleRequest,
 };
 use fc_runtime::{
     authority::{AuthorityReader, AuthorityStore, PreparedAuthority},
@@ -68,8 +70,8 @@ pub use materials_web::{
     WebMaterialClass, WebMaterialClasses, WebMaterialScope, WebMaterialScopes,
 };
 pub use profile_content::{
-    MediaEntry, MediaInventory, MediaReservation, MediaRetirement, MediaState,
-    ProfileContentPreparationGuard, ProfileContentPreparationState,
+    MediaEntry, MediaInventory, MediaReservation, MediaRetirement, MediaState, ProfileContentOwner,
+    ProfileContentPreparationGuard, ProfileContentPreparationState, ProfilePageTarget,
 };
 use std::{
     path::Path,
@@ -497,6 +499,7 @@ pub struct Backend {
     handle: StorageHandle<Snapshot>,
     repository: Repository,
     request_execution_fence: Option<TransactionExecutionFence>,
+    current_command: Option<fc_ports::command_window::IssuedCommand>,
     authority: AuthorityReader<IdentityState>,
     codec: CredentialRecordCodec,
     crypto: CredentialCryptoAdapter<PlatformRandom>,
@@ -597,7 +600,16 @@ impl Backend {
         publisher
             .initialize()
             .map_err(|_| BackendError::Storage(StorageError::AuthorityUnavailable))?;
-        let writer = StorageWriter::open_with_login_clock(path, 16, publisher, monotonic.clone())?;
+        let writer = StorageWriter::open_with_clocks(
+            path,
+            16,
+            publisher,
+            monotonic.clone(),
+            Arc::new(command_window::ApplicationWindowClock {
+                wall: clock.clone(),
+                monotonic: monotonic.clone(),
+            }),
+        )?;
         let handle = writer.handle();
         let health = reader.gate();
         let authority = reader.clone();
@@ -683,6 +695,7 @@ impl Backend {
             handle,
             repository,
             request_execution_fence: None,
+            current_command: None,
             authority,
             codec,
             crypto: CredentialCryptoAdapter::new(PlatformRandom),
@@ -794,6 +807,12 @@ impl Backend {
         Ok(())
     }
     fn command_id(&mut self) -> Result<CommandId> {
+        if let Some(command) = self.current_command {
+            return Ok(command.command_id);
+        }
+        Err(BackendError::Storage(StorageError::CommandNotIssued))
+    }
+    fn random_id(&self) -> Result<CommandId> {
         for _ in 0..4 {
             let mut bytes = [0u8; 8];
             self.crypto_random(&mut bytes)?;
@@ -966,6 +985,15 @@ impl Backend {
     /// Locking the local workbench remains a separate local-only operation.
     pub fn logout_account(&mut self, lease: SessionLease) -> Result<()> {
         let actor = self.check_session(lease, SessionPurpose::Manage)?;
+        if self.current_command.is_none() {
+            // This is the actual authenticated logout security flow, including
+            // Web self-logout, not a general anonymous/native Identity permit.
+            let issued = self.issue_for_owner(
+                fc_ports::command_window::CommandFamily::Identity,
+                fc_ports::command_window::CommandOwner::authenticated(&actor),
+            )?;
+            return self.begin_command_scope(issued)?.logout_account(lease);
+        }
         self.identity(
             lease,
             IdentityCommand::LogoutAccount {
@@ -1017,6 +1045,16 @@ impl Backend {
         }
     }
     pub fn initialize(&mut self, options: Initialize, password: Password) -> Result<RecoveryCode> {
+        if self.current_command.is_none() {
+            let issued = self.issue_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                None,
+                SessionPurpose::Manage,
+            )?;
+            return self
+                .begin_command_scope(issued)?
+                .initialize(options, password);
+        }
         let state = self.state()?;
         if state.installation.is_some() {
             return Err(BackendError::Identity(IdentityRepositoryError::Domain(
@@ -1326,6 +1364,15 @@ impl Backend {
         code: RecoveryCode,
         new: Password,
     ) -> Result<RecoveryCode> {
+        self.recover_window(login, code, new, |_| true)
+    }
+    pub fn recover_window(
+        &mut self,
+        login: &str,
+        code: RecoveryCode,
+        new: Password,
+        on_issued: impl FnOnce(fc_ports::command_window::IssuedCommand) -> bool,
+    ) -> Result<RecoveryCode> {
         let state = self.state()?;
         let id = state
             .account_by_login(login)
@@ -1344,15 +1391,17 @@ impl Backend {
                 return Err(BackendError::CorruptCredential);
             }
         };
-        let request = self.request(
-            &state,
-            IdentityCommand::RecoveryConsumed {
-                id,
-                expected_recovery_version: admission.recovery_version,
-            },
-        )?;
-        let (change, next) = match prepare_recovery(&mut self.crypto, &code, &new, &record, request)
-        {
+        let command = IdentityCommand::RecoveryConsumed {
+            id,
+            expected_recovery_version: admission.recovery_version,
+        };
+        let (preparation, next) = match fc_ports::prepare_verified_recovery(
+            &mut self.crypto,
+            &code,
+            &new,
+            &record,
+            command,
+        ) {
             Ok(change) => change,
             Err(fc_ports::CredentialError::VerificationFailed) => {
                 self.finish(admission.reservation, Verification::Rejected)?;
@@ -1362,22 +1411,41 @@ impl Backend {
         };
         let completion = self.finish(admission.reservation, Verification::Verified)?;
         self.authenticated(completion, &self.state()?, id)?;
-        let transition = self.repository.execute_credentials(
-            self.encode(
-                change,
-                id,
-                admission
-                    .credential_version
-                    .checked_add(1)
-                    .ok_or(BackendError::Overflow)?,
-                admission
-                    .recovery_version
-                    .checked_add(1)
-                    .ok_or(BackendError::Overflow)?,
-            )?,
-            None,
-            self.clock.as_ref(),
-        )?;
+        let current = self.state()?;
+        let account = current
+            .account(id)
+            .map_err(|_| BackendError::InvalidCredentials)?;
+        let owner = fc_ports::command_window::CommandOwner::Principal {
+            principal: id,
+            school: account.principal.school_id,
+            epoch: account.principal.auth_epoch,
+            origin: TrustedOrigin::Local,
+        };
+        let issued =
+            self.issue_for_owner(fc_ports::command_window::CommandFamily::Identity, owner)?;
+        if !on_issued(issued) {
+            return Err(BackendError::Storage(StorageError::ExecutionCancelled));
+        }
+        let change = preparation.bind(issued.command_id, state.revision);
+        let transition = self
+            .repository
+            .with_command_window(issued)
+            .execute_credentials(
+                self.encode(
+                    change,
+                    id,
+                    admission
+                        .credential_version
+                        .checked_add(1)
+                        .ok_or(BackendError::Overflow)?,
+                    admission
+                        .recovery_version
+                        .checked_add(1)
+                        .ok_or(BackendError::Overflow)?,
+                )?,
+                None,
+                self.clock.as_ref(),
+            )?;
         self.apply(&transition)?;
         Ok(next)
     }
@@ -1890,21 +1958,33 @@ mod tests {
         let stale = service.0.state().unwrap().revision;
         service
             .0
-            .identity(
-                admin,
-                IdentityCommand::CreateClass {
-                    id: ClassId::new(1).unwrap(),
-                    name: "Synthetic Class".into(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::CreateClass {
+                            id: ClassId::new(1).unwrap(),
+                            name: "Synthetic Class".into(),
+                        },
+                    )
                 },
             )
             .unwrap();
         assert!(matches!(
-            service.0.identity_at(
-                admin,
-                stale,
-                IdentityCommand::RenameSchool {
-                    name: "stale must not overwrite".into()
-                }
+            service.0.test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| backend.identity_at(
+                    admin,
+                    stale,
+                    IdentityCommand::RenameSchool {
+                        name: "stale must not overwrite".into()
+                    }
+                )
             ),
             Err(BackendError::Identity(IdentityRepositoryError::Domain(
                 IdentityError::RevisionConflict
@@ -1912,27 +1992,41 @@ mod tests {
         ));
         service
             .0
-            .identity(
-                admin,
-                IdentityCommand::BindCurrentClass {
-                    id: ClassId::new(1).unwrap(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::BindCurrentClass {
+                            id: ClassId::new(1).unwrap(),
+                        },
+                    )
                 },
             )
             .unwrap();
         service
             .0
-            .identity(
-                admin,
-                IdentityCommand::PutSubject {
-                    id: SubjectId::new(1).unwrap(),
-                    name: "Math".into(),
-                    enabled: true,
-                    color: Rgb {
-                        red: 40,
-                        green: 80,
-                        blue: 160,
-                    },
-                    expected_revision: None,
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::PutSubject {
+                            id: SubjectId::new(1).unwrap(),
+                            name: "Math".into(),
+                            enabled: true,
+                            color: Rgb {
+                                red: 40,
+                                green: 80,
+                                blue: 160,
+                            },
+                            expected_revision: None,
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -1940,20 +2034,27 @@ mod tests {
         let revision = service.0.state().unwrap().revision;
         let teacher_recovery = service
             .0
-            .create_account_at(
-                admin,
-                revision,
-                NewAccount {
-                    id: teacher,
-                    login_name: "teacher".into(),
-                    display_name: "Synthetic Teacher".into(),
-                    role: Role::TeacherAdmin,
-                    scopes: vec![AssignmentScope {
-                        class_id: ClassId::new(1).unwrap(),
-                        subject_id: SubjectId::new(1).unwrap(),
-                    }],
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.create_account_at(
+                        admin,
+                        revision,
+                        NewAccount {
+                            id: teacher,
+                            login_name: "teacher".into(),
+                            display_name: "Synthetic Teacher".into(),
+                            role: Role::TeacherAdmin,
+                            scopes: vec![AssignmentScope {
+                                class_id: ClassId::new(1).unwrap(),
+                                subject_id: SubjectId::new(1).unwrap(),
+                            }],
+                        },
+                        password("Backend-teacher-initial-2026"),
+                    )
                 },
-                password("Backend-teacher-initial-2026"),
             )
             .unwrap();
         drop(teacher_recovery);
@@ -1967,10 +2068,17 @@ mod tests {
         );
         service
             .0
-            .change_password(
-                initial,
-                password("Backend-teacher-initial-2026"),
-                password("Backend-teacher-changed-2026"),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(initial),
+                SessionPurpose::ChangeInitialPassword,
+                |backend| {
+                    backend.change_password(
+                        initial,
+                        password("Backend-teacher-initial-2026"),
+                        password("Backend-teacher-changed-2026"),
+                    )
+                },
             )
             .unwrap();
         assert!(service
@@ -1993,7 +2101,19 @@ mod tests {
             expected_revision: Revision::default(),
             text: "Synthetic persistent assignment".into(),
         };
-        let record = service.0.content(lease, command.clone()).unwrap();
+        let record = service
+            .0
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Content,
+                Some(lease),
+                SessionPurpose::Manage,
+                |backend| {
+                    let mut request = command.clone();
+                    request.command_id = backend.issued_command_id()?;
+                    backend.content(lease, request)
+                },
+            )
+            .unwrap();
         assert_eq!(
             service.0.read_content(lease, key.clone()).unwrap(),
             Some(record.clone())
@@ -2083,7 +2203,12 @@ mod tests {
             .unwrap();
         let rotated = service
             .0
-            .rotate_recovery(admin, password("Backend-admin-recovered-2026"))
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| backend.rotate_recovery(admin, password("Backend-admin-recovered-2026")),
+            )
             .unwrap();
         assert!(service
             .0
@@ -2162,15 +2287,21 @@ mod tests {
     }
     fn policy_accounts(service: &mut Backend) {
         use fc_ports::IdentityRepository;
-        let mut repo = service
+        let repo = service
             .repository
             .clone()
             .with_initial_installation_identity([47; 32])
             .with_session_guard(Arc::new(|_, _| Ok(())));
         let admin = PrincipalId::new(1).unwrap();
         let teacher = PrincipalId::new(2).unwrap();
+        let initial = service
+            .issue_for_owner(
+                fc_ports::command_window::CommandFamily::Identity,
+                fc_ports::command_window::CommandOwner::PublicDesktop,
+            )
+            .unwrap();
         let request = IdentityRequest {
-            command_id: CommandId::new(1).unwrap(),
+            command_id: initial.command_id,
             expected_revision: Revision::default(),
             command: IdentityCommand::FirstAdministrator {
                 school_id: SchoolId::new(1).unwrap(),
@@ -2181,7 +2312,8 @@ mod tests {
             },
         };
         let (change, _) = prepare_initial_credentials(&mut PolicyCrypto, &(), request).unwrap();
-        repo.execute_credentials(change, None, service.clock.as_ref())
+        repo.with_command_window(initial)
+            .execute_credentials(change, None, service.clock.as_ref())
             .unwrap();
         let admin_actor = ActorContext {
             principal_id: admin,
@@ -2190,7 +2322,7 @@ mod tests {
             expires_at: next_day(service.clock.now()).unwrap(),
             origin: TrustedOrigin::Local,
         };
-        for (id, command) in [
+        for (_label, command) in [
             (
                 2,
                 IdentityCommand::CreateClass {
@@ -2214,20 +2346,33 @@ mod tests {
             ),
         ] {
             let state = repo.load_identity().unwrap();
-            repo.execute_identity(
-                IdentityRequest {
-                    command_id: CommandId::new(id).unwrap(),
-                    expected_revision: state.revision,
-                    command,
-                },
-                Some(&admin_actor),
-                service.clock.as_ref(),
-            )
-            .unwrap();
+            let issued = service
+                .issue_for_owner(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    fc_ports::command_window::CommandOwner::authenticated(&admin_actor),
+                )
+                .unwrap();
+            repo.with_command_window(issued)
+                .execute_identity(
+                    IdentityRequest {
+                        command_id: issued.command_id,
+                        expected_revision: state.revision,
+                        command,
+                    },
+                    Some(&admin_actor),
+                    service.clock.as_ref(),
+                )
+                .unwrap();
         }
         let state = repo.load_identity().unwrap();
+        let issued = service
+            .issue_for_owner(
+                fc_ports::command_window::CommandFamily::Identity,
+                fc_ports::command_window::CommandOwner::authenticated(&admin_actor),
+            )
+            .unwrap();
         let request = IdentityRequest {
-            command_id: CommandId::new(4).unwrap(),
+            command_id: issued.command_id,
             expected_revision: state.revision,
             command: IdentityCommand::CreateAccount(NewAccount {
                 id: teacher,
@@ -2241,11 +2386,22 @@ mod tests {
             }),
         };
         let (change, _) = prepare_initial_credentials(&mut PolicyCrypto, &(), request).unwrap();
-        repo.execute_credentials(change, Some(&admin_actor), service.clock.as_ref())
+        repo.with_command_window(issued)
+            .execute_credentials(change, Some(&admin_actor), service.clock.as_ref())
             .unwrap();
         let state = repo.load_identity().unwrap();
+        let teacher_actor = ActorContext {
+            principal_id: teacher,
+            ..admin_actor
+        };
+        let issued = service
+            .issue_for_owner(
+                fc_ports::command_window::CommandFamily::Identity,
+                fc_ports::command_window::CommandOwner::authenticated(&teacher_actor),
+            )
+            .unwrap();
         let request = IdentityRequest {
-            command_id: CommandId::new(5).unwrap(),
+            command_id: issued.command_id,
             expected_revision: state.revision,
             command: IdentityCommand::PasswordChanged {
                 id: teacher,
@@ -2254,11 +2410,8 @@ mod tests {
         };
         let change =
             prepare_password_change(&mut PolicyCrypto, &(), &(), &vec![1], request).unwrap();
-        let teacher_actor = ActorContext {
-            principal_id: teacher,
-            ..admin_actor
-        };
-        repo.execute_credentials(change, Some(&teacher_actor), service.clock.as_ref())
+        repo.with_command_window(issued)
+            .execute_credentials(change, Some(&teacher_actor), service.clock.as_ref())
             .unwrap();
     }
     fn policy_lease(service: &Backend, id: u64, origin: TrustedOrigin) -> SessionLease {
@@ -2399,7 +2552,12 @@ mod tests {
         };
         let saved = service
             .0
-            .save_schedule(admin, Revision::default(), doc)
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Schedule,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| backend.save_schedule(admin, Revision::default(), doc),
+            )
             .unwrap();
         assert_eq!(saved.revision, Revision::new(1));
         let identity_revision = service.0.state().unwrap().revision;
@@ -2407,35 +2565,51 @@ mod tests {
         draft.automatic_gaps = false;
         service
             .0
-            .content(
-                admin,
-                ContentCommand {
-                    command_id: CommandId::new(7600).unwrap(),
-                    key: ContentKey::Homework(HomeworkKey {
-                        class_id: ClassId::new(1).unwrap(),
-                        actual_date: clock.wall.date,
-                        subject_id: SubjectId::new(1).unwrap(),
-                        owner_teacher_id: PrincipalId::new(2).unwrap(),
-                    }),
-                    expected_revision: Revision::default(),
-                    text: "independent content revision".into(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Content,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    let mut request = ContentCommand {
+                        command_id: CommandId::new(7600).unwrap(),
+                        key: ContentKey::Homework(HomeworkKey {
+                            class_id: ClassId::new(1).unwrap(),
+                            actual_date: clock.wall.date,
+                            subject_id: SubjectId::new(1).unwrap(),
+                            owner_teacher_id: PrincipalId::new(2).unwrap(),
+                        }),
+                        expected_revision: Revision::default(),
+                        text: "independent content revision".into(),
+                    };
+                    request.command_id = backend.issued_command_id()?;
+                    backend.content(admin, request)
                 },
             )
             .unwrap();
         let saved = service
             .0
-            .save_schedule(admin, saved.revision, draft.clone())
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Schedule,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| backend.save_schedule(admin, saved.revision, draft.clone()),
+            )
             .unwrap();
         assert_eq!(saved.revision, Revision::new(2));
         assert_eq!(service.0.state().unwrap().revision, identity_revision);
         assert!(
-            matches!(service.0.save_schedule(admin,Revision::new(1),draft),Err(BackendError::Schedule(ScheduleRepositoryError::Domain(e)))if matches!(e.kind,DocumentErrorKind::RevisionConflict{current}if current==Revision::new(2)))
+            matches!(service.0.test_native_command(fc_ports::command_window::CommandFamily::Schedule, Some(admin), SessionPurpose::Manage, |backend| backend.save_schedule(admin,Revision::new(1),draft)),Err(BackendError::Schedule(ScheduleRepositoryError::Domain(e)))if matches!(e.kind,DocumentErrorKind::RevisionConflict{current}if current==Revision::new(2)))
         );
         let teacher = policy_lease(&service.0, 2, TrustedOrigin::Local);
         assert!(service.0.read_schedule(teacher).is_err());
         assert!(service
             .0
-            .save_schedule(teacher, saved.revision, saved.clone())
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Schedule,
+                Some(teacher),
+                SessionPurpose::Manage,
+                |backend| backend.save_schedule(teacher, saved.revision, saved.clone())
+            )
             .is_err());
         let global = service.0.global_revision().unwrap();
         service.0.close().unwrap();
@@ -2456,10 +2630,17 @@ mod tests {
         let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
         service
             .0
-            .identity(
-                admin,
-                IdentityCommand::BindCurrentClass {
-                    id: ClassId::new(1).unwrap(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::BindCurrentClass {
+                            id: ClassId::new(1).unwrap(),
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -2499,7 +2680,12 @@ mod tests {
         };
         service
             .0
-            .save_schedule(admin, Revision::default(), doc)
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Schedule,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| backend.save_schedule(admin, Revision::default(), doc),
+            )
             .unwrap();
         let before = service.0.read_lesson(admin).unwrap();
         let current = before.current.as_ref().unwrap();
@@ -2507,19 +2693,34 @@ mod tests {
         let target = current.base.clone();
         let replaced = service
             .0
-            .change_lesson(
-                admin,
-                before.revision,
-                key.clone(),
-                LessonAction::Replace(target.clone()),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Lesson,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.change_lesson(
+                        admin,
+                        before.revision,
+                        key.clone(),
+                        LessonAction::Replace(target.clone()),
+                    )
+                },
             )
             .unwrap();
         assert!(replaced.active_override.is_some());
         assert_eq!(replaced.current.as_ref().unwrap().effective, target);
         assert!(matches!(
-            service
-                .0
-                .change_lesson(admin, before.revision, key.clone(), LessonAction::Restore),
+            service.0.test_native_command(
+                fc_ports::command_window::CommandFamily::Lesson,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| backend.change_lesson(
+                    admin,
+                    before.revision,
+                    key.clone(),
+                    LessonAction::Restore
+                )
+            ),
             Err(BackendError::Lesson(LessonRepositoryError::Domain(
                 fc_domain::lesson_context::LessonContextError::RevisionConflict { .. }
             )))
@@ -2532,37 +2733,67 @@ mod tests {
         assert_eq!(loaded.active_override, replaced.active_override);
         let restored = service
             .0
-            .change_lesson(admin, loaded.revision, key.clone(), LessonAction::Restore)
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Lesson,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.change_lesson(
+                        admin,
+                        loaded.revision,
+                        key.clone(),
+                        LessonAction::Restore,
+                    )
+                },
+            )
             .unwrap();
         assert!(restored.active_override.is_none());
         let teacher = policy_lease(&service.0, 2, TrustedOrigin::Local);
         assert!(service.0.read_lesson(teacher).is_err());
         assert!(service
             .0
-            .change_lesson(
-                teacher,
-                restored.revision,
-                key.clone(),
-                LessonAction::Replace(target.clone())
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Lesson,
+                Some(teacher),
+                SessionPurpose::Manage,
+                |backend| backend.change_lesson(
+                    teacher,
+                    restored.revision,
+                    key.clone(),
+                    LessonAction::Replace(target.clone())
+                )
             )
             .is_err());
         let web = policy_lease(&service.0, 1, TrustedOrigin::Web);
         assert!(service.0.read_lesson(web).is_err());
         assert!(service
             .0
-            .change_lesson(
-                web,
-                restored.revision,
-                key.clone(),
-                LessonAction::Replace(target.clone())
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Lesson,
+                Some(web),
+                SessionPurpose::Manage,
+                |backend| backend.change_lesson(
+                    web,
+                    restored.revision,
+                    key.clone(),
+                    LessonAction::Replace(target.clone())
+                )
             )
             .is_err());
         let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
         service.0.session_control().lock_local();
         assert!(matches!(
-            service
-                .0
-                .change_lesson(admin, restored.revision, key, LessonAction::Replace(target)),
+            service.0.test_native_command(
+                fc_ports::command_window::CommandFamily::Lesson,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| backend.change_lesson(
+                    admin,
+                    restored.revision,
+                    key,
+                    LessonAction::Replace(target)
+                )
+            ),
             Err(BackendError::Session(SessionError::Revoked))
         ));
     }
@@ -2576,10 +2807,17 @@ mod tests {
         let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
         service
             .0
-            .identity(
-                admin,
-                IdentityCommand::BindCurrentClass {
-                    id: ClassId::new(1).unwrap(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::BindCurrentClass {
+                            id: ClassId::new(1).unwrap(),
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -2587,26 +2825,37 @@ mod tests {
         draft.clock_mode = ClockMode::Digital12;
         let saved = service
             .0
-            .save_display(admin, Revision::default(), draft.clone())
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Display,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| backend.save_display(admin, Revision::default(), draft.clone()),
+            )
             .unwrap();
         assert_eq!(saved.revision, Revision::new(1));
         assert!(
-            matches!(service.0.save_display(admin,Revision::default(),draft),Err(BackendError::Display(DisplayRepositoryError::Domain(DisplayError::RevisionConflict{current})))if current==Revision::new(1))
+            matches!(service.0.test_native_command(fc_ports::command_window::CommandFamily::Display, Some(admin), SessionPurpose::Manage, |backend| backend.save_display(admin,Revision::default(),draft)),Err(BackendError::Display(DisplayRepositoryError::Domain(DisplayError::RevisionConflict{current})))if current==Revision::new(1))
         );
         service
             .0
-            .content(
-                admin,
-                ContentCommand {
-                    command_id: CommandId::new(7800).unwrap(),
-                    key: ContentKey::Homework(HomeworkKey {
-                        class_id: ClassId::new(1).unwrap(),
-                        actual_date: clock.wall.date,
-                        subject_id: SubjectId::new(1).unwrap(),
-                        owner_teacher_id: PrincipalId::new(2).unwrap(),
-                    }),
-                    expected_revision: Revision::default(),
-                    text: "public desktop homework".into(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Content,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    let mut request = ContentCommand {
+                        command_id: CommandId::new(7800).unwrap(),
+                        key: ContentKey::Homework(HomeworkKey {
+                            class_id: ClassId::new(1).unwrap(),
+                            actual_date: clock.wall.date,
+                            subject_id: SubjectId::new(1).unwrap(),
+                            owner_teacher_id: PrincipalId::new(2).unwrap(),
+                        }),
+                        expected_revision: Revision::default(),
+                        text: "public desktop homework".into(),
+                    };
+                    request.command_id = backend.issued_command_id()?;
+                    backend.content(admin, request)
                 },
             )
             .unwrap();
@@ -2632,7 +2881,12 @@ mod tests {
         assert!(service.0.read_display(teacher).is_err());
         assert!(service
             .0
-            .save_display(teacher, saved.revision, saved.clone())
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Display,
+                Some(teacher),
+                SessionPurpose::Manage,
+                |backend| backend.save_display(teacher, saved.revision, saved.clone())
+            )
             .is_err());
         let global = service.0.global_revision().unwrap();
         service.0.close().unwrap();
@@ -2667,10 +2921,17 @@ mod tests {
         let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
         service
             .0
-            .identity(
-                admin,
-                IdentityCommand::BindCurrentClass {
-                    id: ClassId::new(1).unwrap(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::BindCurrentClass {
+                            id: ClassId::new(1).unwrap(),
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -2718,7 +2979,12 @@ mod tests {
         };
         service
             .0
-            .save_schedule(admin, Revision::default(), doc)
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Schedule,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| backend.save_schedule(admin, Revision::default(), doc),
+            )
             .unwrap();
         let scope = MaterialScope {
             teacher_id: PrincipalId::new(2).unwrap(),
@@ -2726,6 +2992,14 @@ mod tests {
         };
         let version = ResourceVersionId::new(7900).unwrap();
         let id = MaterialId::new(7900).unwrap();
+        let append_command = service
+            .0
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::Materials,
+                Some(admin),
+                SessionPurpose::Manage,
+            )
+            .unwrap();
         let prepared = fc_ports::prepare_material_append(
             &mut Fixture,
             MaterialResource {
@@ -2735,7 +3009,7 @@ mod tests {
                 bytes: 10,
             },
             fc_ports::MaterialAppendMetadata {
-                command_id: CommandId::new(7900).unwrap(),
+                command_id: append_command.command_id,
                 scope,
                 material_id: id,
                 display_name: "lesson.txt".into(),
@@ -2743,7 +3017,12 @@ mod tests {
             },
         )
         .unwrap();
-        service.0.append_material(admin, prepared).unwrap();
+        service
+            .0
+            .begin_command_scope(append_command)
+            .unwrap()
+            .append_material(admin, prepared)
+            .unwrap();
         let facts = service.0.desktop_facts(0).unwrap();
         let source = facts.materials_source.unwrap();
         let generation = SceneGeneration::new(7);
@@ -2788,13 +3067,20 @@ mod tests {
             .unwrap();
         service
             .0
-            .delete_material(
-                admin,
-                MaterialDeleteRequest {
-                    command_id: CommandId::new(7901).unwrap(),
-                    scope,
-                    material_id: id,
-                    expected_material_revision: Revision::new(1),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Materials,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.delete_material(
+                        admin,
+                        MaterialDeleteRequest {
+                            command_id: backend.issued_command_id()?,
+                            scope,
+                            material_id: id,
+                            expected_material_revision: Revision::new(1),
+                        },
+                    )
                 },
             )
             .unwrap();

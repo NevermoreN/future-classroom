@@ -20,9 +20,9 @@ owner.expected_csp, owner.node_report = "script-src 'self'; connect-src 'self'",
 run = {'generation': 1, 'origin': origin, 'maxMillis': 12000}
 base = '/fc/api/v1/content/homework/1/1/1/2026-11-01'
 paths = [('GET', '/fc/api/v1/status')] * 2 + [('GET', '/fc/api/v1/session')] * 2 + [('GET', '/fc/api/v1/content/homework/scopes/0')] * 2
-paths += [('GET', base)] * 2 + [('POST', base)] + [('GET', base + '/visual')] * 4
-records = [{'method': method, 'url': origin + path, 'status': 200, 'mime': 'application/json', 'servedFromCache': False,
-            'fromDiskCache': False, 'fromServiceWorker': False, 'fromPrefetchCache': False, 'wireStatus': 200,
+paths += [('GET', base)] * 2 + [('POST', base), ('POST', '/fc/api/v1/commands')] + [('GET', base + '/visual')] * 4
+records = [{'method': method, 'url': origin + path, 'status': 201 if path.endswith('/commands') else 200, 'mime': 'application/json', 'servedFromCache': False,
+            'fromDiskCache': False, 'fromServiceWorker': False, 'fromPrefetchCache': False, 'wireStatus': 201 if path.endswith('/commands') else 200,
             'finished': True, 'bodyVerified': True} for method, path in paths]
 visual = {'subjectRevision': '2', 'displayRevision': '4', 'rulesVersion': 1, 'effectiveRgb': '#C98282', 'mode': 'FILLED',
           'homeworkFillPercent': 0, 'courseFillPercent': 20, 'homeworkComponentOpacityPercent': 50, 'courseComponentOpacityPercent': 100,
@@ -43,13 +43,15 @@ value = {'contentKind': 'HOMEWORK', 'reminderShortcutClicks': 0, 'reminderObserv
          'expectedCspSha256': m.digest(owner.expected_csp.encode()), 'contextDisposed': True, 'cdpDisconnected': True,
          'sessionCsrfMatched': True, 'writeOutcome': 'COMMITTED', 'contentPosts': 1, 'network': records,
          'wireResponseCount': len(records), 'wireResponses': records, 'observedRequestCount': len(records),
-         'observedResponseCount': len(records), 'apiResponses': 13, 'cacheOnlyResponseCount': 0, 'apiOperations': dict(m.API_OPERATIONS),
+         'observedResponseCount': len(records), 'apiResponses': 14, 'cacheOnlyResponseCount': 0, 'apiOperations': dict(m.API_OPERATIONS),
+         'commandId':'17', 'commandTicket':'c2:'+'a'*32+':1', 'commandIssues':1,
+         'issuedCommand':{'commandId':'17','commandTicket':'c2:'+'a'*32+':1'},
          'pageErrorCount': 0, 'consoleErrorCount': 0, 'assets': [], 'visualReads': 4, 'visualObservations': observations}
 message = {'type': 'RESULT', 'status': 'PASS', 'marker': marker, 'wireResponseCount': len(records),
            'contentPosts': 1, 'contextDisposed': True, 'report': str(owner.node_report)}
 checks = []
 owner._validate_result(value, message, run)
-checks.append('synthetic exact 13-operation ledger and Filled0/20 CSS accepted; not IO/browser evidence')
+checks.append('synthetic exact 14-operation ledger including actual issuance and Filled0/20 CSS accepted; not IO/browser evidence')
 outlined = copy.deepcopy(value)
 for observation in outlined['visualObservations']:
     observation['visual']['mode'] = 'OUTLINED'
@@ -58,6 +60,10 @@ for observation in outlined['visualObservations']:
 owner._validate_result(outlined, message, run)
 checks.append('synthetic Outlined transparent background and independent whole opacity accepted')
 mutations = [
+    ('wrong full ticket', lambda v:v.update(commandTicket='c2:'+'b'*32+':1')),
+    ('issuer count bool', lambda v:v.update(commandIssues=True)),
+    ('missing issue wire proof', lambda v:v['network'].pop(9)),
+    ('wrong issue status', lambda v:v['network'][9].update(status=200,wireStatus=200)),
     ('missing visual', lambda v: v.update(visualReads=3)),
     ('forged ninth-only total', lambda v: v.update(apiResponses=9)),
     ('bool operation count', lambda v: v['apiOperations'].update(contentPosts=True)),
@@ -83,18 +89,18 @@ for label, mutate in mutations:
 # cannot opt itself into the cheaper ledger or reuse a homework visual result.
 reminder = copy.deepcopy(value)
 reminder.update(contentKind='REMINDER', reminderShortcutClicks=2, visualReads=0, visualObservations=[],
-                apiResponses=9, apiOperations=dict(m.REMINDER_OPERATIONS))
-reminder_records = reminder['network'][:9]
+                apiResponses=10, apiOperations=dict(m.REMINDER_OPERATIONS))
+reminder_records = reminder['network'][:10]
 for record in reminder_records:
     record['url'] = record['url'].replace('/content/homework/scopes/', '/content/reminders/scopes/').replace(
         '/content/homework/1/1/1/', '/content/reminders/1/')
-reminder.update(network=reminder_records, wireResponses=reminder_records, wireResponseCount=9,
-                observedRequestCount=9, observedResponseCount=9)
-reminder_message = {**message, 'wireResponseCount': 9}
+reminder.update(network=reminder_records, wireResponses=reminder_records, wireResponseCount=10,
+                observedRequestCount=10, observedResponseCount=10)
+reminder_message = {**message, 'wireResponseCount': 10}
 reminder['reminderObservations'] = [dict(stage=stage, key={'kind':'REMINDER','classId':'1','date':'2026-11-01'}, revision=('0','1','1')[i], titleMatches=True, dateMatches=True, expiryMatches=True, draftMatches=True, noVisualPreview=True, bottomShortcutAvailable=True) for i, stage in enumerate(('initial','after-save','after-reload'))]
 owner.content_kind = 'REMINDER'
 owner._validate_result(reminder, reminder_message, run)
-checks.append('independent exact reminder 9-operation ledger with two bottom-shortcut clicks and zero visuals accepted')
+checks.append('independent exact reminder 10-operation ledger with two bottom-shortcut clicks and zero visuals accepted')
 reminder_mutations = [
     ('missing reminder DOM', lambda v: v.update(reminderObservations=[])),
     ('wrong reminder DOM key', lambda v: v['reminderObservations'][1]['key'].update(classId='2')),

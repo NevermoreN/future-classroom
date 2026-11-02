@@ -13,6 +13,7 @@ use fc_domain::{
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ProfileContentRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(ProfileContentError),
     Unavailable,
     Faulted,

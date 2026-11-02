@@ -57,6 +57,8 @@ struct Fixture {
     app: Arc<WebApplication>,
     cookie: String,
     csrf: String,
+    commands:
+        Mutex<std::collections::BTreeMap<u64, fc_protocol::web::command_window::CommandReference>>,
     directory: Directory,
 }
 fn field(bytes: &[u8], key: &str) -> String {
@@ -154,42 +156,63 @@ impl Fixture {
             .login("admin", Password::new(PASSWORD.into()).unwrap())
             .unwrap();
         backend
-            .identity(
-                admin,
-                IdentityCommand::CreateClass {
-                    id: ClassId::new(1).unwrap(),
-                    name: "Synthetic class".into(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::CreateClass {
+                            id: ClassId::new(1).unwrap(),
+                            name: "Synthetic class".into(),
+                        },
+                    )
                 },
             )
             .unwrap();
         backend
-            .identity(
-                admin,
-                IdentityCommand::PutSubject {
-                    id: SubjectId::new(1).unwrap(),
-                    name: "Synthetic subject".into(),
-                    enabled: true,
-                    color: Rgb {
-                        red: 2,
-                        green: 3,
-                        blue: 4,
-                    },
-                    expected_revision: None,
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::PutSubject {
+                            id: SubjectId::new(1).unwrap(),
+                            name: "Synthetic subject".into(),
+                            enabled: true,
+                            color: Rgb {
+                                red: 2,
+                                green: 3,
+                                blue: 4,
+                            },
+                            expected_revision: None,
+                        },
+                    )
                 },
             )
             .unwrap();
         backend
-            .identity(
-                admin,
-                IdentityCommand::UpdateAccount {
-                    id: PrincipalId::new(1).unwrap(),
-                    display_name: "Synthetic stream administrator".into(),
-                    role: Role::GlobalAdmin,
-                    enabled: true,
-                    scopes: vec![AssignmentScope {
-                        class_id: ClassId::new(1).unwrap(),
-                        subject_id: SubjectId::new(1).unwrap(),
-                    }],
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::UpdateAccount {
+                            id: PrincipalId::new(1).unwrap(),
+                            display_name: "Synthetic stream administrator".into(),
+                            role: Role::GlobalAdmin,
+                            enabled: true,
+                            scopes: vec![AssignmentScope {
+                                class_id: ClassId::new(1).unwrap(),
+                                subject_id: SubjectId::new(1).unwrap(),
+                            }],
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -267,6 +290,7 @@ impl Fixture {
             app: Arc::new(app),
             cookie,
             csrf,
+            commands: Mutex::new(std::collections::BTreeMap::new()),
             directory,
         }
     }
@@ -299,8 +323,49 @@ impl Fixture {
             .join(format!("web-material-{id}.part"));
         (id, head, path)
     }
+    // Labels are test metadata. First use calls the real authenticated HTTP
+    // issuer; retries and changed-payload negatives keep that exact original pair.
+    fn command_fields(&self, label: u64) -> String {
+        let mut commands = self.commands.lock().unwrap();
+        let command = if let Some(original) = commands.get(&label) {
+            *original
+        } else {
+            let body = br#"{"schemaVersion":2,"family":"materials"}"#;
+            let response = self.app.dispatch(
+                &mut self.backend.lock().unwrap(),
+                &self.head("commands", body.len()),
+                body,
+            );
+            assert_eq!(
+                response.head.status,
+                201,
+                "{}",
+                String::from_utf8_lossy(&response.body)
+            );
+            let command = fc_protocol::web::command_window::CommandReference {
+                ticket: fc_ports::command_window::CommandTicket::parse(&field(
+                    &response.body,
+                    "commandTicket",
+                ))
+                .unwrap(),
+                command_id: CommandId::new(field(&response.body, "commandId").parse().unwrap())
+                    .unwrap(),
+            };
+            commands.insert(label, command);
+            command
+        };
+        format!(
+            r#""schemaVersion":2,"commandTicket":"{}","commandId":"{}""#,
+            command.ticket,
+            command.command_id.get()
+        )
+    }
     fn append(&self, id: u64, command: u64) -> (RequestHead, Vec<u8>) {
-        let body=format!(r#"{{"schemaVersion":1,"commandId":"{command}","uploadId":"{id}","allowedClassIds":["1"]}}"#).into_bytes();
+        let body = format!(
+            r#"{{{},"uploadId":"{id}","allowedClassIds":["1"]}}"#,
+            self.command_fields(command)
+        )
+        .into_bytes();
         (self.head("materials/folders/1/1/append", body.len()), body)
     }
 }
@@ -756,11 +821,20 @@ fn material_stream_prepared_proof_keeps_original_transfer_cancellation_through_c
         .service
         .authenticate(&cookie_secret(f.cookie.as_bytes()).unwrap())
         .unwrap();
-    assert!(f
-        .backend
-        .lock()
+    let original = *f.commands.lock().unwrap().get(&88003).unwrap();
+    let mut backend = f.backend.lock().unwrap();
+    let issued = backend
+        .resolve_web_command(
+            session.lease(),
+            fc_ports::command_window::CommandFamily::Materials,
+            original.ticket,
+            original.command_id,
+        )
+        .unwrap();
+    assert!(backend
+        .begin_command_scope(issued)
         .unwrap()
-        .web_material_outcome(session.lease(), CommandId::new(88003).unwrap())
+        .web_material_outcome(session.lease(), original.command_id)
         .unwrap()
         .is_none());
 }

@@ -1,9 +1,10 @@
+import { commandIdentity, type CommandApi, type CommandIdentity } from './command-protocol'
 import { ApiError, abortError, HttpApi, NetworkFault, readJson } from './client'
 import { decimal, errorCode, ProtocolFault, secret } from './protocol'
 import * as m from './material-protocol'
-export interface AppendMaterial { commandId: string; uploadId: string; allowedClassIds: string[] }
-export interface DeleteMaterial { commandId: string; materialId: string; resourceVersionId: string; expectedMaterialRevision: string }
-export interface MaterialApi {
+export interface AppendMaterial extends CommandIdentity { uploadId: string; allowedClassIds: string[] }
+export interface DeleteMaterial extends CommandIdentity { materialId: string; resourceVersionId: string; expectedMaterialRevision: string }
+export interface MaterialApi extends CommandApi {
   materialScopes(offset: number, signal: AbortSignal): Promise<m.MaterialScopes>
   materialClasses(scope: m.MaterialScope, offset: number, signal: AbortSignal): Promise<m.MaterialClasses>
   materials(scope: m.MaterialScope, cursor: m.MaterialCursor | null, signal: AbortSignal): Promise<m.MaterialPage>
@@ -12,7 +13,7 @@ export interface MaterialApi {
   cancelUpload(id: string, csrf: string, signal: AbortSignal): Promise<void>
   append(scope: m.MaterialScope, input: AppendMaterial, csrf: string, signal: AbortSignal): Promise<m.MaterialCommitted>
   deleteMaterial(scope: m.MaterialScope, input: DeleteMaterial, csrf: string, signal: AbortSignal): Promise<m.MaterialCommitted>
-  materialOutcome(id: string, signal: AbortSignal): Promise<m.MaterialOutcome>
+  materialOutcome(command: CommandIdentity, signal: AbortSignal): Promise<m.MaterialOutcome>
   download(scope: m.MaterialScope, record: m.MaterialRecord, signal: AbortSignal): Promise<Blob>
 }
 export class MaterialHttpApi extends HttpApi implements MaterialApi {
@@ -53,12 +54,12 @@ export class MaterialHttpApi extends HttpApi implements MaterialApi {
   }
   async cancelUpload(id: string, csrf: string, signal: AbortSignal) { const r = await this.request('materials/uploads/' + decimal(id) + '/cancel', signal, { schemaVersion: 1 }, csrf); if (r.status !== 200) throw new ProtocolFault(); m.cancelled(r.value, id) }
   async append(scope: m.MaterialScope, input: AppendMaterial, csrf: string, signal: AbortSignal) {
-    const r = await this.request(m.folderPath(scope) + '/append', signal, { schemaVersion: 1, ...input }, csrf); if (r.status !== 200) throw new ProtocolFault(); return m.committed(r.value, input.commandId, scope)
+    const r = await this.request(m.folderPath(scope) + '/append', signal, { schemaVersion: 2, ...input, ...commandIdentity(input) }, csrf); if (r.status !== 200) throw new ProtocolFault(); return m.committed(r.value, input, scope)
   }
   async deleteMaterial(scope: m.MaterialScope, input: DeleteMaterial, csrf: string, signal: AbortSignal) {
-    const r = await this.request(m.folderPath(scope) + '/delete', signal, { schemaVersion: 1, ...input }, csrf); if (r.status !== 200) throw new ProtocolFault(); return m.committed(r.value, input.commandId, scope)
+    const r = await this.request(m.folderPath(scope) + '/delete', signal, { schemaVersion: 2, ...input, ...commandIdentity(input) }, csrf); if (r.status !== 200) throw new ProtocolFault(); return m.committed(r.value, input, scope)
   }
-  async materialOutcome(id: string, signal: AbortSignal) { const r = await this.request('materials/commands/' + decimal(id), signal); if (r.status !== 200) throw new ProtocolFault(); return m.outcome(r.value, id) }
+  async materialOutcome(command: CommandIdentity, signal: AbortSignal) { const r = await this.request('materials/commands/' + commandIdentity(command).commandTicket + '/' + commandIdentity(command).commandId, signal); if (r.status !== 200) throw new ProtocolFault(); return m.outcome(r.value, command) }
   async download(scope: m.MaterialScope, record: m.MaterialRecord, signal: AbortSignal): Promise<Blob> {
     record = m.record(record)
     return this.binary('materials/download/' + decimal(scope.ownerTeacherId) + '/' + decimal(scope.subjectId) + '/' + decimal(record.materialId) + '/' + decimal(record.resourceVersionId), signal, async (response, operation) => {

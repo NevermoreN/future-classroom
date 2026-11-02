@@ -11,7 +11,7 @@ fn limits() -> VoiceLimits {
 }
 fn save(service: &VoiceService, local: SessionLease) -> Result<VoiceSnapshot> {
     let review = service.management_snapshot(local)?;
-    service.set_limits_reviewed(
+    service.test_set_limits_reviewed(
         local,
         limits(),
         review.revision,
@@ -114,7 +114,7 @@ fn committed_disable_retires_normally_and_explicit_enable_updates_the_same_stop_
     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
     let before = service.management_snapshot(local).unwrap();
     service
-        .set_enabled_reviewed(
+        .test_set_enabled_reviewed(
             local,
             false,
             before.revision,
@@ -135,7 +135,7 @@ fn committed_disable_retires_normally_and_explicit_enable_updates_the_same_stop_
     );
     let disabled = service.management_snapshot(local).unwrap();
     service
-        .set_enabled_reviewed(
+        .test_set_enabled_reviewed(
             local,
             true,
             disabled.revision,
@@ -202,7 +202,7 @@ fn enable_of_a_running_policy_does_not_create_a_new_native_stop_receipt() {
     let service = backend.0.lock().unwrap().voice_service();
     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
     let queued = service
-        .submit(
+        .test_submit(
             web,
             fixtures::independent_request(&service, web, class, 2_881),
         )
@@ -226,7 +226,7 @@ fn enable_of_a_running_policy_does_not_create_a_new_native_stop_receipt() {
     let guard = service.guard(playing.id).unwrap();
     let before = service.management_snapshot(local).unwrap();
     service
-        .set_enabled_reviewed(
+        .test_set_enabled_reviewed(
             local,
             true,
             before.revision,
@@ -279,7 +279,7 @@ fn real_negative_driver_precommit_rolls_back_on_pending_and_can_later_settle_the
     let (_directory, backend, web, class) = fixtures::shared_fixture();
     let service = backend.0.lock().unwrap().voice_service();
     let queued = service
-        .submit(
+        .test_submit(
             web,
             fixtures::independent_request(&service, web, class, 2_882),
         )
@@ -293,7 +293,7 @@ fn real_negative_driver_precommit_rolls_back_on_pending_and_can_later_settle_the
         })
         .unwrap();
     let stopping = service
-        .cancel(
+        .test_cancel(
             web,
             VoiceCancelRequest {
                 command_id: CommandId::new(2_883).unwrap(),

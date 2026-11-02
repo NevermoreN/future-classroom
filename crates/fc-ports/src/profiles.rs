@@ -28,6 +28,7 @@ pub struct ProfileRequest {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ProfileRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(ProfileError),
     Display(fc_domain::desktop::DisplayError),
     Unavailable,

@@ -5,6 +5,7 @@ use crate::backend::{BackendError, VoiceService};
 use fc_application::identity::SessionLease;
 use fc_domain::voice::*;
 use fc_ports::voice::VoiceRepositoryError;
+use fc_protocol::web::command_window::CommandReference;
 use fc_protocol::web::voice as wire;
 pub(super) fn dispatch(
     service: &VoiceService,
@@ -17,32 +18,79 @@ pub(super) fn dispatch(
             Ok(c) => capabilities_response(&c),
             Err(e) => error(e, false),
         },
-        Route::VoiceList => match service.web_jobs(lease) {
-            Ok(jobs) => response(200, wire::jobs(&jobs), None),
+        Route::VoiceList => match service.web_jobs_bound(lease) {
+            Ok(jobs) => response(200, wire::jobs_bound(&jobs), None),
             Err(e) => error(e, false),
         },
-        Route::VoiceStatus { job_id } => match service.status(lease, job_id) {
-            Ok(job) => response(200, wire::status(&job), None),
+        Route::VoiceStatus { job_id } => match service.status_bound(lease, job_id, None) {
+            Ok(job) => response(200, wire::status_bound(&job, None), None),
             Err(e) => error(e, false),
         },
+        Route::VoiceBoundStatus {
+            job_id,
+            command_ticket,
+        } => match service.status_bound(lease, job_id, Some(command_ticket)) {
+            Ok(job) => response(200, wire::status_bound(&job, Some(command_ticket)), None),
+            Err(e) => error(e, false),
+        },
+        Route::VoiceWindowCommand { command } => {
+            match service.command_outcome(lease, command.ticket, command.command_id) {
+                Ok(result) => response(
+                    200,
+                    wire::command_outcome(
+                        command,
+                        result.as_ref().map(|(job, ticket)| (job, *ticket)),
+                    ),
+                    None,
+                ),
+                Err(e) => error(e, false),
+            }
+        }
         Route::VoiceSubmit => {
-            let request = match fc_protocol::web::voice_submit(body) {
+            let (request, command_ticket) = match fc_protocol::web::voice_submit_window(body) {
                 Ok(r) => r,
                 Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
             };
-            match service.submit(lease, request) {
-                Ok(job) => mutation(service, lease, wire::committed(&job)),
+            let command_id = request.command_id;
+            match service.submit_window(lease, request, command_ticket) {
+                Ok((job, submit_ticket)) => mutation(
+                    service,
+                    lease,
+                    match command_ticket {
+                        Some(ticket) => wire::committed_window(
+                            CommandReference { ticket, command_id },
+                            &job,
+                            submit_ticket,
+                        ),
+                        None => wire::committed(&job),
+                    },
+                ),
                 Err(e) => error(e, true),
             }
         }
         Route::VoiceCancel { job_id } => {
-            let request = match fc_protocol::web::voice_cancel(job_id, body) {
-                Ok(r) => r,
-                Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
-            };
+            let (request, command_ticket, job_command_ticket) =
+                match fc_protocol::web::voice_cancel_window(job_id, body) {
+                    Ok(r) => r,
+                    Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+                };
             let id = request.command_id;
-            match service.cancel(lease, request) {
-                Ok(job) => mutation(service, lease, wire::cancelled(id, &job)),
+            match service.cancel_window(lease, request, command_ticket, job_command_ticket) {
+                Ok((job, submit_ticket)) => mutation(
+                    service,
+                    lease,
+                    match command_ticket {
+                        Some(ticket) => wire::cancelled_window(
+                            CommandReference {
+                                ticket,
+                                command_id: id,
+                            },
+                            &job,
+                            submit_ticket,
+                        ),
+                        None => wire::cancelled(id, &job),
+                    },
+                ),
                 Err(e) => error(e, true),
             }
         }
@@ -91,6 +139,9 @@ fn mutation(
     }
 }
 pub(super) fn error(error: BackendError, mutating: bool) -> WebResponse {
+    if let Some(response) = command_failure(&error) {
+        return response;
+    }
     match error {
         BackendError::Voice(VoiceRepositoryError::Domain(error)) => match error {
             VoiceError::Permission(_) => failure(403, responses::ErrorCode::Forbidden),

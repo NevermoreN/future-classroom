@@ -285,11 +285,18 @@ fn upload_wait_rechecks_the_actual_new_class_binding_after_publication_without_s
         let mut backend = backend.0.lock().unwrap();
         let local = fixtures::issue(&backend, TrustedOrigin::Local);
         backend
-            .identity(
-                local,
-                IdentityCommand::CreateClass {
-                    id: other,
-                    name: "New upload binding".into(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(local),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        local,
+                        IdentityCommand::CreateClass {
+                            id: other,
+                            name: "New upload binding".into(),
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -298,12 +305,21 @@ fn upload_wait_rechecks_the_actual_new_class_binding_after_publication_without_s
             .actor(&state, local, SessionPurpose::Manage)
             .unwrap()
             .0;
+        let issued = backend
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(local),
+                SessionPurpose::Manage,
+            )
+            .unwrap();
         let request = backend
+            .begin_command_scope(issued)
+            .unwrap()
             .request(&state, IdentityCommand::BindCurrentClass { id: other })
             .unwrap();
         (
             local,
-            backend.repository.clone(),
+            backend.repository.with_command_window(issued),
             request,
             actor,
             backend.clock.clone(),

@@ -4,6 +4,7 @@ pub mod autostart;
 pub use autostart::*;
 pub mod calendar;
 pub use calendar::*;
+pub mod command_window;
 pub mod content_web;
 pub mod material_outcome;
 pub mod profile_content;
@@ -41,6 +42,7 @@ pub struct IdentityRequest {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum IdentityRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(fc_domain::identity::IdentityError),
     Unavailable,
     Faulted,
@@ -176,15 +178,47 @@ pub fn prepare_password_change<C: CredentialCrypto>(
         recovery: None,
     })
 }
-pub fn prepare_recovery<C: CredentialCrypto>(
+/// Verified credential records with the original recovery action closed over.
+/// No constructor accepts a boolean proof. The Writer command identity can be
+/// issued after cryptographic verification without editing a sealed request.
+pub struct VerifiedRecoveryPreparation<P, R> {
+    command: fc_domain::identity::IdentityCommand,
+    password: P,
+    recovery: R,
+}
+impl<P, R> VerifiedRecoveryPreparation<P, R> {
+    pub fn bind(
+        self,
+        command_id: fc_domain::ids::CommandId,
+        expected_revision: Revision,
+    ) -> PreparedCredentialChange<P, R> {
+        PreparedCredentialChange {
+            request: IdentityRequest {
+                command_id,
+                expected_revision,
+                command: self.command,
+            },
+            password: Some(self.password),
+            recovery: Some(self.recovery),
+        }
+    }
+}
+pub type VerifiedRecovery<C> = (
+    VerifiedRecoveryPreparation<
+        <C as CredentialCrypto>::PasswordRecord,
+        <C as CredentialCrypto>::RecoveryRecord,
+    >,
+    <C as CredentialCrypto>::RecoveryCode,
+);
+pub fn prepare_verified_recovery<C: CredentialCrypto>(
     crypto: &mut C,
     code: &C::RecoveryCode,
     new: &C::Secret,
     existing: &C::RecoveryRecord,
-    request: IdentityRequest,
-) -> Result<CredentialPreparation<C>, CredentialError> {
+    command: fc_domain::identity::IdentityCommand,
+) -> Result<VerifiedRecovery<C>, CredentialError> {
     if !matches!(
-        request.command,
+        command,
         fc_domain::identity::IdentityCommand::RecoveryConsumed { .. }
     ) {
         return Err(CredentialError::InvalidSecret);
@@ -195,11 +229,25 @@ pub fn prepare_recovery<C: CredentialCrypto>(
     let password = crypto.password_record(new)?;
     let (code, recovery) = crypto.recovery_record()?;
     Ok((
-        PreparedCredentialChange {
-            request,
-            password: Some(password),
-            recovery: Some(recovery),
+        VerifiedRecoveryPreparation {
+            command,
+            password,
+            recovery,
         },
+        code,
+    ))
+}
+pub fn prepare_recovery<C: CredentialCrypto>(
+    crypto: &mut C,
+    code: &C::RecoveryCode,
+    new: &C::Secret,
+    existing: &C::RecoveryRecord,
+    request: IdentityRequest,
+) -> Result<CredentialPreparation<C>, CredentialError> {
+    let (preparation, code) =
+        prepare_verified_recovery(crypto, code, new, existing, request.command)?;
+    Ok((
+        preparation.bind(request.command_id, request.expected_revision),
         code,
     ))
 }
@@ -268,6 +316,7 @@ pub trait AuthorityPublisher {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum RepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(ContentError),
     Unavailable,
     Faulted,
@@ -296,6 +345,7 @@ pub struct ScheduleRequest {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ScheduleRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(fc_domain::schedule_document::ScheduleDocumentError),
     Unavailable,
     Faulted,
@@ -336,6 +386,7 @@ pub struct DisplayRequest {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DisplayRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(fc_domain::desktop::DisplayError),
     Unavailable,
     Faulted,
@@ -399,6 +450,7 @@ pub struct MaterialListRequest {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MaterialRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(fc_domain::materials::MaterialError),
     Unavailable,
     Faulted,
@@ -595,6 +647,7 @@ pub struct LessonRequest {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum LessonRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(fc_domain::lesson_context::LessonContextError),
     Unavailable,
     Faulted,

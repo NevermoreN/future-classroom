@@ -8,7 +8,7 @@ use crate::{
     recovery_files::{entry_relative_path, RecoveryFiles},
     voice_runtime::VoiceRuntime,
 };
-use fc_application::identity::SessionLease;
+use fc_application::identity::{SessionLease, SessionPurpose};
 use fc_domain::{
     auth::Role,
     desktop::ComponentKind,
@@ -21,6 +21,7 @@ use fc_domain::{
     time::{LocalDate, LocalDateTime},
 };
 use fc_materials::office::{ContainerError, ValidationControl};
+use fc_ports::command_window::CommandFamily;
 use fc_ports::{MaterialAppendMetadata, MaterialPreparation, MaterialRepositoryError};
 use fc_runtime::worker::WorkerPool;
 use fc_security::Password;
@@ -49,52 +50,80 @@ fn teacher_password() -> Password {
 fn catalog(f: &Fixture) -> MaterialScope {
     let mut backend = f.backend.lock().unwrap();
     backend
-        .identity(
-            f.lease,
-            IdentityCommand::CreateClass {
-                id: ClassId::new(1).unwrap(),
-                name: "合成一班".into(),
+        .test_native_command(
+            CommandFamily::Identity,
+            Some(f.lease),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    f.lease,
+                    IdentityCommand::CreateClass {
+                        id: ClassId::new(1).unwrap(),
+                        name: "合成一班".into(),
+                    },
+                )
             },
         )
         .unwrap();
     backend
-        .identity(
-            f.lease,
-            IdentityCommand::PutSubject {
-                id: SubjectId::new(1).unwrap(),
-                name: "合成数学".into(),
-                enabled: true,
-                color: Rgb {
-                    red: 70,
-                    green: 110,
-                    blue: 150,
-                },
-                expected_revision: None,
+        .test_native_command(
+            CommandFamily::Identity,
+            Some(f.lease),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    f.lease,
+                    IdentityCommand::PutSubject {
+                        id: SubjectId::new(1).unwrap(),
+                        name: "合成数学".into(),
+                        enabled: true,
+                        color: Rgb {
+                            red: 70,
+                            green: 110,
+                            blue: 150,
+                        },
+                        expected_revision: None,
+                    },
+                )
             },
         )
         .unwrap();
     backend
-        .identity(
-            f.lease,
-            IdentityCommand::BindCurrentClass {
-                id: ClassId::new(1).unwrap(),
+        .test_native_command(
+            CommandFamily::Identity,
+            Some(f.lease),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    f.lease,
+                    IdentityCommand::BindCurrentClass {
+                        id: ClassId::new(1).unwrap(),
+                    },
+                )
             },
         )
         .unwrap();
     backend
-        .create_account(
-            f.lease,
-            NewAccount {
-                id: PrincipalId::new(2).unwrap(),
-                login_name: "synthetic-teacher".into(),
-                display_name: "合成教师".into(),
-                role: Role::TeacherAdmin,
-                scopes: vec![AssignmentScope {
-                    class_id: ClassId::new(1).unwrap(),
-                    subject_id: SubjectId::new(1).unwrap(),
-                }],
+        .test_native_command(
+            CommandFamily::Identity,
+            Some(f.lease),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.create_account(
+                    f.lease,
+                    NewAccount {
+                        id: PrincipalId::new(2).unwrap(),
+                        login_name: "synthetic-teacher".into(),
+                        display_name: "合成教师".into(),
+                        role: Role::TeacherAdmin,
+                        scopes: vec![AssignmentScope {
+                            class_id: ClassId::new(1).unwrap(),
+                            subject_id: SubjectId::new(1).unwrap(),
+                        }],
+                    },
+                    teacher_password(),
+                )
             },
-            teacher_password(),
         )
         .unwrap();
     MaterialScope {
@@ -174,6 +203,16 @@ impl MaterialPreparation for TxtPreparation<'_> {
     }
 }
 fn material(f: &Fixture, scope: MaterialScope) -> MaterialRecord {
+    let issued = f
+        .backend
+        .lock()
+        .unwrap()
+        .issue_native_command(
+            CommandFamily::Materials,
+            Some(f.lease),
+            SessionPurpose::Manage,
+        )
+        .unwrap();
     let files = ControlledFiles::new(&f.root).unwrap();
     let mut source = files
         .create_new(&f.root.join("quarantine").join("source.txt"))
@@ -192,7 +231,7 @@ fn material(f: &Fixture, scope: MaterialScope) -> MaterialRecord {
         &mut preparation,
         SelectedFile::isolated_probe(&f.root, "source.txt").unwrap(),
         MaterialAppendMetadata {
-            command_id: CommandId::new(500).unwrap(),
+            command_id: issued.command_id,
             scope,
             material_id: MaterialId::new(500).unwrap(),
             display_name: "合成资料.txt".into(),
@@ -202,6 +241,8 @@ fn material(f: &Fixture, scope: MaterialScope) -> MaterialRecord {
     .unwrap();
     f.backend
         .lock()
+        .unwrap()
+        .begin_command_scope(issued)
         .unwrap()
         .append_material(f.lease, proof)
         .unwrap()
@@ -249,12 +290,19 @@ fn image_slot(f: &Fixture) -> ContentSlotKey {
         image_fit: ImageFit::Contain,
     });
     backend
-        .save_public_layout(
-            f.lease,
-            state.layout.revision,
-            state.display.revision,
-            layout,
-            state.display,
+        .test_native_command(
+            CommandFamily::Profiles,
+            Some(f.lease),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.save_public_layout(
+                    f.lease,
+                    state.layout.revision,
+                    state.display.revision,
+                    layout,
+                    state.display,
+                )
+            },
         )
         .unwrap();
     ContentSlotKey {
@@ -297,11 +345,11 @@ fn publish_image(
     root: &Path,
     lease: SessionLease,
     slot: ContentSlotKey,
-    command: u64,
+    source_label: u64,
     red: u8,
 ) -> ProfileContentDocument {
     let files = ControlledFiles::new(root).unwrap();
-    let name = format!("source-{command}.png");
+    let name = format!("source-{source_label}.png");
     let mut source = files
         .create_new(&root.join("quarantine").join(&name))
         .unwrap();
@@ -318,8 +366,17 @@ fn publish_image(
         .unwrap()
         .read_profile_content(lease, slot)
         .unwrap();
+    let issued = backend
+        .lock()
+        .unwrap()
+        .issue_native_command(
+            CommandFamily::ProfileContent,
+            Some(lease),
+            SessionPurpose::Manage,
+        )
+        .unwrap();
     let request = BeginContentRequest {
-        command_id: CommandId::new(command).unwrap(),
+        command_id: issued.command_id,
         slot,
         expected_revision: current.revision,
         operation,
@@ -329,10 +386,14 @@ fn publish_image(
     let admission = backend
         .lock()
         .unwrap()
+        .begin_command_scope(issued)
+        .unwrap()
         .begin_profile_content(lease, request)
         .unwrap();
     let reservation = backend
         .lock()
+        .unwrap()
+        .begin_command_scope(issued)
         .unwrap()
         .reserve_profile_media(lease, &admission, &sources.image_sizes().unwrap())
         .unwrap();
@@ -349,6 +410,8 @@ fn publish_image(
             fc_ports::prepare_profile_content(&mut preparation, admission, sources).unwrap();
         backend
             .lock()
+            .unwrap()
+            .begin_command_scope(issued)
             .unwrap()
             .commit_profile_content(lease, prepared)
             .unwrap();
@@ -430,27 +493,46 @@ fn complete_backup_cold_restore_preserves_current_security_txt_and_both_wic_imag
     {
         let mut backend = f.backend.lock().unwrap();
         backend
-            .identity(
-                f.lease,
-                IdentityCommand::RenameSchool {
-                    name: "Post-backup school".into(),
+            .test_native_command(
+                CommandFamily::Identity,
+                Some(f.lease),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        f.lease,
+                        IdentityCommand::RenameSchool {
+                            name: "Post-backup school".into(),
+                        },
+                    )
                 },
             )
             .unwrap();
         backend
-            .identity(
-                f.lease,
-                IdentityCommand::UpdateAccount {
-                    id: scope.teacher_id,
-                    display_name: "已停用合成教师".into(),
-                    role: Role::User,
-                    enabled: false,
-                    scopes: vec![],
+            .test_native_command(
+                CommandFamily::Identity,
+                Some(f.lease),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        f.lease,
+                        IdentityCommand::UpdateAccount {
+                            id: scope.teacher_id,
+                            display_name: "已停用合成教师".into(),
+                            role: Role::User,
+                            enabled: false,
+                            scopes: vec![],
+                        },
+                    )
                 },
             )
             .unwrap();
         backend
-            .change_password(f.lease, password(), changed_password())
+            .test_native_command(
+                CommandFamily::Identity,
+                Some(f.lease),
+                SessionPurpose::ChangeInitialPassword,
+                |backend| backend.change_password(f.lease, password(), changed_password()),
+            )
             .unwrap();
     }
     let lease = f

@@ -19,6 +19,7 @@ pub struct HttpsSettingsState {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum HttpsSettingsRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(HttpsSettingsError),
     IdempotencyConflict,
     DocumentTooLarge,

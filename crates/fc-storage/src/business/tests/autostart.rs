@@ -1,6 +1,7 @@
 //! Autostart intent transactions use synthetic identity; no real system writes.
 use super::*;
 use fc_domain::time::{LocalDate, LocalDateTime};
+use fc_ports::command_window::{CommandFamily, CommandOwner};
 use fc_ports::AuthorityPublisher;
 use std::sync::{
     atomic::{AtomicBool, AtomicU64, Ordering},
@@ -96,6 +97,7 @@ impl AuthorityPublisher for Publisher {
     fn fault(&mut self) {}
 }
 struct Fixture {
+    commands: crate::fixture_commands::FixtureCommands,
     writer: Option<StorageWriter<Revision>>,
     directory: Directory,
     clock: Arc<Time>,
@@ -110,8 +112,24 @@ impl Drop for Fixture {
     }
 }
 impl Fixture {
+    fn command_id(&self, family: CommandFamily, label: u64) -> CommandId {
+        if let Some(original) = self.commands.labelled(family, &label.to_string()) {
+            return original.command_id;
+        }
+        self.commands
+            .issue(
+                &self.handle(),
+                family,
+                &label.to_string(),
+                CommandOwner::authenticated(&actor()),
+            )
+            .unwrap()
+            .command_id
+    }
+
     fn new() -> Self {
         let mut f = Self {
+            commands: crate::fixture_commands::FixtureCommands::default(),
             writer: None,
             directory: Directory::new(),
             clock: Arc::new(Time(Mutex::new(at(10)))),
@@ -156,14 +174,19 @@ impl Fixture {
     }
     fn commit(&self, m: Vec<Mutation>) {
         let r = self.handle().try_revision().unwrap().wait().unwrap();
-        self.handle()
-            .try_commit(
-                CommitCommand::new(format!("fixture{}", r.get()), r, m).unwrap(),
-                r.next().unwrap(),
-            )
-            .unwrap()
-            .wait()
-            .unwrap();
+        {
+            let (fixture_handle, fixture_command) = self
+                .commands
+                .prepare_generic(
+                    &self.handle(),
+                    CommitCommand::new(format!("fixture{}", r.get()), r, m).unwrap(),
+                )
+                .unwrap();
+            fixture_handle.try_commit(fixture_command, r.next().unwrap())
+        }
+        .unwrap()
+        .wait()
+        .unwrap();
     }
     fn repo(&self) -> BusinessRepository<Revision> {
         let active = self.active.clone();
@@ -177,9 +200,9 @@ impl Fixture {
             }))
     }
 }
-fn request(id: u64, revision: Revision, desired: bool) -> AutostartRequest {
+fn request(f: &Fixture, id: u64, revision: Revision, desired: bool) -> AutostartRequest {
     AutostartRequest {
-        command_id: CommandId::new(id).unwrap(),
+        command_id: f.command_id(CommandFamily::Autostart, id),
         expected_revision: revision,
         desired,
         target_command: "\"C:\\教室 空间\\FutureClassroom.exe\" --autostart".into(),
@@ -206,18 +229,26 @@ fn default_has_no_intent_and_no_os_action() {
 #[test]
 fn prepare_apply_finish_is_durable_and_keeps_exact_intent() {
     let mut f = Fixture::new();
-    let mut r = f.repo();
-    let op = r
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
+    let r = f.repo();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
     assert_eq!(op.phase, AutostartPhase::Prepared);
     assert_eq!(op.ticket.prepared_revision.get(), 1);
     f.reopen();
     let mut r = f.repo();
     assert_eq!(r.autostart_status(&actor()).unwrap().current(), Some(&op));
-    let applying = r
-        .mark_autostart_applying(op.ticket.clone(), &actor())
-        .unwrap();
+    let applying = {
+        let fixture_request = op.ticket.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.mark_autostart_applying(fixture_request, &actor())
+    }
+    .unwrap();
     assert_eq!(applying.phase, AutostartPhase::Applying);
     let s = r.finish_autostart(op.ticket.clone(), success(&op)).unwrap();
     assert_eq!(s.current().unwrap().phase, AutostartPhase::Succeeded);
@@ -229,15 +260,30 @@ fn prepare_apply_finish_is_durable_and_keeps_exact_intent() {
 #[test]
 fn read_and_preparation_require_local_current_global_lease() {
     let f = Fixture::new();
-    let mut r = f.repo();
+    let r = f.repo();
     let mut web = actor();
     web.origin = TrustedOrigin::Web;
+    // This is a server-issued Web request, so the unchanged Local-only domain
+    // guard (rather than a transplanted Local ticket) supplies the denial.
+    f.commands
+        .issue(
+            &f.handle(),
+            CommandFamily::Autostart,
+            "1",
+            CommandOwner::authenticated(&web),
+        )
+        .unwrap();
     assert_eq!(
         r.autostart_status(&web),
         Err(AutostartRepositoryError::Denied)
     );
     assert_eq!(
-        r.begin_autostart(request(1, Revision::default(), true), &web),
+        {
+            let fixture_request = request(&f, 1, Revision::default(), true);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &web)
+        },
         Err(AutostartRepositoryError::Denied)
     );
     f.active.store(false, Ordering::Release);
@@ -251,8 +297,12 @@ fn committed_preparation_is_fenced_at_real_precommit() {
     let f = Fixture::new();
     f.revoke.store(true, Ordering::Release);
     assert_eq!(
-        f.repo()
-            .begin_autostart(request(1, Revision::default(), true), &actor()),
+        {
+            let fixture_request = request(&f, 1, Revision::default(), true);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        },
         Err(AutostartRepositoryError::Denied)
     );
     f.active.store(true, Ordering::Release);
@@ -264,9 +314,14 @@ fn committed_preparation_is_fenced_at_real_precommit() {
 #[test]
 fn execution_cancel_is_not_health_fault_and_no_intent_is_committed() {
     let f = Fixture::new();
-    let mut r = f.repo().with_autostart_execution_guard(Arc::new(|| false));
+    let r = f.repo().with_autostart_execution_guard(Arc::new(|| false));
     assert_eq!(
-        r.begin_autostart(request(1, Revision::default(), true), &actor()),
+        {
+            let fixture_request = request(&f, 1, Revision::default(), true);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        },
         Err(AutostartRepositoryError::Cancelled)
     );
     assert_eq!(
@@ -286,7 +341,12 @@ fn execution_guard_is_checked_after_factory_at_precommit() {
     });
     r = r.with_autostart_execution_guard(Arc::new(move || active.load(Ordering::Acquire)));
     assert_eq!(
-        r.begin_autostart(request(1, Revision::default(), true), &actor()),
+        {
+            let fixture_request = request(&f, 1, Revision::default(), true);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        },
         Err(AutostartRepositoryError::Cancelled)
     );
     assert_eq!(
@@ -297,14 +357,21 @@ fn execution_guard_is_checked_after_factory_at_precommit() {
 #[test]
 fn applying_rechecks_authorization_and_exact_owner() {
     let f = Fixture::new();
-    let op = f
-        .repo()
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
     f.revoke.store(true, Ordering::Release);
     assert_eq!(
-        f.repo()
-            .mark_autostart_applying(op.ticket.clone(), &actor()),
+        {
+            let fixture_request = op.ticket.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository.mark_autostart_applying(fixture_request, &actor())
+        },
         Err(AutostartRepositoryError::Denied)
     );
     f.active.store(true, Ordering::Release);
@@ -321,12 +388,21 @@ fn applying_rechecks_authorization_and_exact_owner() {
 #[test]
 fn finish_can_record_physical_success_after_lock_and_cancellation() {
     let f = Fixture::new();
-    let mut r = f.repo();
-    let op = r
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
-    r.mark_autostart_applying(op.ticket.clone(), &actor())
-        .unwrap();
+    let r = f.repo();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
+    {
+        let fixture_request = op.ticket.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.mark_autostart_applying(fixture_request, &actor())
+    }
+    .unwrap();
     f.active.store(false, Ordering::Release);
     let s = r
         .with_autostart_execution_guard(Arc::new(|| false))
@@ -338,9 +414,13 @@ fn finish_can_record_physical_success_after_lock_and_cancellation() {
 fn prepared_cancellation_settles_but_cannot_claim_mutation() {
     let f = Fixture::new();
     let mut r = f.repo();
-    let op = r
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
     assert_eq!(
         r.finish_autostart(op.ticket.clone(), success(&op)),
         Err(AutostartRepositoryError::Invalid)
@@ -363,9 +443,13 @@ fn prepared_cancellation_settles_but_cannot_claim_mutation() {
 fn stale_ticket_cannot_settle_new_operation() {
     let f = Fixture::new();
     let mut r = f.repo();
-    let first = r
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
+    let first = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
     let s = r
         .finish_autostart(
             first.ticket.clone(),
@@ -376,9 +460,13 @@ fn stale_ticket_cannot_settle_new_operation() {
             },
         )
         .unwrap();
-    let second = r
-        .begin_autostart(request(2, s.revision, false), &actor())
-        .unwrap();
+    let second = {
+        let fixture_request = request(&f, 2, s.revision, false);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
     assert!(second.ticket.sequence > first.ticket.sequence);
     assert_eq!(
         r.finish_autostart(first.ticket, success(&second)),
@@ -388,41 +476,79 @@ fn stale_ticket_cannot_settle_new_operation() {
 #[test]
 fn pending_operation_and_wrong_revision_prevent_replacement() {
     let f = Fixture::new();
-    let mut r = f.repo();
-    r.begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
+    let r = f.repo();
+    {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
     assert_eq!(
-        r.begin_autostart(request(2, Revision::new(1), false), &actor()),
+        {
+            let fixture_request = request(&f, 2, Revision::new(1), false);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        },
         Err(AutostartRepositoryError::Stale)
     );
     assert_eq!(
-        r.begin_autostart(request(3, Revision::default(), false), &actor()),
+        {
+            let fixture_request = request(&f, 3, Revision::default(), false);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        },
         Err(AutostartRepositoryError::Stale)
     );
 }
 #[test]
 fn exact_begin_replay_never_performs_second_operation() {
     let f = Fixture::new();
-    let mut r = f.repo();
-    let req = request(1, Revision::default(), true);
-    let first = r.begin_autostart(req.clone(), &actor()).unwrap();
+    let r = f.repo();
+    let req = request(&f, 1, Revision::default(), true);
+    let first = {
+        let fixture_request = req.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
     let global = f.handle().try_revision().unwrap().wait().unwrap();
-    assert_eq!(r.begin_autostart(req, &actor()).unwrap(), first);
+    assert_eq!(
+        {
+            let fixture_request = req;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        }
+        .unwrap(),
+        first
+    );
     assert_eq!(f.handle().try_revision().unwrap().wait().unwrap(), global);
-    let mut altered = request(1, Revision::default(), false);
+    let mut altered = request(&f, 1, Revision::default(), false);
     altered.previous_observed = AutostartObservation::Command("other".into());
     assert_eq!(
-        r.begin_autostart(altered, &actor()),
+        {
+            let fixture_request = altered;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        },
         Err(AutostartRepositoryError::Stale)
     );
 }
 #[test]
 fn restart_prepared_is_never_mistaken_for_proven_system_success() {
     let mut f = Fixture::new();
-    let op = f
-        .repo()
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
     f.reopen();
     let mut r = f.repo();
     let s = r.autostart_reconciliation_status().unwrap();
@@ -439,12 +565,21 @@ fn restart_prepared_is_never_mistaken_for_proven_system_success() {
 fn restart_applying_exact_readback_proves_fact_but_mismatch_needs_reconcile() {
     for matching in [false, true] {
         let mut f = Fixture::new();
-        let mut r = f.repo();
-        let op = r
-            .begin_autostart(request(1, Revision::default(), true), &actor())
-            .unwrap();
-        r.mark_autostart_applying(op.ticket.clone(), &actor())
-            .unwrap();
+        let r = f.repo();
+        let op = {
+            let fixture_request = request(&f, 1, Revision::default(), true);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        }
+        .unwrap();
+        {
+            let fixture_request = op.ticket.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.mark_autostart_applying(fixture_request, &actor())
+        }
+        .unwrap();
         f.reopen();
         let mut r = f.repo();
         let s = r.autostart_reconciliation_status().unwrap();
@@ -472,11 +607,20 @@ fn restart_applying_exact_readback_proves_fact_but_mismatch_needs_reconcile() {
 fn external_removal_records_drift_without_rebuilding_intent() {
     let f = Fixture::new();
     let mut r = f.repo();
-    let op = r
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
-    r.mark_autostart_applying(op.ticket.clone(), &actor())
-        .unwrap();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
+    {
+        let fixture_request = op.ticket.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.mark_autostart_applying(fixture_request, &actor())
+    }
+    .unwrap();
     let s = r.finish_autostart(op.ticket.clone(), success(&op)).unwrap();
     let history = s.history.clone();
     let s = r
@@ -495,17 +639,27 @@ fn malformed_or_unavailable_preimage_and_nonfixed_command_are_rejected() {
         AutostartObservation::default(),
         AutostartObservation::Command("x".repeat(260)),
     ] {
-        let mut req = request(1, Revision::default(), true);
+        let mut req = request(&f, 1, Revision::default(), true);
         req.previous_observed = previous;
         assert_eq!(
-            f.repo().begin_autostart(req, &actor()),
+            {
+                let fixture_request = req;
+                let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+                let mut issued_repository = f.repo().with_command_window(original_pair);
+                issued_repository.begin_autostart(fixture_request, &actor())
+            },
             Err(AutostartRepositoryError::Invalid)
         );
     }
-    let mut req = request(2, Revision::default(), true);
+    let mut req = request(&f, 2, Revision::default(), true);
     req.target_command = "cmd.exe /c anything".into();
     assert_eq!(
-        f.repo().begin_autostart(req, &actor()),
+        {
+            let fixture_request = req;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        },
         Err(AutostartRepositoryError::Invalid)
     );
 }
@@ -515,7 +669,13 @@ fn history_is_bounded_and_sequence_does_not_reset_when_trimmed() {
     let mut r = f.repo();
     let mut rev = Revision::default();
     for id in 1..=40 {
-        let op = r.begin_autostart(request(id, rev, true), &actor()).unwrap();
+        let op = {
+            let fixture_request = request(&f, id, rev, true);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        }
+        .unwrap();
         let s = r
             .finish_autostart(
                 op.ticket,
@@ -595,8 +755,12 @@ fn actual_role_epoch_password_and_expiry_are_rechecked_not_cached_buttons() {
             value: codec::bytes(&codec::identity(&identity)).unwrap(),
         }]);
         assert_eq!(
-            f.repo()
-                .begin_autostart(request(1, Revision::default(), true), &actor()),
+            {
+                let fixture_request = request(&f, 1, Revision::default(), true);
+                let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+                let mut issued_repository = f.repo().with_command_window(original_pair);
+                issued_repository.begin_autostart(fixture_request, &actor())
+            },
             Err(AutostartRepositoryError::Denied)
         );
         assert_eq!(
@@ -607,8 +771,12 @@ fn actual_role_epoch_password_and_expiry_are_rechecked_not_cached_buttons() {
     let f = Fixture::new();
     *f.clock.0.lock().unwrap() = actor().expires_at;
     assert_eq!(
-        f.repo()
-            .begin_autostart(request(1, Revision::default(), true), &actor()),
+        {
+            let fixture_request = request(&f, 1, Revision::default(), true);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        },
         Err(AutostartRepositoryError::Denied)
     );
 }
@@ -616,11 +784,20 @@ fn actual_role_epoch_password_and_expiry_are_rechecked_not_cached_buttons() {
 fn forged_ticket_owner_sequence_or_revision_is_never_a_finish_capability() {
     let f = Fixture::new();
     let mut r = f.repo();
-    let op = r
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
-    r.mark_autostart_applying(op.ticket.clone(), &actor())
-        .unwrap();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
+    {
+        let fixture_request = op.ticket.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.mark_autostart_applying(fixture_request, &actor())
+    }
+    .unwrap();
     for variant in 0..5 {
         let mut ticket = op.ticket.clone();
         match variant {
@@ -661,11 +838,20 @@ fn each_system_failure_preserves_desired_and_factual_readback() {
         for mutated in [false, true] {
             let f = Fixture::new();
             let mut r = f.repo();
-            let op = r
-                .begin_autostart(request(1, Revision::default(), true), &actor())
-                .unwrap();
-            r.mark_autostart_applying(op.ticket.clone(), &actor())
-                .unwrap();
+            let op = {
+                let fixture_request = request(&f, 1, Revision::default(), true);
+                let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+                let mut issued_repository = r.with_command_window(original_pair);
+                issued_repository.begin_autostart(fixture_request, &actor())
+            }
+            .unwrap();
+            {
+                let fixture_request = op.ticket.clone();
+                let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+                let mut issued_repository = r.with_command_window(original_pair);
+                issued_repository.mark_autostart_applying(fixture_request, &actor())
+            }
+            .unwrap();
             let s = r
                 .finish_autostart(
                     op.ticket,
@@ -701,11 +887,20 @@ fn untrusted_observation_cannot_be_reported_as_success() {
     ] {
         let f = Fixture::new();
         let mut r = f.repo();
-        let op = r
-            .begin_autostart(request(1, Revision::default(), true), &actor())
-            .unwrap();
-        r.mark_autostart_applying(op.ticket.clone(), &actor())
-            .unwrap();
+        let op = {
+            let fixture_request = request(&f, 1, Revision::default(), true);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        }
+        .unwrap();
+        {
+            let fixture_request = op.ticket.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.mark_autostart_applying(fixture_request, &actor())
+        }
+        .unwrap();
         let s = r
             .finish_autostart(
                 op.ticket,
@@ -756,18 +951,29 @@ fn encoded_budget_rejects_whole_operation_without_truncating_history_or_intent()
     let mut state = r.autostart_status(&actor()).unwrap();
     let mut capacity = false;
     for id in 1..=40 {
-        let mut req = request(id, state.revision, true);
+        let mut req = request(&f, id, state.revision, true);
         req.target_command = target.clone();
         req.previous_observed = previous.clone();
-        match r.begin_autostart(req, &actor()) {
+        let res = {
+            let fixture_request = req;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.begin_autostart(fixture_request, &actor())
+        };
+        match res {
             Err(AutostartRepositoryError::Capacity) => {
                 capacity = true;
                 assert_eq!(r.autostart_status(&actor()).unwrap(), state);
                 break;
             }
             Ok(op) => {
-                r.mark_autostart_applying(op.ticket.clone(), &actor())
-                    .unwrap();
+                {
+                    let fixture_request = op.ticket.clone();
+                    let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+                    let mut issued_repository = r.with_command_window(original_pair);
+                    issued_repository.mark_autostart_applying(fixture_request, &actor())
+                }
+                .unwrap();
                 state = r.finish_autostart(op.ticket.clone(), success(&op)).unwrap();
                 assert!(encode(&state).unwrap().len() <= MAX_VALUE_BYTES);
             }
@@ -798,9 +1004,13 @@ fn startup_rejects_autostart_metadata_before_installation_initialization() {
 fn codec_rejects_phase_sequence_duplicate_command_and_unknown_fields() {
     let f = Fixture::new();
     let mut r = f.repo();
-    let op = r
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
     let state = r.autostart_status(&actor()).unwrap();
     for variant in 0..5 {
         let mut v = dto::state(&state);
@@ -836,11 +1046,20 @@ fn codec_rejects_phase_sequence_duplicate_command_and_unknown_fields() {
 fn final_database_failure_keeps_applying_for_factual_startup_reconciliation() {
     let mut f = Fixture::new();
     let mut r = f.repo();
-    let op = r
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
-    r.mark_autostart_applying(op.ticket.clone(), &actor())
-        .unwrap();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
+    {
+        let fixture_request = op.ticket.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.mark_autostart_applying(fixture_request, &actor())
+    }
+    .unwrap();
     r.factory = Arc::new(|_, _| Err(StorageError::Database));
     assert_eq!(
         r.finish_autostart(op.ticket.clone(), success(&op)),
@@ -869,10 +1088,13 @@ fn final_database_failure_keeps_applying_for_factual_startup_reconciliation() {
 #[test]
 fn applying_execution_fence_at_precommit_does_not_authorize_effect() {
     let f = Fixture::new();
-    let op = f
-        .repo()
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
     let active = Arc::new(AtomicBool::new(true));
     let flip = active.clone();
     let mut r = f.repo();
@@ -880,9 +1102,14 @@ fn applying_execution_fence_at_precommit_does_not_authorize_effect() {
         flip.store(false, Ordering::Release);
         Ok(revision)
     });
-    let mut r = r.with_autostart_execution_guard(Arc::new(move || active.load(Ordering::Acquire)));
+    let r = r.with_autostart_execution_guard(Arc::new(move || active.load(Ordering::Acquire)));
     assert_eq!(
-        r.mark_autostart_applying(op.ticket, &actor()),
+        {
+            let fixture_request = op.ticket;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.mark_autostart_applying(fixture_request, &actor())
+        },
         Err(AutostartRepositoryError::Cancelled)
     );
     assert_eq!(
@@ -899,11 +1126,20 @@ fn applying_execution_fence_at_precommit_does_not_authorize_effect() {
 fn exact_success_finish_replay_is_read_only_but_altered_outcome_is_stale() {
     let f = Fixture::new();
     let mut r = f.repo();
-    let op = r
-        .begin_autostart(request(1, Revision::default(), true), &actor())
-        .unwrap();
-    r.mark_autostart_applying(op.ticket.clone(), &actor())
-        .unwrap();
+    let op = {
+        let fixture_request = request(&f, 1, Revision::default(), true);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.begin_autostart(fixture_request, &actor())
+    }
+    .unwrap();
+    {
+        let fixture_request = op.ticket.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.mark_autostart_applying(fixture_request, &actor())
+    }
+    .unwrap();
     let outcome = success(&op);
     let state = r
         .finish_autostart(op.ticket.clone(), outcome.clone())

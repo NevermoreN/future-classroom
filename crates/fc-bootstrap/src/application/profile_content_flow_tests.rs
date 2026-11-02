@@ -28,6 +28,22 @@ static NEXT: AtomicU64 = AtomicU64::new(0);
 fn checked<T, E: std::fmt::Debug>(result: std::result::Result<T, E>) -> Check<T> {
     result.map_err(|error| format!("isolated content flow: {error:?}"))
 }
+fn command_scope<T>(
+    backend: &mut Backend,
+    family: fc_ports::command_window::CommandFamily,
+    lease: Option<SessionLease>,
+    context: &JobContext,
+    action: impl FnOnce(&mut Backend) -> super::super::Result<T>,
+) -> Check<T> {
+    checked(super::super::NativeCommand::new().run(
+        backend,
+        family,
+        lease,
+        fc_application::identity::SessionPurpose::Manage,
+        context,
+        action,
+    ))
+}
 struct Setup {
     lease: SessionLease,
     slots: [ContentSlotKey; 4],
@@ -118,26 +134,52 @@ impl Task for Job {
                 .map(Reply::Lease),
             Self::Setup(backend) => {
                 let mut backend = checked(backend.lock())?;
-                drop(checked(backend.initialize(
-                    Initialize {
-                        school_name: "Synthetic content flow".into(),
-                        login_name: "content-flow".into(),
-                        display_name: "Synthetic global administrator".into(),
+                drop(command_scope(
+                    &mut backend,
+                    fc_ports::command_window::CommandFamily::Identity,
+                    None,
+                    context,
+                    |backend| {
+                        Ok(backend.initialize(
+                            Initialize {
+                                school_name: "Synthetic content flow".into(),
+                                login_name: "content-flow".into(),
+                                display_name: "Synthetic global administrator".into(),
+                            },
+                            Password::new(PASSWORD.into())
+                                .map_err(|_| super::super::Failure::Stopped)?,
+                        )?)
                     },
-                    checked(Password::new(PASSWORD.into()))?,
-                ))?);
+                )?);
                 let lease = checked(
                     backend.login("content-flow", checked(Password::new(PASSWORD.into()))?),
                 )?;
                 let class = ClassId::new(1).unwrap();
-                checked(backend.identity(
-                    lease,
-                    IdentityCommand::CreateClass {
-                        id: class,
-                        name: "Synthetic class".into(),
+                command_scope(
+                    &mut backend,
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(lease),
+                    context,
+                    |backend| {
+                        Ok(backend.identity(
+                            lease,
+                            IdentityCommand::CreateClass {
+                                id: class,
+                                name: "Synthetic class".into(),
+                            },
+                        )?)
                     },
-                ))?;
-                checked(backend.identity(lease, IdentityCommand::BindCurrentClass { id: class }))?;
+                )?;
+                command_scope(
+                    &mut backend,
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(lease),
+                    context,
+                    |backend| {
+                        Ok(backend
+                            .identity(lease, IdentityCommand::BindCurrentClass { id: class })?)
+                    },
+                )?;
                 let mut layout = LayoutDocument::default();
                 // Two real glass groups replace fallback; Recess's display slot
                 // is explicitly removed so six builtins + two groups stays at 8.
@@ -211,13 +253,21 @@ impl Task for Job {
                         .children
                         .push(parent);
                 }
-                checked(backend.save_public_layout(
-                    lease,
-                    Revision::default(),
-                    Revision::default(),
-                    layout,
-                    DisplaySettings::default(),
-                ))?;
+                command_scope(
+                    &mut backend,
+                    fc_ports::command_window::CommandFamily::Profiles,
+                    Some(lease),
+                    context,
+                    |backend| {
+                        Ok(backend.save_public_layout(
+                            lease,
+                            Revision::default(),
+                            Revision::default(),
+                            layout,
+                            DisplaySettings::default(),
+                        )?)
+                    },
+                )?;
                 Ok(Reply::Setup(Box::new(Setup {
                     lease,
                     slots: slots.try_into().unwrap(),
@@ -251,22 +301,40 @@ fn registry_prefix(job: PrefixInput, context: &JobContext) -> Check<PrefixOutput
         ))?;
         let now = checked(CurrentClock::new().try_now())?;
         let operation = ContentOperation::Publish(ContentPayloadKind::Images);
-        let request = BeginContentRequest {
-            command_id: CommandId::new(2000 + batch).unwrap(),
-            slot: job.slot,
-            expected_revision: job.expected,
-            operation,
-            payload_fingerprint: checked(sources.intent_fingerprint(job.slot, operation))?,
-            expires_at: LocalDateTime::new(now.date, (now.second_of_day() + 300).min(86399))
-                .unwrap(),
-        };
-        let admission =
-            checked(checked(job.backend.lock())?.begin_profile_content(job.lease, request))?;
-        let reservation = checked(checked(job.backend.lock())?.reserve_profile_media(
-            job.lease,
-            &admission,
-            &sources.image_sizes().unwrap(),
+        let command = super::super::NativeCommand::new();
+        let mut backend = checked(job.backend.lock())?;
+        let (admission, owner) = checked(command.run(
+            &mut backend,
+            fc_ports::command_window::CommandFamily::ProfileContent,
+            Some(job.lease),
+            fc_application::identity::SessionPurpose::Manage,
+            context,
+            |backend| {
+                let request = BeginContentRequest {
+                    command_id: backend.issued_command_id()?,
+                    slot: job.slot,
+                    expected_revision: job.expected,
+                    operation,
+                    payload_fingerprint: sources
+                        .intent_fingerprint(job.slot, operation)
+                        .map_err(fc_bootstrap::backend::BackendError::ProfileContent)?,
+                    expires_at: LocalDateTime::new(
+                        now.date,
+                        (now.second_of_day() + 300).min(86399),
+                    )
+                    .unwrap(),
+                };
+                Ok(backend.begin_profile_content_owned(job.lease, request)?)
+            },
         ))?;
+        let reservation = checked(command.query(&mut backend, context, |backend| {
+            Ok(backend.reserve_profile_media(
+                job.lease,
+                &admission,
+                &sources.image_sizes().unwrap(),
+            )?)
+        }))?;
+        drop(backend);
         // These are real admitted imports cancelled before copying: all source
         // handles really exit before settlement, no fabricated MediaRef/proof.
         drop(sources);
@@ -278,7 +346,7 @@ fn registry_prefix(job: PrefixInput, context: &JobContext) -> Check<PrefixOutput
         }
         ids.extend_from_slice(&reservation.ids);
         checked(checked(job.backend.lock())?.settle_profile_media(reservation))?;
-        checked(checked(job.backend.lock())?.fail_profile_content(job.lease, admission))?;
+        checked(checked(job.backend.lock())?.fail_profile_content_owned(owner))?;
     }
     unreachable!("the last reservation is deliberately retained until explicit settle")
 }
@@ -289,21 +357,38 @@ fn held_preparation(job: HeldInput, context: &JobContext) -> Check<Reply> {
     ))?;
     let now = checked(CurrentClock::new().try_now())?;
     let operation = ContentOperation::Publish(ContentPayloadKind::Images);
-    let request = BeginContentRequest {
-        command_id: CommandId::new(900).unwrap(),
-        slot: job.slot,
-        expected_revision: job.expected,
-        operation,
-        payload_fingerprint: checked(sources.intent_fingerprint(job.slot, operation))?,
-        expires_at: LocalDateTime::new(now.date, (now.second_of_day() + 300).min(86399)).unwrap(),
-    };
-    let admission =
-        checked(checked(job.backend.lock())?.begin_profile_content(job.lease, request))?;
-    let reservation = checked(checked(job.backend.lock())?.reserve_profile_media(
-        job.lease,
-        &admission,
-        &sources.image_sizes().unwrap(),
+    let command = super::super::NativeCommand::new();
+    let mut backend = checked(job.backend.lock())?;
+    let (admission, owner) = checked(command.run(
+        &mut backend,
+        fc_ports::command_window::CommandFamily::ProfileContent,
+        Some(job.lease),
+        fc_application::identity::SessionPurpose::Manage,
+        context,
+        |backend| {
+            let request = BeginContentRequest {
+                command_id: backend.issued_command_id()?,
+                slot: job.slot,
+                expected_revision: job.expected,
+                operation,
+                payload_fingerprint: sources
+                    .intent_fingerprint(job.slot, operation)
+                    .map_err(fc_bootstrap::backend::BackendError::ProfileContent)?,
+                expires_at: LocalDateTime::new(now.date, (now.second_of_day() + 300).min(86399))
+                    .unwrap(),
+            };
+            Ok(backend.begin_profile_content_owned(job.lease, request)?)
+        },
     ))?;
+    let reservation =
+        checked(command.query(&mut backend, context, |backend| {
+            Ok(backend.reserve_profile_media(
+                job.lease,
+                &admission,
+                &sources.image_sizes().unwrap(),
+            )?)
+        }))?;
+    drop(backend);
     let ids = reservation.ids.clone();
     let files = checked(ControlledContentFiles::new(&job.root))?;
     let guard = checked(checked(job.backend.lock())?.profile_content_preparation_guard(job.lease))?;
@@ -347,9 +432,9 @@ fn held_preparation(job: HeldInput, context: &JobContext) -> Check<Reply> {
         std::thread::sleep(Duration::from_millis(1));
     }
     checked(checked(job.backend.lock())?.settle_profile_media(reservation))?;
-    // Revocation also denies failure writes from the old lease. No publication
-    // is inferred from a missing result; a new owner must reopen the document.
-    let _ = checked(job.backend.lock())?.fail_profile_content(job.lease, admission);
+    // Only the original negative owner can retire its Accepted admission after
+    // revocation; this token grants no new publication or live client window.
+    checked(checked(job.backend.lock())?.fail_profile_content_owned(owner))?;
     Ok(Reply::Exited(ids))
 }
 fn submit(handle: &WorkerHandle<Job>, mut task: Job) -> JobTicket<Check<Reply>> {
@@ -393,6 +478,7 @@ struct Harness {
     lease: SessionLease,
     slots: [ContentSlotKey; 4],
     gc: Arc<Mutex<GcCursor>>,
+    commands: Mutex<std::collections::BTreeMap<u64, super::super::NativeCommand>>,
 }
 struct Owner {
     root: PathBuf,
@@ -443,7 +529,7 @@ impl Harness {
             &handle,
             Work::Open(
                 DataPaths::isolated_test(root.clone()).unwrap(),
-                Arc::new(CurrentClock::new()),
+                Arc::new(super::super::CurrentClock::new()),
             ),
         )
         .unwrap()
@@ -462,6 +548,7 @@ impl Harness {
             lease: setup.lease,
             slots: setup.slots,
             gc: Arc::new(Mutex::new(GcCursor::default())),
+            commands: Mutex::new(std::collections::BTreeMap::new()),
         }
     }
     fn handle(&self) -> WorkerHandle<Job> {
@@ -478,18 +565,27 @@ impl Harness {
         operation: ContentOperation,
         input: LocalContentInput,
     ) -> Work {
-        Work::ProfileContent(Box::new(ContentJob {
-            root: self.root.clone(),
-            backend: self.backend(),
-            lease: self.lease,
-            operation: Operation::Publish {
-                slot,
-                expected_revision: Revision::new(revision),
-                command_id: CommandId::new(id).unwrap(),
-                operation,
-                input,
-            },
-        }))
+        let command = self
+            .commands
+            .lock()
+            .unwrap()
+            .entry(id)
+            .or_insert_with(super::super::NativeCommand::new)
+            .clone();
+        Work::Tracked(
+            Box::new(Work::ProfileContent(Box::new(ContentJob {
+                root: self.root.clone(),
+                backend: self.backend(),
+                lease: self.lease,
+                operation: Operation::Publish {
+                    slot,
+                    expected_revision: Revision::new(revision),
+                    operation,
+                    input,
+                },
+            }))),
+            command,
+        )
     }
     fn publish(
         &self,
@@ -544,7 +640,7 @@ impl Harness {
             &handle,
             Work::Open(
                 DataPaths::isolated_test(self.root.clone()).unwrap(),
-                Arc::new(CurrentClock::new()),
+                Arc::new(super::super::CurrentClock::new()),
             ),
         )
         .unwrap()
@@ -932,10 +1028,19 @@ fn real_worker_wic_fifty_pages_existing_reorder_partial_failure_and_physical_set
     assert_eq!(after_failure.revision, restored.document.revision);
     assert!(after_failure.latest_publish_sequence > restored.document.latest_publish_sequence);
     let files = ControlledContentFiles::new(&h.root).unwrap();
+    let failed_command_id = h
+        .commands
+        .lock()
+        .unwrap()
+        .get(&206)
+        .unwrap()
+        .original()
+        .unwrap()
+        .command_id;
     let failed_entries = || {
         inventory(&h.backend())
             .into_iter()
-            .filter(|entry| entry.command_id == CommandId::new(206).unwrap())
+            .filter(|entry| entry.command_id == failed_command_id)
             .collect::<Vec<_>>()
     };
     let physical_failed = || {

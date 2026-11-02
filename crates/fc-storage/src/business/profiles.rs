@@ -363,6 +363,9 @@ fn read_public_state(v: &Value) -> Result<fc_ports::PublicLayoutState, StorageEr
     })
 }
 fn repository_error(e: StorageError) -> fc_ports::ProfileRepositoryError {
+    if let Some(error) = e.command_window_error() {
+        return fc_ports::ProfileRepositoryError::CommandWindow(error);
+    }
     use fc_ports::ProfileRepositoryError as E;
     match e {
         StorageError::Profile(e) => E::Domain(e),
@@ -581,6 +584,13 @@ struct SavePublic<S> {
     factory: Factory<S>,
 }
 impl<S: Send> TransactionTask<S> for SavePublic<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Profiles,
+            self.request.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         self.request
             .layout
@@ -720,6 +730,13 @@ struct SaveSubject<S> {
     factory: Factory<S>,
 }
 impl<S: Send> TransactionTask<S> for SaveSubject<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Profiles,
+            self.request.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         self.request
             .candidate

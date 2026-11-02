@@ -1,6 +1,7 @@
 //! Real SQLite/writer regressions: public desktop capability is not a session.
 use super::*;
 use fc_domain::{auth::*, schedule::*, schedule_document::SemesterPlan, time::*};
+use fc_ports::command_window::{CommandFamily, CommandOwner};
 use fc_ports::{AuthorityPublisher, LessonRepository};
 use std::sync::{atomic::AtomicU64, Mutex};
 static NEXT: AtomicU64 = AtomicU64::new(0);
@@ -58,6 +59,7 @@ impl AuthorityPublisher for Publisher {
     fn fault(&mut self) {}
 }
 struct Fixture {
+    commands: crate::fixture_commands::FixtureCommands,
     writer: Option<StorageWriter<Revision>>,
     root: PathBuf,
     active: Arc<AtomicBool>,
@@ -67,6 +69,33 @@ struct Fixture {
     published: Arc<AtomicUsize>,
 }
 impl Fixture {
+    fn receipt_key(&self, legacy: &str) -> String {
+        let (slot, id) =
+            crate::business::command_window::legacy(legacy).expect("exact fixture receipt slot");
+        let original = self
+            .commands
+            .original(id)
+            .expect("original fixture receipt pair");
+        crate::business::command_window::namespaced(slot, original.ticket)
+    }
+
+    // Labels name fixture intents only. Request ids come from the real Writer;
+    // this cache keeps the exact original pair through retries and reopen.
+    fn command_id(&self, family: CommandFamily, label: u64) -> CommandId {
+        if let Some(original) = self.commands.labelled(family, &label.to_string()) {
+            return original.command_id;
+        }
+        self.commands
+            .issue(
+                &self.handle(),
+                family,
+                &label.to_string(),
+                CommandOwner::PublicDesktop,
+            )
+            .unwrap()
+            .command_id
+    }
+
     fn new() -> Self {
         let root = std::env::temp_dir().join(format!(
             "FutureClassroom-PublicDesktopLesson-{}-{}-{}",
@@ -79,6 +108,7 @@ impl Fixture {
         ));
         std::fs::create_dir(&root).unwrap();
         let mut f = Self {
+            commands: crate::fixture_commands::FixtureCommands::default(),
             writer: None,
             root,
             active: Arc::new(AtomicBool::new(true)),
@@ -215,15 +245,20 @@ impl Fixture {
     }
     fn commit(&self, mutations: Vec<Mutation>) {
         let revision = self.revision();
-        self.handle()
-            .try_commit(
-                CommitCommand::new(format!("fixture{}", revision.get()), revision, mutations)
-                    .unwrap(),
-                revision.next().unwrap(),
-            )
-            .unwrap()
-            .wait()
-            .unwrap();
+        {
+            let (fixture_handle, fixture_command) = self
+                .commands
+                .prepare_generic(
+                    &self.handle(),
+                    CommitCommand::new(format!("fixture{}", revision.get()), revision, mutations)
+                        .unwrap(),
+                )
+                .unwrap();
+            fixture_handle.try_commit(fixture_command, revision.next().unwrap())
+        }
+        .unwrap()
+        .wait()
+        .unwrap();
     }
     fn identity(&self) -> IdentityState {
         codec::read_identity(&codec::value(&self.get(IDENTITY).value).unwrap()).unwrap()
@@ -251,12 +286,16 @@ impl Fixture {
         binding: DesktopLessonBinding,
         action: LessonAction,
     ) -> Result<DesktopLessonSource, LessonRepositoryError> {
-        self.repository()
-            .execute_desktop_lesson(DesktopLessonRequest {
-                command_id: CommandId::new(id).unwrap(),
+        {
+            let fixture_request = DesktopLessonRequest {
+                command_id: self.command_id(CommandFamily::DesktopLesson, id),
                 binding,
                 action,
-            })
+            };
+            let original_pair = self.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = self.repository().with_command_window(original_pair);
+            issued_repository.execute_desktop_lesson(fixture_request)
+        }
     }
 }
 impl Drop for Fixture {
@@ -341,7 +380,7 @@ fn public_commands_need_no_account_session_and_preserve_only_this_lesson() {
     let schedule = f.schedule();
     let original = f.binding();
     assert!(f.base().desktop_lesson(original.clone()).is_err());
-    let mut repository = f.repository().with_session_guard(Arc::new(|_, _| {
+    let repository = f.repository().with_session_guard(Arc::new(|_, _| {
         panic!("public desktop must never ask for a session")
     }));
     let source = repository.desktop_lesson(original.clone()).unwrap();
@@ -351,13 +390,17 @@ fn public_commands_need_no_account_session_and_preserve_only_this_lesson() {
         .teachers
         .iter()
         .all(|t| t.subject_ids == [SubjectId::new(1).unwrap()]));
-    let saved = repository
-        .execute_desktop_lesson(DesktopLessonRequest {
-            command_id: CommandId::new(1).unwrap(),
+    let saved = {
+        let fixture_request = DesktopLessonRequest {
+            command_id: f.command_id(CommandFamily::DesktopLesson, 1),
             binding: original,
             action: replacement(),
-        })
-        .unwrap();
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = repository.with_command_window(original_pair);
+        issued_repository.execute_desktop_lesson(fixture_request)
+    }
+    .unwrap();
     assert_eq!(
         saved.context.active_override.as_ref().unwrap().initiator,
         LessonInitiator::LocalDesktop
@@ -389,27 +432,40 @@ fn desktop_receipts_are_idempotent_and_never_impersonate_managed_receipts() {
     );
     assert!(f
         .handle()
-        .try_get("business/receipt/lesson/1".into())
+        .try_get(f.receipt_key(&format!(
+            "business/receipt/lesson/{}",
+            f.command_id(CommandFamily::DesktopLesson, 1).get()
+        )))
         .unwrap()
         .wait()
         .unwrap()
         .is_none());
-    let record = codec::value(&f.get("business/receipt/desktop-lesson/1").value).unwrap();
+    let record = codec::value(
+        &f.get(&f.receipt_key(&format!(
+            "business/receipt/desktop-lesson/{}",
+            f.command_id(CommandFamily::DesktopLesson, 1).get()
+        )))
+        .value,
+    )
+    .unwrap();
     assert_eq!(
         record["result"]["override"]["initiator"],
         json!({"kind":"local-desktop"})
     );
     assert!(record["result"]["override"].get("actor").is_none());
     let admin_request = fc_ports::LessonRequest {
-        command_id: CommandId::new(10).unwrap(),
+        command_id: f.command_id(CommandFamily::Lesson, 10),
         expected_revision: f.context().revision,
         lesson: f.binding().lesson,
         action: LessonAction::Restore,
     };
-    assert!(f
-        .repository()
-        .execute_lesson(admin_request, &admin(), f.clock.as_ref())
-        .is_err());
+    assert!({
+        let fixture_request = admin_request;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repository().with_command_window(original_pair);
+        issued_repository.execute_lesson(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .is_err());
 }
 #[test]
 fn exact_catalog_schedule_lesson_key_and_class_cas_never_rebinds_a_stale_click() {
@@ -520,7 +576,10 @@ fn guard_revocation_and_course_expiry_at_precommit_roll_back_without_publication
         assert_eq!(f.published.load(Ordering::Acquire), published);
         assert!(f
             .handle()
-            .try_get("business/receipt/desktop-lesson/1".into())
+            .try_get(f.receipt_key(&format!(
+                "business/receipt/desktop-lesson/{}",
+                f.command_id(CommandFamily::DesktopLesson, 1).get()
+            )))
             .unwrap()
             .wait()
             .unwrap()
@@ -556,6 +615,8 @@ fn queued_public_task_cancellation_keeps_sql_state_and_receipt_unchanged() {
     let publications = f.published.load(Ordering::Acquire);
     let (entered, arrived) = mpsc::channel();
     let (release, wait) = mpsc::channel();
+    let queued_id = f.command_id(CommandFamily::DesktopLesson, 1);
+    let queued_pair = f.commands.original(queued_id).unwrap();
     let held = f
         .handle()
         .try_transaction(Held {
@@ -564,9 +625,9 @@ fn queued_public_task_cancellation_keeps_sql_state_and_receipt_unchanged() {
         })
         .unwrap();
     arrived.recv_timeout(Duration::from_secs(5)).unwrap();
-    let r = f.repository();
+    let r = f.repository().with_command_window(queued_pair);
     let request = DesktopLessonRequest {
-        command_id: CommandId::new(1).unwrap(),
+        command_id: f.command_id(CommandFamily::DesktopLesson, 1),
         binding: binding.clone(),
         action: replacement(),
     };
@@ -590,7 +651,10 @@ fn queued_public_task_cancellation_keeps_sql_state_and_receipt_unchanged() {
     assert_eq!(f.published.load(Ordering::Acquire), publications);
     assert!(f
         .handle()
-        .try_get("business/receipt/desktop-lesson/1".into())
+        .try_get(f.receipt_key(&format!(
+            "business/receipt/desktop-lesson/{}",
+            f.command_id(CommandFamily::DesktopLesson, 1).get()
+        )))
         .unwrap()
         .wait()
         .unwrap()
@@ -611,11 +675,16 @@ fn scoped_execution_fence_still_cancels_before_commit_and_base_remains_healthy()
         Ok(revision)
     });
     assert_eq!(
-        r.execute_desktop_lesson(DesktopLessonRequest {
-            command_id: CommandId::new(1).unwrap(),
-            binding: binding.clone(),
-            action: replacement()
-        }),
+        {
+            let fixture_request = DesktopLessonRequest {
+                command_id: f.command_id(CommandFamily::DesktopLesson, 1),
+                binding: binding.clone(),
+                action: replacement(),
+            };
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_desktop_lesson(fixture_request)
+        },
         Err(LessonRepositoryError::Unavailable)
     );
     assert_eq!(f.revision(), before);
@@ -687,7 +756,10 @@ fn projected_backup_and_restore_never_revive_live_desktop_override_or_capability
     assert!(projected.active_override.is_none());
     assert!(!projected.history.is_empty());
     assert!(TransactionView(&ordinary)
-        .get("business/receipt/desktop-lesson/1")
+        .get(&f.receipt_key(&format!(
+            "business/receipt/desktop-lesson/{}",
+            f.command_id(CommandFamily::DesktopLesson, 1).get()
+        )))
         .unwrap()
         .is_none());
     drop(ordinary);
@@ -830,7 +902,10 @@ fn mapped_format_three_audit_remains_inert_and_preserves_complete_history() {
     assert_eq!(audit.history, mapped_context.history);
     assert_eq!(audit.history, projected.history);
     assert!(TransactionView(&db)
-        .get("business/receipt/desktop-lesson/1")
+        .get(&source.receipt_key(&format!(
+            "business/receipt/desktop-lesson/{}",
+            source.command_id(CommandFamily::DesktopLesson, 1).get()
+        )))
         .unwrap()
         .is_none());
     assert!(target.context().active_override.is_none());

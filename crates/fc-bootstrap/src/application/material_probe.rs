@@ -33,7 +33,11 @@ enum ProbeTask {
     Work(Box<Work>),
     Setup(Arc<Mutex<Backend>>),
     Login(Arc<Mutex<Backend>>),
-    DeleteMetadata(Arc<Mutex<Backend>>, SessionLease, MaterialDeleteRequest),
+    DeleteMetadata(
+        Arc<Mutex<Backend>>,
+        SessionLease,
+        material_flow::DeleteDraft,
+    ),
     Write(PathBuf, Vec<u8>),
     CopyChecks(PathBuf, Arc<Mutex<Backend>>, SessionControl, SessionLease),
     Barrier(Arc<AtomicUsize>, Arc<AtomicBool>),
@@ -100,13 +104,22 @@ impl Task for ProbeTask {
                 let password = checked(Password::new(PASSWORD.into()), "password")?;
                 // The recovery value is never printed, cloned or placed in a DTO.
                 drop(checked(
-                    backend.initialize(
-                        Initialize {
-                            school_name: "Synthetic materials school".into(),
-                            login_name: "probe".into(),
-                            display_name: "Probe teacher".into(),
+                    NativeCommand::new().run(
+                        &mut backend,
+                        fc_ports::command_window::CommandFamily::Identity,
+                        None,
+                        SessionPurpose::Manage,
+                        context,
+                        |backend| {
+                            Ok(backend.initialize(
+                                Initialize {
+                                    school_name: "Synthetic materials school".into(),
+                                    login_name: "probe".into(),
+                                    display_name: "Probe teacher".into(),
+                                },
+                                password,
+                            )?)
                         },
-                        password,
                     ),
                     "initialize",
                 )?);
@@ -147,7 +160,17 @@ impl Task for ProbeTask {
                         }],
                     },
                 ] {
-                    checked(backend.identity(lease, command), "identity fixture")?;
+                    checked(
+                        NativeCommand::new().run(
+                            &mut backend,
+                            fc_ports::command_window::CommandFamily::Identity,
+                            Some(lease),
+                            SessionPurpose::Manage,
+                            context,
+                            |backend| Ok(backend.identity(lease, command)?),
+                        ),
+                        "identity fixture",
+                    )?;
                 }
                 checked(
                     backend.login(
@@ -159,9 +182,28 @@ impl Task for ProbeTask {
                 .map(ProbeOutput::Ready)
             }
             Self::DeleteMetadata(backend, lease, request) => {
+                let mut backend = checked(backend.lock(), "retirement metadata lock")?;
+                let command = NativeCommand::new();
                 checked(
-                    checked(backend.lock(), "retirement metadata lock")?
-                        .delete_material(lease, request),
+                    command.run(
+                        &mut backend,
+                        fc_ports::command_window::CommandFamily::Materials,
+                        Some(lease),
+                        fc_application::identity::SessionPurpose::Manage,
+                        context,
+                        |backend| {
+                            backend.delete_material(
+                                lease,
+                                MaterialDeleteRequest {
+                                    command_id: backend.issued_command_id()?,
+                                    scope: request.scope,
+                                    material_id: request.material_id,
+                                    expected_material_revision: request.expected_material_revision,
+                                },
+                            )?;
+                            Ok(())
+                        },
+                    ),
                     "durable delete before restart",
                 )?;
                 Ok(ProbeOutput::Done)
@@ -217,7 +259,7 @@ fn copy_checks(
             control: control.clone(),
             job: Job::Copies { lease, clean },
         }
-        .run(context)
+        .run(context, &NativeCommand::new())
     };
     let before = match checked(inspect(false), "inspect copies")? {
         Outcome::LaunchCopies(report) => report,
@@ -494,8 +536,7 @@ impl Session {
             handle,
             self.work(Job::Delete {
                 lease: self.lease,
-                request: MaterialDeleteRequest {
-                    command_id: checked(command_id(), "delete id")?,
+                request: material_flow::DeleteDraft {
                     scope: self.scope,
                     material_id: record.id,
                     expected_material_revision: record.revision,
@@ -786,8 +827,7 @@ pub(super) fn run() -> Check<()> {
             ProbeTask::DeleteMetadata(
                 session.backend.clone(),
                 session.lease,
-                MaterialDeleteRequest {
-                    command_id: checked(command_id(), "restart delete id")?,
+                material_flow::DeleteDraft {
                     scope: session.scope,
                     material_id: record.id,
                     expected_material_revision: record.revision,

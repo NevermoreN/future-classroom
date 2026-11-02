@@ -7,6 +7,9 @@ use fc_ports::{
 };
 
 fn error(error: StorageError) -> SubjectVisualRepositoryError {
+    if let Some(error) = error.command_window_error() {
+        return SubjectVisualRepositoryError::CommandWindow(error);
+    }
     match error {
         StorageError::SubjectVisual(e) => SubjectVisualRepositoryError::Domain(e),
         StorageError::Identity(e) => {
@@ -195,6 +198,9 @@ impl<S: Send + 'static> SubjectVisualRepository for BusinessRepository<S> {
         // one writer transaction with this repository's exact session/fence.
         self.observe_content_day(actor)
             .map_err(|error| match error {
+                RepositoryError::CommandWindow(error) => {
+                    SubjectVisualRepositoryError::CommandWindow(error)
+                }
                 RepositoryError::Domain(error) => SubjectVisualRepositoryError::Content(error),
                 RepositoryError::Unavailable => SubjectVisualRepositoryError::Unavailable,
                 RepositoryError::Faulted => SubjectVisualRepositoryError::Faulted,
@@ -250,6 +256,13 @@ struct SaveVisuals<S> {
     factory: Factory<S>,
 }
 impl<S: Send + 'static> TransactionTask<S> for SaveVisuals<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::SubjectVisual,
+            self.request.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
             .saturating_add(self.request.expected_palette_revision.allocation_bytes())

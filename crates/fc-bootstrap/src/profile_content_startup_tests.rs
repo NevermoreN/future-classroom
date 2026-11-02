@@ -3,7 +3,9 @@
 //! WIC validation. The separate content-files tests exercise real WIC prep.
 use super::*;
 use crate::backend::Initialize;
+use fc_application::identity::SessionPurpose;
 use fc_domain::{ids::*, layout::*, profile_content::*, time::*};
+use fc_ports::command_window::{CommandFamily, IssuedCommand};
 use fc_ports::{
     prepare_profile_content, Clock, MonotonicClock, ProfileContentPreparation,
     ProfileContentRepositoryError,
@@ -160,12 +162,19 @@ impl Fixture {
             .content_styles
             .push(ContentNodeStyle::new(id, ContentPayloadKind::Images));
         self.bm()
-            .save_public_layout(
-                lease,
-                layout.revision,
-                state.display.revision,
-                layout,
-                state.display,
+            .test_native_command(
+                CommandFamily::Profiles,
+                Some(lease),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.save_public_layout(
+                        lease,
+                        layout.revision,
+                        state.display.revision,
+                        layout,
+                        state.display,
+                    )
+                },
             )
             .unwrap();
         (
@@ -180,22 +189,34 @@ impl Fixture {
         &mut self,
         lease: fc_application::identity::SessionLease,
         slot: ContentSlotKey,
-        command: u64,
+        fingerprint_label: u64,
         revision: u64,
-    ) -> ContentAdmission {
-        self.bm()
+    ) -> (ContentAdmission, IssuedCommand) {
+        let issued = self
+            .b()
+            .issue_native_command(
+                CommandFamily::ProfileContent,
+                Some(lease),
+                SessionPurpose::Manage,
+            )
+            .unwrap();
+        let admission = self
+            .bm()
+            .begin_command_scope(issued)
+            .unwrap()
             .begin_profile_content(
                 lease,
                 BeginContentRequest {
-                    command_id: CommandId::new(command).unwrap(),
+                    command_id: issued.command_id,
                     slot,
                     expected_revision: Revision::new(revision),
                     operation: ContentOperation::Publish(ContentPayloadKind::Images),
-                    payload_fingerprint: [command as u8; 32],
+                    payload_fingerprint: [fingerprint_label as u8; 32],
                     expires_at: LocalDateTime::new(Time.now().date, 7200).unwrap(),
                 },
             )
-            .unwrap()
+            .unwrap();
+        (admission, issued)
     }
 }
 impl Drop for Fixture {
@@ -252,9 +273,11 @@ fn startup_validates_everything_before_deletion_then_reconciles_reserved_orphans
     let files = ControlledContentFiles::new(&f.root).unwrap();
     let (lease, slot) = f.setup();
     let data = bmp();
-    let ad = f.begin(lease, slot, 71_001, 0);
+    let (ad, issued) = f.begin(lease, slot, 71_001, 0);
     let r = f
-        .b()
+        .bm()
+        .begin_command_scope(issued)
+        .unwrap()
         .reserve_profile_media(lease, &ad, &[data.len() as u64])
         .unwrap();
     let resource = MediaReference {
@@ -277,11 +300,17 @@ fn startup_validates_everything_before_deletion_then_reconciles_reserved_orphans
         (),
     )
     .unwrap();
-    f.bm().commit_profile_content(lease, prepared).unwrap();
+    f.bm()
+        .begin_command_scope(issued)
+        .unwrap()
+        .commit_profile_content(lease, prepared)
+        .unwrap();
     f.b().settle_profile_media(r).unwrap();
-    let ad = f.begin(lease, slot, 71_002, 1);
+    let (ad, issued) = f.begin(lease, slot, 71_002, 1);
     let incomplete = f
-        .b()
+        .bm()
+        .begin_command_scope(issued)
+        .unwrap()
         .reserve_profile_media(lease, &ad, &[data.len() as u64, data.len() as u64])
         .unwrap();
     let partial = f.path(

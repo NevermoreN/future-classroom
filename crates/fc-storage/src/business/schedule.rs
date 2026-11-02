@@ -127,6 +127,9 @@ pub(super) fn check_identity_change(
     Ok(())
 }
 fn error(error: StorageError) -> ScheduleRepositoryError {
+    if let Some(error) = error.command_window_error() {
+        return ScheduleRepositoryError::CommandWindow(error);
+    }
     match error {
         StorageError::Schedule(e) => ScheduleRepositoryError::Domain(e),
         StorageError::CommandIdReused => ScheduleRepositoryError::IdempotencyConflict,
@@ -222,6 +225,13 @@ struct SaveSchedule<S> {
     factory: Factory<S>,
 }
 impl<S: Send> TransactionTask<S> for SaveSchedule<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Schedule,
+            self.request.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         self.request
             .candidate

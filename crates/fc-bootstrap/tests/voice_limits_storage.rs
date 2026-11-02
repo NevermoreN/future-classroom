@@ -5,7 +5,16 @@ use fc_ports::{
     CredentialIdentityRepository, IdentityRepository, IdentityRepositoryError, IdentityRequest,
 };
 use fc_runtime::authority::{AuthorityStore, PreparedAuthority};
-use fc_storage::{business::BusinessRepository, StorageError, StorageWriter};
+// This harness shares the real issuer fixture but exercises only its identity
+// and voice subset; unused helpers for other business families stay test-only.
+#[expect(
+    dead_code,
+    reason = "shared integration fixture has other business families"
+)]
+#[path = "support/business_commands.rs"]
+mod business_commands;
+use business_commands::Repository as BusinessRepository;
+use fc_storage::{business::BusinessRepository as NativeRepository, StorageError, StorageWriter};
 use std::{
     path::PathBuf,
     sync::{
@@ -129,6 +138,9 @@ impl FixturePreparation for BusinessRepository<Snapshot> {
         a: Option<&ActorContext>,
         c: PreparedCredentials,
     ) -> Result<IdentityTransition, IdentityRepositoryError> {
+        // Bind before preparation: the opaque credential proof carries the
+        // actual Writer-issued id, not the fixture's numeric intent label.
+        let r = self.identity_request(r, a);
         let secret = vec![c.id as u8, c.version as u8, 42];
         let mut crypto = FixtureCrypto;
         let change = if c.both {
@@ -157,7 +169,13 @@ fn open(
     });
     (
         Joined(Some(w)),
-        BusinessRepository::new(handle, clock, factory).with_session_guard(Arc::new(|_, _| Ok(()))),
+        BusinessRepository::new(
+            handle,
+            clock,
+            factory,
+            Arc::new(business_commands::Commands::default()),
+        )
+        .with_session_guard(Arc::new(|_, _| Ok(()))),
     )
 }
 fn initialize(repo: &mut BusinessRepository<Snapshot>, clock: &Time) {
@@ -317,6 +335,125 @@ fn drive(
     })
 }
 
+static NEXT_VOICE_INTENT: AtomicU64 = AtomicU64::new(1_000_000_000);
+trait FixtureVoice {
+    fn with_voice_timeout(
+        self,
+        timeout: std::time::Duration,
+        active: Arc<dyn Fn() -> bool + Send + Sync>,
+    ) -> Self;
+    fn voice_scope(&self, label: u64, actor: &ActorContext) -> NativeRepository<Snapshot>;
+    fn set_voice_limits(
+        &self,
+        limits: VoiceLimits,
+        expected: Revision,
+        actor: &ActorContext,
+    ) -> Result<VoiceSnapshot, VoiceRepositoryError>;
+    fn set_voice_enabled(
+        &self,
+        enabled: bool,
+        expected: Revision,
+        actor: &ActorContext,
+    ) -> Result<VoiceSnapshot, VoiceRepositoryError>;
+    fn reserve_voice_upload(
+        &self,
+        id: VoiceAssetId,
+        class: ClassId,
+        actor: &ActorContext,
+    ) -> Result<VoiceAsset, VoiceRepositoryError>;
+    fn publish_voice_upload(
+        &self,
+        prepared: PreparedVoiceUpload,
+        actor: &ActorContext,
+    ) -> Result<VoiceAsset, VoiceRepositoryError>;
+    fn submit_voice(
+        &self,
+        request: VoiceSubmitRequest,
+        actor: &ActorContext,
+    ) -> Result<VoiceJob, VoiceRepositoryError>;
+}
+impl FixtureVoice for BusinessRepository<Snapshot> {
+    fn with_voice_timeout(
+        mut self,
+        timeout: std::time::Duration,
+        active: Arc<dyn Fn() -> bool + Send + Sync>,
+    ) -> Self {
+        let scoped = std::ops::Deref::deref(&self)
+            .clone()
+            .with_voice_timeout(timeout, active);
+        *std::ops::DerefMut::deref_mut(&mut self) = scoped;
+        self
+    }
+    fn voice_scope(&self, label: u64, actor: &ActorContext) -> NativeRepository<Snapshot> {
+        let issued = self.issue(
+            fc_ports::command_window::CommandFamily::Voice,
+            label,
+            Some(actor),
+        );
+        std::ops::Deref::deref(self).with_command_window(issued)
+    }
+    fn set_voice_limits(
+        &self,
+        limits: VoiceLimits,
+        expected: Revision,
+        actor: &ActorContext,
+    ) -> Result<VoiceSnapshot, VoiceRepositoryError> {
+        // Each old id-less policy call is a distinct intent. Production handles
+        // this SQL-only operation through its typed Atomic transaction; retries
+        // of explicit commands below retain their original cached pair.
+        self.voice_scope(NEXT_VOICE_INTENT.fetch_add(1, Ordering::Relaxed), actor)
+            .set_voice_limits(limits, expected, actor)
+    }
+    fn set_voice_enabled(
+        &self,
+        enabled: bool,
+        expected: Revision,
+        actor: &ActorContext,
+    ) -> Result<VoiceSnapshot, VoiceRepositoryError> {
+        self.voice_scope(NEXT_VOICE_INTENT.fetch_add(1, Ordering::Relaxed), actor)
+            .set_voice_enabled(enabled, expected, actor)
+    }
+    fn reserve_voice_upload(
+        &self,
+        id: VoiceAssetId,
+        class: ClassId,
+        actor: &ActorContext,
+    ) -> Result<VoiceAsset, VoiceRepositoryError> {
+        self.voice_scope(1_100_000_000u64.checked_add(id.get()).unwrap(), actor)
+            .reserve_voice_upload(id, class, actor)
+    }
+    fn publish_voice_upload(
+        &self,
+        prepared: PreparedVoiceUpload,
+        actor: &ActorContext,
+    ) -> Result<VoiceAsset, VoiceRepositoryError> {
+        // Both preparation attempts for one upload use its original full pair,
+        // and the real opaque prepared reservation remains unchanged.
+        self.voice_scope(
+            1_100_000_000u64
+                .checked_add(prepared.reservation().id.get())
+                .unwrap(),
+            actor,
+        )
+        .publish_voice_upload(prepared, actor)
+    }
+    fn submit_voice(
+        &self,
+        mut request: VoiceSubmitRequest,
+        actor: &ActorContext,
+    ) -> Result<VoiceJob, VoiceRepositoryError> {
+        let issued = self.issue(
+            fc_ports::command_window::CommandFamily::Voice,
+            request.command_id.get(),
+            Some(actor),
+        );
+        request.command_id = issued.command_id;
+        std::ops::Deref::deref(self)
+            .with_command_window(issued)
+            .submit_voice(request, actor)
+    }
+}
+
 fn small_limits() -> VoiceLimits {
     VoiceLimits {
         max_duration_millis: 500,
@@ -408,12 +545,13 @@ fn sqlite_policy_exact_authority_cas_and_guard_at_evaluation_and_precommit() {
         Err(VoiceRepositoryError::Domain(VoiceError::RevisionConflict))
     );
     assert_eq!(repo.voice_inventory().unwrap(), before);
-    // Use the real transaction's two exact-session checkpoints; reject at the
-    // second one and verify neither policy nor a stop request became durable.
+    // Reject on the original business precommit: the typed admission check and
+    // its precommit wrapper add two checks around the original two. Policy and
+    // durable stop requests must both roll back at the fourth actual callback.
     let calls = Arc::new(AtomicUsize::new(0));
     let seen = calls.clone();
     let guarded = repo.clone().with_session_guard(Arc::new(move |_, _| {
-        if seen.fetch_add(1, Ordering::SeqCst) == 0 {
+        if seen.fetch_add(1, Ordering::SeqCst) < 3 {
             Ok(())
         } else {
             Err(StorageError::AuthorityUnavailable)
@@ -422,7 +560,7 @@ fn sqlite_policy_exact_authority_cas_and_guard_at_evaluation_and_precommit() {
     assert!(guarded
         .set_voice_limits(small_limits(), before.revision, &local)
         .is_err());
-    assert_eq!(calls.load(Ordering::SeqCst), 2);
+    assert_eq!(calls.load(Ordering::SeqCst), 4);
     assert_eq!(repo.voice_inventory().unwrap(), before);
     let denied = repo
         .clone()

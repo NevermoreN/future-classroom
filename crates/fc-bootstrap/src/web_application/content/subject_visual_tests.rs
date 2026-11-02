@@ -55,12 +55,19 @@ fn subject_visual_joint_save_keeps_exact_lease_and_web_preview_discloses_only_on
     homework.visible = false;
     let saved = f
         .backend
-        .save_subject_visuals(
-            f.admin,
-            old.palette.revision.clone(),
-            old.display.revision,
-            changed,
-            display,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::SubjectVisual,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.save_subject_visuals(
+                    f.admin,
+                    old.palette.revision.clone(),
+                    old.display.revision,
+                    changed,
+                    display,
+                )
+            },
         )
         .unwrap();
     assert_eq!(
@@ -93,12 +100,19 @@ fn subject_visual_joint_save_keeps_exact_lease_and_web_preview_discloses_only_on
         assert!(!body.contains(forbidden));
     }
     // A rejected joint CAS must not restore colors or partially change display.
-    let stale = f.backend.save_subject_visuals(
-        f.admin,
-        old.palette.revision.clone(),
-        saved.display.revision,
-        colors(&old),
-        saved.display.clone(),
+    let stale = f.backend.test_native_command(
+        fc_ports::command_window::CommandFamily::SubjectVisual,
+        Some(f.admin),
+        SessionPurpose::Manage,
+        |backend| {
+            backend.save_subject_visuals(
+                f.admin,
+                old.palette.revision.clone(),
+                saved.display.revision,
+                colors(&old),
+                saved.display.clone(),
+            )
+        },
     );
     assert!(matches!(
         stale,
@@ -107,12 +121,19 @@ fn subject_visual_joint_save_keeps_exact_lease_and_web_preview_discloses_only_on
         ))
     ));
     assert_eq!(f.backend.read_subject_visuals(f.admin).unwrap(), saved);
-    let stale_display = f.backend.save_subject_visuals(
-        f.admin,
-        saved.palette.revision.clone(),
-        old.display.revision,
-        colors(&saved),
-        saved.display.clone(),
+    let stale_display = f.backend.test_native_command(
+        fc_ports::command_window::CommandFamily::SubjectVisual,
+        Some(f.admin),
+        SessionPurpose::Manage,
+        |backend| {
+            backend.save_subject_visuals(
+                f.admin,
+                saved.palette.revision.clone(),
+                old.display.revision,
+                colors(&saved),
+                saved.display.clone(),
+            )
+        },
     );
     assert!(matches!(
         stale_display,
@@ -220,23 +241,30 @@ fn subject_visual_management_denies_initial_teacher_user_and_preview_remains_own
         let changed = "Synthetic-Visual-Changed-Password-2026";
         drop(
             f.backend
-                .create_account(
-                    f.admin,
-                    NewAccount {
-                        id: PrincipalId::new(2).unwrap(),
-                        login_name: "visual-user".into(),
-                        display_name: "Synthetic visual user".into(),
-                        role,
-                        scopes: if role == Role::TeacherAdmin {
-                            vec![AssignmentScope {
-                                class_id: ClassId::new(1).unwrap(),
-                                subject_id: SubjectId::new(1).unwrap(),
-                            }]
-                        } else {
-                            vec![]
-                        },
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(f.admin),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.create_account(
+                            f.admin,
+                            NewAccount {
+                                id: PrincipalId::new(2).unwrap(),
+                                login_name: "visual-user".into(),
+                                display_name: "Synthetic visual user".into(),
+                                role,
+                                scopes: if role == Role::TeacherAdmin {
+                                    vec![AssignmentScope {
+                                        class_id: ClassId::new(1).unwrap(),
+                                        subject_id: SubjectId::new(1).unwrap(),
+                                    }]
+                                } else {
+                                    vec![]
+                                },
+                            },
+                            Password::new(original.into()).unwrap(),
+                        )
                     },
-                    Password::new(original.into()).unwrap(),
                 )
                 .unwrap(),
         );
@@ -249,10 +277,17 @@ fn subject_visual_management_denies_initial_teacher_user_and_preview_remains_own
             Err(BackendError::Session(SessionError::PasswordChangeRequired))
         ));
         f.backend
-            .change_password(
-                initial,
-                Password::new(original.into()).unwrap(),
-                Password::new(changed.into()).unwrap(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(initial),
+                SessionPurpose::ChangeInitialPassword,
+                |backend| {
+                    backend.change_password(
+                        initial,
+                        Password::new(original.into()).unwrap(),
+                        Password::new(changed.into()).unwrap(),
+                    )
+                },
             )
             .unwrap();
         let user = f
@@ -266,12 +301,17 @@ fn subject_visual_management_denies_initial_teacher_user_and_preview_remains_own
             )))
         ));
         assert!(matches!(
-            f.backend.save_subject_visuals(
-                user,
-                before.palette.revision.clone(),
-                before.display.revision,
-                colors(&before),
-                before.display.clone()
+            f.backend.test_native_command(
+                fc_ports::command_window::CommandFamily::SubjectVisual,
+                Some(user),
+                SessionPurpose::Manage,
+                |backend| backend.save_subject_visuals(
+                    user,
+                    before.palette.revision.clone(),
+                    before.display.revision,
+                    colors(&before),
+                    before.display.clone()
+                )
             ),
             Err(BackendError::Identity(IdentityRepositoryError::Domain(
                 fc_domain::identity::IdentityError::Permission(PermissionError::RoleDenied)
@@ -294,17 +334,24 @@ fn subject_visual_management_denies_initial_teacher_user_and_preview_remains_own
                 "FORBIDDEN",
             );
             f.backend
-                .identity(
-                    f.admin,
-                    IdentityCommand::UpdateAccount {
-                        id: PrincipalId::new(2).unwrap(),
-                        display_name: "Synthetic visual user".into(),
-                        role,
-                        enabled: false,
-                        scopes: vec![AssignmentScope {
-                            class_id: ClassId::new(1).unwrap(),
-                            subject_id: SubjectId::new(1).unwrap(),
-                        }],
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(f.admin),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.identity(
+                            f.admin,
+                            IdentityCommand::UpdateAccount {
+                                id: PrincipalId::new(2).unwrap(),
+                                display_name: "Synthetic visual user".into(),
+                                role,
+                                enabled: false,
+                                scopes: vec![AssignmentScope {
+                                    class_id: ClassId::new(1).unwrap(),
+                                    subject_id: SubjectId::new(1).unwrap(),
+                                }],
+                            },
+                        )
                     },
                 )
                 .unwrap();

@@ -216,38 +216,59 @@ impl Fixture {
         for n in 1..=2 {
             fixture
                 .backend
-                .identity(
-                    admin,
-                    IdentityCommand::CreateClass {
-                        id: ClassId::new(n).unwrap(),
-                        name: format!("Class {n}"),
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    fc_application::identity::SessionPurpose::Manage,
+                    |issued_backend| {
+                        issued_backend.identity(
+                            admin,
+                            IdentityCommand::CreateClass {
+                                id: ClassId::new(n).unwrap(),
+                                name: format!("Class {n}"),
+                            },
+                        )
                     },
                 )
                 .unwrap();
             fixture
                 .backend
-                .identity(
-                    admin,
-                    IdentityCommand::PutSubject {
-                        id: SubjectId::new(n).unwrap(),
-                        name: format!("Subject {n}"),
-                        enabled: true,
-                        color: Rgb {
-                            red: 20,
-                            green: 40,
-                            blue: 60,
-                        },
-                        expected_revision: None,
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    fc_application::identity::SessionPurpose::Manage,
+                    |issued_backend| {
+                        issued_backend.identity(
+                            admin,
+                            IdentityCommand::PutSubject {
+                                id: SubjectId::new(n).unwrap(),
+                                name: format!("Subject {n}"),
+                                enabled: true,
+                                color: Rgb {
+                                    red: 20,
+                                    green: 40,
+                                    blue: 60,
+                                },
+                                expected_revision: None,
+                            },
+                        )
                     },
                 )
                 .unwrap();
         }
         fixture
             .backend
-            .identity(
-                admin,
-                IdentityCommand::BindCurrentClass {
-                    id: ClassId::new(1).unwrap(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |issued_backend| {
+                    issued_backend.identity(
+                        admin,
+                        IdentityCommand::BindCurrentClass {
+                            id: ClassId::new(1).unwrap(),
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -290,43 +311,59 @@ impl Fixture {
         fixture
     }
     fn seed(&mut self, admin: Option<SessionLease>, command: IdentityCommand) {
-        let state = self.backend.state().unwrap();
+        let issued = self
+            .backend
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                admin,
+                SessionPurpose::Manage,
+            )
+            .unwrap();
+        let mut backend = self.backend.begin_command_scope(issued).unwrap();
+        let state = backend.state().unwrap();
         let principal = match &command {
             IdentityCommand::FirstAdministrator { id, .. } => *id,
             IdentityCommand::CreateAccount(spec) => spec.id,
             _ => unreachable!(),
         };
-        let request = self.backend.request(&state, command).unwrap();
+        let request = backend.request(&state, command).unwrap();
         let (change, _) =
             prepare_initial_credentials(&mut SyntheticCredentials, &(), request).unwrap();
         let (actor, generation) = admin
             .map(|lease| {
-                self.backend
+                backend
                     .actor(&state, lease, SessionPurpose::Manage)
                     .unwrap()
             })
             .unzip();
         let mut repository = match admin {
-            Some(lease) => self
-                .backend
-                .guarded(lease, generation.unwrap(), SessionPurpose::Manage),
-            None => self.backend.repository.clone(),
+            Some(lease) => backend.guarded(lease, generation.unwrap(), SessionPurpose::Manage),
+            None => backend.repository.clone(),
         };
         let transition = repository
             .execute_credentials(
-                self.backend.encode(change, principal, 1, 1).unwrap(),
+                backend.encode(change, principal, 1, 1).unwrap(),
                 actor.as_ref(),
                 self.clock.as_ref(),
             )
             .unwrap();
-        self.backend.apply(&transition).unwrap();
+        backend.apply(&transition).unwrap();
+        drop(backend);
         if admin.is_some() {
             // Initial password change is a local component operation. No Web
             // pairing/listener readiness is fabricated to complete this seed.
             let lease = self.issue(principal.get(), TrustedOrigin::Local);
-            let state = self.backend.state().unwrap();
-            let request = self
+            let issued = self
                 .backend
+                .issue_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(lease),
+                    SessionPurpose::ChangeInitialPassword,
+                )
+                .unwrap();
+            let mut backend = self.backend.begin_command_scope(issued).unwrap();
+            let state = backend.state().unwrap();
+            let request = backend
                 .request(
                     &state,
                     IdentityCommand::PasswordChanged {
@@ -339,21 +376,19 @@ impl Fixture {
             let change =
                 prepare_password_change(&mut SyntheticCredentials, &(), &(), &original, request)
                     .unwrap();
-            let (actor, generation) = self
-                .backend
+            let (actor, generation) = backend
                 .actor(&state, lease, SessionPurpose::ChangeInitialPassword)
                 .unwrap();
             let mut repository =
-                self.backend
-                    .guarded(lease, generation, SessionPurpose::ChangeInitialPassword);
+                backend.guarded(lease, generation, SessionPurpose::ChangeInitialPassword);
             let transition = repository
                 .execute_credentials(
-                    self.backend.encode(change, principal, 2, 1).unwrap(),
+                    backend.encode(change, principal, 2, 1).unwrap(),
                     Some(&actor),
                     self.clock.as_ref(),
                 )
                 .unwrap();
-            self.backend.apply(&transition).unwrap();
+            backend.apply(&transition).unwrap();
         }
     }
     fn issue(&self, principal: u64, origin: TrustedOrigin) -> SessionLease {
@@ -488,17 +523,24 @@ fn accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected
     // One real production PBKDF2 account creation, no extra login KDF loop.
     let code = fixture
         .backend
-        .create_account_at(
-            admin,
-            captured,
-            NewAccount {
-                id: id(5),
-                login_name: "multi-new".into(),
-                display_name: "New teacher".into(),
-                role: Role::TeacherAdmin,
-                scopes: vec![scope(1, 1), scope(2, 2)],
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.create_account_at(
+                    admin,
+                    captured,
+                    NewAccount {
+                        id: id(5),
+                        login_name: "multi-new".into(),
+                        display_name: "New teacher".into(),
+                        role: Role::TeacherAdmin,
+                        scopes: vec![scope(1, 1), scope(2, 2)],
+                    },
+                    Password::new("Synthetic account creation 2026!".into()).unwrap(),
+                )
             },
-            Password::new("Synthetic account creation 2026!".into()).unwrap(),
         )
         .unwrap();
     drop(code);
@@ -506,10 +548,15 @@ fn accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected
     let before = fixture.backend.state().unwrap();
     let global = fixture.backend.global_revision().unwrap();
     assert_eq!(
-        fixture.backend.identity_at(
-            admin,
-            captured,
-            update(5, "stale edit", Role::TeacherAdmin, true, vec![scope(1, 2)])
+        fixture.backend.test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.identity_at(
+                admin,
+                captured,
+                update(5, "stale edit", Role::TeacherAdmin, true, vec![scope(1, 2)])
+            )
         ),
         Err(identity_error(IdentityError::RevisionConflict))
     );
@@ -518,17 +565,22 @@ fn accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected
     assert_eq!(
         fixture
             .backend
-            .create_account_at(
-                admin,
-                captured,
-                NewAccount {
-                    id: id(6),
-                    login_name: "stale-create".into(),
-                    display_name: "Stale create".into(),
-                    role: Role::User,
-                    scopes: vec![]
-                },
-                Password::new("Synthetic rejected create 2026!".into()).unwrap()
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |issued_backend| issued_backend.create_account_at(
+                    admin,
+                    captured,
+                    NewAccount {
+                        id: id(6),
+                        login_name: "stale-create".into(),
+                        display_name: "Stale create".into(),
+                        role: Role::User,
+                        scopes: vec![]
+                    },
+                    Password::new("Synthetic rejected create 2026!".into()).unwrap()
+                )
             )
             .err(),
         Some(identity_error(IdentityError::RevisionConflict))
@@ -542,16 +594,23 @@ fn accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected
         .is_ok());
     let changed = fixture
         .backend
-        .identity_at(
-            admin,
-            before.revision,
-            update(
-                5,
-                "Three scopes",
-                Role::TeacherAdmin,
-                true,
-                vec![scope(1, 1), scope(2, 1), scope(2, 2)],
-            ),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity_at(
+                    admin,
+                    before.revision,
+                    update(
+                        5,
+                        "Three scopes",
+                        Role::TeacherAdmin,
+                        true,
+                        vec![scope(1, 1), scope(2, 1), scope(2, 2)],
+                    ),
+                )
+            },
         )
         .unwrap();
     let account = changed.account(id(5)).unwrap();
@@ -599,9 +658,14 @@ fn accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_withou
     );
     assert!(fixture
         .backend
-        .identity(
-            web,
-            update(2, "forbidden", Role::TeacherAdmin, true, vec![scope(1, 1)])
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(web),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.identity(
+                web,
+                update(2, "forbidden", Role::TeacherAdmin, true, vec![scope(1, 1)])
+            )
         )
         .is_err());
     let teacher = fixture.issue(2, TrustedOrigin::Local);
@@ -613,26 +677,43 @@ fn accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_withou
     );
     assert!(fixture
         .backend
-        .identity(
-            teacher,
-            update(2, "forbidden", Role::TeacherAdmin, true, vec![scope(1, 1)])
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(teacher),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.identity(
+                teacher,
+                update(2, "forbidden", Role::TeacherAdmin, true, vec![scope(1, 1)])
+            )
         )
         .is_err());
     let admin = fixture.admin();
     fixture
         .backend
-        .identity(
-            admin,
-            update(3, "Disabled second", Role::GlobalAdmin, false, vec![]),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    admin,
+                    update(3, "Disabled second", Role::GlobalAdmin, false, vec![]),
+                )
+            },
         )
         .unwrap();
     let before = fixture.backend.state().unwrap();
     let revision = fixture.backend.global_revision().unwrap();
     assert_eq!(
-        fixture.backend.identity_at(
-            admin,
-            before.revision,
-            update(1, "Cannot leave", Role::User, true, vec![])
+        fixture.backend.test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.identity_at(
+                admin,
+                before.revision,
+                update(1, "Cannot leave", Role::User, true, vec![])
+            )
         ),
         Err(identity_error(IdentityError::LastAdministrator))
     );
@@ -655,16 +736,30 @@ fn accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_withou
         .is_ok());
     fixture
         .backend
-        .identity(
-            admin,
-            update(3, "Enabled second", Role::GlobalAdmin, true, vec![]),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    admin,
+                    update(3, "Enabled second", Role::GlobalAdmin, true, vec![]),
+                )
+            },
         )
         .unwrap();
     let renamed = fixture
         .backend
-        .identity(
-            admin,
-            update(1, "Self renamed", Role::GlobalAdmin, true, vec![]),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    admin,
+                    update(1, "Self renamed", Role::GlobalAdmin, true, vec![]),
+                )
+            },
         )
         .unwrap();
     assert_eq!(renamed.account(id(1)).unwrap().display_name, "Self renamed");
@@ -678,7 +773,14 @@ fn accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_withou
     let own_web = fixture.pair(fresh, "admin");
     let demoted = fixture
         .backend
-        .identity(fresh, update(1, "Self demoted", Role::User, true, vec![]))
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(fresh),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(fresh, update(1, "Self demoted", Role::User, true, vec![]))
+            },
+        )
         .unwrap();
     assert_eq!(demoted.account(id(1)).unwrap().principal.role, Role::User);
     assert!(fixture
@@ -692,11 +794,16 @@ fn accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_withou
         .is_err());
     assert!(fixture
         .backend
-        .identity(
-            fresh,
-            IdentityCommand::RenameSchool {
-                name: "stale session".into()
-            }
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(fresh),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.identity(
+                fresh,
+                IdentityCommand::RenameSchool {
+                    name: "stale session".into()
+                }
+            )
         )
         .is_err());
     let remaining = fixture.issue(3, TrustedOrigin::Local);
@@ -746,14 +853,19 @@ fn accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_a
     assert!(fixture.backend.management_identity(teacher).is_err());
     assert!(fixture
         .backend
-        .identity(
-            teacher,
-            update(
-                2,
-                "Forbidden Web management",
-                Role::TeacherAdmin,
-                true,
-                vec![self::scope(1, 1)]
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(teacher),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.identity(
+                teacher,
+                update(
+                    2,
+                    "Forbidden Web management",
+                    Role::TeacherAdmin,
+                    true,
+                    vec![self::scope(1, 1)]
+                )
             )
         )
         .is_err());
@@ -768,11 +880,19 @@ fn accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_a
             &[ClassId::new(1).unwrap(), ClassId::new(2).unwrap()],
         )
         .unwrap();
+    let material_command = fixture
+        .backend
+        .issue_native_command(
+            fc_ports::command_window::CommandFamily::Materials,
+            Some(admin),
+            SessionPurpose::Manage,
+        )
+        .unwrap();
     let material = fc_ports::prepare_material_append(
         &mut MaterialFixture,
         (),
         fc_ports::MaterialAppendMetadata {
-            command_id: CommandId::new(900).unwrap(),
+            command_id: material_command.command_id,
             scope,
             material_id: MaterialId::new(900).unwrap(),
             display_name: "Synthetic account material.txt".into(),
@@ -780,7 +900,12 @@ fn accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_a
         },
     )
     .unwrap();
-    fixture.backend.append_material(admin, material).unwrap();
+    fixture
+        .backend
+        .begin_command_scope(material_command)
+        .unwrap()
+        .append_material(admin, material)
+        .unwrap();
     let material_guard = fixture
         .backend
         .material_for_owner(
@@ -797,12 +922,18 @@ fn accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_a
         .unwrap();
     let prepared = prepare_voice_upload(&mut VoiceFixture, (), asset).unwrap();
     let asset = fixture.backend.voice_publish(teacher, prepared).unwrap();
+    let voice_command = fixture
+        .backend
+        .issue_web_command(teacher, fc_ports::command_window::CommandFamily::Voice)
+        .unwrap();
     let job = fixture
         .backend
+        .begin_command_scope(voice_command)
+        .unwrap()
         .voice_submit(
             teacher,
             VoiceSubmitRequest {
-                command_id: CommandId::new(901).unwrap(),
+                command_id: voice_command.command_id,
                 asset_id: asset.id,
                 expected_asset_revision: asset.revision,
                 class_id: ClassId::new(1).unwrap(),
@@ -828,15 +959,22 @@ fn accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_a
     assert!(material_guard_after.is_context_valid());
     let changed = fixture
         .backend
-        .identity(
-            admin,
-            update(
-                2,
-                "Class two only",
-                Role::TeacherAdmin,
-                true,
-                vec![self::scope(2, 1), self::scope(2, 2)],
-            ),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    admin,
+                    update(
+                        2,
+                        "Class two only",
+                        Role::TeacherAdmin,
+                        true,
+                        vec![self::scope(2, 1), self::scope(2, 2)],
+                    ),
+                )
+            },
         )
         .unwrap();
     assert_eq!(
@@ -868,7 +1006,15 @@ fn accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_a
         .is_err());
     fixture
         .backend
-        .identity(admin, update(2, "Read only user", Role::User, true, vec![]))
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend
+                    .identity(admin, update(2, "Read only user", Role::User, true, vec![]))
+            },
+        )
         .unwrap();
     assert!(fixture
         .backend
@@ -886,7 +1032,15 @@ fn accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_a
         .is_err());
     fixture
         .backend
-        .identity(admin, update(2, "Disabled user", Role::User, false, vec![]))
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend
+                    .identity(admin, update(2, "Disabled user", Role::User, false, vec![]))
+            },
+        )
         .unwrap();
     assert!(fixture.backend.management_identity(user_lease).is_err());
     assert!(fixture
@@ -983,28 +1137,49 @@ fn accounts_active_default_and_retained_history_references_reject_atomically_wit
         if mode == "implicit-default" {
             fixture
                 .backend
-                .identity(
-                    admin,
-                    update(4, "Not currently teaching", Role::User, true, vec![]),
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    fc_application::identity::SessionPurpose::Manage,
+                    |issued_backend| {
+                        issued_backend.identity(
+                            admin,
+                            update(4, "Not currently teaching", Role::User, true, vec![]),
+                        )
+                    },
                 )
                 .unwrap();
         }
         if mode == "default" {
             fixture
                 .backend
-                .identity(
-                    admin,
-                    IdentityCommand::SetDefaultTeacher(DefaultTeacher {
-                        class_id: ClassId::new(1).unwrap(),
-                        subject_id: SubjectId::new(1).unwrap(),
-                        teacher_id: id(2),
-                    }),
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    fc_application::identity::SessionPurpose::Manage,
+                    |issued_backend| {
+                        issued_backend.identity(
+                            admin,
+                            IdentityCommand::SetDefaultTeacher(DefaultTeacher {
+                                class_id: ClassId::new(1).unwrap(),
+                                subject_id: SubjectId::new(1).unwrap(),
+                                teacher_id: id(2),
+                            }),
+                        )
+                    },
                 )
                 .unwrap();
         }
         let document = fixture
             .backend
-            .save_schedule(admin, Revision::default(), timetable(mode))
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Schedule,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |issued_backend| {
+                    issued_backend.save_schedule(admin, Revision::default(), timetable(mode))
+                },
+            )
             .unwrap();
         let before = fixture.backend.state().unwrap();
         let revision = fixture.backend.global_revision().unwrap();
@@ -1037,7 +1212,12 @@ fn accounts_active_default_and_retained_history_references_reject_atomically_wit
         };
         for command in commands {
             assert_eq!(
-                fixture.backend.identity_at(admin, before.revision, command),
+                fixture.backend.test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    fc_application::identity::SessionPurpose::Manage,
+                    |issued_backend| issued_backend.identity_at(admin, before.revision, command)
+                ),
                 Err(identity_error(IdentityError::InvalidScope)),
                 "reference mode={mode}"
             );
@@ -1080,11 +1260,18 @@ fn accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_ato
     for class in 3..=128 {
         fixture
             .backend
-            .identity(
-                admin,
-                IdentityCommand::CreateClass {
-                    id: ClassId::new(class).unwrap(),
-                    name: format!("Class {class}"),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |issued_backend| {
+                    issued_backend.identity(
+                        admin,
+                        IdentityCommand::CreateClass {
+                            id: ClassId::new(class).unwrap(),
+                            name: format!("Class {class}"),
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -1092,18 +1279,25 @@ fn accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_ato
     for subject in 3..=32 {
         fixture
             .backend
-            .identity(
-                admin,
-                IdentityCommand::PutSubject {
-                    id: SubjectId::new(subject).unwrap(),
-                    name: format!("Subject {subject}"),
-                    enabled: true,
-                    color: Rgb {
-                        red: 20,
-                        green: 40,
-                        blue: 60,
-                    },
-                    expected_revision: None,
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |issued_backend| {
+                    issued_backend.identity(
+                        admin,
+                        IdentityCommand::PutSubject {
+                            id: SubjectId::new(subject).unwrap(),
+                            name: format!("Subject {subject}"),
+                            enabled: true,
+                            color: Rgb {
+                                red: 20,
+                                green: 40,
+                                blue: 60,
+                            },
+                            expected_revision: None,
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -1131,7 +1325,12 @@ fn accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_ato
         .transition(&command, Some(&actor), fixture.clock.now())
         .is_ok());
     assert_eq!(
-        fixture.backend.identity_at(admin, before.revision, command),
+        fixture.backend.test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.identity_at(admin, before.revision, command)
+        ),
         Err(identity_error(IdentityError::Capacity))
     );
     assert_eq!(fixture.backend.state().unwrap(), before);
@@ -1157,16 +1356,23 @@ fn accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_ato
     );
     let next = fixture
         .backend
-        .identity_at(
-            admin,
-            before.revision,
-            update(
-                2,
-                "Small valid retry",
-                Role::TeacherAdmin,
-                true,
-                vec![scope(1, 1), scope(2, 2)],
-            ),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity_at(
+                    admin,
+                    before.revision,
+                    update(
+                        2,
+                        "Small valid retry",
+                        Role::TeacherAdmin,
+                        true,
+                        vec![scope(1, 1), scope(2, 2)],
+                    ),
+                )
+            },
         )
         .unwrap();
     assert_eq!(

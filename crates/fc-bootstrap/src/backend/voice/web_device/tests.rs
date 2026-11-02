@@ -197,7 +197,7 @@ fn disabled_closed_wrong_origin_and_cancelled_requests_never_query_or_reuse_nega
     service.resume_after_stop(epoch).unwrap();
     let inventory = service.inventory().unwrap();
     service
-        .set_enabled(local, false, inventory.revision)
+        .test_set_enabled(local, false, inventory.revision)
         .unwrap();
     let disabled = service
         .web_capabilities_with_output(web, due(), || panic!("disabled query"))
@@ -245,45 +245,66 @@ fn completed_queries_cannot_cache_or_deliver_after_revocation_request_cancel_or_
                         .0
                         .lock()
                         .unwrap()
-                        .identity(
-                            local,
-                            IdentityCommand::PutSubject {
-                                id: SubjectId::new(1).unwrap(),
-                                name: "Changed observation catalog".into(),
-                                enabled: true,
-                                color: Rgb {
-                                    red: 1,
-                                    green: 2,
-                                    blue: 3,
-                                },
-                                expected_revision: None,
+                        .test_native_command(
+                            fc_ports::command_window::CommandFamily::Identity,
+                            Some(local),
+                            SessionPurpose::Manage,
+                            |backend| {
+                                backend.identity(
+                                    local,
+                                    IdentityCommand::PutSubject {
+                                        id: SubjectId::new(1).unwrap(),
+                                        name: "Changed observation catalog".into(),
+                                        enabled: true,
+                                        color: Rgb {
+                                            red: 1,
+                                            green: 2,
+                                            blue: 3,
+                                        },
+                                        expected_revision: None,
+                                    },
+                                )
                             },
                         )
                         .unwrap();
                 }
                 "voice" => {
                     let request = fixtures::independent_request(&service, web, class, 40901);
-                    service.submit(web, request).unwrap();
+                    service.test_submit(web, request).unwrap();
                 }
                 "class" => {
                     let id = ClassId::new(2).unwrap();
                     let mut backend = backend.0.lock().unwrap();
                     backend
-                        .identity(
-                            local,
-                            IdentityCommand::CreateClass {
-                                id,
-                                name: "Changed target".into(),
+                        .test_native_command(
+                            fc_ports::command_window::CommandFamily::Identity,
+                            Some(local),
+                            SessionPurpose::Manage,
+                            |backend| {
+                                backend.identity(
+                                    local,
+                                    IdentityCommand::CreateClass {
+                                        id,
+                                        name: "Changed target".into(),
+                                    },
+                                )
                             },
                         )
                         .unwrap();
                     backend
-                        .identity(local, IdentityCommand::BindCurrentClass { id })
+                        .test_native_command(
+                            fc_ports::command_window::CommandFamily::Identity,
+                            Some(local),
+                            SessionPurpose::Manage,
+                            |backend| {
+                                backend.identity(local, IdentityCommand::BindCurrentClass { id })
+                            },
+                        )
                         .unwrap();
                 }
                 "enabled" => {
                     service
-                        .set_enabled(local, false, service.inventory().unwrap().revision)
+                        .test_set_enabled(local, false, service.inventory().unwrap().revision)
                         .unwrap();
                 }
                 "runtime" => {
@@ -306,7 +327,9 @@ fn completed_queries_cannot_cache_or_deliver_after_revocation_request_cancel_or_
             // exists in this fixture. Restore admission for the next new case.
             let state = service.interrupt_all().unwrap();
             if !state.enabled {
-                service.set_enabled(local, true, state.revision).unwrap();
+                service
+                    .test_set_enabled(local, true, state.revision)
+                    .unwrap();
             }
             if !service.is_admitting() {
                 service.resume_after_stop(service.generation()).unwrap();
@@ -670,45 +693,66 @@ fn only_authorized_teacher_or_global_web_can_query_and_no_password_change_or_use
     {
         let mut backend = backend.0.lock().unwrap();
         backend
-            .identity(
-                admin,
-                IdentityCommand::CreateClass {
-                    id: other,
-                    name: "Other class".into(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::CreateClass {
+                            id: other,
+                            name: "Other class".into(),
+                        },
+                    )
                 },
             )
             .unwrap();
         backend
-            .identity(
-                admin,
-                IdentityCommand::PutSubject {
-                    id: subject,
-                    name: "Subject".into(),
-                    enabled: true,
-                    color: Rgb {
-                        red: 1,
-                        green: 2,
-                        blue: 3,
-                    },
-                    expected_revision: None,
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::PutSubject {
+                            id: subject,
+                            name: "Subject".into(),
+                            enabled: true,
+                            color: Rgb {
+                                red: 1,
+                                green: 2,
+                                blue: 3,
+                            },
+                            expected_revision: None,
+                        },
+                    )
                 },
             )
             .unwrap();
         drop(
             backend
-                .create_account(
-                    admin,
-                    NewAccount {
-                        id: PrincipalId::new(2).unwrap(),
-                        login_name: "output-teacher".into(),
-                        display_name: "Teacher".into(),
-                        role: Role::TeacherAdmin,
-                        scopes: vec![AssignmentScope {
-                            class_id: other,
-                            subject_id: subject,
-                        }],
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.create_account(
+                            admin,
+                            NewAccount {
+                                id: PrincipalId::new(2).unwrap(),
+                                login_name: "output-teacher".into(),
+                                display_name: "Teacher".into(),
+                                role: Role::TeacherAdmin,
+                                scopes: vec![AssignmentScope {
+                                    class_id: other,
+                                    subject_id: subject,
+                                }],
+                            },
+                            Password::new("Synthetic initial output credential!".into()).unwrap(),
+                        )
                     },
-                    Password::new("Synthetic initial output credential!".into()).unwrap(),
                 )
                 .unwrap(),
         );
@@ -722,10 +766,17 @@ fn only_authorized_teacher_or_global_web_can_query_and_no_password_change_or_use
         .0
         .lock()
         .unwrap()
-        .change_password(
-            first_local,
-            Password::new("Synthetic initial output credential!".into()).unwrap(),
-            Password::new("Changed synthetic output credential!".into()).unwrap(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(first_local),
+            SessionPurpose::ChangeInitialPassword,
+            |backend| {
+                backend.change_password(
+                    first_local,
+                    Password::new("Synthetic initial output credential!".into()).unwrap(),
+                    Password::new("Changed synthetic output credential!".into()).unwrap(),
+                )
+            },
         )
         .unwrap();
     let admin = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
@@ -752,14 +803,21 @@ fn only_authorized_teacher_or_global_web_can_query_and_no_password_change_or_use
             .0
             .lock()
             .unwrap()
-            .identity(
-                admin,
-                IdentityCommand::UpdateAccount {
-                    id: PrincipalId::new(2).unwrap(),
-                    display_name: "Teacher".into(),
-                    role,
-                    enabled: true,
-                    scopes,
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::UpdateAccount {
+                            id: PrincipalId::new(2).unwrap(),
+                            display_name: "Teacher".into(),
+                            role,
+                            enabled: true,
+                            scopes,
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -947,18 +1005,25 @@ fn real_catalog_voice_policy_runtime_and_class_changes_never_reuse_old_cache_sta
         .0
         .lock()
         .unwrap()
-        .identity(
-            local,
-            IdentityCommand::PutSubject {
-                id: SubjectId::new(1).unwrap(),
-                name: "Changed cache catalog".into(),
-                enabled: true,
-                color: Rgb {
-                    red: 1,
-                    green: 2,
-                    blue: 3,
-                },
-                expected_revision: None,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(local),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    local,
+                    IdentityCommand::PutSubject {
+                        id: SubjectId::new(1).unwrap(),
+                        name: "Changed cache catalog".into(),
+                        enabled: true,
+                        color: Rgb {
+                            red: 1,
+                            green: 2,
+                            blue: 3,
+                        },
+                        expected_revision: None,
+                    },
+                )
             },
         )
         .unwrap();
@@ -973,7 +1038,7 @@ fn real_catalog_voice_policy_runtime_and_class_changes_never_reuse_old_cache_sta
     assert_eq!(calls.load(Ordering::Acquire), 3);
     let review = service.management_snapshot(local).unwrap();
     service
-        .set_limits_reviewed(
+        .test_set_limits_reviewed(
             local,
             VoiceLimits {
                 max_duration_millis: 1_000,
@@ -999,16 +1064,28 @@ fn real_catalog_voice_policy_runtime_and_class_changes_never_reuse_old_cache_sta
     {
         let mut backend = backend.0.lock().unwrap();
         backend
-            .identity(
-                local,
-                IdentityCommand::CreateClass {
-                    id,
-                    name: "Current cache target".into(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(local),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        local,
+                        IdentityCommand::CreateClass {
+                            id,
+                            name: "Current cache target".into(),
+                        },
+                    )
                 },
             )
             .unwrap();
         backend
-            .identity(local, IdentityCommand::BindCurrentClass { id })
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(local),
+                SessionPurpose::Manage,
+                |backend| backend.identity(local, IdentityCommand::BindCurrentClass { id }),
+            )
             .unwrap();
     }
     let changed = service

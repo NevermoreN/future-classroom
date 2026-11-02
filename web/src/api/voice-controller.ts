@@ -1,17 +1,20 @@
-import { ApiError, isAborted } from './client'
-import { newCommandId } from './content-protocol'
+import { ApiError, commandRejected, commandRetired, isAborted } from './client'
+import { commandIdentity } from './command-protocol'
 import { ProtocolFault, ProtocolVersionFault } from './protocol'
 import type { VoiceApi } from './voice-client'
 import { sameTarget, terminal, type VoiceCapabilities, type VoiceJob, type VoiceSubmit, type VoiceCancel } from './voice-protocol'
 
+/** Local recorder generation only; never sent as a command identity. */
+export const newRecordingId = () => globalThis.crypto.randomUUID()
+
 export interface RecordingContext { recordingId: string; capabilities: VoiceCapabilities; classId: string; repeatTotal: number }
-export type PendingVoice = { kind: 'SUBMIT'; input: VoiceSubmit } | { kind: 'CANCEL'; jobId: string; input: VoiceCancel }
+export type PendingVoice = ({ kind: 'SUBMIT'; input: VoiceSubmit } | { kind: 'CANCEL'; jobId: string; input: VoiceCancel }) & { retired?: boolean }
 export interface VoiceState {
   capabilities: VoiceCapabilities | null; jobs: VoiceJob[]; repeatTotal: number
   phase: 'idle' | 'recording' | 'uploading' | 'submitting' | 'unknown' | 'blocked'
-  context: RecordingContext | null; pending: PendingVoice | null; busy: boolean; notice: string
+  history: { command: PendingVoice; job: VoiceJob } | null; context: RecordingContext | null; pending: PendingVoice | null; busy: boolean; notice: string
 }
-export const emptyVoice: VoiceState = { capabilities: null, jobs: [], repeatTotal: 3, phase: 'idle', context: null, pending: null, busy: false, notice: '' }
+export const emptyVoice: VoiceState = { capabilities: null, jobs: [], repeatTotal: 3, phase: 'idle', history: null, context: null, pending: null, busy: false, notice: '' }
 export const mayRecord = (c: VoiceCapabilities | null) => !!c?.currentClass && c.enabled && c.admission === 'OPEN' && c.targetAuthorized && c.deviceAvailability !== 'UNAVAILABLE'
 
 export class VoiceController {
@@ -24,7 +27,7 @@ export class VoiceController {
   private incompatible = ''
   private active = false
   private visible = true
-  constructor(private api: VoiceApi, private csrf: string, private changed: (s: VoiceState) => void, private revoked: () => void, private cancelRecorder: () => void, private commandId = newCommandId) {}
+  constructor(private api: VoiceApi, private csrf: string, private changed: (s: VoiceState) => void, private revoked: () => void, private cancelRecorder: () => void) {}
   snapshot() { return this.state }
   private publish(patch: Partial<VoiceState>) {
     if (this.disposed) return
@@ -46,7 +49,7 @@ export class VoiceController {
   hasRiskyDraft() { return !!this.state.context || !!this.state.pending || this.state.busy }
   setRepeat(value: number) { if (!this.incompatible && this.state.phase === 'idle' && !this.state.busy && Number.isInteger(value) && value >= 1 && value <= (this.state.capabilities?.maxRepeatTotal ?? 10)) this.publish({ repeatTotal: value }) }
   private checkUpdate(next: VoiceJob, previous: VoiceJob) {
-    if (next.jobId !== previous.jobId || next.commandId !== previous.commandId || next.classId !== previous.classId || next.repeatTotal !== previous.repeatTotal || BigInt(next.revision) < BigInt(previous.revision) || next.completedRepeats < previous.completedRepeats || terminal(previous) && JSON.stringify(next) !== JSON.stringify(previous) || next.revision === previous.revision && JSON.stringify(next) !== JSON.stringify(previous)) throw new ProtocolFault()
+    if (next.jobId !== previous.jobId || next.commandId !== previous.commandId || next.commandTicket !== previous.commandTicket || next.classId !== previous.classId || next.repeatTotal !== previous.repeatTotal || BigInt(next.revision) < BigInt(previous.revision) || next.completedRepeats < previous.completedRepeats || terminal(previous) && JSON.stringify(next) !== JSON.stringify(previous) || next.revision === previous.revision && JSON.stringify(next) !== JSON.stringify(previous)) throw new ProtocolFault()
   }
   private mergeJob(job: VoiceJob) {
     const previous = this.state.jobs.find(j => j.jobId === job.jobId)
@@ -102,7 +105,10 @@ export class VoiceController {
       const receipt = await this.api.uploadVoice(context.classId, result.wav, this.csrf, signal)
       if (!this.current(id)) return
       if (receipt.classId !== context.classId || receipt.bytes !== result.wav.size || receipt.durationMillis !== Math.floor(result.frames / 16)) throw new ProtocolFault()
-      input = { commandId: this.commandId(), assetId: receipt.assetId, expectedAssetRevision: receipt.assetRevision, classId: context.classId, repeatTotal: context.repeatTotal }
+      const captured = { assetId: receipt.assetId, expectedAssetRevision: receipt.assetRevision, classId: context.classId, repeatTotal: context.repeatTotal }
+      const pair = commandIdentity(await this.api.issueCommand('voice', this.csrf, signal))
+      if (!this.current(id)) return
+      input = { ...pair, ...captured }
       this.publish({ context: null, phase: 'submitting', pending: { kind: 'SUBMIT', input }, notice: '正在提交原命令；上传完成不等于已排队。' })
       const job = await this.api.submitVoice(input, this.csrf, signal)
       if (!this.current(id)) return
@@ -110,43 +116,59 @@ export class VoiceController {
       this.publish({ jobs: this.mergeJob(job), pending: null, busy: false, phase: 'idle', notice: '白板已确认任务持久化。排队和驱动播放完成均不能保证扬声器已被听到。' })
     } catch (error) {
       if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
-      const definite = error instanceof ApiError && [400, 409, 429].includes(error.status)
-      this.publish({ busy: false, context: null, phase: input && !definite ? 'unknown' : 'blocked', pending: input && !definite ? { kind: 'SUBMIT', input } : null, notice: input && !definite ? '提交结果未知。仅手动查询原任务，不会自动重发或生成新命令。' : '本次上传或提交未能完成。不会自动重试；临时录音由白板到期清理，请重新核对后明确操作。' })
+      const definite = commandRejected(error), retired = commandRetired(error)
+      this.publish({ busy: false, context: null, phase: input && !definite ? 'unknown' : 'blocked', pending: input && retired ? { kind: 'SUBMIT', input, retired: true } : input && !definite ? { kind: 'SUBMIT', input } : null, notice: retired ? '原票据已过期或未获发行，此操作已停止；保留原票据，只可明确核对当前任务，不会重发。' : input && !definite ? '提交结果未知。仅手动查询原任务，不会自动重发或生成新命令。' : '本次上传或提交未能完成。不会自动重试；临时录音由白板到期清理，请重新核对后明确操作。' })
     } finally { this.schedule() }
   }
-  private verifySubmit(job: VoiceJob, input: VoiceSubmit) { if (job.jobId !== input.commandId || job.commandId !== input.commandId || job.classId !== input.classId || job.repeatTotal !== input.repeatTotal) throw new ProtocolFault() }
+  private verifySubmit(job: VoiceJob, input: VoiceSubmit) { if (job.jobId !== input.commandId || job.commandId !== input.commandId || job.commandTicket !== input.commandTicket || job.classId !== input.classId || job.repeatTotal !== input.repeatTotal) throw new ProtocolFault() }
   async stop(job: VoiceJob) {
-    if (this.disposed || this.incompatible || this.state.busy || this.state.pending || terminal(job) || job.state === 'STOPPING' || !this.state.jobs.some(j => j.jobId === job.jobId && j.revision === job.revision)) return
+    if (this.disposed || this.incompatible || this.state.busy || this.state.pending || terminal(job) || job.state === 'STOPPING' || !this.state.jobs.some(j => j.jobId === job.jobId && j.commandTicket === job.commandTicket && j.revision === job.revision)) return
     if (this.state.context) this.cancelUnsent('已取消未发送录音，正在处理原任务的停止请求。')
-    let input: VoiceCancel
-    try { input = { commandId: this.commandId(), expectedRevision: job.revision } } catch { this.publish({ notice: '无法生成安全停止命令，请核对浏览器。' }); return }
-    const { id, signal } = this.begin(); this.publish({ busy: true, pending: { kind: 'CANCEL', input, jobId: job.jobId }, notice: '正在请求停止此任务及其剩余遍数。' })
+    const captured = { jobId: job.jobId, jobCommandTicket: job.commandTicket, expectedRevision: job.revision }
+    let input: VoiceCancel | undefined
+    const { id, signal } = this.begin(); this.publish({ busy: true, notice: '正在领取原任务停止操作的服务器票据。' })
     try {
-      const next = await this.api.cancelVoice(job.jobId, input, this.csrf, signal)
+      const pair = commandIdentity(await this.api.issueCommand('voice', this.csrf, signal))
+      if (!this.current(id)) return
+      input = { ...pair, jobCommandTicket: captured.jobCommandTicket, expectedRevision: captured.expectedRevision }
+      this.publish({ pending: { kind: 'CANCEL', input, jobId: captured.jobId }, notice: '正在请求停止此任务及其剩余遍数。' })
+      const next = await this.api.cancelVoice(captured.jobId, input, this.csrf, signal)
       if (!this.current(id)) return
       this.checkUpdate(next, job)
       if (BigInt(next.revision) <= BigInt(input.expectedRevision) || next.state !== 'STOPPING' && !terminal(next)) throw new ProtocolFault()
       this.publish({ jobs: this.mergeJob(next), pending: null, busy: false, phase: 'idle', notice: terminal(next) ? '白板已确认此任务终态。' : '停止请求已提交，正在等待驱动归还；还不能显示为已停止。' })
     } catch (error) {
       if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
-      const definite = error instanceof ApiError && [400, 409, 429].includes(error.status)
-      this.publish({ busy: false, phase: definite ? 'blocked' : 'unknown', pending: definite ? null : { kind: 'CANCEL', input, jobId: job.jobId }, notice: definite ? '停止请求被拒绝或修订已变化，请主动读取当前任务再操作。' : '停止结果未知。仅手动读取原任务，不会自动重发停止请求。' })
+      const definite = commandRejected(error), retired = commandRetired(error)
+      this.publish({ busy: false, phase: !input || definite ? 'blocked' : 'unknown', pending: input && retired ? { kind: 'CANCEL', input, jobId: captured.jobId, retired: true } : input && !definite ? { kind: 'CANCEL', input, jobId: captured.jobId } : null, notice: !input ? '未取得服务器票据，停止请求尚未发送；请明确核对任务后操作。' : retired ? '原票据已过期或未获发行，已停止此操作。原任务的实际所有权与状态仍需独立核对。' : definite ? '停止请求被拒绝或修订已变化，请主动读取当前任务再操作。' : '停止结果未知。仅手动读取原任务，不会自动重发停止请求。' })
     } finally { this.schedule() }
   }
   async queryPending() {
     const pending = this.state.pending
     if (!pending || this.state.busy || this.disposed) return
-    const jobId = pending.kind === 'SUBMIT' ? pending.input.commandId : pending.jobId
     const { id, signal } = this.begin(); this.publish({ busy: true })
     try {
-      const job = await this.api.voiceJob(jobId, signal)
+      if (pending.retired) {
+        const jobId = pending.kind === 'SUBMIT' ? pending.input.commandId : pending.jobId
+        const submitTicket = pending.kind === 'SUBMIT' ? pending.input.commandTicket : pending.input.jobCommandTicket
+        const job = await this.api.voiceJob(jobId, submitTicket, signal)
+        if (!this.current(id)) return
+        if (pending.kind === 'SUBMIT') this.verifySubmit(job, pending.input)
+        else if (job.jobId !== pending.jobId || job.commandTicket !== pending.input.jobCommandTicket) throw new ProtocolFault()
+        this.publish({ jobs: this.mergeJob(job), busy: false, phase: 'blocked', notice: '已独立读取原任务的当前状态；原命令票据仍已停止使用，不会重发或据此推断停止成功。' }); return
+      }
+      const result = await this.api.voiceOutcome(commandIdentity(pending.input), signal)
       if (!this.current(id)) return
+      if (result.commandId !== pending.input.commandId || result.commandTicket !== pending.input.commandTicket) throw new ProtocolFault()
+      if (result.state === 'NOT_FOUND') { this.publish({ busy: false, phase: 'unknown', notice: '当前未查到原命令，不证明从未提交；不会因此补发或停止任务。' }); return }
+      const job = result.job
       if (pending.kind === 'SUBMIT') this.verifySubmit(job, pending.input)
-      const jobs = this.mergeJob(job), resolved = pending.kind === 'SUBMIT' || terminal(job)
-      this.publish({ jobs, busy: false, pending: resolved && !this.incompatible ? null : pending, phase: resolved && !this.incompatible ? 'idle' : 'unknown', notice: resolved ? '已查到原任务当前持久状态；不会补发播报。' : '当前任务尚未终止，停止结果仍未确认。不会自动重复停止请求，请继续主动查询。' })
+      else if (job.jobId !== pending.jobId || job.commandTicket !== pending.input.jobCommandTicket || BigInt(job.revision) <= BigInt(pending.input.expectedRevision) || job.state !== 'STOPPING' && !terminal(job)) throw new ProtocolFault()
+      this.publish({ history: { command: pending, job }, busy: false, pending: this.incompatible ? pending : null, phase: this.incompatible ? 'unknown' : 'idle', notice: '已查到原命令的历史持久回执；它不代表当前播放或停止状态。请明确刷新当前任务，不会补发操作。' })
     } catch (error) {
       if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
-      this.publish({ busy: false, phase: 'unknown', notice: error instanceof ApiError && error.status === 404 ? '当前未查到原任务，不证明从未提交；不会因此补发。' : '查询未能确认原任务，请稍后主动查询。' })
+      if (commandRetired(error)) { this.publish({ busy: false, pending: { ...pending, retired: true }, phase: 'blocked', notice: '原票据已过期或未获发行，历史查询已停止。保留原元数据，可明确读取原任务当前状态；不推断所有权已归还。' }); return }
+      this.publish({ busy: false, phase: pending.retired ? 'blocked' : 'unknown', notice: '查询未能确认原命令或任务，请稍后主动核对；不会重发。' })
     } finally { this.schedule() }
   }
   private schedule() {

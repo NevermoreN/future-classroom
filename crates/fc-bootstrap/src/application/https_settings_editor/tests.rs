@@ -41,9 +41,6 @@ fn edit() -> Editor {
     e.loaded(base(0));
     e
 }
-fn id(value: u64) -> CommandId {
-    CommandId::new(value).unwrap()
-}
 
 #[test]
 fn no_configuration_has_blank_port_and_no_fake_certificate_or_listener_readiness() {
@@ -83,7 +80,7 @@ fn save_captures_both_loaded_versions_before_admission_and_busy_keeps_id_and_dea
     let mut e = edit();
     e.capture(form("Board.School", "8443")).unwrap();
     let now = Instant::now();
-    let first = e.prepare_save(id(8), now).unwrap();
+    let first = e.prepare_save(now).unwrap();
     let until = e.save_deadline().unwrap();
     assert_eq!(first.expected_revision, Revision::new(0));
     assert_eq!(first.expected_identity_revision, Revision::new(12));
@@ -91,32 +88,29 @@ fn save_captures_both_loaded_versions_before_admission_and_busy_keeps_id_and_dea
         first.configuration.as_ref().unwrap().host.as_str(),
         "board.school"
     );
-    assert_eq!(
-        e.prepare_save(id(9), now + Duration::from_secs(1)).unwrap(),
-        first
-    );
+    assert_eq!(e.prepare_save(now + Duration::from_secs(1)).unwrap(), first);
     assert_eq!(e.save_deadline(), Some(until));
     assert!(e.query_request().is_none());
-    assert!(e.prepare_save(id(10), until).is_err());
+    assert!(e.prepare_save(until).is_err());
     assert_eq!(e.original.as_ref().unwrap().request, first);
 }
 #[test]
 fn accepted_write_never_replays_save_and_query_does_not_read_mutated_form_payload() {
     let mut e = edit();
     e.capture(form("localhost", "8443")).unwrap();
-    let original = e.prepare_save(id(11), Instant::now()).unwrap();
+    let original = e.prepare_save(Instant::now()).unwrap();
     e.accepted();
     e.capture(form("changed.school", "9443")).unwrap();
     assert_eq!(e.query_request(), Some(original.clone()));
     assert!(e.handle(owner(1), SAVE_CONFIG, FormData::new()).is_err());
-    assert!(e.prepare_save(id(12), Instant::now()).is_err());
+    assert!(e.prepare_save(Instant::now()).is_err());
     assert_eq!(e.query_request(), Some(original));
 }
 #[test]
 fn query_none_preserves_draft_original_and_never_says_not_saved() {
     let mut e = edit();
     e.capture(form("localhost", "8443")).unwrap();
-    let original = e.prepare_save(id(13), Instant::now()).unwrap();
+    let original = e.prepare_save(Instant::now()).unwrap();
     e.accepted();
     let draft = e.draft.clone();
     e.queried(None);
@@ -140,7 +134,7 @@ fn query_none_preserves_draft_original_and_never_says_not_saved() {
 fn historical_receipt_does_not_become_current_cas_or_erase_draft() {
     let mut e = edit();
     e.capture(form("localhost", "8443")).unwrap();
-    let original = e.prepare_save(id(14), Instant::now()).unwrap();
+    let original = e.prepare_save(Instant::now()).unwrap();
     e.accepted();
     let historical = configured(17);
     e.queried(Some(historical));
@@ -167,7 +161,7 @@ fn cancel_and_reload_require_explicit_risk_choice_and_cancel_never_constructs_wr
         Command::Stay
     ));
     assert!(e.dirty());
-    let request = e.prepare_save(id(15), Instant::now()).unwrap();
+    let request = e.prepare_save(Instant::now()).unwrap();
     e.accepted();
     assert!(matches!(
         e.handle(owner(1), RELOAD, FormData::new()).unwrap(),
@@ -186,7 +180,7 @@ fn cancel_and_reload_require_explicit_risk_choice_and_cancel_never_constructs_wr
 fn another_owner_sees_no_draft_or_receipt_and_cannot_query_or_rebind_it() {
     let mut e = edit();
     e.capture(form("private-board.school", "8443")).unwrap();
-    let request = e.prepare_save(id(16), Instant::now()).unwrap();
+    let request = e.prepare_save(Instant::now()).unwrap();
     e.accepted();
     e.queried(Some(configured(7)));
     let view = e.view(owner(2), "", false);
@@ -209,12 +203,12 @@ fn another_owner_sees_no_draft_or_receipt_and_cannot_query_or_rebind_it() {
 fn locking_retains_original_capsule_without_permission_to_replay_it() {
     let mut e = edit();
     e.capture(form("localhost", "8443")).unwrap();
-    let r = e.prepare_save(id(17), Instant::now()).unwrap();
+    let r = e.prepare_save(Instant::now()).unwrap();
     e.accepted();
     e.suspended();
     assert_eq!(e.query_request(), Some(r));
     assert!(e.dirty());
-    assert!(e.prepare_save(id(18), Instant::now()).is_err());
+    assert!(e.prepare_save(Instant::now()).is_err());
 }
 #[test]
 fn certificate_inspection_is_explicit_saved_clean_only_and_never_a_readiness_action() {
@@ -275,7 +269,7 @@ fn source_policy_must_be_explicit_and_is_part_of_original_unknown_command() {
     }
     let mut e = edit();
     e.capture(form("localhost", "8443")).unwrap();
-    let request = e.prepare_save(id(78), Instant::now()).unwrap();
+    let request = e.prepare_save(Instant::now()).unwrap();
     assert_eq!(
         request
             .configuration
@@ -311,5 +305,5 @@ fn legacy_saved_configuration_does_not_invent_source_networks() {
             .value,
         ""
     );
-    assert!(e.prepare_save(id(79), Instant::now()).is_err());
+    assert!(e.prepare_save(Instant::now()).is_err());
 }

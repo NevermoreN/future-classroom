@@ -178,6 +178,21 @@ fn validate_parent(parent: &std::path::Path, marker: &str) -> Result<()> {
     )?;
     Ok(())
 }
+fn identity_command(
+    backend: &mut Backend,
+    admin: SessionLease,
+    command: IdentityCommand,
+) -> Result<()> {
+    use fc_ports::command_window::CommandFamily;
+    let issued = backend.issue_native_command(
+        CommandFamily::Identity,
+        Some(admin),
+        SessionPurpose::Manage,
+    )?;
+    let mut command_scope = backend.begin_command_scope(issued)?;
+    command_scope.identity(admin, command)?;
+    Ok(())
+}
 fn setup(parent: PathBuf, marker: &str, origin: &str, context: &JobContext) -> Result<Setup> {
     validate_parent(&parent, marker)?;
     let visual_fixture = VisualFixture::load(&parent)?;
@@ -240,15 +255,21 @@ fn setup(parent: PathBuf, marker: &str, origin: &str, context: &JobContext) -> R
         )?;
         let class = checked(ClassId::new(1), "business synthetic class")?;
         let subject = checked(SubjectId::new(1), "business synthetic subject")?;
-        scoped.identity(
+        identity_command(
+            &mut scoped,
             admin,
             IdentityCommand::CreateClass {
                 id: class,
                 name: "Synthetic TLS class".into(),
             },
         )?;
-        scoped.identity(admin, IdentityCommand::BindCurrentClass { id: class })?;
-        scoped.identity(
+        identity_command(
+            &mut scoped,
+            admin,
+            IdentityCommand::BindCurrentClass { id: class },
+        )?;
+        identity_command(
+            &mut scoped,
             admin,
             IdentityCommand::PutSubject {
                 id: subject,
@@ -262,7 +283,8 @@ fn setup(parent: PathBuf, marker: &str, origin: &str, context: &JobContext) -> R
                 expected_revision: None,
             },
         )?;
-        scoped.identity(
+        identity_command(
+            &mut scoped,
             admin,
             IdentityCommand::UpdateAccount {
                 id: admin.principal_id(),
@@ -313,6 +335,12 @@ fn setup(parent: PathBuf, marker: &str, origin: &str, context: &JobContext) -> R
                     color: subject.color,
                 })
                 .collect();
+            let issued = scoped.issue_native_command(
+                fc_ports::command_window::CommandFamily::SubjectVisual,
+                Some(admin),
+                SessionPurpose::Manage,
+            )?;
+            let mut scoped = scoped.begin_command_scope(issued)?;
             scoped.save_subject_visuals(
                 admin,
                 current.palette.revision,

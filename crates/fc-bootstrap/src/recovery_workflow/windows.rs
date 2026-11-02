@@ -318,10 +318,20 @@ impl RecoveryWorkflow {
     /// prevent its commit, but cannot erase a capability already committed.
     pub fn confirm(
         &self,
+        bundle: ReviewBundle,
+        backend: Arc<Mutex<Backend>>,
+        lease: SessionLease,
+        fence: ExecutionFence,
+    ) -> Result<ConfirmedBundle> {
+        self.confirm_window(bundle, backend, lease, fence, |_| true)
+    }
+    pub fn confirm_window(
+        &self,
         mut bundle: ReviewBundle,
         backend: Arc<Mutex<Backend>>,
         lease: SessionLease,
         fence: ExecutionFence,
+        on_issued: impl FnOnce(fc_ports::command_window::IssuedCommand) -> bool,
     ) -> Result<ConfirmedBundle> {
         if !self.slot.same(&bundle.workflow.slot) {
             return Err(WorkflowError::Busy);
@@ -346,7 +356,7 @@ impl RecoveryWorkflow {
             .lock()
             .map_err(|_| WorkflowError::Backend(BackendError::Closed))?
             .review_preflighted_restore(lease, preview)?;
-        let confirmed = review.confirm(fence)?;
+        let confirmed = review.confirm_window(fence, on_issued)?;
         // Cancellation is intentionally not consulted after the durable barrier.
         // This slot cannot be reused while the reservation owns its generation.
         if !self.slot.publish_irreversible(

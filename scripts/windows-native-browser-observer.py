@@ -32,7 +32,7 @@ REPORT_KEYS = frozenset((
     "syntheticTextSha256", "elapsedMillis", "contextDisposed", "cdpDisconnected",
     "network", "wireResponses", "wireResponseCount", "observedRequestCount",
     "observedResponseCount", "cacheOnlyResponseCount", "apiResponses", "contentPosts",
-    "sessionCsrfMatched", "writeOutcome", "contentRevision", "commandId",
+    "sessionCsrfMatched", "writeOutcome", "contentRevision", "commandId", "commandTicket", "issuedCommand", "commandIssues",
     "pageErrorCount", "consoleErrorCount", "sourceSha256", "error", "apiOperations", "visualReads", "visualObservations", "contentKind", "reminderShortcutClicks", "reminderObservations",
 ))
 RECORD_KEYS = frozenset((
@@ -82,6 +82,16 @@ def encoded(value):
     return json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 
 
+def command_identity(value):
+    require(type(value) is dict and set(value) == {"commandId", "commandTicket"}, "NODE_COMMAND_PAIR_SHAPE")
+    raw, ticket = value["commandId"], value["commandTicket"]
+    require(type(raw) is str and re.fullmatch(r"[1-9][0-9]{0,19}", raw) is not None and int(raw) <= 2**64-1,
+            "NODE_COMMAND_RAW_CANONICAL")
+    match = re.fullmatch(r"c2:([0-9a-f]{32}):([1-9][0-9]{0,18})", ticket) if type(ticket) is str else None
+    require(match is not None and match[1] != "0"*32 and int(match[2]) <= 2**63-1, "NODE_COMMAND_TICKET_CANONICAL")
+    return {"commandId":raw,"commandTicket":ticket}
+
+
 def failure(error, phase):
     # Exception messages can contain private stdin, a CDP capability or a remote
     # response body. Only static phase/type metadata belongs in the QA report.
@@ -115,11 +125,12 @@ def validate_network_failures(value, run, manifest, content_kind):
         ids = r"[1-9][0-9]{0,19}/" * (3 if content_kind == "HOMEWORK" else 1)
         content = f"/fc/api/v1/content/{prefix}/" + ids + r"[0-9]{4}-[0-9]{2}-[0-9]{2}"
         assets = {"/fc/" + asset["path"] for asset in manifest["assets"]} | {"/fc/"}
-        kind = ("content" if re.fullmatch(content, path) else
+        kind = ("command-issue" if path == "/fc/api/v1/commands" else
+                "content" if re.fullmatch(content, path) else
                 "visual" if content_kind == "HOMEWORK" and re.fullmatch(content + r"/visual", path) else
                 "api" if path in fixed_api else "asset" if path in assets else None)
         require(kind is not None and observation["kind"] == kind
-                and (kind == "content" or record["method"] == "GET"), "NODE_FAILURE_UNEXPECTED_TARGET")
+                and (record["method"] == "POST" if kind == "command-issue" else kind == "content" or record["method"] == "GET"), "NODE_FAILURE_UNEXPECTED_TARGET")
         require(type(observation["requestOrdinal"]) is int and observation["requestOrdinal"] == index + 1
                 and isinstance(observation["phase"], str) and observation["phase"] in FAILURE_PHASES
                 and type(observation["canceled"]) is bool
@@ -156,7 +167,7 @@ def validate_network_failures(value, run, manifest, content_kind):
 
 
 API_OPERATIONS = {"statusGets": 2, "sessionGets": 2, "scopeGets": 2,
-                  "contentGets": 2, "contentPosts": 1, "visualGets": 4}
+                  "contentGets": 2, "contentPosts": 1, "commandIssues": 1, "visualGets": 4}
 REMINDER_OPERATIONS = {**API_OPERATIONS, "visualGets": 0}
 VISUAL_FIELDS = frozenset(("subjectRevision", "displayRevision", "rulesVersion", "effectiveRgb", "mode",
                           "homeworkFillPercent", "courseFillPercent", "homeworkComponentOpacityPercent",
@@ -435,6 +446,9 @@ class BrowserObserver:
                 and type(value.get("contentPosts")) is int and value["contentPosts"] == 1
                 and value.get("contentKind") == self.content_kind,
                 "NODE_REPORT_IDENTITY_OR_OUTCOME")
+        pair = command_identity({k:value.get(k) for k in ("commandId","commandTicket")})
+        require(command_identity(value.get("issuedCommand")) == pair
+                and type(value.get("commandIssues")) is int and value["commandIssues"] == 1, "NODE_ISSUED_PAIR_MISMATCH")
         require(type(value.get("reminderShortcutClicks")) is int
                 and value["reminderShortcutClicks"] == (2 if self.content_kind == "REMINDER" else 0),
                 "NODE_REMINDER_SHORTCUT_COUNT")
@@ -450,15 +464,17 @@ class BrowserObserver:
                     and record.get("method") in ("GET", "POST") and isinstance(record.get("url"), str),
                     "NODE_NETWORK_SHAPE")
             path = record["url"].removeprefix(run["origin"])
+            is_issue = path == "/fc/api/v1/commands" and record["method"] == "POST"
             is_content = re.fullmatch(content, path) is not None
             is_visual = self.content_kind == "HOMEWORK" and re.fullmatch(content + r"/visual", path) is not None
             require(record["url"] == run["origin"] + path
-                    and (is_content or record["method"] == "GET" and
+                    and (is_issue or is_content or record["method"] == "GET" and
                          (is_visual or path in api or path == "/fc/" or path.startswith("/fc/") and path[4:] in assets)),
                     "NODE_UNEXPECTED_TARGET")
             if "csp" in record:
                 require(record["csp"] == self.expected_csp, "NODE_CSP_MISMATCH")
-            require(record.get("status") in (200, 304, None) and record.get("wireStatus") in (200, 304, None),
+            statuses = (201,) if is_issue else (200,304,None)
+            require(record.get("status") in statuses and record.get("wireStatus") in statuses,
                     "NODE_UNEXPECTED_HTTP_STATUS")
             require(record.get("finished") is True and record.get("bodyVerified") is True,
                     "NODE_INCOMPLETE_RESPONSE")
@@ -468,20 +484,21 @@ class BrowserObserver:
                   record.get("fromServiceWorker") or record.get("fromPrefetchCache"))]
         require(type(value.get("wireResponseCount")) is int and value["wireResponseCount"] == len(wires)
                 and value.get("wireResponses") == wires and value.get("observedRequestCount") == len(records)
-                and value["contentPosts"] == sum(record["method"] == "POST" for record in records)
+                and value["contentPosts"] == sum(record["method"] == "POST" and record["url"] != run["origin"]+"/fc/api/v1/commands" for record in records)
                 and value.get("apiResponses") == sum(expected_operations.values()) and value.get("pageErrorCount") == 0
                 and value.get("consoleErrorCount") == 0,
                 "NODE_WIRE_LEDGER_MISMATCH")
         api_records = [record for record in records if "/api/v1/" in record["url"]]
-        require(len(api_records) == sum(expected_operations.values()) and all(record.get("wireStatus") == 200
-                and record.get("status") == 200 and not any(record.get(key) for key in
+        require(len(api_records) == sum(expected_operations.values()) and all(record.get("wireStatus") == (201 if record["url"] == run["origin"]+"/fc/api/v1/commands" else 200)
+                and record.get("status") == record.get("wireStatus") and not any(record.get(key) for key in
                 ("servedFromCache", "fromDiskCache", "fromServiceWorker", "fromPrefetchCache"))
                 for record in api_records), "NODE_API_WIRE_IDENTITY")
         operations = dict.fromkeys(API_OPERATIONS, 0)
         content_paths, visual_paths = set(), set()
         for record in api_records:
             path = record["url"].removeprefix(run["origin"])
-            if path == api[0] and record["method"] == "GET": operations["statusGets"] += 1
+            if path == "/fc/api/v1/commands" and record["method"] == "POST": operations["commandIssues"] += 1
+            elif path == api[0] and record["method"] == "GET": operations["statusGets"] += 1
             elif path == api[1] and record["method"] == "GET": operations["sessionGets"] += 1
             elif path == api[2] and record["method"] == "GET": operations["scopeGets"] += 1
             elif re.fullmatch(content, path):

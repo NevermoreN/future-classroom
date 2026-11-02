@@ -2,7 +2,7 @@
 //! No native or SQL owner is returned to the window pump.
 use super::*;
 use fc_application::identity::SessionPurpose;
-use fc_ports::{HttpsSettingsRequest, HttpsSettingsState};
+use fc_ports::HttpsSettingsState;
 use https_settings_editor as editor;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -15,8 +15,8 @@ pub(super) enum Kind {
 #[derive(Clone, PartialEq, Eq)]
 pub(super) enum Operation {
     Load,
-    Save(HttpsSettingsRequest),
-    Query(HttpsSettingsRequest),
+    Save(editor::Save),
+    Query(editor::Save),
     Check(HttpsSettingsState),
 }
 impl Operation {
@@ -100,10 +100,29 @@ pub(super) fn run(
     let mut scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
     let value = match operation {
         Operation::Load => Value::Loaded(scoped.read_https_settings(lease)?),
-        Operation::Save(request) => Value::Saved(scoped.save_https_settings(lease, request)?),
+        Operation::Save(request) => {
+            let command = request.command.clone();
+            command.run(
+                &mut scoped,
+                fc_ports::command_window::CommandFamily::HttpsSettings,
+                Some(lease),
+                SessionPurpose::Manage,
+                context,
+                |backend| {
+                    let request = request.request(backend.issued_command_id()?);
+                    Ok(Value::Saved(backend.save_https_settings(lease, request)?))
+                },
+            )?
+        }
         Operation::Check(_) => return Err(invalid("检查请求已变化。")),
         Operation::Query(request) => {
-            Value::Queried(scoped.query_https_settings_outcome(lease, request)?)
+            let command = request.command.clone();
+            command.query(&mut scoped, context, |backend| {
+                let request = request.request(backend.issued_command_id()?);
+                Ok(Value::Queried(
+                    backend.query_https_settings_outcome(lease, request)?,
+                ))
+            })?
         }
     };
     // Capture the actual publication AFTER a possible own COMMIT. The identity
@@ -379,12 +398,11 @@ impl App {
                 return self.submit_https(Operation::Load);
             }
             Ok(editor::Command::Save) => {
-                let id = command_id().map_err(|e| error_text(&e))?;
                 let request = self
                     .https_editor
                     .as_mut()
                     .ok_or("配置页面已关闭。")?
-                    .prepare_save(id, Instant::now());
+                    .prepare_save(Instant::now());
                 match request {
                     Ok(r) => return self.submit_https(Operation::Save(r)),
                     Err(message) => self.status = message,
@@ -484,6 +502,13 @@ impl App {
                 }
             }
             Err(error) => {
+                if same_interval
+                    && matches!(&error, Failure::Backend(e) if matches!(e.command_window_error(), Some(fc_ports::command_window::CommandWindowError::Expired | fc_ports::command_window::CommandWindowError::NotIssued)))
+                {
+                    if let Some(editor) = &mut self.https_editor {
+                        editor.retire_command();
+                    }
+                }
                 if fatal(&error) {
                     if let Some(c) = &self.control {
                         c.fault();

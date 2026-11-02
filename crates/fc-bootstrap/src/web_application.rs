@@ -296,6 +296,22 @@ impl WebApplication {
                     None,
                 )
             }
+            Route::CommandIssue => {
+                let Some(session) = authenticated else {
+                    return failure(401, responses::ErrorCode::Unauthorized);
+                };
+                let family = match fc_protocol::web::command_window::issue(body) {
+                    Ok(family) => family,
+                    Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+                };
+                match backend.issue_web_command(session.lease(), family) {
+                    Ok(issued) => {
+                        response(201, fc_protocol::web::command_window::issued(issued), None)
+                    }
+                    Err(error) => command_failure(&error)
+                        .unwrap_or_else(|| failure(403, responses::ErrorCode::Forbidden)),
+                }
+            }
             Route::SessionLogout => {
                 if pairing::logout(body).is_err() {
                     return failure(400, responses::ErrorCode::InvalidRequest);
@@ -319,6 +335,8 @@ impl WebApplication {
             | Route::VoiceList
             | Route::VoiceSubmit
             | Route::VoiceStatus { .. }
+            | Route::VoiceBoundStatus { .. }
+            | Route::VoiceWindowCommand { .. }
             | Route::VoiceCancel { .. } => {
                 let Some(session) = authenticated else {
                     return failure(401, responses::ErrorCode::Unauthorized);
@@ -335,7 +353,8 @@ impl WebApplication {
             | Route::SubjectVisual { .. }
             | Route::ContentRead { .. }
             | Route::ContentSave { .. }
-            | Route::ContentCommand { .. } => {
+            | Route::ContentCommand { .. }
+            | Route::ContentWindowCommand { .. } => {
                 let Some(session) = authenticated else {
                     return failure(401, responses::ErrorCode::Unauthorized);
                 };
@@ -386,6 +405,15 @@ fn response(
 }
 fn failure(status: u16, code: responses::ErrorCode) -> WebResponse {
     response(status, responses::error(code), None)
+}
+fn command_failure(error: &crate::backend::BackendError) -> Option<WebResponse> {
+    use fc_ports::command_window::CommandWindowError as E;
+    Some(match error.command_window_error()? {
+        E::Expired => failure(410, responses::ErrorCode::CommandExpired),
+        E::NotIssued => failure(404, responses::ErrorCode::CommandNotIssued),
+        E::Capacity => failure(503, responses::ErrorCode::CommandWindowFull),
+        E::Clock => failure(503, responses::ErrorCode::CommandWindowUnavailable),
+    })
 }
 fn boundary_error(error: WebError) -> WebResponse {
     match error {

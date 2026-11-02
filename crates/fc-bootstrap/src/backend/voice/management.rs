@@ -6,6 +6,13 @@ pub use device_check::{VoiceDeviceCheckResult, VoiceDeviceObservation};
 #[cfg(test)]
 mod tests;
 
+fn typed_voice_error(error: StorageError) -> BackendError {
+    match error {
+        StorageError::Voice(error) => BackendError::Voice(VoiceRepositoryError::Domain(error)),
+        other => BackendError::Storage(other),
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VoiceManagementSnapshot {
     /// Global publication revision for delivery freshness, distinct from identity.
@@ -44,17 +51,22 @@ impl VoiceService {
         expected_identity: Revision,
         expected_runtime: u64,
     ) -> Result<VoiceSnapshot> {
-        self.change_policy_reviewed(
+        match self.apply_policy_window(
             lease,
-            PolicyChange::Enabled(enabled),
-            expected_voice,
-            expected_identity,
-            expected_runtime,
-        )
+            fc_ports::command_window::VoicePolicyIntent::Enabled {
+                enabled,
+                expected_voice,
+                expected_identity,
+                expected_runtime,
+            },
+        )? {
+            fc_ports::command_window::TypedCommandOutcome::Completed(
+                fc_ports::command_window::TypedCommandResult::VoicePolicy(snapshot),
+            ) => Ok(snapshot),
+            _ => Err(BackendError::Storage(StorageError::Indeterminate)),
+        }
     }
 
-    /// Saving limits retires previous recordings and jobs even when enabled is
-    /// unchanged. It grants no Web configuration permission or replay action.
     pub fn set_limits_reviewed(
         &self,
         lease: SessionLease,
@@ -63,22 +75,149 @@ impl VoiceService {
         expected_identity: Revision,
         expected_runtime: u64,
     ) -> Result<VoiceSnapshot> {
-        self.change_policy_reviewed(
+        match self.apply_policy_window(
             lease,
-            PolicyChange::Limits(limits),
-            expected_voice,
-            expected_identity,
-            expected_runtime,
-        )
+            fc_ports::command_window::VoicePolicyIntent::Limits {
+                limits,
+                expected_voice,
+                expected_identity,
+                expected_runtime,
+            },
+        )? {
+            fc_ports::command_window::TypedCommandOutcome::Completed(
+                fc_ports::command_window::TypedCommandResult::VoicePolicy(snapshot),
+            ) => Ok(snapshot),
+            _ => Err(BackendError::Storage(StorageError::Indeterminate)),
+        }
     }
 
-    fn change_policy_reviewed(
+    pub fn query_policy_outcome_native(
+        &self,
+        lease: SessionLease,
+        issued: fc_ports::command_window::IssuedCommand,
+        intent: fc_ports::command_window::VoicePolicyIntent,
+    ) -> Result<fc_ports::command_window::TypedCommandOutcome> {
+        let service = self.with_command_window(lease, issued)?;
+        let actor = service.actor(lease, false)?;
+        service
+            .repository(service.generation(), Some(lease))
+            .query_typed_command(
+                fc_ports::command_window::TypedCommandIntent::VoicePolicy(intent),
+                &actor,
+            )
+            .map_err(typed_voice_error)
+    }
+    pub fn apply_policy_window(
+        &self,
+        lease: SessionLease,
+        intent: fc_ports::command_window::VoicePolicyIntent,
+    ) -> Result<fc_ports::command_window::TypedCommandOutcome> {
+        use fc_ports::command_window::{TypedCommandOutcome, VoicePolicyIntent};
+        let issued = self.command_window.ok_or(StorageError::CommandNotIssued)?;
+        // History uses current authority, not an obsolete business/runtime CAS.
+        match self.query_policy_outcome_native(lease, issued, intent.clone()) {
+            Ok(history) => return Ok(history),
+            Err(BackendError::Storage(StorageError::CommandNotIssued)) => (),
+            Err(error) => return Err(error),
+        }
+        let (change, expected_voice, expected_identity, expected_runtime) = match &intent {
+            VoicePolicyIntent::Enabled {
+                enabled,
+                expected_voice,
+                expected_identity,
+                expected_runtime,
+            } => (
+                PolicyChange::Enabled(*enabled),
+                *expected_voice,
+                *expected_identity,
+                *expected_runtime,
+            ),
+            VoicePolicyIntent::Limits {
+                limits,
+                expected_voice,
+                expected_identity,
+                expected_runtime,
+            } => (
+                PolicyChange::Limits(*limits),
+                *expected_voice,
+                *expected_identity,
+                *expected_runtime,
+            ),
+        };
+        let local_generation = self.inner.control.generation();
+        let state = self
+            .inner
+            .authority
+            .snapshot()
+            .map_err(|_| BackendError::Closed)?;
+        let actor = self.management_actor(lease, local_generation, &state)?;
+        let repository = self.repository(self.generation(), Some(lease));
+        let admission = repository
+            .accept_voice_policy(
+                intent.clone(),
+                &actor,
+                self.exact_session_guard(
+                    lease,
+                    local_generation,
+                    Some((expected_identity, expected_runtime)),
+                ),
+            )
+            .map_err(typed_voice_error)?;
+        match admission {
+            fc_storage::typed_command::TypedAdmission::History(outcome) => Ok(outcome),
+            fc_storage::typed_command::TypedAdmission::Fresh(permit) => {
+                let mut permit = Some(permit);
+                match self.execute_policy_first(
+                    lease,
+                    change,
+                    expected_voice,
+                    expected_identity,
+                    expected_runtime,
+                    &mut permit,
+                ) {
+                    Ok(snapshot) => Ok(TypedCommandOutcome::Completed(
+                        fc_ports::command_window::TypedCommandResult::VoicePolicy(snapshot),
+                    )),
+                    Err(error) => {
+                        if let Some(permit) = permit {
+                            let failure = match &error {
+                                BackendError::Voice(VoiceRepositoryError::Domain(
+                                    VoiceError::RevisionConflict,
+                                )) => Some(fc_ports::command_window::TypedCommandFailure::Conflict),
+                                BackendError::Voice(VoiceRepositoryError::Domain(
+                                    VoiceError::StaleGeneration,
+                                )) => Some(fc_ports::command_window::TypedCommandFailure::Stale),
+                                BackendError::Voice(VoiceRepositoryError::Domain(
+                                    VoiceError::Permission(_),
+                                )) => Some(fc_ports::command_window::TypedCommandFailure::Denied),
+                                BackendError::Storage(StorageError::ExecutionCancelled) => {
+                                    Some(fc_ports::command_window::TypedCommandFailure::Cancelled)
+                                }
+                                _ => None,
+                            };
+                            // A failed metadata write stays Pending; it never grants
+                            // another native execution or fabricates owner return.
+                            if let Some(failure) = failure {
+                                let _ = self
+                                    .repository(self.generation(), Some(lease))
+                                    .fail_typed_command(permit, failure);
+                            }
+                        }
+                        Err(error)
+                    }
+                }
+            }
+        }
+    }
+
+    fn execute_policy_first(
         &self,
         lease: SessionLease,
         change: PolicyChange,
         expected_voice: Revision,
         expected_identity: Revision,
         expected_runtime: u64,
+        permit: &mut Option<fc_storage::typed_command::FirstExecutionPermit>,
     ) -> Result<VoiceSnapshot> {
         let local_generation = self.inner.control.generation();
         let state = self
@@ -154,22 +293,23 @@ impl VoiceService {
                     local_generation,
                     Some((expected_identity, epoch)),
                 ));
-        let persisted = match change {
-            PolicyChange::Enabled(enabled) => {
-                repository.set_voice_enabled(enabled, expected_voice, &actor)
-            }
-            PolicyChange::Limits(limits) => {
-                repository.set_voice_limits(limits, expected_voice, &actor)
-            }
-        };
+        let persisted = repository
+            .complete_voice_policy(permit.take().ok_or(StorageError::CommandNotIssued)?, &actor);
         let snapshot = match persisted {
-            Ok(snapshot) => snapshot,
+            Ok(fc_ports::command_window::TypedCommandOutcome::Completed(
+                fc_ports::command_window::TypedCommandResult::VoicePolicy(snapshot),
+            )) => snapshot,
+            Ok(_) => {
+                handoff.failed();
+                self.wake();
+                return Err(StorageError::Indeterminate.into());
+            }
             Err(error) => {
                 // The known policy endpoint is already closed. Do not use
                 // conclude() to advance/adopt a different stop on uncertainty.
                 handoff.failed();
                 self.wake();
-                return Err(BackendError::Voice(error));
+                return Err(typed_voice_error(error));
             }
         };
         #[cfg(test)]

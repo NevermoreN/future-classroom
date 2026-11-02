@@ -1,7 +1,9 @@
 //! Real package/SQLite capabilities through the same physical workflow slot.
 //! No production proof, native picker or credential state is fabricated.
 use super::*;
+use fc_application::identity::SessionPurpose;
 use fc_domain::{identity::IdentityCommand, recovery::MigrationMapping};
+use fc_ports::command_window::CommandFamily;
 use fc_storage::StorageError;
 use std::sync::mpsc;
 
@@ -190,10 +192,17 @@ fn changed_target_revision_cannot_rebless_old_mapping_but_fresh_review_can_be_re
         .backend
         .lock()
         .unwrap()
-        .identity(
-            pair.target.lease,
-            IdentityCommand::RenameSchool {
-                name: "Synthetic target changed after migration inspection".into(),
+        .test_native_command(
+            CommandFamily::Identity,
+            Some(pair.target.lease),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    pair.target.lease,
+                    IdentityCommand::RenameSchool {
+                        name: "Synthetic target changed after migration inspection".into(),
+                    },
+                )
             },
         )
         .unwrap();

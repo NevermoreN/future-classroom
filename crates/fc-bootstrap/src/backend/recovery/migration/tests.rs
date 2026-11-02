@@ -43,11 +43,18 @@ fn mapped_projection_is_inert_and_ordinary_guard_still_rejects_original_foreign_
         .backend
         .lock()
         .unwrap()
-        .identity(
-            source.lease,
-            IdentityCommand::CreateClass {
-                id: ClassId::new(1).unwrap(),
-                name: "Source class".into(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(source.lease),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    source.lease,
+                    IdentityCommand::CreateClass {
+                        id: ClassId::new(1).unwrap(),
+                        name: "Source class".into(),
+                    },
+                )
             },
         )
         .unwrap();
@@ -55,11 +62,18 @@ fn mapped_projection_is_inert_and_ordinary_guard_still_rejects_original_foreign_
         .backend
         .lock()
         .unwrap()
-        .identity(
-            target.lease,
-            IdentityCommand::CreateClass {
-                id: ClassId::new(11).unwrap(),
-                name: "Target class preserved".into(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(target.lease),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    target.lease,
+                    IdentityCommand::CreateClass {
+                        id: ClassId::new(11).unwrap(),
+                        name: "Target class preserved".into(),
+                    },
+                )
             },
         )
         .unwrap();
@@ -178,11 +192,18 @@ fn fresh_target_access_cannot_rebless_old_inspection_and_lock_closes_mapping_adm
         .backend
         .lock()
         .unwrap()
-        .identity(
-            target.lease,
-            IdentityCommand::CreateClass {
-                id: ClassId::new(11).unwrap(),
-                name: "Changed target".into(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(target.lease),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    target.lease,
+                    IdentityCommand::CreateClass {
+                        id: ClassId::new(11).unwrap(),
+                        name: "Changed target".into(),
+                    },
+                )
             },
         )
         .unwrap();

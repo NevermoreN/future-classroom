@@ -103,16 +103,28 @@ fn fixture() -> Fixture {
         .unwrap();
     let class = ClassId::new(1).unwrap();
     backend
-        .identity(
-            admin,
-            IdentityCommand::CreateClass {
-                id: class,
-                name: "Synthetic class".into(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    admin,
+                    IdentityCommand::CreateClass {
+                        id: class,
+                        name: "Synthetic class".into(),
+                    },
+                )
             },
         )
         .unwrap();
     backend
-        .identity(admin, IdentityCommand::BindCurrentClass { id: class })
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |backend| backend.identity(admin, IdentityCommand::BindCurrentClass { id: class }),
+        )
         .unwrap();
     let service = backend.web_service();
     service.set_enabled(admin, true).unwrap();

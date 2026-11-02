@@ -3,7 +3,10 @@
 mod public_desktop_lesson {
     use super::*;
     use fc_domain::{lesson_context::LessonInitiator, schedule::*, schedule_document::*};
-    use fc_ports::DesktopLessonBinding;
+    use fc_ports::{
+        command_window::{CommandFamily, IssuedCommand},
+        DesktopLessonBinding, DesktopLessonSource,
+    };
 
     struct Fixture {
         service: Joined,
@@ -19,10 +22,17 @@ mod public_desktop_lesson {
             let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
             service
                 .0
-                .identity(
-                    admin,
-                    IdentityCommand::BindCurrentClass {
-                        id: ClassId::new(1).unwrap(),
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    fc_application::identity::SessionPurpose::Manage,
+                    |issued_backend| {
+                        issued_backend.identity(
+                            admin,
+                            IdentityCommand::BindCurrentClass {
+                                id: ClassId::new(1).unwrap(),
+                            },
+                        )
                     },
                 )
                 .unwrap();
@@ -63,7 +73,14 @@ mod public_desktop_lesson {
             };
             service
                 .0
-                .save_schedule(admin, Revision::default(), document)
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Schedule,
+                    Some(admin),
+                    fc_application::identity::SessionPurpose::Manage,
+                    |issued_backend| {
+                        issued_backend.save_schedule(admin, Revision::default(), document)
+                    },
+                )
                 .unwrap();
             Self {
                 service,
@@ -93,6 +110,21 @@ mod public_desktop_lesson {
             assert!(control.publish_desktop_lesson_scene(stamp.clone()));
             control.begin_desktop_lesson_flow(&stamp).unwrap()
         }
+    }
+    fn issue_desktop(backend: &Backend) -> IssuedCommand {
+        backend
+            .issue_native_command(CommandFamily::DesktopLesson, None, SessionPurpose::Manage)
+            .unwrap()
+    }
+    fn change_with_ticket(
+        backend: &mut Backend,
+        issued: IssuedCommand,
+        guard: &DesktopLessonGuard,
+        action: LessonAction,
+    ) -> Result<DesktopLessonSource> {
+        backend
+            .begin_command_scope(issued)?
+            .change_desktop_lesson(guard, action)
     }
     fn cancelled<T>(result: Result<T>) {
         assert!(matches!(
@@ -133,6 +165,7 @@ mod public_desktop_lesson {
     #[test]
     fn public_desktop_os_callback_revokes_active_flow_and_old_scene_before_main_pump_cleanup() {
         let mut fixture = Fixture::new();
+        let issued = issue_desktop(&fixture.service.0);
         let control = fixture.service.0.session_control();
         let original = fixture.stamp(1);
         assert!(control.publish_desktop_lesson_scene(original.clone()));
@@ -142,12 +175,12 @@ mod public_desktop_lesson {
         control.cancel_desktop_lesson_flow();
         // No owner.cancel/main-pump event or worker-ticket return was needed.
         assert!(!guard.is_current());
-        cancelled(
-            fixture
-                .service
-                .0
-                .change_desktop_lesson(&guard, LessonAction::Restore),
-        );
+        cancelled(change_with_ticket(
+            &mut fixture.service.0,
+            issued,
+            &guard,
+            LessonAction::Restore,
+        ));
         cancelled(control.begin_desktop_lesson_flow(&original));
         assert!(!control.publish_desktop_lesson_scene(original));
         assert_eq!(fixture.service.0.global_revision().unwrap(), before);
@@ -204,6 +237,9 @@ mod public_desktop_lesson {
     fn public_desktop_without_login_survives_local_lock_and_commits_honest_origin_then_new_entry_restores(
     ) {
         let mut fixture = Fixture::new();
+        let issued = issue_desktop(&fixture.service.0);
+        let stale_restore = issue_desktop(&fixture.service.0);
+        let restore = issue_desktop(&fixture.service.0);
         let owner = fixture.flow(1);
         let guard = owner.guard();
         let admin = policy_lease(&fixture.service.0, 1, TrustedOrigin::Local);
@@ -217,32 +253,38 @@ mod public_desktop_lesson {
         assert_eq!(source.teachers.len(), 1);
         assert_eq!(source.teachers[0].id, PrincipalId::new(2).unwrap());
         let target = source.context.current.unwrap().base;
-        let changed = fixture
-            .service
-            .0
-            .change_desktop_lesson(&guard, LessonAction::Replace(target))
-            .unwrap();
+        let changed = change_with_ticket(
+            &mut fixture.service.0,
+            issued,
+            &guard,
+            LessonAction::Replace(target),
+        )
+        .unwrap();
         assert_eq!(
             changed.context.active_override.as_ref().unwrap().initiator,
             LessonInitiator::LocalDesktop
         );
         assert!(guard.is_current()); // Own publication must not turn committed success into stale-source failure.
         assert!(matches!(
-            fixture
-                .service
-                .0
-                .change_desktop_lesson(&guard, LessonAction::Restore),
+            change_with_ticket(
+                &mut fixture.service.0,
+                stale_restore,
+                &guard,
+                LessonAction::Restore
+            ),
             Err(BackendError::Lesson(LessonRepositoryError::Domain(
                 fc_domain::lesson_context::LessonContextError::RevisionConflict { .. }
             )))
         ));
         owner.cancel();
         let restore_owner = fixture.flow(2);
-        let restored = fixture
-            .service
-            .0
-            .change_desktop_lesson(&restore_owner.guard(), LessonAction::Restore)
-            .unwrap();
+        let restored = change_with_ticket(
+            &mut fixture.service.0,
+            restore,
+            &restore_owner.guard(),
+            LessonAction::Restore,
+        )
+        .unwrap();
         assert!(restored.context.active_override.is_none());
         assert!(restored.context.revision > changed.context.revision);
     }
@@ -250,16 +292,17 @@ mod public_desktop_lesson {
     #[test]
     fn public_desktop_cancellation_and_original_budget_do_not_mutate_or_rebind() {
         let mut fixture = Fixture::new();
+        let issued = issue_desktop(&fixture.service.0);
         let owner = fixture.flow(1);
         let guard = owner.guard();
         let before = fixture.service.0.global_revision().unwrap();
         owner.cancel();
-        cancelled(
-            fixture
-                .service
-                .0
-                .change_desktop_lesson(&guard, LessonAction::Restore),
-        );
+        cancelled(change_with_ticket(
+            &mut fixture.service.0,
+            issued,
+            &guard,
+            LessonAction::Restore,
+        ));
         assert_eq!(fixture.service.0.global_revision().unwrap(), before);
         let next = fixture.flow(2);
         let next_guard = next.guard();
@@ -295,6 +338,7 @@ mod public_desktop_lesson {
     fn public_desktop_foreign_backend_and_request_execution_scope_are_not_authority() {
         let fixture = Fixture::new();
         let mut other = Fixture::new();
+        let issued = issue_desktop(&other.service.0);
         let owner = fixture.flow(1);
         let guard = owner.guard();
         cancelled(other.service.0.read_desktop_lesson(&guard));
@@ -305,7 +349,12 @@ mod public_desktop_lesson {
         {
             let mut scope = other.service.0.begin_execution_scope(Arc::new(|| false));
             cancelled(scope.read_desktop_lesson(&other_guard));
-            cancelled(scope.change_desktop_lesson(&other_guard, LessonAction::Restore));
+            cancelled(change_with_ticket(
+                &mut scope,
+                issued,
+                &other_guard,
+                LessonAction::Restore,
+            ));
         }
         assert!(other_guard.is_current());
         assert_eq!(other.service.0.global_revision().unwrap(), before);
@@ -321,10 +370,17 @@ mod public_desktop_lesson {
         fixture
             .service
             .0
-            .identity(
-                admin,
-                IdentityCommand::RenameSchool {
-                    name: "Changed catalog".into(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |issued_backend| {
+                    issued_backend.identity(
+                        admin,
+                        IdentityCommand::RenameSchool {
+                            name: "Changed catalog".into(),
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -341,7 +397,12 @@ mod public_desktop_lesson {
         fixture
             .service
             .0
-            .save_schedule(admin, schedule.revision, schedule)
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Schedule,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |issued_backend| issued_backend.save_schedule(admin, schedule.revision, schedule),
+            )
             .unwrap();
         assert!(matches!(
             fixture.service.0.read_desktop_lesson(&next_guard),
@@ -354,6 +415,7 @@ mod public_desktop_lesson {
     #[test]
     fn public_desktop_waiting_is_not_submit_authority_and_allows_own_real_publication_to_finish() {
         let mut fixture = Fixture::new();
+        let issued = issue_desktop(&fixture.service.0);
         let owner = fixture.flow(1);
         let guard = owner.guard();
         assert!(guard.is_current());
@@ -383,8 +445,7 @@ mod public_desktop_lesson {
                 true
             }));
             assert_eq!(
-                scope
-                    .change_desktop_lesson(&guard, LessonAction::Replace(target))
+                change_with_ticket(&mut scope, issued, &guard, LessonAction::Replace(target))
                     .unwrap()
                     .context
                     .active_override
@@ -402,6 +463,7 @@ mod public_desktop_lesson {
     fn public_desktop_single_liveness_check_survives_a_deterministic_updating_to_healthy_phase_flip(
     ) {
         let mut fixture = Fixture::new();
+        let issued = issue_desktop(&fixture.service.0);
         let owner = fixture.flow(1);
         let guard = owner.guard();
         let target = fixture
@@ -427,9 +489,7 @@ mod public_desktop_lesson {
                 }
                 true
             }));
-            scope
-                .change_desktop_lesson(&guard, LessonAction::Replace(target))
-                .unwrap();
+            change_with_ticket(&mut scope, issued, &guard, LessonAction::Replace(target)).unwrap();
         }
         // The first old predicate was sampled in real Updating; this second
         // old predicate is sampled after actual COMMIT/publication is Healthy.
@@ -445,6 +505,7 @@ mod public_desktop_lesson {
     #[test]
     fn public_desktop_waiting_never_defers_original_deadline_during_real_precommit_phase() {
         let mut fixture = Fixture::new();
+        let issued = issue_desktop(&fixture.service.0);
         let owner = fixture.flow(1);
         let guard = owner.guard();
         let target = fixture
@@ -476,7 +537,7 @@ mod public_desktop_lesson {
                 true
             }));
             assert_eq!(
-                scope.change_desktop_lesson(&guard, LessonAction::Replace(target)),
+                change_with_ticket(&mut scope, issued, &guard, LessonAction::Replace(target)),
                 Err(BackendError::Lesson(LessonRepositoryError::Unavailable))
             );
         }
@@ -496,6 +557,7 @@ mod public_desktop_lesson {
     #[test]
     fn public_desktop_precommit_os_callback_rolls_back_without_fault_and_never_renews_capability() {
         let mut fixture = Fixture::new();
+        let issued = issue_desktop(&fixture.service.0);
         let owner = Arc::new(fixture.flow(1));
         let guard = owner.guard();
         let source = fixture.service.0.read_desktop_lesson(&guard).unwrap();
@@ -516,7 +578,7 @@ mod public_desktop_lesson {
                 true
             }));
             assert_eq!(
-                scope.change_desktop_lesson(&guard, LessonAction::Replace(target)),
+                change_with_ticket(&mut scope, issued, &guard, LessonAction::Replace(target)),
                 Err(BackendError::Lesson(LessonRepositoryError::Unavailable))
             );
         }
@@ -542,6 +604,7 @@ mod public_desktop_lesson {
     #[test]
     fn public_desktop_cancel_after_real_commit_suppresses_delivery_but_does_not_claim_rollback() {
         let mut fixture = Fixture::new();
+        let issued = issue_desktop(&fixture.service.0);
         let owner = Arc::new(fixture.flow(1));
         let guard = owner.guard();
         let target = fixture
@@ -566,7 +629,7 @@ mod public_desktop_lesson {
                 true
             }));
             assert_eq!(
-                scope.change_desktop_lesson(&guard, LessonAction::Replace(target)),
+                change_with_ticket(&mut scope, issued, &guard, LessonAction::Replace(target)),
                 Err(BackendError::Lesson(LessonRepositoryError::Unavailable))
             );
         }

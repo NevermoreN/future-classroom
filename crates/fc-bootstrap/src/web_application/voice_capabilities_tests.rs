@@ -47,17 +47,31 @@ impl SharedFixture {
             .unwrap();
         for id in [1, 2] {
             backend
-                .identity(
-                    admin,
-                    IdentityCommand::CreateClass {
-                        id: class(id),
-                        name: format!("Synthetic voice class {id}"),
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.identity(
+                            admin,
+                            IdentityCommand::CreateClass {
+                                id: class(id),
+                                name: format!("Synthetic voice class {id}"),
+                            },
+                        )
                     },
                 )
                 .unwrap();
         }
         backend
-            .identity(admin, IdentityCommand::BindCurrentClass { id: class(1) })
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(admin, IdentityCommand::BindCurrentClass { id: class(1) })
+                },
+            )
             .unwrap();
         let service = backend.web_service();
         service.set_enabled(admin, true).unwrap();

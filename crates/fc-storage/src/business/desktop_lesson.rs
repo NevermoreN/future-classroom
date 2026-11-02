@@ -289,6 +289,15 @@ struct Task<S> {
     factory: Factory<S>,
 }
 impl<S: Send + 'static> TransactionTask<S> for Task<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        self.request.as_ref().map(|r| {
+            (
+                fc_ports::command_window::CommandFamily::DesktopLesson,
+                r.command_id,
+            )
+        })
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
     }

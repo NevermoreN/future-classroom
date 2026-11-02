@@ -8,6 +8,9 @@ use fc_ports::{
 
 pub(crate) const DOCUMENT: &str = "business/security/https/v1";
 fn error(error: StorageError) -> HttpsSettingsRepositoryError {
+    if let Some(error) = error.command_window_error() {
+        return HttpsSettingsRepositoryError::CommandWindow(error);
+    }
     match error {
         StorageError::HttpsSettings(e) => HttpsSettingsRepositoryError::Domain(e),
         StorageError::CommandIdReused => HttpsSettingsRepositoryError::IdempotencyConflict,
@@ -306,6 +309,13 @@ struct QueryOutcome {
     session: SessionGuard,
 }
 impl<S: Send> TransactionTask<S> for QueryOutcome {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::HttpsSettings,
+            self.request.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
             + self
@@ -371,6 +381,13 @@ struct SaveSettings<S> {
     guard: HttpsConfigurationGuard,
 }
 impl<S: Send + 'static> TransactionTask<S> for SaveSettings<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::HttpsSettings,
+            self.request.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
             + self

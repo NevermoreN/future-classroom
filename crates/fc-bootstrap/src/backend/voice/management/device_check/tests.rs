@@ -73,7 +73,7 @@ fn device_observation_is_local_historical_and_never_changes_voice_or_opens_admis
     let lease = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
     let original = service.management_snapshot(lease).unwrap();
     service
-        .set_enabled(lease, false, original.revision)
+        .test_set_enabled(lease, false, original.revision)
         .unwrap();
     let review = service.management_snapshot(lease).unwrap();
     let inventory = service.inventory().unwrap();
@@ -215,16 +215,23 @@ fn device_checks_require_global_role_and_password_change_without_querying() {
         .0
         .lock()
         .unwrap()
-        .create_account(
-            admin,
-            NewAccount {
-                id: PrincipalId::new(2).unwrap(),
-                login_name: "device-manager".into(),
-                display_name: "Device manager".into(),
-                role: Role::GlobalAdmin,
-                scopes: vec![],
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.create_account(
+                    admin,
+                    NewAccount {
+                        id: PrincipalId::new(2).unwrap(),
+                        login_name: "device-manager".into(),
+                        display_name: "Device manager".into(),
+                        role: Role::GlobalAdmin,
+                        scopes: vec![],
+                    },
+                    Password::new(password.into()).unwrap(),
+                )
             },
-            Password::new(password.into()).unwrap(),
         )
         .unwrap();
     let must_change = super::super::tests::issue_account(
@@ -243,10 +250,17 @@ fn device_checks_require_global_role_and_password_change_without_querying() {
         .0
         .lock()
         .unwrap()
-        .change_password(
-            must_change,
-            Password::new(password.into()).unwrap(),
-            Password::new("Changed synthetic device manager 2026!".into()).unwrap(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(must_change),
+            SessionPurpose::ChangeInitialPassword,
+            |backend| {
+                backend.change_password(
+                    must_change,
+                    Password::new(password.into()).unwrap(),
+                    Password::new("Changed synthetic device manager 2026!".into()).unwrap(),
+                )
+            },
         )
         .unwrap();
     let admin = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
@@ -255,18 +269,25 @@ fn device_checks_require_global_role_and_password_change_without_querying() {
         .0
         .lock()
         .unwrap()
-        .identity(
-            admin,
-            IdentityCommand::PutSubject {
-                id: subject,
-                name: "Synthetic device subject".into(),
-                enabled: true,
-                color: fc_domain::identity::Rgb {
-                    red: 1,
-                    green: 2,
-                    blue: 3,
-                },
-                expected_revision: None,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    admin,
+                    IdentityCommand::PutSubject {
+                        id: subject,
+                        name: "Synthetic device subject".into(),
+                        enabled: true,
+                        color: fc_domain::identity::Rgb {
+                            red: 1,
+                            green: 2,
+                            blue: 3,
+                        },
+                        expected_revision: None,
+                    },
+                )
             },
         )
         .unwrap();
@@ -284,14 +305,21 @@ fn device_checks_require_global_role_and_password_change_without_querying() {
             .0
             .lock()
             .unwrap()
-            .identity(
-                admin,
-                IdentityCommand::UpdateAccount {
-                    id: PrincipalId::new(2).unwrap(),
-                    display_name: "Limited device account".into(),
-                    role,
-                    enabled: true,
-                    scopes,
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::UpdateAccount {
+                            id: PrincipalId::new(2).unwrap(),
+                            display_name: "Limited device account".into(),
+                            role,
+                            enabled: true,
+                            scopes,
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -354,25 +382,32 @@ fn native_results_after_lock_revoke_publication_voice_change_or_epoch_change_are
                     action_backend
                         .lock()
                         .unwrap()
-                        .identity(
-                            local,
-                            IdentityCommand::PutSubject {
-                                id: SubjectId::new(1).unwrap(),
-                                name: "Changed device observation authority".into(),
-                                enabled: true,
-                                color: fc_domain::identity::Rgb {
-                                    red: 1,
-                                    green: 2,
-                                    blue: 3,
-                                },
-                                expected_revision: None,
+                        .test_native_command(
+                            fc_ports::command_window::CommandFamily::Identity,
+                            Some(local),
+                            SessionPurpose::Manage,
+                            |backend| {
+                                backend.identity(
+                                    local,
+                                    IdentityCommand::PutSubject {
+                                        id: SubjectId::new(1).unwrap(),
+                                        name: "Changed device observation authority".into(),
+                                        enabled: true,
+                                        color: fc_domain::identity::Rgb {
+                                            red: 1,
+                                            green: 2,
+                                            blue: 3,
+                                        },
+                                        expected_revision: None,
+                                    },
+                                )
                             },
                         )
                         .unwrap();
                 }
                 "voice" => {
                     let request = fixtures::independent_request(&action_service, web, class, 987);
-                    action_service.submit(web, request).unwrap();
+                    action_service.test_submit(web, request).unwrap();
                 }
                 "runtime" => {
                     action_service.invalidate_runtime();
@@ -529,7 +564,7 @@ fn saving_policy_invalidates_an_observation_and_lock_cannot_rebind_it_to_a_new_l
     .unwrap();
     let observation = checked.device_observation.clone().unwrap();
     service
-        .set_limits_reviewed(
+        .test_set_limits_reviewed(
             local,
             VoiceLimits::default(),
             checked.revision,

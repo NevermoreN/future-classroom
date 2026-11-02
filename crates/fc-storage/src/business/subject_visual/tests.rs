@@ -4,6 +4,7 @@ use fc_domain::{
     recovery::MigrationMapping,
     time::{LocalDate, LocalDateTime},
 };
+use fc_ports::command_window::{CommandFamily, CommandOwner};
 use fc_ports::{AuthorityPublisher, DisplayRepository, DisplayRequest};
 use std::sync::{
     atomic::{AtomicU64, Ordering},
@@ -72,6 +73,7 @@ impl AuthorityPublisher for Publisher {
     fn fault(&mut self) {}
 }
 struct Fixture {
+    commands: crate::fixture_commands::FixtureCommands,
     writer: Option<StorageWriter<Snapshot>>,
     clock: Arc<Time>,
     active: Arc<AtomicBool>,
@@ -81,6 +83,33 @@ struct Fixture {
     root: PathBuf,
 }
 impl Fixture {
+    fn receipt_key(&self, legacy: &str) -> String {
+        let (slot, id) =
+            crate::business::command_window::legacy(legacy).expect("exact fixture receipt slot");
+        let original = self
+            .commands
+            .original(id)
+            .expect("original fixture receipt pair");
+        crate::business::command_window::namespaced(slot, original.ticket)
+    }
+
+    // Labels name fixture intents only. Request ids come from the real Writer;
+    // this cache keeps the exact original pair through retries and reopen.
+    fn command_id(&self, family: CommandFamily, label: u64) -> CommandId {
+        if let Some(original) = self.commands.labelled(family, &label.to_string()) {
+            return original.command_id;
+        }
+        self.commands
+            .issue(
+                &self.handle(),
+                family,
+                &label.to_string(),
+                CommandOwner::authenticated(&actor(1, TrustedOrigin::Local)),
+            )
+            .unwrap()
+            .command_id
+    }
+
     fn new() -> Self {
         let root = std::env::temp_dir().join(format!(
             "FutureClassroom-SubjectVisual-{}-{}-{}",
@@ -93,6 +122,7 @@ impl Fixture {
         ));
         std::fs::create_dir(&root).unwrap();
         let mut f = Self {
+            commands: crate::fixture_commands::FixtureCommands::default(),
             writer: None,
             clock: Arc::new(Time(Mutex::new(now()))),
             active: Arc::new(AtomicBool::new(true)),
@@ -192,18 +222,26 @@ impl Fixture {
                 }
             })
             .unwrap_or_else(|| self.identity());
-        self.handle()
-            .try_commit(
-                CommitCommand::new(format!("fixture-{}", revision.get()), revision, mutations)
-                    .unwrap(),
+        {
+            let (fixture_handle, fixture_command) = self
+                .commands
+                .prepare_generic(
+                    &self.handle(),
+                    CommitCommand::new(format!("fixture-{}", revision.get()), revision, mutations)
+                        .unwrap(),
+                )
+                .unwrap();
+            fixture_handle.try_commit(
+                fixture_command,
                 Snapshot {
                     identity,
                     revision: revision.next().unwrap(),
                 },
             )
-            .unwrap()
-            .wait()
-            .unwrap();
+        }
+        .unwrap()
+        .wait()
+        .unwrap();
     }
     fn replace_identity(&self, state: &IdentityState) {
         self.commit(vec![Mutation::Put {
@@ -222,19 +260,24 @@ impl Fixture {
         base: &SubjectVisualState,
         red: u8,
     ) -> Result<SubjectVisualState, SubjectVisualRepositoryError> {
-        let mut r = self.repository(actor(1, TrustedOrigin::Local));
-        r.execute_subject_visuals(
-            request(id, base, red),
-            &actor(1, TrustedOrigin::Local),
-            self.clock.as_ref(),
-        )
+        let r = self.repository(actor(1, TrustedOrigin::Local));
+        {
+            let fixture_request = request(self, id, base, red);
+            let original_pair = self.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_subject_visuals(
+                fixture_request,
+                &actor(1, TrustedOrigin::Local),
+                self.clock.as_ref(),
+            )
+        }
     }
     fn legacy_subject(&self, id: u64, name: &str, color: Rgb, expected: Option<Revision>) {
-        let mut r = self.repository(actor(1, TrustedOrigin::Local));
+        let r = self.repository(actor(1, TrustedOrigin::Local));
         let current = r.load_identity().unwrap();
-        r.execute_identity(
-            IdentityRequest {
-                command_id: CommandId::new(1000 + self.revision().get()).unwrap(),
+        {
+            let fixture_request = IdentityRequest {
+                command_id: self.command_id(CommandFamily::Identity, 1000 + self.revision().get()),
                 expected_revision: current.revision,
                 command: IdentityCommand::PutSubject {
                     id: SubjectId::new(id).unwrap(),
@@ -243,10 +286,15 @@ impl Fixture {
                     color,
                     expected_revision: expected,
                 },
-            },
-            Some(&actor(1, TrustedOrigin::Local)),
-            self.clock.as_ref(),
-        )
+            };
+            let original_pair = self.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_identity(
+                fixture_request,
+                Some(&actor(1, TrustedOrigin::Local)),
+                self.clock.as_ref(),
+            )
+        }
         .unwrap();
     }
 }
@@ -260,7 +308,7 @@ impl Drop for Fixture {
         std::fs::remove_dir_all(&self.root).expect("subject visual owned fixture cleanup");
     }
 }
-fn request(id: u64, base: &SubjectVisualState, red: u8) -> SubjectVisualRequest {
+fn request(f: &Fixture, id: u64, base: &SubjectVisualState, red: u8) -> SubjectVisualRequest {
     let mut colors: Vec<_> = base
         .palette
         .subjects
@@ -274,7 +322,7 @@ fn request(id: u64, base: &SubjectVisualState, red: u8) -> SubjectVisualRequest 
     let mut display = base.display.clone();
     display.subject_fill = !display.subject_fill;
     SubjectVisualRequest {
-        command_id: CommandId::new(id).unwrap(),
+        command_id: f.command_id(CommandFamily::SubjectVisual, id),
         expected_palette_revision: base.palette.revision.clone(),
         expected_display_revision: base.display.revision,
         colors,
@@ -402,16 +450,21 @@ fn each_cas_conflict_leaves_the_other_document_and_receipt_untouched() {
     ));
     assert_eq!(f.read(), current);
     assert_eq!(f.revision(), revision);
-    let mut r = f.repository(actor(1, TrustedOrigin::Local));
-    r.execute_display(
-        DisplayRequest {
-            command_id: CommandId::new(80).unwrap(),
+    let r = f.repository(actor(1, TrustedOrigin::Local));
+    {
+        let fixture_request = DisplayRequest {
+            command_id: f.command_id(CommandFamily::Display, 80),
             expected_revision: current.display.revision,
             candidate: current.display.clone(),
-        },
-        &actor(1, TrustedOrigin::Local),
-        f.clock.as_ref(),
-    )
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_display(
+            fixture_request,
+            &actor(1, TrustedOrigin::Local),
+            f.clock.as_ref(),
+        )
+    }
     .unwrap();
     let before = f.read();
     let revision = f.revision();
@@ -425,7 +478,10 @@ fn each_cas_conflict_leaves_the_other_document_and_receipt_untouched() {
     assert_eq!(f.revision(), revision);
     assert!(f
         .handle()
-        .try_get("business/receipt/subject-visual/2".into())
+        .try_get(f.receipt_key(&format!(
+            "business/receipt/subject-visual/{}",
+            f.command_id(CommandFamily::SubjectVisual, 2).get()
+        )))
         .unwrap()
         .wait()
         .unwrap()
@@ -460,19 +516,24 @@ fn legacy_color_aba_and_new_subject_conflict_but_unrelated_catalog_does_not() {
         ))
     ));
     let base = f.read();
-    let mut r = f.repository(actor(1, TrustedOrigin::Local));
+    let r = f.repository(actor(1, TrustedOrigin::Local));
     let current = r.load_identity().unwrap();
-    r.execute_identity(
-        IdentityRequest {
-            command_id: CommandId::new(90).unwrap(),
+    {
+        let fixture_request = IdentityRequest {
+            command_id: f.command_id(CommandFamily::Identity, 90),
             expected_revision: current.revision,
             command: IdentityCommand::RenameSchool {
                 name: "新学校名".into(),
             },
-        },
-        Some(&actor(1, TrustedOrigin::Local)),
-        f.clock.as_ref(),
-    )
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_identity(
+            fixture_request,
+            Some(&actor(1, TrustedOrigin::Local)),
+            f.clock.as_ref(),
+        )
+    }
     .unwrap();
     f.commit(vec![Mutation::Put {
         key: "fixture/material-noise".into(),
@@ -492,30 +553,42 @@ fn exact_local_global_session_invalid_palette_and_settings_fail_without_writes()
         actor(2, TrustedOrigin::Local),
         actor(2, TrustedOrigin::Web),
     ] {
-        let mut r = f.repository(a.clone());
+        let r = f.repository(a.clone());
         assert!(r.subject_visuals(&a).is_err());
-        assert!(r
-            .execute_subject_visuals(request(1, &base, 180), &a, f.clock.as_ref())
-            .is_err());
+        assert!({
+            let fixture_request = request(&f, 1, &base, 180);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_subject_visuals(fixture_request, &a, f.clock.as_ref())
+        }
+        .is_err());
     }
     let captured = actor(1, TrustedOrigin::Local);
     let mut other = captured.clone();
     other.expires_at = LocalDateTime::new(date(4), 0).unwrap();
     assert!(f.repository(captured).subject_visuals(&other).is_err());
-    let mut r = f.repository(actor(1, TrustedOrigin::Local));
+    let r = f.repository(actor(1, TrustedOrigin::Local));
     for mut bad in [
-        request(2, &base, 180),
-        request(3, &base, 180),
-        request(4, &base, 180),
+        request(&f, 2, &base, 180),
+        request(&f, 3, &base, 180),
+        request(&f, 4, &base, 180),
     ] {
         match bad.command_id.get() {
             2 => bad.colors.clear(),
             3 => bad.colors[0].subject_id = SubjectId::new(999).unwrap(),
             _ => bad.display.course_fill_percent = 101,
         }
-        assert!(r
-            .execute_subject_visuals(bad, &actor(1, TrustedOrigin::Local), f.clock.as_ref())
-            .is_err());
+        assert!({
+            let fixture_request = bad;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_subject_visuals(
+                fixture_request,
+                &actor(1, TrustedOrigin::Local),
+                f.clock.as_ref(),
+            )
+        }
+        .is_err());
     }
     assert_eq!(f.revision(), revision);
     assert_eq!(f.read(), base);
@@ -540,7 +613,10 @@ fn precommit_revocation_rolls_back_both_and_does_not_publish_a_snapshot() {
     assert_eq!(f.published.lock().unwrap().len(), publications);
     assert!(f
         .handle()
-        .try_get("business/result/subject-visual/1".into())
+        .try_get(f.receipt_key(&format!(
+            "business/result/subject-visual/{}",
+            f.command_id(CommandFamily::SubjectVisual, 1).get()
+        )))
         .unwrap()
         .wait()
         .unwrap()
@@ -592,17 +668,34 @@ fn equivalent_color_order_replays_the_same_durable_command() {
     let initial = f.read();
     f.legacy_subject(2, "数学", initial.palette.subjects[0].color, None);
     let base = f.read();
-    let original = request(1, &base, 180);
+    let original = request(&f, 1, &base, 180);
     let mut reversed = original.clone();
     reversed.colors.reverse();
-    let mut r = f.repository(actor(1, TrustedOrigin::Local));
-    let saved = r
-        .execute_subject_visuals(original, &actor(1, TrustedOrigin::Local), f.clock.as_ref())
-        .unwrap();
+    let r = f.repository(actor(1, TrustedOrigin::Local));
+    let saved = {
+        let fixture_request = original;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = r.with_command_window(original_pair);
+        issued_repository.execute_subject_visuals(
+            fixture_request,
+            &actor(1, TrustedOrigin::Local),
+            f.clock.as_ref(),
+        )
+    }
+    .unwrap();
     let revision = f.revision();
     assert_eq!(
-        r.execute_subject_visuals(reversed, &actor(1, TrustedOrigin::Local), f.clock.as_ref())
-            .unwrap(),
+        {
+            let fixture_request = reversed;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_subject_visuals(
+                fixture_request,
+                &actor(1, TrustedOrigin::Local),
+                f.clock.as_ref(),
+            )
+        }
+        .unwrap(),
         saved
     );
     assert_eq!(f.revision(), revision);
@@ -638,6 +731,8 @@ fn queued_request_execution_cancellation_never_writes_or_publishes() {
     let publications = f.published.lock().unwrap().len();
     let (entered, arrived) = std::sync::mpsc::channel();
     let (release, wait) = std::sync::mpsc::channel();
+    let queued_id = f.command_id(CommandFamily::SubjectVisual, 1);
+    let queued_pair = f.commands.original(queued_id).unwrap();
     let held = f
         .handle()
         .try_transaction(Held {
@@ -652,9 +747,10 @@ fn queued_request_execution_cancellation_never_writes_or_publishes() {
     let observed = active.clone();
     let r = f
         .repository(actor(1, TrustedOrigin::Local))
-        .with_execution_fence(Arc::new(move || observed.load(Ordering::Acquire)));
+        .with_execution_fence(Arc::new(move || observed.load(Ordering::Acquire)))
+        .with_command_window(queued_pair);
     let task = SaveVisuals {
-        request: request(1, &base, 180),
+        request: request(&f, 1, &base, 180),
         actor: actor(1, TrustedOrigin::Local),
         clock: r.clock.clone(),
         session: r.session.clone(),
@@ -688,11 +784,16 @@ fn precommit_execution_cancellation_rolls_back_and_keeps_writer_healthy() {
         })
     });
     assert_eq!(
-        r.execute_subject_visuals(
-            request(1, &base, 180),
-            &actor(1, TrustedOrigin::Local),
-            f.clock.as_ref()
-        ),
+        {
+            let fixture_request = request(&f, 1, &base, 180);
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.execute_subject_visuals(
+                fixture_request,
+                &actor(1, TrustedOrigin::Local),
+                f.clock.as_ref(),
+            )
+        },
         Err(SubjectVisualRepositoryError::Unavailable)
     );
     assert_eq!(f.revision(), before);
@@ -717,12 +818,21 @@ fn bounded_result_and_strict_palette_codec_refuse_malformed_data() {
     bad["palette"]["unknown"] = json!(true);
     assert!(read_state(&bad).is_err());
     let revision = f.revision();
-    let mut request = request(1, &base, 180);
+    let mut request = request(&f, 1, &base, 180);
     request.display.countdown.label = "x".repeat(MAX_VALUE_BYTES + 1);
-    assert!(f
-        .repository(actor(1, TrustedOrigin::Local))
-        .execute_subject_visuals(request, &actor(1, TrustedOrigin::Local), f.clock.as_ref())
-        .is_err());
+    assert!({
+        let fixture_request = request;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f
+            .repository(actor(1, TrustedOrigin::Local))
+            .with_command_window(original_pair);
+        issued_repository.execute_subject_visuals(
+            fixture_request,
+            &actor(1, TrustedOrigin::Local),
+            f.clock.as_ref(),
+        )
+    }
+    .is_err());
     assert_eq!(f.revision(), revision);
     assert_eq!(f.read(), base);
     assert_eq!(
@@ -757,11 +867,26 @@ fn ordinary_restore_rebases_current_subject_versions_and_restores_original_color
         .wait()
         .unwrap();
     assert_eq!(f.read(), changed);
-    let barrier = r
-        .try_advance_recovery_barrier(receipt.current_revision, &admin, Arc::new(|| true))
-        .unwrap()
-        .wait()
-        .unwrap();
+    let barrier = {
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Generic,
+                "restore-barrier",
+                CommandOwner::authenticated(&admin),
+            )
+            .unwrap();
+        let issued_repository = r.with_command_window(original_pair);
+        issued_repository.try_advance_recovery_barrier(
+            receipt.current_revision,
+            &admin,
+            Arc::new(|| true),
+        )
+    }
+    .unwrap()
+    .wait()
+    .unwrap();
     let candidate = f.root.join("candidate.sqlite3");
     r.try_prepare_ordinary_restore(backup, candidate.clone(), barrier, Arc::new(|| true))
         .unwrap()
@@ -782,7 +907,10 @@ fn ordinary_restore_rebases_current_subject_versions_and_restores_original_color
         assert_eq!(display.subject_fill, old.display.subject_fill);
         assert!(display.revision > changed.display.revision);
         assert!(TransactionView(&db)
-            .get("business/result/subject-visual/1")
+            .get(&f.receipt_key(&format!(
+                "business/result/subject-visual/{}",
+                f.command_id(CommandFamily::SubjectVisual, 1).get()
+            )))
             .unwrap()
             .is_none());
     }

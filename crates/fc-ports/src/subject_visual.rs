@@ -28,6 +28,7 @@ pub struct SubjectVisualPreviewSource {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SubjectVisualRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(SubjectVisualError),
     Display(DisplayError),
     Content(ContentError),

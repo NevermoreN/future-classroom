@@ -52,6 +52,9 @@ pub(super) fn mutation(settings: &DisplaySettings) -> Result<Mutation, StorageEr
     })
 }
 pub(super) fn error(error: StorageError) -> DisplayRepositoryError {
+    if let Some(error) = error.command_window_error() {
+        return DisplayRepositoryError::CommandWindow(error);
+    }
     match error {
         StorageError::Display(e) => DisplayRepositoryError::Domain(e),
         StorageError::CommandIdReused => DisplayRepositoryError::IdempotencyConflict,
@@ -178,6 +181,13 @@ struct SaveDisplay<S> {
     factory: Factory<S>,
 }
 impl<S: Send> TransactionTask<S> for SaveDisplay<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Display,
+            self.request.command_id,
+        ))
+    }
+
     fn allocation_bytes(&self) -> usize {
         self.request
             .candidate

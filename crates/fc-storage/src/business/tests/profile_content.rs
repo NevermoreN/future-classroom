@@ -2,6 +2,7 @@
 //! synthetic metadata (no WIC/FS/DPAPI claim), SHA-256 is the actual implementation.
 use super::*;
 use fc_domain::profile_content::*;
+use fc_ports::command_window::CommandFamily;
 use fc_ports::{
     prepare_profile_content, ProfileContentPreparation, ProfileContentRepository,
     ProfileContentRepositoryError as CE, ProfileContentStatus,
@@ -11,7 +12,7 @@ fn admin() -> ActorContext {
     actor(1, TrustedOrigin::Local)
 }
 fn content_node(f: &Fixture, image: bool) -> ContentSlotKey {
-    let mut r = public_request(20_000, f.admin().public_layout(&admin()).unwrap());
+    let mut r = public_request(f, 20_000, f.admin().public_layout(&admin()).unwrap());
     let id = r.layout.allocate_id().unwrap();
     let group = r.layout.allocate_id().unwrap();
     let outlet = r
@@ -59,9 +60,13 @@ fn content_node(f: &Fixture, image: bool) -> ContentSlotKey {
         component,
         image_fit: ImageFit::Contain,
     });
-    f.admin()
-        .execute_public_layout(r, &admin(), f.clock.as_ref())
-        .unwrap();
+    {
+        let fixture_request = r;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.execute_public_layout(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     ContentSlotKey {
         scope: LayoutScope::Public,
         node_id: id,
@@ -75,7 +80,7 @@ fn request(
     op: ContentOperation,
 ) -> BeginContentRequest {
     BeginContentRequest {
-        command_id: CommandId::new(c).unwrap(),
+        command_id: f.command_id(CommandFamily::ProfileContent, c),
         slot: s,
         expected_revision: Revision::new(rev),
         operation: op,
@@ -103,9 +108,13 @@ fn begin(
     rev: u64,
     op: ContentOperation,
 ) -> ContentAdmission {
-    f.admin()
-        .begin_profile_content(request(f, s, c, rev, op), &admin(), f.clock.as_ref())
-        .unwrap()
+    {
+        let fixture_request = request(f, s, c, rev, op);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.begin_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap()
 }
 fn publish(
     f: &Fixture,
@@ -121,13 +130,16 @@ fn publish(
         rev,
         ContentOperation::Publish(ContentPayloadKind::Text),
     );
-    f.admin()
-        .commit_profile_content(
-            proof(a, ContentPayload::Text(text.into())),
-            &admin(),
-            f.clock.as_ref(),
-        )
-        .unwrap()
+    {
+        let fixture_request = proof(a, ContentPayload::Text(text.into()));
+        let original_pair = f
+            .commands
+            .original(fixture_request.admission().request.command_id)
+            .unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap()
 }
 #[test]
 fn profile_content_versions_full_limit_clear_undo_restart_and_light_facts() {
@@ -174,9 +186,16 @@ fn profile_content_versions_full_limit_clear_undo_restart_and_light_facts() {
         Revision::new(2)
     );
     let ad = begin(&f, s, 20_003, 2, ContentOperation::Clear);
-    f.admin()
-        .commit_profile_content(proof(ad, ContentPayload::Empty), &admin(), f.clock.as_ref())
-        .unwrap();
+    {
+        let fixture_request = proof(ad, ContentPayload::Empty);
+        let original_pair = f
+            .commands
+            .original(fixture_request.admission().request.command_id)
+            .unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     let undo = begin(
         &f,
         s,
@@ -186,13 +205,16 @@ fn profile_content_versions_full_limit_clear_undo_restart_and_light_facts() {
             target_revision: Revision::new(2),
         },
     );
-    f.admin()
-        .commit_profile_content(
-            proof(undo, ContentPayload::Empty),
-            &admin(),
-            f.clock.as_ref(),
-        )
-        .unwrap();
+    {
+        let fixture_request = proof(undo, ContentPayload::Empty);
+        let original_pair = f
+            .commands
+            .original(fixture_request.admission().request.command_id)
+            .unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     assert_eq!(
         f.admin()
             .profile_content(s, &admin())
@@ -228,32 +250,51 @@ fn profile_content_durable_latest_intent_survives_failed_newer_prepare() {
         ContentOperation::Publish(ContentPayloadKind::Text),
     );
     assert_eq!(b.sequence, a.sequence + 1);
-    f.admin()
-        .fail_profile_content(b.clone(), &admin(), f.clock.as_ref())
-        .unwrap();
+    {
+        let fixture_request = b.clone();
+        let original_pair = f
+            .commands
+            .original(fixture_request.request.command_id)
+            .unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.fail_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     f.reopen();
     assert_eq!(
-        f.admin().commit_profile_content(
-            proof(a, ContentPayload::Text("old".into())),
-            &admin(),
-            f.clock.as_ref()
-        ),
+        {
+            let fixture_request = proof(a, ContentPayload::Text("old".into()));
+            let original_pair = f
+                .commands
+                .original(fixture_request.admission().request.command_id)
+                .unwrap();
+            let mut issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+        },
         Err(CE::Domain(ProfileContentError::Superseded))
     );
     assert_eq!(
-        f.admin()
-            .profile_content_outcome(CommandId::new(21_001).unwrap(), &admin(), f.clock.as_ref())
-            .unwrap()
-            .unwrap()
-            .status,
+        {
+            let fixture_request = f.command_id(CommandFamily::ProfileContent, 21_001);
+            let original_pair = f.commands.original(fixture_request).unwrap();
+            let issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.profile_content_outcome(fixture_request, &admin(), f.clock.as_ref())
+        }
+        .unwrap()
+        .unwrap()
+        .status,
         ProfileContentStatus::Superseded
     );
     assert_eq!(
-        f.admin()
-            .profile_content_outcome(b.request.command_id, &admin(), f.clock.as_ref())
-            .unwrap()
-            .unwrap()
-            .status,
+        {
+            let fixture_request = b.request.command_id;
+            let original_pair = f.commands.original(fixture_request).unwrap();
+            let issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.profile_content_outcome(fixture_request, &admin(), f.clock.as_ref())
+        }
+        .unwrap()
+        .unwrap()
+        .status,
         ProfileContentStatus::Failed
     );
     assert_eq!(
@@ -275,46 +316,70 @@ fn profile_content_receipts_bind_actor_intent_actual_bytes_and_never_double_publ
         0,
         ContentOperation::Publish(ContentPayloadKind::Text),
     );
-    let ad = f
-        .admin()
-        .begin_profile_content(r.clone(), &admin(), f.clock.as_ref())
-        .unwrap();
+    let ad = {
+        let fixture_request = r.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.begin_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     assert_eq!(
         ad,
-        f.admin()
-            .begin_profile_content(r.clone(), &admin(), f.clock.as_ref())
-            .unwrap()
+        {
+            let fixture_request = r.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.begin_profile_content(fixture_request, &admin(), f.clock.as_ref())
+        }
+        .unwrap()
     );
     let mut changed = r;
     changed.payload_fingerprint = [1; 32];
     assert_eq!(
-        f.admin()
-            .begin_profile_content(changed, &admin(), f.clock.as_ref()),
+        {
+            let fixture_request = changed;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.begin_profile_content(fixture_request, &admin(), f.clock.as_ref())
+        },
         Err(CE::IdempotencyConflict)
     );
     let prepared = proof(ad.clone(), ContentPayload::Text("correct".into()));
-    let first = f
-        .admin()
-        .commit_profile_content(prepared, &admin(), f.clock.as_ref())
-        .unwrap();
+    let first = {
+        let fixture_request = prepared;
+        let original_pair = f
+            .commands
+            .original(fixture_request.admission().request.command_id)
+            .unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     let rev = f.revision();
     assert_eq!(
-        f.admin()
-            .commit_profile_content(
-                proof(ad.clone(), ContentPayload::Text("correct".into())),
-                &admin(),
-                f.clock.as_ref()
-            )
-            .unwrap(),
+        {
+            let fixture_request = proof(ad.clone(), ContentPayload::Text("correct".into()));
+            let original_pair = f
+                .commands
+                .original(fixture_request.admission().request.command_id)
+                .unwrap();
+            let mut issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+        }
+        .unwrap(),
         first
     );
     assert_eq!(f.revision(), rev);
     assert_eq!(
-        f.admin().commit_profile_content(
-            proof(ad, ContentPayload::Text("other".into())),
-            &admin(),
-            f.clock.as_ref()
-        ),
+        {
+            let fixture_request = proof(ad, ContentPayload::Text("other".into()));
+            let original_pair = f
+                .commands
+                .original(fixture_request.admission().request.command_id)
+                .unwrap();
+            let mut issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+        },
         Err(CE::IdempotencyConflict)
     );
 }
@@ -323,20 +388,19 @@ fn profile_content_teacher_web_and_exact_precommit_lock_cannot_publish() {
     let f = Fixture::new();
     let s = content_node(&f, false);
     for a in [actor(2, TrustedOrigin::Local), actor(1, TrustedOrigin::Web)] {
-        assert!(f
-            .repo(a.clone())
-            .begin_profile_content(
-                request(
-                    &f,
-                    s,
-                    23_001,
-                    0,
-                    ContentOperation::Publish(ContentPayloadKind::Text)
-                ),
-                &a,
-                f.clock.as_ref()
-            )
-            .is_err());
+        assert!({
+            let fixture_request = request(
+                &f,
+                s,
+                23_001,
+                0,
+                ContentOperation::Publish(ContentPayloadKind::Text),
+            );
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+            issued_repository.begin_profile_content(fixture_request, &a, f.clock.as_ref())
+        }
+        .is_err());
     }
     let ad = begin(
         &f,
@@ -347,14 +411,16 @@ fn profile_content_teacher_web_and_exact_precommit_lock_cannot_publish() {
     );
     let rev = f.revision();
     f.lock_begin.store(true, Ordering::Release);
-    assert!(f
-        .admin()
-        .commit_profile_content(
-            proof(ad, ContentPayload::Text("locked".into())),
-            &admin(),
-            f.clock.as_ref()
-        )
-        .is_err());
+    assert!({
+        let fixture_request = proof(ad, ContentPayload::Text("locked".into()));
+        let original_pair = f
+            .commands
+            .original(fixture_request.admission().request.command_id)
+            .unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .is_err());
     assert_eq!(f.revision(), rev);
     f.active.store(true, Ordering::Release);
     assert!(f
@@ -380,10 +446,16 @@ fn images(
         0,
         ContentOperation::Publish(ContentPayloadKind::Images),
     );
-    let r = f
-        .admin()
-        .reserve_profile_media(&ad, &[100, 200], &admin())
-        .unwrap();
+    let r = {
+        let fixture_request = &ad;
+        let original_pair = f
+            .commands
+            .original(fixture_request.request.command_id)
+            .unwrap();
+        let issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.reserve_profile_media(fixture_request, &[100, 200], &admin())
+    }
+    .unwrap();
     let a = r
         .ids
         .iter()
@@ -406,14 +478,16 @@ fn profile_content_media_page_default_deny_exact_guard_and_ref_safe_gc() {
     let mut f = Fixture::new();
     let s = content_node(&f, true);
     let (ad, r, images) = images(&f, s, 24_001);
-    let snap = f
-        .admin()
-        .commit_profile_content(
-            proof(ad, ContentPayload::Images(images)),
-            &admin(),
-            f.clock.as_ref(),
-        )
-        .unwrap();
+    let snap = {
+        let fixture_request = proof(ad, ContentPayload::Images(images));
+        let original_pair = f
+            .commands
+            .original(fixture_request.admission().request.command_id)
+            .unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     let entry = f
         .admin()
         .inventory_profile_media(None, 128)
@@ -427,18 +501,21 @@ fn profile_content_media_page_default_deny_exact_guard_and_ref_safe_gc() {
         .is_err());
     f.admin().settle_profile_media(r).unwrap();
     let page = PageContentRequest {
-        command_id: CommandId::new(24_002).unwrap(),
+        command_id: f.command_id(CommandFamily::ProfileContent, 24_002),
         slot: s,
         expected_content_revision: snap.revision,
         expected_view_revision: snap.view_revision,
         page: 1,
     };
-    assert!(f
-        .admin()
-        .page_profile_content(page.clone(), f.clock.as_ref())
-        .is_err());
+    assert!({
+        let fixture_request = page.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.page_profile_content(fixture_request, f.clock.as_ref())
+    }
+    .is_err());
     let allowed = f.active.clone();
-    let mut repo =
+    let repo =
         f.admin()
             .with_profile_content_scene_guard(Arc::new(move |slot, content, view, _| {
                 if allowed.load(Ordering::Acquire)
@@ -451,34 +528,41 @@ fn profile_content_media_page_default_deny_exact_guard_and_ref_safe_gc() {
                     Err(StorageError::AuthorityUnavailable)
                 }
             }));
-    let result = repo.page_profile_content(page, f.clock.as_ref()).unwrap();
+    let result = {
+        let fixture_request = page;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = repo.with_command_window(original_pair);
+        issued_repository.page_profile_content(fixture_request, f.clock.as_ref())
+    }
+    .unwrap();
     assert_eq!(result.current_page, 1);
     assert_eq!(result.revision, snap.revision);
     assert_eq!(result.view_revision, Revision::new(2));
     let active = f.active.clone();
-    let mut revoke_repo =
-        f.admin()
-            .with_profile_content_scene_guard(Arc::new(move |_, _, _, _| {
-                if active.load(Ordering::Acquire) {
-                    Ok(())
-                } else {
-                    Err(StorageError::AuthorityUnavailable)
-                }
-            }));
+    let revoke_repo = f
+        .admin()
+        .with_profile_content_scene_guard(Arc::new(move |_, _, _, _| {
+            if active.load(Ordering::Acquire) {
+                Ok(())
+            } else {
+                Err(StorageError::AuthorityUnavailable)
+            }
+        }));
     f.lock_begin.store(true, Ordering::Release);
     let before = f.revision();
-    assert!(revoke_repo
-        .page_profile_content(
-            PageContentRequest {
-                command_id: CommandId::new(24_003).unwrap(),
-                slot: s,
-                expected_content_revision: Revision::new(1),
-                expected_view_revision: Revision::new(2),
-                page: 0
-            },
-            f.clock.as_ref()
-        )
-        .is_err());
+    assert!({
+        let fixture_request = PageContentRequest {
+            command_id: f.command_id(CommandFamily::ProfileContent, 24_003),
+            slot: s,
+            expected_content_revision: Revision::new(1),
+            expected_view_revision: Revision::new(2),
+            page: 0,
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = revoke_repo.with_command_window(original_pair);
+        issued_repository.page_profile_content(fixture_request, f.clock.as_ref())
+    }
+    .is_err());
     assert_eq!(f.revision(), before);
     f.active.store(true, Ordering::Release);
     f.reopen();
@@ -493,13 +577,16 @@ fn profile_content_remove_node_atomically_cancels_and_drops_refs_before_physical
     let mut f = Fixture::new();
     let s = content_node(&f, true);
     let (ad, res, pages) = images(&f, s, 25_001);
-    f.admin()
-        .commit_profile_content(
-            proof(ad, ContentPayload::Images(pages)),
-            &admin(),
-            f.clock.as_ref(),
-        )
-        .unwrap();
+    {
+        let fixture_request = proof(ad, ContentPayload::Images(pages));
+        let original_pair = f
+            .commands
+            .original(fixture_request.admission().request.command_id)
+            .unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     let pending = begin(
         &f,
         s,
@@ -509,21 +596,29 @@ fn profile_content_remove_node_atomically_cancels_and_drops_refs_before_physical
     );
     let before = f.admin().inventory_profile_media(None, 128).unwrap();
     let charged: u64 = before.items.iter().map(|e| e.charged_bytes).sum();
-    let mut req = public_request(25_003, f.admin().public_layout(&admin()).unwrap());
+    let mut req = public_request(&f, 25_003, f.admin().public_layout(&admin()).unwrap());
     req.layout.tree.nodes.retain(|n| n.id != s.node_id);
     for n in &mut req.layout.tree.nodes {
         n.children.retain(|id| *id != s.node_id);
     }
     req.layout.content_styles.clear();
-    f.admin()
-        .execute_public_layout(req, &admin(), f.clock.as_ref())
-        .unwrap();
+    {
+        let fixture_request = req;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.execute_public_layout(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     assert_eq!(
-        f.admin()
-            .profile_content_outcome(pending.request.command_id, &admin(), f.clock.as_ref())
-            .unwrap()
-            .unwrap()
-            .status,
+        {
+            let fixture_request = pending.request.command_id;
+            let original_pair = f.commands.original(fixture_request).unwrap();
+            let issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.profile_content_outcome(fixture_request, &admin(), f.clock.as_ref())
+        }
+        .unwrap()
+        .unwrap()
+        .status,
         ProfileContentStatus::Cancelled
     );
     let inv = f.admin().inventory_profile_media(None, 128).unwrap();
@@ -609,11 +704,14 @@ fn profile_content_expiry_restart_settlement_preserves_charge_and_never_releases
         expires_at: at(23, 59),
         ..admin()
     };
-    let outcome = f
-        .repo(a.clone())
-        .profile_content_outcome(ad.request.command_id, &a, f.clock.as_ref())
-        .unwrap()
-        .unwrap();
+    let outcome = {
+        let fixture_request = ad.request.command_id;
+        let original_pair = f.commands.original(fixture_request).unwrap();
+        let issued_repository = f.repo(a.clone()).with_command_window(original_pair);
+        issued_repository.profile_content_outcome(fixture_request, &a, f.clock.as_ref())
+    }
+    .unwrap()
+    .unwrap();
     assert_eq!(outcome.status, ProfileContentStatus::Expired);
     let inv = f.admin().inventory_profile_media(None, 128).unwrap();
     assert!(inv.items.iter().all(|e| e.state == MediaState::Reserved));
@@ -662,8 +760,15 @@ fn profile_content_writer_rehashes_even_trusted_preparation_proof() {
     let prepared = prepare_profile_content(&mut WrongHash, ad, ()).unwrap();
     let before = f.revision();
     assert_eq!(
-        f.admin()
-            .commit_profile_content(prepared, &admin(), f.clock.as_ref()),
+        {
+            let fixture_request = prepared;
+            let original_pair = f
+                .commands
+                .original(fixture_request.admission().request.command_id)
+                .unwrap();
+            let mut issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+        },
         Err(CE::Unavailable)
     );
     assert_eq!(f.revision(), before);
@@ -729,13 +834,30 @@ fn profile_content_reserved_media_and_materials_share_two_gib_without_ttl_refund
             0,
             ContentOperation::Publish(ContentPayloadKind::Images),
         );
-        let r = f
-            .admin()
-            .reserve_profile_media(&ad, &vec![10 * 1024 * 1024; 50], &admin())
-            .unwrap();
-        f.admin()
-            .fail_profile_content(ad, &admin(), f.clock.as_ref())
-            .unwrap();
+        let r = {
+            let fixture_request = &ad;
+            let original_pair = f
+                .commands
+                .original(fixture_request.request.command_id)
+                .unwrap();
+            let issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.reserve_profile_media(
+                fixture_request,
+                &vec![10 * 1024 * 1024; 50],
+                &admin(),
+            )
+        }
+        .unwrap();
+        {
+            let fixture_request = ad;
+            let original_pair = f
+                .commands
+                .original(fixture_request.request.command_id)
+                .unwrap();
+            let mut issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.fail_profile_content(fixture_request, &admin(), f.clock.as_ref())
+        }
+        .unwrap();
         reservations.push(r);
     }
     let prepared = || {
@@ -743,7 +865,7 @@ fn profile_content_reserved_media_and_materials_share_two_gib_without_ttl_refund
             &mut LargeMaterial,
             (),
             fc_ports::MaterialAppendMetadata {
-                command_id: CommandId::new(31_100).unwrap(),
+                command_id: f.command_id(CommandFamily::Materials, 31_100),
                 scope: MaterialScope {
                     teacher_id: principal(2),
                     subject_id: SubjectId::new(1).unwrap(),
@@ -756,16 +878,30 @@ fn profile_content_reserved_media_and_materials_share_two_gib_without_ttl_refund
         .unwrap()
     };
     assert_eq!(
-        f.admin()
-            .append_material(prepared(), &admin(), f.clock.as_ref()),
+        {
+            let fixture_request = prepared();
+            let original_pair = f
+                .commands
+                .original(fixture_request.request().command_id)
+                .unwrap();
+            let mut issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.append_material(fixture_request, &admin(), f.clock.as_ref())
+        },
         Err(fc_ports::MaterialRepositoryError::QuotaExceeded)
     );
     f.admin()
         .settle_profile_media(reservations.remove(0))
         .unwrap();
     assert_eq!(
-        f.admin()
-            .append_material(prepared(), &admin(), f.clock.as_ref()),
+        {
+            let fixture_request = prepared();
+            let original_pair = f
+                .commands
+                .original(fixture_request.request().command_id)
+                .unwrap();
+            let mut issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.append_material(fixture_request, &admin(), f.clock.as_ref())
+        },
         Err(fc_ports::MaterialRepositoryError::QuotaExceeded)
     );
     let first = f.admin().inventory_profile_media(None, 128).unwrap();
@@ -773,9 +909,16 @@ fn profile_content_reserved_media_and_materials_share_two_gib_without_ttl_refund
         let t = f.admin().retire_profile_media(e.id, e.revision).unwrap();
         f.admin().finalize_profile_media_removal(t).unwrap();
     }
-    f.admin()
-        .append_material(prepared(), &admin(), f.clock.as_ref())
-        .unwrap();
+    {
+        let fixture_request = prepared();
+        let original_pair = f
+            .commands
+            .original(fixture_request.request().command_id)
+            .unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.append_material(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     f.reopen();
 }
 
@@ -792,14 +935,18 @@ fn profile_content_committed_publication_failure_preserves_immutable_version_and
     );
     f.publish_fail.store(true, Ordering::Release);
     assert_eq!(
-        f.admin().commit_profile_content(
-            proof(
+        {
+            let fixture_request = proof(
                 ad.clone(),
-                ContentPayload::Text("committed before fault".into())
-            ),
-            &admin(),
-            f.clock.as_ref()
-        ),
+                ContentPayload::Text("committed before fault".into()),
+            );
+            let original_pair = f
+                .commands
+                .original(fixture_request.admission().request.command_id)
+                .unwrap();
+            let mut issued_repository = f.admin().with_command_window(original_pair);
+            issued_repository.commit_profile_content(fixture_request, &admin(), f.clock.as_ref())
+        },
         Err(CE::Faulted)
     );
     assert!(f.admin().profile_content(s, &admin()).is_err());
@@ -807,11 +954,14 @@ fn profile_content_committed_publication_failure_preserves_immutable_version_and
     startup_state(f.directory.db()).unwrap();
     f.publish_fail.store(false, Ordering::Release);
     f.open();
-    let outcome = f
-        .admin()
-        .profile_content_outcome(ad.request.command_id, &admin(), f.clock.as_ref())
-        .unwrap()
-        .unwrap();
+    let outcome = {
+        let fixture_request = ad.request.command_id;
+        let original_pair = f.commands.original(fixture_request).unwrap();
+        let issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.profile_content_outcome(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap()
+    .unwrap();
     assert_eq!(outcome.status, ProfileContentStatus::Committed);
     assert_eq!(outcome.committed_revision, Some(Revision::new(1)));
     assert_eq!(
@@ -850,17 +1000,17 @@ fn profile_content_subject_owners_are_exact_and_disabled_history_stays_manageabl
         publish(&f, slot, n + 10, 0, &format!("teacher-{owner}"));
         slots.push((slot, p));
     }
-    f.admin()
-        .execute_schedule(
-            fc_ports::ScheduleRequest {
-                command_id: CommandId::new(33_030).unwrap(),
-                expected_revision: Revision::default(),
-                candidate: schedule(),
-            },
-            &admin(),
-            f.clock.as_ref(),
-        )
-        .unwrap();
+    {
+        let fixture_request = fc_ports::ScheduleRequest {
+            command_id: f.command_id(CommandFamily::Schedule, 33_030),
+            expected_revision: Revision::default(),
+            candidate: schedule(),
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.execute_schedule(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .unwrap();
     let facts = f.admin().desktop_facts(0, f.clock.as_ref()).unwrap();
     assert_eq!(facts.profile_contents.len(), 1);
     assert_eq!(facts.profile_contents[0].slot, slots[0].0);
@@ -884,7 +1034,7 @@ fn profile_content_subject_owners_are_exact_and_disabled_history_stays_manageabl
     let expected = disabled.revision;
     disabled.enabled = false;
     f.save(ProfileRequest {
-        command_id: CommandId::new(33_031).unwrap(),
+        command_id: f.command_id(CommandFamily::Profiles, 33_031),
         key: disabled.key,
         expected_revision: expected,
         candidate: disabled,
@@ -905,13 +1055,12 @@ fn profile_content_subject_owners_are_exact_and_disabled_history_stays_manageabl
             .payload,
         ContentPayload::Text("teacher-2".into())
     );
-    assert!(f
-        .admin()
-        .begin_profile_content(
-            request(&f, slot, 33_032, 1, ContentOperation::Clear),
-            &admin(),
-            f.clock.as_ref()
-        )
-        .is_err());
+    assert!({
+        let fixture_request = request(&f, slot, 33_032, 1, ContentOperation::Clear);
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.admin().with_command_window(original_pair);
+        issued_repository.begin_profile_content(fixture_request, &admin(), f.clock.as_ref())
+    }
+    .is_err());
     f.reopen();
 }

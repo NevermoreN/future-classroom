@@ -959,6 +959,36 @@ impl VoiceSnapshot {
     }
     /// Returns pruned jobs so the same writer commit can delete their receipts.
     pub fn maintain(&mut self, now: i64) -> Result<Vec<VoiceJob>, VoiceError> {
+        self.maintain_retaining(now, None)
+    }
+    /// Keep the result of this exact new cancellation through its own commit.
+    /// This is metadata retention, never a playback/owner-return capability.
+    /// Other terminal audits still satisfy the same TTL and count bounds.
+    pub fn maintain_after_cancel(
+        &mut self,
+        now: i64,
+        id: VoiceJobId,
+    ) -> Result<Vec<VoiceJob>, VoiceError> {
+        let at = now.max(self.observed_at.unwrap_or(now));
+        let job = self
+            .jobs
+            .iter()
+            .find(|job| job.id == id)
+            .ok_or(VoiceError::Missing)?;
+        if job.cancel_command.is_none()
+            || !((job.state == VoiceState::Canceled && job.ended_at == Some(at))
+                || (job.state == VoiceState::Stopping
+                    && job.pending_terminal == Some(VoiceState::Canceled)))
+        {
+            return Err(VoiceError::InvalidState);
+        }
+        self.maintain_retaining(now, Some(id))
+    }
+    fn maintain_retaining(
+        &mut self,
+        now: i64,
+        protected_cancel: Option<VoiceJobId>,
+    ) -> Result<Vec<VoiceJob>, VoiceError> {
         let before = self.clone();
         let now = now.max(self.observed_at.unwrap_or(now));
         for a in &mut self.assets {
@@ -985,8 +1015,10 @@ impl VoiceSnapshot {
                 .jobs
                 .iter()
                 .enumerate()
-                .filter(|(_, j)| j.state.terminal())
-                .min_by_key(|(_, j)| j.sequence)
+                .filter(|(_, j)| j.state.terminal() && Some(j.id) != protected_cancel)
+                // Completion time is the TTL source. Submission sequence is
+                // only a stable same-second tie; it is not completion order.
+                .min_by_key(|(_, j)| (j.ended_at, j.sequence))
                 .map(|(n, _)| n);
             let Some(n) = candidate else { break };
             if terminals <= MAX_VOICE_AUDIT
@@ -1445,5 +1477,200 @@ mod tests {
             ),
             Err(VoiceError::OwnerLimit)
         );
+    }
+}
+
+#[cfg(test)]
+mod cancel_retention_tests {
+    //! Synthetic pure-domain reproduction; no audio, Writer, SQL, or rate-policy bypass.
+    use crate::{
+        auth::{ActorContext, TrustedOrigin},
+        time::*,
+        voice::*,
+    };
+    use std::collections::BTreeMap;
+
+    fn actor(n: u64) -> ActorContext {
+        ActorContext {
+            principal_id: PrincipalId::new(n).unwrap(),
+            school_id: SchoolId::new(1).unwrap(),
+            auth_epoch: AuthEpoch::new(1),
+            origin: TrustedOrigin::Web,
+            expires_at: LocalDateTime::new(LocalDate::new(2026, 11, 3).unwrap(), 0).unwrap(),
+        }
+    }
+    fn track(s: &VoiceSnapshot, high: &mut (usize, usize, u64)) {
+        s.validate().unwrap();
+        high.0 = high
+            .0
+            .max(s.jobs.iter().filter(|j| !j.state.terminal()).count());
+        high.1 = high.1.max(s.assets.len());
+        high.2 = high.2.max(s.charged_bytes().unwrap());
+    }
+    fn submit(s: &mut VoiceSnapshot, n: u64, owner: &ActorContext, now: i64) -> VoiceJob {
+        assert!(s.maintain(now).unwrap().is_empty());
+        let a = s
+            .reserve(
+                VoiceAssetId::new(n).unwrap(),
+                owner,
+                ClassId::new(1).unwrap(),
+                now,
+            )
+            .unwrap();
+        let a = s
+            .publish(
+                a.id,
+                a.revision,
+                VoicePcmMetadata {
+                    byte_length: 16044,
+                    frame_count: 8000,
+                    sha256: [7; 32],
+                },
+                now,
+            )
+            .unwrap();
+        s.submit(CommandId::new(n).unwrap(), a.id, a.revision, 10, owner, now)
+            .unwrap()
+    }
+    fn drive(s: &mut VoiceSnapshot, j: &VoiceJob, action: VoiceDriverAction, now: i64) -> VoiceJob {
+        s.drive(
+            &VoiceDriverUpdate {
+                job_id: j.id,
+                expected_revision: j.revision,
+                generation: j.generation,
+                action,
+            },
+            now,
+        )
+        .unwrap()
+    }
+    fn cancellation_retention(same_second: bool) {
+        let mut s = VoiceSnapshot::default();
+        let first = submit(&mut s, 1, &actor(1), 0);
+        let first = drive(&mut s, &first, VoiceDriverAction::Start, 0);
+        let first = drive(&mut s, &first, VoiceDriverAction::FirstWrite, 0);
+        let queued = submit(&mut s, 2, &actor(1), 0);
+        assert_eq!(first.state, VoiceState::Playing);
+        assert_eq!(queued.state, VoiceState::Queued);
+        assert_eq!(queued.sequence, 2);
+        let mut high = (0, 0, 0);
+        track(&s, &mut high);
+        // Each reserve corresponds to one upload and each submit to one enqueue.
+        // Keep an independent history even after finalize_delete, so removal cannot
+        // hide a violation of the persisted Writer's 10-per-60-second counters.
+        let mut rate = BTreeMap::<u64, Vec<i64>>::new();
+        rate.insert(1, vec![0, 0]);
+        let mut now = 0;
+        for n in 0..100u64 {
+            let owner = if same_second { 2 + n / 10 } else { 2 + n % 3 };
+            now = if same_second {
+                188
+            } else {
+                2 + (n / 30) as i64 * 61 + ((n % 30) / 3) as i64
+            };
+            let history = rate.entry(owner).or_default();
+            assert!(history.iter().filter(|at| now - **at < 60).count() < 10);
+            history.push(now);
+            let j = submit(&mut s, 100 + n, &actor(owner), now);
+            track(&s, &mut high);
+            let canceled = s
+                .cancel(j.id, j.revision, CommandId::new(1000 + n).unwrap(), now)
+                .unwrap();
+            assert_eq!(canceled.state, VoiceState::Canceled);
+            assert!(s.maintain(now).unwrap().is_empty());
+            track(&s, &mut high);
+            let a = s
+                .assets
+                .iter()
+                .find(|a| Some(a.id) == canceled.asset_id)
+                .unwrap()
+                .clone();
+            s.finalize_delete(a.id, a.revision, now).unwrap();
+            track(&s, &mut high);
+        }
+        assert_eq!(s.jobs.iter().filter(|j| j.state.terminal()).count(), 100);
+        assert_eq!(s.jobs.iter().filter(|j| !j.state.terminal()).count(), 2);
+        assert_eq!(now, 188);
+        if !same_second {
+            now += 1;
+        }
+        assert!(now < queued.latest_start_at);
+        assert!(s.maintain(now).unwrap().is_empty());
+        let canceled = s
+            .cancel(
+                queued.id,
+                queued.revision,
+                CommandId::new(9999).unwrap(),
+                now,
+            )
+            .unwrap();
+        assert_eq!(canceled.state, VoiceState::Canceled);
+        assert_eq!(canceled.ended_at, Some(now));
+        let removed = s.maintain_after_cancel(now, canceled.id).unwrap();
+        assert_eq!(removed.len(), 1);
+        assert_ne!(removed[0].id, canceled.id);
+        assert_eq!(removed[0].id, VoiceJobId::new(100).unwrap());
+        assert_eq!(
+            removed[0].cancel_command,
+            Some(CommandId::new(1000).unwrap())
+        );
+        assert_eq!(
+            s.jobs.iter().find(|j| j.id == queued.id).unwrap(),
+            &canceled
+        );
+        assert_eq!(s.jobs.iter().find(|j| j.id == first.id).unwrap(), &first);
+        track(&s, &mut high);
+        assert_eq!(s.jobs.iter().filter(|j| j.state.terminal()).count(), 100);
+        assert_eq!(high.0, 3);
+        assert_eq!(high.1, 3);
+        assert!(high.2 <= MAX_VOICE_BYTES);
+        println!("PURE_DOMAIN_FIXED now={} queued_deadline={} terminal=100 max_pending={} max_assets={} max_charged_bytes={} exact_pruned_command={} cancel={} original_playing_unchanged=true rate_per_owner_60s_le10=true",now,queued.latest_start_at,high.0,high.1,high.2,removed[0].command_id.get(),removed[0].cancel_command.unwrap().get());
+    }
+
+    #[test]
+    fn new_cancel_survives_its_commit_while_an_older_terminal_is_evicted() {
+        cancellation_retention(false);
+    }
+    #[test]
+    fn same_second_new_cancel_is_protected_without_claiming_global_completion_order() {
+        cancellation_retention(true);
+    }
+    #[test]
+    fn ttl_evicts_earlier_completion_even_when_a_lower_submission_sequence_is_fresh() {
+        let mut s = VoiceSnapshot::default();
+        let first = submit(&mut s, 1, &actor(1), 0);
+        let first = drive(&mut s, &first, VoiceDriverAction::Start, 0);
+        let first = drive(&mut s, &first, VoiceDriverAction::FirstWrite, 0);
+        let second = submit(&mut s, 2, &actor(1), 0);
+        let second = s
+            .cancel(second.id, second.revision, CommandId::new(90).unwrap(), 1)
+            .unwrap();
+        assert!(s.maintain_after_cancel(1, second.id).unwrap().is_empty());
+        let first = s
+            .cancel(first.id, first.revision, CommandId::new(91).unwrap(), 100)
+            .unwrap();
+        let first = s
+            .drive(
+                &VoiceDriverUpdate {
+                    job_id: first.id,
+                    expected_revision: first.revision,
+                    generation: first.release_generation.unwrap(),
+                    action: VoiceDriverAction::Released,
+                },
+                100,
+            )
+            .unwrap();
+        assert_eq!(first.ended_at, Some(100));
+        assert_eq!(second.ended_at, Some(1));
+        let at = 1 + AUDIT_TTL_SECONDS;
+        // A stale cancellation cannot ask this new metadata API for protection.
+        assert_eq!(
+            s.maintain_after_cancel(at, second.id),
+            Err(VoiceError::InvalidState)
+        );
+        let removed = s.maintain(at).unwrap();
+        assert_eq!(removed, vec![second]);
+        assert_eq!(s.jobs, vec![first]);
+        s.validate().unwrap();
     }
 }

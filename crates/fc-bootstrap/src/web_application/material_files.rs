@@ -445,6 +445,7 @@ pub struct PreparedWebMaterial {
     lease: SessionLease,
     scope: MaterialScope,
     command_id: CommandId,
+    command_ticket: Option<fc_ports::command_window::CommandTicket>,
     proof: Option<PreparedMaterialAppend>,
     pin: Option<LockedFile>,
     path: PathBuf,
@@ -1106,6 +1107,7 @@ impl WebApplication {
             lease,
             scope,
             command_id: input.command_id,
+            command_ticket: input.command_ticket,
             proof: Some(proof),
             pin: preparation.pin.take(),
             path: preparation.path.clone(),
@@ -1177,9 +1179,25 @@ impl WebApplication {
         {
             return failure(403, responses::ErrorCode::Forbidden);
         }
-        prepared.attempted = true;
-        let proof = prepared.proof.take().expect("opaque proof consumed once");
-        match backend.web_material_append(prepared.lease, proof) {
+        let result = (|| {
+            if let Some(ticket) = prepared.command_ticket {
+                let issued = backend.resolve_web_command(
+                    prepared.lease,
+                    fc_ports::command_window::CommandFamily::Materials,
+                    ticket,
+                    prepared.command_id,
+                )?;
+                let mut scope = backend.begin_command_scope(issued)?;
+                prepared.attempted = true;
+                let proof = prepared.proof.take().expect("opaque proof consumed once");
+                scope.web_material_append(prepared.lease, proof)
+            } else {
+                prepared.attempted = true;
+                let proof = prepared.proof.take().expect("opaque proof consumed once");
+                backend.web_material_append(prepared.lease, proof)
+            }
+        })();
+        match result {
             Ok(record) => {
                 if !current()
                     || prepared
@@ -1189,21 +1207,28 @@ impl WebApplication {
                 {
                     return failure(503, responses::ErrorCode::ResultUnknown);
                 }
-                materials::committed(prepared.command_id, prepared.scope, &record)
+                materials::committed_window(
+                    prepared.command_id,
+                    prepared.scope,
+                    &record,
+                    prepared.command_ticket,
+                )
             }
             Err(e) => {
                 // Domain/CAS/quota/idempotency failures are returned before
                 // COMMIT; only uncertain completion retains unreferenced bytes.
-                if matches!(
-                    &e,
-                    BackendError::Material(
-                        MaterialRepositoryError::Domain(_)
-                            | MaterialRepositoryError::IdempotencyConflict
-                            | MaterialRepositoryError::QuotaExceeded
-                            | MaterialRepositoryError::DocumentTooLarge
-                            | MaterialRepositoryError::Cancelled
+                if e.command_window_error().is_some()
+                    || matches!(
+                        &e,
+                        BackendError::Material(
+                            MaterialRepositoryError::Domain(_)
+                                | MaterialRepositoryError::IdempotencyConflict
+                                | MaterialRepositoryError::QuotaExceeded
+                                | MaterialRepositoryError::DocumentTooLarge
+                                | MaterialRepositoryError::Cancelled
+                        )
                     )
-                ) {
+                {
                     prepared.attempted = false;
                 }
                 materials::error(e, true)
@@ -1244,7 +1269,7 @@ impl WebApplication {
                 return Err(unavailable());
             }
             scoped
-                .web_material_outcome(lease, input.command_id)
+                .web_material_outcome_window(lease, input.command_id, input.command_ticket)
                 .map_err(|error| materials::error(error, false))?
         };
         // The read may have waited for publication/SQL. Reauthenticate the exact
@@ -1269,7 +1294,12 @@ impl WebApplication {
         {
             return Err(failure(409, responses::ErrorCode::IdempotencyConflict));
         }
-        let response = materials::committed(input.command_id, scope, &prior.record);
+        let response = materials::committed_window(
+            input.command_id,
+            scope,
+            &prior.record,
+            input.command_ticket,
+        );
         if !current() {
             return Err(unavailable());
         }
@@ -1306,14 +1336,20 @@ impl WebApplication {
             if !self.service.same_instance(&backend.web_service()) {
                 return unavailable();
             }
-            match backend.web_material_outcome(lease, input.command_id) {
+            match backend.web_material_outcome_window(lease, input.command_id, input.command_ticket)
+            {
                 Ok(Some(prior)) => {
                     if prior.kind == fc_ports::MaterialCommandKind::Append
                         && prior.scope == scope
                         && prior.record.resource.version_id.get() == input.upload_id
                         && prior.record.allowed_class_ids == input.allowed_class_ids
                     {
-                        return materials::committed(input.command_id, scope, &prior.record);
+                        return materials::committed_window(
+                            input.command_id,
+                            scope,
+                            &prior.record,
+                            input.command_ticket,
+                        );
                     }
                     return failure(409, responses::ErrorCode::IdempotencyConflict);
                 }

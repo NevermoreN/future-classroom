@@ -267,11 +267,39 @@ impl Backend {
         lease: SessionLease,
         command: CommandId,
     ) -> Result<Option<MaterialCommandOutcome>> {
+        self.material_outcome_scoped(lease, command, self.current_command)
+    }
+    pub fn web_material_outcome_window(
+        &self,
+        lease: SessionLease,
+        command: CommandId,
+        ticket: Option<fc_ports::command_window::CommandTicket>,
+    ) -> Result<Option<MaterialCommandOutcome>> {
+        let issued = ticket
+            .map(|ticket| {
+                self.resolve_web_command(
+                    lease,
+                    fc_ports::command_window::CommandFamily::Materials,
+                    ticket,
+                    command,
+                )
+            })
+            .transpose()?;
+        self.material_outcome_scoped(lease, command, issued)
+    }
+    fn material_outcome_scoped(
+        &self,
+        lease: SessionLease,
+        command: CommandId,
+        issued: Option<fc_ports::command_window::IssuedCommand>,
+    ) -> Result<Option<MaterialCommandOutcome>> {
         let state = self.state()?;
         let (actor, generation) = self.web_material_actor(&state, lease)?;
-        let result = self
-            .guarded(lease, generation, SessionPurpose::Manage)
-            .material_outcome(command, &actor)?;
+        let mut repository = self.guarded(lease, generation, SessionPurpose::Manage);
+        if let Some(issued) = issued {
+            repository = repository.with_command_window(issued);
+        }
+        let result = repository.material_outcome(command, &actor)?;
         if let Some(result) = &result {
             self.web_material_authorize(lease, result.scope, &[])?;
         } else {
@@ -287,9 +315,9 @@ impl Backend {
     ) -> Result<(u64, MaterialId, ResourceVersionId)> {
         self.web_material_authorize(lease, scope, &[])?;
         Ok((
-            self.command_id()?.get(),
-            MaterialId::new(self.command_id()?.get()).map_err(|_| BackendError::Overflow)?,
-            ResourceVersionId::new(self.command_id()?.get()).map_err(|_| BackendError::Overflow)?,
+            self.random_id()?.get(),
+            MaterialId::new(self.random_id()?.get()).map_err(|_| BackendError::Overflow)?,
+            ResourceVersionId::new(self.random_id()?.get()).map_err(|_| BackendError::Overflow)?,
         ))
     }
     pub fn web_material_download_record(

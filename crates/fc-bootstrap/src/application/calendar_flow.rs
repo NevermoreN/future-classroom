@@ -1,7 +1,7 @@
 //! Calendar composition on the existing shared pool. The Backend mutex is held
 //! only for bounded writer calls, never while WinHTTP owns a physical request.
-use super::{Failure, Outcome, Result};
-use fc_application::identity::SessionLease;
+use super::{Failure, NativeCommand, NativeHistory, NativeIntent, Outcome, Result};
+use fc_application::identity::{SessionLease, SessionPurpose};
 use fc_bootstrap::backend::Backend;
 use fc_domain::{ids::*, schedule_document::ScheduleDocument};
 use fc_ports::calendar::*;
@@ -43,6 +43,10 @@ impl CalendarProvider for HolidayCnProvider {
 
 pub(super) enum Operation {
     Load(i32),
+    Query {
+        year: i32,
+        original: NativeCommand,
+    },
     Download(i32),
     Adopt {
         year: i32,
@@ -66,6 +70,7 @@ pub(super) struct Loaded {
     pub document: ScheduleDocument,
     pub status: CalendarStatus,
     pub message: String,
+    pub history: Option<NativeHistory>,
 }
 impl Job {
     pub fn allocation_bytes(&self) -> Option<usize> {
@@ -84,6 +89,14 @@ impl Job {
         )
     }
     fn loaded(&self, year: i32, message: String) -> Result<Outcome> {
+        self.loaded_history(year, message, None)
+    }
+    fn loaded_history(
+        &self,
+        year: i32,
+        message: String,
+        history: Option<NativeHistory>,
+    ) -> Result<Outcome> {
         let lease = self.lease.ok_or(Failure::Stopped)?;
         let backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
         let document = backend.read_schedule(lease)?;
@@ -93,26 +106,68 @@ impl Job {
             document,
             status,
             message,
+            history,
         })))
     }
-    pub fn run(self, context: &JobContext) -> Result<Outcome> {
+    pub fn run_with_command(
+        self,
+        context: &JobContext,
+        command: &NativeCommand,
+    ) -> Result<Outcome> {
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         match &self.operation {
             Operation::Load(year) => self.loaded(*year, String::new()),
+            Operation::Query { year, original } => {
+                use fc_ports::command_window::TypedCommandIntent;
+                let intent = match original.intent() {
+                    Some(NativeIntent::CalendarPolicy {
+                        year: captured,
+                        expected,
+                        enabled,
+                    }) if captured == year => TypedCommandIntent::CalendarPolicy {
+                        enabled: *enabled,
+                        expected_policy: *expected,
+                    },
+                    Some(NativeIntent::CalendarDownload { year: captured }) if captured == year => {
+                        TypedCommandIntent::CalendarManualFetch { year: *year }
+                    }
+                    _ => return Err(Failure::Stopped),
+                };
+                let lease = self.lease.ok_or(Failure::Stopped)?;
+                let issued = original.original()?;
+                let result = self
+                    .backend
+                    .lock()
+                    .map_err(|_| Failure::Stopped)?
+                    .query_typed_outcome_native(lease, issued, intent);
+                let history = NativeHistory::from_query(original.clone(), issued, result)?;
+                self.loaded_history(*year, history.message().into(), Some(history))
+            }
             Operation::Adopt {
                 year,
                 expected,
                 candidates,
             } => {
-                self.backend
-                    .lock()
-                    .map_err(|_| Failure::Stopped)?
-                    .adopt_calendar_while(
-                        self.lease.ok_or(Failure::Stopped)?,
-                        *expected,
-                        candidates.clone(),
-                        Arc::new(context.execution_fence()),
+                let lease = self.lease.ok_or(Failure::Stopped)?;
+                {
+                    let mut backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
+                    command.run(
+                        &mut backend,
+                        fc_ports::command_window::CommandFamily::Calendar,
+                        Some(lease),
+                        SessionPurpose::Manage,
+                        context,
+                        |backend| {
+                            backend.adopt_calendar_while(
+                                lease,
+                                *expected,
+                                candidates.clone(),
+                                Arc::new(context.execution_fence()),
+                            )?;
+                            Ok(())
+                        },
                     )?;
+                }
                 self.loaded(
                     *year,
                     "所选年度候选已采用；补班日仍需明确课程来源，人工映射优先。".into(),
@@ -123,45 +178,71 @@ impl Job {
                 expected,
                 enabled,
             } => {
-                self.backend
-                    .lock()
-                    .map_err(|_| Failure::Stopped)?
-                    .set_calendar_auto_policy_while(
-                        self.lease.ok_or(Failure::Stopped)?,
-                        *expected,
-                        *enabled,
-                        Arc::new(context.execution_fence()),
-                    )?;
-                self.loaded(
-                    *year,
-                    if *enabled {
-                        "已开启受限的纯放假变化自动采用。"
-                    } else {
-                        "已关闭自动采用。"
-                    }
-                    .into(),
-                )
+                let lease = self.lease.ok_or(Failure::Stopped)?;
+                if command.intent()
+                    != Some(&NativeIntent::CalendarPolicy {
+                        year: *year,
+                        expected: *expected,
+                        enabled: *enabled,
+                    })
+                {
+                    return Err(Failure::Stopped);
+                }
+                let outcome = {
+                    let mut backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
+                    command.run(
+                        &mut backend,
+                        fc_ports::command_window::CommandFamily::Calendar,
+                        Some(lease),
+                        SessionPurpose::Manage,
+                        context,
+                        |backend| {
+                            Ok(backend.set_calendar_auto_policy_window_while(
+                                lease,
+                                *expected,
+                                *enabled,
+                                Arc::new(context.execution_fence()),
+                            )?)
+                        },
+                    )?
+                };
+                let history =
+                    NativeHistory::completed(command.clone(), command.original()?, outcome)?;
+                self.loaded_history(*year, history.message().into(), Some(history))
             }
             Operation::Download(year) => {
-                let reservation = self
-                    .backend
-                    .lock()
-                    .map_err(|_| Failure::Stopped)?
-                    .reserve_calendar_fetch_while(
-                        self.lease.ok_or(Failure::Stopped)?,
-                        *year,
-                        Arc::new(context.execution_fence()),
-                    )?;
-                match reservation {
-                    CalendarReservation::RateLimited { next_allowed } => self.loaded(*year, format!(
-                        "尚未到下一次允许下载的时间：{:04}-{:02}-{:02} {:02}:{:02}。保留已有候选与采用资料。",
-                        next_allowed.date.year(),next_allowed.date.month(),next_allowed.date.day(),
-                        next_allowed.second_of_day()/3600,next_allowed.second_of_day()%3600/60)),
-                    CalendarReservation::Reserved(ticket) => {
-                        let message = fetch_and_finish(&self.backend, ticket, context)?;
-                        self.loaded(*year, message)
-                    }
+                let lease = self.lease.ok_or(Failure::Stopped)?;
+                if command.intent() != Some(&NativeIntent::CalendarDownload { year: *year }) {
+                    return Err(Failure::Stopped);
                 }
+                let start = {
+                    let mut backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
+                    command.run(
+                        &mut backend,
+                        fc_ports::command_window::CommandFamily::Calendar,
+                        Some(lease),
+                        SessionPurpose::Manage,
+                        context,
+                        |backend| {
+                            Ok(backend.begin_calendar_manual_fetch_while(
+                                lease,
+                                *year,
+                                Arc::new(context.execution_fence()),
+                            )?)
+                        },
+                    )?
+                };
+                let outcome = match start {
+                    fc_bootstrap::backend::CalendarManualStart::History(outcome) => outcome,
+                    fc_bootstrap::backend::CalendarManualStart::Fresh(permit) => {
+                        // This private non-Clone value exists only for first durable
+                        // admission. A history result never reaches this provider.
+                        fetch_manual_and_finish(&self.backend, permit, context)?
+                    }
+                };
+                let history =
+                    NativeHistory::completed(command.clone(), command.original()?, outcome)?;
+                self.loaded_history(*year, history.message().into(), Some(history))
             }
             Operation::Background => {
                 // A busy foreground KDF/writer must not occupy the other pool
@@ -228,25 +309,7 @@ fn fetch_and_finish(
         etag: ticket.etag.clone(),
         last_modified: ticket.last_modified.clone(),
     };
-    let mut outcome = match HolidayCnProvider.fetch(ticket.year, Some(&validators), &|| {
-        context.checkpoint().is_err()
-    }) {
-        Ok(CalendarProviderResponse::NotModified) => CalendarFetchOutcome::NotModified,
-        Ok(CalendarProviderResponse::Downloaded(candidate)) => {
-            CalendarFetchOutcome::Downloaded(candidate)
-        }
-        Err(error) => CalendarFetchOutcome::Failed(error),
-    };
-    // Cancellation/deadline cannot publish a body obtained by a non-preemptible
-    // native call after its owner expired. The attempt itself stays rate-limited.
-    if let Err(error) = context.checkpoint() {
-        outcome =
-            CalendarFetchOutcome::Failed(if error == fc_runtime::worker::JobError::Deadline {
-                CalendarFetchFailure::Deadline
-            } else {
-                CalendarFetchFailure::Cancelled
-            });
-    }
+    let outcome = fetch_outcome(ticket.year, validators, context);
     let text = message(&outcome).to_owned();
     let status = backend
         .lock()
@@ -270,3 +333,45 @@ fn fetch_and_finish(
         },
     )
 }
+
+fn fetch_outcome(
+    year: i32,
+    validators: CalendarFetchValidators,
+    context: &JobContext,
+) -> CalendarFetchOutcome {
+    let mut outcome =
+        match HolidayCnProvider.fetch(year, Some(&validators), &|| context.checkpoint().is_err()) {
+            Ok(CalendarProviderResponse::NotModified) => CalendarFetchOutcome::NotModified,
+            Ok(CalendarProviderResponse::Downloaded(candidate)) => {
+                CalendarFetchOutcome::Downloaded(candidate)
+            }
+            Err(error) => CalendarFetchOutcome::Failed(error),
+        };
+    // Cancellation/deadline cannot publish a body obtained by a non-preemptible
+    // native call after its owner expired. The attempt itself stays rate-limited.
+    if let Err(error) = context.checkpoint() {
+        outcome =
+            CalendarFetchOutcome::Failed(if error == fc_runtime::worker::JobError::Deadline {
+                CalendarFetchFailure::Deadline
+            } else {
+                CalendarFetchFailure::Cancelled
+            });
+    }
+    outcome
+}
+fn fetch_manual_and_finish(
+    backend: &Arc<Mutex<Backend>>,
+    permit: fc_bootstrap::backend::ManualCalendarFetch,
+    context: &JobContext,
+) -> Result<fc_ports::command_window::TypedCommandOutcome> {
+    let outcome = fetch_outcome(permit.year(), permit.validators(), context);
+    // Consume the original owner even after cancellation/TTL; the backend
+    // selects its exact negative-finish fallback, without opening a new scope.
+    Ok(backend
+        .lock()
+        .map_err(|_| Failure::Stopped)?
+        .finish_calendar_manual_fetch_while(permit, outcome, Arc::new(context.execution_fence()))?)
+}
+
+#[cfg(test)]
+mod tests;

@@ -10,48 +10,69 @@ impl BackendFixture {
     fn catalog(&mut self, subjects: u64) {
         for id in [2, 1] {
             self.backend
-                .identity(
-                    self.admin,
-                    IdentityCommand::CreateClass {
-                        id: ClassId::new(id).unwrap(),
-                        name: format!("Synthetic class {id}"),
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(self.admin),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.identity(
+                            self.admin,
+                            IdentityCommand::CreateClass {
+                                id: ClassId::new(id).unwrap(),
+                                name: format!("Synthetic class {id}"),
+                            },
+                        )
                     },
                 )
                 .unwrap();
         }
         for id in (1..=subjects).rev() {
             self.backend
-                .identity(
-                    self.admin,
-                    IdentityCommand::PutSubject {
-                        id: SubjectId::new(id).unwrap(),
-                        name: format!("Synthetic subject {id}"),
-                        enabled: true,
-                        color: Rgb {
-                            red: 4,
-                            green: 5,
-                            blue: 6,
-                        },
-                        expected_revision: None,
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(self.admin),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.identity(
+                            self.admin,
+                            IdentityCommand::PutSubject {
+                                id: SubjectId::new(id).unwrap(),
+                                name: format!("Synthetic subject {id}"),
+                                enabled: true,
+                                color: Rgb {
+                                    red: 4,
+                                    green: 5,
+                                    blue: 6,
+                                },
+                                expected_revision: None,
+                            },
+                        )
                     },
                 )
                 .unwrap();
         }
         self.backend
-            .identity(
-                self.admin,
-                IdentityCommand::UpdateAccount {
-                    id: PrincipalId::new(1).unwrap(),
-                    display_name: "Synthetic global".into(),
-                    role: Role::GlobalAdmin,
-                    enabled: true,
-                    scopes: (1..=subjects)
-                        .rev()
-                        .map(|id| AssignmentScope {
-                            class_id: ClassId::new(1).unwrap(),
-                            subject_id: SubjectId::new(id).unwrap(),
-                        })
-                        .collect(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(self.admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        self.admin,
+                        IdentityCommand::UpdateAccount {
+                            id: PrincipalId::new(1).unwrap(),
+                            display_name: "Synthetic global".into(),
+                            role: Role::GlobalAdmin,
+                            enabled: true,
+                            scopes: (1..=subjects)
+                                .rev()
+                                .map(|id| AssignmentScope {
+                                    class_id: ClassId::new(1).unwrap(),
+                                    subject_id: SubjectId::new(id).unwrap(),
+                                })
+                                .collect(),
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -76,9 +97,10 @@ impl BackendFixture {
         )
     }
 }
-fn save(id: u64, revision: u64, json_text: &str) -> String {
+fn save(command: TestCommand, revision: u64, json_text: &str) -> String {
     format!(
-        r#"{{"schemaVersion":1,"commandId":"{id}","expectedRevision":"{revision}","text":{json_text}}}"#
+        r#"{{{},"expectedRevision":"{revision}","text":{json_text}}}"#,
+        command.fields()
     )
 }
 fn ok(response: &WebResponse) -> &str {
@@ -121,6 +143,10 @@ fn content_http_clear_keeps_cas_and_receipts_keep_original_result_without_automa
     ));
     let cookie = f.pair("content-browser", false);
     let csrf = f.csrf(&cookie);
+    let command101 = f.issue(&cookie, "content");
+    let command102 = f.issue(&cookie, "content");
+    let command103 = f.issue(&cookie, "content");
+    let command104 = f.issue(&cookie, "content");
     let route = "content/homework/1/1/1/2026-10-30";
     let absent = f.get_content(&cookie, route);
     let absent = ok(&absent);
@@ -134,19 +160,24 @@ fn content_http_clear_keeps_cas_and_receipts_keep_original_result_without_automa
     ] {
         assert!(absent.contains(expected), "{absent}");
     }
-    let first_body = save(101, 0, r#"" \t练习\n第二行\t保留\r字符 \r\n""#);
+    let first_body = save(command101, 0, r#"" \t练习\n第二行\t保留\r字符 \r\n""#);
     let first = f.save_content(&cookie, &csrf, route, &first_body);
     assert!(ok(&first).contains("\"status\":\"COMMITTED\""));
     assert!(ok(&first).contains("\"revision\":\"1\""));
     assert!(ok(&first).contains("\"text\":\"练习\\n第二行\\t保留\\r字符\""));
-    let clear = f.save_content(&cookie, &csrf, route, &save(102, 1, "\"\""));
+    let clear = f.save_content(&cookie, &csrf, route, &save(command102, 1, "\"\""));
     assert!(ok(&clear).contains("\"revision\":\"2\""));
     let cleared = f.get_content(&cookie, route);
     assert!(ok(&cleared).contains("\"revision\":\"2\""));
     assert!(ok(&cleared).contains("\"text\":\"\",\"lastActorId\":\"1\""));
-    let later = f.save_content(&cookie, &csrf, route, &save(103, 2, "\"Later version\""));
+    let later = f.save_content(
+        &cookie,
+        &csrf,
+        route,
+        &save(command103, 2, "\"Later version\""),
+    );
     assert!(ok(&later).contains("\"revision\":\"3\""));
-    let original = f.get_content(&cookie, "content/commands/101");
+    let original = f.get_content(&cookie, &command101.history("content"));
     assert!(ok(&original).contains("\"state\":\"COMMITTED\""));
     assert!(ok(&original).contains("\"revision\":\"1\""));
     assert!(ok(&original).contains("练习\\n第二行\\t保留\\r字符"));
@@ -154,7 +185,7 @@ fn content_http_clear_keeps_cas_and_receipts_keep_original_result_without_automa
     let replay = f.save_content(&cookie, &csrf, route, &first_body);
     assert!(ok(&replay).contains("\"revision\":\"1\""));
     error(
-        f.save_content(&cookie, &csrf, route, &save(101, 0, "\"different\"")),
+        f.save_content(&cookie, &csrf, route, &save(command101, 0, "\"different\"")),
         409,
         "IDEMPOTENCY_CONFLICT",
     );
@@ -163,18 +194,19 @@ fn content_http_clear_keeps_cas_and_receipts_keep_original_result_without_automa
             &cookie,
             &csrf,
             route,
-            &save(101, 0, r#""练习\n第二行\t保留\r字符""#),
+            &save(command101, 0, r#""练习\n第二行\t保留\r字符""#),
         ),
         409,
         "IDEMPOTENCY_CONFLICT",
     );
     error(
-        f.save_content(&cookie, &csrf, route, &save(104, 0, "\"stale\"")),
+        f.save_content(&cookie, &csrf, route, &save(command104, 0, "\"stale\"")),
         409,
         "REVISION_CONFLICT",
     );
-    let unknown = f.get_content(&cookie, "content/commands/104");
-    assert!(ok(&unknown).contains("\"state\":\"NOT_FOUND\",\"content\":null"));
+    let unknown = f.get_content(&cookie, &command104.history("content"));
+    assert!(ok(&unknown).contains("\"state\":\"NOT_FOUND\""));
+    assert!(ok(&unknown).contains("\"content\":null"));
     let latest = f.get_content(&cookie, route);
     assert!(ok(&latest).contains("\"revision\":\"3\""));
 }
@@ -185,8 +217,9 @@ fn content_http_authority_and_csrf_injection_fail_before_durable_mutation() {
     f.catalog(1);
     let cookie = f.pair("guard-browser", false);
     let csrf = f.csrf(&cookie);
+    let command201 = f.issue(&cookie, "content");
     let route = "content/homework/1/1/1/2026-10-30";
-    let valid = save(201, 0, "\"must never be stored\"");
+    let valid = save(command201, 0, "\"must never be stored\"");
     error(
         f.dispatch(
             &head("POST", route, valid.len(), None, Some(&csrf)),
@@ -222,7 +255,7 @@ fn content_http_authority_and_csrf_injection_fail_before_durable_mutation() {
     );
     let absent = f.get_content(&cookie, route);
     assert!(ok(&absent).contains("\"revision\":\"0\""));
-    let missing = f.get_content(&cookie, "content/commands/201");
+    let missing = f.get_content(&cookie, &command201.history("content"));
     assert!(ok(&missing).contains("\"state\":\"NOT_FOUND\""));
     let committed = f.save_content(&cookie, &csrf, route, &valid);
     assert!(ok(&committed).contains("\"revision\":\"1\""));
@@ -235,19 +268,26 @@ fn content_http_teacher_scope_global_pagination_and_receipt_privacy_use_actual_a
     let teacher_id = PrincipalId::new(2).unwrap();
     drop(
         f.backend
-            .create_account(
-                f.admin,
-                NewAccount {
-                    id: teacher_id,
-                    login_name: "teacher".into(),
-                    display_name: "Synthetic teacher".into(),
-                    role: Role::TeacherAdmin,
-                    scopes: vec![AssignmentScope {
-                        class_id: ClassId::new(1).unwrap(),
-                        subject_id: SubjectId::new(1).unwrap(),
-                    }],
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(f.admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.create_account(
+                        f.admin,
+                        NewAccount {
+                            id: teacher_id,
+                            login_name: "teacher".into(),
+                            display_name: "Synthetic teacher".into(),
+                            role: Role::TeacherAdmin,
+                            scopes: vec![AssignmentScope {
+                                class_id: ClassId::new(1).unwrap(),
+                                subject_id: SubjectId::new(1).unwrap(),
+                            }],
+                        },
+                        Password::new("Synthetic-Teacher-Initial-Password-2026".into()).unwrap(),
+                    )
                 },
-                Password::new("Synthetic-Teacher-Initial-Password-2026".into()).unwrap(),
             )
             .unwrap(),
     );
@@ -263,10 +303,17 @@ fn content_http_teacher_scope_global_pagination_and_receipt_privacy_use_actual_a
         .check_session(initial, SessionPurpose::Manage)
         .is_err());
     f.backend
-        .change_password(
-            initial,
-            Password::new("Synthetic-Teacher-Initial-Password-2026".into()).unwrap(),
-            Password::new("Synthetic-Teacher-Changed-Password-2026".into()).unwrap(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(initial),
+            SessionPurpose::ChangeInitialPassword,
+            |backend| {
+                backend.change_password(
+                    initial,
+                    Password::new("Synthetic-Teacher-Initial-Password-2026".into()).unwrap(),
+                    Password::new("Synthetic-Teacher-Changed-Password-2026".into()).unwrap(),
+                )
+            },
         )
         .unwrap();
     assert!(f
@@ -280,6 +327,9 @@ fn content_http_teacher_scope_global_pagination_and_receipt_privacy_use_actual_a
     let admin = f.pair("global-content", false);
     let teacher = f.pair_login("teacher", "teacher-content", false);
     let teacher_csrf = f.csrf(&teacher);
+    let command301 = f.issue(&teacher, "content");
+    let command302 = f.issue(&teacher, "content");
+    let command303 = f.issue(&teacher, "content");
     let all = f.get_content(&admin, "content/homework/scopes/0");
     let all = ok(&all);
     assert!(all.contains("\"total\":22,\"nextOffset\":20"), "{all}");
@@ -316,7 +366,7 @@ fn content_http_teacher_scope_global_pagination_and_receipt_privacy_use_actual_a
             &teacher,
             &teacher_csrf,
             foreign,
-            &save(301, 0, "\"foreign\""),
+            &save(command301, 0, "\"foreign\""),
         ),
         403,
         "FORBIDDEN",
@@ -326,34 +376,41 @@ fn content_http_teacher_scope_global_pagination_and_receipt_privacy_use_actual_a
         &teacher,
         &teacher_csrf,
         mine,
-        &save(302, 0, "\"Teacher owned\""),
+        &save(command302, 0, "\"Teacher owned\""),
     );
     assert!(ok(&saved).contains("\"lastActorId\":\"2\""));
     let global_read = f.get_content(&admin, mine);
     assert!(ok(&global_read).contains("Teacher owned"));
-    let hidden_receipt = f.get_content(&admin, "content/commands/302");
-    assert!(ok(&hidden_receipt).contains("\"state\":\"NOT_FOUND\""));
-    let own_receipt = f.get_content(&teacher, "content/commands/302");
+    let hidden_receipt = f.get_content(&admin, &command302.history("content"));
+    error(hidden_receipt, 404, "COMMAND_NOT_ISSUED");
+    let own_receipt = f.get_content(&teacher, &command302.history("content"));
     assert!(ok(&own_receipt).contains("\"state\":\"COMMITTED\""));
     let shared = f.save_content(
         &teacher,
         &teacher_csrf,
         "content/reminders/2/2026-10-30",
-        &save(303, 0, "\"Other managed class reminder\""),
+        &save(command303, 0, "\"Other managed class reminder\""),
     );
     assert!(ok(&shared).contains("Other managed class reminder"));
     f.backend
-        .identity(
-            f.admin,
-            IdentityCommand::UpdateAccount {
-                id: teacher_id,
-                display_name: "Synthetic teacher".into(),
-                role: Role::TeacherAdmin,
-                enabled: true,
-                scopes: vec![AssignmentScope {
-                    class_id: ClassId::new(2).unwrap(),
-                    subject_id: SubjectId::new(21).unwrap(),
-                }],
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    f.admin,
+                    IdentityCommand::UpdateAccount {
+                        id: teacher_id,
+                        display_name: "Synthetic teacher".into(),
+                        role: Role::TeacherAdmin,
+                        enabled: true,
+                        scopes: vec![AssignmentScope {
+                            class_id: ClassId::new(2).unwrap(),
+                            subject_id: SubjectId::new(21).unwrap(),
+                        }],
+                    },
+                )
             },
         )
         .unwrap();
@@ -373,19 +430,31 @@ fn content_http_midnight_rejects_old_routes_and_receipts_and_day_floor_survives_
     f.catalog(1);
     let cookie = f.pair("midnight-content", false);
     let csrf = f.csrf(&cookie);
+    let command401 = f.issue(&cookie, "content");
+    let command402 = f.issue(&cookie, "content");
     let old = "content/homework/1/1/1/2026-10-30";
-    let stored = f.save_content(&cookie, &csrf, old, &save(401, 0, "\"Yesterday secret\""));
+    let stored = f.save_content(
+        &cookie,
+        &csrf,
+        old,
+        &save(command401, 0, "\"Yesterday secret\""),
+    );
     assert!(ok(&stored).contains("Yesterday secret"));
     f.clock.1.store(86_401, Ordering::Release);
     f.clock.0.fetch_add(1_000, Ordering::AcqRel);
     error(f.get_content(&cookie, old), 409, "DAY_CHANGED");
     error(
-        f.get_content(&cookie, "content/commands/401"),
+        f.get_content(&cookie, &command401.history("content")),
         409,
         "DAY_CHANGED",
     );
     error(
-        f.save_content(&cookie, &csrf, old, &save(402, 1, "\"old date write\"")),
+        f.save_content(
+            &cookie,
+            &csrf,
+            old,
+            &save(command402, 1, "\"old date write\""),
+        ),
         409,
         "DAY_CHANGED",
     );
@@ -395,9 +464,17 @@ fn content_http_midnight_rejects_old_routes_and_receipts_and_day_floor_survives_
     assert!(ok(&empty).contains("\"expiresAt\":\"2026-11-01T00:00:00\""));
     f.clock.1.store(36_001, Ordering::Release);
     f.clock.0.fetch_add(1_000, Ordering::AcqRel);
+    // A backwards civil clock retires the old command epoch. A fresh explicit
+    // intent still cannot bypass the content repository's durable day floor.
+    let command403 = f.issue(&cookie, "content");
     error(f.get_content(&cookie, old), 409, "DAY_CHANGED");
     error(
-        f.save_content(&cookie, &csrf, old, &save(403, 1, "\"must not revive\"")),
+        f.save_content(
+            &cookie,
+            &csrf,
+            old,
+            &save(command403, 1, "\"must not revive\""),
+        ),
         409,
         "DAY_CHANGED",
     );

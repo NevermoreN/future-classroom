@@ -1,3 +1,4 @@
+import { identity, ticket } from './command-fixtures'
 import { describe, expect, it, vi } from 'vitest'
 import { ProtocolVersionFault } from '../src/api/protocol'
 import { ApiError, NetworkFault } from '../src/api/client'
@@ -10,9 +11,9 @@ const scopes = (): MaterialScopes => ({ identityRevision: '1', offset: 0, total:
 const page = (): MaterialPage => ({ scope: { ownerTeacherId: '9', subjectId: '2' }, folderId: '4', folderRevision: '1', offset: 0, total: 1, items: [row()], nextCursor: null })
 const ready: UploadReady = { uploadId: '6', expiresInSeconds: 300, maxChunkBytes: 65536 }
 function fixture() {
-  const api = { materialScopes: vi.fn<MaterialApi['materialScopes']>().mockResolvedValue(scopes()), materialClasses: vi.fn<MaterialApi['materialClasses']>().mockResolvedValue({ identityRevision: '1', scope: target, offset: 2, total: 2, nextOffset: null, items: [] }), materials: vi.fn<MaterialApi['materials']>().mockResolvedValue(page()), createUpload: vi.fn<MaterialApi['createUpload']>().mockResolvedValue(ready), upload: vi.fn<MaterialApi['upload']>().mockResolvedValue(undefined), cancelUpload: vi.fn<MaterialApi['cancelUpload']>().mockResolvedValue(undefined), append: vi.fn<MaterialApi['append']>().mockImplementation(async (scope, command) => ({ commandId: command.commandId, scope, record: row() })), deleteMaterial: vi.fn<MaterialApi['deleteMaterial']>().mockImplementation(async (scope, command) => ({ commandId: command.commandId, scope, record: { ...row(), status: 'DELETED', revision: (BigInt(command.expectedMaterialRevision) + 1n).toString() } })), materialOutcome: vi.fn<MaterialApi['materialOutcome']>().mockResolvedValue({ commandId: '77', state: 'NOT_FOUND', scope: null, record: null }), download: vi.fn<MaterialApi['download']>().mockResolvedValue(new Blob(['sample'])) }
   let next = 76
-  const changed = vi.fn<(state: MaterialState) => void>(), revoked = vi.fn(), controller = new MaterialController(api, 'b'.repeat(64), changed, revoked, () => String(++next))
+  const api = { issueCommand: vi.fn<MaterialApi['issueCommand']>().mockImplementation(async () => identity(String(++next))), materialScopes: vi.fn<MaterialApi['materialScopes']>().mockResolvedValue(scopes()), materialClasses: vi.fn<MaterialApi['materialClasses']>().mockResolvedValue({ identityRevision: '1', scope: target, offset: 2, total: 2, nextOffset: null, items: [] }), materials: vi.fn<MaterialApi['materials']>().mockResolvedValue(page()), createUpload: vi.fn<MaterialApi['createUpload']>().mockResolvedValue(ready), upload: vi.fn<MaterialApi['upload']>().mockResolvedValue(undefined), cancelUpload: vi.fn<MaterialApi['cancelUpload']>().mockResolvedValue(undefined), append: vi.fn<MaterialApi['append']>().mockImplementation(async (scope, command) => ({ commandId: command.commandId, commandTicket: ticket, scope, record: row() })), deleteMaterial: vi.fn<MaterialApi['deleteMaterial']>().mockImplementation(async (scope, command) => ({ commandId: command.commandId, commandTicket: ticket, scope, record: { ...row(), status: 'DELETED', revision: (BigInt(command.expectedMaterialRevision) + 1n).toString() } })), materialOutcome: vi.fn<MaterialApi['materialOutcome']>().mockResolvedValue({ commandId: '77', commandTicket: ticket, state: 'NOT_FOUND', scope: null, record: null }), download: vi.fn<MaterialApi['download']>().mockResolvedValue(new Blob(['sample'])) }
+  const changed = vi.fn<(state: MaterialState) => void>(), revoked = vi.fn(), controller = new MaterialController(api, 'b'.repeat(64), changed, revoked)
   return { api, controller, changed, revoked, state: () => controller.snapshot() }
 }
 async function open(f: ReturnType<typeof fixture>) { await f.controller.loadScopes(); await f.controller.select(f.state().scopes!.items[0]!) }
@@ -21,7 +22,7 @@ describe('material drafts, one-shot commands and exact result correlation', () =
   it('uploads without append and only explicit addition submits a command', async () => {
     const f = fixture(); await open(f); await transfer(f)
     expect(f.state().phase).toBe('uploaded'); expect(f.api.append).not.toHaveBeenCalled(); expect(f.controller.hasRiskyDraft()).toBe(true); expect(f.controller.leave()).toBe(false)
-    await f.controller.append(); expect(f.api.append).toHaveBeenCalledOnce(); expect(f.api.append.mock.calls[0]![1]).toEqual({ commandId: '77', uploadId: ready.uploadId, allowedClassIds: ['1'] }); expect(f.state().history?.status).toBe('PUBLISHED'); expect(f.state().notice).toContain('不代表'); expect(f.api.materials).toHaveBeenCalledOnce(); f.controller.dispose()
+    await f.controller.append(); expect(f.api.append).toHaveBeenCalledOnce(); expect(f.api.append.mock.calls[0]![1]).toEqual({ commandId: '77', commandTicket: ticket, uploadId: ready.uploadId, allowedClassIds: ['1'] }); expect(f.state().history?.status).toBe('PUBLISHED'); expect(f.state().notice).toContain('不代表'); expect(f.api.materials).toHaveBeenCalledOnce(); f.controller.dispose()
   })
   it('cancels upload and ignores late success from a transport disregarding abort', async () => {
     const f = fixture(); await open(f); let complete!: () => void
@@ -62,31 +63,31 @@ describe('material drafts, one-shot commands and exact result correlation', () =
   it('NOT_FOUND retains the exact command; historical success requires explicit current GET', async () => {
     const f = fixture(); await open(f); await transfer(f); f.api.append.mockRejectedValueOnce(new NetworkFault()); await f.controller.append(); const pending = f.state().pending; await f.controller.query()
     expect(f.state().pending).toBe(pending); expect(f.state().phase).toBe('unknown'); expect(f.state().notice).toContain('不证明'); expect(f.api.append).toHaveBeenCalledOnce()
-    f.api.materialOutcome.mockResolvedValueOnce({ commandId: '77', state: 'COMMITTED', scope: target, record: row() }); await f.controller.query(); expect(f.state().phase).toBe('result'); expect(f.state().history?.materialId).toBe('5'); expect(f.api.materials).toHaveBeenCalledOnce()
+    f.api.materialOutcome.mockResolvedValueOnce({ commandId: '77', commandTicket: ticket, state: 'COMMITTED', scope: target, record: row() }); await f.controller.query(); expect(f.state().phase).toBe('result'); expect(f.state().history?.materialId).toBe('5'); expect(f.api.materials).toHaveBeenCalledOnce()
     const latest = { ...page(), folderRevision: '2', total: 0, items: [] }; f.api.materials.mockResolvedValueOnce(latest); await f.controller.loadPage(null, true)
     expect(f.state().page).toEqual(latest); expect(f.state().pending).toBeNull(); expect(f.state().history).toBeNull(); expect(f.api.append).toHaveBeenCalledOnce(); f.controller.dispose()
   })
   it('foreign committed scope cannot resolve the original unknown command', async () => {
     const f = fixture(); await open(f); await transfer(f); f.api.append.mockRejectedValueOnce(new NetworkFault()); await f.controller.append()
-    f.api.materialOutcome.mockResolvedValueOnce({ commandId: '77', state: 'COMMITTED', scope: { ownerTeacherId: '10', subjectId: '2' }, record: row() }); await f.controller.query()
+    f.api.materialOutcome.mockResolvedValueOnce({ commandId: '77', commandTicket: ticket, state: 'COMMITTED', scope: { ownerTeacherId: '10', subjectId: '2' }, record: row() }); await f.controller.query()
     expect(f.state().phase).toBe('unknown'); expect(f.state().history).toBeNull(); expect(f.state().pending?.command.commandId).toBe('77'); expect(f.api.append).toHaveBeenCalledOnce(); f.controller.dispose()
   })
   it('captures immutable original resource version and revision for one delete', async () => {
     const f = fixture(); await open(f); const original = f.state().page!.items[0]!
     f.api.deleteMaterial.mockRejectedValueOnce(new NetworkFault()); await f.controller.delete(original)
-    expect(f.api.deleteMaterial.mock.calls[0]![1]).toEqual({ commandId: '77', materialId: '5', resourceVersionId: '6', expectedMaterialRevision: '1' })
+    expect(f.api.deleteMaterial.mock.calls[0]![1]).toEqual({ commandId: '77', commandTicket: ticket, materialId: '5', resourceVersionId: '6', expectedMaterialRevision: '1' })
     original.revision = '9'; original.resourceVersionId = '99'; await f.controller.delete(original); expect(f.api.deleteMaterial).toHaveBeenCalledOnce()
     const p = f.state().pending; expect(p?.kind).toBe('DELETE'); if (p?.kind === 'DELETE') expect(p.command.expectedMaterialRevision).toBe('1')
-    f.api.materialOutcome.mockResolvedValueOnce({ commandId: '77', state: 'COMMITTED', scope: target, record: { ...row(), status: 'DELETED', revision: '2' } }); await f.controller.query(); expect(f.state().phase).toBe('result'); f.controller.dispose()
+    f.api.materialOutcome.mockResolvedValueOnce({ commandId: '77', commandTicket: ticket, state: 'COMMITTED', scope: target, record: { ...row(), status: 'DELETED', revision: '2' } }); await f.controller.query(); expect(f.state().phase).toBe('result'); f.controller.dispose()
   })
   it('a new append receipt cannot resolve as an already revised material', async () => {
     const f = fixture(); await open(f); await transfer(f)
-    f.api.append.mockResolvedValueOnce({ commandId: '77', scope: target, record: { ...row(), revision: '2' } }); await f.controller.append()
+    f.api.append.mockResolvedValueOnce({ commandId: '77', commandTicket: ticket, scope: target, record: { ...row(), revision: '2' } }); await f.controller.append()
     expect(f.state().phase).toBe('unknown'); expect(f.state().history).toBeNull(); expect(f.state().pending?.command.commandId).toBe('77'); f.controller.dispose()
   })
   it('delete cannot confirm different content bytes under the original fixed resource version', async () => {
     const f = fixture(); await open(f)
-    f.api.deleteMaterial.mockResolvedValueOnce({ commandId: '77', scope: target, record: { ...row(), sha256: 'b'.repeat(64), status: 'DELETED', revision: '2' } }); await f.controller.delete(f.state().page!.items[0]!)
+    f.api.deleteMaterial.mockResolvedValueOnce({ commandId: '77', commandTicket: ticket, scope: target, record: { ...row(), sha256: 'b'.repeat(64), status: 'DELETED', revision: '2' } }); await f.controller.delete(f.state().page!.items[0]!)
     expect(f.state().phase).toBe('unknown'); expect(f.state().history).toBeNull(); expect(f.state().pending?.command.commandId).toBe('77'); f.controller.dispose()
   })
   it('never deletes a version differing from the loaded row', async () => {
@@ -142,9 +143,9 @@ describe('material version recovery keeps files and original commands', () => {
     f.controller.pick(new File(['other'], 'other.txt')); f.controller.setClasses(['2'])
     expect(f.api.append).toHaveBeenCalledOnce(); expect(f.api.createUpload).toHaveBeenCalledOnce(); expect(f.api.cancelUpload).not.toHaveBeenCalled(); expect(f.api.deleteMaterial).not.toHaveBeenCalled(); expect(f.api.materials).toHaveBeenCalledOnce(); expect(f.api.materialScopes).toHaveBeenCalledOnce()
     await f.controller.query(); expect(f.state().pending).toBe(pending); expect(f.state().notice).toContain('不证明'); expect(f.state().notice).toContain(fault.message)
-    f.api.materialOutcome.mockResolvedValueOnce({ commandId: '77', state: 'COMMITTED', scope: target, record: row() }); await f.controller.query()
+    f.api.materialOutcome.mockResolvedValueOnce({ commandId: '77', commandTicket: ticket, state: 'COMMITTED', scope: target, record: row() }); await f.controller.query()
     expect(f.state().pending).toBe(pending); expect(f.state().history?.materialId).toBe('5'); expect(f.state().file).toBe(file); expect(f.state().upload).toBe(upload); expect(f.state().classes).toBe(classes); expect(f.state().notice).toContain(fault.message)
-    expect(f.api.materialOutcome.mock.calls.map(call => call[0])).toEqual(['77', '77']); await f.controller.append(); expect(f.api.append).toHaveBeenCalledOnce(); expect(f.controller.leave()).toBe(false); f.controller.dispose()
+    expect(f.api.materialOutcome.mock.calls.map(call => call[0])).toEqual([identity('77'), identity('77')]); await f.controller.append(); expect(f.api.append).toHaveBeenCalledOnce(); expect(f.controller.leave()).toBe(false); f.controller.dispose()
   })
   it('keeps an unsubmitted file and classes on a typed upload failure and does not recreate the stage', async () => {
     const f = fixture(); await open(f); const file = new File(['sample'], '课件.txt'); f.controller.pick(file); f.controller.setClasses(['1'])
@@ -155,6 +156,32 @@ describe('material version recovery keeps files and original commands', () => {
   it('keeps exact unknown delete metadata when command-query decoding reports a version change', async () => {
     const f = fixture(); await open(f); f.api.deleteMaterial.mockRejectedValueOnce(new NetworkFault()); await f.controller.delete(row()); const pending = f.state().pending
     f.api.materialOutcome.mockRejectedValueOnce(new ProtocolVersionFault()); await f.controller.query(); expect(f.state().pending).toBe(pending); expect(f.state().notice).toContain('管理员升级')
-    await f.controller.query(); expect(f.api.materialOutcome.mock.calls.map(call => call[0])).toEqual(['77', '77']); expect(f.state().pending).toBe(pending); await f.controller.delete(row()); expect(f.api.deleteMaterial).toHaveBeenCalledOnce(); f.controller.dispose()
+    await f.controller.query(); expect(f.api.materialOutcome.mock.calls.map(call => call[0])).toEqual([identity('77'), identity('77')]); expect(f.state().pending).toBe(pending); await f.controller.delete(row()); expect(f.api.deleteMaterial).toHaveBeenCalledOnce(); f.controller.dispose()
+  })
+})
+
+describe('material server ticket generation boundary', () => {
+  it('never binds a late ticket to a replaced scope or file after discard', async () => {
+    const f = fixture(); await open(f); await transfer(f)
+    let issue!: (pair: ReturnType<typeof identity>) => void
+    f.api.issueCommand.mockImplementationOnce(() => new Promise(resolve => { issue = resolve }))
+    const sending = f.controller.append(); expect(f.api.append).not.toHaveBeenCalled()
+    expect(f.controller.leave(true)).toBe(true); issue(identity()); await sending
+    expect(f.api.append).not.toHaveBeenCalled(); expect(f.state().pending).toBeNull(); f.controller.dispose()
+  })
+  it('retains upload and exact classes when no usable ticket is delivered', async () => {
+    const f = fixture(); await open(f); await transfer(f); f.api.issueCommand.mockRejectedValueOnce(new ApiError(503, 'COMMAND_WINDOW_FULL')); await f.controller.append()
+    expect(f.state().phase).toBe('uploaded'); expect(f.state().upload?.uploadId).toBe('6'); expect(f.state().classes).toEqual(['1']); expect(f.api.append).not.toHaveBeenCalled(); expect(f.api.issueCommand).toHaveBeenCalledExactlyOnceWith('materials', 'b'.repeat(64), expect.any(AbortSignal)); f.controller.dispose()
+  })
+  it('stops an expired original pair without a replacement issuance or POST', async () => {
+    const f = fixture(); await open(f); await transfer(f); f.api.append.mockRejectedValueOnce(new NetworkFault()); await f.controller.append()
+    f.api.materialOutcome.mockRejectedValueOnce(new ApiError(410, 'COMMAND_EXPIRED')); await f.controller.query()
+    expect(f.state().pending?.retired).toBe(true); expect(f.state().file?.name).toBe('课件.txt')
+    await f.controller.query(); await f.controller.append(); expect(f.api.materialOutcome).toHaveBeenCalledOnce(); expect(f.api.append).toHaveBeenCalledOnce(); expect(f.api.issueCommand).toHaveBeenCalledOnce(); f.controller.dispose()
+  })
+  it('does not accept a NOT_FOUND for another ticket', async () => {
+    const f = fixture(); await open(f); await transfer(f); f.api.append.mockRejectedValueOnce(new NetworkFault()); await f.controller.append()
+    f.api.materialOutcome.mockResolvedValueOnce({ ...identity(), commandTicket: ticket.replace('12', '34'), state: 'NOT_FOUND', scope: null, record: null }); await f.controller.query()
+    expect(f.state().phase).toBe('unknown'); expect(f.state().pending?.command.commandTicket).toBe(ticket); expect(f.api.issueCommand).toHaveBeenCalledOnce(); f.controller.dispose()
   })
 })

@@ -117,7 +117,11 @@ fn successful_append_retry_reads_exact_durable_receipt_before_the_now_vacant_hub
         ("materials/folders/1/1/append", "2"),
         ("materials/folders/1/2/append", "1"),
     ] {
-        let body=format!(r#"{{"schemaVersion":1,"commandId":"97001","uploadId":"{id}","allowedClassIds":["{classes}"]}}"#).into_bytes();
+        let body = format!(
+            r#"{{{},"uploadId":"{id}","allowedClassIds":["{classes}"]}}"#,
+            f.command_fields(97001)
+        )
+        .into_bytes();
         let head = f.head(route, body.len());
         let conflict = append(&pool, &hub, &f, head, body, false);
         assert_eq!(conflict.head.status, 409);

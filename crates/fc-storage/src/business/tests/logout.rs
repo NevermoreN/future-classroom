@@ -1,6 +1,7 @@
 //! Self logout crosses the real writer, SQLite transaction and durable epoch boundary.
 use super::*;
 use fc_domain::time::{LocalDate, LocalDateTime};
+use fc_ports::command_window::{CommandFamily, CommandOwner, IssuedCommand};
 use std::sync::atomic::AtomicU64;
 
 static NEXT_DIRECTORY: AtomicU64 = AtomicU64::new(0);
@@ -74,9 +75,28 @@ fn actor(state: &IdentityState, id: u64, origin: TrustedOrigin) -> ActorContext 
         origin,
     }
 }
-fn request(id: u64, state: &IdentityState, command: IdentityCommand) -> IdentityRequest {
+fn issue(
+    commands: &crate::fixture_commands::FixtureCommands,
+    handle: &StorageHandle<Revision>,
+    label: u64,
+    actor: Option<&ActorContext>,
+) -> IssuedCommand {
+    commands
+        .issue(
+            handle,
+            CommandFamily::Identity,
+            &label.to_string(),
+            actor.map_or(CommandOwner::PublicDesktop, CommandOwner::authenticated),
+        )
+        .unwrap()
+}
+fn request(
+    issued: IssuedCommand,
+    state: &IdentityState,
+    command: IdentityCommand,
+) -> IdentityRequest {
     IdentityRequest {
-        command_id: CommandId::new(id).unwrap(),
+        command_id: issued.command_id,
         expected_revision: state.revision,
         command,
     }
@@ -88,6 +108,7 @@ fn logout(id: PrincipalId, epoch: AuthEpoch) -> IdentityCommand {
     }
 }
 struct Fixture {
+    commands: crate::fixture_commands::FixtureCommands,
     writer: Option<StorageWriter<Revision>>,
     repository: BusinessRepository<Revision>,
     directory: Directory,
@@ -95,6 +116,24 @@ struct Fixture {
     revoke_at_update: Arc<AtomicBool>,
 }
 impl Fixture {
+    fn receipt_key(&self, legacy: &str) -> String {
+        let (slot, id) =
+            crate::business::command_window::legacy(legacy).expect("exact fixture receipt slot");
+        let original = self
+            .commands
+            .original(id)
+            .expect("original fixture receipt pair");
+        crate::business::command_window::namespaced(slot, original.ticket)
+    }
+
+    fn issue(&self, label: u64, actor: Option<&ActorContext>) -> IssuedCommand {
+        issue(
+            &self.commands,
+            &self.writer.as_ref().unwrap().handle(),
+            label,
+            actor,
+        )
+    }
     fn open(
         directory: &Directory,
         active: Arc<AtomicBool>,
@@ -127,25 +166,28 @@ impl Fixture {
         (writer, repository)
     }
     fn new(complete_initial_password: bool) -> Self {
+        let commands = crate::fixture_commands::FixtureCommands::default();
         let directory = Directory::new();
         let active = Arc::new(AtomicBool::new(true));
         let revoke_at_update = Arc::new(AtomicBool::new(false));
-        let (writer, mut repository) =
-            Self::open(&directory, active.clone(), revoke_at_update.clone());
+        let (writer, repository) = Self::open(&directory, active.clone(), revoke_at_update.clone());
         let empty = repository.load_identity().unwrap();
-        let admin = repository
-            .execute_identity_with_credentials(
-                request(
-                    1,
-                    &empty,
-                    IdentityCommand::FirstAdministrator {
-                        school_id: SchoolId::new(1).unwrap(),
-                        school_name: "学校".into(),
-                        id: principal(1),
-                        login_name: "admin".into(),
-                        display_name: "管理员".into(),
-                    },
-                ),
+        let admin = {
+            let fixture_request = request(
+                issue(&commands, &writer.handle(), 1, None),
+                &empty,
+                IdentityCommand::FirstAdministrator {
+                    school_id: SchoolId::new(1).unwrap(),
+                    school_name: "学校".into(),
+                    id: principal(1),
+                    login_name: "admin".into(),
+                    display_name: "管理员".into(),
+                },
+            );
+            let original_pair = commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = repository.with_command_window(original_pair);
+            issued_repository.execute_identity_with_credentials(
+                fixture_request,
                 None,
                 PreparedCredentials {
                     principal_id: principal(1),
@@ -153,22 +195,26 @@ impl Fixture {
                     recovery: Some((1, vec![12])),
                 },
             )
-            .unwrap()
-            .next;
+        }
+        .unwrap()
+        .next;
         let admin_actor = actor(&admin, 1, TrustedOrigin::Local);
-        let user = repository
-            .execute_identity_with_credentials(
-                request(
-                    2,
-                    &admin,
-                    IdentityCommand::CreateAccount(NewAccount {
-                        id: principal(2),
-                        login_name: "user".into(),
-                        display_name: "用户".into(),
-                        role: Role::User,
-                        scopes: vec![],
-                    }),
-                ),
+        let user = {
+            let fixture_request = request(
+                issue(&commands, &writer.handle(), 2, Some(&admin_actor)),
+                &admin,
+                IdentityCommand::CreateAccount(NewAccount {
+                    id: principal(2),
+                    login_name: "user".into(),
+                    display_name: "用户".into(),
+                    role: Role::User,
+                    scopes: vec![],
+                }),
+            );
+            let original_pair = commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = repository.with_command_window(original_pair);
+            issued_repository.execute_identity_with_credentials(
+                fixture_request,
                 Some(&admin_actor),
                 PreparedCredentials {
                     principal_id: principal(2),
@@ -176,20 +222,24 @@ impl Fixture {
                     recovery: Some((1, vec![22])),
                 },
             )
-            .unwrap()
-            .next;
+        }
+        .unwrap()
+        .next;
         if complete_initial_password {
             let user_actor = actor(&user, 2, TrustedOrigin::Web);
-            repository
-                .execute_identity_with_credentials(
-                    request(
-                        3,
-                        &user,
-                        IdentityCommand::PasswordChanged {
-                            id: principal(2),
-                            expected_credential_version: 1,
-                        },
-                    ),
+            {
+                let fixture_request = request(
+                    issue(&commands, &writer.handle(), 3, Some(&user_actor)),
+                    &user,
+                    IdentityCommand::PasswordChanged {
+                        id: principal(2),
+                        expected_credential_version: 1,
+                    },
+                );
+                let original_pair = commands.original(fixture_request.command_id).unwrap();
+                let mut issued_repository = repository.with_command_window(original_pair);
+                issued_repository.execute_identity_with_credentials(
+                    fixture_request,
                     Some(&user_actor),
                     PreparedCredentials {
                         principal_id: principal(2),
@@ -197,9 +247,11 @@ impl Fixture {
                         recovery: None,
                     },
                 )
-                .unwrap();
+            }
+            .unwrap();
         }
         Self {
+            commands,
             writer: Some(writer),
             repository,
             directory,
@@ -234,11 +286,21 @@ fn logout_sqlite_epoch_survives_restart_and_old_local_and_web_actors_stay_revoke
         let old_local = actor(&before, 2, TrustedOrigin::Local);
         let old_web = actor(&before, 2, TrustedOrigin::Web);
         let initiator = actor(&before, 2, origin);
-        let command = request(4, &before, logout(principal(2), initiator.auth_epoch));
-        let transition = fixture
-            .repository
-            .execute_identity(command.clone(), Some(&initiator), &Time)
-            .unwrap();
+        let command = request(
+            fixture.issue(4, Some(&initiator)),
+            &before,
+            logout(principal(2), initiator.auth_epoch),
+        );
+        let transition = {
+            let fixture_request = command.clone();
+            let original_pair = fixture
+                .commands
+                .original(fixture_request.command_id)
+                .unwrap();
+            let mut issued_repository = fixture.repository.with_command_window(original_pair);
+            issued_repository.execute_identity(fixture_request, Some(&initiator), &Time)
+        }
+        .unwrap();
         assert_eq!(
             transition.events,
             vec![IdentityEvent::AuthorizationRevoked(principal(2))]
@@ -254,12 +316,25 @@ fn logout_sqlite_epoch_survives_restart_and_old_local_and_web_actors_stay_revoke
         assert_eq!(fixture.repository.load_identity().unwrap(), transition.next);
         for old in [&old_local, &old_web] {
             assert_eq!(
-                fixture
-                    .repository
-                    .execute_identity(command.clone(), Some(old), &Time),
-                Err(IdentityRepositoryError::Domain(IdentityError::Permission(
-                    PermissionError::StaleAuthorization
-                )))
+                {
+                    let fixture_request = command.clone();
+                    let original_pair = fixture
+                        .commands
+                        .original(fixture_request.command_id)
+                        .unwrap();
+                    let mut issued_repository =
+                        fixture.repository.with_command_window(original_pair);
+                    issued_repository.execute_identity(fixture_request, Some(old), &Time)
+                },
+                if old.origin == initiator.origin {
+                    Err(IdentityRepositoryError::Domain(IdentityError::Permission(
+                        PermissionError::StaleAuthorization,
+                    )))
+                } else {
+                    Err(IdentityRepositoryError::CommandWindow(
+                        fc_ports::command_window::CommandWindowError::NotIssued,
+                    ))
+                }
             );
         }
         fixture.reopen();
@@ -267,37 +342,64 @@ fn logout_sqlite_epoch_survives_restart_and_old_local_and_web_actors_stay_revoke
         assert_eq!(reopened, transition.next);
         for old in [&old_local, &old_web] {
             assert_eq!(
-                fixture
-                    .repository
-                    .execute_identity(command.clone(), Some(old), &Time),
-                Err(IdentityRepositoryError::Domain(IdentityError::Permission(
-                    PermissionError::StaleAuthorization
-                )))
+                {
+                    let fixture_request = command.clone();
+                    let original_pair = fixture
+                        .commands
+                        .original(fixture_request.command_id)
+                        .unwrap();
+                    let mut issued_repository =
+                        fixture.repository.with_command_window(original_pair);
+                    issued_repository.execute_identity(fixture_request, Some(old), &Time)
+                },
+                if old.origin == initiator.origin {
+                    Err(IdentityRepositoryError::Domain(IdentityError::Permission(
+                        PermissionError::StaleAuthorization,
+                    )))
+                } else {
+                    Err(IdentityRepositoryError::CommandWindow(
+                        fc_ports::command_window::CommandWindowError::NotIssued,
+                    ))
+                }
             );
         }
         let new = actor(&reopened, 2, origin);
         assert_eq!(
-            fixture
-                .repository
-                .execute_identity(command, Some(&new), &Time),
-            Err(IdentityRepositoryError::IdempotencyConflict),
+            {
+                let fixture_request = command;
+                let original_pair = fixture
+                    .commands
+                    .original(fixture_request.command_id)
+                    .unwrap();
+                let mut issued_repository = fixture.repository.with_command_window(original_pair);
+                issued_repository.execute_identity(fixture_request, Some(&new), &Time)
+            },
+            Err(IdentityRepositoryError::CommandWindow(
+                fc_ports::command_window::CommandWindowError::NotIssued
+            )),
             "a receipt cannot be transplanted to a different actor epoch"
         );
         assert_eq!(fixture.repository.load_identity().unwrap(), reopened);
-        fixture
-            .repository
-            .execute_identity(
-                request(5, &reopened, logout(principal(2), new.auth_epoch)),
-                Some(&new),
-                &Time,
-            )
-            .unwrap();
+        {
+            let fixture_request = request(
+                fixture.issue(5, Some(&new)),
+                &reopened,
+                logout(principal(2), new.auth_epoch),
+            );
+            let original_pair = fixture
+                .commands
+                .original(fixture_request.command_id)
+                .unwrap();
+            let mut issued_repository = fixture.repository.with_command_window(original_pair);
+            issued_repository.execute_identity(fixture_request, Some(&new), &Time)
+        }
+        .unwrap();
     }
 }
 
 #[test]
 fn logout_sqlite_rejects_other_accounts_stale_expected_epoch_and_initial_password() {
-    let mut fixture = Fixture::new(true);
+    let fixture = Fixture::new(true);
     let before = fixture.repository.load_identity().unwrap();
     let user = actor(&before, 2, TrustedOrigin::Web);
     for (id, command, expected) in [
@@ -313,22 +415,36 @@ fn logout_sqlite_rejects_other_accounts_stale_expected_epoch_and_initial_passwor
         ),
     ] {
         assert_eq!(
-            fixture
-                .repository
-                .execute_identity(request(id, &before, command), Some(&user), &Time),
+            {
+                let fixture_request = request(fixture.issue(id, Some(&user)), &before, command);
+                let original_pair = fixture
+                    .commands
+                    .original(fixture_request.command_id)
+                    .unwrap();
+                let mut issued_repository = fixture.repository.with_command_window(original_pair);
+                issued_repository.execute_identity(fixture_request, Some(&user), &Time)
+            },
             Err(IdentityRepositoryError::Domain(expected))
         );
         assert_eq!(fixture.repository.load_identity().unwrap(), before);
     }
-    let mut initial = Fixture::new(false);
+    let initial = Fixture::new(false);
     let before = initial.repository.load_identity().unwrap();
     let user = actor(&before, 2, TrustedOrigin::Local);
     assert_eq!(
-        initial.repository.execute_identity(
-            request(3, &before, logout(principal(2), user.auth_epoch)),
-            Some(&user),
-            &Time
-        ),
+        {
+            let fixture_request = request(
+                initial.issue(3, Some(&user)),
+                &before,
+                logout(principal(2), user.auth_epoch),
+            );
+            let original_pair = initial
+                .commands
+                .original(fixture_request.command_id)
+                .unwrap();
+            let mut issued_repository = initial.repository.with_command_window(original_pair);
+            issued_repository.execute_identity(fixture_request, Some(&user), &Time)
+        },
         Err(IdentityRepositoryError::Domain(
             IdentityError::PasswordChangeRequired
         ))
@@ -338,31 +454,50 @@ fn logout_sqlite_rejects_other_accounts_stale_expected_epoch_and_initial_passwor
 
 #[test]
 fn logout_sqlite_revalidates_live_session_after_authority_update_before_commit() {
-    let mut fixture = Fixture::new(true);
+    let fixture = Fixture::new(true);
     let before = fixture.repository.load_identity().unwrap();
     let user = actor(&before, 2, TrustedOrigin::Web);
     fixture.revoke_at_update.store(true, Ordering::Release);
-    let command = request(4, &before, logout(principal(2), user.auth_epoch));
+    let command = request(
+        fixture.issue(4, Some(&user)),
+        &before,
+        logout(principal(2), user.auth_epoch),
+    );
     assert_eq!(
-        fixture
-            .repository
-            .execute_identity(command.clone(), Some(&user), &Time),
+        {
+            let fixture_request = command.clone();
+            let original_pair = fixture
+                .commands
+                .original(fixture_request.command_id)
+                .unwrap();
+            let mut issued_repository = fixture.repository.with_command_window(original_pair);
+            issued_repository.execute_identity(fixture_request, Some(&user), &Time)
+        },
         Err(IdentityRepositoryError::Faulted)
     );
     assert_eq!(fixture.repository.load_identity().unwrap(), before);
     let db = Connection::open(fixture.directory.path()).unwrap();
     let receipts: u64 = db
         .query_row(
-            "SELECT count(*) FROM documents WHERE key='business/receipt/identity/4'",
-            [],
+            "SELECT count(*) FROM documents WHERE key=?1",
+            [fixture.receipt_key(&format!(
+                "business/receipt/identity/{}",
+                command.command_id.get()
+            ))],
             |row| row.get(0),
         )
         .unwrap();
     assert_eq!(receipts, 0);
     drop(db);
     fixture.active.store(true, Ordering::Release);
-    fixture
-        .repository
-        .execute_identity(command, Some(&user), &Time)
-        .unwrap();
+    {
+        let fixture_request = command;
+        let original_pair = fixture
+            .commands
+            .original(fixture_request.command_id)
+            .unwrap();
+        let mut issued_repository = fixture.repository.with_command_window(original_pair);
+        issued_repository.execute_identity(fixture_request, Some(&user), &Time)
+    }
+    .unwrap();
 }

@@ -64,33 +64,71 @@ pub(super) fn dispatch(
                 Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
             };
             let id = input.command_id;
-            match backend.web_content_save(
-                lease,
-                ContentCommand {
+            let command = input.command_ticket.map(|ticket| {
+                fc_protocol::web::command_window::CommandReference {
+                    ticket,
                     command_id: id,
-                    key: key.into_domain(),
-                    expected_revision: input.expected_revision,
-                    text: input.text,
-                },
-            ) {
-                Ok(document) => {
-                    let Some(record) = document.record.as_ref() else {
-                        return failure(503, responses::ErrorCode::ResultUnknown);
-                    };
-                    // A durable mutation may already have committed even if the
-                    // response cannot be encoded. Never label it uncommitted.
-                    match wire::committed(
-                        id,
-                        &document.key,
-                        document.now,
-                        document.expires_at,
-                        record,
-                    ) {
-                        Ok(body) => response(200, Ok(body), None),
-                        Err(_) => failure(503, responses::ErrorCode::ResultUnknown),
-                    }
                 }
-                Err(error) => backend_error(error, true),
+            });
+            let issued = match command
+                .map(|command| {
+                    backend.resolve_web_command(
+                        lease,
+                        fc_ports::command_window::CommandFamily::Content,
+                        command.ticket,
+                        id,
+                    )
+                })
+                .transpose()
+            {
+                Ok(issued) => issued,
+                Err(error) => return backend_error(error, true),
+            };
+            if let Some(issued) = issued {
+                let mut scope = match backend.begin_command_scope(issued) {
+                    Ok(scope) => scope,
+                    Err(error) => return backend_error(error, true),
+                };
+                perform_save(&mut scope, lease, key, input, command)
+            } else {
+                perform_save(backend, lease, key, input, command)
+            }
+        }
+        Route::ContentWindowCommand { command } => {
+            let issued = match backend.resolve_web_command(
+                lease,
+                fc_ports::command_window::CommandFamily::Content,
+                command.ticket,
+                command.command_id,
+            ) {
+                Ok(issued) => issued,
+                Err(error) => return backend_error(error, false),
+            };
+            let scope = match backend.begin_command_scope(issued) {
+                Ok(scope) => scope,
+                Err(error) => return backend_error(error, false),
+            };
+            match scope.web_content_outcome(lease, command.command_id) {
+                Ok(document) => {
+                    let bytes = match document.as_ref() {
+                        None => wire::command_result(command.command_id, None),
+                        Some(document) => match document.record.as_ref() {
+                            Some(record) => wire::command_result(
+                                command.command_id,
+                                Some((&document.key, document.now, document.expires_at, record)),
+                            ),
+                            None => return failure(503, responses::ErrorCode::ServiceUnavailable),
+                        },
+                    };
+                    response(
+                        200,
+                        bytes.and_then(|bytes| {
+                            fc_protocol::web::command_window::bind_response(&bytes, command)
+                        }),
+                        None,
+                    )
+                }
+                Err(error) => backend_error(error, false),
             }
         }
         Route::ContentCommand { command_id } => {
@@ -113,6 +151,44 @@ pub(super) fn dispatch(
             }
         }
         _ => failure(404, responses::ErrorCode::NotFound),
+    }
+}
+
+fn perform_save(
+    backend: &mut Backend,
+    lease: SessionLease,
+    key: wire::Key,
+    input: wire::SaveInput,
+    command: Option<fc_protocol::web::command_window::CommandReference>,
+) -> WebResponse {
+    let id = input.command_id;
+    match backend.web_content_save(
+        lease,
+        ContentCommand {
+            command_id: id,
+            key: key.into_domain(),
+            expected_revision: input.expected_revision,
+            text: input.text,
+        },
+    ) {
+        Ok(document) => {
+            let Some(record) = document.record.as_ref() else {
+                return failure(503, responses::ErrorCode::ResultUnknown);
+            };
+            // A durable mutation may already have committed even if the
+            // response cannot be encoded. Never label it uncommitted.
+            match wire::committed(id, &document.key, document.now, document.expires_at, record)
+                .and_then(|bytes| match command {
+                    Some(command) => {
+                        fc_protocol::web::command_window::bind_response(&bytes, command)
+                    }
+                    None => Ok(bytes),
+                }) {
+                Ok(body) => response(200, Ok(body), None),
+                Err(_) => failure(503, responses::ErrorCode::ResultUnknown),
+            }
+        }
+        Err(error) => backend_error(error, true),
     }
 }
 fn document_bytes(document: &WebContentDocument) -> Result<Vec<u8>, ProtocolError> {
@@ -164,6 +240,9 @@ fn scope_bytes(page: &WebContentScopes) -> Result<Vec<u8>, ProtocolError> {
     )
 }
 fn backend_error(error: BackendError, mutating: bool) -> WebResponse {
+    if let Some(response) = command_failure(&error) {
+        return response;
+    }
     match error {
         BackendError::SubjectVisual(
             fc_ports::subject_visual::SubjectVisualRepositoryError::Content(error),

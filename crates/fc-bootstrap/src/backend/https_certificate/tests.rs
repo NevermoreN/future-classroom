@@ -2,7 +2,7 @@
 //! query is explicitly a model; no CryptoAPI/TLS/device evidence is claimed.
 use super::*;
 use fc_domain::https_settings::*;
-use fc_ports::HttpsSettingsRequest;
+use fc_ports::{command_window::CommandFamily, HttpsSettingsRequest};
 use fc_runtime::worker::{JobContext, Rejection, Task, WorkerPool};
 use std::sync::{atomic::AtomicUsize, mpsc};
 
@@ -59,13 +59,23 @@ impl Fixture {
             admin,
         }
     }
-    fn configured(&mut self, id: u64) -> HttpsSettingsState {
+    fn configured(&mut self) -> HttpsSettingsState {
         let old = self.backend.read_https_settings(self.admin).unwrap();
+        let issued = self
+            .backend
+            .issue_native_command(
+                CommandFamily::HttpsSettings,
+                Some(self.admin),
+                SessionPurpose::Manage,
+            )
+            .unwrap();
         self.backend
+            .begin_command_scope(issued)
+            .unwrap()
             .save_https_settings(
                 self.admin,
                 HttpsSettingsRequest {
-                    command_id: CommandId::new(id).unwrap(),
+                    command_id: issued.command_id,
                     expected_revision: old.settings.revision,
                     expected_identity_revision: old.identity_revision,
                     configuration: Some(
@@ -109,7 +119,7 @@ fn model(
 #[test]
 fn https_certificate_held_ledger_is_recoverable_uncertainty_and_explicit_retry_works() {
     let mut f = Fixture::new();
-    let expected = f.configured(805);
+    let expected = f.configured();
     let service = f.service();
     let before = f.backend.session_control().health_gate().status();
     let ledger = service.ledger.lock().unwrap();
@@ -142,7 +152,7 @@ fn https_certificate_requires_configured_exact_state_and_original_nonrelaxable_f
             )),
         Err(HttpsCertificateError::NotConfigured)
     );
-    let saved = f.configured(801);
+    let saved = f.configured();
     // A real paired Web GlobalAdmin remains a Web lease, never the exact local
     // management session required by this inspection.
     let web = f.backend.web_service();
@@ -223,13 +233,13 @@ fn https_certificate_requires_configured_exact_state_and_original_nonrelaxable_f
 fn https_certificate_discards_query_after_configuration_publication_or_local_lock_and_keeps_native_error(
 ) {
     let mut f = Fixture::new();
-    let saved = f.configured(802);
+    let saved = f.configured();
     let service = f.service();
     let admin = f.admin;
     assert!(service
         .inspect_with(admin, saved.clone(), |_, active| {
             assert!(active());
-            f.configured(803); // even explicit same-value save advances settings/pub
+            f.configured(); // even explicit same-value save advances settings/pub
             assert!(!active());
             Ok(CertificateQueryReport::default())
         })
@@ -312,7 +322,7 @@ impl Task for QueryWork {
 fn https_certificate_actual_shared_worker_cancel_retains_job_until_query_returns_without_backend_lock(
 ) {
     let fixture = Arc::new(Mutex::new(Fixture::new()));
-    let expected = fixture.lock().unwrap().configured(804);
+    let expected = fixture.lock().unwrap().configured();
     let pool = WorkerPool::start().unwrap();
     let (entered, seen) = mpsc::channel();
     let (release, held) = mpsc::channel();

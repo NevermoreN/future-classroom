@@ -1,0 +1,544 @@
+{
+  "status": "PASS_FINITE_S9_INTEGRATION_EVIDENCE",
+  "baseCommit": "82c9a06515a57d1e9b866e4e6c6d3b8a732a860e",
+  "sourceInputsSha256": "4f952c422abc9534dd4846c7b407b2585b818c78515ce8a51cb5a1638c09c320",
+  "workingTreeExactFiles": 641,
+  "changedSourcePaths": 174,
+  "newSourcePaths": 24,
+  "host": {
+    "harnesses": 22,
+    "passed": 1031,
+    "failed": 0,
+    "selfCheck": "PASS",
+    "strictClippy": "PASS"
+  },
+  "win11GNU": {
+    "harnesses": 22,
+    "passed": 1684,
+    "failed": 0,
+    "ignored": 4,
+    "scope": "All22 actual GNU x86 harnesses same S9 on authorized Win11; nested subprocess summaries excluded from outer count; no Win7/Win10 realOS or formal installer/Seewo acceptance claim.",
+    "criticalActualPassed": [
+      "recovery::integration_windows::complete_backup_cold_restore_preserves_current_security_txt_and_both_wic_image_versions",
+      "business::profile_content::media::recovered_owner_tests::restored_returned_media_has_no_live_admission_only_with_exact_marker",
+      "business::profile_content::media::recovered_owner_tests::recovery_marker_cannot_return_reserved_owner_or_hide_corrupt_reservation",
+      "application::calendar_flow::tests::lost_policy_reply_current_year_read_is_separate_from_original_typed_history",
+      "application::voice_controller::tests::lost_policy_reply_queries_original_pair_while_current_read_cannot_confirm_it",
+      "application::tests::unrelated_successful_read_cannot_retire_the_original_unknown_target"
+    ],
+    "ignoredNamesReasons": [
+      "test installer_lifecycle::native::broker::installed_release::cached_database::native_probe::captures_real_installed_a470_cache_and_returns_every_owned_handle ... ignored, Requires root-installed exact a470 MSVC package; run exact with --ignored",
+      "test installer_lifecycle::native::broker::source_package::native_probe::actual_fixed_source_capture_closes_all_msi_before_begin ... ignored, Requires its exact canonical ABI2 GNU-testPE/MSI sibling fixture; readonly, no Begin",
+      "test installer_lifecycle::native::broker::source_package::native_probe::sibling_msi_seal_mismatch_rejects_before_begin ... ignored, Requires fixed sibling MSI and deliberately wrong own32-byte seal fixture",
+      "test installer_lifecycle::native::broker::source_package::native_probe::sibling_template_outside_digest_hole_rejects_before_begin ... ignored, Requires template outside-hole mutation and actual newly sealed MSI fixture"
+    ],
+    "cleanup": "PASS"
+  },
+  "normalProductExeSha256": "53db9f5c4ff2d9b66f7c25dbdcb01d4115fbc2a564bf8ed8f9583adf7edc7a55",
+  "publicDesktopSteps": 20,
+  "teacherBrowser": {
+    "checks": 11,
+    "requests": 93,
+    "originalReportSha256": "32d01ac2680820710ab245b9c23b58167f41811d81b3bf5af50697b52ade13ce",
+    "originalReportIncluded": false,
+    "raw17FilesIncluded": false,
+    "scope": "Actual source9 native/browser results qualified locally; only qualification and producer operation included, not full original/base64 raw report."
+  },
+  "webReuse": {
+    "actualStaticTests": 326,
+    "staticInputsExact": 65,
+    "normalBuildInputsExact": 68,
+    "generatedBuildBudgetExcluded": "scripts/budget.mjs output, not consumed build input"
+  },
+  "cleanup": "28 SHA-verified frozen PE files and2 owner-marked targets removed; own Windows processes/nonces/certs and Host test-temp cleaned; SSH/external identity preserved. Original reports and failure originals retained.",
+  "archive": {
+    "file": "results.zip",
+    "bytes": 606754,
+    "sha256": "5d2998de939e8814b875e752a9e34efee3c2d209bb8b717a3c92f08bde968e44",
+    "textMembers": 78,
+    "memberReplay": "All members exactly replayed against originals",
+    "tokenPatternScan": "Selected text: no private-key/PAT/OpenAI-token patterns; no credential file read or included",
+    "members": [
+      {
+        "name": "host/clippy.stderr.log",
+        "bytes": 1595,
+        "sha256": "1831d71a100ab3c87448b72e875d2f7937d4baa9b2b65558dcd076dd35b8891b",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/clippy.stderr.log"
+      },
+      {
+        "name": "host/clippy.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/clippy.stdout.log"
+      },
+      {
+        "name": "host/compile.stderr.log",
+        "bytes": 1647,
+        "sha256": "649f51c1c1ada430cedc20ccbf303d59e250ed3b7fbc3745341547d55d7bf4ff",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/compile.stderr.log"
+      },
+      {
+        "name": "host/harness-00.stdout.log",
+        "bytes": 15355,
+        "sha256": "a3b637599d5f7fdb519af63a645f048a6c61d51f5d84149ea562967d243a4041",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-00.stdout.log"
+      },
+      {
+        "name": "host/harness-01.stdout.log",
+        "bytes": 439,
+        "sha256": "aeb3df0a189d59ce5b8e8b32ebf2bb527a0815f062f71d2e35a2b88d77f71060",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-01.stdout.log"
+      },
+      {
+        "name": "host/harness-02.stdout.log",
+        "bytes": 585,
+        "sha256": "081d628b16c2ff0551fcbde2d80a7d0f7414022593c1242b310c49c758fe3318",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-02.stdout.log"
+      },
+      {
+        "name": "host/harness-03.stdout.log",
+        "bytes": 207,
+        "sha256": "b041be4f5168637e3a4180af96e517d15f383b4e0c375713329ce013f915752a",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-03.stdout.log"
+      },
+      {
+        "name": "host/harness-04.stdout.log",
+        "bytes": 26570,
+        "sha256": "f15b44cc8abebb3a4206d514156a1620eb8ec7ef76e70138f806b913e79ffb76",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-04.stdout.log"
+      },
+      {
+        "name": "host/harness-05.stdout.log",
+        "bytes": 4138,
+        "sha256": "69860988b0df8807007d97535b15aabc9879f9ed3f49257ebcfa0c44a7f60cdc",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-05.stdout.log"
+      },
+      {
+        "name": "host/harness-06.stdout.log",
+        "bytes": 826,
+        "sha256": "da3235753e5538e0a95897a7d4e6809fd5bc05fc8245064906a1071d978bfea0",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-06.stdout.log"
+      },
+      {
+        "name": "host/harness-07.stdout.log",
+        "bytes": 378,
+        "sha256": "41c6cd51379293e56466aaa3a0da15a986f7fd0a56de12b6494c67a14151ed15",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-07.stdout.log"
+      },
+      {
+        "name": "host/harness-08.stdout.log",
+        "bytes": 451,
+        "sha256": "dd9851f7970d55dc5ee50a6f8a09f3fc67d7cbfd01978efb6bbdfdfdcabf93a4",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-08.stdout.log"
+      },
+      {
+        "name": "host/harness-09.stdout.log",
+        "bytes": 113,
+        "sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-09.stdout.log"
+      },
+      {
+        "name": "host/harness-10.stdout.log",
+        "bytes": 1127,
+        "sha256": "50d84a540f4a6521e5032b5f67f27e04cd8d242b39ce090a0c30778c04e0fe84",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-10.stdout.log"
+      },
+      {
+        "name": "host/harness-11.stdout.log",
+        "bytes": 113,
+        "sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-11.stdout.log"
+      },
+      {
+        "name": "host/harness-12.stdout.log",
+        "bytes": 5770,
+        "sha256": "2474b11c04d0ee707d29db65c3c07618ccf492ad67555ba65bdb9a6e4801552c",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-12.stdout.log"
+      },
+      {
+        "name": "host/harness-13.stdout.log",
+        "bytes": 8675,
+        "sha256": "0862e6e258791b4a98f2e6e82381c5a6bcaff7aba4b0c39b6fb50441f38b621b",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-13.stdout.log"
+      },
+      {
+        "name": "host/harness-14.stdout.log",
+        "bytes": 5974,
+        "sha256": "415e347088929ebe741d9ac160ee3e9f6e24ee56de659cf0ffdd05faa003cdab",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-14.stdout.log"
+      },
+      {
+        "name": "host/harness-15.stdout.log",
+        "bytes": 2234,
+        "sha256": "4fd893bb92b7089f65193506fd8057b0786a3bd85866eab136901be9c5d1ac87",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-15.stdout.log"
+      },
+      {
+        "name": "host/harness-16.stdout.log",
+        "bytes": 3685,
+        "sha256": "2a3b35e354303866edadf89df084d332f343e61566c4045fc7851041384fec2c",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-16.stdout.log"
+      },
+      {
+        "name": "host/harness-17.stdout.log",
+        "bytes": 1653,
+        "sha256": "4f5e6d8ba6d6d4bb7252c7d6d546f5eb5c2cbcdbb57b8d222f381d0ae5a8d393",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-17.stdout.log"
+      },
+      {
+        "name": "host/harness-18.stdout.log",
+        "bytes": 2468,
+        "sha256": "0e5130712599c48746a3852e7069eab66d1104e330d206d3432481a1f1abe1de",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-18.stdout.log"
+      },
+      {
+        "name": "host/harness-19.stdout.log",
+        "bytes": 3110,
+        "sha256": "2e9f0d6664791bd0d77f4fb51880a19c7415470e994dbc0e5cfba5731ac01c70",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-19.stdout.log"
+      },
+      {
+        "name": "host/harness-20.stdout.log",
+        "bytes": 892,
+        "sha256": "73cf1116872690a3e322efc46c7b6ee9b11fe20a3ba4600045638d6097ebf3d2",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-20.stdout.log"
+      },
+      {
+        "name": "host/harness-21.stdout.log",
+        "bytes": 26107,
+        "sha256": "3545498b45d73abad21ca44fe958aee9ed027f4fd93d8af5bf3050527b0412b4",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/harness-21.stdout.log"
+      },
+      {
+        "name": "host/report-ninth.json",
+        "bytes": 165474,
+        "sha256": "42d456787635fc5d09400ca593975c18a7a91b98ee18235a882a722f2c408912",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/report-ninth.json"
+      },
+      {
+        "name": "host/root-qualification-ninth.json",
+        "bytes": 323,
+        "sha256": "ecbc12114e569c7f6bde1332630f9d5617e1de6593f4223137172f301c53db2b",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/root-qualification-ninth.json"
+      },
+      {
+        "name": "host/self-check.stderr.log",
+        "bytes": 177,
+        "sha256": "5b47a238650a87f91ed4c6e42d989f3e31d05e5a018495e5c12e4e9a59b28415",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/self-check.stderr.log"
+      },
+      {
+        "name": "host/self-check.stdout.log",
+        "bytes": 150,
+        "sha256": "fe12a4f345dae24afefe2f3dceb90dbb6ea92c841feee0bc6113d674e8ffd9d3",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/self-check.stdout.log"
+      },
+      {
+        "name": "host/test-temp-cleanup-ninth.json",
+        "bytes": 209,
+        "sha256": "5db36ceeb28b9733086d224544b033e87f589660b60d161307841433edbe06cd",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-host-ninth/test-temp-cleanup-ninth.json"
+      },
+      {
+        "name": "integration/batch-cleanup-ninth.json",
+        "bytes": 7021,
+        "sha256": "e46487d418ad13f4b23acc07096c621039691b6b9747325b8600d56c589d4849",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-fixture-integration-ninth/batch-cleanup-ninth.json"
+      },
+      {
+        "name": "integration/final-combined-ninth.patch",
+        "bytes": 1807259,
+        "sha256": "b0478304ae226151480f08c1363a7502527ac60a3a031284af3c0f1f72e94537",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-fixture-integration-ninth/final-combined-ninth.patch"
+      },
+      {
+        "name": "integration/final-inputs-ninth.json",
+        "bytes": 116287,
+        "sha256": "4f952c422abc9534dd4846c7b407b2585b818c78515ce8a51cb5a1638c09c320",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-fixture-integration-ninth/final-inputs-ninth.json"
+      },
+      {
+        "name": "integration/final-patch-check-ninth.json",
+        "bytes": 48274,
+        "sha256": "b92e3b7fdb26516c1c223aead91c3e9a3ffe37c74da5020e2e37441561105cdd",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-fixture-integration-ninth/final-patch-check-ninth.json"
+      },
+      {
+        "name": "integration/main-integration-ninth.json",
+        "bytes": 914,
+        "sha256": "d5e67c5d8efabf726fe65dbf2e42c23476f193145a2d5161a222a0bdb06cc7b0",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-fixture-integration-ninth/main-integration-ninth.json"
+      },
+      {
+        "name": "integration/preflight-ninth.json",
+        "bytes": 565,
+        "sha256": "d0b39b08993e4c96b3effe2d466a1b317f43e74eebd340b8d3a7ca2976bdd2fa",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-fixture-integration-ninth/preflight-ninth.json"
+      },
+      {
+        "name": "local-script-checks/00.stdout.log",
+        "bytes": 3665,
+        "sha256": "4267a63028658889941ba988e1db9a7d04cd90a2adebec905830b52b79603726",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-script-checks-ninth/00.stdout.log"
+      },
+      {
+        "name": "local-script-checks/01.stdout.log",
+        "bytes": 3139,
+        "sha256": "dbcae7e995c413ec6ac711cbafaf6132d40c724ff0906712c8bf66079b59555f",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-script-checks-ninth/01.stdout.log"
+      },
+      {
+        "name": "local-script-checks/02.stdout.log",
+        "bytes": 1023,
+        "sha256": "30fd9cc2298298b6d8ff44435f907b2e62bfea064d233ed4df07c38aff709a5a",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-script-checks-ninth/02.stdout.log"
+      },
+      {
+        "name": "local-script-checks/03.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-script-checks-ninth/03.stdout.log"
+      },
+      {
+        "name": "local-script-checks/04.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-script-checks-ninth/04.stdout.log"
+      },
+      {
+        "name": "local-script-checks/report.json",
+        "bytes": 1237,
+        "sha256": "ba1d8110c889978b2d07288a2027685cf6e198646952da96896147eb5e3fc4bc",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-script-checks-ninth/report.json"
+      },
+      {
+        "name": "minimal-restore-fix/complete.patch",
+        "bytes": 6484,
+        "sha256": "d587438750e378e1415ef66e4e49426b6bc9706055cf2311177110b1eea52828",
+        "originalPath": "/tmp/fc-round80-controlled-repair/recovered-media-owner-fix-2357691c76dc4fb4abdf862720a1d47d/complete.patch"
+      },
+      {
+        "name": "minimal-restore-fix/fix-after-regression.patch",
+        "bytes": 1382,
+        "sha256": "3294e6c7507ec0601506d22106a330e6acc1c817271362a1297158c364aeee90",
+        "originalPath": "/tmp/fc-round80-controlled-repair/recovered-media-owner-fix-2357691c76dc4fb4abdf862720a1d47d/fix-after-regression.patch"
+      },
+      {
+        "name": "minimal-restore-fix/regression-only.patch",
+        "bytes": 5246,
+        "sha256": "2f9c91169b7699f367c384aa4dff6e817800d98e37d314176bbda74b34322b09",
+        "originalPath": "/tmp/fc-round80-controlled-repair/recovered-media-owner-fix-2357691c76dc4fb4abdf862720a1d47d/regression-only.patch"
+      },
+      {
+        "name": "minimal-restore-fix/report.json",
+        "bytes": 4914,
+        "sha256": "70396b686b0fc5f91f725a7b6a5024ff30d99ad08a41a3905585262748714662",
+        "originalPath": "/tmp/fc-round80-controlled-repair/recovered-media-owner-fix-2357691c76dc4fb4abdf862720a1d47d/report.json"
+      },
+      {
+        "name": "normal-gnu/build.stderr.log",
+        "bytes": 1647,
+        "sha256": "ffaa086dbd22ae376b0c77c52b43b431592be3a9c1b3222b13abb8550db04169",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-gnu-ninth/build.stderr.log"
+      },
+      {
+        "name": "normal-gnu/clippy.stderr.log",
+        "bytes": 1595,
+        "sha256": "55cc7f06654c2b8993f7e8f3e1cd1068d29df90bc41c0613fefb5f6eebba535c",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-gnu-ninth/clippy.stderr.log"
+      },
+      {
+        "name": "normal-gnu/report-ninth.json",
+        "bytes": 2670,
+        "sha256": "31b88079d018c103a9180a25873c8800cf83b6039972a62103923d452b503e56",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-final-gnu-ninth/report-ninth.json"
+      },
+      {
+        "name": "old-production-red/red-inputs.json",
+        "bytes": 115998,
+        "sha256": "0ed92a04ca870e3380ad9b2b5c268a371128d182941a1746214d39c4522f9408",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-recovered-media-red-ninth/red-inputs.json"
+      },
+      {
+        "name": "old-production-red/report.json",
+        "bytes": 583,
+        "sha256": "3ef488c325308bb006c16b4ee6d15ee835ba26f52475848aae6d35e7af5f7387",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-recovered-media-red-ninth/report.json"
+      },
+      {
+        "name": "old-production-red/stderr.log",
+        "bytes": 1490,
+        "sha256": "33b31431925ea0b689812b65bfc7f259b91387b4092e39fcea8566948551e9cd",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-recovered-media-red-ninth/stderr.log"
+      },
+      {
+        "name": "old-production-red/stdout.log",
+        "bytes": 376,
+        "sha256": "5bd1434f912799d476db7824682288a157888a61ddccfa256448e208d5eef55d",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-recovered-media-red-ninth/stdout.log"
+      },
+      {
+        "name": "old-production-red/test-temp-cleanup-ninth.json",
+        "bytes": 218,
+        "sha256": "cdcfb011f752f6cac93ca110e4c90cc613504130db9473666db79b706354b552",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-recovered-media-red-ninth/test-temp-cleanup-ninth.json"
+      },
+      {
+        "name": "original-s8-failure/backend-lib-report-eighth.json",
+        "bytes": 49452,
+        "sha256": "3b0529e3e2c20532a5004bafd8fd86a88ab3c64b4ebb727bcc3653834a673892",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-windows-affected-runtime-eighth/backend-lib-report-eighth.json"
+      },
+      {
+        "name": "original-s8-failure/operation-eighth.json",
+        "bytes": 3114,
+        "sha256": "afcd5f3426ed8d254c6eb749a52f770d207bda6c41a2c08a4225f0cb5fb62be0",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-windows-affected-runtime-eighth/operation-eighth.json"
+      },
+      {
+        "name": "public-desktop/operation-ninth.json",
+        "bytes": 1076,
+        "sha256": "f216eaa748b70925594cf9cfee243a57ab2c1c20408e083e873933c72899d0ee",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g03-final-public-desktop-ninth/operation-ninth.json"
+      },
+      {
+        "name": "public-desktop/report-ninth.json",
+        "bytes": 8523,
+        "sha256": "0a93d755780b4641858a3cf4e1f0d8fe757795ff39e37426464ddd83962245b0",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g03-final-public-desktop-ninth/report-ninth.json"
+      },
+      {
+        "name": "public-desktop/root-qualification-ninth.json",
+        "bytes": 1613,
+        "sha256": "d4e2e5c7234646b55ed367727177b48fa17f79a09ab6588a9a62a6eb9425ad34",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g03-final-public-desktop-ninth/root-qualification-ninth.json"
+      },
+      {
+        "name": "teacher-browser/operation-ninth.json",
+        "bytes": 6540,
+        "sha256": "eacc3a8e15a3fbdf73913c2f16537415593dba4927e5862be2f75e22fcf23cbe",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g03-windows-runtime-final-ninth/operation-ninth.json"
+      },
+      {
+        "name": "teacher-browser/root-qualification-ninth.json",
+        "bytes": 1671,
+        "sha256": "840cfec8da7fd6527511b4e5700be20ad7def918309986843cd4a147ed0cc9f8",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g03-windows-runtime-final-ninth/root-qualification-ninth.json"
+      },
+      {
+        "name": "unchanged-web-normal/report-first.json",
+        "bytes": 22520,
+        "sha256": "cdb160b10374391f197b3c0c342341129da3b341a3db1e363247ed5b256dfb53",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g03-new-web-build-first/report-first.json"
+      },
+      {
+        "name": "unchanged-web-static/build-final-second.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "originalPath": "/tmp/fc-round80-controlled-repair/command-window-web-implementation-first/build-final-second.stderr"
+      },
+      {
+        "name": "unchanged-web-static/build-final-second.stdout",
+        "bytes": 939,
+        "sha256": "e05ceb7bf8ad4e9a3cfb79fa6967b7857acc46abab45a6e3945a90b37acc589f",
+        "originalPath": "/tmp/fc-round80-controlled-repair/command-window-web-implementation-first/build-final-second.stdout"
+      },
+      {
+        "name": "unchanged-web-static/tests-final-second.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "originalPath": "/tmp/fc-round80-controlled-repair/command-window-web-implementation-first/tests-final-second.stderr"
+      },
+      {
+        "name": "unchanged-web-static/tests-final-second.stdout",
+        "bytes": 487,
+        "sha256": "7c95764d8142db8b9c5c05f4e036faaff8f31c0276719586999d8aed807ca21d",
+        "originalPath": "/tmp/fc-round80-controlled-repair/command-window-web-implementation-first/tests-final-second.stdout"
+      },
+      {
+        "name": "unchanged-web-static/typecheck-final-second.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "originalPath": "/tmp/fc-round80-controlled-repair/command-window-web-implementation-first/typecheck-final-second.stderr"
+      },
+      {
+        "name": "unchanged-web-static/typecheck-final-second.stdout",
+        "bytes": 60,
+        "sha256": "99b856e0dae663563ee3f5f454c2ba5e32fddfca161704b8b35c2ab7a8295cae",
+        "originalPath": "/tmp/fc-round80-controlled-repair/command-window-web-implementation-first/typecheck-final-second.stdout"
+      },
+      {
+        "name": "unchanged-web-static/validation-final-second.json",
+        "bytes": 2558,
+        "sha256": "7c72164f5ca2c81f5e193efe5cf3e3a2de86829a7a73c9ffd809ddfda2b62ae9",
+        "originalPath": "/tmp/fc-round80-controlled-repair/command-window-web-implementation-first/validation-final-second.json"
+      },
+      {
+        "name": "unchanged-web-static/web-exact-binding-sixth.json",
+        "bytes": 784,
+        "sha256": "c81631b2197f38e3bc41dbbbfbebe804d76ce506f211c077d9adc25010b274c1",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-fixture-integration-sixth/web-exact-binding-sixth.json"
+      },
+      {
+        "name": "unchanged-web-static/web-input-before-final-second.json",
+        "bytes": 9707,
+        "sha256": "4c178e0d95ecb85c0749f91cec1f19815a304fa7150269f45bfecd5350df1593",
+        "originalPath": "/tmp/fc-round80-controlled-repair/command-window-web-implementation-first/web-input-before-final-second.json"
+      },
+      {
+        "name": "windows-build/compile.stderr.log",
+        "bytes": 1596,
+        "sha256": "2f68353c1ff6217cd165dcb9fc66e425b009ee8419d4fafc0ecbbb6c02f7090c",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-windows-test-build-ninth/compile.stderr.log"
+      },
+      {
+        "name": "windows-build/compile.stdout.log",
+        "bytes": 116593,
+        "sha256": "c62822a10dbea499ff8fa4a4c6cb98823f17faa2a9cf3257b636aaa32f27bd39",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-windows-test-build-ninth/compile.stdout.log"
+      },
+      {
+        "name": "windows-build/report-ninth.json",
+        "bytes": 37938,
+        "sha256": "d82b40526cff31f0deea7a6ea20d5af3a0137c2c4886473b101700b64f5f878a",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-windows-test-build-ninth/report-ninth.json"
+      },
+      {
+        "name": "windows-runtime/operation-ninth.json",
+        "bytes": 1248,
+        "sha256": "cf01533467e6db0d634e364231433988e9a2ca9507375626631ae83335c528c3",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-windows-all-runtime-ninth/operation-ninth.json"
+      },
+      {
+        "name": "windows-runtime/report-ninth.json",
+        "bytes": 220090,
+        "sha256": "c179fbfd39f965270b3a2c6be4f06508b73ae705a7cdc21df76aa7aa66e0d821",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-windows-all-runtime-ninth/report-ninth.json"
+      },
+      {
+        "name": "windows-runtime/root-qualification-ninth.json",
+        "bytes": 7782,
+        "sha256": "cbaa79fe9d2ac4b5a9d0b471b260d2c062a788e83c137e8d02f0af7d7f4b3bea",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-windows-all-runtime-ninth/root-qualification-ninth.json"
+      },
+      {
+        "name": "windows-runtime/transport-proof.json",
+        "bytes": 41797,
+        "sha256": "39576ba92dbcc90ce1407b134d84ea2c1df6eeca4a76224e7f83e6684fa77658",
+        "originalPath": "/tmp/fc-round80-controlled-repair/g02-g03-windows-all-runtime-ninth/transport-proof.json"
+      }
+    ]
+  },
+  "overallGoal": "ACTIVE_NOT_COMPLETE",
+  "remainingSoftware": "P3-08 classroom material batch import is not implemented in native/teacher UI; single-file flow does not satisfy batch requirement.",
+  "notValidated": [
+    "Win7 SP1 x86 actual OS",
+    "Windows10 actual OS",
+    "visible Seewo/PPT/touch/DPI",
+    "physical microphone/audibility/mobile",
+    "campus P0 capacity/TLS/header-budget calibration",
+    "72h stability",
+    "full formal release/installer matrix"
+  ],
+  "historyScope": "Includes S8 original backend failure and genuine old-production regression red. Earlier intermediate FAIL originals remain local; this finite archive does not claim all historical raw evidence or PE/source snapshots."
+}

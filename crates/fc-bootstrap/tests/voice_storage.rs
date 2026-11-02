@@ -1,11 +1,15 @@
 //! Durable voice against real SQLite, exact leases and authority publication.
+#[path = "support/business_commands.rs"]
+pub mod business_commands;
+use business_commands::{Commands, Repository as BusinessRepository};
 use fc_domain::{auth::*, identity::*, ids::*, time::*};
 use fc_ports::{
+    command_window::{CommandFamily, CommandWindowError, IssuedCommand},
     prepare_initial_credentials, prepare_password_change, Clock, CredentialCrypto, CredentialError,
     CredentialIdentityRepository, IdentityRepository, IdentityRepositoryError, IdentityRequest,
 };
 use fc_runtime::authority::{AuthorityStore, PreparedAuthority};
-use fc_storage::{business::BusinessRepository, StorageError, StorageWriter};
+use fc_storage::{StorageError, StorageWriter};
 use std::{
     path::PathBuf,
     sync::{
@@ -129,6 +133,9 @@ impl FixturePreparation for BusinessRepository<Snapshot> {
         a: Option<&ActorContext>,
         c: PreparedCredentials,
     ) -> Result<IdentityTransition, IdentityRepositoryError> {
+        // Opaque credential preparation must retain the real issued identity
+        // pair; the synthetic request number is only a stable fixture label.
+        let r = self.identity_request(r, a);
         let secret = vec![c.id as u8, c.version as u8, 42];
         let mut crypto = FixtureCrypto;
         let change = if c.both {
@@ -157,7 +164,8 @@ fn open(
     });
     (
         Joined(Some(w)),
-        BusinessRepository::new(handle, clock, factory).with_session_guard(Arc::new(|_, _| Ok(()))),
+        BusinessRepository::new(handle, clock, factory, Arc::new(Commands::default()))
+            .with_session_guard(Arc::new(|_, _| Ok(()))),
     )
 }
 fn initialize(repo: &mut BusinessRepository<Snapshot>, clock: &Time) {
@@ -248,6 +256,56 @@ fn initialize(repo: &mut BusinessRepository<Snapshot>, clock: &Time) {
 }
 use fc_domain::voice::*;
 use fc_ports::voice::*;
+// These thin fixture operations reuse the original label-to-issued cache.
+// A retry resolves the same full pair, including after payload/lease changes;
+// it never replaces the original ticket with a newly issued command.
+trait VoiceCommands {
+    fn submit_voice(
+        &self,
+        request: VoiceSubmitRequest,
+        actor: &ActorContext,
+    ) -> Result<VoiceJob, VoiceRepositoryError>;
+    fn cancel_voice(
+        &self,
+        request: VoiceCancelRequest,
+        actor: &ActorContext,
+    ) -> Result<VoiceJob, VoiceRepositoryError>;
+}
+impl VoiceCommands for BusinessRepository<Snapshot> {
+    fn submit_voice(
+        &self,
+        mut request: VoiceSubmitRequest,
+        actor: &ActorContext,
+    ) -> Result<VoiceJob, VoiceRepositoryError> {
+        let issued = self.issue(CommandFamily::Voice, request.command_id.get(), Some(actor));
+        request.command_id = issued.command_id;
+        self.with_command_window(issued)
+            .submit_voice(request, actor)
+    }
+    fn cancel_voice(
+        &self,
+        mut request: VoiceCancelRequest,
+        actor: &ActorContext,
+    ) -> Result<VoiceJob, VoiceRepositoryError> {
+        let issued = self.issue(CommandFamily::Voice, request.command_id.get(), Some(actor));
+        request.command_id = issued.command_id;
+        self.with_command_window(issued)
+            .cancel_voice(request, actor)
+    }
+}
+fn voice_receipt_key(issued: IssuedCommand) -> String {
+    let epoch: String = issued
+        .ticket
+        .epoch()
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect();
+    format!(
+        "business/voice-receipt/v1/v2/{epoch}/{}",
+        issued.ticket.serial()
+    )
+}
+
 struct Preparation;
 impl VoicePreparation for Preparation {
     type Input = ();
@@ -522,6 +580,7 @@ fn sqlite_voice_canonical_three_repeats_deadline_and_backup_strip_active_bytes()
     bind(&mut repo, &clock);
     let a = actor(2, 2, TrustedOrigin::Web);
     let asset = ready(&repo, 1, &a);
+    let original = repo.issue(CommandFamily::Voice, 100, Some(&a));
     let mut j = submit(&repo, 100, &asset, 3, &a);
     j = drive(&repo, &j, VoiceDriverAction::Start).unwrap();
     j = drive(&repo, &j, VoiceDriverAction::FirstWrite).unwrap();
@@ -553,7 +612,7 @@ fn sqlite_voice_canonical_three_repeats_deadline_and_backup_strip_active_bytes()
         .as_ref()
         .unwrap()
         .handle()
-        .try_get("business/voice-receipt/v1/00000000000000000100".into())
+        .try_get(voice_receipt_key(original))
         .unwrap()
         .wait()
         .unwrap()
@@ -609,19 +668,33 @@ fn sqlite_voice_audit_and_receipts_are_capped_and_age_out_together() {
     initialize(&mut repo, &clock);
     bind(&mut repo, &clock);
     let a = actor(2, 2, TrustedOrigin::Web);
+    let first_command = repo.issue(CommandFamily::Voice, 1001, Some(&a));
+    let last_command = repo.issue(CommandFamily::Voice, 1105, Some(&a));
+    let first_cancel = repo.issue(CommandFamily::Voice, 2001, Some(&a));
+    let last_cancel = repo.issue(CommandFamily::Voice, 2105, Some(&a));
+    let mut first_requests = None;
     for n in 1..=105 {
         *clock.0.lock().unwrap() = LocalDateTime::new(date(30), 3600 + n as u32 * 7).unwrap();
         let asset = ready(&repo, n, &a);
-        let j = submit(&repo, 1000 + n, &asset, 3, &a);
-        repo.cancel_voice(
-            VoiceCancelRequest {
-                command_id: CommandId::new(2000 + n).unwrap(),
-                job_id: j.id,
-                expected_revision: j.revision,
-            },
-            &a,
-        )
-        .unwrap();
+        let issued = repo.issue(CommandFamily::Voice, 1000 + n, Some(&a));
+        let request = VoiceSubmitRequest {
+            command_id: issued.command_id,
+            asset_id: asset.id,
+            expected_asset_revision: asset.revision,
+            class_id: asset.class_id,
+            repeat_total: 3,
+        };
+        let j = repo.submit_voice(request.clone(), &a).unwrap();
+        let issued_cancel = repo.issue(CommandFamily::Voice, 2000 + n, Some(&a));
+        let cancel = VoiceCancelRequest {
+            command_id: issued_cancel.command_id,
+            job_id: j.id,
+            expected_revision: j.revision,
+        };
+        repo.cancel_voice(cancel.clone(), &a).unwrap();
+        if n == 1 {
+            first_requests = Some((request, cancel));
+        }
         let s = repo.voice_inventory().unwrap();
         let a = s.assets.iter().find(|a| a.id == asset.id).unwrap();
         repo.finalize_voice_delete(a.id, a.revision).unwrap();
@@ -638,11 +711,50 @@ fn sqlite_voice_audit_and_receipts_are_capped_and_age_out_together() {
         .as_ref()
         .unwrap()
         .handle()
-        .try_get("business/voice-receipt/v1/00000000000000001001".into())
+        .try_get(voice_receipt_key(first_command))
         .unwrap()
         .wait()
         .unwrap()
         .is_none());
+    assert!(writer
+        .0
+        .as_ref()
+        .unwrap()
+        .handle()
+        .try_get(voice_receipt_key(first_cancel))
+        .unwrap()
+        .wait()
+        .unwrap()
+        .is_none());
+    let (original_submit, original_cancel) = first_requests.unwrap();
+    assert_eq!(
+        repo.with_command_window(first_command)
+            .submit_voice(original_submit.clone(), &a),
+        Err(VoiceRepositoryError::CommandWindow(
+            CommandWindowError::Expired
+        ))
+    );
+    assert_eq!(
+        repo.with_command_window(first_cancel)
+            .cancel_voice(original_cancel.clone(), &a),
+        Err(VoiceRepositoryError::CommandWindow(
+            CommandWindowError::Expired
+        ))
+    );
+    assert_eq!(
+        repo.voice_inventory().unwrap(),
+        s,
+        "pruned original pairs cannot create a job or repeat a control action"
+    );
+    writer
+        .0
+        .as_ref()
+        .unwrap()
+        .handle()
+        .try_check_command(last_command)
+        .unwrap()
+        .wait()
+        .unwrap();
     *clock.0.lock().unwrap() = LocalDateTime::new(date(31), 5000).unwrap();
     let s = repo.maintain_voice().unwrap();
     assert!(s.jobs.is_empty());
@@ -651,11 +763,51 @@ fn sqlite_voice_audit_and_receipts_are_capped_and_age_out_together() {
         .as_ref()
         .unwrap()
         .handle()
-        .try_get("business/voice-receipt/v1/00000000000000001105".into())
+        .try_get(voice_receipt_key(last_command))
         .unwrap()
         .wait()
         .unwrap()
         .is_none());
+    assert!(writer
+        .0
+        .as_ref()
+        .unwrap()
+        .handle()
+        .try_get(voice_receipt_key(last_cancel))
+        .unwrap()
+        .wait()
+        .unwrap()
+        .is_none());
+    assert_eq!(
+        repo.with_command_window(first_command)
+            .submit_voice(original_submit.clone(), &a),
+        Err(VoiceRepositoryError::CommandWindow(
+            CommandWindowError::Expired
+        ))
+    );
+    assert_eq!(repo.voice_inventory().unwrap(), s);
+    drop(repo);
+    drop(writer);
+    // Close the actual Writer/connection and reopen the real disk database.
+    // The original pair remains expired after startup, without fixture issuance.
+    let startup = fc_storage::business::startup_state(dir.path()).unwrap();
+    let (writer, repo) = open(&dir, clock.clone(), startup.identity, startup.revision);
+    assert_eq!(repo.voice_inventory().unwrap(), s);
+    assert_eq!(
+        repo.with_command_window(first_command)
+            .submit_voice(original_submit, &a),
+        Err(VoiceRepositoryError::CommandWindow(
+            CommandWindowError::Expired
+        ))
+    );
+    assert_eq!(
+        repo.with_command_window(first_cancel)
+            .cancel_voice(original_cancel, &a),
+        Err(VoiceRepositoryError::CommandWindow(
+            CommandWindowError::Expired
+        ))
+    );
+    assert_eq!(repo.voice_inventory().unwrap(), s);
     drop(repo);
     drop(writer);
 }
@@ -712,6 +864,7 @@ fn sqlite_voice_first_boot_idle_recovery_is_read_only_and_expired_reads_are_reda
     );
     let a = actor(2, 2, TrustedOrigin::Web);
     let asset = ready(&repo, 1, &a);
+    let original = repo.issue(CommandFamily::Voice, 100, Some(&a));
     let request = VoiceSubmitRequest {
         command_id: CommandId::new(100).unwrap(),
         asset_id: asset.id,
@@ -744,7 +897,7 @@ fn sqlite_voice_first_boot_idle_recovery_is_read_only_and_expired_reads_are_reda
         .as_ref()
         .unwrap()
         .handle()
-        .try_get("business/voice-receipt/v1/00000000000000000100".into())
+        .try_get(voice_receipt_key(original))
         .unwrap()
         .wait()
         .unwrap()
@@ -815,6 +968,202 @@ fn sqlite_voice_expire_before_write_ignores_revoked_lease_but_requires_exact_rel
     assert_eq!(expired.state, VoiceState::Expired);
     assert_eq!(expired.generation, 0);
     assert!(expired.release_generation.is_none());
+    drop(repo);
+    drop(writer);
+}
+
+#[test]
+fn sqlite_voice_new_cancel_at_full_audit_commits_with_original_playing_owner_and_history() {
+    let dir = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (writer, mut repo) = open(
+        &dir,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    // Three independent teachers generate the terminal history while teacher2
+    // owns the original Playing and Queued jobs. Keep the normal class scopes.
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    for id in [4, 5] {
+        let revision = repo.load_identity().unwrap().revision.get();
+        repo.execute_identity_with_credentials(
+            request(
+                50 + id,
+                revision,
+                IdentityCommand::CreateAccount(NewAccount {
+                    id: principal(id),
+                    login_name: format!("teacher{id}"),
+                    display_name: format!("Teacher {id}"),
+                    role: Role::TeacherAdmin,
+                    scopes: vec![AssignmentScope {
+                        class_id: ClassId::new(1).unwrap(),
+                        subject_id: SubjectId::new(1).unwrap(),
+                    }],
+                }),
+            ),
+            Some(&admin),
+            credentials(id, 1, true),
+        )
+        .unwrap();
+        repo.execute_identity_with_credentials(
+            request(
+                60 + id,
+                revision + 1,
+                IdentityCommand::PasswordChanged {
+                    id: principal(id),
+                    expected_credential_version: 1,
+                },
+            ),
+            Some(&actor(id, 1, TrustedOrigin::Local)),
+            credentials(id, 2, false),
+        )
+        .unwrap();
+    }
+    bind(&mut repo, &clock);
+    let owner = actor(2, 2, TrustedOrigin::Web);
+    let first_issued = repo.issue(CommandFamily::Voice, 70000, Some(&owner));
+    let a = ready(&repo, 70000, &owner);
+    let first = submit(&repo, first_issued.command_id.get(), &a, 10, &owner);
+    let first = drive(&repo, &first, VoiceDriverAction::Start).unwrap();
+    let first = drive(&repo, &first, VoiceDriverAction::FirstWrite).unwrap();
+    let original_playing = repo.voice_job(first.id, &owner).unwrap();
+    assert_eq!(original_playing.state, VoiceState::Playing);
+    assert!(original_playing.release_generation.is_some());
+    let a = ready(&repo, 70001, &owner);
+    let queued = submit(&repo, 70001, &a, 10, &owner);
+    let mut first_terminal = None;
+    for n in 0..100u64 {
+        let at = 3602 + (n / 30) as u32 * 61 + ((n % 30) / 3) as u32;
+        *clock.0.lock().unwrap() = LocalDateTime::new(date(30), at).unwrap();
+        let other = actor(3 + n % 3, 2, TrustedOrigin::Web);
+        let issued = repo.issue(CommandFamily::Voice, 71000 + n, Some(&other));
+        let a = ready(&repo, 71000 + n, &other);
+        let job = submit(&repo, issued.command_id.get(), &a, 1, &other);
+        repo.cancel_voice(
+            VoiceCancelRequest {
+                command_id: CommandId::new(72000 + n).unwrap(),
+                job_id: job.id,
+                expected_revision: job.revision,
+            },
+            &other,
+        )
+        .unwrap();
+        if n == 0 {
+            first_terminal = Some(issued);
+        }
+        let inventory = repo.voice_inventory().unwrap();
+        assert!(
+            inventory
+                .jobs
+                .iter()
+                .filter(|j| !j.state.terminal())
+                .count()
+                <= 3
+        );
+        assert!(inventory.assets.len() <= 3);
+        let a = inventory
+            .assets
+            .iter()
+            .find(|a| Some(a.id) == job.asset_id)
+            .unwrap();
+        repo.finalize_voice_delete(a.id, a.revision).unwrap();
+    }
+    let before = repo.voice_inventory().unwrap();
+    assert_eq!(
+        before.jobs.iter().filter(|j| j.state.terminal()).count(),
+        100
+    );
+    assert_eq!(repo.voice_job(first.id, &owner).unwrap(), original_playing);
+    *clock.0.lock().unwrap() = LocalDateTime::new(date(30), 3789).unwrap();
+    assert!(civil_seconds(clock.now()) < queued.latest_start_at);
+    assert_eq!(civil_seconds(clock.now()) - queued.submitted_at, 189);
+    let cancel_issued = repo.issue(CommandFamily::Voice, 73000, Some(&owner));
+    let cancel = VoiceCancelRequest {
+        command_id: cancel_issued.command_id,
+        job_id: queued.id,
+        expected_revision: queued.revision,
+    };
+    // This original transaction used to fail its duplicate Put/Delete key check.
+    let canceled = repo
+        .with_command_window(cancel_issued)
+        .cancel_voice(cancel.clone(), &owner)
+        .unwrap();
+    assert_eq!(canceled.state, VoiceState::Canceled);
+    let committed = repo.voice_inventory().unwrap();
+    assert_eq!(
+        committed.jobs.iter().filter(|j| j.state.terminal()).count(),
+        100
+    );
+    assert_eq!(repo.voice_job(first.id, &owner).unwrap(), original_playing);
+    assert_eq!(repo.voice_job(canceled.id, &owner).unwrap(), canceled);
+    let first_terminal = first_terminal.unwrap();
+    assert!(!committed
+        .jobs
+        .iter()
+        .any(|j| j.command_id == first_terminal.command_id));
+    assert_eq!(
+        writer
+            .0
+            .as_ref()
+            .unwrap()
+            .handle()
+            .try_check_command(first_terminal)
+            .unwrap()
+            .wait(),
+        Err(StorageError::CommandExpired)
+    );
+    writer
+        .0
+        .as_ref()
+        .unwrap()
+        .handle()
+        .try_check_command(first_issued)
+        .unwrap()
+        .wait()
+        .unwrap();
+    assert_eq!(
+        repo.with_command_window(cancel_issued)
+            .voice_command_outcome(cancel_issued.command_id, &owner)
+            .unwrap(),
+        Some(canceled.clone())
+    );
+    assert_eq!(
+        repo.with_command_window(cancel_issued)
+            .cancel_voice(cancel, &owner)
+            .unwrap(),
+        canceled
+    );
+    assert_eq!(
+        repo.voice_inventory().unwrap(),
+        committed,
+        "original C2 history cannot execute a second cancellation"
+    );
+    assert!(writer
+        .0
+        .as_ref()
+        .unwrap()
+        .handle()
+        .try_get(voice_receipt_key(cancel_issued))
+        .unwrap()
+        .wait()
+        .unwrap()
+        .is_some());
+    // Return the exact original physical owner before fixture cleanup. No TTL,
+    // audit retention or replacement generation stands in for this receipt.
+    let stopping = repo.emergency_stop_voice().unwrap();
+    let original = stopping.jobs.iter().find(|j| j.id == first.id).unwrap();
+    assert_eq!(
+        original.release_generation,
+        original_playing.release_generation
+    );
+    let returned = drive(&repo, original, VoiceDriverAction::Released).unwrap();
+    assert_eq!(returned.state, VoiceState::Interrupted);
+    for a in repo.voice_inventory().unwrap().assets {
+        repo.finalize_voice_delete(a.id, a.revision).unwrap();
+    }
+    assert_eq!(repo.voice_inventory().unwrap().charged_bytes().unwrap(), 0);
     drop(repo);
     drop(writer);
 }

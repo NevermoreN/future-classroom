@@ -2,6 +2,53 @@
 use super::{autostart_codec as dto, *};
 use fc_ports::autostart::*;
 const DOCUMENT: &str = "business/autostart/v1";
+pub(crate) const COMMAND_BINDING_PREFIX: &str = "business/security/autostart-command/v2/";
+pub(crate) fn command_binding_key(ticket: &AutostartTicket) -> String {
+    format!(
+        "{COMMAND_BINDING_PREFIX}{:020}/{:020}",
+        ticket.sequence,
+        ticket.prepared_revision.get()
+    )
+}
+fn original_ticket(ticket: &AutostartTicket) -> Value {
+    json!({"command_id":ticket.command_id.get(),"sequence":ticket.sequence,"prepared_revision":ticket.prepared_revision.get(),"principal":ticket.principal_id.get(),"auth_epoch":ticket.auth_epoch.get()})
+}
+pub(crate) fn command_binding_value(
+    ticket: &AutostartTicket,
+    issued: fc_ports::command_window::IssuedCommand,
+) -> Result<Vec<u8>, StorageError> {
+    codec::bytes(
+        &json!({"format":2,"original":original_ticket(ticket),"commandTicket":issued.ticket.to_string()}),
+    )
+}
+fn check_original_binding(
+    d: &dyn TransactionDocuments,
+    original: &AutostartTicket,
+) -> Result<(), StorageError> {
+    let binding = d.get(&command_binding_key(original))?;
+    match (binding, d.active_command()) {
+        (Some(row), Some(issued)) => {
+            let v = codec::value(&row.value)?;
+            codec::object_fields(&v, &["format", "original", "commandTicket"])?;
+            if codec::number(&v, "format")? != 2
+                || v["original"] != original_ticket(original)
+                || v["commandTicket"] != issued.ticket.to_string()
+                || issued.family != fc_ports::command_window::CommandFamily::Autostart
+                || issued.command_id != original.command_id
+            {
+                return Err(StorageError::CommandNotIssued);
+            }
+            Ok(())
+        }
+        (None, None) => Ok(()), // Only the already frozen legacy grace may reach here.
+        _ => Err(StorageError::CommandNotIssued),
+    }
+}
+pub(crate) fn command_window_operations(
+    bytes: &[u8],
+) -> Result<Vec<AutostartOperation>, StorageError> {
+    Ok(dto::read_state(&codec::value(bytes)?)?.history)
+}
 fn denied() -> StorageError {
     StorageError::Identity(IdentityError::Permission(PermissionError::RoleDenied))
 }
@@ -36,6 +83,9 @@ pub(super) fn startup_check(d: &dyn TransactionDocuments) -> Result<(), StorageE
     Ok(())
 }
 fn error(e: StorageError) -> AutostartRepositoryError {
+    if let Some(error) = e.command_window_error() {
+        return AutostartRepositoryError::CommandWindow(error);
+    }
     match e {
         StorageError::AutostartCancelled => AutostartRepositoryError::Cancelled,
         StorageError::Identity(_) => AutostartRepositoryError::Denied,
@@ -268,6 +318,27 @@ struct Change<S> {
     factory: Factory<S>,
 }
 impl<S: Send + 'static> TransactionTask<S> for Change<S> {
+    fn lifetime(&self) -> TransactionLifetime {
+        match self.kind {
+            ChangeKind::Finish(..) | ChangeKind::Reconcile(..) => TransactionLifetime::OwnerReturn,
+            _ => TransactionLifetime::Ordinary,
+        }
+    }
+
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        match &self.kind {
+            ChangeKind::Begin(r) => Some((
+                fc_ports::command_window::CommandFamily::Autostart,
+                r.command_id,
+            )),
+            ChangeKind::Applying(t) => Some((
+                fc_ports::command_window::CommandFamily::Autostart,
+                t.command_id,
+            )),
+            _ => None,
+        }
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
             + match &self.kind {
@@ -305,6 +376,7 @@ impl<S: Send + 'static> TransactionTask<S> for Change<S> {
                     .iter()
                     .find(|o| o.ticket.command_id == r.command_id)
                 {
+                    check_original_binding(d, &old.ticket)?;
                     if s.current() != Some(old)
                         || old.ticket.prepared_revision.get()
                             != r.expected_revision
@@ -365,6 +437,7 @@ impl<S: Send + 'static> TransactionTask<S> for Change<S> {
                 settlement_budget(&s)?;
             }
             ChangeKind::Applying(ticket) => {
+                check_original_binding(d, ticket)?;
                 let a = self.actor.as_ref().ok_or_else(denied)?;
                 let current = s.history.last_mut().filter(|o| &o.ticket == ticket).ok_or(
                     StorageError::Conflict {
@@ -489,3 +562,14 @@ impl<S: Send + 'static> TransactionTask<S> for Change<S> {
 #[cfg(test)]
 #[path = "tests/autostart.rs"]
 mod tests;
+
+/// Only factual reconciliation/settlement in the original autostart state
+/// releases this accounting hold; a client timer does not settle an OS write.
+pub(crate) fn command_window_holds(bytes: &[u8]) -> Result<Vec<(CommandId, bool)>, StorageError> {
+    let state = dto::read_state(&codec::value(bytes)?)?;
+    Ok(state
+        .history
+        .into_iter()
+        .map(|operation| (operation.ticket.command_id, operation.phase.pending()))
+        .collect())
+}

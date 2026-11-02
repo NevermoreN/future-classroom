@@ -56,6 +56,26 @@ fn manual_startup_feedback(args: impl IntoIterator<Item = std::ffi::OsString>) -
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag, reference, port, old_package, new_package, marker]
+            if flag == "--teacher-browser-probe" =>
+        {
+            #[cfg(windows)]
+            {
+                application::teacher_browser_probe(
+                    reference,
+                    port.parse::<u16>().map_err(|_| "expected high TCP port")?,
+                    std::path::Path::new(old_package),
+                    std::path::Path::new(new_package),
+                    marker,
+                )
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (reference, port, old_package, new_package, marker);
+                Err("teacher browser native probe requires Windows".into())
+            }
+        }
+
         [flag, reference, port, package, marker] if flag == "--ordinary-https-probe" => {
             #[cfg(windows)]
             {
@@ -498,9 +518,22 @@ fn self_check() -> Result<(), String> {
         StorageWriter::open(root.0.join("probe.db"), 128, publisher).map_err(debug_error)?,
     ));
     let handle = writer.handle()?;
+    // This diagnostic owns a fresh isolated database. Synthetic entropy still
+    // goes through the real sole Writer issuer; it never becomes a client id
+    // or an authorization path for the application's normal database.
+    let issued = handle
+        .try_issue_command(fc_storage::command_window::IssueCommand {
+            family: fc_ports::command_window::CommandFamily::Generic,
+            owner: fc_ports::command_window::CommandOwner::PublicDesktop,
+            entropy: [83; 24],
+        })
+        .map_err(debug_error)?
+        .wait()
+        .map_err(debug_error)?;
+    let handle = handle.with_command_window(issued);
     let command = || {
         CommitCommand::new(
-            "probe-commit-1".into(),
+            issued.command_id.get().to_string(),
             Revision::new(0),
             vec![Mutation::Put {
                 key: "probe".into(),

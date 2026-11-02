@@ -1,3 +1,4 @@
+import { commandIdentity, commandTicket, commandVersion, sameCommand, type CommandIdentity } from './command-protocol'
 import { decimal, ProtocolFault, protocolVersions, unicodeText } from './protocol'
 const fail = (): never => { throw new ProtocolFault() }
 export type ContentKind = 'HOMEWORK' | 'REMINDER'
@@ -5,9 +6,9 @@ export type ContentKey = { kind: 'HOMEWORK'; classId: string; subjectId: string;
 export type ScopeItem = { kind: 'HOMEWORK'; classId: string; className: string; subjectId: string; subjectName: string; ownerTeacherId: string; ownerDisplayName: string } | { kind: 'REMINDER'; classId: string; className: string }
 export interface ScopePage { kind: ContentKind; today: string; identityRevision: string; offset: number; total: number; nextOffset: number | null; items: ScopeItem[] }
 export interface ContentDocument { today: string; serverNow: string; expiresAt: string; key: ContentKey; revision: string; text: string; lastActorId: string | null; updatedAt: string | null }
-export interface ContentCommand { commandId: string; expectedRevision: string; text: string }
-export interface Committed { commandId: string; content: ContentDocument }
-export type CommandResult = { commandId: string; state: 'COMMITTED'; content: ContentDocument } | { commandId: string; state: 'NOT_FOUND'; content: null }
+export interface ContentCommand extends CommandIdentity { expectedRevision: string; text: string }
+export interface Committed extends CommandIdentity { content: ContentDocument }
+export type CommandResult = { commandId: string; commandTicket: string; state: 'COMMITTED'; content: ContentDocument } | { commandId: string; commandTicket: string; state: 'NOT_FOUND'; content: null }
 function object(value: unknown, fields: readonly string[]): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value) || Object.keys(value).length !== fields.length || Object.keys(value).some(k => !fields.includes(k))) return fail()
   return value as Record<string, unknown>
@@ -96,22 +97,18 @@ export function content(value: unknown): ContentDocument {
   if (updatedAt && (updatedAt.slice(0, 10) !== today)) return fail()
   return { key: target, today, serverNow, expiresAt, revision: rev, text, lastActorId, updatedAt }
 }
-export function committed(value: unknown, originalId: string, originalKey: ContentKey, originalRevision: string, originalText: string): Committed {
-  const v = object(value, ['schemaVersion', 'status', 'commandId', 'content']); schema(v, 'COMMITTED')
+export function committed(value: unknown, original: CommandIdentity, originalKey: ContentKey, originalRevision: string, originalText: string): Committed {
+  const v = object(value, ['schemaVersion', 'status', 'commandId', 'commandTicket', 'content']); commandVersion(v.schemaVersion); if (v.status !== 'COMMITTED') fail()
   const result = content(v.content)
-  if (decimal(v.commandId) !== originalId || !sameKey(result.key, originalKey) || BigInt(result.revision) !== BigInt(revision(originalRevision)) + 1n || result.text !== normalizedBodyText(originalText)) return fail()
-  return { commandId: originalId, content: result }
+  if (!sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, commandIdentity(original)) || !sameKey(result.key, originalKey) || BigInt(result.revision) !== BigInt(revision(originalRevision)) + 1n || result.text !== normalizedBodyText(originalText)) return fail()
+  return { ...commandIdentity(original), content: result }
 }
-export function commandResult(value: unknown, originalId: string): CommandResult {
-  const v = object(value, ['schemaVersion', 'status', 'commandId', 'state', 'content']); schema(v, 'COMMAND_RESULT')
-  if (decimal(v.commandId) !== originalId) return fail()
-  if (v.state === 'NOT_FOUND' && v.content === null) return { commandId: originalId, state: 'NOT_FOUND', content: null }
+export function commandResult(value: unknown, original: CommandIdentity): CommandResult {
+  const v = object(value, ['schemaVersion', 'status', 'commandId', 'commandTicket', 'state', 'content']); commandVersion(v.schemaVersion); if (v.status !== 'COMMAND_RESULT') fail()
+  if (!sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, commandIdentity(original))) return fail()
+  if (v.state === 'NOT_FOUND' && v.content === null) return { ...commandIdentity(original), state: 'NOT_FOUND', content: null }
   if (v.state !== 'COMMITTED' || v.content === null) return fail()
-  return { commandId: originalId, state: 'COMMITTED', content: content(v.content) }
-}
-export function newCommandId(random: Pick<Crypto, 'getRandomValues'> = globalThis.crypto): string {
-  for (let attempt = 0; attempt < 16; attempt++) { const words = random.getRandomValues(new Uint32Array(2)); const id = BigInt(words[0]!) << 32n | BigInt(words[1]!); if (id) return id.toString() }
-  throw new ProtocolFault('无法生成安全的命令编号，请刷新页面后重试。')
+  return { ...commandIdentity(original), state: 'COMMITTED', content: content(v.content) }
 }
 /** Uses only the already validated server civil date/time, never the teacher's
  * wall clock/timezone. The midnight timer subsequently uses monotonic time. */

@@ -182,6 +182,58 @@ impl Drop for BackendFixture {
             .expect("web application backend shutdown");
     }
 }
+/// Synthetic labels stay in local variable names only. The command identity
+/// and owner/family binding below come from the actual authenticated HTTP issuer.
+#[derive(Clone, Copy)]
+struct TestCommand {
+    ticket: fc_ports::command_window::CommandTicket,
+    id: fc_domain::ids::CommandId,
+}
+impl TestCommand {
+    fn fields(self) -> String {
+        format!(
+            r#""schemaVersion":2,"commandTicket":"{}","commandId":"{}""#,
+            self.ticket,
+            self.id.get()
+        )
+    }
+    fn history(self, family: &str) -> String {
+        format!("{family}/commands/{}/{}", self.ticket, self.id.get())
+    }
+    fn job(self) -> String {
+        format!(
+            "voice/broadcasts/{}/commands/{}",
+            self.id.get(),
+            self.ticket
+        )
+    }
+    fn cancel(self) -> String {
+        format!("voice/broadcasts/{}/cancel", self.id.get())
+    }
+}
+impl BackendFixture {
+    fn issue(&mut self, cookie: &str, family: &str) -> TestCommand {
+        let session = self.dispatch(&head("GET", "session", 0, Some(cookie), None), b"");
+        assert_eq!(session.head.status, 200);
+        let csrf = field(&session.body, "csrf");
+        let body = format!(r#"{{"schemaVersion":2,"family":"{family}"}}"#);
+        let issued = self.dispatch(
+            &head("POST", "commands", body.len(), Some(cookie), Some(&csrf)),
+            body.as_bytes(),
+        );
+        assert_eq!(issued.head.status, 201, "{}", text(&issued.body));
+        assert!(text(&issued.body).contains("\"status\":\"ISSUED\""));
+        TestCommand {
+            ticket: fc_ports::command_window::CommandTicket::parse(&field(
+                &issued.body,
+                "commandTicket",
+            ))
+            .unwrap(),
+            id: fc_domain::ids::CommandId::new(field(&issued.body, "commandId").parse().unwrap())
+                .unwrap(),
+        }
+    }
+}
 fn text(bytes: &[u8]) -> &str {
     std::str::from_utf8(bytes).unwrap()
 }

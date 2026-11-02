@@ -1,9 +1,9 @@
-import { ApiError, isAborted } from './client'
-import { newCommandId } from './content-protocol'
+import { commandRejected, commandRetired, ApiError, isAborted } from './client'
+import { commandIdentity, sameCommand } from './command-protocol'
 import { ProtocolFault, ProtocolVersionFault } from './protocol'
 import { fileLimit, sameScope, type MaterialScopes, type MaterialScopeItem, type MaterialRecord, type MaterialPage, type MaterialCursor, type UploadReady, type MaterialCommitted } from './material-protocol'
 import type { AppendMaterial, DeleteMaterial, MaterialApi } from './material-client'
-export type PendingMaterial = { kind: 'APPEND'; scope: MaterialScopeItem; command: AppendMaterial; fileName: string; bytes: number } | { kind: 'DELETE'; scope: MaterialScopeItem; command: DeleteMaterial; original: MaterialRecord }
+export type PendingMaterial = ({ kind: 'APPEND'; scope: MaterialScopeItem; command: AppendMaterial; fileName: string; bytes: number } | { kind: 'DELETE'; scope: MaterialScopeItem; command: DeleteMaterial; original: MaterialRecord }) & { retired?: boolean }
 export interface MaterialState { scopes: MaterialScopes | null; selected: MaterialScopeItem | null; page: MaterialPage | null; file: File | null; classes: string[]; upload: UploadReady | null; phase: 'idle' | 'uploading' | 'uploaded' | 'committing' | 'unknown' | 'result' | 'blocked'; pending: PendingMaterial | null; history: MaterialRecord | null; busy: boolean; notice: string; previousScopeOffset: number | null; previousCursor: MaterialCursor | null; canPrevious: boolean }
 export const emptyMaterials: MaterialState = { scopes: null, selected: null, page: null, file: null, classes: [], upload: null, phase: 'idle', pending: null, history: null, busy: false, notice: '', previousScopeOffset: null, previousCursor: null, canPrevious: false }
 export class MaterialController {
@@ -14,7 +14,7 @@ export class MaterialController {
   private incompatible = ''
   private scopeOffsets: number[] = []
   private cursors: (MaterialCursor | null)[] = []
-  constructor(private api: MaterialApi, private csrf: string, private changed: (s: MaterialState) => void, private revoked: () => void, private commandId = newCommandId) {}
+  constructor(private api: MaterialApi, private csrf: string, private changed: (s: MaterialState) => void, private revoked: () => void) {}
   snapshot() { return this.state }
   private publish(patch: Partial<MaterialState>) {
     if (this.disposed) return
@@ -84,16 +84,26 @@ export class MaterialController {
   }
   async append() {
     const { selected, file, upload, classes } = this.state; if (this.incompatible || !selected || !file || !upload || !classes.length || this.state.busy || this.state.phase !== 'uploaded') return
-    let commandId: string; try { commandId = this.commandId() } catch { this.publish({ notice: '无法生成安全命令编号，请核对浏览器后重试。' }); return }
-    await this.submit({ kind: 'APPEND', scope: { ...selected }, command: { commandId, uploadId: upload.uploadId, allowedClassIds: classes.slice() }, fileName: file.name, bytes: file.size })
+    await this.issueAndSubmit({ kind: 'APPEND', scope: { ...selected }, command: { uploadId: upload.uploadId, allowedClassIds: classes.slice() }, fileName: file.name, bytes: file.size })
   }
   async delete(record: MaterialRecord) {
     const selected = this.state.selected; if (this.incompatible || !selected || this.state.busy || this.hasRiskyDraft() || !this.state.page?.items.some(r => r.materialId === record.materialId && r.revision === record.revision && r.resourceVersionId === record.resourceVersionId)) return
-    let commandId: string; try { commandId = this.commandId() } catch { this.publish({ notice: '无法生成安全命令编号。' }); return }
-    await this.submit({ kind: 'DELETE', scope: { ...selected }, command: { commandId, materialId: record.materialId, resourceVersionId: record.resourceVersionId, expectedMaterialRevision: record.revision }, original: { ...record } })
+    await this.issueAndSubmit({ kind: 'DELETE', scope: { ...selected }, command: { materialId: record.materialId, resourceVersionId: record.resourceVersionId, expectedMaterialRevision: record.revision }, original: { ...record, allowedClassIds: record.allowedClassIds.slice() } })
+  }
+  private async issueAndSubmit(captured: { kind: 'APPEND'; scope: MaterialScopeItem; command: Omit<AppendMaterial, 'commandId' | 'commandTicket'>; fileName: string; bytes: number } | { kind: 'DELETE'; scope: MaterialScopeItem; command: Omit<DeleteMaterial, 'commandId' | 'commandTicket'>; original: MaterialRecord }) {
+    const { id, signal } = this.begin(); this.publish({ busy: true, phase: 'committing', notice: '正在领取原操作的服务器票据，尚未提交目录变更。' })
+    try {
+      const pair = commandIdentity(await this.api.issueCommand('materials', this.csrf, signal))
+      if (!this.current(id)) return
+      const pending: PendingMaterial = captured.kind === 'APPEND' ? { ...captured, command: { ...captured.command, ...pair } } : { ...captured, command: { ...captured.command, ...pair } }
+      await this.submit(pending)
+    } catch (error) {
+      if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
+      this.publish({ busy: false, phase: captured.kind === 'APPEND' ? 'uploaded' : 'idle', notice: '未取得可用服务器票据，目录变更尚未提交。原文件和选择保留，请明确操作，不会自动重试。' })
+    }
   }
   private verify(result: MaterialCommitted, p: PendingMaterial) {
-    if (result.commandId !== p.command.commandId || !sameScope(result.scope, p.scope)) throw new ProtocolFault()
+    if (!sameCommand(result, p.command) || !sameScope(result.scope, p.scope)) throw new ProtocolFault()
     const r = result.record
     if (p.kind === 'DELETE') {
       const o = p.original
@@ -104,13 +114,13 @@ export class MaterialController {
     if (this.incompatible || this.disposed) return
     const { id, signal } = this.begin(); this.publish({ busy: true, phase: 'committing', pending, history: null, notice: '正在校验并保存此次命令，不会自动重复提交。' })
     try { const result = pending.kind === 'APPEND' ? await this.api.append(pending.scope, pending.command, this.csrf, signal) : await this.api.deleteMaterial(pending.scope, pending.command, this.csrf, signal); if (!this.current(id)) return; this.verify(result, pending); this.publish({ busy: false, phase: 'result', history: result.record, file: null, upload: null, notice: '白板已确认此次命令持久保存。请明确重新读取目录核对；此结果不代表当前正在屏幕显示。' }) }
-    catch (e) { if (!this.current(id) || isAborted(e) || this.unauthorized(e) || this.versionFault(e)) return; const definite = e instanceof ApiError && (e.status === 400 || e.status === 409 || e.status === 429); this.publish({ busy: false, phase: definite ? 'blocked' : 'unknown', pending: definite ? null : pending, notice: definite ? '此次命令被拒绝。请重新核对目录、权限或临时文件有效期，再明确操作。' : '提交结果未知。原命令保留在本页，只能手动查询；不会自动重发或生成新命令。' }) }
+    catch (e) { if (!this.current(id) || isAborted(e) || this.unauthorized(e) || this.versionFault(e)) return; const definite = commandRejected(e), retired = commandRetired(e); this.publish({ busy: false, phase: definite ? 'blocked' : 'unknown', pending: retired ? { ...pending, retired: true } : definite ? null : pending, notice: retired ? '原票据已过期或未获发行，已停止此操作。原文件、选择和票据保留，请明确重读目录核对。' : definite ? '此次命令被拒绝。请重新核对目录、权限或临时文件有效期，再明确操作。' : '提交结果未知。原命令保留在本页，只能手动查询；不会自动重发或生成新命令。' }) }
   }
   async query() {
-    const p = this.state.pending; if (!p || this.state.busy || !['unknown', 'result'].includes(this.state.phase)) return
+    const p = this.state.pending; if (!p || p.retired || this.state.busy || !['unknown', 'result'].includes(this.state.phase)) return
     const { id, signal } = this.begin(); this.publish({ busy: true })
-    try { const result = await this.api.materialOutcome(p.command.commandId, signal); if (!this.current(id)) return; if (result.state === 'NOT_FOUND') { this.publish({ busy: false, phase: 'unknown', notice: '当前未查到原命令，不证明从未提交；不会因此重发。' }); return }; this.verify(result, p); this.publish({ busy: false, phase: 'result', history: result.record, ...(this.incompatible ? {} : { file: null, upload: null }), notice: '已查到原命令保存结果。它可能已被后续操作替代，请明确读取当前目录。' }) }
-    catch (e) { if (!this.current(id) || isAborted(e) || this.unauthorized(e) || this.versionFault(e)) return; this.publish({ busy: false, phase: 'unknown', notice: '查询未能确认原命令，请稍后主动查询。不会重发。' }) }
+    try { const result = await this.api.materialOutcome(commandIdentity(p.command), signal); if (!this.current(id)) return; if (!sameCommand(result, p.command)) throw new ProtocolFault(); if (result.state === 'NOT_FOUND') { this.publish({ busy: false, phase: 'unknown', notice: '当前未查到原命令，不证明从未提交；不会因此重发。' }); return }; this.verify(result, p); this.publish({ busy: false, phase: 'result', history: result.record, ...(this.incompatible ? {} : { file: null, upload: null }), notice: '已查到原命令保存结果。它可能已被后续操作替代，请明确读取当前目录。' }) }
+    catch (e) { if (!this.current(id) || isAborted(e) || this.unauthorized(e) || this.versionFault(e)) return; if (commandRetired(e)) { this.publish({ busy: false, phase: 'blocked', pending: { ...p, retired: true }, notice: '原票据已过期或未获发行，已停止查询。请明确读取当前目录核对。' }); return }; this.publish({ busy: false, phase: 'unknown', notice: '查询未能确认原命令，请稍后主动查询。不会重发。' }) }
   }
   async download(record: MaterialRecord): Promise<Blob | null> {
     const selected = this.state.selected; if (this.incompatible || !selected || this.state.busy || this.state.phase === 'blocked') return null

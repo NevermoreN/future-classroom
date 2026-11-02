@@ -30,10 +30,10 @@ fn initialized() -> (Scratch, App) {
     assert!(app.screen == Screen::Home);
     (scratch, app)
 }
-fn request(base: &HttpsSettingsState) -> HttpsSettingsRequest {
+fn request(base: &HttpsSettingsState) -> editor::Save {
     use fc_domain::https_settings::*;
-    HttpsSettingsRequest {
-        command_id: CommandId::new(700).unwrap(),
+    editor::Save {
+        command: NativeCommand::new(),
         expected_revision: base.settings.revision,
         expected_identity_revision: base.identity_revision,
         configuration: Some(
@@ -88,12 +88,10 @@ fn accepted_cancellation_while_backend_busy_keeps_original_fence_and_cannot_writ
         owner.lock().unwrap().read_https_settings(lease).unwrap(),
         before
     );
-    assert!(owner
-        .lock()
-        .unwrap()
-        .query_https_settings_outcome(lease, original)
-        .unwrap()
-        .is_none());
+    assert!(
+        original.command.snapshot().is_none(),
+        "cancelled waiter never issued a command or entered persistence"
+    );
     drain(app);
 }
 #[test]
@@ -125,9 +123,7 @@ fn old_page_generation_cannot_deliver_positive_saved_state_or_erase_original_que
         .unwrap();
     let e = app.https_editor.as_mut().unwrap();
     e.capture(data).unwrap();
-    let original = e
-        .prepare_save(CommandId::new(701).unwrap(), Instant::now())
-        .unwrap();
+    let original = e.prepare_save(Instant::now()).unwrap();
     e.accepted();
     let mut fake_saved = before.clone();
     fake_saved.settings.revision = Revision::new(77);
@@ -187,4 +183,89 @@ fn typed_https_fault_is_fatal_but_cas_conflict_is_not() {
             current: Revision::new(3)
         })
     ))));
+}
+
+#[test]
+fn query_never_issues_and_lease_loss_keeps_the_original_ticket_pair() {
+    let _serial = SERIAL.lock().unwrap();
+    let (_scratch, app) = initialized();
+    let lease = app.lease.unwrap();
+    let owner = app.backend.as_ref().unwrap().clone();
+    let before = owner.lock().unwrap().read_https_settings(lease).unwrap();
+    let original = request(&before);
+    let run = |operation| {
+        admit(
+            &app,
+            Work::Https(owner.clone(), lease, operation),
+            Instant::now() + Duration::from_secs(15),
+        )
+        .wait()
+        .unwrap()
+    };
+    assert!(run(Operation::Query(original.clone())).is_err());
+    assert!(
+        original.command.snapshot().is_none(),
+        "query has no issuer path"
+    );
+    assert_eq!(
+        owner.lock().unwrap().read_https_settings(lease).unwrap(),
+        before
+    );
+    let saved = match run(Operation::Save(original.clone())).unwrap() {
+        Outcome::Https(completion) => match completion.value {
+            Value::Saved(state) => state,
+            _ => panic!("actual save response"),
+        },
+        _ => panic!("actual HTTPS worker response"),
+    };
+    let issued = original
+        .command
+        .snapshot()
+        .expect("real worker issued original pair");
+    match run(Operation::Query(original.clone())).unwrap() {
+        Outcome::Https(completion) => match completion.value {
+            Value::Queried(Some(state)) => assert_eq!(state, saved),
+            _ => panic!("original receipt only"),
+        },
+        _ => panic!("actual HTTPS query response"),
+    }
+    assert_eq!(original.command.snapshot(), Some(issued));
+    // A temporarily busy metadata cell is not evidence that no command was
+    // issued. The original cancelled worker must never mint a replacement.
+    let held = original.command.0.lock().unwrap();
+    let late = admit(
+        &app,
+        Work::Https(owner.clone(), lease, Operation::Save(original.clone())),
+        Instant::now() + Duration::from_secs(15),
+    );
+    let until = Instant::now() + Duration::from_secs(15);
+    while !app
+        .pool
+        .handle()
+        .try_stats()
+        .is_some_and(|stats| stats.running > 0)
+    {
+        assert!(Instant::now() < until);
+        std::thread::yield_now();
+    }
+    late.cancel();
+    drop(held);
+    while !late.is_finished() {
+        assert!(Instant::now() < until);
+        std::thread::yield_now();
+    }
+    assert!(matches!(late.wait(), Err(JobError::Cancelled)));
+    assert_eq!(original.command.snapshot(), Some(issued));
+    assert_eq!(
+        owner.lock().unwrap().read_https_settings(lease).unwrap(),
+        saved
+    );
+    app.control.as_ref().unwrap().lock_local();
+    assert!(run(Operation::Query(original.clone())).is_err());
+    assert_eq!(
+        original.command.snapshot(),
+        Some(issued),
+        "revocation never replaces the old identity"
+    );
+    drain(app);
 }

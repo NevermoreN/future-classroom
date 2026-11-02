@@ -1,3 +1,4 @@
+import { commandIdentity, commandTicket, commandVersion, sameCommand, type CommandIdentity } from './command-protocol'
 import { decimal, ProtocolFault, protocolVersions, unicodeText } from './protocol'
 import { civilTime } from './content-protocol'
 export const MAX_FILE_BYTES = 50 * 1024 * 1024
@@ -9,8 +10,8 @@ export interface MaterialRecord { materialId: string; folderId: string; displayN
 export interface MaterialCursor { folderId: string; folderRevision: string; offset: number }
 export interface MaterialPage { scope: MaterialScope; folderId: string; folderRevision: string; offset: number; total: number; items: MaterialRecord[]; nextCursor: MaterialCursor | null }
 export interface UploadReady { uploadId: string; expiresInSeconds: 300; maxChunkBytes: 65536 }
-export interface MaterialCommitted { commandId: string; scope: MaterialScope; record: MaterialRecord }
-export type MaterialOutcome = { commandId: string; state: 'COMMITTED'; scope: MaterialScope; record: MaterialRecord } | { commandId: string; state: 'NOT_FOUND'; scope: null; record: null }
+export interface MaterialCommitted extends CommandIdentity { scope: MaterialScope; record: MaterialRecord }
+export type MaterialOutcome = { commandId: string; commandTicket: string; state: 'COMMITTED'; scope: MaterialScope; record: MaterialRecord } | { commandId: string; commandTicket: string; state: 'NOT_FOUND'; scope: null; record: null }
 const fail = (): never => { throw new ProtocolFault() }
 function object(x: unknown, keys: readonly string[]): Record<string, unknown> { if (!x || typeof x !== 'object' || Array.isArray(x) || Object.keys(x).length !== keys.length || Object.keys(x).some(k => !keys.includes(k))) return fail(); return x as Record<string, unknown> }
 function schema(x: Record<string, unknown>, status: string) { protocolVersions(x.schemaVersion); if (x.status !== status) fail() }
@@ -66,12 +67,12 @@ export function page(x: unknown, target: MaterialScope, expected: MaterialCursor
 }
 export function ready(x: unknown): UploadReady { const v = object(x, ['schemaVersion', 'status', 'uploadId', 'expiresInSeconds', 'maxChunkBytes']); schema(v, 'UPLOAD_READY'); if (v.expiresInSeconds !== 300 || v.maxChunkBytes !== 65536) fail(); return { uploadId: decimal(v.uploadId), expiresInSeconds: 300, maxChunkBytes: 65536 } }
 export function uploaded(x: unknown, id: string, bytes: number): void { const v = object(x, ['schemaVersion', 'status', 'uploadId', 'bytes']); schema(v, 'UPLOADED'); if (v.uploadId !== id || v.bytes !== bytes) fail() }
-export function committed(x: unknown, id: string, target: MaterialScope): MaterialCommitted { const v = object(x, ['schemaVersion', 'status', 'commandId', 'scope', 'record']); schema(v, 'COMMITTED'); const s = scope(v.scope); if (v.commandId !== id || !sameScope(s, target)) fail(); return { commandId: decimal(v.commandId), scope: s, record: record(v.record) } }
-export function outcome(x: unknown, id: string): MaterialOutcome {
-  const v = object(x, ['schemaVersion', 'status', 'commandId', 'state', 'scope', 'record']); schema(v, 'COMMAND_RESULT'); if (v.commandId !== id) fail()
-  if (v.state === 'NOT_FOUND' && v.scope === null && v.record === null) return { commandId: id, state: 'NOT_FOUND', scope: null, record: null }
+export function committed(x: unknown, original: CommandIdentity, target: MaterialScope): MaterialCommitted { const v = object(x, ['schemaVersion', 'status', 'commandId', 'commandTicket', 'scope', 'record']); commandVersion(v.schemaVersion); if (v.status !== 'COMMITTED') fail(); const s = scope(v.scope); if (!sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, commandIdentity(original)) || !sameScope(s, target)) fail(); return { ...commandIdentity(original), scope: s, record: record(v.record) } }
+export function outcome(x: unknown, original: CommandIdentity): MaterialOutcome {
+  const v = object(x, ['schemaVersion', 'status', 'commandId', 'commandTicket', 'state', 'scope', 'record']); commandVersion(v.schemaVersion); if (v.status !== 'COMMAND_RESULT') fail(); if (!sameCommand({ commandId: decimal(v.commandId), commandTicket: commandTicket(v.commandTicket) }, commandIdentity(original))) fail()
+  if (v.state === 'NOT_FOUND' && v.scope === null && v.record === null) return { ...commandIdentity(original), state: 'NOT_FOUND', scope: null, record: null }
   if (v.state !== 'COMMITTED') return fail()
-  return { commandId: id, state: 'COMMITTED', scope: scope(v.scope), record: record(v.record) }
+  return { ...commandIdentity(original), state: 'COMMITTED', scope: scope(v.scope), record: record(v.record) }
 }
 export function folderPath(s: MaterialScope): string { return 'materials/folders/' + decimal(s.ownerTeacherId) + '/' + decimal(s.subjectId) }
 

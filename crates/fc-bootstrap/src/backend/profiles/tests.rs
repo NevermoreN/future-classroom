@@ -174,38 +174,59 @@ impl Fixture {
         for n in 1..=2 {
             fixture
                 .backend
-                .identity(
-                    admin,
-                    IdentityCommand::CreateClass {
-                        id: ClassId::new(n).unwrap(),
-                        name: format!("Class {n}"),
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    fc_application::identity::SessionPurpose::Manage,
+                    |issued_backend| {
+                        issued_backend.identity(
+                            admin,
+                            IdentityCommand::CreateClass {
+                                id: ClassId::new(n).unwrap(),
+                                name: format!("Class {n}"),
+                            },
+                        )
                     },
                 )
                 .unwrap();
             fixture
                 .backend
-                .identity(
-                    admin,
-                    IdentityCommand::PutSubject {
-                        id: SubjectId::new(n).unwrap(),
-                        name: format!("Subject {n}"),
-                        enabled: true,
-                        color: Rgb {
-                            red: 20,
-                            green: 40,
-                            blue: 60,
-                        },
-                        expected_revision: None,
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(admin),
+                    fc_application::identity::SessionPurpose::Manage,
+                    |issued_backend| {
+                        issued_backend.identity(
+                            admin,
+                            IdentityCommand::PutSubject {
+                                id: SubjectId::new(n).unwrap(),
+                                name: format!("Subject {n}"),
+                                enabled: true,
+                                color: Rgb {
+                                    red: 20,
+                                    green: 40,
+                                    blue: 60,
+                                },
+                                expected_revision: None,
+                            },
+                        )
                     },
                 )
                 .unwrap();
         }
         fixture
             .backend
-            .identity(
-                admin,
-                IdentityCommand::BindCurrentClass {
-                    id: ClassId::new(1).unwrap(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                fc_application::identity::SessionPurpose::Manage,
+                |issued_backend| {
+                    issued_backend.identity(
+                        admin,
+                        IdentityCommand::BindCurrentClass {
+                            id: ClassId::new(1).unwrap(),
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -248,43 +269,59 @@ impl Fixture {
         fixture
     }
     fn seed(&mut self, admin: Option<SessionLease>, command: IdentityCommand) {
-        let state = self.backend.state().unwrap();
+        let issued = self
+            .backend
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                admin,
+                SessionPurpose::Manage,
+            )
+            .unwrap();
+        let mut backend = self.backend.begin_command_scope(issued).unwrap();
+        let state = backend.state().unwrap();
         let principal = match &command {
             IdentityCommand::FirstAdministrator { id, .. } => *id,
             IdentityCommand::CreateAccount(spec) => spec.id,
             _ => unreachable!(),
         };
-        let request = self.backend.request(&state, command).unwrap();
+        let request = backend.request(&state, command).unwrap();
         let (change, _) =
             prepare_initial_credentials(&mut SyntheticCredentials, &(), request).unwrap();
         let (actor, generation) = admin
             .map(|lease| {
-                self.backend
+                backend
                     .actor(&state, lease, SessionPurpose::Manage)
                     .unwrap()
             })
             .unzip();
         let mut repository = match admin {
-            Some(lease) => self
-                .backend
-                .guarded(lease, generation.unwrap(), SessionPurpose::Manage),
-            None => self.backend.repository.clone(),
+            Some(lease) => backend.guarded(lease, generation.unwrap(), SessionPurpose::Manage),
+            None => backend.repository.clone(),
         };
         let transition = repository
             .execute_credentials(
-                self.backend.encode(change, principal, 1, 1).unwrap(),
+                backend.encode(change, principal, 1, 1).unwrap(),
                 actor.as_ref(),
                 self.clock.as_ref(),
             )
             .unwrap();
-        self.backend.apply(&transition).unwrap();
+        backend.apply(&transition).unwrap();
+        drop(backend);
         if admin.is_some() {
             // Initial password change is a local component operation. No Web
             // pairing/listener readiness is fabricated to complete this seed.
             let lease = self.issue(principal.get(), TrustedOrigin::Local);
-            let state = self.backend.state().unwrap();
-            let request = self
+            let issued = self
                 .backend
+                .issue_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(lease),
+                    SessionPurpose::ChangeInitialPassword,
+                )
+                .unwrap();
+            let mut backend = self.backend.begin_command_scope(issued).unwrap();
+            let state = backend.state().unwrap();
+            let request = backend
                 .request(
                     &state,
                     IdentityCommand::PasswordChanged {
@@ -297,21 +334,19 @@ impl Fixture {
             let change =
                 prepare_password_change(&mut SyntheticCredentials, &(), &(), &original, request)
                     .unwrap();
-            let (actor, generation) = self
-                .backend
+            let (actor, generation) = backend
                 .actor(&state, lease, SessionPurpose::ChangeInitialPassword)
                 .unwrap();
             let mut repository =
-                self.backend
-                    .guarded(lease, generation, SessionPurpose::ChangeInitialPassword);
+                backend.guarded(lease, generation, SessionPurpose::ChangeInitialPassword);
             let transition = repository
                 .execute_credentials(
-                    self.backend.encode(change, principal, 2, 1).unwrap(),
+                    backend.encode(change, principal, 2, 1).unwrap(),
                     Some(&actor),
                     self.clock.as_ref(),
                 )
                 .unwrap();
-            self.backend.apply(&transition).unwrap();
+            backend.apply(&transition).unwrap();
         }
     }
     fn issue(&self, principal: u64, origin: TrustedOrigin) -> SessionLease {
@@ -376,12 +411,19 @@ fn profiles_backend_exact_management_lease_joint_cas_and_restart() {
     let before = f.backend.read_public_layout(admin).unwrap();
     let public = f
         .backend
-        .save_public_layout(
-            admin,
-            before.layout.revision,
-            before.display.revision,
-            before.layout,
-            before.display,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Profiles,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.save_public_layout(
+                    admin,
+                    before.layout.revision,
+                    before.display.revision,
+                    before.layout,
+                    before.display,
+                )
+            },
         )
         .unwrap();
     assert_eq!(public.layout.revision, Revision::new(1));
@@ -389,7 +431,19 @@ fn profiles_backend_exact_management_lease_joint_cas_and_restart() {
     let draft = SubjectProfileDocument::new(ProfileId::new(900).unwrap(), key());
     let profile = f
         .backend
-        .save_subject_profile(admin, key(), Revision::default(), draft.clone())
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Profiles,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.save_subject_profile(
+                    admin,
+                    key(),
+                    Revision::default(),
+                    draft.clone(),
+                )
+            },
+        )
         .unwrap();
     assert_eq!(profile.id.get(), 1);
     assert_eq!(
@@ -401,7 +455,7 @@ fn profiles_backend_exact_management_lease_joint_cas_and_restart() {
         Some(profile.clone())
     );
     assert!(
-        matches!(f.backend.save_subject_profile(admin,key(),Revision::default(),draft),Err(BackendError::Profile(fc_ports::ProfileRepositoryError::Domain(fc_domain::profile::ProfileError::RevisionConflict{current})))if current==profile.revision)
+        matches!(f.backend.test_native_command(fc_ports::command_window::CommandFamily::Profiles, Some(admin), fc_application::identity::SessionPurpose::Manage, |issued_backend| issued_backend.save_subject_profile(admin,key(),Revision::default(),draft)),Err(BackendError::Profile(fc_ports::ProfileRepositoryError::Domain(fc_domain::profile::ProfileError::RevisionConflict{current})))if current==profile.revision)
     );
     let teacher = f.issue(2, TrustedOrigin::Local);
     assert!(f.backend.read_public_layout(teacher).is_err());
@@ -409,13 +463,33 @@ fn profiles_backend_exact_management_lease_joint_cas_and_restart() {
     assert!(f.backend.list_subject_profiles(teacher, None).is_err());
     assert!(f
         .backend
-        .save_subject_profile(teacher, key(), profile.revision, profile.clone())
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Profiles,
+            Some(teacher),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.save_subject_profile(
+                teacher,
+                key(),
+                profile.revision,
+                profile.clone()
+            )
+        )
         .is_err());
     let web = f.issue(1, TrustedOrigin::Web);
     assert!(f.backend.read_public_layout(web).is_err());
     assert!(f
         .backend
-        .save_subject_profile(web, key(), profile.revision, profile.clone())
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Profiles,
+            Some(web),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.save_subject_profile(
+                web,
+                key(),
+                profile.revision,
+                profile.clone()
+            )
+        )
         .is_err());
     let admin = f.issue(1, TrustedOrigin::Local);
     let initial = f.backend.read_public_layout(admin).unwrap();
@@ -423,10 +497,15 @@ fn profiles_backend_exact_management_lease_joint_cas_and_restart() {
     changed.clock_seconds = !changed.clock_seconds;
     let display = f
         .backend
-        .save_display(admin, initial.display.revision, changed)
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Display,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.save_display(admin, initial.display.revision, changed),
+        )
         .unwrap();
     assert!(
-        matches!(f.backend.save_public_layout(admin,initial.layout.revision,initial.display.revision,initial.layout,initial.display),Err(BackendError::Profile(fc_ports::ProfileRepositoryError::Display(fc_domain::desktop::DisplayError::RevisionConflict{current})))if current==display.revision)
+        matches!(f.backend.test_native_command(fc_ports::command_window::CommandFamily::Profiles, Some(admin), fc_application::identity::SessionPurpose::Manage, |issued_backend| issued_backend.save_public_layout(admin,initial.layout.revision,initial.display.revision,initial.layout,initial.display)),Err(BackendError::Profile(fc_ports::ProfileRepositoryError::Display(fc_domain::desktop::DisplayError::RevisionConflict{current})))if current==display.revision)
     );
     assert_eq!(
         f.backend.read_public_layout(admin).unwrap().layout,
@@ -436,7 +515,17 @@ fn profiles_backend_exact_management_lease_joint_cas_and_restart() {
     assert!(f.backend.read_subject_profile(admin, key()).is_err());
     assert!(f
         .backend
-        .save_subject_profile(admin, key(), profile.revision, profile.clone())
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Profiles,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.save_subject_profile(
+                admin,
+                key(),
+                profile.revision,
+                profile.clone()
+            )
+        )
         .is_err());
     f.backend.close().unwrap();
     f.backend = Backend::open(
@@ -463,11 +552,18 @@ fn profiles_backend_retained_disabled_owner_can_be_managed_but_not_reenabled() {
     let admin = f.issue(1, TrustedOrigin::Local);
     let original = f
         .backend
-        .save_subject_profile(
-            admin,
-            key(),
-            Revision::default(),
-            SubjectProfileDocument::new(ProfileId::new(900).unwrap(), key()),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Profiles,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.save_subject_profile(
+                    admin,
+                    key(),
+                    Revision::default(),
+                    SubjectProfileDocument::new(ProfileId::new(900).unwrap(), key()),
+                )
+            },
         )
         .unwrap();
     let teacher = f.issue(2, TrustedOrigin::Web);
@@ -484,14 +580,21 @@ fn profiles_backend_retained_disabled_owner_can_be_managed_but_not_reenabled() {
         })
         .collect();
     f.backend
-        .identity(
-            admin,
-            IdentityCommand::UpdateAccount {
-                id: id(2),
-                display_name: "Disabled teacher".into(),
-                role: Role::TeacherAdmin,
-                enabled: false,
-                scopes,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    admin,
+                    IdentityCommand::UpdateAccount {
+                        id: id(2),
+                        display_name: "Disabled teacher".into(),
+                        role: Role::TeacherAdmin,
+                        enabled: false,
+                        scopes,
+                    },
+                )
             },
         )
         .unwrap();
@@ -507,7 +610,14 @@ fn profiles_backend_retained_disabled_owner_can_be_managed_but_not_reenabled() {
     off.enabled = false;
     let disabled = f
         .backend
-        .save_subject_profile(admin, key(), original.revision, off)
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Profiles,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.save_subject_profile(admin, key(), original.revision, off)
+            },
+        )
         .unwrap();
     assert!(!disabled.enabled);
     assert_eq!(disabled.id, original.id);
@@ -515,8 +625,17 @@ fn profiles_backend_retained_disabled_owner_can_be_managed_but_not_reenabled() {
     let mut on = disabled.clone();
     on.enabled = true;
     assert_eq!(
-        f.backend
-            .save_subject_profile(admin, key(), disabled.revision, on),
+        f.backend.test_native_command(
+            fc_ports::command_window::CommandFamily::Profiles,
+            Some(admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| issued_backend.save_subject_profile(
+                admin,
+                key(),
+                disabled.revision,
+                on
+            )
+        ),
         Err(BackendError::Profile(
             fc_ports::ProfileRepositoryError::Domain(
                 fc_domain::profile::ProfileError::InvalidScope

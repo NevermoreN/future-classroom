@@ -1,3 +1,4 @@
+import { identity, ticket } from './command-fixtures'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ApiError, NetworkFault } from '../src/api/client'
 import { MaterialHttpApi } from '../src/api/material-client'
@@ -13,17 +14,17 @@ afterEach(() => vi.useRealTimers())
 describe('material HTTP transport has bounded bodies and fixed-version destinations', () => {
   it('separates READY metadata, raw File body, explicit append and original-command GET', async () => {
     const id = '18446744073709551615', cmd = '9007199254740993', f = file()
-    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json({ schemaVersion: 1, status: 'UPLOAD_READY', uploadId: id, expiresInSeconds: 300, maxChunkBytes: 65536 }, 201)).mockResolvedValueOnce(json({ schemaVersion: 1, status: 'UPLOADED', uploadId: id, bytes: f.size })).mockResolvedValueOnce(json({ schemaVersion: 1, status: 'COMMITTED', commandId: cmd, scope: target, record: record() })).mockResolvedValueOnce(json({ schemaVersion: 1, status: 'COMMAND_RESULT', commandId: cmd, state: 'NOT_FOUND', scope: null, record: null }))
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json({ schemaVersion: 1, status: 'UPLOAD_READY', uploadId: id, expiresInSeconds: 300, maxChunkBytes: 65536 }, 201)).mockResolvedValueOnce(json({ schemaVersion: 1, status: 'UPLOADED', uploadId: id, bytes: f.size })).mockResolvedValueOnce(json({ schemaVersion: 2, status: 'COMMITTED', commandId: cmd, commandTicket: ticket, scope: target, record: record() })).mockResolvedValueOnce(json({ schemaVersion: 2, status: 'COMMAND_RESULT', commandId: cmd, commandTicket: ticket, state: 'NOT_FOUND', scope: null, record: null }))
     const api = new MaterialHttpApi(new URL('https://board.school/fc/api/v1/'), fetcher)
     await api.createUpload(target, f, csrf, signal()); await api.upload(id, f, csrf, signal())
     expect(fetcher).toHaveBeenCalledTimes(2)
-    await api.append(target, { commandId: cmd, uploadId: id, allowedClassIds: ['1'] }, csrf, signal()); await api.materialOutcome(cmd, signal())
-    expect(fetcher.mock.calls.map(c => String(c[0]))).toEqual([`https://board.school/fc/api/v1/materials/uploads/${target.ownerTeacherId}/${target.subjectId}`, `https://board.school/fc/api/v1/materials/uploads/${id}/bytes`, `https://board.school/fc/api/v1/materials/folders/${target.ownerTeacherId}/${target.subjectId}/append`, `https://board.school/fc/api/v1/materials/commands/${cmd}`])
+    await api.append(target, { commandId: cmd, commandTicket: ticket, uploadId: id, allowedClassIds: ['1'] }, csrf, signal()); await api.materialOutcome(identity(cmd), signal())
+    expect(fetcher.mock.calls.map(c => String(c[0]))).toEqual([`https://board.school/fc/api/v1/materials/uploads/${target.ownerTeacherId}/${target.subjectId}`, `https://board.school/fc/api/v1/materials/uploads/${id}/bytes`, `https://board.school/fc/api/v1/materials/folders/${target.ownerTeacherId}/${target.subjectId}/append`, `https://board.school/fc/api/v1/materials/commands/${ticket}/${cmd}`])
     expect(JSON.parse(fetcher.mock.calls[0]![1]!.body as string)).toEqual({ schemaVersion: 1, displayName: f.name, bytes: 6 })
     expect(fetcher.mock.calls[1]![1]?.body).toBe(f)
     expect(new Headers(fetcher.mock.calls[1]![1]?.headers).get('content-type')).toBe('application/octet-stream')
     expect(new Headers(fetcher.mock.calls[1]![1]?.headers).get('x-fc-csrf')).toBe(csrf)
-    expect(JSON.parse(fetcher.mock.calls[2]![1]!.body as string)).toEqual({ schemaVersion: 1, commandId: cmd, uploadId: id, allowedClassIds: ['1'] })
+    expect(JSON.parse(fetcher.mock.calls[2]![1]!.body as string)).toEqual({ schemaVersion: 2, commandId: cmd, commandTicket: ticket, uploadId: id, allowedClassIds: ['1'] })
     expect(fetcher.mock.calls.every(c => c[1]?.credentials === 'same-origin' && c[1]?.redirect === 'error' && c[1]?.cache === 'no-store')).toBe(true)
     expect(fetcher.mock.calls[3]![1]?.method).toBe('GET')
   })

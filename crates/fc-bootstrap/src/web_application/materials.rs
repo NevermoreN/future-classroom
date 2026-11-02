@@ -3,7 +3,9 @@ use super::*;
 use crate::backend::BackendError;
 use fc_application::identity::SessionLease;
 use fc_domain::materials::*;
+use fc_ports::command_window::{CommandFamily, CommandTicket};
 use fc_ports::{MaterialDeleteRequest, MaterialListRequest, MaterialRepositoryError};
+use fc_protocol::web::command_window::CommandReference;
 use fc_protocol::web::materials::{self as wire, MaterialRoute};
 pub(super) fn dispatch(
     app: &WebApplication,
@@ -95,18 +97,46 @@ pub(super) fn dispatch(
                 Ok(i) => i,
                 Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
             };
-            match backend.web_material_delete(
+            if let Some(ticket) = input.command_ticket {
+                let issued = match backend.resolve_web_command(
+                    lease,
+                    CommandFamily::Materials,
+                    ticket,
+                    input.command_id,
+                ) {
+                    Ok(issued) => issued,
+                    Err(e) => return error(e, true),
+                };
+                let mut scoped = match backend.begin_command_scope(issued) {
+                    Ok(scoped) => scoped,
+                    Err(e) => return error(e, true),
+                };
+                delete(&mut scoped, lease, scope, input)
+            } else {
+                delete(backend, lease, scope, input)
+            }
+        }
+        MaterialRoute::WindowCommand { command } => {
+            let issued = match backend.resolve_web_command(
                 lease,
-                MaterialDeleteRequest {
-                    command_id: input.command_id,
-                    scope,
-                    material_id: input.material_id,
-                    expected_material_revision: input.expected_material_revision,
-                },
-                input.resource_version_id,
+                CommandFamily::Materials,
+                command.ticket,
+                command.command_id,
             ) {
-                Ok(record) => committed(input.command_id, scope, &record),
-                Err(e) => error(e, true),
+                Ok(issued) => issued,
+                Err(e) => return error(e, false),
+            };
+            let scoped = match backend.begin_command_scope(issued) {
+                Ok(scoped) => scoped,
+                Err(e) => return error(e, false),
+            };
+            match scoped.web_material_outcome(lease, command.command_id) {
+                Ok(outcome) => response(
+                    200,
+                    wire::command_window(command, outcome.as_ref().map(|v| (v.scope, &v.record))),
+                    None,
+                ),
+                Err(e) => error(e, false),
             }
         }
         MaterialRoute::Command { command_id } => {
@@ -167,6 +197,49 @@ pub(super) fn dispatch(
         _ => failure(400, responses::ErrorCode::InvalidRequest),
     }
 }
+fn delete(
+    backend: &mut Backend,
+    lease: SessionLease,
+    scope: MaterialScope,
+    input: wire::DeleteInput,
+) -> WebResponse {
+    match backend.web_material_delete(
+        lease,
+        MaterialDeleteRequest {
+            command_id: input.command_id,
+            scope,
+            material_id: input.material_id,
+            expected_material_revision: input.expected_material_revision,
+        },
+        input.resource_version_id,
+    ) {
+        Ok(record) => committed_window(input.command_id, scope, &record, input.command_ticket),
+        Err(e) => error(e, true),
+    }
+}
+pub(super) fn committed_window(
+    id: fc_domain::ids::CommandId,
+    scope: MaterialScope,
+    record: &MaterialRecord,
+    command_ticket: Option<CommandTicket>,
+) -> WebResponse {
+    let bytes = match command_ticket {
+        Some(ticket) => wire::committed_window(
+            id,
+            scope,
+            record,
+            CommandReference {
+                ticket,
+                command_id: id,
+            },
+        ),
+        None => return committed(id, scope, record),
+    };
+    match bytes {
+        Ok(bytes) => response(200, Ok(bytes), None),
+        Err(_) => failure(503, responses::ErrorCode::ResultUnknown),
+    }
+}
 pub(super) fn committed(
     id: fc_domain::ids::CommandId,
     scope: MaterialScope,
@@ -178,6 +251,9 @@ pub(super) fn committed(
     }
 }
 pub(super) fn error(e: BackendError, mutating: bool) -> WebResponse {
+    if let Some(response) = command_failure(&e) {
+        return response;
+    }
     match e {
         BackendError::Material(MaterialRepositoryError::Domain(e)) => match e {
             MaterialError::Permission(_)

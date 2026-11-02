@@ -80,6 +80,7 @@ pub struct CalendarAdoptionRequest {
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CalendarRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Cancelled,
     Invalid,
     Denied,

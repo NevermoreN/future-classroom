@@ -81,6 +81,18 @@ mod public_lesson_editor;
 pub fn public_desktop_probe() -> std::result::Result<(), String> {
     public_desktop_probe::run()
 }
+mod clock_source;
+use clock_source::AppClock as CurrentClock;
+mod teacher_browser_probe;
+pub fn teacher_browser_probe(
+    reference: &str,
+    port: u16,
+    old_package: &Path,
+    new_package: &Path,
+    marker: &str,
+) -> std::result::Result<(), String> {
+    teacher_browser_probe::run(reference, port, old_package, new_package, marker)
+}
 mod ordinary_https_probe;
 pub fn ordinary_https_probe(
     reference: &str,
@@ -110,7 +122,7 @@ pub fn voice_settings_probe() -> std::result::Result<(), String> {
 pub fn voice_output_probe() -> std::result::Result<(), String> {
     voice_output_probe::run()
 }
-use fc_application::identity::SessionLease;
+use fc_application::identity::{SessionLease, SessionPurpose};
 use fc_bootstrap::backend::web::{WebService, WebServiceError};
 use fc_bootstrap::backend::{Backend, BackendError, Initialize, SessionControl, VoiceService};
 use fc_bootstrap::voice_runtime::{NativeFactory, RuntimePhase, StopReason, VoiceRuntime};
@@ -124,7 +136,7 @@ use fc_runtime::worker::{JobContext, JobTicket, Task, WorkerPool};
 use fc_security::{CredentialRecordCodec, Password, RecoveryCode};
 use fc_windows::{
     host::{HiddenHost, HostHints},
-    system::{CurrentClock, CurrentUserDpapi, DataPaths, SecretBytes},
+    system::{CurrentUserDpapi, DataPaths, SecretBytes},
     workbench::Window,
     InstanceGuard, SystemRandom,
 };
@@ -260,6 +272,8 @@ enum Failure {
     Input(&'static str),
     Deployment(&'static str),
     Stopped,
+    #[cfg(test)]
+    LostCompletedHistoryForTest,
 }
 fn fatal(error: &Failure) -> bool {
     if let Failure::Autostart(fc_bootstrap::autostart::Error::Unsettled { error, .. }) = error {
@@ -339,6 +353,8 @@ fn confirm(data: &FormData, left: FieldId) -> Result<()> {
 }
 fn error_text(error: &Failure) -> String {
     match error {
+        #[cfg(test)]
+        Failure::LostCompletedHistoryForTest => "测试丢弃原完成交付；请查询原命令结果。".into(),
         Failure::Input(s) | Failure::Deployment(s) => (*s).into(),
         Failure::Autostart(fc_bootstrap::autostart::Error::Busy) => "启动项仍在核对，请稍后重新读取。".into(),
         Failure::Autostart(_) => "本次启动项结果尚未确认，请重新打开登录自启动并核对实际状态。".into(),
@@ -544,10 +560,7 @@ enum Outcome {
     Https(Box<https_settings_controller::Completion>),
     WebOpened(WebService, web_editor::Loaded),
     WebLoaded(web_editor::Loaded),
-    VoiceLoaded(
-        SessionLease,
-        Box<fc_bootstrap::backend::VoiceManagementSnapshot>,
-    ),
+    VoiceLoaded(SessionLease, Box<voice_controller::Loaded>),
     Closed,
     Office(fc_materials::office::ContainerReport),
 }
@@ -562,7 +575,267 @@ struct Request {
     revision: Revision,
     clock: Arc<CurrentClock>,
 }
+/// Immutable identity metadata outlives worker output loss. UI reads are
+/// nonblocking; no metadata lock survives a sole-Writer or native wait.
+/// The original client request is retained independently of its current-state
+/// view. It is metadata only; only the backend can hash/admit this typed intent.
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum NativeIntent {
+    VoicePolicy(voice_controller::PolicyIntent),
+    CalendarPolicy {
+        year: i32,
+        expected: Revision,
+        enabled: bool,
+    },
+    CalendarDownload {
+        year: i32,
+    },
+}
+#[derive(Clone, Debug)]
+struct NativeCommand(
+    Arc<Mutex<Option<fc_ports::command_window::IssuedCommand>>>,
+    Option<NativeIntent>,
+);
+impl PartialEq for NativeCommand {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
+    }
+}
+impl Eq for NativeCommand {}
+impl NativeCommand {
+    fn new() -> Self {
+        Self::with_intent(None)
+    }
+    fn with_intent(intent: Option<NativeIntent>) -> Self {
+        Self(Arc::new(Mutex::new(None)), intent)
+    }
+    fn intent(&self) -> Option<&NativeIntent> {
+        self.1.as_ref()
+    }
+    fn snapshot(&self) -> Option<fc_ports::command_window::IssuedCommand> {
+        self.0.try_lock().ok().and_then(|value| *value)
+    }
+    fn read_worker(&self) -> Result<Option<fc_ports::command_window::IssuedCommand>> {
+        Ok(*self.0.lock().map_err(|_| Failure::Stopped)?)
+    }
+    fn original(&self) -> Result<fc_ports::command_window::IssuedCommand> {
+        self.read_worker()?
+            .ok_or_else(|| invalid("原操作尚未取得服务器票据，未发送写入；不会自动重试。"))
+    }
+    fn bind(&self, issued: fc_ports::command_window::IssuedCommand) -> Result<()> {
+        let mut value = self.0.lock().map_err(|_| Failure::Stopped)?;
+        if value.is_some_and(|original| original != issued) {
+            return Err(Failure::Stopped);
+        }
+        *value = Some(issued);
+        Ok(())
+    }
+    fn issue(
+        &self,
+        backend: &Backend,
+        family: fc_ports::command_window::CommandFamily,
+        lease: Option<SessionLease>,
+        purpose: SessionPurpose,
+        context: &JobContext,
+    ) -> Result<fc_ports::command_window::IssuedCommand> {
+        context.checkpoint().map_err(|_| Failure::Stopped)?;
+        let issued = match self.read_worker()? {
+            Some(original) => original,
+            None => {
+                let issued = backend.issue_native_command(family, lease, purpose)?;
+                self.bind(issued)?;
+                issued
+            }
+        };
+        if issued.family != family {
+            return Err(Failure::Stopped);
+        }
+        context.checkpoint().map_err(|_| Failure::Stopped)?;
+        Ok(issued)
+    }
+    fn run<T>(
+        &self,
+        backend: &mut Backend,
+        family: fc_ports::command_window::CommandFamily,
+        lease: Option<SessionLease>,
+        purpose: SessionPurpose,
+        context: &JobContext,
+        action: impl FnOnce(&mut Backend) -> Result<T>,
+    ) -> Result<T> {
+        let mut execution = backend.begin_execution_scope(Arc::new(context.execution_fence()));
+        let issued = self.issue(&execution, family, lease, purpose, context)?;
+        let mut scope = execution.begin_command_scope(issued)?;
+        action(&mut scope)
+    }
+    fn query<T>(
+        &self,
+        backend: &mut Backend,
+        context: &JobContext,
+        action: impl FnOnce(&mut Backend) -> Result<T>,
+    ) -> Result<T> {
+        context.checkpoint().map_err(|_| Failure::Stopped)?;
+        let issued = self.original()?;
+        let mut execution = backend.begin_execution_scope(Arc::new(context.execution_fence()));
+        let mut scope = execution.begin_command_scope(issued)?;
+        action(&mut scope)
+    }
+}
+/// A bounded historical outcome carries the exact original command metadata.
+/// It is not an execution permit, current snapshot, or physical-release proof.
+struct NativeHistory {
+    command: NativeCommand,
+    issued: fc_ports::command_window::IssuedCommand,
+    resolution: NativeResolution,
+}
+enum NativeResolution {
+    Outcome(fc_ports::command_window::TypedCommandOutcome),
+    Expired,
+}
+impl NativeHistory {
+    fn completed(
+        command: NativeCommand,
+        issued: fc_ports::command_window::IssuedCommand,
+        outcome: fc_ports::command_window::TypedCommandOutcome,
+    ) -> Result<Self> {
+        let history = Self {
+            command,
+            issued,
+            resolution: NativeResolution::Outcome(outcome),
+        };
+        if !history.valid_result() {
+            return Err(Failure::Stopped);
+        }
+        Ok(history)
+    }
+    fn valid_result(&self) -> bool {
+        use fc_ports::command_window::{TypedCommandOutcome as O, TypedCommandResult as R};
+        match (&self.resolution, self.command.intent()) {
+            (
+                NativeResolution::Outcome(O::Completed(R::VoicePolicy(_))),
+                Some(NativeIntent::VoicePolicy(_)),
+            ) => true,
+            (
+                NativeResolution::Outcome(O::Completed(R::CalendarPolicy(_))),
+                Some(NativeIntent::CalendarPolicy { .. }),
+            ) => true,
+            (
+                NativeResolution::Outcome(O::Completed(R::CalendarManualFetch(result))),
+                Some(NativeIntent::CalendarDownload { year }),
+            ) => result.year == *year,
+            (NativeResolution::Outcome(O::Completed(_)), _) => false,
+            (_, Some(_)) => true,
+            (_, None) => false,
+        }
+    }
+    fn from_query(
+        command: NativeCommand,
+        issued: fc_ports::command_window::IssuedCommand,
+        result: fc_bootstrap::backend::Result<fc_ports::command_window::TypedCommandOutcome>,
+    ) -> Result<Self> {
+        match result {
+            Ok(outcome) => Self::completed(command, issued, outcome),
+            Err(error)
+                if error.command_window_error()
+                    == Some(fc_ports::command_window::CommandWindowError::Expired) =>
+            {
+                Ok(Self {
+                    command,
+                    issued,
+                    resolution: NativeResolution::Expired,
+                })
+            }
+            Err(error) => Err(error.into()),
+        }
+    }
+    fn pending(&self) -> bool {
+        matches!(
+            self.resolution,
+            NativeResolution::Outcome(fc_ports::command_window::TypedCommandOutcome::Pending)
+        )
+    }
+    fn message(&self) -> &'static str {
+        match &self.resolution {
+            NativeResolution::Expired => {
+                "原操作的查询窗口已过期，未重新执行。请核对当前状态后，再明确发起新的操作。"
+            }
+            NativeResolution::Outcome(fc_ports::command_window::TypedCommandOutcome::Pending) => {
+                "原操作结果仍未确认，已保留原请求和票据；当前状态单独显示，不会重新执行。"
+            }
+            NativeResolution::Outcome(
+                fc_ports::command_window::TypedCommandOutcome::Completed(_),
+            ) => "已查到原操作的持久结果；以下显示当前状态，设备释放仍需独立确认。",
+            NativeResolution::Outcome(fc_ports::command_window::TypedCommandOutcome::Failed(_)) => {
+                "原操作已有明确的失败结果；以下显示当前状态，不会重发原请求。"
+            }
+        }
+    }
+    fn matches(&self, command: &NativeCommand) -> bool {
+        &self.command == command
+            && self.command.intent() == command.intent()
+            && command.snapshot() == Some(self.issued)
+    }
+}
+impl Outcome {
+    fn native_history(&self) -> Option<&NativeHistory> {
+        match self {
+            Self::VoiceLoaded(_, loaded) => loaded.history.as_ref(),
+            Self::Calendar(loaded) => loaded.history.as_ref(),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq)]
+enum NativeTarget {
+    Identity,
+    Accounts(SessionLease),
+    Schedule(SessionLease),
+    Display(SessionLease),
+    Lesson(SessionLease),
+    PublicLesson,
+    Materials(SessionLease, fc_domain::materials::MaterialScope),
+    ProfileContent(SessionLease, fc_domain::profile_content::ContentSlotKey),
+    Homework(SessionLease, ContentKey),
+    Calendar(SessionLease, i32),
+    PublicProfile(SessionLease),
+    SubjectProfile(SessionLease, fc_domain::profile::SubjectProfileKey),
+    Voice(SessionLease),
+}
+impl NativeTarget {
+    fn same_reader(actual: SessionLease, original: SessionLease) -> bool {
+        actual.principal_id() == original.principal_id() && actual.origin() == original.origin()
+    }
+    fn confirms(&self, outcome: &Outcome) -> bool {
+        match (self, outcome) {
+            (Self::Identity, Outcome::Updated { .. })
+            | (Self::Accounts(_), Outcome::AccountsLoaded(_))
+            | (Self::Schedule(_), Outcome::ScheduleLoaded(_))
+            | (Self::Display(_), Outcome::DisplayLoaded(..))
+            | (Self::Lesson(_), Outcome::LessonLoaded(_))
+            | (Self::PublicLesson, Outcome::PublicLessonLoaded(_)) => true,
+            (Self::Voice(original), Outcome::VoiceLoaded(actual, _)) => {
+                Self::same_reader(*actual, *original)
+            }
+            (Self::Materials(_, scope), Outcome::Materials(page)) => page.folder.scope == *scope,
+            (Self::Calendar(_, year), Outcome::Calendar(loaded)) => {
+                loaded.status.selected_year == *year
+            }
+            (Self::PublicProfile(_), Outcome::Profile(loaded)) => matches!(
+                loaded.as_ref(),
+                profile_flow::Loaded::Public { saved: false, .. }
+            ),
+            (Self::SubjectProfile(_, expected), Outcome::Profile(loaded)) => {
+                matches!(loaded.as_ref(), profile_flow::Loaded::Subject { key, saved: false, .. } if key == expected)
+            }
+            (Self::ProfileContent(_, slot), Outcome::ProfileContent(loaded)) => {
+                loaded.document.slot == *slot
+            }
+            (Self::Homework(_, expected), Outcome::Loaded { key, .. }) => expected == key,
+            _ => false,
+        }
+    }
+}
 enum Work {
+    Tracked(Box<Work>, NativeCommand),
     HttpsRuntime(Box<https_runtime_controller::Job>),
     Http(fc_bootstrap::web_transfer::HttpJob),
     HttpProbe(Box<http_business_probe::Job>),
@@ -638,7 +911,7 @@ enum Work {
         backend: Arc<Mutex<Backend>>,
         generation: SceneGeneration,
         source_revision: Revision,
-        request: fc_domain::profile_content::PageContentRequest,
+        request: fc_bootstrap::backend::ProfilePageTarget,
     },
     ProfileContent(Box<profile_content_flow::ContentJob>),
     Material(Box<material_flow::MaterialJob>),
@@ -662,6 +935,9 @@ impl Task for Work {
     type Output = Result<Outcome>;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
+            Self::Tracked(work, _) => work
+                .allocation_bytes()?
+                .checked_add(std::mem::size_of::<NativeCommand>() + 128),
             Self::HttpsRuntime(job) => job.allocation_bytes(),
             Self::Https(_, _, operation) => operation.allocation_bytes(),
             Self::Http(job) => job.allocation_bytes(),
@@ -738,8 +1014,190 @@ impl Task for Work {
         }
     }
     fn run(self, context: &JobContext) -> Self::Output {
+        match self {
+            Self::Tracked(work, command) => work.run_tracked(context, command),
+            work => work.run_tracked(context, NativeCommand::new()),
+        }
+    }
+}
+impl Work {
+    fn native_mutation(&self) -> bool {
+        match self {
+            Self::Tracked(work, _) => work.native_mutation(),
+            Self::Request(r) => matches!(
+                (r.screen, r.action),
+                (
+                    Screen::Setup
+                        | Screen::Recovery
+                        | Screen::Password
+                        | Screen::Rotate
+                        | Screen::School
+                        | Screen::Subjects
+                        | Screen::HomeworkEdit,
+                    SAVE
+                ) | (Screen::School, ADD_CLASS | BIND_CLASS)
+            ),
+            Self::SaveAccount(..)
+            | Self::ChangePublicLesson(..)
+            | Self::ChangeLesson(..)
+            | Self::SaveSchedule(..)
+            | Self::SaveDisplay(..)
+            | Self::ContentPage { .. } => true,
+            Self::Calendar(job) => matches!(
+                &job.operation,
+                calendar_flow::Operation::Adopt { .. } | calendar_flow::Operation::Policy { .. }
+            ),
+            Self::Profile(_, _, operation, ..) => matches!(
+                operation.as_ref(),
+                profiles_editor::Command::SavePublic { .. }
+                    | profiles_editor::Command::SaveSubject { .. }
+            ),
+            Self::Voice(_, _, operation) => !matches!(
+                operation,
+                voice_controller::Operation::Refresh | voice_controller::Operation::Query(_)
+            ),
+            Self::Material(job) => matches!(
+                job.job,
+                material_flow::Job::Import { .. } | material_flow::Job::Delete { .. }
+            ),
+            Self::ProfileContent(job) => matches!(
+                job.operation,
+                profile_content_flow::Operation::Publish { .. }
+            ),
+            _ => false,
+        }
+    }
+    fn native_intent(&self) -> Option<NativeIntent> {
+        match self {
+            Self::Tracked(work, _) => work.native_intent(),
+            Self::Voice(_, _, operation) => {
+                operation.policy_intent().map(NativeIntent::VoicePolicy)
+            }
+            Self::Calendar(job) => match job.operation {
+                calendar_flow::Operation::Policy {
+                    year,
+                    expected,
+                    enabled,
+                } => Some(NativeIntent::CalendarPolicy {
+                    year,
+                    expected,
+                    enabled,
+                }),
+                calendar_flow::Operation::Download(year) => {
+                    Some(NativeIntent::CalendarDownload { year })
+                }
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+    fn native_target(&self) -> Option<NativeTarget> {
+        Some(match self {
+            Self::Tracked(work, _) => return work.native_target(),
+            Self::Request(r) if r.screen == Screen::HomeworkEdit && r.action == SAVE => {
+                NativeTarget::Homework(r.lease?, r.key.clone()?)
+            }
+            Self::Request(_) if self.native_mutation() => NativeTarget::Identity,
+            Self::SaveAccount(_, lease, _) => NativeTarget::Accounts(*lease),
+            Self::SaveSchedule(_, lease, ..) => NativeTarget::Schedule(*lease),
+            Self::SaveDisplay(_, lease, ..) => NativeTarget::Display(*lease),
+            Self::ChangeLesson(_, lease, ..) => NativeTarget::Lesson(*lease),
+            Self::ChangePublicLesson(..) => NativeTarget::PublicLesson,
+            Self::Calendar(job) => match &job.operation {
+                calendar_flow::Operation::Adopt { year, .. }
+                | calendar_flow::Operation::Policy { year, .. } => {
+                    NativeTarget::Calendar(job.lease?, *year)
+                }
+                _ => return None,
+            },
+            Self::Profile(_, lease, operation, ..) => match operation.as_ref() {
+                profiles_editor::Command::SavePublic { .. } => NativeTarget::PublicProfile(*lease),
+                profiles_editor::Command::SaveSubject { key, .. } => {
+                    NativeTarget::SubjectProfile(*lease, *key)
+                }
+                _ => return None,
+            },
+            Self::Voice(_, lease, operation)
+                if !matches!(
+                    operation,
+                    voice_controller::Operation::Refresh | voice_controller::Operation::Query(_)
+                ) =>
+            {
+                NativeTarget::Voice(*lease)
+            }
+            Self::Material(job) => match &job.job {
+                material_flow::Job::Import { lease, scope, .. } => {
+                    NativeTarget::Materials(*lease, *scope)
+                }
+                material_flow::Job::Delete { lease, request } => {
+                    NativeTarget::Materials(*lease, request.scope)
+                }
+                _ => return None,
+            },
+            Self::ProfileContent(job) => match &job.operation {
+                profile_content_flow::Operation::Publish { slot, .. } => {
+                    NativeTarget::ProfileContent(job.lease, *slot)
+                }
+                _ => return None,
+            },
+            _ => return None,
+        })
+    }
+    fn reads_native_target(&self, target: &NativeTarget) -> bool {
+        match (self, target) {
+            (Self::Tracked(work, _), target) => work.reads_native_target(target),
+            (Self::Refresh(_), NativeTarget::Identity) => true,
+            (Self::LoadAccounts(_, lease), NativeTarget::Accounts(original))
+            | (Self::LoadSchedule(_, lease), NativeTarget::Schedule(original))
+            | (Self::LoadDisplay(_, lease), NativeTarget::Display(original))
+            | (Self::LoadLesson(_, lease), NativeTarget::Lesson(original)) => {
+                NativeTarget::same_reader(*lease, *original)
+            }
+            (Self::LoadPublicLesson(..), NativeTarget::PublicLesson) => true,
+            (Self::Calendar(job), NativeTarget::Calendar(lease, year)) => {
+                job.lease
+                    .is_some_and(|actual| NativeTarget::same_reader(actual, *lease))
+                    && matches!(job.operation, calendar_flow::Operation::Load(actual) if actual == *year)
+            }
+            (Self::Profile(_, lease, operation, ..), NativeTarget::PublicProfile(original)) => {
+                NativeTarget::same_reader(*lease, *original)
+                    && matches!(operation.as_ref(), profiles_editor::Command::LoadPublic)
+            }
+            (
+                Self::Profile(_, lease, operation, ..),
+                NativeTarget::SubjectProfile(original, key),
+            ) => {
+                NativeTarget::same_reader(*lease, *original)
+                    && matches!(operation.as_ref(), profiles_editor::Command::LoadSubject { key: actual } if actual == key)
+            }
+            (
+                Self::Voice(
+                    _,
+                    lease,
+                    voice_controller::Operation::Refresh | voice_controller::Operation::Query(_),
+                ),
+                NativeTarget::Voice(original),
+            ) => NativeTarget::same_reader(*lease, *original),
+            (Self::Material(job), NativeTarget::Materials(lease, scope)) => {
+                matches!(&job.job, material_flow::Job::Load { lease: actual, request } if NativeTarget::same_reader(*actual, *lease) && request.scope == *scope)
+            }
+            (Self::ProfileContent(job), NativeTarget::ProfileContent(lease, slot)) => {
+                NativeTarget::same_reader(job.lease, *lease)
+                    && matches!(&job.operation, profile_content_flow::Operation::Load { slot: actual } if actual == slot)
+            }
+            (Self::Request(r), NativeTarget::Homework(lease, _)) => {
+                r.screen == Screen::Homework
+                    && r.action == LOAD
+                    && r.lease
+                        .is_some_and(|actual| NativeTarget::same_reader(actual, *lease))
+            }
+            _ => false,
+        }
+    }
+    fn run_tracked(self, context: &JobContext, command: NativeCommand) -> Result<Outcome> {
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         match self {
+            Self::Tracked(..) => Err(Failure::Stopped),
             Self::HttpsRuntime(job) => job.run(context),
             Self::Https(backend, lease, operation) => {
                 https_settings_controller::run(backend, lease, operation, context)
@@ -753,7 +1211,7 @@ impl Task for Work {
                 hold.wait();
                 Ok(Outcome::MaterialCleaned)
             }
-            Self::Backup(job) => job.run(context),
+            Self::Backup(job) => job.run_with_command(context, &command),
             Self::Open(paths, clock) => {
                 let root = paths.root().to_owned();
                 // The first frame is already visible. Recovery owns the same
@@ -858,9 +1316,9 @@ impl Task for Work {
             Self::MaintainProfileContent(root, backend, cursor) => {
                 profile_content_flow::maintain(root, backend, cursor, context)
             }
-            Self::Request(r) => execute(r),
+            Self::Request(r) => settings_registry::execute(r, &command, context),
             Self::Voice(service, lease, operation) => {
-                voice_controller::run(service, lease, operation, context)
+                voice_controller::run(service, lease, operation, context, &command)
             }
             Self::OpenWeb(backend, lease) => {
                 let service = backend.lock().map_err(|_| Failure::Stopped)?.web_service();
@@ -908,59 +1366,82 @@ impl Task for Work {
             }
             Self::SaveAccount(backend, lease, operation) => {
                 let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
-                match *operation {
-                    accounts_editor::Command::Create {
-                        expected,
-                        account,
-                        password,
-                    } => {
-                        let code = backend.create_account_at(lease, expected, account, password)?;
-                        Ok(Outcome::Updated {
-                            state: backend.state()?,
-                            lease: Some(lease),
-                            code: Some(code),
-                            next: Screen::Code,
-                        })
-                    }
-                    accounts_editor::Command::Update {
-                        expected,
-                        command:
-                            IdentityCommand::UpdateAccount {
-                                id,
-                                display_name,
-                                role,
-                                enabled,
-                                scopes,
-                            },
-                    } => {
-                        let self_changed = id == lease.principal_id();
-                        let state = backend.identity_at(
-                            lease,
+                command.run(
+                    &mut backend,
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(lease),
+                    SessionPurpose::Manage,
+                    context,
+                    |backend| match *operation {
+                        accounts_editor::Command::Create {
                             expected,
-                            IdentityCommand::UpdateAccount {
-                                id,
-                                display_name,
-                                role,
-                                enabled,
-                                scopes,
-                            },
-                        )?;
-                        Ok(Outcome::AccountSaved {
-                            state,
-                            self_changed,
-                        })
-                    }
-                    _ => Err(invalid("账号操作在当前页面不可用。")),
-                }
+                            account,
+                            password,
+                        } => {
+                            let code =
+                                backend.create_account_at(lease, expected, account, password)?;
+                            Ok(Outcome::Updated {
+                                state: backend.state()?,
+                                lease: Some(lease),
+                                code: Some(code),
+                                next: Screen::Code,
+                            })
+                        }
+                        accounts_editor::Command::Update {
+                            expected,
+                            command:
+                                IdentityCommand::UpdateAccount {
+                                    id,
+                                    display_name,
+                                    role,
+                                    enabled,
+                                    scopes,
+                                },
+                        } => {
+                            let self_changed = id == lease.principal_id();
+                            let state = backend.identity_at(
+                                lease,
+                                expected,
+                                IdentityCommand::UpdateAccount {
+                                    id,
+                                    display_name,
+                                    role,
+                                    enabled,
+                                    scopes,
+                                },
+                            )?;
+                            Ok(Outcome::AccountSaved {
+                                state,
+                                self_changed,
+                            })
+                        }
+                        _ => Err(invalid("账号操作在当前页面不可用。")),
+                    },
+                )
             }
-            Self::Calendar(job) => job.run(context),
+            Self::Calendar(job) => job.run_with_command(context, &command),
             Self::Autostart(job, scope) => {
                 let owner = job.lease.map(|lease| lease.principal_id());
                 let scope = match scope { Some(scope) => scope, None => fc_windows::system::RunScope::current_executable().map_err(|_| invalid("当前程序路径无法用于登录自启动，请将程序移至较短的本地目录后重新核对。"))? };
                 let mut system = scope
                     .open()
                     .map_err(|_| invalid("启动项适配器不可用，请重新读取。"))?;
-                job.run(context, &mut system)
+                let issued = if matches!(
+                    &job.operation,
+                    fc_bootstrap::autostart::Operation::Change { .. }
+                ) {
+                    let backend = job.backend.lock().map_err(|_| Failure::Stopped)?;
+                    Some(command.issue(
+                        &backend,
+                        fc_ports::command_window::CommandFamily::Autostart,
+                        job.lease,
+                        SessionPurpose::Manage,
+                        context,
+                    )?)
+                } else {
+                    None
+                };
+                job.run_with_command(context, &mut system, issued)
                     .map(|loaded| Outcome::Autostart(owner, Box::new(loaded)))
                     .map_err(Failure::from)
             }
@@ -980,10 +1461,18 @@ impl Task for Work {
             }
             Self::ChangePublicLesson(backend, guard, action) => {
                 let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
-                let mut scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
-                Ok(Outcome::PublicLessonSaved(
-                    scoped.change_desktop_lesson(&guard, action)?,
-                ))
+                command.run(
+                    &mut backend,
+                    fc_ports::command_window::CommandFamily::DesktopLesson,
+                    None,
+                    SessionPurpose::Manage,
+                    context,
+                    |scoped| {
+                        Ok(Outcome::PublicLessonSaved(
+                            scoped.change_desktop_lesson(&guard, action)?,
+                        ))
+                    },
+                )
             }
             Self::LoadLesson(backend, lease) => {
                 let snapshot = backend
@@ -993,18 +1482,34 @@ impl Task for Work {
                 Ok(Outcome::LessonLoaded(snapshot))
             }
             Self::ChangeLesson(backend, lease, expected, lesson, action) => {
-                let snapshot = backend
-                    .lock()
-                    .map_err(|_| Failure::Stopped)?
-                    .change_lesson(lease, expected, lesson, action)?;
-                Ok(Outcome::LessonSaved(snapshot))
+                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
+                command.run(
+                    &mut backend,
+                    fc_ports::command_window::CommandFamily::Lesson,
+                    Some(lease),
+                    SessionPurpose::Manage,
+                    context,
+                    |backend| {
+                        Ok(Outcome::LessonSaved(
+                            backend.change_lesson(lease, expected, lesson, action)?,
+                        ))
+                    },
+                )
             }
             Self::SaveSchedule(backend, lease, expected, document) => {
-                let document = backend
-                    .lock()
-                    .map_err(|_| Failure::Stopped)?
-                    .save_schedule(lease, expected, document)?;
-                Ok(Outcome::ScheduleSaved(document))
+                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
+                command.run(
+                    &mut backend,
+                    fc_ports::command_window::CommandFamily::Schedule,
+                    Some(lease),
+                    SessionPurpose::Manage,
+                    context,
+                    |backend| {
+                        Ok(Outcome::ScheduleSaved(
+                            backend.save_schedule(lease, expected, document)?,
+                        ))
+                    },
+                )
             }
             Self::LoadDisplay(backend, lease) => {
                 let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
@@ -1015,18 +1520,26 @@ impl Task for Work {
             }
             Self::SaveDisplay(backend, lease, palette, expected, colors, settings) => {
                 let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
-                let mut scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
-                let settings =
-                    scoped.save_subject_visuals(lease, palette, expected, colors, settings)?;
-                let identity = Arc::new(scoped.state()?);
-                Ok(Outcome::DisplaySaved(settings, identity))
+                command.run(
+                    &mut backend,
+                    fc_ports::command_window::CommandFamily::SubjectVisual,
+                    Some(lease),
+                    SessionPurpose::Manage,
+                    context,
+                    |scoped| {
+                        let settings = scoped
+                            .save_subject_visuals(lease, palette, expected, colors, settings)?;
+                        let identity = Arc::new(scoped.state()?);
+                        Ok(Outcome::DisplaySaved(settings, identity))
+                    },
+                )
             }
             Self::DisplayPreview(job) => job.run(context),
-            Self::Profile(backend, lease, operation, sequence, root) => {
-                profile_flow::run(backend, lease, *operation, sequence, root, context)
-                    .map(|loaded| Outcome::Profile(Box::new(loaded)))
-            }
-            Self::Material(job) => job.run(context),
+            Self::Profile(backend, lease, operation, sequence, root) => profile_flow::run(
+                backend, lease, *operation, sequence, root, context, &command,
+            )
+            .map(|loaded| Outcome::Profile(Box::new(loaded))),
+            Self::Material(job) => job.run(context, &command),
             Self::CleanupMaterial(root, path) => {
                 let files = fc_windows::materials::files::ControlledFiles::new(&root)
                     .map_err(|_| invalid("副本清理目录不可用。"))?;
@@ -1055,22 +1568,41 @@ impl Task for Work {
                 Ok(Outcome::Desktop(Box::new(facts), content))
             }
             Self::ContentImages(job) => job.run(context),
-            Self::ProfileContent(job) => job.run(context),
+            Self::ProfileContent(job) => job.run(context, &command),
             Self::ContentPage {
                 backend,
                 generation,
                 source_revision,
                 request,
             } => {
-                let snapshot = backend
+                context.checkpoint().map_err(|_| Failure::Stopped)?;
+                let mut backend = backend
                     .try_lock()
-                    .map_err(|_| invalid("内容状态正在更新，请稍后刷新。"))?
-                    .page_profile_content_while(
+                    .map_err(|_| invalid("内容状态正在更新，请稍后刷新。"))?;
+                if command.read_worker()?.is_none() {
+                    let issued = backend.issue_profile_page_command(
+                        generation,
+                        source_revision,
+                        &request,
+                        Arc::new(context.execution_fence()),
+                    )?;
+                    command.bind(issued)?;
+                }
+                let snapshot = command.query(&mut backend, context, |backend| {
+                    let request = fc_domain::profile_content::PageContentRequest {
+                        command_id: backend.issued_command_id()?,
+                        slot: request.slot,
+                        expected_content_revision: request.expected_content_revision,
+                        expected_view_revision: request.expected_view_revision,
+                        page: request.page,
+                    };
+                    Ok(backend.page_profile_content_while(
                         generation,
                         source_revision,
                         request,
                         Arc::new(context.execution_fence()),
-                    )?;
+                    )?)
+                })?;
                 Ok(Outcome::ContentPage {
                     generation,
                     snapshot,
@@ -1101,9 +1633,6 @@ impl Task for Work {
             }
         }
     }
-}
-fn execute(r: Request) -> Result<Outcome> {
-    settings_registry::execute(r)
 }
 fn find_class(state: &IdentityState, name: &str) -> Result<ClassId> {
     let key = normalized_name(name, 128).map_err(|_| invalid("请选择已有班级。"))?;
@@ -1173,6 +1702,11 @@ struct App {
     calendar: Option<calendar_editor::Editor>,
     autostart: Option<autostart_editor::Editor>,
     autostart_job: Option<Pending>,
+    autostart_command: Option<NativeCommand>,
+    autostart_unknown: bool,
+    calendar_command: Option<NativeCommand>,
+    calendar_unknown: bool,
+    calendar_command_target: Option<(PrincipalId, i32)>,
     autostart_scope: Option<fc_windows::system::RunScope>,
     backup: backup_controller::State,
     calendar_job: Option<Pending>,
@@ -1191,11 +1725,20 @@ struct App {
     lesson_editor: Option<lesson_editor::Editor>,
     public_lesson_editor: Option<public_lesson_editor::Editor>,
     public_lesson_flow: Option<fc_bootstrap::backend::DesktopLessonFlow>,
+    public_lesson_command: Option<NativeCommand>,
+    public_lesson_unknown: bool,
     web_service: Option<WebService>,
     web_editor: Option<web_editor::Editor>,
     https_editor: Option<https_settings_editor::Editor>,
     https_pending: Option<https_settings_controller::Pending>,
     https_unadmitted: Option<(Work, Instant)>,
+    native_command: Option<NativeCommand>,
+    native_unknown: bool,
+    native_target: Option<NativeTarget>,
+    native_mutation_pending: bool,
+    native_readback_pending: bool,
+    #[cfg(test)]
+    lose_completed_history_for_test: Option<NativeCommand>,
     voice_editor: Option<voice_editor::Editor>,
     web_readiness: web_editor::Readiness,
     teacher_https: https_runtime_controller::State,
@@ -1400,9 +1943,49 @@ impl App {
             module_registry::stop(module_registry::Kind::SharedWorkers, self);
         }
     }
+    fn apply_native_history(&mut self, history: &NativeHistory) {
+        if self
+            .native_command
+            .as_ref()
+            .is_some_and(|original| history.matches(original))
+        {
+            self.native_unknown = history.pending();
+        }
+        if self
+            .calendar_command
+            .as_ref()
+            .is_some_and(|original| history.matches(original))
+        {
+            self.calendar_unknown = history.pending();
+        }
+    }
     fn submit(&mut self, work: Work) -> std::result::Result<(), String> {
         if self.pending.is_some() {
             return Ok(());
+        }
+        let public_lesson = matches!(
+            &work,
+            Work::LoadPublicLesson(..) | Work::ChangePublicLesson(..)
+        );
+        let mutation = work.native_mutation();
+        let readback = if public_lesson {
+            self.public_lesson_command.is_some()
+                && work.reads_native_target(&NativeTarget::PublicLesson)
+        } else {
+            self.native_target
+                .as_ref()
+                .is_some_and(|target| work.reads_native_target(target))
+        };
+        let target = work.native_target();
+        if mutation
+            && if public_lesson {
+                self.public_lesson_unknown
+            } else {
+                self.native_unknown
+            }
+        {
+            self.status = "原操作结果尚未核对，票据与目标已保留。请明确读取当前状态后再决定新的操作，不会重发。".into();
+            return self.render();
         }
         if self.offscreen_probe {
             let kind = match &work {
@@ -1428,18 +2011,26 @@ impl App {
         // current local lease before their completion reaches the window pump.
         // WTS/explicit lock still wins immediately; the heartbeat must allow this
         // particular completion to be consumed rather than cancel its own success.
-        let public_lesson = matches!(
-            &work,
-            Work::LoadPublicLesson(..) | Work::ChangePublicLesson(..)
-        );
         let self_revokes = matches!(&work,Work::Request(r) if r.action==EXIT||r.action==SAVE&&matches!(r.screen,Screen::Password|Screen::Rotate))
             || matches!(&work, Work::SaveAccount(_, lease, operation) if matches!(operation.as_ref(), accounts_editor::Command::Update { command: IdentityCommand::UpdateAccount { id, .. }, .. } if *id == lease.principal_id()));
+        let command = NativeCommand::with_intent(work.native_intent());
+        let work = Work::Tracked(Box::new(work), command.clone());
         match self
             .pool
             .handle()
             .try_submit(work, Instant::now() + Duration::from_secs(90))
         {
             Ok(ticket) => {
+                if mutation {
+                    if public_lesson {
+                        self.public_lesson_command = Some(command);
+                    } else {
+                        self.native_command = Some(command);
+                        self.native_target = target;
+                    }
+                }
+                self.native_mutation_pending = mutation;
+                self.native_readback_pending = readback;
                 self.pending = Some(Pending {
                     ticket,
                     generation: self.generation,
@@ -2028,23 +2619,12 @@ impl App {
                 expected_revision,
                 operation,
                 input,
-            }) => match command_id() {
-                Ok(command_id) => {
-                    self.submit_profile_content(profile_content_flow::Operation::Publish {
-                        slot,
-                        expected_revision,
-                        command_id,
-                        operation,
-                        input,
-                    })?
-                }
-                Err(error) => {
-                    if let Some(editor) = &mut self.profile_content {
-                        editor.cancel_review();
-                    }
-                    self.status = error_text(&error);
-                }
-            },
+            }) => self.submit_profile_content(profile_content_flow::Operation::Publish {
+                slot,
+                expected_revision,
+                operation,
+                input,
+            })?,
             Err(message) => self.status = message,
         }
         self.render()
@@ -2743,18 +3323,14 @@ impl App {
                 scope,
                 material_id,
                 expected_material_revision,
-            }) => match command_id() {
-                Ok(command_id) => self.submit_material(material_flow::Job::Delete {
-                    lease,
-                    request: fc_ports::MaterialDeleteRequest {
-                        command_id,
-                        scope,
-                        material_id,
-                        expected_material_revision,
-                    },
-                })?,
-                Err(e) => self.status = error_text(&e),
-            },
+            }) => self.submit_material(material_flow::Job::Delete {
+                lease,
+                request: material_flow::DeleteDraft {
+                    scope,
+                    material_id,
+                    expected_material_revision,
+                },
+            })?,
             Ok(Command::Open {
                 scope,
                 material_id,
@@ -3258,6 +3834,8 @@ impl App {
             },
             None => None,
         };
+        #[cfg(test)]
+        let completed = tests::drop_completed_history_for_test(self, completed);
         if let Some(outcome) = completed {
             if self.offscreen_probe {
                 let kind = match &outcome {
@@ -3280,6 +3858,56 @@ impl App {
                     self.view().title
                 );
             }
+            let public_command = self
+                .pending
+                .as_ref()
+                .is_some_and(|pending| pending.public_lesson);
+            if self.native_mutation_pending {
+                if public_command {
+                    self.public_lesson_unknown = outcome.is_err();
+                } else {
+                    self.native_unknown = outcome.is_err();
+                }
+            } else if self.native_readback_pending
+                && self
+                    .pending
+                    .as_ref()
+                    .is_some_and(|pending| pending.generation == self.generation)
+                && !self.stopping
+                && outcome.as_ref().is_ok_and(|outcome| {
+                    if public_command {
+                        NativeTarget::PublicLesson.confirms(outcome)
+                    } else {
+                        self.native_command
+                            .as_ref()
+                            .is_none_or(|command| command.intent().is_none())
+                            && self
+                                .native_target
+                                .as_ref()
+                                .is_some_and(|target| target.confirms(outcome))
+                    }
+                })
+            {
+                if public_command {
+                    self.public_lesson_unknown = false;
+                } else {
+                    self.native_unknown = false;
+                }
+            }
+            if self
+                .pending
+                .as_ref()
+                .is_some_and(|pending| pending.generation == self.generation)
+                && !self.stopping
+            {
+                if let Ok(outcome) = &outcome {
+                    if let Some(history) = outcome.native_history() {
+                        self.apply_native_history(history);
+                    }
+                }
+            }
+            self.native_mutation_pending = false;
+            self.native_readback_pending = false;
             let completed_pending = self.pending.take();
             let public_lesson = completed_pending.as_ref().is_some_and(|p| p.public_lesson);
             let generation = completed_pending.map_or(self.generation, |p| p.generation);
@@ -3379,7 +4007,11 @@ impl App {
                     }
                 }
                 Ok(Outcome::VoiceLoaded(lease, loaded)) => {
-                    self.voice_management_loaded(lease, *loaded)?;
+                    let history_message = loaded.history.as_ref().map(NativeHistory::message);
+                    self.voice_management_loaded(lease, loaded.snapshot)?;
+                    if let Some(message) = history_message {
+                        self.status = message.into();
+                    }
                 }
                 Ok(Outcome::WebLoaded(loaded)) => {
                     if self.screen == Screen::Web {
@@ -3609,6 +4241,15 @@ impl App {
                         self.screen = Screen::Repair;
                     }
                     self.status = error_text(&error);
+                    if self
+                        .native_command
+                        .as_ref()
+                        .and_then(NativeCommand::snapshot)
+                        .is_some()
+                    {
+                        self.status
+                            .push_str(" 原操作票据已保留；请明确核对当前状态，勿重复提交。");
+                    }
                 }
             }
             self.render()?;
@@ -4038,6 +4679,11 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         calendar: None,
         autostart: None,
         autostart_job: None,
+        autostart_command: None,
+        autostart_unknown: false,
+        calendar_command: None,
+        calendar_unknown: false,
+        calendar_command_target: None,
         autostart_scope: None,
         backup: backup_controller::State::default(),
         calendar_job: None,
@@ -4045,11 +4691,20 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         lesson_editor: None,
         public_lesson_editor: None,
         public_lesson_flow: None,
+        public_lesson_command: None,
+        public_lesson_unknown: false,
         web_service: None,
         web_editor: None,
         https_editor: None,
         https_pending: None,
         https_unadmitted: None,
+        native_command: None,
+        native_unknown: false,
+        native_target: None,
+        native_mutation_pending: false,
+        native_readback_pending: false,
+        #[cfg(test)]
+        lose_completed_history_for_test: None,
         voice_editor: None,
         web_readiness: web_editor::Readiness::Unavailable,
         teacher_https: module_registry::create_https()?,
@@ -5052,6 +5707,502 @@ mod tests {
         app.begin_shutdown();
         wait_for(&mut app, |a| a.pool.is_finished());
         app.pool.join().unwrap();
+    }
+    pub(super) fn ready_management() -> (Scratch, App) {
+        let (scratch, mut app) = fixture();
+        wait_for(&mut app, |app| app.pending.is_none());
+        let until = Instant::now() + Duration::from_secs(90);
+        app.next_content_maintenance = until;
+        app.next_voice_maintenance = until;
+        app.next_calendar_maintenance = until;
+        voice_management_probe::submit(
+            &mut app,
+            SAVE,
+            &[
+                (SCHOOL, "Synthetic typed history"),
+                (LOGIN, voice_management_probe::LOGIN_NAME),
+                (NAME, "Synthetic administrator"),
+                (PASSWORD, voice_management_probe::PASSWORD_VALUE),
+                (CONFIRM, voice_management_probe::PASSWORD_VALUE),
+            ],
+            until,
+        )
+        .unwrap();
+        voice_management_probe::submit(&mut app, ACK, &[], until).unwrap();
+        if app.screen == Screen::Login {
+            voice_management_probe::login(&mut app, until).unwrap();
+        }
+        (scratch, app)
+    }
+    /// Drop only the verified successful metadata completion at the UI delivery
+    /// boundary. Keep the original JobTicket for the normal pump to consume;
+    /// reading it here would manufacture Consumed/Stopped and revoke the lease.
+    pub(super) fn lose_worker_reply(app: &mut App) {
+        let lease = app.lease.expect("original management lease");
+        let original = app.native_command.as_ref().unwrap().clone();
+        assert!(app.lose_completed_history_for_test.is_none());
+        let until = Instant::now() + Duration::from_secs(30);
+        while !app.pending.as_ref().unwrap().ticket.is_finished() {
+            assert!(Instant::now() < until);
+            std::thread::yield_now();
+        }
+        app.lose_completed_history_for_test = Some(original.clone());
+        wait_for(app, |app| app.pending.is_none());
+        assert!(app.lose_completed_history_for_test.is_none());
+        assert!(app.native_unknown);
+        assert_eq!(app.lease, Some(lease), "completion loss is not worker loss");
+        assert!(app.native_command.as_ref() == Some(&original));
+        app.backend
+            .as_ref()
+            .unwrap()
+            .lock()
+            .unwrap()
+            .check_session(lease, SessionPurpose::Manage)
+            .expect("original lease remains valid without reauthentication");
+    }
+    pub(super) fn drop_completed_history_for_test(
+        app: &mut App,
+        completed: Option<Result<Outcome>>,
+    ) -> Option<Result<Outcome>> {
+        if app.lose_completed_history_for_test.is_none() {
+            return completed;
+        }
+        let outcome = match completed {
+            None => return None,
+            Some(Ok(outcome)) => outcome,
+            Some(Err(error)) => panic!("expected actual successful history: {error:?}"),
+        };
+        let original = app.lose_completed_history_for_test.take().unwrap();
+        assert!(app.native_mutation_pending);
+        assert!(app.native_command.as_ref() == Some(&original));
+        let history = outcome
+            .native_history()
+            .expect("actual typed worker history");
+        assert!(history.matches(&original));
+        assert!(history.valid_result());
+        assert!(matches!(
+            history.resolution,
+            NativeResolution::Outcome(fc_ports::command_window::TypedCommandOutcome::Completed(_))
+        ));
+        // Calendar/Voice history outputs contain metadata only; physical owners
+        // remain with their original executor. No fake historical result is made.
+        drop(outcome);
+        Some(Err(Failure::LostCompletedHistoryForTest))
+    }
+    #[test]
+    fn management_unknown_never_blocks_public_lesson_and_public_read_cannot_clear_it() {
+        use fc_domain::{
+            lesson_context::LessonAction, schedule::*, schedule_document::SemesterPlan, time::*,
+        };
+        use fc_ports::{Clock, DesktopLessonBinding};
+        struct FixedCivil;
+        impl Clock for FixedCivil {
+            fn now(&self) -> LocalDateTime {
+                LocalDateTime::new(LocalDate::new(2026, 11, 2).unwrap(), 10 * 3600 + 1800).unwrap()
+            }
+        }
+        let _serial = SERIAL.lock().unwrap();
+        let root = std::env::temp_dir().join(format!(
+            "FutureClassroom-Test-Public-Unknown-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let scratch = Scratch(root.clone());
+        let paths = DataPaths::isolated_test(root.clone()).unwrap();
+        paths
+            .prepare_for_current_user()
+            .unwrap()
+            .read_back()
+            .unwrap();
+        let clock = Arc::new(CurrentClock::new());
+        let mut backend = Backend::open(
+            paths.database(),
+            CredentialRecordCodec::generate(&mut SystemRandom).unwrap(),
+            Arc::new(FixedCivil),
+            clock.clone(),
+        )
+        .unwrap();
+        let issued = backend
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                None,
+                SessionPurpose::Manage,
+            )
+            .unwrap();
+        drop(
+            backend
+                .begin_command_scope(issued)
+                .unwrap()
+                .initialize(
+                    Initialize {
+                        school_name: "Synthetic public unknown".into(),
+                        login_name: "public-unknown".into(),
+                        display_name: "Synthetic administrator".into(),
+                    },
+                    Password::new("Synthetic public unknown 2026!".into()).unwrap(),
+                )
+                .unwrap(),
+        );
+        let lease = backend
+            .login(
+                "public-unknown",
+                Password::new("Synthetic public unknown 2026!".into()).unwrap(),
+            )
+            .unwrap();
+        let class = ClassId::new(1).unwrap();
+        let subject = SubjectId::new(1).unwrap();
+        for action in [
+            IdentityCommand::CreateClass {
+                id: class,
+                name: "Synthetic class".into(),
+            },
+            IdentityCommand::BindCurrentClass { id: class },
+            IdentityCommand::PutSubject {
+                id: subject,
+                name: "Synthetic subject".into(),
+                enabled: true,
+                color: Rgb {
+                    red: 10,
+                    green: 20,
+                    blue: 30,
+                },
+                expected_revision: None,
+            },
+            IdentityCommand::UpdateAccount {
+                id: lease.principal_id(),
+                display_name: "Synthetic administrator".into(),
+                role: Role::GlobalAdmin,
+                enabled: true,
+                scopes: vec![AssignmentScope {
+                    class_id: class,
+                    subject_id: subject,
+                }],
+            },
+        ] {
+            let issued = backend
+                .issue_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(lease),
+                    SessionPurpose::Manage,
+                )
+                .unwrap();
+            backend
+                .begin_command_scope(issued)
+                .unwrap()
+                .identity(lease, action)
+                .unwrap();
+        }
+        let lease = backend
+            .login(
+                "public-unknown",
+                Password::new("Synthetic public unknown 2026!".into()).unwrap(),
+            )
+            .unwrap();
+        let cell = CourseCell {
+            subject_id: subject,
+            teacher: TeacherBinding::Explicit(lease.principal_id()),
+        };
+        let document = ScheduleDocument {
+            semesters: vec![SemesterPlan::new(
+                Semester {
+                    id: SemesterId::new(1).unwrap(),
+                    class_id: class,
+                    revision: Revision::default(),
+                    enabled: true,
+                    start: LocalDate::new(2026, 11, 1).unwrap(),
+                    end: LocalDate::new(2026, 11, 30).unwrap(),
+                    first_week_monday: LocalDate::new(2026, 10, 26).unwrap(),
+                    tables: vec![WeekTable {
+                        id: TableId::new(1).unwrap(),
+                        role: TableRole::Single,
+                        rows: vec![TimetableRow {
+                            id: RowId::new(1).unwrap(),
+                            logical_key: LogicalRowKey::new(1).unwrap(),
+                            group: DayGroup::Morning,
+                            kind: RowKind::Course,
+                            range: MinuteRange::new(
+                                Minute::new(600).unwrap(),
+                                Minute::new(660).unwrap(),
+                            )
+                            .unwrap(),
+                            enabled_days: [true; 7],
+                            courses: std::array::from_fn(|_| Some(cell.clone())),
+                        }],
+                    }],
+                },
+                "Synthetic public lesson".into(),
+            )],
+            ..ScheduleDocument::default()
+        };
+        let mut app = create_app(clock, true).unwrap();
+        app.root = root.clone();
+        app.desktop.set_root(root);
+        let control = backend.session_control();
+        let _ = app.control_slot.set(control.clone());
+        app.control = Some(control.clone());
+        app.state = Arc::new(backend.state().unwrap());
+        app.lease = Some(lease);
+        app.screen = Screen::Home;
+        let backend = Arc::new(Mutex::new(backend));
+        app.backend = Some(backend.clone());
+        let until = Instant::now() + Duration::from_secs(90);
+        app.next_calendar_maintenance = until;
+        app.next_content_maintenance = until;
+        app.next_voice_maintenance = until;
+        // Execute a real manager write, then deliberately lose only its UI handoff.
+        app.submit(Work::SaveSchedule(
+            backend.clone(),
+            lease,
+            Revision::default(),
+            document,
+        ))
+        .unwrap();
+        let manager = app.native_command.clone().unwrap();
+        let pending = app.pending.take().unwrap();
+        assert!(matches!(
+            pending.ticket.wait().unwrap().unwrap(),
+            Outcome::ScheduleSaved(_)
+        ));
+        assert!(manager.snapshot().is_some());
+        app.native_mutation_pending = false;
+        app.native_readback_pending = false;
+        app.native_unknown = true;
+        control.lock_local();
+        app.lease = None;
+        app.screen = Screen::Login;
+        let open = |app: &mut App, generation| {
+            let facts = backend.lock().unwrap().desktop_facts(0).unwrap();
+            let current = facts.lesson_context.current.as_ref().unwrap();
+            let stamp = fc_bootstrap::backend::DesktopLessonStamp {
+                generation: SceneGeneration::new(generation),
+                source_revision: facts.global_revision,
+                binding: DesktopLessonBinding {
+                    expected_revision: facts.lesson_context.revision,
+                    expected_identity_revision: facts.identity.revision,
+                    expected_schedule_revision: facts.schedule.revision,
+                    lesson: current.key.clone(),
+                },
+                captured_at: facts.captured_at,
+                valid_until: current.effective_until,
+            };
+            assert!(control.publish_desktop_lesson_scene(stamp.clone()));
+            app.open_public_lesson(stamp).unwrap();
+            wait_for(app, |app| app.pending.is_none());
+            assert!(
+                app.public_lesson_editor.is_some(),
+                "actual public read needs no account lease"
+            );
+        };
+        open(&mut app, 100);
+        assert!(app.native_unknown);
+        assert_eq!(app.native_command.as_ref(), Some(&manager));
+        let guard = app.public_lesson_flow.as_ref().unwrap().guard();
+        app.submit(Work::ChangePublicLesson(
+            backend.clone(),
+            guard,
+            LessonAction::Replace(cell),
+        ))
+        .unwrap();
+        assert!(
+            app.pending.is_some(),
+            "manager unknown cannot block public change admission"
+        );
+        wait_for(&mut app, |app| app.pending.is_none());
+        assert!(backend
+            .lock()
+            .unwrap()
+            .desktop_facts(0)
+            .unwrap()
+            .lesson_context
+            .active_override
+            .is_some());
+        assert!(app.native_unknown);
+        assert_eq!(app.native_command.as_ref(), Some(&manager));
+        assert!(!app.public_lesson_unknown);
+        open(&mut app, 101);
+        let guard = app.public_lesson_flow.as_ref().unwrap().guard();
+        app.submit(Work::ChangePublicLesson(
+            backend.clone(),
+            guard.clone(),
+            LessonAction::Restore,
+        ))
+        .unwrap();
+        let public = app.public_lesson_command.clone().unwrap();
+        let pending = app.pending.take().unwrap();
+        assert!(matches!(
+            pending.ticket.wait().unwrap().unwrap(),
+            Outcome::PublicLessonSaved(_)
+        ));
+        app.native_mutation_pending = false;
+        app.native_readback_pending = false;
+        app.public_lesson_unknown = true;
+        let original = public.snapshot();
+        assert!(original.is_some());
+        app.submit(Work::ChangePublicLesson(
+            backend.clone(),
+            guard,
+            LessonAction::Restore,
+        ))
+        .unwrap();
+        assert!(
+            app.pending.is_none(),
+            "public unknown cannot replay its old body"
+        );
+        assert_eq!(public.snapshot(), original);
+        assert!(app.native_unknown);
+        app.close_public_lesson();
+        open(&mut app, 102);
+        assert!(
+            !app.public_lesson_unknown,
+            "a new exact public scene read reconciles only that chain"
+        );
+        assert!(app.native_unknown);
+        assert_eq!(app.native_command.as_ref(), Some(&manager));
+        let flow = app.public_lesson_flow.as_ref().unwrap();
+        let guard = flow.guard();
+        flow.cancel();
+        app.submit(Work::ChangePublicLesson(
+            backend.clone(),
+            guard,
+            LessonAction::Restore,
+        ))
+        .unwrap();
+        wait_for(&mut app, |app| app.pending.is_none());
+        assert!(
+            backend
+                .lock()
+                .unwrap()
+                .desktop_facts(0)
+                .unwrap()
+                .lesson_context
+                .active_override
+                .is_none(),
+            "original cancelled scene still rejects mutation"
+        );
+        assert!(app.native_unknown);
+        assert_eq!(app.native_command.as_ref(), Some(&manager));
+        drain(app);
+        drop(backend);
+        drop(scratch);
+    }
+    #[test]
+    fn unrelated_successful_read_cannot_retire_the_original_unknown_target() {
+        let _serial = SERIAL.lock().unwrap();
+        let (_scratch, mut app) = ready_management();
+        let lease = app.lease.unwrap();
+        let backend = app.backend.as_ref().unwrap().clone();
+        let year = app.clock.try_now().unwrap().date.year();
+        let before = backend
+            .lock()
+            .unwrap()
+            .calendar_status(lease, year)
+            .unwrap();
+        // An empty NativeCommand only exercises the legacy current-read
+        // fallback. This case must retain a real typed intent and issued pair.
+        app.submit_calendar(calendar_flow::Operation::Policy {
+            year,
+            expected: before.policy.revision,
+            enabled: !before.policy.enabled,
+        })
+        .unwrap();
+        let original = app.native_command.as_ref().unwrap().clone();
+        let intent = original.intent().cloned();
+        assert!(matches!(intent, Some(NativeIntent::CalendarPolicy { .. })));
+        lose_worker_reply(&mut app);
+        let pair = original.snapshot().unwrap();
+        let committed = backend
+            .lock()
+            .unwrap()
+            .calendar_status(lease, year)
+            .unwrap();
+        assert_ne!(committed.policy.revision, before.policy.revision);
+        app.submit(Work::LoadAccounts(backend.clone(), lease))
+            .unwrap();
+        wait_for(&mut app, |app| app.pending.is_none());
+        assert!(
+            app.accounts.is_some(),
+            "unrelated actual current read succeeded"
+        );
+        assert!(
+            app.native_unknown,
+            "accounts do not reconcile a calendar policy"
+        );
+        assert_eq!(app.native_command.as_ref(), Some(&original));
+        app.submit(Work::Calendar(Box::new(calendar_flow::Job {
+            backend: backend.clone(),
+            lease: Some(lease),
+            operation: calendar_flow::Operation::Load(year),
+        })))
+        .unwrap();
+        let until = Instant::now() + Duration::from_secs(15);
+        while !app.pending.as_ref().unwrap().ticket.is_finished() {
+            assert!(Instant::now() < until);
+            std::thread::yield_now();
+        }
+        app.generation = app.generation.checked_add(1).unwrap();
+        wait_for(&mut app, |app| app.pending.is_none());
+        assert!(
+            app.native_unknown,
+            "a queued successful read from the old UI generation cannot reconcile"
+        );
+        assert_eq!(app.native_command.as_ref(), Some(&original));
+        assert_eq!(original.snapshot(), Some(pair));
+        assert!(original.intent() == intent.as_ref());
+        // The real stale-generation path refreshes authority and returns to
+        // Login. Authenticate again through the existing UI/worker, never by
+        // copying the old lease or assigning a replacement command identity.
+        assert!(app.screen == Screen::Login);
+        assert!(app.lease.is_none());
+        voice_management_probe::login(&mut app, Instant::now() + Duration::from_secs(90)).unwrap();
+        let current_lease = app.lease.unwrap();
+        assert_eq!(current_lease.principal_id(), lease.principal_id());
+        assert!(app.native_unknown);
+        assert_eq!(app.native_command.as_ref(), Some(&original));
+        assert_eq!(original.snapshot(), Some(pair));
+        app.submit(Work::Calendar(Box::new(calendar_flow::Job {
+            backend: backend.clone(),
+            lease: Some(current_lease),
+            operation: calendar_flow::Operation::Load(year),
+        })))
+        .unwrap();
+        wait_for(&mut app, |app| app.pending.is_none());
+        assert!(
+            app.calendar.is_some(),
+            "matching actual current read succeeded"
+        );
+        assert!(
+            app.native_unknown,
+            "a matching current read is still not the original typed receipt"
+        );
+        assert_eq!(app.native_command.as_ref(), Some(&original));
+        assert_eq!(original.snapshot(), Some(pair));
+        assert!(original.intent() == intent.as_ref());
+        // This explicit route queries the original pair/intent; it does not
+        // issue or submit another policy change after reauthentication.
+        app.submit_calendar(calendar_flow::Operation::Load(year))
+            .unwrap();
+        wait_for(&mut app, |app| app.pending.is_none());
+        assert!(!app.native_unknown);
+        assert_eq!(
+            app.native_command.as_ref(),
+            Some(&original),
+            "history never replaces the old command identity"
+        );
+        assert_eq!(original.snapshot(), Some(pair));
+        assert!(original.intent() == intent.as_ref());
+        let after = backend
+            .lock()
+            .unwrap()
+            .calendar_status(current_lease, year)
+            .unwrap();
+        assert_eq!(
+            after.policy, committed.policy,
+            "history cannot apply policy twice"
+        );
+        drain(app);
     }
     #[test]
     fn shutdown_during_open_hands_backend_to_shutdown_worker_before_pool_stops() {

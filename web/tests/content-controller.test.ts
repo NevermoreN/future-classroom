@@ -1,3 +1,4 @@
+import { identity, ticket } from './command-fixtures'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError, NetworkFault, type ContentApi } from '../src/api/client'
 import { ProtocolVersionFault } from '../src/api/protocol'
@@ -6,8 +7,8 @@ import { content, normalizedBodyText, type ContentDocument } from '../src/api/co
 import { document, homeworkKey, page, wireDocument } from './content-fixtures'
 function fixture() {
   let id = 76
-  const api = { scopes: vi.fn<ContentApi['scopes']>().mockResolvedValue(page()), content: vi.fn<ContentApi['content']>().mockResolvedValue(document()), saveContent: vi.fn<ContentApi['saveContent']>().mockImplementation(async (key, command) => ({ commandId: command.commandId, content: document(key, (BigInt(command.expectedRevision) + 1n).toString(), normalizedBodyText(command.text)) })), commandResult: vi.fn<ContentApi['commandResult']>().mockResolvedValue({ commandId: '77', state: 'NOT_FOUND', content: null }) }
-  const states: ContentState[] = [], revoked = vi.fn(), controller = new ContentController(api, 'b'.repeat(64), state => states.push(state), revoked, () => String(++id))
+  const api = { issueCommand: vi.fn<ContentApi['issueCommand']>().mockImplementation(async () => identity(String(++id))), scopes: vi.fn<ContentApi['scopes']>().mockResolvedValue(page()), content: vi.fn<ContentApi['content']>().mockResolvedValue(document()), saveContent: vi.fn<ContentApi['saveContent']>().mockImplementation(async (key, command) => ({ commandId: command.commandId, commandTicket: ticket, content: document(key, (BigInt(command.expectedRevision) + 1n).toString(), normalizedBodyText(command.text)) })), commandResult: vi.fn<ContentApi['commandResult']>().mockResolvedValue({ commandId: '77', commandTicket: ticket, state: 'NOT_FOUND', content: null }) }
+  const states: ContentState[] = [], revoked = vi.fn(), controller = new ContentController(api, 'b'.repeat(64), state => states.push(state), revoked)
   return { api, controller, states, revoked, state: () => states.at(-1)!, editor: () => states.at(-1)!.editor! }
 }
 async function open(f: ReturnType<typeof fixture>) { await f.controller.loadScopes('HOMEWORK'); await f.controller.select(f.state().page!.items[0]!) }
@@ -35,7 +36,7 @@ describe('content draft and command lifecycle', () => {
     const f = fixture(); await open(f); const raw = ' \t\n　\ufeff正文\ufeff　\r '
     f.controller.edit(raw); f.api.saveContent.mockRejectedValueOnce(new NetworkFault()); await f.controller.save()
     expect(f.editor().pending?.command.text).toBe(raw)
-    f.api.commandResult.mockResolvedValueOnce({ commandId: '77', state: 'COMMITTED', content: document(homeworkKey, '1', '\ufeff正文\ufeff') }); await f.controller.query()
+    f.api.commandResult.mockResolvedValueOnce({ commandId: '77', commandTicket: ticket, state: 'COMMITTED', content: document(homeworkKey, '1', '\ufeff正文\ufeff') }); await f.controller.query()
     expect(f.editor().phase).toBe('result'); expect(f.editor().pending?.command.text).toBe(raw)
     expect(f.editor().history?.text).toBe('\ufeff正文\ufeff'); expect(f.api.saveContent).toHaveBeenCalledOnce(); f.controller.dispose()
   })
@@ -47,10 +48,10 @@ describe('content draft and command lifecycle', () => {
   it('saves once with captured CAS, and clear preserves the new nonzero revision', async () => {
     const f = fixture(); f.api.content.mockResolvedValueOnce(document(homeworkKey, '7', '原正文')); await open(f)
     f.controller.edit('  新正文  '); await f.controller.save()
-    expect(f.api.saveContent.mock.calls[0]![1]).toEqual({ commandId: '77', expectedRevision: '7', text: '  新正文  ' })
+    expect(f.api.saveContent.mock.calls[0]![1]).toEqual({ commandId: '77', commandTicket: ticket, expectedRevision: '7', text: '  新正文  ' })
     expect(f.editor().draft).toBe('新正文'); expect(f.editor().loaded.revision).toBe('8'); expect(f.controller.hasRiskyDraft()).toBe(false)
     await f.controller.save(true)
-    expect(f.api.saveContent.mock.calls[1]![1]).toEqual({ commandId: '78', expectedRevision: '8', text: '' })
+    expect(f.api.saveContent.mock.calls[1]![1]).toEqual({ commandId: '78', commandTicket: ticket, expectedRevision: '8', text: '' })
     expect(f.editor().loaded.revision).toBe('9'); expect(f.editor().loaded.text).toBe(''); expect(f.editor().notice).toContain('不代表')
     f.controller.dispose()
   })
@@ -60,19 +61,19 @@ describe('content draft and command lifecycle', () => {
     expect(f.editor().phase).toBe('unknown'); f.controller.edit('偷偷替换'); expect(f.editor().draft).toBe('原始草稿')
     await f.controller.query(); await vi.advanceTimersByTimeAsync(2000)
     expect(f.editor().phase).toBe('unknown'); expect(f.editor().notice).toContain('不证明'); expect(f.editor().pending).toBe(original)
-    expect(f.api.saveContent).toHaveBeenCalledOnce(); expect(f.api.commandResult).toHaveBeenCalledWith('77', expect.any(AbortSignal))
+    expect(f.api.saveContent).toHaveBeenCalledOnce(); expect(f.api.commandResult).toHaveBeenCalledWith(identity('77'), expect.any(AbortSignal))
     f.controller.dispose()
   })
   it('shows command COMMITTED as historical and requires latest GET plus explicit merge before new command', async () => {
     const f = fixture(); await open(f); f.controller.edit('自己的草稿'); f.api.saveContent.mockRejectedValueOnce(new NetworkFault()); await f.controller.save()
-    f.api.commandResult.mockResolvedValueOnce({ commandId: '77', state: 'COMMITTED', content: document(homeworkKey, '1', '自己的草稿') }); await f.controller.query()
+    f.api.commandResult.mockResolvedValueOnce({ commandId: '77', commandTicket: ticket, state: 'COMMITTED', content: document(homeworkKey, '1', '自己的草稿') }); await f.controller.query()
     expect(f.editor().history?.revision).toBe('1'); expect(f.editor().loaded.revision).toBe('0'); expect(f.editor().notice).toContain('不代表当前最新')
     await f.controller.save(); expect(f.api.saveContent).toHaveBeenCalledOnce()
     f.api.content.mockResolvedValueOnce(document(homeworkKey, '2', '其他人更新')); await f.controller.loadLatest()
     expect(f.editor().latest?.revision).toBe('2'); expect(f.editor().draft).toBe('自己的草稿')
     await f.controller.save(); expect(f.api.saveContent).toHaveBeenCalledOnce()
     f.controller.acknowledgeMerge(false); await f.controller.save()
-    expect(f.api.saveContent.mock.calls[1]![1]).toEqual({ commandId: '78', expectedRevision: '2', text: '自己的草稿' }); f.controller.dispose()
+    expect(f.api.saveContent.mock.calls[1]![1]).toEqual({ commandId: '78', commandTicket: ticket, expectedRevision: '2', text: '自己的草稿' }); f.controller.dispose()
   })
   it('conflict keeps draft and cannot overwrite before fresh GET and explicit confirmation', async () => {
     const f = fixture(); await open(f); f.controller.edit('冲突草稿'); f.api.saveContent.mockRejectedValueOnce(new ApiError(409, 'REVISION_CONFLICT')); await f.controller.save()
@@ -84,7 +85,7 @@ describe('content draft and command lifecycle', () => {
   })
   it('a foreign receipt or wrong revision cannot resolve the original unknown command', async () => {
     const f = fixture(); await open(f); f.controller.edit('原草稿'); f.api.saveContent.mockRejectedValueOnce(new NetworkFault()); await f.controller.save()
-    f.api.commandResult.mockResolvedValueOnce({ commandId: '77', state: 'COMMITTED', content: document({ ...homeworkKey, classId: '2' }, '1', '他人') }); await f.controller.query()
+    f.api.commandResult.mockResolvedValueOnce({ commandId: '77', commandTicket: ticket, state: 'COMMITTED', content: document({ ...homeworkKey, classId: '2' }, '1', '他人') }); await f.controller.query()
     expect(f.editor().phase).toBe('unknown'); expect(f.editor().history).toBeNull(); expect(f.editor().pending?.command.commandId).toBe('77'); expect(f.api.saveContent).toHaveBeenCalledOnce(); f.controller.dispose()
   })
   it('DAY_CHANGED preserves old draft/date, and explicit new-day selection starts from new server content', async () => {
@@ -135,9 +136,9 @@ describe('explicit version recovery preserves content commands', () => {
     expect(f.editor().pending).toBe(original); expect(f.editor().draft).toBe('版本升级前的草稿'); expect(f.api.saveContent).toHaveBeenCalledOnce(); expect(f.api.scopes).toHaveBeenCalledOnce(); expect(f.api.content).toHaveBeenCalledOnce()
     await vi.advanceTimersByTimeAsync(60000); expect(f.api.commandResult).not.toHaveBeenCalled()
     await f.controller.query(); expect(f.editor().pending).toBe(original); expect(f.editor().notice).toContain('不证明'); expect(f.editor().notice).toContain(fault.message)
-    f.api.commandResult.mockResolvedValueOnce({ commandId: '77', state: 'COMMITTED', content: document(homeworkKey, '1', '版本升级前的草稿') }); await f.controller.query()
+    f.api.commandResult.mockResolvedValueOnce({ commandId: '77', commandTicket: ticket, state: 'COMMITTED', content: document(homeworkKey, '1', '版本升级前的草稿') }); await f.controller.query()
     expect(f.editor().history?.text).toBe('版本升级前的草稿'); expect(f.editor().pending).toBe(original); expect(f.editor().notice).toContain(fault.message)
-    expect(f.api.commandResult.mock.calls.map(call => call[0])).toEqual(['77', '77']); await f.controller.save(); expect(f.api.saveContent).toHaveBeenCalledOnce(); f.controller.dispose()
+    expect(f.api.commandResult.mock.calls.map(call => call[0])).toEqual([identity('77'), identity('77')]); await f.controller.save(); expect(f.api.saveContent).toHaveBeenCalledOnce(); f.controller.dispose()
   })
   it('a version fault during a read retains the local draft and never treats a reload as recovery', async () => {
     const f = fixture(); await open(f); f.controller.edit('未提交的本地正文'); const loaded = f.editor().loaded
@@ -148,6 +149,49 @@ describe('explicit version recovery preserves content commands', () => {
   it('a typed version failure of an explicit unknown-result query keeps its old command ID', async () => {
     const f = fixture(); await open(f); f.controller.edit('等待核对'); f.api.saveContent.mockRejectedValueOnce(new NetworkFault()); await f.controller.save(); const original = f.editor().pending
     f.api.commandResult.mockRejectedValueOnce(new ProtocolVersionFault()); await f.controller.query()
-    expect(f.editor().pending).toBe(original); expect(f.editor().notice).toContain('刷新页面'); await f.controller.query(); expect(f.api.commandResult.mock.calls.map(call => call[0])).toEqual(['77', '77']); expect(f.api.saveContent).toHaveBeenCalledOnce(); f.controller.dispose()
+    expect(f.editor().pending).toBe(original); expect(f.editor().notice).toContain('刷新页面'); await f.controller.query(); expect(f.api.commandResult.mock.calls.map(call => call[0])).toEqual([identity('77'), identity('77')]); expect(f.api.saveContent).toHaveBeenCalledOnce(); f.controller.dispose()
+  })
+})
+
+describe('content server ticket generation boundary', () => {
+  it('captures the original text and target before waiting for issuance', async () => {
+    const f = fixture(); await open(f); f.controller.edit(' \t原正文　')
+    let issue!: (pair: ReturnType<typeof identity>) => void
+    f.api.issueCommand.mockImplementationOnce(() => new Promise(resolve => { issue = resolve }))
+    const saving = f.controller.save(); f.controller.edit('晚到替换'); await f.controller.select(f.state().page!.items[0]!)
+    expect(f.api.saveContent).not.toHaveBeenCalled()
+    expect(f.editor().draft).toBe(' \t原正文　')
+    issue(identity('9007199254740993')); await saving
+    expect(f.api.issueCommand).toHaveBeenCalledExactlyOnceWith('content', 'b'.repeat(64), expect.any(AbortSignal))
+    expect(f.api.saveContent.mock.calls[0]!.slice(0, 2)).toEqual([homeworkKey, { ...identity('9007199254740993'), expectedRevision: '0', text: ' \t原正文　' }]); f.controller.dispose()
+  })
+  it('ignores a late issued ticket after the original editor was explicitly abandoned', async () => {
+    const f = fixture(); await open(f); f.controller.edit('原草稿')
+    let issue!: (pair: ReturnType<typeof identity>) => void
+    f.api.issueCommand.mockImplementationOnce(() => new Promise(resolve => { issue = resolve }))
+    const saving = f.controller.save(); expect(f.controller.leave(true)).toBe(true)
+    issue(identity()); await saving
+    expect(f.api.saveContent).not.toHaveBeenCalled(); expect(f.state().editor).toBeNull(); f.controller.dispose()
+  })
+  it('keeps a draft without submitting when issuance is full or delivery fails', async () => {
+    for (const failure of [new ApiError(503, 'COMMAND_WINDOW_FULL'), new NetworkFault()]) {
+      const f = fixture(); await open(f); f.controller.edit('未提交正文'); f.api.issueCommand.mockRejectedValueOnce(failure)
+      await f.controller.save(); await vi.advanceTimersByTimeAsync(3000)
+      expect(f.editor().draft).toBe('未提交正文'); expect(f.editor().pending).toBeNull(); expect(f.editor().phase).toBe('ready')
+      expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.saveContent).not.toHaveBeenCalled(); f.controller.dispose()
+    }
+  })
+  it('stops an expired original ticket and requires an explicit current read before any new operation', async () => {
+    const f = fixture(); await open(f); f.controller.edit('未知原文'); f.api.saveContent.mockRejectedValueOnce(new NetworkFault()); await f.controller.save()
+    f.api.commandResult.mockRejectedValueOnce(new ApiError(410, 'COMMAND_EXPIRED')); await f.controller.query()
+    expect(f.editor().pending?.retired).toBe(true); expect(f.editor().pending?.command).toEqual({ ...identity(), expectedRevision: '0', text: '未知原文' })
+    await f.controller.query(); await f.controller.save(); await vi.advanceTimersByTimeAsync(3000)
+    expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.commandResult).toHaveBeenCalledOnce(); expect(f.api.saveContent).toHaveBeenCalledOnce()
+    await f.controller.loadLatest(); expect(f.editor().phase).toBe('merge'); expect(f.editor().draft).toBe('未知原文'); f.controller.dispose()
+  })
+  it('rejects the wrong epoch even when a result echoes the same raw command id', async () => {
+    const f = fixture(); await open(f); f.controller.edit('原正文'); f.api.saveContent.mockRejectedValueOnce(new NetworkFault()); await f.controller.save()
+    f.api.commandResult.mockResolvedValueOnce({ ...identity(), commandTicket: ticket.replace('12', '34'), state: 'NOT_FOUND', content: null }); await f.controller.query()
+    expect(f.editor().phase).toBe('unknown'); expect(f.editor().pending?.command.commandTicket).toBe(ticket); expect(f.api.issueCommand).toHaveBeenCalledOnce(); f.controller.dispose()
   })
 })

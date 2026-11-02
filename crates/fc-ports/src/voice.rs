@@ -4,6 +4,7 @@
 use fc_domain::{auth::ActorContext, ids::*, voice::*};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum VoiceRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Domain(VoiceError),
     Unavailable,
     Faulted,

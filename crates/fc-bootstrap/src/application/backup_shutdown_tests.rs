@@ -302,7 +302,12 @@ fn delivered_voice_metadata_cannot_cross_later_authority_or_runtime_generation()
     let lease = app.lease.unwrap();
     let service = app.voice_service.as_ref().unwrap().clone();
     let initial = service.management_snapshot(lease).unwrap();
-    service.set_enabled(lease, false, initial.revision).unwrap();
+    let issued = service.issue_native_command(lease).unwrap();
+    service
+        .with_command_window(lease, issued)
+        .unwrap()
+        .set_enabled(lease, false, initial.revision)
+        .unwrap();
     let before_identity = service.management_snapshot(lease).unwrap();
     assert!(before_identity.publication_revision > before_identity.identity_revision);
     app.screen = Screen::Voice;
@@ -313,19 +318,27 @@ fn delivered_voice_metadata_cannot_cross_later_authority_or_runtime_generation()
         "global publication is distinct from identity revision"
     );
     app.voice_editor = None;
-    app.backend
-        .as_ref()
-        .unwrap()
-        .lock()
-        .unwrap()
-        .identity(
-            lease,
-            IdentityCommand::CreateClass {
-                id: ClassId::new(1).unwrap(),
-                name: "Synthetic later authority".into(),
-            },
-        )
-        .unwrap();
+    {
+        let mut backend = app.backend.as_ref().unwrap().lock().unwrap();
+        let issued = backend
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(lease),
+                SessionPurpose::Manage,
+            )
+            .unwrap();
+        backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .identity(
+                lease,
+                IdentityCommand::CreateClass {
+                    id: ClassId::new(1).unwrap(),
+                    name: "Synthetic later authority".into(),
+                },
+            )
+            .unwrap();
+    }
     app.screen = Screen::Voice;
     app.voice_management_loaded(lease, before_identity).unwrap();
     assert!(app.voice_editor.is_none());

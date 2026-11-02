@@ -309,6 +309,26 @@ impl<S: Send + 'static> BusinessRepository<S> {
     }
 }
 impl<S: Send> TransactionTask<S> for MediaTask<S> {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        match &self.op {
+            MediaOp::Reserve(a, _) => Some((
+                fc_ports::command_window::CommandFamily::ProfileContent,
+                a.request.command_id,
+            )),
+            _ => None,
+        }
+    }
+
+    fn lifetime(&self) -> TransactionLifetime {
+        match self.op {
+            MediaOp::Settle(_)
+            | MediaOp::RestartSettle(..)
+            | MediaOp::Retire(..)
+            | MediaOp::Finalize(_) => TransactionLifetime::OwnerReturn,
+            _ => TransactionLifetime::Ordinary,
+        }
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
             + match &self.op {
@@ -457,14 +477,19 @@ impl<S: Send> TransactionTask<S> for MediaTask<S> {
                     });
                 }
                 if e.state == MediaState::Reserved {
-                    let mut r = receipt(d, e.command_id)?.ok_or(StorageError::Database)?;
+                    let reservation =
+                        read(d, &format!("{ROOT}reservations/{:020}", e.command_id.get()))?
+                            .ok_or(StorageError::Database)?;
+                    let admission = dto::read_admission(&reservation["admission"])?;
+                    let (key, mut r) =
+                        owner_receipt(d, &admission)?.ok_or(StorageError::Database)?;
                     if r.status == Status::Accepted {
                         let (doc, retired, _) = super::load(d, e.owner)?;
                         if !retired && doc.pending.as_ref() == Some(&r.admission) {
                             writes.push(head(&doc.fail(&r.admission).map_err(pe)?, false)?);
                         }
                         r.status = Status::Cancelled;
-                        writes.push(r.mutation()?);
+                        writes.push(put(key, r.value())?);
                     }
                     e.state = MediaState::Unreferenced;
                     e.revision = e
@@ -644,9 +669,11 @@ pub(super) fn startup_check(
             if k != format!("{ROOT}reservations/{:020}", a.request.command_id.get()) {
                 return Err(StorageError::Database);
             }
-            let receipt = receipt(d, a.request.command_id)?.ok_or(StorageError::Database)?;
-            if receipt.admission != a {
-                return Err(StorageError::Database);
+            if admission_has_reserved(d, &a)? {
+                let (_, receipt) = owner_receipt(d, &a)?.ok_or(StorageError::Database)?;
+                if receipt.admission != a {
+                    return Err(StorageError::Database);
+                }
             }
             let ids = codec::array(&v, "ids")?;
             let sizes = codec::array(&v, "sizes")?;
@@ -677,4 +704,173 @@ pub(super) fn startup_check(
         return Err(StorageError::Database);
     }
     Ok(())
+}
+
+pub(super) fn admission_has_reserved(
+    d: &dyn TransactionDocuments,
+    admission: &ContentAdmission,
+) -> Result<bool, StorageError> {
+    let key = format!(
+        "{ROOT}reservations/{:020}",
+        admission.request.command_id.get()
+    );
+    let Some(v) = read(d, &key)? else {
+        return Ok(false);
+    };
+    codec::object_fields(&v, &["admission", "sizes", "ids"])?;
+    if dto::read_admission(&v["admission"])? != *admission {
+        return Err(StorageError::CommandIdReused);
+    }
+    let ids = codec::array(&v, "ids")?;
+    if ids.is_empty() || ids.len() > MAX_CONTENT_PAGES {
+        return Err(StorageError::Database);
+    }
+    for id in ids {
+        let id = MediaVersionId::new(id.as_u64().ok_or(StorageError::Database)?)
+            .map_err(|_| StorageError::Database)?;
+        let e = load(d, id)?;
+        if e.owner != admission.request.slot || e.command_id != admission.request.command_id {
+            return Err(StorageError::Database);
+        }
+        if e.state == MediaState::Reserved {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+pub(super) fn entry_admission(
+    d: &dyn TransactionDocuments,
+    k: &str,
+) -> Result<Option<ContentAdmission>, StorageError> {
+    if !k.starts_with(&format!("{ROOT}entries/")) {
+        return Ok(None);
+    }
+    let v = read(d, k)?.ok_or(StorageError::Database)?;
+    let e = entry(&v)?;
+    if key(e.id) != k {
+        return Err(StorageError::Database);
+    }
+    let reservation = read(d, &format!("{ROOT}reservations/{:020}", e.command_id.get()))?;
+    let Some(r) = reservation else {
+        // Ordinary restore intentionally omits old preparation reservations.
+        // Its exact recovery-owner marker describes an already returned owner,
+        // not an active admission or permission to reserve/publish new media.
+        if e.state == MediaState::Reserved {
+            return Err(StorageError::Database);
+        }
+        let marker = read(d, &format!("{ROOT}recovery-owners/{:020}", e.id.get()))?
+            .ok_or(StorageError::Database)?;
+        codec::object_fields(&marker, &["format", "id"])?;
+        if codec::number(&marker, "format")? != 1 || codec::number(&marker, "id")? != e.id.get() {
+            return Err(StorageError::Database);
+        }
+        return Ok(None);
+    };
+    let ad = dto::read_admission(&r["admission"])?;
+    if ad.request.command_id != e.command_id || ad.request.slot != e.owner {
+        return Err(StorageError::Database);
+    }
+    Ok(Some(ad))
+}
+
+#[cfg(test)]
+mod recovered_owner_tests {
+    use super::*;
+    use rusqlite::{params, Connection};
+
+    fn association(
+        marker: Option<Value>,
+        reserved: bool,
+        corrupt_reservation: bool,
+    ) -> Result<Option<ContentAdmission>, StorageError> {
+        let db = Connection::open_in_memory().unwrap();
+        db.execute_batch(
+            "CREATE TABLE documents(key TEXT PRIMARY KEY,value BLOB NOT NULL,revision INTEGER NOT NULL);",
+        ).unwrap();
+        let id = MediaVersionId::new(1).unwrap();
+        let owner = ContentSlotKey {
+            scope: LayoutScope::Public,
+            node_id: LayoutNodeId::new(1).unwrap(),
+        };
+        let entry = MediaEntry {
+            id,
+            owner,
+            command_id: CommandId::new(17).unwrap(),
+            charged_bytes: 4,
+            resource: (!reserved).then_some(MediaReference {
+                version_id: id,
+                owner,
+                sha256: [7; 32],
+                bytes: 4,
+                width: 1,
+                height: 1,
+                format: ImageFormat::Png,
+            }),
+            revision: Revision::new(1),
+            refs: u64::from(!reserved),
+            state: if reserved {
+                MediaState::Reserved
+            } else {
+                MediaState::Referenced
+            },
+        };
+        db.execute(
+            "INSERT INTO documents VALUES(?1,?2,1)",
+            params![key(id), codec::bytes(&value(&entry)).unwrap()],
+        )
+        .unwrap();
+        if let Some(marker) = marker {
+            db.execute(
+                "INSERT INTO documents VALUES(?1,?2,1)",
+                params![
+                    format!("{ROOT}recovery-owners/{:020}", id.get()),
+                    codec::bytes(&marker).unwrap()
+                ],
+            )
+            .unwrap();
+        }
+        if corrupt_reservation {
+            db.execute(
+                "INSERT INTO documents VALUES(?1,?2,1)",
+                params![
+                    format!("{ROOT}reservations/{:020}", entry.command_id.get()),
+                    b"not-json".as_slice()
+                ],
+            )
+            .unwrap();
+        }
+        entry_admission(&crate::TransactionView(&db), &key(id))
+    }
+
+    #[test]
+    fn restored_returned_media_has_no_live_admission_only_with_exact_marker() {
+        assert_eq!(
+            association(Some(json!({"format":1,"id":1})), false, false),
+            Ok(None)
+        );
+        for marker in [
+            None,
+            Some(json!({"format":2,"id":1})),
+            Some(json!({"format":1,"id":2})),
+            Some(json!({"format":1,"id":1,"extra":true})),
+        ] {
+            assert_eq!(
+                association(marker, false, false),
+                Err(StorageError::Database)
+            );
+        }
+    }
+
+    #[test]
+    fn recovery_marker_cannot_return_reserved_owner_or_hide_corrupt_reservation() {
+        assert_eq!(
+            association(Some(json!({"format":1,"id":1})), true, false),
+            Err(StorageError::Database)
+        );
+        assert_eq!(
+            association(Some(json!({"format":1,"id":1})), false, true),
+            Err(StorageError::Database)
+        );
+    }
 }

@@ -14,11 +14,18 @@ fn captured_backup_rejects_revision_drift_and_lock_without_renewing_session() {
     f.backend
         .lock()
         .unwrap()
-        .identity(
-            f.lease,
-            IdentityCommand::CreateClass {
-                id: ClassId::new(1).unwrap(),
-                name: "Synthetic".into(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.lease),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    f.lease,
+                    IdentityCommand::CreateClass {
+                        id: ClassId::new(1).unwrap(),
+                        name: "Synthetic".into(),
+                    },
+                )
             },
         )
         .unwrap();
@@ -135,11 +142,18 @@ fn full_preflight_is_inert_and_its_exact_target_revision_cannot_be_reblessed_aft
     f.backend
         .lock()
         .unwrap()
-        .identity(
-            f.lease,
-            IdentityCommand::CreateClass {
-                id: ClassId::new(1).unwrap(),
-                name: "Changed after preflight".into(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.lease),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    f.lease,
+                    IdentityCommand::CreateClass {
+                        id: ClassId::new(1).unwrap(),
+                        name: "Changed after preflight".into(),
+                    },
+                )
             },
         )
         .unwrap();

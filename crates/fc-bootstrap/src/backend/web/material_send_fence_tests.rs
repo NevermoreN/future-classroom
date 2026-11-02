@@ -2,18 +2,25 @@ fn setup() -> (Fixture, WebService, IssuedWebSession, MaterialScope) {
     let mut fixture = Fixture::new();
     fixture
         .backend
-        .identity(
-            fixture.admin,
-            IdentityCommand::PutSubject {
-                id: SubjectId::new(1).unwrap(),
-                name: "Synthetic download subject".into(),
-                enabled: true,
-                color: Rgb {
-                    red: 1,
-                    green: 2,
-                    blue: 3,
-                },
-                expected_revision: None,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(fixture.admin),
+            fc_application::identity::SessionPurpose::Manage,
+            |issued_backend| {
+                issued_backend.identity(
+                    fixture.admin,
+                    IdentityCommand::PutSubject {
+                        id: SubjectId::new(1).unwrap(),
+                        name: "Synthetic download subject".into(),
+                        enabled: true,
+                        color: Rgb {
+                            red: 1,
+                            green: 2,
+                            blue: 3,
+                        },
+                        expected_revision: None,
+                    },
+                )
             },
         )
         .unwrap();

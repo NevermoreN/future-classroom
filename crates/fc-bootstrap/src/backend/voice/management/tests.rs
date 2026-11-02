@@ -7,7 +7,7 @@ fn assert_limits_denied(service: &VoiceService, lease: SessionLease) {
     let identity = service.inner.authority.snapshot().unwrap().data.revision;
     let epoch = service.generation();
     assert!(service
-        .set_limits_reviewed(
+        .test_set_limits_reviewed(
             lease,
             VoiceLimits::default(),
             before.revision,
@@ -79,7 +79,7 @@ fn management_metadata_counts_jobs_and_disabled_setting_survives_reopen_and_cas_
         (0, 0, 0)
     );
     let request = fixtures::independent_request(&service, web, class, 901);
-    let job = service.submit(web, request).unwrap();
+    let job = service.test_submit(web, request).unwrap();
     let queued = service.management_snapshot(local).unwrap();
     assert_eq!(
         (queued.active_jobs, queued.queued_jobs, queued.playing_jobs),
@@ -92,7 +92,7 @@ fn management_metadata_counts_jobs_and_disabled_setting_survives_reopen_and_cas_
     assert_eq!(queued.revision, service.inventory().unwrap().revision);
     let generation = service.generation();
     assert!(matches!(
-        service.set_enabled(local, false, initial.revision),
+        service.test_set_enabled(local, false, initial.revision),
         Err(BackendError::Voice(VoiceRepositoryError::Domain(
             VoiceError::RevisionConflict
         )))
@@ -100,7 +100,9 @@ fn management_metadata_counts_jobs_and_disabled_setting_survives_reopen_and_cas_
     assert_eq!(service.generation(), generation);
     assert!(service.management_snapshot(local).unwrap().admitting);
     let guard = service.guard(job.id).unwrap();
-    let disabled = service.set_enabled(local, false, queued.revision).unwrap();
+    let disabled = service
+        .test_set_enabled(local, false, queued.revision)
+        .unwrap();
     assert!(!disabled.enabled);
     assert!(!guard.guard.is_valid());
     let view = service.management_snapshot(local).unwrap();
@@ -111,7 +113,7 @@ fn management_metadata_counts_jobs_and_disabled_setting_survives_reopen_and_cas_
     );
     assert!(view.runtime_generation > queued.runtime_generation);
     assert!(matches!(
-        service.set_enabled(local, true, queued.revision),
+        service.test_set_enabled(local, true, queued.revision),
         Err(BackendError::Voice(VoiceRepositoryError::Domain(
             VoiceError::RevisionConflict
         )))
@@ -143,7 +145,7 @@ fn management_rejects_web_stale_revoked_expired_and_lock_or_faulted_local_leases
     let service = backend.0.lock().unwrap().voice_service();
     assert!(service.management_snapshot(web).is_err());
     assert!(service
-        .set_enabled(web, false, service.inventory().unwrap().revision)
+        .test_set_enabled(web, false, service.inventory().unwrap().revision)
         .is_err());
     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
     service.management_snapshot(local).unwrap();
@@ -181,16 +183,23 @@ fn management_requires_global_admin_and_completed_initial_password_change() {
     let password = "Synthetic managed voice account 2026!";
     drop(
         backend
-            .create_account(
-                admin,
-                NewAccount {
-                    id: PrincipalId::new(2).unwrap(),
-                    login_name: "voice-manager".into(),
-                    display_name: "Voice manager".into(),
-                    role: Role::GlobalAdmin,
-                    scopes: vec![],
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.create_account(
+                        admin,
+                        NewAccount {
+                            id: PrincipalId::new(2).unwrap(),
+                            login_name: "voice-manager".into(),
+                            display_name: "Voice manager".into(),
+                            role: Role::GlobalAdmin,
+                            scopes: vec![],
+                        },
+                        Password::new(password.into()).unwrap(),
+                    )
                 },
-                Password::new(password.into()).unwrap(),
             )
             .unwrap(),
     );
@@ -199,10 +208,17 @@ fn management_requires_global_admin_and_completed_initial_password_change() {
     assert!(service.management_snapshot(candidate).is_err());
     assert_limits_denied(&service, candidate);
     backend
-        .change_password(
-            candidate,
-            Password::new(password.into()).unwrap(),
-            Password::new("Changed synthetic managed voice 2026!".into()).unwrap(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(candidate),
+            SessionPurpose::ChangeInitialPassword,
+            |backend| {
+                backend.change_password(
+                    candidate,
+                    Password::new(password.into()).unwrap(),
+                    Password::new("Changed synthetic managed voice 2026!".into()).unwrap(),
+                )
+            },
         )
         .unwrap();
     let candidate = issue_account(&backend, 2, TrustedOrigin::Local, false);
@@ -210,18 +226,25 @@ fn management_requires_global_admin_and_completed_initial_password_change() {
     let admin = fixtures::issue(&backend, TrustedOrigin::Local);
     let subject = SubjectId::new(1).unwrap();
     backend
-        .identity(
-            admin,
-            IdentityCommand::PutSubject {
-                id: subject,
-                name: "Synthetic voice subject".into(),
-                enabled: true,
-                color: Rgb {
-                    red: 1,
-                    green: 2,
-                    blue: 3,
-                },
-                expected_revision: None,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    admin,
+                    IdentityCommand::PutSubject {
+                        id: subject,
+                        name: "Synthetic voice subject".into(),
+                        enabled: true,
+                        color: Rgb {
+                            red: 1,
+                            green: 2,
+                            blue: 3,
+                        },
+                        expected_revision: None,
+                    },
+                )
             },
         )
         .unwrap();
@@ -236,14 +259,21 @@ fn management_requires_global_admin_and_completed_initial_password_change() {
         ),
     ] {
         backend
-            .identity(
-                admin,
-                IdentityCommand::UpdateAccount {
-                    id: PrincipalId::new(2).unwrap(),
-                    display_name: "Synthetic limited account".into(),
-                    role,
-                    enabled: true,
-                    scopes,
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        admin,
+                        IdentityCommand::UpdateAccount {
+                            id: PrincipalId::new(2).unwrap(),
+                            display_name: "Synthetic limited account".into(),
+                            role,
+                            enabled: true,
+                            scopes,
+                        },
+                    )
                 },
             )
             .unwrap();
@@ -260,7 +290,7 @@ fn management_requires_global_admin_and_completed_initial_password_change() {
         assert!(service.management_snapshot(limited).is_err());
         assert_limits_denied(&service, limited);
         assert!(service
-            .set_enabled(limited, false, service.inventory().unwrap().revision)
+            .test_set_enabled(limited, false, service.inventory().unwrap().revision)
             .is_err());
         // Selecting another local account is not a renewal of the old admin.
         backend
@@ -295,7 +325,9 @@ fn disabling_wakes_before_writer_rejection_and_keeps_runtime_closed_without_faki
             }
         }))
         .unwrap();
-    assert!(service.set_enabled(local, false, before.revision).is_err());
+    assert!(service
+        .test_set_enabled(local, false, before.revision)
+        .is_err());
     service.clear_waker().unwrap();
     assert_eq!(wakes.load(Ordering::Acquire), 2);
     assert!(!service.inner.enabled.load(Ordering::Acquire));
@@ -315,6 +347,7 @@ fn disabling_wakes_before_writer_rejection_and_keeps_runtime_closed_without_faki
 }
 
 struct PublicationClock {
+    writer_caller: Option<std::thread::ThreadId>,
     reads: AtomicU64,
     fire_at: u64,
     tick: AtomicU64,
@@ -322,7 +355,11 @@ struct PublicationClock {
 }
 impl MonotonicClock for PublicationClock {
     fn monotonic_millis(&self) -> u64 {
-        if self.reads.fetch_add(1, Ordering::AcqRel) + 1 == self.fire_at {
+        if self
+            .writer_caller
+            .is_none_or(|caller| std::thread::current().id() != caller)
+            && self.reads.fetch_add(1, Ordering::AcqRel) + 1 == self.fire_at
+        {
             let action = self.action.lock().unwrap().take();
             if let Some(action) = action {
                 action();
@@ -342,6 +379,7 @@ fn management_revalidates_original_lease_health_and_runtime_after_the_writer_rea
     for kind in ["revoke", "lock", "runtime", "fault"] {
         let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
         let clock = Arc::new(PublicationClock {
+            writer_caller: None,
             reads: AtomicU64::new(0),
             fire_at: 2,
             tick: AtomicU64::new(0),
@@ -393,6 +431,7 @@ fn management_reads_never_renew_the_original_local_idle_deadline() {
     let original = backend.0.lock().unwrap().voice_service();
     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
     let clock = Arc::new(PublicationClock {
+        writer_caller: None,
         reads: AtomicU64::new(0),
         fire_at: 2,
         tick: AtomicU64::new(0),
@@ -428,7 +467,7 @@ fn management_distinguishes_starting_playing_and_stopping_until_exact_release() 
     let service = backend.0.lock().unwrap().voice_service();
     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
     let request = fixtures::independent_request(&service, web, class, 902);
-    let queued = service.submit(web, request).unwrap();
+    let queued = service.test_submit(web, request).unwrap();
     let starting = service
         .drive(VoiceDriverUpdate {
             job_id: queued.id,
@@ -456,7 +495,9 @@ fn management_distinguishes_starting_playing_and_stopping_until_exact_release() 
         (view.active_jobs, view.queued_jobs, view.playing_jobs),
         (1, 0, 1)
     );
-    let disabled = service.set_enabled(local, false, view.revision).unwrap();
+    let disabled = service
+        .test_set_enabled(local, false, view.revision)
+        .unwrap();
     let stopping = disabled
         .jobs
         .iter()
@@ -490,7 +531,7 @@ fn apply_review(
     enabled: bool,
     view: &VoiceManagementSnapshot,
 ) -> Result<VoiceSnapshot> {
-    service.set_enabled_reviewed(
+    service.test_set_enabled_reviewed(
         lease,
         enabled,
         view.revision,
@@ -512,10 +553,17 @@ fn reviewed_change_rejects_identity_only_or_runtime_only_changes_with_unchanged_
         .0
         .lock()
         .unwrap()
-        .identity(
-            local,
-            IdentityCommand::RenameSchool {
-                name: "Changed review identity".into(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(local),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    local,
+                    IdentityCommand::RenameSchool {
+                        name: "Changed review identity".into(),
+                    },
+                )
             },
         )
         .unwrap();
@@ -562,10 +610,17 @@ fn reviewed_writer_guard_rejects_identity_or_runtime_changed_after_disable_cas_b
                         backend_handle
                             .lock()
                             .unwrap()
-                            .identity(
-                                local,
-                                IdentityCommand::RenameSchool {
-                                    name: "Changed after stop CAS".into(),
+                            .test_native_command(
+                                fc_ports::command_window::CommandFamily::Identity,
+                                Some(local),
+                                SessionPurpose::Manage,
+                                |backend| {
+                                    backend.identity(
+                                        local,
+                                        IdentityCommand::RenameSchool {
+                                            name: "Changed after stop CAS".into(),
+                                        },
+                                    )
                                 },
                             )
                             .unwrap();
@@ -646,6 +701,7 @@ fn reviewed_writer_rechecks_exact_epoch_during_evaluation_and_immediately_before
     for enabled in [false, true] {
         for fire_at in [3, 4] {
             let clock = Arc::new(PublicationClock {
+                writer_caller: Some(caller),
                 reads: AtomicU64::new(0),
                 fire_at,
                 tick: AtomicU64::new(0),
@@ -659,6 +715,8 @@ fn reviewed_writer_rechecks_exact_epoch_during_evaluation_and_immediately_before
                 original.inner.clock.clone(),
                 clock.clone(),
             );
+            let issued = service.issue_native_command(local).unwrap();
+            let service = service.scoped_command(issued);
             let before = service.management_snapshot(local).unwrap();
             clock.reads.store(0, Ordering::Release);
             let changed_service = service.clone();

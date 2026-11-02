@@ -99,7 +99,70 @@ impl MonotonicClock for TestClock {
         0
     }
 }
-struct Joined(Backend);
+struct ScopedBackend(Backend);
+impl std::ops::Deref for ScopedBackend {
+    type Target = Backend;
+    fn deref(&self) -> &Backend {
+        &self.0
+    }
+}
+impl std::ops::DerefMut for ScopedBackend {
+    fn deref_mut(&mut self) -> &mut Backend {
+        &mut self.0
+    }
+}
+impl ScopedBackend {
+    fn command<T>(
+        &mut self,
+        lease: SessionLease,
+        family: fc_ports::command_window::CommandFamily,
+        action: impl FnOnce(&mut Backend) -> fc_bootstrap::backend::Result<T>,
+    ) -> fc_bootstrap::backend::Result<T> {
+        let issued = self.0.issue_native_command(
+            family,
+            Some(lease),
+            fc_application::identity::SessionPurpose::Manage,
+        )?;
+        let mut scoped = self.0.begin_command_scope(issued)?;
+        action(&mut scoped)
+    }
+    fn save_schedule(
+        &mut self,
+        lease: SessionLease,
+        expected: Revision,
+        document: ScheduleDocument,
+    ) -> fc_bootstrap::backend::Result<ScheduleDocument> {
+        self.command(
+            lease,
+            fc_ports::command_window::CommandFamily::Schedule,
+            |b| b.save_schedule(lease, expected, document),
+        )
+    }
+    fn adopt_calendar(
+        &mut self,
+        lease: SessionLease,
+        expected: Revision,
+        candidates: Vec<fc_ports::calendar::CalendarCandidateRef>,
+    ) -> fc_bootstrap::backend::Result<ScheduleDocument> {
+        self.command(
+            lease,
+            fc_ports::command_window::CommandFamily::Calendar,
+            |b| b.adopt_calendar(lease, expected, candidates),
+        )
+    }
+    fn begin_manual(
+        &mut self,
+        lease: SessionLease,
+        year: i32,
+    ) -> fc_bootstrap::backend::Result<fc_bootstrap::backend::CalendarManualStart> {
+        self.command(
+            lease,
+            fc_ports::command_window::CommandFamily::Calendar,
+            |b| b.begin_calendar_manual_fetch_while(lease, year, Arc::new(|| true)),
+        )
+    }
+}
+struct Joined(ScopedBackend);
 impl Drop for Joined {
     fn drop(&mut self) {
         let result = self.0.close();
@@ -109,7 +172,7 @@ impl Drop for Joined {
     }
 }
 fn open(directory: &Directory, clock: Arc<TestClock>) -> Joined {
-    Joined(
+    Joined(ScopedBackend(
         Backend::open(
             directory.database(),
             CredentialRecordCodec::from_key([39; 32]).unwrap(),
@@ -117,7 +180,7 @@ fn open(directory: &Directory, clock: Arc<TestClock>) -> Joined {
             clock,
         )
         .unwrap(),
-    )
+    ))
 }
 fn password() -> Password {
     Password::new(PASSWORD.into()).unwrap()
@@ -153,7 +216,18 @@ fn initialize(backend: &mut Backend) -> SessionLease {
             expected_revision: None,
         },
     ] {
-        backend.identity(lease, command).unwrap();
+        let issued = backend
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(lease),
+                fc_application::identity::SessionPurpose::Manage,
+            )
+            .unwrap();
+        backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .identity(lease, command)
+            .unwrap();
     }
     lease
 }
@@ -319,17 +393,22 @@ fn public_calendar_real_lease_cache_review_adoption_manual_priority_and_offline_
         .0
         .save_schedule(lease, Revision::default(), draft)
         .unwrap();
-    let CalendarReservation::Reserved(ticket) =
-        service.0.reserve_calendar_fetch(lease, 2026).unwrap()
+    let fc_bootstrap::backend::CalendarManualStart::Fresh(permit) =
+        service.0.begin_manual(lease, 2026).unwrap()
     else {
         panic!("first fetch must reserve");
     };
     let feed = br#"{"year":2026,"papers":["https://www.gov.cn/zhengce/content/202501/content_1000000.htm"],"days":[{"date":"2026-10-14","name":"synthetic rest","isOffDay":true},{"date":"2026-10-15","name":"synthetic makeup","isOffDay":false}]}"#;
     let candidate = fc_protocol::calendar_feed::parse(2026, feed, clock.now(), None, None).unwrap();
-    let status = service
+    service
         .0
-        .finish_calendar_fetch(ticket, CalendarFetchOutcome::Downloaded(candidate))
+        .finish_calendar_manual_fetch_while(
+            permit,
+            CalendarFetchOutcome::Downloaded(candidate),
+            Arc::new(|| true),
+        )
         .unwrap();
+    let status = service.0.calendar_status(lease, 2026).unwrap();
     assert!(!status.policy.enabled);
     assert_eq!(service.0.read_schedule(lease).unwrap(), initial);
     let reference = CalendarCandidateRef {
@@ -392,8 +471,17 @@ fn public_calendar_real_lease_cache_review_adoption_manual_priority_and_offline_
         .candidate
         .is_some());
     assert!(matches!(
-        service.0.reserve_calendar_fetch(lease, 2026).unwrap(),
-        CalendarReservation::RateLimited { .. }
+        service.0.begin_manual(lease, 2026).unwrap(),
+        fc_bootstrap::backend::CalendarManualStart::History(
+            fc_ports::command_window::TypedCommandOutcome::Completed(
+                fc_ports::command_window::TypedCommandResult::CalendarManualFetch(
+                    fc_ports::command_window::CalendarManualResult {
+                        kind: fc_ports::command_window::CalendarManualResultKind::RateLimited { .. },
+                        ..
+                    }
+                )
+            )
+        )
     ));
 }
 

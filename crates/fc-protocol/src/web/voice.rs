@@ -1,7 +1,9 @@
 //! Explicit bounded voice disclosures; no actor proof, path, audio or generation
 //! of an individual native job enters browser JSON.
+use super::command_window::CommandReference;
 use crate::{ProtocolError, SCHEMA_VERSION};
 use fc_domain::{ids::*, time::*, voice::*};
+use fc_ports::command_window::CommandTicket;
 use serde::Serialize;
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -90,6 +92,8 @@ pub fn capabilities(
 struct Job {
     job_id: String,
     command_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    command_ticket: Option<Option<String>>,
     class_id: String,
     repeat_total: u8,
     completed_repeats: u8,
@@ -110,6 +114,7 @@ fn job(j: &VoiceJob) -> Result<Job, ProtocolError> {
     Ok(Job {
         job_id: j.id.get().to_string(),
         command_id: j.command_id.get().to_string(),
+        command_ticket: None,
         class_id: j.class_id.get().to_string(),
         repeat_total: j.repeat_total,
         completed_repeats: j.completed_repeats,
@@ -158,6 +163,8 @@ struct Mutation {
     schema_version: u16,
     status: &'static str,
     command_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    command_ticket: Option<String>,
     job: Job,
 }
 pub fn committed(j: &VoiceJob) -> Result<Vec<u8>, ProtocolError> {
@@ -165,6 +172,7 @@ pub fn committed(j: &VoiceJob) -> Result<Vec<u8>, ProtocolError> {
         schema_version: 1,
         status: "COMMITTED",
         command_id: j.command_id.get().to_string(),
+        command_ticket: None,
         job: job(j)?,
     })
 }
@@ -173,6 +181,7 @@ pub fn cancelled(command_id: CommandId, j: &VoiceJob) -> Result<Vec<u8>, Protoco
         schema_version: 1,
         status: "CANCEL_REQUESTED",
         command_id: command_id.get().to_string(),
+        command_ticket: None,
         job: job(j)?,
     })
 }
@@ -194,6 +203,96 @@ pub fn jobs(items: &[VoiceJob]) -> Result<Vec<u8>, ProtocolError> {
         schema_version: 1,
         status: "VOICE_JOBS",
         jobs: items.iter().map(job).collect::<Result<_, _>>()?,
+    })
+}
+/// Native job binding is independent of the historical command window. Null
+/// is explicit retained legacy identity, never a fallback for a failed v2 lookup.
+fn bound_job(j: &VoiceJob, ticket: Option<CommandTicket>) -> Result<Job, ProtocolError> {
+    let mut value = job(j)?;
+    value.command_ticket = Some(ticket.map(|ticket| ticket.to_string()));
+    Ok(value)
+}
+pub fn status_bound(j: &VoiceJob, ticket: Option<CommandTicket>) -> Result<Vec<u8>, ProtocolError> {
+    super::responses::encode(&JobResponse {
+        schema_version: 2,
+        status: "VOICE_JOB",
+        job: bound_job(j, ticket)?,
+    })
+}
+pub fn committed_window(
+    command: CommandReference,
+    j: &VoiceJob,
+    submit_ticket: Option<CommandTicket>,
+) -> Result<Vec<u8>, ProtocolError> {
+    if command.command_id != j.command_id || submit_ticket != Some(command.ticket) {
+        return Err(ProtocolError::InvalidCommand);
+    }
+    mutation_window("COMMITTED", command, j, submit_ticket)
+}
+pub fn cancelled_window(
+    command: CommandReference,
+    j: &VoiceJob,
+    submit_ticket: Option<CommandTicket>,
+) -> Result<Vec<u8>, ProtocolError> {
+    mutation_window("CANCEL_REQUESTED", command, j, submit_ticket)
+}
+fn mutation_window(
+    status: &'static str,
+    command: CommandReference,
+    j: &VoiceJob,
+    submit_ticket: Option<CommandTicket>,
+) -> Result<Vec<u8>, ProtocolError> {
+    super::responses::encode(&Mutation {
+        schema_version: 2,
+        status,
+        command_id: command.command_id.get().to_string(),
+        command_ticket: Some(command.ticket.to_string()),
+        job: bound_job(j, submit_ticket)?,
+    })
+}
+pub fn jobs_bound(items: &[(VoiceJob, Option<CommandTicket>)]) -> Result<Vec<u8>, ProtocolError> {
+    if items.len() > 24
+        || items.iter().filter(|(j, _)| !j.state.terminal()).count() > 4
+        || items.iter().filter(|(j, _)| j.state.terminal()).count() > 20
+    {
+        return Err(ProtocolError::TooLarge);
+    }
+    super::responses::encode(&Jobs {
+        schema_version: 2,
+        status: "VOICE_JOBS",
+        jobs: items
+            .iter()
+            .map(|(job, ticket)| bound_job(job, *ticket))
+            .collect::<Result<_, _>>()?,
+    })
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CommandOutcome {
+    schema_version: u16,
+    status: &'static str,
+    command_id: String,
+    command_ticket: String,
+    state: &'static str,
+    job: Option<Job>,
+}
+pub fn command_outcome(
+    command: CommandReference,
+    result: Option<(&VoiceJob, Option<CommandTicket>)>,
+) -> Result<Vec<u8>, ProtocolError> {
+    super::responses::encode(&CommandOutcome {
+        schema_version: 2,
+        status: "COMMAND_RESULT",
+        command_id: command.command_id.get().to_string(),
+        command_ticket: command.ticket.to_string(),
+        state: if result.is_some() {
+            "COMMITTED"
+        } else {
+            "NOT_FOUND"
+        },
+        job: result
+            .map(|(job, ticket)| bound_job(job, ticket))
+            .transpose()?,
     })
 }
 /// Gregorian inverse of the domain's private civil epoch. Never use browser
@@ -337,5 +436,84 @@ mod tests {
         assert!(s.contains("\"currentClass\":null"));
         assert!(s.contains("\"runtimeGeneration\":\"2\""));
         assert!(!s.contains("owner"));
+    }
+    fn sample_job() -> VoiceJob {
+        VoiceJob {
+            id: VoiceJobId::new(7).unwrap(),
+            command_id: CommandId::new(7).unwrap(),
+            asset_id: None,
+            owner: PrincipalId::new(9).unwrap(),
+            class_id: ClassId::new(3).unwrap(),
+            repeat_total: 3,
+            completed_repeats: 0,
+            current_repeat: 1,
+            state: VoiceState::Stopping,
+            revision: Revision::new(2),
+            generation: 5,
+            release_generation: Some(4),
+            pending_terminal: Some(VoiceState::Canceled),
+            sequence: 11,
+            submitted_at: 0,
+            latest_start_at: 10,
+            first_started_at: Some(1),
+            gap_until: None,
+            ended_at: None,
+            failure: None,
+            authorization: None,
+            cancel_command: Some(CommandId::new(8).unwrap()),
+        }
+    }
+    #[test]
+    fn current_job_binding_and_historical_cancel_identity_are_distinct() {
+        let original = CommandTicket::new([7; 16], 1).unwrap();
+        let cancel = CommandReference {
+            ticket: CommandTicket::new([7; 16], 2).unwrap(),
+            command_id: CommandId::new(8).unwrap(),
+        };
+        let job = sample_job();
+        let read = |bytes: Vec<u8>| serde_json::from_slice::<serde_json::Value>(&bytes).unwrap();
+        let value = read(cancelled_window(cancel, &job, Some(original)).unwrap());
+        assert_eq!(value["schemaVersion"], 2);
+        assert_eq!(value["commandId"], "8");
+        assert_eq!(value["commandTicket"], cancel.ticket.to_string());
+        assert_eq!(value["job"]["commandId"], "7");
+        assert_eq!(value["job"]["commandTicket"], original.to_string());
+        let outcome = read(command_outcome(cancel, Some((&job, Some(original)))).unwrap());
+        assert_eq!(outcome["commandTicket"], cancel.ticket.to_string());
+        assert_eq!(outcome["job"], value["job"]);
+        let current = read(status_bound(&job, Some(original)).unwrap());
+        assert_eq!(current["job"], value["job"]);
+        assert!(current.get("commandTicket").is_none());
+        assert!(current["job"].get("generation").is_none());
+        assert!(current["job"].get("authorization").is_none());
+    }
+    #[test]
+    fn legacy_null_is_explicit_in_v2_lists_and_never_a_fake_committed_v2_submit() {
+        let job = sample_job();
+        let reference = CommandReference {
+            ticket: CommandTicket::new([7; 16], 1).unwrap(),
+            command_id: job.command_id,
+        };
+        assert!(committed_window(reference, &job, None).is_err());
+        assert!(committed_window(
+            CommandReference {
+                command_id: CommandId::new(9).unwrap(),
+                ..reference
+            },
+            &job,
+            Some(reference.ticket)
+        )
+        .is_err());
+        let bytes = jobs_bound(&[(job.clone(), None)]).unwrap();
+        let value: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(value["schemaVersion"], 2);
+        assert_eq!(value["jobs"][0]["commandTicket"], serde_json::Value::Null);
+        let bytes = committed_window(reference, &job, Some(reference.ticket)).unwrap();
+        let value: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(value["job"]["commandTicket"], reference.ticket.to_string());
+        let empty: serde_json::Value =
+            serde_json::from_slice(&command_outcome(reference, None).unwrap()).unwrap();
+        assert_eq!(empty["state"], "NOT_FOUND");
+        assert_eq!(empty["job"], serde_json::Value::Null);
     }
 }

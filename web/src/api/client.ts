@@ -1,8 +1,15 @@
+import { issued, commandIdentity, type CommandApi, type CommandFamily, type CommandIdentity } from './command-protocol'
 import { subjectVisual, type HomeworkTarget } from "./subject-visual-protocol"
 import { bodyText, commandResult, committed, content, contentPath, revision, sameKey, scopes, type CommandResult, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type ScopePage } from './content-protocol'
 import { decimal, errorCode, loggedOut, MAX_JSON_BYTES, pairingReceipt, pollResult, ProtocolFault, publicStatus, secret, session, strictJson, validateForm, type ErrorCode, type PairingForm, type PairingReceipt, type PollResult, type PublicStatus, type Session } from './protocol'
 export class ApiError extends Error {
   constructor(public readonly status: number, public readonly code: ErrorCode) { super('白板未能完成此次请求。'); this.name = 'ApiError' }
+}
+export function commandRejected(error: unknown): boolean {
+  return error instanceof ApiError && ([400, 409, 429].includes(error.status) || ['COMMAND_EXPIRED', 'COMMAND_NOT_ISSUED', 'COMMAND_WINDOW_FULL', 'COMMAND_WINDOW_UNAVAILABLE'].includes(error.code))
+}
+export function commandRetired(error: unknown): boolean {
+  return error instanceof ApiError && (error.code === 'COMMAND_EXPIRED' || error.code === 'COMMAND_NOT_ISSUED')
 }
 export class NetworkFault extends Error {
   constructor() { super('无法确认白板的响应，请检查网络后主动核对。'); this.name = 'NetworkFault' }
@@ -51,11 +58,11 @@ export interface ServerApi {
   poll(id: string, proof: string, signal: AbortSignal): Promise<PollResult>
   logout(csrf: string, signal: AbortSignal): Promise<void>
 }
-export interface ContentApi {
+export interface ContentApi extends CommandApi {
   scopes(kind: ContentKind, offset: number, signal: AbortSignal): Promise<ScopePage>
   content(key: ContentKey, signal: AbortSignal): Promise<ContentDocument>
   saveContent(key: ContentKey, command: ContentCommand, csrf: string, signal: AbortSignal): Promise<Committed>
-  commandResult(commandId: string, signal: AbortSignal): Promise<CommandResult>
+  commandResult(command: CommandIdentity, signal: AbortSignal): Promise<CommandResult>
 }
 export class HttpApi implements ServerApi, ContentApi {
   constructor(protected readonly base: URL, protected readonly fetcher: typeof fetch = globalThis.fetch.bind(globalThis)) {}
@@ -85,6 +92,12 @@ export class HttpApi implements ServerApi, ContentApi {
       if (error instanceof ApiError || error instanceof ProtocolFault) throw error
       throw new NetworkFault()
     } finally { clearTimeout(timeout); signal.removeEventListener('abort', abort) }
+  }
+  async issueCommand(family: CommandFamily, csrf: string, signal: AbortSignal): Promise<CommandIdentity> {
+    if (!['content', 'materials', 'voice'].includes(family)) throw new ProtocolFault()
+    const r = await this.request('commands', signal, { schemaVersion: 2, family }, csrf)
+    if (r.status !== 201) throw new ProtocolFault()
+    return issued(r.value, family)
   }
   async status(signal: AbortSignal) { const r = await this.request('status', signal); if (r.status !== 200) throw new ProtocolFault(); return publicStatus(r.value) }
   async session(signal: AbortSignal) { const r = await this.request('session', signal); if (r.status !== 200) throw new ProtocolFault(); return session(r.value) }
@@ -119,20 +132,20 @@ export class HttpApi implements ServerApi, ContentApi {
     return document
   }
   async saveContent(key: ContentKey, command: ContentCommand, csrf: string, signal: AbortSignal) {
-    const input = { schemaVersion: 1, commandId: decimal(command.commandId), expectedRevision: revision(command.expectedRevision), text: bodyText(command.text) }
+    const input = { schemaVersion: 2, ...commandIdentity(command), expectedRevision: revision(command.expectedRevision), text: bodyText(command.text) }
     const r = await this.request(contentPath(key), signal, input, csrf)
     if (r.status !== 200) throw new ProtocolFault()
-    return committed(r.value, input.commandId, key, input.expectedRevision, input.text)
+    return committed(r.value, command, key, input.expectedRevision, input.text)
   }
   async subjectVisual(target: HomeworkTarget, signal: AbortSignal) {
     const r = await this.request(contentPath(target) + '/visual', signal)
     if (r.status !== 200) throw new ProtocolFault()
     return subjectVisual(r.value, target)
   }
-  async commandResult(commandId: string, signal: AbortSignal) {
-    const id = decimal(commandId), r = await this.request(`content/commands/${id}`, signal)
+  async commandResult(command: CommandIdentity, signal: AbortSignal) {
+    const pair = commandIdentity(command), r = await this.request(`content/commands/${pair.commandTicket}/${pair.commandId}`, signal)
     if (r.status !== 200) throw new ProtocolFault()
-    return commandResult(r.value, id)
+    return commandResult(r.value, command)
   }
 
 }

@@ -14,6 +14,7 @@ pub struct AutostartRequest {
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AutostartRepositoryError {
+    CommandWindow(crate::command_window::CommandWindowError),
     Cancelled,
     Invalid,
     Denied,

@@ -1,11 +1,13 @@
 //! Real SQLite transactions with synthetic identity and an exact fixture lease.
 use super::*;
+use fc_ports::command_window::{CommandFamily, CommandOwner};
 use fc_ports::{AuthorityPublisher, ScheduleRepository, ScheduleRequest};
 use std::sync::{
     atomic::{AtomicBool, AtomicU64, Ordering},
     Mutex,
 };
 static NEXT: AtomicU64 = AtomicU64::new(0);
+static NEXT_CALENDAR_INTENT: AtomicU64 = AtomicU64::new(0);
 struct Directory(std::path::PathBuf);
 impl Directory {
     fn new() -> Self {
@@ -95,6 +97,7 @@ impl AuthorityPublisher for Publisher {
     fn fault(&mut self) {}
 }
 struct Fixture {
+    commands: crate::fixture_commands::FixtureCommands,
     writer: Option<StorageWriter<Revision>>,
     directory: Directory,
     clock: Arc<Time>,
@@ -109,8 +112,83 @@ impl Drop for Fixture {
     }
 }
 impl Fixture {
+    fn legacy(extra: Vec<Mutation>) -> Self {
+        let mut f = Self {
+            commands: crate::fixture_commands::FixtureCommands::default(),
+            writer: None,
+            directory: Directory::new(),
+            clock: Arc::new(Time(Mutex::new(at(10)))),
+            active: Arc::new(AtomicBool::new(true)),
+            revoke: Arc::new(AtomicBool::new(false)),
+        };
+        let mut rows = vec![Mutation::Put {
+            key: IDENTITY.into(),
+            value: codec::bytes(&codec::identity(&identity())).unwrap(),
+        }];
+        for id in 1..=2 {
+            for kind in ["password", "recovery"] {
+                rows.push(Mutation::Put {
+                    key: credential_key(PrincipalId::new(id).unwrap(), kind, 1),
+                    value: vec![id as u8],
+                });
+            }
+        }
+        rows.extend(extra);
+        {
+            let mut db = crate::open_connection(&f.directory.0.join("state.sqlite3")).unwrap();
+            let tx = db.transaction().unwrap();
+            tx.execute("UPDATE state_meta SET revision=2", []).unwrap();
+            for row in rows {
+                match row {
+                    Mutation::Put { key, value } => {
+                        assert!(!key.is_empty() && key.len() <= 256);
+                        assert!(value.len() <= crate::MAX_VALUE_BYTES);
+                        tx.execute(
+                            "INSERT INTO documents(key,value,revision) VALUES (?1,?2,2)",
+                            params![key, value],
+                        )
+                        .unwrap();
+                    }
+                    Mutation::Delete { .. } => panic!("legacy fixture contains only original rows"),
+                }
+            }
+            tx.commit().unwrap();
+        }
+        // First Writer/Window open freezes the real legacy catalog. No issued
+        // row, epoch, or physical owner has been removed or reset.
+        f.open();
+        f
+    }
+    fn receipt_key(&self, legacy: &str) -> String {
+        let (slot, id) =
+            crate::business::command_window::legacy(legacy).expect("exact fixture receipt slot");
+        let original = self
+            .commands
+            .original(id)
+            .expect("original fixture receipt pair");
+        crate::business::command_window::namespaced(slot, original.ticket)
+    }
+
+    // Labels name fixture intents only. Request ids come from the real Writer;
+    // this cache keeps the exact original pair through retries and reopen.
+    fn command_id(&self, family: CommandFamily, label: u64) -> CommandId {
+        if let Some(original) = self.commands.labelled(family, &label.to_string()) {
+            return original.command_id;
+        }
+        self.commands
+            .issue(
+                &self.handle(),
+                family,
+                &label.to_string(),
+                CommandOwner::authenticated(&actor()),
+            )
+            .unwrap()
+            .command_id
+    }
+
     fn new() -> Self {
         let mut f = Self {
+            commands: crate::fixture_commands::FixtureCommands::default(),
             writer: None,
             directory: Directory::new(),
             clock: Arc::new(Time(Mutex::new(at(10)))),
@@ -155,14 +233,19 @@ impl Fixture {
     }
     fn commit(&self, m: Vec<Mutation>) {
         let r = self.handle().try_revision().unwrap().wait().unwrap();
-        self.handle()
-            .try_commit(
-                CommitCommand::new(format!("fixture{}", r.get()), r, m).unwrap(),
-                r.next().unwrap(),
-            )
-            .unwrap()
-            .wait()
-            .unwrap();
+        {
+            let (fixture_handle, fixture_command) = self
+                .commands
+                .prepare_generic(
+                    &self.handle(),
+                    CommitCommand::new(format!("fixture{}", r.get()), r, m).unwrap(),
+                )
+                .unwrap();
+            fixture_handle.try_commit(fixture_command, r.next().unwrap())
+        }
+        .unwrap()
+        .wait()
+        .unwrap();
     }
     fn repo(&self) -> BusinessRepository<Revision> {
         let active = self.active.clone();
@@ -178,25 +261,45 @@ impl Fixture {
     fn next(&self, day: u8) {
         *self.clock.0.lock().unwrap() = at(day)
     }
-    fn fetch(&self, year: i32) -> CalendarFetchTicket {
-        match self.repo().reserve_calendar_fetch(year, &actor()).unwrap() {
-            CalendarReservation::Reserved(t) => t,
+    fn fetch(&self, year: i32) -> ManualFetchPermit {
+        match {
+            let fixture_arg0 = year;
+            let fixture_arg1 = &actor();
+            let original_pair = self
+                .commands
+                .issue(
+                    &self.handle(),
+                    CommandFamily::Calendar,
+                    &format!(
+                        "reserve_calendar_fetch-{}-{:?}",
+                        NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                        fixture_arg0
+                    ),
+                    CommandOwner::authenticated(fixture_arg1),
+                )
+                .unwrap();
+            let issued_repository = self.repo().with_command_window(original_pair);
+            issued_repository
+                .begin_calendar_manual_typed(fixture_arg0, fixture_arg1)
+                .map_err(error)
+        }
+        .unwrap()
+        {
+            ManualFetchStart::Fresh(t) => t,
             _ => panic!("unexpected throttle"),
         }
     }
     fn cache(&self, c: CalendarCandidate) -> CalendarStatus {
         let t = self.fetch(c.source_year);
-        self.repo()
-            .finish_calendar_fetch(t, CalendarFetchOutcome::Downloaded(c))
-            .unwrap()
+        finish_manual(self, &self.repo(), t, CalendarFetchOutcome::Downloaded(c)).unwrap()
     }
     fn adopt(&self, id: u64, year: i32) -> fc_domain::schedule_document::ScheduleDocument {
-        let mut r = self.repo();
+        let r = self.repo();
         let current = r.schedule(&actor()).unwrap();
         let status = r.calendar_status(year, &actor()).unwrap();
-        r.adopt_calendar(
-            CalendarAdoptionRequest {
-                command_id: CommandId::new(id).unwrap(),
+        {
+            let fixture_request = CalendarAdoptionRequest {
+                command_id: self.command_id(CommandFamily::Calendar, id),
                 expected_schedule_revision: current.revision,
                 candidates: vec![CalendarCandidateRef {
                     year,
@@ -207,9 +310,11 @@ impl Fixture {
                         .unwrap()
                         .candidate_revision,
                 }],
-            },
-            &actor(),
-        )
+            };
+            let original_pair = self.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = r.with_command_window(original_pair);
+            issued_repository.adopt_calendar(fixture_request, &actor())
+        }
         .unwrap()
     }
     fn update_identity(&self, change: impl FnOnce(&mut IdentityState)) {
@@ -222,6 +327,44 @@ impl Fixture {
         }]);
     }
 }
+
+fn policy_typed(
+    repo: &BusinessRepository<Revision>,
+    expected: Revision,
+    enabled: bool,
+    actor: &ActorContext,
+) -> Result<CalendarAutoPolicy, CalendarRepositoryError> {
+    match repo
+        .set_calendar_policy_typed(expected, enabled, actor)
+        .map_err(error)?
+    {
+        fc_ports::command_window::TypedCommandOutcome::Completed(
+            fc_ports::command_window::TypedCommandResult::CalendarPolicy(policy),
+        ) => Ok(policy),
+        other => panic!("policy operation requires its actual typed result: {other:?}"),
+    }
+}
+fn finish_manual(
+    f: &Fixture,
+    repo: &BusinessRepository<Revision>,
+    permit: ManualFetchPermit,
+    outcome: CalendarFetchOutcome,
+) -> Result<CalendarStatus, CalendarRepositoryError> {
+    let year = permit.year();
+    let result = repo
+        .finish_calendar_manual_typed(permit, outcome)
+        .map_err(error)?;
+    assert!(
+        matches!(result, fc_ports::command_window::TypedCommandOutcome::Completed(fc_ports::command_window::TypedCommandResult::CalendarManualFetch(ref reply)) if reply.year == year)
+    );
+    // Completion is an original-owner return even after lease revocation. This
+    // is a test-only observation of the actual committed database, not a public
+    // status API or a synthesized typed reply. Public read guard tests remain.
+    let db = Connection::open(f.directory.0.join("state.sqlite3")).unwrap();
+    let docs = TransactionView(&db);
+    snapshot(&load(&docs).map_err(error)?, &docs, year).map_err(error)
+}
+
 fn candidate(year: i32, day: u8) -> CalendarCandidate {
     CalendarCandidate {
         source_year: year,
@@ -241,23 +384,24 @@ fn candidate(year: i32, day: u8) -> CalendarCandidate {
 fn reservation_failure_and_clock_rollback_survive_restart() {
     let mut f = Fixture::new();
     let t = f.fetch(2026);
-    assert_eq!(t.attempt_sequence, 1);
-    f.repo()
-        .finish_calendar_fetch(
-            t,
-            CalendarFetchOutcome::Failed(CalendarFetchFailure::Network),
-        )
-        .unwrap();
+    assert_eq!(t.ticket.attempt_sequence, 1);
+    finish_manual(
+        &f,
+        &f.repo(),
+        t,
+        CalendarFetchOutcome::Failed(CalendarFetchFailure::Network),
+    )
+    .unwrap();
     f.reopen();
     f.next(9);
     assert!(
-        matches!(f.repo().reserve_calendar_fetch(2026,&actor()).unwrap(),CalendarReservation::RateLimited{next_allowed}if next_allowed==at(11))
+        matches!({let fixture_arg0 = 2026;let fixture_arg1 = &actor();let original_pair = f.commands.issue(&f.handle(), CommandFamily::Calendar, &format!("reserve_calendar_fetch-{}-{:?}", NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),fixture_arg0),CommandOwner::authenticated(fixture_arg1)).unwrap(); let issued_repository = f.repo().with_command_window(original_pair); issued_repository.begin_calendar_manual_typed(fixture_arg0,fixture_arg1).map_err(error)}.unwrap(),ManualFetchStart::History(fc_ports::command_window::TypedCommandOutcome::Completed(fc_ports::command_window::TypedCommandResult::CalendarManualFetch(fc_ports::command_window::CalendarManualResult { kind:fc_ports::command_window::CalendarManualResultKind::RateLimited{next_allowed}, .. })))if next_allowed==at(11))
     );
     let s = f.repo().calendar_status(2026, &actor()).unwrap();
     assert_eq!(s.years[0].last_error, Some(CalendarFetchFailure::Network));
     assert!(s.candidate.is_none());
     f.next(11);
-    assert_eq!(f.fetch(2026).attempt_sequence, 2);
+    assert_eq!(f.fetch(2026).ticket.attempt_sequence, 2);
 }
 #[test]
 fn cache_is_not_active_and_only_explicit_adoption_verifies() {
@@ -282,28 +426,30 @@ fn ordinary_schedule_draft_cannot_forge_sourced_data_or_verified_years() {
     let mut forged = fc_domain::schedule_document::ScheduleDocument::default();
     forged.public_calendar_data.years.push(candidate(2026, 1));
     let request = ScheduleRequest {
-        command_id: CommandId::new(1).unwrap(),
+        command_id: f.command_id(CommandFamily::Schedule, 1),
         expected_revision: Revision::default(),
         candidate: forged,
     };
-    assert!(f
-        .repo()
-        .execute_schedule(request, &actor(), f.clock.as_ref())
-        .is_err());
+    assert!({
+        let fixture_request = request;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.execute_schedule(fixture_request, &actor(), f.clock.as_ref())
+    }
+    .is_err());
     let mut forged = fc_domain::schedule_document::ScheduleDocument::default();
     forged.public_calendar.public_verified_years.push(2026);
-    assert!(f
-        .repo()
-        .execute_schedule(
-            ScheduleRequest {
-                command_id: CommandId::new(2).unwrap(),
-                expected_revision: Revision::default(),
-                candidate: forged
-            },
-            &actor(),
-            f.clock.as_ref()
-        )
-        .is_err());
+    assert!({
+        let fixture_request = ScheduleRequest {
+            command_id: f.command_id(CommandFamily::Schedule, 2),
+            expected_revision: Revision::default(),
+            candidate: forged,
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.execute_schedule(fixture_request, &actor(), f.clock.as_ref())
+    }
+    .is_err());
     assert_eq!(
         f.repo().schedule(&actor()).unwrap().revision,
         Revision::default()
@@ -317,13 +463,21 @@ fn late_completion_cannot_overwrite_new_attempt_after_restart() {
     f.next(11);
     let new = f.fetch(2026);
     assert!(matches!(
-        f.repo()
-            .finish_calendar_fetch(old, CalendarFetchOutcome::Downloaded(candidate(2026, 1))),
+        finish_manual(
+            &f,
+            &f.repo(),
+            old,
+            CalendarFetchOutcome::Downloaded(candidate(2026, 1))
+        ),
         Err(CalendarRepositoryError::Stale)
     ));
-    f.repo()
-        .finish_calendar_fetch(new, CalendarFetchOutcome::Downloaded(candidate(2026, 2)))
-        .unwrap();
+    finish_manual(
+        &f,
+        &f.repo(),
+        new,
+        CalendarFetchOutcome::Downloaded(candidate(2026, 2)),
+    )
+    .unwrap();
     assert_eq!(
         f.repo()
             .calendar_status(2026, &actor())
@@ -338,10 +492,7 @@ fn late_completion_cannot_overwrite_new_attempt_after_restart() {
 fn not_modified_requires_existing_exact_validators_and_preserves_source_hash() {
     let f = Fixture::new();
     let t = f.fetch(2026);
-    let s = f
-        .repo()
-        .finish_calendar_fetch(t, CalendarFetchOutcome::NotModified)
-        .unwrap();
+    let s = finish_manual(&f, &f.repo(), t, CalendarFetchOutcome::NotModified).unwrap();
     assert_eq!(
         s.years[0].last_error,
         Some(CalendarFetchFailure::InvalidData)
@@ -351,10 +502,7 @@ fn not_modified_requires_existing_exact_validators_and_preserves_source_hash() {
     f.cache(candidate(2026, 1));
     f.next(12);
     let t = f.fetch(2026);
-    let s = f
-        .repo()
-        .finish_calendar_fetch(t, CalendarFetchOutcome::NotModified)
-        .unwrap();
+    let s = finish_manual(&f, &f.repo(), t, CalendarFetchOutcome::NotModified).unwrap();
     assert_eq!(s.candidate.unwrap().source_sha256, [1; 32]);
     assert_eq!(s.years[0].last_success, Some(at(12)));
     assert_eq!(s.years[0].candidate_revision, Revision::new(2));
@@ -366,13 +514,13 @@ fn failure_keeps_previous_candidate_and_adopted_schedule() {
     let before = f.adopt(1, 2026);
     f.next(11);
     let t = f.fetch(2026);
-    let status = f
-        .repo()
-        .finish_calendar_fetch(
-            t,
-            CalendarFetchOutcome::Failed(CalendarFetchFailure::Cancelled),
-        )
-        .unwrap();
+    let status = finish_manual(
+        &f,
+        &f.repo(),
+        t,
+        CalendarFetchOutcome::Failed(CalendarFetchFailure::Cancelled),
+    )
+    .unwrap();
     assert_eq!(status.candidate.unwrap().source_sha256, [1; 32]);
     assert_eq!(status.years[0].last_success, Some(at(10)));
     assert_eq!(f.repo().schedule(&actor()).unwrap(), before);
@@ -382,7 +530,27 @@ fn exact_local_lease_is_checked_again_at_real_commit() {
     let f = Fixture::new();
     f.revoke.store(true, Ordering::Release);
     assert!(matches!(
-        f.repo().reserve_calendar_fetch(2026, &actor()),
+        {
+            let fixture_arg0 = 2026;
+            let fixture_arg1 = &actor();
+            let original_pair = f
+                .commands
+                .issue(
+                    &f.handle(),
+                    CommandFamily::Calendar,
+                    &format!(
+                        "reserve_calendar_fetch-{}-{:?}",
+                        NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                        fixture_arg0
+                    ),
+                    CommandOwner::authenticated(fixture_arg1),
+                )
+                .unwrap();
+            let issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository
+                .begin_calendar_manual_typed(fixture_arg0, fixture_arg1)
+                .map_err(error)
+        },
         Err(CalendarRepositoryError::Denied)
     ));
     f.active.store(true, Ordering::Release);
@@ -392,33 +560,60 @@ fn exact_local_lease_is_checked_again_at_real_commit() {
         .unwrap()
         .years
         .is_empty());
-    assert_eq!(f.fetch(2026).attempt_sequence, 1);
+    assert_eq!(f.fetch(2026).ticket.attempt_sequence, 1);
 }
 #[test]
 fn adoption_candidate_cas_schedule_cas_and_idempotent_result() {
     let f = Fixture::new();
     f.cache(candidate(2026, 1));
     let request = CalendarAdoptionRequest {
-        command_id: CommandId::new(5).unwrap(),
+        command_id: f.command_id(CommandFamily::Calendar, 5),
         expected_schedule_revision: Revision::default(),
         candidates: vec![CalendarCandidateRef {
             year: 2026,
             revision: Revision::new(1),
         }],
     };
-    let next = f.repo().adopt_calendar(request.clone(), &actor()).unwrap();
+    let next = {
+        let fixture_request = request.clone();
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.adopt_calendar(fixture_request, &actor())
+    }
+    .unwrap();
     assert_eq!(
-        f.repo().adopt_calendar(request.clone(), &actor()).unwrap(),
+        {
+            let fixture_request = request.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository.adopt_calendar(fixture_request, &actor())
+        }
+        .unwrap(),
         next
     );
     let mut stale = request.clone();
-    stale.command_id = CommandId::new(6).unwrap();
-    assert!(f.repo().adopt_calendar(stale, &actor()).is_err());
+    stale.command_id = f.command_id(CommandFamily::Calendar, 6);
+    assert!({
+        let fixture_request = stale;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.adopt_calendar(fixture_request, &actor())
+    }
+    .is_err());
     f.next(11);
     f.cache(candidate(2026, 2));
-    assert_eq!(f.repo().adopt_calendar(request, &actor()).unwrap(), next);
+    assert_eq!(
+        {
+            let fixture_request = request;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository.adopt_calendar(fixture_request, &actor())
+        }
+        .unwrap(),
+        next
+    );
     let stale = CalendarAdoptionRequest {
-        command_id: CommandId::new(7).unwrap(),
+        command_id: f.command_id(CommandFamily::Calendar, 7),
         expected_schedule_revision: next.revision,
         candidates: vec![CalendarCandidateRef {
             year: 2026,
@@ -426,7 +621,12 @@ fn adoption_candidate_cas_schedule_cas_and_idempotent_result() {
         }],
     };
     assert_eq!(
-        f.repo().adopt_calendar(stale, &actor()),
+        {
+            let fixture_request = stale;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository.adopt_calendar(fixture_request, &actor())
+        },
         Err(CalendarRepositoryError::Stale)
     );
 }
@@ -436,10 +636,13 @@ fn invalid_empty_or_wrong_year_download_does_not_verify_or_erase() {
     f.cache(candidate(2026, 1));
     f.next(11);
     let t = f.fetch(2026);
-    let s = f
-        .repo()
-        .finish_calendar_fetch(t, CalendarFetchOutcome::Downloaded(candidate(2027, 1)))
-        .unwrap();
+    let s = finish_manual(
+        &f,
+        &f.repo(),
+        t,
+        CalendarFetchOutcome::Downloaded(candidate(2027, 1)),
+    )
+    .unwrap();
     assert_eq!(
         s.years[0].last_error,
         Some(CalendarFetchFailure::InvalidData)
@@ -449,10 +652,7 @@ fn invalid_empty_or_wrong_year_download_does_not_verify_or_erase() {
     let t = f.fetch(2026);
     let mut empty = candidate(2026, 2);
     empty.days.clear();
-    let s = f
-        .repo()
-        .finish_calendar_fetch(t, CalendarFetchOutcome::Downloaded(empty))
-        .unwrap();
+    let s = finish_manual(&f, &f.repo(), t, CalendarFetchOutcome::Downloaded(empty)).unwrap();
     assert_eq!(s.candidate.unwrap().source_sha256, [1; 32]);
     assert_eq!(s.years[0].last_success, Some(at(10)));
 }
@@ -461,14 +661,51 @@ fn auto_policy_default_cas_and_revoked_grant_fail_closed() {
     let f = Fixture::new();
     let s = f.repo().calendar_status(2026, &actor()).unwrap();
     assert!(!s.policy.enabled);
-    let p = f
-        .repo()
-        .set_calendar_auto_policy(Revision::default(), true, &actor())
-        .unwrap();
+    let p = {
+        let fixture_arg0 = Revision::default();
+        let fixture_arg1 = true;
+        let fixture_arg2 = &actor();
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Calendar,
+                &format!(
+                    "set_calendar_auto_policy-{}-{:?}-{:?}",
+                    NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                    fixture_arg0,
+                    fixture_arg1
+                ),
+                CommandOwner::authenticated(fixture_arg2),
+            )
+            .unwrap();
+        let issued_repository = f.repo().with_command_window(original_pair);
+        policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+    }
+    .unwrap();
     assert_eq!(p.grant.unwrap().principal_id, actor().principal_id);
     assert_eq!(
-        f.repo()
-            .set_calendar_auto_policy(Revision::default(), false, &actor()),
+        {
+            let fixture_arg0 = Revision::default();
+            let fixture_arg1 = false;
+            let fixture_arg2 = &actor();
+            let original_pair = f
+                .commands
+                .issue(
+                    &f.handle(),
+                    CommandFamily::Calendar,
+                    &format!(
+                        "set_calendar_auto_policy-{}-{:?}-{:?}",
+                        NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                        fixture_arg0,
+                        fixture_arg1
+                    ),
+                    CommandOwner::authenticated(fixture_arg2),
+                )
+                .unwrap();
+            let issued_repository = f.repo().with_command_window(original_pair);
+            policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+        },
         Err(CalendarRepositoryError::Stale)
     );
     f.update_identity(|i| i.accounts[0].principal.auth_epoch = AuthEpoch::new(2));
@@ -479,9 +716,28 @@ fn auto_pure_rest_update_works_without_live_local_lease() {
     let f = Fixture::new();
     f.cache(candidate(2026, 1));
     let adopted = f.adopt(1, 2026);
-    f.repo()
-        .set_calendar_auto_policy(Revision::default(), true, &actor())
-        .unwrap();
+    {
+        let fixture_arg0 = Revision::default();
+        let fixture_arg1 = true;
+        let fixture_arg2 = &actor();
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Calendar,
+                &format!(
+                    "set_calendar_auto_policy-{}-{:?}-{:?}",
+                    NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                    fixture_arg0,
+                    fixture_arg1
+                ),
+                CommandOwner::authenticated(fixture_arg2),
+            )
+            .unwrap();
+        let issued_repository = f.repo().with_command_window(original_pair);
+        policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+    }
+    .unwrap();
     f.next(11);
     let t = f.fetch(2026);
     let mut changed = candidate(2026, 1);
@@ -492,9 +748,7 @@ fn auto_pure_rest_update_works_without_live_local_lease() {
         name: "new synthetic holiday".into(),
     });
     f.active.store(false, Ordering::Release);
-    f.repo()
-        .finish_calendar_fetch(t, CalendarFetchOutcome::Downloaded(changed))
-        .unwrap();
+    finish_manual(&f, &f.repo(), t, CalendarFetchOutcome::Downloaded(changed)).unwrap();
     f.active.store(true, Ordering::Release);
     let next = f.repo().schedule(&actor()).unwrap();
     assert_eq!(next.revision, adopted.revision.next().unwrap());
@@ -509,16 +763,38 @@ fn auto_revoked_epoch_keeps_successful_cache_but_does_not_adopt() {
     let f = Fixture::new();
     f.cache(candidate(2026, 1));
     let adopted = f.adopt(1, 2026);
-    f.repo()
-        .set_calendar_auto_policy(Revision::default(), true, &actor())
-        .unwrap();
+    {
+        let fixture_arg0 = Revision::default();
+        let fixture_arg1 = true;
+        let fixture_arg2 = &actor();
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Calendar,
+                &format!(
+                    "set_calendar_auto_policy-{}-{:?}-{:?}",
+                    NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                    fixture_arg0,
+                    fixture_arg1
+                ),
+                CommandOwner::authenticated(fixture_arg2),
+            )
+            .unwrap();
+        let issued_repository = f.repo().with_command_window(original_pair);
+        policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+    }
+    .unwrap();
     f.next(11);
     let t = f.fetch(2026);
     f.update_identity(|i| i.accounts[0].principal.auth_epoch = AuthEpoch::new(2));
-    let s = f
-        .repo()
-        .finish_calendar_fetch(t, CalendarFetchOutcome::Downloaded(candidate(2026, 2)))
-        .unwrap();
+    let s = finish_manual(
+        &f,
+        &f.repo(),
+        t,
+        CalendarFetchOutcome::Downloaded(candidate(2026, 2)),
+    )
+    .unwrap();
     assert_eq!(s.candidate.unwrap().source_sha256, [2; 32]);
     f.update_identity(|_| {});
     assert_eq!(f.repo().schedule(&actor()).unwrap(), adopted);
@@ -528,28 +804,50 @@ fn switch_to_school_while_fetch_in_flight_only_updates_cache() {
     let f = Fixture::new();
     f.cache(candidate(2026, 1));
     f.adopt(1, 2026);
-    f.repo()
-        .set_calendar_auto_policy(Revision::default(), true, &actor())
-        .unwrap();
+    {
+        let fixture_arg0 = Revision::default();
+        let fixture_arg1 = true;
+        let fixture_arg2 = &actor();
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Calendar,
+                &format!(
+                    "set_calendar_auto_policy-{}-{:?}-{:?}",
+                    NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                    fixture_arg0,
+                    fixture_arg1
+                ),
+                CommandOwner::authenticated(fixture_arg2),
+            )
+            .unwrap();
+        let issued_repository = f.repo().with_command_window(original_pair);
+        policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+    }
+    .unwrap();
     f.next(11);
     let t = f.fetch(2026);
     let mut current = f.repo().schedule(&actor()).unwrap();
     current.calendar_mode = CalendarMode::School;
-    let before = f
-        .repo()
-        .execute_schedule(
-            ScheduleRequest {
-                command_id: CommandId::new(2).unwrap(),
-                expected_revision: current.revision,
-                candidate: current,
-            },
-            &actor(),
-            f.clock.as_ref(),
-        )
-        .unwrap();
-    f.repo()
-        .finish_calendar_fetch(t, CalendarFetchOutcome::Downloaded(candidate(2026, 2)))
-        .unwrap();
+    let before = {
+        let fixture_request = ScheduleRequest {
+            command_id: f.command_id(CommandFamily::Schedule, 2),
+            expected_revision: current.revision,
+            candidate: current,
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.execute_schedule(fixture_request, &actor(), f.clock.as_ref())
+    }
+    .unwrap();
+    finish_manual(
+        &f,
+        &f.repo(),
+        t,
+        CalendarFetchOutcome::Downloaded(candidate(2026, 2)),
+    )
+    .unwrap();
     assert_eq!(f.repo().schedule(&actor()).unwrap(), before);
     assert_eq!(
         f.repo()
@@ -585,7 +883,28 @@ fn bounded_cache_rejects_thirty_third_year_without_losing_existing() {
         f.fetch(year);
     }
     assert_eq!(
-        f.repo().reserve_calendar_fetch(2032, &actor()),
+        ({
+            let fixture_arg0 = 2032;
+            let fixture_arg1 = &actor();
+            let original_pair = f
+                .commands
+                .issue(
+                    &f.handle(),
+                    CommandFamily::Calendar,
+                    &format!(
+                        "reserve_calendar_fetch-{}-{:?}",
+                        NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                        fixture_arg0
+                    ),
+                    CommandOwner::authenticated(fixture_arg1),
+                )
+                .unwrap();
+            let issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository
+                .begin_calendar_manual_typed(fixture_arg0, fixture_arg1)
+                .map_err(error)
+        })
+        .map(|_| ()),
         Err(CalendarRepositoryError::Capacity)
     );
     assert_eq!(
@@ -643,26 +962,45 @@ fn add_term(f: &Fixture) -> fc_domain::schedule_document::ScheduleDocument {
         row_details: vec![],
         cell_details: vec![],
     });
-    f.repo()
-        .execute_schedule(
-            ScheduleRequest {
-                command_id: CommandId::new(500).unwrap(),
-                expected_revision: d.revision,
-                candidate: d,
-            },
-            &actor(),
-            f.clock.as_ref(),
-        )
-        .unwrap()
+    {
+        let fixture_request = ScheduleRequest {
+            command_id: f.command_id(CommandFamily::Schedule, 500),
+            expected_revision: d.revision,
+            candidate: d,
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.execute_schedule(fixture_request, &actor(), f.clock.as_ref())
+    }
+    .unwrap()
 }
 #[test]
 fn background_reserves_term_years_and_next_year_without_local_actor() {
     let f = Fixture::new();
     add_term(&f);
     assert!(f.repo().calendar_background_fetch().unwrap().is_none());
-    f.repo()
-        .set_calendar_auto_policy(Revision::default(), true, &actor())
-        .unwrap();
+    {
+        let fixture_arg0 = Revision::default();
+        let fixture_arg1 = true;
+        let fixture_arg2 = &actor();
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Calendar,
+                &format!(
+                    "set_calendar_auto_policy-{}-{:?}-{:?}",
+                    NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                    fixture_arg0,
+                    fixture_arg1
+                ),
+                CommandOwner::authenticated(fixture_arg2),
+            )
+            .unwrap();
+        let issued_repository = f.repo().with_command_window(original_pair);
+        policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+    }
+    .unwrap();
     f.active.store(false, Ordering::Release);
     for year in [2026, 2027, 2028] {
         let t = f.repo().calendar_background_fetch().unwrap().unwrap();
@@ -681,22 +1019,81 @@ fn policy_revision_change_after_reserve_blocks_auto_without_discarding_cache() {
     let f = Fixture::new();
     f.cache(candidate(2026, 1));
     let before = f.adopt(1, 2026);
-    let p = f
-        .repo()
-        .set_calendar_auto_policy(Revision::default(), true, &actor())
-        .unwrap();
+    let p = {
+        let fixture_arg0 = Revision::default();
+        let fixture_arg1 = true;
+        let fixture_arg2 = &actor();
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Calendar,
+                &format!(
+                    "set_calendar_auto_policy-{}-{:?}-{:?}",
+                    NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                    fixture_arg0,
+                    fixture_arg1
+                ),
+                CommandOwner::authenticated(fixture_arg2),
+            )
+            .unwrap();
+        let issued_repository = f.repo().with_command_window(original_pair);
+        policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+    }
+    .unwrap();
     f.next(11);
     let t = f.fetch(2026);
-    let p = f
-        .repo()
-        .set_calendar_auto_policy(p.revision, false, &actor())
-        .unwrap();
-    f.repo()
-        .set_calendar_auto_policy(p.revision, true, &actor())
-        .unwrap();
-    f.repo()
-        .finish_calendar_fetch(t, CalendarFetchOutcome::Downloaded(candidate(2026, 2)))
-        .unwrap();
+    let p = {
+        let fixture_arg0 = p.revision;
+        let fixture_arg1 = false;
+        let fixture_arg2 = &actor();
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Calendar,
+                &format!(
+                    "set_calendar_auto_policy-{}-{:?}-{:?}",
+                    NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                    fixture_arg0,
+                    fixture_arg1
+                ),
+                CommandOwner::authenticated(fixture_arg2),
+            )
+            .unwrap();
+        let issued_repository = f.repo().with_command_window(original_pair);
+        policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+    }
+    .unwrap();
+    {
+        let fixture_arg0 = p.revision;
+        let fixture_arg1 = true;
+        let fixture_arg2 = &actor();
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Calendar,
+                &format!(
+                    "set_calendar_auto_policy-{}-{:?}-{:?}",
+                    NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                    fixture_arg0,
+                    fixture_arg1
+                ),
+                CommandOwner::authenticated(fixture_arg2),
+            )
+            .unwrap();
+        let issued_repository = f.repo().with_command_window(original_pair);
+        policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+    }
+    .unwrap();
+    finish_manual(
+        &f,
+        &f.repo(),
+        t,
+        CalendarFetchOutcome::Downloaded(candidate(2026, 2)),
+    )
+    .unwrap();
     assert_eq!(f.repo().schedule(&actor()).unwrap(), before);
     assert_eq!(
         f.repo()
@@ -713,30 +1110,53 @@ fn mode_changed_away_and_back_invalidates_auto_capture() {
     let f = Fixture::new();
     f.cache(candidate(2026, 1));
     f.adopt(1, 2026);
-    f.repo()
-        .set_calendar_auto_policy(Revision::default(), true, &actor())
-        .unwrap();
+    {
+        let fixture_arg0 = Revision::default();
+        let fixture_arg1 = true;
+        let fixture_arg2 = &actor();
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Calendar,
+                &format!(
+                    "set_calendar_auto_policy-{}-{:?}-{:?}",
+                    NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                    fixture_arg0,
+                    fixture_arg1
+                ),
+                CommandOwner::authenticated(fixture_arg2),
+            )
+            .unwrap();
+        let issued_repository = f.repo().with_command_window(original_pair);
+        policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+    }
+    .unwrap();
     f.next(11);
     let t = f.fetch(2026);
     for (id, mode) in [(20, CalendarMode::School), (21, CalendarMode::Public)] {
         let mut d = f.repo().schedule(&actor()).unwrap();
         d.calendar_mode = mode;
-        f.repo()
-            .execute_schedule(
-                ScheduleRequest {
-                    command_id: CommandId::new(id).unwrap(),
-                    expected_revision: d.revision,
-                    candidate: d,
-                },
-                &actor(),
-                f.clock.as_ref(),
-            )
-            .unwrap();
+        {
+            let fixture_request = ScheduleRequest {
+                command_id: f.command_id(CommandFamily::Schedule, id),
+                expected_revision: d.revision,
+                candidate: d,
+            };
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository.execute_schedule(fixture_request, &actor(), f.clock.as_ref())
+        }
+        .unwrap();
     }
     let before = f.repo().schedule(&actor()).unwrap();
-    f.repo()
-        .finish_calendar_fetch(t, CalendarFetchOutcome::Downloaded(candidate(2026, 2)))
-        .unwrap();
+    finish_manual(
+        &f,
+        &f.repo(),
+        t,
+        CalendarFetchOutcome::Downloaded(candidate(2026, 2)),
+    )
+    .unwrap();
     assert_eq!(f.repo().schedule(&actor()).unwrap(), before);
 }
 #[test]
@@ -744,7 +1164,7 @@ fn adoption_commit_revocation_rolls_back_document_receipt_and_change_ledger() {
     let f = Fixture::new();
     f.cache(candidate(2026, 1));
     let request = CalendarAdoptionRequest {
-        command_id: CommandId::new(11).unwrap(),
+        command_id: f.command_id(CommandFamily::Calendar, 11),
         expected_schedule_revision: Revision::default(),
         candidates: vec![CalendarCandidateRef {
             year: 2026,
@@ -753,12 +1173,20 @@ fn adoption_commit_revocation_rolls_back_document_receipt_and_change_ledger() {
     };
     f.revoke.store(true, Ordering::Release);
     assert_eq!(
-        f.repo().adopt_calendar(request.clone(), &actor()),
+        {
+            let fixture_request = request.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository.adopt_calendar(fixture_request, &actor())
+        },
         Err(CalendarRepositoryError::Denied)
     );
     assert!(f
         .handle()
-        .try_get("business/receipt/calendar/11".into())
+        .try_get(f.receipt_key(&format!(
+            "business/receipt/calendar/{}",
+            f.command_id(CommandFamily::Calendar, 11).get()
+        )))
         .unwrap()
         .wait()
         .unwrap()
@@ -771,7 +1199,13 @@ fn adoption_commit_revocation_rolls_back_document_receipt_and_change_ledger() {
         .unwrap()
         .is_none());
     f.active.store(true, Ordering::Release);
-    f.repo().adopt_calendar(request, &actor()).unwrap();
+    {
+        let fixture_request = request;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.adopt_calendar(fixture_request, &actor())
+    }
+    .unwrap();
     assert!(f
         .handle()
         .try_get("business/schedule/last-changed/v1".into())
@@ -793,21 +1227,39 @@ fn manual_override_and_makeup_changes_require_explicit_adoption() {
         date: LocalDate::new(2026, 10, 2).unwrap(),
         mapping: DayMapping::Unconfirmed,
     });
-    let d = f
-        .repo()
-        .execute_schedule(
-            ScheduleRequest {
-                command_id: CommandId::new(22).unwrap(),
-                expected_revision: d.revision,
-                candidate: d,
-            },
-            &actor(),
-            f.clock.as_ref(),
-        )
-        .unwrap();
-    f.repo()
-        .set_calendar_auto_policy(Revision::default(), true, &actor())
-        .unwrap();
+    let d = {
+        let fixture_request = ScheduleRequest {
+            command_id: f.command_id(CommandFamily::Schedule, 22),
+            expected_revision: d.revision,
+            candidate: d,
+        };
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.execute_schedule(fixture_request, &actor(), f.clock.as_ref())
+    }
+    .unwrap();
+    {
+        let fixture_arg0 = Revision::default();
+        let fixture_arg1 = true;
+        let fixture_arg2 = &actor();
+        let original_pair = f
+            .commands
+            .issue(
+                &f.handle(),
+                CommandFamily::Calendar,
+                &format!(
+                    "set_calendar_auto_policy-{}-{:?}-{:?}",
+                    NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                    fixture_arg0,
+                    fixture_arg1
+                ),
+                CommandOwner::authenticated(fixture_arg2),
+            )
+            .unwrap();
+        let issued_repository = f.repo().with_command_window(original_pair);
+        policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+    }
+    .unwrap();
     f.next(11);
     f.cache(candidate(2026, 2));
     assert_eq!(f.repo().schedule(&actor()).unwrap(), d);
@@ -841,7 +1293,7 @@ fn impossible_ticket_headers_fail_startup() {
         startup_state(f.directory.0.join("state.sqlite3")),
         Err(StorageError::Database)
     );
-    assert_eq!(t.attempt_sequence, 1);
+    assert_eq!(t.ticket.attempt_sequence, 1);
 }
 #[test]
 fn startup_rejects_unindexed_candidate_namespace() {
@@ -877,10 +1329,7 @@ fn oversize_candidate_is_failed_attempt_and_preserves_previous_cache() {
         })
         .collect();
     large.validate().unwrap();
-    let s = f
-        .repo()
-        .finish_calendar_fetch(t, CalendarFetchOutcome::Downloaded(large))
-        .unwrap();
+    let s = finish_manual(&f, &f.repo(), t, CalendarFetchOutcome::Downloaded(large)).unwrap();
     assert_eq!(s.years[0].last_error, Some(CalendarFetchFailure::TooLarge));
     assert_eq!(s.candidate.unwrap().source_sha256, [1; 32]);
     assert_eq!(s.years[0].candidate_revision, Revision::new(1));
@@ -900,7 +1349,7 @@ fn durable_adoption_receipt_capacity_fails_without_touching_schedule() {
     c.adoption_count = 65536;
     f.commit(vec![meta(&c).unwrap()]);
     let request = CalendarAdoptionRequest {
-        command_id: CommandId::new(55).unwrap(),
+        command_id: f.command_id(CommandFamily::Calendar, 55),
         expected_schedule_revision: Revision::default(),
         candidates: vec![CalendarCandidateRef {
             year: 2026,
@@ -908,7 +1357,12 @@ fn durable_adoption_receipt_capacity_fails_without_touching_schedule() {
         }],
     };
     assert_eq!(
-        f.repo().adopt_calendar(request, &actor()),
+        {
+            let fixture_request = request;
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f.repo().with_command_window(original_pair);
+            issued_repository.adopt_calendar(fixture_request, &actor())
+        },
         Err(CalendarRepositoryError::Capacity)
     );
     assert_eq!(
@@ -918,7 +1372,6 @@ fn durable_adoption_receipt_capacity_fails_without_touching_schedule() {
 }
 #[test]
 fn identical_pre_upgrade_schedule_receipt_replays_without_sourced_downgrade() {
-    let f = Fixture::new();
     let draft = fc_domain::schedule_document::ScheduleDocument::default();
     let result = draft
         .transition(&draft, Revision::default(), &identity(), &actor(), at(10))
@@ -940,9 +1393,24 @@ fn identical_pre_upgrade_schedule_receipt_replays_without_sourced_downgrade() {
     hash.update(codec::bytes(&codec::actor(&actor())).unwrap());
     hash.update(super::super::schedule::encode(&legacy_draft).unwrap());
     let fingerprint = hash.finalize().to_vec();
-    f.commit(vec![Mutation::Put{key:"business/schedule/v1".into(),value:result_blob.clone()},Mutation::Put{key:"business/result/schedule/99".into(),value:result_blob.clone()},Mutation::Put{key:"business/receipt/schedule/99".into(),value:codec::bytes(&json!({"fingerprint":fingerprint,"revision":result.revision.get(),"result_digest":Sha256::digest(&result_blob).to_vec()})).unwrap()}]);
+    let old_id = CommandId::new(99).unwrap();
+    let legacy_receipt = codec::bytes(&json!({"fingerprint":fingerprint,"revision":result.revision.get(),"result_digest":Sha256::digest(&result_blob).to_vec()})).unwrap();
+    let f = Fixture::legacy(vec![
+        Mutation::Put {
+            key: "business/schedule/v1".into(),
+            value: result_blob.clone(),
+        },
+        Mutation::Put {
+            key: "business/result/schedule/99".into(),
+            value: result_blob.clone(),
+        },
+        Mutation::Put {
+            key: "business/receipt/schedule/99".into(),
+            value: legacy_receipt.clone(),
+        },
+    ]);
     let mut request = ScheduleRequest {
-        command_id: CommandId::new(99).unwrap(),
+        command_id: old_id,
         expected_revision: Revision::default(),
         candidate: draft,
     };
@@ -952,6 +1420,7 @@ fn identical_pre_upgrade_schedule_receipt_replays_without_sourced_downgrade() {
             .unwrap(),
         result
     );
+    let original_request = request.clone();
     request
         .candidate
         .public_calendar_data
@@ -959,8 +1428,40 @@ fn identical_pre_upgrade_schedule_receipt_replays_without_sourced_downgrade() {
         .push(candidate(2026, 1));
     assert!(f
         .repo()
-        .execute_schedule(request, &actor(), f.clock.as_ref())
+        .execute_schedule(request.clone(), &actor(), f.clock.as_ref())
         .is_err());
+    // The real new ticket deliberately reuses the old numeric id. Its C2
+    // namespace must not consume the historical receipt or replay its result.
+    let mut entropy = [67; 24];
+    entropy[16..].copy_from_slice(&old_id.get().to_be_bytes());
+    let fresh = f
+        .handle()
+        .try_issue_command(crate::command_window::IssueCommand {
+            family: CommandFamily::Schedule,
+            owner: CommandOwner::authenticated(&actor()),
+            entropy,
+        })
+        .unwrap()
+        .wait()
+        .unwrap();
+    assert_eq!(fresh.command_id, old_id);
+    f.handle().try_check_command(fresh).unwrap().wait().unwrap();
+    assert!(matches!(
+        f.repo().with_command_window(fresh).execute_schedule(original_request, &actor(), f.clock.as_ref()),
+        Err(fc_ports::ScheduleRepositoryError::Domain(fc_domain::schedule_document::ScheduleDocumentError {
+            kind: fc_domain::schedule_document::DocumentErrorKind::RevisionConflict { current }, ..
+        })) if current == result.revision
+    ));
+    assert_eq!(
+        f.handle()
+            .try_get("business/receipt/schedule/99".into())
+            .unwrap()
+            .wait()
+            .unwrap()
+            .unwrap()
+            .value,
+        legacy_receipt
+    );
 }
 #[test]
 fn largest_bounded_status_uses_separate_response_budget_without_relaxing_blob_cap() {
@@ -987,10 +1488,13 @@ fn largest_bounded_status_uses_separate_response_budget_without_relaxing_blob_ca
         }
         date = tomorrow(LocalDateTime::new(date, 0).unwrap()).unwrap().date;
     }
-    let s = f
-        .repo()
-        .finish_calendar_fetch(selected.unwrap(), CalendarFetchOutcome::Downloaded(c))
-        .unwrap();
+    let s = finish_manual(
+        &f,
+        &f.repo(),
+        selected.unwrap(),
+        CalendarFetchOutcome::Downloaded(c),
+    )
+    .unwrap();
     let response = codec::bytes(&dto::status(&s)).unwrap();
     assert!(response.len() > MAX_VALUE_BYTES);
     assert!(response.len() <= 2 * MAX_VALUE_BYTES);
@@ -1017,11 +1521,52 @@ fn execution_guard_rejects_before_evaluation_without_faulting_authority() {
         .with_calendar_execution_guard(Arc::new(|| false))
         .clone();
     assert_eq!(
-        r.reserve_calendar_fetch(2026, &actor()),
+        ({
+            let fixture_arg0 = 2026;
+            let fixture_arg1 = &actor();
+            let original_pair = f
+                .commands
+                .issue(
+                    &f.handle(),
+                    CommandFamily::Calendar,
+                    &format!(
+                        "reserve_calendar_fetch-{}-{:?}",
+                        NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                        fixture_arg0
+                    ),
+                    CommandOwner::authenticated(fixture_arg1),
+                )
+                .unwrap();
+            let issued_repository = r.with_command_window(original_pair);
+            issued_repository
+                .begin_calendar_manual_typed(fixture_arg0, fixture_arg1)
+                .map_err(error)
+        })
+        .map(|_| ()),
         Err(CalendarRepositoryError::Cancelled)
     );
     assert_eq!(
-        r.set_calendar_auto_policy(Revision::default(), true, &actor()),
+        {
+            let fixture_arg0 = Revision::default();
+            let fixture_arg1 = true;
+            let fixture_arg2 = &actor();
+            let original_pair = f
+                .commands
+                .issue(
+                    &f.handle(),
+                    CommandFamily::Calendar,
+                    &format!(
+                        "set_calendar_auto_policy-{}-{:?}-{:?}",
+                        NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                        fixture_arg0,
+                        fixture_arg1
+                    ),
+                    CommandOwner::authenticated(fixture_arg2),
+                )
+                .unwrap();
+            let issued_repository = r.with_command_window(original_pair);
+            policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+        },
         Err(CalendarRepositoryError::Cancelled)
     );
     assert_eq!(
@@ -1034,15 +1579,37 @@ fn execution_guard_rejects_before_evaluation_without_faulting_authority() {
         .unwrap()
         .years
         .is_empty());
-    assert_eq!(f.fetch(2026).attempt_sequence, 1);
+    assert_eq!(f.fetch(2026).ticket.attempt_sequence, 1);
 }
 #[test]
 fn reservation_and_policy_precommit_cancellation_roll_back_without_consuming_reservation() {
     let f = Fixture::new();
     assert_eq!(
-        f.repo()
-            .with_calendar_execution_guard(until_precommit())
-            .reserve_calendar_fetch(2026, &actor()),
+        ({
+            let fixture_arg0 = 2026;
+            let fixture_arg1 = &actor();
+            let original_pair = f
+                .commands
+                .issue(
+                    &f.handle(),
+                    CommandFamily::Calendar,
+                    &format!(
+                        "reserve_calendar_fetch-{}-{:?}",
+                        NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                        fixture_arg0
+                    ),
+                    CommandOwner::authenticated(fixture_arg1),
+                )
+                .unwrap();
+            let issued_repository = f
+                .repo()
+                .with_calendar_execution_guard(until_precommit())
+                .with_command_window(original_pair);
+            issued_repository
+                .begin_calendar_manual_typed(fixture_arg0, fixture_arg1)
+                .map_err(error)
+        })
+        .map(|_| ()),
         Err(CalendarRepositoryError::Cancelled)
     );
     assert!(f
@@ -1051,11 +1618,32 @@ fn reservation_and_policy_precommit_cancellation_roll_back_without_consuming_res
         .unwrap()
         .years
         .is_empty());
-    assert_eq!(f.fetch(2026).attempt_sequence, 1);
+    assert_eq!(f.fetch(2026).ticket.attempt_sequence, 1);
     assert_eq!(
-        f.repo()
-            .with_calendar_execution_guard(until_precommit())
-            .set_calendar_auto_policy(Revision::default(), true, &actor()),
+        {
+            let fixture_arg0 = Revision::default();
+            let fixture_arg1 = true;
+            let fixture_arg2 = &actor();
+            let original_pair = f
+                .commands
+                .issue(
+                    &f.handle(),
+                    CommandFamily::Calendar,
+                    &format!(
+                        "set_calendar_auto_policy-{}-{:?}-{:?}",
+                        NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                        fixture_arg0,
+                        fixture_arg1
+                    ),
+                    CommandOwner::authenticated(fixture_arg2),
+                )
+                .unwrap();
+            let issued_repository = f
+                .repo()
+                .with_calendar_execution_guard(until_precommit())
+                .with_command_window(original_pair);
+            policy_typed(&issued_repository, fixture_arg0, fixture_arg1, fixture_arg2)
+        },
         Err(CalendarRepositoryError::Cancelled)
     );
     assert_eq!(
@@ -1065,33 +1653,36 @@ fn reservation_and_policy_precommit_cancellation_roll_back_without_consuming_res
 }
 #[test]
 fn positive_finish_precommit_cancel_preserves_cache_then_failure_settles_same_ticket() {
+    use fc_ports::command_window::{
+        CalendarManualResultKind, TypedCommandOutcome, TypedCommandResult,
+    };
     let f = Fixture::new();
     f.cache(candidate(2026, 1));
     f.next(11);
-    let ticket = f.fetch(2026);
-    assert_eq!(
-        f.repo()
-            .with_calendar_execution_guard(until_precommit())
-            .finish_calendar_fetch(
-                ticket.clone(),
-                CalendarFetchOutcome::Downloaded(candidate(2026, 2))
-            ),
-        Err(CalendarRepositoryError::Cancelled)
+    let permit = f.fetch(2026);
+    let original = permit.first.issued;
+    let outcome = f
+        .repo()
+        .with_calendar_execution_guard(until_precommit())
+        .finish_calendar_manual_typed(permit, CalendarFetchOutcome::Downloaded(candidate(2026, 2)))
+        .unwrap();
+    assert!(
+        matches!(&outcome, TypedCommandOutcome::Completed(TypedCommandResult::CalendarManualFetch(result)) if result.kind == CalendarManualResultKind::Failed(CalendarFetchFailure::Cancelled))
     );
     let before = f.repo().calendar_status(2026, &actor()).unwrap();
-    assert_eq!(before.candidate.unwrap().source_sha256, [1; 32]);
-    assert!(before.years[0].pending);
+    assert_eq!(before.candidate.as_ref().unwrap().source_sha256, [1; 32]);
+    assert!(!before.years[0].pending);
     assert_eq!(before.years[0].candidate_revision, Revision::new(1));
-    let settled = f
+    // The exact original pair can return history only; no fresh fetch permit,
+    // execution callback, transport or replacement admission can be obtained.
+    let replay = f
         .repo()
-        .with_calendar_execution_guard(Arc::new(|| {
-            panic!("failure settlement must not consult execution")
-        }))
-        .finish_calendar_fetch(
-            ticket,
-            CalendarFetchOutcome::Failed(CalendarFetchFailure::Cancelled),
-        )
+        .with_command_window(original)
+        .with_calendar_execution_guard(Arc::new(|| panic!("history must not consult execution")))
+        .begin_calendar_manual_typed(2026, &actor())
         .unwrap();
+    assert!(matches!(replay, ManualFetchStart::History(ref result) if *result == outcome));
+    let settled = f.repo().calendar_status(2026, &actor()).unwrap();
     assert!(!settled.years[0].pending);
     assert_eq!(
         settled.years[0].last_error,
@@ -1100,12 +1691,13 @@ fn positive_finish_precommit_cancel_preserves_cache_then_failure_settles_same_ti
     assert_eq!(settled.years[0].next_allowed, Some(at(12)));
     assert_eq!(settled.candidate.unwrap().source_sha256, [1; 32]);
 }
+
 #[test]
 fn adoption_precommit_execution_cancellation_rolls_back_receipt_and_schedule() {
     let f = Fixture::new();
     f.cache(candidate(2026, 1));
     let request = CalendarAdoptionRequest {
-        command_id: CommandId::new(200).unwrap(),
+        command_id: f.command_id(CommandFamily::Calendar, 200),
         expected_schedule_revision: Revision::default(),
         candidates: vec![CalendarCandidateRef {
             year: 2026,
@@ -1113,9 +1705,15 @@ fn adoption_precommit_execution_cancellation_rolls_back_receipt_and_schedule() {
         }],
     };
     assert_eq!(
-        f.repo()
-            .with_calendar_execution_guard(until_precommit())
-            .adopt_calendar(request.clone(), &actor()),
+        {
+            let fixture_request = request.clone();
+            let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+            let mut issued_repository = f
+                .repo()
+                .with_calendar_execution_guard(until_precommit())
+                .with_command_window(original_pair);
+            issued_repository.adopt_calendar(fixture_request, &actor())
+        },
         Err(CalendarRepositoryError::Cancelled)
     );
     assert_eq!(
@@ -1124,21 +1722,54 @@ fn adoption_precommit_execution_cancellation_rolls_back_receipt_and_schedule() {
     );
     assert!(f
         .handle()
-        .try_get("business/receipt/calendar/200".into())
+        .try_get(f.receipt_key(&format!(
+            "business/receipt/calendar/{}",
+            f.command_id(CommandFamily::Calendar, 200).get()
+        )))
         .unwrap()
         .wait()
         .unwrap()
         .is_none());
-    f.repo().adopt_calendar(request, &actor()).unwrap();
+    {
+        let fixture_request = request;
+        let original_pair = f.commands.original(fixture_request.command_id).unwrap();
+        let mut issued_repository = f.repo().with_command_window(original_pair);
+        issued_repository.adopt_calendar(fixture_request, &actor())
+    }
+    .unwrap();
 }
 #[test]
 fn panicked_execution_callback_is_cancelled_not_an_authority_fault() {
     let f = Fixture::new();
     assert_eq!(
-        f.repo()
-            .with_calendar_execution_guard(Arc::new(|| panic!("synthetic ownership fence panic")))
-            .reserve_calendar_fetch(2026, &actor()),
+        ({
+            let fixture_arg0 = 2026;
+            let fixture_arg1 = &actor();
+            let original_pair = f
+                .commands
+                .issue(
+                    &f.handle(),
+                    CommandFamily::Calendar,
+                    &format!(
+                        "reserve_calendar_fetch-{}-{:?}",
+                        NEXT_CALENDAR_INTENT.fetch_add(1, Ordering::Relaxed),
+                        fixture_arg0
+                    ),
+                    CommandOwner::authenticated(fixture_arg1),
+                )
+                .unwrap();
+            let issued_repository = f
+                .repo()
+                .with_calendar_execution_guard(Arc::new(|| {
+                    panic!("synthetic ownership fence panic")
+                }))
+                .with_command_window(original_pair);
+            issued_repository
+                .begin_calendar_manual_typed(fixture_arg0, fixture_arg1)
+                .map_err(error)
+        })
+        .map(|_| ()),
         Err(CalendarRepositoryError::Cancelled)
     );
-    assert_eq!(f.fetch(2026).attempt_sequence, 1);
+    assert_eq!(f.fetch(2026).ticket.attempt_sequence, 1);
 }

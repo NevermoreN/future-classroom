@@ -1,23 +1,24 @@
+import { identity, ticket } from './command-fixtures'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { VoiceHttpApi } from '../src/api/voice-client'
 import { ApiError, NetworkFault } from '../src/api/client'
 import { ProtocolFault } from '../src/api/protocol'
 import { csrf, job, json, signal, wav, wireCaps, wireUpload } from './voice-fixtures'
 const base = new URL('https://board.school/fc/api/v1/')
-const input = { commandId: '71', assetId: '45', expectedAssetRevision: '2', classId: '7', repeatTotal: 3 }
+const input = { commandId: '71', commandTicket: ticket, assetId: '45', expectedAssetRevision: '2', classId: '7', repeatTotal: 3 }
 afterEach(() => vi.useRealTimers())
 describe('authenticated voice transport', () => {
   it('uses exact shared broadcasts path, captured upload class, credentials and no extra owner/path fields', async () => {
-    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json(wireCaps())).mockResolvedValueOnce(json({ schemaVersion: 1, status: 'VOICE_JOBS', jobs: [] })).mockResolvedValueOnce(json(wireUpload(), 201)).mockResolvedValueOnce(json({ schemaVersion: 1, status: 'COMMITTED', commandId: '71', job: job() })).mockResolvedValueOnce(json({ schemaVersion: 1, status: 'VOICE_JOB', job: job() })).mockResolvedValueOnce(json({ schemaVersion: 1, status: 'CANCEL_REQUESTED', commandId: '81', job: job({ revision: '2', state: 'STOPPING', currentRepeat: 1 }) }))
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json(wireCaps())).mockResolvedValueOnce(json({ schemaVersion: 2, status: 'VOICE_JOBS', jobs: [] })).mockResolvedValueOnce(json(wireUpload(), 201)).mockResolvedValueOnce(json({ schemaVersion: 2, status: 'COMMITTED', commandId: '71', commandTicket: ticket, job: job() })).mockResolvedValueOnce(json({ schemaVersion: 2, status: 'VOICE_JOB', job: job() })).mockResolvedValueOnce(json({ schemaVersion: 2, status: 'CANCEL_REQUESTED', commandId: '81', commandTicket: ticket, job: job({ revision: '2', state: 'STOPPING', currentRepeat: 1 }) }))
     const api = new VoiceHttpApi(base, fetcher), blob = wav()
-    await api.voiceCapabilities(signal()); await api.voiceJobs(signal()); await api.uploadVoice('7', blob, csrf, signal()); await api.submitVoice(input, csrf, signal()); await api.voiceJob('71', signal()); await api.cancelVoice('71', { commandId: '81', expectedRevision: '1' }, csrf, signal())
-    expect(fetcher.mock.calls.map(c => String(c[0]))).toEqual(['voice/capabilities', 'voice/broadcasts', 'voice/uploads?classId=7', 'voice/broadcasts', 'voice/broadcasts/71', 'voice/broadcasts/71/cancel'].map(p => new URL(p, base).href))
+    await api.voiceCapabilities(signal()); await api.voiceJobs(signal()); await api.uploadVoice('7', blob, csrf, signal()); await api.submitVoice(input, csrf, signal()); await api.voiceJob('71', ticket, signal()); await api.cancelVoice('71', { commandId: '81', commandTicket: ticket, jobCommandTicket: ticket, expectedRevision: '1' }, csrf, signal())
+    expect(fetcher.mock.calls.map(c => String(c[0]))).toEqual(['voice/capabilities', 'voice/broadcasts', 'voice/uploads?classId=7', 'voice/broadcasts', `voice/broadcasts/71/commands/${ticket}`, 'voice/broadcasts/71/cancel'].map(p => new URL(p, base).href))
     expect(fetcher.mock.calls.every(c => c[1]?.credentials === 'same-origin' && c[1]?.cache === 'no-store' && c[1]?.redirect === 'error')).toBe(true)
     expect(fetcher.mock.calls[2]![1]!.body).toBe(blob)
     expect(new Headers(fetcher.mock.calls[2]![1]!.headers).get('content-type')).toBe('audio/wav')
     for (const index of [2, 3, 5]) expect(new Headers(fetcher.mock.calls[index]![1]!.headers).get('x-fc-csrf')).toBe(csrf)
-    expect(JSON.parse(fetcher.mock.calls[3]![1]!.body as string)).toEqual({ schemaVersion: 1, ...input })
-    expect(JSON.parse(fetcher.mock.calls[5]![1]!.body as string)).toEqual({ schemaVersion: 1, commandId: '81', expectedRevision: '1' })
+    expect(JSON.parse(fetcher.mock.calls[3]![1]!.body as string)).toEqual({ schemaVersion: 2, ...input })
+    expect(JSON.parse(fetcher.mock.calls[5]![1]!.body as string)).toEqual({ schemaVersion: 2, commandId: '81', commandTicket: ticket, jobCommandTicket: ticket, expectedRevision: '1' })
   })
   it('rejects duplicate JSON including escaped keys, oversized body, malformed UTF8 and foreign receipt', async () => {
     const value = JSON.stringify(wireCaps()), duplicate = value.replace('"schemaVersion":1', '"schemaVersion":1,"\\u0073chemaVersion":1')
@@ -45,5 +46,27 @@ describe('authenticated voice transport', () => {
     const api = new VoiceHttpApi(base, fetcher), pending = expect(api.uploadVoice('7', wav(), csrf, signal())).rejects.toThrow(NetworkFault)
     await vi.advanceTimersByTimeAsync(120000); await pending; expect(fetcher).toHaveBeenCalledOnce(); expect(vi.getTimerCount()).toBe(0)
     const abort = new AbortController(), cancelled = expect(api.uploadVoice('7', wav(), csrf, abort.signal)).rejects.toMatchObject({ name: 'AbortError' }); abort.abort(); await cancelled; expect(fetcher).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('voice command outcome versus independently retained job binding', () => {
+  it('uses the exact historical pair and the original submit ticket for separate routes', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json({ schemaVersion: 2, status: 'COMMAND_RESULT', ...identity('81'), state: 'COMMITTED', job: job({ state: 'STOPPING', currentRepeat: 1, revision: '2' }) })).mockResolvedValueOnce(json({ schemaVersion: 2, status: 'VOICE_JOB', job: job() }))
+    const api = new VoiceHttpApi(base, fetcher)
+    expect((await api.voiceOutcome(identity('81'), signal())).state).toBe('COMMITTED'); await api.voiceJob('71', ticket, signal())
+    expect(fetcher.mock.calls.map(c => String(c[0]))).toEqual([`voice/commands/${ticket}/81`, `voice/broadcasts/71/commands/${ticket}`].map(path => new URL(path, base).href))
+    expect(fetcher.mock.calls.every(c => c[1]?.method === 'GET')).toBe(true)
+  })
+  it('allows numeric current lookup only for an explicitly null legacy binding, never as v2 fallback', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json({ schemaVersion: 2, status: 'VOICE_JOB', job: job({ commandTicket: null }) })).mockResolvedValueOnce(json({ schemaVersion: 2, status: 'VOICE_JOB', job: job({ commandTicket: null }) }))
+    const api = new VoiceHttpApi(base, fetcher)
+    await api.voiceJob('71', null, signal())
+    await expect(api.voiceJob('71', ticket, signal())).rejects.toThrow(ProtocolFault)
+    expect(fetcher.mock.calls.map(c => String(c[0]))).toEqual([new URL('voice/broadcasts/71', base).href, new URL(`voice/broadcasts/71/commands/${ticket}`, base).href])
+  })
+  it('rejects a command history echo from a different ticket even with the same id', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json({ schemaVersion: 2, status: 'COMMAND_RESULT', ...identity('81'), commandTicket: ticket.replace('12', '34'), state: 'NOT_FOUND', job: null }))
+    await expect(new VoiceHttpApi(base, fetcher).voiceOutcome(identity('81'), signal())).rejects.toThrow(ProtocolFault)
+    expect(fetcher).toHaveBeenCalledOnce()
   })
 })

@@ -60,17 +60,29 @@ fn fixture() -> BackendFixture {
 fn catalog(f: &mut BackendFixture) {
     for id in [1, 2] {
         f.backend
-            .identity(
-                f.admin,
-                IdentityCommand::CreateClass {
-                    id: class(id),
-                    name: format!("Synthetic voice class {id}"),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(f.admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        f.admin,
+                        IdentityCommand::CreateClass {
+                            id: class(id),
+                            name: format!("Synthetic voice class {id}"),
+                        },
+                    )
                 },
             )
             .unwrap();
     }
     f.backend
-        .identity(f.admin, IdentityCommand::BindCurrentClass { id: class(1) })
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| backend.identity(f.admin, IdentityCommand::BindCurrentClass { id: class(1) }),
+        )
         .unwrap();
 }
 fn auth(f: &mut BackendFixture, login: &str, device: &str) -> (String, String, SessionLease) {
@@ -154,9 +166,10 @@ fn ready(f: &BackendFixture, lease: SessionLease) -> VoiceAsset {
     let proof = prepare_voice_upload(&mut ActualPcm, wav(), asset).unwrap();
     service.publish(lease, proof).unwrap()
 }
-fn submit_body(id: u64, asset: &VoiceAsset) -> String {
+fn submit_body(command: TestCommand, asset: &VoiceAsset) -> String {
     format!(
-        r#"{{"schemaVersion":1,"commandId":"{id}","assetId":"{}","expectedAssetRevision":"{}","classId":"1","repeatTotal":3}}"#,
+        r#"{{{},"assetId":"{}","expectedAssetRevision":"{}","classId":"1","repeatTotal":3}}"#,
+        command.fields(),
         asset.id.get(),
         asset.revision.get()
     )
@@ -166,6 +179,9 @@ fn voice_http_submit_is_durable_idempotent_queryable_and_never_claims_device_or_
     let mut f = fixture();
     catalog(&mut f);
     let (cookie, csrf, lease) = auth(&mut f, "admin", "voice-http");
+    let command81001 = f.issue(&cookie, "voice");
+    let command81002 = f.issue(&cookie, "voice");
+    let command81999 = f.issue(&cookie, "voice");
     let cap = get(&mut f, &cookie, "voice/capabilities");
     expect(&cap, 200, "\"deviceAvailability\":\"UNVERIFIED\"");
     expect(
@@ -181,7 +197,7 @@ fn voice_http_submit_is_durable_idempotent_queryable_and_never_claims_device_or_
         .check_web_target(lease, class(2), f.backend.voice_service().generation())
         .is_err());
     let asset = ready(&f, lease);
-    let body = submit_body(81001, &asset);
+    let body = submit_body(command81001, &asset);
     expect(
         &post(
             &mut f,
@@ -196,7 +212,11 @@ fn voice_http_submit_is_durable_idempotent_queryable_and_never_claims_device_or_
     assert!(f.backend.voice_inventory().unwrap().jobs.is_empty());
     let accepted = post(&mut f, &cookie, &csrf, "voice/broadcasts", &body);
     expect(&accepted, 200, "\"status\":\"COMMITTED\"");
-    expect(&accepted, 200, "\"jobId\":\"81001\"");
+    expect(
+        &accepted,
+        200,
+        &format!("\"jobId\":\"{}\"", command81001.id.get()),
+    );
     expect(&accepted, 200, "\"state\":\"QUEUED\"");
     for hidden in [
         "authorization",
@@ -225,34 +245,28 @@ fn voice_http_submit_is_durable_idempotent_queryable_and_never_claims_device_or_
         "IDEMPOTENCY_CONFLICT",
     );
     expect(
-        &get(&mut f, &cookie, "voice/broadcasts/81001"),
+        &get(&mut f, &cookie, &command81001.job()),
         200,
         "\"status\":\"VOICE_JOB\"",
     );
-    expect(
-        &get(&mut f, &cookie, "voice/broadcasts/81999"),
-        404,
-        "NOT_FOUND",
-    );
+    expect(&get(&mut f, &cookie, &command81999.job()), 404, "NOT_FOUND");
     expect(
         &get(&mut f, &cookie, "voice/broadcasts"),
         200,
         "\"status\":\"VOICE_JOBS\"",
     );
-    let cancel = r#"{"schemaVersion":1,"commandId":"81002","expectedRevision":"1"}"#;
+    let cancel = format!(
+        r#"{{{},"jobCommandTicket":"{}","expectedRevision":"1"}}"#,
+        command81002.fields(),
+        command81001.ticket
+    );
     expect(
-        &post(
-            &mut f,
-            &cookie,
-            &csrf,
-            "voice/broadcasts/81001/cancel",
-            cancel,
-        ),
+        &post(&mut f, &cookie, &csrf, &command81001.cancel(), &cancel),
         200,
         "\"status\":\"CANCEL_REQUESTED\"",
     );
     expect(
-        &get(&mut f, &cookie, "voice/broadcasts/81001"),
+        &get(&mut f, &cookie, &command81001.job()),
         200,
         "\"state\":\"CANCELED\"",
     );
@@ -273,35 +287,49 @@ fn voice_http_submit_is_durable_idempotent_queryable_and_never_claims_device_or_
 }
 fn teacher(f: &mut BackendFixture) {
     f.backend
-        .identity(
-            f.admin,
-            IdentityCommand::PutSubject {
-                id: SubjectId::new(1).unwrap(),
-                name: "Synthetic voice subject".into(),
-                enabled: true,
-                color: Rgb {
-                    red: 1,
-                    green: 2,
-                    blue: 3,
-                },
-                expected_revision: None,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    f.admin,
+                    IdentityCommand::PutSubject {
+                        id: SubjectId::new(1).unwrap(),
+                        name: "Synthetic voice subject".into(),
+                        enabled: true,
+                        color: Rgb {
+                            red: 1,
+                            green: 2,
+                            blue: 3,
+                        },
+                        expected_revision: None,
+                    },
+                )
             },
         )
         .unwrap();
     f.backend
-        .create_account(
-            f.admin,
-            NewAccount {
-                id: PrincipalId::new(2).unwrap(),
-                login_name: "voice-teacher".into(),
-                display_name: "Synthetic voice teacher".into(),
-                role: Role::TeacherAdmin,
-                scopes: vec![AssignmentScope {
-                    class_id: class(1),
-                    subject_id: SubjectId::new(1).unwrap(),
-                }],
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.create_account(
+                    f.admin,
+                    NewAccount {
+                        id: PrincipalId::new(2).unwrap(),
+                        login_name: "voice-teacher".into(),
+                        display_name: "Synthetic voice teacher".into(),
+                        role: Role::TeacherAdmin,
+                        scopes: vec![AssignmentScope {
+                            class_id: class(1),
+                            subject_id: SubjectId::new(1).unwrap(),
+                        }],
+                    },
+                    Password::new("Synthetic-Voice-Teacher-Initial-2026".into()).unwrap(),
+                )
             },
-            Password::new("Synthetic-Voice-Teacher-Initial-2026".into()).unwrap(),
         )
         .unwrap();
     let initial = f
@@ -312,10 +340,17 @@ fn teacher(f: &mut BackendFixture) {
         )
         .unwrap();
     f.backend
-        .change_password(
-            initial,
-            Password::new("Synthetic-Voice-Teacher-Initial-2026".into()).unwrap(),
-            Password::new("Synthetic-Voice-Teacher-Changed-2026".into()).unwrap(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(initial),
+            SessionPurpose::ChangeInitialPassword,
+            |backend| {
+                backend.change_password(
+                    initial,
+                    Password::new("Synthetic-Voice-Teacher-Initial-2026".into()).unwrap(),
+                    Password::new("Synthetic-Voice-Teacher-Changed-2026".into()).unwrap(),
+                )
+            },
         )
         .unwrap();
     f.admin = f
@@ -330,9 +365,11 @@ fn voice_http_teacher_current_target_and_old_job_stop_survive_binding_disable_an
     catalog(&mut f);
     teacher(&mut f);
     let (cookie, csrf, lease) = auth(&mut f, "voice-teacher", "teacher-voice");
+    let command82001 = f.issue(&cookie, "voice");
+    let command82002 = f.issue(&cookie, "voice");
     let (global, _, global_lease) = auth(&mut f, "admin", "global-voice");
     let asset = ready(&f, lease);
-    let body = submit_body(82001, &asset);
+    let body = submit_body(command82001, &asset);
     expect(
         &post(&mut f, &cookie, &csrf, "voice/broadcasts", &body),
         200,
@@ -340,7 +377,7 @@ fn voice_http_teacher_current_target_and_old_job_stop_survive_binding_disable_an
     );
     let service = f.backend.voice_service();
     let queued = service
-        .status(lease, VoiceJobId::new(82001).unwrap())
+        .status(lease, VoiceJobId::new(command82001.id.get()).unwrap())
         .unwrap();
     let started = service
         .drive(VoiceDriverUpdate {
@@ -352,29 +389,30 @@ fn voice_http_teacher_current_target_and_old_job_stop_survive_binding_disable_an
         .unwrap();
     assert_eq!(started.state, VoiceState::Starting);
     f.backend
-        .identity(f.admin, IdentityCommand::BindCurrentClass { id: class(2) })
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| backend.identity(f.admin, IdentityCommand::BindCurrentClass { id: class(2) }),
+        )
         .unwrap();
     let cap = get(&mut f, &cookie, "voice/capabilities");
     expect(&cap, 200, "\"targetAuthorized\":false");
     expect(&cap, 200, "Synthetic voice class 2");
     service.invalidate_runtime();
+    expect(&get(&mut f, &cookie, &command82001.job()), 200, "STARTING");
     expect(
-        &get(&mut f, &cookie, "voice/broadcasts/82001"),
+        &get(&mut f, &cookie, "voice/broadcasts"),
         200,
-        "STARTING",
+        &command82001.id.get().to_string(),
     );
-    expect(&get(&mut f, &cookie, "voice/broadcasts"), 200, "82001");
     let cancel = format!(
-        r#"{{"schemaVersion":1,"commandId":"82002","expectedRevision":"{}"}}"#,
+        r#"{{{},"jobCommandTicket":"{}","expectedRevision":"{}"}}"#,
+        command82002.fields(),
+        command82001.ticket,
         started.revision.get()
     );
-    let result = post(
-        &mut f,
-        &cookie,
-        &csrf,
-        "voice/broadcasts/82001/cancel",
-        &cancel,
-    );
+    let result = post(&mut f, &cookie, &csrf, &command82001.cancel(), &cancel);
     expect(&result, 200, "CANCEL_REQUESTED");
     expect(&result, 200, "STOPPING");
     assert!(!text(&result.body).contains("已停止"));
@@ -399,17 +437,13 @@ fn voice_http_teacher_current_target_and_old_job_stop_survive_binding_disable_an
         .check_web_target(global_lease, class(2), service.generation())
         .is_ok());
     let revision = service.inventory().unwrap().revision;
-    service.set_enabled(f.admin, false, revision).unwrap();
+    service.test_set_enabled(f.admin, false, revision).unwrap();
     expect(
         &get(&mut f, &global, "voice/capabilities"),
         200,
         "\"enabled\":false",
     );
-    expect(
-        &get(&mut f, &cookie, "voice/broadcasts/82001"),
-        200,
-        "CANCELED",
-    );
+    expect(&get(&mut f, &cookie, &command82001.job()), 200, "CANCELED");
 }
 
 #[test]
@@ -417,6 +451,7 @@ fn voice_http_post_commit_stop_reports_unknown_and_original_command_is_queryable
     let mut f = fixture();
     catalog(&mut f);
     let (cookie, csrf, lease) = auth(&mut f, "admin", "voice-unknown");
+    let command83001 = f.issue(&cookie, "voice");
     let service = f.backend.voice_service();
     let stop = service.clone();
     service.after_next_commit(Arc::new(move || {
@@ -435,7 +470,7 @@ fn voice_http_post_commit_stop_reports_unknown_and_original_command_is_queryable
     );
     service.resume_after_stop(service.generation()).unwrap();
     let asset = ready(&f, lease);
-    let body = submit_body(83001, &asset);
+    let body = submit_body(command83001, &asset);
     let stop = service.clone();
     service.after_next_commit(Arc::new(move || {
         stop.invalidate_runtime();
@@ -445,33 +480,49 @@ fn voice_http_post_commit_stop_reports_unknown_and_original_command_is_queryable
         503,
         "RESULT_UNKNOWN",
     );
+    expect(
+        &get(&mut f, &cookie, &command83001.history("voice")),
+        200,
+        "QUEUED",
+    );
     let inventory = service.inventory().unwrap();
     assert_eq!(inventory.jobs.len(), 1);
-    assert_eq!(inventory.jobs[0].id.get(), 83001);
+    assert_eq!(inventory.jobs[0].id.get(), command83001.id.get());
     expect(
-        &get(&mut f, &cookie, "voice/broadcasts/83001"),
+        &get(&mut f, &cookie, &command83001.job()),
         200,
         "\"state\":\"QUEUED\"",
     );
-    expect(&get(&mut f, &cookie, "voice/broadcasts"), 200, "83001");
+    expect(
+        &get(&mut f, &cookie, "voice/broadcasts"),
+        200,
+        &command83001.id.get().to_string(),
+    );
     assert_eq!(service.inventory().unwrap().jobs.len(), 1);
-    assert!(service.guard(VoiceJobId::new(83001).unwrap()).is_err(),"a missing post-COMMIT native capability cannot be fabricated by querying its durable result");
+    assert!(service.guard(VoiceJobId::new(command83001.id.get()).unwrap()).is_err(),"a missing post-COMMIT native capability cannot be fabricated by querying its durable result");
 }
 #[test]
 fn voice_http_readonly_user_pairing_never_discloses_remote_voice_capabilities_or_jobs() {
     let mut f = fixture();
     catalog(&mut f);
     f.backend
-        .create_account(
-            f.admin,
-            NewAccount {
-                id: PrincipalId::new(3).unwrap(),
-                login_name: "voice-user".into(),
-                display_name: "Synthetic readonly user".into(),
-                role: Role::User,
-                scopes: vec![],
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.create_account(
+                    f.admin,
+                    NewAccount {
+                        id: PrincipalId::new(3).unwrap(),
+                        login_name: "voice-user".into(),
+                        display_name: "Synthetic readonly user".into(),
+                        role: Role::User,
+                        scopes: vec![],
+                    },
+                    Password::new("Synthetic-Voice-User-Initial-2026".into()).unwrap(),
+                )
             },
-            Password::new("Synthetic-Voice-User-Initial-2026".into()).unwrap(),
         )
         .unwrap();
     let initial = f
@@ -482,10 +533,17 @@ fn voice_http_readonly_user_pairing_never_discloses_remote_voice_capabilities_or
         )
         .unwrap();
     f.backend
-        .change_password(
-            initial,
-            Password::new("Synthetic-Voice-User-Initial-2026".into()).unwrap(),
-            Password::new("Synthetic-Voice-User-Changed-2026".into()).unwrap(),
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(initial),
+            SessionPurpose::ChangeInitialPassword,
+            |backend| {
+                backend.change_password(
+                    initial,
+                    Password::new("Synthetic-Voice-User-Initial-2026".into()).unwrap(),
+                    Password::new("Synthetic-Voice-User-Changed-2026".into()).unwrap(),
+                )
+            },
         )
         .unwrap();
     f.admin = f
@@ -616,33 +674,47 @@ fn voice_windows_material_and_voice_share_two_physical_owners_across_application
     let mut f = fixture();
     catalog(&mut f);
     f.backend
-        .identity(
-            f.admin,
-            IdentityCommand::PutSubject {
-                id: SubjectId::new(1).unwrap(),
-                name: "Synthetic shared subject".into(),
-                enabled: true,
-                color: Rgb {
-                    red: 1,
-                    green: 2,
-                    blue: 3,
-                },
-                expected_revision: None,
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    f.admin,
+                    IdentityCommand::PutSubject {
+                        id: SubjectId::new(1).unwrap(),
+                        name: "Synthetic shared subject".into(),
+                        enabled: true,
+                        color: Rgb {
+                            red: 1,
+                            green: 2,
+                            blue: 3,
+                        },
+                        expected_revision: None,
+                    },
+                )
             },
         )
         .unwrap();
     f.backend
-        .identity(
-            f.admin,
-            IdentityCommand::UpdateAccount {
-                id: PrincipalId::new(1).unwrap(),
-                display_name: "Synthetic shared global".into(),
-                role: Role::GlobalAdmin,
-                enabled: true,
-                scopes: vec![AssignmentScope {
-                    class_id: class(1),
-                    subject_id: SubjectId::new(1).unwrap(),
-                }],
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Identity,
+            Some(f.admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.identity(
+                    f.admin,
+                    IdentityCommand::UpdateAccount {
+                        id: PrincipalId::new(1).unwrap(),
+                        display_name: "Synthetic shared global".into(),
+                        role: Role::GlobalAdmin,
+                        enabled: true,
+                        scopes: vec![AssignmentScope {
+                            class_id: class(1),
+                            subject_id: SubjectId::new(1).unwrap(),
+                        }],
+                    },
+                )
             },
         )
         .unwrap();
@@ -651,6 +723,7 @@ fn voice_windows_material_and_voice_share_two_physical_owners_across_application
         .login("admin", Password::new(PASSWORD.into()).unwrap())
         .unwrap();
     let (cookie, csrf, _) = auth(&mut f, "admin", "shared-upload-owner");
+    let command84001 = f.issue(&cookie, "materials");
     f.app
         .configure_voice_files(&f.backend, &f.directory.0)
         .unwrap();
@@ -675,7 +748,8 @@ fn voice_windows_material_and_voice_share_two_physical_owners_across_application
         "UPLOADED",
     );
     let append = format!(
-        r#"{{"schemaVersion":1,"commandId":"84001","uploadId":"{id}","allowedClassIds":["1"]}}"#
+        r#"{{{},"uploadId":"{id}","allowedClassIds":["1"]}}"#,
+        command84001.fields()
     );
     let material_proof = match f.app.prepare_material_append(
         &head(

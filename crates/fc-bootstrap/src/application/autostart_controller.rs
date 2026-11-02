@@ -26,18 +26,31 @@ impl App {
         let Some(backend) = self.backend.clone() else {
             return Ok(());
         };
+        let mutation = matches!(&operation, Operation::Change { .. });
+        if mutation && self.autostart_unknown {
+            self.status =
+                "原启动项结果尚未确认，已保留原票据；请先重新读取实际状态，不会重发。".into();
+            return self.render();
+        }
+        let command = NativeCommand::new();
         let job = Job {
             backend,
             lease: Some(lease),
             operation,
         };
-        let work = Work::Autostart(Box::new(job), self.autostart_scope.clone());
+        let work = Work::Tracked(
+            Box::new(Work::Autostart(Box::new(job), self.autostart_scope.clone())),
+            command.clone(),
+        );
         match self
             .pool
             .handle()
             .try_submit(work, Instant::now() + Duration::from_secs(40))
         {
             Ok(ticket) => {
+                if mutation {
+                    self.autostart_command = Some(command);
+                }
                 self.autostart_job = Some(Pending {
                     ticket,
                     generation: self.generation,
@@ -124,6 +137,7 @@ impl App {
                         && self.current_global_owner() == owner
                         && owner.is_some() =>
                 {
+                    self.autostart_unknown = false;
                     self.status = loaded
                         .state
                         .as_ref()
@@ -139,6 +153,7 @@ impl App {
                     self.render()?;
                 }
                 Err(error) if generation == Some(self.generation) && !self.stopping => {
+                    self.autostart_unknown = self.autostart_command.is_some();
                     if let Some(editor) = &mut self.autostart {
                         editor.invalidate();
                         self.screen = Screen::Autostart;

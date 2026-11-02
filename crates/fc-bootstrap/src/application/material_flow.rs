@@ -1,6 +1,6 @@
 //! Owned material preparation on the existing shared worker pool. No file bytes
 //! or native handles enter SQLite transactions; publication follows full validation.
-use super::{command_id, fatal, invalid, Failure, Outcome, Result};
+use super::{command_id, fatal, invalid, Failure, NativeCommand, Outcome, Result};
 use fc_application::identity::SessionLease;
 use fc_bootstrap::backend::{
     Backend, MaterialOpenAuthorization, MaterialOpenGuard, ResourceState, SessionControl,
@@ -44,6 +44,11 @@ impl Drop for LaunchPreparation {
         LAUNCH_PREPARING.store(false, std::sync::atomic::Ordering::Release);
     }
 }
+pub(super) struct DeleteDraft {
+    pub scope: MaterialScope,
+    pub material_id: MaterialId,
+    pub expected_material_revision: Revision,
+}
 pub(super) enum Job {
     Load {
         lease: SessionLease,
@@ -57,7 +62,7 @@ pub(super) enum Job {
     },
     Delete {
         lease: SessionLease,
-        request: MaterialDeleteRequest,
+        request: DeleteDraft,
     },
     Open(OpenRequest),
     Copies {
@@ -334,7 +339,7 @@ impl MaterialJob {
                 },
         )
     }
-    pub fn run(self, context: &JobContext) -> Result<Outcome> {
+    pub fn run(self, context: &JobContext, command: &NativeCommand) -> Result<Outcome> {
         let files = ControlledFiles::new(&self.root).map_err(|_| io_error())?;
         match self.job {
             Job::Copies { lease, clean } => {
@@ -358,10 +363,26 @@ impl MaterialJob {
             ))),
             Job::Delete { lease, request } => {
                 let scope = request.scope;
-                self.backend
-                    .try_lock()
-                    .map_err(backend_lock_error)?
-                    .delete_material(lease, request)?;
+                {
+                    let mut backend = self.backend.try_lock().map_err(backend_lock_error)?;
+                    command.run(
+                        &mut backend,
+                        fc_ports::command_window::CommandFamily::Materials,
+                        Some(lease),
+                        fc_application::identity::SessionPurpose::Manage,
+                        context,
+                        |backend| {
+                            let request = MaterialDeleteRequest {
+                                command_id: backend.issued_command_id()?,
+                                scope: request.scope,
+                                material_id: request.material_id,
+                                expected_material_revision: request.expected_material_revision,
+                            };
+                            backend.delete_material(lease, request)?;
+                            Ok(())
+                        },
+                    )?;
+                }
                 reconcile(&files, &self.backend, context).map_err(after_committed_material)?;
                 Ok(Outcome::Materials(Box::new(
                     self.backend
@@ -395,6 +416,17 @@ impl MaterialJob {
                             cursor: None,
                         },
                     )?;
+                let issued_id = {
+                    let mut backend = self.backend.try_lock().map_err(backend_lock_error)?;
+                    command.run(
+                        &mut backend,
+                        fc_ports::command_window::CommandFamily::Materials,
+                        Some(lease),
+                        fc_application::identity::SessionPurpose::Manage,
+                        context,
+                        |backend| Ok(backend.issued_command_id()?),
+                    )?
+                };
                 let name = selected.display_name().map_err(|_| io_error())?;
                 let id = MaterialId::new(command_id()?.get()).map_err(|_| Failure::Stopped)?;
                 let version =
@@ -421,7 +453,7 @@ impl MaterialJob {
                     &mut preparation,
                     selected,
                     MaterialAppendMetadata {
-                        command_id: command_id()?,
+                        command_id: issued_id,
                         scope,
                         material_id: id,
                         display_name: name,
@@ -437,12 +469,17 @@ impl MaterialJob {
                 if preparation.control.canceled() {
                     return Err(Failure::Stopped);
                 }
-                let mut result = self
-                    .backend
-                    .try_lock()
-                    .map_err(backend_lock_error)?
-                    .append_material(lease, prepared)
-                    .map_err(Failure::from);
+                let mut result = {
+                    let mut backend = self.backend.try_lock().map_err(backend_lock_error)?;
+                    command.run(
+                        &mut backend,
+                        fc_ports::command_window::CommandFamily::Materials,
+                        Some(lease),
+                        fc_application::identity::SessionPurpose::Manage,
+                        context,
+                        |backend| Ok(backend.append_material(lease, prepared)?),
+                    )
+                };
                 // Unavailable also covers decoding a completion after COMMIT.
                 // Without a definite rejection, retain the validated inode and
                 // fail closed; a fresh startup inventory resolves DB truth.

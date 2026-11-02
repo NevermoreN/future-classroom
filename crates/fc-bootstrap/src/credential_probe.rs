@@ -4,17 +4,19 @@
 
 use fc_application::identity::{IdentitySessions, SessionLease, SessionPurpose};
 use fc_domain::{auth::*, identity::*, ids::*, time::*};
+use fc_ports::command_window::{CommandFamily, CommandOwner, CommandWindowError, IssuedCommand};
 use fc_ports::{
     prepare_initial_credentials, prepare_password_change, prepare_recovery, Clock,
     CredentialCrypto, CredentialIdentityRepository, IdentityRepository, IdentityRepositoryError,
-    IdentityRequest, MonotonicClock, PreparedCredentialChange,
+    IdentityRequest, MonotonicClock, PreparedCredentialChange, RandomSource,
 };
 use fc_runtime::authority::{AuthorityStore, PreparedAuthority};
 use fc_security::{
     CredentialCryptoAdapter, CredentialRecordCodec, Password, PasswordRecord, RecoveryRecord,
 };
 use fc_storage::{
-    business::BusinessRepository, login::*, StorageError, StorageHandle, StorageWriter,
+    business::BusinessRepository, command_window::IssueCommand, login::*, StorageError,
+    StorageHandle, StorageWriter,
 };
 use fc_windows::{
     system::{CurrentUserDpapi, SecretBytes},
@@ -100,15 +102,46 @@ fn open(
     let repository = BusinessRepository::new(handle.clone(), clock, factory);
     Ok((Joined(Some(writer)), repository, handle))
 }
+/// The real Writer issues the full pair before the request enters an opaque
+/// credential proof. Preparation and execution retain this exact original pair.
 fn request(
-    sequence: u64,
+    handle: &StorageHandle<Snapshot>,
+    owner: CommandOwner,
     state: &IdentityState,
     command: IdentityCommand,
-) -> Result<IdentityRequest, String> {
-    Ok(IdentityRequest {
-        command_id: checked(CommandId::new(sequence), "command ID")?,
-        expected_revision: state.revision,
-        command,
+) -> Result<(IssuedCommand, IdentityRequest), String> {
+    let mut entropy = [0; 24];
+    checked(SystemRandom.fill(&mut entropy), "command entropy")?;
+    let issued = checked(
+        checked(
+            handle.try_issue_command(IssueCommand {
+                family: CommandFamily::Identity,
+                owner,
+                entropy,
+            }),
+            "command issuance queue",
+        )?
+        .wait(),
+        "command issuance",
+    )?;
+    Ok((
+        issued,
+        IdentityRequest {
+            command_id: issued.command_id,
+            expected_revision: state.revision,
+            command,
+        },
+    ))
+}
+/// Recovery has no authenticated session actor, but its command still belongs
+/// to the current account epoch, as checked again by the real Writer.
+fn recovery_owner(state: &IdentityState, id: PrincipalId) -> Result<CommandOwner, String> {
+    let account = checked(state.account(id), "recovery command owner")?;
+    Ok(CommandOwner::Principal {
+        principal: id,
+        school: account.principal.school_id,
+        epoch: account.principal.auth_epoch,
+        origin: TrustedOrigin::Local,
     })
 }
 fn encode(
@@ -346,10 +379,11 @@ pub fn run(root: &Path) -> Result<(), String> {
         Password::new("Probe-recovered-password-2026".into()),
         "recovered password fixture",
     )?;
-    let (mut joined, mut repository, _) =
+    let (mut joined, repository, handle) =
         open(&directory, clock.clone(), IdentityState::default())?;
-    let r = request(
-        1,
+    let (issued, r) = request(
+        &handle,
+        CommandOwner::PublicDesktop,
         &IdentityState::default(),
         IdentityCommand::FirstAdministrator {
             school_id: checked(SchoolId::new(1), "school fixture")?,
@@ -364,7 +398,11 @@ pub fn run(root: &Path) -> Result<(), String> {
         "initial credential preparation",
     )?;
     let first = checked(
-        repository.execute_credentials(encode(change, &codec, id, 1, 1)?, None, clock.as_ref()),
+        repository.with_command_window(issued).execute_credentials(
+            encode(change, &codec, id, 1, 1)?,
+            None,
+            clock.as_ref(),
+        ),
         "first administrator transaction",
     )?;
     joined.close()?;
@@ -382,17 +420,19 @@ pub fn run(root: &Path) -> Result<(), String> {
     let sessions = Arc::new(Mutex::new(IdentitySessions::default()));
     let lease = issue(&sessions, &state, id, &clock)?;
     let original_actor = actor(&sessions, &state, lease, &clock)?;
-    let mut local = guarded(repository.clone(), sessions.clone(), lease, clock.clone());
+    let local = guarded(repository.clone(), sessions.clone(), lease, clock.clone());
+    let (issued, r) = request(
+        &handle,
+        CommandOwner::authenticated(&original_actor),
+        &state,
+        IdentityCommand::CreateClass {
+            id: checked(ClassId::new(1), "class fixture")?,
+            name: "Diagnostic Class".into(),
+        },
+    )?;
     let transition = checked(
-        local.execute_identity(
-            request(
-                2,
-                &state,
-                IdentityCommand::CreateClass {
-                    id: checked(ClassId::new(1), "class fixture")?,
-                    name: "Diagnostic Class".into(),
-                },
-            )?,
+        local.with_command_window(issued).execute_identity(
+            r,
             Some(&original_actor),
             clock.as_ref(),
         ),
@@ -402,21 +442,17 @@ pub fn run(root: &Path) -> Result<(), String> {
 
     let a = admission(&handle, id, CredentialKind::Password)?;
     let old_record = password_record(&codec, id, &a)?;
+    let (issued, r) = request(
+        &handle,
+        CommandOwner::authenticated(&original_actor),
+        &state,
+        IdentityCommand::PasswordChanged {
+            id,
+            expected_credential_version: a.credential_version,
+        },
+    )?;
     let change = checked(
-        prepare_password_change(
-            &mut crypto,
-            &initial,
-            &changed,
-            &old_record,
-            request(
-                3,
-                &state,
-                IdentityCommand::PasswordChanged {
-                    id,
-                    expected_credential_version: a.credential_version,
-                },
-            )?,
-        ),
+        prepare_password_change(&mut crypto, &initial, &changed, &old_record, r),
         "password change preparation",
     )?;
     authenticated(
@@ -425,7 +461,7 @@ pub fn run(root: &Path) -> Result<(), String> {
         id,
     )?;
     let transition = checked(
-        local.execute_credentials(
+        local.with_command_window(issued).execute_credentials(
             encode(change, &codec, id, 2, 1)?,
             Some(&original_actor),
             clock.as_ref(),
@@ -433,14 +469,16 @@ pub fn run(root: &Path) -> Result<(), String> {
         "atomic password change",
     )?;
     let state = transition.next;
-    let old_result = local.execute_identity(
-        request(
-            4,
-            &state,
-            IdentityCommand::RenameSchool {
-                name: "Must not commit".into(),
-            },
-        )?,
+    let (issued, r) = request(
+        &handle,
+        CommandOwner::authenticated(&original_actor),
+        &state,
+        IdentityCommand::RenameSchool {
+            name: "Must not commit".into(),
+        },
+    )?;
+    let old_result = local.with_command_window(issued).execute_identity(
+        r,
         Some(&original_actor),
         clock.as_ref(),
     );
@@ -463,7 +501,7 @@ pub fn run(root: &Path) -> Result<(), String> {
     )?;
     let lease = issue(&sessions, &state, id, &clock)?;
     let current_actor = actor(&sessions, &state, lease, &clock)?;
-    let mut local = guarded(repository.clone(), sessions.clone(), lease, clock.clone());
+    let local = guarded(repository.clone(), sessions.clone(), lease, clock.clone());
     println!("credential.password-rotation-old-lease: PASS");
 
     let a = admission(&handle, id, CredentialKind::Recovery)?;
@@ -471,43 +509,35 @@ pub fn run(root: &Path) -> Result<(), String> {
         codec.decode_recovery(id, a.recovery_version, &a.protected_record),
         "recovery record authentication",
     )?;
+    let (issued, r) = request(
+        &handle,
+        recovery_owner(&state, id)?,
+        &state,
+        IdentityCommand::RecoveryConsumed {
+            id,
+            expected_recovery_version: a.recovery_version,
+        },
+    )?;
     let (change, next_recovery) = checked(
-        prepare_recovery(
-            &mut crypto,
-            &initial_recovery,
-            &recovered,
-            &old_recovery,
-            request(
-                10,
-                &state,
-                IdentityCommand::RecoveryConsumed {
-                    id,
-                    expected_recovery_version: a.recovery_version,
-                },
-            )?,
-        ),
+        prepare_recovery(&mut crypto, &initial_recovery, &recovered, &old_recovery, r),
         "recovery preparation",
     )?;
-    // Prepare an intentionally stale competing change while the SAME physical KDF
-    // reservation is held. A predicted next CAS revision isolates the account-version
-    // rejection from the separate global-revision rejection in this diagnostic fixture.
+    // Keep the competing worker's original pair/proof from before recovery.
+    // Successful recovery retires that entire command epoch, so this proof must
+    // be rejected by C2 before its stale account version can reach business CAS.
     let mut after_recovery = state.clone();
     after_recovery.revision = checked(state.revision.next(), "recovery CAS fixture")?;
+    let (replay_issued, r) = request(
+        &handle,
+        recovery_owner(&state, id)?,
+        &after_recovery,
+        IdentityCommand::RecoveryConsumed {
+            id,
+            expected_recovery_version: 1,
+        },
+    )?;
     let (replay, _) = checked(
-        prepare_recovery(
-            &mut crypto,
-            &initial_recovery,
-            &recovered,
-            &old_recovery,
-            request(
-                12,
-                &after_recovery,
-                IdentityCommand::RecoveryConsumed {
-                    id,
-                    expected_recovery_version: 1,
-                },
-            )?,
-        ),
+        prepare_recovery(&mut crypto, &initial_recovery, &recovered, &old_recovery, r),
         "stale recovery worker fixture",
     )?;
     authenticated(
@@ -516,23 +546,26 @@ pub fn run(root: &Path) -> Result<(), String> {
         id,
     )?;
     let transition = checked(
-        local.execute_credentials(encode(change, &codec, id, 3, 2)?, None, clock.as_ref()),
+        local.with_command_window(issued).execute_credentials(
+            encode(change, &codec, id, 3, 2)?,
+            None,
+            clock.as_ref(),
+        ),
         "atomic recovery rotation",
     )?;
     let state = transition.next;
+    let (issued, r) = request(
+        &handle,
+        CommandOwner::authenticated(&current_actor),
+        &state,
+        IdentityCommand::RenameSchool {
+            name: "Must not commit".into(),
+        },
+    )?;
     require(
         local
-            .execute_identity(
-                request(
-                    11,
-                    &state,
-                    IdentityCommand::RenameSchool {
-                        name: "Must not commit".into(),
-                    },
-                )?,
-                Some(&current_actor),
-                clock.as_ref(),
-            )
+            .with_command_window(issued)
+            .execute_identity(r, Some(&current_actor), clock.as_ref())
             .is_err(),
         "pre-recovery lease rejected",
     )?;
@@ -560,9 +593,47 @@ pub fn run(root: &Path) -> Result<(), String> {
         "old recovery rejected",
     )?;
 
-    // A worker holding a legitimately verified *old* record cannot consume that old
-    // version again, even with a fresh global CAS revision and a new command ID.
-    let result = local.execute_credentials(encode(replay, &codec, id, 4, 2)?, None, clock.as_ref());
+    let result = local
+        .with_command_window(replay_issued)
+        .execute_credentials(encode(replay, &codec, id, 4, 2)?, None, clock.as_ref());
+    require(
+        matches!(
+            result,
+            Err(IdentityRepositoryError::CommandWindow(
+                CommandWindowError::Expired
+            ))
+        ),
+        "pre-recovery command epoch retired",
+    )?;
+    require(
+        checked(
+            repository.load_identity(),
+            "state after retired recovery proof",
+        )? == state,
+        "retired recovery proof leaves state intact",
+    )?;
+    // Independently retain the account-version diagnostic. This is a new
+    // synthetic intent with the CURRENT owner and a new real Writer issuance;
+    // prepare binds its new raw id before verifying the captured OLD record.
+    // No original proof/ticket is rewritten, and no old code becomes current.
+    let (issued, r) = request(
+        &handle,
+        recovery_owner(&state, id)?,
+        &state,
+        IdentityCommand::RecoveryConsumed {
+            id,
+            expected_recovery_version: 1,
+        },
+    )?;
+    let (stale_version, _) = checked(
+        prepare_recovery(&mut crypto, &initial_recovery, &recovered, &old_recovery, r),
+        "old recovery version preparation",
+    )?;
+    let result = local.with_command_window(issued).execute_credentials(
+        encode(stale_version, &codec, id, 4, 2)?,
+        None,
+        clock.as_ref(),
+    );
     require(
         matches!(
             result,

@@ -1025,7 +1025,13 @@ struct Transition {
     lease: Option<SessionLease>,
     code: Option<RecoveryCode>,
 }
-type RequestHandler = fn(&mut Backend, &mut Request, &mut Transition) -> Result<Option<Outcome>>;
+type RequestHandler = fn(
+    &mut Backend,
+    &mut Request,
+    &mut Transition,
+    &NativeCommand,
+    &JobContext,
+) -> Result<Option<Outcome>>;
 static REQUESTS: &[Registration<(Screen, ActionId), RequestHandler>] = &[
     Registration {
         key: (Screen::Setup, SAVE),
@@ -1187,31 +1193,64 @@ static REQUESTS: &[Registration<(Screen, ActionId), RequestHandler>] = &[
 fn require_lease(r: &Request) -> Result<SessionLease> {
     r.lease.ok_or_else(|| invalid("请先登录。"))
 }
-pub(super) fn execute(mut r: Request) -> Result<Outcome> {
+pub(super) fn execute(
+    mut r: Request,
+    command: &NativeCommand,
+    context: &JobContext,
+) -> Result<Outcome> {
     let handler = Registry::new(REQUESTS)
         .and_then(|registry| registry.get((r.screen, r.action)))
         .map_err(|_| invalid("此操作在当前页面不可用。"))?;
     let owner = Arc::clone(&r.backend);
     let mut backend = owner.lock().map_err(|_| Failure::Stopped)?;
-    let mut transition = Transition {
-        next: Screen::Home,
-        lease: r.lease,
-        code: None,
+    let family = match (r.screen, r.action) {
+        (
+            Screen::Setup | Screen::Password | Screen::Rotate | Screen::School | Screen::Subjects,
+            SAVE,
+        )
+        | (Screen::School, ADD_CLASS | BIND_CLASS) => {
+            Some(fc_ports::command_window::CommandFamily::Identity)
+        }
+        (Screen::HomeworkEdit, SAVE) => Some(fc_ports::command_window::CommandFamily::Content),
+        _ => None,
     };
-    if let Some(outcome) = handler(&mut backend, &mut r, &mut transition)? {
-        return Ok(outcome);
+    let purpose = if r.screen == Screen::Password {
+        SessionPurpose::ChangeInitialPassword
+    } else {
+        SessionPurpose::Manage
+    };
+    let lease = r.lease;
+    let mut execute = |backend: &mut Backend| {
+        let mut transition = Transition {
+            next: Screen::Home,
+            lease: r.lease,
+            code: None,
+        };
+        if let Some(outcome) = handler(backend, &mut r, &mut transition, command, context)? {
+            return Ok(outcome);
+        }
+        Ok(Outcome::Updated {
+            state: backend.state()?,
+            lease: transition.lease,
+            code: transition.code,
+            next: transition.next,
+        })
+    };
+    if let Some(family) = family {
+        command.run(&mut backend, family, lease, purpose, context, execute)
+    } else {
+        context.checkpoint().map_err(|_| Failure::Stopped)?;
+        let mut scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
+        execute(&mut scoped)
     }
-    Ok(Outcome::Updated {
-        state: backend.state()?,
-        lease: transition.lease,
-        code: transition.code,
-        next: transition.next,
-    })
 }
+
 fn request_setup_save(
     backend: &mut Backend,
     r: &mut Request,
     transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     confirm(&r.data, PASSWORD)?;
     let options = Initialize {
@@ -1228,6 +1267,8 @@ fn request_login_log_in(
     backend: &mut Backend,
     r: &mut Request,
     transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     let name = text(&r.data, LOGIN)?;
     let proof = backend.login(&name, password(&mut r.data, PASSWORD)?)?;
@@ -1248,13 +1289,19 @@ fn request_recovery_save(
     backend: &mut Backend,
     r: &mut Request,
     transition: &mut Transition,
+    command: &NativeCommand,
+    context: &JobContext,
 ) -> Result<Option<Outcome>> {
     confirm(&r.data, NEW_PASSWORD)?;
     let login = text(&r.data, LOGIN)?;
     let recovery = RecoveryCode::parse(r.data.take(CODE).ok_or_else(|| invalid("请输入恢复码。"))?)
         .map_err(|_| invalid("恢复码格式不正确。"))?;
-    transition.code =
-        Some(backend.recover(&login, recovery, password(&mut r.data, NEW_PASSWORD)?)?);
+    transition.code = Some(backend.recover_window(
+        &login,
+        recovery,
+        password(&mut r.data, NEW_PASSWORD)?,
+        |issued| context.checkpoint().is_ok() && command.bind(issued).is_ok(),
+    )?);
     transition.lease = None;
     transition.next = Screen::Code;
     Ok(None)
@@ -1263,6 +1310,8 @@ fn request_password_save(
     backend: &mut Backend,
     r: &mut Request,
     transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     confirm(&r.data, NEW_PASSWORD)?;
     let proof = require_lease(r)?;
@@ -1277,6 +1326,8 @@ fn request_rotate_save(
     backend: &mut Backend,
     r: &mut Request,
     transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     transition.code =
         Some(backend.rotate_recovery(require_lease(r)?, password(&mut r.data, PASSWORD)?)?);
@@ -1288,6 +1339,8 @@ fn request_school_save(
     backend: &mut Backend,
     r: &mut Request,
     _transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     backend.identity_at(
         require_lease(r)?,
@@ -1302,6 +1355,8 @@ fn request_school_add_class(
     backend: &mut Backend,
     r: &mut Request,
     _transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     let id = ClassId::new(
         r.state
@@ -1328,6 +1383,8 @@ fn request_school_bind_class(
     backend: &mut Backend,
     r: &mut Request,
     _transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     let class = find_class(&r.state, &text(&r.data, CLASS)?)?;
     backend.identity_at(
@@ -1341,6 +1398,8 @@ fn request_subjects_save(
     backend: &mut Backend,
     r: &mut Request,
     _transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     let old = r.data.get(OLD_NAME).unwrap_or("").trim();
     let existing = if old.is_empty() {
@@ -1396,6 +1455,8 @@ fn request_homework_load(
     backend: &mut Backend,
     r: &mut Request,
     _transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     let proof = require_lease(r)?;
     let class = find_class(&r.state, &text(&r.data, CLASS)?)?;
@@ -1426,11 +1487,13 @@ fn request_homeworkedit_save(
     backend: &mut Backend,
     r: &mut Request,
     _transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     backend.content(
         require_lease(r)?,
         ContentCommand {
-            command_id: command_id()?,
+            command_id: backend.issued_command_id()?,
             key: r.key.take().ok_or_else(|| invalid("请重新加载作业。"))?,
             expected_revision: r.revision,
             text: r.data.get(CONTENT).unwrap_or("").to_owned(),
@@ -1442,6 +1505,8 @@ fn request_any_exit(
     backend: &mut Backend,
     r: &mut Request,
     _transition: &mut Transition,
+    _command: &NativeCommand,
+    _context: &JobContext,
 ) -> Result<Option<Outcome>> {
     backend.authorize_exit(require_lease(r)?)?;
     Ok(Some(Outcome::ExitAuthorized))

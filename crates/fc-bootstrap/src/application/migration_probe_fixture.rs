@@ -2,6 +2,7 @@
 //! Caller owns the isolated deployment, authenticated administrator and actual
 //! worker lifetime. No arbitrary resource descriptor or credential row is used.
 use super::{App, Backend, SessionLease};
+use fc_application::identity::SessionPurpose;
 use fc_bootstrap::{
     profile_content_files::{ContentSources, ControlledContentFiles, LocalContentInput},
     recovery_files::entry_relative_path,
@@ -23,7 +24,9 @@ use fc_domain::{
 };
 use fc_materials::office::{ContainerError, ValidationControl};
 use fc_ports::{
+    command_window::{CommandFamily, IssuedCommand},
     MaterialAppendMetadata, MaterialListRequest, MaterialPreparation, MaterialRepositoryError,
+    ProfileContentStatus,
 };
 use fc_security::Password;
 use fc_windows::{
@@ -65,6 +68,35 @@ const TARGET_HOMEWORK_SENTINEL: &str = "合成目标旧教学哨兵，应由完�
 fn checked<T, E: std::fmt::Debug>(value: Result<T, E>, stage: &str) -> Check<T> {
     value.map_err(|error| format!("migration fixture: {stage}: {error:?}"))
 }
+/// Issue on the real Writer, then restore the unscoped Backend after this
+/// single database operation. Physical preparation must stay outside this call.
+fn command<T>(
+    backend: &mut Backend,
+    lease: SessionLease,
+    family: CommandFamily,
+    action: impl FnOnce(&mut Backend) -> Check<T>,
+) -> Check<T> {
+    let issued = checked(
+        backend.issue_native_command(family, Some(lease), SessionPurpose::Manage),
+        "issue native command",
+    )?;
+    let mut scoped = checked(
+        backend.begin_command_scope(issued),
+        "check native command scope",
+    )?;
+    action(&mut scoped)
+}
+fn with_issued<T>(
+    backend: &mut Backend,
+    issued: IssuedCommand,
+    action: impl FnOnce(&mut Backend) -> Check<T>,
+) -> Check<T> {
+    let mut scoped = checked(
+        backend.begin_command_scope(issued),
+        "check original command scope",
+    )?;
+    action(&mut scoped)
+}
 fn require(value: bool, stage: &str) -> Check<()> {
     if value {
         Ok(())
@@ -101,120 +133,132 @@ fn seed_catalog(app: &mut App, target: bool) -> Check<()> {
     let (backend, lease) = handles(app)?;
     let mut backend = checked(backend.lock(), "catalog lock")?;
     let k = key(target);
-    checked(
-        backend.identity(
-            lease,
-            IdentityCommand::CreateClass {
-                id: k.class_id,
-                name: if target {
-                    TARGET_CLASS_NAME
-                } else {
-                    "源合成一班"
-                }
-                .into(),
-            },
-        ),
-        "create class",
-    )?;
-    if target {
+    command(&mut backend, lease, CommandFamily::Identity, |backend| {
         checked(
             backend.identity(
                 lease,
                 IdentityCommand::CreateClass {
-                    id: ClassId::new(99).unwrap(),
-                    name: TARGET_EXTRA_CLASS_NAME.into(),
-                },
-            ),
-            "create preserved extra class",
-        )?;
-    }
-    checked(
-        backend.identity(
-            lease,
-            IdentityCommand::PutSubject {
-                id: k.subject_id,
-                name: if target {
-                    TARGET_SUBJECT_NAME
-                } else {
-                    "源合成科目一"
-                }
-                .into(),
-                enabled: true,
-                color: if target {
-                    TARGET_SUBJECT_COLOR
-                } else {
-                    Rgb {
-                        red: 170,
-                        green: 42,
-                        blue: 66,
-                    }
-                },
-                expected_revision: None,
-            },
-        ),
-        "create subject",
-    )?;
-    checked(
-        backend.create_account(
-            lease,
-            NewAccount {
-                id: k.teacher_id,
-                login_name: if target {
-                    TARGET_TEACHER_LOGIN
-                } else {
-                    SOURCE_TEACHER_LOGIN
-                }
-                .into(),
-                display_name: if target {
-                    TARGET_TEACHER_NAME
-                } else {
-                    "源合成教师二"
-                }
-                .into(),
-                role: Role::TeacherAdmin,
-                scopes: vec![AssignmentScope {
-                    class_id: k.class_id,
-                    subject_id: k.subject_id,
-                }],
-            },
-            checked(
-                Password::new(
-                    if target {
-                        TARGET_TEACHER_PASSWORD
+                    id: k.class_id,
+                    name: if target {
+                        TARGET_CLASS_NAME
                     } else {
-                        SOURCE_TEACHER_PASSWORD
+                        "源合成一班"
                     }
                     .into(),
-                ),
-                "synthetic teacher password",
-            )?,
-        ),
-        "create teacher through credential port",
-    )?;
-    checked(
-        backend.identity(
-            lease,
-            IdentityCommand::BindCurrentClass {
-                id: if target {
-                    ClassId::new(99).unwrap()
-                } else {
-                    k.class_id
                 },
-            },
-        ),
-        "bind current class",
-    )?;
-    checked(
-        backend.identity(
-            lease,
-            IdentityCommand::SetDefaultTeacher(DefaultTeacher {
-                class_id: k.class_id,
-                subject_id: k.subject_id,
-                teacher_id: k.teacher_id,
-            }),
-        ),
-        "set default teacher",
-    )?;
+            ),
+            "create class",
+        )
+    })?;
+    if target {
+        command(&mut backend, lease, CommandFamily::Identity, |backend| {
+            checked(
+                backend.identity(
+                    lease,
+                    IdentityCommand::CreateClass {
+                        id: ClassId::new(99).unwrap(),
+                        name: TARGET_EXTRA_CLASS_NAME.into(),
+                    },
+                ),
+                "create preserved extra class",
+            )
+        })?;
+    }
+    command(&mut backend, lease, CommandFamily::Identity, |backend| {
+        checked(
+            backend.identity(
+                lease,
+                IdentityCommand::PutSubject {
+                    id: k.subject_id,
+                    name: if target {
+                        TARGET_SUBJECT_NAME
+                    } else {
+                        "源合成科目一"
+                    }
+                    .into(),
+                    enabled: true,
+                    color: if target {
+                        TARGET_SUBJECT_COLOR
+                    } else {
+                        Rgb {
+                            red: 170,
+                            green: 42,
+                            blue: 66,
+                        }
+                    },
+                    expected_revision: None,
+                },
+            ),
+            "create subject",
+        )
+    })?;
+    command(&mut backend, lease, CommandFamily::Identity, |backend| {
+        checked(
+            backend.create_account(
+                lease,
+                NewAccount {
+                    id: k.teacher_id,
+                    login_name: if target {
+                        TARGET_TEACHER_LOGIN
+                    } else {
+                        SOURCE_TEACHER_LOGIN
+                    }
+                    .into(),
+                    display_name: if target {
+                        TARGET_TEACHER_NAME
+                    } else {
+                        "源合成教师二"
+                    }
+                    .into(),
+                    role: Role::TeacherAdmin,
+                    scopes: vec![AssignmentScope {
+                        class_id: k.class_id,
+                        subject_id: k.subject_id,
+                    }],
+                },
+                checked(
+                    Password::new(
+                        if target {
+                            TARGET_TEACHER_PASSWORD
+                        } else {
+                            SOURCE_TEACHER_PASSWORD
+                        }
+                        .into(),
+                    ),
+                    "synthetic teacher password",
+                )?,
+            ),
+            "create teacher through credential port",
+        )
+    })?;
+    command(&mut backend, lease, CommandFamily::Identity, |backend| {
+        checked(
+            backend.identity(
+                lease,
+                IdentityCommand::BindCurrentClass {
+                    id: if target {
+                        ClassId::new(99).unwrap()
+                    } else {
+                        k.class_id
+                    },
+                },
+            ),
+            "bind current class",
+        )
+    })?;
+    command(&mut backend, lease, CommandFamily::Identity, |backend| {
+        checked(
+            backend.identity(
+                lease,
+                IdentityCommand::SetDefaultTeacher(DefaultTeacher {
+                    class_id: k.class_id,
+                    subject_id: k.subject_id,
+                    teacher_id: k.teacher_id,
+                }),
+            ),
+            "set default teacher",
+        )
+    })?;
     Ok(())
 }
 
@@ -325,6 +369,14 @@ fn seed_material(app: &App, paths: &DataPaths, target: bool) -> Check<MaterialRe
         teacher_id: k.teacher_id,
         subject_id: k.subject_id,
     };
+    let issued = checked(
+        checked(backend.lock(), "issue material lock")?.issue_native_command(
+            CommandFamily::Materials,
+            Some(lease),
+            SessionPurpose::Manage,
+        ),
+        "issue material append",
+    )?;
     let mut preparation = TxtPreparation {
         files: &files,
         scope,
@@ -340,7 +392,7 @@ fn seed_material(app: &App, paths: &DataPaths, target: bool) -> Check<MaterialRe
                 "isolated TXT selection",
             )?,
             MaterialAppendMetadata {
-                command_id: CommandId::new(if target { 900 } else { 500 }).unwrap(),
+                command_id: issued.command_id,
                 scope,
                 material_id,
                 display_name: MATERIAL_NAME.into(),
@@ -349,38 +401,46 @@ fn seed_material(app: &App, paths: &DataPaths, target: bool) -> Check<MaterialRe
         ),
         "prepare validated material append",
     )?;
-    let record = checked(
-        checked(backend.lock(), "append material lock")?.append_material(lease, proof),
-        "append prepared material",
-    )?;
+    let record = {
+        let mut backend = checked(backend.lock(), "append material lock")?;
+        with_issued(&mut backend, issued, |backend| {
+            checked(
+                backend.append_material(lease, proof),
+                "append prepared material",
+            )
+        })?
+    };
     Ok(record)
 }
 fn seed_homework(app: &App, target: bool) -> Check<()> {
     let (backend, lease) = handles(app)?;
     let k = key(target);
     let now = checked(app.clock.try_now(), "homework clock")?;
-    checked(
-        checked(backend.lock(), "homework lock")?.content(
-            lease,
-            ContentCommand {
-                command_id: CommandId::new(if target { 950 } else { 550 }).unwrap(),
-                key: ContentKey::Homework(HomeworkKey {
-                    class_id: k.class_id,
-                    actual_date: now.date,
-                    subject_id: k.subject_id,
-                    owner_teacher_id: k.teacher_id,
-                }),
-                expected_revision: Revision::default(),
-                text: if target {
-                    TARGET_HOMEWORK_SENTINEL
-                } else {
-                    HOMEWORK_TEXT
-                }
-                .into(),
-            },
-        ),
-        "persist homework",
-    )?;
+    let mut backend = checked(backend.lock(), "homework lock")?;
+    command(&mut backend, lease, CommandFamily::Content, |backend| {
+        checked(
+            backend.content(
+                lease,
+                ContentCommand {
+                    command_id: checked(backend.issued_command_id(), "issued homework command")?,
+                    key: ContentKey::Homework(HomeworkKey {
+                        class_id: k.class_id,
+                        actual_date: now.date,
+                        subject_id: k.subject_id,
+                        owner_teacher_id: k.teacher_id,
+                    }),
+                    expected_revision: Revision::default(),
+                    text: if target {
+                        TARGET_HOMEWORK_SENTINEL
+                    } else {
+                        HOMEWORK_TEXT
+                    }
+                    .into(),
+                },
+            ),
+            "persist homework",
+        )
+    })?;
     Ok(())
 }
 fn seed_profile(app: &App, record: &MaterialRecord) -> Check<(ContentSlotKey, ContentSlotKey)> {
@@ -444,10 +504,12 @@ fn seed_profile(app: &App, record: &MaterialRecord) -> Check<(ContentSlotKey, Co
         public.layout.tree.validate_composition(Some(&profile.tree)),
         "synthetic subject/public composition",
     )?;
-    checked(
-        backend.save_subject_profile(lease, k, Revision::default(), profile),
-        "save subject-owned layout",
-    )?;
+    command(&mut backend, lease, CommandFamily::Profiles, |backend| {
+        checked(
+            backend.save_subject_profile(lease, k, Revision::default(), profile),
+            "save subject-owned layout",
+        )
+    })?;
     Ok((
         ContentSlotKey {
             scope: LayoutScope::Subject(k),
@@ -494,10 +556,12 @@ fn publish(
     app: &App,
     paths: &DataPaths,
     slot: ContentSlotKey,
-    command: u64,
+    _intent_label: u64,
     input: LocalContentInput,
     kind: ContentPayloadKind,
 ) -> Check<()> {
+    // The fixture's 601/602/603 labels name synthetic input files only. They
+    // never supply the permission-bearing command id.
     let (backend, lease) = handles(app)?;
     let sources = checked(
         ContentSources::open(input, &mut SystemRandom),
@@ -517,63 +581,126 @@ fn publish(
         checked(backend.lock(), "read content lock")?.read_profile_content(lease, slot),
         "read current content",
     )?;
-    let admission = checked(
-        checked(backend.lock(), "content admission lock")?.begin_profile_content(
-            lease,
-            BeginContentRequest {
-                command_id: CommandId::new(command).unwrap(),
-                slot,
-                expected_revision: current.revision,
-                operation,
-                payload_fingerprint: checked(
-                    sources.intent_fingerprint(slot, operation),
-                    "content intent fingerprint",
-                )?,
-                expires_at,
-            },
-        ),
-        "admit content publish",
+    let fingerprint = checked(
+        sources.intent_fingerprint(slot, operation),
+        "content intent fingerprint",
     )?;
-    let reservation = match sources.image_sizes().filter(|sizes| !sizes.is_empty()) {
-        Some(sizes) => Some(checked(
-            checked(backend.lock(), "reserve image lock")?
-                .reserve_profile_media(lease, &admission, &sizes),
-            "reserve real image IDs",
-        )?),
-        None => None,
+    let (issued, admission, owner) = {
+        let mut backend = checked(backend.lock(), "content admission lock")?;
+        let issued = checked(
+            backend.issue_native_command(
+                CommandFamily::ProfileContent,
+                Some(lease),
+                SessionPurpose::Manage,
+            ),
+            "issue content publish",
+        )?;
+        let (admission, owner) = with_issued(&mut backend, issued, |backend| {
+            let command_id = checked(backend.issued_command_id(), "issued content command")?;
+            checked(
+                backend.begin_profile_content_owned(
+                    lease,
+                    BeginContentRequest {
+                        command_id,
+                        slot,
+                        expected_revision: current.revision,
+                        operation,
+                        payload_fingerprint: fingerprint,
+                        expires_at,
+                    },
+                ),
+                "admit content publish",
+            )
+        })?;
+        (issued, admission, owner)
     };
-    let files = checked(
-        ControlledContentFiles::new(paths.root()),
-        "controlled content originals",
-    )?;
-    let guard = checked(
-        checked(backend.lock(), "content guard lock")?.profile_content_preparation_guard(lease),
-        "content preparation guard",
-    )?;
-    let check = || guard.is_context_valid();
-    let mut preparation = files.preparation(reservation.as_ref(), &check);
-    let result = (|| {
+    let reserved: Check<_> = (|| match sources.image_sizes().filter(|sizes| !sizes.is_empty()) {
+        Some(sizes) => {
+            let mut backend = checked(backend.lock(), "reserve image lock")?;
+            with_issued(&mut backend, issued, |backend| {
+                checked(
+                    backend.reserve_profile_media(lease, &admission, &sizes),
+                    "reserve real image IDs",
+                )
+            })
+            .map(Some)
+        }
+        None => Ok(None),
+    })();
+    let reservation = match reserved {
+        Ok(reservation) => reservation,
+        Err(error) => {
+            // Sources must physically return before the original owner marks
+            // Begin failed. This negative receipt does not recheck client TTL.
+            drop(sources);
+            checked(
+                checked(backend.lock(), "failed reserve lock")?.fail_profile_content_owned(owner),
+                "return failed content owner",
+            )?;
+            return Err(error);
+        }
+    };
+    let result: Check<()> = (|| {
+        let files = checked(
+            ControlledContentFiles::new(paths.root()),
+            "controlled content originals",
+        )?;
+        let guard = checked(
+            checked(backend.lock(), "content guard lock")?.profile_content_preparation_guard(lease),
+            "content preparation guard",
+        )?;
+        let check = || guard.is_context_valid();
+        let mut preparation = files.preparation(reservation.as_ref(), &check);
         let prepared = checked(
             fc_ports::prepare_profile_content(&mut preparation, admission, sources),
             "prepare WIC/text content",
         )?;
-        checked(
-            checked(backend.lock(), "content commit lock")?.commit_profile_content(lease, prepared),
-            "commit prepared content",
-        )?;
+        let mut backend = checked(backend.lock(), "content commit lock")?;
+        with_issued(&mut backend, issued, |backend| {
+            checked(
+                backend.commit_profile_content(lease, prepared),
+                "commit prepared content",
+            )
+        })?;
         Ok(())
-    })();
-    // Real preparation owns original-file pins. Release those owners before
-    // settling the durable reservation, as in the production worker path.
-    drop(preparation);
-    if let Some(reservation) = reservation {
+    })(); // All source/preparation pins have actually returned, including Err.
+    let settled = if let Some(reservation) = reservation {
         checked(
             checked(backend.lock(), "settle content lock")?.settle_profile_media(reservation),
             "settle media reservation",
+        )
+    } else {
+        Ok(())
+    };
+    if result.is_err() {
+        // The original owned Begin, never a replacement command/scope, closes
+        // the failed flow after its physical producers have returned.
+        checked(
+            checked(backend.lock(), "failed content lock")?.fail_profile_content_owned(owner),
+            "return failed content owner",
         )?;
     }
-    result
+    settled?;
+    result?;
+    // Query the result using the original pair; a newly issued command would
+    // change the flow being observed and cannot prove this publication.
+    let mut backend = checked(backend.lock(), "content outcome lock")?;
+    let outcome = with_issued(&mut backend, issued, |backend| {
+        let command_id = checked(
+            backend.issued_command_id(),
+            "issued content outcome command",
+        )?;
+        checked(
+            backend.profile_content_outcome(lease, command_id),
+            "query original content outcome",
+        )
+    })?;
+    require(
+        outcome.is_some_and(|outcome| outcome.status == ProfileContentStatus::Committed),
+        "original content command committed",
+    )
 }
+
 fn publish_image(
     app: &App,
     paths: &DataPaths,

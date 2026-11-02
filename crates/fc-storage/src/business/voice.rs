@@ -51,6 +51,9 @@ pub(super) fn startup_check(
     Ok(())
 }
 fn error(e: StorageError) -> VoiceRepositoryError {
+    if let Some(error) = e.command_window_error() {
+        return VoiceRepositoryError::CommandWindow(error);
+    }
     match e {
         StorageError::Voice(e) => VoiceRepositoryError::Domain(e),
         StorageError::CommandIdReused => VoiceRepositoryError::IdempotencyConflict,
@@ -146,6 +149,32 @@ impl Operation {
         )
     }
 }
+fn policy_operation(
+    intent: &fc_ports::command_window::VoicePolicyIntent,
+    actor: &ActorContext,
+) -> Operation {
+    use fc_ports::command_window::VoicePolicyIntent;
+    match intent {
+        VoicePolicyIntent::Enabled {
+            enabled,
+            expected_voice,
+            ..
+        } => Operation::SetEnabled {
+            enabled: *enabled,
+            expected: *expected_voice,
+            actor: actor.clone(),
+        },
+        VoicePolicyIntent::Limits {
+            limits,
+            expected_voice,
+            ..
+        } => Operation::SetLimits {
+            limits: *limits,
+            expected: *expected_voice,
+            actor: actor.clone(),
+        },
+    }
+}
 impl<S: Send + 'static> BusinessRepository<S> {
     fn voice_operation(&self, op: Operation) -> Result<Value, VoiceRepositoryError> {
         let driver_guard =
@@ -170,23 +199,162 @@ impl<S: Send + 'static> BusinessRepository<S> {
             }
             return Err(VoiceRepositoryError::Faulted);
         }
-        let ticket = self
-            .handle
-            .try_transaction(VoiceTask {
-                op,
-                clock: self.clock.clone(),
-                session: self.session.clone(),
-                factory: self.factory.clone(),
-                active,
-                driver_guard,
-            })
-            .map_err(error)?;
+        use fc_ports::command_window::{TypedCommandIntent, VoicePolicyIntent};
+        let typed = match &op {
+            Operation::SetEnabled {
+                enabled,
+                expected,
+                actor,
+            } => Some((
+                TypedCommandIntent::VoicePolicy(VoicePolicyIntent::Enabled {
+                    enabled: *enabled,
+                    expected_voice: *expected,
+                    expected_identity: Revision::default(),
+                    expected_runtime: 0,
+                }),
+                actor.clone(),
+            )),
+            Operation::SetLimits {
+                limits,
+                expected,
+                actor,
+            } => Some((
+                TypedCommandIntent::VoicePolicy(VoicePolicyIntent::Limits {
+                    limits: *limits,
+                    expected_voice: *expected,
+                    expected_identity: Revision::default(),
+                    expected_runtime: 0,
+                }),
+                actor.clone(),
+            )),
+            _ => None,
+        };
+        let sql_policy = typed.is_some();
+        let task = VoiceTask {
+            op,
+            clock: self.clock.clone(),
+            session: self.session.clone(),
+            factory: self.factory.clone(),
+            active,
+            driver_guard,
+        };
+        let ticket = if let Some((intent, actor)) = typed {
+            self.handle
+                .try_transaction(super::typed_commands::TypedTask {
+                    inner: Some(Box::new(task)),
+                    intent,
+                    mode: crate::typed_command::Mode::Atomic,
+                    original: None,
+                    actor: Some(actor),
+                    clock: self.clock.clone(),
+                    session: self.session.clone(),
+                    manual: None,
+                })
+        } else {
+            self.handle.try_transaction(task)
+        }
+        .map_err(error)?;
         let bytes = match &self.voice_timeout {
             Some((timeout, _)) => ticket.wait_timeout(*timeout),
             None => ticket.wait(),
         }
         .map_err(error)?;
-        codec::value(&bytes).map_err(error)
+        if sql_policy {
+            let (_, stored, _) = super::typed_commands::read_reply(&bytes).map_err(error)?;
+            if stored.phase != 2 {
+                return Err(VoiceRepositoryError::Faulted);
+            }
+            codec::value(&stored.value).map_err(error)
+        } else {
+            codec::value(&bytes).map_err(error)
+        }
+    }
+    /// Durable acceptance precedes the first native stop. The review callback is
+    /// evaluated only for Fresh; historical retries recheck current authority.
+    pub fn accept_voice_policy(
+        &self,
+        intent: fc_ports::command_window::VoicePolicyIntent,
+        actor: &ActorContext,
+        review: SessionGuard,
+    ) -> Result<crate::typed_command::TypedAdmission, StorageError> {
+        use crate::{business::typed_commands::TypedTask, typed_command::Mode};
+        let op = policy_operation(&intent, actor);
+        let task = TypedTask {
+            inner: Some(Box::new(VoiceTask {
+                op,
+                clock: self.clock.clone(),
+                session: review,
+                factory: self.factory.clone(),
+                active: None,
+                driver_guard: None,
+            })),
+            intent: fc_ports::command_window::TypedCommandIntent::VoicePolicy(intent.clone()),
+            mode: Mode::Accept,
+            original: None,
+            actor: Some(actor.clone()),
+            clock: self.clock.clone(),
+            session: self.session.clone(),
+            manual: None,
+        };
+        let bytes = self.wait_typed_voice(task)?;
+        self.typed_admission(
+            &bytes,
+            fc_ports::command_window::TypedCommandIntent::VoicePolicy(intent),
+        )
+    }
+    pub fn complete_voice_policy(
+        &self,
+        permit: crate::typed_command::FirstExecutionPermit,
+        actor: &ActorContext,
+    ) -> Result<fc_ports::command_window::TypedCommandOutcome, StorageError> {
+        use crate::{
+            business::typed_commands::{outcome, read_reply, TypedTask},
+            typed_command::Mode,
+        };
+        let fc_ports::command_window::TypedCommandIntent::VoicePolicy(intent) = &permit.intent
+        else {
+            return Err(StorageError::InvalidCommand);
+        };
+        let op = policy_operation(intent, actor);
+        let deadline = self
+            .voice_timeout
+            .as_ref()
+            .and_then(|(t, _)| std::time::Instant::now().checked_add(*t));
+        let active = self.voice_timeout.as_ref().map(|(_, current)| {
+            let current = current.clone();
+            Arc::new(move || deadline.is_some_and(|d| std::time::Instant::now() < d) && current())
+                as Arc<dyn Fn() -> bool + Send + Sync>
+        });
+        let task = TypedTask {
+            inner: Some(Box::new(VoiceTask {
+                op,
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+                factory: self.factory.clone(),
+                active,
+                driver_guard: None,
+            })),
+            intent: permit.intent.clone(),
+            mode: Mode::Complete,
+            original: Some(permit.issued),
+            actor: Some(actor.clone()),
+            clock: self.clock.clone(),
+            session: self.session.clone(),
+            manual: None,
+        };
+        let bytes = self.wait_typed_voice(task)?;
+        let (_, stored, _) = read_reply(&bytes)?;
+        outcome(&permit.intent, &stored)
+    }
+    fn wait_typed_voice(
+        &self,
+        task: super::typed_commands::TypedTask<S>,
+    ) -> Result<Vec<u8>, StorageError> {
+        let ticket = self.handle.try_transaction(task)?;
+        match &self.voice_timeout {
+            Some((timeout, _)) => ticket.wait_timeout(*timeout),
+            None => ticket.wait(),
+        }
     }
     /// Trusted executor only. Start and FirstWrite recheck the original exact
     /// Web lease and current binding both during evaluation and before COMMIT.
@@ -373,7 +541,20 @@ fn prune(
     now: i64,
     mutations: &mut Vec<Mutation>,
 ) -> Result<(), StorageError> {
-    for job in s.maintain(now).map_err(err)? {
+    prune_retaining_cancel(s, now, mutations, None)
+}
+fn prune_retaining_cancel(
+    s: &mut VoiceSnapshot,
+    now: i64,
+    mutations: &mut Vec<Mutation>,
+    protected_cancel: Option<VoiceJobId>,
+) -> Result<(), StorageError> {
+    let removed = match protected_cancel {
+        Some(id) => s.maintain_after_cancel(now, id),
+        None => s.maintain(now),
+    }
+    .map_err(err)?;
+    for job in removed {
         mutations.push(Mutation::Delete {
             key: receipt_key(job.command_id),
         });
@@ -489,6 +670,43 @@ fn retire_accepted(s: &mut VoiceSnapshot, now: i64) -> Result<(), StorageError> 
     Ok(())
 }
 impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
+    fn command_family(&self) -> Option<fc_ports::command_window::CommandFamily> {
+        match self.op {
+            Operation::SetEnabled { .. } | Operation::SetLimits { .. } => {
+                Some(fc_ports::command_window::CommandFamily::Voice)
+            }
+            _ => None,
+        }
+    }
+
+    fn lifetime(&self) -> TransactionLifetime {
+        match self.op {
+            Operation::Driver(VoiceDriverUpdate {
+                action:
+                    VoiceDriverAction::Released
+                    | VoiceDriverAction::Fail(_)
+                    | VoiceDriverAction::Interrupt
+                    | VoiceDriverAction::ExpireBeforeWrite
+                    | VoiceDriverAction::NaturalComplete,
+                ..
+            })
+            | Operation::EmergencyStop
+            | Operation::Recover
+            | Operation::Maintain
+            | Operation::Finalize { .. } => TransactionLifetime::OwnerReturn,
+            _ => TransactionLifetime::Ordinary,
+        }
+    }
+
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        match &self.op {
+            Operation::Submit { request, .. } => Some(request.command_id),
+            Operation::Cancel { request, .. } => Some(request.command_id),
+            _ => None,
+        }
+        .map(|id| (fc_ports::command_window::CommandFamily::Voice, id))
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
     }
@@ -525,6 +743,7 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
         ) {
             prune(&mut s, now, &mut mutations)?;
         }
+        let mut protected_cancel = None;
         let mut pre_actor: Option<(ActorContext, Option<ClassId>)> = None;
         let mut pre_management = false;
         let snapshot_outcome = matches!(
@@ -680,6 +899,9 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
                     )
                     .map_err(err)?;
                 mutations.push(receipt(r.command_id, hash, &result)?);
+                // The newly emitted receipt must not be Put and Delete in
+                // this same transaction when the audit count crosses 100.
+                protected_cancel = Some(result.id);
                 pre_actor = Some((actor, None));
                 dto::job(&result)
             }
@@ -816,7 +1038,7 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
                 dto::snapshot(&s)
             }
         };
-        prune(&mut s, now, &mut mutations)?;
+        prune_retaining_cancel(&mut s, now, &mut mutations, protected_cancel)?;
         if s == original && mutations.is_empty() {
             return Ok(TransactionDecision {
                 outcome: encode(&outcome)?,
@@ -928,5 +1150,617 @@ pub(crate) fn sanitize_backup(db: &mut Connection) -> Result<(), StorageError> {
             params![RECEIPT_PREFIX, "business/voice-receipt/v10"],
         )
         .map_err(|_| StorageError::Database)?;
+    transaction
+        .execute(
+            "DELETE FROM documents WHERE key>=?1 AND key<?2",
+            params![COMMAND_BINDING_PREFIX, "business/voice-job-command/v3/"],
+        )
+        .map_err(|_| StorageError::Database)?;
     transaction.commit().map_err(|_| StorageError::Database)
+}
+
+/// Domain terminal voice states require the original Released transition.
+/// Expiring a client command is deliberately absent from this decision.
+pub(crate) fn command_window_holds(bytes: &[u8]) -> Result<Vec<(CommandId, bool)>, StorageError> {
+    let snapshot = dto::read_snapshot(&codec::value(bytes)?)?;
+    let mut holds = Vec::with_capacity(snapshot.jobs.len() * 2);
+    for job in snapshot.jobs {
+        holds.push((job.command_id, !job.state.terminal()));
+        if let Some(cancel) = job.cancel_command {
+            holds.push((cancel, !job.state.terminal()));
+        }
+    }
+    Ok(holds)
+}
+
+pub(crate) const COMMAND_BINDING_PREFIX: &str = "business/voice-job-command/v2/";
+pub(crate) fn command_binding_key(id: VoiceJobId) -> String {
+    format!("{COMMAND_BINDING_PREFIX}{:020}", id.get())
+}
+pub(crate) fn read_command_binding(
+    bytes: &[u8],
+) -> Result<fc_ports::command_window::CommandTicket, StorageError> {
+    let value = codec::value(bytes)?;
+    codec::object_fields(&value, &["format", "ticket"])?;
+    if codec::number(&value, "format")? != 2 {
+        return Err(StorageError::Database);
+    }
+    fc_ports::command_window::CommandTicket::parse(
+        value["ticket"].as_str().ok_or(StorageError::Database)?,
+    )
+    .map_err(|_| StorageError::Database)
+}
+/// Only the dedicated VoiceTask's exact prune deletes authorize retirement.
+/// A job still present in the new snapshot, including a held original owner,
+/// is never selected. The actual terminal transition can be in this same TX.
+pub(crate) fn command_window_pruned_jobs(
+    old: &[u8],
+    new: &[u8],
+    mutations: &[Mutation],
+) -> Result<Vec<VoiceJob>, StorageError> {
+    let old = dto::read_snapshot(&codec::value(old)?)?;
+    let new = dto::read_snapshot(&codec::value(new)?)?;
+    let mut pruned = Vec::new();
+    for job in old.jobs {
+        if new.jobs.iter().any(|retained| retained.id == job.id) {
+            continue;
+        }
+        for id in std::iter::once(job.command_id).chain(job.cancel_command) {
+            let key = receipt_key(id);
+            if !mutations
+                .iter()
+                .any(|m| matches!(m, Mutation::Delete { key: deleted } if deleted == &key))
+            {
+                return Err(StorageError::Database);
+            }
+        }
+        pruned.push(job);
+    }
+    Ok(pruned)
+}
+/// Validate the indexed original receipt instead of trusting a numeric alias.
+pub(crate) fn command_window_receipt_matches(
+    bytes: &[u8],
+    job: &VoiceJob,
+    command: CommandId,
+) -> Result<(), StorageError> {
+    let v = codec::value(bytes)?;
+    codec::object_fields(&v, &["fingerprint", "job", "owner", "digest"])?;
+    let fingerprint: Vec<u8> =
+        serde_json::from_value(v["fingerprint"].clone()).map_err(|_| StorageError::Database)?;
+    let digest: Vec<u8> =
+        serde_json::from_value(v["digest"].clone()).map_err(|_| StorageError::Database)?;
+    let id = codec::number(&v, "job")?;
+    let owner = codec::number(&v, "owner")?;
+    let bound = codec::bytes(&json!({"fingerprint":fingerprint,"job":id,"owner":owner}))?;
+    if fingerprint.len() != 32
+        || digest.as_slice() != Sha256::digest(bound).as_slice()
+        || id != job.id.get()
+        || owner != job.owner.get()
+        || (command != job.command_id && job.cancel_command != Some(command))
+    {
+        return Err(StorageError::Database);
+    }
+    Ok(())
+}
+pub(crate) fn command_window_jobs(bytes: &[u8]) -> Result<Vec<VoiceJob>, StorageError> {
+    Ok(dto::read_snapshot(&codec::value(bytes)?)?.jobs)
+}
+
+impl<S: Send + 'static> BusinessRepository<S> {
+    pub fn check_command_window(
+        &self,
+        issued: fc_ports::command_window::IssuedCommand,
+    ) -> Result<(), StorageError> {
+        let ticket = self.handle.try_check_command(issued)?;
+        match &self.voice_timeout {
+            Some((timeout, _)) => ticket.wait_timeout(*timeout),
+            None => ticket.wait(),
+        }
+    }
+    pub fn voice_job_command_binding(
+        &self,
+        id: VoiceJobId,
+        actor: &ActorContext,
+    ) -> Result<Option<fc_ports::command_window::CommandTicket>, VoiceRepositoryError> {
+        let bytes = self
+            .handle
+            .try_transaction(CommandRead {
+                kind: CommandReadKind::Binding(id),
+                actor: actor.clone(),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+            })
+            .map_err(error)?
+            .wait()
+            .map_err(error)?;
+        let value = codec::value(&bytes).map_err(error)?;
+        if value.is_null() {
+            Ok(None)
+        } else {
+            fc_ports::command_window::CommandTicket::parse(
+                value
+                    .as_str()
+                    .ok_or_else(|| error(StorageError::Database))?,
+            )
+            .map(Some)
+            .map_err(|_| error(StorageError::Database))
+        }
+    }
+    pub fn voice_command_outcome(
+        &self,
+        id: CommandId,
+        actor: &ActorContext,
+    ) -> Result<Option<VoiceJob>, VoiceRepositoryError> {
+        let bytes = self
+            .handle
+            .try_transaction(CommandRead {
+                kind: CommandReadKind::Outcome(id),
+                actor: actor.clone(),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+            })
+            .map_err(error)?
+            .wait()
+            .map_err(error)?;
+        let value = codec::value(&bytes).map_err(error)?;
+        if value.is_null() {
+            Ok(None)
+        } else {
+            dto::read_job(&value)
+                .map(public_job)
+                .map(Some)
+                .map_err(error)
+        }
+    }
+}
+#[derive(Clone, Copy)]
+enum CommandReadKind {
+    Binding(VoiceJobId),
+    Outcome(CommandId),
+}
+struct CommandRead {
+    kind: CommandReadKind,
+    actor: ActorContext,
+    clock: Arc<dyn Clock + Send + Sync>,
+    session: SessionGuard,
+}
+impl<S> TransactionTask<S> for CommandRead {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        match self.kind {
+            CommandReadKind::Outcome(id) => {
+                Some((fc_ports::command_window::CommandFamily::Voice, id))
+            }
+            _ => None,
+        }
+    }
+
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+    }
+    fn evaluate(
+        self: Box<Self>,
+        d: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        let identity = load_identity(d)?;
+        let snapshot = load(d)?;
+        (self.session)(&identity, &self.actor)?;
+        let (outcome, job) = match self.kind {
+            CommandReadKind::Binding(id) => {
+                let job = snapshot
+                    .jobs
+                    .iter()
+                    .find(|job| job.id == id)
+                    .ok_or(err(VoiceError::Missing))?;
+                query_authorize(
+                    &identity,
+                    &self.actor,
+                    job,
+                    self.clock.as_ref(),
+                    &self.session,
+                )?;
+                let binding = d
+                    .get(&command_binding_key(id))?
+                    .map(|row| read_command_binding(&row.value))
+                    .transpose()?;
+                (
+                    binding.map_or(Value::Null, |ticket| json!(ticket.to_string())),
+                    Some(job.clone()),
+                )
+            }
+            CommandReadKind::Outcome(id) => {
+                let Some(row) = d.get(&receipt_key(id))? else {
+                    return Ok(TransactionDecision {
+                        precommit: None,
+                        outcome: encode(&Value::Null)?,
+                        commit: None,
+                    });
+                };
+                let value = codec::value(&row.value)?;
+                codec::object_fields(&value, &["fingerprint", "job", "owner", "digest"])?;
+                let fingerprint: Vec<u8> = serde_json::from_value(value["fingerprint"].clone())
+                    .map_err(|_| StorageError::Database)?;
+                let digest: Vec<u8> = serde_json::from_value(value["digest"].clone())
+                    .map_err(|_| StorageError::Database)?;
+                let job_id = codec::number(&value, "job")?;
+                let owner = codec::number(&value, "owner")?;
+                let bound =
+                    codec::bytes(&json!({"fingerprint":fingerprint,"job":job_id,"owner":owner}))?;
+                if fingerprint.len() != 32
+                    || digest.len() != 32
+                    || digest.as_slice() != Sha256::digest(bound).as_slice()
+                {
+                    return Err(StorageError::Database);
+                }
+                let job = snapshot
+                    .jobs
+                    .iter()
+                    .find(|job| job.id.get() == job_id)
+                    .ok_or(err(VoiceError::Missing))?;
+                if job.owner.get() != owner
+                    || job.command_id != id && job.cancel_command != Some(id)
+                {
+                    return Err(StorageError::Database);
+                }
+                query_authorize(
+                    &identity,
+                    &self.actor,
+                    job,
+                    self.clock.as_ref(),
+                    &self.session,
+                )?;
+                (dto::job(job), Some(job.clone()))
+            }
+        };
+        let precommit = job.map(|job| {
+            Box::new(move || {
+                query_authorize(
+                    &identity,
+                    &self.actor,
+                    &job,
+                    self.clock.as_ref(),
+                    &self.session,
+                )
+            }) as Box<dyn FnOnce() -> Result<(), StorageError> + Send>
+        });
+        Ok(TransactionDecision {
+            precommit,
+            outcome: encode(&outcome)?,
+            commit: None,
+        })
+    }
+}
+
+#[cfg(test)]
+mod c2_prune_tests {
+    use super::*;
+    use crate::command_window::{IssueCommand, Window, WindowClock};
+    use fc_ports::command_window::{CommandFamily, CommandOwner, CommandTicket, IssuedCommand};
+    use rusqlite::Connection;
+
+    struct Fixed;
+    impl WindowClock for Fixed {
+        fn wall_millis(&self) -> Result<u64, StorageError> {
+            Ok(1000)
+        }
+        fn monotonic_millis(&self) -> u64 {
+            0
+        }
+    }
+    fn issue(
+        db: &mut Connection,
+        window: &mut Window,
+        id: u64,
+        actor: &ActorContext,
+    ) -> IssuedCommand {
+        let mut entropy = [7; 24];
+        entropy[16..].copy_from_slice(&id.to_be_bytes());
+        window
+            .issue(
+                db,
+                IssueCommand {
+                    family: CommandFamily::Voice,
+                    owner: CommandOwner::authenticated(actor),
+                    entropy,
+                },
+            )
+            .unwrap()
+    }
+    fn append_job(
+        snapshot: &mut VoiceSnapshot,
+        actor: &ActorContext,
+        asset: u64,
+        command: CommandId,
+        now: i64,
+    ) -> VoiceJob {
+        let reserved = snapshot
+            .reserve(
+                VoiceAssetId::new(asset).unwrap(),
+                actor,
+                ClassId::new(1).unwrap(),
+                now,
+            )
+            .unwrap();
+        let asset = snapshot
+            .publish(
+                reserved.id,
+                reserved.revision,
+                VoicePcmMetadata {
+                    byte_length: 16044,
+                    frame_count: 8000,
+                    sha256: [7; 32],
+                },
+                now,
+            )
+            .unwrap();
+        snapshot
+            .submit(command, asset.id, asset.revision, 1, actor, now)
+            .unwrap()
+    }
+    fn apply(db: &Connection, changes: &[Mutation]) {
+        for change in changes {
+            match change {
+                Mutation::Put { key, value } => {
+                    db.execute("INSERT INTO documents VALUES(?1,?2,1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",params![key,value]).unwrap();
+                }
+                Mutation::Delete { key } => {
+                    db.execute("DELETE FROM documents WHERE key=?1", [key])
+                        .unwrap();
+                }
+            }
+        }
+    }
+    fn key(issued: IssuedCommand) -> String {
+        let (slot, _) =
+            crate::business::command_window::legacy(&receipt_key(issued.command_id)).unwrap();
+        crate::business::command_window::namespaced(slot, issued.ticket)
+    }
+    struct Fixture {
+        db: Connection,
+        window: Window,
+        submit: IssuedCommand,
+        cancel: IssuedCommand,
+        held: IssuedCommand,
+        changes: Vec<Mutation>,
+    }
+    fn fixture() -> Fixture {
+        let mut db = Connection::open_in_memory().unwrap();
+        db.execute_batch("PRAGMA foreign_keys=ON;CREATE TABLE documents(key TEXT PRIMARY KEY,value BLOB NOT NULL,revision INTEGER NOT NULL);CREATE TABLE command_journal(command_id TEXT PRIMARY KEY,fingerprint BLOB,revision INTEGER);").unwrap();
+        let mut window = Window::open(&mut db, Arc::new(Fixed)).unwrap();
+        let day = fc_domain::time::LocalDate::new(2026, 10, 30).unwrap();
+        let instant = fc_domain::time::LocalDateTime::new(day, 3600).unwrap();
+        let now = civil_seconds(instant);
+        let actor = ActorContext {
+            principal_id: PrincipalId::new(1).unwrap(),
+            school_id: fc_domain::ids::SchoolId::new(1).unwrap(),
+            auth_epoch: fc_domain::ids::AuthEpoch::new(1),
+            expires_at: fc_domain::time::LocalDateTime::new(
+                fc_domain::time::LocalDate::new(2026, 11, 2).unwrap(),
+                3600,
+            )
+            .unwrap(),
+            origin: TrustedOrigin::Web,
+        };
+        // The retained original owner has an earlier serial than the pruned
+        // commands: advancing a global watermark would incorrectly retire it.
+        let held = issue(&mut db, &mut window, 22, &actor);
+        let submit = issue(&mut db, &mut window, 11, &actor);
+        let cancel = issue(&mut db, &mut window, 33, &actor);
+        let mut snapshot = VoiceSnapshot::default();
+        let first = append_job(&mut snapshot, &actor, 1, submit.command_id, now);
+        let terminal = snapshot
+            .cancel(first.id, first.revision, cancel.command_id, now)
+            .unwrap();
+        let queued = append_job(&mut snapshot, &actor, 2, held.command_id, now);
+        let starting = snapshot
+            .drive(
+                &VoiceDriverUpdate {
+                    job_id: queued.id,
+                    expected_revision: queued.revision,
+                    generation: queued.generation,
+                    action: VoiceDriverAction::Start,
+                },
+                now,
+            )
+            .unwrap();
+        let playing = snapshot
+            .drive(
+                &VoiceDriverUpdate {
+                    job_id: starting.id,
+                    expected_revision: starting.revision,
+                    generation: starting.generation,
+                    action: VoiceDriverAction::FirstWrite,
+                },
+                now,
+            )
+            .unwrap();
+        snapshot.validate().unwrap();
+        for (issued, job) in [(submit, &terminal), (cancel, &terminal), (held, &playing)] {
+            crate::typed_command::raw_claim(&db, issued).unwrap();
+            let mut changes = vec![receipt(issued.command_id, vec![7; 32], job).unwrap()];
+            crate::command_window::register_documents(&db, issued, &mut changes).unwrap();
+            apply(&db, &changes);
+        }
+        let old = vec![mutation(&snapshot).unwrap()];
+        apply(&db, &old);
+        crate::command_window::sync_owner_holds(&db, &old, Some(submit), 1).unwrap();
+        crate::command_window::sync_owner_holds(&db, &old, Some(held), 1).unwrap();
+        let mut changes = Vec::new();
+        prune(&mut snapshot, now + AUDIT_TTL_SECONDS, &mut changes).unwrap();
+        assert_eq!(snapshot.jobs.len(), 1);
+        assert_eq!(snapshot.jobs[0].id, playing.id);
+        assert_eq!(snapshot.jobs[0].state, VoiceState::Playing);
+        changes.push(mutation(&snapshot).unwrap());
+        Fixture {
+            db,
+            window,
+            submit,
+            cancel,
+            held,
+            changes,
+        }
+    }
+    fn charge(db: &Connection, issued: IssuedCommand) -> u64 {
+        db.query_row(
+            "SELECT charged_bytes FROM command_window_entries WHERE serial=?1",
+            [issued.ticket.serial()],
+            |r| r.get(0),
+        )
+        .unwrap()
+    }
+    #[test]
+    fn c2_voice_prune_is_atomic_replay_inert_exactly_charged_and_preserves_held_owner() {
+        let mut f = fixture();
+        let before = charge(&f.db, f.submit) + charge(&f.db, f.cancel);
+        let held_charge = charge(&f.db, f.held);
+        let removed_bytes: u64 = [f.submit, f.cancel]
+            .into_iter()
+            .map(|i| {
+                f.db.query_row(
+                    "SELECT length(value) FROM documents WHERE key=?1",
+                    [key(i)],
+                    |r| r.get::<_, u64>(0),
+                )
+                .unwrap()
+                    + key(i).len() as u64
+                    + 32
+            })
+            .sum();
+        {
+            let tx = f.db.transaction().unwrap();
+            crate::command_window::sync_owner_holds(&tx, &f.changes, None, 2).unwrap();
+            assert_eq!(
+                f.window.check(&tx, f.submit),
+                Err(StorageError::CommandExpired)
+            );
+            tx.rollback().unwrap();
+        }
+        assert_eq!(f.window.check(&f.db, f.submit), Ok(()));
+        assert_eq!(charge(&f.db, f.submit) + charge(&f.db, f.cancel), before);
+        {
+            let tx = f.db.transaction().unwrap();
+            crate::command_window::sync_owner_holds(&tx, &f.changes, None, 2).unwrap();
+            apply(&tx, &f.changes);
+            tx.commit().unwrap();
+        }
+        for issued in [f.submit, f.cancel] {
+            assert_eq!(
+                f.window.check(&f.db, issued),
+                Err(StorageError::CommandExpired)
+            );
+            assert_eq!(
+                crate::typed_command::raw_check(&f.db, issued),
+                Err(StorageError::CommandExpired)
+            );
+            assert!(!f
+                .db
+                .query_row(
+                    "SELECT EXISTS(SELECT 1 FROM documents WHERE key=?1)",
+                    [key(issued)],
+                    |r| r.get::<_, bool>(0)
+                )
+                .unwrap());
+            assert_eq!(
+                f.db.query_row(
+                    "SELECT COUNT(*) FROM command_window_documents WHERE serial=?1",
+                    [issued.ticket.serial()],
+                    |r| r.get::<_, u64>(0)
+                )
+                .unwrap(),
+                0
+            );
+            assert_eq!(charge(&f.db, issued), 256);
+        }
+        assert_eq!(
+            before - charge(&f.db, f.submit) - charge(&f.db, f.cancel),
+            removed_bytes
+        );
+        assert_eq!(f.window.check(&f.db, f.held), Ok(()));
+        assert_eq!(charge(&f.db, f.held), held_charge);
+        assert!(f
+            .db
+            .query_row(
+                "SELECT held FROM command_window_entries WHERE serial=?1",
+                [f.held.ticket.serial()],
+                |r| r.get::<_, bool>(0)
+            )
+            .unwrap());
+        assert_eq!(
+            f.db.query_row("SELECT COUNT(*) FROM command_window_entries", [], |r| r
+                .get::<_, u64>(0))
+                .unwrap(),
+            3
+        );
+        // Re-enter the actual startup validation; raw tombstones remain denied.
+        let reopened = Window::open(&mut f.db, Arc::new(Fixed)).unwrap();
+        assert_eq!(
+            reopened.check(&f.db, f.submit),
+            Err(StorageError::CommandExpired)
+        );
+        assert_eq!(reopened.check(&f.db, f.held), Ok(()));
+        let action = crate::typed_command::WindowAction::new(
+            fc_ports::command_window::TypedCommandIntent::CalendarManualFetch { year: 2026 },
+            crate::typed_command::Mode::Accept,
+        );
+        assert!(matches!(
+            crate::typed_command::read(&f.db, f.submit, &action),
+            Err(StorageError::CommandIdReused)
+        ));
+        // No payload is needed in a raw tombstone; all other phases fail closed.
+        f.db.execute(
+            "UPDATE command_window_consumption SET phase=1 WHERE serial=?1",
+            [f.cancel.ticket.serial()],
+        )
+        .unwrap();
+        assert_eq!(
+            crate::typed_command::open(&f.db),
+            Err(StorageError::Database)
+        );
+    }
+    #[test]
+    fn c2_voice_prune_rejects_foreign_alias_and_missing_original_prune_markers() {
+        let mut f = fixture();
+        let without_markers = f
+            .changes
+            .iter()
+            .filter(|m| !matches!(m, Mutation::Delete { .. }))
+            .cloned()
+            .collect::<Vec<_>>();
+        {
+            let tx = f.db.transaction().unwrap();
+            assert_eq!(
+                crate::command_window::sync_owner_holds(&tx, &without_markers, None, 2),
+                Err(StorageError::Database)
+            );
+            tx.rollback().unwrap();
+        }
+        let original = key(f.cancel);
+        let (slot, _) = crate::business::command_window::owned(&original).unwrap();
+        let foreign = crate::business::command_window::namespaced(
+            slot,
+            CommandTicket::new([8; 16], f.cancel.ticket.serial()).unwrap(),
+        );
+        f.db.execute(
+            "UPDATE documents SET key=?1 WHERE key=?2",
+            params![foreign, original],
+        )
+        .unwrap();
+        f.db.execute(
+            "UPDATE command_window_documents SET key=?1 WHERE key=?2",
+            params![foreign, original],
+        )
+        .unwrap();
+        let before = charge(&f.db, f.cancel);
+        {
+            let tx = f.db.transaction().unwrap();
+            assert_eq!(
+                crate::command_window::sync_owner_holds(&tx, &f.changes, None, 2),
+                Err(StorageError::Database)
+            );
+            tx.rollback().unwrap();
+        }
+        assert_eq!(charge(&f.db, f.cancel), before);
+        assert_eq!(f.window.check(&f.db, f.submit), Ok(()));
+        assert_eq!(f.window.check(&f.db, f.held), Ok(()));
+    }
 }

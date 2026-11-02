@@ -1,6 +1,8 @@
 //! Typed material metadata only. Binary upload/download uses bounded stream ports.
+use super::command_window::CommandReference;
 use crate::{parse, ProtocolError, SCHEMA_VERSION};
 use fc_domain::{ids::*, materials::*};
+use fc_ports::command_window::CommandTicket;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -33,6 +35,9 @@ pub enum MaterialRoute {
     },
     Command {
         command_id: CommandId,
+    },
+    WindowCommand {
+        command: CommandReference,
     },
     Download {
         scope: MaterialScope,
@@ -114,6 +119,12 @@ pub(super) fn route(path: &str) -> Option<MaterialRoute> {
         ["folders", a, b, "delete"] => MaterialRoute::Delete {
             scope: scope(a, b)?,
         },
+        ["commands", ticket, i] => MaterialRoute::WindowCommand {
+            command: CommandReference {
+                ticket: CommandTicket::parse(ticket).ok()?,
+                command_id: CommandId::new(id(i)?).ok()?,
+            },
+        },
         ["commands", i] => MaterialRoute::Command {
             command_id: CommandId::new(id(i)?).ok()?,
         },
@@ -160,17 +171,21 @@ pub fn upload(bytes: &[u8]) -> Result<UploadInput, ProtocolError> {
 struct AppendDto {
     schema_version: u16,
     command_id: String,
+    #[serde(default, deserialize_with = "super::command_window::provided_ticket")]
+    command_ticket: Option<String>,
     upload_id: String,
     allowed_class_ids: Vec<String>,
 }
 pub struct AppendInput {
     pub command_id: CommandId,
+    pub command_ticket: Option<CommandTicket>,
     pub upload_id: u64,
     pub allowed_class_ids: Vec<ClassId>,
 }
 pub fn append(bytes: &[u8]) -> Result<AppendInput, ProtocolError> {
     let d: AppendDto = parse(bytes)?;
-    schema(d.schema_version)?;
+    let command_ticket =
+        super::command_window::ticket(d.schema_version, d.command_ticket.as_deref())?;
     if d.allowed_class_ids.is_empty()
         || d.allowed_class_ids.len() > fc_domain::identity::MAX_CLASSES
     {
@@ -186,6 +201,7 @@ pub fn append(bytes: &[u8]) -> Result<AppendInput, ProtocolError> {
         classes.push(c)
     }
     Ok(AppendInput {
+        command_ticket,
         command_id: CommandId::new(id(&d.command_id).ok_or(ProtocolError::InvalidCommand)?)
             .map_err(|_| ProtocolError::InvalidCommand)?,
         upload_id: id(&d.upload_id).ok_or(ProtocolError::InvalidCommand)?,
@@ -197,20 +213,25 @@ pub fn append(bytes: &[u8]) -> Result<AppendInput, ProtocolError> {
 struct DeleteDto {
     schema_version: u16,
     command_id: String,
+    #[serde(default, deserialize_with = "super::command_window::provided_ticket")]
+    command_ticket: Option<String>,
     material_id: String,
     resource_version_id: String,
     expected_material_revision: String,
 }
 pub struct DeleteInput {
     pub command_id: CommandId,
+    pub command_ticket: Option<CommandTicket>,
     pub material_id: MaterialId,
     pub resource_version_id: ResourceVersionId,
     pub expected_material_revision: Revision,
 }
 pub fn delete(bytes: &[u8]) -> Result<DeleteInput, ProtocolError> {
     let d: DeleteDto = parse(bytes)?;
-    schema(d.schema_version)?;
+    let command_ticket =
+        super::command_window::ticket(d.schema_version, d.command_ticket.as_deref())?;
     Ok(DeleteInput {
+        command_ticket,
         command_id: CommandId::new(id(&d.command_id).ok_or(ProtocolError::InvalidCommand)?)
             .map_err(|_| ProtocolError::InvalidCommand)?,
         material_id: MaterialId::new(id(&d.material_id).ok_or(ProtocolError::InvalidCommand)?)
@@ -480,6 +501,21 @@ pub fn command(
         record: result.map(|r| record(r.1)),
     })
 }
+/// Exact v2 identity echo; domain record and legacy payload serialization remain unchanged.
+pub fn committed_window(
+    id: CommandId,
+    scope: MaterialScope,
+    r: &MaterialRecord,
+    command: CommandReference,
+) -> Result<Vec<u8>, ProtocolError> {
+    super::command_window::bind_response(&committed(id, scope, r)?, command)
+}
+pub fn command_window(
+    reference: CommandReference,
+    result: Option<(MaterialScope, &MaterialRecord)>,
+) -> Result<Vec<u8>, ProtocolError> {
+    super::command_window::bind_response(&command(reference.command_id, result)?, reference)
+}
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct Ready {
@@ -622,5 +658,85 @@ mod tests {
             ProtocolError::TooLarge
         );
         assert!(scopes(Revision::new(1), 1, 20, &[]).is_err());
+    }
+    #[test]
+    fn window_mutations_require_the_explicit_pair_without_changing_business_values() {
+        let ticket = CommandTicket::new([0xab; 16], 9007199254740993).unwrap();
+        let value = serde_json::json!({"schemaVersion":2,"commandId":u64::MAX.to_string(),"commandTicket":ticket.to_string(),"uploadId":"2","allowedClassIds":["9","3"]});
+        let bytes = serde_json::to_vec(&value).unwrap();
+        let decoded = append(&bytes).unwrap();
+        assert_eq!(decoded.command_id.get(), u64::MAX);
+        assert_eq!(decoded.command_ticket, Some(ticket));
+        assert_eq!(decoded.upload_id, 2);
+        assert_eq!(
+            decoded
+                .allowed_class_ids
+                .iter()
+                .map(|id| id.get())
+                .collect::<Vec<_>>(),
+            [9, 3]
+        );
+        let delete_value = serde_json::json!({"schemaVersion":2,"commandId":"7","commandTicket":ticket.to_string(),"materialId":"2","resourceVersionId":"3","expectedMaterialRevision":"1"});
+        let decoded = delete(&serde_json::to_vec(&delete_value).unwrap()).unwrap();
+        assert_eq!(decoded.command_ticket, Some(ticket));
+        assert_eq!(decoded.expected_material_revision.get(), 1);
+        for bad_ticket in [
+            serde_json::Value::Null,
+            serde_json::json!("1"),
+            serde_json::json!("c2:ABABABABABABABABABABABABABABABAB:1"),
+            serde_json::json!("c2:abababababababababababababababab:01"),
+        ] {
+            let mut invalid = value.clone();
+            invalid["commandTicket"] = bad_ticket;
+            assert!(append(&serde_json::to_vec(&invalid).unwrap()).is_err());
+        }
+        let mut missing = delete_value.clone();
+        missing.as_object_mut().unwrap().remove("commandTicket");
+        assert!(delete(&serde_json::to_vec(&missing).unwrap()).is_err());
+        let mut mixed = delete_value.clone();
+        mixed["schemaVersion"] = serde_json::json!(1);
+        assert!(delete(&serde_json::to_vec(&mixed).unwrap()).is_err());
+        let mut wrong = delete_value;
+        wrong["commandTicket"] = serde_json::json!("c2:00000000000000000000000000000000:1");
+        assert!(delete(&serde_json::to_vec(&wrong).unwrap()).is_err());
+    }
+    #[test]
+    fn window_history_path_keeps_ticket_and_raw_id_separate_without_numeric_fallback() {
+        let ticket = CommandTicket::new([7; 16], i64::MAX as u64).unwrap();
+        let path = format!("commands/{ticket}/{}", u64::MAX);
+        assert_eq!(
+            route(&path),
+            Some(MaterialRoute::WindowCommand {
+                command: CommandReference {
+                    ticket,
+                    command_id: CommandId::new(u64::MAX).unwrap()
+                }
+            })
+        );
+        assert_eq!(
+            route(&path).unwrap().allowed_methods(),
+            crate::web::AllowedMethods::Get
+        );
+        for path in [
+            format!("commands/{ticket}"),
+            format!("commands/{ticket}/01"),
+            format!("commands/{ticket}/1/2"),
+            format!("commands/{ticket}/0"),
+            format!("commands/{ticket}/1?renew=1"),
+        ] {
+            assert!(route(&path).is_none());
+        }
+        let reference = CommandReference {
+            ticket,
+            command_id: CommandId::new(u64::MAX).unwrap(),
+        };
+        let bytes = command_window(reference, None).unwrap();
+        let value: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(value["schemaVersion"], 2);
+        assert_eq!(value["commandTicket"], ticket.to_string());
+        assert_eq!(value["commandId"], u64::MAX.to_string());
+        assert_eq!(value["state"], "NOT_FOUND");
+        assert_eq!(value["scope"], serde_json::Value::Null);
+        assert_eq!(value["record"], serde_json::Value::Null);
     }
 }

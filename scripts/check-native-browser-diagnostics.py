@@ -52,6 +52,16 @@ assert valid(candidate)[0]['finished'] is False
 checks.append('fault-instant frozen facts survive a later already pending body-analysis completion')
 assert valid({'status': 'PASS', 'network': [], 'wireResponses': []}) == []
 checks.append('normal reports omit diagnostics')
+issue_failure=copy.deepcopy(value)
+issue_failure['network'][0].update(method='POST',url=origin+'/fc/api/v1/commands',status=201,wireStatus=201)
+issue_failure['network'][0]['failure'].update(kind='command-issue',path='/fc/api/v1/commands')
+assert valid(issue_failure)[0]['kind']=='command-issue'
+wrong_issue=copy.deepcopy(issue_failure);wrong_issue['network'][0]['method']='GET'
+try: valid(wrong_issue)
+except RuntimeError: pass
+else: raise AssertionError('issuer GET accepted as command-issue failure')
+checks.append('exact issuer POST failure is diagnostic only; issuer GET rejected')
+
 mutations = [
     ('extra header field', lambda v: v['network'][0]['failure'].update(headers={'Cookie': 'PRIVATE'})),
     ('extra raw frame field', lambda v: v['network'][0]['failure'].update(rawCDP='PRIVATE')),

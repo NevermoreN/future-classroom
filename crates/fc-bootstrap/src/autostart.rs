@@ -96,6 +96,14 @@ impl Job {
         context: &JobContext,
         system: &mut dyn AutostartSystem,
     ) -> Result<Loaded, Error> {
+        self.run_with_command(context, system, None)
+    }
+    pub fn run_with_command(
+        self,
+        context: &JobContext,
+        system: &mut dyn AutostartSystem,
+        issued: Option<fc_ports::command_window::IssuedCommand>,
+    ) -> Result<Loaded, Error> {
         context.checkpoint().map_err(|_| Error::Cancelled)?;
         // Every observer participates: reconciliation must not mark a live
         // physical Applying operation as interrupted.
@@ -152,21 +160,32 @@ impl Job {
                     )));
                 }
                 let lease = self.lease.ok_or(Error::Cancelled)?;
-                let prepared = self.lock()?.begin_autostart_while(
-                    lease,
-                    *expected,
-                    *desired,
-                    target.clone(),
-                    previous_observed.clone(),
-                    Arc::new(context.execution_fence()),
-                )?;
+                let issued = issued.ok_or(Error::Backend(BackendError::Storage(
+                    fc_storage::StorageError::CommandNotIssued,
+                )))?;
+                let prepared = {
+                    let mut backend = self.lock()?;
+                    let mut scoped = backend.begin_command_scope(issued)?;
+                    scoped.begin_autostart_while(
+                        lease,
+                        *expected,
+                        *desired,
+                        target.clone(),
+                        previous_observed.clone(),
+                        Arc::new(context.execution_fence()),
+                    )?
+                };
                 // The lease, epoch and job fence are all checked again by the
                 // writer immediately before marking this exact intent Applying.
-                let applying = self.lock()?.mark_autostart_applying_while(
-                    lease,
-                    prepared.ticket.clone(),
-                    Arc::new(context.execution_fence()),
-                );
+                let applying = (|| -> Result<_, Error> {
+                    let mut backend = self.lock()?;
+                    let mut scoped = backend.begin_command_scope(issued)?;
+                    Ok(scoped.mark_autostart_applying_while(
+                        lease,
+                        prepared.ticket.clone(),
+                        Arc::new(context.execution_fence()),
+                    )?)
+                })();
                 if applying.is_err() {
                     let outcome = AutostartSystemOutcome {
                         observation: system.observe(),
@@ -175,11 +194,15 @@ impl Job {
                     };
                     return self.settle(prepared.ticket, outcome, target);
                 }
-                let guard = self.lock()?.autostart_effect_guard(
-                    lease,
-                    &prepared.ticket,
-                    Arc::new(context.execution_fence()),
-                );
+                let guard = (|| -> Result<_, Error> {
+                    let mut backend = self.lock()?;
+                    let scoped = backend.begin_command_scope(issued)?;
+                    Ok(scoped.autostart_effect_guard(
+                        lease,
+                        &prepared.ticket,
+                        Arc::new(context.execution_fence()),
+                    )?)
+                })();
                 let mut outcome = match guard {
                     Ok(guard) => {
                         // No Backend or SQLite lock is held across this physical

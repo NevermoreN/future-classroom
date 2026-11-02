@@ -275,6 +275,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
                     factory: self.factory.clone(),
                     fence,
                 }),
+                self.handle.command_window,
                 reply,
             )
         })
@@ -390,6 +391,22 @@ struct BarrierTask<S> {
     fence: ExecutionFence,
 }
 impl<S: Send> TransactionTask<S> for BarrierTask<S> {
+    fn window_action(&self) -> Option<crate::typed_command::WindowAction> {
+        Some(crate::typed_command::WindowAction::new(
+            fc_ports::command_window::TypedCommandIntent::RestoreBarrier {
+                expected_global: self.expected_revision,
+            },
+            crate::typed_command::Mode::Barrier,
+        ))
+    }
+    fn command_family(&self) -> Option<fc_ports::command_window::CommandFamily> {
+        Some(fc_ports::command_window::CommandFamily::Generic)
+    }
+
+    fn retirement(&self) -> CommandRetirement {
+        CommandRetirement::DatabaseRestoreBarrier
+    }
+
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
     }
@@ -658,6 +675,7 @@ pub(crate) fn known_omitted(key: &str) -> bool {
             "business/result/",
             "business/voice-receipt/",
             "business/voice-rate/",
+            "business/voice-job-command/v2/",
             "business/profiles/v1/receipts/",
             "business/profiles/v1/results/",
             "business/material/v1/receipts/",

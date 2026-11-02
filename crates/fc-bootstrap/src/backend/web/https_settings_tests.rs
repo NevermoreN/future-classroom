@@ -2,7 +2,10 @@
 //! strength, introducing fake accounts, or creating a second execution pool.
 use super::*;
 use fc_domain::https_settings::*;
-use fc_ports::{HttpsSettingsRequest, HttpsSettingsState};
+use fc_ports::{
+    command_window::{CommandFamily, IssuedCommand},
+    HttpsSettingsRequest, HttpsSettingsState,
+};
 fn configuration() -> HttpsConfiguration {
     HttpsConfiguration::new(
         HttpsHost::parse("Board.School").unwrap(),
@@ -11,68 +14,96 @@ fn configuration() -> HttpsConfiguration {
     )
     .unwrap()
 }
-fn request(id: u64, base: &HttpsSettingsState) -> HttpsSettingsRequest {
+fn request(issued: IssuedCommand, base: &HttpsSettingsState) -> HttpsSettingsRequest {
     HttpsSettingsRequest {
-        command_id: CommandId::new(id).unwrap(),
+        command_id: issued.command_id,
         expected_revision: base.settings.revision,
         expected_identity_revision: base.identity_revision,
         configuration: Some(configuration()),
     }
+}
+fn issue_https(backend: &Backend, lease: SessionLease) -> IssuedCommand {
+    backend
+        .issue_native_command(
+            CommandFamily::HttpsSettings,
+            Some(lease),
+            SessionPurpose::Manage,
+        )
+        .unwrap()
+}
+fn save_with_ticket(
+    backend: &mut Backend,
+    issued: IssuedCommand,
+    lease: SessionLease,
+    request: HttpsSettingsRequest,
+) -> Result<HttpsSettingsState> {
+    backend
+        .begin_command_scope(issued)?
+        .save_https_settings(lease, request)
+}
+fn query_with_ticket(
+    backend: &mut Backend,
+    issued: IssuedCommand,
+    lease: SessionLease,
+    request: HttpsSettingsRequest,
+) -> Result<Option<HttpsSettingsState>> {
+    backend
+        .begin_command_scope(issued)?
+        .query_https_settings_outcome(lease, request)
 }
 #[test]
 fn local_configuration_only_save_replay_and_physical_reopen_leave_web_disabled() {
     let mut f = Fixture::new();
     let base = f.backend.read_https_settings(f.admin).unwrap();
     assert!(base.settings.configuration.is_none());
-    let saved = f
-        .backend
-        .save_https_settings(f.admin, request(100, &base))
-        .unwrap();
+    let issued = issue_https(&f.backend, f.admin);
+    let original = request(issued, &base);
+    let saved = save_with_ticket(&mut f.backend, issued, f.admin, original.clone()).unwrap();
     assert_eq!(
-        f.backend
-            .save_https_settings(f.admin, request(100, &base))
-            .unwrap(),
+        save_with_ticket(&mut f.backend, issued, f.admin, original.clone()).unwrap(),
         saved
     );
     assert!(!f.service().management_snapshot(f.admin).unwrap().enabled);
     assert!(!f.service().configuration_in_progress());
     f.reopen();
     assert_eq!(f.backend.read_https_settings(f.admin).unwrap(), saved);
+    assert_eq!(
+        query_with_ticket(&mut f.backend, issued, f.admin, original).unwrap(),
+        Some(saved)
+    );
     assert!(!f.service().management_snapshot(f.admin).unwrap().enabled);
 }
 #[test]
 fn real_web_global_session_active_web_and_canceled_scope_cannot_save_https_configuration() {
     let mut f = Fixture::new();
     let base = f.backend.read_https_settings(f.admin).unwrap();
+    let local = issue_https(&f.backend, f.admin);
+    let canceled = issue_https(&f.backend, f.admin);
     let service = f.service();
     service.set_enabled(f.admin, true).unwrap();
-    assert!(f
-        .backend
-        .save_https_settings(f.admin, request(100, &base))
-        .is_err());
+    assert!(save_with_ticket(&mut f.backend, local, f.admin, request(local, &base)).is_err());
     let issued = f.grant("admin", "Synthetic HTTPS configuration tester");
     let web = service.authenticate(&issued.cookie).unwrap().lease();
     assert!(f.backend.read_https_settings(web).is_err());
-    assert!(f
-        .backend
-        .save_https_settings(web, request(101, &base))
-        .is_err());
+    assert!(save_with_ticket(&mut f.backend, local, web, request(local, &base)).is_err());
     service.set_enabled(f.admin, false).unwrap();
     {
         let mut scope = f.backend.begin_execution_scope(Arc::new(|| false));
-        assert!(scope
-            .save_https_settings(f.admin, request(102, &base))
-            .is_err());
+        assert!(save_with_ticket(&mut scope, canceled, f.admin, request(canceled, &base)).is_err());
     }
     assert_eq!(f.backend.read_https_settings(f.admin).unwrap(), base);
     assert!(!service.configuration_in_progress());
     f.backend.session_control().lock_local();
     assert!(f.backend.read_https_settings(f.admin).is_err());
     f.login_admin();
-    assert!(f
-        .backend
-        .save_https_settings(f.admin, request(103, &base))
-        .is_ok());
+    let after_login = issue_https(&f.backend, f.admin);
+    assert!(save_with_ticket(
+        &mut f.backend,
+        after_login,
+        f.admin,
+        request(after_login, &base)
+    )
+    .is_ok());
 }
 #[test]
 fn configuration_owner_and_actual_last_writer_guard_exclude_enable_and_next_owner() {
@@ -135,11 +166,13 @@ fn queued_real_writer_save_retains_disabled_owner_until_old_local_session_cancel
     let base = f.backend.read_https_settings(f.admin).unwrap();
     let service = f.service();
     let control = f.backend.session_control();
+    let issued = issue_https(&f.backend, f.admin);
+    let original = request(issued, &base);
     let before = f.backend.handle.try_revision().unwrap().wait().unwrap();
+    let mut command = f.backend.begin_command_scope(issued).unwrap();
     let (entered, arrived) = std::sync::mpsc::channel();
     let (release, wait) = std::sync::mpsc::channel();
-    let held = f
-        .backend
+    let held = command
         .handle
         .try_transaction(Held {
             entered,
@@ -149,7 +182,7 @@ fn queued_real_writer_save_retains_disabled_owner_until_old_local_session_cancel
     arrived.recv_timeout(Duration::from_secs(5)).unwrap();
     let admin = f.admin;
     std::thread::scope(|scope| {
-        let job = scope.spawn(|| f.backend.save_https_settings(admin, request(100, &base)));
+        let job = scope.spawn(|| command.save_https_settings(admin, original));
         let deadline = Instant::now() + Duration::from_secs(2);
         while !service.configuration_in_progress() && Instant::now() < deadline {
             std::thread::yield_now();
@@ -166,17 +199,16 @@ fn queued_real_writer_save_retains_disabled_owner_until_old_local_session_cancel
         assert_eq!(enable, Err(WebServiceError::Busy));
         assert!(result.is_err());
     });
+    drop(command);
     assert!(!service.configuration_in_progress());
     assert_eq!(
         f.backend.handle.try_revision().unwrap().wait().unwrap(),
         before
     );
     f.login_admin();
+    let next = issue_https(&f.backend, f.admin);
     assert_eq!(f.backend.read_https_settings(f.admin).unwrap(), base);
-    assert!(f
-        .backend
-        .save_https_settings(f.admin, request(101, &base))
-        .is_ok());
+    assert!(save_with_ticket(&mut f.backend, next, f.admin, request(next, &base)).is_ok());
 }
 struct LaterClock {
     later: AtomicBool,
@@ -221,23 +253,16 @@ fn same_committed_command_on_real_new_local_lease_returns_original_outcome_witho
     f.login_admin();
     let original_lease = f.admin;
     let base = f.backend.read_https_settings(f.admin).unwrap();
-    let original = request(100, &base);
-    let saved = f
-        .backend
-        .save_https_settings(f.admin, original.clone())
-        .unwrap();
+    let issued = issue_https(&f.backend, f.admin);
+    let original = request(issued, &base);
+    let saved = save_with_ticket(&mut f.backend, issued, f.admin, original.clone()).unwrap();
     f.backend.session_control().lock_local();
     clock.later.store(true, Ordering::Release);
     f.login_admin();
     assert_ne!(f.admin, original_lease);
-    assert!(f
-        .backend
-        .save_https_settings(original_lease, original.clone())
-        .is_err());
+    assert!(save_with_ticket(&mut f.backend, issued, original_lease, original.clone()).is_err());
     assert_eq!(
-        f.backend
-            .save_https_settings(f.admin, original.clone())
-            .unwrap(),
+        save_with_ticket(&mut f.backend, issued, f.admin, original.clone()).unwrap(),
         saved
     );
     // Pure query works while admission is enabled, never takes configuration
@@ -245,21 +270,18 @@ fn same_committed_command_on_real_new_local_lease_returns_original_outcome_witho
     let service = f.service();
     service.set_enabled(f.admin, true).unwrap();
     assert_eq!(
-        f.backend
-            .query_https_settings_outcome(f.admin, original.clone())
-            .unwrap(),
+        query_with_ticket(&mut f.backend, issued, f.admin, original.clone()).unwrap(),
         Some(saved.clone())
     );
-    assert!(f
-        .backend
-        .query_https_settings_outcome(original_lease, original.clone())
-        .is_err());
-    let missing = request(901, &f.backend.read_https_settings(f.admin).unwrap());
+    assert!(query_with_ticket(&mut f.backend, issued, original_lease, original.clone()).is_err());
+    let missing_issued = issue_https(&f.backend, f.admin);
+    let missing = request(
+        missing_issued,
+        &f.backend.read_https_settings(f.admin).unwrap(),
+    );
     let before = f.backend.handle.try_revision().unwrap().wait().unwrap();
     assert_eq!(
-        f.backend
-            .query_https_settings_outcome(f.admin, missing)
-            .unwrap(),
+        query_with_ticket(&mut f.backend, missing_issued, f.admin, missing).unwrap(),
         None
     );
     assert_eq!(
@@ -271,7 +293,7 @@ fn same_committed_command_on_real_new_local_lease_returns_original_outcome_witho
     let mut different = original;
     different.configuration.as_mut().unwrap().port = 9443;
     assert!(matches!(
-        f.backend.save_https_settings(f.admin, different),
+        save_with_ticket(&mut f.backend, issued, f.admin, different),
         Err(BackendError::HttpsSettings(
             fc_ports::HttpsSettingsRepositoryError::IdempotencyConflict
         ))
@@ -285,9 +307,8 @@ fn preexisting_enable_snapshot_cannot_survive_configuration_publication() {
     let old = service.snapshot().unwrap();
     let generation = f.backend.session_control().generation();
     let base = f.backend.read_https_settings(f.admin).unwrap();
-    f.backend
-        .save_https_settings(f.admin, request(100, &base))
-        .unwrap();
+    let issued = issue_https(&f.backend, f.admin);
+    save_with_ticket(&mut f.backend, issued, f.admin, request(issued, &base)).unwrap();
     let mut ledger = service.inner.ledger.lock().unwrap();
     assert_eq!(
         service.admin_current(&old, &mut ledger, f.admin, generation),

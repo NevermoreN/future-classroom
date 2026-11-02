@@ -1,21 +1,23 @@
+import { identity, ticket } from './command-fixtures'
 import { describe, expect, it } from 'vitest'
 import * as voice from '../src/api/voice-protocol'
 import { ProtocolFault, ProtocolVersionFault } from '../src/api/protocol'
 import { caps, job, wireCaps, wireUpload } from './voice-fixtures'
-const input = { commandId: '71', assetId: '45', expectedAssetRevision: '2', classId: '7', repeatTotal: 3 }
+const input = { commandId: '71', commandTicket: ticket, assetId: '45', expectedAssetRevision: '2', classId: '7', repeatTotal: 3 }
 describe('voice wire boundary and state meaning', () => {
   it('distinguishes new integer versions from corrupt schema fields on all voice envelopes', () => {
     const readers: ((version: unknown) => unknown)[] = [
       version => voice.capabilities({ ...wireCaps(), schemaVersion: version }),
       version => voice.uploaded({ ...wireUpload(), schemaVersion: version }, '7', 16044),
-      version => voice.currentJob({ schemaVersion: version, status: 'VOICE_JOB', job: job() }, '71'),
+      version => voice.currentJob({ schemaVersion: version, status: 'VOICE_JOB', job: job() }, '71', ticket),
       version => voice.jobs({ schemaVersion: version, status: 'VOICE_JOBS', jobs: [job()] }),
-      version => voice.committed({ schemaVersion: version, status: 'COMMITTED', commandId: '71', job: job() }, input),
-      version => voice.cancelled({ schemaVersion: version, status: 'CANCEL_REQUESTED', commandId: '81', job: job({ state: 'STOPPING', currentRepeat: 1, revision: '2' }) }, '71', { commandId: '81', expectedRevision: '1' }),
+      version => voice.committed({ schemaVersion: version, status: 'COMMITTED', commandId: '71', commandTicket: ticket, job: job() }, input),
+      version => voice.cancelled({ schemaVersion: version, status: 'CANCEL_REQUESTED', commandId: '81', commandTicket: ticket, job: job({ state: 'STOPPING', currentRepeat: 1, revision: '2' }) }, '71', { commandId: '81', commandTicket: ticket, jobCommandTicket: ticket, expectedRevision: '1' }),
     ]
-    for (const read of readers) {
-      expect(() => read(1)).not.toThrow()
-      expect(() => read(2)).toThrow(ProtocolVersionFault)
+    for (const [index, read] of readers.entries()) {
+      const expected = [2, 3, 4, 5].includes(index) ? 2 : 1
+      expect(() => read(expected)).not.toThrow()
+      expect(() => read(expected === 1 ? 2 : 1)).toThrow(ProtocolVersionFault)
       for (const invalid of [undefined, '2', null, 0, -1, 1.5]) {
         expect(() => read(invalid)).toThrow(ProtocolFault)
         expect(() => read(invalid)).not.toThrow(ProtocolVersionFault)
@@ -57,25 +59,25 @@ describe('voice wire boundary and state meaning', () => {
     for (const patch of [{ state: 'COMPLETED', completedRepeats: 2 }, { state: 'PLAYING', currentRepeat: 0 }, { state: 'PLAYING', completedRepeats: 3, currentRepeat: 3 }, { state: 'QUEUED', completedRepeats: 1 }, { state: 'GAP', currentRepeat: 0 }, { jobId: '72' }, { revision: '0' }, { failure: 'UNKNOWN_FAILURE' }]) expect(() => voice.job({ ...job(), ...patch })).toThrow(ProtocolFault)
   })
   it('rejects duplicate task rows, too many active jobs and internal authorization fields', () => {
-    expect(() => voice.jobs({ schemaVersion: 1, status: 'VOICE_JOBS', jobs: [job(), job()] })).toThrow(ProtocolFault)
-    expect(() => voice.jobs({ schemaVersion: 1, status: 'VOICE_JOBS', jobs: Array.from({ length: 5 }, (_, i) => job({ jobId: String(i + 1), commandId: String(i + 1) })) })).toThrow(ProtocolFault)
+    expect(() => voice.jobs({ schemaVersion: 2, status: 'VOICE_JOBS', jobs: [job(), job()] })).toThrow(ProtocolFault)
+    expect(() => voice.jobs({ schemaVersion: 2, status: 'VOICE_JOBS', jobs: Array.from({ length: 5 }, (_, i) => job({ jobId: String(i + 1), commandId: String(i + 1) })) })).toThrow(ProtocolFault)
     expect(() => voice.job({ ...job(), authorization: { principalId: '1' } })).toThrow(ProtocolFault)
-    expect(() => voice.jobs({ schemaVersion: 1, status: 'VOICE_JOBS', jobs: Array.from({ length: 25 }, (_, i) => job({ jobId: String(i + 1), commandId: String(i + 1), state: 'CANCELED' })) })).toThrow(ProtocolFault)
+    expect(() => voice.jobs({ schemaVersion: 2, status: 'VOICE_JOBS', jobs: Array.from({ length: 25 }, (_, i) => job({ jobId: String(i + 1), commandId: String(i + 1), state: 'CANCELED' })) })).toThrow(ProtocolFault)
   })
   it('requires nonzero CAS revisions and bounded repeat input before any fetch', () => {
-    expect(voice.submitInput(input)).toEqual({ schemaVersion: 1, ...input })
+    expect(voice.submitInput(input)).toEqual({ schemaVersion: 2, ...input })
     for (const total of [0, 11, 1.5, NaN]) expect(() => voice.submitInput({ ...input, repeatTotal: total })).toThrow(ProtocolFault)
     expect(() => voice.submitInput({ ...input, expectedAssetRevision: '0' })).toThrow(ProtocolFault)
-    expect(() => voice.cancelInput({ commandId: '81', expectedRevision: '0' })).toThrow(ProtocolFault)
+    expect(() => voice.cancelInput({ commandId: '81', commandTicket: ticket, jobCommandTicket: ticket, expectedRevision: '0' })).toThrow(ProtocolFault)
   })
   it('rejects foreign committed task and refuses active playback as cancellation acknowledgement', () => {
-    const receipt = { schemaVersion: 1, status: 'COMMITTED', commandId: '71', job: job() }
+    const receipt = { schemaVersion: 2, status: 'COMMITTED', commandId: '71', commandTicket: ticket, job: job() }
     expect(voice.committed(receipt, input).jobId).toBe('71')
     for (const patch of [{ classId: '8' }, { repeatTotal: 10 }, { jobId: '72', commandId: '72' }]) expect(() => voice.committed({ ...receipt, job: job(patch) }, input)).toThrow(ProtocolFault)
-    const cancel = { commandId: '81', expectedRevision: '1' }
-    expect(voice.cancelled({ schemaVersion: 1, status: 'CANCEL_REQUESTED', commandId: '81', job: job({ state: 'STOPPING', currentRepeat: 1, revision: '2' }) }, '71', cancel).state).toBe('STOPPING')
-    for (const state of ['QUEUED', 'STARTING', 'PLAYING', 'GAP'] as const) expect(() => voice.cancelled({ schemaVersion: 1, status: 'CANCEL_REQUESTED', commandId: '81', job: job({ state, currentRepeat: state === 'QUEUED' ? 0 : 1, completedRepeats: state === 'GAP' ? 1 : 0, revision: '2' }) }, '71', cancel)).toThrow(ProtocolFault)
-    expect(() => voice.currentJob({ schemaVersion: 1, status: 'VOICE_JOB', job: job() }, '72')).toThrow(ProtocolFault)
+    const cancel = { commandId: '81', commandTicket: ticket, jobCommandTicket: ticket, expectedRevision: '1' }
+    expect(voice.cancelled({ schemaVersion: 2, status: 'CANCEL_REQUESTED', commandId: '81', commandTicket: ticket, job: job({ state: 'STOPPING', currentRepeat: 1, revision: '2' }) }, '71', cancel).state).toBe('STOPPING')
+    for (const state of ['QUEUED', 'STARTING', 'PLAYING', 'GAP'] as const) expect(() => voice.cancelled({ schemaVersion: 2, status: 'CANCEL_REQUESTED', commandId: '81', commandTicket: ticket, job: job({ state, currentRepeat: state === 'QUEUED' ? 0 : 1, completedRepeats: state === 'GAP' ? 1 : 0, revision: '2' }) }, '71', cancel)).toThrow(ProtocolFault)
+    expect(() => voice.currentJob({ schemaVersion: 2, status: 'VOICE_JOB', job: job() }, '72', ticket)).toThrow(ProtocolFault)
   })
   it('tracks identity and runtime generation as well as actual class during recording', () => {
     expect(voice.sameTarget(caps(), caps())).toBe(true)

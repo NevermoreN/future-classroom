@@ -80,6 +80,7 @@ struct Inner {
 #[derive(Clone)]
 pub struct VoiceService {
     inner: Arc<Inner>,
+    command_window: Option<fc_ports::command_window::IssuedCommand>,
     execution: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
 }
 #[derive(Clone)]
@@ -163,6 +164,7 @@ impl VoiceService {
                 after_commit: Mutex::new(None),
             }),
             execution: None,
+            command_window: None,
         }
     }
     /// A request-local clone. Never installs a request lifetime in the shared
@@ -178,6 +180,7 @@ impl VoiceService {
         Self {
             inner: self.inner.clone(),
             execution: Some(execution),
+            command_window: self.command_window,
         }
     }
     fn execution_current(&self) -> bool {
@@ -436,6 +439,9 @@ impl VoiceService {
         }
         if let Some(fence) = &self.execution {
             repository = repository.with_execution_fence(fence.clone());
+        }
+        if let Some(issued) = self.command_window {
+            repository = repository.with_command_window(issued);
         }
         repository
     }
@@ -1361,9 +1367,13 @@ impl VoiceRuntimeHandle {
 }
 impl Backend {
     pub fn voice_service(&self) -> VoiceService {
-        match &self.request_execution_fence {
+        let service = match &self.request_execution_fence {
             Some(fence) => self.voice.with_execution_fence(fence.clone()),
             None => self.voice.clone(),
+        };
+        match self.current_command {
+            Some(issued) => service.scoped_command(issued),
+            None => service,
         }
     }
     pub fn voice_reserve(&mut self, l: SessionLease, c: ClassId) -> Result<VoiceAsset> {
@@ -1411,6 +1421,307 @@ impl Backend {
         self.voice.finalize(id, r)
     }
 }
+impl VoiceService {
+    /// Worker-only issuance bound to the actual local lease. No backend mutex
+    /// or audio/session critical section is held while waiting on the Writer.
+    pub fn issue_native_command(
+        &self,
+        lease: SessionLease,
+    ) -> Result<fc_ports::command_window::IssuedCommand> {
+        use fc_ports::command_window::*;
+        if lease.origin() != TrustedOrigin::Local {
+            return Err(BackendError::InvalidInput);
+        }
+        let owner = CommandOwner::authenticated(&self.actor(lease, false)?);
+        for _ in 0..4 {
+            let mut entropy = [0; 24];
+            PlatformRandom
+                .fill(&mut entropy)
+                .map_err(|_| BackendError::CryptoUnavailable)?;
+            if entropy[..16] == [0; 16] || entropy[16..] == [0; 8] {
+                continue;
+            }
+            let result = self.inner.repository.issue_command_window(
+                fc_storage::command_window::IssueCommand {
+                    family: CommandFamily::Voice,
+                    owner,
+                    entropy,
+                },
+            );
+            let issued = match result {
+                Err(StorageError::CommandIdReused) => continue,
+                other => other?,
+            };
+            if CommandOwner::authenticated(&self.actor(lease, false)?) != owner {
+                return Err(BackendError::Storage(StorageError::CommandNotIssued));
+            }
+            return Ok(issued);
+        }
+        Err(BackendError::CryptoUnavailable)
+    }
+    pub fn with_command_window(
+        &self,
+        lease: SessionLease,
+        issued: fc_ports::command_window::IssuedCommand,
+    ) -> Result<Self> {
+        use fc_ports::command_window::*;
+        if lease.origin() != TrustedOrigin::Local
+            || issued.family != CommandFamily::Voice
+            || issued.owner != CommandOwner::authenticated(&self.actor(lease, false)?)
+        {
+            return Err(BackendError::Storage(StorageError::CommandNotIssued));
+        }
+        self.repository(self.generation(), Some(lease))
+            .check_command_window(issued)?;
+        Ok(self.scoped_command(issued))
+    }
+    pub fn command_outcome_native(
+        &self,
+        lease: SessionLease,
+        ticket: fc_ports::command_window::CommandTicket,
+        id: CommandId,
+    ) -> Result<Option<(VoiceJob, Option<fc_ports::command_window::CommandTicket>)>> {
+        use fc_ports::command_window::*;
+        if lease.origin() != TrustedOrigin::Local {
+            return Err(BackendError::InvalidInput);
+        }
+        let actor = self.actor(lease, false)?;
+        let issued = IssuedCommand {
+            ticket,
+            command_id: id,
+            family: CommandFamily::Voice,
+            owner: CommandOwner::authenticated(&actor),
+            window_millis: COMMAND_WINDOW_MILLIS,
+        };
+        let service = self.with_command_window(lease, issued)?;
+        let outcome = service.conclude(
+            service
+                .repository(service.generation(), Some(lease))
+                .voice_command_outcome(id, &actor),
+        )?;
+        let result = outcome
+            .map(|job| {
+                self.job_ticket(lease, job.id, false)
+                    .map(|binding| (job, binding))
+            })
+            .transpose()?;
+        self.actor(lease, false)?;
+        Ok(result)
+    }
+    fn scoped_command(&self, issued: fc_ports::command_window::IssuedCommand) -> Self {
+        let mut scoped = self.clone();
+        scoped.command_window = Some(issued);
+        scoped
+    }
+    fn without_client_window(&self) -> Self {
+        let mut service = self.clone();
+        service.command_window = None;
+        service
+    }
+    fn resolve_window(
+        &self,
+        lease: SessionLease,
+        ticket: fc_ports::command_window::CommandTicket,
+        id: CommandId,
+    ) -> Result<fc_ports::command_window::IssuedCommand> {
+        use fc_ports::command_window::*;
+        let actor = self.actor(lease, true)?;
+        let issued = IssuedCommand {
+            ticket,
+            command_id: id,
+            family: CommandFamily::Voice,
+            owner: CommandOwner::authenticated(&actor),
+            window_millis: COMMAND_WINDOW_MILLIS,
+        };
+        self.inner.repository.check_command_window(issued)?;
+        Ok(issued)
+    }
+    fn original_job_ticket(
+        &self,
+        lease: SessionLease,
+        id: VoiceJobId,
+    ) -> Result<Option<fc_ports::command_window::CommandTicket>> {
+        self.job_ticket(lease, id, true)
+    }
+    fn job_ticket(
+        &self,
+        lease: SessionLease,
+        id: VoiceJobId,
+        web: bool,
+    ) -> Result<Option<fc_ports::command_window::CommandTicket>> {
+        let service = self.without_client_window();
+        let actor = service.actor(lease, web)?;
+        let binding = service.conclude(
+            service
+                .repository(service.generation(), Some(lease))
+                .voice_job_command_binding(id, &actor),
+        )?;
+        service.actor(lease, web)?;
+        Ok(binding)
+    }
+    pub fn web_jobs_bound(
+        &self,
+        lease: SessionLease,
+    ) -> Result<Vec<(VoiceJob, Option<fc_ports::command_window::CommandTicket>)>> {
+        let mut bound = Vec::new();
+        for job in self.web_jobs(lease)? {
+            let ticket = self.original_job_ticket(lease, job.id)?;
+            bound.push((job, ticket));
+        }
+        self.actor(lease, true)?;
+        Ok(bound)
+    }
+    pub fn status_bound(
+        &self,
+        lease: SessionLease,
+        id: VoiceJobId,
+        ticket: Option<fc_ports::command_window::CommandTicket>,
+    ) -> Result<VoiceJob> {
+        let service = self.without_client_window();
+        let job = service.status(lease, id)?;
+        if service.original_job_ticket(lease, id)? != ticket {
+            return Err(BackendError::Voice(VoiceRepositoryError::Domain(
+                VoiceError::Missing,
+            )));
+        }
+        service.actor(lease, true)?;
+        Ok(job)
+    }
+    pub fn submit_window(
+        &self,
+        lease: SessionLease,
+        request: VoiceSubmitRequest,
+        ticket: Option<fc_ports::command_window::CommandTicket>,
+    ) -> Result<(VoiceJob, Option<fc_ports::command_window::CommandTicket>)> {
+        let scoped = match ticket {
+            Some(ticket) => {
+                self.scoped_command(self.resolve_window(lease, ticket, request.command_id)?)
+            }
+            None => self.without_client_window(),
+        };
+        let job = scoped.submit(lease, request)?;
+        let binding = self
+            .original_job_ticket(lease, job.id)
+            .map_err(|_| result_unknown())?;
+        if ticket.is_some() && binding != ticket {
+            return Err(result_unknown());
+        }
+        self.actor(lease, true).map_err(|_| result_unknown())?;
+        Ok((job, binding))
+    }
+    pub fn cancel_window(
+        &self,
+        lease: SessionLease,
+        request: VoiceCancelRequest,
+        ticket: Option<fc_ports::command_window::CommandTicket>,
+        target: Option<fc_ports::command_window::CommandTicket>,
+    ) -> Result<(VoiceJob, Option<fc_ports::command_window::CommandTicket>)> {
+        // Reject a reused raw job id with a different original submission before
+        // invalidating any native playback capability or submitting stop intent.
+        self.status_bound(lease, request.job_id, target)?;
+        let scoped = match ticket {
+            Some(ticket) => {
+                self.scoped_command(self.resolve_window(lease, ticket, request.command_id)?)
+            }
+            None => self.without_client_window(),
+        };
+        let job = scoped.cancel(lease, request)?;
+        let binding = self
+            .original_job_ticket(lease, job.id)
+            .map_err(|_| result_unknown())?;
+        if binding != target {
+            return Err(result_unknown());
+        }
+        self.actor(lease, true).map_err(|_| result_unknown())?;
+        Ok((job, binding))
+    }
+    pub fn command_outcome(
+        &self,
+        lease: SessionLease,
+        ticket: fc_ports::command_window::CommandTicket,
+        id: CommandId,
+    ) -> Result<Option<(VoiceJob, Option<fc_ports::command_window::CommandTicket>)>> {
+        let issued = self.resolve_window(lease, ticket, id)?;
+        let actor = self.actor(lease, true)?;
+        let repository = self
+            .repository(self.generation(), Some(lease))
+            .with_command_window(issued);
+        let outcome = self.conclude(repository.voice_command_outcome(id, &actor))?;
+        let bound = outcome
+            .map(|job| {
+                self.original_job_ticket(lease, job.id)
+                    .map(|binding| (job, binding))
+            })
+            .transpose()?;
+        self.actor(lease, true)?;
+        Ok(bound)
+    }
+}
+
+#[cfg(test)]
+impl VoiceService {
+    pub(crate) fn test_submit(
+        &self,
+        lease: SessionLease,
+        request: VoiceSubmitRequest,
+    ) -> Result<VoiceJob> {
+        let issued = tests::original_command(self, request.command_id)?;
+        self.scoped_command(issued).submit(lease, request)
+    }
+    pub(crate) fn test_cancel(
+        &self,
+        lease: SessionLease,
+        mut request: VoiceCancelRequest,
+    ) -> Result<VoiceJob> {
+        let issued = tests::new_command(self, lease, true)?;
+        request.command_id = issued.command_id;
+        self.scoped_command(issued).cancel(lease, request)
+    }
+    pub(crate) fn test_set_enabled(
+        &self,
+        lease: SessionLease,
+        enabled: bool,
+        expected: Revision,
+    ) -> Result<VoiceSnapshot> {
+        let issued = match self.command_window {
+            Some(original) => original,
+            None => self.issue_native_command(lease)?,
+        };
+        self.scoped_command(issued)
+            .set_enabled(lease, enabled, expected)
+    }
+    pub(crate) fn test_set_enabled_reviewed(
+        &self,
+        lease: SessionLease,
+        enabled: bool,
+        voice: Revision,
+        identity: Revision,
+        runtime: u64,
+    ) -> Result<VoiceSnapshot> {
+        let issued = match self.command_window {
+            Some(original) => original,
+            None => self.issue_native_command(lease)?,
+        };
+        self.scoped_command(issued)
+            .set_enabled_reviewed(lease, enabled, voice, identity, runtime)
+    }
+    pub(crate) fn test_set_limits_reviewed(
+        &self,
+        lease: SessionLease,
+        limits: VoiceLimits,
+        voice: Revision,
+        identity: Revision,
+        runtime: u64,
+    ) -> Result<VoiceSnapshot> {
+        let issued = match self.command_window {
+            Some(original) => original,
+            None => self.issue_native_command(lease)?,
+        };
+        self.scoped_command(issued)
+            .set_limits_reviewed(lease, limits, voice, identity, runtime)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1421,6 +1732,72 @@ mod tests {
     // Production deadlines are wall-clock safety bounds. Avoid four synthetic
     // password KDF fixtures starving each other's real SQLite writer in tests.
     pub(super) static VOICE_FIXTURE: Mutex<()> = Mutex::new(());
+    type CommandKey = (usize, u64);
+    type FixtureIssued = fc_ports::command_window::IssuedCommand;
+    static COMMANDS: Mutex<Vec<(CommandKey, FixtureIssued)>> = Mutex::new(Vec::new());
+    pub(super) fn new_command(
+        service: &VoiceService,
+        lease: SessionLease,
+        web: bool,
+    ) -> Result<FixtureIssued> {
+        use fc_ports::command_window::{CommandFamily, CommandOwner};
+        let owner = CommandOwner::authenticated(&service.actor(lease, web)?);
+        let mut issued = None;
+        for _ in 0..4 {
+            let mut entropy = [0; 24];
+            PlatformRandom
+                .fill(&mut entropy)
+                .map_err(|_| BackendError::CryptoUnavailable)?;
+            if entropy[..16] == [0; 16] || entropy[16..] == [0; 8] {
+                continue;
+            }
+            match service.inner.repository.issue_command_window(
+                fc_storage::command_window::IssueCommand {
+                    family: CommandFamily::Voice,
+                    owner,
+                    entropy,
+                },
+            ) {
+                Err(StorageError::CommandIdReused) => continue,
+                result => {
+                    issued = Some(result?);
+                    break;
+                }
+            }
+        }
+        let issued = issued.ok_or(BackendError::CryptoUnavailable)?;
+        if CommandOwner::authenticated(&service.actor(lease, web)?) != owner {
+            return Err(BackendError::InvalidInput);
+        }
+        let key = (
+            Arc::as_ptr(&service.inner) as usize,
+            issued.command_id.get(),
+        );
+        let mut commands = COMMANDS.lock().map_err(|_| BackendError::Closed)?;
+        // Trusted fixture metadata has a fixed bound and is removed with its service.
+        if commands.len() >= 4096 {
+            return Err(BackendError::InvalidInput);
+        }
+        commands.push((key, issued));
+        Ok(issued)
+    }
+    pub(super) fn original_command(service: &VoiceService, id: CommandId) -> Result<FixtureIssued> {
+        let key = (Arc::as_ptr(&service.inner) as usize, id.get());
+        COMMANDS
+            .lock()
+            .map_err(|_| BackendError::Closed)?
+            .iter()
+            .find(|(k, _)| *k == key)
+            .map(|(_, issued)| *issued)
+            .ok_or(BackendError::Storage(StorageError::CommandNotIssued))
+    }
+    fn drop_commands(service: &VoiceService) {
+        let key = Arc::as_ptr(&service.inner) as usize;
+        COMMANDS
+            .lock()
+            .unwrap_or_else(|p| p.into_inner())
+            .retain(|((owner, _), _)| *owner != key);
+    }
     struct ClockFixture(Mutex<LocalDateTime>);
     impl Clock for ClockFixture {
         fn now(&self) -> LocalDateTime {
@@ -1460,6 +1837,7 @@ mod tests {
     struct Service(Backend);
     impl Drop for Service {
         fn drop(&mut self) {
+            drop_commands(&self.0.voice_service());
             let r = self.0.close();
             if !std::thread::panicking() {
                 r.unwrap();
@@ -1520,10 +1898,12 @@ mod tests {
         class: ClassId,
         id: u64,
     ) -> VoiceSubmitRequest {
+        let _label = id;
+        let issued = new_command(&backend.voice_service(), lease, true).unwrap();
         let reservation = backend.voice_reserve(lease, class).unwrap();
         let asset = backend.voice_publish(lease, prepared(reservation)).unwrap();
         VoiceSubmitRequest {
-            command_id: CommandId::new(id).unwrap(),
+            command_id: issued.command_id,
             asset_id: asset.id,
             expected_asset_revision: asset.revision,
             class_id: class,
@@ -1570,20 +1950,35 @@ mod tests {
         let local = issue(backend, TrustedOrigin::Local);
         let class = ClassId::new(1).unwrap();
         backend
-            .identity(
-                local,
-                IdentityCommand::CreateClass {
-                    id: class,
-                    name: "Synthetic class".into(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(local),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        local,
+                        IdentityCommand::CreateClass {
+                            id: class,
+                            name: "Synthetic class".into(),
+                        },
+                    )
                 },
             )
             .unwrap();
         backend
-            .identity(local, IdentityCommand::BindCurrentClass { id: class })
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(local),
+                SessionPurpose::Manage,
+                |backend| backend.identity(local, IdentityCommand::BindCurrentClass { id: class }),
+            )
             .unwrap();
         let old = issue(backend, TrustedOrigin::Web);
         let request = submit(backend, old, class, 71);
-        let job = backend.voice_submit(old, request.clone()).unwrap();
+        let job = backend
+            .voice_service()
+            .test_submit(old, request.clone())
+            .unwrap();
         assert!(job.authorization.is_none());
         let queued = backend.voice_guard(job.id).unwrap();
         assert!(queued.guard.is_valid());
@@ -1592,7 +1987,10 @@ mod tests {
             !queued.guard.is_valid(),
             "same principal's new session cannot revive old queued permit"
         );
-        assert!(backend.voice_submit(newer, request.clone()).is_err());
+        assert!(backend
+            .voice_service()
+            .test_submit(newer, request.clone())
+            .is_err());
         assert!(backend
             .voice_drive(VoiceDriverUpdate {
                 job_id: job.id,
@@ -1604,7 +2002,8 @@ mod tests {
         // Current authenticated owner may cancel the old job, but cannot replace
         // the original session to play it. Terminal retry returns current state.
         let canceled = backend
-            .voice_cancel(
+            .voice_service()
+            .test_cancel(
                 newer,
                 VoiceCancelRequest {
                     command_id: CommandId::new(72).unwrap(),
@@ -1614,7 +2013,7 @@ mod tests {
             )
             .unwrap();
         assert_eq!(canceled.state, VoiceState::Canceled);
-        let replay = backend.voice_submit(newer, request).unwrap();
+        let replay = backend.voice_service().test_submit(newer, request).unwrap();
         assert_eq!(replay.state, VoiceState::Canceled);
         assert!(replay.authorization.is_none());
         assert!(backend.voice_guard(job.id).is_err());
@@ -1627,7 +2026,7 @@ mod tests {
             .jobs
             .contains_key(&job.id));
         let request = submit(backend, newer, class, 73);
-        let job = backend.voice_submit(newer, request).unwrap();
+        let job = backend.voice_service().test_submit(newer, request).unwrap();
         let queued = backend.voice_guard(job.id).unwrap();
         let started = backend
             .voice_drive(VoiceDriverUpdate {
@@ -1644,7 +2043,8 @@ mod tests {
         let active = backend.voice_guard(job.id).unwrap();
         assert!(active.guard.is_valid());
         let stopped = backend
-            .voice_cancel(
+            .voice_service()
+            .test_cancel(
                 newer,
                 VoiceCancelRequest {
                     command_id: CommandId::new(74).unwrap(),
@@ -1665,10 +2065,13 @@ mod tests {
             })
             .unwrap();
         let request = submit(backend, newer, class, 75);
-        let job = backend.voice_submit(newer, request).unwrap();
+        let job = backend.voice_service().test_submit(newer, request).unwrap();
         let permit = backend.voice_guard(job.id).unwrap();
         let revision = backend.voice_inventory().unwrap().revision;
-        backend.voice_enabled(local, false, revision).unwrap();
+        backend
+            .voice_service()
+            .test_set_enabled(local, false, revision)
+            .unwrap();
         assert!(!permit.guard.is_valid());
         assert!(backend.voice_guard(job.id).is_err());
         assert_eq!(
@@ -1678,9 +2081,12 @@ mod tests {
         backend.voice_maintain().unwrap();
         assert!(backend.voice.inner.sessions.lock().unwrap().jobs.is_empty());
         let revision = backend.voice_inventory().unwrap().revision;
-        backend.voice_enabled(local, true, revision).unwrap();
+        backend
+            .voice_service()
+            .test_set_enabled(local, true, revision)
+            .unwrap();
         let request = submit(backend, newer, class, 76);
-        let queued = backend.voice_submit(newer, request).unwrap();
+        let queued = backend.voice_service().test_submit(newer, request).unwrap();
         let starting = backend
             .voice_drive(VoiceDriverUpdate {
                 job_id: queued.id,
@@ -1701,7 +2107,9 @@ mod tests {
     pub(super) struct SharedService(pub(super) Arc<Mutex<Backend>>);
     impl Drop for SharedService {
         fn drop(&mut self) {
-            let result = self.0.lock().unwrap_or_else(|p| p.into_inner()).close();
+            let mut backend = self.0.lock().unwrap_or_else(|p| p.into_inner());
+            drop_commands(&backend.voice_service());
+            let result = backend.close();
             if !std::thread::panicking() {
                 result.unwrap();
             }
@@ -1742,16 +2150,28 @@ mod tests {
         let local = issue(&backend, TrustedOrigin::Local);
         let class = ClassId::new(1).unwrap();
         backend
-            .identity(
-                local,
-                IdentityCommand::CreateClass {
-                    id: class,
-                    name: "Synthetic class".into(),
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(local),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.identity(
+                        local,
+                        IdentityCommand::CreateClass {
+                            id: class,
+                            name: "Synthetic class".into(),
+                        },
+                    )
                 },
             )
             .unwrap();
         backend
-            .identity(local, IdentityCommand::BindCurrentClass { id: class })
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(local),
+                SessionPurpose::Manage,
+                |backend| backend.identity(local, IdentityCommand::BindCurrentClass { id: class }),
+            )
             .unwrap();
         let web = issue(&backend, TrustedOrigin::Web);
         (
@@ -1767,10 +2187,12 @@ mod tests {
         class: ClassId,
         id: u64,
     ) -> VoiceSubmitRequest {
+        let _label = id;
+        let issued = new_command(service, lease, true).unwrap();
         let reservation = service.reserve(lease, class).unwrap();
         let asset = service.publish(lease, prepared(reservation)).unwrap();
         VoiceSubmitRequest {
-            command_id: CommandId::new(id).unwrap(),
+            command_id: issued.command_id,
             asset_id: asset.id,
             expected_asset_revision: asset.revision,
             class_id: class,
@@ -1789,7 +2211,7 @@ mod tests {
         let (_directory, backend, web, class) = shared_fixture();
         let service = backend.0.lock().unwrap().voice_service();
         let request = independent_request(&service, web, class, 301);
-        let queued = service.submit(web, request).unwrap();
+        let queued = service.test_submit(web, request).unwrap();
         let runtime = service.runtime_handle();
         let queued_guard = runtime.guard(queued.id).unwrap();
         assert!(queued_guard.guard.is_valid());
@@ -1865,7 +2287,7 @@ mod tests {
             let playing_guard = runtime.guard(playing.id).unwrap();
             assert!(playing_guard.guard.is_valid());
             let stopped = service
-                .cancel(
+                .test_cancel(
                     web,
                     VoiceCancelRequest {
                         command_id: CommandId::new(302).unwrap(),
@@ -1901,7 +2323,7 @@ mod tests {
         assert!(!service.is_admitting());
         service.resume_after_stop(newer).unwrap();
         let request = independent_request(&service, web, class, 303);
-        let queued = service.submit(web, request).unwrap();
+        let queued = service.test_submit(web, request).unwrap();
         assert!(old
             .drive(VoiceDriverUpdate {
                 job_id: queued.id,
@@ -1971,7 +2393,7 @@ mod tests {
         let (_directory, backend, web, class) = shared_fixture();
         let service = backend.0.lock().unwrap().voice_service();
         let queued = service
-            .submit(web, independent_request(&service, web, class, 351))
+            .test_submit(web, independent_request(&service, web, class, 351))
             .unwrap();
         let permission = service.guard(queued.id).unwrap();
         let durable_job = service
@@ -2123,17 +2545,31 @@ mod tests {
             let mut backend = backend.0.lock().unwrap();
             let other = ClassId::new(2).unwrap();
             backend
-                .identity(
-                    local,
-                    IdentityCommand::CreateClass {
-                        id: other,
-                        name: "Other synthetic class".into(),
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(local),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.identity(
+                            local,
+                            IdentityCommand::CreateClass {
+                                id: other,
+                                name: "Other synthetic class".into(),
+                            },
+                        )
                     },
                 )
                 .unwrap();
             assert_eq!(permission.guard.decision(), AudioAuthorization::Authorized);
             backend
-                .identity(local, IdentityCommand::BindCurrentClass { id: other })
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(local),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.identity(local, IdentityCommand::BindCurrentClass { id: other })
+                    },
+                )
                 .unwrap();
         }
         assert_eq!(
@@ -2180,7 +2616,7 @@ mod tests {
         let (_directory, backend, web, class) = shared_fixture();
         let service = backend.0.lock().unwrap().voice_service();
         let queued = service
-            .submit(web, independent_request(&service, web, class, 451))
+            .test_submit(web, independent_request(&service, web, class, 451))
             .unwrap();
         let runtime = service.runtime_handle();
         let permission = runtime.guard(queued.id).unwrap();
@@ -2282,11 +2718,18 @@ mod tests {
             let mut backend = backend.0.lock().unwrap();
             let local = issue(&backend, TrustedOrigin::Local);
             backend
-                .identity(
-                    local,
-                    IdentityCommand::CreateClass {
-                        id: other,
-                        name: "Actual new binding".into(),
+                .test_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(local),
+                    SessionPurpose::Manage,
+                    |backend| {
+                        backend.identity(
+                            local,
+                            IdentityCommand::CreateClass {
+                                id: other,
+                                name: "Actual new binding".into(),
+                            },
+                        )
                     },
                 )
                 .unwrap();
@@ -2295,12 +2738,21 @@ mod tests {
                 .actor(&state, local, SessionPurpose::Manage)
                 .unwrap()
                 .0;
+            let issued = backend
+                .issue_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(local),
+                    SessionPurpose::Manage,
+                )
+                .unwrap();
             let request = backend
+                .begin_command_scope(issued)
+                .unwrap()
                 .request(&state, IdentityCommand::BindCurrentClass { id: other })
                 .unwrap();
             (
                 local,
-                backend.repository.clone(),
+                backend.repository.with_command_window(issued),
                 request,
                 actor,
                 backend.clock.clone(),
@@ -2398,7 +2850,7 @@ mod tests {
         let (_directory, backend, web, class) = shared_fixture();
         let service = backend.0.lock().unwrap().voice_service();
         let first = service
-            .submit(web, independent_request(&service, web, class, 401))
+            .test_submit(web, independent_request(&service, web, class, 401))
             .unwrap();
         let runtime = service.runtime_handle();
         let permission = runtime.guard(first.id).unwrap();
@@ -2426,7 +2878,9 @@ mod tests {
         // merely a timed-out query. Exact actor/session/generation hooks are the
         // same repository and conclude path used by VoiceService::submit.
         let actor = service.actor(web, true).unwrap();
-        let repository = service.repository(runtime.generation(), Some(web));
+        let repository = service
+            .scoped_command(original_command(&service, late.command_id).unwrap())
+            .repository(runtime.generation(), Some(web));
         let begin = Instant::now();
         let error = service
             .conclude(repository.submit_voice(late, &actor))
