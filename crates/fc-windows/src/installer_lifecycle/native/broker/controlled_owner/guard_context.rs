@@ -43,7 +43,8 @@ struct State {
 }
 struct GrantWrite {
     overlapped: OVERLAPPED,
-    bytes: [u8; 48],
+    bytes: [u8; v2::FRAME_BYTES],
+    length: usize,
     pending: bool,
     cancel_attempted: bool,
 }
@@ -55,6 +56,7 @@ struct Context {
     deadline: Instant,
     deadline_ticks: u64,
     transaction: u32,
+    package: Option<ObservedPackage>,
     sid: Vec<u8>,
     active: AtomicUsize,
     fault: AtomicBool,
@@ -78,6 +80,7 @@ impl Registration {
         deadline_ticks: u64,
         transaction: u32,
         sid: Vec<u8>,
+        package: Option<ObservedPackage>,
     ) -> Result<Self> {
         current(deadline)?;
         if transaction == 0 || !CONTEXT_UNTIL_EXIT.load(Ordering::Acquire).is_null() {
@@ -97,6 +100,7 @@ impl Registration {
                 deadline,
                 deadline_ticks,
                 transaction,
+                package,
                 sid,
                 active: AtomicUsize::new(0),
                 fault: AtomicBool::new(false),
@@ -335,7 +339,16 @@ impl Context {
             }
         };
         if kind == INSTALLMESSAGE_INFO.0 as u32 && text.starts_with(INFO_PREFIX) {
+            if self.package.is_some() {
+                return Err(LifecycleError::Invalid);
+            }
             self.grant(&mut state, Nonce::parse_info(&text)?)?;
+        } else if kind == INSTALLMESSAGE_INFO.0 as u32 && text.starts_with(v2::INFO_PREFIX) {
+            let (package, nonce) = ObservedPackage::parse_info(&text)?;
+            if self.package.as_ref() != Some(&package) {
+                return Err(LifecycleError::Invalid);
+            }
+            self.grant(&mut state, nonce)?;
         } else if kind == INSTALLMESSAGE_ACTIONSTART.0 as u32 && text == "InstallInitialize" {
             // A native typed successor, rather than an INFO log or callback
             // return, proves the preceding immediate guard actually returned0.
@@ -349,13 +362,19 @@ impl Context {
             state.resources.close_handle(pipe)?;
             state.pipe = None;
             state.resources.release()?;
-            let returned = Bridge::new(
-                BridgeKind::Returned,
-                self.transaction,
-                state.nonce.ok_or(LifecycleError::Invalid)?,
-                0,
-            )?;
-            send_frame(self.deadline, self.broker_pipe, &returned.encode())?;
+            let nonce = state.nonce.ok_or(LifecycleError::Invalid)?;
+            if let Some(package) = &self.package {
+                let returned = v2::Bridge::new(
+                    BridgeKind::Returned,
+                    self.transaction,
+                    nonce,
+                    package.clone(),
+                )?;
+                send_guard_bytes(self.deadline, self.broker_pipe, &returned.encode())?;
+            } else {
+                let returned = Bridge::new(BridgeKind::Returned, self.transaction, nonce, 0)?;
+                send_frame(self.deadline, self.broker_pipe, &returned.encode())?;
+            }
             state.returned = true;
         }
         Ok(())
@@ -384,21 +403,53 @@ impl Context {
         state.resources.add(pipe, Role::Control);
         state.pipe = Some(pipe);
         let server = self.authenticate_server(state, pipe)?;
-        let request = Bridge::new(BridgeKind::Request, self.transaction, nonce, 0)?;
-        send_frame(self.deadline, self.broker_pipe, &request.encode())?;
-        let ack = Bridge::parse(&receive_frame(self.deadline, self.broker_pipe)?)?;
-        if ack.kind() != BridgeKind::Ack
-            || ack.transaction_id() != self.transaction
-            || ack.nonce() != nonce
-            || ack.code() != 0
-        {
-            return Err(LifecycleError::Invalid);
+        if let Some(package) = &self.package {
+            let request = v2::Bridge::new(
+                BridgeKind::Request,
+                self.transaction,
+                nonce,
+                package.clone(),
+            )?;
+            send_guard_bytes(self.deadline, self.broker_pipe, &request.encode())?;
+            let GuardFrame::Package(bytes) = receive_guard_frame(self.deadline, self.broker_pipe)?
+            else {
+                return Err(LifecycleError::Invalid);
+            };
+            let ack = v2::Bridge::parse(&bytes)?;
+            if ack.kind() != BridgeKind::Ack
+                || ack.transaction_id() != self.transaction
+                || ack.nonce() != nonce
+                || ack.package() != package
+            {
+                return Err(LifecycleError::Invalid);
+            }
+            live(server)?;
+            let grant = v2::Grant::new(
+                package.clone(),
+                nonce,
+                self.deadline_ticks,
+                self.transaction,
+            )?;
+            grant.validate(package, nonce, unsafe { GetTickCount64() })?;
+            current(self.deadline)?;
+            self.write_grant(state, pipe, &grant.encode())?;
+        } else {
+            let request = Bridge::new(BridgeKind::Request, self.transaction, nonce, 0)?;
+            send_frame(self.deadline, self.broker_pipe, &request.encode())?;
+            let ack = Bridge::parse(&receive_frame(self.deadline, self.broker_pipe)?)?;
+            if ack.kind() != BridgeKind::Ack
+                || ack.transaction_id() != self.transaction
+                || ack.nonce() != nonce
+                || ack.code() != 0
+            {
+                return Err(LifecycleError::Invalid);
+            }
+            live(server)?;
+            let grant = Grant::new(nonce, self.deadline_ticks, self.transaction)?;
+            grant.validate(nonce, unsafe { GetTickCount64() })?;
+            current(self.deadline)?;
+            self.write_grant(state, pipe, &grant.encode())?;
         }
-        live(server)?;
-        let grant = Grant::new(nonce, self.deadline_ticks, self.transaction)?;
-        grant.validate(nonce, unsafe { GetTickCount64() })?;
-        current(self.deadline)?;
-        self.write_grant(state, pipe, grant)?;
         current(self.deadline)?;
         // Keep pipe/server/token/image alive while CA resumes, captures its real
         // G client and reads buffered grant. Do not FlushFileBuffers or wait for
@@ -406,7 +457,15 @@ impl Context {
         state.granted = true;
         Ok(())
     }
-    fn write_grant(&self, state: &mut State, pipe: HANDLE, grant: Grant) -> Result<()> {
+    fn write_grant(&self, state: &mut State, pipe: HANDLE, bytes: &[u8]) -> Result<()> {
+        let expected = if self.package.is_some() {
+            v2::FRAME_BYTES
+        } else {
+            48
+        };
+        if bytes.len() != expected {
+            return Err(LifecycleError::Invalid);
+        }
         if state.resources.handles.len() >= HANDLE_LIMIT || state.write.is_some() {
             return Err(LifecycleError::Invalid);
         }
@@ -419,7 +478,12 @@ impl Context {
                 hEvent: event,
                 ..Default::default()
             },
-            bytes: grant.encode(),
+            bytes: {
+                let mut out = [0; v2::FRAME_BYTES];
+                out[..bytes.len()].copy_from_slice(bytes);
+                out
+            },
+            length: bytes.len(),
             pending: true,
             cancel_attempted: false,
         }));
@@ -430,7 +494,7 @@ impl Context {
         let start = unsafe {
             WriteFile(
                 pipe,
-                Some(&write.bytes),
+                Some(&write.bytes[..write.length]),
                 Some(&mut immediate),
                 Some(&mut write.overlapped),
             )
@@ -447,7 +511,7 @@ impl Context {
             match unsafe { GetOverlappedResult(pipe, &write.overlapped, &mut transferred, false) } {
                 Ok(()) => {
                     write.pending = false;
-                    if transferred == 48 {
+                    if transferred as usize == write.length {
                         return current(self.deadline);
                     }
                     return Err(LifecycleError::Unsettled);

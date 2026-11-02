@@ -211,6 +211,7 @@ mod tests {
                 peer_images: Vec::new(),
                 sealed_package_sha: None,
                 captured_source: None,
+                verified_maintenance: None,
             };
             Self { root, session }
         }

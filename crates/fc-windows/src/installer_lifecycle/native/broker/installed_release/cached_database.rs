@@ -289,6 +289,8 @@ impl InstalledReleaseReader {
         let summary = self.acquired(code, summary, MsiKind::Summary)?;
         let mut kind = 0;
         let mut integer = 0;
+        // Even a string Summary property requires non-null output storage.
+        let mut file_time = windows::Win32::Foundation::FILETIME::default();
         let mut buf = [0u16; 39];
         let mut len = buf.len() as u32;
         let code = unsafe {
@@ -297,7 +299,7 @@ impl InstalledReleaseReader {
                 9,
                 &mut kind,
                 &mut integer,
-                None,
+                Some(&mut file_time),
                 Some(PWSTR(buf.as_mut_ptr())),
                 Some(&mut len),
             )

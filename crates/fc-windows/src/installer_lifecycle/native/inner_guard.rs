@@ -6,7 +6,7 @@
 use super::*;
 use crate::installer_lifecycle::{
     broker::manifest,
-    guard_contract::{Grant, Nonce, GUARD_TEMPLATE_QUERY},
+    guard_contract::{v2, Grant, Nonce, GUARD_TEMPLATE_QUERY},
 };
 use fc_ports::RandomSource;
 use std::{
@@ -57,7 +57,7 @@ struct GuardState {
     event: Option<HANDLE>,
     overlapped: OVERLAPPED,
     io: Io,
-    grant_bytes: [u8; 48],
+    grant_bytes: [u8; v2::FRAME_BYTES],
     entry_tick: u64,
     grant_deadline: Option<u64>,
     peer: Option<GuardianIdentity>,
@@ -75,7 +75,7 @@ impl GuardState {
             event: None,
             overlapped: OVERLAPPED::default(),
             io: Io::None,
-            grant_bytes: [0; 48],
+            grant_bytes: [0; v2::FRAME_BYTES],
             entry_tick: unsafe { GetTickCount64() },
             grant_deadline: None,
             peer: None,
@@ -176,7 +176,10 @@ impl GuardState {
         require_user(&self.resources.sid)?;
         Ok(())
     }
-    fn prepare_accept(&mut self, nonce: Nonce) -> Result<()> {
+    fn prepare_accept(&mut self, nonce: Nonce, length: usize) -> Result<()> {
+        if length != 48 && length != v2::FRAME_BYTES {
+            return Err(LifecycleError::Invalid);
+        }
         self.room(2)?;
         let event = unsafe { CreateEventW(None, true, false, None)? };
         self.resources.add(event, Role::Control);
@@ -193,8 +196,8 @@ impl GuardState {
                         | PIPE_WAIT
                         | PIPE_REJECT_REMOTE_CLIENTS,
                     1,
-                    48,
-                    48,
+                    length as u32,
+                    length as u32,
                     0,
                     Some(attributes),
                 )
@@ -264,13 +267,17 @@ impl GuardState {
             Err(error) => Err(error.into()),
         }
     }
-    fn receive(&mut self, nonce: Nonce) -> Result<Grant> {
+    fn receive(&mut self, nonce: Nonce, format: &abi2::PackageFormat) -> Result<()> {
         self.time()?;
         if self.io == Io::Accept {
             // No new wait for a client after the INFO callback has returned.
             // An external direct inner invocation is rejected immediately.
             self.completed_io()?;
         }
+        let length = match format {
+            abi2::PackageFormat::Legacy => 48,
+            abi2::PackageFormat::Abi2(_) => v2::FRAME_BYTES,
+        };
         let pipe = self.pipe.ok_or(LifecycleError::Invalid)?;
         let mut available = 0;
         let mut message_remaining = 0;
@@ -284,7 +291,7 @@ impl GuardState {
                 Some(&mut message_remaining),
             )?;
         }
-        if available != 48 || message_remaining != 48 {
+        if available as usize != length || message_remaining as usize != length {
             return Err(LifecycleError::Invalid);
         }
         self.overlapped = OVERLAPPED {
@@ -297,20 +304,20 @@ impl GuardState {
         match unsafe {
             ReadFile(
                 pipe,
-                Some(&mut self.grant_bytes),
+                Some(&mut self.grant_bytes[..length]),
                 Some(&mut bytes),
                 Some(&raw mut self.overlapped),
             )
         } {
             Ok(()) => {
-                if self.completed_io()? != 48 {
+                if self.completed_io()? as usize != length {
                     return Err(LifecycleError::Unsettled);
                 }
             }
             Err(error) if error.code() == ERROR_IO_PENDING.to_hresult() => {
                 // Data was already present, but an incomplete read still
                 // cannot grant success. Cancellation/drain handles this path.
-                if self.completed_io()? != 48 {
+                if self.completed_io()? as usize != length {
                     return Err(LifecycleError::Unsettled);
                 }
             }
@@ -320,11 +327,19 @@ impl GuardState {
                 return Err(error.into());
             }
         }
-        let grant = Grant::parse(&self.grant_bytes)?;
-        grant.validate(nonce, unsafe { GetTickCount64() })?;
-        self.grant_deadline = Some(grant.deadline_ticks());
-        self.time()?;
-        Ok(grant)
+        self.grant_deadline = Some(match format {
+            abi2::PackageFormat::Legacy => {
+                let grant = Grant::parse(&self.grant_bytes[..length])?;
+                grant.validate(nonce, unsafe { GetTickCount64() })?;
+                grant.deadline_ticks()
+            }
+            abi2::PackageFormat::Abi2(package) => {
+                let grant = v2::Grant::parse(&self.grant_bytes[..length])?;
+                grant.validate(package, nonce, unsafe { GetTickCount64() })?;
+                grant.deadline_ticks()
+            }
+        });
+        self.time()
     }
     fn peer_image(&mut self) -> Result<HANDLE> {
         self.time()?;
@@ -640,20 +655,18 @@ impl GuardState {
                 info
             }
         };
-        self.prepare_accept(nonce)?;
+        let length = match &format {
+            abi2::PackageFormat::Legacy => 48,
+            abi2::PackageFormat::Abi2(_) => v2::FRAME_BYTES,
+        };
+        self.prepare_accept(nonce, length)?;
         self.message(install, &info)?;
         // The client remains held in G's original callback context until its
         // later InstallInitialize callback or negative API return. Consequently
         // the actual peer query does not depend on a closed client's metadata.
-        let grant = self.receive(nonce)?;
+        self.receive(nonce, &format)?;
         let image = self.peer_image()?;
         self.template_matches(install, image, &format)?;
-        if matches!(format, abi2::PackageFormat::Abi2(_)) {
-            // The old FCGA v1 nonce-only grant can never authorize ABI2. A
-            // private Plan/package-bound ticket and original G/B bridge are
-            // deliberately not wired in this revision. Old G ignores FCGI2.
-            return Err(LifecycleError::Invalid);
-        }
         let process = self.resources.handle(Role::Guardian)?;
         let peer = self.peer.ok_or(LifecycleError::Invalid)?;
         if unsafe { GetProcessId(process) } != peer.process_id
@@ -661,7 +674,6 @@ impl GuardState {
         {
             return Err(LifecycleError::Unsettled);
         }
-        grant.validate(nonce, unsafe { GetTickCount64() })?;
         self.time()
     }
 }

@@ -23,6 +23,8 @@ pub(crate) mod controlled_owner;
 mod effects;
 #[allow(dead_code)] // Read-only capture foundation; not wired to an upgrade permit.
 mod installed_release;
+#[allow(dead_code)] // Same-source maintenance proof; no published predecessor permit.
+mod maintenance;
 mod retirement;
 #[allow(dead_code)] // Captured ABI2 source facts do not yet create a private Plan.
 mod source_package;
@@ -361,6 +363,7 @@ struct Session {
     peer_images: Vec<(HANDLE, HANDLE)>,
     sealed_package_sha: Option<[u8; 32]>,
     captured_source: Option<source_package::CapturedSource>,
+    verified_maintenance: Option<maintenance::VerifiedSameSourceMaintenance>,
 }
 impl Session {
     fn new(deadline: Instant) -> Result<Self> {
@@ -459,7 +462,18 @@ impl Session {
             peer_images: Vec::new(),
             sealed_package_sha,
             captured_source,
+            verified_maintenance: None,
         })
+    }
+    fn capture_maintenance(&mut self) -> Result<()> {
+        let Some(source) = &self.captured_source else {
+            return Ok(());
+        };
+        let original = std::mem::replace(&mut self.resources, maintenance::released_placeholder());
+        let (resources, verified) = maintenance::Reader::capture(original, self.deadline, source)?;
+        self.resources = resources;
+        self.verified_maintenance = verified;
+        Ok(())
     }
     fn authenticate_image(&mut self, process: HANDLE) -> Result<(GuardianIdentity, HANDLE)> {
         // Keep captured source facts tied to this original image/session. This
@@ -1124,6 +1138,7 @@ mod tests {
             peer_images: Vec::new(),
             sealed_package_sha: None,
             captured_source: None,
+            verified_maintenance: None,
         }
     }
     fn fixture_name() -> String {

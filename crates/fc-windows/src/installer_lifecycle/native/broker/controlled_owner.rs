@@ -3,6 +3,7 @@
 //! legacy helpers without that seal cannot enter this route.
 use super::super::super::guard_contract::{Bridge, BridgeKind, Nonce};
 use super::*;
+use crate::installer_lifecycle::guard_contract::v2::{self, ObservedPackage};
 use windows::Win32::System::SystemInformation::GetTickCount64;
 
 mod guard_context;
@@ -165,12 +166,18 @@ fn send(s: &Session, pipe: HANDLE, m: Message) -> Result<()> {
     send_frame(s.deadline, pipe, &m.bytes())
 }
 fn send_frame(deadline: Instant, pipe: HANDLE, bytes: &[u8; FRAME]) -> Result<()> {
+    send_guard_bytes(deadline, pipe, bytes)
+}
+fn send_guard_bytes(deadline: Instant, pipe: HANDLE, bytes: &[u8]) -> Result<()> {
+    if bytes.len() != FRAME && bytes.len() != v2::FRAME_BYTES {
+        return Err(LifecycleError::Invalid);
+    }
     current(deadline)?;
     let mut n = 0;
     unsafe {
         WriteFile(pipe, Some(bytes), Some(&mut n), None)?;
     }
-    if n as usize != FRAME {
+    if n as usize != bytes.len() {
         return Err(LifecycleError::Unsettled);
     }
     current(deadline)
@@ -194,12 +201,108 @@ fn receive_frame(deadline: Instant, pipe: HANDLE) -> Result<[u8; FRAME]> {
     Ok(b)
 }
 
+enum GuardFrame {
+    Legacy([u8; FRAME]),
+    Package([u8; v2::FRAME_BYTES]),
+}
+fn receive_guard_frame(deadline: Instant, pipe: HANDLE) -> Result<GuardFrame> {
+    // Session::server/connect use PIPE_TYPE_BYTE/PIPE_READMODE_BYTE, with the
+    // original4096-byte buffers. This is not a message-mode partial read.
+    let first = receive_frame(deadline, pipe)?;
+    if &first[..4] != b"FCB2" {
+        return Ok(GuardFrame::Legacy(first));
+    }
+    let mut bytes = [0; v2::FRAME_BYTES];
+    bytes[..FRAME].copy_from_slice(&first);
+    for chunk in bytes[FRAME..].chunks_exact_mut(FRAME) {
+        chunk.copy_from_slice(&receive_frame(deadline, pipe)?);
+    }
+    Ok(GuardFrame::Package(bytes))
+}
+// Constructed solely from the already-pinned, before-Begin native capture.
+// The same-image peer check binds both original B and G to the same MSI seal.
+fn source_identity(s: &Session) -> Result<Option<ObservedPackage>> {
+    let Some(source) = &s.captured_source else {
+        return Ok(None);
+    };
+    if source.abi != 2
+        || source.family != INSTALL_FAMILY
+        || Some(source.source_sha256) != s.sealed_package_sha
+        || source.image_sha256 != s.image_sha
+    {
+        return Err(LifecycleError::Invalid);
+    }
+    Ok(Some(ObservedPackage::new(
+        &source.manifest.product,
+        &source.package,
+        &source.manifest.version,
+    )?))
+}
+#[cfg(test)]
+fn fresh_only(
+    source: Option<ObservedPackage>,
+    operation: Operation,
+    admitted: MaintenanceOperation,
+) -> Result<Option<ObservedPackage>> {
+    if source.is_some()
+        && (operation != Operation::Install || admitted != MaintenanceOperation::Install)
+    {
+        return Err(LifecycleError::Invalid);
+    }
+    Ok(source)
+}
+
+// Only a native before-Begin capture can supply the private maintenance proof.
+// This is same Product/Package/version/source, never an Upgrade predecessor.
+fn admitted_source(
+    s: &Session,
+    operation: Operation,
+    admitted: MaintenanceOperation,
+) -> Result<Option<ObservedPackage>> {
+    let source = source_identity(s)?;
+    if source.is_some() {
+        let same = s
+            .verified_maintenance
+            .as_ref()
+            .is_some_and(|proof| proof.matches(s));
+        let allowed = same_source_operation(operation, admitted, same);
+        if !allowed {
+            return Err(LifecycleError::Invalid);
+        }
+    }
+    Ok(source)
+}
+// Pure policy predicate; the bool is obtained only from the private native
+// proof above. It is never decoded from Run, a property, or a caller argument.
+fn same_source_operation(operation: Operation, admitted: MaintenanceOperation, same: bool) -> bool {
+    match operation {
+        Operation::Install => !same && admitted == MaintenanceOperation::Install,
+        Operation::Repair | Operation::Uninstall => {
+            same && admitted == MaintenanceOperation::SameManifest
+        }
+    }
+}
+
+fn captured_operation(s: &Session, operation: Operation) -> Result<()> {
+    if source_identity(s)?.is_some() {
+        let same = s
+            .verified_maintenance
+            .as_ref()
+            .is_some_and(|proof| proof.matches(s));
+        if (operation == Operation::Install) == same {
+            return Err(LifecycleError::Invalid);
+        }
+    }
+    Ok(())
+}
+
 /// Association belongs to this original authenticated G's one active Run.
 /// A nonce, callback return or UI text alone cannot satisfy this state machine.
 struct GuardAssociation {
     transaction: u32,
     nonce: Option<Nonce>,
     returned: bool,
+    package: Option<ObservedPackage>,
 }
 impl GuardAssociation {
     fn new(transaction: u32) -> Self {
@@ -207,28 +310,62 @@ impl GuardAssociation {
             transaction,
             nonce: None,
             returned: false,
+            package: None,
         }
     }
-    fn observe(&mut self, bridge: Bridge) -> Result<Option<Bridge>> {
-        if bridge.transaction_id() != self.transaction || bridge.code() != 0 {
+    // Private B-only construction after native Fresh admission/revalidation,
+    // exclusive Draft, actual original Begin and armed Pending all succeeded.
+    fn package(transaction: u32, package: ObservedPackage) -> Self {
+        Self {
+            package: Some(package),
+            ..Self::new(transaction)
+        }
+    }
+    fn observe_nonce(
+        &mut self,
+        kind: BridgeKind,
+        transaction: u32,
+        nonce: Nonce,
+    ) -> Result<Option<BridgeKind>> {
+        if transaction != self.transaction {
             return Err(LifecycleError::Invalid);
         }
-        match bridge.kind() {
+        match kind {
             BridgeKind::Request if self.nonce.is_none() => {
-                self.nonce = Some(bridge.nonce());
-                Ok(Some(Bridge::new(
-                    BridgeKind::Ack,
-                    self.transaction,
-                    bridge.nonce(),
-                    0,
-                )?))
+                self.nonce = Some(nonce);
+                Ok(Some(BridgeKind::Ack))
             }
-            BridgeKind::Returned if self.nonce == Some(bridge.nonce()) && !self.returned => {
+            BridgeKind::Returned if self.nonce == Some(nonce) && !self.returned => {
                 self.returned = true;
                 Ok(None)
             }
             _ => Err(LifecycleError::Invalid),
         }
+    }
+    fn observe(&mut self, bridge: Bridge) -> Result<Option<Bridge>> {
+        if self.package.is_some() || bridge.code() != 0 {
+            return Err(LifecycleError::Invalid);
+        }
+        let reply = self.observe_nonce(bridge.kind(), bridge.transaction_id(), bridge.nonce())?;
+        reply
+            .map(|kind| Bridge::new(kind, self.transaction, bridge.nonce(), 0))
+            .transpose()
+    }
+    fn observe_package(&mut self, bridge: v2::Bridge) -> Result<Option<v2::Bridge>> {
+        if self.package.as_ref() != Some(bridge.package()) {
+            return Err(LifecycleError::Invalid);
+        }
+        let reply = self.observe_nonce(bridge.kind(), bridge.transaction_id(), bridge.nonce())?;
+        reply
+            .map(|kind| {
+                v2::Bridge::new(
+                    kind,
+                    self.transaction,
+                    bridge.nonce(),
+                    bridge.package().clone(),
+                )
+            })
+            .transpose()
     }
     fn require_returned(&self) -> Result<()> {
         if self.returned {
@@ -399,6 +536,7 @@ impl Drop for ApiOwner {
 
 pub(super) fn guardian(s: &mut Session) -> Result<()> {
     s.sealed_package_sha.ok_or(LifecycleError::Invalid)?;
+    let source = source_identity(s)?;
     let parent = s.resources.parent(unsafe { GetCurrentProcess() })?;
     s.authenticate_image(parent)?;
     let original = process_identity(parent)?;
@@ -419,6 +557,7 @@ pub(super) fn guardian(s: &mut Session) -> Result<()> {
     s.deadline = s
         .deadline
         .min(Instant::now() + Duration::from_millis(ready.ticks - now));
+    s.capture_maintenance()?;
     let path = package(s)?;
     let mut api = ApiOwner::begin()?;
     let mut began = Message::new(BEGUN);
@@ -437,6 +576,14 @@ pub(super) fn guardian(s: &mut Session) -> Result<()> {
         if run.kind != RUN || run.transaction != api.transaction.0 || api.begin != 0 {
             return Err(LifecycleError::Invalid);
         }
+        let operation = match run.outcome {
+            1 => Operation::Install,
+            2 => Operation::Repair,
+            3 => Operation::Uninstall,
+            _ => return Err(LifecycleError::Invalid),
+        };
+        captured_operation(s, operation)?;
+        maintenance::revalidate(s)?;
         current(s.deadline)?;
         // No Session/API reference is passed through FFI. During this synchronous
         // call only the independent callback context uses the original pipe.
@@ -446,6 +593,7 @@ pub(super) fn guardian(s: &mut Session) -> Result<()> {
             ready.ticks,
             api.transaction.0,
             s.resources.sid.clone(),
+            source,
         )?;
         let install = api.install(&path, run.outcome);
         // Unregister/check callback controls even when the native API fails.
@@ -576,6 +724,8 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
     s.sealed_package_sha.ok_or(LifecycleError::Invalid)?;
     let identity = InstallIdentity::for_current_user()?;
     let mut draft = LifecycleGate::try_draft_maintenance(&identity, deadline)?;
+    s.capture_maintenance()?;
+    captured_operation(&s, operation)?;
     package(&mut s)?;
     let own = process_identity(unsafe { GetCurrentProcess() })?;
     s.pipe_name = pipe_name(&s.pipe_name, own);
@@ -624,10 +774,12 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
         return Err(LifecycleError::Unsettled);
     }
     observed?;
-    let admission = match effects::admit(&mut s).and_then(|admission| {
-        effects::revalidate(&mut s, &admission)?;
-        Ok(admission)
-    }) {
+    let admission = match maintenance::revalidate(&mut s)
+        .and_then(|()| effects::admit(&mut s))
+        .and_then(|admission| {
+            effects::revalidate(&mut s, &admission)?;
+            Ok(admission)
+        }) {
         Ok(admission) => admission,
         Err(e) => {
             abort(
@@ -642,7 +794,9 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
             return Err(e);
         }
     };
-    if !operation.admits(admission.operation()) {
+    if !operation.admits(admission.operation())
+        || admitted_source(&s, operation, admission.operation()).is_err()
+    {
         abort(
             &mut s,
             pipe,
@@ -660,19 +814,28 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
         run.transaction = began.transaction;
         run.outcome = operation.tag();
         send(&s, pipe, run)?;
-        let mut guard = GuardAssociation::new(began.transaction);
+        let mut guard = match admitted_source(&s, operation, admission.operation())? {
+            Some(source) => GuardAssociation::package(began.transaction, source),
+            None => GuardAssociation::new(began.transaction),
+        };
         let installed = loop {
-            let frame = receive_frame(s.deadline, pipe)?;
-            if &frame[..4] == b"FCGB" {
-                // This is still the original CreateProcess capability and the
-                // same authenticated pipe; no PID/image string substitutes it.
-                live(child.process)?;
-                if let Some(ack) = guard.observe(Bridge::parse(&frame)?)? {
-                    send_frame(s.deadline, pipe, &ack.encode())?;
+            match receive_guard_frame(s.deadline, pipe)? {
+                GuardFrame::Package(frame) => {
+                    live(child.process)?;
+                    if let Some(ack) = guard.observe_package(v2::Bridge::parse(&frame)?)? {
+                        send_guard_bytes(s.deadline, pipe, &ack.encode())?;
+                    }
                 }
-            } else {
-                guard.require_returned()?;
-                break Message::parse(frame)?;
+                GuardFrame::Legacy(frame) if &frame[..4] == b"FCGB" => {
+                    live(child.process)?;
+                    if let Some(ack) = guard.observe(Bridge::parse(&frame)?)? {
+                        send_frame(s.deadline, pipe, &ack.encode())?;
+                    }
+                }
+                GuardFrame::Legacy(frame) => {
+                    guard.require_returned()?;
+                    break Message::parse(frame)?;
+                }
             }
         };
         if installed.kind != INSTALLED || installed.transaction != began.transaction {
@@ -748,6 +911,95 @@ pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn same_source_maintenance_never_promotes_upgrade_or_missing_native_proof() {
+        for operation in [Operation::Install, Operation::Repair, Operation::Uninstall] {
+            for admitted in [
+                MaintenanceOperation::Install,
+                MaintenanceOperation::Repair,
+                MaintenanceOperation::Uninstall,
+                MaintenanceOperation::SameManifest,
+                MaintenanceOperation::Upgrade,
+            ] {
+                for same in [false, true] {
+                    let expected = matches!(
+                        (operation, admitted, same),
+                        (Operation::Install, MaintenanceOperation::Install, false)
+                            | (
+                                Operation::Repair | Operation::Uninstall,
+                                MaintenanceOperation::SameManifest,
+                                true
+                            )
+                    );
+                    assert_eq!(same_source_operation(operation, admitted, same), expected);
+                }
+            }
+        }
+    }
+    #[test]
+    fn fresh_v2_requires_install_native_fresh_and_one_exact_package_ticket() {
+        let p = ObservedPackage::new(
+            "99378807-098D-5F04-8D4D-F181DFA218D6",
+            "99378807-098D-5F04-8D4D-F181DFA218D7",
+            "1.2.3",
+        )
+        .unwrap();
+        for operation in [Operation::Repair, Operation::Uninstall] {
+            assert!(fresh_only(Some(p.clone()), operation, MaintenanceOperation::Install).is_err());
+        }
+        assert!(fresh_only(
+            Some(p.clone()),
+            Operation::Install,
+            MaintenanceOperation::SameManifest
+        )
+        .is_err());
+        assert!(fresh_only(
+            Some(p.clone()),
+            Operation::Install,
+            MaintenanceOperation::Install
+        )
+        .unwrap()
+        .is_some());
+        let nonce = Nonce::from_bytes([7; 16]).unwrap();
+        let other = Nonce::from_bytes([8; 16]).unwrap();
+        let mut guard = GuardAssociation::package(42, p.clone());
+        assert!(guard
+            .observe(Bridge::new(BridgeKind::Request, 42, nonce, 0).unwrap())
+            .is_err());
+        let wrong = ObservedPackage::new(
+            "99378807-098D-5F04-8D4D-F181DFA218D6",
+            "99378807-098D-5F04-8D4D-F181DFA218D8",
+            "1.2.3",
+        )
+        .unwrap();
+        assert!(guard
+            .observe_package(v2::Bridge::new(BridgeKind::Request, 42, nonce, wrong).unwrap())
+            .is_err());
+        assert!(guard
+            .observe_package(v2::Bridge::new(BridgeKind::Request, 43, nonce, p.clone()).unwrap())
+            .is_err());
+        let request = v2::Bridge::new(BridgeKind::Request, 42, nonce, p.clone()).unwrap();
+        assert!(GuardAssociation::new(42)
+            .observe_package(request.clone())
+            .is_err());
+        assert_eq!(
+            guard
+                .observe_package(request.clone())
+                .unwrap()
+                .unwrap()
+                .kind(),
+            BridgeKind::Ack
+        );
+        assert!(guard.observe_package(request).is_err());
+        assert!(guard
+            .observe_package(v2::Bridge::new(BridgeKind::Returned, 42, other, p.clone()).unwrap())
+            .is_err());
+        assert!(guard.require_returned().is_err());
+        guard
+            .observe_package(v2::Bridge::new(BridgeKind::Returned, 42, nonce, p).unwrap())
+            .unwrap();
+        guard.require_returned().unwrap();
+    }
     #[test]
     fn setup_operation_requires_native_admission_and_closed_run_tags() {
         assert!(Operation::Install.admits(MaintenanceOperation::Install));

@@ -205,6 +205,8 @@ impl GuardState {
         let code = unsafe { MsiGetSummaryInformationW(db, PCWSTR::null(), 0, &mut summary) };
         let summary = self.abi2_acquired(code, summary)?;
         let (mut kind, mut integer) = (0, 0);
+        // Even a string Summary property requires non-null output storage.
+        let mut file_time = windows::Win32::Foundation::FILETIME::default();
         let mut buffer = [0u16; 39];
         let mut count = buffer.len() as u32; // capacity INCLUDES the terminating NUL.
         let code = unsafe {
@@ -213,7 +215,7 @@ impl GuardState {
                 9,
                 &mut kind,
                 &mut integer,
-                None,
+                Some(&mut file_time),
                 Some(PWSTR(buffer.as_mut_ptr())),
                 Some(&mut count),
             )
