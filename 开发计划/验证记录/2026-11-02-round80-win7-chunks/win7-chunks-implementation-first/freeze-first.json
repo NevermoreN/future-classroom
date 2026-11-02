@@ -1,0 +1,88 @@
+{
+  "status": "FROZEN_TWO_CHUNKS_SYNTAX_ONLY_SOURCE_FIX",
+  "files": [
+    {
+      "path": "architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "before/crates/fc-windows/src/installer_lifecycle/broker/published_host/predecessor.rs",
+      "bytes": 5674,
+      "sha256": "3897d224b1c21f50e1baaffd981773f81c97441adb99dfcb10a646624eab246f"
+    },
+    {
+      "path": "before/crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+      "bytes": 44562,
+      "sha256": "c136d74c13cd2e199a9a5f8b676c7b2e79cdac85cfbbcce1a92a023a3173b6c7"
+    },
+    {
+      "path": "checks-first.json",
+      "bytes": 927848,
+      "sha256": "b1e57283d6bb9efb0720e17324e12eb71d77f51e7989170322126f02e6dcf830"
+    },
+    {
+      "path": "cleanup-first.json",
+      "bytes": 201,
+      "sha256": "7b9b95e854bf0192998b1801badeac5cdcddafa0e649547a250c4522a04d0030"
+    },
+    {
+      "path": "complete.patch",
+      "bytes": 1586,
+      "sha256": "b027a95da39a868d05d945933700951fbd700efc55a69d512fa0ead25d614d57"
+    },
+    {
+      "path": "diff.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "diff.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "gnu-strict-clippy.stderr.log",
+      "bytes": 3617,
+      "sha256": "d5f0f062b574f55a5fed77d722067cc7bc20ced6849ba1af7ffac6024d924ad5"
+    },
+    {
+      "path": "gnu-strict-clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "run-checks-first.py",
+      "bytes": 1999,
+      "sha256": "3293074424d7ac73013fdc56825aa8dee41ef2e57fcf47d8373dd8d3a1ab3594"
+    },
+    {
+      "path": "source/crates/fc-windows/src/installer_lifecycle/broker/published_host/predecessor.rs",
+      "bytes": 5685,
+      "sha256": "0fe6e6c015cf02ff79b0d8fc37ece8140e6a74e45f9d9b1f5d90bdecb51d0103"
+    },
+    {
+      "path": "source/crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+      "bytes": 44565,
+      "sha256": "3647b6d07b5ee44233c7cab864e5bedbb0e1abca731fa65dfe77c67a3f0125bb"
+    }
+  ],
+  "changes": "Only two equivalent fixed-size slice partition expressions; no budget, layout, authority, or runtime behavior change intended.",
+  "originalWin7CI": "0cdf clippy101 remains retained; new Win7 CI NOT_RUN",
+  "Windows": "NOT_RUN"
+}

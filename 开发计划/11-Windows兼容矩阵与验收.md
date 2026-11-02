@@ -403,3 +403,6 @@ R06界面12源的61项展示层测试，以及该Win11上的5项精确原生测�
 R80升级补证：正常GNU开发来源的0.2→0.3在该Win11实际完成安装/跨版本升级/卸载，六原B/G均实际0及checked-close，新14份健康、旧产品/组件客户/缓存Absent。另一个Type19写后失败夹具实际恢复旧版LICENSE缺失、51字节PROBE及其余12份文件、旧注册/组件/缓存前像，随后修复/卸载通过，四B为0/1603/0/0、四G均0；测试nonce完整下载核同后清理。原观察器配置FAIL与正式清理收据保留，见[升级归档](验证记录/2026-11-02-round80-abi2-upgrade/archive-index-first.json)。该运行不含学校实际数据保留、启用Run或标准用户验收，不含新14份中间SHA见证；最终Upgrade20源加纯位置修正1源仅另有整合静态检查，不能冒充该整合版已完整native回归。
 
 71ced30的现代MSVC51条命令实际全部0；Win7目标53条恰Clippy101，其他编译/PE命令0，原失败保留于[完整文本构建归档](验证记录/2026-11-02-round80-maintenance-msvc/archive-index-first.json)。位置修正通过61项host展示测试及GNU严格检查，新源码官方CI仍待运行，不能据旧产物发布升级包。另以四组合成输入补齐生产600000轮Rust/Python与[Win11 x64 BCrypt独立对照](验证记录/2026-11-02-round80-password-cng/archive-index-first.json)，四原CNG provider实际正常关闭；该64位API探针不是x86产品全回归、Win7/Win10实际运行或目标白板性能证据。Win7 SP1 x86、Win10 x86/x64实机与其余现场门槛不变，SSH授权保留。
+
+
+2026-11-02 补充：0cdf 现代 MSVC run41387127138 实际 success/51 原命令全 0；Win7 目标 run41387130749 实际 failure，恰 Clippy101，其余52命令0，原错误为两处 chunks_exact_to_as_chunks。root 已核全部 ZIP 成员及655实际输入/19926 Git 元数据。两处写法已在 c8ba14d 候选做等价修订并通过 GNU 严格检查，新的官方 MSVC 构建仍待运行；Win7/Win10 实机及该新修订 Windows 运行全部 NOT_RUN。见[有限核心证据](验证记录/2026-11-02-round80-win7-chunks/README.md)，不将原失败或仅编译产物写成系统兼容验收通过。
