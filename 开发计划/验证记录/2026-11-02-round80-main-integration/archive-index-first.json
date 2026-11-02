@@ -1,0 +1,74 @@
+{
+  "status": "PASS_ROOT_REPLAY_COPY_AND_ADDITIONAL_CREDENTIAL_SCAN",
+  "scope": "Supplementary root observations for the separately frozen D12/D13 archives; does not change either original archive.",
+  "d12": {
+    "members": 2630,
+    "binaryIdentities": 186,
+    "sensitiveMetadataOnly": 3,
+    "freezeSha256": "b30a8f07b920003aa8d584369eb6235cf31e4738dbe94fdb1c55a45b854fcc7e",
+    "rawReplayStdoutSaved": false,
+    "normalizedReplayReceiptOnly": true
+  },
+  "d13": {
+    "members": 240,
+    "binaryIdentities": 9,
+    "sensitiveMetadataOnly": 0,
+    "freezeSha256": "fb87e1d76cc1169eb62ffaea1a9c264702db8a5ea8355fe44eea4db78fd7783b",
+    "rawReplayStdoutSaved": true
+  },
+  "notes": [
+    "Original scan scripts preserve their actual historical temporary paths and are not portable replay entry points.",
+    "Additional scans read archived text and decoded JSON/JSONL/CLIXML/base64 views; zero credential findings. Sensitive source files were not read.",
+    "Control-character checks and narrow exact-byte exceptions remain in each frozen archive."
+  ],
+  "files": [
+    {
+      "path": "d12-replay-receipt.json",
+      "size": 1018,
+      "sha256": "0459360f909d6da32e7aa6a3e680a3b0d0ba403e765c166bdd9abeb30a9d85f4",
+      "original": "/tmp/fc-round80-controlled-repair/root-d12-independent-copy-verification-first.json"
+    },
+    {
+      "path": "d12-credential-scan.py",
+      "size": 4503,
+      "sha256": "a1363df092cfb46c17032221b595b1631e7d842884b5d62b1d7a7fc91afc06d4",
+      "original": "/tmp/fc-round80-controlled-repair/root-scan-d12-credential-views-first.py"
+    },
+    {
+      "path": "d12-credential-scan-report.json",
+      "size": 559,
+      "sha256": "d81999352d4e57a78df3da5416da490fbb0eefa0d1e7fade7ee7dc4fa87c3f67",
+      "original": "/tmp/fc-round80-controlled-repair/root-d12-credential-views-first/report.json"
+    },
+    {
+      "path": "d13-replay-receipt.json",
+      "size": 1204,
+      "sha256": "7a305f98ee3a578ef2918f2df9e05cdfb1d369242c0a89658331e9a03a79f991",
+      "original": "/tmp/fc-round80-controlled-repair/root-d13-independent-verification-first/report.json"
+    },
+    {
+      "path": "d13-replay.stdout.log",
+      "size": 346,
+      "sha256": "c3f0b046679f1c3af6a65b109bc42b597f1ad1436dbd12e12f4965a7ee20dbe8",
+      "original": "/tmp/fc-round80-controlled-repair/root-d13-independent-verification-first/replay.stdout.log"
+    },
+    {
+      "path": "d13-replay.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original": "/tmp/fc-round80-controlled-repair/root-d13-independent-verification-first/replay.stderr.log"
+    },
+    {
+      "path": "d13-credential-scan.py",
+      "size": 4495,
+      "sha256": "b5d771fb63d37aa7a6f1fb90adc2595fc15a8684d08be4b8478a38c69d423e35",
+      "original": "/tmp/fc-round80-controlled-repair/root-scan-d13-credential-views-first.py"
+    },
+    {
+      "path": "d13-credential-scan-report.json",
+      "size": 552,
+      "sha256": "b227aeccdd5f58662175994e0aad2f3bd92b72ea83c82530bb4dfbea810767ac",
+      "original": "/tmp/fc-round80-controlled-repair/root-d13-credential-views-first/report.json"
+    }
+  ]
+}

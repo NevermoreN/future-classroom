@@ -1,0 +1,3 @@
+本批保存 ABI2 同包安装维护证据：首次守卫失败1780、原只读Pending捕获与补取、合法Absent恢复、诊断仍拒无grant、四处Summary输出地址修复，以及新正常GNU三产物与Win11安装→损坏LICENSE→修复14件→卸载。原失败原件不改，旧End保持UNKNOWN。新成功路径的Begin/End为冻结native成功分支推论，非直接API返回JSON。3B/3G为六个真实原进程，未补造线程捕获。f82双MSVC CI为原f82源码的编译检查，不能代替本批新ABI2源码MSVC验证或Win7/Win10实机。不同版本升级、R06/G02不在本档。
+
+Scope二进制/hex及原文binding只保存文件元数据且未读取内容；PE/MSI/CAB/ZIP与伪装成日志的原始Binary流仅保存身份。所有纳入文本保留原字节及原错误。源码候选本地6eb6ec099b6b14e78b280df5df526545c8e04ecc的保存状态见原收据，不据此声称已同步主线/远程。

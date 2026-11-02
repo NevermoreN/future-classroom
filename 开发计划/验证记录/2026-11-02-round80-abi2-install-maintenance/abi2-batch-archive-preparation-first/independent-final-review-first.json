@@ -1,0 +1,145 @@
+{
+  "status": "PASS_FINITE_NORMAL_GNU_THREE_ARTIFACTS_FOUR_OUTPUT_FIX_AND_WIN11_FRESH_REPAIR_REMOVE_CLEANUP_REVIEW",
+  "normalEvidence": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-producer-first/evidence.json",
+    "bytes": 5855,
+    "sha256": "ee430d8f06b1485c2f53121da9eff277157f1773e4b5de1ca8d1163f8fadfcd0"
+  },
+  "sourceInputs": 588,
+  "sourceBeforeAfterEqual": true,
+  "sourceDeltaOnlyFourSummaryOutputAddresses": [
+    "crates/fc-windows/src/installer_lifecycle/native/broker/installed_release/cached_database.rs",
+    "crates/fc-windows/src/installer_lifecycle/native/broker/maintenance/database.rs",
+    "crates/fc-windows/src/installer_lifecycle/native/broker/source_package/database.rs",
+    "crates/fc-windows/src/installer_lifecycle/native/inner_guard/abi2.rs"
+  ],
+  "normalArtifacts": [
+    {
+      "name": "product-compile",
+      "artifact": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-producer-first/artifacts/fc-bootstrap.exe",
+        "bytes": 11420672,
+        "sha256": "3cde4c5b40cb38073bed42220177351d790b0b4e4c123feab05124e5868c7356"
+      },
+      "profileTest": false,
+      "features": [
+        "default"
+      ],
+      "actualExit": 0
+    },
+    {
+      "name": "lifecycle-compile",
+      "artifact": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-producer-first/artifacts/fc-installer-lifecycle.exe",
+        "bytes": 714240,
+        "sha256": "c769703b5d313ab01adc4032ff78fa3099d9a7fcc61522e18bf57e0ff8d23634"
+      },
+      "profileTest": false,
+      "features": [
+        "default"
+      ],
+      "actualExit": 0
+    },
+    {
+      "name": "guard-library-compile",
+      "artifact": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-producer-first/artifacts/fc_windows.dll",
+        "bytes": 3382272,
+        "sha256": "3afa443fd5150de011c1742acc15ef8a0539fca6169194469bbadf3c85da13a7"
+      },
+      "profileTest": false,
+      "features": [
+        "default"
+      ],
+      "actualExit": 0
+    }
+  ],
+  "staticPackage": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-summary-output-product-package-first/report.json",
+    "bytes": 77077,
+    "sha256": "6a084e9e863d71d2c0d21334413b30d09b98c0efda3b7d1ac78bf78164fb15dc"
+  },
+  "normalRuntime": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-summary-output-product-runtime-first/report.json",
+    "bytes": 128846,
+    "sha256": "c737764233f3f88cfee7e2b02c90a9dad30a7036443af27f4d325fa0ef58d754"
+  },
+  "nativeElapsedMilliseconds": 5918,
+  "outerSeconds": 8.213952416997927,
+  "threeBThreeGOriginalProcesses": [
+    {
+      "role": "setup-install",
+      "pid": 3660,
+      "creation": 134380607546406629,
+      "exit": 0,
+      "wait": 0,
+      "checkedClose": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "role": "owned-guardian",
+      "pid": 24164,
+      "creation": 134380607547082300,
+      "exit": 0,
+      "wait": 0,
+      "checkedClose": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "role": "setup-repair",
+      "pid": 10444,
+      "creation": 134380607560787583,
+      "exit": 0,
+      "wait": 0,
+      "checkedClose": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "role": "owned-guardian",
+      "pid": 22844,
+      "creation": 134380607561815748,
+      "exit": 0,
+      "wait": 0,
+      "checkedClose": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "role": "setup-uninstall",
+      "pid": 13356,
+      "creation": 134380607574309623,
+      "exit": 0,
+      "wait": 0,
+      "checkedClose": "CHECKED_CLOSE_SUCCESS"
+    },
+    {
+      "role": "owned-guardian",
+      "pid": 33852,
+      "creation": 134380607575309969,
+      "exit": 0,
+      "wait": 0,
+      "checkedClose": "CHECKED_CLOSE_SUCCESS"
+    }
+  ],
+  "processCount": 6,
+  "threadCapture": "NOT_INVENTED_FROM_PROCESS_EXIT",
+  "originalAPISequence": "SUCCESS_BRANCH_INFERENCE_FROM_FROZEN_NATIVE_NOT_DIRECT_BEGIN_END_API_RETURN_JSON",
+  "fullDownloadedFiles": 30,
+  "fullDownloadedDirectories": 4,
+  "nonceCleaned": true,
+  "productAndGateAbsent": true,
+  "scopedRecoveryCleanup": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-recovered-cleanup-runtime-first/report.json",
+    "bytes": 41898,
+    "sha256": "6d1a3d164e55f9aabfd570c66a5e6f050f9a52d417fa2c4a05996aa621f9a62a"
+  },
+  "oldEnd": "UNKNOWN_UNCHANGED_NOT_REWRITTEN_BY_NEW_SUCCESS",
+  "newDiagNoGrantNegative": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-third/report.json",
+    "bytes": 77278,
+    "sha256": "4db7457e4d3fafdc9f1fef1fd671e6b44cf592bd3650c8c24045e6d872ac8fbf"
+  },
+  "WindowsOS": "AUTHORIZED_WIN11_ONLY",
+  "Win7OS": "NOT_RUN",
+  "Win10OS": "NOT_RUN",
+  "newABI2MSVC": "NOT_RUN_F82_CI_IS_OLDER_SOURCE_COMPILE_ONLY",
+  "upgrade": "NOT_EXERCISED",
+  "rawScope": "EXCLUDED",
+  "Git": "NO_OPERATIONS",
+  "targetOrSourceCopy": "NOT_SCANNED"
+}

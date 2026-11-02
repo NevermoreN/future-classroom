@@ -1,0 +1,1941 @@
+{
+  "status": "PASS_EXPECTED_DIRECT_INNER_1603_STAGE_OBSERVATIONS_WIN11_ONLY_NOT_INSTALL_SUCCESS",
+  "scope": "DIRECT_INNER_EXPECTED_NEGATIVE_OBSERVATION_NOT_NORMAL_NOT_RECOVERY",
+  "oldPending": "NOT_OPENED_OR_CHANGED_BY_CONTROLLER",
+  "oldEnd": "UNKNOWN",
+  "beginEnd": "NOT_CALLED",
+  "packageReport": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-package-third/report.json",
+    "bytes": 86235,
+    "sha256": "e28704559d9c95425a34488e9d07a68f28852571957efdb74082d87811c18e92"
+  },
+  "diagnosticProducer": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-producer-second/report.json",
+    "bytes": 219086,
+    "sha256": "b67fd099cf5f69403693c7b99eb3a1775f36e9908c5210efa0e8ed61ef71427b"
+  },
+  "preparationFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-preparation-second/freeze-first.json",
+    "bytes": 1567,
+    "sha256": "d199f188b26d9a62ba2487afe3dac40410aa3cdcbc67c79a0a0ae748309e9a9b"
+  },
+  "operations": [
+    {
+      "name": "create",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.5153697889982141,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/create.stdout.log",
+        "bytes": 138,
+        "sha256": "9a56b08a515331d7b97553ed56217c5a5754af8d033efcd805e6496137ea5f58"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/create.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "name": "upload-Capture.cs",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload/Capture.cs",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ca-diagnostic-cd75fc700bea929eb28b2b9accd4c887/"
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.22517544299626024,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload-Capture.cs.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload-Capture.cs.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "upload-DirectDiagnostic.exe",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload/DirectDiagnostic.exe",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ca-diagnostic-cd75fc700bea929eb28b2b9accd4c887/"
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.2187352330001886,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload-DirectDiagnostic.exe.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload-DirectDiagnostic.exe.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "upload-FutureClassroom.msi",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload/FutureClassroom.msi",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ca-diagnostic-cd75fc700bea929eb28b2b9accd4c887/"
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.3532079260039609,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload-FutureClassroom.msi.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload-FutureClassroom.msi.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "upload-ProductState.cs",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload/ProductState.cs",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ca-diagnostic-cd75fc700bea929eb28b2b9accd4c887/"
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.2164428800024325,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload-ProductState.cs.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload-ProductState.cs.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "upload-ProductState.ps1",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload/ProductState.ps1",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ca-diagnostic-cd75fc700bea929eb28b2b9accd4c887/"
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.2140857549966313,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload-ProductState.ps1.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/upload-ProductState.ps1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "run",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 1.4545698830042966,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/run.stdout.log",
+        "bytes": 25476,
+        "sha256": "37137ea74b3d05ffea4827df4701d2bb94dc3a7a564948f22d231a6f7a78f2de"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/run.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "name": "owned-processes",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.5557822050031973,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/owned-processes.stdout.log",
+        "bytes": 13,
+        "sha256": "7886222597aa503c7fcb97ba200bf66c918aaf8bb08b6c702386457d30bdf0d7"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/owned-processes.stderr.log",
+        "bytes": 596,
+        "sha256": "be2a813c5e264e6e4b05c9816b17dc6eb039a1cc247767c8927d259fa5541e12"
+      }
+    },
+    {
+      "name": "inventory",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.5506490279949503,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/inventory.stdout.log",
+        "bytes": 1088,
+        "sha256": "59f27e108ce31d79f94162e5da5d3a1f531160b1389b4ea2a1b4384a56fa00d9"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/inventory.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    },
+    {
+      "name": "download",
+      "argv": [
+        "scp",
+        "-q",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ca-diagnostic-cd75fc700bea929eb28b2b9accd4c887",
+        "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/download"
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.3425523549958598,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/download.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/download.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "owned-processes-before-delete",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.540357561003475,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/owned-processes-before-delete.stdout.log",
+        "bytes": 13,
+        "sha256": "7886222597aa503c7fcb97ba200bf66c918aaf8bb08b6c702386457d30bdf0d7"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/owned-processes-before-delete.stderr.log",
+        "bytes": 596,
+        "sha256": "be2a813c5e264e6e4b05c9816b17dc6eb039a1cc247767c8927d259fa5541e12"
+      }
+    },
+    {
+      "name": "delete",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAKQApAA=="
+      ],
+      "actualExit": 0,
+      "localOriginalReaped": true,
+      "remoteOriginalUnknown": false,
+      "seconds": 0.5617201549976016,
+      "stdout": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/delete.stdout.log",
+        "bytes": 117,
+        "sha256": "4dfdc677dfe5eddc39b2533c1206ddafa7046134dac94942f598c13a538e4c8a"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/delete.stderr.log",
+        "bytes": 596,
+        "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+      }
+    }
+  ],
+  "cleanup": "PASS_EXACT_NEW_OWNED_SCRATCH_ONLY",
+  "outerSeconds": 900,
+  "windowsRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ca-diagnostic-cd75fc700bea929eb28b2b9accd4c887",
+  "native": {
+    "creation": 134380596504479568,
+    "stdout": "FC_DIRECT_ACK_CLOSE ok=1 error=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=30 field1rc=0 FCGD2:seq=1;stage=run_start;class=OK;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=31 field1rc=0 FCGD2:seq=2;stage=module_reference;class=OK;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=32 field1rc=0 FCGD2:seq=3;stage=effective_user;class=OK;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=33 field1rc=0 FCGD2:seq=4;stage=random;class=OK;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=34 field1rc=0 FCGD2:seq=5;stage=abi2_active_database;class=MSI_RAW;code=00000000;detail=4\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=35 field1rc=0 FCGD2:seq=6;stage=abi2_open_view;class=MSI_RAW;code=00000000;detail=5\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=36 field1rc=0 FCGD2:seq=7;stage=abi2_execute_view;class=MSI_RAW;code=00000000;detail=5\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=37 field1rc=0 FCGD2:seq=8;stage=abi2_fetch;class=MSI_RAW;code=00000000;detail=6\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=38 field1rc=0 FCGD2:seq=9;stage=abi2_template_data_size;class=MSI_RAW;code=00000000;detail=714372\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=39 field1rc=0 FCGD2:seq=10;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=40 field1rc=0 FCGD2:seq=11;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=41 field1rc=0 FCGD2:seq=12;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=42 field1rc=0 FCGD2:seq=13;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=43 field1rc=0 FCGD2:seq=14;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=44 field1rc=0 FCGD2:seq=15;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=45 field1rc=0 FCGD2:seq=16;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=46 field1rc=0 FCGD2:seq=17;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=47 field1rc=0 FCGD2:seq=18;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=48 field1rc=0 FCGD2:seq=19;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=49 field1rc=0 FCGD2:seq=20;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=50 field1rc=0 FCGD2:seq=21;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=51 field1rc=0 FCGD2:seq=22;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=52 field1rc=0 FCGD2:seq=23;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=53 field1rc=0 FCGD2:seq=24;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=54 field1rc=0 FCGD2:seq=25;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=55 field1rc=0 FCGD2:seq=26;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=56 field1rc=0 FCGD2:seq=27;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=57 field1rc=0 FCGD2:seq=28;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=58 field1rc=0 FCGD2:seq=29;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=59 field1rc=0 FCGD2:seq=30;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=60 field1rc=0 FCGD2:seq=31;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=61 field1rc=0 FCGD2:seq=32;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=62 field1rc=0 FCGD2:seq=33;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=63 field1rc=0 FCGD2:seq=34;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=64 field1rc=0 FCGD2:seq=35;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=65 field1rc=0 FCGD2:seq=36;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=66 field1rc=0 FCGD2:seq=37;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=67 field1rc=0 FCGD2:seq=38;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=68 field1rc=0 FCGD2:seq=39;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=69 field1rc=0 FCGD2:seq=40;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=70 field1rc=0 FCGD2:seq=41;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=71 field1rc=0 FCGD2:seq=42;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=72 field1rc=0 FCGD2:seq=43;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=73 field1rc=0 FCGD2:seq=44;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=74 field1rc=0 FCGD2:seq=45;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=75 field1rc=0 FCGD2:seq=46;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=76 field1rc=0 FCGD2:seq=47;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=77 field1rc=0 FCGD2:seq=48;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=78 field1rc=0 FCGD2:seq=49;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=79 field1rc=0 FCGD2:seq=50;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=80 field1rc=0 FCGD2:seq=51;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=81 field1rc=0 FCGD2:seq=52;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=16384\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=82 field1rc=0 FCGD2:seq=53;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=9860\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=83 field1rc=0 FCGD2:seq=54;stage=abi2_stream_end;class=MSI_RAW;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=84 field1rc=0 FCGD2:seq=55;stage=abi2_fetch;class=MSI_RAW;code=00000103;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=85 field1rc=0 FCGD2:seq=56;stage=close_msi;class=MSI_RAW;code=00000000;detail=6\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=86 field1rc=0 FCGD2:seq=57;stage=close_view;class=MSI_RAW;code=00000000;detail=5\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=87 field1rc=0 FCGD2:seq=58;stage=close_msi;class=MSI_RAW;code=00000000;detail=5\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=88 field1rc=0 FCGD2:seq=59;stage=abi2_tail_read_complete;class=MSI_RAW;code=00000000;detail=714372\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=89 field1rc=0 FCGD2:seq=60;stage=abi2_open_view;class=MSI_RAW;code=00000000;detail=7\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=90 field1rc=0 FCGD2:seq=61;stage=abi2_execute_view;class=MSI_RAW;code=00000000;detail=7\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=91 field1rc=0 FCGD2:seq=62;stage=abi2_fetch;class=MSI_RAW;code=00000000;detail=8\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=92 field1rc=0 FCGD2:seq=63;stage=abi2_manifest_data_size;class=MSI_RAW;code=00000000;detail=1484\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=93 field1rc=0 FCGD2:seq=64;stage=abi2_stream_read;class=MSI_RAW;code=00000000;detail=1484\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=94 field1rc=0 FCGD2:seq=65;stage=abi2_stream_end;class=MSI_RAW;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=95 field1rc=0 FCGD2:seq=66;stage=abi2_fetch;class=MSI_RAW;code=00000103;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=96 field1rc=0 FCGD2:seq=67;stage=close_msi;class=MSI_RAW;code=00000000;detail=8\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=97 field1rc=0 FCGD2:seq=68;stage=close_view;class=MSI_RAW;code=00000000;detail=7\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=98 field1rc=0 FCGD2:seq=69;stage=close_msi;class=MSI_RAW;code=00000000;detail=7\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=99 field1rc=0 FCGD2:seq=70;stage=abi2_manifest_parse;class=OK;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=100 field1rc=0 FCGD2:seq=71;stage=abi2_open_view;class=MSI_RAW;code=00000000;detail=9\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=101 field1rc=0 FCGD2:seq=72;stage=abi2_execute_view;class=MSI_RAW;code=00000000;detail=9\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=102 field1rc=0 FCGD2:seq=73;stage=abi2_fetch;class=MSI_RAW;code=00000000;detail=10\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=103 field1rc=0 FCGD2:seq=74;stage=abi2_record_text;class=MSI_RAW;code=00000000;detail=4294967307\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=104 field1rc=0 FCGD2:seq=75;stage=abi2_record_text;class=MSI_RAW;code=00000000;detail=8589934630\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=105 field1rc=0 FCGD2:seq=76;stage=close_msi;class=MSI_RAW;code=00000000;detail=10\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=106 field1rc=0 FCGD2:seq=77;stage=abi2_fetch;class=MSI_RAW;code=00000000;detail=11\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=107 field1rc=0 FCGD2:seq=78;stage=abi2_record_text;class=MSI_RAW;code=00000000;detail=4294967307\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=108 field1rc=0 FCGD2:seq=79;stage=abi2_record_text;class=MSI_RAW;code=00000000;detail=8589934630\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=109 field1rc=0 FCGD2:seq=80;stage=close_msi;class=MSI_RAW;code=00000000;detail=11\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=110 field1rc=0 FCGD2:seq=81;stage=abi2_fetch;class=MSI_RAW;code=00000000;detail=12\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=111 field1rc=0 FCGD2:seq=82;stage=abi2_record_text;class=MSI_RAW;code=00000000;detail=4294967310\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=112 field1rc=0 FCGD2:seq=83;stage=abi2_record_text;class=MSI_RAW;code=00000000;detail=8589934597\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=113 field1rc=0 FCGD2:seq=84;stage=close_msi;class=MSI_RAW;code=00000000;detail=12\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=114 field1rc=0 FCGD2:seq=85;stage=abi2_fetch;class=MSI_RAW;code=00000103;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=115 field1rc=0 FCGD2:seq=86;stage=close_view;class=MSI_RAW;code=00000000;detail=9\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=116 field1rc=0 FCGD2:seq=87;stage=close_msi;class=MSI_RAW;code=00000000;detail=9\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=117 field1rc=0 FCGD2:seq=88;stage=abi2_summary_open;class=MSI_RAW;code=00000000;detail=13\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=118 field1rc=0 FCGD2:seq=89;stage=abi2_summary_property9;class=MSI_RAW;code=000006f4;detail=39\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=119 field1rc=0 FCGD2:seq=90;stage=package_format;class=Invalid;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=120 field1rc=0 FCGD2:seq=91;stage=finish_cancel_drain;class=OK;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=121 field1rc=0 FCGD2:seq=92;stage=close_msi;class=MSI_RAW;code=00000000;detail=13\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=122 field1rc=0 FCGD2:seq=93;stage=finish_msi;class=OK;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=123 field1rc=0 FCGD2:seq=94;stage=close_msi;class=MSI_RAW;code=00000000;detail=4\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=124 field1rc=0 FCGD2:seq=95;stage=finish_msi;class=OK;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=125 field1rc=0 FCGD2:seq=96;stage=finish_kernel;class=OK;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=126 field1rc=0 FCGD2:seq=97;stage=finish_module;class=OK;code=00000000;detail=0\r\nFC_DIRECT_OBSERVATION pid=36500 tid=41536 originalTid=41536 record=127 field1rc=0 FCGD2:seq=98;stage=finish_before_observer_close_and_claim_release;class=NOT_SERIALIZED_AFTER_LAST_RECORD_CLOSE;code=00000000;detail=0\r\nFC_DIRECT_RESULT {\"logEnable\":0,\"uiSet\":0,\"previousNull\":true,\"installReturn\":1603,\"uiUnset\":0,\"removedOwnCallback\":true,\"logDisable\":0,\"restoredPreviousUi\":true,\"diagnosticCount\":98,\"initializeCount\":0,\"callbackOk\":true,\"expectedNegative\":true,\"beginEnd\":\"NOT_CALLED\",\"borrowedRecordClosed\":false}\r\n",
+    "originalCapAcquired": true,
+    "originalDeadlineWholeMilliseconds": 150320,
+    "pid": 36500,
+    "stderr": "",
+    "noSetupOrGuardian": true,
+    "after": {
+      "status": "PASS_READONLY_EXPECTED_ABSENT",
+      "sourceGit": "d9dacefb481678a2f1c12cf8371fa6567820547d",
+      "expected": "Absent",
+      "healthyPresent": false,
+      "knownAbsent": true,
+      "matchesExpected": true,
+      "stateClassification": "KNOWN_ABSENT",
+      "observations": {
+        "files": {
+          "root": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "presentExact": false,
+          "absentExact": true,
+          "files": [],
+          "rootOpenCode": 2
+        },
+        "markers": {
+          "view": "Registry32",
+          "key": "Software\\FutureClassroom\\Installer\\Components",
+          "presentExact": false,
+          "absentExact": true,
+          "values": []
+        },
+        "registration": {
+          "productsEx": [],
+          "relatedProducts": [],
+          "calls": [
+            {
+              "index": 0,
+              "queryContext": 3,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "index": 0,
+              "queryContext": 4,
+              "sidArgument": null,
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "relatedIndex": 0,
+              "code": 259
+            }
+          ],
+          "productState": -1,
+          "apiCallsComplete": true,
+          "presentExact": false,
+          "absentExact": true,
+          "scope": "Exact product, actual-user managed/unmanaged plus machine contexts; no other-user enumeration"
+        },
+        "components": {
+          "rows": [
+            {
+              "component": "BF8ECC92-DF5E-5031-AF8F-B122A05E64E6",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "1F2DCDC9-9F80-51BE-A10D-F294D45FDB05",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "44E7E505-D3CB-5DC8-9730-50964BA3CC8C",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0CA01C62-B71F-5C57-905B-B6C979ACB487",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "8D7F75D1-8AD6-5097-AEE4-62389B788737",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "51201E26-0CF3-5876-A591-91F68B3A94DB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "D0B2E913-0457-5E64-A66B-EC1EE7DA7138",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "18B1A37C-EE86-5233-ACC2-773B48D189BB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "B9ADCF83-BCB1-5F42-97D8-967FF84A306F",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "28DB1C02-71DB-5DAF-8D0C-9844E24D16DC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "C0EC8190-410A-52A3-895E-AD6564B75C1E",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0C6686BF-2327-51F5-89A6-4243C1FD11CF",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "58B108D4-3264-56B1-9DE5-19636D8437E2",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            }
+          ],
+          "presentExact": false,
+          "absentExact": true
+        },
+        "run": {
+          "view": "Registry32",
+          "value": "FutureClassroom",
+          "queryCode": 2,
+          "type": 0,
+          "bytes": 0,
+          "absent": true,
+          "contentsRead": false
+        }
+      },
+      "phaseErrors": [],
+      "mutations": false,
+      "coordinationGate": "NOT_MEASURED_BY_THIS_MODULE",
+      "scope": "Independent finite readonly poststate, not permission or broker Settlement; no Pending/gate query or cleanup",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "runAbsent": true
+    },
+    "exitCode": 0,
+    "startedWholeMilliseconds": 320,
+    "startAttempted": true,
+    "original": {
+      "Pid": 36500,
+      "Tid": 0,
+      "Wait": 0,
+      "ExitCode": 0,
+      "Creation": 134380596504479568,
+      "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ca-diagnostic-cd75fc700bea929eb28b2b9accd4c887\\DirectDiagnostic.exe",
+      "Sha256": "55fc6cec230f5afb0f51b16c00d6bc606ee26ecb3ad005cfd3d77a7977edc9a6",
+      "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "Kind": "process",
+      "Status": "HELD_ORIGINAL_IDENTITY",
+      "Error": null,
+      "ExitKnown": true,
+      "CheckedClose": true
+    },
+    "originalParentReturned": true,
+    "before": {
+      "status": "PASS_READONLY_EXPECTED_ABSENT",
+      "sourceGit": "d9dacefb481678a2f1c12cf8371fa6567820547d",
+      "expected": "Absent",
+      "healthyPresent": false,
+      "knownAbsent": true,
+      "matchesExpected": true,
+      "stateClassification": "KNOWN_ABSENT",
+      "observations": {
+        "files": {
+          "root": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "presentExact": false,
+          "absentExact": true,
+          "files": [],
+          "rootOpenCode": 2
+        },
+        "markers": {
+          "view": "Registry32",
+          "key": "Software\\FutureClassroom\\Installer\\Components",
+          "presentExact": false,
+          "absentExact": true,
+          "values": []
+        },
+        "registration": {
+          "productsEx": [],
+          "relatedProducts": [],
+          "calls": [
+            {
+              "index": 0,
+              "queryContext": 3,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "index": 0,
+              "queryContext": 4,
+              "sidArgument": null,
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "relatedIndex": 0,
+              "code": 259
+            }
+          ],
+          "productState": -1,
+          "apiCallsComplete": true,
+          "presentExact": false,
+          "absentExact": true,
+          "scope": "Exact product, actual-user managed/unmanaged plus machine contexts; no other-user enumeration"
+        },
+        "components": {
+          "rows": [
+            {
+              "component": "BF8ECC92-DF5E-5031-AF8F-B122A05E64E6",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "1F2DCDC9-9F80-51BE-A10D-F294D45FDB05",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "44E7E505-D3CB-5DC8-9730-50964BA3CC8C",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0CA01C62-B71F-5C57-905B-B6C979ACB487",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "8D7F75D1-8AD6-5097-AEE4-62389B788737",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "51201E26-0CF3-5876-A591-91F68B3A94DB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "D0B2E913-0457-5E64-A66B-EC1EE7DA7138",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "18B1A37C-EE86-5233-ACC2-773B48D189BB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "B9ADCF83-BCB1-5F42-97D8-967FF84A306F",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "28DB1C02-71DB-5DAF-8D0C-9844E24D16DC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "C0EC8190-410A-52A3-895E-AD6564B75C1E",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0C6686BF-2327-51F5-89A6-4243C1FD11CF",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "58B108D4-3264-56B1-9DE5-19636D8437E2",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            }
+          ],
+          "presentExact": false,
+          "absentExact": true
+        },
+        "run": {
+          "view": "Registry32",
+          "value": "FutureClassroom",
+          "queryCode": 2,
+          "type": 0,
+          "bytes": 0,
+          "absent": true,
+          "contentsRead": false
+        }
+      },
+      "phaseErrors": [],
+      "mutations": false,
+      "coordinationGate": "NOT_MEASURED_BY_THIS_MODULE",
+      "scope": "Independent finite readonly poststate, not permission or broker Settlement; no Pending/gate query or cleanup",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "runAbsent": true
+    },
+    "originalProcessState": "ORIGINAL_PROCESS_RETURNED",
+    "endedWholeMilliseconds": 917,
+    "oldPending": "NOT_OPENED_OR_CHANGED",
+    "cleanup": "ROOT_DOWNLOAD_THEN_EXACT_DELETE_ONLY",
+    "startSucceeded": true,
+    "actualExit": true,
+    "beginEnd": "NOT_CALLED_NO_SETTLEMENT_INFERENCE",
+    "originalObjects": [
+      {
+        "Pid": 36500,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380596504479568,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ca-diagnostic-cd75fc700bea929eb28b2b9accd4c887\\DirectDiagnostic.exe",
+        "Sha256": "55fc6cec230f5afb0f51b16c00d6bc606ee26ecb3ad005cfd3d77a7977edc9a6",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true
+      }
+    ],
+    "status": "PASS_DIRECT_INNER_EXPECTED_REJECTION_OBSERVATION_ONLY",
+    "elapsedMilliseconds": 924,
+    "originalClientSeconds": 150,
+    "originalWholeSeconds": 600
+  },
+  "ownedProcessReadback": {
+    "count": 0
+  },
+  "inventory": {
+    "directories": [
+      "compiler-temp"
+    ],
+    "files": [
+      {
+        "path": ".owner",
+        "sha256": "2d22933df2b83c477366b05b5e54a8404c5908778dd789f0ffeb420de3831842",
+        "bytes": 52
+      },
+      {
+        "path": "capture-ack",
+        "sha256": "17a554f322cba5a4080a33d45433d841a33f1df0ddea2af82e5d98e3cea19ade",
+        "bytes": 16
+      },
+      {
+        "path": "Capture.cs",
+        "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a",
+        "bytes": 9814
+      },
+      {
+        "path": "direct-msi.log",
+        "sha256": "676f770501ed36b505a8696d4fa78bdd9b08f084b921c56d1339ac91f86673f3",
+        "bytes": 79294
+      },
+      {
+        "path": "DirectDiagnostic.exe",
+        "sha256": "55fc6cec230f5afb0f51b16c00d6bc606ee26ecb3ad005cfd3d77a7977edc9a6",
+        "bytes": 245591
+      },
+      {
+        "path": "FutureClassroom.msi",
+        "sha256": "b44df3ac7c8a1c26112191bd9e000a986ba14616d7c729be18772d782dda1e3e",
+        "bytes": 10708480
+      },
+      {
+        "path": "native-result.json",
+        "sha256": "84fb211d1771e916e1c9bb46e44c2e7d5a456166eb032b0ddedc42d06cd31a1d",
+        "bytes": 52983
+      },
+      {
+        "path": "ProductState.cs",
+        "sha256": "f1ed5387d971ecdf5de1416bcf78d613e4d3a8d0b12f82548db0f5514c93a6a7",
+        "bytes": 28349
+      },
+      {
+        "path": "ProductState.ps1",
+        "sha256": "6d2ea950c73dc8e14303dbcd5add64c124a5a8fe591248078f08c2e63fde16d2",
+        "bytes": 3692
+      }
+    ]
+  },
+  "downloadVerified": true,
+  "downloadCounts": {
+    "files": 9,
+    "directories": 1
+  },
+  "qualified": {
+    "nativeResult": {
+      "logEnable": 0,
+      "uiSet": 0,
+      "previousNull": true,
+      "installReturn": 1603,
+      "uiUnset": 0,
+      "removedOwnCallback": true,
+      "logDisable": 0,
+      "restoredPreviousUi": true,
+      "diagnosticCount": 98,
+      "initializeCount": 0,
+      "callbackOk": true,
+      "expectedNegative": true,
+      "beginEnd": "NOT_CALLED",
+      "borrowedRecordClosed": false
+    },
+    "observations": [
+      {
+        "sequence": 1,
+        "stage": "run_start",
+        "errorClass": "OK",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 2,
+        "stage": "module_reference",
+        "errorClass": "OK",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 3,
+        "stage": "effective_user",
+        "errorClass": "OK",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 4,
+        "stage": "random",
+        "errorClass": "OK",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 5,
+        "stage": "abi2_active_database",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 4,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 6,
+        "stage": "abi2_open_view",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 5,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 7,
+        "stage": "abi2_execute_view",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 5,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 8,
+        "stage": "abi2_fetch",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 6,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 9,
+        "stage": "abi2_template_data_size",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 714372,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 10,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 11,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 12,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 13,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 14,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 15,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 16,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 17,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 18,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 19,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 20,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 21,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 22,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 23,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 24,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 25,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 26,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 27,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 28,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 29,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 30,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 31,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 32,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 33,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 34,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 35,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 36,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 37,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 38,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 39,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 40,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 41,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 42,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 43,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 44,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 45,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 46,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 47,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 48,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 49,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 50,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 51,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 52,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 16384,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 53,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 9860,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 54,
+        "stage": "abi2_stream_end",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 55,
+        "stage": "abi2_fetch",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000103",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 56,
+        "stage": "close_msi",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 6,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 57,
+        "stage": "close_view",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 5,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 58,
+        "stage": "close_msi",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 5,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 59,
+        "stage": "abi2_tail_read_complete",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 714372,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 60,
+        "stage": "abi2_open_view",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 7,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 61,
+        "stage": "abi2_execute_view",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 7,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 62,
+        "stage": "abi2_fetch",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 8,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 63,
+        "stage": "abi2_manifest_data_size",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 1484,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 64,
+        "stage": "abi2_stream_read",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 1484,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 65,
+        "stage": "abi2_stream_end",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 66,
+        "stage": "abi2_fetch",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000103",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 67,
+        "stage": "close_msi",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 8,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 68,
+        "stage": "close_view",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 7,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 69,
+        "stage": "close_msi",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 7,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 70,
+        "stage": "abi2_manifest_parse",
+        "errorClass": "OK",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 71,
+        "stage": "abi2_open_view",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 9,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 72,
+        "stage": "abi2_execute_view",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 9,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 73,
+        "stage": "abi2_fetch",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 10,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 74,
+        "stage": "abi2_record_text",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 4294967307,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 75,
+        "stage": "abi2_record_text",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 8589934630,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 76,
+        "stage": "close_msi",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 10,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 77,
+        "stage": "abi2_fetch",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 11,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 78,
+        "stage": "abi2_record_text",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 4294967307,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 79,
+        "stage": "abi2_record_text",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 8589934630,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 80,
+        "stage": "close_msi",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 11,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 81,
+        "stage": "abi2_fetch",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 12,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 82,
+        "stage": "abi2_record_text",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 4294967310,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 83,
+        "stage": "abi2_record_text",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 8589934597,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 84,
+        "stage": "close_msi",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 12,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 85,
+        "stage": "abi2_fetch",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000103",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 86,
+        "stage": "close_view",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 9,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 87,
+        "stage": "close_msi",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 9,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 88,
+        "stage": "abi2_summary_open",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 13,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 89,
+        "stage": "abi2_summary_property9",
+        "errorClass": "MSI_RAW",
+        "codeHex": "000006f4",
+        "detail": 39,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 90,
+        "stage": "package_format",
+        "errorClass": "Invalid",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 91,
+        "stage": "finish_cancel_drain",
+        "errorClass": "OK",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 92,
+        "stage": "close_msi",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 13,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 93,
+        "stage": "finish_msi",
+        "errorClass": "OK",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 94,
+        "stage": "close_msi",
+        "errorClass": "MSI_RAW",
+        "codeHex": "00000000",
+        "detail": 4,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 95,
+        "stage": "finish_msi",
+        "errorClass": "OK",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 96,
+        "stage": "finish_kernel",
+        "errorClass": "OK",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 97,
+        "stage": "finish_module",
+        "errorClass": "OK",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      },
+      {
+        "sequence": 98,
+        "stage": "finish_before_observer_close_and_claim_release",
+        "errorClass": "NOT_SERIALIZED_AFTER_LAST_RECORD_CLOSE",
+        "codeHex": "00000000",
+        "detail": 0,
+        "pid": 36500,
+        "tid": 41536,
+        "originalTid": 41536,
+        "borrowedRecordClosed": false
+      }
+    ],
+    "authority": "NONE_DIAGNOSTIC_TEXT_ONLY",
+    "beginEnd": "NOT_CALLED_OLD_END_STILL_UNKNOWN",
+    "productBeforeAfter": "KNOWN_ABSENT",
+    "originalProcess": "REAL_EXIT0_CHECKED_CLOSE"
+  },
+  "actualLog": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-ca-diagnostic-runtime-second/download/FutureClassroom-r80-ca-diagnostic-cd75fc700bea929eb28b2b9accd4c887/direct-msi.log",
+    "bytes": 79294,
+    "sha256": "676f770501ed36b505a8696d4fa78bdd9b08f084b921c56d1339ac91f86673f3",
+    "guardActionReturn3": true,
+    "installInitializeActionStart": false,
+    "diagnosticTextAuthority": false
+  },
+  "delete": {
+    "nonce": "cd75fc700bea929eb28b2b9accd4c887",
+    "status": "REMOVED_EXACT_CA_DIAGNOSTIC_RUNTIME_ROOT",
+    "knownAbsent": true
+  },
+  "elapsedSeconds": 5.879463828998269,
+  "inputsUnchanged": true
+}

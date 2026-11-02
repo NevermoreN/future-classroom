@@ -1,0 +1,2563 @@
+{
+  "status": "PASS_NORMAL_GNU_ABI2_DEV_STATIC_BUNDLE_NATIVE_NOT_RUN",
+  "scope": "NORMAL_GNU_ABI2_DEV_STATIC_BUNDLE_ONLY_NOT_FORMAL_MSVC",
+  "formalCI": false,
+  "normalProfileTest": false,
+  "installation": "NOT_RUN",
+  "productionReadiness": "NOT_GRANTED",
+  "sourceRoot": "/tmp/fc-round80-controlled-repair/checkout-abi2-summary-output-production-second",
+  "sourceBase": "d9dacefb481678a2f1c12cf8371fa6567820547d",
+  "sourceEvidenceSha256": "ee430d8f06b1485c2f53121da9eff277157f1773e4b5de1ca8d1163f8fadfcd0",
+  "normalProvenance": {
+    "source_sha": "d9dacefb481678a2f1c12cf8371fa6567820547d",
+    "source_inventory_sha256": "953d5c2a873d7d55327ed19e0a1bc8f7b33d079b533acf8ef2c82e334c756154",
+    "result_sha256": "ee430d8f06b1485c2f53121da9eff277157f1773e4b5de1ca8d1163f8fadfcd0",
+    "current_inputs_verified": 588,
+    "target": "i686-pc-windows-gnu",
+    "development_fixture_only": true,
+    "formal_ci": false,
+    "profile_test": false
+  },
+  "maintenanceSourceBinding": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-producer-first/maintenance-source.json",
+    "bytes": 2175,
+    "sha256": "8750f3587cf6d038352c3d887b024c9de64d4873741cb7f1d2a5c2a301e407b3",
+    "lifecycleMode": "ABI2_SAME_PACKAGE_MAINTENANCE_NORMAL_GNU_DEV",
+    "originalFreeze": {
+      "path": "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-preparation-first/maintenance-source-freeze-first.json",
+      "bytes": 3971,
+      "sha256": "3f03bfc74a73ade80cca4718231cd2e9c92f82d02308c4548a47e235dcf083a8"
+    },
+    "sourceCount": 8
+  },
+  "normalPEExtents": {
+    "product-compile": {
+      "bytes": 11420672,
+      "sha256": "3cde4c5b40cb38073bed42220177351d790b0b4e4c123feab05124e5868c7356",
+      "coffSymbolPointer": 0,
+      "coffSymbolCount": 0,
+      "parsedExtentEqualsFileLength": true,
+      "headerOrTailModified": false
+    },
+    "lifecycle-compile": {
+      "bytes": 714240,
+      "sha256": "c769703b5d313ab01adc4032ff78fa3099d9a7fcc61522e18bf57e0ff8d23634",
+      "coffSymbolPointer": 0,
+      "coffSymbolCount": 0,
+      "parsedExtentEqualsFileLength": true,
+      "headerOrTailModified": false
+    },
+    "guard-library-compile": {
+      "bytes": 3382272,
+      "sha256": "3afa443fd5150de011c1742acc15ef8a0539fca6169194469bbadf3c85da13a7",
+      "coffSymbolPointer": 0,
+      "coffSymbolCount": 0,
+      "parsedExtentEqualsFileLength": true,
+      "headerOrTailModified": false
+    }
+  },
+  "webReportSha256": "706673da7a6ee05299b04f76b0cfe14329d5842417740bd2be0c4430ae0da41c",
+  "productCode": "9E50831D-7811-5039-8BC3-4934647448D8",
+  "packageCode": "8F66764D-7267-43D3-BE0F-972BC232DD87",
+  "version": "0.1.0",
+  "artifactVersion": "0.1.0",
+  "payloadVersionPolicy": "Actual artifact/manifest.json compiler version preserved; MSI release identity is an explicit separate build input",
+  "productCodeGeneration": "Existing fixed UUIDv5 per version; unchanged authoring policy",
+  "packageCodeGeneration": "Actual unexecuted compiler Summary UUID, then manifest stream replacement and exact full Summary re-read before seal",
+  "intermediateEnvelopePackageCode": "80EB0875-83BC-4668-8DCB-6133FC900CFE",
+  "authoringPackageId": "OMITTED_PINNED_WIXL_0_103_IGNORES_ATTRIBUTE",
+  "commands": [
+    {
+      "name": "wixl-version",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrappers/wixl-second",
+        "--version"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.061321601999225095,
+      "stdout": {
+        "path": "wixl-version.stdout.log",
+        "size": 6,
+        "sha256": "29a5c9876291dc46d045df4bb186fc84c6ac92dae2112c05d0881c9480f4c2d2"
+      },
+      "stderr": {
+        "path": "wixl-version.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "msiinfo-version",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "--version"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020765250999829732,
+      "stdout": {
+        "path": "msiinfo-version.stdout.log",
+        "size": 33,
+        "sha256": "800355227b76826fac964bf4dfa464bac08a221935f22c6bf90f635df05100e3"
+      },
+      "stderr": {
+        "path": "msiinfo-version.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "msiextract-version",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiextract",
+        "--version"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020779580998350866,
+      "stdout": {
+        "path": "msiextract-version.stdout.log",
+        "size": 6,
+        "sha256": "29a5c9876291dc46d045df4bb186fc84c6ac92dae2112c05d0881c9480f4c2d2"
+      },
+      "stderr": {
+        "path": "msiextract-version.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "objdump-version",
+      "command": [
+        "/usr/bin/i686-w64-mingw32-objdump",
+        "--version"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02077993099373998,
+      "stdout": {
+        "path": "objdump-version.stdout.log",
+        "size": 289,
+        "sha256": "ddbfd9b9ba42894a45a45fc085e4a33a51f9326c99053f5cbd047dfcb53cee56"
+      },
+      "stderr": {
+        "path": "objdump-version.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "product-pe",
+      "command": [
+        "/usr/bin/i686-w64-mingw32-objdump",
+        "-p",
+        "/tmp/fc-round80-controlled-repair/abi2-summary-output-product-package-first/payload/fc-bootstrap.exe"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.04092830700392369,
+      "stdout": {
+        "path": "product-pe.stdout.log",
+        "size": 3304161,
+        "sha256": "c19e05aad656b495f4a6bd42aa4fa07448a6ee39970da4ddfa66837e16e93065"
+      },
+      "stderr": {
+        "path": "product-pe.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "helper-pe",
+      "command": [
+        "/usr/bin/i686-w64-mingw32-objdump",
+        "-p",
+        "/tmp/fc-round80-controlled-repair/abi2-summary-output-product-package-first/lifecycle/guard-client-template.exe"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02063121499668341,
+      "stdout": {
+        "path": "helper-pe.stdout.log",
+        "size": 272283,
+        "sha256": "88adbcc5026d51e24e5bcfabd1b8481fb949827f05b80d29327f61f794367bd2"
+      },
+      "stderr": {
+        "path": "helper-pe.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "guard-pe",
+      "command": [
+        "/usr/bin/i686-w64-mingw32-objdump",
+        "-p",
+        "/tmp/fc-round80-controlled-repair/abi2-summary-output-product-package-first/lifecycle/fc_windows.dll"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02070236899453448,
+      "stdout": {
+        "path": "guard-pe.stdout.log",
+        "size": 1304159,
+        "sha256": "fb2519e0dde8649d0eee435f4d44f308376bd3a8f63dab950116f83aa50d6a35"
+      },
+      "stderr": {
+        "path": "guard-pe.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "wixl-build",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrappers/wixl-second",
+        "-a",
+        "x86",
+        "-o",
+        "FutureClassroom.msi",
+        "candidate.wxs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.6880725389928557,
+      "stdout": {
+        "path": "wixl-build.stdout.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "wixl-build.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "intermediate-summary",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "suminfo",
+        "FutureClassroom.msi"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02107198200246785,
+      "stdout": {
+        "path": "intermediate-summary.stdout.log",
+        "size": 458,
+        "sha256": "58f1c58c5f84161e9954097573a3a9975c5a09bf2ada4a4f502c3b1ae5ec334e"
+      },
+      "stderr": {
+        "path": "intermediate-summary.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "manifest-actual-package-import",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msibuild",
+        "FutureClassroom.msi",
+        "-a",
+        "Binary.FcPayloadManifest",
+        "lifecycle/payload-manifest.bin"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.046579544999985956,
+      "stdout": {
+        "path": "manifest-actual-package-import.stdout.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "manifest-actual-package-import.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "intermediate-CustomAction",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "CustomAction"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02078692099894397,
+      "stdout": {
+        "path": "intermediate-CustomAction.stdout.log",
+        "size": 81,
+        "sha256": "4ed7932415204180493560560cadee5180a86d44c63401db088c9f287bfab344"
+      },
+      "stderr": {
+        "path": "intermediate-CustomAction.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "intermediate-sequence",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "InstallExecuteSequence"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02093535800668178,
+      "stdout": {
+        "path": "intermediate-sequence.stdout.log",
+        "size": 582,
+        "sha256": "0593351f59c99d9e79942db774b7310414f44c248ee97001622f570d0f07892f"
+      },
+      "stderr": {
+        "path": "intermediate-sequence.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "guard-import",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msibuild",
+        "FutureClassroom.msi",
+        "-q",
+        "DROP TABLE `CustomAction`",
+        "-q",
+        "DROP TABLE `InstallExecuteSequence`",
+        "-i",
+        "CustomAction.idt",
+        "-i",
+        "InstallExecuteSequence.idt"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.2527715010000975,
+      "stdout": {
+        "path": "guard-import.stdout.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "guard-import.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "summary",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "suminfo",
+        "FutureClassroom.msi"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.021080172999063507,
+      "stdout": {
+        "path": "summary.stdout.log",
+        "size": 458,
+        "sha256": "58f1c58c5f84161e9954097573a3a9975c5a09bf2ada4a4f502c3b1ae5ec334e"
+      },
+      "stderr": {
+        "path": "summary.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "tables",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "tables",
+        "FutureClassroom.msi"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02073845000268193,
+      "stdout": {
+        "path": "tables.stdout.log",
+        "size": 402,
+        "sha256": "8f0a9337f8a8277a362d5d41c81ade3b54fb4739b44e52531f6327c73eb8bbc6"
+      },
+      "stderr": {
+        "path": "tables.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Binary",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "Binary"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02081590300076641,
+      "stdout": {
+        "path": "table-Binary.stdout.log",
+        "size": 178,
+        "sha256": "4a095dea48ac59e940e45c77f4879a8ec7fd53e125ec61dea35f35465b269995"
+      },
+      "stderr": {
+        "path": "table-Binary.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Component",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "Component"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020793021998542827,
+      "stdout": {
+        "path": "table-Component.stdout.log",
+        "size": 1725,
+        "sha256": "27c9893baee46e99ee7aae35fa42ffead18f1df90f77314d6bda670c0f3c3eeb"
+      },
+      "stderr": {
+        "path": "table-Component.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-CreateFolder",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "CreateFolder"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020736548998684157,
+      "stdout": {
+        "path": "table-CreateFolder.stdout.log",
+        "size": 68,
+        "sha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e"
+      },
+      "stderr": {
+        "path": "table-CreateFolder.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-CustomAction",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "CustomAction"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.039122362999478355,
+      "stdout": {
+        "path": "table-CustomAction.stdout.log",
+        "size": 135,
+        "sha256": "6804e84673bc4cc6152ca85034add9bd6e01fd0340c5b52fd1570d5765c2dc17"
+      },
+      "stderr": {
+        "path": "table-CustomAction.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Directory",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "Directory"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020847744002821855,
+      "stdout": {
+        "path": "table-Directory.stdout.log",
+        "size": 317,
+        "sha256": "eb4df46d72d3097f5da595293a4751fe1ca97f652d19c62b6ac56a6e6ec9241f"
+      },
+      "stderr": {
+        "path": "table-Directory.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Feature",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "Feature"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020676886997534893,
+      "stdout": {
+        "path": "table-Feature.stdout.log",
+        "size": 167,
+        "sha256": "108fd38630ae5bbe40d6e3e8f8b25038651214628f5ad45cc2260d8321f01175"
+      },
+      "stderr": {
+        "path": "table-Feature.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-FeatureComponents",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "FeatureComponents"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020596342998032924,
+      "stdout": {
+        "path": "table-FeatureComponents.stdout.log",
+        "size": 517,
+        "sha256": "fbc9d7ca8c1018eee51f2713d7ddd78a9986ab2d0684f17ee5516ddffcd31af9"
+      },
+      "stderr": {
+        "path": "table-FeatureComponents.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-File",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "File"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020621204996132292,
+      "stdout": {
+        "path": "table-File.stdout.log",
+        "size": 1307,
+        "sha256": "8ebdd932ec50534c20567b2ca683fadbf92ae8896b7fe2495d351ac04adfd524"
+      },
+      "stderr": {
+        "path": "table-File.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-IniFile",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "IniFile"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02071178800542839,
+      "stdout": {
+        "path": "table-IniFile.stdout.log",
+        "size": 119,
+        "sha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0"
+      },
+      "stderr": {
+        "path": "table-IniFile.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-InstallExecuteSequence",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "InstallExecuteSequence"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02079607199993916,
+      "stdout": {
+        "path": "table-InstallExecuteSequence.stdout.log",
+        "size": 613,
+        "sha256": "8c75bb062921cbc8283d2e17735430942a9852d4a75fc590a43b03e4ac6ca967"
+      },
+      "stderr": {
+        "path": "table-InstallExecuteSequence.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-InstallUISequence",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "InstallUISequence"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020719127998745535,
+      "stdout": {
+        "path": "table-InstallUISequence.stdout.log",
+        "size": 243,
+        "sha256": "216550bf1fb3b7dd26fc5a598a81443d7c6effdaaf553414762da2e0fba3a0e5"
+      },
+      "stderr": {
+        "path": "table-InstallUISequence.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-LaunchCondition",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "LaunchCondition"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02069468799891183,
+      "stdout": {
+        "path": "table-LaunchCondition.stdout.log",
+        "size": 553,
+        "sha256": "021448bac17687b1cd97bb2a09b915e749ca7fc33b856553e559dc9666e8345a"
+      },
+      "stderr": {
+        "path": "table-LaunchCondition.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Media",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "Media"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02084029300021939,
+      "stdout": {
+        "path": "table-Media.stdout.log",
+        "size": 119,
+        "sha256": "93342edce9b3542c94e0ccce692496c551fa98f59dbc6d832b51b645b6bc8663"
+      },
+      "stderr": {
+        "path": "table-Media.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Property",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "Property"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020658227003877982,
+      "stdout": {
+        "path": "table-Property.stdout.log",
+        "size": 399,
+        "sha256": "1f96df0566a2d92022972fcdaf94e11eda6f9f7e5510ecafc62bfeeee8fcc9f3"
+      },
+      "stderr": {
+        "path": "table-Property.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Registry",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "Registry"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.03584324099938385,
+      "stdout": {
+        "path": "table-Registry.stdout.log",
+        "size": 2059,
+        "sha256": "fbbb8cd141d95e9219ae19f8442d03c6ad28cd436444b5fed97a91b1c1dbdccb"
+      },
+      "stderr": {
+        "path": "table-Registry.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-RemoveFile",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "RemoveFile"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020583343000907917,
+      "stdout": {
+        "path": "table-RemoveFile.stdout.log",
+        "size": 94,
+        "sha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052"
+      },
+      "stderr": {
+        "path": "table-RemoveFile.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-RemoveIniFile",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "RemoveIniFile"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02074313999764854,
+      "stdout": {
+        "path": "table-RemoveIniFile.stdout.log",
+        "size": 137,
+        "sha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06"
+      },
+      "stderr": {
+        "path": "table-RemoveIniFile.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-ServiceControl",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "ServiceControl"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.021440158001496457,
+      "stdout": {
+        "path": "table-ServiceControl.stdout.log",
+        "size": 109,
+        "sha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8"
+      },
+      "stderr": {
+        "path": "table-ServiceControl.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-ServiceInstall",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "ServiceInstall"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02675495300354669,
+      "stdout": {
+        "path": "table-ServiceInstall.stdout.log",
+        "size": 237,
+        "sha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39"
+      },
+      "stderr": {
+        "path": "table-ServiceInstall.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Shortcut",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "Shortcut"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020767490997968707,
+      "stdout": {
+        "path": "table-Shortcut.stdout.log",
+        "size": 269,
+        "sha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5"
+      },
+      "stderr": {
+        "path": "table-Shortcut.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "table-Upgrade",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "FutureClassroom.msi",
+        "Upgrade"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.032099689000460785,
+      "stdout": {
+        "path": "table-Upgrade.stdout.log",
+        "size": 316,
+        "sha256": "88fad2e51dcbd0d9c475ce0985339397abdfc572cc59cd9990a8fdb69259956d"
+      },
+      "stderr": {
+        "path": "table-Upgrade.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "binary-FcControlledGuardDll",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "FutureClassroom.msi",
+        "Binary.FcControlledGuardDll"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.02100362000055611,
+      "stdout": {
+        "path": "binary-FcControlledGuardDll.stdout.log",
+        "size": 3382272,
+        "sha256": "3afa443fd5150de011c1742acc15ef8a0539fca6169194469bbadf3c85da13a7"
+      },
+      "stderr": {
+        "path": "binary-FcControlledGuardDll.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "binary-FcGuardClientTemplate",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "FutureClassroom.msi",
+        "Binary.FcGuardClientTemplate"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020731328993861098,
+      "stdout": {
+        "path": "binary-FcGuardClientTemplate.stdout.log",
+        "size": 714372,
+        "sha256": "d06832efda57b22964aae42aba1a3e401d1735b044020db47c2263f8f5a370d1"
+      },
+      "stderr": {
+        "path": "binary-FcGuardClientTemplate.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "binary-FcPayloadManifest",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "FutureClassroom.msi",
+        "Binary.FcPayloadManifest"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.020684518000052776,
+      "stdout": {
+        "path": "binary-FcPayloadManifest.stdout.log",
+        "size": 1484,
+        "sha256": "cca20603e8b7432c009da68b28c773dd7dde158e3236cdf167a8d6518d0675f7"
+      },
+      "stderr": {
+        "path": "binary-FcPayloadManifest.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "payload-extract",
+      "command": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiextract",
+        "-C",
+        "/tmp/fc-round80-controlled-repair/abi2-summary-output-product-package-first/extracted",
+        "FutureClassroom.msi"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.10120703700522427,
+      "stdout": {
+        "path": "payload-extract.stdout.log",
+        "size": 670,
+        "sha256": "f49e59cf3298bcf04d4e4b6199f7e849bff8fac397d38ad8f66839a8ba0184e7"
+      },
+      "stderr": {
+        "path": "payload-extract.stderr.log",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "tools": {
+    "wixl": {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrappers/wixl-second",
+      "sha256": "714bf91398b4312f5a57878708a75b0591c5fa91224dc1eac02d8b0201a8574e"
+    },
+    "msibuild": {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msibuild",
+      "sha256": "87ee3aa0af25bb997646071a45e35ebae3e3ba5f26fe7b479df97aa31bd8a1eb"
+    },
+    "msiinfo": {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+      "sha256": "50b25845c863756975a8523fe1b370c4bf5dd1812a2a0229cf22139aa4b5ea81"
+    },
+    "msiextract": {
+      "path": "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiextract",
+      "sha256": "145ef607aa9127ebaf334aecc799d01cfe0b50484bab1ff7f5d7de544c02e21e"
+    },
+    "objdump": {
+      "path": "/usr/bin/i686-w64-mingw32-objdump",
+      "sha256": "521df27111c0ac3c8f6b6498505cbd35e8f087551418f4e084055f8ac308379a"
+    }
+  },
+  "payloads": [
+    {
+      "path": "LICENSE",
+      "size": 1067,
+      "sha256": "1fef5a26bc7b7bf66e38e83ac8d246a54e2e4e3d62fcfcb416d4db77603b2e40",
+      "component_guid": "BF8ECC92-DF5E-5031-AF8F-B122A05E64E6"
+    },
+    {
+      "path": "MSI-CANDIDATE.txt",
+      "size": 1784,
+      "sha256": "5995cd920d173e401a7767f2a86974d28b65b0927e866882aa39a8227d9d7634",
+      "component_guid": "00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC"
+    },
+    {
+      "path": "PROBE-README.txt",
+      "size": 21767,
+      "sha256": "7ebdcc9f18d6f0c1f9d2471f7b496f317e1ac5797264940b0f95be1945f64e09",
+      "component_guid": "1F2DCDC9-9F80-51BE-A10D-F294D45FDB05"
+    },
+    {
+      "path": "THIRD-PARTY-NOTICES.txt",
+      "size": 2401720,
+      "sha256": "b611a4c99e2f65d2c5c2f1618f088dec978cab792cbdef2810937cc60d7ed6b0",
+      "component_guid": "44E7E505-D3CB-5DC8-9730-50964BA3CC8C"
+    },
+    {
+      "path": "fc-bootstrap.exe",
+      "size": 11420672,
+      "sha256": "3cde4c5b40cb38073bed42220177351d790b0b4e4c123feab05124e5868c7356",
+      "component_guid": "0CA01C62-B71F-5C57-905B-B6C979ACB487"
+    },
+    {
+      "path": "manifest.json",
+      "size": 34953,
+      "sha256": "e45baee29a5e4bf779f41f062d829f820efa77f761cfff23f892da50f969969c",
+      "component_guid": "8D7F75D1-8AD6-5097-AEE4-62389B788737"
+    },
+    {
+      "path": "web/THIRD-PARTY-NOTICES.txt",
+      "size": 25543,
+      "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7",
+      "component_guid": "51201E26-0CF3-5876-A591-91F68B3A94DB"
+    },
+    {
+      "path": "web/assets/favicon-CXuYoSfB.svg",
+      "size": 282,
+      "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+      "component_guid": "D0B2E913-0457-5E64-A66B-EC1EE7DA7138"
+    },
+    {
+      "path": "web/assets/index-BkiZ2CBl.js",
+      "size": 415401,
+      "sha256": "cdf0d8f9c8cfa259031cb22e10aacb1ffea7b1f7affb3a4235478069b2138bf3",
+      "component_guid": "18B1A37C-EE86-5233-ACC2-773B48D189BB"
+    },
+    {
+      "path": "web/assets/index-DrrJeLm9.css",
+      "size": 39554,
+      "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+      "component_guid": "B9ADCF83-BCB1-5F42-97D8-967FF84A306F"
+    },
+    {
+      "path": "web/assets/pcm-worklet-B7E4LRoP.js",
+      "size": 1724,
+      "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+      "component_guid": "28DB1C02-71DB-5DAF-8D0C-9844E24D16DC"
+    },
+    {
+      "path": "web/assets/wav-worker-LSywWbpJ.js",
+      "size": 884,
+      "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+      "component_guid": "C0EC8190-410A-52A3-895E-AD6564B75C1E"
+    },
+    {
+      "path": "web/fc-assets.json",
+      "size": 1073,
+      "sha256": "2b4034c8a0f0bfa73812a7f2853ba83b766772ff55096fc1e33c9f2ddb9e4593",
+      "component_guid": "0C6686BF-2327-51F5-89A6-4243C1FD11CF"
+    },
+    {
+      "path": "web/index.html",
+      "size": 1232,
+      "sha256": "8761e3d65d2bee4fb860e14b315eec9e634a019b1633aea627c335397f8299f2",
+      "component_guid": "58B108D4-3264-56B1-9DE5-19636D8437E2"
+    }
+  ],
+  "lifecycleMode": "ABI2_SAME_PACKAGE_MAINTENANCE_NORMAL_GNU_DEV",
+  "builderSha256": "4800b442a88522dddf9ea9a3313fba9f70047432ea65babdeb38fceb4be17662",
+  "codecSha256": "e6af659783695e42f25ad83c6dad45d2af62257cd42ec4a6566cc8d7d52fd897",
+  "productPEAudit": {
+    "status": "NOT_VALIDATED",
+    "format": "PE32-x86",
+    "subsystem": "Windows GUI",
+    "expected_subsystem": "gui",
+    "structural_errors": [],
+    "imports": {
+      "advapi32.dll": [
+        "AddAccessAllowedAceEx",
+        "ConvertSidToStringSidW",
+        "ConvertStringSecurityDescriptorToSecurityDescriptorW",
+        "CreateWellKnownSid",
+        "CryptReleaseContext",
+        "EqualSid",
+        "GetAce",
+        "GetKernelObjectSecurity",
+        "GetNamedSecurityInfoW",
+        "GetSecurityDescriptorControl",
+        "GetSecurityDescriptorDacl",
+        "GetSecurityDescriptorOwner",
+        "GetTokenInformation",
+        "InitializeAcl",
+        "InitializeSecurityDescriptor",
+        "IsValidAcl",
+        "IsValidSid",
+        "OpenProcessToken",
+        "OpenThreadToken",
+        "RegCloseKey",
+        "RegCreateKeyExW",
+        "RegDeleteKeyW",
+        "RegDeleteTreeW",
+        "RegDeleteValueW",
+        "RegOpenKeyExW",
+        "RegQueryValueExW",
+        "RegSetValueExW",
+        "SetSecurityDescriptorControl",
+        "SetSecurityDescriptorDacl",
+        "SetSecurityDescriptorOwner"
+      ],
+      "api-ms-win-core-synch-l1-2-0.dll": [
+        "WaitOnAddress",
+        "WakeByAddressAll",
+        "WakeByAddressSingle"
+      ],
+      "bcrypt.dll": [
+        "BCryptCloseAlgorithmProvider",
+        "BCryptCreateHash",
+        "BCryptDestroyHash",
+        "BCryptFinishHash",
+        "BCryptGenRandom",
+        "BCryptGetProperty",
+        "BCryptHashData",
+        "BCryptOpenAlgorithmProvider"
+      ],
+      "bcryptprimitives.dll": [
+        "ProcessPrng"
+      ],
+      "comctl32.dll": [
+        "DefSubclassProc",
+        "RemoveWindowSubclass",
+        "SetWindowSubclass"
+      ],
+      "comdlg32.dll": [
+        "ChooseColorW",
+        "CommDlgExtendedError"
+      ],
+      "crypt32.dll": [
+        "CertCloseStore",
+        "CertFindCertificateInStore",
+        "CertFreeCertificateChain",
+        "CertFreeCertificateContext",
+        "CertGetCertificateChain",
+        "CertGetCertificateContextProperty",
+        "CertGetEnhancedKeyUsage",
+        "CertOpenStore",
+        "CertVerifyCertificateChainPolicy",
+        "CertVerifyTimeValidity",
+        "CryptAcquireCertificatePrivateKey",
+        "CryptProtectData",
+        "CryptUnprotectData"
+      ],
+      "d2d1.dll": [
+        "D2D1CreateFactory"
+      ],
+      "dwrite.dll": [
+        "DWriteCreateFactory"
+      ],
+      "gdi32.dll": [
+        "CombineRgn",
+        "CreateCompatibleDC",
+        "CreateDIBSection",
+        "CreateFontW",
+        "CreateRectRgn",
+        "CreateRoundRectRgn",
+        "CreateSolidBrush",
+        "DeleteDC",
+        "DeleteObject",
+        "GetRegionData",
+        "GetStockObject",
+        "SelectObject",
+        "SetBkMode",
+        "SetTextColor",
+        "StretchDIBits"
+      ],
+      "httpapi.dll": [
+        "HttpAddUrlToUrlGroup",
+        "HttpCancelHttpRequest",
+        "HttpCloseRequestQueue",
+        "HttpCloseServerSession",
+        "HttpCloseUrlGroup",
+        "HttpCreateRequestQueue",
+        "HttpCreateServerSession",
+        "HttpCreateUrlGroup",
+        "HttpInitialize",
+        "HttpReceiveHttpRequest",
+        "HttpReceiveRequestEntityBody",
+        "HttpRemoveUrlFromUrlGroup",
+        "HttpSendHttpResponse",
+        "HttpSendResponseEntityBody",
+        "HttpSetRequestQueueProperty",
+        "HttpSetUrlGroupProperty",
+        "HttpShutdownRequestQueue",
+        "HttpTerminate"
+      ],
+      "kernel32.dll": [
+        "AddVectoredExceptionHandler",
+        "AreFileApisANSI",
+        "AssignProcessToJobObject",
+        "CancelIoEx",
+        "CloseHandle",
+        "CompareStringOrdinal",
+        "ConnectNamedPipe",
+        "CopyFileExW",
+        "CreateDirectoryW",
+        "CreateEventA",
+        "CreateEventW",
+        "CreateFileA",
+        "CreateFileMappingA",
+        "CreateFileMappingW",
+        "CreateFileW",
+        "CreateIoCompletionPort",
+        "CreateJobObjectW",
+        "CreateMutexA",
+        "CreateMutexW",
+        "CreateNamedPipeW",
+        "CreateProcessW",
+        "CreateSemaphoreA",
+        "CreateThread",
+        "CreateToolhelp32Snapshot",
+        "CreateWaitableTimerExW",
+        "DeleteCriticalSection",
+        "DeleteFileA",
+        "DeleteFileW",
+        "DuplicateHandle",
+        "EnterCriticalSection",
+        "ExitProcess",
+        "FindClose",
+        "FindFirstFileExW",
+        "FindNextFileW",
+        "FlushFileBuffers",
+        "FlushViewOfFile",
+        "FormatMessageA",
+        "FormatMessageW",
+        "FreeEnvironmentStringsW",
+        "FreeLibrary",
+        "GetCommandLineW",
+        "GetConsoleMode",
+        "GetConsoleOutputCP",
+        "GetConsoleWindow",
+        "GetCurrentDirectoryW",
+        "GetCurrentProcess",
+        "GetCurrentProcessId",
+        "GetCurrentThread",
+        "GetCurrentThreadId",
+        "GetDiskFreeSpaceA",
+        "GetDiskFreeSpaceW",
+        "GetDriveTypeW",
+        "GetEnvironmentStringsW",
+        "GetEnvironmentVariableW",
+        "GetExitCodeProcess",
+        "GetFileAttributesA",
+        "GetFileAttributesExW",
+        "GetFileAttributesW",
+        "GetFileInformationByHandle",
+        "GetFileInformationByHandleEx",
+        "GetFileSize",
+        "GetFileSizeEx",
+        "GetFinalPathNameByHandleW",
+        "GetFullPathNameA",
+        "GetFullPathNameW",
+        "GetHandleInformation",
+        "GetLastError",
+        "GetLocalTime",
+        "GetModuleFileNameW",
+        "GetModuleHandleA",
+        "GetModuleHandleExW",
+        "GetModuleHandleW",
+        "GetNamedPipeClientProcessId",
+        "GetNativeSystemInfo",
+        "GetOverlappedResult",
+        "GetProcAddress",
+        "GetProcessAffinityMask",
+        "GetProcessHeap",
+        "GetProcessId",
+        "GetProcessTimes",
+        "GetQueuedCompletionStatus",
+        "GetStdHandle",
+        "GetSystemDirectoryW",
+        "GetSystemInfo",
+        "GetSystemTime",
+        "GetSystemTimeAsFileTime",
+        "GetSystemTimePreciseAsFileTime",
+        "GetSystemWow64DirectoryW",
+        "GetTempPathA",
+        "GetTempPathW",
+        "GetThreadContext",
+        "GetThreadPriority",
+        "GetThreadTimes",
+        "GetTickCount",
+        "GetTickCount64",
+        "GetWindowsDirectoryW",
+        "GlobalLock",
+        "GlobalSize",
+        "GlobalUnlock",
+        "HeapAlloc",
+        "HeapCompact",
+        "HeapCreate",
+        "HeapDestroy",
+        "HeapFree",
+        "HeapReAlloc",
+        "HeapSize",
+        "HeapValidate",
+        "InitOnceBeginInitialize",
+        "InitOnceComplete",
+        "InitializeCriticalSection",
+        "IsDebuggerPresent",
+        "IsWow64Process",
+        "K32GetMappedFileNameW",
+        "LeaveCriticalSection",
+        "LoadLibraryA",
+        "LoadLibraryExA",
+        "LoadLibraryW",
+        "LocalFree",
+        "LockFile",
+        "LockFileEx",
+        "MapViewOfFile",
+        "Module32FirstW",
+        "Module32NextW",
+        "MultiByteToWideChar",
+        "OpenProcess",
+        "OutputDebugStringA",
+        "OutputDebugStringW",
+        "PeekNamedPipe",
+        "ProcessIdToSessionId",
+        "QueryDosDeviceW",
+        "QueryFullProcessImageNameW",
+        "QueryInformationJobObject",
+        "QueryPerformanceCounter",
+        "QueryPerformanceFrequency",
+        "RaiseException",
+        "ReadConsoleW",
+        "ReadFile",
+        "ReadFileEx",
+        "ReleaseMutex",
+        "ReleaseSemaphore",
+        "RemoveDirectoryW",
+        "RemoveVectoredExceptionHandler",
+        "ResetEvent",
+        "ResumeThread",
+        "RtlCaptureContext",
+        "SetEndOfFile",
+        "SetEvent",
+        "SetFileInformationByHandle",
+        "SetFilePointer",
+        "SetFilePointerEx",
+        "SetFileTime",
+        "SetInformationJobObject",
+        "SetLastError",
+        "SetProcessAffinityMask",
+        "SetThreadContext",
+        "SetThreadPriority",
+        "SetThreadStackGuarantee",
+        "SetUnhandledExceptionFilter",
+        "SetWaitableTimer",
+        "Sleep",
+        "SleepEx",
+        "SuspendThread",
+        "SwitchToThread",
+        "SystemTimeToFileTime",
+        "TerminateJobObject",
+        "TerminateProcess",
+        "TlsAlloc",
+        "TlsFree",
+        "TlsGetValue",
+        "TlsSetValue",
+        "TryEnterCriticalSection",
+        "UnlockFile",
+        "UnlockFileEx",
+        "UnmapViewOfFile",
+        "VirtualProtect",
+        "VirtualQuery",
+        "WaitForMultipleObjects",
+        "WaitForSingleObject",
+        "WaitForSingleObjectEx",
+        "WideCharToMultiByte",
+        "WriteConsoleW",
+        "WriteFile",
+        "WriteFileEx",
+        "lstrlenW"
+      ],
+      "msi.dll": [
+        "MsiCloseHandle",
+        "MsiCreateRecord",
+        "MsiDatabaseOpenViewW",
+        "MsiGetActiveDatabase",
+        "MsiGetPropertyW",
+        "MsiGetSummaryInformationW",
+        "MsiProcessMessage",
+        "MsiRecordDataSize",
+        "MsiRecordGetStringW",
+        "MsiRecordReadStream",
+        "MsiRecordSetStringW",
+        "MsiSummaryInfoGetPropertyW",
+        "MsiViewClose",
+        "MsiViewExecute",
+        "MsiViewFetch"
+      ],
+      "msvcrt.dll": [
+        "__getmainargs",
+        "__initenv",
+        "__p__commode",
+        "__p__fmode",
+        "__set_app_type",
+        "__setusermatherr",
+        "_amsg_exit",
+        "_beginthreadex",
+        "_cexit",
+        "_commode",
+        "_endthreadex",
+        "_errno",
+        "_fmode",
+        "_fpreset",
+        "_hypot",
+        "_initterm",
+        "_iob",
+        "_onexit",
+        "_setjmp3",
+        "_strdup",
+        "_ultoa",
+        "abort",
+        "calloc",
+        "exit",
+        "fprintf",
+        "free",
+        "fwrite",
+        "localtime",
+        "log",
+        "longjmp",
+        "malloc",
+        "memchr",
+        "memcmp",
+        "memcpy",
+        "memmove",
+        "memset",
+        "pow",
+        "printf",
+        "qsort",
+        "realloc",
+        "signal",
+        "strchr",
+        "strcmp",
+        "strcspn",
+        "strlen",
+        "strncmp",
+        "strrchr",
+        "strspn",
+        "vfprintf",
+        "wcslen"
+      ],
+      "ncrypt.dll": [
+        "NCryptFreeObject"
+      ],
+      "ntdll.dll": [
+        "NtCreateNamedPipeFile",
+        "NtOpenFile",
+        "NtReadFile",
+        "NtWriteFile",
+        "RtlNtStatusToDosError"
+      ],
+      "ole32.dll": [
+        "CoCreateInstance",
+        "CoInitializeEx",
+        "CoUninitialize"
+      ],
+      "oleaut32.dll": [
+        "GetErrorInfo",
+        "SysFreeString",
+        "SysStringLen"
+      ],
+      "secur32.dll": [
+        "AcceptSecurityContext",
+        "AcquireCredentialsHandleW",
+        "ApplyControlToken",
+        "DecryptMessage",
+        "DeleteSecurityContext",
+        "EncryptMessage",
+        "FreeCredentialsHandle",
+        "QueryContextAttributesW"
+      ],
+      "shell32.dll": [
+        "SHGetKnownFolderPath",
+        "ShellExecuteExW",
+        "Shell_NotifyIconW"
+      ],
+      "user32.dll": [
+        "AppendMenuW",
+        "BeginPaint",
+        "CloseClipboard",
+        "CloseDesktop",
+        "CreatePopupMenu",
+        "CreateWindowExW",
+        "DefWindowProcW",
+        "DestroyMenu",
+        "DestroyWindow",
+        "DispatchMessageW",
+        "DrawTextW",
+        "EnableWindow",
+        "EndMenu",
+        "EndPaint",
+        "FillRect",
+        "FrameRect",
+        "GetCapture",
+        "GetClassNameW",
+        "GetClientRect",
+        "GetClipboardData",
+        "GetCursorPos",
+        "GetDesktopWindow",
+        "GetForegroundWindow",
+        "GetKeyState",
+        "GetMessageW",
+        "GetScrollInfo",
+        "GetUserObjectInformationW",
+        "GetWindowLongW",
+        "GetWindowTextLengthW",
+        "GetWindowTextW",
+        "GetWindowThreadProcessId",
+        "InvalidateRect",
+        "IsChild",
+        "IsDialogMessageW",
+        "IsWindow",
+        "IsWindowEnabled",
+        "IsWindowVisible",
+        "KillTimer",
+        "LoadCursorW",
+        "LoadIconW",
+        "MessageBoxW",
+        "MoveWindow",
+        "OpenClipboard",
+        "OpenInputDesktop",
+        "PeekMessageW",
+        "PostMessageW",
+        "PostQuitMessage",
+        "RedrawWindow",
+        "RegisterClassW",
+        "RegisterWindowMessageW",
+        "ReleaseCapture",
+        "ScreenToClient",
+        "SendMessageW",
+        "SetCapture",
+        "SetFocus",
+        "SetForegroundWindow",
+        "SetLayeredWindowAttributes",
+        "SetScrollInfo",
+        "SetTimer",
+        "SetWinEventHook",
+        "SetWindowLongW",
+        "SetWindowPos",
+        "SetWindowRgn",
+        "SetWindowTextW",
+        "ShowWindow",
+        "SystemParametersInfoW",
+        "TrackMouseEvent",
+        "TrackPopupMenu",
+        "TranslateMessage",
+        "UnhookWinEvent",
+        "UnregisterClassW",
+        "UpdateLayeredWindow",
+        "UpdateLayeredWindowIndirect"
+      ],
+      "winhttp.dll": [
+        "WinHttpCloseHandle",
+        "WinHttpConnect",
+        "WinHttpOpen",
+        "WinHttpOpenRequest",
+        "WinHttpQueryHeaders",
+        "WinHttpReadData",
+        "WinHttpReceiveResponse",
+        "WinHttpSendRequest",
+        "WinHttpSetOption",
+        "WinHttpSetTimeouts"
+      ],
+      "winmm.dll": [
+        "waveOutClose",
+        "waveOutOpen",
+        "waveOutPrepareHeader",
+        "waveOutReset",
+        "waveOutUnprepareHeader",
+        "waveOutWrite"
+      ],
+      "ws2_32.dll": [
+        "WSACleanup",
+        "WSAGetLastError",
+        "WSAIoctl",
+        "WSARecv",
+        "WSASend",
+        "WSASocketW",
+        "WSAStartup",
+        "bind",
+        "closesocket",
+        "freeaddrinfo",
+        "getaddrinfo",
+        "getpeername",
+        "getsockname",
+        "listen",
+        "setsockopt",
+        "shutdown"
+      ],
+      "wtsapi32.dll": [
+        "WTSFreeMemory",
+        "WTSQuerySessionInformationW",
+        "WTSRegisterSessionNotification",
+        "WTSUnRegisterSessionNotification"
+      ]
+    },
+    "risks": [
+      {
+        "kind": "API_SET_DLL",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WaitOnAddress",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WakeByAddressAll",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WakeByAddressSingle",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "kernel32.dll",
+        "api": "GetSystemTimePreciseAsFileTime",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      }
+    ],
+    "limitations": [
+      "Static import inspection cannot establish Win7 compatibility.",
+      "Dynamic loads, delayed paths, prerequisite updates and actual OS behavior require separate validation.",
+      "Formal MSVC baseline and real Win7 SP1 x86 machine gates remain NOT_VALIDATED."
+    ]
+  },
+  "helperPEAudit": {
+    "status": "NOT_VALIDATED",
+    "format": "PE32-x86",
+    "subsystem": "Windows GUI",
+    "expected_subsystem": "gui",
+    "structural_errors": [],
+    "imports": {
+      "advapi32.dll": [
+        "AddAccessAllowedAceEx",
+        "CreateWellKnownSid",
+        "EqualSid",
+        "GetAce",
+        "GetKernelObjectSecurity",
+        "GetSecurityDescriptorControl",
+        "GetSecurityDescriptorDacl",
+        "GetSecurityDescriptorOwner",
+        "GetTokenInformation",
+        "ImpersonateNamedPipeClient",
+        "InitializeAcl",
+        "InitializeSecurityDescriptor",
+        "IsValidAcl",
+        "IsValidSid",
+        "OpenProcessToken",
+        "OpenThreadToken",
+        "RegCloseKey",
+        "RegEnumValueW",
+        "RegNotifyChangeKeyValue",
+        "RegOpenKeyExW",
+        "RegQueryInfoKeyW",
+        "RegQueryValueExW",
+        "RevertToSelf",
+        "SetSecurityDescriptorControl",
+        "SetSecurityDescriptorDacl",
+        "SetSecurityDescriptorOwner"
+      ],
+      "api-ms-win-core-synch-l1-2-0.dll": [
+        "WaitOnAddress",
+        "WakeByAddressAll",
+        "WakeByAddressSingle"
+      ],
+      "bcrypt.dll": [
+        "BCryptCloseAlgorithmProvider",
+        "BCryptCreateHash",
+        "BCryptDestroyHash",
+        "BCryptFinishHash",
+        "BCryptGenRandom",
+        "BCryptHashData",
+        "BCryptOpenAlgorithmProvider"
+      ],
+      "kernel32.dll": [
+        "AddVectoredExceptionHandler",
+        "CancelIoEx",
+        "CloseHandle",
+        "CompareStringOrdinal",
+        "ConnectNamedPipe",
+        "CreateDirectoryW",
+        "CreateEventA",
+        "CreateEventW",
+        "CreateFileMappingA",
+        "CreateFileW",
+        "CreateMutexA",
+        "CreateNamedPipeW",
+        "CreateProcessW",
+        "CreateSemaphoreA",
+        "CreateToolhelp32Snapshot",
+        "CreateWaitableTimerExW",
+        "DeleteCriticalSection",
+        "DisconnectNamedPipe",
+        "DuplicateHandle",
+        "EnterCriticalSection",
+        "ExitProcess",
+        "FindClose",
+        "FindFirstFileExW",
+        "FindFirstFileW",
+        "FindNextFileW",
+        "FlushFileBuffers",
+        "FormatMessageW",
+        "FreeLibrary",
+        "GetCommandLineW",
+        "GetConsoleMode",
+        "GetConsoleOutputCP",
+        "GetCurrentDirectoryW",
+        "GetCurrentProcess",
+        "GetCurrentProcessId",
+        "GetCurrentThread",
+        "GetCurrentThreadId",
+        "GetDriveTypeW",
+        "GetEnvironmentVariableW",
+        "GetExitCodeProcess",
+        "GetExitCodeThread",
+        "GetFileInformationByHandle",
+        "GetFileInformationByHandleEx",
+        "GetFileSizeEx",
+        "GetFullPathNameW",
+        "GetHandleInformation",
+        "GetLastError",
+        "GetModuleFileNameW",
+        "GetModuleHandleA",
+        "GetModuleHandleExW",
+        "GetModuleHandleW",
+        "GetNamedPipeClientProcessId",
+        "GetNamedPipeServerProcessId",
+        "GetNativeSystemInfo",
+        "GetOverlappedResult",
+        "GetProcAddress",
+        "GetProcessAffinityMask",
+        "GetProcessHeap",
+        "GetProcessId",
+        "GetProcessIdOfThread",
+        "GetProcessTimes",
+        "GetStdHandle",
+        "GetSystemDirectoryW",
+        "GetSystemTimeAsFileTime",
+        "GetSystemWow64DirectoryW",
+        "GetThreadContext",
+        "GetThreadId",
+        "GetThreadPriority",
+        "GetThreadTimes",
+        "GetTickCount64",
+        "GetWindowsDirectoryW",
+        "HeapAlloc",
+        "HeapFree",
+        "HeapReAlloc",
+        "InitOnceBeginInitialize",
+        "InitOnceComplete",
+        "InitializeCriticalSection",
+        "IsDebuggerPresent",
+        "IsWow64Process",
+        "K32GetMappedFileNameW",
+        "LeaveCriticalSection",
+        "LoadLibraryA",
+        "MapViewOfFile",
+        "Module32FirstW",
+        "Module32NextW",
+        "MultiByteToWideChar",
+        "OpenProcess",
+        "OutputDebugStringA",
+        "PeekNamedPipe",
+        "Process32FirstW",
+        "Process32NextW",
+        "QueryDosDeviceW",
+        "QueryFullProcessImageNameW",
+        "QueryPerformanceCounter",
+        "QueryPerformanceFrequency",
+        "RaiseException",
+        "ReadFile",
+        "ReleaseMutex",
+        "ReleaseSemaphore",
+        "RemoveVectoredExceptionHandler",
+        "ResetEvent",
+        "ResumeThread",
+        "RtlCaptureContext",
+        "SetEvent",
+        "SetFileInformationByHandle",
+        "SetFilePointerEx",
+        "SetFileTime",
+        "SetLastError",
+        "SetNamedPipeHandleState",
+        "SetProcessAffinityMask",
+        "SetThreadContext",
+        "SetThreadPriority",
+        "SetThreadStackGuarantee",
+        "SetUnhandledExceptionFilter",
+        "SetWaitableTimer",
+        "Sleep",
+        "SuspendThread",
+        "TlsAlloc",
+        "TlsFree",
+        "TlsGetValue",
+        "TlsSetValue",
+        "TryEnterCriticalSection",
+        "UnmapViewOfFile",
+        "VirtualProtect",
+        "VirtualQuery",
+        "WaitForMultipleObjects",
+        "WaitForSingleObject",
+        "WaitForSingleObjectEx",
+        "WriteConsoleW",
+        "WriteFile",
+        "lstrlenW"
+      ],
+      "msi.dll": [
+        "MsiBeginTransactionW",
+        "MsiCloseHandle",
+        "MsiCreateRecord",
+        "MsiDatabaseOpenViewW",
+        "MsiEndTransaction",
+        "MsiEnumPatchesExW",
+        "MsiEnumProductsExW",
+        "MsiEnumRelatedProductsW",
+        "MsiGetActiveDatabase",
+        "MsiGetComponentPathExW",
+        "MsiGetProductInfoExW",
+        "MsiGetPropertyW",
+        "MsiGetSummaryInformationW",
+        "MsiInstallProductW",
+        "MsiJoinTransaction",
+        "MsiOpenDatabaseW",
+        "MsiProcessMessage",
+        "MsiRecordDataSize",
+        "MsiRecordGetFieldCount",
+        "MsiRecordGetInteger",
+        "MsiRecordGetStringW",
+        "MsiRecordIsNull",
+        "MsiRecordReadStream",
+        "MsiRecordSetStringW",
+        "MsiSetExternalUIRecord",
+        "MsiSetInternalUI",
+        "MsiSummaryInfoGetPropertyW",
+        "MsiViewClose",
+        "MsiViewExecute",
+        "MsiViewFetch",
+        "MsiViewGetColumnInfo"
+      ],
+      "msvcrt.dll": [
+        "__getmainargs",
+        "__initenv",
+        "__p__commode",
+        "__p__fmode",
+        "__set_app_type",
+        "__setusermatherr",
+        "_amsg_exit",
+        "_beginthreadex",
+        "_cexit",
+        "_commode",
+        "_endthreadex",
+        "_errno",
+        "_fmode",
+        "_fpreset",
+        "_initterm",
+        "_iob",
+        "_onexit",
+        "_setjmp3",
+        "_strdup",
+        "_ultoa",
+        "abort",
+        "calloc",
+        "exit",
+        "fprintf",
+        "free",
+        "fwrite",
+        "longjmp",
+        "malloc",
+        "memcmp",
+        "memcpy",
+        "memmove",
+        "memset",
+        "printf",
+        "realloc",
+        "signal",
+        "strlen",
+        "strncmp",
+        "vfprintf",
+        "wcslen"
+      ],
+      "ntdll.dll": [
+        "NtWriteFile",
+        "RtlNtStatusToDosError"
+      ],
+      "oleaut32.dll": [
+        "GetErrorInfo"
+      ],
+      "shell32.dll": [
+        "SHGetKnownFolderPath"
+      ],
+      "user32.dll": [
+        "DialogBoxIndirectParamW",
+        "EndDialog",
+        "MessageBoxW"
+      ]
+    },
+    "risks": [
+      {
+        "kind": "API_SET_DLL",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WaitOnAddress",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WakeByAddressAll",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WakeByAddressSingle",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      }
+    ],
+    "limitations": [
+      "Static import inspection cannot establish Win7 compatibility.",
+      "Dynamic loads, delayed paths, prerequisite updates and actual OS behavior require separate validation.",
+      "Formal MSVC baseline and real Win7 SP1 x86 machine gates remain NOT_VALIDATED."
+    ]
+  },
+  "guardPEAudit": {
+    "status": "NOT_VALIDATED",
+    "format": "PE32-x86",
+    "subsystem": "Windows CUI",
+    "expected_subsystem": "console",
+    "structural_errors": [],
+    "imports": {
+      "advapi32.dll": [
+        "AddAccessAllowedAceEx",
+        "ConvertSidToStringSidW",
+        "ConvertStringSecurityDescriptorToSecurityDescriptorW",
+        "CreateWellKnownSid",
+        "CryptReleaseContext",
+        "EqualSid",
+        "GetAce",
+        "GetKernelObjectSecurity",
+        "GetNamedSecurityInfoW",
+        "GetSecurityDescriptorControl",
+        "GetSecurityDescriptorDacl",
+        "GetSecurityDescriptorOwner",
+        "GetTokenInformation",
+        "ImpersonateNamedPipeClient",
+        "InitializeAcl",
+        "InitializeSecurityDescriptor",
+        "IsValidAcl",
+        "IsValidSid",
+        "OpenProcessToken",
+        "OpenThreadToken",
+        "RegCloseKey",
+        "RegCreateKeyExW",
+        "RegDeleteKeyW",
+        "RegDeleteTreeW",
+        "RegDeleteValueW",
+        "RegEnumValueW",
+        "RegNotifyChangeKeyValue",
+        "RegOpenKeyExW",
+        "RegQueryInfoKeyW",
+        "RegQueryValueExW",
+        "RegSetValueExW",
+        "RevertToSelf",
+        "SetSecurityDescriptorControl",
+        "SetSecurityDescriptorDacl",
+        "SetSecurityDescriptorOwner"
+      ],
+      "api-ms-win-core-synch-l1-2-0.dll": [
+        "WaitOnAddress",
+        "WakeByAddressAll",
+        "WakeByAddressSingle"
+      ],
+      "api-ms-win-core-winrt-error-l1-1-0.dll": [
+        "RoOriginateErrorW"
+      ],
+      "bcrypt.dll": [
+        "BCryptCloseAlgorithmProvider",
+        "BCryptCreateHash",
+        "BCryptDestroyHash",
+        "BCryptFinishHash",
+        "BCryptGenRandom",
+        "BCryptGetProperty",
+        "BCryptHashData",
+        "BCryptOpenAlgorithmProvider"
+      ],
+      "bcryptprimitives.dll": [
+        "ProcessPrng"
+      ],
+      "combase.dll": [
+        "CoCreateFreeThreadedMarshaler"
+      ],
+      "comctl32.dll": [
+        "DefSubclassProc",
+        "RemoveWindowSubclass",
+        "SetWindowSubclass"
+      ],
+      "comdlg32.dll": [
+        "ChooseColorW",
+        "CommDlgExtendedError"
+      ],
+      "crypt32.dll": [
+        "CertCloseStore",
+        "CertFindCertificateInStore",
+        "CertFreeCertificateChain",
+        "CertFreeCertificateContext",
+        "CertGetCertificateChain",
+        "CertGetCertificateContextProperty",
+        "CertGetEnhancedKeyUsage",
+        "CertOpenStore",
+        "CertVerifyCertificateChainPolicy",
+        "CertVerifyTimeValidity",
+        "CryptAcquireCertificatePrivateKey",
+        "CryptProtectData",
+        "CryptUnprotectData"
+      ],
+      "d2d1.dll": [
+        "D2D1CreateFactory"
+      ],
+      "dwrite.dll": [
+        "DWriteCreateFactory"
+      ],
+      "gdi32.dll": [
+        "CombineRgn",
+        "CreateCompatibleDC",
+        "CreateDIBSection",
+        "CreateFontW",
+        "CreateRectRgn",
+        "CreateRoundRectRgn",
+        "CreateSolidBrush",
+        "DeleteDC",
+        "DeleteObject",
+        "GetRegionData",
+        "GetStockObject",
+        "SelectObject",
+        "SetBkMode",
+        "SetTextColor",
+        "StretchDIBits"
+      ],
+      "httpapi.dll": [
+        "HttpAddUrlToUrlGroup",
+        "HttpCancelHttpRequest",
+        "HttpCloseRequestQueue",
+        "HttpCloseServerSession",
+        "HttpCloseUrlGroup",
+        "HttpCreateRequestQueue",
+        "HttpCreateServerSession",
+        "HttpCreateUrlGroup",
+        "HttpInitialize",
+        "HttpReceiveHttpRequest",
+        "HttpReceiveRequestEntityBody",
+        "HttpRemoveUrlFromUrlGroup",
+        "HttpSendHttpResponse",
+        "HttpSendResponseEntityBody",
+        "HttpSetRequestQueueProperty",
+        "HttpSetUrlGroupProperty",
+        "HttpShutdownRequestQueue",
+        "HttpTerminate"
+      ],
+      "kernel32.dll": [
+        "AddVectoredExceptionHandler",
+        "CancelIo",
+        "CancelIoEx",
+        "CloseHandle",
+        "CompareStringOrdinal",
+        "ConnectNamedPipe",
+        "CopyFileExW",
+        "CreateDirectoryW",
+        "CreateEventA",
+        "CreateEventW",
+        "CreateFileMappingA",
+        "CreateFileMappingW",
+        "CreateFileW",
+        "CreateHardLinkW",
+        "CreateIoCompletionPort",
+        "CreateMutexA",
+        "CreateNamedPipeW",
+        "CreatePipe",
+        "CreateProcessW",
+        "CreateSemaphoreA",
+        "CreateSymbolicLinkW",
+        "CreateThread",
+        "CreateToolhelp32Snapshot",
+        "CreateWaitableTimerExW",
+        "DeleteCriticalSection",
+        "DeleteFileW",
+        "DeleteProcThreadAttributeList",
+        "DeviceIoControl",
+        "DisconnectNamedPipe",
+        "DuplicateHandle",
+        "EnterCriticalSection",
+        "ExitProcess",
+        "FindClose",
+        "FindFirstFileExW",
+        "FindFirstFileW",
+        "FindNextFileW",
+        "FlushFileBuffers",
+        "FormatMessageW",
+        "FreeEnvironmentStringsW",
+        "FreeLibrary",
+        "GetCommandLineW",
+        "GetConsoleMode",
+        "GetConsoleOutputCP",
+        "GetConsoleWindow",
+        "GetCurrentDirectoryW",
+        "GetCurrentProcess",
+        "GetCurrentProcessId",
+        "GetCurrentThread",
+        "GetCurrentThreadId",
+        "GetDriveTypeW",
+        "GetEnvironmentStringsW",
+        "GetEnvironmentVariableW",
+        "GetExitCodeProcess",
+        "GetExitCodeThread",
+        "GetFileAttributesW",
+        "GetFileInformationByHandle",
+        "GetFileInformationByHandleEx",
+        "GetFileSizeEx",
+        "GetFileType",
+        "GetFinalPathNameByHandleW",
+        "GetFullPathNameW",
+        "GetHandleInformation",
+        "GetLastError",
+        "GetLocalTime",
+        "GetModuleFileNameW",
+        "GetModuleHandleA",
+        "GetModuleHandleExW",
+        "GetModuleHandleW",
+        "GetNamedPipeClientProcessId",
+        "GetNamedPipeServerProcessId",
+        "GetNativeSystemInfo",
+        "GetOverlappedResult",
+        "GetProcAddress",
+        "GetProcessAffinityMask",
+        "GetProcessHeap",
+        "GetProcessId",
+        "GetProcessIdOfThread",
+        "GetProcessTimes",
+        "GetQueuedCompletionStatus",
+        "GetStdHandle",
+        "GetSystemDirectoryW",
+        "GetSystemInfo",
+        "GetSystemTime",
+        "GetSystemTimeAsFileTime",
+        "GetSystemTimePreciseAsFileTime",
+        "GetSystemWow64DirectoryW",
+        "GetTempPathW",
+        "GetThreadContext",
+        "GetThreadId",
+        "GetThreadPriority",
+        "GetThreadTimes",
+        "GetTickCount64",
+        "GetWindowsDirectoryW",
+        "GlobalLock",
+        "GlobalSize",
+        "GlobalUnlock",
+        "HeapAlloc",
+        "HeapFree",
+        "HeapReAlloc",
+        "InitOnceBeginInitialize",
+        "InitOnceComplete",
+        "InitializeCriticalSection",
+        "InitializeProcThreadAttributeList",
+        "IsDebuggerPresent",
+        "IsWow64Process",
+        "K32GetMappedFileNameW",
+        "LeaveCriticalSection",
+        "LoadLibraryA",
+        "LoadLibraryExA",
+        "LocalFree",
+        "LockFileEx",
+        "MapViewOfFile",
+        "Module32FirstW",
+        "Module32NextW",
+        "MoveFileExW",
+        "MultiByteToWideChar",
+        "OpenProcess",
+        "OutputDebugStringA",
+        "PeekNamedPipe",
+        "Process32FirstW",
+        "Process32NextW",
+        "ProcessIdToSessionId",
+        "QueryDosDeviceW",
+        "QueryFullProcessImageNameW",
+        "QueryPerformanceCounter",
+        "QueryPerformanceFrequency",
+        "RaiseException",
+        "ReadConsoleW",
+        "ReadFile",
+        "ReadFileEx",
+        "ReleaseMutex",
+        "ReleaseSemaphore",
+        "RemoveDirectoryW",
+        "RemoveVectoredExceptionHandler",
+        "ResetEvent",
+        "ResumeThread",
+        "RtlCaptureContext",
+        "SetCurrentDirectoryW",
+        "SetEnvironmentVariableW",
+        "SetEvent",
+        "SetFileAttributesW",
+        "SetFileInformationByHandle",
+        "SetFilePointerEx",
+        "SetFileTime",
+        "SetHandleInformation",
+        "SetLastError",
+        "SetNamedPipeHandleState",
+        "SetProcessAffinityMask",
+        "SetThreadContext",
+        "SetThreadPriority",
+        "SetThreadStackGuarantee",
+        "SetWaitableTimer",
+        "Sleep",
+        "SleepEx",
+        "SuspendThread",
+        "SwitchToThread",
+        "TerminateProcess",
+        "TlsAlloc",
+        "TlsFree",
+        "TlsGetValue",
+        "TlsSetValue",
+        "TryEnterCriticalSection",
+        "UnlockFile",
+        "UnmapViewOfFile",
+        "UpdateProcThreadAttribute",
+        "VirtualProtect",
+        "VirtualQuery",
+        "WaitForMultipleObjects",
+        "WaitForSingleObject",
+        "WaitForSingleObjectEx",
+        "WideCharToMultiByte",
+        "WriteConsoleW",
+        "WriteFile",
+        "WriteFileEx",
+        "lstrlenW"
+      ],
+      "msi.dll": [
+        "MsiBeginTransactionW",
+        "MsiCloseHandle",
+        "MsiCreateRecord",
+        "MsiDatabaseOpenViewW",
+        "MsiEndTransaction",
+        "MsiEnumPatchesExW",
+        "MsiEnumProductsExW",
+        "MsiEnumRelatedProductsW",
+        "MsiGetActiveDatabase",
+        "MsiGetComponentPathExW",
+        "MsiGetProductInfoExW",
+        "MsiGetPropertyW",
+        "MsiGetSummaryInformationW",
+        "MsiInstallProductW",
+        "MsiJoinTransaction",
+        "MsiOpenDatabaseW",
+        "MsiProcessMessage",
+        "MsiRecordDataSize",
+        "MsiRecordGetFieldCount",
+        "MsiRecordGetInteger",
+        "MsiRecordGetStringW",
+        "MsiRecordIsNull",
+        "MsiRecordReadStream",
+        "MsiRecordSetStringW",
+        "MsiSetExternalUIRecord",
+        "MsiSetInternalUI",
+        "MsiSummaryInfoGetPropertyW",
+        "MsiViewClose",
+        "MsiViewExecute",
+        "MsiViewFetch",
+        "MsiViewGetColumnInfo"
+      ],
+      "msvcrt.dll": [
+        "_amsg_exit",
+        "_beginthreadex",
+        "_endthreadex",
+        "_errno",
+        "_fpreset",
+        "_hypot",
+        "_initterm",
+        "_iob",
+        "_lock",
+        "_setjmp3",
+        "_strdup",
+        "_ultoa",
+        "_unlock",
+        "abort",
+        "calloc",
+        "exit",
+        "fprintf",
+        "free",
+        "fwrite",
+        "longjmp",
+        "malloc",
+        "memcmp",
+        "memcpy",
+        "memmove",
+        "memset",
+        "printf",
+        "realloc",
+        "strlen",
+        "strncmp",
+        "vfprintf",
+        "wcslen"
+      ],
+      "ncrypt.dll": [
+        "NCryptFreeObject"
+      ],
+      "ntdll.dll": [
+        "NtCreateFile",
+        "NtCreateNamedPipeFile",
+        "NtOpenFile",
+        "NtReadFile",
+        "NtWriteFile",
+        "RtlNtStatusToDosError"
+      ],
+      "ole32.dll": [
+        "CoCreateInstance",
+        "CoInitializeEx",
+        "CoUninitialize"
+      ],
+      "oleaut32.dll": [
+        "GetErrorInfo",
+        "SetErrorInfo",
+        "SysAllocStringLen",
+        "SysFreeString",
+        "SysStringLen"
+      ],
+      "rpcrt4.dll": [
+        "UuidCreate"
+      ],
+      "secur32.dll": [
+        "AcceptSecurityContext",
+        "AcquireCredentialsHandleW",
+        "ApplyControlToken",
+        "DecryptMessage",
+        "DeleteSecurityContext",
+        "EncryptMessage",
+        "FreeCredentialsHandle",
+        "QueryContextAttributesW"
+      ],
+      "shell32.dll": [
+        "SHGetKnownFolderPath",
+        "ShellExecuteExW",
+        "Shell_NotifyIconW"
+      ],
+      "user32.dll": [
+        "AppendMenuW",
+        "BeginPaint",
+        "CloseClipboard",
+        "CloseDesktop",
+        "CreatePopupMenu",
+        "CreateWindowExW",
+        "DefWindowProcW",
+        "DestroyMenu",
+        "DestroyWindow",
+        "DialogBoxIndirectParamW",
+        "DispatchMessageW",
+        "DrawTextW",
+        "EnableWindow",
+        "EndDialog",
+        "EndMenu",
+        "EndPaint",
+        "FillRect",
+        "FrameRect",
+        "GetCapture",
+        "GetClassNameW",
+        "GetClientRect",
+        "GetClipboardData",
+        "GetCursorPos",
+        "GetDesktopWindow",
+        "GetForegroundWindow",
+        "GetKeyState",
+        "GetMessageW",
+        "GetScrollInfo",
+        "GetUserObjectInformationW",
+        "GetWindowLongW",
+        "GetWindowTextLengthW",
+        "GetWindowTextW",
+        "GetWindowThreadProcessId",
+        "InvalidateRect",
+        "IsChild",
+        "IsDialogMessageW",
+        "IsWindow",
+        "IsWindowEnabled",
+        "IsWindowVisible",
+        "KillTimer",
+        "LoadCursorW",
+        "LoadIconW",
+        "MessageBoxW",
+        "MoveWindow",
+        "OpenClipboard",
+        "OpenInputDesktop",
+        "PeekMessageW",
+        "PostMessageW",
+        "PostQuitMessage",
+        "RedrawWindow",
+        "RegisterClassW",
+        "RegisterWindowMessageW",
+        "ReleaseCapture",
+        "ScreenToClient",
+        "SendMessageW",
+        "SetCapture",
+        "SetFocus",
+        "SetForegroundWindow",
+        "SetLayeredWindowAttributes",
+        "SetScrollInfo",
+        "SetTimer",
+        "SetWinEventHook",
+        "SetWindowLongW",
+        "SetWindowPos",
+        "SetWindowRgn",
+        "SetWindowTextW",
+        "ShowWindow",
+        "SystemParametersInfoW",
+        "TrackMouseEvent",
+        "TrackPopupMenu",
+        "TranslateMessage",
+        "UnhookWinEvent",
+        "UnregisterClassW",
+        "UpdateLayeredWindow",
+        "UpdateLayeredWindowIndirect"
+      ],
+      "userenv.dll": [
+        "GetUserProfileDirectoryW"
+      ],
+      "winhttp.dll": [
+        "WinHttpCloseHandle",
+        "WinHttpConnect",
+        "WinHttpOpen",
+        "WinHttpOpenRequest",
+        "WinHttpQueryHeaders",
+        "WinHttpReadData",
+        "WinHttpReceiveResponse",
+        "WinHttpSendRequest",
+        "WinHttpSetOption",
+        "WinHttpSetTimeouts"
+      ],
+      "winmm.dll": [
+        "waveOutClose",
+        "waveOutOpen",
+        "waveOutPrepareHeader",
+        "waveOutReset",
+        "waveOutUnprepareHeader",
+        "waveOutWrite"
+      ],
+      "ws2_32.dll": [
+        "GetHostNameW",
+        "WSACleanup",
+        "WSADuplicateSocketW",
+        "WSAGetLastError",
+        "WSAIoctl",
+        "WSARecv",
+        "WSASend",
+        "WSASocketW",
+        "WSAStartup",
+        "accept",
+        "bind",
+        "closesocket",
+        "connect",
+        "freeaddrinfo",
+        "getaddrinfo",
+        "getpeername",
+        "getsockname",
+        "getsockopt",
+        "ioctlsocket",
+        "listen",
+        "recv",
+        "recvfrom",
+        "select",
+        "send",
+        "sendto",
+        "setsockopt",
+        "shutdown"
+      ],
+      "wtsapi32.dll": [
+        "WTSFreeMemory",
+        "WTSQuerySessionInformationW",
+        "WTSRegisterSessionNotification",
+        "WTSUnRegisterSessionNotification"
+      ]
+    },
+    "risks": [
+      {
+        "kind": "API_SET_DLL",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WaitOnAddress",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WakeByAddressAll",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WakeByAddressSingle",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "WINRT_DLL",
+        "dll": "api-ms-win-core-winrt-error-l1-1-0.dll",
+        "reason": "WinRT/COM import requires baseline OS export validation; Win7 is not established."
+      },
+      {
+        "kind": "WINRT_DLL",
+        "dll": "combase.dll",
+        "reason": "WinRT/COM import requires baseline OS export validation; Win7 is not established."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "kernel32.dll",
+        "api": "GetSystemTimePreciseAsFileTime",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      }
+    ],
+    "limitations": [
+      "Static import inspection cannot establish Win7 compatibility.",
+      "Dynamic loads, delayed paths, prerequisite updates and actual OS behavior require separate validation.",
+      "Formal MSVC baseline and real Win7 SP1 x86 machine gates remain NOT_VALIDATED."
+    ]
+  },
+  "msiContract": {
+    "status": "PASS",
+    "template": "Intel;1033",
+    "installer_version": 500,
+    "source_flags": 10,
+    "lifecycle_capabilities": {
+      "scope": "CONTROLLED_SEALED_SAME_SOURCE_BUNDLE_CANDIDATE",
+      "candidate_paths": [
+        "fresh_install",
+        "same_manifest_version_damaged_repair",
+        "same_bundle_source_remove_all",
+        "known_rollback"
+      ],
+      "runtime_validation": "NOT_EXERCISED",
+      "admission": "ORIGINAL_B_G_ACTIVE_INSTALL_ACK_AND_EXACT_TEMPLATE_PROCESS_CAP; NO_CLI_PROPERTY_AUTHORITY",
+      "settlement": "ORIGINAL_BEGIN_END_G_THREAD_PROCESS_CAPS_PLUS_STRICT_EXPECTED_EFFECTS",
+      "run_policy": "FIXED_PROJECT_VALUE_ABSENT_ONLY; NO_WRITE_OR_DELETE",
+      "diagnostic_logging": "FIXED_MsiLogging_voicewarmup!; DEVELOPMENT_CANDIDATE_ONLY",
+      "unsupported": [
+        "standard_ARP_uninstall",
+        "moved_or_deleted_bundle",
+        "different_manifest_or_version",
+        "major_upgrade",
+        "run_cleanup"
+      ]
+    },
+    "payload_files": 14,
+    "registry_scope": "Exact installer-only HKCU component markers; no Run cleanup",
+    "transaction_sequence": {
+      "CostFinalize": 1000,
+      "FcControlledInnerGuard": 1499,
+      "InstallExecute": 6500,
+      "InstallFinalize": 6600,
+      "InstallInitialize": 1500,
+      "InstallValidate": 1400,
+      "RemoveExistingProducts": 6501
+    },
+    "guardABI": 2,
+    "binaryStreams": [
+      "FcControlledGuardDll",
+      "FcGuardClientTemplate",
+      "FcPayloadManifest"
+    ],
+    "packageCode": "8F66764D-7267-43D3-BE0F-972BC232DD87"
+  },
+  "msi": {
+    "path": "FutureClassroom.msi",
+    "bytes": 10703872,
+    "sha256": "eea6c0c7b1fc783a698724a79c503448a8f5e43978d6294516f1ca12363a2a5e"
+  },
+  "setup": {
+    "path": "Setup.exe",
+    "bytes": 714372,
+    "sha256": "a776455ecdf99dbf53d9fcd1420aa18db1bcd3841ed08d836080bea6f9b0a6a3"
+  },
+  "template": {
+    "bytes": 714372,
+    "sha256": "d06832efda57b22964aae42aba1a3e401d1735b044020db47c2263f8f5a370d1",
+    "hole": 714256,
+    "canonicalZero32": true,
+    "normalPrefixExact": true
+  },
+  "payloadManifest": {
+    "bytes": 1484,
+    "sha256": "cca20603e8b7432c009da68b28c773dd7dde158e3236cdf167a8d6518d0675f7",
+    "rawBodySha256": "3fc6fabfd68772ca33fec35362fd572dca7c109df24741e617557f80ba015a4c",
+    "payloads": 14
+  },
+  "binaryReadback": "ALL_THREE_EXACT",
+  "payloadReadback": "ALL_FOURTEEN_EXACT",
+  "onlyExternal32HoleFilled": true
+}

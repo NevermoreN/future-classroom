@@ -1,0 +1,189 @@
+{
+  "status": "DEV_FROZEN_NORMAL_BUILD_ONLY",
+  "target": "i686-pc-windows-gnu",
+  "source_root": "/tmp/fc-round80-controlled-repair/checkout-abi2-summary-output-production-second",
+  "source_head": "d9dacefb481678a2f1c12cf8371fa6567820547d",
+  "formal_ci": false,
+  "environment": {
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_PROFILE_RELEASE_STRIP": "symbols",
+    "CARGO_TARGET_DIR": "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-target-first",
+    "CARGO_TARGET_I686_PC_WINDOWS_GNU_LINKER": "i686-w64-mingw32-gcc",
+    "RUSTFLAGS": "-C target-feature=+crt-static -C link-arg=-Wl,--major-subsystem-version,6,--minor-subsystem-version,1"
+  },
+  "removed_environment_keys": [
+    "CARGO_ENCODED_RUSTFLAGS",
+    "FC_OWNED_REMOVAL_SCOPE_HEX"
+  ],
+  "runtime": "NOT_RUN",
+  "commands": [
+    {
+      "name": "product-compile",
+      "argv": [
+        "cargo",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-bootstrap",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-target-first",
+        "--message-format=json"
+      ],
+      "actual_exit": 0,
+      "parent_reaped": true,
+      "timed_out": false,
+      "seconds": 379.24697371499497,
+      "original_budget_seconds": 900,
+      "stdout": {
+        "path": "product-compile.stdout.jsonl",
+        "bytes": 93719,
+        "sha256": "9a0783a05a860030608b0916c07661b58990d4555c3e0baf1c7e0846762c3c25"
+      },
+      "stderr": {
+        "path": "product-compile.stderr.log",
+        "bytes": 3857,
+        "sha256": "fea1af83203fd6094b4c863ce7daf27d5224b1c9a9d6c8d3301e06778bfbf90a"
+      },
+      "artifact": {
+        "path": "artifacts/fc-bootstrap.exe",
+        "bytes": 11420672,
+        "sha256": "3cde4c5b40cb38073bed42220177351d790b0b4e4c123feab05124e5868c7356"
+      }
+    },
+    {
+      "name": "lifecycle-compile",
+      "argv": [
+        "cargo",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-installer-lifecycle",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-target-first",
+        "--message-format=json"
+      ],
+      "actual_exit": 0,
+      "parent_reaped": true,
+      "timed_out": false,
+      "seconds": 7.093374121999659,
+      "original_budget_seconds": 900,
+      "stdout": {
+        "path": "lifecycle-compile.stdout.jsonl",
+        "bytes": 93676,
+        "sha256": "a2b2ee0e00ab529baf81c62df1329b43e5b29371b9f9ebf6b353c84c1cb53645"
+      },
+      "stderr": {
+        "path": "lifecycle-compile.stderr.log",
+        "bytes": 198,
+        "sha256": "69572ee5f97277d38396ca54c042eebbeeb7fb76db53e9f676558e7d356095e6"
+      },
+      "artifact": {
+        "path": "artifacts/fc-installer-lifecycle.exe",
+        "bytes": 714240,
+        "sha256": "c769703b5d313ab01adc4032ff78fa3099d9a7fcc61522e18bf57e0ff8d23634"
+      }
+    },
+    {
+      "name": "guard-library-compile",
+      "argv": [
+        "cargo",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "-p",
+        "fc-windows",
+        "--lib",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-target-first",
+        "--message-format=json"
+      ],
+      "actual_exit": 0,
+      "parent_reaped": true,
+      "timed_out": false,
+      "seconds": 45.81464255899482,
+      "original_budget_seconds": 900,
+      "stdout": {
+        "path": "guard-library-compile.stdout.jsonl",
+        "bytes": 44347,
+        "sha256": "c07202cb4325255eb5d4d59907af3a1bebf3c21f610bfc10da8c5d89e0f19213"
+      },
+      "stderr": {
+        "path": "guard-library-compile.stderr.log",
+        "bytes": 443,
+        "sha256": "88d795484d7469dd80b369752eb0e55d8ce3884cbdf6a9bce91750bf9460a4e1"
+      },
+      "artifact": {
+        "path": "artifacts/fc_windows.dll",
+        "bytes": 3382272,
+        "sha256": "3afa443fd5150de011c1742acc15ef8a0539fca6169194469bbadf3c85da13a7"
+      }
+    }
+  ],
+  "lifecycle_mode": "ABI2_SAME_PACKAGE_MAINTENANCE_NORMAL_GNU_DEV",
+  "maintenance_source": {
+    "path": "maintenance-source.json",
+    "bytes": 2175,
+    "sha256": "8750f3587cf6d038352c3d887b024c9de64d4873741cb7f1d2a5c2a301e407b3"
+  },
+  "producer_script": {
+    "path": "/tmp/fc-round80-controlled-repair/abi2-summary-output-normal-preparation-first/build-normal-first.py",
+    "sha256": "3fe90c0c0bf62267185174350fccce03d5d0b7c076e135a8e7010cad5a0c88cc"
+  },
+  "metadata_command": {
+    "name": "metadata",
+    "argv": [
+      "cargo",
+      "metadata",
+      "--offline",
+      "--locked",
+      "--no-deps",
+      "--format-version",
+      "1"
+    ],
+    "actual_exit": 0,
+    "parent_reaped": true,
+    "timed_out": false,
+    "seconds": 0.07459801900404273,
+    "original_budget_seconds": 60,
+    "stdout": {
+      "path": "metadata.stdout.jsonl",
+      "bytes": 30881,
+      "sha256": "99536a23775e3ce7ad09c62f999ef127da39f5fcb2d7d142bac50d7eab923a9a"
+    },
+    "stderr": {
+      "path": "metadata.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "metadata": {
+    "path": "metadata.stdout.jsonl",
+    "bytes": 30881,
+    "sha256": "99536a23775e3ce7ad09c62f999ef127da39f5fcb2d7d142bac50d7eab923a9a"
+  },
+  "inputs_before": {
+    "path": "inputs-before.json",
+    "bytes": 100323,
+    "sha256": "953d5c2a873d7d55327ed19e0a1bc8f7b33d079b533acf8ef2c82e334c756154"
+  },
+  "inputs_after": {
+    "path": "inputs-after.json",
+    "bytes": 100323,
+    "sha256": "953d5c2a873d7d55327ed19e0a1bc8f7b33d079b533acf8ef2c82e334c756154"
+  }
+}

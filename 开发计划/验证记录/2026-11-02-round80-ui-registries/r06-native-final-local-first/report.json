@@ -1,0 +1,23 @@
+{
+  "status": "PASS_FINAL_DEFAULT_ADMISSION_PARSE_AND_FROZEN_CHUNK_EQUALITY_WINDOWS_NOT_RUN",
+  "preparationFreezeSha256": "991423847ed86a02a7f2db33227c65c015f9979d28c3f161a7d300ec4ce0a54b",
+  "runnerSha256": "638ac7fb395d7cf7d987632edaed1428043d433310f8f652193913a33d362cb2",
+  "operations": [
+    {
+      "name": "default",
+      "actualExit": 0
+    },
+    {
+      "name": "admission",
+      "actualExit": 0
+    }
+  ],
+  "frozenFilesExact": 23,
+  "priorLocalReplayFailure": {
+    "command": "python3 -B r06-native-preparation-first/local-checks-first.py",
+    "actualExit": 1,
+    "error": "FileExistsError: ps-ast-chunks already exists on a second invocation; the first run had already passed 8 local checks and emitted 6 chunks. Second invocation passed its qualifiers/default/admission and failed only at mkdir. Frozen first files were not changed after freezing.",
+    "classification": "LOCAL_CHECK_EMISSION_REPLAY_FAILURE_NO_WINDOWS_NOT_A_NATIVE_PASS"
+  },
+  "newDirectoryOnly": true
+}

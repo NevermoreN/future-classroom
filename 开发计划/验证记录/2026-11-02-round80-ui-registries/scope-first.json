@@ -1,0 +1,36 @@
+{
+  "status": "FINAL_TERMINAL_FINITE_D13_SCOPE",
+  "destination": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-02-round80-ui-registries",
+  "terminalDirectoryWhitelist": [
+    "r06-registry-implementation-first",
+    "r06-integrated-native-producer-first",
+    "r06-integrated-native-producer-closure-first",
+    "r06-native-preparation-first",
+    "r06-native-final-local-first",
+    "r06-native-runtime-230d4fc4669db3b3ff4547fb51218815",
+    "combined-main-checks-first",
+    "r06-archive-preparation-first",
+    "r06-ui-registries-archive-staged-first"
+  ],
+  "terminalFileWhitelist": [
+    "r06-source-commit-first.json",
+    "check-combined-main-first.py",
+    "root-r06-native-ps-parse-first.py",
+    "root-r06-native-ps-parse-first.stdin.ps1",
+    "root-r06-native-ps-parse-first.stdout.log",
+    "root-r06-native-ps-parse-first.stderr.log",
+    "root-r06-native-ps-parse-first.json",
+    "prepare-r06-archive-first.py",
+    "prepare-r06-archive-second.py"
+  ],
+  "waitingNotRead": [],
+  "binaryPolicy": "IDENTITY_ONLY_NEVER_PE_EXECUTION",
+  "sensitivePolicy": "PREOPEN_METADATA_ONLY",
+  "excluded": [
+    "all_target_checkout_Git_trees",
+    "G02",
+    "Upgrade",
+    "D12_duplicate_evidence"
+  ],
+  "nativeScopes": "R06_12_NATIVE_SEPARATE_FROM_INSTALLER16_NATIVE_COMBINED_ONLY_STATIC28"
+}

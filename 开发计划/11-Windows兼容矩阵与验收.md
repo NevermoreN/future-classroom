@@ -392,3 +392,9 @@ host平台cfg修正后，实际严格Clippy及8项受影响运行状态测试、
 
 
 R80新增范围：abf71f4的现代run41368780507及Win7目标run41368783471现均completed/success，两原ZIP与各623项提交输入、全部原命令/日志已核；这些产物尚无新运行，且不覆盖后续d9/f95389源码。另在授权Win11实际完成三项GNU cfgtest ABI2源包只读测试（正常捕获、整包seal错误拒绝、内嵌模板洞外篡改拒绝），三个原进程均exit0/checked-close、下载核同及精确临时清理完成。它们不启动Begin、不安装产品，不代替新的160字节安装授权联动或完整升级；细节及来源限制见[实施记录](10-实施进度与验证记录.md)。Win7 SP1 x86、Win10各自实机及现场门槛继续NOT_RUN。
+
+R80后续ABI2正常GNU开发包已在相同授权Win11实际完成首次安装、LICENSE真实缺失后的同源修复及卸载，三B/三G原对象实际退出0并checked-close；14文件健康恢复、产品/注册/Run/cache/Pending/gate最终Absent及测试目录清理通过。首个正常包1603和诊断/恢复工具的启动前失败仍保留；真实Summary API空输出问题已最小修复并由实际调用复核，旧事务End仍UNKNOWN，旧Pending由独立编译scope恢复权限处置。详见[安装与恢复证据](验证记录/2026-11-02-round80-abi2-install-maintenance/archive-index-first.json)。这组运行来源是完整冻结的正常GNU构建，不冒称官方MSVC或跨版本升级验收。
+
+R06界面12源的61项展示层测试，以及该Win11上的5项精确原生测试/正常主程序公开桌面20步已通过，六原过程均实际退出0和checked-close，前台窗口不变、测试nonce清理通过；[界面注册证据](验证记录/2026-11-02-round80-ui-registries/archive-index-first.json)保留原编译wrapper因GCC临时文件未清的FAIL和后续独立清理收据。安装16源和界面12源的整合版本另通过GNU all-targets检查、严格Clippy、格式和12/33架构；两组分别受测的运行不能替代整合版本全量回归。
+
+较早f82d0fd的现代run41373542153/Win7目标run41373544611均实际success，各635项输入与全部51/53条原命令具证，但不覆盖上述新28源；新源码仍须独立MSVC构建及相应运行。当前实际操作系统依然只有Win11 Pro build26300 x64/WOW64；Win7 SP1 x86、Win10 x86/x64各自实机和希沃可见触控/PPT/DPI、物理音频/手机、校园P0/容量/TLS及72小时门槛均未因本批通过而放行。持续SSH授权和用户现有前台工作保持。

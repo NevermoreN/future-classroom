@@ -1,0 +1,28 @@
+{
+  "status": "PASS_COMPLETE_D13_REPLAY_CURRENT_ORIGINALS_AND_EXACT_COPY",
+  "argv": [
+    "python3",
+    "/tmp/fc-round80-controlled-repair/r06-ui-registries-archive-staged-second/replay.py",
+    "--root",
+    "/tmp/fc-round80-controlled-repair/r06-ui-registries-archive-staged-second",
+    "--freeze-sha256",
+    "fb87e1d76cc1169eb62ffaea1a9c264702db8a5ea8355fe44eea4db78fd7783b",
+    "--compare-current"
+  ],
+  "actualExit": 0,
+  "originalReaped": true,
+  "native": {
+    "status": "PASS_COMPLETE_ARCHIVE_FREEZE_ALL_MEMBERS_AND_IDENTITIES_REPLAY",
+    "archiveSha256": "a378749aacc15f0445cad39144e97084fa82d62f9f61a2a9e823851e1a7f9954",
+    "members": 240,
+    "binaryIdentities": 9,
+    "sensitiveMetadataOnly": 0,
+    "currentOriginalsCompared": true,
+    "sensitiveContentRead": false,
+    "allFrozenFiles": 19,
+    "nestedFreezeIncluded": true
+  },
+  "copyDestination": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-02-round80-ui-registries",
+  "stdoutSha256": "c3f0b046679f1c3af6a65b109bc42b597f1ad1436dbd12e12f4965a7ee20dbe8",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

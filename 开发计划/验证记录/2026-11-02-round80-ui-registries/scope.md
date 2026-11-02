@@ -1,0 +1,3 @@
+本档仅保存 R06 两套注册表/页面生命周期重构的冻结源和验证证据。原 no-run wrapper 保持FAIL，原cargo实际返回0；后续closure记录260个0字节GCC临时文件条目已清理，没有据此改写首失败。3个实际产物中两个为Rust test-profile PE，一个为正常profile.test=false的fc-bootstrap。Win11实际运行5个固定exact测试，各1通过/0失败/0忽略，以及正常main的20步隔离合成公开桌面流程。六个原进程wait0/exit0并checked-close，观测测试会话foreground=0→0；18文件7目录完整下载核对后nonce精确删除。物理音频、真实学校数据、网络、MSI/Pending和Win7/Win10实机不在此次运行范围。
+
+组合主分支本地f4023a7e4950de359e7a89de25a1adfdc8cafb36的594输入前后相同，架构12crate/33edge、fmt、GNU两crate all-targets检查、strictClippy、diff五命令通过。28个owned源分别绑定installer16与R06-12各自实际native来源；这不构成组合源码全量native通过。R06本地候选3ae1b3de4dee9ba7f190861220f467bcf7258f39的保存收据保留当时not-yet-remote状态，不回写历史。D12、G02和Upgrade不混入此档，PE仅身份，不执行。
