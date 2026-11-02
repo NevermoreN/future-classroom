@@ -377,3 +377,23 @@ mod tests {
         assert_eq!(view.validate(), Err(FormError::InvalidView));
     }
 }
+
+/// Logical roles select registered UI-thread native owners; display surfaces
+/// and management forms keep separate constructors.
+/// These are compile-time roles, never persisted IDs or management capabilities.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum WindowRole {
+    Display,
+    Workbench,
+    LayoutEditor,
+    Preview,
+    Status,
+}
+impl WindowRole {
+    pub const FORMS: [Self; 4] = [
+        Self::Workbench,
+        Self::LayoutEditor,
+        Self::Preview,
+        Self::Status,
+    ];
+}

@@ -43,6 +43,8 @@ use windows::{
 mod backdrop;
 #[path = "desktop/content.rs"]
 mod content;
+#[path = "desktop/registry.rs"]
+mod registry;
 #[path = "desktop/tree.rs"]
 mod tree;
 use backdrop::Backdrop;
@@ -477,6 +479,16 @@ struct Card {
     dynamic: Option<Surface>,
     clock_tick: Option<u32>,
 }
+impl Drop for Card {
+    fn drop(&mut self) {
+        // Fields retain native ownership and are dropped after the registered
+        // lifecycle hides every surface, including partially prepared cards.
+        match registry::hooks(self.source.kind) {
+            Ok(hooks) => (hooks.dispose)(self),
+            Err(_) => self.hide(),
+        }
+    }
+}
 impl Card {
     fn hide(&self) {
         if let Some(backdrop) = &self.backdrop {
@@ -825,8 +837,9 @@ impl DesktopRenderer {
                 if !control {
                     kinds.push(card.kind);
                 }
-                validate_card(card)?;
-                let body = prepare_content(&self.graphics, card, scene.public_calendar_unverified)?;
+                let hooks = registry::hooks(card.kind)?;
+                (hooks.bind)(card)?;
+                let body = (hooks.measure)(&self.graphics, card, scene.public_calendar_unverified)?;
                 let dynamic_rect = match card.content {
                     CardContent::Recess { .. } => {
                         let width = (card.rect.width - 32.).min(560.);
@@ -914,7 +927,7 @@ impl DesktopRenderer {
                 } else {
                     None
                 };
-                let surface = self.surface(static_rect)?;
+                let surface = (hooks.create)(self, static_rect)?;
                 let dynamic = dynamic_rect.map(|r| self.surface(r)).transpose()?;
                 let input = input_rect.map(|r| self.input_strip(r)).transpose()?;
                 let page = prior_pages
@@ -1789,28 +1802,10 @@ fn bounds(l: f32, t: f32, r: f32, b: f32, radius: f32) -> D2D1_ROUNDED_RECT {
         radiusY: radius,
     }
 }
-fn title(kind: ComponentKind) -> &'static str {
-    match kind {
-        ComponentKind::Clock => "时钟",
-        ComponentKind::Date => "日期",
-        ComponentKind::Schedule => "今日课表",
-        ComponentKind::Homework => "今日作业",
-        ComponentKind::Materials => "课堂资料",
-        ComponentKind::Reminder => "今日提醒",
-        ComponentKind::DateCountdown => "日期倒计时",
-        ComponentKind::Recess => "课间倒计时",
-        ComponentKind::SubjectText => "独立文字",
-        ComponentKind::SubjectImage => "独立图片",
-    }
-}
 fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
-    if let CardContent::LessonControl {
-        caption,
-        can_change,
-    } = &c.source.content
-    {
-        return render_lesson_control(g, c, caption.clone(), *can_change);
-    }
+    (registry::hooks(c.source.kind)?.render)(g, c)
+}
+fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
     // SAFETY below: all COM targets/brushes/layouts and selected DIBs belong to this
     // UI thread; local targets drop before DIB release, no UI calls borrow State.
     let target = g.target(&c.surface.dib)?;
@@ -1848,7 +1843,7 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
                 target.DrawRoundedRectangle(&shape, &edge, 0.75, None);
             }
             let heading = g.layout(
-                title(c.source.kind),
+                registry::hooks(c.source.kind)?.title,
                 if c.input.is_some() {
                     (w - 112.).max(28.)
                 } else {
@@ -1922,11 +1917,7 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
                 );
             }
             target.PopAxisAlignedClip();
-            if let CardContent::Clock(clock) = c.source.content {
-                if clock.mode == ClockMode::Analog {
-                    draw_dial(&target, c)?;
-                }
-            }
+            (registry::hooks(c.source.kind)?.decorate)(&target, c)?;
         }
         target.EndDraw(None, None)?;
     }
@@ -2021,6 +2012,9 @@ fn draw_dial(target: &ID2D1DCRenderTarget, c: &Card) -> Result<()> {
     }
 }
 fn render_dynamic(g: &Graphics, c: &mut Card, now: LocalDateTime) -> Result<()> {
+    (registry::hooks(c.source.kind)?.dynamic)(g, c, now)
+}
+fn render_dynamic_frame(g: &Graphics, c: &mut Card, now: LocalDateTime) -> Result<()> {
     // SAFETY below: this small UI-owned DIB survives its synchronous COM target.
     let Some(surface) = &mut c.dynamic else {
         return Ok(());
@@ -2214,6 +2208,9 @@ fn input_message(hwnd: HWND, msg: u32, lp: LPARAM, state: &InputState) -> Option
     }
 }
 fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
+    (registry::hooks(c.source.kind)?.input)(g, c)
+}
+fn render_input_strip(g: &Graphics, c: &mut Card) -> Result<()> {
     let Some(input) = &mut c.input else {
         return Ok(());
     };

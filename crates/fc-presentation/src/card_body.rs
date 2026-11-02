@@ -407,144 +407,12 @@ pub fn card_body_spec(
         CardContent::LessonControl { caption, .. } => add_units(&mut units, caption)?,
         _ => {}
     }
-    let mut push = |text: String,
-                    center: bool,
-                    fill: Option<(Rgb, f32, f32)>,
-                    leaf: Option<usize>,
-                    role: CardBodyRole| {
-        spec.blocks.push(CardBodyBlock {
-            text,
-            center,
-            fill,
-            leaf,
-            role,
-            min_height: if fill.is_some() || role != CardBodyRole::Plain {
-                44.
-            } else {
-                24.
-            },
-        });
-    };
-    match content {
-        CardContent::Clock(clock) if kind == ComponentKind::Clock => {
-            spec.dynamic = if clock.mode == ClockMode::Analog {
-                CardBodyDynamic::AnalogClock
-            } else {
-                CardBodyDynamic::DigitalClock(*clock)
-            }
-        }
-        CardContent::Recess { .. } if kind == ComponentKind::Recess => {
-            spec.dynamic = CardBodyDynamic::Recess
-        }
-        CardContent::LessonControl {
-            caption,
-            can_change,
-        } if kind == ComponentKind::Schedule => {
-            spec.dynamic = CardBodyDynamic::LessonControl {
-                caption: caption.clone(),
-                can_change: *can_change,
-            }
-        }
-        CardContent::Text(text) => push(text.clone(), false, None, None, CardBodyRole::Plain),
-        CardContent::StandaloneText(text) => {
-            push(text.to_string(), false, None, None, CardBodyRole::Plain)
-        }
-        CardContent::Image(image) => {
-            spec.dynamic = CardBodyDynamic::Image {
-                width: image.current.width,
-                height: image.current.height,
-                pages: image.total_pages,
-            };
-        }
-        CardContent::Courses(rows) => {
-            for (i, row) in rows.iter().enumerate() {
-                push(
-                    if row.current {
-                        format!(
-                            "{}\n{}",
-                            row.name,
-                            if row.temporary {
-                                "临时 · 仅本节有效"
-                            } else {
-                                "正在上课"
-                            }
-                        )
-                    } else {
-                        row.name.clone()
-                    },
-                    true,
-                    Some((row.color, row.fill_alpha, row.stroke_width)),
-                    Some(i),
-                    CardBodyRole::Plain,
-                );
-            }
-        }
-        CardContent::Homework(rows) => {
-            for (i, row) in rows.iter().enumerate() {
-                push(
-                    format!("{} · {}", row.subject_name, row.teacher_name),
-                    false,
-                    Some((row.color, row.fill_alpha, 0.)),
-                    Some(i),
-                    CardBodyRole::Plain,
-                );
-                push(row.text.clone(), false, None, Some(i), CardBodyRole::Plain);
-            }
-        }
-        CardContent::Materials(list) => {
-            spec.gap = f32::from(list.row_gap_dip);
-            if let Some(note) = note {
-                push(note.into(), false, None, None, CardBodyRole::Plain);
-            }
-            push(
-                format!("{} · {}", list.subject_name, list.teacher_name),
-                false,
-                None,
-                None,
-                CardBodyRole::Plain,
-            );
-            if list.rows.is_empty() {
-                push(
-                    "该老师暂无课堂资料".into(),
-                    false,
-                    None,
-                    None,
-                    CardBodyRole::Plain,
-                );
-            }
-            for (i, row) in list.rows.iter().enumerate() {
-                push(
-                    row.name.clone(),
-                    false,
-                    None,
-                    Some(i),
-                    CardBodyRole::MaterialRow(i),
-                );
-            }
-            if list.next_cursor.is_some() {
-                push(
-                    "更多资料 ›".into(),
-                    false,
-                    None,
-                    None,
-                    CardBodyRole::MaterialMore,
-                );
-            }
-        }
-        CardContent::MaterialsUnavailable if kind == ComponentKind::Materials => {
-            if let Some(note) = note {
-                push(note.into(), false, None, None, CardBodyRole::Plain);
-            }
-            push(
-                "资料尚未就绪".into(),
-                false,
-                None,
-                None,
-                CardBodyRole::Plain,
-            );
-        }
-        _ => return Err(CardBodyError::InvalidContent),
-    }
+    let registry =
+        crate::registry::Registry::new(BODIES).map_err(|_| CardBodyError::InvalidContent)?;
+    let builder = registry
+        .get((kind, BodyKind::of(content)))
+        .map_err(|_| CardBodyError::InvalidContent)?;
+    builder(&mut spec, content, note)?;
     spec.validate()?;
     Ok(spec)
 }
@@ -552,3 +420,425 @@ pub fn card_body_spec(
 #[cfg(test)]
 #[path = "card_body_tests.rs"]
 mod tests;
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum BodyKind {
+    Clock,
+    Recess,
+    LessonControl,
+    Text,
+    StandaloneText,
+    Image,
+    Courses,
+    Homework,
+    Materials,
+    MaterialsUnavailable,
+}
+impl BodyKind {
+    fn of(content: &CardContent) -> Self {
+        match content {
+            CardContent::Clock(_) => Self::Clock,
+            CardContent::Recess { .. } => Self::Recess,
+            CardContent::LessonControl { .. } => Self::LessonControl,
+            CardContent::Text(_) => Self::Text,
+            CardContent::StandaloneText(_) => Self::StandaloneText,
+            CardContent::Image(_) => Self::Image,
+            CardContent::Courses(_) => Self::Courses,
+            CardContent::Homework(_) => Self::Homework,
+            CardContent::Materials(_) => Self::Materials,
+            CardContent::MaterialsUnavailable => Self::MaterialsUnavailable,
+        }
+    }
+}
+type BodyBuilder = fn(&mut CardBodySpec, &CardContent, Option<&str>) -> Result<(), CardBodyError>;
+static BODIES: &[crate::registry::Registration<(ComponentKind, BodyKind), BodyBuilder>] = &[
+    crate::registry::Registration {
+        key: (ComponentKind::Clock, BodyKind::Clock),
+        implementation: bind_clock,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Recess, BodyKind::Recess),
+        implementation: bind_recess,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Schedule, BodyKind::LessonControl),
+        implementation: bind_lesson,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Clock, BodyKind::Text),
+        implementation: bind_text,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Date, BodyKind::Text),
+        implementation: bind_text,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Schedule, BodyKind::Text),
+        implementation: bind_text,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Homework, BodyKind::Text),
+        implementation: bind_text,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Materials, BodyKind::Text),
+        implementation: bind_text,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Reminder, BodyKind::Text),
+        implementation: bind_text,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::DateCountdown, BodyKind::Text),
+        implementation: bind_text,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Recess, BodyKind::Text),
+        implementation: bind_text,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::SubjectText, BodyKind::Text),
+        implementation: bind_text,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::SubjectImage, BodyKind::Text),
+        implementation: bind_text,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::SubjectText, BodyKind::StandaloneText),
+        implementation: bind_standalone,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::SubjectImage, BodyKind::Image),
+        implementation: bind_image,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Schedule, BodyKind::Courses),
+        implementation: bind_courses,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Homework, BodyKind::Homework),
+        implementation: bind_homework,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Materials, BodyKind::Materials),
+        implementation: bind_materials,
+    },
+    crate::registry::Registration {
+        key: (ComponentKind::Materials, BodyKind::MaterialsUnavailable),
+        implementation: bind_unavailable,
+    },
+];
+fn bind_clock(
+    spec: &mut CardBodySpec,
+    content: &CardContent,
+    _note: Option<&str>,
+) -> Result<(), CardBodyError> {
+    let CardContent::Clock(clock) = content else {
+        return Err(CardBodyError::InvalidContent);
+    };
+
+    spec.dynamic = if clock.mode == ClockMode::Analog {
+        CardBodyDynamic::AnalogClock
+    } else {
+        CardBodyDynamic::DigitalClock(*clock)
+    };
+    Ok(())
+}
+fn bind_recess(
+    spec: &mut CardBodySpec,
+    content: &CardContent,
+    _note: Option<&str>,
+) -> Result<(), CardBodyError> {
+    let CardContent::Recess { .. } = content else {
+        return Err(CardBodyError::InvalidContent);
+    };
+
+    spec.dynamic = CardBodyDynamic::Recess;
+    Ok(())
+}
+fn bind_lesson(
+    spec: &mut CardBodySpec,
+    content: &CardContent,
+    _note: Option<&str>,
+) -> Result<(), CardBodyError> {
+    let CardContent::LessonControl {
+        caption,
+        can_change,
+    } = content
+    else {
+        return Err(CardBodyError::InvalidContent);
+    };
+
+    spec.dynamic = CardBodyDynamic::LessonControl {
+        caption: caption.clone(),
+        can_change: *can_change,
+    };
+    Ok(())
+}
+fn bind_text(
+    spec: &mut CardBodySpec,
+    content: &CardContent,
+    _note: Option<&str>,
+) -> Result<(), CardBodyError> {
+    let CardContent::Text(text) = content else {
+        return Err(CardBodyError::InvalidContent);
+    };
+    push(spec, text.clone(), false, None, None, CardBodyRole::Plain);
+    Ok(())
+}
+fn bind_standalone(
+    spec: &mut CardBodySpec,
+    content: &CardContent,
+    _note: Option<&str>,
+) -> Result<(), CardBodyError> {
+    let CardContent::StandaloneText(text) = content else {
+        return Err(CardBodyError::InvalidContent);
+    };
+
+    push(
+        spec,
+        text.to_string(),
+        false,
+        None,
+        None,
+        CardBodyRole::Plain,
+    );
+    Ok(())
+}
+fn bind_image(
+    spec: &mut CardBodySpec,
+    content: &CardContent,
+    _note: Option<&str>,
+) -> Result<(), CardBodyError> {
+    let CardContent::Image(image) = content else {
+        return Err(CardBodyError::InvalidContent);
+    };
+
+    spec.dynamic = CardBodyDynamic::Image {
+        width: image.current.width,
+        height: image.current.height,
+        pages: image.total_pages,
+    };
+    Ok(())
+}
+fn bind_courses(
+    spec: &mut CardBodySpec,
+    content: &CardContent,
+    _note: Option<&str>,
+) -> Result<(), CardBodyError> {
+    let CardContent::Courses(rows) = content else {
+        return Err(CardBodyError::InvalidContent);
+    };
+
+    for (i, row) in rows.iter().enumerate() {
+        push(
+            spec,
+            if row.current {
+                format!(
+                    "{}\n{}",
+                    row.name,
+                    if row.temporary {
+                        "临时 · 仅本节有效"
+                    } else {
+                        "正在上课"
+                    }
+                )
+            } else {
+                row.name.clone()
+            },
+            true,
+            Some((row.color, row.fill_alpha, row.stroke_width)),
+            Some(i),
+            CardBodyRole::Plain,
+        );
+    }
+    Ok(())
+}
+fn bind_homework(
+    spec: &mut CardBodySpec,
+    content: &CardContent,
+    _note: Option<&str>,
+) -> Result<(), CardBodyError> {
+    let CardContent::Homework(rows) = content else {
+        return Err(CardBodyError::InvalidContent);
+    };
+
+    for (i, row) in rows.iter().enumerate() {
+        push(
+            spec,
+            format!("{} · {}", row.subject_name, row.teacher_name),
+            false,
+            Some((row.color, row.fill_alpha, 0.)),
+            Some(i),
+            CardBodyRole::Plain,
+        );
+        push(
+            spec,
+            row.text.clone(),
+            false,
+            None,
+            Some(i),
+            CardBodyRole::Plain,
+        );
+    }
+    Ok(())
+}
+fn bind_materials(
+    spec: &mut CardBodySpec,
+    content: &CardContent,
+    note: Option<&str>,
+) -> Result<(), CardBodyError> {
+    let CardContent::Materials(list) = content else {
+        return Err(CardBodyError::InvalidContent);
+    };
+
+    spec.gap = f32::from(list.row_gap_dip);
+    if let Some(note) = note {
+        push(spec, note.into(), false, None, None, CardBodyRole::Plain);
+    }
+    push(
+        spec,
+        format!("{} · {}", list.subject_name, list.teacher_name),
+        false,
+        None,
+        None,
+        CardBodyRole::Plain,
+    );
+    if list.rows.is_empty() {
+        push(
+            spec,
+            "该老师暂无课堂资料".into(),
+            false,
+            None,
+            None,
+            CardBodyRole::Plain,
+        );
+    }
+    for (i, row) in list.rows.iter().enumerate() {
+        push(
+            spec,
+            row.name.clone(),
+            false,
+            None,
+            Some(i),
+            CardBodyRole::MaterialRow(i),
+        );
+    }
+    if list.next_cursor.is_some() {
+        push(
+            spec,
+            "更多资料 ›".into(),
+            false,
+            None,
+            None,
+            CardBodyRole::MaterialMore,
+        );
+    };
+    Ok(())
+}
+fn bind_unavailable(
+    spec: &mut CardBodySpec,
+    content: &CardContent,
+    note: Option<&str>,
+) -> Result<(), CardBodyError> {
+    let CardContent::MaterialsUnavailable = content else {
+        return Err(CardBodyError::InvalidContent);
+    };
+
+    if let Some(note) = note {
+        push(spec, note.into(), false, None, None, CardBodyRole::Plain);
+    }
+    push(
+        spec,
+        "资料尚未就绪".into(),
+        false,
+        None,
+        None,
+        CardBodyRole::Plain,
+    );
+    Ok(())
+}
+
+fn push(
+    spec: &mut CardBodySpec,
+    text: String,
+    center: bool,
+    fill: Option<(Rgb, f32, f32)>,
+    leaf: Option<usize>,
+    role: CardBodyRole,
+) {
+    spec.blocks.push(CardBodyBlock {
+        text,
+        center,
+        fill,
+        leaf,
+        role,
+        min_height: if fill.is_some() || role != CardBodyRole::Plain {
+            44.
+        } else {
+            24.
+        },
+    });
+}
+
+#[cfg(test)]
+mod registration_tests {
+    use super::*;
+    #[test]
+    fn neutral_placeholders_bind_without_borrowing_another_components_builder() {
+        let content = CardContent::Text("等待当前课程数据".into());
+        for kind in ComponentKind::ALL
+            .into_iter()
+            .chain([ComponentKind::SubjectText, ComponentKind::SubjectImage])
+        {
+            let body = card_body_spec(kind, &content, false, None).unwrap();
+            assert_eq!(body.blocks.len(), 1);
+            assert_eq!(body.blocks[0].text, "等待当前课程数据");
+            assert_eq!(body.dynamic, CardBodyDynamic::Static);
+        }
+        let clock = CardContent::Clock(ClockContent {
+            mode: ClockMode::Analog,
+            show_seconds: false,
+        });
+        assert!(matches!(
+            card_body_spec(ComponentKind::Clock, &clock, false, None)
+                .unwrap()
+                .dynamic,
+            CardBodyDynamic::AnalogClock
+        ));
+        assert_eq!(
+            card_body_spec(ComponentKind::Date, &clock, false, None),
+            Err(CardBodyError::InvalidContent)
+        );
+    }
+    #[test]
+    fn public_lesson_control_keeps_its_own_binding_without_changing_schedule_content() {
+        let content = CardContent::LessonControl {
+            caption: "仅本节".into(),
+            can_change: true,
+        };
+        let control = card_body_spec(ComponentKind::Schedule, &content, true, None).unwrap();
+        assert!(control.blocks.is_empty());
+        assert_eq!(
+            control.dynamic,
+            CardBodyDynamic::LessonControl {
+                caption: "仅本节".into(),
+                can_change: true
+            }
+        );
+        assert_eq!(
+            card_body_spec(ComponentKind::Date, &content, false, None),
+            Err(CardBodyError::InvalidContent)
+        );
+        let schedule = card_body_spec(
+            ComponentKind::Schedule,
+            &CardContent::Courses(vec![]),
+            true,
+            None,
+        )
+        .unwrap();
+        assert_eq!(schedule.dynamic, CardBodyDynamic::Static);
+        assert_eq!(schedule.top_inset, control.top_inset);
+    }
+}
