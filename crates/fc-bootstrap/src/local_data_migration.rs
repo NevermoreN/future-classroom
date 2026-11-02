@@ -460,7 +460,7 @@ fn migrate_known(source: &DataPaths, target: &DataPaths, check: &dyn Fn() -> boo
     } else {
         None
     };
-    validate_source_layout(&source)?;
+    validate_source_layout(source)?;
     require(read_small(&source.root().join(DEPLOYMENT), 128)? == MARKER)?;
     let encrypted_key = read_small(&source.root().join(KEY), 4096)?;
     let secret = checked(CurrentUserDpapi::default().unprotect(&encrypted_key))?;

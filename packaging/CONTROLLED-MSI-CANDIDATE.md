@@ -14,8 +14,13 @@ caller hash, PID, transaction number or success claim authorizes installation.
 The original B/G association, actual MSI Type1 session and checked native return
 path remain required. Direct inner install/repair/remove has no such grant.
 
-The ABI2 inner Binary table has exactly three streams: the admitted Rust guard
-DLL, the canonical zero32 client template and FcPayloadManifest. The manifest
+The ABI2 inner Binary table has three fixed streams: the admitted Rust guard
+DLL, the canonical zero32 client template and FcPayloadManifest. A qualified
+upgrade adds only the fixed FcPublishedPredecessor fourth stream. Capability3
+binds each version's own normal helper/template/DLL, including a four-stream
+predecessor, without recursively executing its older publication. Earlier
+capability0 internal bundles need a compatible installer; their data is retained.
+The manifest
 binds the actual compiler-generated PackageCode, product/version and fourteen
 payload identities. The final MSI is completed first; only the external
 Setup's fixed32 digest slot is filled afterwards. Its normal compiler prefix
@@ -32,10 +37,13 @@ Removing or disabling the guard is not an uninstall solution.
 
 School business data, certificates, URLACL and firewall are outside this MSI
 payload's write/remove scope. Default uninstall preserves school data. Upgrade
-can preserve an exact owned installed Run value; repair and removal currently
-require it absent. They do not clear unrelated Run values or silently disable
-autostart. Standard-user deployment and complete failure acceptance remain
-independent checks.
+and repair preserve an exact owned installed Run value. Closed Setup removal
+deletes only that installation's exact value. Its original maintenance owner
+retains the preimage; a known rollback restores the original bytes only into an
+absent value, after the original transaction and guardian return. Observed
+external values are preserved. Adjacent registry reads/writes are not CAS against
+a Windows user simultaneously editing the same value. Standard-user deployment
+and complete failure acceptance remain independent checks.
 
 Windows 7 and Windows 10 physical testing is not scheduled, at the user's
 request. Their compatibility design and build checks remain; runtime status is
