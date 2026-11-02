@@ -717,3 +717,6 @@ fn managed_download_missing_version_or_deleted_record_is_not_found_without_mutat
     );
     assert_eq!(f.revision(), deleted_revision);
 }
+
+#[path = "materials_batch_tests.rs"]
+mod batch_tests;

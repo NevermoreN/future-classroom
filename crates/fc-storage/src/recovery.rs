@@ -144,6 +144,7 @@ pub(crate) fn is_receipt(key: &str) -> bool {
         "business/profile-content/v1/receipts/",
         "business/profile-content/v1/page-receipts/",
         "business/material/v1/receipts/",
+        "business/material/v1/batch-receipts/",
         "business/voice-receipt/v1/",
     ]
     .iter()

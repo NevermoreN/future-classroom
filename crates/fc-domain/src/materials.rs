@@ -12,6 +12,7 @@ use crate::{
 };
 use std::collections::HashSet;
 pub const MAX_FOLDER_RECORDS: usize = 2048;
+pub const MAX_MATERIAL_BATCH_FILES: usize = 20;
 pub const MAX_MATERIAL_BYTES: u64 = 50 * 1024 * 1024;
 pub const DESKTOP_MATERIAL_PAGE: usize = 5;
 pub const MANAGEMENT_MATERIAL_PAGE: usize = 20;
@@ -263,7 +264,15 @@ impl MaterialFolderState {
         if self.records.len() > MAX_FOLDER_RECORDS {
             return Err(MaterialError::Capacity);
         }
-        if self.folder.last_added_sequence > self.folder.revision.get()
+        // One atomic folder operation may append up to twenty records.
+        // Sequence counts records; revision counts committed directory operations.
+        // Saturation preserves the upper bound without arithmetic wraparound.
+        if self.folder.last_added_sequence
+            > self
+                .folder
+                .revision
+                .get()
+                .saturating_mul(MAX_MATERIAL_BATCH_FILES as u64)
             || self.folder.last_added_sequence == 0
                 && (!self.records.is_empty() || self.folder.revision.get() > 1)
             || self.folder.revision.get() == 0
@@ -335,6 +344,79 @@ impl MaterialFolderState {
             status: MaterialStatus::Published,
             revision: Revision::new(1),
         });
+        Ok(next)
+    }
+    /// Publish one ordered batch, or return an error without changing the
+    /// original state. All logical appends are returned as one candidate;
+    /// storage publishes it in one transaction without intermediate states.
+    pub fn append_batch(
+        &self,
+        appends: &[MaterialAppend],
+        identity: &IdentityState,
+        actor: &ActorContext,
+        now: LocalDateTime,
+    ) -> Result<Self, MaterialError> {
+        self.validate()?;
+        if appends.is_empty() || appends.len() > MAX_MATERIAL_BATCH_FILES {
+            return Err(MaterialError::Capacity);
+        }
+        authorize_material_folder(identity, actor, self.folder.scope, now)?;
+        if self
+            .records
+            .len()
+            .checked_add(appends.len())
+            .is_none_or(|count| count > MAX_FOLDER_RECORDS)
+        {
+            return Err(MaterialError::Capacity);
+        }
+        let mut ids = self.records.iter().map(|r| r.id).collect::<HashSet<_>>();
+        let mut versions = self
+            .records
+            .iter()
+            .map(|r| r.resource.version_id)
+            .collect::<HashSet<_>>();
+        for append in appends {
+            append.validate()?;
+            if !ids.insert(append.material_id) || !versions.insert(append.resource.version_id) {
+                return Err(MaterialError::AlreadyExists);
+            }
+            if append.allowed_class_ids.iter().any(|class| {
+                !identity.is_teacher(
+                    self.folder.scope.teacher_id,
+                    *class,
+                    self.folder.scope.subject_id,
+                )
+            }) {
+                return Err(MaterialError::InvalidScope);
+            }
+        }
+        // Check both counters before copying any record into the candidate.
+        let last_sequence = self
+            .folder
+            .last_added_sequence
+            .checked_add(appends.len() as u64)
+            .ok_or(MaterialError::VersionOverflow)?;
+        let revision = self
+            .folder
+            .revision
+            .next()
+            .map_err(|_| MaterialError::VersionOverflow)?;
+        let mut next = self.clone();
+        for (offset, append) in appends.iter().enumerate() {
+            next.records.push(MaterialRecord {
+                id: append.material_id,
+                folder_id: self.folder.id,
+                display_name: append.display_name.clone(),
+                resource: append.resource.clone(),
+                allowed_class_ids: append.allowed_class_ids.clone(),
+                added_at: now,
+                added_sequence: self.folder.last_added_sequence + offset as u64 + 1,
+                status: MaterialStatus::Published,
+                revision: Revision::new(1),
+            });
+        }
+        next.folder.last_added_sequence = last_sequence;
+        next.folder.revision = revision;
         Ok(next)
     }
     pub fn delete(

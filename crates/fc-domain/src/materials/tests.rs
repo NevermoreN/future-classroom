@@ -502,3 +502,323 @@ fn default_teacher_is_used_only_for_explicit_default_binding() {
         id(3)
     );
 }
+
+#[test]
+fn bounded_batch_is_one_candidate_with_input_order_and_unchanged_single_append_semantics() {
+    let identity = identity();
+    let owner = actor(&identity, 2);
+    let initial = empty()
+        .append(&append(100), &identity, &owner, now(30000))
+        .unwrap();
+    let batch = vec![append(7), append(3), append(9)];
+    let next = initial
+        .append_batch(&batch, &identity, &owner, now(29000))
+        .unwrap();
+    next.validate().unwrap();
+    assert_eq!(initial.records.len(), 1);
+    assert_eq!(next.folder.revision, Revision::new(2));
+    assert_eq!(next.folder.last_added_sequence, 4);
+    assert_eq!(next.records[0], initial.records[0]);
+    for (offset, (record, input)) in next.records[1..].iter().zip(&batch).enumerate() {
+        assert_eq!(record.id, input.material_id);
+        assert_eq!(record.resource, input.resource);
+        assert_eq!(record.allowed_class_ids, input.allowed_class_ids);
+        assert_eq!(record.added_sequence, offset as u64 + 2);
+        assert_eq!(record.added_at, now(29000));
+        assert_eq!(record.revision, Revision::new(1));
+    }
+    let page = next
+        .management_page(&identity, &owner, now(31000), None)
+        .unwrap();
+    assert_eq!(
+        page.items.iter().map(|r| r.id.get()).collect::<Vec<_>>(),
+        vec![9, 3, 7, 100]
+    );
+    let single = next
+        .append(&append(11), &identity, &owner, now(28000))
+        .unwrap();
+    assert_eq!(single.folder.revision, Revision::new(3));
+    assert_eq!(single.folder.last_added_sequence, 5);
+    assert_eq!(single.records.last().unwrap().revision, Revision::new(1));
+    single.validate().unwrap();
+}
+
+#[test]
+fn batch_rejects_a_bad_last_item_without_changing_any_original_record() {
+    let identity = identity();
+    let owner = actor(&identity, 2);
+    let state = saved(&identity);
+    let before = state.clone();
+    let mut invalid = append(3);
+    invalid.resource.bytes = 0;
+    assert_eq!(
+        state.append_batch(&[append(2), invalid], &identity, &owner, now(31000)),
+        Err(MaterialError::InvalidResource)
+    );
+    let mut wrong_class = append(3);
+    wrong_class.allowed_class_ids = vec![class(3)];
+    assert_eq!(
+        state.append_batch(
+            &[append(2), wrong_class],
+            &identity,
+            &actor(&identity, 1),
+            now(31000)
+        ),
+        Err(MaterialError::InvalidScope)
+    );
+    assert!(matches!(
+        state.append_batch(&[append(2)], &identity, &actor(&identity, 3), now(31000)),
+        Err(MaterialError::Permission(PermissionError::WrongOwner))
+    ));
+    assert!(matches!(
+        state.append_batch(&[append(2)], &identity, &actor(&identity, 4), now(31000)),
+        Err(MaterialError::Permission(PermissionError::RoleDenied))
+    ));
+    assert_eq!(state, before);
+}
+
+#[test]
+fn batch_rejects_duplicate_material_and_resource_versions_within_and_before_batch() {
+    let identity = identity();
+    let owner = actor(&identity, 2);
+    let state = saved(&identity);
+    let before = state.clone();
+    let mut repeated_version = append(3);
+    repeated_version.resource.version_id = ResourceVersionId::new(2).unwrap();
+    for batch in [
+        vec![append(2), append(2)],
+        vec![append(2), repeated_version],
+        vec![append(2), append(1)],
+    ] {
+        assert_eq!(
+            state.append_batch(&batch, &identity, &owner, now(31000)),
+            Err(MaterialError::AlreadyExists)
+        );
+    }
+    let mut old_version = append(2);
+    old_version.resource.version_id = state.records[0].resource.version_id;
+    assert_eq!(
+        state.append_batch(&[old_version], &identity, &owner, now(31000)),
+        Err(MaterialError::AlreadyExists)
+    );
+    let deleted = state
+        .delete(
+            MaterialId::new(1).unwrap(),
+            Revision::new(1),
+            &identity,
+            &owner,
+            now(31000),
+        )
+        .unwrap();
+    assert_eq!(
+        deleted.append_batch(&[append(1)], &identity, &owner, now(32000)),
+        Err(MaterialError::AlreadyExists)
+    );
+    assert_eq!(state, before);
+}
+
+#[test]
+fn batch_limits_folder_capacity_and_counter_overflow_remain_atomic() {
+    let identity = identity();
+    let owner = actor(&identity, 2);
+    assert_eq!(
+        empty().append_batch(&[], &identity, &owner, now(30000)),
+        Err(MaterialError::Capacity)
+    );
+    let twenty = (1..=MAX_MATERIAL_BATCH_FILES as u64)
+        .map(append)
+        .collect::<Vec<_>>();
+    let full_batch = empty()
+        .append_batch(&twenty, &identity, &owner, now(30000))
+        .unwrap();
+    assert_eq!(full_batch.records.len(), 20);
+    assert_eq!(full_batch.folder.revision, Revision::new(1));
+    assert_eq!(full_batch.folder.last_added_sequence, 20);
+    full_batch.validate().unwrap();
+    let too_many = (1..=21).map(append).collect::<Vec<_>>();
+    assert_eq!(
+        empty().append_batch(&too_many, &identity, &owner, now(30000)),
+        Err(MaterialError::Capacity)
+    );
+    let mut near_full = empty();
+    for n in 1..MAX_FOLDER_RECORDS as u64 {
+        let input = append(n);
+        near_full.records.push(MaterialRecord {
+            id: input.material_id,
+            folder_id: near_full.folder.id,
+            display_name: input.display_name,
+            resource: input.resource,
+            allowed_class_ids: input.allowed_class_ids,
+            added_at: now(30000),
+            added_sequence: n,
+            status: MaterialStatus::Published,
+            revision: Revision::new(1),
+        });
+    }
+    near_full.folder.revision = Revision::new((MAX_FOLDER_RECORDS - 1) as u64);
+    near_full.folder.last_added_sequence = (MAX_FOLDER_RECORDS - 1) as u64;
+    near_full.validate().unwrap();
+    let before = near_full.clone();
+    assert_eq!(
+        near_full.append_batch(&[append(2048), append(2049)], &identity, &owner, now(31000)),
+        Err(MaterialError::Capacity)
+    );
+    assert_eq!(near_full, before);
+    let full = near_full
+        .append_batch(&[append(2048)], &identity, &owner, now(31000))
+        .unwrap();
+    assert_eq!(full.records.len(), MAX_FOLDER_RECORDS);
+    full.validate().unwrap();
+    for (revision, last_sequence) in [(u64::MAX, 1), (u64::MAX - 1, u64::MAX - 1)] {
+        let mut overflow = saved(&identity);
+        overflow.folder.revision = Revision::new(revision);
+        overflow.folder.last_added_sequence = last_sequence;
+        let before = overflow.clone();
+        assert_eq!(
+            overflow.append_batch(&[append(2), append(3)], &identity, &owner, now(31000)),
+            Err(MaterialError::VersionOverflow)
+        );
+        assert_eq!(overflow, before);
+    }
+}
+
+#[test]
+fn twenty_batch_preserves_atomic_folder_and_desktop_global_revision() {
+    use crate::{
+        desktop::DesktopFacts,
+        lesson_context::LessonContextSnapshot,
+        profile::{ProfileSelectionReason, ProfileSelectionSnapshot},
+    };
+    let identity = identity();
+    let schedule = schedule_fixture(&identity);
+    let at = now(30000);
+    let context = LessonContextSnapshot::default()
+        .observe(&identity, &schedule, at)
+        .unwrap();
+    let source = context
+        .material_source(&identity, &schedule, class(1), at)
+        .unwrap()
+        .unwrap();
+    let mut state = empty();
+    state.folder.revision = Revision::new(1); // A persisted empty folder is one prior operation.
+    let global_before = Revision::new(
+        identity
+            .revision
+            .get()
+            .max(schedule.revision.get())
+            .max(context.revision.get())
+            + 1,
+    );
+    let mut facts = DesktopFacts {
+        global_revision: global_before,
+        captured_at: at,
+        date_watermark: at.date,
+        clock_rollback: false,
+        identity: identity.clone(),
+        schedule,
+        lesson_context: context,
+        display: Default::default(),
+        profiles: ProfileSelectionSnapshot {
+            reason: ProfileSelectionReason::Missing,
+            ..Default::default()
+        },
+        profile_contents: vec![],
+        homework_offset: 0,
+        homework_eligible_total: 0,
+        homework: vec![],
+        reminder: None,
+        materials_source: Some(source.clone()),
+        materials_page: None,
+    };
+    facts.validate().unwrap();
+    let appends = (1..=MAX_MATERIAL_BATCH_FILES as u64)
+        .map(append)
+        .collect::<Vec<_>>();
+    let batch = state
+        .append_batch(&appends, &identity, &actor(&identity, 2), at)
+        .unwrap();
+    facts.global_revision = global_before.next().unwrap(); // One actual atomic Writer operation.
+    facts.materials_page = Some(batch.published_page(&identity, &source, None).unwrap());
+    eprintln!(
+        "global_before={} global_after={} folder_before={} folder_after={} last_sequence={}",
+        global_before.get(),
+        facts.global_revision.get(),
+        state.folder.revision.get(),
+        batch.folder.revision.get(),
+        batch.folder.last_added_sequence
+    );
+    assert_eq!(facts.validate(), Ok(()));
+    assert_eq!(batch.folder.revision, state.folder.revision.next().unwrap());
+    assert_eq!(batch.folder.last_added_sequence, 20);
+    assert_eq!(
+        facts
+            .materials_page
+            .as_ref()
+            .unwrap()
+            .items
+            .iter()
+            .map(|r| r.added_sequence)
+            .collect::<Vec<_>>(),
+        vec![20, 19, 18, 17, 16]
+    );
+    // The global relationship remains strict, independently of sequence count.
+    facts.materials_page.as_mut().unwrap().folder.revision = facts.global_revision.next().unwrap();
+    assert!(facts.validate().is_err());
+}
+
+#[test]
+fn batch_sequence_bound_preserves_invalid_state_checks_and_atomic_delete_revision() {
+    let identity = identity();
+    let owner = actor(&identity, 2);
+    let appends = (1..=MAX_MATERIAL_BATCH_FILES as u64)
+        .map(append)
+        .collect::<Vec<_>>();
+    let batch = empty()
+        .append_batch(&appends, &identity, &owner, now(30000))
+        .unwrap();
+    assert_eq!(batch.folder.revision, Revision::new(1));
+    batch.validate().unwrap();
+    for mutation in 0..6 {
+        let mut invalid = batch.clone();
+        match mutation {
+            0 => invalid.folder.last_added_sequence = MAX_MATERIAL_BATCH_FILES as u64 + 1,
+            1 => invalid.folder.revision = Revision::default(),
+            2 => invalid.records[1].id = invalid.records[0].id,
+            3 => invalid.records[1].added_sequence = invalid.records[0].added_sequence,
+            4 => invalid.records[1].revision = Revision::new(2),
+            _ => invalid.records[1].folder_id = FolderId::new(999).unwrap(),
+        }
+        assert_eq!(invalid.validate(), Err(MaterialError::InvalidState));
+    }
+    let mut invalid_empty = empty();
+    invalid_empty.folder.revision = Revision::new(2);
+    assert_eq!(invalid_empty.validate(), Err(MaterialError::InvalidState));
+    let deleted = batch
+        .delete(
+            MaterialId::new(1).unwrap(),
+            Revision::new(1),
+            &identity,
+            &owner,
+            now(31000),
+        )
+        .unwrap();
+    assert_eq!(deleted.folder.revision, Revision::new(2));
+    assert_eq!(deleted.folder.last_added_sequence, 20);
+    deleted.validate().unwrap();
+    let appended = deleted
+        .append(&append(21), &identity, &owner, now(32000))
+        .unwrap();
+    assert_eq!(appended.folder.revision, Revision::new(3));
+    assert_eq!(appended.folder.last_added_sequence, 21);
+    appended.validate().unwrap();
+    // A two-member batch needs only one remaining revision; sequence overflow
+    // is independently checked, and a saturated validation bound must not wrap.
+    let mut near_max = saved(&identity);
+    near_max.folder.revision = Revision::new(u64::MAX - 1);
+    let final_revision = near_max
+        .append_batch(&[append(2), append(3)], &identity, &owner, now(32000))
+        .unwrap();
+    assert_eq!(final_revision.folder.revision, Revision::new(u64::MAX));
+    assert_eq!(final_revision.folder.last_added_sequence, 3);
+    final_revision.validate().unwrap();
+}

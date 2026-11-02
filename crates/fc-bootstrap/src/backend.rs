@@ -45,10 +45,10 @@ use fc_ports::{
     prepare_initial_credentials, prepare_password_change, prepare_recovery_rotation, Clock,
     CredentialCrypto, CredentialIdentityRepository, DisplayRepository, DisplayRepositoryError,
     DisplayRequest, IdentityRepositoryError, IdentityRequest, LessonRepository,
-    LessonRepositoryError, LessonRequest, MaterialDeleteRequest, MaterialListRequest,
-    MaterialRepository, MaterialRepositoryError, MonotonicClock, PreparedCredentialChange,
-    PreparedMaterialAppend, RandomSource, RepositoryError, ScheduleRepository,
-    ScheduleRepositoryError, ScheduleRequest,
+    LessonRepositoryError, LessonRequest, MaterialBatchOutcomeRepository, MaterialBatchRepository,
+    MaterialDeleteRequest, MaterialListRequest, MaterialRepository, MaterialRepositoryError,
+    MonotonicClock, PreparedCredentialChange, PreparedMaterialAppend, RandomSource,
+    RepositoryError, ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
 };
 use fc_runtime::{
     authority::{AuthorityReader, AuthorityStore, PreparedAuthority},
@@ -1517,6 +1517,62 @@ impl Backend {
             .guarded(lease, generation, SessionPurpose::Manage)
             .append_material(prepared, &actor, self.clock.as_ref())?)
     }
+    /// Every verified file is published by one Writer transaction. This method
+    /// never turns a batch into a sequence of independently visible appends.
+    pub fn append_material_batch(
+        &mut self,
+        lease: SessionLease,
+        prepared: fc_ports::PreparedMaterialBatchAppend,
+    ) -> Result<Vec<MaterialRecord>> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        Ok(self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .append_material_batch(prepared, &actor, self.clock.as_ref())?)
+    }
+    /// Read the original batch under its exact issued identity and a fresh
+    /// management lease. A current folder read cannot confirm this result.
+    pub fn material_batch_outcome(
+        &self,
+        lease: SessionLease,
+        scope: MaterialScope,
+        issued: fc_ports::command_window::IssuedCommand,
+    ) -> Result<Option<fc_ports::MaterialBatchCommandOutcome>> {
+        use fc_ports::command_window::{CommandFamily, CommandOwner};
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        if issued.family != CommandFamily::Materials
+            || issued.owner != CommandOwner::authenticated(&actor)
+            || self
+                .current_command
+                .is_some_and(|original| original != issued)
+        {
+            return Err(BackendError::Storage(StorageError::CommandNotIssued));
+        }
+        authorize_material_folder(&state, &actor, scope, self.clock.now())
+            .map_err(|e| BackendError::Material(MaterialRepositoryError::Domain(e)))?;
+        self.handle.try_check_command(issued)?.wait()?;
+        let result = self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .with_command_window(issued)
+            .material_batch_outcome(issued.command_id, &actor)?;
+        if result
+            .as_ref()
+            .is_some_and(|result| result.command_id != issued.command_id || result.scope != scope)
+        {
+            return Err(BackendError::Material(
+                MaterialRepositoryError::IdempotencyConflict,
+            ));
+        }
+        let fresh = self.state()?;
+        let (current, current_generation) = self.actor(&fresh, lease, SessionPurpose::Manage)?;
+        if current != actor || current_generation != generation {
+            return Err(BackendError::Material(MaterialRepositoryError::Unavailable));
+        }
+        authorize_material_folder(&fresh, &current, scope, self.clock.now())
+            .map_err(|e| BackendError::Material(MaterialRepositoryError::Domain(e)))?;
+        Ok(result)
+    }
     pub fn delete_material(
         &mut self,
         lease: SessionLease,
@@ -2897,6 +2953,207 @@ mod tests {
         restored.0.session_control().fault();
         assert!(restored.0.desktop_facts(0).is_err());
         restored.0.close().unwrap();
+    }
+    #[test]
+    fn material_batch_original_result_survives_new_lease_and_current_directory_change() {
+        struct PreparedBytes;
+        impl fc_ports::MaterialPreparation for PreparedBytes {
+            type Input = MaterialResource;
+            fn prepare(
+                &mut self,
+                resource: MaterialResource,
+            ) -> std::result::Result<MaterialResource, MaterialRepositoryError> {
+                Ok(resource)
+            }
+        }
+        let directory = Directory::new();
+        let clock = Arc::new(TestClock::new());
+        let mut service = open(&directory, clock);
+        policy_accounts(&mut service.0);
+        let lease = policy_lease(&service.0, 2, TrustedOrigin::Local);
+        let scope = MaterialScope {
+            teacher_id: PrincipalId::new(2).unwrap(),
+            subject_id: SubjectId::new(1).unwrap(),
+        };
+        let issued = service
+            .0
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::Materials,
+                Some(lease),
+                SessionPurpose::Manage,
+            )
+            .unwrap();
+        let proofs = [7101, 7102]
+            .into_iter()
+            .map(|id| {
+                fc_ports::prepare_material_append(
+                    &mut PreparedBytes,
+                    MaterialResource {
+                        version_id: ResourceVersionId::new(id).unwrap(),
+                        sha256: [id as u8; 32],
+                        kind: MaterialKind::Txt,
+                        bytes: 4,
+                    },
+                    fc_ports::MaterialAppendMetadata {
+                        command_id: issued.command_id,
+                        scope,
+                        material_id: MaterialId::new(id).unwrap(),
+                        display_name: "same-name.txt".into(),
+                        allowed_class_ids: vec![ClassId::new(1).unwrap()],
+                    },
+                )
+                .unwrap()
+            })
+            .collect();
+        let batch = fc_ports::prepare_material_batch_append(proofs).unwrap();
+        let before = service.0.global_revision().unwrap();
+        let saved = service
+            .0
+            .begin_command_scope(issued)
+            .unwrap()
+            .append_material_batch(lease, batch)
+            .unwrap();
+        assert_eq!(saved.len(), 2);
+        assert_eq!(saved[0].id.get(), 7101);
+        assert_eq!(saved[1].id.get(), 7102);
+        assert_eq!(saved[1].added_sequence, saved[0].added_sequence + 1);
+        assert_eq!(service.0.global_revision().unwrap(), before.next().unwrap());
+        let page = service
+            .0
+            .materials(
+                lease,
+                MaterialListRequest {
+                    scope,
+                    cursor: None,
+                },
+            )
+            .unwrap();
+        assert_eq!(page.items[0].id, saved[1].id);
+        assert_eq!(page.items[1].id, saved[0].id);
+
+        // Issue a fresh verified same-account lease through the actual session
+        // ledger. This tests history/session boundaries, not password verification.
+        let fresh = policy_lease(&service.0, 2, TrustedOrigin::Local);
+        assert!(service
+            .0
+            .material_batch_outcome(lease, scope, issued)
+            .is_err());
+        let original = service
+            .0
+            .material_batch_outcome(fresh, scope, issued)
+            .unwrap()
+            .unwrap();
+        assert_eq!(original.command_id, issued.command_id);
+        assert_eq!(original.records, saved);
+        service
+            .0
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Materials,
+                Some(fresh),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.delete_material(
+                        fresh,
+                        MaterialDeleteRequest {
+                            command_id: backend.issued_command_id()?,
+                            scope,
+                            material_id: saved[0].id,
+                            expected_material_revision: saved[0].revision,
+                        },
+                    )
+                },
+            )
+            .unwrap();
+        let current = service
+            .0
+            .materials(
+                fresh,
+                MaterialListRequest {
+                    scope,
+                    cursor: None,
+                },
+            )
+            .unwrap();
+        assert_eq!(current.items.len(), 1);
+        assert_eq!(current.items[0].id, saved[1].id);
+        assert_eq!(
+            service
+                .0
+                .material_batch_outcome(fresh, scope, issued)
+                .unwrap(),
+            Some(original)
+        );
+        let mut wrong = issued;
+        wrong.command_id = CommandId::new(7999).unwrap();
+        assert!(service
+            .0
+            .material_batch_outcome(fresh, scope, wrong)
+            .is_err());
+        let foreign = policy_lease(&service.0, 1, TrustedOrigin::Local);
+        assert!(service
+            .0
+            .material_batch_outcome(foreign, scope, issued)
+            .is_err());
+        // Service-boundary fixture only: reserve and activate the real runtime
+        // metadata under the current local admin before issuing a Web lease.
+        // No TLS listener/readiness or browser pairing is claimed by this test.
+        let web_service = service.0.web_service();
+        let runtime = web_service.reserve_runtime(foreign).unwrap();
+        runtime.activate(71).unwrap();
+        let web = policy_lease(&service.0, 2, TrustedOrigin::Web);
+        assert!(service
+            .0
+            .material_batch_outcome(web, scope, issued)
+            .is_err());
+        let web_issued = service
+            .0
+            .issue_web_command(web, fc_ports::command_window::CommandFamily::Materials)
+            .unwrap();
+        let web_file = fc_ports::prepare_material_append(
+            &mut PreparedBytes,
+            MaterialResource {
+                version_id: ResourceVersionId::new(7201).unwrap(),
+                sha256: [9; 32],
+                kind: MaterialKind::Txt,
+                bytes: 4,
+            },
+            fc_ports::MaterialAppendMetadata {
+                command_id: web_issued.command_id,
+                scope,
+                material_id: MaterialId::new(7201).unwrap(),
+                display_name: "web-owned.txt".into(),
+                allowed_class_ids: vec![ClassId::new(1).unwrap()],
+            },
+        )
+        .unwrap();
+        let web_saved = service
+            .0
+            .begin_command_scope(web_issued)
+            .unwrap()
+            .web_material_append_batch(
+                web,
+                fc_ports::prepare_material_batch_append(vec![web_file]).unwrap(),
+            )
+            .unwrap();
+        let other_web_lease = policy_lease(&service.0, 2, TrustedOrigin::Web);
+        assert_eq!(
+            service
+                .0
+                .web_material_batch_outcome_window(
+                    other_web_lease,
+                    scope,
+                    web_issued.command_id,
+                    web_issued.ticket,
+                )
+                .unwrap()
+                .unwrap()
+                .records,
+            web_saved
+        );
+        assert!(runtime.negative_stop());
+        assert!(web_service.settle_runtime_stop());
+        runtime.physical_returned();
+        service.0.close().unwrap();
     }
     #[test]
     fn material_backend_owner_and_guest_permissions_are_fresh_memory_guards() {

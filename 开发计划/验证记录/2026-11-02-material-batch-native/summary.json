@@ -1,0 +1,2280 @@
+{
+  "status": "PASS_FINITE_TEXT_PRESERVATION_FULL_ZIP_REPLAY_AND_CREDENTIAL_SCAN",
+  "qualification": {
+    "host": {
+      "status": "PASS_FINAL_HOST_WORKSPACE_TESTS_AND_STRICT_CHECKS",
+      "pass": 1050,
+      "failed": 0,
+      "ignored": 0,
+      "scope": "Actual complete S4 Host programs. Other source versions and later frontend/format-only binding remain separately attributed by root."
+    },
+    "windows": {
+      "status": "PASS_S4_NATIVE_BATCH_AND_CURRENT_WEB_READER_QUALIFICATION",
+      "scope": "Actual frozen S4 whole Host+Win11 development regression; main three Rust nonfunctional deltas and independently tested frontend parser changes are explicitly bound by root-byte-binding.json. Teacher Web batch upload UI/HTTP, batch deletion, legacy migration and full product acceptance remain incomplete.",
+      "inputsSha256": "519aed2080b359ae899991467cd1474e94e2429253020c4d2ab516791583f7c5",
+      "platform": {
+        "caption": "Microsoft Windows 11 专业版",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      },
+      "host": {
+        "harnesses": 22,
+        "passed": 1050,
+        "failed": 0,
+        "ignored": 0,
+        "filtered": 0
+      },
+      "windowsHarnesses": 22,
+      "passed": 1711,
+      "failed": 0,
+      "ignored": 4,
+      "filtered": 0,
+      "tests": [
+        {
+          "name": "test-00-fc-installer-lifecycle.exe",
+          "sha256": "80b9011dcd5167f9eac60bedb160bad892e90f6a99aed318a38fdbca7dc2c287",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-01-runtime_storage.exe",
+          "sha256": "3bc91f61ba46dc21eb4b4fec8a4d56810a1049e8edadcf09213c6a9ebf1279a1",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-02-verify_web_assets.exe",
+          "sha256": "9389cd1253337d9d1a4e56f153616d2db0247b0bc4ea16947d0de78c6743b63b",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-03-autostart_coordinator.exe",
+          "sha256": "47d3da5228810c3db63abd6e518c01696c476043b7d879907c49f3a1a700214b",
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-04-voice_storage.exe",
+          "sha256": "23b2ff00daacd88ac8ca2f34c64c03544bc4abd22a3414b88a04a71a6f44456b",
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-05-business_storage.exe",
+          "sha256": "7f64684234f83f4ef66be4d7f8711e51cfd68c811ba511f5b622859100e610e8",
+          "passed": 43,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-06-calendar_execution_fence.exe",
+          "sha256": "b9d66e3bf490ca1fe88dee2214deb1ce06aa81a7dd839d1cddecb2dcb474a9bb",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-07-voice_limits_storage.exe",
+          "sha256": "ab45331cdcd557443b0a0165eb7a05c09572aaf39bb5f16ad00a62af27f36392",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-08-fc-bootstrap.exe",
+          "sha256": "eafe8b913a5153ee31389edd6ab3f816ed3298207c7f5fcf41d1eaff6a877602",
+          "passed": 239,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-09-schedule_operations.exe",
+          "sha256": "386a5020088b41cbeb1efc652d345bbf694bafea329d0d01ad1467eaa93908b0",
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-10-fc_bootstrap.exe",
+          "sha256": "fb2f572ecbfff97fc6d9c0a320ad5db9d21bb7961c7d80e29f4303484c883ad0",
+          "passed": 350,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-11-fc_windows.exe",
+          "sha256": "d2d5bd2e297bb007046a974984ad66ef6b49f9ffcdf9f075070873bd012cbb95",
+          "passed": 341,
+          "failed": 0,
+          "ignored": 4,
+          "filtered": 0,
+          "nestedSummariesExcluded": 3
+        },
+        {
+          "name": "test-12-fc_materials.exe",
+          "sha256": "aea31df56d31c83022a78e5e6f5d1f35f938e0e8e2cfdf0e8141e600f70219dc",
+          "passed": 39,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-13-fc_security.exe",
+          "sha256": "480d86554161706e6227c8f320799be82677a25c4093553155a0195dde7fecb0",
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-14-fc_storage.exe",
+          "sha256": "6105aa615de3c76d7749f0d4e1c3db212a56fde36efa347c828bb738fed43754",
+          "passed": 242,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-15-fc_presentation.exe",
+          "sha256": "7ec55af94c28de6d18df802edc70683ae8677550ecdd0779b084191dd0c2a8b2",
+          "passed": 61,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-16-fc_protocol.exe",
+          "sha256": "8cc4b67acf6621b20a8ad6fda5e5bc87cc9ad1a1f622cf519079c4c6dd988541",
+          "passed": 90,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-17-fc_application.exe",
+          "sha256": "fa4a7dc1fcfaac70eda416b64a1d5bb39a47a2cb98e2ccbac3ed4ec6e0fd0503",
+          "passed": 25,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-18-fc_runtime.exe",
+          "sha256": "734a936e1f60bfbc3da8648d061ae4dd69335e526214c1ca358a27bf6f72d91c",
+          "passed": 33,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-19-fc_audio.exe",
+          "sha256": "7146a57c769215a9ca8e6f3a8dc2d5fbccafd946fe2e895843c8c0a665e2ba00",
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-20-fc_ports.exe",
+          "sha256": "7e21ee0655dd53838e46411c39ff651e7c0285acc0ca103c991e9f0201ddfcdf",
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        },
+        {
+          "name": "test-21-fc_domain.exe",
+          "sha256": "81a25639e69f586a333e700baab25c604cb06ae16920f1e1ca5719dcb4703c6a",
+          "passed": 158,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nestedSummariesExcluded": 0
+        }
+      ],
+      "normalGuiSha256": "51cb686d9f19b92d99eaa5a3aac5dd796d96946737ff76c083b091217a307333",
+      "selfCheckExit": 0,
+      "publicDesktopSteps": 20,
+      "publicDesktopStatus": "PASS",
+      "cleanup": "PASS",
+      "strictHost": 0,
+      "strictGnu": 0,
+      "nativePeScope": "x86 normalGUI2/testCUI3 headers6.1 structural only; actual imports/Win7/Win10/Seewo not proved here.",
+      "webSequenceReader": {
+        "tests": 329,
+        "typecheck": 0,
+        "normalBuild": 0,
+        "browser": "NOT_RUN"
+      },
+      "win7ActualOs": "NOT_RUN",
+      "win10ActualOs": "NOT_RUN",
+      "seewoVisible": "NOT_RUN",
+      "wholeGoal": "ACTIVE_INCOMPLETE"
+    },
+    "windowsQualificationSha256": "3074e13e29276d3273ee74324cee30b89d0b198553b0b80c9df9e946422a7dcb",
+    "meaning": "Final S4 qualification only, with later root byte binding/frontend facts independently attributed. S1/S2/S3 remain historical and cannot substitute for this gate or a release."
+  },
+  "preservedHistory": [
+    "S1 original compiler failures",
+    "S2 backend red and complete Host 1046/1 FAIL",
+    "S3 controller143/compiler build-finished success without OS exit observation and recovered Host218",
+    "S3 stale fresh=true old-byte library349/1 FAIL and cache diagnosis",
+    "S3 forced rebuilt fresh=false library BUILD_ONLY, no new S3 Windows run",
+    "desktop batch folder/global revision RED and green fix, real SQLite regression and complete S4 results",
+    "Web sequence RED29/2FAIL then green29/full329/typecheck/build; original wrapper1 retained and qualification corrected without rerun"
+  ],
+  "remaining": [
+    "P3-08 teacher Web aggregate batch workflow",
+    "batch deletion and legacy original/thumbnail migration",
+    "Win7 and Win10 physical runtime NOT_RUN",
+    "visible picker, Seewo/touch/DPI and physical audio acceptance"
+  ],
+  "archive": {
+    "file": "results.zip",
+    "bytes": 831856,
+    "sha256": "5fa129dc3d8eaf9af8ef140b9934a0ae37f20a92de4b0d83e25ec71e1fe665ff",
+    "members": 328,
+    "uncompressedBytes": 3659993,
+    "limits": {
+      "members": 400,
+      "uncompressedBytes": 31457280
+    },
+    "fullReplay": "PASS"
+  },
+  "originals": [
+    {
+      "member": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/after.rs",
+      "original": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/after.rs",
+      "bytes": 24479,
+      "sha256": "4f1cd4be3dd4bf6cc3babafd72c30ff8cb65f7199860d88b95ec043592f01f97"
+    },
+    {
+      "member": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/before.rs",
+      "original": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/before.rs",
+      "bytes": 17116,
+      "sha256": "94392048ada1b8421f7b5df1a7e0ca4f92e8b63e88a6decce2cdf80aba0a2bf1"
+    },
+    {
+      "member": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/complete.patch",
+      "original": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/complete.patch",
+      "bytes": 8256,
+      "sha256": "be3b81e6b532f852e45a0613e2c70fb132511dd65c4099bbb7c39deb2d3474c2"
+    },
+    {
+      "member": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/diff.stderr",
+      "original": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/diff.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/diff.stdout",
+      "original": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/diff.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/fmt.stderr",
+      "original": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/fmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/fmt.stdout",
+      "original": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/fmt.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/freeze-first.json",
+      "original": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/freeze-first.json",
+      "bytes": 1258,
+      "sha256": "d999b6ebc728dd57243c77fe4475ddee4fe243556e0f65ba6e03ee0438988d7e"
+    },
+    {
+      "member": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/report-first.json",
+      "original": "material-batch-desktop-regression-first-071b0fd8d5714624b6b9293e0d08da79/report-first.json",
+      "bytes": 2555,
+      "sha256": "741f28513549c78973c205ce0b2e5719e73a6528fa0e22c8e16053c54810d144"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/complete.patch",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/complete.patch",
+      "bytes": 9957,
+      "sha256": "4d2032c3156f0f6a2ea3f4c2b37203e95ccab8b4416b6421916e5be4d3a0500e"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/desktop-regression.rs",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/desktop-regression.rs",
+      "bytes": 2497,
+      "sha256": "472cad5c98147254636b011bcc0803680067684934202984d357cdea8be38a10"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/fmt.stderr.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/fmt.stdout.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/freeze-first.json",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/freeze-first.json",
+      "bytes": 25262,
+      "sha256": "efa760836a3ab069e686bf3cb44e762607cc40dd8b32bd43e998886f7d778be8"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-0.stderr.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-0.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-0.stdout.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-0.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-1.stderr.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-1.stderr.log",
+      "bytes": 81,
+      "sha256": "f585c71396067a3371a15fd04c27d9f7bd1ab3cdb4f3641d82b9175f15595b6d"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-1.stdout.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-1.stdout.log",
+      "bytes": 1633,
+      "sha256": "4231012136573dde92b9eb249712948014f64fe6471c018ef6e1086504c96b13"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-2.stderr.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-2.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-2.stdout.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-command-2.stdout.log",
+      "bytes": 15975,
+      "sha256": "48e881d22beab7cdcc43784b2ae91872fd228a7e5fad9c94ee9428e5a1ca2bac"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-commands.json",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-commands.json",
+      "bytes": 1011,
+      "sha256": "0344a816a70c43632d826f1026754979aaafb18b2ebd3c9ace3515a777453b2b"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-inputs-after.json",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-inputs-after.json",
+      "bytes": 5315,
+      "sha256": "c07d6bdfdab1565a8766d8eb8cfc47edd7a20de7e8ad2c8e5558953cd870b0a4"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-inputs-before.json",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/green-inputs-before.json",
+      "bytes": 5315,
+      "sha256": "c07d6bdfdab1565a8766d8eb8cfc47edd7a20de7e8ad2c8e5558953cd870b0a4"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/red-command-0.stderr.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/red-command-0.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/red-command-0.stdout.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/red-command-0.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/red-command-1.stderr.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/red-command-1.stderr.log",
+      "bytes": 501,
+      "sha256": "a2726d61e873a7f17e60dd44231ab1e8047179619e91ac0afb3dea03d895a4d6"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/red-command-1.stdout.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/red-command-1.stdout.log",
+      "bytes": 326,
+      "sha256": "38192baf96abf57112af0b41e4ffb249a38ea1afa7afe4d5476ec5f9d0db34d9"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/red-commands.json",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/red-commands.json",
+      "bytes": 846,
+      "sha256": "b02047d75989800b812f187cde2537efbf374396db9c2508fa4a7ad3f7841d50"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/report.json",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/report.json",
+      "bytes": 5646,
+      "sha256": "427650d48960642559949765a4f9ab4f7ba07d90f63c7149fe54f40db5d650a9"
+    },
+    {
+      "member": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/sequence-assumptions.stdout.log",
+      "original": "material-batch-desktop-revision-fix-d6e78f63db7f4a20ae9b5757832ad68c/sequence-assumptions.stdout.log",
+      "bytes": 3640,
+      "sha256": "e646a012c6540faa0882502ff25f7e49ac42ea6ca4b4def8d8787d8192113982"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/cache-diagnosis/clean.stderr.log",
+      "original": "p3-08-backend-fixture-third/cache-diagnosis/clean.stderr.log",
+      "bytes": 39,
+      "sha256": "c6d55a5e41df3a5fd258e43e6bf826d3f66bf945832716a7b965a2e971b91f95"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/cache-diagnosis/clean.stdout.log",
+      "original": "p3-08-backend-fixture-third/cache-diagnosis/clean.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/cache-diagnosis/report.json",
+      "original": "p3-08-backend-fixture-third/cache-diagnosis/report.json",
+      "bytes": 1141,
+      "sha256": "77951474ee9c5c78bca3aacc84507cddddadfdf8ba5cd9c6819193eeca08ad20"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/fixture.patch",
+      "original": "p3-08-backend-fixture-third/fixture.patch",
+      "bytes": 949,
+      "sha256": "a37b12e5aa0b2a9ae909e16f69a1261c281663cf7c4ed40e9a937908b33cdf72"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/gnu-library-rebuilt-fourth/clippy.stderr.log",
+      "original": "p3-08-backend-fixture-third/gnu-library-rebuilt-fourth/clippy.stderr.log",
+      "bytes": 187,
+      "sha256": "fdb68927bb6d79da99228a0f0389a4727c4f3d132e48a7ec108b088916108170"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/gnu-library-rebuilt-fourth/clippy.stdout.log",
+      "original": "p3-08-backend-fixture-third/gnu-library-rebuilt-fourth/clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/gnu-library-rebuilt-fourth/compile.stderr.log",
+      "original": "p3-08-backend-fixture-third/gnu-library-rebuilt-fourth/compile.stderr.log",
+      "bytes": 187,
+      "sha256": "1a2d5a58c1720114e5917c50075313ca0f1f1abdff03ee81bfa5620e2e9ecaa2"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/gnu-library-rebuilt-fourth/compile.stdout.log",
+      "original": "p3-08-backend-fixture-third/gnu-library-rebuilt-fourth/compile.stdout.log",
+      "bytes": 91390,
+      "sha256": "4bb3eca0adccd6998cf2555c36debf189ca263dc37e9c94ffcedde9ba9a794a5"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/gnu-library-rebuilt-fourth/report.json",
+      "original": "p3-08-backend-fixture-third/gnu-library-rebuilt-fourth/report.json",
+      "bytes": 2907,
+      "sha256": "981cc86ffead4963e0ff9cc2a571079de7816e26d590bc9f8885c3c5a1b07437"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/gnu-library/clippy.stderr.log",
+      "original": "p3-08-backend-fixture-third/gnu-library/clippy.stderr.log",
+      "bytes": 187,
+      "sha256": "0adfe48845cb0090349947132777f4e9c10b62e69e94ff4e696db60c98f9b5dc"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/gnu-library/clippy.stdout.log",
+      "original": "p3-08-backend-fixture-third/gnu-library/clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/gnu-library/compile.stderr.log",
+      "original": "p3-08-backend-fixture-third/gnu-library/compile.stderr.log",
+      "bytes": 62,
+      "sha256": "0b5fe2277fd2b29cc111b76604c482f8ec516047dbc0954657203c5614f4e4db"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/gnu-library/compile.stdout.log",
+      "original": "p3-08-backend-fixture-third/gnu-library/compile.stdout.log",
+      "bytes": 91388,
+      "sha256": "fcaffa15d1a804d4829a423a06f1ff6c2500ea3df438f8a2b3cd87fd4c5ed113"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/gnu-library/report.json",
+      "original": "p3-08-backend-fixture-third/gnu-library/report.json",
+      "bytes": 2908,
+      "sha256": "82d6ea0fc93ddba599a2219de7fad43ffae95d5565ab4917579821a5ea1f8aef"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/host-final-qualification.json",
+      "original": "p3-08-backend-fixture-third/host-final-qualification.json",
+      "bytes": 126094,
+      "sha256": "25ee56711fd504076bcd9ad2c711777ffda8eec48b926deda1f58898bfe2f8e2"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/host-library-recovered/report.json",
+      "original": "p3-08-backend-fixture-third/host-library-recovered/report.json",
+      "bytes": 2926,
+      "sha256": "3812eb10cca07ebb0384fd3bebc4ae796d4a7780e2e75388713f9c2777b26002"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/host-library-recovered/tests.stderr.log",
+      "original": "p3-08-backend-fixture-third/host-library-recovered/tests.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/host-library-recovered/tests.stdout.log",
+      "original": "p3-08-backend-fixture-third/host-library-recovered/tests.stdout.log",
+      "bytes": 26677,
+      "sha256": "50bd3c3790a599fa96e7c4b44516ec1b9b7693f9d26d5897944e878f31896436"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/host-library/clippy.stderr.log",
+      "original": "p3-08-backend-fixture-third/host-library/clippy.stderr.log",
+      "bytes": 187,
+      "sha256": "2adf49372064084dd926bec61f62b72d44bdf259ed8222cc1b5aa474df07599c"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/host-library/clippy.stdout.log",
+      "original": "p3-08-backend-fixture-third/host-library/clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/host-library/compile.stderr.log",
+      "original": "p3-08-backend-fixture-third/host-library/compile.stderr.log",
+      "bytes": 187,
+      "sha256": "cc2a2e9e31f1a0192012c2226f62829e8129e8cf2496c003c7dc5c9596b922ca"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/host-library/compile.stdout.log",
+      "original": "p3-08-backend-fixture-third/host-library/compile.stdout.log",
+      "bytes": 76288,
+      "sha256": "b8e18a7c70c843c1a427157c9fa9425b1a9252bea842203f3f07ab18cba4eba8"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/host-library/controller-loss-observation.json",
+      "original": "p3-08-backend-fixture-third/host-library/controller-loss-observation.json",
+      "bytes": 219,
+      "sha256": "34899a720a395b0292aa22fc48198bfbb886702d7554989f0d0049731929d221"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/host-library/report.json",
+      "original": "p3-08-backend-fixture-third/host-library/report.json",
+      "bytes": 760,
+      "sha256": "a66ba7412587d85ec816e131215a4e79990f81834e516e556512ba0af5d85c0e"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/inputs.json",
+      "original": "p3-08-backend-fixture-third/inputs.json",
+      "bytes": 116850,
+      "sha256": "f6b6a67f7bdd180e2bcc9742b76ed11dcfd17708ec69158ec1a7d5cb9c32e052"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/rebuild-library-gnu.py",
+      "original": "p3-08-backend-fixture-third/rebuild-library-gnu.py",
+      "bytes": 4409,
+      "sha256": "3fc894380bc63049249f5875038b1af1de54ee742feed08033cf33cde24c81ad"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/recover-host.py",
+      "original": "p3-08-backend-fixture-third/recover-host.py",
+      "bytes": 3419,
+      "sha256": "7fa02215a96bceb227642ee91ef41fa63fd5b2699f65367e7952fe053a11c7f0"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/run-library.py",
+      "original": "p3-08-backend-fixture-third/run-library.py",
+      "bytes": 4246,
+      "sha256": "89623561c531e83651dd2a55f2327b959180ab9cf77c5a0a4308a0fe41638495"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/windows-library-runtime/operation.json",
+      "original": "p3-08-backend-fixture-third/windows-library-runtime/operation.json",
+      "bytes": 1424,
+      "sha256": "06c7b4c7c011b50b603d5932d1f73a91d9f7261d0e77e884a6dad8f9261f2d03"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/windows-library-runtime/producer.stderr.log",
+      "original": "p3-08-backend-fixture-third/windows-library-runtime/producer.stderr.log",
+      "bytes": 415,
+      "sha256": "873d055eba5ce821ce5c81c47a438a1e54d6b39f3af45dd6b2df116c39b3ba83"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/windows-library-runtime/producer.stdout.log",
+      "original": "p3-08-backend-fixture-third/windows-library-runtime/producer.stdout.log",
+      "bytes": 47,
+      "sha256": "98de5b525a096f476b2c8e8c24a7ed948be4d65461dc168a2fdaac19737862df"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/windows-library-runtime/report.json",
+      "original": "p3-08-backend-fixture-third/windows-library-runtime/report.json",
+      "bytes": 49486,
+      "sha256": "40710380b5c71cb27ebe0a0a3bcecf615411932f3185644c4f20afbec43a28e9"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/windows-library-runtime/run.py",
+      "original": "p3-08-backend-fixture-third/windows-library-runtime/run.py",
+      "bytes": 2045,
+      "sha256": "4481e1aa5009898b33b8dfa14ee624e56f0150df651ae0d6c5baba40e91d4aa8"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/windows-library-runtime/transport-proof.json",
+      "original": "p3-08-backend-fixture-third/windows-library-runtime/transport-proof.json",
+      "bytes": 2125,
+      "sha256": "a864aae1fceefa41e15160166dffeac203ac3e00e577fc65668770a1619868e6"
+    },
+    {
+      "member": "p3-08-backend-fixture-third/windows-library-runtime/transport.jsonl",
+      "original": "p3-08-backend-fixture-third/windows-library-runtime/transport.jsonl",
+      "bytes": 948,
+      "sha256": "8af3ce8306096b7ce29110a3d970dc9c64bc63f52137ec19aeb5d432630a0b18"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/actual-pe-role.json",
+      "original": "p3-08-desktop-revision-fourth/actual-pe-role.json",
+      "bytes": 8348,
+      "sha256": "7aea228076841d84d25a22dc190b97d6e2d9872658629c479a78ce7ba7f28f28"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/clean-workspace-cache.py",
+      "original": "p3-08-desktop-revision-fourth/clean-workspace-cache.py",
+      "bytes": 1401,
+      "sha256": "7b35f60817a3a5dfb46b4f67835e46e68c19f3fe863b4318021af213d7eb19fa"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/early-desktop-storage/report.json",
+      "original": "p3-08-desktop-revision-fourth/early-desktop-storage/report.json",
+      "bytes": 392,
+      "sha256": "99e8ffd2e7a339f0d869a65de957f078e02acdb9a1fc5bd8eb1439ac2be90bfe"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/early-desktop-storage/stderr.log",
+      "original": "p3-08-desktop-revision-fourth/early-desktop-storage/stderr.log",
+      "bytes": 1158,
+      "sha256": "9f2643289afa60d7460bc116fa6e271b0c5240e95b0cccd40ddaf33bba1985c2"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/early-desktop-storage/stdout.log",
+      "original": "p3-08-desktop-revision-fourth/early-desktop-storage/stdout.log",
+      "bytes": 261,
+      "sha256": "7b095be3d0fb2558b075ad53640a44a065f990059b595295fd65bb0aafc50f16"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/gnu-cache-invalidation/report.json",
+      "original": "p3-08-desktop-revision-fourth/gnu-cache-invalidation/report.json",
+      "bytes": 713,
+      "sha256": "0f5c432e33d1ba4c389e3bc09e9328658a3e1f5397d0c73c908bd5458d568f4c"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/gnu-cache-invalidation/stderr.log",
+      "original": "p3-08-desktop-revision-fourth/gnu-cache-invalidation/stderr.log",
+      "bytes": 91,
+      "sha256": "e834f1f55f9114498b1a3fbb17830b92915f7ff72c980ab5c1bf44ac96d3fdbf"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/gnu-cache-invalidation/stdout.log",
+      "original": "p3-08-desktop-revision-fourth/gnu-cache-invalidation/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/gnu-checks/report.json",
+      "original": "p3-08-desktop-revision-fourth/gnu-checks/report.json",
+      "bytes": 495,
+      "sha256": "447729c98bb17617f34b857868930936ed5d332d2d00e4a2251a1fb4664370a0"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/gnu-checks/stderr.log",
+      "original": "p3-08-desktop-revision-fourth/gnu-checks/stderr.log",
+      "bytes": 1547,
+      "sha256": "90669b450795e73819bf6b1ff2e703dadf53e6a265bcea1c30fe052a638fb361"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/gnu-checks/stdout.log",
+      "original": "p3-08-desktop-revision-fourth/gnu-checks/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/gnu-product/build.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/gnu-product/build.stderr.log",
+      "bytes": 62,
+      "sha256": "1d4a459075bb084f679636df54054e09c302d0ad0d545b52395925946c48d277"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/gnu-product/build.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/gnu-product/build.stdout.log",
+      "bytes": 92407,
+      "sha256": "010b2ff9f3c34e452780b26e18bfe557c7a7e3bd17f83528ead8b61d9017fcb4"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/gnu-product/report.json",
+      "original": "p3-08-desktop-revision-fourth/gnu-product/report.json",
+      "bytes": 2173,
+      "sha256": "c64ab0fe003267385560f8a5d2874caad274a1d45a28d54614201604a158f041"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/gnu-product/run.py",
+      "original": "p3-08-desktop-revision-fourth/gnu-product/run.py",
+      "bytes": 2588,
+      "sha256": "eb83754ba7e88f5cc7d1622382a565682452412e0e257740b0894390f6991d6e"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-cache-invalidation/report.json",
+      "original": "p3-08-desktop-revision-fourth/host-cache-invalidation/report.json",
+      "bytes": 671,
+      "sha256": "345d3a65fa16f9b739e81561d7e7b452ee82a167ff4681e4bbc8dd7c21e1226c"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-cache-invalidation/stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-cache-invalidation/stderr.log",
+      "bytes": 91,
+      "sha256": "ee7949e8360a45331c86279549082ee11f6023883d2724ea6308f66f877025c8"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-cache-invalidation/stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-cache-invalidation/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/clippy.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/clippy.stderr.log",
+      "bytes": 1547,
+      "sha256": "c0eb52b62f5a72c7a360994701f418109ec53835aa6691a2af7c95e20b7678c6"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/clippy.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/compile.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/compile.stderr.log",
+      "bytes": 1547,
+      "sha256": "6a1574f983508490ff6b544320f1f5e7e9ca14ccc4ebb6f02a47c099c5a51d50"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/compile.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/compile.stdout.log",
+      "bytes": 98534,
+      "sha256": "9d0567559fa6b8ef8528cc81e4bd219ab78cf42b2dd69e5d3e48f7dff40448cb"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-00.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-00.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-00.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-00.stdout.log",
+      "bytes": 15975,
+      "sha256": "86ceb85a786dfbf59ce661baa5b4557ceda2c76899b72ef5dcafa940fe0bc750"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-01.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-01.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-01.stdout.log",
+      "bytes": 378,
+      "sha256": "41c6cd51379293e56466aaa3a0da15a986f7fd0a56de12b6494c67a14151ed15"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-02.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-02.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-02.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-02.stdout.log",
+      "bytes": 1127,
+      "sha256": "a0279ca7c68d7265253fb413a9f86dce2727f915db079d36f6f4d0a05515bdda"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-03.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-03.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-03.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-03.stdout.log",
+      "bytes": 26677,
+      "sha256": "b3e3d3aa5ba6dc088a55785796e255c098199ebe0aad9da287908383763b3368"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-04.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-04.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-04.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-04.stdout.log",
+      "bytes": 4138,
+      "sha256": "353dcde36d3beeaff720f8080c5138022f165ca6afb7e8c2cf4e7d60c524f06b"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-05.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-05.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-05.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-05.stdout.log",
+      "bytes": 113,
+      "sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-06.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-06.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-06.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-06.stdout.log",
+      "bytes": 207,
+      "sha256": "b041be4f5168637e3a4180af96e517d15f383b4e0c375713329ce013f915752a"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-07.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-07.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-07.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-07.stdout.log",
+      "bytes": 113,
+      "sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-08.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-08.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-08.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-08.stdout.log",
+      "bytes": 954,
+      "sha256": "eae3bf0d8703ae38f3f05ebb386fbc86fed0225cc1855cce45b9e87779dd62d7"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-09.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-09.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-09.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-09.stdout.log",
+      "bytes": 451,
+      "sha256": "19b43fb418c28e6356236e3d1fb22660157c0c61273451d2166a6d8aab8047eb"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-10.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-10.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-10.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-10.stdout.log",
+      "bytes": 439,
+      "sha256": "c1ea2e18b1d7f4a2692f794fa51e682593902255a9d5ce57c1fdce7a3fa78aca"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-11.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-11.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-11.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-11.stdout.log",
+      "bytes": 585,
+      "sha256": "f18373f2431791b04d1d96afb492ae2c12eec56b39f8fe5a614bbde71f4d8d1c"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-12.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-12.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-12.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-12.stdout.log",
+      "bytes": 5770,
+      "sha256": "c9689ab7d6719bb0383ecb494d0e26cb48f0406c7ed6f23b51dddd25b88fc91e"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-13.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-13.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-13.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-13.stdout.log",
+      "bytes": 5974,
+      "sha256": "0ea64c8d43b54e8580f178e5bf928cdb035dc969d7cd55283f46a75faba00ad6"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-14.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-14.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-14.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-14.stdout.log",
+      "bytes": 3110,
+      "sha256": "2ce0033570043d9e8e87b21803dea901ccea8b73ef86d56d8938afbaa3cfc061"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-15.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-15.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-15.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-15.stdout.log",
+      "bytes": 3685,
+      "sha256": "16589edc40f7818f2dbdc41112bd3f0e5ecf3b3991e020cf2618c34494890d05"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-16.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-16.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-16.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-16.stdout.log",
+      "bytes": 1653,
+      "sha256": "8b0b621721f8818c5cfc0b12f6ae336154c7bf344914a69578de7ec0bc37c3d0"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-17.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-17.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-17.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-17.stdout.log",
+      "bytes": 2468,
+      "sha256": "767eac3dd0f008c4485f97c1ca6501c65cc0a2539365a02bb40eced1957a455d"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-18.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-18.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-18.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-18.stdout.log",
+      "bytes": 2234,
+      "sha256": "bc375535a294f418c1780d1606f1fa42b7819b0ea98138f5c831fca2a8677e9a"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-19.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-19.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-19.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-19.stdout.log",
+      "bytes": 8675,
+      "sha256": "652fc1b6e508dfcaf21e2177e4f71591e93a929d001505b7346a1299dd1afa17"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-20.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-20.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-20.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-20.stdout.log",
+      "bytes": 1198,
+      "sha256": "5bc20ea2156473a1f9e8046b14bb0a3af727332da6f1cbe6c974cf62cb1fd599"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-21.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-21.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/harness-21.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/harness-21.stdout.log",
+      "bytes": 27323,
+      "sha256": "4889b5aac6ef9a5b3be19c8296dfd3b9ae8caea1623ab0bf012309dfbcd59355"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/report.json",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/report.json",
+      "bytes": 168049,
+      "sha256": "0caee76764c0188df5a09896e66ffca1a33593a13deeda448070a3cad87a037d"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/run.py",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/run.py",
+      "bytes": 4346,
+      "sha256": "610872ada0425f6ff79ec04de38ddff30918812d3c6d3e94b1a51da60e6274ec"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/self-check.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/self-check.stderr.log",
+      "bytes": 182,
+      "sha256": "9270ec55a054e827ab6354b1408f0462c714f3f7677e10ef2e8f5dc93a45cbf4"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/host-runtime/self-check.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/host-runtime/self-check.stdout.log",
+      "bytes": 150,
+      "sha256": "fe12a4f345dae24afefe2f3dceb90dbb6ea92c841feee0bc6113d674e8ffd9d3"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/inputs.json",
+      "original": "p3-08-desktop-revision-fourth/inputs.json",
+      "bytes": 117051,
+      "sha256": "519aed2080b359ae899991467cd1474e94e2429253020c4d2ab516791583f7c5"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/main-format-normalization.json",
+      "original": "p3-08-desktop-revision-fourth/main-format-normalization.json",
+      "bytes": 995,
+      "sha256": "78f0583c05031c86ff6877af7c3a9268e30186f4a26a3d6f9512b7ee860667fe"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/main-static-checks/architecture.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/main-static-checks/architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/main-static-checks/architecture.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/main-static-checks/architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/main-static-checks/diff.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/main-static-checks/diff.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/main-static-checks/diff.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/main-static-checks/diff.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/main-static-checks/fmt.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/main-static-checks/fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/main-static-checks/fmt.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/main-static-checks/fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/main-static-checks/report.json",
+      "original": "p3-08-desktop-revision-fourth/main-static-checks/report.json",
+      "bytes": 741,
+      "sha256": "6fda3853cdeff2ae6795aba8a54c8d527616a3e0d11c5876c2ecb518a77107cd"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/run-checks.py",
+      "original": "p3-08-desktop-revision-fourth/run-checks.py",
+      "bytes": 1751,
+      "sha256": "097564db6e2423710b6df50191fa3e629203bb1bc2199d9d52178ca487c40683"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/run-gnu-all.py",
+      "original": "p3-08-desktop-revision-fourth/run-gnu-all.py",
+      "bytes": 366,
+      "sha256": "540e1435f78cacce80a404c39519d36f3f35e175c0c154f84620d319f8966b27"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/run-host-first.py",
+      "original": "p3-08-desktop-revision-fourth/run-host-first.py",
+      "bytes": 2148,
+      "sha256": "02c8e20d34e12d63e7c9101483dbe252d64d828cdfa4c57b4c7de8dad9ca319b"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/source.patch",
+      "original": "p3-08-desktop-revision-fourth/source.patch",
+      "bytes": 96113,
+      "sha256": "713a3a40a715917676ea4752f702c29de00996d767934148bfce860a5c2b6f2c"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/source/crates/fc-bootstrap/src/application/material_batch_tests.rs",
+      "original": "p3-08-desktop-revision-fourth/source/crates/fc-bootstrap/src/application/material_batch_tests.rs",
+      "bytes": 13592,
+      "sha256": "f851e444ac737421ae186f7d7e3023624d88e690c8c4e29436833e9f4239aabd"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/source/crates/fc-ports/src/material_batch.rs",
+      "original": "p3-08-desktop-revision-fourth/source/crates/fc-ports/src/material_batch.rs",
+      "bytes": 12315,
+      "sha256": "94f436d491279aa4bce58687d4223cf65b5d282c02c0f47a719f1e3bbdf47ded"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/source/crates/fc-storage/src/business/materials_batch.rs",
+      "original": "p3-08-desktop-revision-fourth/source/crates/fc-storage/src/business/materials_batch.rs",
+      "bytes": 16175,
+      "sha256": "8521da9cf631cc5a4608f130f49f1b04f7c8d5a590eae15f6eecd7f979ea01b1"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/source/crates/fc-storage/src/business/materials_batch_tests.rs",
+      "original": "p3-08-desktop-revision-fourth/source/crates/fc-storage/src/business/materials_batch_tests.rs",
+      "bytes": 24479,
+      "sha256": "4f1cd4be3dd4bf6cc3babafd72c30ff8cb65f7199860d88b95ec043592f01f97"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-all/operation.json",
+      "original": "p3-08-desktop-revision-fourth/windows-all/operation.json",
+      "bytes": 1424,
+      "sha256": "a85172399c22b4ca687ace610fbed2e49ac701d4d57aef9b4b5f81aad407c782"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-all/producer.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/windows-all/producer.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-all/producer.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/windows-all/producer.stdout.log",
+      "bytes": 798,
+      "sha256": "339e1ba8f29ce407b86dd84cb0f8f25199b09613ae31755d0e5215295a98e011"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-all/report.json",
+      "original": "p3-08-desktop-revision-fourth/windows-all/report.json",
+      "bytes": 230746,
+      "sha256": "d0196f7e184529263a0e5e18fbb7e11cffc3b2ea23f6c6945d2ff586862ec9df"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-all/run.py",
+      "original": "p3-08-desktop-revision-fourth/windows-all/run.py",
+      "bytes": 3291,
+      "sha256": "7982292b4588e36d5d6a5bf834592d537fad299f05b1bffb26b7b39edeb9df36"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-all/transport-proof.json",
+      "original": "p3-08-desktop-revision-fourth/windows-all/transport-proof.json",
+      "bytes": 41313,
+      "sha256": "bd34e552d062bccd43501fd364d2bb0d663bb1d1765daeafa2520cb691960989"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-all/transport.jsonl",
+      "original": "p3-08-desktop-revision-fourth/windows-all/transport.jsonl",
+      "bytes": 20657,
+      "sha256": "7c8e3d9a73ef177d4ec08d14fda170822c8d282ecd65f0e5a0a1ff74b4ba7eba"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-final-qualification.json",
+      "original": "p3-08-desktop-revision-fourth/windows-final-qualification.json",
+      "bytes": 7086,
+      "sha256": "3074e13e29276d3273ee74324cee30b89d0b198553b0b80c9df9e946422a7dcb"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-test-build/compile.stderr.log",
+      "original": "p3-08-desktop-revision-fourth/windows-test-build/compile.stderr.log",
+      "bytes": 1600,
+      "sha256": "a2afe0e977531c27ae68e7a9fe426e3c9d114e8d5cc96dc811546939eb9e7827"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-test-build/compile.stdout.log",
+      "original": "p3-08-desktop-revision-fourth/windows-test-build/compile.stdout.log",
+      "bytes": 114737,
+      "sha256": "6f89024d7905f995d1b14d5c9736727726b33af974b190cb239509ee5dedd833"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-test-build/report.json",
+      "original": "p3-08-desktop-revision-fourth/windows-test-build/report.json",
+      "bytes": 37235,
+      "sha256": "f280197c3e6dddd4501a079f5003328c434d4115b5a7eae4499262c8e0444a9f"
+    },
+    {
+      "member": "p3-08-desktop-revision-fourth/windows-test-build/run.py",
+      "original": "p3-08-desktop-revision-fourth/windows-test-build/run.py",
+      "bytes": 2682,
+      "sha256": "2dd62b1a95c0f780800c956ad5598b63b32d7876ad7981b416f4116d86eacd6c"
+    },
+    {
+      "member": "p3-08-native-batch-first/gnu-checks/report.json",
+      "original": "p3-08-native-batch-first/gnu-checks/report.json",
+      "bytes": 514,
+      "sha256": "290943107e53240bb32261f95f40136f3d91ce19455fc322d0e79f65cb115943"
+    },
+    {
+      "member": "p3-08-native-batch-first/gnu-checks/stderr.log",
+      "original": "p3-08-native-batch-first/gnu-checks/stderr.log",
+      "bytes": 4310,
+      "sha256": "8e2d1e5b8f9f21870e873ab80fa83f398ed368bfb37bedcb1b5625c7c3f2d0b7"
+    },
+    {
+      "member": "p3-08-native-batch-first/gnu-checks/stdout.log",
+      "original": "p3-08-native-batch-first/gnu-checks/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-first/host-checks/report.json",
+      "original": "p3-08-native-batch-first/host-checks/report.json",
+      "bytes": 471,
+      "sha256": "52afffcd16c3ca9c505afee4d87bd10c17486f10a7b7b54efb9371ebabb5f4b3"
+    },
+    {
+      "member": "p3-08-native-batch-first/host-checks/stderr.log",
+      "original": "p3-08-native-batch-first/host-checks/stderr.log",
+      "bytes": 5634,
+      "sha256": "a9994283f87ed75776e111d8d561337b42cc2b576463ce706fb938b1ee9853fb"
+    },
+    {
+      "member": "p3-08-native-batch-first/host-checks/stdout.log",
+      "original": "p3-08-native-batch-first/host-checks/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-first/host-runtime/run.py",
+      "original": "p3-08-native-batch-first/host-runtime/run.py",
+      "bytes": 4380,
+      "sha256": "b7f623737b32181525336b672b0cb9c3ed38b8076b117aa52328f6e6e1d5a4db"
+    },
+    {
+      "member": "p3-08-native-batch-first/inputs.json",
+      "original": "p3-08-native-batch-first/inputs.json",
+      "bytes": 116711,
+      "sha256": "e761754e28d18ec0a9a73d5fe776e8404edbd4a55eabb7e0cd4d041fd9cc7548"
+    },
+    {
+      "member": "p3-08-native-batch-first/run-checks.py",
+      "original": "p3-08-native-batch-first/run-checks.py",
+      "bytes": 1719,
+      "sha256": "5c91272dd78cb8a647b41f0a34174a1b847f480468af547cd8cf8fed930d166a"
+    },
+    {
+      "member": "p3-08-native-batch-first/source.patch",
+      "original": "p3-08-native-batch-first/source.patch",
+      "bytes": 81046,
+      "sha256": "3c8cb366e678688d99206f375fa442091dbafc4f11644f2c4460d7364a3be30a"
+    },
+    {
+      "member": "p3-08-native-batch-first/source/crates/fc-bootstrap/src/application/material_batch_tests.rs",
+      "original": "p3-08-native-batch-first/source/crates/fc-bootstrap/src/application/material_batch_tests.rs",
+      "bytes": 7636,
+      "sha256": "6db6bf88b79e3d06fff3193c04f655fb23893eb88988d96eba966f8cd5fdea01"
+    },
+    {
+      "member": "p3-08-native-batch-first/source/crates/fc-ports/src/material_batch.rs",
+      "original": "p3-08-native-batch-first/source/crates/fc-ports/src/material_batch.rs",
+      "bytes": 12315,
+      "sha256": "94f436d491279aa4bce58687d4223cf65b5d282c02c0f47a719f1e3bbdf47ded"
+    },
+    {
+      "member": "p3-08-native-batch-first/source/crates/fc-storage/src/business/materials_batch.rs",
+      "original": "p3-08-native-batch-first/source/crates/fc-storage/src/business/materials_batch.rs",
+      "bytes": 16175,
+      "sha256": "8521da9cf631cc5a4608f130f49f1b04f7c8d5a590eae15f6eecd7f979ea01b1"
+    },
+    {
+      "member": "p3-08-native-batch-first/source/crates/fc-storage/src/business/materials_batch_tests.rs",
+      "original": "p3-08-native-batch-first/source/crates/fc-storage/src/business/materials_batch_tests.rs",
+      "bytes": 17095,
+      "sha256": "7ea4b53ad917ca169d1e31d3483b9e3a3c01834134a73da2dc569fadf7dc2742"
+    },
+    {
+      "member": "p3-08-native-batch-first/windows-test-build/run.py",
+      "original": "p3-08-native-batch-first/windows-test-build/run.py",
+      "bytes": 2717,
+      "sha256": "2a50e6600aacd3d6181a537d7a720c95acb3cf2bb0ce47800ee92a51798ebc4a"
+    },
+    {
+      "member": "p3-08-native-batch-second/early-backend/report.json",
+      "original": "p3-08-native-batch-second/early-backend/report.json",
+      "bytes": 1807,
+      "sha256": "37e20cdc0411287ac606cba6e76848aded9e70a8e01db4b342aa89822786e27e"
+    },
+    {
+      "member": "p3-08-native-batch-second/early-backend/stderr.log",
+      "original": "p3-08-native-batch-second/early-backend/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/early-backend/stdout.log",
+      "original": "p3-08-native-batch-second/early-backend/stdout.log",
+      "bytes": 773,
+      "sha256": "13a6005003746488072196a3c962263f6b8ceef3dd7c292e2ff4088f82c292da"
+    },
+    {
+      "member": "p3-08-native-batch-second/early-storage/report.json",
+      "original": "p3-08-native-batch-second/early-storage/report.json",
+      "bytes": 1662,
+      "sha256": "cc0952c15c7ff07cf7f95e1281df65f19d4c653f486cbb3916177b23af558b59"
+    },
+    {
+      "member": "p3-08-native-batch-second/early-storage/stderr.log",
+      "original": "p3-08-native-batch-second/early-storage/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/early-storage/stdout.log",
+      "original": "p3-08-native-batch-second/early-storage/stdout.log",
+      "bytes": 1184,
+      "sha256": "46523364dd584c1e12e864a065fcf187ee42f2d8b60f4e0ce37d74ce96664c27"
+    },
+    {
+      "member": "p3-08-native-batch-second/gnu-checks/report.json",
+      "original": "p3-08-native-batch-second/gnu-checks/report.json",
+      "bytes": 496,
+      "sha256": "783be2246fa19ea753ecbcef288e19c574ce01a50e84135eb241d8f91c7bdeda"
+    },
+    {
+      "member": "p3-08-native-batch-second/gnu-checks/stderr.log",
+      "original": "p3-08-native-batch-second/gnu-checks/stderr.log",
+      "bytes": 1603,
+      "sha256": "fbfb4f8ee3b7914812a21014f23db2e96cc1c7c6dc3210e8196cba51e4b90af6"
+    },
+    {
+      "member": "p3-08-native-batch-second/gnu-checks/stdout.log",
+      "original": "p3-08-native-batch-second/gnu-checks/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/gnu-product/actual-pe-role.json",
+      "original": "p3-08-native-batch-second/gnu-product/actual-pe-role.json",
+      "bytes": 252,
+      "sha256": "b53d13f08de4cded12569bd302e5973591c91d3b8c20554c1362f5d786f647d0"
+    },
+    {
+      "member": "p3-08-native-batch-second/gnu-product/build.stderr.log",
+      "original": "p3-08-native-batch-second/gnu-product/build.stderr.log",
+      "bytes": 3203,
+      "sha256": "991a5b603aa601ce924c5110a913fc9817a900bbc08fa6788876b93f6d6cb02a"
+    },
+    {
+      "member": "p3-08-native-batch-second/gnu-product/build.stdout.log",
+      "original": "p3-08-native-batch-second/gnu-product/build.stdout.log",
+      "bytes": 92292,
+      "sha256": "12fde6ee237311c5156857048eb2ae8f3703cc4700994708d50f1eea7e111a68"
+    },
+    {
+      "member": "p3-08-native-batch-second/gnu-product/report.json",
+      "original": "p3-08-native-batch-second/gnu-product/report.json",
+      "bytes": 2158,
+      "sha256": "6bac2a44ae0dd478d42f6d0a824d9431ca7661320cdee81716e6e436ff7f1851"
+    },
+    {
+      "member": "p3-08-native-batch-second/gnu-product/run.py",
+      "original": "p3-08-native-batch-second/gnu-product/run.py",
+      "bytes": 2666,
+      "sha256": "0166648f8d9c9846390c0ccf231b1c81fadcb136b9d019bdd6d40295bd349f15"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-checks/report.json",
+      "original": "p3-08-native-batch-second/host-checks/report.json",
+      "bytes": 452,
+      "sha256": "81701069838647356be4bc61ed417c4e6868fa26f8fd520c141e2447afad37bf"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-checks/stderr.log",
+      "original": "p3-08-native-batch-second/host-checks/stderr.log",
+      "bytes": 407,
+      "sha256": "fa15ed2f5a7f83513a08b410ee4e39e7519e3d2bb379efe7addfafb3730ce12c"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-checks/stdout.log",
+      "original": "p3-08-native-batch-second/host-checks/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/clippy.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/clippy.stderr.log",
+      "bytes": 62,
+      "sha256": "92e06e4842c2fa9a2139c34892b15d58451290c4ed4fe3a60c23f8f551bc9ec1"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/clippy.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/compile.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/compile.stderr.log",
+      "bytes": 2886,
+      "sha256": "07582efe1aa5dde6617bc1f6dfd67f5a3f424e7b8dd552646865c3a912fd6934"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/compile.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/compile.stdout.log",
+      "bytes": 98132,
+      "sha256": "cc810dde5586527840899d3c8ff74cc6ea578689b7f787a81245658a01ad47a7"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-00.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-00.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-00.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-00.stdout.log",
+      "bytes": 113,
+      "sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-01.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-01.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-01.stdout.log",
+      "bytes": 5770,
+      "sha256": "e2a699f527d62654e138a05d0cec4a245c41b3e6a5beaa54c6659a03ec024327"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-02.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-02.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-02.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-02.stdout.log",
+      "bytes": 378,
+      "sha256": "8aa683d6a65acd3ce89109e1af9c24c9951a1db2ad34a20c7fe6a220f041153e"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-03.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-03.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-03.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-03.stdout.log",
+      "bytes": 113,
+      "sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-04.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-04.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-04.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-04.stdout.log",
+      "bytes": 826,
+      "sha256": "b41183f731d13611d684cd5dc3228066021f788884b7c513a7af55cc9099fb30"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-05.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-05.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-05.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-05.stdout.log",
+      "bytes": 207,
+      "sha256": "b041be4f5168637e3a4180af96e517d15f383b4e0c375713329ce013f915752a"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-06.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-06.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-06.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-06.stdout.log",
+      "bytes": 4138,
+      "sha256": "943f9ff96500cbca9bb5b3c3e0f934555dc2a2bee8ec76d9b534e37d873fa225"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-07.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-07.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-07.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-07.stdout.log",
+      "bytes": 439,
+      "sha256": "ac9e745be63db4527bb5437f1ac4dba699f85b613ffee246aad8e437b7a24ab3"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-08.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-08.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-08.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-08.stdout.log",
+      "bytes": 585,
+      "sha256": "7475a9c72a68bb3b4de6c303a240c6b87dcb73a390cbaba64c0f0e1d72f0ae6d"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-09.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-09.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-09.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-09.stdout.log",
+      "bytes": 27152,
+      "sha256": "8f4d5b14d34ed72b88c95bb1a20c09e82b2a2208e9922425233b62f13ee93268"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-10.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-10.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-10.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-10.stdout.log",
+      "bytes": 1127,
+      "sha256": "cfc3e131c02d082cdf09c4f8006147c573a2584eb66c5ec11788b2d3920b7ef7"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-11.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-11.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-11.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-11.stdout.log",
+      "bytes": 451,
+      "sha256": "e5b4e3c6438f5d1d0f73ca6540d9a3a177dc023b00b5543f6a1dbc24805da3b4"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-12.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-12.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-12.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-12.stdout.log",
+      "bytes": 1653,
+      "sha256": "c5bc8ec3a03fc95e0dd9dc865ae68b1f9646a81362dc046ec23e27984c9e9cbe"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-13.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-13.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-13.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-13.stdout.log",
+      "bytes": 3685,
+      "sha256": "5c80b3de867176b092667ebf3435eeba29d702aa2049354510a2c77a6ad4de3e"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-14.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-14.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-14.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-14.stdout.log",
+      "bytes": 5974,
+      "sha256": "44722160922c4b67b16f682ea40e842297ff4a091db90c4447543c08f667d7c4"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-15.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-15.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-15.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-15.stdout.log",
+      "bytes": 2234,
+      "sha256": "beebc048daad7d9ff02edb147e28b6107fa2f8dd7ec76143d8d49ff78a4e6ba4"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-16.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-16.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-16.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-16.stdout.log",
+      "bytes": 8675,
+      "sha256": "a96dd3663b42d37332e63b2476321e06ed5b55b305e71eceea6b75a68c09ae5f"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-17.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-17.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-17.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-17.stdout.log",
+      "bytes": 1198,
+      "sha256": "15f1b03342067ee22950fe2a48c635011446d3de6a89d0ae82883fa2b824742c"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-18.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-18.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-18.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-18.stdout.log",
+      "bytes": 3110,
+      "sha256": "2e6451006ab126466ef9efcea95fe5d698cf8855bab09b42f4dab7819130f3ed"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-19.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-19.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-19.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-19.stdout.log",
+      "bytes": 2468,
+      "sha256": "74794c047d13303a22bb4d59c18acbdfe5498dbb0ae59f94b5f82651e97bbbcd"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-20.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-20.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-20.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-20.stdout.log",
+      "bytes": 27176,
+      "sha256": "8f6f1e55f9e3d9dfe7222e2439b6f93e0b25a659eb556cdde397f6beceff2d4d"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-21.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-21.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/harness-21.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/harness-21.stdout.log",
+      "bytes": 15771,
+      "sha256": "c01ae31fd9d9daef9beac43243b0c9501d44422a3efbdc84bc5d4c86c8a40b8c"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/report.json",
+      "original": "p3-08-native-batch-second/host-runtime/report.json",
+      "bytes": 167390,
+      "sha256": "deb12e2813e8b8554606555d979e37b3e7043170e7c55163996b62fcecd07e66"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/run.py",
+      "original": "p3-08-native-batch-second/host-runtime/run.py",
+      "bytes": 4412,
+      "sha256": "b94fc03d35008204d2d482fdb5ca6e2a050f932e2582e95ab3a6cebf5cbbde61"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/self-check.stderr.log",
+      "original": "p3-08-native-batch-second/host-runtime/self-check.stderr.log",
+      "bytes": 182,
+      "sha256": "55464e8bf209e57e8b608be336d5028eeda24db79f03daa06814abad5302ac73"
+    },
+    {
+      "member": "p3-08-native-batch-second/host-runtime/self-check.stdout.log",
+      "original": "p3-08-native-batch-second/host-runtime/self-check.stdout.log",
+      "bytes": 150,
+      "sha256": "fe12a4f345dae24afefe2f3dceb90dbb6ea92c841feee0bc6113d674e8ffd9d3"
+    },
+    {
+      "member": "p3-08-native-batch-second/inputs.json",
+      "original": "p3-08-native-batch-second/inputs.json",
+      "bytes": 116797,
+      "sha256": "34d9ad6e9b43cb57a3228b253f26f1d724edbc155d942078f985003903b8e38a"
+    },
+    {
+      "member": "p3-08-native-batch-second/native-runtime-early/operation.json",
+      "original": "p3-08-native-batch-second/native-runtime-early/operation.json",
+      "bytes": 1312,
+      "sha256": "71dc5ebf24779dee9fe7ff23acc58060c1b5ecb7030368ddde8218cf51d4334d"
+    },
+    {
+      "member": "p3-08-native-batch-second/native-runtime-early/producer.stderr.log",
+      "original": "p3-08-native-batch-second/native-runtime-early/producer.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/native-runtime-early/producer.stdout.log",
+      "original": "p3-08-native-batch-second/native-runtime-early/producer.stdout.log",
+      "bytes": 125,
+      "sha256": "34f4259103672fe9b7f4d9c89de7aefb816855748e6ceb13805f4ca9c553ac2a"
+    },
+    {
+      "member": "p3-08-native-batch-second/native-runtime-early/qualification.json",
+      "original": "p3-08-native-batch-second/native-runtime-early/qualification.json",
+      "bytes": 1214,
+      "sha256": "dfbe842612b06d73afcd7864feb3a33a79de181b9b550c4c6a7a6d3b10582fa9"
+    },
+    {
+      "member": "p3-08-native-batch-second/native-runtime-early/report.json",
+      "original": "p3-08-native-batch-second/native-runtime-early/report.json",
+      "bytes": 33487,
+      "sha256": "8e45909b042febd15ab3180120a5bddb782f0c6384d97e842b6c4915eabcf55e"
+    },
+    {
+      "member": "p3-08-native-batch-second/native-runtime-early/run.py",
+      "original": "p3-08-native-batch-second/native-runtime-early/run.py",
+      "bytes": 1925,
+      "sha256": "ea5d0704ca37b9ee38510b1393ae03415293af2cd26ad52b91035796966aee01"
+    },
+    {
+      "member": "p3-08-native-batch-second/native-runtime-early/transport-proof.json",
+      "original": "p3-08-native-batch-second/native-runtime-early/transport-proof.json",
+      "bytes": 1641,
+      "sha256": "a6e0838453177938f4be28344aaa298bc4c8ab4853d9bae951e82cc16e7db3a3"
+    },
+    {
+      "member": "p3-08-native-batch-second/native-runtime-early/transport.jsonl",
+      "original": "p3-08-native-batch-second/native-runtime-early/transport.jsonl",
+      "bytes": 933,
+      "sha256": "1b6b9862abdb44814e8a07bbf0c180264d7ca638ee52033e303489a69bbe0fb9"
+    },
+    {
+      "member": "p3-08-native-batch-second/public-desktop/operation.json",
+      "original": "p3-08-native-batch-second/public-desktop/operation.json",
+      "bytes": 1093,
+      "sha256": "e069170832c236fb190d1de2911506ce579626a78ff95c91f4d63024fe58d235"
+    },
+    {
+      "member": "p3-08-native-batch-second/public-desktop/producer.stderr.log",
+      "original": "p3-08-native-batch-second/public-desktop/producer.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/public-desktop/producer.stdout.log",
+      "original": "p3-08-native-batch-second/public-desktop/producer.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+    },
+    {
+      "member": "p3-08-native-batch-second/public-desktop/report.json",
+      "original": "p3-08-native-batch-second/public-desktop/report.json",
+      "bytes": 8523,
+      "sha256": "ccd3e4ab36e03bcc1a7af4fbf64c4d2e9230d324dea0ccb539e03c69258b3682"
+    },
+    {
+      "member": "p3-08-native-batch-second/public-desktop/run.py",
+      "original": "p3-08-native-batch-second/public-desktop/run.py",
+      "bytes": 1798,
+      "sha256": "15ce354c04a03bfd120c67f28ca7072a31742f3b36b7aada5796dc887f7771d9"
+    },
+    {
+      "member": "p3-08-native-batch-second/run-checks.py",
+      "original": "p3-08-native-batch-second/run-checks.py",
+      "bytes": 1751,
+      "sha256": "097564db6e2423710b6df50191fa3e629203bb1bc2199d9d52178ca487c40683"
+    },
+    {
+      "member": "p3-08-native-batch-second/source.patch",
+      "original": "p3-08-native-batch-second/source.patch",
+      "bytes": 88280,
+      "sha256": "313b3d27e4a0d72ed929a7fcd3f17348a9a647874c52cda1e9b7baf9e9846471"
+    },
+    {
+      "member": "p3-08-native-batch-second/source/crates/fc-bootstrap/src/application/material_batch_tests.rs",
+      "original": "p3-08-native-batch-second/source/crates/fc-bootstrap/src/application/material_batch_tests.rs",
+      "bytes": 13592,
+      "sha256": "f851e444ac737421ae186f7d7e3023624d88e690c8c4e29436833e9f4239aabd"
+    },
+    {
+      "member": "p3-08-native-batch-second/source/crates/fc-ports/src/material_batch.rs",
+      "original": "p3-08-native-batch-second/source/crates/fc-ports/src/material_batch.rs",
+      "bytes": 12315,
+      "sha256": "94f436d491279aa4bce58687d4223cf65b5d282c02c0f47a719f1e3bbdf47ded"
+    },
+    {
+      "member": "p3-08-native-batch-second/source/crates/fc-storage/src/business/materials_batch.rs",
+      "original": "p3-08-native-batch-second/source/crates/fc-storage/src/business/materials_batch.rs",
+      "bytes": 16175,
+      "sha256": "8521da9cf631cc5a4608f130f49f1b04f7c8d5a590eae15f6eecd7f979ea01b1"
+    },
+    {
+      "member": "p3-08-native-batch-second/source/crates/fc-storage/src/business/materials_batch_tests.rs",
+      "original": "p3-08-native-batch-second/source/crates/fc-storage/src/business/materials_batch_tests.rs",
+      "bytes": 17116,
+      "sha256": "94392048ada1b8421f7b5df1a7e0ca4f92e8b63e88a6decce2cdf80aba0a2bf1"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-rest20/operation.json",
+      "original": "p3-08-native-batch-second/windows-rest20/operation.json",
+      "bytes": 1357,
+      "sha256": "53393af8999ed6add810cf55c92c9d5f642a8911a0bed13576ac7125a13bb02b"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-rest20/producer.stderr.log",
+      "original": "p3-08-native-batch-second/windows-rest20/producer.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-rest20/producer.stdout.log",
+      "original": "p3-08-native-batch-second/windows-rest20/producer.stdout.log",
+      "bytes": 738,
+      "sha256": "9bb589cea0ee1369c6e877add04d0690d753c486e6189aa61a844f35f1e30875"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-rest20/report.json",
+      "original": "p3-08-native-batch-second/windows-rest20/report.json",
+      "bytes": 143359,
+      "sha256": "7a847548843e531e46ecc9f88fcb2705c2a0239448826ad3b28b7e04e7a69d8c"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-rest20/run.py",
+      "original": "p3-08-native-batch-second/windows-rest20/run.py",
+      "bytes": 3234,
+      "sha256": "37c018b2c5b21329af4e1ad5d87cf8d23f120a77e294f65a9c4aeaf8e093bb8f"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-rest20/transport-proof.json",
+      "original": "p3-08-native-batch-second/windows-rest20/transport-proof.json",
+      "bytes": 37311,
+      "sha256": "60640e3244132debe37ce7de033418c7b54d7cd31caf7c74e04f11c8921d6ecb"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-rest20/transport.jsonl",
+      "original": "p3-08-native-batch-second/windows-rest20/transport.jsonl",
+      "bytes": 18517,
+      "sha256": "f6e7b78595703ffe9dddf5f9bcf69bf999e34cb722a715a77d71cf34cb79d735"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-test-build/compile.stderr.log",
+      "original": "p3-08-native-batch-second/windows-test-build/compile.stderr.log",
+      "bytes": 1500,
+      "sha256": "69db1603f699d29709d99ebeef56bf03ec8fb5b03dbd45a0bcad8c40687f974d"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-test-build/compile.stdout.log",
+      "original": "p3-08-native-batch-second/windows-test-build/compile.stdout.log",
+      "bytes": 114263,
+      "sha256": "8f4d49fa81fdc4710c27334a57d8c8a82a45279cf0de6f72b3cb7b1a19d8c4b9"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-test-build/report.json",
+      "original": "p3-08-native-batch-second/windows-test-build/report.json",
+      "bytes": 36959,
+      "sha256": "f5de427ddfee765733a147925e37dc9a9c74fc1f9dd8fad5ec31e60b995bdabf"
+    },
+    {
+      "member": "p3-08-native-batch-second/windows-test-build/run.py",
+      "original": "p3-08-native-batch-second/windows-test-build/run.py",
+      "bytes": 2749,
+      "sha256": "afbce91cc4906cf8117e175dac7f69c6efd237096f1e127646f8c066486c1a37"
+    },
+    {
+      "member": "root-byte-binding.json",
+      "original": "root-byte-binding.json",
+      "bytes": 118965,
+      "sha256": "4b244c92b76a25b52ae0db4116867cb9d706e2ead14161106bdbc3f06a6ff2c5"
+    },
+    {
+      "member": "root-cleanup.json",
+      "original": "root-cleanup.json",
+      "bytes": 13822,
+      "sha256": "9eea2291d79a0fff97ab1748d790671849a6f6a7af0705d1f84ba0f1f91c0be3"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/before/web/src/api/material-protocol.ts",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/before/web/src/api/material-protocol.ts",
+      "bytes": 11768,
+      "sha256": "28f22666d86d0b5fccc256b2e4d77d2b8c346f796dcf91da8caa484eba021835"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/complete.patch",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/complete.patch",
+      "bytes": 5417,
+      "sha256": "fae4ea536e56b683cefe64a40548b861d0ac9c1375cd0fadc64556d758b079fe"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/first-wrapper-observation.json",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/first-wrapper-observation.json",
+      "bytes": 403,
+      "sha256": "17068e9539fa8e1a5cf0ff4187bd69719beafef5a5c3496d2f5068ca9c8b3695"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/freeze-first.json",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/freeze-first.json",
+      "bytes": 4879,
+      "sha256": "d84d64e5a17acf9607090e62798bfe93d0fcc01bf285416f2e9ad6f03d2f0219"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/full-vitest.stderr",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/full-vitest.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/full-vitest.stdout",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/full-vitest.stdout",
+      "bytes": 529,
+      "sha256": "a1e35d85e58c01208ca4f0a179aee876a7523d2d05be5fd8e4198a509b4c4f82"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/green-protocol.stderr",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/green-protocol.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/green-protocol.stdout",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/green-protocol.stdout",
+      "bytes": 357,
+      "sha256": "d0507c536f1ee6df73cbef6c474d97b1f7548bc776ed51b416502ae00829f4cf"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/input-output-qualification-second.json",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/input-output-qualification-second.json",
+      "bytes": 10186,
+      "sha256": "2aff900c864b29e53446ffae0b96ca596d6260ff2312ff6db49b1fdc72937b27"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/normal-build.stderr",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/normal-build.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/normal-build.stdout",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/normal-build.stdout",
+      "bytes": 939,
+      "sha256": "fb779c1d12c3f347d43b06013a4df5c0820709fba3adcf425be7c5522f90e50e"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/output-identities.json",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/output-identities.json",
+      "bytes": 1314,
+      "sha256": "5972cb014356d64b50f3b2c02549c1972acf85020025a488cd5997420b0a6bb5"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/qualification-commands.json",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/qualification-commands.json",
+      "bytes": 945,
+      "sha256": "8da81b22c46d5d99403cd26c7b0ffcecb2863c0410a82a1f0b1ef4fe4e6c5736"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/red.json",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/red.json",
+      "bytes": 458,
+      "sha256": "f939dd8aace500c8a5302ffd09f1c1d674e14693c048929c507adb670437d2a9"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/red.stderr",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/red.stderr",
+      "bytes": 1062,
+      "sha256": "e8571c9d983b1d47dfcf949b834326b408e3c14973377e5f741b869dcaa27a50"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/red.stdout",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/red.stdout",
+      "bytes": 628,
+      "sha256": "7edd681203ea9da5ffeffc629bcfdb0bf59a7c130186760d1f9b955fe4be76c9"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/report-first.json",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/report-first.json",
+      "bytes": 4009,
+      "sha256": "92bc60d20c8bd055ae0dac7a61f7db078959695db389cd358400620fd882b9a2"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/source-after.json",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/source-after.json",
+      "bytes": 9426,
+      "sha256": "e965f1d25e8b309b01a436feb7c86733c64adbb0aac97a41ad5986c3110c7f8c"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/source-before.json",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/source-before.json",
+      "bytes": 9297,
+      "sha256": "eaecd7b1762a13089a2bd8e0a9362bce6fc065fa2fe8f9ffcac709297948c8c5"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/source/web/src/api/material-protocol.ts",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/source/web/src/api/material-protocol.ts",
+      "bytes": 11888,
+      "sha256": "7e7e63ebb5018c9c73176778b9a2fe43534ff05ed9b2bfb38abf75cf1d7fe369"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/source/web/tests/material-protocol.test.ts",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/source/web/tests/material-protocol.test.ts",
+      "bytes": 12694,
+      "sha256": "9b6984c65a8fef0c3ebd0da9fe5933ebb533b0e441f4a4a6a3c4209d04b73575"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/test-web/build-budget.json",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/test-web/build-budget.json",
+      "bytes": 284,
+      "sha256": "43ad4724d6b1b9a16e1574677caf1b9489e7b75b6afa8af95382d60998600838"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/typecheck.stderr",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/typecheck.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/typecheck.stdout",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/typecheck.stdout",
+      "bytes": 60,
+      "sha256": "99b856e0dae663563ee3f5f454c2ba5e32fddfca161704b8b35c2ab7a8295cae"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/versions-node.stdout",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/versions-node.stdout",
+      "bytes": 9,
+      "sha256": "1506cdf8613ebb6c1198a9587c5e1b708b3e779b139a0b59f937efa199e2ecae"
+    },
+    {
+      "member": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/versions-npm.stdout",
+      "original": "web-material-batch-sequence-first-36f660ce301246e48611601994115824/versions-npm.stdout",
+      "bytes": 7,
+      "sha256": "d4f77e92e0e96c2e3d354af321e208badc2c0ee0d5d33087659b027af2c9466e"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/api-probe-first.json",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/api-probe-first.json",
+      "bytes": 1274,
+      "sha256": "79215cf800d60db2dc5b27d5b68eb97bfa0501d45808547105ae1c7928f51fae"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/compile-second-1.97.1.stderr",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/compile-second-1.97.1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/compile-second-1.97.1.stdout",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/compile-second-1.97.1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/compile-second-nightly-2026-10-29.stderr",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/compile-second-nightly-2026-10-29.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/compile-second-nightly-2026-10-29.stdout",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/compile-second-nightly-2026-10-29.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/execute-second-1.97.1.stderr",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/execute-second-1.97.1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/execute-second-1.97.1.stdout",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/execute-second-1.97.1.stdout",
+      "bytes": 56,
+      "sha256": "47ebc44a4c95dfe50721123968ddd4dfe7e47d0196849d65b3db2be88a0f2af6"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/execute-second-nightly-2026-10-29.stderr",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/execute-second-nightly-2026-10-29.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/execute-second-nightly-2026-10-29.stdout",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/execute-second-nightly-2026-10-29.stdout",
+      "bytes": 56,
+      "sha256": "47ebc44a4c95dfe50721123968ddd4dfe7e47d0196849d65b3db2be88a0f2af6"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/original-ci-diagnostic.json",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/original-ci-diagnostic.json",
+      "bytes": 1051,
+      "sha256": "4b37bbdd26c47a85bee35a320a1d53cd2cf5d50d245b96638cc04ddbe5a04b63"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/report-first.json",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/report-first.json",
+      "bytes": 3636,
+      "sha256": "10caf34ecdd20fadb57564370985571f7686dbd908f9a6036d484e204e1d3584"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-1.97.1.stderr",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-1.97.1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-1.97.1.stdout",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-1.97.1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-nightly-2026-10-29.stderr",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-nightly-2026-10-29.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-nightly-2026-10-29.stdout",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-nightly-2026-10-29.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-update-second.rs",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-update-second.rs",
+      "bytes": 503,
+      "sha256": "14cd1e4186deba89bf2e56d619a744b077d7ee864a680f1cb178bfc585782e8c"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-update.rs",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/try-update.rs",
+      "bytes": 237,
+      "sha256": "6225a848eb82e17fabc51c4365a02396e0eec0cabe9599364b56c08049f1639c"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/version-1.97.1.stderr",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/version-1.97.1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/version-1.97.1.stdout",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/version-1.97.1.stdout",
+      "bytes": 196,
+      "sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/version-nightly-2026-10-29.stderr",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/version-nightly-2026-10-29.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/version-nightly-2026-10-29.stdout",
+      "original": "win7-fixture-atomic-fix-first-ca667af3202f4b63972474c10586f7a8/version-nightly-2026-10-29.stdout",
+      "bytes": 214,
+      "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54"
+    }
+  ],
+  "scanner": {
+    "sha256": "da2906c450ea8c2ac7d18e358507023f519dbcc6faf1a9ac1abb1ae16af8c30f",
+    "findings": 0,
+    "sourceAndReplayViews": {
+      "textViews": 38376,
+      "utf16Views": 0,
+      "cp936Views": 0,
+      "clixmlDecodedViews": 0,
+      "decodedBase64Views": 0,
+      "jsonContainers": 1770,
+      "decodedJsonStringViews": 37632
+    },
+    "controlExceptions": [],
+    "scope": "Raw text, UTF16/CP936, CLIXML, JSON/JSONL and nested base64; stop on unknown controls."
+  },
+  "rootSupplements": {
+    "root-cleanup.json": {
+      "original": "root-cleanup.json",
+      "bytes": 13822,
+      "sha256": "9eea2291d79a0fff97ab1748d790671849a6f6a7af0705d1f84ba0f1f91c0be3"
+    },
+    "root-byte-binding.json": {
+      "original": "root-byte-binding.json",
+      "bytes": 118965,
+      "sha256": "4b244c92b76a25b52ae0db4116867cb9d706e2ead14161106bdbc3f06a6ff2c5"
+    }
+  },
+  "exclusions": "No EXE/ELF/MSI/ZIP inputs, targets, test-temp, duplicate list logs, full source tree, key contents, real school data or signed download URLs. Web node_modules/test-web tree and seven dist outputs are not traversed; only the exact selected build-budget.json and producer identities are included. Binary identities remain in original producer/runtime reports; no binary contents were read."
+}

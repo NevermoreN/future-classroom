@@ -1,13 +1,16 @@
 //! Path-free material workbench. Every selection captures immutable record IDs;
 //! the backend rechecks the live lease, scope and revision in its writer transaction.
+use super::NativeCommand;
 use fc_domain::{auth::Role, identity::IdentityState, ids::*, materials::*};
 use fc_ports::MaterialListRequest;
 use fc_presentation::workbench::*;
+use fc_windows::materials::chooser::SelectedFile;
 
 pub(super) const TEACHER: FieldId = FieldId(300);
 pub(super) const SUBJECT: FieldId = FieldId(301);
 pub(super) const CLASSES: FieldId = FieldId(302);
 const FULL_NAME: FieldId = FieldId(303);
+const BATCH_RESULT: FieldId = FieldId(304);
 pub(super) const LOAD: ActionId = ActionId(300);
 pub(super) const IMPORT: ActionId = ActionId(301);
 pub(super) const DELETE: ActionId = ActionId(302);
@@ -19,6 +22,13 @@ pub(super) const CANCEL_DELETE: ActionId = ActionId(307);
 pub(super) const COPIES: ActionId = ActionId(308);
 pub(super) const CLEAN_COPIES: ActionId = ActionId(309);
 pub(super) const RETURN_COPIES: ActionId = ActionId(310);
+pub(super) const CONFIRM_BATCH: ActionId = ActionId(311);
+pub(super) const CANCEL_BATCH: ActionId = ActionId(312);
+pub(super) const BATCH_UP: ActionId = ActionId(313);
+pub(super) const BATCH_DOWN: ActionId = ActionId(314);
+pub(super) const BATCH_REMOVE: ActionId = ActionId(315);
+pub(super) const QUERY_BATCH: ActionId = ActionId(316);
+pub(super) const DISMISS_BATCH: ActionId = ActionId(317);
 const BACK: ActionId = ActionId(2);
 const LOCK: ActionId = ActionId(6);
 
@@ -31,6 +41,16 @@ pub(super) enum Command {
     Import {
         scope: MaterialScope,
         allowed_class_ids: Vec<ClassId>,
+    },
+    ImportBatch {
+        scope: MaterialScope,
+        classes: Vec<ClassId>,
+        selected: Vec<SelectedFile>,
+        command: NativeCommand,
+    },
+    QueryBatch {
+        scope: MaterialScope,
+        command: NativeCommand,
     },
     Delete {
         scope: MaterialScope,
@@ -46,6 +66,20 @@ pub(super) enum Command {
     Lock,
 }
 
+struct BatchDraft {
+    scope: MaterialScope,
+    classes: Vec<ClassId>,
+    files: Vec<SelectedFile>,
+    names: Vec<String>,
+    selected: usize,
+}
+struct BatchHistory {
+    scope: MaterialScope,
+    names: Vec<String>,
+    command: NativeCommand,
+    classes: Vec<ClassId>,
+    outcome: super::material_flow::BatchOutcome,
+}
 pub(super) struct Editor {
     owner: PrincipalId,
     scope: Option<MaterialScope>,
@@ -54,6 +88,8 @@ pub(super) struct Editor {
     selected: Option<MaterialRecord>,
     confirmation: bool,
     copies: Option<super::material_flow::LaunchCopyReport>,
+    batch: Option<BatchDraft>,
+    history: Option<BatchHistory>,
 }
 
 fn action(id: ActionId, label: &str, enabled: bool) -> Action {
@@ -173,6 +209,8 @@ impl Editor {
             selected: None,
             confirmation: false,
             copies: None,
+            batch: None,
+            history: None,
         }
     }
     fn displayed_scope(&self, identity: &IdentityState) -> Option<MaterialScope> {
@@ -234,6 +272,67 @@ impl Editor {
             }
             return view;
         };
+        if let Some(batch) = &self.batch {
+            view.title = "确认批量导入课堂资料".into();
+            view.description = format!("共{}个文件，将按下列顺序校验后一次提交。最后一项是本批最新项，提交后显示在目录最上方；任一文件准备失败，整批不加入目录。", batch.files.len());
+            view.grid = Some(Grid {
+                columns: vec!["文件名".into(), "加入顺序".into()],
+                rows: batch
+                    .names
+                    .iter()
+                    .enumerate()
+                    .map(|(index, name)| GridRow {
+                        group: String::new(),
+                        label: name.clone(),
+                        cells: vec![format!(
+                            "{}{}",
+                            index + 1,
+                            if index + 1 == batch.files.len() {
+                                "（本批最新）"
+                            } else {
+                                ""
+                            }
+                        )],
+                        merged: false,
+                    })
+                    .collect(),
+                selected: Some((batch.selected, 0)),
+                enabled: !busy,
+            });
+            view.actions = vec![
+                action(BATCH_UP, "上移（较早加入）", !busy && batch.selected > 0),
+                action(
+                    BATCH_DOWN,
+                    "下移（较新加入）",
+                    !busy && batch.selected + 1 < batch.files.len(),
+                ),
+                action(BATCH_REMOVE, "移除选中文件", !busy),
+                action(
+                    CONFIRM_BATCH,
+                    "确认校验并一次加入整批",
+                    !busy && !batch.files.is_empty(),
+                ),
+                action(CANCEL_BATCH, "取消本批", !busy),
+                action(LOCK, "锁定", true),
+            ];
+            return view;
+        }
+        if let Some(history) = &self.history {
+            let state = match &history.outcome {
+                super::material_flow::BatchOutcome::Saved(_) => "原批次已保存",
+                super::material_flow::BatchOutcome::NotSubmitted(_) => "本批未送交目录写入",
+                super::material_flow::BatchOutcome::Rejected(_) => "本批写入已被明确拒绝",
+                super::material_flow::BatchOutcome::Expired => {
+                    "原批次查询窗口已过期（不是保存证明）"
+                }
+                super::material_flow::BatchOutcome::Unknown => "原批次尚未取得确定结果",
+            };
+            view.fields.push(Field {
+                id: BATCH_RESULT, label: state.into(), kind: FieldKind::ReadOnly,
+                value: format!("{}个文件；本批最新：{}。当前目录刷新不代表原命令结果；查询使用原票据，不重新导入。", history.names.len(), history.names.last().map_or("", String::as_str)),
+                max_utf16: 1024,
+            });
+        }
         if self.confirmation {
             if let Some(record) = &self.selected {
                 if self.scope == Some(scope) {
@@ -325,7 +424,11 @@ impl Editor {
         }
         view.actions = vec![
             action(LOAD, "载入目录 / 刷新", !busy),
-            action(IMPORT, "导入资料", !busy && !current_classes.is_empty()),
+            action(
+                IMPORT,
+                "批量导入资料",
+                !busy && !current_classes.is_empty() && self.history.is_none(),
+            ),
             action(OPEN, "打开选中资料", !busy && selected.is_some()),
             action(DELETE, "删除选中资料", !busy && selected.is_some()),
             action(
@@ -337,6 +440,15 @@ impl Editor {
             action(BACK, "返回", !busy),
             action(LOCK, "锁定", true),
         ];
+        if let Some(history) = &self.history {
+            view.actions
+                .push(action(QUERY_BATCH, "查询原批次结果（不重发）", !busy));
+            view.actions.push(action(
+                DISMISS_BATCH,
+                "结束本次操作（不重新执行）",
+                !busy && !matches!(history.outcome, super::material_flow::BatchOutcome::Unknown),
+            ));
+        }
         if global {
             view.actions
                 .insert(6, action(COPIES, "打开副本管理", !busy));
@@ -391,6 +503,13 @@ impl Editor {
         Ok(())
     }
     pub(super) fn select(&mut self, row: usize, column: usize) -> Result<(), String> {
+        if let Some(batch) = &mut self.batch {
+            if column >= 2 || row >= batch.files.len() {
+                return Err("请选择本批有效文件。".into());
+            }
+            batch.selected = row;
+            return Ok(());
+        }
         if self.confirmation || column >= 3 {
             return Err("当前不能改变资料选择。".into());
         }
@@ -400,6 +519,97 @@ impl Editor {
             .and_then(|p| p.items.get(row))
             .ok_or("请选择有效资料。")?;
         self.selected = Some(record.clone());
+        Ok(())
+    }
+    pub(super) fn stage_batch(
+        &mut self,
+        scope: MaterialScope,
+        classes: Vec<ClassId>,
+        files: Vec<SelectedFile>,
+    ) -> Result<(), String> {
+        if files.is_empty()
+            || files.len() > MAX_MATERIAL_BATCH_FILES
+            || self.history.is_some()
+            || classes.is_empty()
+        {
+            return Err("请先处理原批次结果；每批选择1至20个文件。".into());
+        }
+        let names = files
+            .iter()
+            .map(|file| {
+                file.display_name()
+                    .map_err(|_| "无法读取文件名。".to_owned())
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        if names
+            .iter()
+            .any(|name| validate_material_name(name).is_err())
+        {
+            return Err("本批含无效或不受支持的文件名，请重新选择。".into());
+        }
+        self.batch = Some(BatchDraft {
+            scope,
+            classes,
+            files,
+            names,
+            selected: 0,
+        });
+        self.clear_selection();
+        Ok(())
+    }
+    pub(super) fn has_original_batch(&self, command: &NativeCommand, scope: MaterialScope) -> bool {
+        self.history
+            .as_ref()
+            .is_some_and(|history| &history.command == command && history.scope == scope)
+    }
+    pub(super) fn owned_by(&self, owner: PrincipalId) -> bool {
+        self.owner == owner
+    }
+    pub(super) fn suspend(&mut self) {
+        self.batch = None;
+        self.clear_selection();
+    }
+    pub(super) fn batch_result(
+        &mut self,
+        result: super::material_flow::BatchResult,
+    ) -> Result<(), String> {
+        use super::material_flow::BatchOutcome;
+        let history = self.history.as_mut().ok_or("原批次页面已关闭。")?;
+        if history.command != result.command
+            || history.scope != result.scope
+            || history.command.snapshot() != result.issued
+        {
+            return Err("批次结果与原请求或完整票据不一致。".into());
+        }
+        if let BatchOutcome::Saved(records) = &result.outcome {
+            if result.issued.is_none()
+                || records.len() != history.names.len()
+                || records.iter().zip(&history.names).any(|(record, name)| {
+                    record.display_name != *name
+                        || record.allowed_class_ids != history.classes
+                        || record.status != MaterialStatus::Published
+                        || record.validate().is_err()
+                })
+                || records.windows(2).any(|pair| {
+                    pair[1].added_sequence != pair[0].added_sequence.checked_add(1).unwrap_or(0)
+                })
+                || records.iter().enumerate().any(|(index, record)| {
+                    records[..index].iter().any(|prior| {
+                        prior.id == record.id
+                            || prior.resource.version_id == record.resource.version_id
+                    })
+                })
+            {
+                return Err("批次结果不完整或顺序不同，请保留原票据查询。".into());
+            }
+        }
+        // A later absent query never erases an already authoritative receipt or
+        // the known fact that this worker did not call the Writer.
+        if !matches!(result.outcome, BatchOutcome::Unknown)
+            || matches!(history.outcome, BatchOutcome::Unknown)
+        {
+            history.outcome = result.outcome;
+        }
         Ok(())
     }
     fn scope_from(
@@ -459,6 +669,79 @@ impl Editor {
         if self.copies.is_some() {
             return Err("请先返回资料目录。".into());
         }
+        if let Some(batch) = &mut self.batch {
+            if !allowed_scope(identity, self.owner, batch.scope) {
+                self.batch = None;
+                return Err("原批次目录权限已失效，请重新选择。".into());
+            }
+            match action {
+                CANCEL_BATCH => {
+                    self.batch = None;
+                    return Ok(Command::Stay);
+                }
+                BATCH_REMOVE => {
+                    batch.files.remove(batch.selected);
+                    batch.names.remove(batch.selected);
+                    if batch.files.is_empty() {
+                        self.batch = None;
+                    } else {
+                        batch.selected = batch.selected.min(batch.files.len() - 1);
+                    }
+                    return Ok(Command::Stay);
+                }
+                BATCH_UP | BATCH_DOWN => {
+                    let other = if action == BATCH_UP {
+                        batch.selected.checked_sub(1)
+                    } else {
+                        batch
+                            .selected
+                            .checked_add(1)
+                            .filter(|v| *v < batch.files.len())
+                    }
+                    .ok_or("不能继续移动。")?;
+                    batch.files.swap(batch.selected, other);
+                    batch.names.swap(batch.selected, other);
+                    batch.selected = other;
+                    return Ok(Command::Stay);
+                }
+                CONFIRM_BATCH => {
+                    let batch = self.batch.take().ok_or("本批已失效。")?;
+                    let command = NativeCommand::new();
+                    self.history = Some(BatchHistory {
+                        scope: batch.scope,
+                        names: batch.names,
+                        command: command.clone(),
+                        classes: batch.classes.clone(),
+                        outcome: super::material_flow::BatchOutcome::Unknown,
+                    });
+                    return Ok(Command::ImportBatch {
+                        scope: batch.scope,
+                        classes: batch.classes,
+                        selected: batch.files,
+                        command,
+                    });
+                }
+                _ => return Err("请先确认或取消本批资料。".into()),
+            }
+        }
+        if action == QUERY_BATCH {
+            let history = self.history.as_ref().ok_or("没有原批次可查询。")?;
+            return Ok(Command::QueryBatch {
+                scope: history.scope,
+                command: history.command.clone(),
+            });
+        }
+        if action == DISMISS_BATCH {
+            if self
+                .history
+                .as_ref()
+                .is_none_or(|h| matches!(h.outcome, super::material_flow::BatchOutcome::Unknown))
+            {
+                return Err("原批次结果尚未确定，请查询原票据。".into());
+            }
+            self.history = None;
+            return Ok(Command::Stay);
+        }
         if action == CANCEL_DELETE {
             self.confirmation = false;
             return Ok(Command::Stay);
@@ -490,6 +773,9 @@ impl Editor {
             return Ok(self.request(scope, None));
         }
         if action == IMPORT {
+            if self.history.is_some() {
+                return Err("请先核对原批次结果，不会重复导入。".into());
+            }
             let available = classes(identity, scope);
             let allowed_class_ids = match form.get(CLASSES) {
                 Some("all") => available.clone(),
@@ -512,7 +798,7 @@ impl Editor {
                 self.pending = None;
                 self.clear_selection();
             }
-            let _ = self.request(scope, None);
+            self.scope = Some(scope);
             return Ok(Command::Import {
                 scope,
                 allowed_class_ids,
@@ -788,7 +1074,7 @@ mod tests {
             panic!()
         };
         assert_eq!(actual, scope(2));
-        e.loaded(page(2, 0, 1)).unwrap();
+        load(&mut e, &state, 2, page(2, 0, 1));
         assert_eq!(
             allowed_class_ids,
             vec![ClassId::new(1).unwrap(), ClassId::new(2).unwrap()]
@@ -856,5 +1142,160 @@ mod tests {
             Ok(Command::Stay)
         ));
         assert!(global.copies.is_none());
+    }
+    fn selected(name: &str) -> SelectedFile {
+        SelectedFile::isolated_probe(
+            std::path::Path::new(r"C:\FutureClassroom-Test-batch-editor"),
+            name,
+        )
+        .unwrap()
+    }
+    #[test]
+    fn batch_confirmation_preserves_reordered_manifest_and_last_item_is_newest() {
+        let state = identity();
+        let mut editor = Editor::new(principal(2));
+        editor
+            .stage_batch(
+                scope(2),
+                vec![ClassId::new(1).unwrap()],
+                vec![
+                    selected("first.txt"),
+                    selected("remove.txt"),
+                    selected("last.txt"),
+                ],
+            )
+            .unwrap();
+        editor.view(&state, "", false).validate().unwrap();
+        editor.select(1, 0).unwrap();
+        editor
+            .handle(BATCH_REMOVE, FormData::new(), &state)
+            .unwrap();
+        editor.select(1, 0).unwrap();
+        editor.handle(BATCH_UP, FormData::new(), &state).unwrap();
+        let view = editor.view(&state, "", false);
+        assert_eq!(view.grid.as_ref().unwrap().rows[0].label, "last.txt");
+        assert!(view.grid.as_ref().unwrap().rows[1].cells[0].contains("本批最新"));
+        let Command::ImportBatch {
+            selected,
+            classes,
+            command,
+            ..
+        } = editor
+            .handle(CONFIRM_BATCH, FormData::new(), &state)
+            .unwrap()
+        else {
+            panic!()
+        };
+        assert_eq!(
+            selected
+                .iter()
+                .map(|file| file.display_name().unwrap())
+                .collect::<Vec<_>>(),
+            vec!["last.txt", "first.txt"]
+        );
+        assert_eq!(classes, vec![ClassId::new(1).unwrap()]);
+        assert!(
+            command.snapshot().is_none(),
+            "confirmation itself does not issue on the UI thread"
+        );
+        assert!(
+            editor
+                .handle(CONFIRM_BATCH, FormData::new(), &state)
+                .is_err(),
+            "cannot dispatch the same confirmed list twice"
+        );
+        assert!(
+            editor
+                .handle(DISMISS_BATCH, FormData::new(), &state)
+                .is_err(),
+            "unknown is not a completed batch"
+        );
+        editor.view(&state, "", false).validate().unwrap();
+    }
+    #[test]
+    fn wrong_original_batch_is_rejected_and_current_directory_never_resolves_history() {
+        let state = identity();
+        let mut editor = Editor::new(principal(2));
+        editor
+            .stage_batch(
+                scope(2),
+                vec![ClassId::new(1).unwrap()],
+                vec![selected("one.txt")],
+            )
+            .unwrap();
+        let Command::ImportBatch { command, .. } = editor
+            .handle(CONFIRM_BATCH, FormData::new(), &state)
+            .unwrap()
+        else {
+            panic!()
+        };
+        assert!(editor
+            .batch_result(super::super::material_flow::BatchResult {
+                scope: scope(2),
+                command: NativeCommand::new(),
+                issued: None,
+                outcome: super::super::material_flow::BatchOutcome::NotSubmitted(
+                    "another worker".into()
+                ),
+            })
+            .is_err());
+        load(&mut editor, &state, 2, page(2, 0, 1));
+        editor.select(0, 0).unwrap();
+        editor.view(&state, "", false).validate().unwrap();
+        assert!(matches!(
+            editor.history.as_ref().unwrap().outcome,
+            super::super::material_flow::BatchOutcome::Unknown
+        ));
+        let Command::QueryBatch {
+            command: queried, ..
+        } = editor.handle(QUERY_BATCH, FormData::new(), &state).unwrap()
+        else {
+            panic!()
+        };
+        assert_eq!(queried, command);
+        editor
+            .batch_result(super::super::material_flow::BatchResult {
+                scope: scope(2),
+                command,
+                issued: None,
+                outcome: super::super::material_flow::BatchOutcome::NotSubmitted(
+                    "worker did not enter Writer".into(),
+                ),
+            })
+            .unwrap();
+        editor
+            .handle(DISMISS_BATCH, FormData::new(), &state)
+            .unwrap();
+        assert!(editor.history.is_none());
+    }
+    #[test]
+    fn empty_oversized_and_revoked_batch_drafts_cannot_be_confirmed() {
+        let mut editor = Editor::new(principal(2));
+        assert!(editor
+            .stage_batch(scope(2), vec![ClassId::new(1).unwrap()], Vec::new())
+            .is_err());
+        assert!(editor
+            .stage_batch(
+                scope(2),
+                vec![ClassId::new(1).unwrap()],
+                (0..=MAX_MATERIAL_BATCH_FILES)
+                    .map(|_| selected("one.txt"))
+                    .collect()
+            )
+            .is_err());
+        editor
+            .stage_batch(
+                scope(2),
+                vec![ClassId::new(1).unwrap()],
+                vec![selected("one.txt")],
+            )
+            .unwrap();
+        let mut state = identity();
+        state.assignments.clear();
+        assert!(editor
+            .handle(CONFIRM_BATCH, FormData::new(), &state)
+            .is_err());
+        assert!(editor.batch.is_none());
+        assert!(editor.history.is_none());
     }
 }

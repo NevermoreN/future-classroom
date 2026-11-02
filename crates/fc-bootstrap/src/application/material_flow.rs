@@ -8,8 +8,8 @@ use fc_bootstrap::backend::{
 use fc_domain::{ids::*, materials::*};
 use fc_materials::office::{ContainerError, ValidationControl};
 use fc_ports::{
-    prepare_material_append, MaterialAppendMetadata, MaterialDeleteRequest, MaterialListRequest,
-    MaterialPreparation, MaterialRepositoryError,
+    prepare_material_append, prepare_material_batch_append, MaterialAppendMetadata,
+    MaterialDeleteRequest, MaterialListRequest, MaterialPreparation, MaterialRepositoryError,
 };
 use fc_runtime::worker::JobContext;
 use fc_windows::materials::{
@@ -60,6 +60,18 @@ pub(super) enum Job {
         classes: Vec<ClassId>,
         selected: SelectedFile,
     },
+    ImportBatch {
+        lease: SessionLease,
+        scope: MaterialScope,
+        classes: Vec<ClassId>,
+        selected: Vec<SelectedFile>,
+        command: NativeCommand,
+    },
+    QueryBatch {
+        lease: SessionLease,
+        scope: MaterialScope,
+        command: NativeCommand,
+    },
     Delete {
         lease: SessionLease,
         request: DeleteDraft,
@@ -69,6 +81,19 @@ pub(super) enum Job {
         lease: SessionLease,
         clean: bool,
     },
+}
+pub(super) struct BatchResult {
+    pub scope: MaterialScope,
+    pub command: NativeCommand,
+    pub issued: Option<fc_ports::command_window::IssuedCommand>,
+    pub outcome: BatchOutcome,
+}
+pub(super) enum BatchOutcome {
+    Saved(Vec<MaterialRecord>),
+    Unknown,
+    NotSubmitted(String),
+    Rejected(String),
+    Expired,
 }
 #[derive(Clone)]
 pub(super) enum OpenRequest {
@@ -334,6 +359,16 @@ impl MaterialJob {
                         classes.capacity() * std::mem::size_of::<ClassId>()
                             + selected.allocation_bytes()
                     }
+                    Job::ImportBatch {
+                        classes, selected, ..
+                    } => {
+                        classes.capacity() * std::mem::size_of::<ClassId>()
+                            + selected.capacity() * std::mem::size_of::<SelectedFile>()
+                            + selected
+                                .iter()
+                                .map(SelectedFile::allocation_bytes)
+                                .sum::<usize>()
+                    }
                     Job::Open(OpenRequest::Scene { .. }) => 1024,
                     _ => 512,
                 },
@@ -397,6 +432,233 @@ impl MaterialJob {
                             },
                         )?,
                 )))
+            }
+            Job::QueryBatch {
+                lease,
+                scope,
+                command,
+            } => {
+                context.checkpoint().map_err(|_| Failure::Stopped)?;
+                let issued = command.original()?;
+                let query = self
+                    .backend
+                    .try_lock()
+                    .map_err(backend_lock_error)?
+                    .material_batch_outcome(lease, scope, issued);
+                let outcome = match query {
+                    Ok(Some(result))
+                        if result.command_id == issued.command_id && result.scope == scope =>
+                    {
+                        BatchOutcome::Saved(result.records)
+                    }
+                    Ok(Some(_)) => return Err(invalid("原批次结果与请求不一致。")),
+                    Ok(None) => BatchOutcome::Unknown,
+                    Err(error)
+                        if error.command_window_error()
+                            == Some(fc_ports::command_window::CommandWindowError::Expired) =>
+                    {
+                        BatchOutcome::Expired
+                    }
+                    Err(error) => return Err(error.into()),
+                };
+                Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                    scope,
+                    command,
+                    issued: Some(issued),
+                    outcome,
+                })))
+            }
+            Job::ImportBatch {
+                lease,
+                scope,
+                classes,
+                selected,
+                command,
+            } => {
+                // The returned pending inode guards share Preparation's lifetime
+                // with Control, so keep this check outside the fallible closure.
+                let alive = || {
+                    !self.control.is_local_locked()
+                        && self.control.health_gate().check_sensitive().is_ok()
+                };
+                let preparation = (|| -> Result<_> {
+                    if selected.is_empty() || selected.len() > MAX_MATERIAL_BATCH_FILES {
+                        return Err(invalid("每批只允许1至20个文件。"));
+                    }
+                    self.backend
+                        .try_lock()
+                        .map_err(backend_lock_error)?
+                        .materials(
+                            lease,
+                            MaterialListRequest {
+                                scope,
+                                cursor: None,
+                            },
+                        )?;
+                    let issued_id = {
+                        let mut backend = self.backend.try_lock().map_err(backend_lock_error)?;
+                        command.run(
+                            &mut backend,
+                            fc_ports::command_window::CommandFamily::Materials,
+                            Some(lease),
+                            fc_application::identity::SessionPurpose::Manage,
+                            context,
+                            |backend| Ok(backend.issued_command_id()?),
+                        )?
+                    };
+                    let mut prepared = Vec::with_capacity(selected.len());
+                    let mut pending = Vec::with_capacity(selected.len());
+                    let mut material_ids = HashSet::new();
+                    let mut version_ids = HashSet::new();
+                    for file in selected {
+                        context.checkpoint().map_err(|_| Failure::Stopped)?;
+                        let name = file.display_name().map_err(|_| io_error())?;
+                        let id =
+                            MaterialId::new(command_id()?.get()).map_err(|_| Failure::Stopped)?;
+                        let version = ResourceVersionId::new(command_id()?.get())
+                            .map_err(|_| Failure::Stopped)?;
+                        // Reject the improbable random collision rather than silently
+                        // replacing an earlier batch inode or retrying with a new ID.
+                        if !material_ids.insert(id) || !version_ids.insert(version) {
+                            return Err(invalid("资料标识重复，本批尚未提交。"));
+                        }
+                        let mut preparation = Preparation {
+                            files: &files,
+                            scope,
+                            id,
+                            version,
+                            name: name.clone(),
+                            control: Control {
+                                job: context,
+                                check: &alive,
+                                started: Instant::now(),
+                            },
+                            pending: None,
+                            failure: None,
+                        };
+                        let item = prepare_material_append(
+                            &mut preparation,
+                            file,
+                            MaterialAppendMetadata {
+                                command_id: issued_id,
+                                scope,
+                                material_id: id,
+                                display_name: name,
+                                allowed_class_ids: classes.clone(),
+                            },
+                        )
+                        .map_err(|_| {
+                            preparation
+                                .failure
+                                .take()
+                                .unwrap_or_else(|| invalid("本批文件校验未通过；整批未加入目录。"))
+                        })?;
+                        if preparation.control.canceled() {
+                            return Err(Failure::Stopped);
+                        }
+                        prepared.push(item);
+                        pending.push(
+                            preparation
+                                .pending
+                                .take()
+                                .ok_or_else(|| invalid("资料准备状态不完整。"))?,
+                        );
+                    }
+                    let batch = prepare_material_batch_append(prepared)
+                        .map_err(|_| invalid("本批清单无效或超过容量，整批未加入目录。"))?;
+                    Ok((batch, pending))
+                })();
+                let (batch, mut pending) = match preparation {
+                    Ok(prepared) => prepared,
+                    Err(error) if !fatal(&error) => {
+                        return Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                            scope,
+                            issued: command.read_worker()?,
+                            command,
+                            outcome: BatchOutcome::NotSubmitted(super::error_text(&error)),
+                        })))
+                    }
+                    Err(error) => return Err(error),
+                };
+                let mut result = {
+                    let mut backend = match self.backend.try_lock() {
+                        Ok(backend) => backend,
+                        Err(std::sync::TryLockError::WouldBlock) => {
+                            // No Writer call occurred. All prepared guards still
+                            // have retain=false and reclaim this uncommitted batch.
+                            return Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                                scope,
+                                issued: Some(command.original()?),
+                                command,
+                                outcome: BatchOutcome::NotSubmitted(
+                                    "后台繁忙，本批尚未送交目录写入；请稍后重新选择。".into(),
+                                ),
+                            })));
+                        }
+                        Err(error @ std::sync::TryLockError::Poisoned(_)) => {
+                            // Poisoning is a product fault, never ordinary busy or
+                            // proof of rejection. Keep every inode for startup audit.
+                            for blob in &mut pending {
+                                blob.retain = true;
+                            }
+                            return Err(backend_lock_error(error));
+                        }
+                    };
+                    // Retain before entering the Writer boundary: an unwind or
+                    // lost completion must never unlink an inode it may reference.
+                    for blob in &mut pending {
+                        blob.retain = true;
+                    }
+                    command.run(
+                        &mut backend,
+                        fc_ports::command_window::CommandFamily::Materials,
+                        Some(lease),
+                        fc_application::identity::SessionPurpose::Manage,
+                        context,
+                        |backend| Ok(backend.append_material_batch(lease, batch)?),
+                    )
+                };
+                // An unavailable completion can follow COMMIT: retain *all*
+                // validated inodes until authoritative startup reconciliation.
+                if matches!(
+                    result,
+                    Err(Failure::Backend(
+                        fc_bootstrap::backend::BackendError::Material(
+                            MaterialRepositoryError::Unavailable
+                        )
+                    ))
+                ) {
+                    self.control.fault();
+                    result = Err(Failure::Backend(
+                        fc_bootstrap::backend::BackendError::Material(
+                            MaterialRepositoryError::Faulted,
+                        ),
+                    ));
+                }
+                if result.as_ref().is_err_and(|error| !fatal(error)) {
+                    for blob in &mut pending {
+                        blob.retain = false;
+                    }
+                }
+                let records = match result {
+                    Ok(records) => records,
+                    Err(error) if !fatal(&error) => {
+                        return Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                            scope,
+                            issued: Some(command.original()?),
+                            command,
+                            outcome: BatchOutcome::Rejected(super::error_text(&error)),
+                        })))
+                    }
+                    Err(error) => return Err(error),
+                };
+                drop(pending);
+                Ok(Outcome::MaterialBatch(Box::new(BatchResult {
+                    scope,
+                    issued: Some(command.original()?),
+                    command,
+                    outcome: BatchOutcome::Saved(records),
+                })))
             }
             Job::Import {
                 lease,

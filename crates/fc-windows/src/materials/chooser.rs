@@ -95,6 +95,50 @@ pub fn select(owner: Option<HWND>) -> Result<Option<SelectedFile>> {
     })
 }
 
+/// A bounded selection only. Preparation, authorization and publication remain
+/// on the shared worker after the user confirms the ordered list.
+pub fn select_material_batch(owner: Option<HWND>) -> Result<Vec<SelectedFile>> {
+    crate::com_task::with_task_memory(|memory| unsafe {
+        let dialog: IFileOpenDialog =
+            CoCreateInstance(&FileOpenDialog, None, CLSCTX_INPROC_SERVER)?;
+        dialog.SetOptions(
+            dialog.GetOptions()?
+                | FOS_FORCEFILESYSTEM
+                | FOS_FILEMUSTEXIST
+                | FOS_PATHMUSTEXIST
+                | FOS_NOCHANGEDIR
+                | FOS_NODEREFERENCELINKS
+                | FOS_ALLOWMULTISELECT,
+        )?;
+        dialog.SetTitle(w!("选择课堂资料（最多20个，下一步确认顺序）"))?;
+        dialog.SetFileTypes(&[COMDLG_FILTERSPEC {
+            pszName: w!("课堂资料（图片、文本、PDF、Office）"),
+            pszSpec: w!("*.png;*.jpg;*.jpeg;*.bmp;*.txt;*.pdf;*.pptx;*.docx;*.xlsx"),
+        }])?;
+        match dialog.Show(owner) {
+            Ok(()) => (),
+            Err(error) if error.code() == ERROR_CANCELLED.to_hresult() => return Ok(Vec::new()),
+            Err(error) => return Err(error),
+        }
+        let items = dialog.GetResults()?;
+        let count = items.GetCount()? as usize;
+        if count == 0 || count > fc_domain::materials::MAX_MATERIAL_BATCH_FILES {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let mut selected = Vec::with_capacity(count);
+        for index in 0..count {
+            let item = items.GetItemAt(index as u32)?;
+            let text = item.GetDisplayName(SIGDN_FILESYSPATH)?;
+            let value = text.to_string();
+            memory.free(text.0.cast());
+            selected.push(SelectedFile {
+                path: PathBuf::from(value?),
+            });
+        }
+        Ok(selected)
+    })
+}
+
 pub fn select_content_txt(owner: Option<HWND>) -> Result<Option<SelectedFile>> {
     Ok(select_content(owner, false)?.pop())
 }

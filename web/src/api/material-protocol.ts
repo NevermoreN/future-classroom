@@ -59,7 +59,9 @@ export function page(x: unknown, target: MaterialScope, expected: MaterialCursor
   const folderId = decimal(v.folderId), folderRevision = decimal(v.folderRevision), offset = count(v.offset, 2048), total = count(v.total, 2048)
   if (expected ? folderId !== expected.folderId || folderRevision !== expected.folderRevision || offset !== expected.offset : offset !== 0) fail()
   const items = v.items.map(record); let last = 18446744073709551616n; const ids = new Set<string>()
-  for (const r of items) { if (BigInt(r.revision) > BigInt(folderRevision) || BigInt(r.addedSequence) > BigInt(folderRevision) || r.folderId !== folderId || r.status !== 'PUBLISHED' || BigInt(r.addedSequence) >= last || ids.has(r.materialId)) fail(); last = BigInt(r.addedSequence); ids.add(r.materialId) }
+  // One atomic folder operation can append at most twenty confirmed files.
+  const sequenceBound = BigInt(folderRevision) * 20n
+  for (const r of items) { if (BigInt(r.revision) > BigInt(folderRevision) || BigInt(r.addedSequence) > sequenceBound || r.folderId !== folderId || r.status !== 'PUBLISHED' || BigInt(r.addedSequence) >= last || ids.has(r.materialId)) fail(); last = BigInt(r.addedSequence); ids.add(r.materialId) }
   if (offset > total || offset + items.length > total || !items.length && offset < total) fail()
   const next = v.nextCursor === null ? null : cursor(v.nextCursor), end = offset + items.length
   if (end < total ? !next || next.folderId !== folderId || next.folderRevision !== folderRevision || next.offset !== end : next !== null) fail()

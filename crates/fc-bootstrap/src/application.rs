@@ -62,6 +62,8 @@ mod subject_visual_probe;
 pub fn subject_visual_probe() -> std::result::Result<(), String> {
     subject_visual_probe::run()
 }
+#[cfg(test)]
+mod material_batch_tests;
 mod material_flow;
 pub(crate) mod material_probe;
 mod profile_content_editor;
@@ -553,6 +555,7 @@ enum Outcome {
         pending: bool,
     },
     Materials(Box<MaterialPage>),
+    MaterialBatch(Box<material_flow::BatchResult>),
     MaterialLaunch(Box<material_flow::PreparedLaunch>),
     MaterialCleaned,
     LaunchCopies(material_flow::LaunchCopyReport),
@@ -614,6 +617,11 @@ impl NativeCommand {
     }
     fn snapshot(&self) -> Option<fc_ports::command_window::IssuedCommand> {
         self.0.try_lock().ok().and_then(|value| *value)
+    }
+    /// Only for a physically returned worker. A failed/poisoned metadata lock
+    /// cannot prove that issuance never occurred.
+    fn unissued_after_return(&self) -> bool {
+        self.0.try_lock().is_ok_and(|value| value.is_none())
     }
     fn read_worker(&self) -> Result<Option<fc_ports::command_window::IssuedCommand>> {
         Ok(*self.0.lock().map_err(|_| Failure::Stopped)?)
@@ -793,6 +801,7 @@ enum NativeTarget {
     Lesson(SessionLease),
     PublicLesson,
     Materials(SessionLease, fc_domain::materials::MaterialScope),
+    MaterialsBatch(SessionLease, fc_domain::materials::MaterialScope),
     ProfileContent(SessionLease, fc_domain::profile_content::ContentSlotKey),
     Homework(SessionLease, ContentKey),
     Calendar(SessionLease, i32),
@@ -841,6 +850,8 @@ enum Work {
     HttpProbe(Box<http_business_probe::Job>),
     #[cfg(test)]
     HoldForShutdown(Arc<backup_shutdown_tests::Hold>),
+    #[cfg(test)]
+    HoldForMaterialBatch(Arc<material_batch_tests::Hold>),
     Backup(Box<backup_controller::Job>),
     Open(DataPaths, Arc<CurrentClock>),
     Request(Request),
@@ -943,7 +954,7 @@ impl Task for Work {
             Self::Http(job) => job.allocation_bytes(),
             Self::HttpProbe(job) => job.allocation_bytes(),
             #[cfg(test)]
-            Self::HoldForShutdown(_) => Some(0),
+            Self::HoldForShutdown(_) | Self::HoldForMaterialBatch(_) => Some(0),
             Self::Backup(job) => job.allocation_bytes(),
             Self::Open(paths, _) => Some(paths.root().as_os_str().len().saturating_mul(2)),
             Self::ValidateOffice(p)
@@ -1058,7 +1069,9 @@ impl Work {
             ),
             Self::Material(job) => matches!(
                 job.job,
-                material_flow::Job::Import { .. } | material_flow::Job::Delete { .. }
+                material_flow::Job::Import { .. }
+                    | material_flow::Job::ImportBatch { .. }
+                    | material_flow::Job::Delete { .. }
             ),
             Self::ProfileContent(job) => matches!(
                 job.operation,
@@ -1128,6 +1141,9 @@ impl Work {
             Self::Material(job) => match &job.job {
                 material_flow::Job::Import { lease, scope, .. } => {
                     NativeTarget::Materials(*lease, *scope)
+                }
+                material_flow::Job::ImportBatch { lease, scope, .. } => {
+                    NativeTarget::MaterialsBatch(*lease, *scope)
                 }
                 material_flow::Job::Delete { lease, request } => {
                     NativeTarget::Materials(*lease, request.scope)
@@ -1208,6 +1224,11 @@ impl Work {
                 .map(|done| Outcome::HttpProbe(Box::new(done))),
             #[cfg(test)]
             Self::HoldForShutdown(hold) => {
+                hold.wait();
+                Ok(Outcome::MaterialCleaned)
+            }
+            #[cfg(test)]
+            Self::HoldForMaterialBatch(hold) => {
                 hold.wait();
                 Ok(Outcome::MaterialCleaned)
             }
@@ -1829,6 +1850,9 @@ impl App {
         if let Some(c) = &self.control {
             c.lock_local();
         }
+        if let Some(editor) = &mut self.material_editor {
+            editor.suspend();
+        }
         settings_registry::suspend(self);
         // A locked review is discarded; a later session must read current
         // candidates and revisions again. The physical download ticket remains.
@@ -2013,7 +2037,14 @@ impl App {
         // particular completion to be consumed rather than cancel its own success.
         let self_revokes = matches!(&work,Work::Request(r) if r.action==EXIT||r.action==SAVE&&matches!(r.screen,Screen::Password|Screen::Rotate))
             || matches!(&work, Work::SaveAccount(_, lease, operation) if matches!(operation.as_ref(), accounts_editor::Command::Update { command: IdentityCommand::UpdateAccount { id, .. }, .. } if *id == lease.principal_id()));
-        let command = NativeCommand::with_intent(work.native_intent());
+        let command = match &work {
+            Work::Material(job) => match &job.job {
+                material_flow::Job::ImportBatch { command, .. }
+                | material_flow::Job::QueryBatch { command, .. } => command.clone(),
+                _ => NativeCommand::with_intent(work.native_intent()),
+            },
+            _ => NativeCommand::with_intent(work.native_intent()),
+        };
         let work = Work::Tracked(Box::new(work), command.clone());
         match self
             .pool
@@ -2261,8 +2292,14 @@ impl App {
                     }
                     TO_MATERIALS => {
                         if let Some(lease) = self.lease {
-                            self.material_editor =
-                                Some(materials_editor::Editor::new(lease.principal_id()));
+                            if self
+                                .material_editor
+                                .as_ref()
+                                .is_none_or(|editor| !editor.owned_by(lease.principal_id()))
+                            {
+                                self.material_editor =
+                                    Some(materials_editor::Editor::new(lease.principal_id()));
+                            }
                             self.screen = Screen::Materials;
                             self.status.clear();
                             self.render()?;
@@ -3273,6 +3310,12 @@ impl App {
         self.render()
     }
     fn submit_material(&mut self, job: material_flow::Job) -> std::result::Result<(), String> {
+        let original_batch = match &job {
+            material_flow::Job::ImportBatch { scope, command, .. } => {
+                Some((*scope, command.clone()))
+            }
+            _ => None,
+        };
         if let (Some(backend), Some(control)) = (&self.backend, &self.control) {
             self.submit(Work::Material(Box::new(material_flow::MaterialJob {
                 root: self.root.clone(),
@@ -3280,6 +3323,21 @@ impl App {
                 control: control.clone(),
                 job,
             })))?;
+        }
+        if self.pending.is_none() {
+            if let (Some(editor), Some((scope, command))) =
+                (&mut self.material_editor, original_batch)
+            {
+                editor.batch_result(material_flow::BatchResult {
+                    scope,
+                    issued: command.snapshot(),
+                    command,
+                    outcome: material_flow::BatchOutcome::NotSubmitted(
+                        "后台未接纳本批任务；没有执行文件准备或目录写入。".into(),
+                    ),
+                })?;
+                return self.render();
+            }
         }
         Ok(())
     }
@@ -3289,6 +3347,10 @@ impl App {
         data: FormData,
     ) -> std::result::Result<(), String> {
         use materials_editor::Command;
+        if self.pending.is_some() {
+            self.status = "原任务尚未返回，请保留本批清单等待结果。".into();
+            return self.render();
+        }
         let Some(lease) = self.lease else {
             self.lock();
             return self.render();
@@ -3318,6 +3380,27 @@ impl App {
             Ok(Command::Lock) => self.lock(),
             Ok(Command::Load(request)) => {
                 self.submit_material(material_flow::Job::Load { lease, request })?
+            }
+            Ok(Command::ImportBatch {
+                scope,
+                classes,
+                selected,
+                command,
+            }) => {
+                self.submit_material(material_flow::Job::ImportBatch {
+                    lease,
+                    scope,
+                    classes,
+                    selected,
+                    command,
+                })?;
+            }
+            Ok(Command::QueryBatch { scope, command }) => {
+                self.submit_material(material_flow::Job::QueryBatch {
+                    lease,
+                    scope,
+                    command,
+                })?;
             }
             Ok(Command::Delete {
                 scope,
@@ -3349,22 +3432,25 @@ impl App {
             }) => {
                 // Native modal loop still executes the host's independent WTS /
                 // power callback. Never refresh a stale lease when it returns.
-                match self.window.select_material() {
-                    Ok(Some(selected))
+                match self.window.select_material_batch() {
+                    Ok(selected) if selected.is_empty() => self.status = "已取消选择资料。".into(),
+                    Ok(selected)
                         if self.control.as_ref().is_some_and(|c| {
                             c.note_input(lease, self.clock.monotonic_millis())
                         }) =>
                     {
                         self.last_input = Instant::now();
-                        self.submit_material(material_flow::Job::Import {
-                            lease,
-                            scope,
-                            classes: allowed_class_ids,
-                            selected,
-                        })?;
+                        match self
+                            .material_editor
+                            .as_mut()
+                            .ok_or("资料页面已关闭")?
+                            .stage_batch(scope, allowed_class_ids, selected)
+                        {
+                            Ok(()) => self.status = "请调整并确认本批清单，尚未校验或导入。".into(),
+                            Err(message) => self.status = message,
+                        }
                     }
-                    Ok(None) => self.status = "已取消选择资料。".into(),
-                    Ok(Some(_)) => {
+                    Ok(_) => {
                         self.lock();
                         self.status = "会话已锁定，请重新登录后添加资料。".into();
                     }
@@ -3826,13 +3912,59 @@ impl App {
                 }
             }
         }
+        let batch_pending = self.native_mutation_pending
+            && matches!(self.native_target, Some(NativeTarget::MaterialsBatch(..)));
+        let mut clean_batch_return = false;
         let completed = match self.pending.as_mut() {
+            // Completion can be enqueued just before the worker's done flag.
+            // Do not consume this batch terminal event until disposal is done.
+            Some(p) if batch_pending && !p.ticket.is_finished() => None,
             Some(p) => match p.ticket.try_result() {
-                Ok(Some(outcome)) => Some(outcome),
+                Ok(Some(outcome)) => {
+                    clean_batch_return =
+                        p.ticket.is_finished() && matches!(outcome, Err(Failure::Stopped));
+                    Some(outcome)
+                }
                 Ok(None) => None,
-                Err(_) => Some(Err(Failure::Stopped)),
+                Err(error) => {
+                    clean_batch_return = p.ticket.is_finished()
+                        && matches!(
+                            error,
+                            fc_runtime::worker::JobError::Cancelled
+                                | fc_runtime::worker::JobError::Deadline
+                                | fc_runtime::worker::JobError::Stopped
+                        );
+                    Some(Err(Failure::Stopped))
+                }
             },
             None => None,
+        };
+        let completed = if batch_pending && clean_batch_return {
+            match (
+                &self.native_command,
+                &self.native_target,
+                &self.material_editor,
+            ) {
+                (Some(command), Some(NativeTarget::MaterialsBatch(_, scope)), Some(editor))
+                    if command.unissued_after_return()
+                        && editor.has_original_batch(command, *scope) =>
+                {
+                    Some(Ok(Outcome::MaterialBatch(Box::new(
+                        material_flow::BatchResult {
+                            scope: *scope,
+                            command: command.clone(),
+                            issued: None,
+                            outcome: material_flow::BatchOutcome::NotSubmitted(
+                                "原后台任务已取消并实际返回，尚未取得批次票据，没有送交目录写入。"
+                                    .into(),
+                            ),
+                        },
+                    ))))
+                }
+                _ => completed,
+            }
+        } else {
+            completed
         };
         #[cfg(test)]
         let completed = tests::drop_completed_history_for_test(self, completed);
@@ -3919,6 +4051,18 @@ impl App {
                 return Ok(());
             }
             if generation != self.generation {
+                if let Ok(Outcome::MaterialBatch(result)) = &outcome {
+                    if let material_flow::BatchOutcome::NotSubmitted(reason) = &result.outcome {
+                        if let Some(editor) = &mut self.material_editor {
+                            let _ = editor.batch_result(material_flow::BatchResult {
+                                scope: result.scope,
+                                command: result.command.clone(),
+                                issued: result.issued,
+                                outcome: material_flow::BatchOutcome::NotSubmitted(reason.clone()),
+                            });
+                        }
+                    }
+                }
                 if let Ok(Outcome::MaterialLaunch(launch)) = &outcome {
                     self.cleanup_paths.push_back(launch.path.path().to_owned());
                 }
@@ -4117,6 +4261,30 @@ impl App {
                         editor.saved(document);
                     }
                     self.status = "课表、作息和校历已整体保存。".into();
+                }
+                Ok(Outcome::MaterialBatch(result)) => {
+                    use material_flow::BatchOutcome;
+                    let message = match &result.outcome {
+                        BatchOutcome::Saved(_) => "原批次已一次保存。请单独刷新目录查看当前状态；结束本次操作后可开始新批次。".to_owned(),
+                        BatchOutcome::Unknown => "原票据当前没有确定批次结果；保留原票据，不会重新导入。".to_owned(),
+                        BatchOutcome::NotSubmitted(reason) => format!("整批未送交目录写入：{reason} 原文件未变；结束本次操作后可重新选择。"),
+                        BatchOutcome::Rejected(reason) => format!("本批目录写入已被明确拒绝：{reason} 整批没有加入；请核对权限或容量后重新选择。"),
+                        BatchOutcome::Expired => "原批次查询窗口已过期，无法据此确定原保存结果；请明确刷新当前目录核对。不会重执行原票据。".to_owned(),
+                    };
+                    let target_matches = matches!(&self.native_target,
+                        Some(NativeTarget::MaterialsBatch(original, scope))
+                        if *scope == result.scope && self.lease.is_some_and(|current| NativeTarget::same_reader(current, *original)));
+                    let original = result.command.clone();
+                    let settled = !matches!(result.outcome, BatchOutcome::Unknown);
+                    self.material_editor
+                        .as_mut()
+                        .ok_or("资料页面已关闭")?
+                        .batch_result(*result)?;
+                    if settled && self.native_command.as_ref() == Some(&original) && target_matches
+                    {
+                        self.native_unknown = false;
+                    }
+                    self.status = message;
                 }
                 Ok(Outcome::Materials(page)) => {
                     self.material_editor
@@ -5775,16 +5943,27 @@ mod tests {
         let original = app.lose_completed_history_for_test.take().unwrap();
         assert!(app.native_mutation_pending);
         assert!(app.native_command.as_ref() == Some(&original));
-        let history = outcome
-            .native_history()
-            .expect("actual typed worker history");
-        assert!(history.matches(&original));
-        assert!(history.valid_result());
-        assert!(matches!(
-            history.resolution,
-            NativeResolution::Outcome(fc_ports::command_window::TypedCommandOutcome::Completed(_))
-        ));
-        // Calendar/Voice history outputs contain metadata only; physical owners
+        if let Outcome::MaterialBatch(result) = &outcome {
+            assert_eq!(result.command, original);
+            assert_eq!(result.issued, original.snapshot());
+            assert!(matches!(
+                result.outcome,
+                material_flow::BatchOutcome::Saved(_)
+            ));
+        } else {
+            let history = outcome
+                .native_history()
+                .expect("actual typed worker history");
+            assert!(history.matches(&original));
+            assert!(history.valid_result());
+            assert!(matches!(
+                history.resolution,
+                NativeResolution::Outcome(
+                    fc_ports::command_window::TypedCommandOutcome::Completed(_)
+                )
+            ));
+        }
+        // Historical outputs contain metadata only; physical owners
         // remain with their original executor. No fake historical result is made.
         drop(outcome);
         Some(Err(Failure::LostCompletedHistoryForTest))

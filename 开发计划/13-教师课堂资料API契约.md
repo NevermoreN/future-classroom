@@ -28,7 +28,7 @@ MATERIAL_CLASSES字段：`{schemaVersion:1,status:"MATERIAL_CLASSES",identityRev
 
 MATERIALS字段：`{schemaVersion:1,status:"MATERIALS",scope:{ownerTeacherId,subjectId},folderId,folderRevision,offset,total,items,nextCursor}`。普通管理浏览沿用既有writer创建空目录语义，因此folderId/folderRevision总是非零字符串；空列表仍带真实目录基线。items最多20，按addedSequence倒序；nextCursor为null或`{folderId,folderRevision,offset}`，offset/total为0..2048的安全整数。目录修订变化返回409 STALE_CURSOR，不把旧游标静默重新绑定。
 
-record字段：`{materialId,folderId,displayName,resourceVersionId,kind,bytes,sha256,allowedClassIds,addedAt,addedSequence,status,revision}`。kind为TXT/PDF/PNG/JPEG/BMP/PPTX/DOCX/XLSX；bytes为安全整数、SHA256为64位小写hex，addedAt为白板本地民用日期时间。当前列表仅PUBLISHED；历史删除结果为DELETED。record修订和新增序号不得超过所在目录修订。追加创建record修订1，删除保留原资源/文件名/班级/时间/新增序号，只改变状态和条目修订；同名文件是独立条目。
+record字段：`{materialId,folderId,displayName,resourceVersionId,kind,bytes,sha256,allowedClassIds,addedAt,addedSequence,status,revision}`。kind为TXT/PDF/PNG/JPEG/BMP/PPTX/DOCX/XLSX；bytes为安全整数、SHA256为64位小写hex，addedAt为白板本地民用日期时间。当前列表仅PUBLISHED；历史删除结果为DELETED。record修订不得超过所在目录修订。P3-08批量实现中，目录修订每次原子操作推进一次，新增序号按每件推进一次；每批最多20件，序号校验上界为目录修订乘20（饱和计算），零状态及唯一性等约束继续保留。该修正的运行验收状态见实施记录。追加创建record修订1，删除保留原资源/文件名/班级/时间/新增序号，只改变状态和条目修订；同名文件是独立条目。
 
 UPLOAD_READY为`{schemaVersion:1,status:"UPLOAD_READY",uploadId,expiresInSeconds:300,maxChunkBytes:65536}`；uploadId为服务端随机非零u64，并等于该上传预留的resourceVersionId。它不是bearer，必须原精确Web设备lease、原owner/subject、当前权限和单调期限同时有效。UPLOADED为`{schemaVersion:1,status:"UPLOADED",uploadId,bytes}`；只表示已收到受控字节，尚未追加。UPLOAD_CANCELLED为`{schemaVersion:1,status:"UPLOAD_CANCELLED",uploadId}`，只清理原设备未提交临时内容，不撤回既有COMMIT；取消无法确认则保留不确定提示、期限清理，不自动重试。
 

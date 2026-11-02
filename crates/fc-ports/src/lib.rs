@@ -6,10 +6,15 @@ pub mod calendar;
 pub use calendar::*;
 pub mod command_window;
 pub mod content_web;
+pub mod material_batch;
 pub mod material_outcome;
 pub mod profile_content;
 pub mod profiles;
 pub use content_web::ContentOutcomeRepository;
+pub use material_batch::{
+    prepare_material_batch_append, MaterialBatchAppendRequest, MaterialBatchCommandOutcome,
+    MaterialBatchOutcomeRepository, MaterialBatchRepository, PreparedMaterialBatchAppend,
+};
 pub use material_outcome::{
     MaterialCommandKind, MaterialCommandOutcome, MaterialOutcomeRepository,
 };

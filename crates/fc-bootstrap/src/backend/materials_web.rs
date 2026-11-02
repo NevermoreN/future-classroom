@@ -232,6 +232,40 @@ impl Backend {
             .map_err(|_| BackendError::Material(MaterialRepositoryError::Unavailable))?;
         Ok(record)
     }
+    /// The batch shares the existing per-file authorization rules and one
+    /// atomic Writer commit. Filesystem preparation stays outside this method.
+    pub fn web_material_append_batch(
+        &mut self,
+        lease: SessionLease,
+        prepared: fc_ports::PreparedMaterialBatchAppend,
+    ) -> Result<Vec<MaterialRecord>> {
+        let scope = prepared.request().scope;
+        for append in &prepared.request().appends {
+            self.web_material_authorize(lease, scope, &append.allowed_class_ids)?;
+        }
+        let records = self.append_material_batch(lease, prepared)?;
+        for record in &records {
+            self.web_material_authorize(lease, scope, &record.allowed_class_ids)
+                .map_err(|_| BackendError::Material(MaterialRepositoryError::Unavailable))?;
+        }
+        Ok(records)
+    }
+    pub fn web_material_batch_outcome_window(
+        &self,
+        lease: SessionLease,
+        scope: MaterialScope,
+        command: CommandId,
+        ticket: fc_ports::command_window::CommandTicket,
+    ) -> Result<Option<fc_ports::MaterialBatchCommandOutcome>> {
+        self.web_material_authorize(lease, scope, &[])?;
+        let issued = self.resolve_web_command(
+            lease,
+            fc_ports::command_window::CommandFamily::Materials,
+            ticket,
+            command,
+        )?;
+        self.material_batch_outcome(lease, scope, issued)
+    }
     pub fn web_material_delete(
         &mut self,
         lease: SessionLease,

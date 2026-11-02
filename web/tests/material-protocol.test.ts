@@ -82,9 +82,41 @@ describe('materials wire values and immutable directory snapshots', () => {
     for (const wire of mutations) expect(() => m.page(wire, target, null)).toThrow(ProtocolFault)
     expect(() => m.page({ ...page(), offset: 1, total: 2 }, target, { folderId: '8', folderRevision: '6', offset: 1 })).toThrow(ProtocolFault)
   })
-  it('rejects member versions and append sequence newer than their folder snapshot', () => {
+  it('rejects member versions above folder revision and sequence above its batch bound', () => {
     expect(() => m.page({ ...page(), items: [{ ...row(), revision: '8' }] }, target, null)).toThrow(ProtocolFault)
-    expect(() => m.page({ ...page(), items: [{ ...row(), addedSequence: '8' }] }, target, null)).toThrow(ProtocolFault)
+    expect(() => m.page({ ...page(), items: [{ ...row(), addedSequence: '141' }] }, target, null)).toThrow(ProtocolFault)
+  })
+  it('accepts twenty ordered members from one folder revision and keeps exact continuation snapshots', () => {
+    const items = Array.from({ length: 20 }, (_, i) => ({ ...row(), materialId: String(20 - i), resourceVersionId: String(120 - i), addedSequence: String(20 - i) }))
+    const wire = { ...page(), folderRevision: '1', total: 20, items }
+    expect(m.page(wire, target, null).items).toEqual(items)
+    const first = { ...wire, items: items.slice(0, 5), nextCursor: { folderId: '8', folderRevision: '1', offset: 5 } }
+    const parsed = m.page(first, target, null)
+    expect(parsed.nextCursor).toEqual(first.nextCursor)
+    const next = { ...wire, offset: 5, items: items.slice(5, 10), nextCursor: { folderId: '8', folderRevision: '1', offset: 10 } }
+    expect(m.page(next, target, parsed.nextCursor).items).toEqual(items.slice(5, 10))
+    expect(() => m.page(next, target, { ...first.nextCursor, folderRevision: '2' })).toThrow(ProtocolFault)
+  })
+  it('rejects batch sequence21 at revision1 while retaining member revision, unique, order and zero checks', () => {
+    const wire = { ...page(), folderRevision: '1', items: [{ ...row(), addedSequence: '20' }] }
+    for (const changed of [
+      { items: [{ ...wire.items[0], addedSequence: '21' }] },
+      { items: [{ ...wire.items[0], addedSequence: '0' }] },
+      { folderRevision: '0' },
+      { items: [{ ...wire.items[0], revision: '2' }] },
+      { total: 2, items: [wire.items[0], { ...wire.items[0], addedSequence: '19' }] },
+      { total: 2, items: [{ ...wire.items[0], addedSequence: '19' }, { ...wire.items[0], materialId: '12' }] },
+    ]) expect(() => m.page({ ...wire, ...changed }, target, null)).toThrow(ProtocolFault)
+  })
+  it('compares the twenty-per-revision bound exactly at u64 limits without Number rounding or wrap', () => {
+    const max = '18446744073709551615'
+    const wire = { ...page(), folderRevision: '922337203685477580', items: [{ ...row(), addedSequence: '18446744073709551600' }] }
+    expect(m.page(wire, target, null).items[0]?.addedSequence).toBe('18446744073709551600')
+    expect(() => m.page({ ...wire, items: [{ ...row(), addedSequence: '18446744073709551601' }] }, target, null)).toThrow(ProtocolFault)
+    for (const revision of ['922337203685477581', max]) {
+      expect(m.page({ ...wire, folderRevision: revision, items: [{ ...row(), addedSequence: max }] }, target, null).items[0]?.addedSequence).toBe(max)
+    }
+    expect(() => m.page({ ...wire, folderRevision: max, items: [{ ...row(), addedSequence: '18446744073709551616' }] }, target, null)).toThrow(ProtocolFault)
   })
   it('rejects mismatched extension/kind, malformed SHA, duplicate classes and unknown fields', () => {
     for (const changed of [{ kind: 'TXT' }, { sha256: 'A'.repeat(64) }, { allowedClassIds: ['1', '1'] }, { privatePath: 'C:\\school' }]) expect(() => m.record({ ...row(), ...changed })).toThrow(ProtocolFault)

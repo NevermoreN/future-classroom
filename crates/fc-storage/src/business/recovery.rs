@@ -679,6 +679,7 @@ pub(crate) fn known_omitted(key: &str) -> bool {
             "business/profiles/v1/receipts/",
             "business/profiles/v1/results/",
             "business/material/v1/receipts/",
+            "business/material/v1/batch-receipts/",
             "business/material/v1/web-outcomes/",
             "business/profile-content/v1/receipts/",
             "business/profile-content/v1/page-receipts/",

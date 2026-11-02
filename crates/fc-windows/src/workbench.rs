@@ -1199,6 +1199,9 @@ impl Window {
     pub fn select_material(&self) -> Result<Option<crate::materials::chooser::SelectedFile>> {
         crate::materials::chooser::select(Some(self.hwnd))
     }
+    pub fn select_material_batch(&self) -> Result<Vec<crate::materials::chooser::SelectedFile>> {
+        crate::materials::chooser::select_material_batch(Some(self.hwnd))
+    }
     pub fn select_content_txt(&self) -> Result<Option<crate::materials::chooser::SelectedFile>> {
         crate::materials::chooser::select_content_txt(Some(self.hwnd))
     }

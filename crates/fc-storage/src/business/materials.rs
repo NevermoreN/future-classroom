@@ -8,6 +8,9 @@ use fc_ports::{
     MaterialListRequest, MaterialOutcomeRepository, MaterialRepository, MaterialRepositoryError,
     PreparedMaterialAppend,
 };
+#[path = "materials_batch.rs"]
+mod batch;
+
 const ROOT: &str = "business/material/v1/";
 const CATALOG: &str = "business/material/v1/catalog";
 const MAX_FOLDERS: u64 = 4096;
@@ -690,6 +693,7 @@ impl<S: Send> TransactionTask<S> for MutationTask<S> {
         fingerprint.update(codec::bytes(&codec::actor(&self.actor))?);
         fingerprint.update(codec::bytes(&self.operation.payload())?);
         let digest = fingerprint.finalize().to_vec();
+        batch::reject_other_receipt(d, "batch-receipts", self.operation.id())?;
         let journal = key("receipts", self.operation.id().get());
         if let Some(v) = read(d, &journal)? {
             codec::object_fields(&v, &["fingerprint", "record", "result_digest"])?;
@@ -1461,6 +1465,7 @@ impl<S> TransactionTask<S> for OutcomeTask {
         let check =
             || authorize_web_observation(&state, &self.actor, self.clock.as_ref(), &self.session);
         check()?;
+        batch::reject_other_receipt(d, "batch-receipts", self.command_id)?;
         let attribution = read(d, &key("web-outcomes", self.command_id.get()))?;
         let mut value = Value::Null;
         if let Some(meta) = attribution {
