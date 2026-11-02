@@ -37,6 +37,13 @@ pub fn recovery_probe() -> std::result::Result<(), String> {
 pub fn recovery_probe_reopen(root: &Path, nonce: &str) -> std::result::Result<(), String> {
     backup_probe::reopen(root, nonce)
 }
+pub fn update_data_probe_stage(
+    root: &Path,
+    nonce: &str,
+    stage: &str,
+) -> std::result::Result<(), String> {
+    crate::installation_startup::run(|| backup_probe::update_data_stage(root, nonce, stage))
+}
 mod http_business_probe;
 mod http_executor;
 pub fn tls_business_probe(thumbprint: &str, marker: &str) -> std::result::Result<(), String> {
@@ -164,7 +171,6 @@ const NEW_PASSWORD: FieldId = FieldId(6);
 const CODE: FieldId = FieldId(7);
 const CLASS: FieldId = FieldId(8);
 const SUBJECT: FieldId = FieldId(9);
-const OLD_NAME: FieldId = FieldId(10);
 const COLOR: FieldId = FieldId(11);
 const OWNER: FieldId = FieldId(13);
 const CONTENT: FieldId = FieldId(14);
@@ -518,6 +524,15 @@ enum Outcome {
         record: Option<ContentRecord>,
     },
     AccountsLoaded(IdentityState),
+    SubjectsLoaded {
+        facts: settings_registry::SubjectFacts,
+        history: Option<Box<NativeHistory>>,
+        saved: bool,
+    },
+    SubjectSelfRevoked {
+        state: IdentityState,
+        history: Box<NativeHistory>,
+    },
     DefaultTeacherLoaded {
         current: IdentityState,
         history: Box<NativeHistory>,
@@ -589,6 +604,10 @@ struct Request {
 /// view. It is metadata only; only the backend can hash/admit this typed intent.
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum NativeIntent {
+    Subject {
+        expected: Revision,
+        command: IdentityCommand,
+    },
     DefaultTeacher {
         expected: Revision,
         default: fc_domain::identity::DefaultTeacher,
@@ -705,6 +724,8 @@ struct NativeHistory {
     resolution: NativeResolution,
 }
 enum NativeResolution {
+    SubjectRejected(IdentityError),
+    Subject(Option<(Revision, fc_domain::identity::SchoolSubject)>),
     DefaultTeacherRejected(IdentityError),
     DefaultTeacher(Option<(Revision, fc_domain::identity::DefaultTeacher)>),
     Outcome(fc_ports::command_window::TypedCommandOutcome),
@@ -729,6 +750,44 @@ impl NativeHistory {
     fn valid_result(&self) -> bool {
         use fc_ports::command_window::{TypedCommandOutcome as O, TypedCommandResult as R};
         match (&self.resolution, self.command.intent()) {
+            (
+                NativeResolution::SubjectRejected(
+                    IdentityError::RevisionConflict
+                    | IdentityError::InvalidScope
+                    | IdentityError::Capacity
+                    | IdentityError::InvalidText
+                    | IdentityError::DuplicateName
+                    | IdentityError::DuplicateId
+                    | IdentityError::NotFound
+                    | IdentityError::VersionOverflow,
+                ),
+                Some(NativeIntent::Subject { .. }),
+            ) => true,
+            (NativeResolution::SubjectRejected(_), _) => false,
+            (
+                NativeResolution::Subject(saved),
+                Some(NativeIntent::Subject {
+                    expected,
+                    command:
+                        IdentityCommand::PutSubject {
+                            id,
+                            name,
+                            enabled,
+                            color,
+                            expected_revision,
+                        },
+                }),
+            ) => saved.as_ref().is_none_or(|(revision, subject)| {
+                expected.next().ok() == Some(*revision)
+                    && subject.id == *id
+                    && subject.name == *name
+                    && subject.enabled == *enabled
+                    && subject.color == *color
+                    && expected_revision.unwrap_or_default().next().ok() == Some(subject.revision)
+            }),
+            (NativeResolution::Subject(_), _) => false,
+            (NativeResolution::Expired, Some(NativeIntent::Subject { .. })) => true,
+            (_, Some(NativeIntent::Subject { .. })) => false,
             (
                 NativeResolution::DefaultTeacherRejected(
                     IdentityError::RevisionConflict
@@ -763,6 +822,48 @@ impl NativeHistory {
             (_, Some(_)) => true,
             (_, None) => false,
         }
+    }
+    fn subject(
+        command: NativeCommand,
+        issued: fc_ports::command_window::IssuedCommand,
+        result: fc_bootstrap::backend::Result<
+            Option<(Revision, fc_domain::identity::SchoolSubject)>,
+        >,
+    ) -> Result<Self> {
+        let resolution = match result {
+            Ok(value) => NativeResolution::Subject(value),
+            Err(error)
+                if error.command_window_error()
+                    == Some(fc_ports::command_window::CommandWindowError::Expired) =>
+            {
+                NativeResolution::Expired
+            }
+            Err(error) => return Err(error.into()),
+        };
+        let history = Self {
+            command,
+            issued,
+            resolution,
+        };
+        if !history.valid_result() {
+            return Err(Failure::Stopped);
+        }
+        Ok(history)
+    }
+    fn subject_rejected(
+        command: NativeCommand,
+        issued: fc_ports::command_window::IssuedCommand,
+        error: IdentityError,
+    ) -> Result<Self> {
+        let history = Self {
+            command,
+            issued,
+            resolution: NativeResolution::SubjectRejected(error),
+        };
+        if !history.valid_result() {
+            return Err(Failure::Stopped);
+        }
+        Ok(history)
     }
     fn default_teacher_rejection(
         command: NativeCommand,
@@ -831,10 +932,15 @@ impl NativeHistory {
             self.resolution,
             NativeResolution::Outcome(fc_ports::command_window::TypedCommandOutcome::Pending)
                 | NativeResolution::DefaultTeacher(None)
+                | NativeResolution::Subject(None)
         )
     }
     fn message(&self) -> &'static str {
         match &self.resolution {
+            NativeResolution::SubjectRejected(IdentityError::InvalidScope) => "本次保存已被拒绝，未修改科目。请先调整课表中的相关课程和保留双表引用，再重新读取核对。",
+            NativeResolution::SubjectRejected(_) => "本次科目保存已被明确拒绝，未修改设置。草稿保留，请重新读取后核对。",
+            NativeResolution::Subject(None) => "尚未查到原科目保存结果，请重新读取核对；不会重复保存。当前目录另行显示。",
+            NativeResolution::Subject(Some(_)) => "已查到原科目保存结果；当前目录另行显示，不会再次保存。",
             NativeResolution::DefaultTeacherRejected(_) => "本次默认老师保存已被明确拒绝，未修改目录。草稿和原修订已保留；请重新加载后核对，不会自动重发。",
             NativeResolution::DefaultTeacher(None) => {
                 "原默认老师操作仍未查到持久结果；保留原票据，不会重新保存。当前目录另列。"
@@ -868,6 +974,8 @@ impl Outcome {
             Self::VoiceLoaded(_, loaded) => loaded.history.as_ref(),
             Self::Calendar(loaded) => loaded.history.as_ref(),
             Self::DefaultTeacherLoaded { history, .. } => Some(history),
+            Self::SubjectsLoaded { history, .. } => history.as_deref(),
+            Self::SubjectSelfRevoked { history, .. } => Some(history),
             _ => None,
         }
     }
@@ -876,6 +984,7 @@ impl Outcome {
 enum NativeTarget {
     Identity,
     Accounts(SessionLease),
+    Subjects(SessionLease),
     Schedule(SessionLease),
     Display(SessionLease),
     Lesson(SessionLease),
@@ -897,6 +1006,7 @@ impl NativeTarget {
         match (self, outcome) {
             (Self::Identity, Outcome::Updated { .. })
             | (Self::Accounts(_), Outcome::AccountsLoaded(_))
+            | (Self::Subjects(_), Outcome::SubjectsLoaded { .. })
             | (Self::Schedule(_), Outcome::ScheduleLoaded(_))
             | (Self::Display(_), Outcome::DisplayLoaded(..))
             | (Self::Lesson(_), Outcome::LessonLoaded(_))
@@ -945,6 +1055,8 @@ enum Work {
     Shutdown(Arc<Mutex<Backend>>),
     ValidateOffice(PathBuf),
     LoadAccounts(Arc<Mutex<Backend>>, SessionLease),
+    LoadSubjects(Arc<Mutex<Backend>>, SessionLease),
+    SaveSubject(Arc<Mutex<Backend>>, SessionLease, Revision, IdentityCommand),
     SaveAccount(
         Arc<Mutex<Backend>>,
         SessionLease,
@@ -1044,6 +1156,7 @@ impl Task for Work {
             Self::Refresh(_)
             | Self::Shutdown(_)
             | Self::LoadAccounts(_, _)
+            | Self::LoadSubjects(_, _)
             | Self::LoadSchedule(_, _)
             | Self::LoadPublicLesson(_, _)
             | Self::ChangePublicLesson(..)
@@ -1060,6 +1173,10 @@ impl Task for Work {
             Self::Autostart(job, _) => job.allocation_bytes()?.checked_add(2048),
             Self::ContentImages(job) => job.allocation_bytes(),
             Self::ProfileContent(job) => job.allocation_bytes(),
+            Self::SaveSubject(_, _, _, command) => match command {
+                IdentityCommand::PutSubject { name, .. } => name.capacity().checked_add(4096),
+                _ => None,
+            },
             Self::SaveAccount(_, _, operation) => {
                 let (strings, scopes) = match operation.as_ref() {
                     accounts_editor::Command::Create { account, .. } => (
@@ -1127,12 +1244,12 @@ impl Work {
                         | Screen::Password
                         | Screen::Rotate
                         | Screen::School
-                        | Screen::Subjects
                         | Screen::HomeworkEdit,
                     SAVE
                 ) | (Screen::School, ADD_CLASS | BIND_CLASS)
             ),
             Self::SaveAccount(..)
+            | Self::SaveSubject(..)
             | Self::ChangePublicLesson(..)
             | Self::ChangeLesson(..)
             | Self::SaveSchedule(..)
@@ -1168,6 +1285,10 @@ impl Work {
     fn native_intent(&self) -> Option<NativeIntent> {
         match self {
             Self::Tracked(work, _) => work.native_intent(),
+            Self::SaveSubject(_, _, expected, command) => Some(NativeIntent::Subject {
+                expected: *expected,
+                command: command.clone(),
+            }),
             Self::SaveAccount(_, _, operation) => match operation.as_ref() {
                 accounts_editor::Command::Update {
                     expected,
@@ -1207,6 +1328,7 @@ impl Work {
             }
             Self::Request(_) if self.native_mutation() => NativeTarget::Identity,
             Self::SaveAccount(_, lease, _) => NativeTarget::Accounts(*lease),
+            Self::SaveSubject(_, lease, ..) => NativeTarget::Subjects(*lease),
             Self::SaveSchedule(_, lease, ..) => NativeTarget::Schedule(*lease),
             Self::SaveDisplay(_, lease, ..) => NativeTarget::Display(*lease),
             Self::ChangeLesson(_, lease, ..) => NativeTarget::Lesson(*lease),
@@ -1260,6 +1382,7 @@ impl Work {
             (Self::Tracked(work, _), target) => work.reads_native_target(target),
             (Self::Refresh(_), NativeTarget::Identity) => true,
             (Self::LoadAccounts(_, lease), NativeTarget::Accounts(original))
+            | (Self::LoadSubjects(_, lease), NativeTarget::Subjects(original))
             | (Self::LoadSchedule(_, lease), NativeTarget::Schedule(original))
             | (Self::LoadDisplay(_, lease), NativeTarget::Display(original))
             | (Self::LoadLesson(_, lease), NativeTarget::Lesson(original)) => {
@@ -1499,6 +1622,112 @@ impl Work {
                 } else {
                     Ok(Outcome::AccountsLoaded(backend.management_identity(lease)?))
                 }
+            }
+            Self::LoadSubjects(backend, lease) => {
+                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
+                let history = if let Some(NativeIntent::Subject {
+                    expected,
+                    command: intent,
+                }) = command.intent()
+                {
+                    let issued = command.original()?;
+                    let result = command.query(&mut backend, context, |b| {
+                        Ok(b.subject_outcome(lease, *expected, intent.clone())?)
+                    });
+                    Some(Box::new(match result {
+                        Ok(value) => NativeHistory::subject(command.clone(), issued, Ok(value))?,
+                        Err(Failure::Backend(error)) => {
+                            NativeHistory::subject(command.clone(), issued, Err(error))?
+                        }
+                        Err(error) => return Err(error),
+                    }))
+                } else {
+                    None
+                };
+                let facts = settings_registry::load_subjects(&backend, lease, context)?;
+                Ok(Outcome::SubjectsLoaded {
+                    facts,
+                    history,
+                    saved: false,
+                })
+            }
+            Self::SaveSubject(backend, lease, expected, intent) => {
+                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
+                command.run(
+                    &mut backend,
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(lease),
+                    SessionPurpose::Manage,
+                    context,
+                    |b| {
+                        let original_epoch = b
+                            .state()?
+                            .account(lease.principal_id())
+                            .map_err(|_| Failure::Stopped)?
+                            .principal
+                            .auth_epoch;
+                        let (history, saved) = match b.identity_at(lease, expected, intent.clone())
+                        {
+                            Ok(state) => {
+                                let IdentityCommand::PutSubject { id, .. } = &intent else {
+                                    return Err(Failure::Stopped);
+                                };
+                                let subject = state
+                                    .subjects
+                                    .iter()
+                                    .find(|s| s.id == *id)
+                                    .ok_or(Failure::Stopped)?
+                                    .clone();
+                                let history = NativeHistory::subject(
+                                    command.clone(),
+                                    command.original()?,
+                                    Ok(Some((state.revision, subject))),
+                                )?;
+                                if state
+                                    .account(lease.principal_id())
+                                    .map_err(|_| Failure::Stopped)?
+                                    .principal
+                                    .auth_epoch
+                                    != original_epoch
+                                {
+                                    // The committed operation revoked this caller's own teaching
+                                    // session. Report only this original result; do not perform a
+                                    // management read with the retired lease or issue a new one.
+                                    return Ok(Outcome::SubjectSelfRevoked {
+                                        state,
+                                        history: Box::new(history),
+                                    });
+                                }
+                                (history, true)
+                            }
+                            Err(BackendError::Identity(
+                                fc_ports::IdentityRepositoryError::Domain(
+                                    error @ (IdentityError::RevisionConflict
+                                    | IdentityError::InvalidScope
+                                    | IdentityError::Capacity
+                                    | IdentityError::InvalidText
+                                    | IdentityError::DuplicateName
+                                    | IdentityError::DuplicateId
+                                    | IdentityError::NotFound
+                                    | IdentityError::VersionOverflow),
+                                ),
+                            )) => (
+                                NativeHistory::subject_rejected(
+                                    command.clone(),
+                                    command.original()?,
+                                    error,
+                                )?,
+                                false,
+                            ),
+                            Err(error) => return Err(error.into()),
+                        };
+                        Ok(Outcome::SubjectsLoaded {
+                            facts: settings_registry::load_subjects(b, lease, context)?,
+                            history: Some(Box::new(history)),
+                            saved,
+                        })
+                    },
+                )
             }
             Self::SaveAccount(backend, lease, operation) => {
                 let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
@@ -1892,6 +2121,7 @@ struct App {
     next_calendar_maintenance: Instant,
     display: Option<display_editor::Editor>,
     accounts: Option<accounts_editor::Editor>,
+    subject_editor: Option<settings_registry::SubjectEditor>,
     profiles: Option<profiles_editor::Editor>,
     profile_content: Option<profile_content_editor::Editor>,
     profile_content_owner: Option<PrincipalId>,
@@ -1927,6 +2157,7 @@ struct App {
     lesson_entry_pending: bool,
     lesson_flow_active: bool,
     offscreen_probe: bool,
+    probe_trace: bool,
     shell: fc_windows::materials::shell::ShellLauncher,
     control_slot: Arc<OnceLock<SessionControl>>,
     launch_paths: HashMap<u64, PathBuf>,
@@ -2169,7 +2400,7 @@ impl App {
             self.status = "原操作结果尚未核对，票据与目标已保留。请明确读取当前状态后再决定新的操作，不会重发。".into();
             return self.render();
         }
-        if self.offscreen_probe {
+        if self.offscreen_probe && self.probe_trace {
             let kind = match &work {
                 Work::Request(_) => "request",
                 Work::Material(_) => "material",
@@ -2194,8 +2425,23 @@ impl App {
         // WTS/explicit lock still wins immediately; the heartbeat must allow this
         // particular completion to be consumed rather than cancel its own success.
         let self_revokes = matches!(&work,Work::Request(r) if r.action==EXIT||r.action==SAVE&&matches!(r.screen,Screen::Password|Screen::Rotate))
-            || matches!(&work, Work::SaveAccount(_, lease, operation) if matches!(operation.as_ref(), accounts_editor::Command::Update { command: IdentityCommand::UpdateAccount { id, .. }, .. } if *id == lease.principal_id()));
+            || matches!(&work, Work::SaveAccount(_, lease, operation) if matches!(operation.as_ref(), accounts_editor::Command::Update { command: IdentityCommand::UpdateAccount { id, .. }, .. } if *id == lease.principal_id()))
+            || matches!(&work, Work::SaveSubject(_, lease, _, IdentityCommand::PutSubject { id, enabled, .. })
+                if self.state.subjects.iter().any(|s| s.id == *id && s.enabled != *enabled)
+                    && self.state.assignments.iter().any(|a| a.teacher_id == lease.principal_id() && a.subject_id == *id && a.enabled));
         let command = match &work {
+            Work::LoadSubjects(..)
+                if readback
+                    && self.native_unknown
+                    && self.native_command.as_ref().is_some_and(|original| {
+                        matches!(original.intent(), Some(NativeIntent::Subject { .. }))
+                    }) =>
+            {
+                self.native_command
+                    .as_ref()
+                    .ok_or("原科目保存记录不可用。")?
+                    .clone()
+            }
             Work::LoadAccounts(..)
                 if readback
                     && self.native_unknown
@@ -2324,7 +2570,7 @@ impl App {
                 self.render()?;
             }
             Event::Submit(mut action, data) => {
-                if self.offscreen_probe {
+                if self.offscreen_probe && self.probe_trace {
                     eprintln!(
                         "PROBE_EVENT tick={} action={} page={} pending={} generation={}",
                         self.clock.monotonic_millis(),
@@ -2440,6 +2686,10 @@ impl App {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
                                 Screen::Display
+                            } else if self.subject_editor.as_ref().is_some_and(|e| {
+                                Some(e.owner()) == owner && e.has_unsaved_changes()
+                            }) {
+                                Screen::Subjects
                             } else if self.accounts.as_ref().is_some_and(|e| {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
@@ -2528,12 +2778,11 @@ impl App {
                         self.status.clear();
                         self.render()?;
                     }
-                    TO_RECOVERY | TO_SCHOOL | TO_SUBJECTS | TO_HOMEWORK | TO_PASSWORD
-                    | TO_ROTATE => {
+                    TO_SUBJECTS => self.open_subjects()?,
+                    TO_RECOVERY | TO_SCHOOL | TO_HOMEWORK | TO_PASSWORD | TO_ROTATE => {
                         self.screen = match action {
                             TO_RECOVERY => Screen::Recovery,
                             TO_SCHOOL => Screen::School,
-                            TO_SUBJECTS => Screen::Subjects,
                             TO_HOMEWORK => Screen::Homework,
                             TO_PASSWORD => Screen::Password,
                             _ => Screen::Rotate,
@@ -3751,6 +4000,10 @@ impl App {
                 .as_ref()
                 .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
             || self
+                .subject_editor
+                .as_ref()
+                .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+            || self
                 .profiles
                 .as_ref()
                 .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
@@ -4164,7 +4417,7 @@ impl App {
         #[cfg(test)]
         let completed = tests::drop_completed_history_for_test(self, completed);
         if let Some(outcome) = completed {
-            if self.offscreen_probe {
+            if self.offscreen_probe && self.probe_trace {
                 let kind = match &outcome {
                     Ok(Outcome::Updated { .. }) => "updated",
                     Ok(Outcome::LaunchCopies(_)) => "copies",
@@ -4422,6 +4675,18 @@ impl App {
                             format!("{original} 当前目录已单独读取；历史结果不会覆盖当前设置。");
                     }
                 }
+                Ok(Outcome::SubjectSelfRevoked { state, .. }) => {
+                    self.state = Arc::new(state);
+                    self.subject_editor = None;
+                    self.lock();
+                    self.status =
+                        "科目修改已保存。你也任教该科目，原会话已失效；请重新登录。".into();
+                }
+                Ok(Outcome::SubjectsLoaded {
+                    facts,
+                    history,
+                    saved,
+                }) => self.subjects_loaded(facts, history, saved)?,
                 Ok(Outcome::AccountsLoaded(state)) => {
                     self.state = Arc::new(state);
                     if let Some(owner) = self.current_global_owner() {
@@ -4735,7 +5000,12 @@ fn run_at_inner(
         .map_err(|_| "实例运行目录不是受控本地目录".to_owned())?;
     let _instance = InstanceGuard::acquire(paths.root())
         .map_err(|_| "未来教室已运行，或数据目录被其他会话占用".to_owned())?;
-    let host = HiddenHost::new(!probe).map_err(|_| "无法创建托盘宿主".to_owned())?;
+    let host = if probe {
+        HiddenHost::for_isolated_probe()
+    } else {
+        HiddenHost::new(true)
+    }
+    .map_err(|_| "无法创建托盘宿主".to_owned())?;
     let stop = host.controller();
     let clock = Arc::new(CurrentClock::new());
     let mut app = create_app(clock.clone(), probe)?;
@@ -4958,7 +5228,7 @@ fn run_at_inner(
                 } else if accounts_creation == accounts_probe::CREATION_STEPS {
                     stage = 11;
                 }
-            } else if stage == 83 && lesson_stage < 8 {
+            } else if stage == 83 && lesson_stage < 9 {
                 if let Err(error) = lesson_probe_step(&mut app, &mut lesson_stage) {
                     probe_error = Some(error);
                     app.begin_shutdown();
@@ -5049,7 +5319,7 @@ fn run_at_inner(
     }
     if probe
         && (stage != 90
-            || lesson_stage != 8
+            || lesson_stage != 9
             || copies_probe.stage != 6
             || accounts_creation != accounts_probe::CREATION_STEPS
             || accounts_management != accounts_probe::MANAGEMENT_STEPS
@@ -5138,8 +5408,10 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         lesson_entry_pending: false,
         lesson_flow_active: false,
         offscreen_probe: probe,
+        probe_trace: true,
         display: None,
         accounts: None,
+        subject_editor: None,
         profiles: None,
         profile_content: None,
         profile_content_owner: None,
@@ -5178,7 +5450,7 @@ pub fn probe() -> std::result::Result<(), String> {
     let cleanup = fs::remove_dir_all(&root).map_err(|_| "隔离工作台数据未清理".to_owned());
     result?;
     cleanup?;
-    println!("native_workbench_application=PASS account_editor_stable_ID_multi_scope_reference_reject_last_admin_self_revoke_native_worker=PASS profiles_public_joint_cas_subject_exact_native_canvas=PASS profile_native_steps=39 setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
+    println!("native_workbench_application=PASS account_editor_stable_ID_multi_scope_reference_reject_last_admin_self_revoke_native_worker=PASS profiles_public_joint_cas_subject_exact_native_canvas=PASS profile_native_steps={} setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS", profiles_probe::STEPS);
     println!(
         "profile_content_text_images_clear_undo_real_preview=PASS profile_content_native_steps={}",
         profile_content_probe::STEPS
@@ -5501,6 +5773,7 @@ fn lesson_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
         }
         4 => {
             if !app.status.contains("临时安排已被修改")
+                || !app.native_unknown
                 || app
                     .lesson_editor
                     .as_ref()
@@ -5511,11 +5784,37 @@ fn lesson_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
             {
                 return Err("过期换课修订未保留原页面或未拒绝".into());
             }
+            // Phase 3 is a definite precommit Lesson Conflict. Explicitly read
+            // the current lesson before deciding a new restore intent. This is
+            // not an original command receipt query and never replays that
+            // rejected stale command or clears the production guard directly.
+            app.window
+                .probe_submit(lesson_editor::RELOAD, form(app)?)
+                .map_err(|_| "冲突后本节重读拒绝")?;
+        }
+        5 => {
+            let snapshot = &app
+                .lesson_editor
+                .as_ref()
+                .ok_or("冲突后本节重读结果缺失")?
+                .snapshot;
+            if app.screen != Screen::Lesson
+                || app.native_unknown
+                || snapshot.active_override.is_none()
+                || snapshot
+                    .current
+                    .as_ref()
+                    .is_none_or(|c| c.teacher_id.is_none() || c.effective == c.base)
+            {
+                return Err(format!("冲突后未明确读回当前临时安排：{}", app.status));
+            }
+            // Confirm a new restore from the freshly read revision. The failed
+            // original command remains failed; this is a new native C2 intent.
             app.window
                 .probe_submit(lesson_editor::RESTORE, form(app)?)
                 .map_err(|_| "恢复原课命令拒绝")?;
         }
-        5 => {
+        6 => {
             let snapshot = &app
                 .lesson_editor
                 .as_ref()
@@ -5533,7 +5832,7 @@ fn lesson_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
                 .probe_submit(lesson_editor::RELOAD, form(app)?)
                 .map_err(|_| "本节重读拒绝")?;
         }
-        6 => {
+        7 => {
             if app
                 .lesson_editor
                 .as_ref()
@@ -5545,7 +5844,7 @@ fn lesson_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
                 .probe_submit(BACK, form(app)?)
                 .map_err(|_| "换课返回拒绝")?;
         }
-        7 => {
+        8 => {
             if app.screen != Screen::Home {
                 return Err("换课未返回主管理工作台".into());
             }
@@ -5556,6 +5855,55 @@ fn lesson_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
     Ok(())
 }
 fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> {
+    if *stage == 6 {
+        if app.screen == Screen::Home {
+            *stage += 1;
+            return Ok(());
+        }
+        let view = app.view();
+        let action = if app.state.subjects.iter().any(|s| s.name == "数学")
+            && view
+                .actions
+                .iter()
+                .any(|a| a.id == settings_registry::SUBJECT_NEW)
+        {
+            BACK
+        } else if view
+            .actions
+            .iter()
+            .any(|a| a.id == settings_registry::SUBJECT_NEW)
+        {
+            settings_registry::SUBJECT_NEW
+        } else if view
+            .actions
+            .iter()
+            .any(|a| a.id == settings_registry::SUBJECT_REVIEW)
+        {
+            settings_registry::SUBJECT_REVIEW
+        } else {
+            settings_registry::SUBJECT_CONFIRM
+        };
+        let mut form = FormData::new();
+        for field in view
+            .fields
+            .into_iter()
+            .filter(|f| f.kind != FieldKind::ReadOnly)
+        {
+            let value = if field.id == SUBJECT {
+                "数学".into()
+            } else if field.id == COLOR {
+                "70A5D8".into()
+            } else {
+                field.value
+            };
+            form.insert(field.id, value)
+                .map_err(|_| "科目原生诊断表单无效")?;
+        }
+        app.window
+            .probe_submit(action, form)
+            .map_err(|_| "科目原生诊断操作未接纳")?;
+        return Ok(());
+    }
     const INITIAL: &str = "Probe-admin-password-2026";
     const TEACHER: &str = "Probe-teacher-initial-2026";
     const CHANGED: &str = "Probe-teacher-changed-2026";
@@ -5598,13 +5946,6 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
         5 => {
             action = TO_SUBJECTS;
             Screen::Home
-        }
-        6 => {
-            action = SAVE;
-            put(OLD_NAME, "")?;
-            put(SUBJECT, "数学")?;
-            put(COLOR, "70A5D8")?;
-            Screen::Subjects
         }
         7 => {
             action = TO_SCHOOL;
@@ -6217,6 +6558,7 @@ mod tests {
                 NativeResolution::Outcome(
                     fc_ports::command_window::TypedCommandOutcome::Completed(_)
                 ) | NativeResolution::DefaultTeacher(Some(_))
+                    | NativeResolution::Subject(Some(_))
             ));
         }
         // Historical outputs contain metadata only; physical owners
@@ -7512,5 +7854,474 @@ mod tests {
         assert!(app.profiles.as_ref().unwrap().has_unsaved_changes());
         wait_for(&mut app, |a| a.pool.is_finished());
         app.pool.join().unwrap();
+    }
+    fn subject_test_identity(app: &App, command: IdentityCommand) -> IdentityState {
+        let mut backend = app.backend.as_ref().unwrap().lock().unwrap();
+        let lease = app.lease.unwrap();
+        let expected = backend.state().unwrap().revision;
+        let issued = backend
+            .issue_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(lease),
+                SessionPurpose::Manage,
+            )
+            .unwrap();
+        let result = backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .identity_at(lease, expected, command)
+            .unwrap();
+        result
+    }
+    fn subject_test_ui(app: &mut App, action: ActionId, values: &[(FieldId, &str)]) {
+        voice_management_probe::submit(
+            app,
+            action,
+            values,
+            Instant::now() + Duration::from_secs(60),
+        )
+        .unwrap();
+    }
+    fn subject_test_edit(app: &mut App, enabled: &str) {
+        subject_test_ui(
+            app,
+            settings_registry::SUBJECT_EDIT,
+            &[(settings_registry::SUBJECT_SELECT, "1")],
+        );
+        subject_test_ui(
+            app,
+            settings_registry::SUBJECT_REVIEW,
+            &[(settings_registry::SUBJECT_ENABLED, enabled)],
+        );
+    }
+    #[test]
+    fn update_data_subject_text_real_cas_twice_stale_reject_preserves_originals_and_hidden_mode() {
+        let _serial = SERIAL.lock().unwrap();
+        let (scratch, mut app) = ready_management();
+        let paths = DataPaths::isolated_test(scratch.0.clone()).unwrap();
+        assert!(app.offscreen_probe && app.probe_trace);
+        app.probe_trace = false;
+        migration_probe_fixture::test_update_subject_text_cas(&mut app, &paths).unwrap();
+        assert!(
+            app.offscreen_probe,
+            "quiet diagnostics retain hidden/picker protections"
+        );
+        drain(app);
+        drop(scratch);
+    }
+    #[test]
+    fn subjects_native_disable_receipt_after_lost_reply_rename_without_enabling_and_reenable_keep_originals(
+    ) {
+        use fc_domain::{
+            layout::{LayoutScope, NodeKind, WidgetKind},
+            materials::*,
+            profile::SubjectProfileKey,
+            profile_content::*,
+        };
+        use fc_ports::MaterialListRequest;
+        let _serial = SERIAL.lock().unwrap();
+        let (scratch, mut app) = ready_management();
+        let paths = DataPaths::isolated_test(scratch.0.clone()).unwrap();
+        migration_probe_fixture::seed_source(&mut app, &paths).unwrap();
+        let backend = app.backend.as_ref().unwrap().clone();
+        let lease = app.lease.unwrap();
+        let scope = MaterialScope {
+            teacher_id: PrincipalId::new(2).unwrap(),
+            subject_id: SubjectId::new(1).unwrap(),
+        };
+        let profile_key = SubjectProfileKey {
+            class_id: ClassId::new(1).unwrap(),
+            subject_id: scope.subject_id,
+            teacher_id: scope.teacher_id,
+        };
+        let (before, page, profile, images) = {
+            let b = backend.lock().unwrap();
+            let profile = b.read_subject_profile(lease, profile_key).unwrap().unwrap();
+            let slot = ContentSlotKey {
+                scope: LayoutScope::Subject(profile_key),
+                node_id: profile
+                    .tree
+                    .nodes
+                    .iter()
+                    .find(|n| n.kind == NodeKind::Widget(WidgetKind::SubjectImage))
+                    .unwrap()
+                    .id,
+            };
+            (
+                b.state().unwrap(),
+                b.materials(
+                    lease,
+                    MaterialListRequest {
+                        scope,
+                        cursor: None,
+                    },
+                )
+                .unwrap(),
+                profile,
+                b.read_profile_content(lease, slot).unwrap(),
+            )
+        };
+        let original_path = paths.root().join("teachers/2/subjects/1/500/501.txt");
+        let original_bytes = fs::read(&original_path).unwrap();
+        app.open_subjects().unwrap();
+        wait_for(&mut app, |a| a.pending.is_none());
+        subject_test_edit(&mut app, "0");
+        assert!(app.view().description.contains("默认老师1项"));
+        subject_test_ui(&mut app, settings_registry::SUBJECT_CANCEL, &[]);
+        assert_eq!(
+            backend.lock().unwrap().state().unwrap(),
+            before,
+            "review/cancel never writes"
+        );
+        subject_test_edit(&mut app, "0");
+        app.window
+            .probe_submit(settings_registry::SUBJECT_CONFIRM, FormData::new())
+            .unwrap();
+        for event in app.window.take_events().unwrap() {
+            app.event(event).unwrap();
+        }
+        lose_worker_reply(&mut app);
+        let original = app.native_command.as_ref().unwrap().clone();
+        let pair = original.snapshot().unwrap();
+        let NativeIntent::Subject {
+            expected,
+            command: original_intent,
+        } = original.intent().unwrap().clone()
+        else {
+            panic!("subject original intent");
+        };
+        let disabled = backend.lock().unwrap().state().unwrap();
+        assert!(!disabled.subjects[0].enabled);
+        assert!(disabled.default_teachers.is_empty());
+        assert_eq!(disabled.assignments, before.assignments);
+        assert_eq!(fs::read(&original_path).unwrap(), original_bytes);
+        // A later real publication deliberately differs from the original result.
+        let saved = &disabled.subjects[0];
+        subject_test_identity(
+            &app,
+            IdentityCommand::PutSubject {
+                id: saved.id,
+                name: "后续停用名称".into(),
+                enabled: false,
+                color: saved.color,
+                expected_revision: Some(saved.revision),
+            },
+        );
+        let later = backend.lock().unwrap().state().unwrap();
+        subject_test_ui(&mut app, settings_registry::SUBJECT_RELOAD, &[]);
+        assert!(!app.native_unknown);
+        assert_eq!(app.native_command.as_ref(), Some(&original));
+        assert_eq!(
+            app.state.as_ref(),
+            &later,
+            "historical identity cannot replace current authority"
+        );
+        assert!(app.status.contains("源合成科目一") && app.status.contains("停用"));
+        assert_eq!(
+            backend.lock().unwrap().state().unwrap(),
+            later,
+            "original receipt query never replays identity"
+        );
+        {
+            let mut b = backend.lock().unwrap();
+            let mut original_scope = b.begin_command_scope(pair).unwrap();
+            let result = original_scope
+                .subject_outcome(lease, expected, original_intent.clone())
+                .unwrap()
+                .unwrap();
+            assert_eq!(result.1, disabled.subjects[0]);
+            assert!(original_scope
+                .subject_outcome(lease, expected.next().unwrap(), original_intent.clone())
+                .is_err());
+            let mut tampered = original_intent.clone();
+            if let IdentityCommand::PutSubject { enabled, .. } = &mut tampered {
+                *enabled = true;
+            }
+            assert!(
+                original_scope
+                    .subject_outcome(lease, expected, tampered)
+                    .is_err(),
+                "original C2 binds complete intent"
+            );
+        }
+        subject_test_ui(
+            &mut app,
+            settings_registry::SUBJECT_EDIT,
+            &[(settings_registry::SUBJECT_SELECT, "1")],
+        );
+        subject_test_ui(
+            &mut app,
+            settings_registry::SUBJECT_REVIEW,
+            &[(SUBJECT, "界面改名仍停用")],
+        );
+        subject_test_ui(&mut app, settings_registry::SUBJECT_CONFIRM, &[]);
+        assert!(
+            !backend.lock().unwrap().state().unwrap().subjects[0].enabled,
+            "renaming cannot silently enable"
+        );
+        subject_test_edit(&mut app, "1");
+        subject_test_ui(&mut app, settings_registry::SUBJECT_CONFIRM, &[]);
+        let b = backend.lock().unwrap();
+        let enabled = b.state().unwrap();
+        assert!(enabled.subjects[0].enabled);
+        assert_eq!(enabled.subjects[0].id, before.subjects[0].id);
+        assert_eq!(enabled.subjects[0].color, before.subjects[0].color);
+        assert_eq!(enabled.assignments, before.assignments);
+        assert!(
+            enabled.default_teachers.is_empty(),
+            "re-enable cannot silently choose a default teacher"
+        );
+        assert!(
+            enabled
+                .account(scope.teacher_id)
+                .unwrap()
+                .principal
+                .auth_epoch
+                > before
+                    .account(scope.teacher_id)
+                    .unwrap()
+                    .principal
+                    .auth_epoch
+        );
+        assert_eq!(
+            b.materials(
+                lease,
+                MaterialListRequest {
+                    scope,
+                    cursor: None
+                }
+            )
+            .unwrap(),
+            page
+        );
+        assert_eq!(
+            b.read_subject_profile(lease, profile_key).unwrap().unwrap(),
+            profile
+        );
+        assert_eq!(
+            b.read_profile_content(lease, images.slot).unwrap(),
+            images,
+            "both real image versions survive"
+        );
+        assert_eq!(fs::read(&original_path).unwrap(), original_bytes);
+        drop(b);
+        drain(app);
+        drop(backend);
+        drop(scratch);
+    }
+    #[test]
+    fn subjects_native_stale_identity_and_retained_only_timetable_reference_are_definite_rejections(
+    ) {
+        use fc_domain::{schedule::*, schedule_document::SemesterPlan, time::*};
+        let _serial = SERIAL.lock().unwrap();
+        let (scratch, mut app) = ready_management();
+        let paths = DataPaths::isolated_test(scratch.0.clone()).unwrap();
+        migration_probe_fixture::seed_source(&mut app, &paths).unwrap();
+        let backend = app.backend.as_ref().unwrap().clone();
+        let lease = app.lease.unwrap();
+        app.open_subjects().unwrap();
+        wait_for(&mut app, |a| a.pending.is_none());
+        subject_test_edit(&mut app, "0");
+        subject_test_identity(
+            &app,
+            IdentityCommand::RenameSchool {
+                name: "并发合成学校".into(),
+            },
+        );
+        let concurrent = backend.lock().unwrap().state().unwrap();
+        subject_test_ui(&mut app, settings_registry::SUBJECT_CONFIRM, &[]);
+        assert_eq!(backend.lock().unwrap().state().unwrap(), concurrent);
+        assert!(!app.native_unknown && app.status.contains("拒绝"));
+        assert!(app.has_unsaved_changes());
+        subject_test_ui(&mut app, settings_registry::SUBJECT_RELOAD, &[]);
+        // Only the retained Even table references this subject. The surviving
+        // Single table has no cells; counting only current rows would miss it.
+        {
+            let year = app.clock.try_now().unwrap().date.year();
+            let anchor = (25..=31)
+                .filter_map(|day| LocalDate::new(year - 1, 12, day).ok())
+                .find(|d| d.weekday() == Weekday::Monday)
+                .unwrap();
+            let row = |id, cell: bool| TimetableRow {
+                id: RowId::new(id).unwrap(),
+                logical_key: LogicalRowKey::new(100).unwrap(),
+                group: DayGroup::Morning,
+                kind: RowKind::Course,
+                range: MinuteRange::new(Minute::new(480).unwrap(), Minute::new(525).unwrap())
+                    .unwrap(),
+                enabled_days: [true; 7],
+                courses: std::array::from_fn(|day| {
+                    (cell && day == 0).then_some(CourseCell {
+                        subject_id: SubjectId::new(1).unwrap(),
+                        teacher: TeacherBinding::Default,
+                    })
+                }),
+            };
+            let plan = SemesterPlan::new(
+                Semester {
+                    id: SemesterId::new(100).unwrap(),
+                    class_id: ClassId::new(1).unwrap(),
+                    revision: Revision::default(),
+                    enabled: false,
+                    start: LocalDate::new(year, 1, 1).unwrap(),
+                    end: LocalDate::new(year, 12, 31).unwrap(),
+                    first_week_monday: anchor,
+                    tables: vec![
+                        WeekTable {
+                            id: TableId::new(101).unwrap(),
+                            role: TableRole::Odd,
+                            rows: vec![row(102, false)],
+                        },
+                        WeekTable {
+                            id: TableId::new(103).unwrap(),
+                            role: TableRole::Even,
+                            rows: vec![row(104, true)],
+                        },
+                    ],
+                },
+                "保留双表引用合成课表".into(),
+            )
+            .disable_dual(TableId::new(101).unwrap())
+            .unwrap();
+            let mut b = backend.lock().unwrap();
+            let mut document = b.read_schedule(lease).unwrap();
+            document.semesters = vec![plan];
+            document.update_id_high_water();
+            let issued = b
+                .issue_native_command(
+                    fc_ports::command_window::CommandFamily::Schedule,
+                    Some(lease),
+                    SessionPurpose::Manage,
+                )
+                .unwrap();
+            b.begin_command_scope(issued)
+                .unwrap()
+                .save_schedule(lease, document.revision, document)
+                .unwrap();
+        }
+        subject_test_ui(&mut app, settings_registry::SUBJECT_RELOAD, &[]);
+        subject_test_edit(&mut app, "0");
+        assert!(app.view().description.contains("课表1格（含保留双表）"));
+        assert!(app.view().description.contains("保存会被拒绝"));
+        let before = backend.lock().unwrap().state().unwrap();
+        subject_test_ui(&mut app, settings_registry::SUBJECT_CONFIRM, &[]);
+        assert_eq!(backend.lock().unwrap().state().unwrap(), before);
+        assert!(!app.native_unknown && app.status.contains("保留双表"));
+        assert!(app.has_unsaved_changes());
+        // Lock discards the confirmation, preserving only non-secret draft.
+        subject_test_ui(&mut app, settings_registry::SUBJECT_REVIEW, &[]);
+        app.event(Event::Submit(LOCK, FormData::new())).unwrap();
+        assert!(app.screen == Screen::Login && app.lease.is_none());
+        assert_eq!(backend.lock().unwrap().state().unwrap(), before);
+        drain(app);
+        drop(backend);
+        drop(scratch);
+    }
+    #[test]
+    fn subjects_native_self_teaching_revocation_confirms_commit_without_new_lease_or_current_read()
+    {
+        let _serial = SERIAL.lock().unwrap();
+        let (scratch, mut app) = ready_management();
+        let paths = DataPaths::isolated_test(scratch.0.clone()).unwrap();
+        migration_probe_fixture::seed_source(&mut app, &paths).unwrap();
+        let backend = app.backend.as_ref().unwrap().clone();
+        const INITIAL: &str = "Synthetic self subject administrator 2026!";
+        const CHANGED: &str = "Synthetic self subject changed 2026!";
+        {
+            let mut b = backend.lock().unwrap();
+            let lease = app.lease.unwrap();
+            let issued = b
+                .issue_native_command(
+                    fc_ports::command_window::CommandFamily::Identity,
+                    Some(lease),
+                    SessionPurpose::Manage,
+                )
+                .unwrap();
+            drop(
+                b.begin_command_scope(issued)
+                    .unwrap()
+                    .create_account(
+                        lease,
+                        NewAccount {
+                            id: PrincipalId::new(3).unwrap(),
+                            login_name: "subject-self-admin".into(),
+                            display_name: "合成任教主管理员".into(),
+                            role: Role::GlobalAdmin,
+                            scopes: vec![AssignmentScope {
+                                class_id: ClassId::new(1).unwrap(),
+                                subject_id: SubjectId::new(1).unwrap(),
+                            }],
+                        },
+                        Password::new(INITIAL.into()).unwrap(),
+                    )
+                    .unwrap(),
+            );
+        }
+        subject_test_ui(&mut app, LOCK, &[]);
+        subject_test_ui(
+            &mut app,
+            LOG_IN,
+            &[(LOGIN, "subject-self-admin"), (PASSWORD, INITIAL)],
+        );
+        assert!(app.screen == Screen::Password);
+        subject_test_ui(
+            &mut app,
+            SAVE,
+            &[
+                (PASSWORD, INITIAL),
+                (NEW_PASSWORD, CHANGED),
+                (CONFIRM, CHANGED),
+            ],
+        );
+        subject_test_ui(
+            &mut app,
+            LOG_IN,
+            &[(LOGIN, "subject-self-admin"), (PASSWORD, CHANGED)],
+        );
+        let old_lease = app.lease.unwrap();
+        assert_eq!(old_lease.principal_id().get(), 3);
+        app.open_subjects().unwrap();
+        wait_for(&mut app, |a| a.pending.is_none());
+        subject_test_edit(&mut app, "0");
+        app.window
+            .probe_submit(settings_registry::SUBJECT_CONFIRM, FormData::new())
+            .unwrap();
+        for event in app.window.take_events().unwrap() {
+            app.event(event).unwrap();
+        }
+        assert!(
+            app.pending.as_ref().unwrap().self_revokes,
+            "normal GUI heartbeat must consume its original completion"
+        );
+        wait_for(&mut app, |a| a.pending.is_none());
+        assert!(app.screen == Screen::Login && app.lease.is_none());
+        assert!(!app.native_unknown && app.status.contains("已保存"));
+        assert!(app.control.as_ref().unwrap().is_local_locked());
+        let original = app.native_command.as_ref().unwrap().clone();
+        let pair = original.snapshot().unwrap();
+        let NativeIntent::Subject { expected, command } = original.intent().unwrap().clone() else {
+            panic!("subject original intent");
+        };
+        {
+            let mut b = backend.lock().unwrap();
+            let current = b.state().unwrap();
+            assert!(!current.subjects[0].enabled);
+            assert!(b.check_session(old_lease, SessionPurpose::Manage).is_err());
+            let mut original_scope = b.begin_command_scope(pair).unwrap();
+            assert!(
+                original_scope
+                    .subject_outcome(old_lease, expected, command)
+                    .is_err(),
+                "a saved receipt is never authority for the retired caller"
+            );
+        }
+        app.open_subjects().unwrap();
+        assert!(
+            app.lease.is_none() && app.screen == Screen::Login,
+            "original result display cannot mint or renew a management lease"
+        );
+        drain(app);
+        drop(backend);
+        drop(scratch);
     }
 }

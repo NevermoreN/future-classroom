@@ -3,7 +3,7 @@ use super::*;
 use accounts_editor as e;
 
 pub(super) const CREATION_STEPS: u8 = 8;
-pub(super) const MANAGEMENT_STEPS: u8 = 36;
+pub(super) const MANAGEMENT_STEPS: u8 = 37;
 
 fn submit(
     app: &App,
@@ -208,11 +208,30 @@ pub(super) fn manage(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
         }
         16 => submit(app, e::CANCEL, &[])?,
         17 => submit(app, e::DISCARD, &[])?,
-        18 => select(app, "probe-admin")?,
-        19 => submit(app, e::EDIT, &[])?,
-        20 => submit(app, e::REVIEW, &[(e::NAME, "验证主管理员改名")])?,
-        21 => submit(app, e::CONFIRM, &[])?,
-        22 => {
+        18 => {
+            // RETURN/CANCEL/DISCARD only leave the rejected draft. Use the real
+            // reload control before confirming a different account mutation.
+            submit(app, e::RELOAD, &[])?;
+        }
+        19 => {
+            if app.native_unknown
+                || app.screen != Screen::Accounts
+                || !app
+                    .state
+                    .account_by_login("probe-teacher")
+                    .is_ok_and(|a| a.principal.enabled)
+            {
+                return Err("引用拒绝后未明确读回当前账号状态".into());
+            }
+            // The previous disable was definitely rejected. Choose the next
+            // account only after a fresh current read; no original receipt is
+            // inferred and no rejected command is replayed.
+            select(app, "probe-admin")?;
+        }
+        20 => submit(app, e::EDIT, &[])?,
+        21 => submit(app, e::REVIEW, &[(e::NAME, "验证主管理员改名")])?,
+        22 => submit(app, e::CONFIRM, &[])?,
+        23 => {
             if app.screen != Screen::Login
                 || app.lease.is_some()
                 || !app
@@ -235,11 +254,11 @@ pub(super) fn manage(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
                 ],
             )?;
         }
-        23 => submit(app, TO_ACCOUNTS, &[])?,
-        24 => select(app, "probe-admin")?,
-        25 => submit(app, e::EDIT, &[])?,
-        26 => submit(app, e::REVIEW, &[(e::ENABLED, "0")])?,
-        27 => {
+        24 => submit(app, TO_ACCOUNTS, &[])?,
+        25 => select(app, "probe-admin")?,
+        26 => submit(app, e::EDIT, &[])?,
+        27 => submit(app, e::REVIEW, &[(e::ENABLED, "0")])?,
+        28 => {
             if !app.status.contains("最后")
                 || !app
                     .state
@@ -250,17 +269,17 @@ pub(super) fn manage(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
             }
             submit(app, e::CANCEL, &[])?;
         }
-        28 => submit(app, e::DISCARD, &[])?,
-        29 => select(app, "probe-teacher")?,
-        30 => submit(app, e::EDIT, &[])?,
-        31 => submit(app, e::APPLY_ROLE, &[(e::ROLE, "user")])?,
-        32 => {
+        29 => submit(app, e::DISCARD, &[])?,
+        30 => select(app, "probe-teacher")?,
+        31 => submit(app, e::EDIT, &[])?,
+        32 => submit(app, e::APPLY_ROLE, &[(e::ROLE, "user")])?,
+        33 => {
             if !app.view().description.contains("普通用户不能任教") {
                 return Err("角色降级未要求明确清空范围".into());
             }
             submit(app, e::KEEP, &[])?;
         }
-        33 => {
+        34 => {
             // Keeping the old role must leave no silent scope loss. Finish with
             // an explicit cancel; an unchanged draft returns to the account list.
             let teacher = app
@@ -272,8 +291,8 @@ pub(super) fn manage(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
             }
             submit(app, e::CANCEL, &[])?;
         }
-        34 => submit(app, e::CLOSE, &[])?,
-        35 => {
+        35 => submit(app, e::CLOSE, &[])?,
+        36 => {
             if app.screen != Screen::Home {
                 return Err("账号探针结束未返回主管理员工作台".into());
             }

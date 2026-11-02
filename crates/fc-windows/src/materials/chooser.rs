@@ -38,6 +38,43 @@ impl SelectedFile {
     pub fn open(self, max: u64) -> Result<LockedFile> {
         LockedFile::open(&self.path, max)
     }
+    /// Update diagnostics may select only this fixture's fixed synthetic source
+    /// names in the exact nonce-owned, protected default deployment. This does
+    /// not relax the isolated picker or accept an arbitrary external path.
+    pub fn update_probe(root: &Path, nonce: &str, name: &str) -> Result<Self> {
+        use std::io::Read;
+        let paths = crate::system::DataPaths::program_data()?;
+        if root != paths.root()
+            || nonce.len() != 32
+            || !nonce
+                .bytes()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+            || !matches!(
+                name,
+                "migration-source.txt"
+                    | "update-second.txt"
+                    | "migration-source-601.png"
+                    | "migration-source-602.png"
+            )
+        {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        paths.verify_root_for_current_user()?;
+        let _root = super::files::PinnedDirectory::open(root)?;
+        paths.verify_root_for_current_user()?;
+        let mut owner = LockedFile::open(&root.join("update-data-probe.owner"), 32)?;
+        if owner.len()? != 32 {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let mut bytes = [0u8; 32];
+        owner.file_mut().read_exact(&mut bytes)?;
+        if bytes != nonce.as_bytes() {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        Ok(Self {
+            path: root.join("quarantine").join(name),
+        })
+    }
     /// Hidden diagnostics use only synthetic files under a protected isolated
     /// deployment's quarantine, never the user's own material or production tree.
     pub fn isolated_probe(root: &Path, name: &str) -> Result<Self> {

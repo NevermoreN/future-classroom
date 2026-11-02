@@ -43,6 +43,11 @@ struct Descriptor {
 #[derive(Clone)]
 pub struct RunScope(Arc<Descriptor>);
 impl RunScope {
+    /// Shared syntax only: no path ownership, registry access or startup grant.
+    /// Installer effects supply their independently verified fixed product path.
+    pub(crate) fn command_for_executable(executable: &Path) -> Result<String> {
+        command_for(executable)
+    }
     pub fn current_executable() -> Result<Self> {
         let executable = std::env::current_exe().map_err(|_| Error::from_hresult(E_FAIL))?;
         Self::build(RUN_KEY.into(), executable, false)

@@ -36,6 +36,9 @@ impl Admission {
 pub(super) struct Admitted {
     kind: Admission,
     snapshot: Option<preimage::Snapshot>,
+    // Only Upgrade may retain a pre-existing exact owned Run command. This is
+    // volatile read-only evidence, never an intent to create/restore a value.
+    upgrade_run: Option<RunPreimage>,
 }
 impl Admitted {
     pub(super) fn operation(&self) -> MaintenanceOperation {
@@ -296,6 +299,125 @@ fn same_registration(manifest: &Manifest, sid: &[u8]) -> Result<()> {
     }
     component_registration(manifest)
 }
+
+const MAX_RUN_COMMAND_BYTES: usize = 260 * 2;
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum RunPreimage {
+    Absent,
+    ExactCommand { kind: u32, bytes: Vec<u8> },
+}
+fn expected_installed_run_command() -> Result<String> {
+    Ok(crate::system::RunScope::command_for_executable(
+        &root()?.join("fc-bootstrap.exe"),
+    )?)
+}
+fn run_command_bytes(expected: &str) -> Result<Vec<u8>> {
+    if expected.encode_utf16().count() >= MAX_RUN_COMMAND_BYTES / 2 {
+        return Err(LifecycleError::Invalid);
+    }
+    Ok(expected
+        .encode_utf16()
+        .chain(Some(0))
+        .flat_map(u16::to_le_bytes)
+        .collect())
+}
+fn exact_run_value(kind: u32, raw: &[u8], expected: &[u8]) -> Result<RunPreimage> {
+    if expected.len() < 2
+        || expected.len() > MAX_RUN_COMMAND_BYTES
+        || !expected.len().is_multiple_of(2)
+        || !expected.ends_with(&[0, 0])
+    {
+        return Err(LifecycleError::Invalid);
+    }
+    // Expected bytes come only from the existing strict command formatter.
+    // No whitespace/case expansion, environment expansion, alternate flags,
+    // extra NUL, lossy UTF-16 conversion or type reinterpretation is accepted.
+    if kind != REG_SZ.0 || raw != expected {
+        return Err(LifecycleError::Unsettled);
+    }
+    Ok(RunPreimage::ExactCommand {
+        kind,
+        bytes: raw.to_vec(),
+    })
+}
+fn read_run_preimage_at(
+    path: &str,
+    expected_command: impl FnOnce() -> Result<String>,
+) -> Result<RunPreimage> {
+    let mut owner = Resources::empty()?;
+    let mut key = HKEY::default();
+    let opened = unsafe {
+        RegOpenKeyExW(
+            HKEY_CURRENT_USER,
+            &HSTRING::from(path),
+            Some(0),
+            KEY_QUERY_VALUE | KEY_WOW64_32KEY,
+            &mut key,
+        )
+    };
+    if opened == ERROR_FILE_NOT_FOUND {
+        owner.release()?;
+        return Ok(RunPreimage::Absent);
+    }
+    if opened != ERROR_SUCCESS {
+        owner.release()?;
+        return Err(windows::core::Error::from_hresult(opened.to_hresult()).into());
+    }
+    owner.add(HANDLE(key.0), Role::Registry);
+    let mut kind = REG_VALUE_TYPE::default();
+    let mut raw = [0u8; MAX_RUN_COMMAND_BYTES];
+    let mut bytes = raw.len() as u32;
+    // Fixed stack capacity: a value's reported size never controls allocation.
+    let queried = unsafe {
+        RegQueryValueExW(
+            key,
+            windows::core::w!("FutureClassroom"),
+            None,
+            Some(&mut kind),
+            Some(raw.as_mut_ptr()),
+            Some(&mut bytes),
+        )
+    };
+    // Checked HKEY return precedes parsing and every error/result publication.
+    owner.release()?;
+    match queried {
+        ERROR_FILE_NOT_FOUND => Ok(RunPreimage::Absent),
+        ERROR_SUCCESS if bytes as usize <= raw.len() => {
+            // A long installation path may legitimately have no Run value.
+            // Format/length restrictions apply only to a present command.
+            let expected = run_command_bytes(&expected_command()?)?;
+            exact_run_value(kind.0, &raw[..bytes as usize], &expected)
+        }
+        ERROR_SUCCESS | ERROR_MORE_DATA => Err(LifecycleError::Unsettled),
+        error => Err(windows::core::Error::from_hresult(error.to_hresult()).into()),
+    }
+}
+fn match_run_preimage_at(
+    path: &str,
+    original: &RunPreimage,
+    command: impl FnOnce() -> Result<String>,
+) -> Result<()> {
+    if read_run_preimage_at(path, command)? != *original {
+        return Err(LifecycleError::Unsettled);
+    }
+    Ok(())
+}
+fn check_admitted_run(admission: &Admitted) -> Result<()> {
+    if admission.kind == Admission::Upgrade {
+        let original = admission
+            .upgrade_run
+            .as_ref()
+            .ok_or(LifecycleError::Invalid)?;
+        match_run_preimage_at(RUN_KEY, original, expected_installed_run_command)
+    } else {
+        if admission.upgrade_run.is_some() {
+            return Err(LifecycleError::Invalid);
+        }
+        // Fresh install, same-package repair and uninstall keep their original
+        // strict absent-only rule. Upgrade preservation grants no cleanup right.
+        run_absent_at(RUN_KEY)
+    }
+}
 fn run_absent_at(path: &str) -> Result<()> {
     let mut owner = Resources::empty()?;
     let name = HSTRING::from(path);
@@ -415,12 +537,14 @@ pub(super) fn admit(session: &mut Session) -> Result<Admitted> {
         Ok(Admitted {
             kind: Admission::SameManifest,
             snapshot: Some(captured?),
+            upgrade_run: None,
         })
     } else {
         fresh(session)?;
         Ok(Admitted {
             kind: Admission::Fresh,
             snapshot: None,
+            upgrade_run: None,
         })
     }
 }
@@ -433,7 +557,7 @@ fn registered_preimage(session: &Session, proof: &mut Proof) -> Result<preimage:
 }
 pub(super) fn revalidate(session: &mut Session, admission: &Admitted) -> Result<()> {
     current(session.deadline)?;
-    run_absent_at(RUN_KEY)?;
+    check_admitted_run(admission)?;
     match admission.kind {
         Admission::Upgrade => upgrade::revalidate(session, admission)?,
         Admission::Fresh => fresh(session)?,
@@ -454,7 +578,11 @@ pub(super) fn revalidate(session: &mut Session, admission: &Admitted) -> Result<
             }
         }
     }
-    current(session.deadline)
+    current(session.deadline)?;
+    if admission.kind == Admission::Upgrade {
+        check_admitted_run(admission)?;
+    }
+    Ok(())
 }
 
 /// Each group uses the existing checked native ledger (64 resources/8 owners),
@@ -799,7 +927,7 @@ pub(super) fn present(session: &Session) -> Result<Proof> {
 }
 pub(super) fn staged(session: &mut Session, admission: &Admitted) -> Result<Decision> {
     current(session.deadline)?;
-    run_absent_at(RUN_KEY)?;
+    check_admitted_run(admission)?;
     let mut proof = Proof::new(session.deadline);
     let base = root()?;
     let observed = files(&mut proof, &base, &session.manifest, &session.resources.sid)
@@ -816,6 +944,9 @@ pub(super) fn staged(session: &mut Session, admission: &Admitted) -> Result<Deci
         Observation::Other
     };
     current(session.deadline)?;
+    if admission.kind == Admission::Upgrade {
+        check_admitted_run(admission)?;
+    }
     Ok(Decision::observed(admission.kind, observed))
 }
 pub(super) fn failed_install(admission: &Admitted) -> Decision {
@@ -842,9 +973,14 @@ pub(super) fn reconcile(
     decision: Decision,
 ) -> Result<Proof> {
     current(session.deadline)?;
-    run_absent_at(RUN_KEY)?;
+    check_admitted_run(admission)?;
     if admission.kind == Admission::Upgrade {
-        return upgrade::reconcile(session, admission, decision);
+        let proof = upgrade::reconcile(session, admission, decision)?;
+        // Payload hashing and registration checks may take time. Recheck the
+        // original Run bytes after them before publishing reconciled effects.
+        check_admitted_run(admission)?;
+        proof.check()?;
+        return Ok(proof);
     }
     if decision.expected == ExpectedState::Present {
         return present(session);
@@ -1154,6 +1290,196 @@ mod tests {
         assert!(run_absent_at(&path).is_ok());
     }
 
+    #[test]
+    fn upgrade_run_requires_exact_reg_sz_owned_command_and_complete_utf16_bytes() {
+        let command = crate::system::RunScope::command_for_executable(std::path::Path::new(
+            r"C:\Users\Synthetic\AppData\Local\Programs\FutureClassroom\fc-bootstrap.exe",
+        ))
+        .unwrap();
+        let expected = run_command_bytes(&command).unwrap();
+        assert_eq!(
+            exact_run_value(REG_SZ.0, &expected, &expected).unwrap(),
+            RunPreimage::ExactCommand {
+                kind: REG_SZ.0,
+                bytes: expected.clone()
+            }
+        );
+        for kind in [REG_EXPAND_SZ, REG_BINARY, REG_DWORD, REG_NONE] {
+            assert_eq!(
+                exact_run_value(kind.0, &expected, &expected),
+                Err(LifecycleError::Unsettled)
+            );
+        }
+        let mut extra_nul = expected.clone();
+        extra_nul.extend_from_slice(&[0, 0]);
+        let mut interior_nul = expected.clone();
+        interior_nul[2] = 0;
+        interior_nul[3] = 0;
+        let mut invalid_utf16 = expected.clone();
+        invalid_utf16[0] = 0;
+        invalid_utf16[1] = 0xd8;
+        let encoded = |text: &str| {
+            text.encode_utf16()
+                .chain(Some(0))
+                .flat_map(u16::to_le_bytes)
+                .collect::<Vec<_>>()
+        };
+        for other in [
+            Vec::new(),
+            expected[..expected.len() - 2].to_vec(),
+            expected[..expected.len() - 1].to_vec(),
+            extra_nul,
+            interior_nul,
+            invalid_utf16,
+            encoded(&command.replace(" --autostart", "  --autostart")),
+            encoded(&command.replace("fc-bootstrap.exe", "fc-installer-lifecycle.exe")),
+            encoded(&command.replace("fc-bootstrap.exe", "other.exe")),
+            encoded(&command.to_lowercase()),
+            encoded(&format!("{command} --other")),
+            vec![b'x'; MAX_RUN_COMMAND_BYTES + 2],
+        ] {
+            assert_eq!(
+                exact_run_value(REG_SZ.0, &other, &expected),
+                Err(LifecycleError::Unsettled)
+            );
+        }
+    }
+    #[test]
+    fn upgrade_run_formatter_keeps_the_existing_260_unit_including_nul_bound() {
+        let prefix = r"C:\";
+        let suffix = ".exe";
+        let syntax = "\"\" --autostart";
+        let overhead = prefix.encode_utf16().count()
+            + suffix.encode_utf16().count()
+            + syntax.encode_utf16().count();
+        let longest_path = format!("{prefix}{}{suffix}", "a".repeat(259 - overhead));
+        let command =
+            crate::system::RunScope::command_for_executable(std::path::Path::new(&longest_path))
+                .unwrap();
+        assert_eq!(command.encode_utf16().count(), 259);
+        let raw = run_command_bytes(&command).unwrap();
+        assert_eq!(raw.len(), MAX_RUN_COMMAND_BYTES);
+        assert!(exact_run_value(REG_SZ.0, &raw, &raw).is_ok());
+        let too_long = format!("{prefix}{}{suffix}", "a".repeat(260 - overhead));
+        assert!(
+            crate::system::RunScope::command_for_executable(std::path::Path::new(&too_long))
+                .is_err()
+        );
+        assert_eq!(
+            run_command_bytes(&"a".repeat(260)),
+            Err(LifecycleError::Invalid)
+        );
+    }
+    #[test]
+    fn actual_upgrade_run_preimage_preserves_original_bytes_and_never_compensates_external_changes()
+    {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let fixture = RegistryFixture::new();
+        let path = fixture.path.as_ref().unwrap().clone();
+        let command = expected_installed_run_command().unwrap();
+        let absent = read_run_preimage_at(&path, || Ok(command.clone())).unwrap();
+        assert_eq!(absent, RunPreimage::Absent);
+        let mut formatter_called = false;
+        assert_eq!(
+            read_run_preimage_at(&path, || {
+                formatter_called = true;
+                Err(LifecycleError::Invalid)
+            })
+            .unwrap(),
+            RunPreimage::Absent
+        );
+        assert!(
+            !formatter_called,
+            "an absent Run does not reject an otherwise valid long-path installation"
+        );
+        let raw = run_command_bytes(&command).unwrap();
+        unsafe {
+            RegSetValueExW(
+                fixture.key,
+                windows::core::w!("FutureClassroom"),
+                None,
+                REG_SZ,
+                Some(&raw),
+            )
+            .ok()
+            .unwrap();
+        }
+        let before = fixture.read();
+        let original = read_run_preimage_at(&path, || Ok(command.clone())).unwrap();
+        assert_eq!(
+            original,
+            RunPreimage::ExactCommand {
+                kind: REG_SZ.0,
+                bytes: raw.clone()
+            }
+        );
+        assert!(match_run_preimage_at(&path, &original, || Ok(command.clone())).is_ok());
+        assert_eq!(
+            match_run_preimage_at(&path, &absent, || Ok(command.clone())),
+            Err(LifecycleError::Unsettled)
+        );
+        assert_eq!(
+            run_absent_at(&path),
+            Err(LifecycleError::Unsettled),
+            "ordinary maintenance still rejects present Run"
+        );
+        assert_eq!(
+            fixture.read(),
+            before,
+            "successful read-only upgrade admission never rewrites Run"
+        );
+        let foreign = "\"C:\\Other\\application.exe\" --autostart\0"
+            .encode_utf16()
+            .flat_map(u16::to_le_bytes)
+            .collect::<Vec<_>>();
+        for (kind, bytes) in [
+            (REG_SZ, foreign),
+            (REG_EXPAND_SZ, raw.clone()),
+            (REG_SZ, Vec::new()),
+            (REG_SZ, vec![b'x'; MAX_RUN_COMMAND_BYTES + 2]),
+            (REG_BINARY, vec![1, 2, 3, 4]),
+        ] {
+            unsafe {
+                RegSetValueExW(
+                    fixture.key,
+                    windows::core::w!("FutureClassroom"),
+                    None,
+                    kind,
+                    Some(&bytes),
+                )
+                .ok()
+                .unwrap();
+            }
+            let changed = fixture.read();
+            assert_eq!(
+                match_run_preimage_at(&path, &original, || Ok(command.clone())),
+                Err(LifecycleError::Unsettled)
+            );
+            assert_eq!(
+                fixture.read(),
+                changed,
+                "do not restore the captured command over an external value"
+            );
+        }
+        unsafe {
+            RegDeleteValueW(fixture.key, windows::core::w!("FutureClassroom"))
+                .ok()
+                .unwrap();
+        }
+        assert_eq!(
+            match_run_preimage_at(&path, &original, || Ok(command.clone())),
+            Err(LifecycleError::Unsettled)
+        );
+        assert!(match_run_preimage_at(&path, &absent, || Ok(command.clone())).is_ok());
+        assert!(run_absent_at(&path).is_ok());
+        drop(fixture);
+        assert_eq!(
+            read_run_preimage_at(&path, || Ok(command.clone())).unwrap(),
+            RunPreimage::Absent
+        );
+    }
     #[test]
     fn enum_absence_and_x86_registry_component_paths_are_exact() {
         for result in [ERROR_UNKNOWN_PRODUCT.0, ERROR_NO_MORE_ITEMS.0] {

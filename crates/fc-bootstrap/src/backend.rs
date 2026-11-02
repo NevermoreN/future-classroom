@@ -1237,6 +1237,31 @@ impl Backend {
         self.check_open()?;
         Ok(result)
     }
+    /// Only the original C2-bound subject receipt proves the earlier save.
+    /// Current authorization is rechecked; historical identity is never applied.
+    pub fn subject_outcome(
+        &mut self,
+        lease: SessionLease,
+        expected: Revision,
+        command: IdentityCommand,
+    ) -> Result<Option<(Revision, fc_domain::identity::SchoolSubject)>> {
+        if !matches!(command, IdentityCommand::PutSubject { .. }) {
+            return Err(BackendError::InvalidInput);
+        }
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        state
+            .authorize_management(&actor, self.clock.now())
+            .map_err(|e| BackendError::Identity(IdentityRepositoryError::Domain(e)))?;
+        let mut request = self.request(&state, command)?;
+        request.expected_revision = expected;
+        let result = self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .subject_outcome(request, &actor)?;
+        self.actor(&self.state()?, lease, SessionPurpose::Manage)?;
+        self.check_open()?;
+        Ok(result)
+    }
     pub fn create_account(
         &mut self,
         lease: SessionLease,

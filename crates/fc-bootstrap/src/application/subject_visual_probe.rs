@@ -85,19 +85,26 @@ fn initial(
     }
     mark(step, "setup-global-admin")?;
     submit(app, TO_SUBJECTS, &[], deadline)?;
+    submit(app, settings_registry::SUBJECT_NEW, &[], deadline)?;
     submit(
         app,
-        SAVE,
+        settings_registry::SUBJECT_REVIEW,
         &[
-            (OLD_NAME, ""),
             (SUBJECT, "Synthetic mathematics"),
             (COLOR, "1234AB"),
+            (settings_registry::SUBJECT_ENABLED, "1"),
         ],
         deadline,
     )?;
+    submit(app, settings_registry::SUBJECT_CONFIRM, &[], deadline)?;
+    require(
+        app.screen == Screen::Subjects,
+        "subject creation returns to current catalog",
+    )?;
+    submit(app, BACK, &[], deadline)?;
     require(
         app.screen == Screen::Home,
-        "subject save returned to actual home page",
+        "subject catalog closes through its real Back control",
     )?;
     mark(step, "create-subject")?;
     colors(app, deadline)?;
@@ -214,19 +221,28 @@ fn initial(
     submit(app, d::EDIT_BACK, &[], deadline)?;
     submit(app, d::EDIT_BACK, &[], deadline)?;
     submit(app, TO_SUBJECTS, &[], deadline)?;
+    let subject = after.palette.subjects[0].id.get().to_string();
     submit(
         app,
-        SAVE,
-        &[
-            (OLD_NAME, "Synthetic mathematics"),
-            (SUBJECT, "Synthetic renamed mathematics"),
-            (COLOR, "FFFFFF"),
-        ],
+        settings_registry::SUBJECT_EDIT,
+        &[(settings_registry::SUBJECT_SELECT, &subject)],
         deadline,
     )?;
+    submit(
+        app,
+        settings_registry::SUBJECT_REVIEW,
+        &[(SUBJECT, "Synthetic renamed mathematics")],
+        deadline,
+    )?;
+    submit(app, settings_registry::SUBJECT_CONFIRM, &[], deadline)?;
+    require(
+        app.screen == Screen::Subjects,
+        "subject rename returns to current catalog",
+    )?;
+    submit(app, BACK, &[], deadline)?;
     require(
         app.screen == Screen::Home,
-        "subject save returned to actual home page",
+        "subject catalog closes through its real Back control",
     )?;
     let renamed = saved(app)?;
     require(

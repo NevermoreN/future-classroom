@@ -41,13 +41,18 @@ fn observed(session: &Session, proof: &mut Proof) -> Result<preimage::Snapshot> 
 }
 pub(super) fn admit(session: &mut Session) -> Result<Admitted> {
     current(session.deadline)?;
-    run_absent_at(RUN_KEY)?;
+    let run = read_run_preimage_at(RUN_KEY, expected_installed_run_command)?;
     let mut proof = Proof::new(session.deadline);
     let result = observed(session, &mut proof);
     proof.release()?;
+    let snapshot = result?;
+    // Old registration/payload evidence and both Run observations are ready
+    // before admission. Never hold a ninth native owner alongside file pins.
+    match_run_preimage_at(RUN_KEY, &run, expected_installed_run_command)?;
     Ok(Admitted {
         kind: Admission::Upgrade,
-        snapshot: Some(result?),
+        snapshot: Some(snapshot),
+        upgrade_run: Some(run),
     })
 }
 pub(super) fn revalidate(session: &mut Session, admission: &Admitted) -> Result<()> {

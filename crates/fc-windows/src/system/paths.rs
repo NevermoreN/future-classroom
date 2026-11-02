@@ -33,9 +33,10 @@ pub struct DataPaths {
 }
 impl DataPaths {
     pub fn program_data() -> Result<Self> {
-        Ok(Self {
-            root: crate::program_data()?.join("FutureClassroom"),
-        })
+        // The native KnownFolder adapter already appends the application name.
+        let root = crate::program_data()?;
+        reject_nested_legacy_root(&root)?;
+        Ok(Self { root })
     }
     /// Test harness must explicitly choose an isolated direct child of an existing
     /// local directory. The prefix prevents accidentally selecting production data.
@@ -218,6 +219,60 @@ impl DataPaths {
         verify_acl(&candidate.join("profile-content"), &expected)?;
         Ok(prepared)
     }
+    /// Hidden update verification owns a fresh synthetic production deployment.
+    /// Never adopt an existing root, even if its ACL would otherwise be valid.
+    pub fn prepare_fresh_for_current_user(&self) -> Result<DeploymentDirectory> {
+        if self.root != Self::program_data()?.root {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        self.prepare_fresh_root()
+    }
+    fn prepare_fresh_root(&self) -> Result<DeploymentDirectory> {
+        check_local_ancestors(&self.root)?;
+        let user_sid = current_user_sid()?;
+        let expected = Descriptor::for_user(&user_sid)?;
+        let attributes = SECURITY_ATTRIBUTES {
+            nLength: std::mem::size_of::<SECURITY_ATTRIBUTES>() as u32,
+            lpSecurityDescriptor: expected.0 .0,
+            bInheritHandle: false.into(),
+        };
+        // SAFETY: the OS creates this exact fixed root with its protected DACL.
+        // AlreadyExists is deliberately propagated, never accepted as ownership.
+        unsafe {
+            CreateDirectoryW(&HSTRING::from(self.root.as_os_str()), Some(&attributes))?;
+        }
+        let _root = crate::materials::files::PinnedDirectory::open(&self.root)?;
+        verify_acl(&self.root, &expected)?;
+        for child in CHILDREN {
+            ensure_directory(&self.root.join(child), &expected)?;
+        }
+        let deployment = DeploymentDirectory {
+            root: self.root.clone(),
+            user_sid,
+            _thread: PhantomData,
+        };
+        deployment.read_back()?;
+        Ok(deployment)
+    }
+    /// Fixed actual installed GUI destination, discovered without environment
+    /// variable input. This is path discovery, not an installation permission.
+    pub fn installed_bootstrap_for_current_user() -> Result<PathBuf> {
+        use windows::Win32::UI::Shell::{
+            FOLDERID_LocalAppData, SHGetKnownFolderPath, KF_FLAG_DEFAULT,
+        };
+        crate::com_task::with_task_memory(|memory| unsafe {
+            let raw = SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, None)?;
+            let value = raw.to_string();
+            memory.free(raw.0.cast());
+            let local = PathBuf::from(value?);
+            let path = local
+                .join("Programs")
+                .join("FutureClassroom")
+                .join("fc-bootstrap.exe");
+            check_local_ancestors(&path)?;
+            Ok(path)
+        })
+    }
     /// Explicit deployment operation. Creates only this project's directories with
     /// a protected DACL present at creation: SYSTEM, Administrators, deployment user.
     /// Existing roots are verified, never silently repaired or widened.
@@ -234,6 +289,23 @@ impl DataPaths {
             user_sid,
             _thread: PhantomData,
         })
+    }
+}
+
+fn reject_nested_legacy_root(root: &Path) -> Result<()> {
+    // Earlier development builds appended the application name twice. Never
+    // silently create a new empty deployment beside that known old layout.
+    // Discovery neither opens its contents nor moves, repairs or deletes it.
+    match std::fs::symlink_metadata(root.join("FutureClassroom")) {
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Ok(_) => Err(Error::new(
+            E_INVALIDARG,
+            "检测到旧版双层资料目录，需要迁移；未创建或修改资料。",
+        )),
+        Err(_) => Err(Error::new(
+            E_ACCESSDENIED,
+            "无法确认旧版资料目录；未创建或修改资料。",
+        )),
     }
 }
 
@@ -539,6 +611,67 @@ mod tests {
         fn drop(&mut self) {
             let _ = std::fs::remove_dir_all(&self.0);
         }
+    }
+    #[test]
+    fn default_program_data_uses_the_native_application_root_once() {
+        assert_eq!(
+            DataPaths::program_data().unwrap().root(),
+            crate::program_data().unwrap()
+        );
+    }
+    #[test]
+    fn legacy_nested_root_is_refused_without_creating_or_modifying_data() {
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let scratch = Scratch(std::env::temp_dir().join(format!(
+            "FutureClassroom-Test-Legacy-{}-{nonce}",
+            std::process::id()
+        )));
+        reject_nested_legacy_root(&scratch.0).unwrap();
+        assert!(!scratch.0.exists());
+        let legacy = scratch.0.join("FutureClassroom");
+        std::fs::create_dir_all(&legacy).unwrap();
+        let sentinel = legacy.join("sentinel.txt");
+        std::fs::write(&sentinel, b"preserved synthetic old deployment").unwrap();
+        assert_eq!(
+            reject_nested_legacy_root(&scratch.0).unwrap_err().code(),
+            E_INVALIDARG
+        );
+        assert_eq!(
+            std::fs::read(&sentinel).unwrap(),
+            b"preserved synthetic old deployment"
+        );
+        assert_eq!(std::fs::read_dir(&scratch.0).unwrap().count(), 1);
+        assert!(!scratch.0.join("state").exists());
+    }
+    #[test]
+    fn fresh_protected_root_refuses_existing_sentinel_without_repair() {
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let scratch = Scratch(std::env::temp_dir().join(format!(
+            "FutureClassroom-Test-Fresh-{}-{nonce}",
+            std::process::id()
+        )));
+        let paths = DataPaths::isolated_test(scratch.0.clone()).unwrap();
+        let prepared = paths.prepare_fresh_root().unwrap();
+        assert!(prepared.read_back().unwrap().protected);
+        let sentinel = paths.root().join("sentinel.txt");
+        std::fs::write(&sentinel, b"owned synthetic sentinel").unwrap();
+        assert_eq!(
+            paths.prepare_fresh_root().err().unwrap().code(),
+            ERROR_ALREADY_EXISTS.to_hresult()
+        );
+        assert_eq!(
+            std::fs::read(&sentinel).unwrap(),
+            b"owned synthetic sentinel"
+        );
+        paths.verify_root_for_current_user().unwrap();
+        // The public production-only entry cannot adopt even an owned test root.
+        assert!(paths.prepare_fresh_for_current_user().is_err());
     }
     #[test]
     fn isolated_deployment_acl_and_cross_handle_exclusion() {

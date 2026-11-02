@@ -56,6 +56,17 @@ fn manual_startup_feedback(args: impl IntoIterator<Item = std::ffi::OsString>) -
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag, root, nonce, stage] if flag == "--update-data-probe-stage" => {
+            #[cfg(windows)]
+            {
+                application::update_data_probe_stage(std::path::Path::new(root), nonce, stage)
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (root, nonce, stage);
+                Err("update data native probe requires Windows".into())
+            }
+        }
         [flag, reference, port, old_package, new_package, marker]
             if flag == "--teacher-browser-probe" =>
         {

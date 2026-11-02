@@ -721,6 +721,65 @@ impl<S: Send + 'static> BusinessRepository<S> {
             },
         )))
     }
+    pub fn subject_outcome(
+        &self,
+        request: IdentityRequest,
+        actor: &ActorContext,
+    ) -> Result<Option<(Revision, SchoolSubject)>, IdentityRepositoryError> {
+        if !matches!(request.command, IdentityCommand::PutSubject { .. }) {
+            return Err(IdentityRepositoryError::Domain(IdentityError::InvalidState));
+        }
+        let bytes = self
+            .handle
+            .try_transaction(SubjectOutcomeTask {
+                request,
+                actor: actor.clone(),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+            })
+            .map_err(identity_error)?
+            .wait()
+            .map_err(identity_error)?;
+        let value = codec::value(&bytes).map_err(identity_error)?;
+        if value.is_null() {
+            return Ok(None);
+        }
+        codec::object_fields(
+            &value,
+            &[
+                "state_revision",
+                "id",
+                "school",
+                "name",
+                "enabled",
+                "red",
+                "green",
+                "blue",
+                "revision",
+            ],
+        )
+        .map_err(identity_error)?;
+        let number = |name| codec::number(&value, name).map_err(identity_error);
+        let color =
+            |name| u8::try_from(number(name)?).map_err(|_| IdentityRepositoryError::Unavailable);
+        Ok(Some((
+            Revision::new(number("state_revision")?),
+            SchoolSubject {
+                id: SubjectId::new(number("id")?)
+                    .map_err(|_| IdentityRepositoryError::Unavailable)?,
+                school_id: SchoolId::new(number("school")?)
+                    .map_err(|_| IdentityRepositoryError::Unavailable)?,
+                name: codec::text(&value, "name").map_err(identity_error)?,
+                enabled: codec::boolean(&value, "enabled").map_err(identity_error)?,
+                color: Rgb {
+                    red: color("red")?,
+                    green: color("green")?,
+                    blue: color("blue")?,
+                },
+                revision: Revision::new(number("revision")?),
+            },
+        )))
+    }
     /// Trusted credential worker only; records are never authority/UI snapshots.
     pub fn credential_record(
         &self,
@@ -857,6 +916,113 @@ impl<S> TransactionTask<S> for DefaultTeacherOutcomeTask {
         check()?;
         Ok(TransactionDecision {
             outcome: codec::bytes(&value)?,
+            commit: None,
+            precommit: None,
+        })
+    }
+}
+struct SubjectOutcomeTask {
+    request: IdentityRequest,
+    actor: ActorContext,
+    clock: Arc<dyn Clock + Send + Sync>,
+    session: SessionGuard,
+}
+impl<S> TransactionTask<S> for SubjectOutcomeTask {
+    fn command_requirement(&self) -> Option<(fc_ports::command_window::CommandFamily, CommandId)> {
+        Some((
+            fc_ports::command_window::CommandFamily::Identity,
+            self.request.command_id,
+        ))
+    }
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>().saturating_add(match &self.request.command {
+            IdentityCommand::PutSubject { name, .. } => name.capacity(),
+            _ => 0,
+        })
+    }
+    fn evaluate(
+        self: Box<Self>,
+        d: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        let state = load_identity(d)?;
+        let check = || -> Result<(), StorageError> {
+            (self.session)(&state, &self.actor)?;
+            state
+                .authorize_management(&self.actor, self.clock.now())
+                .map_err(StorageError::Identity)
+        };
+        check()?;
+        let IdentityCommand::PutSubject {
+            id,
+            name,
+            enabled,
+            color,
+            expected_revision,
+        } = &self.request.command
+        else {
+            return Err(StorageError::InvalidCommand);
+        };
+        let mut digest = Sha256::new();
+        digest.update(format!("{:?}", self.request));
+        digest.update(codec::bytes(&codec::actor(&self.actor))?);
+        let fingerprint = digest.finalize().to_vec();
+        let value = match d.get(&format!(
+            "business/receipt/identity/{}",
+            self.request.command_id.get()
+        ))? {
+            None => Value::Null,
+            Some(receipt) => {
+                let value = codec::value(&receipt.value)?;
+                codec::object_fields(&value, &["fingerprint", "outcome"])?;
+                codec::object_fields(&value["outcome"], &["state", "events"])?;
+                let original: Vec<u8> = serde_json::from_value(value["fingerprint"].clone())
+                    .map_err(|_| StorageError::Database)?;
+                if original.len() != 32 || original != fingerprint {
+                    return Err(StorageError::CommandIdReused);
+                }
+                let historical = codec::read_identity(&value["outcome"]["state"])?;
+                let events = decode_events(&value["outcome"]["events"])?;
+                let subject = historical
+                    .subjects
+                    .iter()
+                    .find(|s| s.id == *id)
+                    .ok_or(StorageError::Database)?;
+                let subject_revision = expected_revision
+                    .unwrap_or_default()
+                    .next()
+                    .map_err(|_| StorageError::Database)?;
+                if historical.revision
+                    != self
+                        .request
+                        .expected_revision
+                        .next()
+                        .map_err(|_| StorageError::Database)?
+                    || events.last() != Some(&IdentityEvent::CatalogChanged)
+                    || events.iter().any(|e| {
+                        !matches!(
+                            e,
+                            IdentityEvent::CatalogChanged | IdentityEvent::AuthorizationRevoked(_)
+                        )
+                    })
+                    || subject.name != *name
+                    || subject.enabled != *enabled
+                    || subject.color != *color
+                    || subject.revision != subject_revision
+                {
+                    return Err(StorageError::Database);
+                }
+                json!({"state_revision":historical.revision.get(),"id":subject.id.get(),"school":subject.school_id.get(),
+                    "name":subject.name,"enabled":subject.enabled,"red":subject.color.red,"green":subject.color.green,
+                    "blue":subject.color.blue,"revision":subject.revision.get()})
+            }
+        };
+        check()?;
+        let outcome = codec::bytes(&value)?;
+        if outcome.len() > 1024 {
+            return Err(StorageError::Database);
+        }
+        Ok(TransactionDecision {
+            outcome,
             commit: None,
             precommit: None,
         })

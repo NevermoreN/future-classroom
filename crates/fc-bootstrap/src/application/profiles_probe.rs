@@ -9,7 +9,7 @@ use fc_ports::PublicLayoutState;
 use fc_presentation::layout::SceneNodeKey;
 use profiles_editor::{self as e, Command as C};
 
-pub(super) const STEPS: u8 = 39;
+pub(super) const STEPS: u8 = 41;
 
 fn submit(
     app: &App,
@@ -280,6 +280,19 @@ pub(super) fn run(app: &mut App, stage: &mut u8) -> std::result::Result<(), Stri
             submit(app, e::CANCEL, &[])?;
         }
         18 => {
+            // The stale public save was definitely rejected. CANCEL only left
+            // its draft; explicitly read that same current public target before
+            // choosing a different subject save. This is not a receipt query.
+            submit(app, e::PUBLIC, &[])?;
+        }
+        19 => {
+            if app.native_unknown {
+                return Err("公共布局冲突后未明确读回当前状态".into());
+            }
+            verify_public(&public(app)?, true)?;
+            submit(app, e::CANCEL, &[])?;
+        }
+        20 => {
             let teacher = key(app)?.teacher_id.get().to_string();
             submit(
                 app,
@@ -287,10 +300,10 @@ pub(super) fn run(app: &mut App, stage: &mut u8) -> std::result::Result<(), Stri
                 &[(e::CLASS, "1"), (e::SUBJECT, "1"), (e::TEACHER, &teacher)],
             )?;
         }
-        19 => submit(app, e::MATERIALS, &[])?,
-        20 => submit(app, e::BACK, &[(e::ROWS, "3"), (e::ROW_GAP, "23")])?,
-        21 => submit(app, e::PREVIEW, &[])?,
-        22 => {
+        21 => submit(app, e::MATERIALS, &[])?,
+        22 => submit(app, e::BACK, &[(e::ROWS, "3"), (e::ROW_GAP, "23")])?,
+        23 => submit(app, e::PREVIEW, &[])?,
+        24 => {
             if !app.preview_active {
                 return Err(format!("科目配置真实原生预览失败：{}", app.status));
             }
@@ -298,38 +311,38 @@ pub(super) fn run(app: &mut App, stage: &mut u8) -> std::result::Result<(), Stri
             verify_subject(app, &value, 0, true)?;
             submit(app, e::REVIEW, &[])?;
         }
-        23 => submit(app, e::CONFIRM, &[])?,
-        24 => {
+        25 => submit(app, e::CONFIRM, &[])?,
+        26 => {
             let value = subject(app)?;
             verify_subject(app, &value, 1, true)?;
             submit(app, e::CANCEL, &[])?;
         }
-        25 => submit(app, e::FIRST, &[])?,
-        26 => row(app, false)?,
-        27 => submit(app, e::OPEN, &[])?,
-        28 => {
+        27 => submit(app, e::FIRST, &[])?,
+        28 => row(app, false)?,
+        29 => submit(app, e::OPEN, &[])?,
+        30 => {
             let value = subject(app)?;
             verify_subject(app, &value, 1, true)?;
             submit(app, e::MATERIALS, &[])?;
         }
-        29 => submit(app, e::BACK, &[(e::ENABLED, "0")])?,
-        30 => submit(app, e::REVIEW, &[])?,
-        31 => submit(app, e::CONFIRM, &[])?,
-        32 => {
+        31 => submit(app, e::BACK, &[(e::ENABLED, "0")])?,
+        32 => submit(app, e::REVIEW, &[])?,
+        33 => submit(app, e::CONFIRM, &[])?,
+        34 => {
             let value = subject(app)?;
             verify_subject(app, &value, 2, false)?;
             submit(app, e::CANCEL, &[])?;
         }
-        33 => submit(app, e::FIRST, &[])?,
-        34 => row(app, true)?,
-        35 => submit(app, e::OPEN, &[])?,
-        36 => {
-            let value = subject(app)?;
-            verify_subject(app, &value, 2, false)?;
-            submit(app, e::CANCEL, &[])?;
-        }
-        37 => submit(app, e::CLOSE, &[])?,
+        35 => submit(app, e::FIRST, &[])?,
+        36 => row(app, true)?,
+        37 => submit(app, e::OPEN, &[])?,
         38 => {
+            let value = subject(app)?;
+            verify_subject(app, &value, 2, false)?;
+            submit(app, e::CANCEL, &[])?;
+        }
+        39 => submit(app, e::CLOSE, &[])?,
+        40 => {
             if app.screen != Screen::Home
                 || app.current_global_owner().is_none()
                 || app.has_unsaved_changes()

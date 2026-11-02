@@ -172,6 +172,14 @@ impl HiddenHost {
     /// A tray is required in normal interactive operation. Headless tests can
     /// disable it explicitly; that does not count as a real tray acceptance test.
     pub fn new(enable_tray: bool) -> Result<Self> {
+        Self::with_interval(enable_tray, 1000)
+    }
+    /// Pace the explicitly isolated application diagnostic without waiting a
+    /// production second for each synthetic UI step or worker completion.
+    pub fn for_isolated_probe() -> Result<Self> {
+        Self::with_interval(false, 16)
+    }
+    fn with_interval(enable_tray: bool, interval_millis: u32) -> Result<Self> {
         // SAFETY: module pseudohandle retained only for same-process class lifetime.
         let instance = HINSTANCE(unsafe { GetModuleHandleW(None)? }.0);
         let class_name = w!("FutureClassroom.HiddenHost.v1");
@@ -247,7 +255,7 @@ impl HiddenHost {
             return Err(Error::from_thread());
         }
         // SAFETY: window-owned timer has no callback/raw pointers; messages coalesce.
-        if unsafe { SetTimer(Some(host.hwnd), TIMER, 1000, None) } == 0 {
+        if unsafe { SetTimer(Some(host.hwnd), TIMER, interval_millis, None) } == 0 {
             return Err(Error::from_thread());
         }
         if enable_tray {

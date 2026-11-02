@@ -307,19 +307,26 @@ fn create_teacher(app: &mut App, deadline: Instant) -> Check<()> {
     // Real native form commands go through the original shared workers, normal
     // credential KDFs and identity transactions; no SQLite/session fabrication.
     submit(app, TO_SUBJECTS, &[], deadline)?;
+    submit(app, settings_registry::SUBJECT_NEW, &[], deadline)?;
     submit(
         app,
-        SAVE,
+        settings_registry::SUBJECT_REVIEW,
         &[
-            (OLD_NAME, ""),
             (SUBJECT, "Synthetic HTTPS subject"),
             (COLOR, "123456"),
+            (settings_registry::SUBJECT_ENABLED, "1"),
         ],
         deadline,
     )?;
+    submit(app, settings_registry::SUBJECT_CONFIRM, &[], deadline)?;
+    require(
+        app.screen == Screen::Subjects,
+        "subject creation returns to current catalog",
+    )?;
+    submit(app, BACK, &[], deadline)?;
     require(
         app.screen == Screen::Home,
-        "subject save returned to actual home page",
+        "subject catalog closes before opening account management",
     )?;
     submit(app, TO_ACCOUNTS, &[], deadline)?;
     let initial = fixture_password()?;

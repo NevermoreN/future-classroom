@@ -81,15 +81,26 @@ fn fixture(app: &mut App, paths: &DataPaths, step: &mut usize, deadline: Instant
     )?;
     for name in ["Synthetic original", "Synthetic temporary"] {
         submit(app, TO_SUBJECTS, &[], deadline)?;
+        submit(app, settings_registry::SUBJECT_NEW, &[], deadline)?;
         submit(
             app,
-            SAVE,
-            &[(OLD_NAME, ""), (SUBJECT, name), (COLOR, "70A5D8")],
+            settings_registry::SUBJECT_REVIEW,
+            &[
+                (SUBJECT, name),
+                (COLOR, "70A5D8"),
+                (settings_registry::SUBJECT_ENABLED, "1"),
+            ],
             deadline,
         )?;
+        submit(app, settings_registry::SUBJECT_CONFIRM, &[], deadline)?;
+        require(
+            app.screen == Screen::Subjects,
+            "subject creation returns to current catalog",
+        )?;
+        submit(app, BACK, &[], deadline)?;
         require(
             app.screen == Screen::Home,
-            "subject save returned to actual home page",
+            "subject catalog closes before creating the next subject",
         )?;
     }
     mark(step, "create-bound-class-and-subjects")?;

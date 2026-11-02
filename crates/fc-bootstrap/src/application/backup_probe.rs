@@ -860,3 +860,542 @@ pub(super) fn run() -> Check<()> {
     println!("backup_export_save_preflight_cancel_lock_stale_explicit_cold_restore_native_worker=PASS recovery_native_steps={steps} reopen=fresh_App_AND_independent_executable_production_Open old_lease=fresh_App_only picker=ISOLATED_CAPABILITY_ONLY visible_dialog=NOT_TESTED foreground=UNTOUCHED real_run=READ_ONLY isolated_cleanup=PASS elapsed_ms={}",started.elapsed().as_millis());
     Ok(())
 }
+
+// Installed GUI-only preservation fixture. No alternate data root, backup
+// package, custom Run scope or unchecked path is accepted by this entry.
+const UPDATE_OWNER: &str = "update-data-probe.owner";
+const UPDATE_MANIFEST: &str = "update-data-probe.manifest";
+const UPDATE_LOGIN: &str = "update-probe-admin";
+const UPDATE_PASSWORD: &str = "Synthetic update administrator 2026!";
+fn update_manifest_name(sequence: u64) -> String {
+    if sequence == 0 {
+        UPDATE_MANIFEST.into()
+    } else {
+        format!("{UPDATE_MANIFEST}.{sequence:06}")
+    }
+}
+fn update_nonce(nonce: &str) -> bool {
+    nonce.len() == 32
+        && nonce
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+}
+fn update_hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+fn update_owner(root: &Path, nonce: &str) -> Check<LockedFile> {
+    let mut owner = checked(
+        LockedFile::open(&root.join(UPDATE_OWNER), 32),
+        "pin exact update owner",
+    )?;
+    require(
+        checked(owner.len(), "update owner length")? == 32,
+        "exact update owner size",
+    )?;
+    let mut bytes = [0u8; 32];
+    checked(
+        owner.file_mut().read_exact(&mut bytes),
+        "read pinned update owner",
+    )?;
+    require(
+        bytes == nonce.as_bytes(),
+        "update root belongs to exact requested nonce",
+    )?;
+    Ok(owner)
+}
+fn update_load_manifest(
+    root: &Path,
+    nonce: &str,
+) -> Check<(
+    migration_probe_fixture::UpdateManifest,
+    Vec<u8>,
+    Vec<LockedFile>,
+)> {
+    use std::os::windows::fs::MetadataExt;
+    // The caller retains the protected root pin. Inspect only public fixture
+    // filenames; no arbitrary existing school or credential bytes are read.
+    let mut names = std::collections::BTreeMap::new();
+    let mut count = 0;
+    for entry in checked(fs::read_dir(root), "enumerate owned manifest names")? {
+        count += 1;
+        require(count <= 128, "bounded owned root enumeration")?;
+        let entry = checked(entry, "owned manifest directory entry")?;
+        let name = entry.file_name();
+        let Some(name) = name.to_str() else {
+            continue;
+        };
+        if !name.starts_with(UPDATE_MANIFEST) {
+            continue;
+        }
+        let sequence = if name == UPDATE_MANIFEST {
+            0
+        } else {
+            let suffix = name
+                .strip_prefix(&format!("{UPDATE_MANIFEST}."))
+                .ok_or("update probe: unexpected manifest namespace")?;
+            require(
+                suffix.len() == 6 && suffix.bytes().all(|b| b.is_ascii_digit()),
+                "closed manifest suffix (partial writes are not accepted)",
+            )?;
+            let sequence = suffix
+                .parse::<u64>()
+                .map_err(|_| "update probe: manifest sequence")?;
+            require((1..=16).contains(&sequence), "manifest sequence bound")?;
+            sequence
+        };
+        let metadata = checked(
+            fs::symlink_metadata(entry.path()),
+            "inspect public manifest object",
+        )?;
+        require(
+            metadata.is_file()
+                && metadata.file_attributes() & 0x400 == 0
+                && names.insert(sequence, entry.path()).is_none(),
+            "regular unique manifest sequence",
+        )?;
+    }
+    require(
+        !names.is_empty() && names.len() <= 17,
+        "original manifest is required",
+    )?;
+    let mut pins = Vec::new();
+    let mut previous: Option<(migration_probe_fixture::UpdateManifest, Vec<u8>)> = None;
+    for (index, (sequence, path)) in names.into_iter().enumerate() {
+        require(sequence == index as u64, "manifest chain is continuous")?;
+        let mut pin = checked(
+            LockedFile::open(&path, 8192),
+            "pin immutable public manifest",
+        )?;
+        let mut bytes = Vec::new();
+        checked(
+            pin.file_mut().read_to_end(&mut bytes),
+            "read bounded public manifest",
+        )?;
+        let text = std::str::from_utf8(&bytes).map_err(|_| "update probe: manifest UTF-8")?;
+        let manifest = migration_probe_fixture::UpdateManifest::parse(text, nonce)?;
+        require(
+            manifest.sequence()? == sequence,
+            "manifest sequence agrees with immutable filename",
+        )?;
+        if let Some((previous, previous_bytes)) = &previous {
+            manifest.check_successor(previous, previous_bytes)?;
+        } else {
+            require(
+                manifest.value("previous_sha256")? == "0".repeat(64),
+                "seed has no predecessor",
+            )?;
+        }
+        previous = Some((manifest, bytes));
+        pins.push(pin);
+    }
+    let (manifest, bytes) = previous.ok_or("update probe: manifest chain absent")?;
+    Ok((manifest, bytes, pins))
+}
+fn update_publish_manifest(
+    root: &Path,
+    manifest: &migration_probe_fixture::UpdateManifest,
+) -> Check<String> {
+    use fc_windows::materials::files::ControlledFiles;
+    let bytes = manifest.encode().into_bytes();
+    require(bytes.len() <= 8192, "public manifest size")?;
+    let files = checked(ControlledFiles::new(root), "owned manifest publisher")?;
+    let target = root.join(update_manifest_name(manifest.sequence()?));
+    let mut file = checked(
+        files.create_new(&root.join(format!("{UPDATE_MANIFEST}.pending"))),
+        "fresh owned manifest stage",
+    )?;
+    checked(
+        file.file_mut().write_all(&bytes),
+        "write non-secret preservation manifest",
+    )?;
+    let sealed = checked(file.seal(), "flush immutable public manifest")?;
+    drop(checked(
+        sealed.publish(&files, &target),
+        "publish exact new manifest without replacement",
+    )?);
+    Ok(update_hex(&fc_security::sha256(&bytes)))
+}
+fn update_submit(
+    app: &mut App,
+    action: ActionId,
+    values: &[(FieldId, &str)],
+    deadline: Instant,
+) -> Check<()> {
+    submit(app, action, values, deadline)?;
+    while app.autostart_job.is_some() {
+        tick(app, deadline)?;
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    require(!app.stopping, "healthy update workflow")
+}
+fn update_autostart(
+    app: &mut App,
+    scope: &fc_windows::system::RunScope,
+    desired: bool,
+    deadline: Instant,
+) -> Check<()> {
+    use fc_domain::autostart::{AutostartObservation, AutostartPhase};
+    use fc_ports::autostart::AutostartSystem;
+    require(
+        app.autostart_scope.is_none() && !scope.is_scratch(),
+        "actual production Run workflow",
+    )?;
+    let observed = checked(scope.open(), "open actual Run readback")?.observe();
+    require(
+        observed == AutostartObservation::Absent
+            || observed.matches(true, scope.expected_command()),
+        "foreign/opaque Run is never adopted or overwritten",
+    )?;
+    update_submit(app, TO_DISPLAY, &[], deadline)?;
+    update_submit(app, TO_AUTOSTART, &[], deadline)?;
+    require(
+        app.screen == Screen::Autostart
+            && app
+                .autostart
+                .as_ref()
+                .is_some_and(|editor| editor.loaded().target_command == scope.expected_command()),
+        "review uses actual installed application path",
+    )?;
+    let lease = app.lease.ok_or("update probe: Run lease missing")?;
+    let state = checked(
+        checked(
+            app.backend
+                .as_ref()
+                .ok_or("update probe: backend missing")?
+                .lock(),
+            "Run state lock",
+        )?
+        .autostart_status(lease),
+        "real persistent Run state",
+    )?;
+    if !state.observed.matches(desired, scope.expected_command()) || state.desired != desired {
+        update_submit(
+            app,
+            if desired {
+                autostart_editor::ENABLE
+            } else {
+                autostart_editor::DISABLE
+            },
+            &[],
+            deadline,
+        )?;
+        require(
+            app.autostart
+                .as_ref()
+                .is_some_and(|e| e.has_unsaved_changes()),
+            "explicit owned Run review",
+        )?;
+        update_submit(
+            app,
+            autostart_editor::CONFIRM,
+            &[(autostart_editor::ACK, "1")],
+            deadline,
+        )?;
+    }
+    let state = checked(
+        checked(
+            app.backend
+                .as_ref()
+                .ok_or("update probe: backend missing")?
+                .lock(),
+            "confirmed Run state lock",
+        )?
+        .autostart_status(lease),
+        "actual confirmed Run state",
+    )?;
+    require(
+        state.desired == desired
+            && state.observed.matches(desired, scope.expected_command())
+            && state
+                .current()
+                .is_some_and(|op| op.phase == AutostartPhase::Succeeded)
+            && checked(scope.open(), "independent actual Run observer")?
+                .observe()
+                .matches(desired, scope.expected_command()),
+        "real Run physical readback and durable successful operation",
+    )?;
+    update_submit(app, autostart_editor::CLOSE, &[], deadline)?;
+    require(app.screen == Screen::Home, "return after real Run workflow")
+}
+fn update_check_enabled(app: &App, scope: &fc_windows::system::RunScope) -> Check<()> {
+    use fc_domain::autostart::AutostartPhase;
+    use fc_ports::autostart::AutostartSystem;
+    let state = checked(
+        checked(
+            app.backend
+                .as_ref()
+                .ok_or("update probe: backend missing")?
+                .lock(),
+            "preserved Run state lock",
+        )?
+        .autostart_status(app.lease.ok_or("update probe: lease missing")?),
+        "read preserved Run intent",
+    )?;
+    require(
+        state.desired
+            && state.observed.matches(true, scope.expected_command())
+            && state
+                .current()
+                .is_some_and(|op| op.phase == AutostartPhase::Succeeded)
+            && checked(scope.open(), "observe preserved installed Run")?
+                .observe()
+                .matches(true, scope.expected_command()),
+        "enabled Run and original installed command preserved without a repair write",
+    )
+}
+
+pub(super) fn update_data_stage(root: &Path, nonce: &str, stage: &str) -> Check<()> {
+    use fc_domain::autostart::AutostartObservation;
+    use fc_ports::autostart::AutostartSystem;
+    use fc_windows::{materials::files::ControlledFiles, system::RunScope};
+    require(
+        update_nonce(nonce) && matches!(stage, "seed" | "verify" | "disable"),
+        "closed update stage and explicit nonce",
+    )?;
+    let paths = checked(
+        DataPaths::program_data(),
+        "actual default ProgramData discovery",
+    )?;
+    require(
+        root == paths.root(),
+        "an alternate root cannot be update preservation evidence",
+    )?;
+    let installed = checked(
+        DataPaths::installed_bootstrap_for_current_user(),
+        "actual installed GUI destination",
+    )?;
+    let current = checked(
+        std::env::current_exe(),
+        "actual running update verifier image",
+    )?;
+    require(
+        current
+            .as_os_str()
+            .to_string_lossy()
+            .eq_ignore_ascii_case(&installed.as_os_str().to_string_lossy()),
+        "probe must run the actual installed fc-bootstrap.exe",
+    )?;
+    let scope = checked(
+        RunScope::current_executable(),
+        "actual installed Run command",
+    )?;
+    if stage == "seed" {
+        require(
+            checked(scope.open(), "pre-seed Run observation")?.observe()
+                == AutostartObservation::Absent,
+            "seed refuses a pre-existing Run value",
+        )?;
+        // Atomic protected creation is the authority to own the synthetic root.
+        // An existing empty or valid production deployment is still refused.
+        drop(checked(
+            paths.prepare_fresh_for_current_user(),
+            "fresh protected production root (existing data refused)",
+        )?);
+        let _root = checked(
+            PinnedDirectory::open(root),
+            "pin newly owned production root",
+        )?;
+        let files = checked(ControlledFiles::new(root), "new owner files")?;
+        let mut owner = checked(
+            files.create_new(&root.join(UPDATE_OWNER)),
+            "create exclusive nonce owner",
+        )?;
+        checked(
+            owner.file_mut().write_all(nonce.as_bytes()),
+            "write exact update owner",
+        )?;
+        checked(owner.finish(), "flush update owner")?;
+    }
+    checked(
+        paths.verify_root_for_current_user(),
+        "protected update root ACL without repair",
+    )?;
+    let _root = checked(PinnedDirectory::open(root), "retain exact update root")?;
+    checked(
+        paths.verify_root_for_current_user(),
+        "recheck pinned root ACL",
+    )?;
+    let _owner = update_owner(root, nonce)?;
+    checked(
+        paths.prepare_instance_runtime(),
+        "ordinary production instance namespace",
+    )?;
+    let _runtime = checked(
+        PinnedDirectory::open(&paths.runtime()),
+        "pin ordinary instance namespace",
+    )?;
+    let _instance = checked(
+        InstanceGuard::acquire(root),
+        "exclusive actual deployment instance",
+    )?;
+    let loaded = match stage {
+        "verify" => Some(update_load_manifest(root, nonce)?),
+        // Cleanup permission is the pinned exact root owner, not a successful
+        // preservation manifest. A failed seed must still be able to disable
+        // its own already-enabled Run through the actual administrator workflow.
+        "disable" => update_load_manifest(root, nonce).ok(),
+        _ => None,
+    };
+    if stage == "disable"
+        && loaded.is_none()
+        && checked(scope.open(), "failed-seed Run observation")?.observe()
+            == AutostartObservation::Absent
+    {
+        println!("UPDATE_DATA_PROBE stage=disable result=PASS nonce={nonce} sequence=0 manifest_sha256={}", "0".repeat(64));
+        return Ok(());
+    }
+    let (mut manifest, previous_bytes, _manifest_pins) = match loaded {
+        Some((manifest, bytes, pins)) => (Some(manifest), bytes, pins),
+        None => (None, Vec::new(), Vec::new()),
+    };
+    let deadline = Instant::now() + Duration::from_secs(150);
+    let clock = Arc::new(CurrentClock::new());
+    let mut app = create_app(clock.clone(), true)?;
+    app.probe_trace = false;
+    app.root = root.to_owned();
+    app.desktop.set_root(root.to_owned());
+    app.backup.workflow = Some(RecoveryWorkflow::new(paths.clone()));
+    app.next_content_maintenance = deadline;
+    app.next_voice_maintenance = deadline;
+    app.next_calendar_maintenance = deadline;
+    let result: Check<()> = (|| {
+        // This is the registered real Open factory, DPAPI and sole Writer. It
+        // executes ordinary startup reconciliation against the actual root.
+        module_registry::start_writer(&mut app, paths.clone(), clock)?;
+        pump(&mut app, deadline)?;
+        if stage == "seed" {
+            require(
+                app.screen == Screen::Setup,
+                "new actual deployment opens normal initialization",
+            )?;
+            update_submit(
+                &mut app,
+                SAVE,
+                &[
+                    (SCHOOL, "软件更新合成学校"),
+                    (LOGIN, UPDATE_LOGIN),
+                    (NAME, "软件更新合成主管理员"),
+                    (PASSWORD, UPDATE_PASSWORD),
+                    (CONFIRM, UPDATE_PASSWORD),
+                ],
+                deadline,
+            )?;
+            require(
+                app.screen == Screen::Code,
+                "real initial credentials and recovery confirmation",
+            )?;
+            update_submit(&mut app, ACK, &[], deadline)?;
+        } else {
+            require(
+                app.screen == Screen::Login,
+                "reopened actual deployment stays locked",
+            )?;
+        }
+        login(&mut app, UPDATE_LOGIN, UPDATE_PASSWORD, deadline)?;
+        require(
+            app.screen == Screen::Home,
+            "real retained administrator credential authentication",
+        )?;
+        if stage == "disable" {
+            return update_autostart(&mut app, &scope, false, deadline);
+        }
+        if stage == "seed" {
+            manifest = Some(migration_probe_fixture::seed_update_data(
+                &mut app, &paths, nonce,
+            )?);
+        }
+        // Independently authenticate the teacher as well. Seed performs the
+        // ordinary required first-password change, preserving its real record.
+        update_submit(&mut app, LOCK, &[], deadline)?;
+        login(
+            &mut app,
+            migration_probe_fixture::SOURCE_TEACHER_LOGIN,
+            if stage == "seed" {
+                migration_probe_fixture::SOURCE_TEACHER_PASSWORD
+            } else {
+                migration_probe_fixture::UPDATE_TEACHER_PASSWORD
+            },
+            deadline,
+        )?;
+        if stage == "seed" {
+            require(app.screen == Screen::Password, "teacher first-login policy")?;
+            update_submit(
+                &mut app,
+                SAVE,
+                &[
+                    (PASSWORD, migration_probe_fixture::SOURCE_TEACHER_PASSWORD),
+                    (
+                        NEW_PASSWORD,
+                        migration_probe_fixture::UPDATE_TEACHER_PASSWORD,
+                    ),
+                    (CONFIRM, migration_probe_fixture::UPDATE_TEACHER_PASSWORD),
+                ],
+                deadline,
+            )?;
+            require(
+                app.screen == Screen::Login,
+                "teacher credential change closes old session",
+            )?;
+            login(
+                &mut app,
+                migration_probe_fixture::SOURCE_TEACHER_LOGIN,
+                migration_probe_fixture::UPDATE_TEACHER_PASSWORD,
+                deadline,
+            )?;
+        }
+        require(
+            app.screen == Screen::Home && app.lease.is_some_and(|l| l.principal_id().get() == 2),
+            "real retained changed teacher credentials",
+        )?;
+        update_submit(&mut app, LOCK, &[], deadline)?;
+        login(&mut app, UPDATE_LOGIN, UPDATE_PASSWORD, deadline)?;
+        require(
+            app.screen == Screen::Home,
+            "fresh administrator after teacher login",
+        )?;
+        let manifest = manifest
+            .as_mut()
+            .ok_or("update probe: original manifest absent")?;
+        match stage {
+            "seed" => {
+                update_autostart(&mut app, &scope, true, deadline)?;
+                migration_probe_fixture::capture_update_data(&app, &paths, manifest)?;
+            }
+            "verify" => {
+                update_check_enabled(&app, &scope)?;
+                migration_probe_fixture::verify_update_data(&app, &paths, manifest)?;
+                migration_probe_fixture::write_update_content(&app, &paths, manifest)?;
+                // Preserve the original baseline/C2 while recording exactly the
+                // next legitimate new-content state in the public chain.
+                manifest.set_predecessor(&previous_bytes);
+                migration_probe_fixture::verify_update_data(&app, &paths, manifest)?;
+            }
+            _ => unreachable!(),
+        }
+        Ok(())
+    })();
+    // Even a rejected/failed fixture drains the original App before reporting.
+    // Failure never deletes the owned root or compensates an external Run edit.
+    ordinary_shutdown(&mut app, Instant::now() + Duration::from_secs(60))?;
+    require(
+        app.writer_closed,
+        "normal Writer close completed before manifest",
+    )?;
+    join_app(app)?;
+    result?;
+    let sequence = manifest.as_ref().map_or(Ok(0), |m| m.sequence())?;
+    let digest = if stage == "disable" {
+        if manifest.is_some() {
+            update_hex(&fc_security::sha256(&previous_bytes))
+        } else {
+            "0".repeat(64)
+        }
+    } else {
+        update_publish_manifest(
+            root,
+            &manifest.ok_or("update probe: result manifest missing")?,
+        )?
+    };
+    println!("UPDATE_DATA_PROBE stage={stage} result=PASS nonce={nonce} sequence={sequence} manifest_sha256={digest}");
+    Ok(())
+}
