@@ -109,18 +109,23 @@ unsafe fn paint(hwnd: HWND, dc: HDC, kind: usize) {
         } else {
             0
         };
-        let alignment = if navigation || kind & 3 == CHOICE {
-            DT_LEFT
-        } else {
-            DT_CENTER
-        };
         if start < count {
-            let _ = DrawTextW(
-                dc,
-                &mut text[start..count],
-                &mut bounds,
-                alignment | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS | DT_NOPREFIX,
-            );
+            let flags = if navigation || kind & 3 == CHOICE {
+                DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS | DT_NOPREFIX
+            } else {
+                // Keep complete action names readable in the fixed command area.
+                let mut measured = bounds;
+                let _ = DrawTextW(
+                    dc,
+                    &mut text[start..count],
+                    &mut measured,
+                    DT_CENTER | DT_WORDBREAK | DT_NOPREFIX | DT_CALCRECT,
+                );
+                bounds.top = ((bounds.bottom - (measured.bottom - measured.top)) / 2).max(2);
+                bounds.bottom -= 2;
+                DT_CENTER | DT_WORDBREAK | DT_END_ELLIPSIS | DT_NOPREFIX
+            };
+            let _ = DrawTextW(dc, &mut text[start..count], &mut bounds, flags);
         }
         if kind & 3 == CHOICE {
             let x = bounds.right + 14;

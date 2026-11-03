@@ -2019,7 +2019,7 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
     let columns = (width / 192).max(1);
     let button_width = (width / columns - 12).max(80);
     let rows = (actions.len() as i32 + columns - 1) / columns;
-    let footer = (rows * 48 + 20).max(20);
+    let footer = (rows * 58 + 20).max(20);
     let nav_columns = (full_width / 176).max(1);
     let nav_rows = if sidebar {
         0
@@ -2173,9 +2173,9 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
         fixed.push((
             action.hwnd,
             content_x + index as i32 % columns * (button_width + 12),
-            viewport - footer + 10 + index as i32 / columns * 48,
+            viewport - footer + 10 + index as i32 / columns * 58,
             button_width,
-            38,
+            48,
         ));
     }
     let info = SCROLLINFO {
@@ -2592,6 +2592,7 @@ mod tests {
         let foreground = unsafe { GetForegroundWindow() };
         let window = Window::new().unwrap();
         let mut model = view();
+        model.actions[0].label = "节点样式 / 容器Alpha".into();
         model.grid = Some(fc_presentation::workbench::Grid {
             columns: vec!["组件".into()],
             rows: vec![fc_presentation::workbench::GridRow {
@@ -2637,6 +2638,31 @@ mod tests {
         assert!(canvas_rect.right < rect(properties).left);
         assert!(canvas_rect.right - canvas_rect.left >= 360);
         assert!(rect(button(&window).hwnd).top > canvas_rect.bottom);
+        let action = button(&window).hwnd;
+        let action_rect = rect(action);
+        let text_height = unsafe {
+            let dc = GetDC(Some(action));
+            let font = SendMessageW(action, WM_GETFONT, None, None);
+            let old = SelectObject(dc, HGDIOBJ(font.0 as *mut _));
+            let mut bounds = RECT {
+                right: action_rect.right - action_rect.left - 24,
+                ..Default::default()
+            };
+            let mut text: Vec<u16> = model.actions[0].label.encode_utf16().collect();
+            let _ = DrawTextW(
+                dc,
+                &mut text,
+                &mut bounds,
+                DT_WORDBREAK | DT_NOPREFIX | DT_CALCRECT,
+            );
+            let _ = SelectObject(dc, old);
+            let _ = ReleaseDC(Some(action), dc);
+            bounds.bottom - bounds.top
+        };
+        assert!(
+            text_height <= action_rect.bottom - action_rect.top - 4,
+            "complete action label must fit its command button"
+        );
         unsafe { MoveWindow(window.hwnd, 0, 0, 760, 740, false).unwrap() };
         assert_eq!(rect(tree).left, rect(properties).left);
         assert_eq!(rect(canvas).left, rect(properties).left);
