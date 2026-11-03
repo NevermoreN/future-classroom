@@ -79,7 +79,7 @@ try {
         }, $true))
         Require ($assignments.Count -eq 1) 'Missing/duplicate original tracked Split assignment.'
         $expression = [string]$assignments[0].Right.Extent.Text
-        Require ($expression -match '\.Split\(' -and $expression.Contains('20001, [StringSplitOptions]::RemoveEmptyEntries')) 'Tracked Split finite bound differs.'
+        Require ($expression -match '\.Split\(' -and $expression.Contains('20481, [StringSplitOptions]::RemoveEmptyEntries')) 'Tracked Split finite bound differs.'
         $splitExpressions.Add([scriptblock]::Create($expression))
         $bindings.Add([ordered]@{ name = $name + '-Split'; sha256 = Text-Sha256 $expression;
             utf8Bytes = $Utf8.GetByteCount($expression) })
@@ -96,36 +96,36 @@ try {
         Require ($TextSource.Contains('$MaximumBytes -gt 0 -and $bytes.LongLength -gt $MaximumBytes')) 'Output-byte precheck changed.'
         Require ($TextSource.Contains('$inputDomainsDigest')) 'Original manifest binding missing.'
     }
-    Check '20,000 full Git rows accepted with exact last row preserved' {
-        $script:BoundaryRaw = Make-RawTree 20000 10000
+    Check '20,480 full Git rows accepted with exact last row preserved' {
+        $script:BoundaryRaw = Make-RawTree 20480 10000
         $script:BoundaryEntries = ConvertFrom-SourceGitTree $script:BoundaryRaw
-        Require ($script:BoundaryEntries -is [Array] -and $script:BoundaryEntries.Count -eq 20000) 'Boundary inventory was flattened/truncated.'
+        Require ($script:BoundaryEntries -is [Array] -and $script:BoundaryEntries.Count -eq 20480) 'Boundary inventory was flattened/truncated.'
         Require ($script:BoundaryEntries[0].path -ceq 'ordinary/f00000.txt') 'First entry changed.'
         Require ($script:BoundaryEntries[9999].path -ceq 'ordinary/f09999.txt') 'Old boundary changed.'
         Require ($script:BoundaryEntries[10000].path -ceq '开发计划/验证记录/f10000.json') 'First new-capacity entry missing.'
-        Require ($script:BoundaryEntries[19999].path -ceq '开发计划/验证记录/f19999.json') 'Last entry missing.'
+        Require ($script:BoundaryEntries[20479].path -ceq '开发计划/验证记录/f20479.json') 'Last entry missing.'
     }
-    Check '20,001 and larger complete Git row counts reject before parsing a tail' {
-        Reject { ConvertFrom-SourceGitTree (Make-RawTree 20001) } 'Source file inventory exceeds bound.'
-        Reject { ConvertFrom-SourceGitTree (Make-RawTree 20002) } 'Source file inventory exceeds bound.'
+    Check '20,481 and larger complete Git row counts reject before parsing a tail' {
+        Reject { ConvertFrom-SourceGitTree (Make-RawTree 20481) } 'Source file inventory exceeds bound.'
+        Reject { ConvertFrom-SourceGitTree (Make-RawTree 20482) } 'Source file inventory exceeds bound.'
     }
     Check 'last-entry duplicate/case collision cannot hide beyond the old cap' {
         $last = '100644 blob ' + ('a' * 40) + "       1`tORDINARY/F00000.TXT`0"
-        Reject { ConvertFrom-SourceGitTree ((Make-RawTree 19999) + $last) } 'Duplicate/case-colliding Git input path.'
+        Reject { ConvertFrom-SourceGitTree ((Make-RawTree 20479) + $last) } 'Duplicate/case-colliding Git input path.'
     }
-    Check 'both exact production tracked Split expressions preserve 20,000 and expose 20,001' {
+    Check 'both exact production tracked Split expressions preserve 20,480 and expose 20,481' {
         $names = [string[]]@($script:BoundaryEntries | ForEach-Object { $_.path })
         foreach ($expression in $splitExpressions) {
             $script:SplitRaw = [string]::Join("`0", $names) + "`0"
             $parts = @(& $expression)
-            Require ($parts.Count -eq 20000 -and $parts[19999] -ceq $names[19999]) 'Tracked boundary last path lost.'
+            Require ($parts.Count -eq 20480 -and $parts[20479] -ceq $names[20479]) 'Tracked boundary last path lost.'
             $script:SplitRaw += "extra.txt`0"
             $parts = @(& $expression)
-            Require ($parts.Count -eq 20001 -and $parts[20000] -ceq 'extra.txt') 'Overflow hidden by Split.'
+            Require ($parts.Count -eq 20481 -and $parts[20480] -ceq 'extra.txt') 'Overflow hidden by Split.'
             Reject { Hash-Inputs $parts $script:BoundaryEntries } 'Source file inventory count/tree mismatch.'
         }
     }
-    Check 'Hash-Inputs 20,000 count admission reaches a sentinel before any filesystem call' {
+    Check 'Hash-Inputs 20,480 count admission reaches a sentinel before any filesystem call' {
         $originalDomain = ${function:Get-SourceInputDomain}
         try {
             Set-Item -LiteralPath 'Function:Get-SourceInputDomain' -Value { param($Relative) throw 'R57_COUNT_ACCEPTED_BEFORE_FILESYSTEM' }
@@ -135,12 +135,12 @@ try {
     }
     Check 'Hash-Inputs count/tree mismatch and both independent count overflows reject first' {
         $names = [string[]]@($script:BoundaryEntries | ForEach-Object { $_.path })
-        Reject { Hash-Inputs $names[0..19998] $script:BoundaryEntries } 'Source file inventory count/tree mismatch.'
+        Reject { Hash-Inputs $names[0..20478] $script:BoundaryEntries } 'Source file inventory count/tree mismatch.'
         Reject { Hash-Inputs ($names + 'extra.txt') ($script:BoundaryEntries + $script:BoundaryEntries[0]) } 'Source file inventory count/tree mismatch.'
         Reject { Hash-Inputs ($names + 'extra.txt') $script:BoundaryEntries } 'Source file inventory count/tree mismatch.'
         Reject { Hash-Inputs $names ($script:BoundaryEntries + $script:BoundaryEntries[0]) } 'Source file inventory count/tree mismatch.'
     }
-    Check '20,000-entry exact complete S/H partition and honest summary' {
+    Check '20,480-entry exact complete S/H partition and honest summary' {
         $hashRows = [Collections.Generic.List[object]]::new()
         $historyRows = [Collections.Generic.List[object]]::new()
         $allNames = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
@@ -152,17 +152,17 @@ try {
                 $historyRows.Add([ordered]@{ path = $entry.path; checkout_bytes = 2L })
             } else { throw 'Unknown source domain.' }
         }
-        Require ($hashRows.Count -eq 10000 -and $historyRows.Count -eq 10000 -and $allNames.Count -eq 20000) 'Full partition missing paths.'
+        Require ($hashRows.Count -eq 10000 -and $historyRows.Count -eq 10480 -and $allNames.Count -eq 20480) 'Full partition missing paths.'
         $inventory = [ordered]@{ sha256_files = $hashRows.ToArray(); sha256_checkout_bytes = 10000L;
-            historical_checkout = $historyRows.ToArray(); historical_checkout_bytes = 20000L; historical_git_blob_bytes = 10000L }
+            historical_checkout = $historyRows.ToArray(); historical_checkout_bytes = 20960L; historical_git_blob_bytes = 10480L }
         $summary = New-SourceDomainSummary $inventory ('c' * 40) ('d' * 40)
-        Require ($summary.tracked_file_count -eq 20000 -and $summary.sha256_input.file_count -eq 10000 -and
-            $summary.historical_git_archive.file_count -eq 10000) 'Summary counts are incomplete.'
-        Require ($summary.limits.paths -eq 20000 -and $summary.limits.per_file_bytes -eq 64MB -and
+        Require ($summary.tracked_file_count -eq 20480 -and $summary.sha256_input.file_count -eq 10000 -and
+            $summary.historical_git_archive.file_count -eq 10480) 'Summary counts are incomplete.'
+        Require ($summary.limits.paths -eq 20480 -and $summary.limits.per_file_bytes -eq 64MB -and
             $summary.limits.sha256_input_total_bytes -eq 256MB -and $summary.limits.metadata_output_bytes -eq 16MB) 'Summary byte budgets changed.'
         Require ($summary.historical_git_archive.content_sha256 -ceq 'NOT_READ_BY_INPUT_HASHER' -and
-            $summary.historical_git_archive.git_blob_bytes -eq 10000L -and
-            $summary.historical_git_archive.checkout_metadata_bytes -eq 20000L) 'Metadata-only/CRLF-size distinction changed.'
+            $summary.historical_git_archive.git_blob_bytes -eq 10480L -and
+            $summary.historical_git_archive.checkout_metadata_bytes -eq 20960L) 'Metadata-only/CRLF-size distinction changed.'
         Require ($Utf8.GetByteCount(($summary | ConvertTo-Json -Depth 10 -Compress)) -le 16MB) 'Normal complete summary exceeds metadata cap.'
     }
     Check 'exact historical prefix only, no new skip domain' {
@@ -191,7 +191,7 @@ if ($null -ne $fatal -or $failed.Count -gt 0) { $status = 'FAIL_PURE_POWERSHELL_
     sourceExpectedSha256 = $ExpectedSourceSha256; fullSourceParseErrors = @($parseErrors).Count;
     functionBindings = $bindings.ToArray(); checks = $cases.ToArray(); assertions = $script:Assertions; fatal = $fatal;
     scope = 'Pure AST-extracted parser/summary and Hash-Inputs count-entry checks with a before-filesystem sentinel; complete fake metadata partition. No real file hash, build, CI or filesystem acceptance claim.';
-    sourcePathLimit = 20000; metadataByteLimit = 16MB; contentByteLimit = 256MB; perFileByteLimit = 64MB;
+    sourcePathLimit = 20480; metadataByteLimit = 16MB; contentByteLimit = 256MB; perFileByteLimit = 64MB;
     ciEntrypointExecuted = $false; filesystemOrEnvironmentWritten = $false; processOrThreadStarted = $false;
     windowsRuntime = 'NOT_RUN'; oldSourceValidators = 'Unchanged; old 10000-path validators apply only to their original sources.'
 } | ConvertTo-Json -Depth 12 -Compress
