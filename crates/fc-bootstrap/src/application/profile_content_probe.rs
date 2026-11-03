@@ -211,14 +211,17 @@ fn public(app: &mut App) -> std::result::Result<PublicLayoutState, String> {
     }
 }
 fn select(app: &App, id: LayoutNodeId) -> std::result::Result<(), String> {
+    let row = app
+        .profiles
+        .as_ref()
+        .and_then(|editor| editor.node_row(LayoutScope::Public, id))
+        .ok_or("稳定节点行缺失")?;
     let view = app.view();
-    let row = view
-        .grid
+    view.grid
         .as_ref()
         .ok_or("节点表格缺失")?
         .rows
-        .iter()
-        .position(|row| row.label.trim() == format!("#{}", id.get()))
+        .get(row)
         .ok_or("稳定节点行缺失")?;
     app.window
         .probe_select_grid(row, 0)

@@ -1993,6 +1993,23 @@ fn transparent_default() -> NodeKind {
 }
 
 impl Editor {
+    /// Read-only adapter for native diagnostics. The displayed tree and this
+    /// lookup share the same stable-node traversal; labels are never identifiers.
+    pub(super) fn node_row(&self, scope: LayoutScope, id: LayoutNodeId) -> Option<usize> {
+        if self.tree()?.scope != scope
+            || !matches!(
+                self.page,
+                Page::Tree
+                    | Page::Geometry
+                    | Page::Appearance
+                    | Page::ContentStyle
+                    | Page::Materials
+            )
+        {
+            return None;
+        }
+        self.order().iter().position(|(node, _)| *node == id)
+    }
     /// Canvas and Grid both address the exact currently edited scope. Selection
     /// never switches profiles or silently abandons an unparsed node form.
     pub(super) fn selected_node_key(&self) -> Option<fc_presentation::layout::SceneNodeKey> {
