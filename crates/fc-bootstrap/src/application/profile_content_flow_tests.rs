@@ -570,7 +570,15 @@ impl Harness {
             .lock()
             .unwrap()
             .entry(id)
-            .or_insert_with(super::super::NativeCommand::new)
+            .or_insert_with(|| {
+                super::super::NativeCommand::with_intent(Some(
+                    super::super::NativeIntent::ProfileContent {
+                        slot,
+                        expected: Revision::new(revision),
+                        operation,
+                    },
+                ))
+            })
             .clone();
         Work::Tracked(
             Box::new(Work::ProfileContent(Box::new(ContentJob {

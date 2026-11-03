@@ -20,6 +20,7 @@ pub(super) const DOWN: ActionId = ActionId(811);
 pub(super) const REMOVE: ActionId = ActionId(812);
 pub(super) const DISCARD: ActionId = ActionId(813);
 pub(super) const KEEP: ActionId = ActionId(814);
+pub(super) const END_RESULT_QUERY: ActionId = ActionId(815);
 pub(super) enum Command {
     Stay,
     Close,
@@ -211,6 +212,14 @@ impl Editor {
         }
         self.submitted = false;
         self.phase = Phase::Edit;
+    }
+    pub(super) fn original_unknown(&mut self) {
+        self.needs_reload = true;
+        // loaded() has already released file selections. Keep the resulting
+        // bounded text/existing-page draft across further pending queries.
+        self.restore_text = self.kind == ComponentKind::SubjectText;
+        self.restore_images = self.kind == ComponentKind::SubjectImage;
+        self.notice = "当前内容已读取，原操作结果仍未知；请查询原回执或明确结束本次核对。".into();
     }
     fn editable(&self) -> Result<(), String> {
         if self.document.is_none() {
@@ -482,7 +491,7 @@ impl Editor {
         if self.cleanup_pending {
             v.status.push_str(" 原件清理仍在重试，配额暂未归还。");
         }
-        if self.needs_reload {
+        if self.needs_reload && !matches!(self.phase, Phase::Discard(_)) {
             v.actions = vec![
                 action(RELOAD, "重新读取核对", !busy),
                 action(CLOSE, "返回", !busy),

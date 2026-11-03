@@ -732,6 +732,11 @@ struct Request {
 /// view. It is metadata only; only the backend can hash/admit this typed intent.
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum NativeIntent {
+    ProfileContent {
+        slot: fc_domain::profile_content::ContentSlotKey,
+        expected: Revision,
+        operation: fc_domain::profile_content::ContentOperation,
+    },
     Account {
         expected: Revision,
         // Shared public metadata: NativeCommand clones never clone scope arrays.
@@ -900,6 +905,7 @@ struct NativeHistory {
     resolution: NativeResolution,
 }
 enum NativeResolution {
+    ProfileContent(Option<fc_ports::ProfileContentOutcome>),
     Account(Option<fc_bootstrap::backend::OriginalAccountResult>),
     // An inaccessible original owner or missing local preparation proof is NOT
     // proof of failure/success. A current directory may still be shown separately.
@@ -930,6 +936,27 @@ impl NativeHistory {
     fn valid_result(&self) -> bool {
         use fc_ports::command_window::{TypedCommandOutcome as O, TypedCommandResult as R};
         match (&self.resolution, self.command.intent()) {
+            (
+                NativeResolution::ProfileContent(saved),
+                Some(NativeIntent::ProfileContent { slot, expected, .. }),
+            ) => {
+                self.issued.family == fc_ports::command_window::CommandFamily::ProfileContent
+                    && saved.as_ref().is_none_or(|result| {
+                        result.command_id == self.issued.command_id
+                            && result.slot == *slot
+                            && result.sequence > 0
+                            && if result.status == fc_ports::ProfileContentStatus::Committed {
+                                expected.next().is_ok_and(|revision| {
+                                    result.committed_revision == Some(revision)
+                                })
+                            } else {
+                                result.committed_revision.is_none()
+                            }
+                    })
+            }
+            (NativeResolution::ProfileContent(_), _) => false,
+            (NativeResolution::Expired, Some(NativeIntent::ProfileContent { .. })) => true,
+            (_, Some(NativeIntent::ProfileContent { .. })) => false,
             (
                 NativeResolution::Account(saved),
                 Some(NativeIntent::Account { expected, command }),
@@ -1013,6 +1040,37 @@ impl NativeHistory {
             (_, Some(_)) => true,
             (_, None) => false,
         }
+    }
+    fn profile_content(
+        command: NativeCommand,
+        issued: fc_ports::command_window::IssuedCommand,
+        result: fc_bootstrap::backend::Result<Option<fc_ports::ProfileContentOutcome>>,
+    ) -> Result<Self> {
+        let resolution = match result {
+            Ok(value) => NativeResolution::ProfileContent(value),
+            Err(error)
+                if error.command_window_error()
+                    == Some(fc_ports::command_window::CommandWindowError::Expired)
+                    || matches!(
+                        error,
+                        fc_bootstrap::backend::BackendError::ProfileContent(
+                            fc_ports::ProfileContentRepositoryError::ResultWindowExpired
+                        )
+                    ) =>
+            {
+                NativeResolution::Expired
+            }
+            Err(error) => return Err(error.into()),
+        };
+        let history = Self {
+            command,
+            issued,
+            resolution,
+        };
+        if !history.valid_result() {
+            return Err(Failure::Stopped);
+        }
+        Ok(history)
     }
     fn account(
         command: NativeCommand,
@@ -1145,9 +1203,14 @@ impl NativeHistory {
         }
     }
     fn pending(&self) -> bool {
-        // An expired account query cannot resolve whether its original write
+        // An expired original query cannot resolve whether its original write
         // committed. Only explicit end-query may unblock a new intent.
-        (self.command.is_account() && matches!(self.resolution, NativeResolution::Expired))
+        ((self.command.is_account()
+            || matches!(
+                self.command.intent(),
+                Some(NativeIntent::ProfileContent { .. })
+            ))
+            && matches!(self.resolution, NativeResolution::Expired))
             || matches!(
                 self.resolution,
                 NativeResolution::Outcome(fc_ports::command_window::TypedCommandOutcome::Pending)
@@ -1155,10 +1218,25 @@ impl NativeHistory {
                     | NativeResolution::Subject(None)
                     | NativeResolution::Account(None)
                     | NativeResolution::AccountUnavailable
+                    | NativeResolution::ProfileContent(None)
+                    | NativeResolution::ProfileContent(Some(fc_ports::ProfileContentOutcome {
+                        status: fc_ports::ProfileContentStatus::Accepted,
+                        ..
+                    }))
             )
     }
     fn message(&self) -> &'static str {
         match &self.resolution {
+            NativeResolution::ProfileContent(None) => "尚未查到原节点内容操作回执，结果仍未知；当前内容另列，不会重新发布。",
+            NativeResolution::ProfileContent(Some(result)) => match result.status {
+                fc_ports::ProfileContentStatus::Accepted => "原节点内容操作仍在处理中；当前内容另列，不会重新发布。",
+                fc_ports::ProfileContentStatus::Committed => "原节点内容操作已提交；原提交修订与当前内容分别显示，不会再次发布。",
+                fc_ports::ProfileContentStatus::Superseded => "原节点内容操作已被后续准备取代，未提交；当前内容另列，不会重发。",
+                fc_ports::ProfileContentStatus::Failed => "原节点内容操作已失败，未提交；当前内容另列，不会重发。",
+                fc_ports::ProfileContentStatus::Cancelled => "原节点内容操作已取消，未提交；当前内容另列，不会重发。",
+                fc_ports::ProfileContentStatus::Expired => "原节点内容准备已过期，未提交；当前内容另列，不会重发。",
+                fc_ports::ProfileContentStatus::RevisionConflict => "原节点内容操作因版本冲突未提交；当前内容另列，不会重发。",
+            },
             NativeResolution::Account(None) => "尚未查到原账号操作结果；原结果仍未知，不会重新保存。当前目录另列。",
             NativeResolution::Account(Some(_)) => "已查到原账号保存结果；当前目录另列。创建时的恢复码不能再次读取。",
             NativeResolution::AccountUnavailable => "原账号操作结果仍未知，当前无法核对。可明确结束这次核对，再按当前目录发起新操作；结束核对不会重发或证明原操作失败。",
@@ -1196,6 +1274,7 @@ impl NativeHistory {
 impl Outcome {
     fn native_history(&self) -> Option<&NativeHistory> {
         match self {
+            Self::ProfileContent(loaded) => loaded.history.as_deref(),
             Self::VoiceLoaded(_, loaded) => loaded.history.as_ref(),
             Self::Calendar(loaded) => loaded.history.as_ref(),
             Self::DefaultTeacherLoaded { history, .. }
@@ -1557,6 +1636,19 @@ impl Work {
             Self::Voice(_, _, operation) => {
                 operation.policy_intent().map(NativeIntent::VoicePolicy)
             }
+            Self::ProfileContent(job) => match &job.operation {
+                profile_content_flow::Operation::Publish {
+                    slot,
+                    expected_revision,
+                    operation,
+                    ..
+                } => Some(NativeIntent::ProfileContent {
+                    slot: *slot,
+                    expected: *expected_revision,
+                    operation: *operation,
+                }),
+                _ => None,
+            },
             Self::Calendar(job) => match job.operation {
                 calendar_flow::Operation::Policy {
                     year,
@@ -2724,6 +2816,14 @@ impl App {
                 self.pending.is_none() && !self.stopping,
             );
         }
+        if self.screen == Screen::ProfileContent && self.profile_content_result_pending() {
+            view.status.push_str("\n原节点内容操作结果仍未知；重新读取将查询原回执，不会重发。结束核对也不证明原操作失败。");
+            view.actions.push(Action {
+                id: profile_content_editor::END_RESULT_QUERY,
+                label: "结束这次结果核对".into(),
+                enabled: self.pending.is_none() && !self.stopping,
+            });
+        }
         if self.screen == Screen::Home {
             if let Some(owner) = self.transfer_notice_owner() {
                 if let Some(text) = self
@@ -3035,6 +3135,19 @@ impl App {
                 self.native_command
                     .as_ref()
                     .ok_or("原科目保存记录不可用。")?
+                    .clone()
+            }
+            Work::ProfileContent(job)
+                if readback
+                    && self.native_unknown
+                    && matches!(&job.operation, profile_content_flow::Operation::Load { .. })
+                    && self.native_command.as_ref().is_some_and(|original| {
+                        matches!(original.intent(), Some(NativeIntent::ProfileContent { .. }))
+                    }) =>
+            {
+                self.native_command
+                    .as_ref()
+                    .ok_or("原节点内容操作记录不可用。")?
                     .clone()
             }
             Work::LoadAccounts(..)
@@ -3711,6 +3824,31 @@ impl App {
         }
         Ok(())
     }
+    fn profile_content_result_pending(&self) -> bool {
+        if !self.native_unknown
+            || !self.profiles_memory_gate()
+            || self.current_global_owner() != self.profile_content_owner
+        {
+            return false;
+        }
+        let (
+            Some(lease),
+            Some(editor),
+            Some(command),
+            Some(NativeTarget::ProfileContent(original, slot)),
+        ) = (
+            self.lease,
+            self.profile_content.as_ref(),
+            self.native_command.as_ref(),
+            self.native_target.as_ref(),
+        )
+        else {
+            return false;
+        };
+        NativeTarget::same_reader(lease, *original)
+            && editor.slot() == *slot
+            && matches!(command.intent(), Some(NativeIntent::ProfileContent { slot: intent, .. }) if intent == slot)
+    }
     fn submit_profile_content(
         &mut self,
         operation: profile_content_flow::Operation,
@@ -3751,6 +3889,15 @@ impl App {
         if !self.profiles_memory_gate() || self.current_global_owner() != self.profile_content_owner
         {
             self.lock();
+            return self.render();
+        }
+        if action == profile_content_editor::END_RESULT_QUERY {
+            if self.pending.is_none() && self.profile_content_result_pending() {
+                self.native_unknown = false;
+                self.native_command = None;
+                self.native_target = None;
+                self.status = "已结束本次核对，原结果仍未知，未重发操作。请重新读取当前内容并明确确认新的发布。".into();
+            }
             return self.render();
         }
         let Some(editor) = &mut self.profile_content else {
@@ -5470,13 +5617,39 @@ impl App {
                         && self.current_global_owner() == self.profile_content_owner
                         && self.profiles_memory_gate()
                     {
+                        if loaded.history.as_deref().is_some_and(|history| {
+                            self.native_command
+                                .as_ref()
+                                .is_none_or(|original| !history.matches(original))
+                        }) {
+                            return Err("原节点内容回执与当前操作不匹配。".into());
+                        }
+                        let unknown = self.profile_content_result_pending();
+                        let current_revision = loaded.document.revision;
                         if let Some(editor) = &mut self.profile_content {
                             editor.loaded(loaded.document, loaded.cleanup_pending)?;
+                            if unknown {
+                                editor.original_unknown();
+                            }
                         }
-                        self.status = if loaded.outcome.is_some() {
+                        self.status = if let Some(history) = loaded.history {
+                            let mut message = history.message().to_owned();
+                            if let NativeResolution::ProfileContent(Some(result)) =
+                                &history.resolution
+                            {
+                                if let Some(revision) = result.committed_revision {
+                                    message.push_str(&format!(
+                                        " 原操作提交修订：{}；当前内容修订：{}。",
+                                        revision.get(),
+                                        current_revision.get()
+                                    ));
+                                }
+                            }
+                            message
+                        } else if loaded.outcome.is_some() {
                             "节点内容已保存；桌面将读取这一内容版本。".into()
                         } else {
-                            "节点内容已读取。".into()
+                            "当前节点内容已读取；此读取不证明其他原操作结果。".into()
                         };
                     }
                 }
@@ -7873,12 +8046,258 @@ mod tests {
                     fc_ports::command_window::TypedCommandOutcome::Completed(_)
                 ) | NativeResolution::DefaultTeacher(Some(_))
                     | NativeResolution::Subject(Some(_))
+                    | NativeResolution::ProfileContent(Some(fc_ports::ProfileContentOutcome {
+                        status: fc_ports::ProfileContentStatus::Committed,
+                        ..
+                    }))
             ));
         }
         // Historical outputs contain metadata only; physical owners
         // remain with their original executor. No fake historical result is made.
         drop(outcome);
         Some(Err(Failure::LostCompletedHistoryForTest))
+    }
+    #[test]
+    fn profile_content_lost_results_query_original_receipts_instead_of_current_slots() {
+        use fc_bootstrap::profile_content_files::LocalContentInput;
+        use fc_domain::{
+            desktop::ComponentKind,
+            layout::{LayoutScope, NodeKind, WidgetKind},
+            profile::SubjectProfileKey,
+            profile_content::*,
+        };
+        use profile_content_editor as e;
+        let _serial = SERIAL.lock().unwrap();
+        let (scratch, mut app) = ready_management();
+        let paths = DataPaths::isolated_test(scratch.0.clone()).unwrap();
+        migration_probe_fixture::seed_source(&mut app, &paths).unwrap();
+        let backend = app.backend.as_ref().unwrap().clone();
+        let lease = app.lease.unwrap();
+        let profile = backend
+            .lock()
+            .unwrap()
+            .read_subject_profile(
+                lease,
+                SubjectProfileKey {
+                    class_id: ClassId::new(1).unwrap(),
+                    subject_id: SubjectId::new(1).unwrap(),
+                    teacher_id: PrincipalId::new(2).unwrap(),
+                },
+            )
+            .unwrap()
+            .unwrap();
+        for (index, (widget, kind)) in [
+            (WidgetKind::SubjectText, ComponentKind::SubjectText),
+            (WidgetKind::SubjectImage, ComponentKind::SubjectImage),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let slot = ContentSlotKey {
+                scope: LayoutScope::Subject(profile.key),
+                node_id: profile
+                    .tree
+                    .nodes
+                    .iter()
+                    .find(|n| n.kind == NodeKind::Widget(widget))
+                    .unwrap()
+                    .id,
+            };
+            app.screen = Screen::ProfileContent;
+            app.profile_content_owner = Some(lease.principal_id());
+            app.profile_content = Some(e::Editor::new(slot, kind).unwrap());
+            app.submit_profile_content(profile_content_flow::Operation::Load { slot })
+                .unwrap();
+            wait_for(&mut app, |a| a.pending.is_none());
+            let until = Instant::now() + Duration::from_secs(30);
+            let overrides = if kind == ComponentKind::SubjectText {
+                vec![(e::TEXT, "Original lost text receipt")]
+            } else {
+                vec![]
+            };
+            voice_management_probe::submit(&mut app, e::REVIEW, &overrides, until).unwrap();
+            let mut data = FormData::new();
+            for f in app
+                .view()
+                .fields
+                .into_iter()
+                .filter(|f| f.kind != FieldKind::ReadOnly)
+            {
+                data.insert(f.id, f.value).unwrap();
+            }
+            app.window.probe_submit(e::CONFIRM, data).unwrap();
+            for event in app.window.take_events().unwrap() {
+                app.event(event).unwrap();
+            }
+            lose_worker_reply(&mut app);
+            let original = app.native_command.as_ref().unwrap().clone();
+            let issued = original.snapshot().unwrap();
+            assert!(!original.permits_current_read_confirmation());
+            let original_document = backend
+                .lock()
+                .unwrap()
+                .read_profile_content(lease, slot)
+                .unwrap();
+            // A real ordinary current read, deliberately carrying no original
+            // intent, cannot settle the retained mutation or enable publication.
+            assert!(matches!(
+                app.profile_content
+                    .as_mut()
+                    .unwrap()
+                    .command(e::RELOAD, &FormData::new())
+                    .unwrap(),
+                e::Command::Reload
+            ));
+            let ticket = app
+                .pool
+                .handle()
+                .try_submit(
+                    Work::Tracked(
+                        Box::new(Work::ProfileContent(Box::new(
+                            profile_content_flow::ContentJob {
+                                root: app.root.clone(),
+                                backend: backend.clone(),
+                                lease,
+                                operation: profile_content_flow::Operation::Load { slot },
+                            },
+                        ))),
+                        NativeCommand::new(),
+                    ),
+                    until,
+                )
+                .unwrap_or_else(|_| panic!("independent current read admitted"));
+            app.native_readback_pending = true;
+            app.pending = Some(Pending {
+                ticket,
+                generation: app.generation,
+                self_revokes: false,
+                public_lesson: false,
+                desktop_material_open: false,
+                diagnostic: None,
+            });
+            app.render().unwrap();
+            wait_for(&mut app, |a| a.pending.is_none());
+            assert_eq!(app.lease, Some(lease));
+            assert!(app.native_unknown && app.native_command.as_ref() == Some(&original));
+            assert!(!app
+                .profile_content
+                .as_ref()
+                .unwrap()
+                .view(false)
+                .actions
+                .iter()
+                .any(|a| a.id == e::REVIEW));
+            voice_management_probe::submit(&mut app, e::CLOSE, &[], until).unwrap();
+            for id in [e::DISCARD, e::KEEP] {
+                assert!(app.view().actions.iter().any(|a| a.id == id));
+            }
+            voice_management_probe::submit(&mut app, e::KEEP, &[], until).unwrap();
+            assert!(app.native_unknown && app.native_command.as_ref() == Some(&original));
+            // A separate authorized fixture client publishes a later revision.
+            // Its current slot must never be mistaken for the lost command.
+            if kind == ComponentKind::SubjectText {
+                migration_probe_fixture::publish(
+                    &app,
+                    &paths,
+                    slot,
+                    990 + index as u64,
+                    LocalContentInput::Text("Later independent text publication".into()),
+                    ContentPayloadKind::Text,
+                )
+                .unwrap();
+            } else {
+                migration_probe_fixture::publish_image(&app, &paths, slot, 990 + index as u64, 77)
+                    .unwrap();
+            }
+            let later = backend
+                .lock()
+                .unwrap()
+                .read_profile_content(lease, slot)
+                .unwrap();
+            assert_ne!(later.revision, original_document.revision);
+            assert_ne!(
+                later.current.as_ref().unwrap().payload,
+                original_document.current.as_ref().unwrap().payload
+            );
+            voice_management_probe::submit(&mut app, e::RELOAD, &[], until).unwrap();
+            assert!(!app.native_unknown, "{}", app.status);
+            assert_eq!(app.native_command.as_ref(), Some(&original));
+            assert!(app.status.contains(&format!(
+                "原操作提交修订：{}",
+                original_document.revision.get()
+            )));
+            assert!(app
+                .status
+                .contains(&format!("当前内容修订：{}", later.revision.get())));
+            assert_eq!(
+                backend
+                    .lock()
+                    .unwrap()
+                    .read_profile_content(lease, slot)
+                    .unwrap(),
+                later
+            );
+            let receipt = backend
+                .lock()
+                .unwrap()
+                .begin_command_scope(issued)
+                .unwrap()
+                .profile_content_outcome(lease, issued.command_id)
+                .unwrap()
+                .unwrap();
+            assert_eq!(receipt.committed_revision, Some(original_document.revision));
+            assert_eq!(receipt.status, fc_ports::ProfileContentStatus::Committed);
+            voice_management_probe::submit(&mut app, e::RELOAD, &[], until).unwrap();
+            if app.view().actions.iter().any(|a| a.id == e::DISCARD) {
+                voice_management_probe::submit(&mut app, e::DISCARD, &[], until).unwrap();
+            }
+            assert_eq!(
+                backend
+                    .lock()
+                    .unwrap()
+                    .read_profile_content(lease, slot)
+                    .unwrap(),
+                later
+            );
+        }
+        // Inject only the typed query result/error, not a fake committed body:
+        // missing and expired replies cannot prove failure or clear UNKNOWN.
+        let original = app.native_command.as_ref().unwrap().clone();
+        let issued = original.snapshot().unwrap();
+        let missing = NativeHistory::profile_content(original.clone(), issued, Ok(None)).unwrap();
+        app.apply_native_history(&missing);
+        assert!(app.native_unknown);
+        let expired = NativeHistory::profile_content(
+            original.clone(),
+            issued,
+            Err(fc_bootstrap::backend::BackendError::ProfileContent(
+                fc_ports::ProfileContentRepositoryError::ResultWindowExpired,
+            )),
+        )
+        .unwrap();
+        app.apply_native_history(&expired);
+        assert!(app.native_unknown);
+        app.profile_content.as_mut().unwrap().original_unknown();
+        app.render().unwrap();
+        voice_management_probe::submit(
+            &mut app,
+            e::END_RESULT_QUERY,
+            &[],
+            Instant::now() + Duration::from_secs(30),
+        )
+        .unwrap();
+        assert!(!app.native_unknown && app.native_command.is_none());
+        assert!(app.status.contains("原结果仍未知"));
+        voice_management_probe::submit(
+            &mut app,
+            e::RELOAD,
+            &[],
+            Instant::now() + Duration::from_secs(30),
+        )
+        .unwrap();
+        drain(app);
+        drop(backend);
+        drop(scratch);
     }
     #[test]
     fn management_unknown_never_blocks_public_lesson_and_public_read_cannot_clear_it() {

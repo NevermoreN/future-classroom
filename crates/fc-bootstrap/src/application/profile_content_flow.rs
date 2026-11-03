@@ -184,6 +184,7 @@ pub(super) struct ContentJob {
 pub(super) struct Loaded {
     pub document: ProfileContentDocument,
     pub outcome: Option<ProfileContentOutcome>,
+    pub history: Option<Box<super::NativeHistory>>,
     pub cleanup_pending: bool,
 }
 
@@ -208,14 +209,40 @@ impl ContentJob {
     pub fn run(self, context: &JobContext, command: &super::NativeCommand) -> Result<Outcome> {
         match self.operation {
             Operation::Load { slot } => {
-                let document = self
-                    .backend
-                    .lock()
-                    .map_err(|_| Failure::Stopped)?
-                    .read_profile_content(self.lease, slot)?;
+                let mut backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
+                let history = match command.intent() {
+                    None => None,
+                    Some(super::NativeIntent::ProfileContent { slot: original, .. })
+                        if *original == slot =>
+                    {
+                        let issued = command.original()?;
+                        let result = command.query(&mut backend, context, |backend| {
+                            Ok(backend.profile_content_outcome(self.lease, issued.command_id)?)
+                        });
+                        let history = match result {
+                            Ok(outcome) => super::NativeHistory::profile_content(
+                                command.clone(),
+                                issued,
+                                Ok(outcome),
+                            )?,
+                            Err(Failure::Backend(error)) => super::NativeHistory::profile_content(
+                                command.clone(),
+                                issued,
+                                Err(error),
+                            )?,
+                            Err(error) => return Err(error),
+                        };
+                        Some(Box::new(history))
+                    }
+                    Some(_) => return Err(Failure::Stopped),
+                };
+                // The current directory is separate from the original receipt;
+                // later publications cannot prove what that operation committed.
+                let document = backend.read_profile_content(self.lease, slot)?;
                 Ok(Outcome::ProfileContent(Box::new(Loaded {
                     document,
                     outcome: None,
+                    history,
                     cleanup_pending: false,
                 })))
             }
@@ -369,21 +396,26 @@ impl ContentJob {
                     return Err(error);
                 }
                 let mut backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
-                let outcome =
-                    command.query(&mut backend, context, |backend| {
-                        Ok(backend
-                            .profile_content_outcome(self.lease, backend.issued_command_id()?)?)
-                    })?;
+                let issued = command.original()?;
+                let outcome = command.query(&mut backend, context, |backend| {
+                    Ok(backend.profile_content_outcome(self.lease, issued.command_id)?)
+                })?;
                 if !outcome
                     .as_ref()
                     .is_some_and(|outcome| outcome.status == ProfileContentStatus::Committed)
                 {
                     return Err(invalid("尚未确认保存结果，请重新打开核对，勿重复提交。"));
                 }
+                let history = super::NativeHistory::profile_content(
+                    command.clone(),
+                    issued,
+                    Ok(outcome.clone()),
+                )?;
                 let document = backend.read_profile_content(self.lease, slot)?;
                 Ok(Outcome::ProfileContent(Box::new(Loaded {
                     document,
                     outcome,
+                    history: Some(Box::new(history)),
                     cleanup_pending,
                 })))
             }

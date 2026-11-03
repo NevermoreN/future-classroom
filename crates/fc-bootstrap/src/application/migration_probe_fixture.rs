@@ -563,7 +563,7 @@ fn png(red: u8) -> Vec<u8> {
     chunk(&mut out, b"IEND", &[]);
     out
 }
-fn publish(
+pub(super) fn publish(
     app: &App,
     paths: &DataPaths,
     slot: ContentSlotKey,
@@ -742,7 +742,7 @@ fn publish_with_receipt_expected(
     Ok(issued)
 }
 
-fn publish_image(
+pub(super) fn publish_image(
     app: &App,
     paths: &DataPaths,
     slot: ContentSlotKey,
