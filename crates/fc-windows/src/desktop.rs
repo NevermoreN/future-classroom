@@ -33,6 +33,7 @@ use windows::{
         Graphics::{Direct2D::Common::*, Direct2D::*, DirectWrite::*, Dxgi::Common::*, Gdi::*},
         System::{LibraryLoader::*, RemoteDesktop::*, StationsAndDesktops::*, Threading::*},
         UI::{
+            Accessibility::{HCF_HIGHCONTRASTON, HIGHCONTRASTW},
             Controls::WM_MOUSELEAVE,
             Input::KeyboardAndMouse::{TrackMouseEvent, TME_LEAVE, TRACKMOUSEEVENT},
             WindowsAndMessaging::*,
@@ -850,6 +851,7 @@ struct Card {
     image: Option<Arc<RasterFrame>>,
     source: SceneCard,
     tone: TextTone,
+    system_ink: Option<Rgb>,
     subject_backdrop: SubjectBackdrop,
     calendar_unverified: bool,
     render_pending: bool,
@@ -898,6 +900,8 @@ pub struct DesktopRenderer {
     _apartment: Apartment,
     hidden_probe: bool,
     hidden: bool,
+    system_ink: Option<Rgb>,
+    system_colors_dirty: bool,
     last_scene: Option<SceneGeneration>,
     last_revision: Option<fc_domain::ids::Revision>,
     metrics: DesktopMetrics,
@@ -1130,6 +1134,8 @@ impl DesktopRenderer {
             _apartment: a,
             hidden_probe,
             hidden: true,
+            system_ink: None,
+            system_colors_dirty: true,
             last_scene: None,
             last_revision: None,
             metrics: DesktopMetrics::default(),
@@ -1140,6 +1146,11 @@ impl DesktopRenderer {
     pub fn set_raster_cache(&mut self, raster: Arc<RasterCache>) {
         self.release_surfaces();
         self.raster = raster;
+    }
+    /// Coalesced system hints invalidate only the platform colour sample. A
+    /// failed read remains dirty until the next permitted publication retries.
+    pub fn invalidate_system_colors(&mut self) {
+        self.system_colors_dirty = true;
     }
     /// Metadata only; shared workers perform all file verification and WIC work.
     pub fn image_requests(scene: &SceneSnapshot) -> Result<Vec<ImageRenderRequest>> {
@@ -1230,6 +1241,10 @@ impl DesktopRenderer {
             self.hide();
             return Ok(PresentOutcome::Hidden);
         }
+        if self.system_colors_dirty {
+            self.system_ink = sample_system_ink()?;
+            self.system_colors_dirty = false;
+        }
         // Retain these exact reservations through construction. Worker eviction
         // cannot return bytes while either this guard or a Card owns its Arc.
         let mut ready = Vec::new();
@@ -1277,6 +1292,7 @@ impl DesktopRenderer {
             || self.cards.iter().zip(&scene_cards).any(|(a, b)| {
                 a.source != **b
                     || a.tone != scene.text_tone
+                    || a.system_ink != self.system_ink
                     || a.calendar_unverified != scene.public_calendar_unverified
             });
         if changed {
@@ -1405,6 +1421,7 @@ impl DesktopRenderer {
                     image: content::frame(&self.raster, card)?,
                     source: card.clone(),
                     tone: scene.text_tone,
+                    system_ink: self.system_ink,
                     subject_backdrop: SubjectBackdrop::planar(card.surface_alpha, scene.text_tone),
                     calendar_unverified: scene.public_calendar_unverified,
                     render_pending: true,
@@ -2248,7 +2265,38 @@ fn color(rgb: Rgb, a: f32) -> D2D1_COLOR_F {
         a,
     }
 }
-fn ink(tone: TextTone, a: f32) -> D2D1_COLOR_F {
+fn sample_system_ink() -> Result<Option<Rgb>> {
+    let mut high_contrast = HIGHCONTRASTW {
+        cbSize: std::mem::size_of::<HIGHCONTRASTW>() as u32,
+        ..Default::default()
+    };
+    // SAFETY: the complete caller-owned structure outlives this synchronous,
+    // read-only query. No system accessibility or colour setting is changed.
+    unsafe {
+        SystemParametersInfoW(
+            SPI_GETHIGHCONTRAST,
+            high_contrast.cbSize,
+            Some((&mut high_contrast as *mut HIGHCONTRASTW).cast()),
+            SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS(0),
+        )?;
+        // The scheme pointer is borrowed and unused. WinForms' native wrapper
+        // explicitly corrects the HIGHCONTRASTW documentation's LocalFree claim:
+        // dotnet/winforms, PInvokeCore.SystemParametersInfo(ref HIGHCONTRASTW).
+        if !high_contrast.dwFlags.contains(HCF_HIGHCONTRASTON) {
+            return Ok(None);
+        }
+        let rgb = GetSysColor(COLOR_WINDOWTEXT);
+        Ok(Some(Rgb {
+            red: rgb as u8,
+            green: (rgb >> 8) as u8,
+            blue: (rgb >> 16) as u8,
+        }))
+    }
+}
+fn ink(tone: TextTone, system_ink: Option<Rgb>, a: f32) -> D2D1_COLOR_F {
+    if let Some(rgb) = system_ink {
+        return color(rgb, a);
+    }
     let v = if tone == TextTone::Light { 0.97 } else { 0.08 };
     D2D1_COLOR_F {
         r: v,
@@ -2297,7 +2345,8 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
             },
             None,
         )?;
-        let text = target.CreateSolidColorBrush(&ink(c.tone, c.source.component_alpha), None)?;
+        let text = target
+            .CreateSolidColorBrush(&ink(c.tone, c.system_ink, c.source.component_alpha), None)?;
         target.BeginDraw();
         target.Clear(Some(&D2D1_COLOR_F::default()));
         if let Some(b) = &c.backdrop {
@@ -2383,10 +2432,10 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
                         target.DrawRoundedRectangle(&pill, &brush, stroke, None);
                     }
                 }
-                let foreground = if let Some((rgb, alpha, _)) = block
-                    .fill
-                    .filter(|(_, alpha, stroke)| *alpha > 0. && *stroke == 0.)
-                {
+                let foreground = if let Some((rgb, alpha, _)) =
+                    block.fill.filter(|(_, alpha, stroke)| {
+                        c.system_ink.is_none() && *alpha > 0. && *stroke == 0.
+                    }) {
                     let mut foreground =
                         c.subject_backdrop
                             .foreground(rgb, alpha, c.source.component_alpha);
@@ -2434,7 +2483,7 @@ fn render_lesson_control(
         if metrics.height > c.source.rect.height - 24. + 0.5 {
             return Err(Error::from_hresult(E_INVALIDARG));
         }
-        let text = target.CreateSolidColorBrush(&ink(c.tone, 1.), None)?;
+        let text = target.CreateSolidColorBrush(&ink(c.tone, c.system_ink, 1.), None)?;
         let glass = target.CreateSolidColorBrush(
             &D2D1_COLOR_F {
                 r: 0.3,
@@ -2478,7 +2527,8 @@ fn draw_dial(target: &ID2D1DCRenderTarget, c: &Card) -> Result<()> {
         let cx = d.rect.x - c.source.rect.x + w / 2.;
         let cy = d.rect.y - c.source.rect.y + h / 2. - 12.;
         let radius = (w.min(h - 28.) / 2. - 5.).max(8.);
-        let brush = target.CreateSolidColorBrush(&ink(c.tone, c.source.component_alpha), None)?;
+        let brush = target
+            .CreateSolidColorBrush(&ink(c.tone, c.system_ink, c.source.component_alpha), None)?;
         let mut e = xy(cx, cy);
         e.radiusX = radius;
         e.radiusY = radius;
@@ -2509,7 +2559,8 @@ fn render_dynamic_frame(g: &Graphics, c: &mut Card, now: LocalDateTime) -> Resul
     let w = surface.rect.width;
     let h = surface.rect.height;
     unsafe {
-        let brush = target.CreateSolidColorBrush(&ink(c.tone, c.source.component_alpha), None)?;
+        let brush = target
+            .CreateSolidColorBrush(&ink(c.tone, c.system_ink, c.source.component_alpha), None)?;
         target.BeginDraw();
         target.Clear(Some(&D2D1_COLOR_F::default()));
         if let Some(b) = &c.backdrop {
@@ -2827,7 +2878,7 @@ fn render_input_strip(g: &Graphics, c: &mut Card) -> Result<()> {
             }
         }
         if control {
-            let brush = target.CreateSolidColorBrush(&ink(c.tone, 1.), None)?;
+            let brush = target.CreateSolidColorBrush(&ink(c.tone, c.system_ink, 1.), None)?;
             let background = target.CreateSolidColorBrush(
                 &D2D1_COLOR_F {
                     r: 0.3,
@@ -2847,11 +2898,13 @@ fn render_input_strip(g: &Graphics, c: &mut Card) -> Result<()> {
             );
         }
         if image {
-            content::draw_pager(g, &target, &c.source, c.tone)?;
+            content::draw_pager(g, &target, &c.source, c.tone, c.system_ink)?;
         }
         if pagination {
-            let brush =
-                target.CreateSolidColorBrush(&ink(c.tone, c.source.component_alpha), None)?;
+            let brush = target.CreateSolidColorBrush(
+                &ink(c.tone, c.system_ink, c.source.component_alpha),
+                None,
+            )?;
             let background = target.CreateSolidColorBrush(
                 &D2D1_COLOR_F {
                     r: 0.3,
@@ -2917,7 +2970,7 @@ mod tests {
             settings_open: false,
         }
     }
-    fn scene(now: LocalDateTime) -> SceneSnapshot {
+    pub(super) fn scene(now: LocalDateTime) -> SceneSnapshot {
         let mut cards = Vec::new();
         for (index, kind) in ComponentKind::ALL.into_iter().enumerate() {
             let content=match kind {

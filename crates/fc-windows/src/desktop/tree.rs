@@ -17,6 +17,7 @@ pub(super) struct TreeRenderer {
     pub(super) tree: ScenePaintTree,
     original_cards: Vec<SceneCard>,
     tone: TextTone,
+    system_ink: Option<Rgb>,
     unverified: bool,
     pub(super) card_count: usize,
     groups: Vec<Group>,
@@ -293,6 +294,7 @@ fn make_card(
         image: content::frame(&renderer.raster, card)?,
         source,
         tone: scene.text_tone,
+        system_ink: renderer.system_ink,
         subject_backdrop: SubjectBackdrop::planar(card.surface_alpha, scene.text_tone),
         calendar_unverified: scene.public_calendar_unverified,
         render_pending: true,
@@ -829,6 +831,7 @@ pub(super) fn present(
             t.tree != *source
                 || t.original_cards != scene.cards
                 || t.tone != scene.text_tone
+                || t.system_ink != renderer.system_ink
                 || t.unverified != scene.public_calendar_unverified
         });
     if changed {
@@ -948,6 +951,7 @@ pub(super) fn present(
             tree: source.clone(),
             original_cards: scene.cards.clone(),
             tone: scene.text_tone,
+            system_ink: renderer.system_ink,
             unverified: scene.public_calendar_unverified,
             card_count: scene.cards.len(),
             groups,

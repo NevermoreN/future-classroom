@@ -152,6 +152,7 @@ pub(super) fn draw_pager(
     target: &ID2D1DCRenderTarget,
     card: &SceneCard,
     tone: TextTone,
+    system_ink: Option<Rgb>,
 ) -> Result<()> {
     let CardContent::Image(image) = &card.content else {
         return Ok(());
@@ -168,7 +169,8 @@ pub(super) fn draw_pager(
     // SAFETY: local target and layout are borrowed only during this UI-thread
     // draw; all coordinates come from the same validated CardBodySpec geometry.
     unsafe {
-        let brush = target.CreateSolidColorBrush(&ink(tone, card.component_alpha), None)?;
+        let brush =
+            target.CreateSolidColorBrush(&ink(tone, system_ink, card.component_alpha), None)?;
         target.DrawTextLayout(
             xy(pager.rect.x, pager.rect.y + 14.).point,
             &layout,

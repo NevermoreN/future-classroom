@@ -199,6 +199,206 @@ fn requests_for(scene: &SceneSnapshot) -> Result<Vec<ImageRenderRequest>> {
     requests(scene)
 }
 #[test]
+fn system_high_contrast_colors_repaint_cached_flat_tree_and_image_text_without_settings_changes() {
+    let _serial = crate::NATIVE_TEST_SERIAL
+        .lock()
+        .unwrap_or_else(|p| p.into_inner());
+    let foreground = unsafe { GetForegroundWindow() };
+    let fixture = Fixture::new();
+    let source = fixture.bmp();
+    let (_publisher, gate) = authority();
+    let now = crate::native::local_now().unwrap();
+    let colored = |pixels: &[u8], green: bool| {
+        pixels
+            .chunks_exact(4)
+            .filter(|p| {
+                let dominant = if green { p[1] } else { p[0] };
+                let other = if green { p[0] } else { p[1] };
+                p[3] > 80
+                    && u16::from(dominant) > u16::from(other) + 45
+                    && u16::from(dominant) > u16::from(p[2]) + 45
+            })
+            .count()
+    };
+    let snapshot = |r: &DesktopRenderer| {
+        r.cards
+            .iter()
+            .map(|c| {
+                (
+                    c.surface.dib.pixels().to_vec(),
+                    c.dynamic.as_ref().map(|s| s.dib.pixels().to_vec()),
+                    c.input.as_ref().map(|i| i.surface.dib.pixels().to_vec()),
+                )
+            })
+            .collect::<Vec<_>>()
+    };
+    for image in [false, true] {
+        // Independent images require a scoped tree node in the product.
+        for tree in [false, true].into_iter().filter(|tree| !image || *tree) {
+            let mut scene = if image {
+                scene(vec![card(20, true)])
+            } else {
+                crate::desktop::tests::scene(now)
+            };
+            scene.captured_at = now;
+            for c in &mut scene.cards {
+                c.surface_alpha = 0.;
+                c.edge_alpha = 0.;
+                c.component_alpha = 0.75;
+                c.visible_leaf_limit = 8;
+            }
+            scene.paint_tree = tree.then(|| ScenePaintTree {
+                nodes: scene
+                    .cards
+                    .iter()
+                    .enumerate()
+                    .map(|(i, c)| ScenePaintNode {
+                        key: SceneNodeKey {
+                            scope: LayoutScope::Public,
+                            id: c.content_identity.map_or_else(
+                                || LayoutNodeId::new(i as u64 + 1).unwrap(),
+                                |id| id.slot.node_id,
+                            ),
+                        },
+                        parent: None,
+                        rect: c.rect,
+                        clip: c.rect,
+                        local_opacity: c.component_alpha,
+                        effective_opacity: c.component_alpha,
+                        glass: Some(PaintGlass {
+                            surface_alpha: c.surface_alpha,
+                            edge_alpha: c.edge_alpha,
+                        }),
+                        card_index: Some(i),
+                        widget_kind: Some(match c.kind {
+                            ComponentKind::Clock => WidgetKind::Clock,
+                            ComponentKind::Date => WidgetKind::Date,
+                            ComponentKind::Schedule => WidgetKind::Schedule,
+                            ComponentKind::Homework => WidgetKind::Homework,
+                            ComponentKind::Reminder => WidgetKind::Reminder,
+                            ComponentKind::DateCountdown => WidgetKind::DateCountdown,
+                            ComponentKind::Recess => WidgetKind::Recess,
+                            ComponentKind::Materials => WidgetKind::Materials,
+                            ComponentKind::SubjectText => WidgetKind::SubjectText,
+                            ComponentKind::SubjectImage => WidgetKind::SubjectImage,
+                        }),
+                    })
+                    .collect(),
+                public_layout_revision: Revision::new(1),
+                subject_profile: None,
+                selection_reason: ProfileSelectionReason::Public,
+            });
+            let original = scene.clone();
+            let mut r = DesktopRenderer::new_hidden().unwrap();
+            if image {
+                let request = requests(&scene).unwrap().remove(0);
+                r.raster
+                    .decode_verified(
+                        &source,
+                        &request.reference,
+                        request.reference.sha256,
+                        request.max_pixel_width,
+                        request.max_pixel_height,
+                        || true,
+                    )
+                    .unwrap();
+            }
+            // Explicit palette injection, without changing the Windows theme.
+            r.system_colors_dirty = false;
+            r.system_ink = None;
+            let publish = |r: &mut DesktopRenderer| {
+                let result = r.present(&scene, now, &guard(&gate, scene.generation));
+                assert_eq!(
+                    result.unwrap_or_else(|error| panic!(
+                        "image={image} tree={tree} system={:?} dirty={}: {error:?}",
+                        r.system_ink, r.system_colors_dirty,
+                    )),
+                    PresentOutcome::Offscreen
+                );
+            };
+            publish(&mut r);
+            let before = snapshot(&r);
+            let alphas: Vec<_> = r.cards.iter().map(|c| c.source.component_alpha).collect();
+            let bytes = r.last_metrics().dib_bytes;
+            let regions = r.last_metrics().input_regions;
+            for (rgb, green) in [
+                (
+                    Rgb {
+                        red: 19,
+                        green: 231,
+                        blue: 57,
+                    },
+                    true,
+                ),
+                (
+                    Rgb {
+                        red: 31,
+                        green: 67,
+                        blue: 239,
+                    },
+                    false,
+                ),
+            ] {
+                let frames = r.last_metrics().drawn_frames;
+                r.system_ink = Some(rgb);
+                publish(&mut r);
+                assert!(r.last_metrics().drawn_frames > frames);
+                assert_eq!(r.last_metrics().dib_bytes, bytes);
+                assert_eq!(r.last_metrics().input_regions, regions);
+                for (index, c) in r.cards.iter().enumerate() {
+                    assert!(
+                        colored(c.surface.dib.pixels(), green) > 0,
+                        "{:?}",
+                        c.source.kind
+                    );
+                    assert_eq!(c.source.component_alpha, alphas[index]);
+                    if let Some(s) = &c.dynamic {
+                        assert!(colored(s.dib.pixels(), green) > 0);
+                    }
+                    if let Some(input) = &c.input {
+                        if input.state.targets.borrow().iter().any(|t| {
+                            matches!(
+                                t.action,
+                                InputAction::Page(_) | InputAction::ImagePage { .. }
+                            )
+                        }) {
+                            assert!(colored(input.surface.dib.pixels(), green) > 0);
+                        }
+                    }
+                    for block in c.body.blocks.iter().filter(|b| b.fill.is_some()).take(1) {
+                        let top = (c.body.top_inset + block.top).ceil() as usize;
+                        let bottom = ((c.body.top_inset + block.top + block.height).floor()
+                            as usize)
+                            .min(c.surface.dib.height as usize);
+                        if bottom > top && top < c.surface.dib.height as usize {
+                            let stride = c.surface.dib.width as usize * 4;
+                            assert!(
+                                colored(
+                                    &c.surface.dib.pixels()[top * stride..bottom * stride],
+                                    green
+                                ) > 0
+                            );
+                        }
+                    }
+                }
+                let frames = r.last_metrics().drawn_frames;
+                publish(&mut r);
+                assert_eq!(r.last_metrics().drawn_frames, frames);
+            }
+            r.system_ink = None;
+            publish(&mut r);
+            assert_eq!(snapshot(&r), before);
+            assert_eq!(scene, original);
+            assert_eq!(r.last_metrics().visible_windows, 0);
+            // Also execute the real read-only Windows sampler and dirty retry path.
+            r.invalidate_system_colors();
+            publish(&mut r);
+            assert!(!r.system_colors_dirty);
+        }
+    }
+    assert_eq!(unsafe { GetForegroundWindow() }, foreground);
+}
+#[test]
 fn actual_hidden_two_text_nodes_page_only_the_exact_scoped_node() {
     let _serial = crate::NATIVE_TEST_SERIAL
         .lock()

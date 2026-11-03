@@ -1163,6 +1163,9 @@ impl Controller {
         if let Some(control) = control {
             self.control = Some(control.clone());
         }
+        if hints.contains(HostHints::DISPLAY_CHANGED) {
+            self.renderer.invalidate_system_colors();
+        }
         // Display notifications can arrive while settings keep the desktop
         // hidden. Retire the cached area now, before those early returns.
         if hints.contains(HostHints::DISPLAY_CHANGED)
