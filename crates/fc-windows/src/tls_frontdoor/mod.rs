@@ -216,6 +216,7 @@ pub(super) trait Driver {
     }
 }
 pub mod certificate_query;
+pub mod certificate_provision;
 #[cfg(windows)]
 mod certificate_selection;
 #[cfg(windows)]

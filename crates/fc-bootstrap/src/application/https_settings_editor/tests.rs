@@ -307,3 +307,131 @@ fn legacy_saved_configuration_does_not_invent_source_networks() {
     );
     assert!(e.prepare_save(Instant::now()).is_err());
 }
+
+#[test]
+fn certificate_generation_requires_explicit_confirmation_and_only_an_ip_draft() {
+    for (host, canonical) in [
+        ("192.168.10.212", "192.168.10.212"),
+        ("[2001:0db8::1]", "2001:db8::1"),
+    ] {
+        let mut e = edit();
+        let mut data = form(host, "8443");
+        data.take(CERTIFICATE);
+        data.insert(CERTIFICATE, String::new()).unwrap();
+        assert!(matches!(
+            e.handle(owner(1), GENERATE_CERTIFICATE, data).unwrap(),
+            Command::Stay
+        ));
+        let view = e.view(owner(1), "", false);
+        view.validate().unwrap();
+        assert!(view.fields.is_empty());
+        assert!(view.description.contains(canonical));
+        assert!(view.description.contains("不自动保存配置或开启监听"));
+        assert!(e.original.is_none());
+        assert!(e.base.as_ref().unwrap().settings.configuration.is_none());
+        match e
+            .handle(owner(1), CONFIRM_GENERATE, FormData::new())
+            .unwrap()
+        {
+            Command::ProvisionCertificate(ip) => assert_eq!(ip, canonical),
+            _ => panic!("explicit confirmation must provision the captured IP"),
+        }
+        assert!(e.provision_confirmation.is_none());
+        assert!(e
+            .handle(owner(1), CONFIRM_GENERATE, FormData::new())
+            .is_err());
+    }
+    for host in [
+        "board.school",
+        "https://192.168.10.212",
+        "0.0.0.0",
+        "::",
+        "224.0.0.1",
+    ] {
+        let mut e = edit();
+        assert!(e
+            .handle(owner(1), GENERATE_CERTIFICATE, form(host, ""))
+            .is_err());
+        assert!(e.provision_confirmation.is_none());
+    }
+}
+
+#[test]
+fn certificate_generation_cancel_preserves_draft_and_busy_disables_submission() {
+    let mut e = edit();
+    e.handle(
+        owner(1),
+        GENERATE_CERTIFICATE,
+        form("192.168.10.212", "9443"),
+    )
+    .unwrap();
+    let draft = e.draft.clone();
+    assert!(e
+        .view(owner(1), "", true)
+        .actions
+        .iter()
+        .filter(|a| a.enabled)
+        .all(|a| a.id == LOCK));
+    assert!(e
+        .handle(owner(1), CONFIRM_GENERATE, form("192.168.10.213", "443"))
+        .is_err());
+    assert!(matches!(
+        e.handle(owner(1), CANCEL_GENERATE, FormData::new())
+            .unwrap(),
+        Command::Stay
+    ));
+    assert!(e.draft == draft);
+    assert!(e.original.is_none());
+    assert!(
+        !e.view(owner(1), "", true)
+            .actions
+            .iter()
+            .find(|a| a.id == GENERATE_CERTIFICATE)
+            .unwrap()
+            .enabled
+    );
+}
+
+#[test]
+fn certificate_generation_cannot_bypass_unknown_save_or_discard_confirmation() {
+    let mut e = edit();
+    e.capture(form("192.168.10.212", "8443")).unwrap();
+    e.prepare_save(Instant::now()).unwrap();
+    e.accepted();
+    assert!(e
+        .handle(owner(1), GENERATE_CERTIFICATE, FormData::new())
+        .is_err());
+    assert!(e.provision_confirmation.is_none());
+    assert!(
+        !e.view(owner(1), "", false)
+            .actions
+            .iter()
+            .find(|a| a.id == GENERATE_CERTIFICATE)
+            .unwrap()
+            .enabled
+    );
+    e.handle(owner(1), CANCEL_DRAFT, FormData::new()).unwrap();
+    assert!(e
+        .handle(owner(1), GENERATE_CERTIFICATE, FormData::new())
+        .is_err());
+    assert!(e.confirmation.is_some());
+}
+
+#[test]
+fn generated_certificate_only_updates_matching_ip_draft_and_never_saves() {
+    let mut e = edit();
+    e.capture(form("[2001:0db8::1]", "9443")).unwrap();
+    let thumbprint = "CD".repeat(20);
+    assert!(!e.apply_provisioned_certificate("192.168.10.212", &thumbprint));
+    assert_eq!(e.draft.certificate, "ab".repeat(20));
+    assert!(!e.apply_provisioned_certificate("2001:db8::1", "invalid"));
+    assert!(e.apply_provisioned_certificate("2001:db8::1", &thumbprint));
+    assert_eq!(e.draft.certificate, "cd".repeat(20));
+    assert_eq!(e.draft.host, "[2001:0db8::1]");
+    assert_eq!(e.draft.port, "9443");
+    assert_eq!(e.draft.source_networks, "127.0.0.1/32");
+    assert!(e.original.is_none());
+    assert!(e.base.as_ref().unwrap().settings.configuration.is_none());
+    assert!(e.dirty());
+    assert!(e.certificate_observation.is_none());
+}

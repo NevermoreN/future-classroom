@@ -11,6 +11,7 @@ pub(super) enum Kind {
     Save,
     Query,
     Check,
+    Provision,
 }
 #[derive(Clone, PartialEq, Eq)]
 pub(super) enum Operation {
@@ -18,6 +19,7 @@ pub(super) enum Operation {
     Save(editor::Save),
     Query(editor::Save),
     Check(HttpsSettingsState),
+    Provision(String),
 }
 impl Operation {
     fn kind(&self) -> Kind {
@@ -26,6 +28,7 @@ impl Operation {
             Self::Save(_) => Kind::Save,
             Self::Query(_) => Kind::Query,
             Self::Check(_) => Kind::Check,
+            Self::Provision(_) => Kind::Provision,
         }
     }
     pub(super) fn allocation_bytes(&self) -> Option<usize> {
@@ -40,6 +43,7 @@ impl Operation {
                     .as_ref()
                     .map_or(0, |c| c.allocation_bytes()),
                 Self::Load => 0,
+                Self::Provision(host) => host.capacity(),
             })?
             .checked_add(1024)
     }
@@ -58,6 +62,7 @@ enum Value {
     Saved(HttpsSettingsState),
     Queried(Option<HttpsSettingsState>),
     Checked(Box<fc_bootstrap::backend::HttpsCertificateObservation>),
+    Provisioned(fc_bootstrap::backend::ProvisionedHttpsCertificate),
 }
 pub(super) fn run(
     backend: Arc<Mutex<Backend>>,
@@ -67,6 +72,36 @@ pub(super) fn run(
 ) -> Result<Outcome> {
     context.checkpoint().map_err(|_| Failure::Stopped)?;
     let operation = match operation {
+        Operation::Provision(host) => {
+            let (service, control) = {
+                let mut owner = backend.lock().map_err(|_| Failure::Stopped)?;
+                let control = owner.session_control();
+                let scoped = owner.begin_execution_scope(Arc::new(context.execution_fence()));
+                (scoped.https_certificate_service()?, control)
+            };
+            // CryptoAPI and public-file export run after the Backend lock leaves scope.
+            let value = service
+                .with_execution_fence(Arc::new(context.execution_fence()))
+                .provision_ip_certificate(lease, host)
+                .map_err(|error| match error {
+                    fc_bootstrap::backend::HttpsCertificateError::Backend(error) => Failure::Backend(error),
+                    fc_bootstrap::backend::HttpsCertificateError::InvalidIpHost => invalid("请填写有效的IP地址后生成证书。"),
+                    _ => invalid("证书生成或公开导出未完成。证书可能已在本机生成；可重新登录后对同一IP重试并复用。配置尚未保存。"),
+                })?;
+            context.checkpoint().map_err(|_| Failure::Stopped)?;
+            let status = control
+                .health_gate()
+                .check_sensitive()
+                .map_err(|_| Failure::Stopped)?;
+            if status.revision != value.publication_revision {
+                return Err(Failure::Stopped);
+            }
+            return Ok(Outcome::Https(Box::new(Completion {
+                lease,
+                publication: value.publication_revision,
+                value: Value::Provisioned(value),
+            })));
+        }
         Operation::Check(expected) => {
             let service = {
                 let mut owner = backend.lock().map_err(|_| Failure::Stopped)?;
@@ -114,7 +149,7 @@ pub(super) fn run(
                 },
             )?
         }
-        Operation::Check(_) => return Err(invalid("检查请求已变化。")),
+        Operation::Check(_) | Operation::Provision(_) => return Err(invalid("证书请求已变化。")),
         Operation::Query(request) => {
             let command = request.command.clone();
             command.query(&mut scoped, context, |backend| {
@@ -304,6 +339,7 @@ impl App {
                     Kind::Query => "正在只读查询原操作结果。",
                     Kind::Load => "正在读取当前配置。",
                     Kind::Check => "正在只读检查已保存的证书；这不会启用教师连接。",
+                    Kind::Provision => "正在生成本机证书并导出公开证书；不会保存配置或启用连接。",
                 }
                 .into();
             }
@@ -420,6 +456,9 @@ impl App {
                 }
                 self.status = "请先保存并核对当前配置。".into();
             }
+            Ok(editor::Command::ProvisionCertificate(host)) => {
+                return self.submit_https(Operation::Provision(host));
+            }
             Ok(editor::Command::Query) => {
                 if let Some(request) = self
                     .https_editor
@@ -497,6 +536,23 @@ impl App {
                                 self.status = "配置或会话已变化，请重新检查。".into();
                             }
                         }
+                        Value::Provisioned(certificate) if pending.kind == Kind::Provision => {
+                            if e.apply_provisioned_certificate(
+                                &certificate.host,
+                                &certificate.thumbprint,
+                            ) {
+                                self.status = format!(
+                                    "已{}本机证书并回填草稿，尚未保存配置。公开证书：{}。教师设备首次需安装信任。",
+                                    if certificate.reused { "复用" } else { "生成" },
+                                    certificate.export_path.display()
+                                );
+                            } else {
+                                self.status = format!(
+                                    "证书已生成并导出至{}；IP草稿已变化，未覆盖当前草稿。",
+                                    certificate.export_path.display()
+                                );
+                            }
+                        }
                         _ => self.status = "本次结果不匹配，请重新核对。".into(),
                     }
                 } else if self.screen == Screen::HttpsSettings {
@@ -523,6 +579,10 @@ impl App {
                         Kind::Check => {
                             "证书只读检查未完成，旧结果已失效；可核对配置后重新检查。".into()
                         }
+                        Kind::Provision => format!(
+                            "{} 证书可能已生成；同一IP可重试复用，配置尚未保存。",
+                            error_text(&error)
+                        ),
                         _ => "读取未完成，请核对权限后再明确重试。".into(),
                     };
                 }

@@ -15,6 +15,7 @@ mod execution_scope_tests;
 pub mod https_certificate;
 pub use https_certificate::{
     HttpsCertificateError, HttpsCertificateObservation, HttpsCertificateService,
+    ProvisionedHttpsCertificate,
 };
 mod https_settings;
 mod materials_web;

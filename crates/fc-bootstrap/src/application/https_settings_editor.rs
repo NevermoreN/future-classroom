@@ -21,6 +21,9 @@ pub(super) const CONFIRM_DISCARD: ActionId = ActionId(925);
 pub(super) const KEEP: ActionId = ActionId(926);
 pub(super) const CLOSE: ActionId = ActionId(927);
 pub(super) const CHECK_CERTIFICATE: ActionId = ActionId(928);
+pub(super) const GENERATE_CERTIFICATE: ActionId = ActionId(929);
+pub(super) const CONFIRM_GENERATE: ActionId = ActionId(930);
+pub(super) const CANCEL_GENERATE: ActionId = ActionId(931);
 pub(super) const SAVED: &str = "配置已保存；教师连接尚未启用。证书引用尚未检查。";
 pub(super) const UNCONFIRMED: &str = "尚未确认本次保存结果。请查询原操作结果，不要重复保存。";
 
@@ -37,6 +40,14 @@ struct Draft {
     source_networks: String,
 }
 impl Draft {
+    fn certificate_ip(&self) -> std::result::Result<String, String> {
+        let host = HttpsHost::parse(&self.host)
+            .map_err(|_| "请先填写有效的本机IP，不要包含网址前缀、端口或路径。")?;
+        host.as_str()
+            .parse::<std::net::IpAddr>()
+            .map(|ip| ip.to_string())
+            .map_err(|_| "生成本机证书请填写IP地址；域名证书须另行配置。".into())
+    }
     fn from_state(state: &HttpsSettingsState) -> Self {
         state
             .settings
@@ -139,6 +150,7 @@ pub(super) enum Command {
     Save,
     Query,
     CheckCertificate,
+    ProvisionCertificate(String),
 }
 pub(super) struct Editor {
     owner: Owner,
@@ -147,6 +159,7 @@ pub(super) struct Editor {
     original: Option<Original>,
     historical: Option<Option<HttpsSettingsState>>,
     confirmation: Option<Leave>,
+    provision_confirmation: Option<String>,
     certificate_observation: Option<HttpsCertificateObservation>,
 }
 impl Editor {
@@ -158,6 +171,7 @@ impl Editor {
             original: None,
             historical: None,
             confirmation: None,
+            provision_confirmation: None,
             certificate_observation: None,
         }
     }
@@ -171,6 +185,7 @@ impl Editor {
         self.original = None;
         self.historical = None;
         self.confirmation = None;
+        self.provision_confirmation = None;
     }
     pub(super) fn capture(&mut self, data: FormData) -> std::result::Result<(), String> {
         if data.is_empty() {
@@ -195,7 +210,10 @@ impl Editor {
             })
     }
     pub(super) fn navigation_pending(&self) -> bool {
-        self.dirty() || self.original.is_some() || self.confirmation.is_some()
+        self.dirty()
+            || self.original.is_some()
+            || self.confirmation.is_some()
+            || self.provision_confirmation.is_some()
     }
     pub(super) fn has_unknown(&self) -> bool {
         self.original.as_ref().is_some_and(|o| o.accepted)
@@ -252,6 +270,24 @@ impl Editor {
     pub(super) fn suspended(&mut self) {
         self.certificate_observation = None;
         self.confirmation = None;
+        self.provision_confirmation = None;
+    }
+    pub(super) fn apply_provisioned_certificate(&mut self, host: &str, thumbprint: &str) -> bool {
+        let Ok(current_host) = self.draft.certificate_ip() else {
+            return false;
+        };
+        let Ok(certificate) = HttpsCertificateRef::parse(thumbprint) else {
+            return false;
+        };
+        if current_host != host {
+            return false;
+        }
+        self.draft.certificate = certificate.to_hex();
+        self.certificate_observation = None;
+        if self.original.as_ref().is_some_and(|o| !o.accepted) {
+            self.original = None;
+        }
+        true
     }
     pub(super) fn certificate_state(&self) -> Option<HttpsSettingsState> {
         self.base
@@ -342,11 +378,32 @@ impl Editor {
                 _ => Err("请先选择保留或放弃暂存内容。".into()),
             };
         }
+        if self.provision_confirmation.is_some() {
+            if !data.is_empty() {
+                return Err("请先确认或取消本机证书生成。".into());
+            }
+            return match action {
+                CANCEL_GENERATE => {
+                    self.provision_confirmation = None;
+                    Ok(Command::Stay)
+                }
+                CONFIRM_GENERATE if !self.has_unknown() => Ok(Command::ProvisionCertificate(
+                    self.provision_confirmation.take().unwrap(),
+                )),
+                CONFIRM_GENERATE => Err(UNCONFIRMED.into()),
+                _ => Err("请先确认或取消本机证书生成。".into()),
+            };
+        }
         self.capture(data)?;
         if matches!(action, CANCEL_DRAFT | CLOSE | RELOAD) {
             self.certificate_observation = None;
         }
         match action {
+            GENERATE_CERTIFICATE if self.has_unknown() => Err(UNCONFIRMED.into()),
+            GENERATE_CERTIFICATE => {
+                self.provision_confirmation = Some(self.draft.certificate_ip()?);
+                Ok(Command::Stay)
+            }
             SAVE_CONFIG if self.has_unknown() => Err(UNCONFIRMED.into()),
             SAVE_CONFIG => {
                 self.draft.configuration()?;
@@ -409,6 +466,21 @@ impl Editor {
             view.actions = vec![
                 action(KEEP, "保留暂存内容", true),
                 action(CONFIRM_DISCARD, "确认放弃", !busy),
+                action(LOCK, "锁定工作台", true),
+            ];
+            return view;
+        }
+        if let Some(host) = &self.provision_confirmation {
+            view.description = format!(
+                "为本机IP {host} 生成独立自签证书并导出公开证书。教师设备首次使用时须安装并信任公开证书。私钥仅保存在本机当前程序用户的MY证书存储，不导出私钥，也不自动导入根证书信任。生成后只回填草稿中的证书引用，不自动保存配置或开启监听。是否继续？"
+            );
+            view.actions = vec![
+                action(
+                    CONFIRM_GENERATE,
+                    "确认生成并导出",
+                    !busy && !self.has_unknown(),
+                ),
+                action(CANCEL_GENERATE, "取消生成", !busy),
                 action(LOCK, "锁定工作台", true),
             ];
             return view;
@@ -476,6 +548,11 @@ impl Editor {
             view.grid = Some(certificate_grid(&observation.report));
         }
         view.actions = vec![
+            action(
+                GENERATE_CERTIFICATE,
+                "生成本机IP证书并导出",
+                !busy && !self.has_unknown(),
+            ),
             action(
                 CHECK_CERTIFICATE,
                 "检查已保存的证书",

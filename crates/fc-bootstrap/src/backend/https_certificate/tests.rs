@@ -1,7 +1,6 @@
 //! Real credentials/SQLite and shared two-worker composition. The injected
 //! query is explicitly a model; no CryptoAPI/TLS/device evidence is claimed.
 use super::*;
-use fc_domain::https_settings::*;
 use fc_ports::{command_window::CommandFamily, HttpsSettingsRequest};
 use fc_runtime::worker::{JobContext, Rejection, Task, WorkerPool};
 use std::sync::{atomic::AtomicUsize, mpsc};
@@ -114,6 +113,99 @@ fn model(
 ) -> std::result::Result<CertificateQueryReport, HttpsCertificateError> {
     assert!(active());
     Ok(CertificateQueryReport::default())
+}
+
+fn provision_model(reused: bool) -> ProvisionedCertificate {
+    ProvisionedCertificate {
+        thumbprint: "ab".repeat(20),
+        public_der: vec![0x30, 3, 1, 2, 3],
+        reused,
+    }
+}
+
+#[test]
+fn ip_provision_exports_only_public_bytes_without_saving_settings_and_preserves_conflicting_file() {
+    let f = Fixture::new();
+    let before = f.backend.read_https_settings(f.admin).unwrap();
+    let service = f.service();
+    let first = service
+        .provision_with(f.admin, "192.168.10.212".into(), |host, active| {
+            assert_eq!(host, "192.168.10.212");
+            assert!(active());
+            assert!(
+                service.ledger.try_lock().is_ok(),
+                "ledger released for native IO"
+            );
+            Ok(provision_model(false))
+        })
+        .unwrap();
+    assert_eq!(
+        first.export_path.parent(),
+        Some(f.directory.join("exports").as_path())
+    );
+    assert_eq!(
+        std::fs::read(&first.export_path).unwrap(),
+        provision_model(false).public_der
+    );
+    let again = service
+        .provision_with(f.admin, first.host.clone(), |_, _| {
+            Ok(provision_model(true))
+        })
+        .unwrap();
+    assert!(again.reused);
+    assert_eq!(again.export_path, first.export_path);
+    assert_eq!(f.backend.read_https_settings(f.admin).unwrap(), before);
+    std::fs::write(&first.export_path, b"leave this file unchanged").unwrap();
+    assert_eq!(
+        service.provision_with(f.admin, first.host, |_, _| Ok(provision_model(true))),
+        Err(HttpsCertificateError::ExportFailed)
+    );
+    assert_eq!(
+        std::fs::read(&first.export_path).unwrap(),
+        b"leave this file unchanged"
+    );
+}
+
+#[test]
+fn ip_provision_requires_original_fence_local_admin_and_ip_without_calling_native() {
+    let f = Fixture::new();
+    let service = f.service();
+    assert_eq!(
+        service.provision_with(f.admin, "school.example".into(), |_, _| panic!(
+            "DNS is not an IP"
+        )),
+        Err(HttpsCertificateError::InvalidIpHost)
+    );
+    let unfenced = f.backend.https_certificate_service().unwrap();
+    assert_eq!(
+        unfenced.provision_with(f.admin, "192.168.10.212".into(), |_, _| panic!(
+            "missing execution fence"
+        )),
+        Err(HttpsCertificateError::MissingExecutionFence)
+    );
+    f.backend.session_control().lock_local();
+    assert!(service
+        .provision_with(f.admin, "192.168.10.212".into(), |_, _| panic!(
+            "revoked lease"
+        ))
+        .is_err());
+    assert!(!f.directory.join("exports").exists());
+}
+
+#[test]
+fn ip_provision_reports_unknown_after_native_success_and_revocation_without_exporting_or_saving() {
+    let f = Fixture::new();
+    let service = f.service();
+    assert_eq!(
+        service.provision_with(f.admin, "192.168.10.212".into(), |_, active| {
+            assert!(active());
+            f.backend.session_control().lock_local();
+            assert!(!active());
+            Ok(provision_model(false))
+        }),
+        Err(HttpsCertificateError::ProvisioningOutcomeUnknown)
+    );
+    assert!(!f.directory.join("exports").exists());
 }
 
 #[test]

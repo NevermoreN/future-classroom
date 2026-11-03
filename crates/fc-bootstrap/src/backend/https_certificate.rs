@@ -1,14 +1,22 @@
 //! Clone-only trusted composition. Call outside the Backend mutex, on the
 //! original shared worker. No KDF/SQL/ledger lock spans the provider query.
 use super::*;
-use fc_domain::https_settings::HttpsConfiguration;
+use fc_domain::https_settings::{HttpsCertificateRef, HttpsConfiguration, HttpsHost};
 use fc_ports::{HttpsSettingsRepository, HttpsSettingsState};
 use fc_runtime::{
     authority::AuthoritySnapshot,
     health::{Health, HealthStatus},
 };
+use fc_windows::tls_frontdoor::certificate_provision::{
+    CertificateProvisionError, ProvisionedCertificate,
+};
 use fc_windows::tls_frontdoor::certificate_query::{
     CertificateQueryError, CertificateQueryReport, CertificateQueryRequest,
+};
+use std::{
+    io::{Read, Write},
+    net::IpAddr,
+    path::PathBuf,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -18,7 +26,22 @@ pub enum HttpsCertificateError {
     ConfigurationChanged,
     MissingExecutionFence,
     Native(CertificateQueryError),
+    Provision(CertificateProvisionError),
+    InvalidIpHost,
+    ExportFailed,
+    /// Native creation may already have completed. Nothing is saved or enabled;
+    /// a later explicit retry can rediscover the certificate in the local store.
+    ProvisioningOutcomeUnknown,
     UnsupportedPlatform,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ProvisionedHttpsCertificate {
+    pub publication_revision: Revision,
+    pub host: String,
+    pub thumbprint: String,
+    pub export_path: PathBuf,
+    pub reused: bool,
 }
 impl From<BackendError> for HttpsCertificateError {
     fn from(error: BackendError) -> Self {
@@ -69,6 +92,7 @@ pub struct HttpsCertificateService {
     clock: Arc<dyn Clock + Send + Sync>,
     monotonic: Arc<dyn MonotonicClock + Send + Sync>,
     execution: Option<TransactionExecutionFence>,
+    exports_root: Option<PathBuf>,
 }
 struct Review {
     snapshot: Arc<AuthoritySnapshot<IdentityState>>,
@@ -90,10 +114,136 @@ impl Backend {
             clock: self.clock.clone(),
             monotonic: self.monotonic.clone(),
             execution: self.request_execution_fence.clone(),
+            exports_root: self.database_path.parent().and_then(|parent| {
+                if !self.database_path.is_absolute() {
+                    return None;
+                }
+                let production = self.database_path.file_name().is_some_and(|name| {
+                    name.to_string_lossy()
+                        .eq_ignore_ascii_case("classroom.sqlite3")
+                }) && parent
+                    .file_name()
+                    .is_some_and(|name| name.to_string_lossy().eq_ignore_ascii_case("state"));
+                (if production {
+                    parent.parent()
+                } else {
+                    Some(parent)
+                })
+                .map(|root| root.join("exports"))
+            }),
         })
     }
 }
 impl HttpsCertificateService {
+    /// Explicit local-management action, on the shared worker outside Backend.
+    /// Generates/reuses only a local IP certificate and exports its public DER.
+    /// Does not persist HTTPS configuration or start a listener.
+    pub fn provision_ip_certificate(
+        &self,
+        lease: SessionLease,
+        host: String,
+    ) -> std::result::Result<ProvisionedHttpsCertificate, HttpsCertificateError> {
+        self.provision_with(lease, host, |host, active| {
+            fc_windows::tls_frontdoor::certificate_provision::provision_ip_certificate(host, active)
+                .map_err(HttpsCertificateError::Provision)
+        })
+    }
+
+    fn provision_with(
+        &self,
+        lease: SessionLease,
+        host: String,
+        provision: impl FnOnce(
+            &str,
+            &dyn Fn() -> bool,
+        )
+            -> std::result::Result<ProvisionedCertificate, HttpsCertificateError>,
+    ) -> std::result::Result<ProvisionedHttpsCertificate, HttpsCertificateError> {
+        if self.execution.is_none() {
+            return Err(HttpsCertificateError::MissingExecutionFence);
+        }
+        let snapshot = self
+            .authority
+            .snapshot()
+            .map_err(|_| BackendError::Storage(StorageError::AuthorityUnavailable))?;
+        let mut review = Review {
+            snapshot,
+            health: self.control.health_gate().status(),
+            generation: self.control.generation(),
+            lease,
+            actor: None,
+        };
+        review.actor = Some(self.memory_actor(&review)?);
+        let parsed = HttpsHost::parse(&host).map_err(|_| HttpsCertificateError::InvalidIpHost)?;
+        let ip: IpAddr = parsed
+            .as_str()
+            .parse()
+            .map_err(|_| HttpsCertificateError::InvalidIpHost)?;
+        let host = ip.to_string();
+        let exports = self
+            .exports_root
+            .as_ref()
+            .ok_or(HttpsCertificateError::ExportFailed)?;
+        self.current(&review)?;
+        let certificate = provision(&host, &|| self.current(&review).is_ok())?;
+        self.current(&review)
+            .map_err(|_| HttpsCertificateError::ProvisioningOutcomeUnknown)?;
+        let thumbprint = HttpsCertificateRef::parse(&certificate.thumbprint)
+            .map_err(|_| HttpsCertificateError::ProvisioningOutcomeUnknown)?
+            .to_hex();
+        if certificate.public_der.is_empty() || certificate.public_der.len() > 64 * 1024 {
+            return Err(HttpsCertificateError::ProvisioningOutcomeUnknown);
+        }
+        std::fs::create_dir_all(exports).map_err(|_| HttpsCertificateError::ExportFailed)?;
+        self.current(&review)
+            .map_err(|_| HttpsCertificateError::ProvisioningOutcomeUnknown)?;
+        let export_path = exports.join(format!(
+            "FutureClassroom-HTTPS-{}-{thumbprint}.cer",
+            host.replace(':', "_")
+        ));
+        match std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&export_path)
+        {
+            Ok(mut file) => {
+                let result = file
+                    .write_all(&certificate.public_der)
+                    .and_then(|()| file.sync_all());
+                drop(file);
+                if result.is_err() {
+                    let _ = std::fs::remove_file(&export_path);
+                    return Err(HttpsCertificateError::ExportFailed);
+                }
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
+                let metadata = std::fs::symlink_metadata(&export_path)
+                    .map_err(|_| HttpsCertificateError::ExportFailed)?;
+                if !metadata.file_type().is_file()
+                    || metadata.len() != certificate.public_der.len() as u64
+                {
+                    return Err(HttpsCertificateError::ExportFailed);
+                }
+                let mut existing = Vec::new();
+                std::fs::File::open(&export_path)
+                    .and_then(|file| file.take(64 * 1024 + 1).read_to_end(&mut existing))
+                    .map_err(|_| HttpsCertificateError::ExportFailed)?;
+                if existing != certificate.public_der {
+                    return Err(HttpsCertificateError::ExportFailed);
+                }
+            }
+            Err(_) => return Err(HttpsCertificateError::ExportFailed),
+        }
+        self.current(&review)
+            .map_err(|_| HttpsCertificateError::ProvisioningOutcomeUnknown)?;
+        Ok(ProvisionedHttpsCertificate {
+            publication_revision: review.health.revision,
+            host,
+            thumbprint,
+            export_path,
+            reused: certificate.reused,
+        })
+    }
     pub fn with_execution_fence(&self, fence: TransactionExecutionFence) -> Self {
         let mut next = self.clone();
         next.execution = Some(match &self.execution {
