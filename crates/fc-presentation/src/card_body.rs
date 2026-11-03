@@ -198,6 +198,17 @@ impl CardBodySpec {
             total_body_height: top,
         })
     }
+    fn image_reserved_height(&self, pages: u8) -> f32 {
+        self.top_inset + self.bottom_inset + if pages > 1 { 52. } else { 0. }
+    }
+    /// Images need a positive viewport after their header and page controls.
+    /// Other bodies retain their configured minimum and paginate as needed.
+    pub(crate) fn minimum_height(&self) -> f32 {
+        match self.dynamic {
+            CardBodyDynamic::Image { pages, .. } => self.image_reserved_height(pages) + 1.,
+            _ => 0.,
+        }
+    }
     /// Contain the complete original aspect ratio in the allocated card. No
     /// pixel buffers, handles, paths or display-resource side effects occur here.
     pub fn image_geometry(
@@ -215,8 +226,7 @@ impl CardBodySpec {
             return Err(CardBodyError::InvalidContent);
         };
         let available_width = self.text_width(outer_width)?;
-        let nav = if pages > 1 { 52. } else { 0. };
-        let available_height = outer_height - self.top_inset - self.bottom_inset - nav;
+        let available_height = outer_height - self.image_reserved_height(pages);
         if !outer_height.is_finite()
             || outer_height > 16_384.
             || available_height <= 0.
@@ -308,10 +318,8 @@ impl CardBodySpec {
                 height: image_height,
                 pages,
             } => {
-                self.top_inset
+                self.image_reserved_height(*pages)
                     + width * (*image_height as f32 / *image_width as f32)
-                    + self.bottom_inset
-                    + if *pages > 1 { 52. } else { 0. }
             }
             // Recess is assigned the remaining protected region by compose;
             // only its fixed 100-DIP dynamic patch refreshes once a second.

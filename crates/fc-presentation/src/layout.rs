@@ -264,7 +264,9 @@ impl<'a> Solver<'a> {
     }
     fn min_height(&self, n: Ref<'a>) -> f32 {
         if let NodeKind::Widget(_) = n.node().kind {
-            return self.spec(n).map_or(0., |s| s.min_height);
+            return self
+                .spec(n)
+                .map_or(0., |s| s.min_height.max(s.body.minimum_height()));
         }
         let (flow, pad, gap) = self.flow(n);
         let cs: Vec<_> = self
@@ -296,7 +298,8 @@ impl<'a> Solver<'a> {
         }
         if let NodeKind::Widget(_) = n.node().kind {
             let s = self.spec(n).ok_or(TreeLayoutError::InvalidGeometry)?;
-            if width + 0.01 < s.min_width || height_budget + 0.01 < s.min_height {
+            let min_height = s.min_height.max(s.body.minimum_height());
+            if width + 0.01 < s.min_width || height_budget + 0.01 < min_height {
                 return Err(TreeLayoutError::OutOfSpace);
             }
             let width = width.min(s.max_width);
@@ -309,7 +312,7 @@ impl<'a> Solver<'a> {
             }
             let height = measured
                 .ceil()
-                .max(s.min_height)
+                .max(min_height)
                 .min(s.max_height)
                 .min(height_budget);
             if matches!(
@@ -678,3 +681,139 @@ pub fn compose_layout(
 #[cfg(test)]
 #[path = "layout_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+mod image_minimum_regression {
+    use super::*;
+    use crate::card_body::{CardBodyDynamic, CardBodySpec, card_body_spec};
+    use crate::scene::CardContent;
+    use fc_domain::desktop::ComponentKind;
+
+    #[test]
+    fn column_reserves_image_viewport_after_paginated_text() {
+        struct LongText;
+        impl TextMeasure for LongText {
+            fn height(&self, _: &str, _: f32, _: f32) -> Result<f32, fc_ports::MeasureError> {
+                Ok(500.)
+            }
+        }
+        let id = |n| LayoutNodeId::new(n).unwrap();
+        let tree = LayoutTree {
+            scope: LayoutScope::Public,
+            root: id(1),
+            nodes: vec![
+                LayoutNode {
+                    id: id(1),
+                    kind: NodeKind::Root {
+                        flow: Flow::Column,
+                        padding: 0,
+                        gap: 0,
+                        anchor: Anchor::TopLeft,
+                        width: AxisSize::Fixed(240),
+                        height: AxisSize::Fixed(220),
+                    },
+                    children: vec![id(2)],
+                },
+                LayoutNode {
+                    id: id(2),
+                    kind: NodeKind::Outlet {
+                        width: AxisSize::Fixed(240),
+                        height: AxisSize::Fixed(220),
+                    },
+                    children: vec![id(3), id(4)],
+                },
+                LayoutNode {
+                    id: id(3),
+                    kind: NodeKind::Widget(WidgetKind::SubjectText),
+                    children: vec![],
+                },
+                LayoutNode {
+                    id: id(4),
+                    kind: NodeKind::Widget(WidgetKind::SubjectImage),
+                    children: vec![],
+                },
+            ],
+        };
+        let image = CardBodySpec {
+            blocks: vec![],
+            gap: 8.,
+            top_inset: 32.,
+            bottom_inset: 12.,
+            dynamic: CardBodyDynamic::Image {
+                width: 2,
+                height: 1,
+                pages: 2,
+            },
+        };
+        let specs: Vec<_> = [
+            (
+                3,
+                WidgetKind::SubjectText,
+                card_body_spec(
+                    ComponentKind::SubjectText,
+                    &CardContent::StandaloneText("long paginated text".into()),
+                    false,
+                    None,
+                )
+                .unwrap(),
+                1200.,
+            ),
+            (4, WidgetKind::SubjectImage, image.clone(), 112.),
+        ]
+        .into_iter()
+        .map(|(n, kind, body, max_height)| WidgetMeasure {
+            key: SceneNodeKey {
+                scope: LayoutScope::Public,
+                id: id(n),
+            },
+            kind,
+            body,
+            font_dip: 22.,
+            opacity: 1.,
+            min_width: 160.,
+            max_width: 240.,
+            min_height: 84.,
+            max_height,
+            preferred_width: 240.,
+            glass: PaintGlass {
+                surface_alpha: 0.03,
+                edge_alpha: 0.5,
+            },
+        })
+        .collect();
+        let scene = compose_layout(
+            &tree,
+            None,
+            &specs,
+            Rect {
+                x: 0.,
+                y: 0.,
+                width: 480.,
+                height: 240.,
+            },
+            &LongText,
+        )
+        .unwrap();
+        let text = scene
+            .nodes
+            .iter()
+            .find(|node| node.key.id == id(3))
+            .unwrap();
+        let picture = scene
+            .nodes
+            .iter()
+            .find(|node| node.key.id == id(4))
+            .unwrap();
+        assert!(text.rect.height < 136.);
+        assert!(text.rect.y + text.rect.height <= picture.rect.y);
+        assert!(picture.rect.y + picture.rect.height <= 220.);
+        assert!(
+            image
+                .image_geometry(picture.rect.width, picture.rect.height)
+                .unwrap()
+                .image
+                .height
+                > 0.
+        );
+    }
+}
