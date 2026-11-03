@@ -193,15 +193,10 @@ fn make_card(
         note,
     )?;
     let recess_regions = matches!(card.content, CardContent::Recess { .. })
-        .then(|| recess_regions(&renderer.graphics, card.rect, max_dynamic_bytes))
+        .then(|| recess_regions(&renderer.graphics, card, max_dynamic_bytes))
         .transpose()?;
     let dynamic_rect = match card.content {
-        CardContent::Clock(_) => Some(Rect {
-            x: card.rect.x + 16.,
-            y: card.rect.y + 42.,
-            width: card.rect.width - 32.,
-            height: card.rect.height - 54.,
-        }),
+        CardContent::Clock(clock) => Some(clock_dynamic_rect(card, clock)),
         CardContent::Recess { .. } => recess_regions.map(|r| r.digits),
         _ => None,
     };
@@ -213,7 +208,7 @@ fn make_card(
         }
     ) {
         Some(Rect {
-            x: card.rect.x + 8.,
+            x: card.rect.x + card.rect.width - 152.,
             y: card.rect.y + 8.,
             width: 144.,
             height: 40.,
@@ -896,7 +891,7 @@ pub(super) fn present(
                 special.push(i);
             }
             let max_dynamic_bytes = if recess {
-                recess_dynamic_budget(&renderer.graphics, card.rect, total, target_reserve)?
+                recess_dynamic_budget(&renderer.graphics, card, total, target_reserve)?
             } else {
                 0
             };
@@ -2327,6 +2322,7 @@ mod tests {
             )
             .unwrap(),
             until_next_course: true,
+            next_subject: Some("数学".into()),
         };
         node.rect = area;
         node.clip = area;
@@ -2432,6 +2428,8 @@ mod recess_tests {
                 card.content = CardContent::Recess {
                     deadline: LocalDateTime::new(now.date, seconds).unwrap(),
                     until_next_course,
+                    next_subject: until_next_course
+                        .then(|| "长科目名称用于测量与绘制相同的字幕边界".into()),
                 };
                 let mut node = scene.paint_tree.as_ref().unwrap().nodes[2].clone();
                 node.parent = None;
@@ -2588,6 +2586,7 @@ mod recess_tests {
         card.content = CardContent::Recess {
             deadline: LocalDateTime::new(scene.captured_at.date, 120).unwrap(),
             until_next_course: true,
+            next_subject: Some("数学".into()),
         };
         let mut node = scene.paint_tree.as_ref().unwrap().nodes[2].clone();
         node.parent = None;

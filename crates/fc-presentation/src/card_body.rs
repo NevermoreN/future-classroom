@@ -16,6 +16,9 @@ pub const CARD_BODY_TEXT_INSET: f32 = 24.;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CardBodyRole {
     Plain,
+    HomeworkLabel,
+    HomeworkText,
+    CountdownValue,
     MaterialRow(usize),
     MaterialMore,
 }
@@ -170,6 +173,32 @@ impl CardBodySpec {
         }
         Ok(outer_width - inset)
     }
+    /// Homework keeps the subject badge beside its complete wrapped body.
+    /// Native DirectWrite and the pure solver must measure the same columns.
+    pub fn block_text_width(
+        &self,
+        outer_width: f32,
+        role: CardBodyRole,
+    ) -> Result<f32, CardBodyError> {
+        let width = self.text_width(outer_width)?;
+        let label = (width * 0.28).clamp(56., 112.);
+        let width = match role {
+            CardBodyRole::HomeworkLabel => label,
+            CardBodyRole::HomeworkText => width - label - 16.,
+            _ => width,
+        };
+        if width < 8. {
+            return Err(CardBodyError::InvalidGeometry);
+        }
+        Ok(width)
+    }
+    pub fn block_font(&self, font: f32, role: CardBodyRole) -> f32 {
+        if role == CardBodyRole::CountdownValue {
+            (font * 2.5).clamp(32., 72.)
+        } else {
+            font
+        }
+    }
     /// Heights come from the exact text layouts which native will subsequently
     /// draw. Caller-provided count/NaN/infinity/negative/overflow is rejected.
     pub fn arrange(&self, measured_heights: &[f32]) -> Result<CardBodyGeometry, CardBodyError> {
@@ -177,13 +206,33 @@ impl CardBodySpec {
         if measured_heights.len() != self.blocks.len() {
             return Err(CardBodyError::InvalidMeasurement);
         }
-        let mut blocks = Vec::with_capacity(self.blocks.len());
+        let mut blocks: Vec<CardBodyPosition> = Vec::with_capacity(self.blocks.len());
         let mut top = 0.;
         for (i, (block, measured)) in self.blocks.iter().zip(measured_heights).enumerate() {
             if !measured.is_finite() || !(0. ..=MAX_MEASURED_HEIGHT).contains(measured) {
                 return Err(CardBodyError::InvalidMeasurement);
             }
             let height = (*measured + 2. * CARD_BODY_TEXT_PADDING).max(block.min_height);
+            if block.role == CardBodyRole::HomeworkText {
+                let previous = blocks.last_mut().ok_or(CardBodyError::InvalidContent)?;
+                if self.blocks[i - 1].role != CardBodyRole::HomeworkLabel
+                    || self.blocks[i - 1].leaf != block.leaf
+                {
+                    return Err(CardBodyError::InvalidContent);
+                }
+                let row_height = previous.height.max(height);
+                top = previous.top + row_height;
+                previous.height = row_height;
+                let row_top = previous.top;
+                if !top.is_finite() || top > MAX_MEASURED_HEIGHT {
+                    return Err(CardBodyError::InvalidMeasurement);
+                }
+                blocks.push(CardBodyPosition {
+                    top: row_top,
+                    height: row_height,
+                });
+                continue;
+            }
             if i > 0 {
                 top += self.gap;
             }
@@ -299,7 +348,15 @@ impl CardBodySpec {
                 let heights = self
                     .blocks
                     .iter()
-                    .map(|b| measured(&b.text, font))
+                    .map(|b| {
+                        measure
+                            .height(
+                                &b.text,
+                                self.block_text_width(outer_width, b.role)?,
+                                self.block_font(font, b.role),
+                            )
+                            .map_err(|_| CardBodyError::Measure)
+                    })
                     .collect::<Result<Vec<_>, _>>()?;
                 self.top_inset + self.arrange(&heights)?.total_body_height + self.bottom_inset
             }
@@ -310,7 +367,7 @@ impl CardBodySpec {
                     (_, false) => "下午 12:59",
                     (_, true) => "下午 12:59:59",
                 };
-                measured(label, font)? + 54.
+                measured(label, font)? + 32.
             }
             CardBodyDynamic::AnalogClock => 160.,
             CardBodyDynamic::Image {
@@ -357,6 +414,10 @@ pub fn card_body_spec(
         add_units(&mut units, note)?;
     }
     match content {
+        CardContent::Recess {
+            next_subject: Some(name),
+            ..
+        } => add_units(&mut units, name)?,
         CardContent::Text(text) => add_units(&mut units, text)?,
         CardContent::StandaloneText(text) => {
             if kind != ComponentKind::SubjectText
@@ -421,6 +482,28 @@ pub fn card_body_spec(
         .get((kind, BodyKind::of(content)))
         .map_err(|_| CardBodyError::InvalidContent)?;
     builder(&mut spec, content, note)?;
+    if kind == ComponentKind::DateCountdown {
+        if let CardContent::Text(text) = content {
+            let lines: Vec<_> = text.lines().collect();
+            if lines.len() == 3 {
+                spec.blocks.clear();
+                for (index, line) in lines.into_iter().enumerate() {
+                    push(
+                        &mut spec,
+                        line.into(),
+                        true,
+                        None,
+                        None,
+                        if index == 1 {
+                            CardBodyRole::CountdownValue
+                        } else {
+                            CardBodyRole::Plain
+                        },
+                    );
+                }
+            }
+        }
+    }
     spec.validate()?;
     Ok(spec)
 }
@@ -679,7 +762,7 @@ fn bind_homework(
             false,
             Some((row.color, row.fill_alpha, 0.)),
             Some(i),
-            CardBodyRole::Plain,
+            CardBodyRole::HomeworkLabel,
         );
         push(
             spec,
@@ -687,7 +770,7 @@ fn bind_homework(
             false,
             None,
             Some(i),
-            CardBodyRole::Plain,
+            CardBodyRole::HomeworkText,
         );
     }
     Ok(())

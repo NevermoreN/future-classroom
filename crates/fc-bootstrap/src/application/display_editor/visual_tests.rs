@@ -82,6 +82,8 @@ fn bad_rgb_bad_alpha_unknown_or_missing_fields_never_partially_change_joint_draf
         (OPAQUE_RGB, "abcdef00"),
         (COURSE_ALPHA, "101"),
         (HOMEWORK_ALPHA, "-1"),
+        (GLASS, "101"),
+        (REFLECTION, "-1"),
         (PALETTE_SUBJECT, "3"),
     ] {
         let mut e = editor();
@@ -112,6 +114,8 @@ fn save_captures_complete_original_version_vector_and_display_revision_until_suc
     set(&mut d, OPAQUE_RGB, "D02080");
     set(&mut d, FILL, "0");
     set(&mut d, COURSE_ALPHA, "73");
+    set(&mut d, GLASS, "7");
+    set(&mut d, REFLECTION, "80");
     let Command::Save {
         expected_palette,
         expected,
@@ -127,6 +131,8 @@ fn save_captures_complete_original_version_vector_and_display_revision_until_suc
     assert_eq!(colors[1].color, original.palette.subjects[1].color);
     assert!(!settings.subject_fill);
     assert_eq!(settings.course_fill_percent, 73);
+    assert_eq!(settings.glass_surface_percent, 7);
+    assert_eq!(settings.edge_reflection_percent, 80);
     // An error has no saved callback. A second explicit save still captures the
     // old versions, rather than silently rebasing either half of the draft.
     let d = form(&e);

@@ -77,6 +77,13 @@ export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevok
   function reload(offset = 0) { if (page !== 'HOME' && page !== 'MATERIALS' && page !== 'VOICE' && consent()) void owner.current?.loadScopes(page, offset, true) }
   const scopes = state.page
   return <main id="main-content" className="workspace teacher-workspace">
+    <nav className="teacher-navigation" aria-label="教师内容入口">
+      <button type="button" aria-current={page === 'HOME' ? 'page' : undefined} onClick={home}><GraduationCap size={18} />工作台</button>
+      <button type="button" disabled={!canManage} aria-current={page === 'HOMEWORK' ? 'page' : undefined} onClick={() => open('HOMEWORK')}><ClipboardList size={18} />我的今日作业</button>
+      <button type="button" disabled={!canManage} aria-current={page === 'MATERIALS' ? 'page' : undefined} onClick={openMaterials}><FolderOpen size={18} />我的课堂资料</button>
+      <button type="button" disabled={!canManage} aria-current={page === 'REMINDER' ? 'page' : undefined} onClick={() => open('REMINDER')}><BookOpen size={18} />今日提醒</button>
+      <button type="button" disabled={!canManage} aria-current={page === 'VOICE' ? 'page' : undefined} onClick={openVoice}><Radio size={18} />语音播报</button>
+    </nav>
     <div className="workspace-heading"><div><p className="eyebrow">{page === 'HOME' ? '你的课堂，从这里连接' : '以白板实际日期与授权范围为准'}</p><h1>{page === 'HOME' ? `你好，${session.principal.displayName}` : page === 'VOICE' ? '语音播报' : page === 'MATERIALS' ? '我的课堂资料' : page === 'HOMEWORK' ? '我的今日作业' : '管理今日提醒'}<span className="hello-dot">。</span></h1><p>{page === 'HOME' ? '账号与内容范围由白板确认，提交结果与屏幕显示分开核验。' : page === 'VOICE' ? '核对白板当前班级，按住说话、松开发送。' : page === 'MATERIALS' ? '选择老师与科目目录，上传、校验后添加；下载到当前设备。' : page === 'HOMEWORK' ? '选择实际老师、班级和科目；每次保存检查当前修订。' : '共同提醒覆盖受管班级，不受你本人任教班级限制。'}</p></div><div className="workspace-top-actions">{page !== 'HOME' && <Button variant="outline" onClick={home}><ArrowLeft />返回工作台</Button>}<Button variant="outline" onClick={() => { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); onRefresh() } }}><RefreshCw />核对会话</Button><Button variant="outline" onClick={refreshPage}><RefreshCw />刷新页面</Button></div></div>
     {page === 'HOME' ? <>
       <section className="identity-summary" aria-label="当前授权"><div className="avatar"><GraduationCap size={28} /></div><div><strong>{session.principal.displayName}</strong><span>{roles[session.principal.role]}</span></div><div className="summary-divider" /><div><small>白板当前班级</small><strong>{session.currentClassId === null ? '尚未绑定班级' : `班级 ID ${session.currentClassId}`}</strong></div><span className="verified"><ShieldCheck size={15} />白板已确认</span></section>
@@ -97,6 +104,6 @@ export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevok
       {state.busy && scopes && <p className="loading-content" role="status"><LoaderCircle className="spinner" />正在向白板核对…</p>}
     </>}
     <div className="logout-row"><LockKeyhole size={16} /><p>注销会使这个账号的全部渠道授权失效。</p><Button variant="outline" onClick={() => { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); onLogout() } }}><LogOut />注销账号</Button></div>
-    <aside className="bottom-reminder-action" aria-label="今日提醒快捷入口"><div><BookOpen size={19} /><span>班级共同提醒<small>按白板当天日期生效</small></span></div><Button disabled={!canManage} onClick={() => open('REMINDER')}>管理今日提醒<ChevronRight size={17} /></Button></aside>
+    <aside className="bottom-reminder-action" aria-label="今日提醒快捷入口"><Button disabled={!canManage} onClick={() => open('REMINDER')}><Radio size={20} />管理今日提醒<ChevronRight size={17} /></Button></aside>
   </main>
 }

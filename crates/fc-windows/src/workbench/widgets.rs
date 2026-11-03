@@ -11,6 +11,14 @@ const MASK_ID: usize = 0xfc61;
 const GRID_ID: usize = 0xfc62;
 const DIGIT_POS: [usize; 8] = [0, 1, 3, 4, 6, 7, 9, 10];
 
+fn first_column_width(grid: &Grid, width: i32) -> i32 {
+    if grid.columns.len() == 1 {
+        width
+    } else {
+        (width / 3).clamp(120, 260)
+    }
+}
+
 fn input(raw: &str) -> Result<TimeRangeInput> {
     let mut model = TimeRangeInput::default();
     if raw.is_empty() {
@@ -449,8 +457,8 @@ impl GridControl {
         unsafe {
             GetClientRect(self.hwnd, &mut rect)?;
         }
-        let first = (rect.right / 3).clamp(120, 260);
-        let width = (rect.right - first) / (grid.columns.len() as i32 - 1);
+        let first = first_column_width(&grid, rect.right);
+        let width = (rect.right - first) / (grid.columns.len() as i32 - 1).max(1);
         let x = if column == 0 {
             first / 2
         } else {
@@ -518,8 +526,8 @@ fn paint_grid(hwnd: HWND, state: &GridState) {
         if GetClientRect(hwnd, &mut rect).is_err() {
             return;
         }
-        let first = (rect.right / 3).clamp(120, 260);
-        let width = ((rect.right - first) / (grid.columns.len() as i32 - 1)).max(1);
+        let first = first_column_width(&grid, rect.right);
+        let width = ((rect.right - first) / (grid.columns.len() as i32 - 1).max(1)).max(1);
         struct Brush(HBRUSH);
         impl Drop for Brush {
             fn drop(&mut self) {
@@ -558,7 +566,11 @@ fn paint_grid(hwnd: HWND, state: &GridState) {
                 dc,
                 &mut text,
                 &mut bounds,
-                DT_CENTER | DT_WORDBREAK | DT_NOPREFIX,
+                if grid.columns.len() == 1 {
+                    DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX
+                } else {
+                    DT_CENTER | DT_WORDBREAK | DT_NOPREFIX
+                },
             );
         };
         for (index, column) in grid.columns.iter().enumerate() {
@@ -676,15 +688,16 @@ unsafe extern "system" fn grid_proc(
                     let grid = state.grid.borrow();
                     let mut rect = RECT::default();
                     let _ = GetClientRect(hwnd, &mut rect);
-                    let first = (rect.right / 3).clamp(120, 260);
-                    let width = ((rect.right - first) / (grid.columns.len() as i32 - 1)).max(1);
+                    let first = first_column_width(&grid, rect.right);
+                    let width =
+                        ((rect.right - first) / (grid.columns.len() as i32 - 1).max(1)).max(1);
                     row_positions(&grid)
                         .iter()
                         .position(|(top, _)| y >= *top && y < *top + 48)
                         .map(|r| {
                             (
                                 r,
-                                if x < first {
+                                if grid.columns.len() == 1 || x < first {
                                     0
                                 } else {
                                     (1 + (x - first) / width)

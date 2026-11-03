@@ -96,7 +96,7 @@ impl Default for DisplaySettings {
             subject_fill: true,
             course_fill_percent: 20,
             homework_fill_percent: 3,
-            text_tone: TextTone::Light,
+            text_tone: TextTone::Dark,
             glass_surface_percent: 3,
             edge_reflection_percent: 50,
             components: ComponentKind::ALL
@@ -105,10 +105,18 @@ impl Default for DisplaySettings {
                     kind,
                     visible: true,
                     opacity_percent: 100,
-                    font_dip: if kind == ComponentKind::Clock { 40 } else { 22 },
+                    font_dip: match kind {
+                        ComponentKind::Clock => 40,
+                        ComponentKind::Date => 16,
+                        _ => 22,
+                    },
                     min_width: 160,
                     max_width: 800,
-                    min_height: 64,
+                    min_height: if kind == ComponentKind::Clock {
+                        112
+                    } else {
+                        64
+                    },
                     max_height: 1200,
                 })
                 .collect(),

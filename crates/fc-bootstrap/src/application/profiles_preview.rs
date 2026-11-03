@@ -583,10 +583,11 @@ fn samples(
         (
             WidgetKind::Date,
             CardContent::Text(format!(
-                "示例日期 · {}年{}月{}日",
+                "{}年{}月{}日  星期{}",
                 now.date.year(),
                 now.date.month(),
-                now.date.day()
+                now.date.day(),
+                ["一", "二", "三", "四", "五", "六", "日"][now.date.weekday().index()]
             )),
             1,
         ),
@@ -639,7 +640,7 @@ fn samples(
         ),
         (
             WidgetKind::DateCountdown,
-            CardContent::Text("示例活动 · 还有 12 天".into()),
+            CardContent::Text("示例活动\n12 天\n目标日期示例".into()),
             1,
         ),
         (

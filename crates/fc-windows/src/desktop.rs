@@ -700,6 +700,9 @@ impl TextMeasure for NativeTextMeasure {
 #[derive(Clone)]
 struct Block {
     layout: IDWriteTextLayout,
+    role: CardBodyRole,
+    text_left: f32,
+    text_width: f32,
     top: f32,
     height: f32,
     fill: Option<(Rgb, f32, f32)>,
@@ -728,21 +731,59 @@ struct RecessRegions {
     short_font: f32,
     long_font: f32,
 }
-fn recess_heading(g: &Graphics, card: Rect) -> Result<Rect> {
-    let heading_width = card.width.min(560.);
-    let mut heading_height = 48.0f32;
-    for until_next_course in [true, false] {
+fn clock_dynamic_rect(card: &SceneCard, clock: fc_presentation::scene::ClockContent) -> Rect {
+    let analog = clock.mode == ClockMode::Analog;
+    Rect {
+        x: card.rect.x + 16.,
+        y: card.rect.y + if analog { 42. } else { 16. },
+        width: card.rect.width - 32.,
+        height: card.rect.height - if analog { 54. } else { 32. },
+    }
+}
+fn recess_subtitle(content: &CardContent) -> String {
+    let CardContent::Recess {
+        until_next_course,
+        next_subject,
+        ..
+    } = content
+    else {
+        return String::new();
+    };
+    let target = if *until_next_course {
+        next_subject
+            .as_ref()
+            .map(|subject| format!("距离下节课 · {subject}"))
+    } else {
+        None
+    };
+    format!(
+        "{} · {}",
+        target
+            .as_deref()
+            .unwrap_or_else(|| fc_presentation::scene::recess_target_label(*until_next_course)),
+        if *until_next_course {
+            "上课后自动隐藏"
+        } else {
+            "休息结束后自动隐藏"
+        }
+    )
+}
+fn recess_heading(g: &Graphics, source: &SceneCard) -> Result<Rect> {
+    let card = source.rect;
+    let heading_width = card.width;
+    let mut heading_height = 96.0f32;
+    {
         let layout = g.layout(
-            fc_presentation::scene::recess_target_label(until_next_course),
+            &recess_subtitle(&source.content),
             heading_width - 32.,
-            13.,
-            false,
+            16.,
+            true,
         )?;
         let mut metrics = DWRITE_TEXT_METRICS::default();
         unsafe {
             layout.GetMetrics(&mut metrics)?;
         }
-        heading_height = heading_height.max((metrics.height + 24.).ceil());
+        heading_height = heading_height.max((metrics.height + 64.).ceil());
     }
     Ok(Rect {
         x: card.x,
@@ -751,7 +792,12 @@ fn recess_heading(g: &Graphics, card: Rect) -> Result<Rect> {
         height: heading_height,
     })
 }
-fn recess_dynamic_budget(g: &Graphics, card: Rect, allocated: u64, reserve: u64) -> Result<u64> {
+fn recess_dynamic_budget(
+    g: &Graphics,
+    card: &SceneCard,
+    allocated: u64,
+    reserve: u64,
+) -> Result<u64> {
     let fixed = allocated
         .checked_add(surface_bytes(recess_heading(g, card)?)?)
         .ok_or_else(|| Error::from_hresult(E_OUTOFMEMORY))?;
@@ -762,8 +808,13 @@ fn recess_dynamic_budget(g: &Graphics, card: Rect, allocated: u64, reserve: u64)
     // own D2D render target, never both temporary allocations simultaneously.
     Ok((available / 2).min(available.saturating_sub(reserve)))
 }
-fn recess_regions(g: &Graphics, card: Rect, max_dynamic_bytes: u64) -> Result<RecessRegions> {
-    let heading = recess_heading(g, card)?;
+fn recess_regions(
+    g: &Graphics,
+    source: &SceneCard,
+    max_dynamic_bytes: u64,
+) -> Result<RecessRegions> {
+    let heading = recess_heading(g, source)?;
+    let card = source.rect;
     let width = card.width - 32.;
     let height = card.height - heading.height - 32.;
     if width < 8. || height < 12. {
@@ -1369,20 +1420,14 @@ impl DesktopRenderer {
                 (hooks.bind)(card)?;
                 let body = (hooks.measure)(&self.graphics, card, scene.public_calendar_unverified)?;
                 let recess_regions = if matches!(card.content, CardContent::Recess { .. }) {
-                    let bytes =
-                        recess_dynamic_budget(&self.graphics, card.rect, total, target_reserve)?;
-                    Some(recess_regions(&self.graphics, card.rect, bytes)?)
+                    let bytes = recess_dynamic_budget(&self.graphics, card, total, target_reserve)?;
+                    Some(recess_regions(&self.graphics, card, bytes)?)
                 } else {
                     None
                 };
                 let dynamic_rect = match card.content {
                     CardContent::Recess { .. } => recess_regions.map(|r| r.digits),
-                    CardContent::Clock(_) => Some(Rect {
-                        x: card.rect.x + 16.,
-                        y: card.rect.y + 42.,
-                        width: card.rect.width - 32.,
-                        height: card.rect.height - 54.,
-                    }),
+                    CardContent::Clock(clock) => Some(clock_dynamic_rect(card, clock)),
                     _ => None,
                 };
                 let input_rect = if matches!(
@@ -1393,7 +1438,7 @@ impl DesktopRenderer {
                     }
                 ) {
                     Some(Rect {
-                        x: card.rect.x + 8.,
+                        x: card.rect.x + card.rect.width - 152.,
                         y: card.rect.y + 8.,
                         width: 144.,
                         height: 40.,
@@ -2108,8 +2153,7 @@ fn prepare_content_with_note(
             visible_leaves: vec![1],
         });
     }
-    let width = spec
-        .text_width(c.rect.width)
+    spec.text_width(c.rect.width)
         .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
     let viewport = c.rect.height - top_inset - spec.bottom_inset;
     if viewport < 20. {
@@ -2123,7 +2167,24 @@ fn prepare_content_with_note(
             .checked_add(item.text.encode_utf16().count())
             .filter(|n| *n <= MAX_TEXT_UNITS)
             .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
-        let layout = g.layout(&item.text, width, c.font_dip, item.center)?;
+        let text_width = spec
+            .block_text_width(c.rect.width, item.role)
+            .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
+        let text_left = if item.role == CardBodyRole::HomeworkText {
+            CARD_BODY_TEXT_INSET
+                + spec
+                    .block_text_width(c.rect.width, CardBodyRole::HomeworkLabel)
+                    .map_err(|_| Error::from_hresult(E_INVALIDARG))?
+                + 16.
+        } else {
+            CARD_BODY_TEXT_INSET
+        };
+        let layout = g.layout(
+            &item.text,
+            text_width,
+            spec.block_font(c.font_dip, item.role),
+            item.center,
+        )?;
         let mut metrics = DWRITE_TEXT_METRICS::default();
         // SAFETY: apartment-owned immutable layout writes local bounded outputs.
         unsafe {
@@ -2149,7 +2210,10 @@ fn prepare_content_with_note(
             })
             .collect();
         let action = match &item.role {
-            CardBodyRole::Plain => None,
+            CardBodyRole::Plain
+            | CardBodyRole::HomeworkLabel
+            | CardBodyRole::HomeworkText
+            | CardBodyRole::CountdownValue => None,
             CardBodyRole::MaterialRow(index) => {
                 let CardContent::Materials(list) = &c.content else {
                     return Err(Error::from_hresult(E_INVALIDARG));
@@ -2183,6 +2247,9 @@ fn prepare_content_with_note(
         };
         blocks.push(Block {
             layout,
+            role: item.role,
+            text_left,
+            text_width,
             top: 0.,
             height: 0.,
             fill: item.fill,
@@ -2379,12 +2446,10 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
                     c.source.edge_alpha,
                 )?;
             }
+            let is_recess = matches!(c.source.content, CardContent::Recess { .. });
             let heading = g.layout(
-                if let CardContent::Recess {
-                    until_next_course, ..
-                } = c.source.content
-                {
-                    fc_presentation::scene::recess_target_label(until_next_course)
+                if is_recess {
+                    "课间休息"
                 } else {
                     registry::hooks(c.source.kind)?.title
                 },
@@ -2393,15 +2458,33 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
                 } else {
                     w - 32.
                 },
-                if c.input.is_some() { 11. } else { 13. },
-                false,
+                if is_recess {
+                    32.
+                } else if c.input.is_some() {
+                    13.
+                } else {
+                    18.
+                },
+                is_recess,
             )?;
-            target.DrawTextLayout(
-                xy(16., if c.input.is_some() { 8. } else { 12. }).point,
-                &heading,
-                &text,
-                D2D1_DRAW_TEXT_OPTIONS_NONE,
-            );
+            if !matches!(c.source.content, CardContent::Clock(clock) if clock.mode != ClockMode::Analog)
+            {
+                target.DrawTextLayout(
+                    xy(16., if is_recess { 12. } else { 8. }).point,
+                    &heading,
+                    &text,
+                    D2D1_DRAW_TEXT_OPTIONS_NONE,
+                );
+            }
+            if is_recess {
+                let subtitle = g.layout(&recess_subtitle(&c.source.content), w - 32., 16., true)?;
+                target.DrawTextLayout(
+                    xy(16., 58.).point,
+                    &subtitle,
+                    &text,
+                    D2D1_DRAW_TEXT_OPTIONS_NONE,
+                );
+            }
             if c.source.kind == ComponentKind::Schedule && c.calendar_unverified {
                 let subtitle = g.layout("调休资料未核验", w - 32., 11., false)?;
                 target.DrawTextLayout(
@@ -2434,6 +2517,23 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
                     continue;
                 }
                 let y = c.body.top_inset + block.top - offset;
+                if block.role == CardBodyRole::HomeworkLabel
+                    || matches!(block.action, Some(InputAction::MaterialOpen { .. }))
+                {
+                    let glass = target.CreateSolidColorBrush(
+                        &D2D1_COLOR_F {
+                            r: 1.,
+                            g: 1.,
+                            b: 1.,
+                            a: c.source.surface_alpha * c.source.component_alpha,
+                        },
+                        None,
+                    )?;
+                    target.FillRoundedRectangle(
+                        &bounds(16., y, w - 16., y + block.height, 16.),
+                        &glass,
+                    );
+                }
                 if let Some((rgb, alpha, stroke)) = block.fill {
                     let brush = target.CreateSolidColorBrush(
                         &color(
@@ -2446,7 +2546,17 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
                         ),
                         None,
                     )?;
-                    let pill = bounds(16., y, w - 16., y + block.height, block.height / 2.);
+                    let pill = if block.role == CardBodyRole::HomeworkLabel {
+                        bounds(
+                            18.,
+                            y + 2.,
+                            block.text_left + block.text_width + 6.,
+                            y + block.height - 2.,
+                            12.,
+                        )
+                    } else {
+                        bounds(16., y, w - 16., y + block.height, block.height / 2.)
+                    };
                     if stroke == 0. {
                         target.FillRoundedRectangle(&pill, &brush);
                     } else {
@@ -2466,7 +2576,7 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
                     None
                 };
                 target.DrawTextLayout(
-                    xy(CARD_BODY_TEXT_INSET, y + CARD_BODY_TEXT_PADDING).point,
+                    xy(block.text_left, y + CARD_BODY_TEXT_PADDING).point,
                     &block.layout,
                     foreground.as_ref().unwrap_or(&text),
                     D2D1_DRAW_TEXT_OPTIONS_NONE,
@@ -2491,10 +2601,10 @@ fn render_lesson_control(
     can_change: bool,
 ) -> Result<()> {
     let target = g.target(&c.surface.dib)?;
-    let left = if can_change { 164. } else { 16. };
+    let left = 16.;
     let layout = g.layout(
         &caption,
-        c.source.rect.width - left - 16.,
+        c.source.rect.width - if can_change { 180. } else { 32. },
         c.source.font_dip,
         false,
     )?;
@@ -2505,27 +2615,15 @@ fn render_lesson_control(
             return Err(Error::from_hresult(E_INVALIDARG));
         }
         let text = target.CreateSolidColorBrush(&ink(c.tone, c.system_ink, 1.), None)?;
-        let glass = target.CreateSolidColorBrush(
-            &D2D1_COLOR_F {
-                r: 0.3,
-                g: 0.3,
-                b: 0.3,
-                a: 0.16,
-            },
-            None,
-        )?;
         target.BeginDraw();
         target.Clear(Some(&D2D1_COLOR_F::default()));
-        target.FillRoundedRectangle(
-            &bounds(
-                1.,
-                1.,
-                c.surface.rect.width - 1.,
-                c.surface.rect.height - 1.,
-                12.,
-            ),
-            &glass,
-        );
+        backdrop::draw_material(
+            &target,
+            c.surface.rect.width,
+            c.surface.rect.height,
+            c.source.surface_alpha,
+            c.source.edge_alpha,
+        )?;
         target.DrawTextLayout(
             xy(left, 12.).point,
             &layout,
@@ -2623,7 +2721,15 @@ fn render_dynamic_frame(g: &Graphics, c: &mut Card, now: LocalDateTime) -> Resul
                     } else {
                         let text = fc_presentation::scene::clock_label(clock, now);
                         let layout = g.layout(&text, w, c.source.font_dip, true)?;
+                        layout.SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP)?;
                         let mut metrics = DWRITE_TEXT_METRICS::default();
+                        layout.GetMetrics(&mut metrics)?;
+                        let size = (c.source.font_dip
+                            * (w / metrics.widthIncludingTrailingWhitespace.max(1.))
+                                .min(h / metrics.height.max(1.)))
+                        .clamp(10., 96.);
+                        let layout = g.layout(&text, w, size, true)?;
+                        layout.SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP)?;
                         layout.GetMetrics(&mut metrics)?;
                         target.DrawTextLayout(
                             xy(0., ((h - metrics.height) / 2.).max(0.)).point,
@@ -2902,10 +3008,10 @@ fn render_input_strip(g: &Graphics, c: &mut Card) -> Result<()> {
             let brush = target.CreateSolidColorBrush(&ink(c.tone, c.system_ink, 1.), None)?;
             let background = target.CreateSolidColorBrush(
                 &D2D1_COLOR_F {
-                    r: 0.3,
-                    g: 0.3,
-                    b: 0.3,
-                    a: 0.35,
+                    r: 1.,
+                    g: 1.,
+                    b: 1.,
+                    a: 0.20,
                 },
                 None,
             )?;
@@ -2999,7 +3105,7 @@ mod tests {
                 ComponentKind::Homework=>CardContent::Homework(vec![HomeworkEntry{display_ref: fc_domain::content::ContentDisplayRef { key: fc_domain::content::ContentKey::Homework(fc_domain::content::HomeworkKey { class_id: fc_domain::ids::ClassId::new(1).unwrap(), actual_date: fc_domain::time::LocalDate::new(2026, 11, 3).unwrap(), subject_id: fc_domain::ids::SubjectId::new(1).unwrap(), owner_teacher_id: fc_domain::ids::PrincipalId::new(1).unwrap() }), revision: fc_domain::ids::Revision::new(1) },
                     subject_id:SubjectId::new(1).unwrap(),teacher_id:PrincipalId::new(1).unwrap(),subject_name:"合成语文".into(),teacher_name:"合成教师".into(),text:"独立离屏验证：阅读并复述课文，练习汉字。\n保留全部长正文，通过只读按钮逐页阅读。".repeat(12),color:Rgb{red:201,green:164,blue:164},fill_alpha:0.03}]),
                 ComponentKind::Materials=>CardContent::MaterialsUnavailable,
-                ComponentKind::Recess=>CardContent::Recess{deadline:LocalDateTime::new(now.date,(now.second_of_day()+120).min(86399)).unwrap(),until_next_course:true},
+                ComponentKind::Recess=>CardContent::Recess{deadline:LocalDateTime::new(now.date,(now.second_of_day()+120).min(86399)).unwrap(),until_next_course:true,next_subject:Some("数学".into())},
                 ComponentKind::Schedule=>{
                     use fc_domain::{ids::{ClassId,SemesterId,TableId,RowId},schedule::{LessonInstanceKey,ResolvedScheduleVersion,CalendarMode},time::{Minute,MinuteRange}};
                     let key=LessonInstanceKey{actual_date:now.date,class_id:ClassId::new(1).unwrap(),range:MinuteRange::new(Minute::new(480).unwrap(),Minute::new(525).unwrap()).unwrap(),version:ResolvedScheduleVersion{actual_semester_id:SemesterId::new(1).unwrap(),actual_revision:Revision::new(1),source_semester_id:SemesterId::new(1).unwrap(),source_revision:Revision::new(1),calendar_mode:CalendarMode::School,calendar_mode_revision:Revision::new(1),applied_calendar_revision:Revision::new(1),makeup_mapping_revision:Revision::new(1),source_table_id:TableId::new(1).unwrap(),source_row_id:RowId::new(1).unwrap(),rules_revision:Revision::new(1)}};

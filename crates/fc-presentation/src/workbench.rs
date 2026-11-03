@@ -7,6 +7,19 @@ use zeroize::Zeroizing;
 pub struct FieldId(pub u16);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ActionId(pub u16);
+
+/// Closed administrator navigation group IDs. They remain ordinary actions so
+/// validation, enabled-state checks and form capture share the existing path.
+pub const ADMIN_NAVIGATION: [ActionId; 5] = [
+    ActionId(60000),
+    ActionId(60001),
+    ActionId(60002),
+    ActionId(60003),
+    ActionId(60004),
+];
+pub fn admin_navigation_index(id: ActionId) -> Option<usize> {
+    ADMIN_NAVIGATION.iter().position(|item| *item == id)
+}
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FieldKind {
     Text,
@@ -39,7 +52,7 @@ pub struct Grid {
 }
 impl Grid {
     pub fn validate(&self) -> Result<(), FormError> {
-        if !(2..=8).contains(&self.columns.len()) || self.rows.len() > 128 {
+        if !(1..=8).contains(&self.columns.len()) || self.rows.len() > 128 {
             return Err(FormError::TooLarge);
         }
         let text = |s: &str| s.len() <= 1024 && !s.contains('\0');
@@ -47,6 +60,7 @@ impl Grid {
             || self.rows.iter().any(|r| {
                 !text(&r.group)
                     || !text(&r.label)
+                    || r.merged && self.columns.len() == 1
                     || r.cells.len() != if r.merged { 1 } else { self.columns.len() - 1 }
                     || r.cells.iter().any(|s| !text(s))
             })
@@ -95,7 +109,13 @@ pub enum FormError {
 impl View {
     pub fn validate(&self) -> Result<(), FormError> {
         if self.fields.len() > 16
-            || self.actions.len() > 16
+            || self
+                .actions
+                .iter()
+                .filter(|action| admin_navigation_index(action.id).is_none())
+                .count()
+                > 16
+            || self.actions.len() > 21
             || self.title.len() > 512
             || self.description.len() > 8192
             || self.status.len() > 8192

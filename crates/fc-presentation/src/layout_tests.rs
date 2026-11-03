@@ -167,6 +167,20 @@ fn default_material_outlet_keeps_its_preferred_width_below_homework_in_public_an
             subject.map_or(LayoutScope::Public, |s| s.scope)
         );
         assert!(materials.rect.width >= 160.);
+        let clock = tree
+            .nodes
+            .iter()
+            .find(|n| n.widget_kind == Some(WidgetKind::Clock))
+            .unwrap();
+        let schedule = tree
+            .nodes
+            .iter()
+            .find(|n| n.widget_kind == Some(WidgetKind::Schedule))
+            .unwrap();
+        assert!(homework.rect.x + homework.rect.width <= clock.rect.x);
+        assert_eq!(schedule.rect.x, clock.rect.x);
+        assert!(schedule.rect.y >= clock.rect.y + clock.rect.height);
+        assert!(homework.rect.x > work().x + work().width * 0.45);
     }
 }
 #[test]

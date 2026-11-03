@@ -326,11 +326,13 @@ fn recess_and_static_scene_expire_at_actual_second_and_date() {
     let CardContent::Recess {
         deadline,
         until_next_course,
+        ref next_subject,
     } = card.content
     else {
         panic!()
     };
     assert!(until_next_course);
+    assert_eq!(next_subject.as_deref(), Some("数学"));
     assert_eq!(recess_target_label(until_next_course), "距下节上课");
     assert_eq!(
         recess_label(deadline, facts.captured_at),
@@ -374,6 +376,7 @@ fn recess_and_static_scene_expire_at_actual_second_and_date() {
     let CardContent::Recess {
         deadline,
         until_next_course,
+        ref next_subject,
     } = view
         .cards
         .iter()
@@ -384,6 +387,7 @@ fn recess_and_static_scene_expire_at_actual_second_and_date() {
         panic!()
     };
     assert!(!until_next_course);
+    assert!(next_subject.is_none());
     assert_eq!(recess_target_label(until_next_course), "距本次休息结束");
     assert_eq!(
         recess_label(deadline, facts.captured_at).as_deref(),
@@ -422,6 +426,11 @@ fn public_unverified_keeps_base_courses_but_clock_rollback_is_neutral() {
     facts.homework_eligible_total = 0;
     let view = scene(&facts);
     assert!(view.clock_rollback);
+    assert!(view
+        .cards
+        .iter()
+        .any(|card| card.kind == ComponentKind::Date
+            && matches!(&card.content, CardContent::Text(text) if !text.contains("教学周"))));
     assert!(!view
         .cards
         .iter()
@@ -430,6 +439,8 @@ fn public_unverified_keeps_base_courses_but_clock_rollback_is_neutral() {
 #[test]
 fn countdown_expired_policy_and_independent_clock_modes() {
     let mut facts = fixture();
+    assert!(scene(&facts).cards.iter().any(|card| card.kind == ComponentKind::Date
+        && matches!(&card.content, CardContent::Text(text) if text.ends_with("第1教学周 · 单周"))));
     facts.display.countdown.target = Some(date(29));
     assert!(!scene(&facts)
         .cards

@@ -1211,9 +1211,16 @@ impl Editor {
                 self.selected_profile =
                     Some(self.list.items.get(row).ok_or("配置选择超出本页。")?.id);
             }
-            Page::Tree if column < 3 => {
-                self.selected = Some(self.order().get(row).ok_or("节点选择超出范围。")?.0);
-                self.raw.remove(&PARENT);
+            Page::Tree
+            | Page::Geometry
+            | Page::Appearance
+            | Page::ContentStyle
+            | Page::Materials
+                if column < 3 =>
+            {
+                let id = self.order().get(row).ok_or("节点选择超出范围。")?.0;
+                let scope = self.tree().ok_or("没有布局草稿。")?.scope;
+                self.select_node(scope, id)?;
             }
             _ => return Err("此页不能选择列表行。".into()),
         }
@@ -1644,6 +1651,76 @@ impl Editor {
         }
         Ok(Command::Stay)
     }
+    fn node_grid(&self, busy: bool) -> Grid {
+        let order = self.order();
+        Grid {
+            columns: vec!["组件列表".into()],
+            rows: order
+                .iter()
+                .filter_map(|(id, depth)| {
+                    self.tree()?.node(*id).map(|node| GridRow {
+                        group: String::new(),
+                        label: format!(
+                            "{}{}",
+                            "  ".repeat(*depth),
+                            if matches!(node.kind, NodeKind::Root { .. }) {
+                                "桌面（全透明）".into()
+                            } else {
+                                kind_label(&node.kind)
+                            }
+                        ),
+                        cells: vec![],
+                        merged: false,
+                    })
+                })
+                .collect(),
+            selected: self
+                .selected
+                .and_then(|id| order.iter().position(|(n, _)| *n == id))
+                .map(|r| (r, 0)),
+            enabled: !busy,
+        }
+    }
+    pub(super) fn editing_canvas(&self) -> bool {
+        matches!(
+            self.page,
+            Page::Tree
+                | Page::Geometry
+                | Page::Appearance
+                | Page::ContentStyle
+                | Page::Materials
+                | Page::Operations
+                | Page::PublicStyle
+                | Page::Review
+        )
+    }
+    pub(super) fn node_properties_open(&self) -> bool {
+        matches!(
+            self.page,
+            Page::Geometry | Page::Appearance | Page::ContentStyle | Page::Materials
+        )
+    }
+    pub(super) fn draft_preview(&self) -> Result<Option<Command>, String> {
+        authorized(&self.identity, self.owner)?;
+        if !self.editing_canvas() {
+            return Ok(None);
+        }
+        if self.percent_fields_valid() {
+            return self.percent_preview();
+        }
+        self.preflight()?;
+        Ok(match self.draft.as_ref() {
+            Some(Draft::Public(s)) => Some(Command::Preview {
+                public: Some(s.clone()),
+                subject: None,
+            }),
+            Some(Draft::Subject(s)) => Some(Command::Preview {
+                public: None,
+                subject: Some(s.clone()),
+            }),
+            None => None,
+        })
+    }
     pub(super) fn view(&self, status: &str, busy: bool) -> View {
         if self.page == Page::PublicStyle {
             if let Some(style) = &self.style {
@@ -1667,6 +1744,17 @@ impl Editor {
             busy,
             grid: None,
         };
+        if self.page != Page::List {
+            view.title = match self.page {
+                Page::Tree => "桌面展示编辑 · 组件列表".into(),
+                Page::Geometry | Page::Appearance | Page::ContentStyle => format!(
+                    "组件设置 · {}",
+                    self.selected_node()
+                        .map_or("未选择组件".into(), |n| kind_label(&n.kind))
+                ),
+                _ => "桌面展示编辑".into(),
+            };
+        }
         for f in &mut view.fields {
             if let Some(raw) = self.raw.get(&f.id) {
                 if !matches!(&f.kind,FieldKind::Choice(items) if !raw.is_empty()&&!items.iter().any(|c|c.value==*raw))
@@ -1751,32 +1839,8 @@ impl Editor {
                 ];
             }
             Page::Tree => {
-                let order = self.order();
-                view.description="选择节点后编辑尺寸、顺序或父节点。公共内容出口限定科目树边界；玻璃最多两级（作业/课表内卡也计一级），超屏内容分页。重排不会修改作业、课表或课堂资料原件；删除独立内容节点会撤下该节点正文与撤销版本，其独立原件在无引用后回收。".into();
-                let rows = order
-                    .iter()
-                    .filter_map(|(id, depth)| {
-                        self.tree()?.node(*id).map(|node| GridRow {
-                            group: String::new(),
-                            label: format!("{}#{}", "  ".repeat(*depth), id.get()),
-                            cells: vec![
-                                self.parent(*id)
-                                    .map_or("根".into(), |p| format!("#{}", p.get())),
-                                kind_label(&node.kind),
-                            ],
-                            merged: false,
-                        })
-                    })
-                    .collect();
-                view.grid = Some(Grid {
-                    columns: vec!["节点编号".into(), "父节点".into(), "类型".into()],
-                    rows,
-                    selected: self
-                        .selected
-                        .and_then(|id| order.iter().position(|(n, _)| *n == id))
-                        .map(|r| (r, 0)),
-                    enabled: !busy,
-                });
+                view.description = "左侧选择组件，中央查看真实草稿画布，右侧编辑属性。更改应用到草稿后更新预览；保存摘要确认后才写入。".into();
+                view.grid = Some(self.node_grid(busy));
                 view.actions = vec![
                     action(EDIT_NODE, "尺寸 / 排列", true),
                     action(NODE_APPEARANCE, "节点样式 / 容器Alpha", true),
@@ -1819,6 +1883,7 @@ impl Editor {
                 ];
             }
             Page::Geometry | Page::Appearance | Page::ContentStyle | Page::Materials => {
+                view.grid = Some(self.node_grid(busy));
                 view.description=match self.page{Page::Geometry=>"尺寸先确定宽度，再测量内容高度。Content父高度不能依赖子百分比高度；比例以万分位填写。透明根的锚点以系统工作区或科目内容区为边界。",Page::ContentStyle=>"此样式仅属于当前作用域内的稳定节点编号。文字/图片正文另行确认发布；图片始终完整等比显示，不裁切。",Page::Appearance=>"容器玻璃填充不乘到子文字。父组整体Alpha应用到整个子组一次；0%保留布局占位但无展示命中。",_=>"科目配置只控制自己的资料内容区，不能修改公共时钟、学校科目色或全科作业。目录仍按当前有效老师与科目授权；完整名字与只读分页保留。"}.into();
                 view.actions = vec![
                     action(APPLY, "应用到草稿", true),
@@ -1944,12 +2009,40 @@ impl Editor {
         scope: LayoutScope,
         id: LayoutNodeId,
     ) -> Result<(), String> {
-        if self.page != Page::Tree {
-            return Err("请先应用当前字段并返回布局树，再选择画布节点。".into());
+        if !matches!(
+            self.page,
+            Page::Tree | Page::Geometry | Page::Appearance | Page::ContentStyle | Page::Materials
+        ) {
+            return Err("请先返回布局编辑页，再选择画布节点。".into());
         }
         let tree = self.tree().ok_or("没有布局草稿。")?;
         if tree.scope != scope || tree.node(id).is_none() {
             return Err("画布节点不属于当前布局作用域。".into());
+        }
+        if self.selected == Some(id) {
+            return Ok(());
+        }
+        if self.page != Page::Tree {
+            // Invalid or incomplete numbers keep both the previous selection and
+            // raw form. A successful switch applies only to the in-memory draft.
+            self.apply_fields()?;
+            let target = &self
+                .tree()
+                .and_then(|tree| tree.node(id))
+                .ok_or("节点不存在。")?
+                .kind;
+            self.page = match (self.page, target) {
+                (
+                    Page::Geometry,
+                    NodeKind::Root { .. } | NodeKind::Container(_) | NodeKind::Outlet { .. },
+                ) => Page::Geometry,
+                (Page::Appearance | Page::ContentStyle, NodeKind::Container(_)) => Page::Appearance,
+                (
+                    Page::Appearance | Page::ContentStyle,
+                    NodeKind::Widget(WidgetKind::SubjectText | WidgetKind::SubjectImage),
+                ) => Page::ContentStyle,
+                _ => Page::Tree,
+            };
         }
         self.selected = Some(id);
         self.raw.remove(&PARENT);
@@ -2149,6 +2242,42 @@ mod tests {
     }
     fn tree(e: &Editor) -> LayoutTree {
         e.tree().unwrap().clone()
+    }
+    #[test]
+    fn property_tree_selection_preserves_incomplete_input_and_applies_valid_draft() {
+        let mut e = editor();
+        e.loaded_public(public()).unwrap();
+        act(&mut e, ADD_CONTAINER, &[]);
+        let source = e.selected.unwrap();
+        let root = tree(&e).root;
+        let before = tree(&e);
+        let incomplete = form(&e, &[(GAP, "-")]);
+        e.suspend(incomplete);
+        assert!(e.select_node(LayoutScope::Public, root).is_err());
+        assert_eq!(e.selected, Some(source));
+        assert_eq!(e.page, Page::Geometry);
+        assert_eq!(e.value(GAP), "-");
+        assert_eq!(tree(&e), before);
+
+        let complete = form(&e, &[(GAP, "24")]);
+        e.suspend(complete);
+        e.select_node(LayoutScope::Public, root).unwrap();
+        assert_eq!(e.selected, Some(root));
+        assert_eq!(e.page, Page::Geometry);
+        assert!(
+            matches!(&tree(&e).node(source).unwrap().kind, NodeKind::Container(c) if c.gap == 24)
+        );
+        assert_eq!(e.view("", false).grid.unwrap().selected, Some((0, 0)));
+        let Some(Command::Preview {
+            public: Some(draft),
+            ..
+        }) = e.draft_preview().unwrap()
+        else {
+            panic!()
+        };
+        assert_eq!(draft.layout.revision, Revision::new(3));
+        assert_eq!(draft.display.revision, Revision::new(4));
+        assert!(e.has_unsaved_changes());
     }
     #[test]
     fn percent_live_profile_drafts_preserve_unfinished_fields_selection_and_cas() {

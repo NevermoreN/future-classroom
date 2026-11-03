@@ -1,5 +1,7 @@
 //! Native, UI-thread-only form adapter. No browser engine or synchronous worker wait.
-use fc_presentation::workbench::{ActionId, Event, FieldId, FieldKind, FormData, View, WindowRole};
+use fc_presentation::workbench::{
+    admin_navigation_index, ActionId, Event, FieldId, FieldKind, FormData, View, WindowRole,
+};
 #[path = "workbench/color_picker.rs"]
 mod color_picker;
 #[path = "workbench/preview.rs"]
@@ -148,14 +150,17 @@ impl Drop for ClassLease {
 struct Font(HFONT);
 impl Font {
     fn new() -> Result<Self> {
+        Self::sized(19, FW_NORMAL.0 as i32)
+    }
+    fn sized(size: i32, weight: i32) -> Result<Self> {
         // SAFETY: fixed owned font; used only on this UI thread, deleted after controls.
         let font = unsafe {
             CreateFontW(
-                -19,
+                -size,
                 0,
                 0,
                 0,
-                FW_NORMAL.0 as i32,
+                weight,
                 0,
                 0,
                 0,
@@ -234,6 +239,7 @@ struct Controls {
     fields: Vec<FieldBinding>,
     actions: Vec<ActionBinding>,
     labels: Vec<HWND>,
+    heading: HWND,
     description: HWND,
     status: HWND,
     masks: Vec<MaskControl>,
@@ -670,6 +676,7 @@ pub struct Window {
     role: Cell<WindowRole>,
     state: Box<State>,
     font: Font,
+    heading_font: Font,
     class: ClassLease,
     _thread: PhantomData<Rc<()>>,
 }
@@ -736,26 +743,37 @@ impl Window {
     fn create_native() -> Result<Self> {
         let class = ClassLease::acquire()?;
         let font = Font::new()?;
+        let heading_font = Font::sized(24, FW_SEMIBOLD.0 as i32)?;
         let mut window = Self {
             hwnd: HWND::default(),
             role: Cell::new(WindowRole::Workbench),
             state: Box::new(State::new()),
             font,
+            heading_font,
             class,
             _thread: PhantomData,
         };
         // SAFETY: Box pointee is stable through HWND lifetime; NCDESTROY detaches
         // userdata before Box drop. No WS_VISIBLE means no activation on creation.
         window.hwnd = unsafe {
+            let mut work = RECT::default();
+            SystemParametersInfoW(
+                SPI_GETWORKAREA,
+                0,
+                Some((&mut work as *mut RECT).cast()),
+                SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS(0),
+            )?;
+            let width = 1280.min(work.right - work.left);
+            let height = 860.min(work.bottom - work.top);
             CreateWindowExW(
                 WS_EX_APPWINDOW,
                 w!("FutureClassroom.Workbench.v1"),
                 w!("未来教室工作台"),
                 WS_OVERLAPPEDWINDOW | WS_VSCROLL,
-                CW_USEDEFAULT,
-                CW_USEDEFAULT,
-                960,
-                760,
+                work.left + (work.right - work.left - width) / 2,
+                work.top + (work.bottom - work.top - height) / 2,
+                width,
+                height,
                 None,
                 None,
                 Some(window.class.0),
@@ -977,6 +995,11 @@ impl Window {
         // RefCell mutable borrow across possible reentrant messages.
         unsafe {
             SetWindowTextW(self.hwnd, &HSTRING::from(view.title.as_str()))?;
+            let heading = self.state.controls.borrow().heading;
+            SetWindowTextW(
+                heading,
+                &HSTRING::from(format!("未来教室  ·  {}", view.title)),
+            )?;
             SetWindowTextW(description, &HSTRING::from(view.description.as_str()))?;
             SetWindowTextW(status, &HSTRING::from(view.status.as_str()))?;
             for (index, (binding, field)) in fields.iter().zip(&view.fields).enumerate() {
@@ -1039,6 +1062,21 @@ impl Window {
     }
     fn build_controls(&self, view: &View) -> Result<Controls> {
         let mut controls = Controls::default();
+        controls.heading = self.child(
+            &mut controls,
+            w!("STATIC"),
+            &format!("未来教室  ·  {}", view.title),
+            WINDOW_STYLE(SS_LEFT.0 | SS_NOPREFIX.0),
+            0,
+        )?;
+        unsafe {
+            let _ = SendMessageW(
+                controls.heading,
+                WM_SETFONT,
+                Some(WPARAM(self.heading_font.0 .0 as usize)),
+                Some(LPARAM(1)),
+            );
+        }
         controls.description = self.child(
             &mut controls,
             w!("STATIC"),
@@ -1893,7 +1931,7 @@ impl Window {
 
 fn static_text_height(hwnd: HWND, text: &str, width: i32) -> Result<i32> {
     if text.is_empty() {
-        return Ok(58);
+        return Ok(26);
     }
     let mut text: Vec<u16> = text.encode_utf16().collect();
     let mut bounds = RECT {
@@ -1928,7 +1966,7 @@ fn static_text_height(hwnd: HWND, text: &str, width: i32) -> Result<i32> {
     if height == 0 {
         return Err(Error::from_hresult(E_FAIL));
     }
-    Ok((height + 4).max(58))
+    Ok((height + 4).max(26))
 }
 
 fn layout(hwnd: HWND, state: &State) -> Result<()> {
@@ -1958,48 +1996,132 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
     unsafe {
         GetClientRect(hwnd, &mut client)?;
     }
-    let width = (client.right - client.left - 40).max(160);
-    let description_height = static_text_height(description, &view.description, width)?;
-    let mut positions = vec![(description, 20, 16, width, description_height)];
-    let mut y = description_height + 24;
-    if let Some(canvas) = state
+    let full_width = (client.right - client.left - 48).max(160);
+    let viewport = (client.bottom - client.top).max(1);
+    let (navigation, actions): (Vec<_>, Vec<_>) = actions
+        .into_iter()
+        .partition(|action| admin_navigation_index(action.id).is_some());
+    let sidebar = !navigation.is_empty() && full_width >= 1050;
+    let sidebar_width = if sidebar { 176 } else { 0 };
+    let content_x = 24 + sidebar_width;
+    let width = full_width - sidebar_width;
+    let columns = (width / 192).max(1);
+    let button_width = (width / columns - 12).max(80);
+    let rows = (actions.len() as i32 + columns - 1) / columns;
+    let footer = (rows * 48 + 20).max(20);
+    let nav_columns = (full_width / 176).max(1);
+    let nav_rows = if sidebar {
+        0
+    } else {
+        (navigation.len() as i32 + nav_columns - 1) / nav_columns
+    };
+    let body_top = 78 + nav_rows * 52;
+    let body_bottom = (viewport - footer).max(body_top + 1);
+    let body_height = body_bottom - body_top;
+    let heading = state.controls.borrow().heading;
+    let mut fixed = vec![(heading, 24, 20, full_width, 32)];
+    for (index, action) in navigation.iter().enumerate() {
+        let (x, y, w) = if sidebar {
+            (16, 82 + index as i32 * 64, 160)
+        } else {
+            (
+                24 + index as i32 % nav_columns * (full_width / nav_columns),
+                76 + index as i32 / nav_columns * 52,
+                full_width / nav_columns - 12,
+            )
+        };
+        fixed.push((action.hwnd, x, y, w, 44));
+    }
+    let preview = state
         .preview
         .try_borrow()
-        .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
-        .as_ref()
-    {
-        let (canvas_width, height) = canvas.size(width);
-        positions.push((canvas.hwnd(), 20, y, canvas_width, height));
-        y += height + 20;
-    }
-
-    if let Some(grid) = state
+        .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+    let grid = state
         .controls
         .try_borrow()
-        .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
-        .grid
-        .as_ref()
-    {
-        let height = grid.height();
-        positions.push((grid.hwnd(), 20, y, width, height));
-        y += height + 20;
-    }
-    for (index, (binding, field)) in fields.iter().zip(&view.fields).enumerate() {
-        positions.push((labels[index], 20, y, width, 25));
-        let height = if field.kind == FieldKind::Multiline {
-            88
+        .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+    let split = preview.is_some() && width >= 720;
+    let tree_width = if split && grid.grid.is_some() && width >= 1120 {
+        260
+    } else {
+        0
+    };
+    let form_width = if split { 340 } else { width };
+    let form_x = if split && tree_width > 0 {
+        content_x + width - form_width
+    } else {
+        content_x
+    };
+    let description_height = static_text_height(description, &view.description, form_width)?;
+    let mut positions = vec![(description, form_x, 0, form_width, description_height)];
+    let mut y = description_height + 18;
+    if let Some(canvas) = preview.as_ref() {
+        if split {
+            let available = width - form_width - tree_width - 24;
+            let (mut w, mut h) = canvas.size(available);
+            if h > body_height - 24 {
+                w = (w * (body_height - 24).max(1) / h).max(1);
+                h = (body_height - 24).max(1);
+            }
+            let canvas_x = if tree_width > 0 {
+                content_x + tree_width
+            } else {
+                content_x + form_width + 24
+            };
+            fixed.push((
+                canvas.hwnd(),
+                canvas_x + (available - w) / 2,
+                body_top + 12,
+                w,
+                h,
+            ));
         } else {
-            30
+            let (w, h) = canvas.size(width);
+            positions.push((canvas.hwnd(), content_x, y, w, h));
+            y += h + 24;
+        }
+    }
+    let mut tree_height = 0;
+    if let Some(grid) = grid.grid.as_ref() {
+        let h = grid.height();
+        if tree_width > 0 {
+            positions.push((grid.hwnd(), content_x, 0, tree_width - 16, h));
+            tree_height = h;
+        } else {
+            positions.push((grid.hwnd(), form_x, y, form_width, h));
+            y += h + 24;
+        }
+    }
+    // A wide settings window uses two readable columns; a canvas reserves its
+    // own pane so properties never push the live preview below the fold.
+    let field_columns = if !split && grid.grid.is_none() && form_width >= 1050 {
+        2
+    } else {
+        1
+    };
+    let field_width = (form_width - (field_columns - 1) * 28) / field_columns;
+    let fields_top = y;
+    let mut row_height = 0;
+    for (index, (binding, field)) in fields.iter().zip(&view.fields).enumerate() {
+        let column = index as i32 % field_columns;
+        let x = form_x + column * (field_width + 28);
+        let label_height = static_text_height(labels[index], &field.label, field_width)?;
+        positions.push((labels[index], x, y, field_width, label_height));
+        let height = if field.kind == FieldKind::Multiline {
+            96
+        } else {
+            36
         };
+        let control_y = y + label_height + 4;
         if let Some(slider) = binding.slider {
-            positions.push((slider, 20, y + 28, width - 76, height));
-            positions.push((binding.hwnd, 20 + width - 68, y + 28, 68, height));
+            positions.push((slider, x, control_y, field_width - 88, height));
+            positions.push((binding.hwnd, x + field_width - 80, control_y, 80, height));
         } else {
             positions.push((
                 binding.hwnd,
-                20,
-                y + 28,
-                width,
+                x,
+                control_y,
+                field_width,
                 if matches!(field.kind, FieldKind::Choice(_)) {
                     240
                 } else {
@@ -2007,45 +2129,78 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
                 },
             ));
         }
-        y += height + 42;
+        row_height = row_height.max(label_height + height + 22);
+        if column == field_columns - 1 || index == fields.len() - 1 {
+            y += row_height;
+            row_height = 0;
+        }
     }
-    let status_height = static_text_height(status, &view.status, width)?;
-    positions.push((status, 20, y + 4, width, status_height));
-    y += status_height + 18;
-    let columns = (width / 200).max(1);
-    let button_width = (width / columns - 10).max(80);
-    for (index, action) in actions.iter().enumerate() {
-        positions.push((
-            action.hwnd,
-            20 + index as i32 % columns * (button_width + 10),
-            y + index as i32 / columns * 44,
-            button_width,
-            34,
-        ));
-    }
-    let rows = (actions.len() as i32 + columns - 1) / columns;
-    let content_height = y + rows * 44 + 20;
-    let viewport = (client.bottom - client.top).max(1);
+    y = y.max(fields_top);
+    let status_height = if view.status.is_empty() {
+        0
+    } else {
+        static_text_height(status, &view.status, form_width)?
+    };
+    positions.push((status, form_x, y + 4, form_width, status_height));
+    let content_height = (y + status_height + 20).max(tree_height);
     let scroll = state
         .scroll
         .get()
-        .clamp(0, (content_height - viewport).max(0));
+        .clamp(0, (content_height - body_height).max(0));
     state.scroll.set(scroll);
+    for (index, action) in actions.iter().enumerate() {
+        fixed.push((
+            action.hwnd,
+            content_x + index as i32 % columns * (button_width + 12),
+            viewport - footer + 10 + index as i32 / columns * 48,
+            button_width,
+            38,
+        ));
+    }
     let info = SCROLLINFO {
         cbSize: std::mem::size_of::<SCROLLINFO>() as u32,
         fMask: SIF_RANGE | SIF_PAGE | SIF_POS,
         nMin: 0,
         nMax: content_height - 1,
-        nPage: viewport as u32,
+        nPage: body_height as u32,
         nPos: scroll,
         ..Default::default()
     };
-    // SAFETY: only owned controls, copied positions, no live mutable state borrow.
+    drop(grid);
+    drop(preview);
+    // The header, real preview and command footer stay visible while only the
+    // bounded property/tree content scrolls. Each child owns its clipping region.
     unsafe {
         let _ = SetScrollInfo(hwnd, SB_VERT, &info, true);
-        for (child, x, y, w, h) in positions {
-            MoveWindow(child, x, y - scroll, w, h, true)?;
+        for (child, x, y, w, h) in fixed {
+            let _ = SetWindowRgn(child, None, true);
+            MoveWindow(child, x, y, w, h, true)?;
         }
+        for (child, x, y, w, h) in positions {
+            let top = body_top + y - scroll;
+            MoveWindow(child, x, top, w, h, true)?;
+            // A ComboBox's 240px allocation includes its drop-down, while its
+            // visible collapsed field remains 36px. Do not clip the popup list.
+            let visible_h = if fields
+                .iter()
+                .any(|f| f.hwnd == child && f.kind == NativeKind::Choice)
+            {
+                36
+            } else {
+                h
+            };
+            let clip_top = (body_top - top).clamp(0, visible_h);
+            let clip_bottom = (body_bottom - top).clamp(0, visible_h);
+            let region = CreateRectRgn(0, clip_top, w, clip_bottom);
+            if region.is_invalid() {
+                return Err(Error::from_thread());
+            }
+            if SetWindowRgn(child, Some(region), true) == 0 {
+                let _ = DeleteObject(region.into());
+                return Err(Error::from_thread());
+            }
+        }
+        let _ = InvalidateRect(Some(hwnd), None, false);
     }
     Ok(())
 }
@@ -2072,6 +2227,37 @@ unsafe extern "system" fn window_proc(
             }
             if let Some(state) = pointer.as_ref() {
                 match message {
+                    WM_GETMINMAXINFO => {
+                        let info = &mut *(lparam.0 as *mut MINMAXINFO);
+                        info.ptMinTrackSize = POINT { x: 760, y: 640 };
+                        return LRESULT(0);
+                    }
+                    WM_ERASEBKGND => {
+                        let dc = HDC(wparam.0 as *mut _);
+                        let mut bounds = RECT::default();
+                        if GetClientRect(hwnd, &mut bounds).is_ok() {
+                            let brush = HBRUSH(GetStockObject(DC_BRUSH).0);
+                            let _ = SetDCBrushColor(dc, COLORREF(0x00fffaf6));
+                            let _ = FillRect(dc, &bounds, brush);
+                            bounds.bottom = 64;
+                            let _ = SetDCBrushColor(dc, COLORREF(0x00ffffff));
+                            let _ = FillRect(dc, &bounds, brush);
+                        }
+                        return LRESULT(1);
+                    }
+                    WM_CTLCOLORSTATIC => {
+                        let dc = HDC(wparam.0 as *mut _);
+                        let heading = state.controls.try_borrow().ok().map(|c| c.heading);
+                        let is_heading = heading == Some(HWND(lparam.0 as *mut _));
+                        let color = COLORREF(if is_heading { 0x00ffffff } else { 0x00fffaf6 });
+                        let _ = SetBkColor(dc, color);
+                        let _ = SetTextColor(
+                            dc,
+                            COLORREF(if is_heading { 0x0045200e } else { 0x00534433 }),
+                        );
+                        let _ = SetDCBrushColor(dc, color);
+                        return LRESULT(GetStockObject(DC_BRUSH).0 as isize);
+                    }
                     WM_CLOSE => {
                         state.clear_passwords();
                         state.discard_forms();

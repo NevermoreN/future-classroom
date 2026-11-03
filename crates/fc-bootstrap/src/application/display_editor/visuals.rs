@@ -33,6 +33,8 @@ pub(super) fn checked_form(mut data: FormData) -> std::result::Result<FormData, 
         FILL,
         COURSE_ALPHA,
         HOMEWORK_ALPHA,
+        GLASS,
+        REFLECTION,
     ];
     let values = fields.map(|id| data.take(id));
     if !data.is_empty() {
@@ -99,8 +101,20 @@ impl Editor {
         Ok(())
     }
     pub(super) fn visuals_view(&self, view: &mut View) {
-        view.title = "科目颜色与显示".into();
-        view.description="科目按固定编号区分。切换科目前先保留当前颜色；关闭底色不会删除色值。颜色与全部显示设置共用草稿，点击“保存全部”才一起生效。预览使用柔和处理后的颜色与当前透明度，仅绘制示例。".into();
+        view.title = "科目颜色与玻璃外观".into();
+        view.description = "仅全局主管理员可修改。调整玻璃卡片与科目配色，右侧为草稿示例；保存并应用后生效。0%完全透明，100%不透明，文字保持清晰。".into();
+        view.fields.extend([
+            percentage(
+                GLASS,
+                "玻璃底色不透明度",
+                self.settings.glass_surface_percent,
+            ),
+            percentage(
+                REFLECTION,
+                "边缘反射强度",
+                self.settings.edge_reflection_percent,
+            ),
+        ]);
         if let Some(subject) = self
             .palette
             .subjects
@@ -109,7 +123,7 @@ impl Editor {
         {
             view.fields.push(field(
                 PALETTE_SUBJECT,
-                "选择科目（选择后点击切换）",
+                "科目（选择后点击切换科目）",
                 FieldKind::Choice(
                     self.palette
                         .subjects
@@ -159,13 +173,13 @@ impl Editor {
             ),
         ]);
         view.actions = vec![
-            action(APPLY, "应用到共同草稿"),
-            action(SWITCH_SUBJECT, "保留当前颜色并切换科目"),
+            action(APPLY, "更新草稿"),
+            action(SWITCH_SUBJECT, "切换科目"),
             action(PICK_COLOR, "选择颜色…"),
             action(VISUAL_PREVIEW, "应用并预览实际颜色"),
-            action(SAVE_ALL, "保存全部"),
-            action(EDIT_BACK, "应用并返回显示设置"),
-            action(CANCEL, "取消全部修改"),
+            action(SAVE_ALL, "保存并应用"),
+            action(EDIT_BACK, "返回显示设置"),
+            action(CANCEL, "取消修改"),
         ];
         if self.selected_subject.is_none() {
             for action in &mut view.actions {
@@ -183,6 +197,8 @@ impl Editor {
         let fill = yes(data, FILL)?;
         let course = percent(data, COURSE_ALPHA)?;
         let homework = percent(data, HOMEWORK_ALPHA)?;
+        let glass = percent(data, GLASS)?;
+        let reflection = percent(data, REFLECTION)?;
         let mut target = self.selected_subject;
         let mut color = None;
         if let Some(selected) = self.selected_subject {
@@ -214,6 +230,8 @@ impl Editor {
         self.settings.subject_fill = fill;
         self.settings.course_fill_percent = course;
         self.settings.homework_fill_percent = homework;
+        self.settings.glass_surface_percent = glass;
+        self.settings.edge_reflection_percent = reflection;
         self.selected_subject = target;
         Ok(())
     }

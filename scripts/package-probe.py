@@ -16,7 +16,7 @@ import zipfile
 
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 ARTIFACT = f"FutureClassroom-{VERSION}-windows-x86-dev.zip"
 TARGET_ROLES = {
     "i686-pc-windows-gnu": "modern-GNU-development-only",

@@ -114,6 +114,7 @@ pub enum CardContent {
     Recess {
         deadline: LocalDateTime,
         until_next_course: bool,
+        next_subject: Option<String>,
     },
     MaterialsUnavailable,
     Materials(Box<MaterialListContent>),
@@ -551,6 +552,27 @@ pub fn build_scene_with_content(
     } else {
         CardContent::MaterialsUnavailable
     };
+    let mut calendar_label = format!(
+        "{}年{}月{}日  星期{}",
+        now.date.year(),
+        now.date.month(),
+        now.date.day(),
+        ["一", "二", "三", "四", "五", "六", "日"][now.date.weekday().index()]
+    );
+    if !facts.clock_rollback {
+        if let Some(week) = facts
+            .schedule
+            .semesters
+            .iter()
+            .find(|plan| Some(plan.semester.class_id) == class && plan.semester.contains(now.date))
+            .and_then(|plan| plan.semester.teaching_week(now.date).ok())
+        {
+            calendar_label.push_str(&format!(
+                "\n第{week}教学周 · {}周",
+                if week % 2 == 1 { "单" } else { "双" }
+            ));
+        }
+    }
     let mut entries = vec![
         (
             ComponentKind::Clock,
@@ -559,15 +581,7 @@ pub fn build_scene_with_content(
                 show_seconds: settings.clock_seconds,
             }),
         ),
-        (
-            ComponentKind::Date,
-            CardContent::Text(format!(
-                "{}年{}月{}日",
-                now.date.year(),
-                now.date.month(),
-                now.date.day()
-            )),
-        ),
+        (ComponentKind::Date, CardContent::Text(calendar_label)),
         (ComponentKind::Schedule, schedule_content),
         (
             ComponentKind::Homework,
@@ -593,7 +607,13 @@ pub fn build_scene_with_content(
                 CardContent::Text(if days < 0 {
                     format!("{} · 已结束", settings.countdown.label)
                 } else {
-                    format!("{} · {days}天", settings.countdown.label)
+                    format!(
+                        "{}\n{days} 天\n{}年{}月{}日",
+                        settings.countdown.label,
+                        target.year(),
+                        target.month(),
+                        target.day()
+                    )
                 }),
             ))
         }
@@ -653,7 +673,13 @@ pub fn build_scene_with_content(
             .into()
         };
         let can_change = current.is_some() && !facts.clock_rollback;
-        let width = work.width.min(1000.);
+        let class_name = identity
+            .classes
+            .iter()
+            .find(|item| Some(item.id) == class)
+            .map_or("当前班级", |item| item.name.as_str());
+        let caption = format!("{class_name} · {caption}");
+        let width = (work.width * 0.48).clamp(320., 960.).min(work.width);
         let text_width = width - if can_change { 180. } else { 32. };
         if text_width < 80. {
             return Err(SceneError::Layout(LayoutError::OutOfSpace));
@@ -675,7 +701,7 @@ pub fn build_scene_with_content(
         }
         Some(LessonControlContent {
             rect: Rect {
-                x: work.x,
+                x: work.x + work.width - width,
                 y: work.y,
                 width,
                 height: height.ceil(),
@@ -700,11 +726,28 @@ pub fn build_scene_with_content(
         work
     };
     if let Some((deadline, until_next_course)) = recess {
+        let next_subject = if until_next_course {
+            match resolve_lesson(&day, deadline, facts.schedule.automatic_gaps) {
+                LessonState::Course { cell, .. } => Some(
+                    identity
+                        .subjects
+                        .iter()
+                        .find(|subject| subject.id == cell.subject_id && subject.enabled)
+                        .ok_or(SceneError::Schedule)?
+                        .name
+                        .clone(),
+                ),
+                _ => None,
+            }
+        } else {
+            None
+        };
         entries.push((
             ComponentKind::Recess,
             CardContent::Recess {
                 deadline,
                 until_next_course,
+                next_subject,
             },
         ));
     }

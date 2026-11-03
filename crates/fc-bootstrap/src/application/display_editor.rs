@@ -345,8 +345,12 @@ impl Editor {
                 (Page::Main | Page::SubjectVisuals, HOMEWORK_ALPHA) => {
                     self.settings.homework_fill_percent = value
                 }
-                (Page::Main, GLASS) => self.settings.glass_surface_percent = value,
-                (Page::Main, REFLECTION) => self.settings.edge_reflection_percent = value,
+                (Page::Main | Page::SubjectVisuals, GLASS) => {
+                    self.settings.glass_surface_percent = value
+                }
+                (Page::Main | Page::SubjectVisuals, REFLECTION) => {
+                    self.settings.edge_reflection_percent = value
+                }
                 (Page::Components, ALPHA) => {
                     self.settings.components[self.component].opacity_percent = value
                 }

@@ -1581,13 +1581,26 @@ fn grid_accounts(app: &mut App, row: usize, column: usize) -> std::result::Resul
 }
 fn grid_profiles(app: &mut App, row: usize, column: usize) -> std::result::Result<(), String> {
     if app.screen == Screen::Profiles && app.pending.is_none() && !app.stopping {
+        let mut refresh_preview = false;
         if let Some(editor) = &mut app.profiles {
+            let properties = editor.node_properties_open();
             if let Ok(data) = app.window.draft_nonsecret() {
                 editor.suspend(data);
             }
             if let Err(message) = editor.select(row, column) {
                 app.status = message;
+            } else {
+                refresh_preview = properties;
             }
+        }
+        if refresh_preview {
+            app.clear_profile_preview();
+            app.percent_preview_due = Some((
+                Instant::now() + Duration::from_millis(150),
+                Screen::Profiles,
+            ));
+        }
+        if app.profiles.is_some() {
             app.render()?;
             app.sync_layout_selection()?;
         }

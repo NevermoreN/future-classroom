@@ -119,24 +119,38 @@ fn homework_measures_wrapped_label_and_body_as_two_complete_native_blocks() {
         [
             CardBodyPosition {
                 top: 0.,
-                height: 70.
+                height: 124.
             },
             CardBodyPosition {
-                top: 78.,
+                top: 0.,
                 height: 124.
             }
         ]
     );
-    assert_eq!(geometry.total_body_height, 202.);
+    assert_eq!(geometry.total_body_height, 124.);
     let m = measure(54.);
     assert_eq!(
         spec.intrinsic_height(300., 22., &m).unwrap(),
-        32. + 70. + 8. + 70. + 12.
+        32. + 70. + 12.
     );
     let calls = m.calls.borrow();
     assert_eq!(calls.len(), 2);
-    assert!(calls.iter().all(|(_, width, _)| *width == 252.));
+    assert!((calls[0].1 - 70.56).abs() < 0.01);
+    assert!((calls[1].1 - 165.44).abs() < 0.01);
     assert_eq!(calls[1].0, spec.blocks[1].text);
+}
+#[test]
+fn date_countdown_measures_large_day_value_separately_from_label_and_target() {
+    let content = CardContent::Text("距离期末考试\n85 天\n2027年1月22日".into());
+    let spec = card_body_spec(ComponentKind::DateCountdown, &content, false, None).unwrap();
+    let measure = measure(24.);
+    spec.intrinsic_height(300., 16., &measure).unwrap();
+    let calls = measure.calls.borrow();
+    assert_eq!(calls.len(), 3);
+    assert_eq!(calls[0].2, 16.);
+    assert_eq!(calls[1], ("85 天".into(), 252., 40.));
+    assert_eq!(calls[2].2, 16.);
+    assert!(spec.blocks.iter().all(|block| block.center));
 }
 #[test]
 fn material_rows_and_more_share_44_dip_and_exact_gap_without_trailing_gap() {
@@ -364,7 +378,7 @@ fn dynamic_clock_and_control_use_their_native_patch_width_and_insets() {
         )
         .unwrap();
         let m = measure(42.);
-        assert_eq!(spec.intrinsic_height(280., 40., &m).unwrap(), 96.);
+        assert_eq!(spec.intrinsic_height(280., 40., &m).unwrap(), 74.);
         assert_eq!(m.calls.borrow()[0].1, 248.);
         assert!(spec.blocks.is_empty());
     }

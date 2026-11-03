@@ -2533,6 +2533,7 @@ struct App {
     state: Arc<IdentityState>,
     lease: Option<SessionLease>,
     screen: Screen,
+    navigation_group: Option<usize>,
     status: String,
     desktop_notice: String,
     public_material_notice: Option<&'static str>,
@@ -2935,7 +2936,207 @@ impl App {
                 });
             }
         }
+        if self.admin_navigation_visible() {
+            if self.screen == Screen::Home {
+                if let Some(group) = self.navigation_group {
+                    let links: &[(ActionId, &str)] = match group {
+                        1 => &[
+                            (TO_SCHOOL, "学校与班级"),
+                            (TO_SUBJECTS, "基础科目"),
+                            (TO_SCHEDULE, "课表、作息与校历"),
+                            (TO_HOMEWORK, "今天的作业"),
+                            (TO_MATERIALS, "课堂资料"),
+                            (TO_LESSON, "本节临时换课"),
+                            (TO_PROFILES, "桌面展示编辑"),
+                        ],
+                        2 => &[
+                            (TO_AUTOSTART, "Windows 登录自启"),
+                            (TO_DIAGNOSTICS, "设备与运行诊断"),
+                            (TO_DISPLAY, "展示屏幕与桌面设置"),
+                        ],
+                        3 => &[
+                            (TO_WEB, "教师 Web、设备配对与 HTTPS"),
+                            (TO_BACKUP, "备份与恢复"),
+                            (TO_ROTATE, "重新生成本人恢复码"),
+                        ],
+                        4 => &[
+                            (TO_ACCOUNTS, "账号与任教管理"),
+                            (TO_PASSWORD, "修改本人口令"),
+                        ],
+                        _ => &[],
+                    };
+                    let labels = ["桌面显示", "课堂管理", "设备管理", "系统设置", "账号管理"];
+                    view.title = format!("管理员设置 · {}", labels[group]);
+                    view.description =
+                        "全局主管理员 · 选择需要管理的功能。各页面保留原有保存、确认和权限检查。"
+                            .into();
+                    // Result-query actions must remain available until the owner
+                    // explicitly settles them; navigation never hides receipts.
+                    view.actions.retain(|a| {
+                        !matches!(
+                            a.id,
+                            TO_SCHOOL
+                                | TO_SUBJECTS
+                                | TO_ACCOUNTS
+                                | TO_SCHEDULE
+                                | TO_DISPLAY
+                                | TO_LESSON
+                                | TO_WEB
+                                | TO_DIAGNOSTICS
+                                | TO_HOMEWORK
+                                | TO_MATERIALS
+                                | TO_PASSWORD
+                        )
+                    });
+                    view.actions.splice(
+                        0..0,
+                        links.iter().map(|(id, label)| Action {
+                            id: *id,
+                            label: (*label).into(),
+                            enabled: !view.busy,
+                        }),
+                    );
+                }
+            }
+            let active = self.active_navigation_group();
+            for (index, label) in ["桌面显示", "课堂管理", "设备管理", "系统设置", "账号管理"]
+                .iter()
+                .enumerate()
+            {
+                view.actions.push(Action {
+                    id: ADMIN_NAVIGATION[index],
+                    label: if active == Some(index) {
+                        format!("●  {label}")
+                    } else {
+                        (*label).into()
+                    },
+                    enabled: !view.busy
+                        && self.pending.is_none()
+                        && !self.autostart_unknown
+                        && self.https_pending.is_none()
+                        && self.https_unadmitted.is_none()
+                        && !self.native_unknown
+                        && !self.native_mutation_pending,
+                });
+            }
+        }
         view
+    }
+    fn admin_navigation_visible(&self) -> bool {
+        self.current_global_owner().is_some()
+            && matches!(
+                self.screen,
+                Screen::Home
+                    | Screen::Display
+                    | Screen::School
+                    | Screen::Subjects
+                    | Screen::Accounts
+                    | Screen::Schedule
+                    | Screen::Homework
+                    | Screen::Materials
+                    | Screen::Lesson
+                    | Screen::Diagnostics
+                    | Screen::Autostart
+                    | Screen::Web
+                    | Screen::HttpsSettings
+                    | Screen::Password
+            )
+    }
+    fn active_navigation_group(&self) -> Option<usize> {
+        match self.screen {
+            Screen::Display => Some(0),
+            Screen::School
+            | Screen::Subjects
+            | Screen::Schedule
+            | Screen::Homework
+            | Screen::Materials
+            | Screen::Lesson => Some(1),
+            Screen::Autostart | Screen::Diagnostics => Some(2),
+            Screen::Web | Screen::HttpsSettings => Some(3),
+            Screen::Accounts | Screen::Password => Some(4),
+            Screen::Home => self.navigation_group,
+            _ => None,
+        }
+    }
+    fn navigate_admin_group(
+        &mut self,
+        group: usize,
+        data: FormData,
+    ) -> std::result::Result<(), String> {
+        if !self.admin_navigation_visible()
+            || self.pending.is_some()
+            || self.autostart_job.is_some()
+            || self.autostart_unknown
+            || self.https_pending.is_some()
+            || self.https_unadmitted.is_some()
+            || self.stopping
+            || self.native_unknown
+            || self.native_mutation_pending
+        {
+            return Ok(());
+        }
+        if !self.profiles_memory_gate() {
+            self.lock();
+            return self.render();
+        }
+        let changed_fields = self.view().fields.iter().any(|field| {
+            field.kind != FieldKind::ReadOnly
+                && data.get(field.id).is_some_and(|value| value != field.value)
+        });
+        settings_registry::suspend(self);
+        if self.screen == Screen::HttpsSettings {
+            if let Some(editor) = &mut self.https_editor {
+                let _ = editor.capture(data);
+            }
+        }
+        let dirty = match self.screen {
+            Screen::Display => self
+                .display
+                .as_ref()
+                .is_some_and(|e| e.has_unsaved_changes()),
+            Screen::Schedule => self
+                .schedule
+                .as_ref()
+                .is_some_and(|e| e.has_unsaved_changes()),
+            Screen::Accounts => self
+                .accounts
+                .as_ref()
+                .is_some_and(|e| e.has_unsaved_changes()),
+            Screen::Subjects => self
+                .subject_editor
+                .as_ref()
+                .is_some_and(|e| e.has_unsaved_changes()),
+            Screen::Autostart => self
+                .autostart
+                .as_ref()
+                .is_some_and(|e| e.has_unsaved_changes()),
+            Screen::HttpsSettings => self
+                .https_editor
+                .as_ref()
+                .is_some_and(|e| e.navigation_pending()),
+            Screen::Web => self
+                .web_editor
+                .as_ref()
+                .is_some_and(|e| e.awaiting_confirmation()),
+            _ => false,
+        };
+        if changed_fields || dirty {
+            self.status = "当前页面有未保存的修改。请先保存，或使用页面中的取消操作确认放弃，再切换管理分组。".into();
+            return self.render();
+        }
+        self.clear_profile_preview();
+        self.suspend_https();
+        if self.screen == Screen::Web {
+            self.leave_web();
+        }
+        self.navigation_group = Some(group);
+        self.screen = Screen::Home;
+        self.status.clear();
+        if group == 0 {
+            self.event(Event::Submit(TO_DISPLAY, FormData::new()))
+        } else {
+            self.render()
+        }
     }
     fn render(&self) -> std::result::Result<(), String> {
         window_registry::render(&self.window, self.screen, &self.view())
@@ -3397,6 +3598,9 @@ impl App {
                     self.lock();
                     return self.render();
                 }
+                if let Some(group) = admin_navigation_index(action) {
+                    return self.navigate_admin_group(group, data);
+                }
                 if !self.stopping {
                     if let Some(handler) = settings_registry::submit_handler(self.screen, true)? {
                         return handler(self, action, data);
@@ -3743,7 +3947,7 @@ impl App {
                     .as_ref()
                     .filter(|e| e.owner() == lease.principal_id())
                 {
-                    match editor.percent_preview() {
+                    match editor.draft_preview() {
                         Ok(Some(command)) => {
                             self.dispatch_profile_command(command)?;
                             self.render()?;
@@ -3875,6 +4079,16 @@ impl App {
             C::Stay => {
                 self.clear_profile_preview();
                 self.status.clear();
+                if self
+                    .profiles
+                    .as_ref()
+                    .is_some_and(|editor| editor.editing_canvas())
+                {
+                    self.percent_preview_due = Some((
+                        Instant::now() + Duration::from_millis(150),
+                        Screen::Profiles,
+                    ));
+                }
             }
             C::Close => {
                 self.clear_profile_preview();
@@ -4092,6 +4306,7 @@ impl App {
         if editor.owner() != owner {
             return Ok(());
         }
+        let properties = editor.node_properties_open();
         if let Ok(data) = self.window.draft_nonsecret() {
             editor.suspend(data);
         }
@@ -4107,7 +4322,16 @@ impl App {
                     Err(message) => self.status = message,
                 }
             }
-            Ok(()) => self.status.clear(),
+            Ok(()) => {
+                self.status.clear();
+                if properties {
+                    self.clear_profile_preview();
+                    self.percent_preview_due = Some((
+                        Instant::now() + Duration::from_millis(150),
+                        Screen::Profiles,
+                    ));
+                }
+            }
         }
         self.render()?;
         self.sync_layout_selection()
@@ -4161,6 +4385,10 @@ impl App {
                 } else {
                     String::new()
                 };
+                self.percent_preview_due = Some((
+                    Instant::now() + Duration::from_millis(150),
+                    Screen::Profiles,
+                ));
             }
             L::Subject {
                 key,
@@ -4175,6 +4403,10 @@ impl App {
                 } else {
                     String::new()
                 };
+                self.percent_preview_due = Some((
+                    Instant::now() + Duration::from_millis(150),
+                    Screen::Profiles,
+                ));
             }
             L::Preview(preview) => {
                 if preview.sequence != self.preview_sequence {
@@ -5115,7 +5347,17 @@ impl App {
             .ok_or("显示设置草稿不可用")?
             .handle(action, data)
         {
-            Ok(display_editor::Command::Stay) => self.status.clear(),
+            Ok(display_editor::Command::Stay) => {
+                self.status.clear();
+                if self
+                    .display
+                    .as_ref()
+                    .is_some_and(|editor| editor.percent_preview_available())
+                {
+                    self.percent_preview_due =
+                        Some((Instant::now() + Duration::from_millis(150), Screen::Display));
+                }
+            }
             Ok(display_editor::Command::RefreshMonitors) => {
                 self.refresh_display_monitors();
             }
@@ -6004,6 +6246,8 @@ impl App {
                         ));
                         self.refresh_display_monitors();
                         self.screen = Screen::Display;
+                        self.percent_preview_due =
+                            Some((Instant::now() + Duration::from_millis(150), Screen::Display));
                     }
                 }
                 Ok(Outcome::DisplayPreview {
@@ -6549,6 +6793,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         state: Arc::new(IdentityState::default()),
         lease: None,
         screen: Screen::Starting,
+        navigation_group: None,
         status: String::new(),
         desktop_notice: String::new(),
         public_material_notice: None,
@@ -7633,6 +7878,62 @@ fn schedule_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(),
 mod tests {
     use super::*;
     pub(super) static SERIAL: Mutex<()> = Mutex::new(());
+    #[test]
+    fn administrator_navigation_uses_real_groups_and_preserves_unsaved_display() {
+        let _serial = SERIAL.lock().unwrap();
+        let (scratch, mut app) = ready_management();
+        let until = Instant::now() + Duration::from_secs(90);
+        for (group, expected) in [
+            (1, TO_SCHEDULE),
+            (2, TO_AUTOSTART),
+            (3, TO_BACKUP),
+            (4, TO_ACCOUNTS),
+        ] {
+            voice_management_probe::submit(&mut app, ADMIN_NAVIGATION[group], &[], until).unwrap();
+            assert!(app.screen == Screen::Home);
+            let view = app.view();
+            assert_eq!(
+                view.actions
+                    .iter()
+                    .filter(|action| admin_navigation_index(action.id).is_some())
+                    .count(),
+                5
+            );
+            assert!(view
+                .actions
+                .iter()
+                .any(|action| action.id == expected && action.enabled));
+        }
+        voice_management_probe::submit(&mut app, ADMIN_NAVIGATION[0], &[], until).unwrap();
+        assert!(app.screen == Screen::Display);
+        let revision = app.display.as_ref().unwrap().settings.revision;
+        voice_management_probe::submit(
+            &mut app,
+            ADMIN_NAVIGATION[4],
+            &[(display_editor::LABEL, "尚未保存的倒计时名称")],
+            until,
+        )
+        .unwrap();
+        assert!(app.screen == Screen::Display);
+        assert!(app.status.contains("请先保存"));
+        let editor = app.display.as_ref().unwrap();
+        assert!(editor.has_unsaved_changes());
+        assert_eq!(editor.settings.revision, revision);
+        assert!(editor.view("", false).fields.iter().any(|field| field.id
+            == display_editor::LABEL
+            && field.value == "尚未保存的倒计时名称"));
+        app.lock();
+        assert!(app
+            .view()
+            .actions
+            .iter()
+            .all(|action| admin_navigation_index(action.id).is_none()));
+        let locked = app.screen;
+        app.navigate_admin_group(2, FormData::new()).unwrap();
+        assert!(app.screen == locked);
+        drain(app);
+        drop(scratch);
+    }
     #[test]
     fn administrator_transfer_native_review_and_lost_result_query_do_not_restore_management() {
         let _serial = SERIAL.lock().unwrap();

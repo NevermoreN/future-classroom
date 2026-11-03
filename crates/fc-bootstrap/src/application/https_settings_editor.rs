@@ -194,6 +194,9 @@ impl Editor {
                 self.draft != Draft::from_state(s)
             })
     }
+    pub(super) fn navigation_pending(&self) -> bool {
+        self.dirty() || self.original.is_some() || self.confirmation.is_some()
+    }
     pub(super) fn has_unknown(&self) -> bool {
         self.original.as_ref().is_some_and(|o| o.accepted)
     }

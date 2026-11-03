@@ -163,7 +163,7 @@ checksum = "7360491ce676a36bf9bb3c56c1aa791658183a54d2744120f27285738d90465a"
 
 [[package]]
 name = "fc-application"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fc-domain",
  "fc-ports",
@@ -171,7 +171,7 @@ dependencies = [
 
 [[package]]
 name = "fc-audio"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fc-domain",
  "fc-ports",
@@ -179,7 +179,7 @@ dependencies = [
 
 [[package]]
 name = "fc-bootstrap"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fc-application",
  "fc-audio",
@@ -196,11 +196,11 @@ dependencies = [
 
 [[package]]
 name = "fc-domain"
-version = "0.1.1"
+version = "0.1.2"
 
 [[package]]
 name = "fc-materials"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "crc32fast",
  "fc-domain",
@@ -213,14 +213,14 @@ dependencies = [
 
 [[package]]
 name = "fc-ports"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fc-domain",
 ]
 
 [[package]]
 name = "fc-presentation"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fc-domain",
  "fc-ports",
@@ -229,7 +229,7 @@ dependencies = [
 
 [[package]]
 name = "fc-protocol"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fc-domain",
  "fc-ports",
@@ -240,7 +240,7 @@ dependencies = [
 
 [[package]]
 name = "fc-runtime"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fc-domain",
  "fc-ports",
@@ -248,7 +248,7 @@ dependencies = [
 
 [[package]]
 name = "fc-security"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fc-domain",
  "fc-ports",
@@ -261,7 +261,7 @@ dependencies = [
 
 [[package]]
 name = "fc-storage"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fc-domain",
  "fc-ports",
@@ -273,7 +273,7 @@ dependencies = [
 
 [[package]]
 name = "fc-windows"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "fc-domain",
  "fc-ports",
