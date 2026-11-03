@@ -536,25 +536,54 @@ fn paint_grid(hwnd: HWND, state: &GridState) {
                 }
             }
         }
-        let group = Brush(CreateSolidBrush(COLORREF(0x00f6e9df)));
-        let chosen = Brush(CreateSolidBrush(COLORREF(0x00ffe2c7)));
-        let border = Brush(CreateSolidBrush(COLORREF(0x00cfcfcf)));
-        let white = HBRUSH(GetStockObject(WHITE_BRUSH).0);
-        let _ = FillRect(dc, &rect, white);
+        let colors = super::theme::palette();
+        let group = Brush(CreateSolidBrush(colors.soft));
+        let chosen = Brush(CreateSolidBrush(colors.selected));
+        let border = Brush(CreateSolidBrush(colors.border));
+        let surface = Brush(CreateSolidBrush(colors.surface));
+        let _ = FillRect(dc, &rect, surface.0);
         let _ = SetBkMode(dc, TRANSPARENT);
-        let _ = SetTextColor(
-            dc,
-            COLORREF(if state.enabled.get() {
-                0x00202020
+        let draw = |text: &str, mut bounds: RECT, brush: HBRUSH, ink: COLORREF, selected: bool| {
+            let _ = FillRect(dc, &bounds, if selected { surface.0 } else { brush });
+            if selected {
+                // Paint a small rounded selection inset without changing hit areas
+                // or leaving any selected GDI object attached to the shared DC.
+                let old_pen = SelectObject(dc, GetStockObject(DC_PEN));
+                let old_brush = SelectObject(dc, brush.into());
+                let old_pen_color = SetDCPenColor(dc, colors.primary);
+                let _ = RoundRect(
+                    dc,
+                    bounds.left + 1,
+                    bounds.top + 1,
+                    bounds.right - 1,
+                    bounds.bottom - 1,
+                    10,
+                    10,
+                );
+                let _ = SetDCPenColor(dc, old_pen_color);
+                let _ = SelectObject(dc, old_brush);
+                let _ = SelectObject(dc, old_pen);
             } else {
-                0x00808080
-            }),
-        );
-        let draw = |text: &str, mut bounds: RECT, brush: HBRUSH| {
-            let _ = FillRect(dc, &bounds, brush);
-            let _ = FrameRect(dc, &bounds, border.0);
-            bounds.left += 6;
-            bounds.right -= 6;
+                // Light row dividers match the web cards without a heavy cell box.
+                let _ = FillRect(
+                    dc,
+                    &RECT {
+                        top: bounds.bottom - 1,
+                        ..bounds
+                    },
+                    border.0,
+                );
+            }
+            let _ = SetTextColor(
+                dc,
+                if state.enabled.get() {
+                    ink
+                } else {
+                    colors.disabled
+                },
+            );
+            bounds.left += 10;
+            bounds.right -= 10;
             bounds.top += 3;
             let mut text: Vec<u16> = text.encode_utf16().collect();
             // DrawTextW may inspect its pointer even for cchText=0; an empty
@@ -595,6 +624,8 @@ fn paint_grid(hwnd: HWND, state: &GridState) {
                     bottom: 34,
                 },
                 group.0,
+                colors.muted,
+                false,
             );
         }
         for (index, (row, (top, heading))) in grid.rows.iter().zip(row_positions(&grid)).enumerate()
@@ -609,6 +640,8 @@ fn paint_grid(hwnd: HWND, state: &GridState) {
                         bottom: heading + 25,
                     },
                     group.0,
+                    colors.muted,
+                    false,
                 )
             }
             for column in 0..grid.columns.len() {
@@ -632,6 +665,7 @@ fn paint_grid(hwnd: HWND, state: &GridState) {
                 } else {
                     &row.cells[if row.merged { 0 } else { column - 1 }]
                 };
+                let selected = state.selected.get() == Some((index, column));
                 draw(
                     text,
                     RECT {
@@ -640,11 +674,13 @@ fn paint_grid(hwnd: HWND, state: &GridState) {
                         right,
                         bottom: top + 48,
                     },
-                    if state.selected.get() == Some((index, column)) {
-                        chosen.0
+                    if selected { chosen.0 } else { surface.0 },
+                    if selected {
+                        colors.selected_text
                     } else {
-                        white
+                        colors.text
                     },
+                    selected,
                 );
             }
         }

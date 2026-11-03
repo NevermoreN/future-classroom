@@ -2,12 +2,16 @@
 use fc_presentation::workbench::{
     admin_navigation_index, ActionId, Event, FieldId, FieldKind, FormData, View, WindowRole,
 };
+#[path = "workbench/chrome.rs"]
+mod chrome;
 #[path = "workbench/color_picker.rs"]
 mod color_picker;
 #[path = "workbench/preview.rs"]
 mod preview;
 #[path = "workbench/registry.rs"]
 mod registry;
+#[path = "workbench/theme.rs"]
+mod theme;
 #[path = "workbench/widgets.rs"]
 mod widgets;
 pub use preview::{LayoutPreview, PreviewNode};
@@ -150,7 +154,7 @@ impl Drop for ClassLease {
 struct Font(HFONT);
 impl Font {
     fn new() -> Result<Self> {
-        Self::sized(19, FW_NORMAL.0 as i32)
+        Self::sized(17, FW_NORMAL.0 as i32)
     }
     fn sized(size: i32, weight: i32) -> Result<Self> {
         // SAFETY: fixed owned font; used only on this UI thread, deleted after controls.
@@ -265,6 +269,7 @@ struct State {
     capturing: Cell<bool>,
     error: Cell<i32>,
     scroll: Cell<i32>,
+    surface: Cell<RECT>,
     presented_secrets: RefCell<Vec<FieldId>>,
     grid_cell: Cell<Option<(usize, usize)>>,
     lock_action: Cell<Option<ActionId>>,
@@ -285,6 +290,7 @@ impl State {
             capturing: Cell::new(false),
             error: Cell::new(0),
             scroll: Cell::new(0),
+            surface: Cell::new(RECT::default()),
             presented_secrets: RefCell::new(Vec::new()),
             grid_cell: Cell::new(None),
             lock_action: Cell::new(None),
@@ -743,7 +749,7 @@ impl Window {
     fn create_native() -> Result<Self> {
         let class = ClassLease::acquire()?;
         let font = Font::new()?;
-        let heading_font = Font::sized(24, FW_SEMIBOLD.0 as i32)?;
+        let heading_font = Font::sized(26, FW_SEMIBOLD.0 as i32)?;
         let mut window = Self {
             hwnd: HWND::default(),
             role: Cell::new(WindowRole::Workbench),
@@ -769,7 +775,7 @@ impl Window {
                 WS_EX_APPWINDOW,
                 w!("FutureClassroom.Workbench.v1"),
                 w!("未来教室工作台"),
-                WS_OVERLAPPEDWINDOW | WS_VSCROLL,
+                WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_CLIPCHILDREN,
                 work.left + (work.right - work.left - width) / 2,
                 work.top + (work.bottom - work.top - height) / 2,
                 width,
@@ -1139,6 +1145,7 @@ impl Window {
                     native_id,
                 )?
             };
+            chrome::field(hwnd, matches!(field.kind, FieldKind::Choice(_)))?;
             // SAFETY: exact owned Edit HWND and bounded numeric control messages.
             unsafe {
                 let _ = SendMessageW(hwnd, EM_SETLIMITTEXT, Some(WPARAM(field.max_utf16)), None);
@@ -1207,6 +1214,7 @@ impl Window {
                 view.busy,
             )?);
         }
+        let mut primary = true;
         for (index, action) in view.actions.iter().enumerate() {
             let native_id = ACTION_ID_BASE + index as u16;
             let hwnd = self.child(
@@ -1221,6 +1229,9 @@ impl Window {
                     } as u32),
                 native_id,
             )?;
+            let navigation = admin_navigation_index(action.id).is_some();
+            chrome::button(hwnd, primary && !navigation, navigation)?;
+            primary &= navigation;
             controls.actions.push(ActionBinding {
                 id: action.id,
                 hwnd,
@@ -2018,6 +2029,12 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
     let body_top = 78 + nav_rows * 52;
     let body_bottom = (viewport - footer).max(body_top + 1);
     let body_height = body_bottom - body_top;
+    state.surface.set(RECT {
+        left: content_x - 12,
+        top: body_top - 6,
+        right: content_x + width + 12,
+        bottom: body_bottom,
+    });
     let heading = state.controls.borrow().heading;
     let mut fixed = vec![(heading, 24, 20, full_width, 32)];
     for (index, action) in navigation.iter().enumerate() {
@@ -2204,7 +2221,7 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
                 return Err(Error::from_thread());
             }
         }
-        let _ = InvalidateRect(Some(hwnd), None, false);
+        let _ = InvalidateRect(Some(hwnd), None, true);
     }
     Ok(())
 }
@@ -2241,23 +2258,69 @@ unsafe extern "system" fn window_proc(
                         let mut bounds = RECT::default();
                         if GetClientRect(hwnd, &mut bounds).is_ok() {
                             let brush = HBRUSH(GetStockObject(DC_BRUSH).0);
-                            let _ = SetDCBrushColor(dc, COLORREF(0x00fffaf6));
+                            let colors = theme::palette();
+                            let _ = SetDCBrushColor(dc, colors.background);
                             let _ = FillRect(dc, &bounds, brush);
+                            let surface = state.surface.get();
+                            if surface.bottom > surface.top {
+                                let saved = SaveDC(dc);
+                                let _ = SelectObject(dc, GetStockObject(DC_BRUSH));
+                                let _ = SelectObject(dc, GetStockObject(DC_PEN));
+                                let _ = SetDCBrushColor(dc, colors.surface);
+                                let _ = SetDCPenColor(dc, colors.border);
+                                let _ = RoundRect(
+                                    dc,
+                                    surface.left,
+                                    surface.top,
+                                    surface.right,
+                                    surface.bottom,
+                                    16,
+                                    16,
+                                );
+                                if surface.left > 24 {
+                                    let _ = FillRect(
+                                        dc,
+                                        &RECT {
+                                            left: 0,
+                                            top: 64,
+                                            right: surface.left - 12,
+                                            bottom: bounds.bottom,
+                                        },
+                                        brush,
+                                    );
+                                }
+                                let _ = FillRect(
+                                    dc,
+                                    &RECT {
+                                        left: 0,
+                                        top: surface.bottom + 2,
+                                        right: bounds.right,
+                                        bottom: bounds.bottom,
+                                    },
+                                    brush,
+                                );
+                                let _ = RestoreDC(dc, saved);
+                            }
                             bounds.bottom = 64;
-                            let _ = SetDCBrushColor(dc, COLORREF(0x00ffffff));
+                            let _ = SetDCBrushColor(dc, colors.surface);
                             let _ = FillRect(dc, &bounds, brush);
                         }
                         return LRESULT(1);
                     }
-                    WM_CTLCOLORSTATIC => {
+                    WM_CTLCOLORSTATIC | WM_CTLCOLOREDIT | WM_CTLCOLORLISTBOX => {
                         let dc = HDC(wparam.0 as *mut _);
                         let heading = state.controls.try_borrow().ok().map(|c| c.heading);
                         let is_heading = heading == Some(HWND(lparam.0 as *mut _));
-                        let color = COLORREF(if is_heading { 0x00ffffff } else { 0x00fffaf6 });
+                        let colors = theme::palette();
+                        let color = colors.surface;
                         let _ = SetBkColor(dc, color);
                         let _ = SetTextColor(
                             dc,
-                            COLORREF(if is_heading { 0x0045200e } else { 0x00534433 }),
+                            if is_heading || message != WM_CTLCOLORSTATIC {
+                                colors.text
+                            } else {
+                                colors.muted
+                            },
                         );
                         let _ = SetDCBrushColor(dc, color);
                         return LRESULT(GetStockObject(DC_BRUSH).0 as isize);
