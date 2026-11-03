@@ -2661,6 +2661,31 @@ impl App {
             row("当前读数", "共享后台队列", workers),
             row(
                 "当前读数",
+                "桌面绘制方式",
+                m.render_capability.label().into(),
+            ),
+            row(
+                "当前读数",
+                "系统显示环境",
+                m.environment.map_or_else(
+                    || "尚未读取，请手动刷新。".into(),
+                    |e| {
+                        let state = |v: Option<bool>| match v {
+                            Some(true) => "开启",
+                            Some(false) => "关闭",
+                            None => "读取失败",
+                        };
+                        format!(
+                            "合成API报告：{}；远程会话：{}；高对比：{}。",
+                            state(e.dwm_composition),
+                            if e.remote_session { "是" } else { "否" },
+                            state(e.high_contrast)
+                        )
+                    },
+                ),
+            ),
+            row(
+                "当前读数",
                 "渲染器组件及表面",
                 format!("组件 {}；绘图表面 {}", m.components, m.surfaces),
             ),
@@ -2693,6 +2718,14 @@ impl App {
             ("资源范围", "DIB及渲染器暂存不是全进程内存。"),
             ("性能范围", "未测量CPU，不能据此认定性能达标。"),
             ("显示策略", "打开工作台隐藏桌面；窗口为0不代表故障。"),
+            (
+                "绘制方式",
+                "使用基础静态玻璃；系统合成开启不表示已启用额外模糊效果。",
+            ),
+            (
+                "合成报告",
+                "报告受Windows应用兼容声明影响；高对比状态另行读取。",
+            ),
             ("记录范围", "最多16条，仅本进程内存，非持久审计。"),
             ("耗时范围", "耗时包含排队、执行和界面取回等待。"),
             ("结果含义", "后台返回不等于业务已提交或效果已完成。"),

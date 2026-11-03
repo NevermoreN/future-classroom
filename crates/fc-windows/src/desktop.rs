@@ -30,7 +30,10 @@ use windows::{
     core::{w, Error, Result, BOOL},
     Win32::{
         Foundation::*,
-        Graphics::{Direct2D::Common::*, Direct2D::*, DirectWrite::*, Dxgi::Common::*, Gdi::*},
+        Graphics::{
+            Direct2D::Common::*, Direct2D::*, DirectWrite::*, Dwm::DwmIsCompositionEnabled,
+            Dxgi::Common::*, Gdi::*,
+        },
         System::{LibraryLoader::*, RemoteDesktop::*, StationsAndDesktops::*, Threading::*},
         UI::{
             Accessibility::{HCF_HIGHCONTRASTON, HIGHCONTRASTW},
@@ -260,6 +263,10 @@ pub struct PublicationGuard<'a> {
 }
 #[derive(Clone, Debug, Default)]
 pub struct DesktopMetrics {
+    pub render_capability: RenderCapability,
+    /// Fresh only in the explicit manual diagnostic snapshot. Ordinary render
+    /// counters do not poll the system or claim a current environment sample.
+    pub environment: Option<RenderEnvironment>,
     pub components: usize,
     pub surfaces: usize,
     pub dib_bytes: u64,
@@ -280,6 +287,24 @@ pub struct DesktopMetrics {
     pub scratch_peak_bytes: u64,
     pub partial_uploads: u64,
     pub pages: Vec<PageMetrics>,
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum RenderCapability {
+    #[default]
+    BasicGlass,
+}
+impl RenderCapability {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::BasicGlass => "BASIC_GLASS（静态玻璃材质）",
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct RenderEnvironment {
+    pub dwm_composition: Option<bool>,
+    pub remote_session: bool,
+    pub high_contrast: Option<bool>,
 }
 #[derive(Clone, Debug)]
 pub struct PageMetrics {
@@ -1166,7 +1191,17 @@ impl DesktopRenderer {
         self.metrics.clone()
     }
     pub fn diagnostics(&self) -> DesktopMetrics {
-        self.last_metrics()
+        let mut metrics = self.last_metrics();
+        // Read-only sampling happens on manual diagnostics, even while the
+        // desktop is hidden. A failed DWM query cannot disable the BASIC route.
+        metrics.environment = Some(RenderEnvironment {
+            dwm_composition: unsafe { DwmIsCompositionEnabled() }
+                .ok()
+                .map(|v| v.as_bool()),
+            remote_session: unsafe { GetSystemMetrics(SM_REMOTESESSION) } != 0,
+            high_contrast: sample_system_ink().ok().map(|ink| ink.is_some()),
+        });
+        metrics
     }
     pub fn hide(&mut self) {
         if let Some(tree) = &self.tree {
@@ -3010,6 +3045,59 @@ mod tests {
             public_calendar_unverified: true,
             lesson_control: None,
         }
+    }
+    #[test]
+    fn manual_render_capability_diagnostics_sample_system_without_publishing_or_invalidating_cards()
+    {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let foreground = unsafe { GetForegroundWindow() };
+        let mut r = DesktopRenderer::new_hidden().unwrap();
+        let initial = r.diagnostics();
+        eprintln!("RENDER_ENVIRONMENT_INITIAL={:?}", initial.environment);
+        assert_eq!(initial.render_capability, RenderCapability::BasicGlass);
+        assert!(initial.environment.is_some());
+        assert_eq!(initial.dib_bytes, 0);
+        assert_eq!(initial.drawn_frames, 0);
+        assert!(
+            r.system_colors_dirty,
+            "diagnostics do not consume the render sample"
+        );
+        let now = crate::native::local_now().unwrap();
+        let scene = scene(now);
+        let (_publisher, gate) = authority();
+        assert_eq!(
+            r.present(&scene, now, &guard(&gate, scene.generation))
+                .unwrap(),
+            PresentOutcome::Offscreen
+        );
+        let before = r.last_metrics();
+        let pixels: Vec<_> = r
+            .cards
+            .iter()
+            .map(|c| c.surface.dib.pixels().to_vec())
+            .collect();
+        for _ in 0..2 {
+            let observed = r.diagnostics();
+            eprintln!("RENDER_ENVIRONMENT_MANUAL={:?}", observed.environment);
+            assert_eq!(observed.render_capability, RenderCapability::BasicGlass);
+            assert!(observed.environment.is_some());
+            assert_eq!(observed.drawn_frames, before.drawn_frames);
+            assert_eq!(observed.uploaded_frames, before.uploaded_frames);
+            assert_eq!(observed.dib_bytes, before.dib_bytes);
+            assert_eq!(observed.input_regions, before.input_regions);
+            assert_eq!(observed.visible_windows, 0);
+            assert!(!r.system_colors_dirty);
+        }
+        for (card, pixels) in r.cards.iter().zip(pixels) {
+            assert_eq!(card.surface.dib.pixels(), pixels);
+        }
+        assert!(
+            r.last_metrics().environment.is_none(),
+            "ordinary counters do not claim fresh system facts"
+        );
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
     }
     #[test]
     fn monitor_preference_primary_fallback_and_negative_geometry_remain_hidden() {

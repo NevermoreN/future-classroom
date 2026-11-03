@@ -605,9 +605,11 @@ unsafe extern "system" fn window_proc(
                         return LRESULT(0);
                     }
                     WM_TIMECHANGE => state.hint(HostHints::TIME_CHANGED),
-                    WM_DISPLAYCHANGE | WM_SETTINGCHANGE | WM_SYSCOLORCHANGE | WM_THEMECHANGED => {
-                        state.hint(HostHints::DISPLAY_CHANGED)
-                    }
+                    WM_DISPLAYCHANGE
+                    | WM_SETTINGCHANGE
+                    | WM_SYSCOLORCHANGE
+                    | WM_THEMECHANGED
+                    | WM_DWMCOMPOSITIONCHANGED => state.hint(HostHints::DISPLAY_CHANGED),
                     WM_POWERBROADCAST => {
                         let event = match wparam.0 as u32 {
                             PBT_APMSUSPEND => HostHints::SUSPENDING.0,
