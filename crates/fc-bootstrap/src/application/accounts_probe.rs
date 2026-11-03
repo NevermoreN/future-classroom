@@ -214,8 +214,7 @@ pub(super) fn manage(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
             submit(app, e::RELOAD, &[])?;
         }
         19 => {
-            if app.native_unknown
-                || app.screen != Screen::Accounts
+            if app.screen != Screen::Accounts
                 || !app
                     .state
                     .account_by_login("probe-teacher")
@@ -223,9 +222,13 @@ pub(super) fn manage(app: &mut App, stage: &mut u8) -> std::result::Result<(), S
             {
                 return Err("引用拒绝后未明确读回当前账号状态".into());
             }
-            // The previous disable was definitely rejected. Choose the next
-            // account only after a fresh current read; no original receipt is
-            // inferred and no rejected command is replayed.
+            // A current directory read does not settle the original receipt.
+            // Use the real explicit end-query control before a new mutation;
+            // keep this stage until that asynchronous read has completed.
+            if app.native_unknown {
+                return submit(app, e::END_RESULT_QUERY, &[]);
+            }
+            // No original receipt is inferred and no rejected command replayed.
             select(app, "probe-admin")?;
         }
         20 => submit(app, e::EDIT, &[])?,
