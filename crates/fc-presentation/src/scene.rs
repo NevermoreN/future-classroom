@@ -113,6 +113,7 @@ pub enum CardContent {
     Homework(Vec<HomeworkEntry>),
     Recess {
         deadline: LocalDateTime,
+        until_next_course: bool,
     },
     MaterialsUnavailable,
     Materials(Box<MaterialListContent>),
@@ -227,6 +228,13 @@ pub fn clock_hands(clock: ClockContent, now: LocalDateTime) -> ClockHands {
 pub fn recess_label(deadline: LocalDateTime, now: LocalDateTime) -> Option<String> {
     (deadline.date == now.date && now < deadline)
         .then(|| crate::countdown_label(deadline.second_of_day() - now.second_of_day()))
+}
+pub fn recess_target_label(until_next_course: bool) -> &'static str {
+    if until_next_course {
+        "距下节上课"
+    } else {
+        "距本次休息结束"
+    }
 }
 
 /// Shared RGB resolver; input RGB is never mutated and alpha is independent.
@@ -597,7 +605,11 @@ pub fn build_scene_with_content(
             .is_some_and(|c| c.visible)
     {
         match &lesson {
-            LessonState::Recess { deadline, .. } if *deadline > now => Some(*deadline),
+            LessonState::Recess {
+                deadline,
+                until_next_course,
+                ..
+            } if *deadline > now => Some((*deadline, *until_next_course)),
             _ => None,
         }
     } else {
@@ -687,8 +699,14 @@ pub fn build_scene_with_content(
     } else {
         work
     };
-    if let Some(deadline) = recess {
-        entries.push((ComponentKind::Recess, CardContent::Recess { deadline }));
+    if let Some((deadline, until_next_course)) = recess {
+        entries.push((
+            ComponentKind::Recess,
+            CardContent::Recess {
+                deadline,
+                until_next_course,
+            },
+        ));
     }
     // Resolve every active widget by its immutable scoped identity. Public
     // outlet fallback is never hydrated while an exact subject tree replaces it.

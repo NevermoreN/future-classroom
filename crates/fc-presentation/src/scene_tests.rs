@@ -323,9 +323,15 @@ fn recess_and_static_scene_expire_at_actual_second_and_date() {
         .iter()
         .find(|c| c.kind == ComponentKind::Recess)
         .unwrap();
-    let CardContent::Recess { deadline } = card.content else {
+    let CardContent::Recess {
+        deadline,
+        until_next_course,
+    } = card.content
+    else {
         panic!()
     };
+    assert!(until_next_course);
+    assert_eq!(recess_target_label(until_next_course), "距下节上课");
     assert_eq!(
         recess_label(deadline, facts.captured_at),
         Some("05:00".into())
@@ -335,6 +341,56 @@ fn recess_and_static_scene_expire_at_actual_second_and_date() {
     assert!(!view.valid_at(LocalDateTime::new(date(31), 0).unwrap()));
     assert!(!view.valid_at(now(8 * 3600 + 44 * 60)));
     facts.captured_at = now(8 * 3600 + 50 * 60);
+    assert!(!scene(&facts)
+        .cards
+        .iter()
+        .any(|c| c.kind == ComponentKind::Recess));
+    // An explicit break ends before an activity, while a later course still
+    // makes it a valid same-session recess. Do not advertise the activity as
+    // the start of the next lesson.
+    let rows = &mut facts.schedule.semesters[0].semester.tables[0].rows;
+    for (id, begin, end, kind) in [
+        (12, 40, 45, RowKind::Rest(RestPurpose::Recess)),
+        (13, 45, 50, RowKind::Activity),
+    ] {
+        rows.push(TimetableRow {
+            id: RowId::new(id).unwrap(),
+            logical_key: LogicalRowKey::new(id + 10).unwrap(),
+            group: DayGroup::Morning,
+            kind,
+            range: MinuteRange::new(
+                Minute::from_hm(8, begin).unwrap(),
+                Minute::from_hm(8, end).unwrap(),
+            )
+            .unwrap(),
+            enabled_days: [true; 7],
+            courses: std::array::from_fn(|_| None),
+        });
+    }
+    rows.sort_by_key(|r| r.range.begin);
+    facts.schedule.update_id_high_water();
+    facts.captured_at = now(8 * 3600 + 42 * 60);
+    let view = scene(&facts);
+    let CardContent::Recess {
+        deadline,
+        until_next_course,
+    } = view
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Recess)
+        .unwrap()
+        .content
+    else {
+        panic!()
+    };
+    assert!(!until_next_course);
+    assert_eq!(recess_target_label(until_next_course), "距本次休息结束");
+    assert_eq!(
+        recess_label(deadline, facts.captured_at).as_deref(),
+        Some("03:00")
+    );
+    assert!(!view.valid_at(now(8 * 3600 + 45 * 60)));
+    facts.captured_at = now(8 * 3600 + 45 * 60);
     assert!(!scene(&facts)
         .cards
         .iter()

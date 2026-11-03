@@ -161,7 +161,7 @@ fn headless_input(rect: Rect) -> Result<InputStrip> {
         state: state(),
     })
 }
-fn render_reserve(card: &Card) -> Result<u64> {
+pub(super) fn render_reserve(card: &Card) -> Result<u64> {
     std::iter::once(&card.surface)
         .chain(card.dynamic.iter())
         .chain(card.input.iter().map(|i| &i.surface))
@@ -174,6 +174,7 @@ fn make_card(
     scene: &SceneSnapshot,
     headless_leaf: bool,
     total: &mut u64,
+    max_dynamic_bytes: u64,
 ) -> Result<Card> {
     validate_card(card)?;
     let note = if card.kind == ComponentKind::Materials {
@@ -190,6 +191,9 @@ fn make_card(
         scene.public_calendar_unverified,
         note,
     )?;
+    let recess_regions = matches!(card.content, CardContent::Recess { .. })
+        .then(|| recess_regions(&renderer.graphics, card.rect, max_dynamic_bytes))
+        .transpose()?;
     let dynamic_rect = match card.content {
         CardContent::Clock(_) => Some(Rect {
             x: card.rect.x + 16.,
@@ -197,15 +201,7 @@ fn make_card(
             width: card.rect.width - 32.,
             height: card.rect.height - 54.,
         }),
-        CardContent::Recess { .. } => {
-            let width = (card.rect.width - 32.).min(560.);
-            Some(Rect {
-                x: card.rect.x + (card.rect.width - width) / 2.,
-                y: card.rect.y + (card.rect.height - 100.) / 2.,
-                width,
-                height: 100.,
-            })
-        }
+        CardContent::Recess { .. } => recess_regions.map(|r| r.digits),
         _ => None,
     };
     let input_rect = if matches!(
@@ -243,16 +239,7 @@ fn make_card(
     } else {
         None
     };
-    let static_rect = if matches!(card.content, CardContent::Recess { .. }) {
-        Rect {
-            x: card.rect.x,
-            y: card.rect.y,
-            width: card.rect.width.min(560.),
-            height: 48.,
-        }
-    } else {
-        card.rect
-    };
+    let static_rect = recess_regions.map_or(card.rect, |r| r.heading);
     for r in std::iter::once(static_rect)
         .chain(dynamic_rect)
         .chain(input_rect)
@@ -315,6 +302,7 @@ fn make_card(
         surface,
         backdrop,
         dynamic,
+        recess_regions,
         clock_tick: None,
     })
 }
@@ -573,6 +561,39 @@ fn blend(dst: &mut [u8], area: Area, src: &[u8], source: Area, clip: Area, opaci
         }
     }
 }
+fn group_scratch_reserve(tree: &ScenePaintTree, root: usize) -> Result<u64> {
+    let patch = Area::rect(group_bounds(tree, root)?);
+    let mut active = vec![None; tree.nodes.len()];
+    let mut peak = 0;
+    for (index, node) in tree.nodes.iter().enumerate() {
+        if !descendant(tree, index, root) {
+            continue;
+        }
+        let inherited = if index == root {
+            0
+        } else {
+            let Some(bytes) = parent_index(tree, index)?.and_then(|p| active[p]) else {
+                continue;
+            };
+            bytes
+        };
+        let clip = patch.intersection(Area::clip(node.clip));
+        if node.local_opacity == 0. || clip.empty() {
+            continue;
+        }
+        let live = inherited
+            + if node.local_opacity < 1. {
+                clip.bytes()?
+            } else {
+                0
+            };
+        active[index] = Some(live);
+        peak = peak.max(live);
+    }
+    // compose_group's root patch coexists only with one ancestor chain of
+    // temporary opacity groups. Sibling scratch is released before the next.
+    Ok(patch.bytes()? + peak)
+}
 fn contents(
     t: &TreeRenderer,
     index: usize,
@@ -819,57 +840,6 @@ pub(super) fn present(
         let mut total = 0;
         let mut target_reserve = 0;
         let mut special = Vec::new();
-        for (i, card) in scene.cards.iter().enumerate() {
-            let recess = matches!(card.content, CardContent::Recess { .. });
-            if recess {
-                special.push(i);
-            }
-            let mut c = make_card(renderer, card, scene, !recess, &mut total)?;
-            let leaf = source
-                .nodes
-                .iter()
-                .position(|n| n.card_index == Some(i))
-                .ok_or_else(invalid)?;
-            c.subject_backdrop = subject_backdrop(source, leaf, scene.text_tone)?;
-            target_reserve = target_reserve.max(render_reserve(&c)?);
-            if total + target_reserve > DIB_BUDGET {
-                return Err(oom());
-            }
-            render_card(&renderer.graphics, &mut c)?;
-            if recess {
-                scale_dib(&mut c.surface.dib, card.component_alpha);
-            }
-            renderer.metrics.drawn_frames += 1;
-            renderer.metrics.text_layouts += c.body.blocks.len() as u64;
-            renderer.cards.push(c);
-        }
-        if let Some(control) = &scene.lesson_control {
-            special.push(renderer.cards.len());
-            let card = SceneCard {
-                content_display_ref: None,
-                content_identity: None,
-                kind: ComponentKind::Schedule,
-                rect: control.rect,
-                font_dip: 16.,
-                component_alpha: 1.,
-                surface_alpha: 0.03,
-                edge_alpha: 0.5,
-                content: CardContent::LessonControl {
-                    caption: control.caption.clone(),
-                    can_change: control.can_change,
-                },
-                page: Default::default(),
-                visible_leaf_limit: 1,
-            };
-            let mut c = make_card(renderer, &card, scene, false, &mut total)?;
-            target_reserve = target_reserve.max(render_reserve(&c)?);
-            if total + target_reserve > DIB_BUDGET {
-                return Err(oom());
-            }
-            render_card(&renderer.graphics, &mut c)?;
-            renderer.cards.push(c);
-            renderer.metrics.drawn_frames += 1;
-        }
         let mut backgrounds = Vec::new();
         for (i, n) in source.nodes.iter().enumerate() {
             if n.glass.is_some() && n.card_index.is_none() {
@@ -891,6 +861,86 @@ pub(super) fn present(
                 dirty: None,
             });
         }
+        for group in &groups {
+            target_reserve = target_reserve.max(group_scratch_reserve(source, group.node)?);
+        }
+        if total + target_reserve > DIB_BUDGET {
+            return Err(oom());
+        }
+        let prepared_control = if let Some(control) = &scene.lesson_control {
+            special.push(scene.cards.len());
+            let card = SceneCard {
+                content_display_ref: None,
+                content_identity: None,
+                kind: ComponentKind::Schedule,
+                rect: control.rect,
+                font_dip: 16.,
+                component_alpha: 1.,
+                surface_alpha: 0.03,
+                edge_alpha: 0.5,
+                content: CardContent::LessonControl {
+                    caption: control.caption.clone(),
+                    can_change: control.can_change,
+                },
+                page: Default::default(),
+                visible_leaf_limit: 1,
+            };
+            let mut c = make_card(renderer, &card, scene, false, &mut total, 0)?;
+            target_reserve = target_reserve.max(render_reserve(&c)?);
+            if total + target_reserve > DIB_BUDGET {
+                return Err(oom());
+            }
+            render_card(&renderer.graphics, &mut c)?;
+            renderer.metrics.drawn_frames += 1;
+            Some(c)
+        } else {
+            None
+        };
+        let order = scene.cards.iter().enumerate();
+        for (i, card) in order
+            .clone()
+            .filter(|(_, c)| !matches!(c.content, CardContent::Recess { .. }))
+            .chain(order.filter(|(_, c)| matches!(c.content, CardContent::Recess { .. })))
+        {
+            let recess = matches!(card.content, CardContent::Recess { .. });
+            if recess {
+                special.push(i);
+            }
+            let max_dynamic_bytes = if recess {
+                recess_dynamic_budget(&renderer.graphics, card.rect, total, target_reserve)?
+            } else {
+                0
+            };
+            let mut c = make_card(
+                renderer,
+                card,
+                scene,
+                !recess,
+                &mut total,
+                max_dynamic_bytes,
+            )?;
+            let leaf = source
+                .nodes
+                .iter()
+                .position(|n| n.card_index == Some(i))
+                .ok_or_else(invalid)?;
+            c.subject_backdrop = subject_backdrop(source, leaf, scene.text_tone)?;
+            target_reserve = target_reserve.max(render_reserve(&c)?);
+            if total + target_reserve > DIB_BUDGET {
+                return Err(oom());
+            }
+            render_card(&renderer.graphics, &mut c)?;
+            if recess {
+                scale_dib(&mut c.surface.dib, card.component_alpha);
+            }
+            renderer.metrics.drawn_frames += 1;
+            renderer.metrics.text_layouts += c.body.blocks.len() as u64;
+            renderer.cards.insert(i.min(renderer.cards.len()), c);
+        }
+        if let Some(control) = prepared_control {
+            renderer.cards.push(control);
+        }
+        special.sort_unstable();
         if total + target_reserve > DIB_BUDGET {
             return Err(oom());
         }
@@ -2206,6 +2256,174 @@ mod additional_tests {
 mod recess_tests {
     use super::*;
     #[test]
+    fn recess_large_digits_fit_both_formats_and_targets_without_repainting_static_glass() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let foreground = unsafe { GetForegroundWindow() };
+        let (_publisher, gate) = super::tests::authority();
+        let mut renderer = DesktopRenderer::new_hidden().unwrap();
+        let mut generation = 0;
+        for tree_mode in [false, true] {
+            for (width, height, seconds, until_next_course) in [
+                (1076., 1048., 120, true),
+                (2996., 2128., 7200, false),
+                (280., 180., 7200, true),
+            ] {
+                generation += 1;
+                let mut scene = super::tests::sample();
+                scene.generation = SceneGeneration::new(generation);
+                let now = scene.captured_at;
+                let rect = Rect {
+                    x: 16.,
+                    y: 16.,
+                    width,
+                    height,
+                };
+                let card = &mut scene.cards[0];
+                card.kind = ComponentKind::Recess;
+                card.rect = rect;
+                card.component_alpha = 1.;
+                card.surface_alpha = 0.03;
+                card.edge_alpha = 0.5;
+                card.content = CardContent::Recess {
+                    deadline: LocalDateTime::new(now.date, seconds).unwrap(),
+                    until_next_course,
+                };
+                let mut node = scene.paint_tree.as_ref().unwrap().nodes[2].clone();
+                node.parent = None;
+                node.rect = rect;
+                node.clip = rect;
+                node.local_opacity = 1.;
+                node.effective_opacity = 1.;
+                node.glass = Some(fc_presentation::scene::PaintGlass {
+                    surface_alpha: 0.03,
+                    edge_alpha: 0.5,
+                });
+                node.widget_kind = Some(fc_domain::layout::WidgetKind::Recess);
+                scene.paint_tree.as_mut().unwrap().nodes = vec![node];
+                if width > 2000. {
+                    // Fixed cards, a following control and group scratch must
+                    // retain their space before the countdown spends its budget.
+                    let template = super::tests::sample();
+                    let mut normal = template.cards[0].clone();
+                    normal.rect = Rect {
+                        x: 3040.,
+                        y: 16.,
+                        width: 760.,
+                        height: 400.,
+                    };
+                    normal.component_alpha = 0.5;
+                    let mut normal_node = template.paint_tree.unwrap().nodes[2].clone();
+                    normal_node.key.id = fc_domain::ids::LayoutNodeId::new(4).unwrap();
+                    normal_node.parent = None;
+                    normal_node.rect = normal.rect;
+                    normal_node.clip = normal.rect;
+                    normal_node.local_opacity = 0.5;
+                    normal_node.effective_opacity = 0.5;
+                    normal_node.card_index = Some(1);
+                    scene.cards.push(normal);
+                    scene.paint_tree.as_mut().unwrap().nodes.push(normal_node);
+                    scene.lesson_control = Some(fc_presentation::scene::LessonControlContent {
+                        rect: Rect {
+                            x: 3040.,
+                            y: 440.,
+                            width: 560.,
+                            height: 48.,
+                        },
+                        caption: "合成课堂操作".into(),
+                        can_change: false,
+                    });
+                }
+                if !tree_mode {
+                    scene.paint_tree = None;
+                }
+                assert_eq!(
+                    renderer
+                        .present(&scene, now, &super::tests::guard(&gate, scene.generation))
+                        .unwrap(),
+                    PresentOutcome::Offscreen
+                );
+                let card = &renderer.cards[0];
+                let regions = card.recess_regions.unwrap();
+                for surface in [&card.surface, card.dynamic.as_ref().unwrap()] {
+                    assert!(surface.rect.x >= rect.x && surface.rect.y >= rect.y);
+                    assert!(surface.rect.x + surface.rect.width <= rect.x + rect.width);
+                    assert!(surface.rect.y + surface.rect.height <= rect.y + rect.height);
+                }
+                if width >= 1000. {
+                    assert!(regions.short_font > 200. && regions.long_font > 150.);
+                }
+                for (sample, size) in [
+                    ("88:88", regions.short_font),
+                    ("88:88:88", regions.long_font),
+                ] {
+                    let (layout, metrics) = renderer
+                        .graphics
+                        .recess_layout(sample, regions.digits.width, size)
+                        .unwrap();
+                    assert_eq!(metrics.lineCount, 1);
+                    assert!(metrics.widthIncludingTrailingWhitespace <= regions.digits.width + 0.5);
+                    assert!(metrics.height <= regions.digits.height + 0.5);
+                    let mut weight = DWRITE_FONT_WEIGHT_NORMAL;
+                    let mut family = [0u16; 32];
+                    unsafe {
+                        layout.GetFontWeight(0, &mut weight, None).unwrap();
+                        layout.GetFontFamilyName(0, &mut family, None).unwrap();
+                        assert_eq!(layout.GetWordWrapping(), DWRITE_WORD_WRAPPING_NO_WRAP);
+                    }
+                    assert_eq!(weight, DWRITE_FONT_WEIGHT_BOLD);
+                    assert_eq!(
+                        String::from_utf16(&family[..family.iter().position(|v| *v == 0).unwrap()])
+                            .unwrap(),
+                        "Consolas"
+                    );
+                }
+                let heading = renderer
+                    .graphics
+                    .layout(
+                        fc_presentation::scene::recess_target_label(until_next_course),
+                        regions.heading.width - 32.,
+                        13.,
+                        false,
+                    )
+                    .unwrap();
+                let mut metrics = DWRITE_TEXT_METRICS::default();
+                unsafe {
+                    heading.GetMetrics(&mut metrics).unwrap();
+                }
+                assert!(metrics.height + 24. <= regions.heading.height + 0.5);
+                let static_before = card.surface.dib.pixels().to_vec();
+                let digit_before = card.dynamic.as_ref().unwrap().dib.pixels().to_vec();
+                let fixed_before: Vec<_> = renderer
+                    .cards
+                    .iter()
+                    .skip(1)
+                    .map(|c| c.surface.dib.pixels().to_vec())
+                    .collect();
+                let text_layouts = renderer.metrics.text_layouts;
+                let frames = renderer.metrics.drawn_frames;
+                let later = LocalDateTime::new(now.date, 1).unwrap();
+                renderer
+                    .present(&scene, later, &super::tests::guard(&gate, scene.generation))
+                    .unwrap();
+                assert_eq!(renderer.cards[0].surface.dib.pixels(), static_before);
+                for (card, before) in renderer.cards.iter().skip(1).zip(&fixed_before) {
+                    assert_eq!(card.surface.dib.pixels(), before);
+                }
+                assert_ne!(
+                    renderer.cards[0].dynamic.as_ref().unwrap().dib.pixels(),
+                    digit_before
+                );
+                assert_eq!(renderer.metrics.text_layouts, text_layouts);
+                assert_eq!(renderer.metrics.drawn_frames, frames + 1);
+                assert!(renderer.metrics.dib_bytes <= DIB_BUDGET);
+                assert_eq!(renderer.metrics.visible_windows, 0);
+            }
+        }
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
+    }
+    #[test]
     fn four_k_recess_partitions_native_background_holes_and_combines_alpha_once() {
         let _serial = crate::NATIVE_TEST_SERIAL
             .lock()
@@ -2226,6 +2444,7 @@ mod recess_tests {
         card.edge_alpha = 0.5;
         card.content = CardContent::Recess {
             deadline: LocalDateTime::new(scene.captured_at.date, 120).unwrap(),
+            until_next_course: true,
         };
         let mut node = scene.paint_tree.as_ref().unwrap().nodes[2].clone();
         node.parent = None;
@@ -2248,7 +2467,7 @@ mod recess_tests {
         .unwrap();
         assert_eq!(r.metrics.tree_groups, 0);
         assert_eq!(r.metrics.gdi_backdrop_layers, 2);
-        assert!(r.metrics.dib_bytes < 1024 * 1024);
+        assert!(r.metrics.dib_bytes <= DIB_BUDGET);
         let card = &r.cards[0];
         let backdrop = card.backdrop.as_ref().unwrap();
         backdrop.fill.verify_native_paint().unwrap();

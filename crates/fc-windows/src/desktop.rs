@@ -577,6 +577,42 @@ impl Graphics {
                 .CreateTextLayout(&units, &self.format(size, center)?, width, 1_000_000.)
         }
     }
+    fn recess_layout(
+        &self,
+        text: &str,
+        width: f32,
+        size: f32,
+    ) -> Result<(IDWriteTextLayout, DWRITE_TEXT_METRICS)> {
+        if text.len() > 8
+            || !text.bytes().all(|c| c.is_ascii_digit() || c == b':')
+            || !width.is_finite()
+            || width < 8.
+            || !size.is_finite()
+            || !(10. ..=4096.).contains(&size)
+        {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let units: Vec<u16> = text.encode_utf16().collect();
+        unsafe {
+            let format = self.write.CreateTextFormat(
+                w!("Consolas"),
+                None,
+                DWRITE_FONT_WEIGHT_BOLD,
+                DWRITE_FONT_STYLE_NORMAL,
+                DWRITE_FONT_STRETCH_NORMAL,
+                size,
+                w!("zh-CN"),
+            )?;
+            format.SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP)?;
+            format.SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER)?;
+            let layout = self
+                .write
+                .CreateTextLayout(&units, &format, width, 1_000_000.)?;
+            let mut metrics = DWRITE_TEXT_METRICS::default();
+            layout.GetMetrics(&mut metrics)?;
+            Ok((layout, metrics))
+        }
+    }
     fn target(&self, dib: &Dib) -> Result<ID2D1DCRenderTarget> {
         // SAFETY: the caller retains this selected DIB/DC through target EndDraw/drop.
         unsafe {
@@ -660,6 +696,95 @@ struct Surface {
     dirty: bool,
 }
 #[derive(Clone, Copy)]
+struct RecessRegions {
+    heading: Rect,
+    digits: Rect,
+    short_font: f32,
+    long_font: f32,
+}
+fn recess_heading(g: &Graphics, card: Rect) -> Result<Rect> {
+    let heading_width = card.width.min(560.);
+    let mut heading_height = 48.0f32;
+    for until_next_course in [true, false] {
+        let layout = g.layout(
+            fc_presentation::scene::recess_target_label(until_next_course),
+            heading_width - 32.,
+            13.,
+            false,
+        )?;
+        let mut metrics = DWRITE_TEXT_METRICS::default();
+        unsafe {
+            layout.GetMetrics(&mut metrics)?;
+        }
+        heading_height = heading_height.max((metrics.height + 24.).ceil());
+    }
+    Ok(Rect {
+        x: card.x,
+        y: card.y,
+        width: heading_width,
+        height: heading_height,
+    })
+}
+fn recess_dynamic_budget(g: &Graphics, card: Rect, allocated: u64, reserve: u64) -> Result<u64> {
+    let fixed = allocated
+        .checked_add(surface_bytes(recess_heading(g, card)?)?)
+        .ok_or_else(|| Error::from_hresult(E_OUTOFMEMORY))?;
+    let available = DIB_BUDGET
+        .checked_sub(fixed)
+        .ok_or_else(|| Error::from_hresult(E_OUTOFMEMORY))?;
+    // The new DIB coexists with either the existing largest temporary or its
+    // own D2D render target, never both temporary allocations simultaneously.
+    Ok((available / 2).min(available.saturating_sub(reserve)))
+}
+fn recess_regions(g: &Graphics, card: Rect, max_dynamic_bytes: u64) -> Result<RecessRegions> {
+    let heading = recess_heading(g, card)?;
+    let width = card.width - 32.;
+    let height = card.height - heading.height - 32.;
+    if width < 8. || height < 12. {
+        return Err(Error::from_hresult(E_INVALIDARG));
+    }
+    let fit = |sample: &str| -> Result<(f32, f32, f32)> {
+        let (_, metrics) = g.recess_layout(sample, width, 64.)?;
+        let size = (64.
+            * (width / metrics.widthIncludingTrailingWhitespace).min(height / metrics.height))
+        .clamp(10., 4096.);
+        let (_, metrics) = g.recess_layout(sample, width, size)?;
+        Ok((
+            size,
+            metrics.widthIncludingTrailingWhitespace,
+            metrics.height,
+        ))
+    };
+    let (mut short, short_w, short_h) = fit("88:88")?;
+    let (mut long, long_w, long_h) = fit("88:88:88")?;
+    let mut w = short_w.max(long_w).ceil() + 4.;
+    let mut h = short_h.max(long_h).ceil() + 4.;
+    let bytes = w.ceil() as u64 * h.ceil() as u64 * 4;
+    if bytes > max_dynamic_bytes {
+        let scale = ((max_dynamic_bytes as f64 / bytes as f64).sqrt() as f32) * 0.998;
+        short *= scale;
+        long *= scale;
+        w = (w * scale).ceil();
+        h = (h * scale).ceil();
+    }
+    if short < 10. || long < 10. || w < 8. || h < 8. {
+        return Err(Error::from_hresult(E_OUTOFMEMORY));
+    }
+    // Only glyph-bearing pixels get a DIB. The remainder stays in the static
+    // native glass regions; both digit formats share this fixed patch at 1 Hz.
+    Ok(RecessRegions {
+        heading,
+        digits: Rect {
+            x: card.x + (card.width - w) / 2.,
+            y: card.y + heading.height + 16. + (height - h) / 2.,
+            width: w,
+            height: h,
+        },
+        short_font: short,
+        long_font: long,
+    })
+}
+#[derive(Clone, Copy)]
 struct SubjectBackdrop {
     base: f32,
     filled_black: f32,
@@ -736,6 +861,7 @@ struct Card {
     // Recess's static large card and its small clock overlay are separate, so a
     // one-second update never repaints or uploads a large work-area-sized card.
     dynamic: Option<Surface>,
+    recess_regions: Option<RecessRegions>,
     clock_tick: Option<u32>,
 }
 impl Drop for Card {
@@ -1172,7 +1298,15 @@ impl DesktopRenderer {
             }
             let mut total = 0u64;
             let mut kinds = Vec::with_capacity(8);
-            for card in scene_cards {
+            let mut target_reserve = 0;
+            // Allocate the fixed surfaces first, including a following lesson
+            // control. Insert by source index so later ticks see the same order.
+            let order = scene_cards.iter().copied().enumerate();
+            for (index, card) in order
+                .clone()
+                .filter(|(_, c)| !matches!(c.content, CardContent::Recess { .. }))
+                .chain(order.filter(|(_, c)| matches!(c.content, CardContent::Recess { .. })))
+            {
                 let control = matches!(card.content, CardContent::LessonControl { .. });
                 if kinds.contains(&card.kind) && !control {
                     return Err(Error::from_hresult(E_INVALIDARG));
@@ -1183,16 +1317,15 @@ impl DesktopRenderer {
                 let hooks = registry::hooks(card.kind)?;
                 (hooks.bind)(card)?;
                 let body = (hooks.measure)(&self.graphics, card, scene.public_calendar_unverified)?;
+                let recess_regions = if matches!(card.content, CardContent::Recess { .. }) {
+                    let bytes =
+                        recess_dynamic_budget(&self.graphics, card.rect, total, target_reserve)?;
+                    Some(recess_regions(&self.graphics, card.rect, bytes)?)
+                } else {
+                    None
+                };
                 let dynamic_rect = match card.content {
-                    CardContent::Recess { .. } => {
-                        let width = (card.rect.width - 32.).min(560.);
-                        Some(Rect {
-                            x: card.rect.x + (card.rect.width - width) / 2.,
-                            y: card.rect.y + (card.rect.height - 100.) / 2.,
-                            width,
-                            height: 100.,
-                        })
-                    }
+                    CardContent::Recess { .. } => recess_regions.map(|r| r.digits),
                     CardContent::Clock(_) => Some(Rect {
                         x: card.rect.x + 16.,
                         y: card.rect.y + 42.,
@@ -1235,16 +1368,7 @@ impl DesktopRenderer {
                             height: 24.,
                         })
                 };
-                let static_rect = if matches!(card.content, CardContent::Recess { .. }) {
-                    Rect {
-                        x: card.rect.x,
-                        y: card.rect.y,
-                        width: card.rect.width.min(560.),
-                        height: 48.,
-                    }
-                } else {
-                    card.rect
-                };
+                let static_rect = recess_regions.map_or(card.rect, |r| r.heading);
                 for r in std::iter::once(static_rect)
                     .chain(dynamic_rect)
                     .chain(input_rect)
@@ -1290,14 +1414,19 @@ impl DesktopRenderer {
                     surface,
                     backdrop,
                     dynamic,
+                    recess_regions,
                     clock_tick: None,
                 };
+                target_reserve = target_reserve.max(tree::render_reserve(&c)?);
+                if total + target_reserve > DIB_BUDGET {
+                    return Err(Error::from_hresult(E_OUTOFMEMORY));
+                }
                 if card.component_alpha > 0. {
                     render_card(&self.graphics, &mut c)?;
                     self.metrics.drawn_frames += 1;
                 }
                 self.metrics.text_layouts += c.body.blocks.len() as u64;
-                self.cards.push(c);
+                self.cards.insert(index.min(self.cards.len()), c);
             }
             self.last_scene = Some(scene.generation);
             self.last_revision = Some(scene.source_revision);
@@ -2181,7 +2310,14 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
                 target.DrawRoundedRectangle(&shape, &edge, 0.75, None);
             }
             let heading = g.layout(
-                registry::hooks(c.source.kind)?.title,
+                if let CardContent::Recess {
+                    until_next_course, ..
+                } = c.source.content
+                {
+                    fc_presentation::scene::recess_target_label(until_next_course)
+                } else {
+                    registry::hooks(c.source.kind)?.title
+                },
                 if c.input.is_some() {
                     (w - 112.).max(28.)
                 } else {
@@ -2425,12 +2561,26 @@ fn render_dynamic_frame(g: &Graphics, c: &mut Card, now: LocalDateTime) -> Resul
                         );
                     }
                 }
-                CardContent::Recess { deadline } => {
+                CardContent::Recess { deadline, .. } => {
                     let text =
                         fc_presentation::scene::recess_label(deadline, now).unwrap_or_default();
-                    let layout = g.layout(&text, w, 64., true)?;
+                    let regions = c
+                        .recess_regions
+                        .ok_or_else(|| Error::from_hresult(E_UNEXPECTED))?;
+                    let size = if text.len() <= 5 {
+                        regions.short_font
+                    } else {
+                        regions.long_font
+                    };
+                    let (layout, metrics) = g.recess_layout(&text, w, size)?;
+                    if metrics.widthIncludingTrailingWhitespace > w + 0.5
+                        || metrics.height > h + 0.5
+                        || metrics.lineCount != 1
+                    {
+                        return Err(Error::from_hresult(E_BOUNDS));
+                    }
                     target.DrawTextLayout(
-                        xy(0., 6.).point,
+                        xy(0., (h - metrics.height) / 2.).point,
                         &layout,
                         &brush,
                         D2D1_DRAW_TEXT_OPTIONS_NONE,
@@ -2775,7 +2925,7 @@ mod tests {
                 ComponentKind::Homework=>CardContent::Homework(vec![HomeworkEntry{display_ref: fc_domain::content::ContentDisplayRef { key: fc_domain::content::ContentKey::Homework(fc_domain::content::HomeworkKey { class_id: fc_domain::ids::ClassId::new(1).unwrap(), actual_date: fc_domain::time::LocalDate::new(2026, 11, 3).unwrap(), subject_id: fc_domain::ids::SubjectId::new(1).unwrap(), owner_teacher_id: fc_domain::ids::PrincipalId::new(1).unwrap() }), revision: fc_domain::ids::Revision::new(1) },
                     subject_id:SubjectId::new(1).unwrap(),teacher_id:PrincipalId::new(1).unwrap(),subject_name:"合成语文".into(),teacher_name:"合成教师".into(),text:"独立离屏验证：阅读并复述课文，练习汉字。\n保留全部长正文，通过只读按钮逐页阅读。".repeat(12),color:Rgb{red:201,green:164,blue:164},fill_alpha:0.03}]),
                 ComponentKind::Materials=>CardContent::MaterialsUnavailable,
-                ComponentKind::Recess=>CardContent::Recess{deadline:LocalDateTime::new(now.date,(now.second_of_day()+120).min(86399)).unwrap()},
+                ComponentKind::Recess=>CardContent::Recess{deadline:LocalDateTime::new(now.date,(now.second_of_day()+120).min(86399)).unwrap(),until_next_course:true},
                 ComponentKind::Schedule=>{
                     use fc_domain::{ids::{ClassId,SemesterId,TableId,RowId},schedule::{LessonInstanceKey,ResolvedScheduleVersion,CalendarMode},time::{Minute,MinuteRange}};
                     let key=LessonInstanceKey{actual_date:now.date,class_id:ClassId::new(1).unwrap(),range:MinuteRange::new(Minute::new(480).unwrap(),Minute::new(525).unwrap()).unwrap(),version:ResolvedScheduleVersion{actual_semester_id:SemesterId::new(1).unwrap(),actual_revision:Revision::new(1),source_semester_id:SemesterId::new(1).unwrap(),source_revision:Revision::new(1),calendar_mode:CalendarMode::School,calendar_mode_revision:Revision::new(1),applied_calendar_revision:Revision::new(1),makeup_mapping_revision:Revision::new(1),source_table_id:TableId::new(1).unwrap(),source_row_id:RowId::new(1).unwrap(),rules_revision:Revision::new(1)}};
