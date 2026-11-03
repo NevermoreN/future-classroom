@@ -2041,8 +2041,12 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
         .try_borrow()
         .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
     let split = preview.is_some() && width >= 720;
-    let tree_width = if split && grid.grid.is_some() && width >= 1120 {
-        260
+    let tree_width = if split && grid.grid.is_some() && width >= 960 {
+        if width >= 1120 {
+            260
+        } else {
+            220
+        }
     } else {
         0
     };
@@ -2442,7 +2446,7 @@ mod tests {
         }
     }
     #[test]
-    fn long_restore_explanations_and_statuses_expand_with_scrollable_actions() {
+    fn long_restore_explanations_and_statuses_scroll_above_fixed_actions() {
         let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
         let foreground = unsafe { GetForegroundWindow() };
         let window = Window::new().unwrap();
@@ -2456,10 +2460,10 @@ mod tests {
             r
         };
         // Resize only our hidden owned window; never send global input or focus.
-        unsafe { MoveWindow(window.hwnd, 0, 0, 820, 500, false).unwrap() };
+        unsafe { MoveWindow(window.hwnd, 0, 0, 1280, 860, false).unwrap() };
         let wide = rect(window.state.controls.borrow().description);
         assert!(wide.bottom - wide.top > 58);
-        unsafe { MoveWindow(window.hwnd, 0, 0, 360, 300, false).unwrap() };
+        unsafe { MoveWindow(window.hwnd, 0, 0, 760, 640, false).unwrap() };
         let (description, status, label) = {
             let controls = window.state.controls.borrow();
             (controls.description, controls.status, controls.labels[0])
@@ -2469,7 +2473,7 @@ mod tests {
         assert!(description.bottom - description.top > wide.bottom - wide.top);
         assert!(rect(label).top >= description.bottom + 8);
         assert!(status.bottom - status.top > 58);
-        assert!(rect(button(&window).hwnd).top >= status.bottom + 14);
+        let footer_before_scroll = rect(button(&window).hwnd);
         let mut info = SCROLLINFO {
             cbSize: std::mem::size_of::<SCROLLINFO>() as u32,
             fMask: SIF_ALL,
@@ -2486,6 +2490,7 @@ mod tests {
             );
         }
         assert!(window.state.scroll.get() > 0);
+        assert_eq!(rect(button(&window).hwnd), footer_before_scroll);
         let mut client = RECT::default();
         let mut origin = POINT::default();
         unsafe {
@@ -2497,13 +2502,11 @@ mod tests {
         model.description = "短说明".into();
         model.status.clear();
         window.render(&model).unwrap();
-        for hwnd in [
-            window.state.controls.borrow().description,
-            window.state.controls.borrow().status,
-        ] {
-            let r = rect(hwnd);
-            assert_eq!(r.bottom - r.top, 58);
-        }
+        let short_description = rect(window.state.controls.borrow().description);
+        assert!(short_description.bottom - short_description.top >= 26);
+        assert!(short_description.bottom - short_description.top < wide.bottom - wide.top);
+        let empty_status = rect(window.state.controls.borrow().status);
+        assert_eq!(empty_status.bottom - empty_status.top, 0);
         assert!(!window.is_visible());
         assert_eq!(unsafe { GetForegroundWindow() }, foreground);
     }
@@ -2519,6 +2522,64 @@ mod tests {
     }
     fn button(window: &Window) -> ActionBinding {
         window.state.controls.borrow().actions[0]
+    }
+    #[test]
+    fn default_width_editor_keeps_tree_canvas_properties_and_footer_separate() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        let foreground = unsafe { GetForegroundWindow() };
+        let window = Window::new().unwrap();
+        let mut model = view();
+        model.grid = Some(fc_presentation::workbench::Grid {
+            columns: vec!["组件".into()],
+            rows: vec![fc_presentation::workbench::GridRow {
+                group: String::new(),
+                label: "今日作业".into(),
+                cells: vec![],
+                merged: false,
+            }],
+            selected: Some((0, 0)),
+            enabled: true,
+        });
+        model.actions.extend(
+            fc_presentation::workbench::ADMIN_NAVIGATION
+                .into_iter()
+                .map(|id| Action {
+                    id,
+                    label: "管理导航".into(),
+                    enabled: true,
+                }),
+        );
+        // Only resize our hidden HWND; no desktop capture or global input.
+        unsafe { MoveWindow(window.hwnd, 0, 0, 1280, 860, false).unwrap() };
+        window.render(&model).unwrap();
+        window
+            .set_layout_preview(Some(LayoutPreview {
+                generation: 1,
+                width: 640,
+                height: 360,
+                bgra: vec![255; 640 * 360 * 4],
+                nodes: vec![],
+            }))
+            .unwrap();
+        let rect = |hwnd| {
+            let mut r = RECT::default();
+            unsafe { GetWindowRect(hwnd, &mut r).unwrap() };
+            r
+        };
+        let tree = window.state.controls.borrow().grid.as_ref().unwrap().hwnd();
+        let canvas = window.state.preview.borrow().as_ref().unwrap().hwnd();
+        let properties = field(&window, 1).hwnd;
+        let canvas_rect = rect(canvas);
+        assert!(rect(tree).right < canvas_rect.left);
+        assert!(canvas_rect.right < rect(properties).left);
+        assert!(canvas_rect.right - canvas_rect.left >= 360);
+        assert!(rect(button(&window).hwnd).top > canvas_rect.bottom);
+        unsafe { MoveWindow(window.hwnd, 0, 0, 760, 740, false).unwrap() };
+        assert_eq!(rect(tree).left, rect(properties).left);
+        assert_eq!(rect(canvas).left, rect(properties).left);
+        assert!(rect(canvas).bottom < rect(tree).top);
+        assert!(!window.is_visible());
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
     }
     #[test]
     fn percent_native_slider_edit_snapshot_barriers_and_generation_cleanup() {
