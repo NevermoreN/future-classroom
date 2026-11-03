@@ -60,6 +60,78 @@ pub fn current_thread_cpu_time() -> windows::core::Result<std::time::Duration> {
     Ok(std::time::Duration::new(seconds, nanos))
 }
 
+#[derive(Clone, Debug)]
+pub struct ProcessResources {
+    pub sampled_at: std::time::Instant,
+    pub cpu_time: std::time::Duration,
+    pub working_set_bytes: u64,
+    pub private_bytes: u64,
+    pub handles: u32,
+    pub gdi_objects: u32,
+    pub user_objects: u32,
+}
+
+/// Current process only; individual system counters are read sequentially, not
+/// as an atomic snapshot. No handles, paths, or other-process data are retained.
+pub fn current_process_resources() -> windows::core::Result<ProcessResources> {
+    use windows::{
+        core::{Error, Result},
+        Win32::{
+            Foundation::{GetLastError, SetLastError, ERROR_SUCCESS, E_UNEXPECTED, FILETIME},
+            System::{
+                ProcessStatus::{GetProcessMemoryInfo, PROCESS_MEMORY_COUNTERS_EX},
+                Threading::*,
+            },
+        },
+    };
+    let process = unsafe { GetCurrentProcess() };
+    let mut created = FILETIME::default();
+    let mut exited = FILETIME::default();
+    let mut kernel = FILETIME::default();
+    let mut user = FILETIME::default();
+    let mut memory = PROCESS_MEMORY_COUNTERS_EX {
+        cb: std::mem::size_of::<PROCESS_MEMORY_COUNTERS_EX>() as u32,
+        ..Default::default()
+    };
+    let mut handles = 0;
+    // SAFETY: borrowed pseudo-handle is never closed; all exclusive output
+    // structures outlive these synchronous calls and retain no native pointers.
+    unsafe {
+        GetProcessTimes(process, &mut created, &mut exited, &mut kernel, &mut user)?;
+        GetProcessMemoryInfo(
+            process,
+            (&mut memory as *mut PROCESS_MEMORY_COUNTERS_EX).cast(),
+            memory.cb,
+        )?;
+        GetProcessHandleCount(process, &mut handles)?;
+    }
+    let gui = |flags| -> Result<u32> {
+        // Zero GUI objects is legitimate; clear last-error before distinguishing
+        // that value from a failed query. This queries only our own process.
+        unsafe {
+            SetLastError(ERROR_SUCCESS);
+            let count = GetGuiResources(process, flags);
+            if count == 0 && GetLastError() != ERROR_SUCCESS {
+                return Err(Error::from_thread());
+            }
+            Ok(count)
+        }
+    };
+    let ticks = |v: FILETIME| u64::from(v.dwHighDateTime) << 32 | u64::from(v.dwLowDateTime);
+    let cpu = ticks(kernel)
+        .checked_add(ticks(user))
+        .ok_or_else(|| Error::from_hresult(E_UNEXPECTED))?;
+    Ok(ProcessResources {
+        sampled_at: std::time::Instant::now(),
+        cpu_time: std::time::Duration::new(cpu / 10_000_000, (cpu % 10_000_000) as u32 * 100),
+        working_set_bytes: memory.WorkingSetSize as u64,
+        private_bytes: memory.PrivateUsage as u64,
+        handles,
+        gdi_objects: gui(GR_GDIOBJECTS)?,
+        user_objects: gui(GR_USEROBJECTS)?,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

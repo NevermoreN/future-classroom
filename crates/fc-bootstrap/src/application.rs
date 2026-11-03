@@ -2538,6 +2538,7 @@ struct App {
     public_material_notice: Option<&'static str>,
     diagnostics_started: Instant,
     diagnostic_events: VecDeque<DiagnosticEvent>,
+    diagnostic_process: Option<fc_windows::system::ProcessResources>,
     diagnostic_grid: Option<Grid>,
     pending: Option<Pending>,
     generation: u64,
@@ -2633,6 +2634,7 @@ impl App {
         });
     }
     fn refresh_diagnostics(&mut self) {
+        let resources = fc_windows::system::current_process_resources();
         let workers = self.pool.handle().try_stats().map_or_else(
             || "共享后台队列：当前统计不可用，请手动重试。".into(),
             |s| {
@@ -2713,10 +2715,58 @@ impl App {
                 ),
             ),
         ];
+        match resources {
+            Ok(current) => {
+                rows.push(row(
+                    "当前进程",
+                    "内存",
+                    format!(
+                        "工作集 {} 字节；私有提交 {} 字节。",
+                        current.working_set_bytes, current.private_bytes
+                    ),
+                ));
+                rows.push(row(
+                    "当前进程",
+                    "资源对象",
+                    format!(
+                        "进程句柄 {}；GDI {}；USER {}。",
+                        current.handles, current.gdi_objects, current.user_objects
+                    ),
+                ));
+                let cpu = self.diagnostic_process.as_ref().and_then(|previous| {
+                    let wall = current
+                        .sampled_at
+                        .checked_duration_since(previous.sampled_at)?;
+                    let cpu = current.cpu_time.checked_sub(previous.cpu_time)?;
+                    (wall.as_nanos() > 0).then(|| {
+                        format!(
+                            "间隔 {} 毫秒；单核口径 {:.3}%。",
+                            wall.as_millis(),
+                            cpu.as_secs_f64() / wall.as_secs_f64() * 100.
+                        )
+                    })
+                });
+                rows.push(row(
+                    "当前进程",
+                    "CPU间隔读数",
+                    cpu.unwrap_or_else(|| "首个样本；再次手动刷新后显示间隔读数。".into()),
+                ));
+                self.diagnostic_process = Some(current);
+            }
+            Err(_) => {
+                self.diagnostic_process = None;
+                rows.push(row(
+                    "当前进程",
+                    "资源采样",
+                    "当前读取失败；请手动重试。".into(),
+                ));
+            }
+        }
         for (label, value) in [
             ("刷新方式", "仅手动刷新，不自动轮询。"),
             ("资源范围", "DIB及渲染器暂存不是全进程内存。"),
-            ("性能范围", "未测量CPU，不能据此认定性能达标。"),
+            ("性能范围", "CPU间隔含该进程全部线程活动，多核时可超过100%；短间隔读数不代表性能或长稳验收通过。"),
+            ("进程范围", "进程读数不含DWM或外部打开程序；各计数为顺序读取，非原子快照。不自动采样或保存历史。"),
             ("显示策略", "打开工作台隐藏桌面；窗口为0不代表故障。"),
             (
                 "绘制方式",
@@ -6504,6 +6554,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         public_material_notice: None,
         diagnostics_started: Instant::now(),
         diagnostic_events: VecDeque::with_capacity(DIAGNOSTIC_EVENT_LIMIT),
+        diagnostic_process: None,
         diagnostic_grid: None,
         pending: None,
         generation: 0,
@@ -7772,13 +7823,27 @@ mod tests {
         assert!(!contents.contains("synthetic-private-file"));
         assert!(contents.contains("后台返回不等于业务已提交"));
         assert!(contents.contains("不是全进程内存"));
-        assert!(contents.contains("未测量CPU"));
+        assert!(contents.contains("短间隔读数不代表性能"));
+        assert!(contents.contains("首个样本"));
+        let first = app
+            .diagnostic_process
+            .as_ref()
+            .expect("real process resource sample")
+            .clone();
+        assert!(first.working_set_bytes > 0 && first.private_bytes > 0 && first.handles > 0);
         assert!(contents.contains("窗口为0不代表故障"));
         assert!(contents.contains("非持久审计"));
         app.record_diagnostic(timing, "后台未接纳");
         assert_eq!(app.view().grid, Some(grid), "refresh is explicit");
+        assert_eq!(
+            app.diagnostic_process.as_ref().unwrap().sampled_at,
+            first.sampled_at
+        );
         app.event(Event::Submit(LOAD, FormData::new())).unwrap();
         assert!(text(app.view().grid.as_ref().unwrap()).contains("后台未接纳"));
+        let second = app.diagnostic_process.as_ref().unwrap();
+        assert!(second.sampled_at > first.sampled_at && second.cpu_time >= first.cpu_time);
+        assert!(text(app.view().grid.as_ref().unwrap()).contains("单核口径"));
         assert!(
             app.pending.is_none(),
             "reading diagnostics does not enqueue work"
