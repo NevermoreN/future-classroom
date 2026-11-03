@@ -210,7 +210,9 @@ fn system_high_contrast_colors_repaint_cached_flat_tree_and_image_text_without_s
     let now = crate::native::local_now().unwrap();
     let colored = |pixels: &[u8], green: bool| {
         pixels
-            .chunks_exact(4)
+            .as_chunks::<4>()
+            .0
+            .iter()
             .filter(|p| {
                 let dominant = if green { p[1] } else { p[0] };
                 let other = if green { p[0] } else { p[1] };
