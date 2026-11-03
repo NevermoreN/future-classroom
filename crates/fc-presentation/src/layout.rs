@@ -685,7 +685,7 @@ mod tests;
 #[cfg(test)]
 mod image_minimum_regression {
     use super::*;
-    use crate::card_body::{CardBodyDynamic, CardBodySpec, card_body_spec};
+    use crate::card_body::{card_body_spec, CardBodyDynamic, CardBodySpec};
     use crate::scene::CardContent;
     use fc_domain::desktop::ComponentKind;
 
