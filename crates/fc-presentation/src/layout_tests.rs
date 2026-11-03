@@ -138,6 +138,38 @@ fn enclose_clock(tree: &mut LayoutTree, opacity: u8, glass: bool) {
     });
 }
 #[test]
+fn default_material_outlet_keeps_its_preferred_width_below_homework_in_public_and_subject_layouts()
+{
+    let public = default_public_layout();
+    let subject = default_subject_layout(key());
+    let mut ss = specs();
+    ss.iter_mut()
+        .find(|s| s.kind == WidgetKind::Homework)
+        .unwrap()
+        .preferred_width = 480.;
+    for subject in [None, Some(&subject)] {
+        let tree = compose_layout(&public, subject, &ss, work(), &measure()).unwrap();
+        let homework = tree
+            .nodes
+            .iter()
+            .find(|n| n.widget_kind == Some(WidgetKind::Homework))
+            .unwrap();
+        let materials = tree
+            .nodes
+            .iter()
+            .find(|n| n.widget_kind == Some(WidgetKind::Materials))
+            .unwrap();
+        assert!(materials.rect.width < homework.rect.width);
+        assert!(materials.rect.width <= 300.);
+        assert!(materials.rect.y >= homework.rect.y + homework.rect.height);
+        assert_eq!(
+            materials.key.scope,
+            subject.map_or(LayoutScope::Public, |s| s.scope)
+        );
+        assert!(materials.rect.width >= 160.);
+    }
+}
+#[test]
 fn nested_parent_group_has_real_geometry_clip_and_independent_fill() {
     let mut public = default_public_layout();
     enclose_clock(&mut public, 50, true);

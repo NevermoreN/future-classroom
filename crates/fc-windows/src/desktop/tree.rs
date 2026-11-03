@@ -519,27 +519,13 @@ fn background(g: &Graphics, node: &fc_presentation::scene::ScenePaintNode) -> Re
     unsafe {
         target.BeginDraw();
         target.Clear(Some(&D2D1_COLOR_F::default()));
-        let fill = target.CreateSolidColorBrush(
-            &D2D1_COLOR_F {
-                r: 1.,
-                g: 1.,
-                b: 1.,
-                a: m.surface_alpha,
-            },
-            None,
+        backdrop::draw_material(
+            &target,
+            node.rect.width,
+            node.rect.height,
+            m.surface_alpha,
+            m.edge_alpha,
         )?;
-        let edge = target.CreateSolidColorBrush(
-            &D2D1_COLOR_F {
-                r: 1.,
-                g: 1.,
-                b: 1.,
-                a: m.edge_alpha,
-            },
-            None,
-        )?;
-        let shape = bounds(1., 1., node.rect.width - 1., node.rect.height - 1., 20.);
-        target.FillRoundedRectangle(&shape, &fill);
-        target.DrawRoundedRectangle(&shape, &edge, 0.75, None);
         target.EndDraw(None, None)?;
     }
     Ok(s)
@@ -2218,6 +2204,159 @@ mod tests {
                 }]
             );
         }
+    }
+    #[test]
+    fn static_glass_material_shared_flat_tree_backdrop_preview_and_dynamic_patch() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let foreground = unsafe { GetForegroundWindow() };
+        let (_publisher, gate) = authority();
+        let mut renderer = DesktopRenderer::new_hidden().unwrap();
+        let area = rect(0., 0., 320., 180.);
+        let pixel = |surface: &Surface, x: usize, y: usize| -> [u8; 4] {
+            surface.dib.pixels()[(y * surface.dib.width as usize + x) * 4..][..4]
+                .try_into()
+                .unwrap()
+        };
+        let draw = |edge: f32| {
+            let surface = headless(area).unwrap();
+            let target = renderer.graphics.target(&surface.dib).unwrap();
+            unsafe {
+                target.BeginDraw();
+                target.Clear(Some(&D2D1_COLOR_F::default()));
+            }
+            backdrop::draw_material(&target, area.width, area.height, 0.03, edge).unwrap();
+            unsafe {
+                target.EndDraw(None, None).unwrap();
+            }
+            surface
+        };
+        let none = draw(0.);
+        let half = draw(0.5);
+        let full = draw(1.);
+        assert_eq!(
+            pixel(&half, 160, 90)[3],
+            8,
+            "centre stays at 3%, independent of reflection"
+        );
+        assert_eq!(pixel(&none, 80, 1)[3], 8);
+        assert!(pixel(&half, 80, 1)[3] > 8);
+        assert!(pixel(&full, 80, 1)[3] > pixel(&half, 80, 1)[3]);
+        assert_eq!(
+            pixel(&half, 230, 1)[3],
+            8,
+            "upper highlight has a deliberate gap"
+        );
+        assert!(
+            pixel(&half, 80, 1)[0] > pixel(&half, 160, 178)[0],
+            "upper arc is brighter than the cool lower arc"
+        );
+        let mut scene = sample();
+        let mut node = scene.paint_tree.as_ref().unwrap().nodes[2].clone();
+        node.rect = area;
+        node.glass = Some(fc_presentation::scene::PaintGlass {
+            surface_alpha: 0.03,
+            edge_alpha: 0.5,
+        });
+        let tree_material = background(&renderer.graphics, &node).unwrap();
+        assert_eq!(tree_material.dib.pixels(), half.dib.pixels());
+        scene.paint_tree = None;
+        scene.cards[0].rect = area;
+        scene.cards[0].surface_alpha = 0.03;
+        scene.cards[0].edge_alpha = 0.5;
+        renderer
+            .present(&scene, scene.captured_at, &guard(&gate, scene.generation))
+            .unwrap();
+        for (x, y) in [(80, 1), (230, 1), (160, 178)] {
+            assert_eq!(pixel(&renderer.cards[0].surface, x, y), pixel(&half, x, y));
+        }
+        if let Some(directory) = std::env::var_os("FC_DESKTOP_CAPTURE_DIR") {
+            let path = Path::new(&directory).join("static-glass-material.bmp");
+            renderer.probe_capture_bmp_for_area(&path, area).unwrap();
+            eprintln!("STATIC_GLASS_SYNTHETIC_BITMAP=static-glass-material.bmp");
+        }
+        let backdrop =
+            Backdrop::new_partitioned(&renderer.class, area, 0.03, 0.5, 1., &[]).unwrap();
+        backdrop.fill.verify_native_paint().unwrap();
+        backdrop.edge.verify_native_paint().unwrap();
+        let patch = headless(area).unwrap();
+        let target = renderer.graphics.target(&patch.dib).unwrap();
+        unsafe {
+            target.BeginDraw();
+            target.Clear(Some(&D2D1_COLOR_F::default()));
+        }
+        backdrop.draw_patch(&target, area).unwrap();
+        unsafe {
+            target.EndDraw(None, None).unwrap();
+        }
+        assert_eq!(patch.dib.pixels(), half.dib.pixels());
+        let mut preview = vec![0; 320 * 180 * 4];
+        backdrop
+            .fill
+            .composite_scaled(&mut preview, area, 320, 180)
+            .unwrap();
+        backdrop
+            .edge
+            .composite_scaled(&mut preview, area, 320, 180)
+            .unwrap();
+        for (x, y) in [(80, 1), (230, 1), (160, 178), (160, 90)] {
+            let expected = pixel(&half, x, y);
+            for (a, b) in preview[(y * 320 + x) * 4..][..4].iter().zip(expected) {
+                assert!(
+                    a.abs_diff(b) <= 2,
+                    "native alpha quantization only: {a} vs {b}"
+                );
+            }
+        }
+        drop(target);
+        drop(backdrop);
+        // Real large recess remains two native region layers plus the original
+        // bounded heading/digit DIBs; only the digit patch changes on a tick.
+        let mut scene = sample();
+        let area = rect(0., 0., 1600., 900.);
+        let card = &mut scene.cards[0];
+        card.kind = ComponentKind::Recess;
+        card.rect = area;
+        card.surface_alpha = 0.03;
+        card.edge_alpha = 0.5;
+        card.content = CardContent::Recess {
+            deadline: LocalDateTime::new(
+                scene.captured_at.date,
+                scene.captured_at.second_of_day() + 120,
+            )
+            .unwrap(),
+            until_next_course: true,
+        };
+        node.rect = area;
+        node.clip = area;
+        node.parent = None;
+        node.local_opacity = 1.;
+        node.effective_opacity = 1.;
+        node.widget_kind = Some(fc_domain::layout::WidgetKind::Recess);
+        scene.paint_tree.as_mut().unwrap().nodes = vec![node];
+        renderer
+            .present(&scene, scene.captured_at, &guard(&gate, scene.generation))
+            .unwrap();
+        let before = renderer.cards[0].surface.dib.pixels().to_vec();
+        let frames = renderer.metrics.drawn_frames;
+        let preview = renderer.export_preview_bgra(area, 400, 225).unwrap();
+        assert_eq!(preview.bgra.len(), 400 * 225 * 4);
+        let now = LocalDateTime::new(
+            scene.captured_at.date,
+            scene.captured_at.second_of_day() + 1,
+        )
+        .unwrap();
+        renderer
+            .present(&scene, now, &guard(&gate, scene.generation))
+            .unwrap();
+        assert_eq!(renderer.cards[0].surface.dib.pixels(), before);
+        assert_eq!(renderer.metrics.drawn_frames, frames + 1);
+        assert_eq!(renderer.metrics.backdrop_updates, 0);
+        assert_eq!(renderer.metrics.gdi_backdrop_layers, 2);
+        assert!(renderer.metrics.dib_bytes <= DIB_BUDGET);
+        assert_eq!(renderer.metrics.visible_windows, 0);
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
     }
 }
 #[cfg(test)]

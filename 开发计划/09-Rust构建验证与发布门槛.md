@@ -35,7 +35,7 @@ P0-09的探针必须实际链接并运行SQLite bundled、精简libcurl/Schannel
 
 R45修正仅将精确路径前缀 `开发计划/验证记录/` 的历史档案与实际编译输入分开；不隐藏它们的Git对象或路径数量。完整HEAD的root tree、所有跟踪路径及普通blob的mode/type/Git SHA1/原blob大小分别保存于 `input-git-tree.json`，与 `git ls-files` 精确匹配；历史域仍检查文件存在、单件大小、文件及祖先目录重解析属性，并记录检出大小，但不声称读取其内容SHA256。Git原blob大小和对象SHA1不等于Windows检出大小或SHA256，CRLF转换单独说明。
 
-除该精确前缀外的全部跟踪文件仍逐件计算实际检出SHA256，保持 `input-sha256.json` 数组形状；`input-domains.json` 使用 `future-classroom.ci-input-domains/v1` 显式列两域。所有路径合计仍最多10000，单blob及检出文件仍不超过64MiB，实际SHA输入合计仍不超过256MiB，元数据输出和这三类JSON各受原16MiB限制。构建后重新核对HEAD、路径、Git树、两域清单、普通文件SHA及干净检出，保留六份before/after清单及三个初始摘要。独立产物审查须按该schema分别证明全Git元数据和SHA子集，不能沿用旧“全部Git文件均读取内容SHA”的计数。
+除该精确前缀外的全部跟踪文件仍逐件计算实际检出SHA256，保持 `input-sha256.json` 数组形状；`input-domains.json` 使用 `future-classroom.ci-input-domains/v1` 显式列两域。所有路径合计当前最多20000（已落实于采集脚本；历史10000路径结果仅适用其当时源码），单blob及检出文件仍不超过64MiB，实际SHA输入合计仍不超过256MiB，元数据输出和这三类JSON各受原16MiB限制。构建后重新核对HEAD、路径、Git树、两域清单、普通文件SHA及干净检出，保留六份before/after清单及三个初始摘要。独立产物审查须按该schema分别证明全Git元数据和SHA子集，不能沿用旧“全部Git文件均读取内容SHA”的计数。
 
 Rust/Cargo构建输入出现显式历史域路径（含Windows分隔符）即拒绝；真正需要的fixture应进入SHA域，不能静默当档案跳过。这是当前输入政策及文字检查，不能证明任意动态build.rs I/O已经被沙箱隔离。原工具链/CRT、完整workspace/all-targets/严格Clippy、jobs2及各命令原超时参数均保持：Hosted默认120秒，测试编译2400秒、产品编译1200秒、Clippy1500秒；本地Rust矩阵每命令900秒属于另一验证范围。
 

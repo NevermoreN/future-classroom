@@ -2327,24 +2327,6 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
     let w = c.surface.rect.width;
     let h = c.surface.rect.height;
     unsafe {
-        let glass = target.CreateSolidColorBrush(
-            &D2D1_COLOR_F {
-                r: 1.,
-                g: 1.,
-                b: 1.,
-                a: c.source.surface_alpha,
-            },
-            None,
-        )?;
-        let edge = target.CreateSolidColorBrush(
-            &D2D1_COLOR_F {
-                r: 1.,
-                g: 1.,
-                b: 1.,
-                a: c.source.edge_alpha,
-            },
-            None,
-        )?;
         let text = target
             .CreateSolidColorBrush(&ink(c.tone, c.system_ink, c.source.component_alpha), None)?;
         target.BeginDraw();
@@ -2353,10 +2335,14 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
             b.draw_patch(&target, c.surface.rect)?;
         }
         if c.source.component_alpha > 0. {
-            let shape = bounds(1., 1., w - 1., h - 1., 20.);
             if c.backdrop.is_none() {
-                target.FillRoundedRectangle(&shape, &glass);
-                target.DrawRoundedRectangle(&shape, &edge, 0.75, None);
+                backdrop::draw_material(
+                    &target,
+                    w,
+                    h,
+                    c.source.surface_alpha,
+                    c.source.edge_alpha,
+                )?;
             }
             let heading = g.layout(
                 if let CardContent::Recess {

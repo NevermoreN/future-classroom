@@ -225,12 +225,18 @@ impl<'a> Solver<'a> {
                 pref += b;
             } else {
                 min = min.max(a);
-                pref = pref.max(b);
+                pref = if flow == Flow::Wrap {
+                    pref + b
+                } else {
+                    pref.max(b)
+                };
             }
         }
-        if flow == Flow::Row {
+        if flow != Flow::Column {
             let gaps = gap * children.len().saturating_sub(1) as f32;
-            min += gaps;
+            if flow == Flow::Row {
+                min += gaps;
+            }
             pref += gaps;
         }
         min += pad * 2.;
@@ -348,6 +354,7 @@ impl<'a> Solver<'a> {
         let mut used_w: f32 = 0.;
         let mut used_h: f32 = 0.;
         if flow == Flow::Column {
+            let content_width = self.axes(n).expect("container").0.is_content();
             for (i, c) in cs.iter().enumerate() {
                 let reserve = cs[i + 1..].iter().map(|c| self.min_height(*c)).sum::<f32>()
                     + gap * cs.len().saturating_sub(i + 1) as f32;
@@ -355,12 +362,14 @@ impl<'a> Solver<'a> {
                 if min > inner_w + 0.01 {
                     return Err(TreeLayoutError::OutOfSpace);
                 }
-                // Column children use the allocated width when auto-sized, while
-                // fixed/percent axes retain their declared extent.
+                // Content-width columns respect each child's preferred extent.
+                // Explicit-width viewports still stretch auto-sized children;
+                // fixed/percent children retain their declared extent.
                 let cw = match self.axes(*c) {
                     Some((a, _)) if !a.is_content() => {
                         Self::axis(a, Some(inner_w), pref)?.1.min(inner_w)
                     }
+                    _ if content_width => pref.min(inner_w).min(max),
                     _ => inner_w.min(max),
                 };
                 let mut b = self.layout(
