@@ -200,6 +200,9 @@ pub(super) struct Editor {
     code_window: Option<u64>,
 }
 impl Editor {
+    pub(super) fn awaiting_confirmation(&self) -> bool {
+        self.confirmation.is_some()
+    }
     pub(super) fn set_readiness(&mut self, readiness: Readiness) {
         if self.readiness != readiness {
             self.readiness = readiness;
