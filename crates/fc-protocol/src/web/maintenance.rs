@@ -67,7 +67,7 @@ pub fn recognize(path: &str) -> Option<Resource> {
         return Some(Resource::Jobs);
     }
     let suffix = path.strip_prefix(BASE)?.strip_prefix('/')?;
-    let (id, action) = suffix.split_once('/').map_or((suffix, ""), |v| v);
+    let (id, action) = suffix.split_once('/').unwrap_or((suffix, ""));
     let id = super::admin::id(id).ok()?;
     Some(match action {
         "" => Resource::Job(id),

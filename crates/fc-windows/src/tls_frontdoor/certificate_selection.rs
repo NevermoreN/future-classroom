@@ -149,7 +149,8 @@ impl SelectedCertificate {
                     remember(CryptReleaseContext(key.0, 0));
                 }
             }
-            let certificate = std::mem::replace(&mut self.certificate, std::ptr::null_mut());
+            let certificate = self.certificate;
+            self.certificate = std::ptr::null_mut();
             if !certificate.is_null() {
                 remember(CertFreeCertificateContext(Some(certificate)).ok());
             }

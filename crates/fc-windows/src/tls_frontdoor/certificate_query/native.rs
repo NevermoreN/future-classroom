@@ -79,7 +79,8 @@ impl NativeQuery {
     }
 
     fn free_chain(&mut self) {
-        let chain = std::mem::replace(&mut self.chain, std::ptr::null_mut());
+        let chain = self.chain;
+        self.chain = std::ptr::null_mut();
         if !chain.is_null() {
             // SAFETY: exactly this context was returned to this sole owner.
             // The native API is void: return discharges our one reference,

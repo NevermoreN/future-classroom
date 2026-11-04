@@ -70,7 +70,7 @@ impl PageToken {
             return Err(WebSecretError::InvalidSecret);
         }
         let mut bytes = Zeroizing::new([0; 64]);
-        for (byte, pair) in bytes.iter_mut().zip(input.as_bytes().chunks_exact(2)) {
+        for (byte, pair) in bytes.iter_mut().zip(input.as_bytes().as_chunks::<2>().0) {
             *byte = (super::hex(pair[0]).ok_or(WebSecretError::InvalidSecret)? << 4)
                 | super::hex(pair[1]).ok_or(WebSecretError::InvalidSecret)?;
         }

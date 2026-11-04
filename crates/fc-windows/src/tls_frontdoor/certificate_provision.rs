@@ -178,7 +178,8 @@ mod native {
                     record(CryptReleaseContext(std::mem::take(&mut self.provider), 0));
                 }
                 if !self.cert.is_null() {
-                    let cert = std::mem::replace(&mut self.cert, std::ptr::null_mut());
+                    let cert = self.cert;
+                    self.cert = std::ptr::null_mut();
                     if self.rollback && self.stored {
                         record(CertDeleteCertificateFromStore(cert));
                     } else {
@@ -315,7 +316,9 @@ mod native {
         let raw_label = property(certificate, CERT_FRIENDLY_NAME_PROP_ID)?;
         let label = String::from_utf16(
             &raw_label
-                .chunks_exact(2)
+                .as_chunks::<2>()
+                .0
+                .iter()
                 .map(|b| u16::from_le_bytes([b[0], b[1]]))
                 .collect::<Vec<_>>(),
         )
@@ -773,7 +776,9 @@ mod native {
         let label = property(owner.cert, CERT_FRIENDLY_NAME_PROP_ID)?;
         let label = String::from_utf16(
             &label
-                .chunks_exact(2)
+                .as_chunks::<2>()
+                .0
+                .iter()
                 .map(|b| u16::from_le_bytes([b[0], b[1]]))
                 .collect::<Vec<_>>(),
         )
