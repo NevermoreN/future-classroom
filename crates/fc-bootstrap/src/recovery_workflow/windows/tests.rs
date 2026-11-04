@@ -303,3 +303,73 @@ fn abort_without_restore_capability_waits_for_the_real_worker_and_keeps_original
     let recovery = fixture.root.join("recovery");
     assert!(!recovery.exists() || std::fs::read_dir(recovery).unwrap().next().is_none());
 }
+
+#[test]
+fn sealed_web_upload_at_eof_preflights_whole_backup_and_retires_without_live_writes() {
+    use fc_windows::materials::files::ControlledFiles;
+    use std::io::{Seek, Write};
+    let fixture = Fixture::new();
+    let mut pool = crate::web_transfer::uploads::tests::Pool::new();
+    let root = fixture.root.clone();
+    let backend = fixture.backend.clone();
+    let service = backend.lock().unwrap().web_service().for_local_control();
+    service.set_local_control_ready(true);
+    let proof = backend
+        .lock()
+        .unwrap()
+        .login_web_page("admin", crate::recovery::test_support::password(), &service)
+        .unwrap();
+    let lease = service.authenticate_page(&proof).unwrap().lease();
+    assert_eq!(lease.origin(), fc_domain::auth::TrustedOrigin::Web);
+    pool.call(move |_| {
+        let paths = DataPaths::isolated_test(root.clone()).unwrap();
+        let content = crate::profile_content_files::ControlledContentFiles::new(&root).unwrap();
+        crate::profile_content_startup::reconcile_after_restart(&backend.lock().unwrap(), &content)
+            .unwrap();
+        drop(content);
+        let workflow = RecoveryWorkflow::new(paths);
+        let revision = backend.lock().unwrap().global_revision().unwrap();
+        let access = backend
+            .lock()
+            .unwrap()
+            .ordinary_backup_access(lease, revision)
+            .unwrap();
+        let exported = workflow.export(access, Arc::new(|| true)).unwrap();
+        let bytes = std::fs::read(&exported.path).unwrap();
+        let controlled = ControlledFiles::new(&root).unwrap();
+        let upload_path = root.join("quarantine/sealed-upload.fcbackup");
+        let mut upload = controlled.create_new(&upload_path).unwrap();
+        upload.file_mut().write_all(&bytes).unwrap();
+        let mut pin = upload.seal().unwrap();
+        assert_eq!(
+            pin.file_mut().stream_position().unwrap(),
+            bytes.len() as u64,
+            "sealed upload preserves EOF rather than reopening its path"
+        );
+        assert_eq!(bytes.len() as u64, exported.bytes);
+        let access = backend
+            .lock()
+            .unwrap()
+            .ordinary_backup_access(lease, revision)
+            .unwrap();
+        let bundle = workflow
+            .preflight_pinned(pin, access, Arc::new(|| true))
+            .unwrap();
+        assert!(bundle.summary().document_count > 0);
+        assert!(bundle.summary().database_bytes > 0);
+        assert_eq!(
+            backend.lock().unwrap().global_revision().unwrap(),
+            revision,
+            "preflight must not write the live database"
+        );
+        assert!(
+            controlled.remove(&upload_path).unwrap(),
+            "preflight releases the original package pin before Web retires it"
+        );
+        drop(bundle);
+        workflow.request_close();
+        assert!(workflow.retire_pending_on_worker());
+        controlled.remove(&exported.path).unwrap();
+    });
+    pool.join().unwrap();
+}

@@ -70,6 +70,7 @@ pub enum Route {
     },
     Session,
     SessionLogin,
+    AccountRecover,
     SessionResume,
     SessionPassword,
     Setup,
@@ -142,7 +143,8 @@ impl Route {
             } => AllowedMethods::Get,
             Self::Admin {
                 resource:
-                    admin::Resource::Preview { .. }
+                    admin::Resource::AccountSecurity
+                    | admin::Resource::Preview { .. }
                     | admin::Resource::ImageManifest { .. }
                     | admin::Resource::ImageBytes { .. }
                     | admin::Resource::ImageCancel { .. },
@@ -166,6 +168,7 @@ impl Route {
                 | Self::PairingPoll { .. }
                 | Self::Setup
                 | Self::SessionLogin
+                | Self::AccountRecover
                 | Self::SessionResume
                 | Self::Repair { .. }
         )
@@ -187,9 +190,11 @@ impl Route {
             } => admin::images::CHUNK_BYTES as u64,
             Self::Admin { write: true, .. } => admin::MAX_ADMIN_JSON_BYTES as u64,
             Self::Materials { route } => route.body_limit(),
-            Self::Setup | Self::SessionLogin | Self::SessionResume | Self::SessionPassword => {
-                session::MAX_SESSION_JSON_BYTES as u64
-            }
+            Self::Setup
+            | Self::SessionLogin
+            | Self::AccountRecover
+            | Self::SessionResume
+            | Self::SessionPassword => session::MAX_SESSION_JSON_BYTES as u64,
             Self::PairingCreate | Self::PairingPoll { .. } | Self::SessionLogout => {
                 pairing::MAX_PAIRING_JSON_BYTES as u64
             }
@@ -207,6 +212,7 @@ impl Route {
                 Self::PairingCreate
                     | Self::PairingPoll { .. }
                     | Self::SessionLogin
+                    | Self::AccountRecover
                     | Self::SessionResume
                     | Self::Setup
                     | Self::Repair { .. }
@@ -226,6 +232,7 @@ impl Route {
             self,
             Self::Setup
                 | Self::SessionLogin
+                | Self::AccountRecover
                 | Self::SessionResume
                 | Self::SessionPassword
                 | Self::PairingCreate
@@ -318,6 +325,7 @@ impl WebBoundary {
             "pairing/requests" => Route::PairingCreate,
             "session" => Route::Session,
             "session/login" => Route::SessionLogin,
+            "session/recover" => Route::AccountRecover,
             "session/resume" => Route::SessionResume,
             "session/password" => Route::SessionPassword,
             "setup" => Route::Setup,

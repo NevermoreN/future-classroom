@@ -66,6 +66,7 @@ export interface Session {
   currentClassId: string | null
   assignments: { classId: string; subjectId: string }[]
   csrf: string
+  recoveryCode?: string
   mustChangePassword?: boolean
 }
 export interface LoginForm { loginName: string; password: string }
@@ -92,8 +93,9 @@ export function validateLogin(form: LoginForm): void {
 }
 export function pageSession(value: unknown): PageSession {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return fail()
-  const { pageToken, ...rest } = value as Record<string, unknown>
-  return { ...session(rest), pageToken: pageCredential(pageToken) }
+  const { pageToken, recoveryCode, ...rest } = value as Record<string, unknown>
+  if (recoveryCode !== undefined && (typeof recoveryCode !== 'string' || !/^FC1-[0-9a-f]{64}$/.test(recoveryCode))) return fail()
+  return { ...session(rest), pageToken: pageCredential(pageToken), ...(typeof recoveryCode === 'string' ? { recoveryCode } : {}) }
 }
 export function session(value: unknown): Session {
   const hasPasswordState = typeof value === 'object' && value !== null && 'mustChangePassword' in value

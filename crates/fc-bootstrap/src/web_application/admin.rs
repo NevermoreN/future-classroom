@@ -188,8 +188,13 @@ pub(super) fn dispatch(
                     };
                     match scoped.create_account_at(lease, expected, account, password) {
                         Ok(recovery) => {
-                            drop(recovery);
-                            scoped.management_identity(lease)
+                            return match scoped.management_identity(lease) {
+                                Ok(state) => data_response(wire::identity::created(
+                                    &state,
+                                    recovery.reveal().as_str(),
+                                )),
+                                Err(error) => backend_error(error),
+                            };
                         }
                         Err(error) => Err(error),
                     }

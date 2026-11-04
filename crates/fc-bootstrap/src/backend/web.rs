@@ -37,6 +37,20 @@ pub enum WebServiceError {
 type WebResult<T> = std::result::Result<T, WebServiceError>;
 
 impl Backend {
+    pub(crate) fn account_ticket(&self) -> Result<WebSecret> {
+        WebSecret::generate(&mut PlatformRandom).map_err(|_| BackendError::CryptoUnavailable)
+    }
+    pub(crate) fn issue_for_web_account(
+        &self,
+        lease: SessionLease,
+    ) -> Result<fc_ports::command_window::IssuedCommand> {
+        let state = self.state()?;
+        let (actor, _) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        self.issue_for_owner(
+            fc_ports::command_window::CommandFamily::Identity,
+            fc_ports::command_window::CommandOwner::authenticated(&actor),
+        )
+    }
     pub fn issue_for_web_admin(
         &self,
         lease: SessionLease,
@@ -68,7 +82,7 @@ impl Backend {
         options: Initialize,
         password: Password,
         service: &WebService,
-    ) -> Result<PageToken> {
+    ) -> Result<(PageToken, RecoveryCode)> {
         if !service.local_control || !self.web.same_instance(service) {
             return Err(BackendError::InvalidInput);
         }
@@ -78,14 +92,15 @@ impl Backend {
             )));
         }
         let login = options.login_name.clone();
-        drop(self.initialize(options, password)?);
+        let recovery = self.initialize(options, password)?;
         let state = self.state()?;
         let account = state
             .account_by_login(&login)
             .map_err(|_| BackendError::InvalidCredentials)?;
-        service
+        let page = service
             .issue_page(account)
-            .map_err(|_| BackendError::Closed)
+            .map_err(|_| BackendError::Closed)?;
+        Ok((page, recovery))
     }
     /// Reuses the credential reservation/verification path; no pairing approval
     /// and no local workbench unlock is involved in a browser page login.

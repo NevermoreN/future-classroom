@@ -16,7 +16,7 @@ pub(super) fn hook(
     backend: &Arc<Mutex<Backend>>,
     control: LocalControlHandle,
     app: Arc<OnceLock<Weak<WebApplication>>>,
-    diagnostics: Arc<Mutex<Option<fc_windows::desktop::DesktopMetrics>>>,
+    diagnostics: Arc<Mutex<local_web_controller::Diagnostics>>,
     workers: fc_runtime::worker::WorkerHandle<Work>,
 ) -> PlatformHook {
     let backend = Arc::downgrade(backend);
@@ -37,11 +37,11 @@ pub(super) fn hook(
             .map_err(|_| PlatformError::Unavailable)?;
         match request {
             PlatformRequest::Status => {
-                let desktop = diagnostics
+                let (desktop, events) = diagnostics
                     .try_lock()
-                    .ok()
-                    .and_then(|snapshot| snapshot.clone());
-                let mut rows = Vec::with_capacity(12);
+                    .map(|snapshot| (snapshot.desktop.clone(), snapshot.events.clone()))
+                    .unwrap_or_default();
+                let mut rows = Vec::with_capacity(12 + DIAGNOSTIC_EVENT_LIMIT);
                 let mut row = |label: &str, value: String| {
                     rows.push(dto::Diagnostic {
                         label: label.into(),
@@ -102,6 +102,15 @@ pub(super) fn hook(
                         format!(
                             "可见 {}；输入区域 {}",
                             metrics.visible_windows, metrics.input_regions
+                        ),
+                    );
+                }
+                for event in events {
+                    row(
+                        &format!("动作 +{} ms", event.after_ms),
+                        format!(
+                            "{} · {} · 耗时 {} ms（后台返回不等于效果完成）",
+                            event.operation, event.phase, event.elapsed_ms
                         ),
                     );
                 }

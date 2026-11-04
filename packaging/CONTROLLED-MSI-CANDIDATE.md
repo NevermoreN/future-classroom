@@ -9,6 +9,26 @@ fixtures remain separate
 from the original Win7-target MSVC CI admission; modern MSVC compilation is an
 additional check. Compiling a target does not establish runtime compatibility.
 
+The 0.1.4 D12 source implements unified Web management; its formal package is
+still pending the current Win7-target MSVC CI and packaging. This document does
+not announce a release or change the behavior of previously delivered bundles.
+
+For D12, start the application from the desktop/Start menu shortcut, or keep the
+complete direct-run directory and its adjacent web folder. Tray View Status and
+Settings open the actual loopback Web address. Login uses username/password;
+refresh, reconnect and ordinary idle retain the open page's session. Normal tab
+close/new open uses standard sessionStorage semantics and requires login again.
+Closing the browser does not stop the resident desktop. It remains nonactivating
+and topmost across ordinary foreground programs, with Windows lock/security
+desktop exceptions. Normal application exit is the tray Exit action.
+
+Application startup separately prepares its installation-owned IP-SAN certificate
+and CurrentUser trust for the local control endpoint. LAN access still requires
+explicit address/port/source configuration and enablement; teacher devices must
+trust the selected certificate or chain. LAN may use another eligible CurrentUser
+MY server certificate without replacing the local certificate. Private keys are
+not distributed and no firewall rule is created automatically.
+
 Setup expresses only fixed install/repair/remove intent. No command line path,
 caller hash, PID, transaction number or success claim authorizes installation.
 The original B/G association, actual MSI Type1 session and checked native return
@@ -27,6 +47,25 @@ Setup's fixed32 digest slot is filled afterwards. Its normal compiler prefix
 stays byte-for-byte unchanged. Neither the embedded template nor the DLL hashes
 its enclosing MSI. Legacy FCLM73 overlay candidates use a different format and
 must not be mixed with ABI2 products.
+
+Do not install over an old version unless the successor explicitly carries an
+accepted predecessor record matching that deployment. Delivered 0.1.1/0.1.2
+FCLM73 bundles and the three-stream 0.1.3 bundle do not establish that permission
+for the pending 0.1.4 package. Without it, disable the old login startup, exit
+the old app, and uninstall using that version's complete matching Setup/MSI pair.
+Default uninstall preserves school data. Then install the newly delivered full
+pair and verify the original accounts, timetable, layouts and materials. Do not
+mix versions' Setup/MSI files, overwrite an installed directory, delete the
+database, or use data reset as an upgrade step.
+
+Setup Repair restores installer-owned files. Application data reset is a separate
+destructive operation: use authenticated loopback Web maintenance, or first exit
+the app and explicitly run fc-bootstrap.exe --repair for the OS-authorized Web
+repair process. Review the deletion scope and new-identity impact before
+confirmation. This clears deployment data, including internal exports, while
+preserving externally saved copies and Windows settings; restart then initializes
+a new school/admin identity. Missing old credentials do not open registration or
+grant ordinary unauthenticated pages administrator access.
 
 Controlled joint install, damaged repair, failure rollback and same-bundle
 source REMOVE=ALL still require actual evidence. Static build/inspection PASS

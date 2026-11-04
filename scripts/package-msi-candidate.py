@@ -417,7 +417,7 @@ def admit_normal_helper(args, payloads: dict[str, bytes], version: str) -> tuple
             raise ValueError("Invalid CI input ledger")
         inputs[row["path"]] = row
     tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT, timeout=10).decode("utf-8").split("\0")
-    selected = [name for name in tracked if name and (name.startswith(("crates/", "scripts/", "web/", ".cargo/")) or name in ("Cargo.toml", "Cargo.lock"))]
+    selected = [name for name in tracked if name and (name.startswith(("crates/", "scripts/", "web/", ".cargo/")) or name in ("Cargo.toml", "Cargo.lock", "assets/icons/future-classroom.ico"))]
     for name in selected:
         data = PROBE["bounded_regular_file"](ROOT / name, 64 * 1024 * 1024)
         if inputs.get(name) != {"path": name, "bytes": len(data), "sha256": digest(data)}:

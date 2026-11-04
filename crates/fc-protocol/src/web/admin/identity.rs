@@ -213,3 +213,9 @@ pub fn mutation(bytes: &[u8], state: &IdentityState) -> Result<(Revision, Change
     };
     Ok((expected, change))
 }
+/// Only the just-created credential transaction may include its one-time code.
+pub fn created(state: &IdentityState, code: &str) -> Result<Vec<u8>, ProtocolError> {
+    let mut value: serde_json::Value = parse(&document(state)?)?;
+    value["data"]["recoveryCode"] = serde_json::json!(code);
+    serde_json::to_vec(&value).map_err(|_| ProtocolError::InvalidJson)
+}

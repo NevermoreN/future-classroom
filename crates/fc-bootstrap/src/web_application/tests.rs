@@ -963,7 +963,7 @@ fn page_password_initial_login_is_restricted_and_change_returns_new_revoking_ses
 }
 
 #[test]
-fn local_setup_initializes_once_without_pairing_or_recovery_disclosure() {
+fn local_setup_initializes_once_and_returns_recovery_code_only_once() {
     let directory = Directory::new();
     let clock = Arc::new(Time(AtomicU64::new(1000), AtomicU64::new(36000)));
     let mut backend = BackendFixture::open(&directory, clock);
@@ -992,7 +992,7 @@ fn local_setup_initializes_once_without_pairing_or_recovery_disclosure() {
         body.as_bytes(),
     );
     assert_eq!(created.head.status, 200);
-    assert!(!text(&created.body).contains("recovery"));
+    assert!(field(&created.body, "recoveryCode").starts_with("FC1-"));
     let page = field(&created.body, "pageToken");
     assert_eq!(
         app.dispatch(
@@ -1415,4 +1415,208 @@ fn web_images_real_wic_publish_range_and_cancel_retire_controlled_owners() {
     assert_eq!(super::quarantined_uploads(), 0);
     pool.join().unwrap();
     // Fixture Drop closes the real writer and removes its isolated controlled directory.
+}
+
+#[test]
+fn web_account_security_preserves_recovery_and_current_owner_transfer_receipt() {
+    let mut fixture = BackendFixture::new();
+    let prefix = ListenPrefix::https("https://board.school:443/fc/").unwrap();
+    fixture.app = WebApplication::new_local(&prefix, fixture.service.clone()).unwrap();
+    let (page, csrf) = direct_page_login(&mut fixture);
+    let revision = fixture.backend.state().unwrap().revision.get();
+    let create = format!(
+        r#"{{"schemaVersion":1,"expectedRevision":"{revision}","action":"createAccount","candidate":{{"loginName":"recipient","displayName":"Recipient","role":"USER","password":"Initial-recipient-password-2026","scopes":[]}}}}"#
+    );
+    let result = fixture.dispatch(
+        &page_head("POST", "admin/identity", create.len(), &page, Some(&csrf)),
+        create.as_bytes(),
+    );
+    assert_eq!(result.head.status, 200, "{}", text(&result.body));
+    assert!(field(&result.body, "recoveryCode").starts_with("FC1-"));
+    let recipient_id = fixture
+        .backend
+        .state()
+        .unwrap()
+        .account_by_login("recipient")
+        .unwrap()
+        .principal
+        .id
+        .get();
+    let login = r#"{"schemaVersion":1,"loginName":"recipient","password":"Initial-recipient-password-2026"}"#;
+    let response = fixture.dispatch(
+        &head("POST", "session/login", login.len(), None, None),
+        login.as_bytes(),
+    );
+    let recipient_page = field(&response.body, "pageToken");
+    let recipient_csrf = field(&response.body, "csrf");
+    let change = r#"{"schemaVersion":1,"currentPassword":"Initial-recipient-password-2026","newPassword":"Changed-recipient-password-2026"}"#;
+    assert_eq!(
+        fixture
+            .dispatch(
+                &page_head(
+                    "POST",
+                    "session/password",
+                    change.len(),
+                    &recipient_page,
+                    Some(&recipient_csrf)
+                ),
+                change.as_bytes()
+            )
+            .head
+            .status,
+        200
+    );
+    let revision = fixture.backend.state().unwrap().revision.get();
+    let prepare = format!(
+        r#"{{"schemaVersion":1,"action":"prepareTransfer","expectedRevision":"{revision}","targetId":"{recipient_id}"}}"#
+    );
+    let remote = WebApplication::new(&prefix, fixture.service.clone()).unwrap();
+    assert_eq!(
+        remote
+            .dispatch(
+                &mut fixture.backend,
+                &page_head(
+                    "POST",
+                    "admin/account-security",
+                    prepare.len(),
+                    &page,
+                    Some(&csrf)
+                ),
+                prepare.as_bytes()
+            )
+            .head
+            .status,
+        403
+    );
+    let response = fixture.dispatch(
+        &page_head(
+            "POST",
+            "admin/account-security",
+            prepare.len(),
+            &page,
+            Some(&csrf),
+        ),
+        prepare.as_bytes(),
+    );
+    assert_eq!(response.head.status, 200, "{}", text(&response.body));
+    let ticket = field(&response.body, "ticket");
+    let transfer = format!(
+        r#"{{"schemaVersion":1,"action":"transfer","ticket":"{ticket}","currentPassword":"{PASSWORD}","reviewedTarget":true,"understoodRevocation":true}}"#
+    );
+    let response = fixture.dispatch(
+        &page_head(
+            "POST",
+            "admin/account-security",
+            transfer.len(),
+            &page,
+            Some(&csrf),
+        ),
+        transfer.as_bytes(),
+    );
+    assert_eq!(response.head.status, 200, "{}", text(&response.body));
+    assert!(text(&response.body).contains("COMMITTED"));
+    assert_eq!(
+        fixture
+            .dispatch(&page_head("GET", "session", 0, &page, None), b"")
+            .head
+            .status,
+        401
+    );
+    let (fresh, fresh_csrf) = direct_page_login(&mut fixture);
+    assert_eq!(
+        fixture
+            .dispatch(&page_head("GET", "admin/identity", 0, &fresh, None), b"")
+            .head
+            .status,
+        403
+    );
+    let query = format!(r#"{{"schemaVersion":1,"action":"outcome","ticket":"{ticket}"}}"#);
+    let original = fixture.dispatch(
+        &page_head(
+            "POST",
+            "admin/account-security",
+            query.len(),
+            &fresh,
+            Some(&fresh_csrf),
+        ),
+        query.as_bytes(),
+    );
+    assert_eq!(original.head.status, 200, "{}", text(&original.body));
+    assert!(text(&original.body).contains("COMMITTED"));
+    assert!(!text(&original.body).contains("Recipient"));
+    fixture.backend.close().unwrap();
+}
+
+#[test]
+fn web_recovery_rotation_and_forgot_password_use_original_single_use_credential_flow() {
+    let mut fixture = BackendFixture::new();
+    let prefix = ListenPrefix::https("https://board.school:443/fc/").unwrap();
+    fixture.app = WebApplication::new_local(&prefix, fixture.service.clone()).unwrap();
+    let (page, csrf) = direct_page_login(&mut fixture);
+    let rotate = format!(
+        r#"{{"schemaVersion":1,"action":"rotateRecovery","currentPassword":"{PASSWORD}"}}"#
+    );
+    let response = fixture.dispatch(
+        &page_head(
+            "POST",
+            "admin/account-security",
+            rotate.len(),
+            &page,
+            Some(&csrf),
+        ),
+        rotate.as_bytes(),
+    );
+    assert_eq!(response.head.status, 200, "{}", text(&response.body));
+    let code = field(&response.body, "recoveryCode");
+    assert_eq!(
+        fixture
+            .dispatch(&page_head("GET", "session", 0, &page, None), b"")
+            .head
+            .status,
+        401
+    );
+    let recover = format!(
+        r#"{{"schemaVersion":1,"loginName":"admin","recoveryCode":"{code}","newPassword":"Recovered-admin-password-2026"}}"#
+    );
+    let remote = WebApplication::new(&prefix, fixture.service.clone()).unwrap();
+    assert_eq!(
+        remote
+            .dispatch(
+                &mut fixture.backend,
+                &head("POST", "session/recover", recover.len(), None, None),
+                recover.as_bytes()
+            )
+            .head
+            .status,
+        403
+    );
+    let response = fixture.dispatch(
+        &head("POST", "session/recover", recover.len(), None, None),
+        recover.as_bytes(),
+    );
+    assert_eq!(response.head.status, 200, "{}", text(&response.body));
+    assert_ne!(field(&response.body, "recoveryCode"), code);
+    assert_eq!(
+        fixture
+            .dispatch(
+                &head("POST", "session/recover", recover.len(), None, None),
+                recover.as_bytes()
+            )
+            .head
+            .status,
+        403
+    );
+    let login =
+        r#"{"schemaVersion":1,"loginName":"admin","password":"Recovered-admin-password-2026"}"#;
+    assert_eq!(
+        fixture
+            .dispatch(
+                &head("POST", "session/login", login.len(), None, None),
+                login.as_bytes()
+            )
+            .head
+            .status,
+        200
+    );
+    fixture.backend.close().unwrap();
 }

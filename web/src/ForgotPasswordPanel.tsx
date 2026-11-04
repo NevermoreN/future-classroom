@@ -1,0 +1,15 @@
+import { useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Field, Section } from './AdminForms'
+import RecoveryCodeNotice from './RecoveryCodeNotice'
+import { AccountSecurityHttpApi, localAccountControl } from './api/account-security-client'
+import { ApiError, isAborted, trustedApiBase } from './api/client'
+export default function ForgotPasswordPanel({ done }: { done: () => void }) {
+  const [login, setLogin] = useState(''), [code, setCode] = useState(''), [password, setPassword] = useState(''), [confirm, setConfirm] = useState(''), [issued, setIssued] = useState<string | null>(null), [notice, setNotice] = useState(''), [busy, setBusy] = useState(false), [uncertain, setUncertain] = useState(false)
+  const [api] = useState(() => new AccountSecurityHttpApi(trustedApiBase(import.meta.env.BASE_URL, window.location.href))), operation = useRef<AbortController | null>(null)
+  useEffect(() => () => operation.current?.abort(), [])
+  async function recover() { if (busy || uncertain) return; if (password !== confirm) { setNotice('两次密码不一致。'); return } if ([...password].length < 12 || [...password].length > 128) { setNotice('新密码需要12–128字符。'); return } const owner = new AbortController(); operation.current = owner; setBusy(true); const oldCode = code, nextPassword = password; setCode(''); setPassword(''); setConfirm(''); try { const next = await api.recover(login, oldCode, nextPassword, owner.signal); if (!owner.signal.aborted) setIssued(next) } catch (e) { if (!isAborted(e)) { const unknown = !(e instanceof ApiError) || e.status >= 500; setUncertain(unknown); setNotice(unknown ? '恢复结果尚未确认，不会自动重发。请先尝试用刚设置的新密码登录，再核对本人恢复码。' : e instanceof ApiError && e.status === 429 ? '核验次数较多，请稍后再试。' : '恢复未完成，请核对用户名、恢复码以及本机访问地址。') } } finally { if (!owner.signal.aborted) setBusy(false) } }
+  if (issued) return <RecoveryCodeNotice code={issued} onDone={() => { setIssued(null); done() }} />
+  return <Section title="使用恢复码设置新密码">{!localAccountControl() ? <p>请在教室电脑上从未来教室托盘打开本机 Web 设置，使用离线保存的恢复码恢复账号。</p> : <form className="pair-form" onSubmit={e => { e.preventDefault(); void recover() }}><fieldset className="admin-fieldset" disabled={busy || uncertain}><Field label="用户名"><Input required autoComplete="username" maxLength={64} value={login} onChange={e => setLogin(e.target.value)} /></Field><Field label="离线保存的恢复码"><Input required type="password" autoComplete="off" maxLength={68} value={code} onChange={e => setCode(e.target.value)} /></Field><Field label="新密码（12–128字符）"><Input required type="password" autoComplete="new-password" maxLength={256} value={password} onChange={e => setPassword(e.target.value)} /></Field><Field label="再次输入新密码"><Input required type="password" autoComplete="new-password" maxLength={256} value={confirm} onChange={e => setConfirm(e.target.value)} /></Field><p>成功后旧密码、旧恢复码和全部旧会话失效；请保存新恢复码，再使用新密码登录。</p><Button type="submit">确认使用恢复码恢复本人账号</Button></fieldset></form>}<p role="alert">{notice}</p><Button type="button" variant="outline" disabled={busy} onClick={done}>返回用户名密码登录</Button></Section>
+}

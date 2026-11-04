@@ -414,6 +414,7 @@ impl MaintenanceWork {
         let execution = context.execution_fence();
         let fence: ExecutionFence = Arc::new(move || job.active() && execution());
         active.job.update(Phase::Working, |s| s.error = None)?;
+        let mut failure_hint = None;
         let result = (|| {
             match self.kind {
                 MaintenanceWorkKind::ResetReview => {
@@ -483,8 +484,33 @@ impl MaintenanceWork {
                     // its own workspace and released the original package before
                     // either workflow returns. Retire our upload on this worker
                     // before confirmation can stop the shared pool.
+                    if let Err(error) = &outcome {
+                        use crate::{
+                            recovery_files::RecoveryFileError as F,
+                            recovery_workflow::WorkflowError as W,
+                        };
+                        failure_hint = Some(match error {
+                            W::Files(F::InvalidPackage) => {
+                                "备份包格式或完整性预检未通过，正式数据未修改。"
+                            }
+                            W::Files(F::Unavailable) => {
+                                "无法读取受控备份或创建预检工作区，正式数据未修改。"
+                            }
+                            W::Files(F::RepairRequired) => {
+                                "预检工作区需要修复或清理，正式数据未修改。"
+                            }
+                            W::Backend(_) => "备份数据或恢复权限预检未通过，正式数据未修改。",
+                            W::Busy => "恢复工作区仍被占用，请先结束上一项维护。",
+                            W::Cancelled | W::Files(F::Cancelled) => {
+                                "备份预检已取消，正式数据未修改。"
+                            }
+                            W::Shutdown(_) => "恢复协调器未完成准备，正式数据未修改。",
+                        });
+                    }
                     if let Some(upload) = active.uploaded.as_mut() {
-                        upload.retire()?;
+                        upload.retire().inspect_err(|_| {
+                            failure_hint = Some("备份上传暂存文件尚未完成清理，正式数据未修改。");
+                        })?;
                     }
                     active.uploaded = None;
                     outcome.map_err(|_| MaintenanceError::Unavailable)??;
@@ -603,7 +629,7 @@ impl MaintenanceWork {
             } else {
                 active
                     .job
-                    .fail("维护操作未完成，正式数据未由本次预检修改。")?;
+                    .fail(failure_hint.unwrap_or("维护操作未完成，正式数据未由本次预检修改。"))?;
             }
             return Err(error);
         }

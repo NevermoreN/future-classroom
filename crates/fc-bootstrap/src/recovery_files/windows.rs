@@ -502,6 +502,12 @@ impl RecoveryFiles {
         check: &dyn Fn() -> bool,
     ) -> Result<PreparedRestore> {
         ensure(check)?;
+        // Sealed Web uploads retain the write handle's EOF cursor. A backup
+        // package is always a whole-file container, regardless of its handoff.
+        source
+            .file_mut()
+            .seek(SeekFrom::Start(0))
+            .map_err(unavailable)?;
         let workspace = self.workspace()?;
         let new = workspace.new_root();
         let candidate_files = ControlledFiles::new(&new).map_err(unavailable)?;

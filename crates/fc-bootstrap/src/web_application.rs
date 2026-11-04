@@ -15,6 +15,7 @@ use fc_protocol::{
 };
 use fc_security::web::{page::PageToken, PairingCode, WebSecret};
 
+mod account_security;
 pub mod admin;
 pub(crate) mod admin_platform;
 #[cfg(windows)]
@@ -58,6 +59,7 @@ pub struct WebApplication {
         std::sync::Arc<std::sync::Mutex<Option<std::sync::Arc<profile_images::ImageFiles>>>>,
     boundary: std::sync::Arc<WebBoundary>,
     service: WebService,
+    account_receipts: std::sync::Arc<std::sync::Mutex<Vec<account_security::Receipt>>>,
     local_control: bool,
     admin_platform: Option<admin::PlatformHook>,
     #[cfg(windows)]
@@ -122,6 +124,7 @@ impl WebApplication {
         Ok(Self {
             boundary: std::sync::Arc::new(WebBoundary::new(prefix)?),
             service,
+            account_receipts: Default::default(),
             local_control: false,
             #[cfg(windows)]
             profile_images: std::sync::Arc::new(std::sync::Mutex::new(None)),
@@ -174,6 +177,7 @@ impl WebApplication {
         Self {
             boundary: self.boundary.clone(),
             service: self.service.with_execution_fence(fence),
+            account_receipts: self.account_receipts.clone(),
             local_control: self.local_control,
             #[cfg(windows)]
             profile_images: self.profile_images.clone(),
@@ -360,6 +364,9 @@ impl WebApplication {
                 let Some(session) = authenticated else {
                     return failure(401, responses::ErrorCode::Unauthorized);
                 };
+                if resource == fc_protocol::web::admin::Resource::AccountSecurity {
+                    return account_security::dispatch(self, backend, session.lease(), body);
+                }
                 admin::dispatch(
                     backend,
                     session.lease(),
@@ -368,6 +375,7 @@ impl WebApplication {
                     self.admin_platform.as_ref(),
                 )
             }
+            Route::AccountRecover => account_security::recover(self, backend, body),
             Route::SessionLogin => {
                 let input = match fc_protocol::web::session::login(body) {
                     Ok(input) => input,
@@ -460,7 +468,9 @@ impl WebApplication {
                     password,
                     &self.service,
                 ) {
-                    Ok(proof) => self.page_session_response(&proof),
+                    Ok((proof, recovery)) => {
+                        account_security::setup_response(self, &proof, recovery)
+                    }
                     Err(crate::backend::BackendError::Identity(
                         fc_ports::IdentityRepositoryError::Domain(
                             fc_domain::identity::IdentityError::AlreadyInitialized,

@@ -37,6 +37,11 @@ export class SessionController {
     const { pageToken: _, ...account } = session
     this.publish({ phase: 'authenticated', session: account })
   }
+  acknowledgeRecoveryCode(): void {
+    if (this.state.phase !== 'authenticated') return
+    const { recoveryCode: _, ...session } = this.state.session
+    this.publish({ ...this.state, session })
+  }
   private clear() { this.pageToken = undefined; this.credentials.clear(); setPageToken(undefined) }
   private failed(error: unknown, previous?: Session) {
     if (error instanceof ApiError && error.status === 401) {

@@ -2,6 +2,7 @@
 use crate::{ProtocolError, SCHEMA_VERSION};
 use fc_domain::ids::Revision;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+pub mod account_security;
 pub mod display;
 pub mod identity;
 pub mod images;
@@ -17,6 +18,7 @@ pub const MAX_ADMIN_JSON_BYTES: usize = 4 * 1024 * 1024;
 pub enum Resource {
     Status,
     Identity,
+    AccountSecurity,
     Display,
     Schedule,
     Layout,
@@ -130,6 +132,7 @@ impl Resource {
         Some(match path {
             "status" => Self::Status,
             "identity" => Self::Identity,
+            "account-security" => Self::AccountSecurity,
             "display" => Self::Display,
             "schedule" => Self::Schedule,
             "layout" => Self::Layout,

@@ -13,7 +13,7 @@ pub(super) enum Job {
         root: PathBuf,
         control: fc_bootstrap::local_https::LocalControlHandle,
         maintenance: Arc<fc_bootstrap::maintenance_web::MaintenanceService>,
-        diagnostics: Arc<Mutex<Option<fc_windows::desktop::DesktopMetrics>>>,
+        diagnostics: Arc<Mutex<Diagnostics>>,
         workers: fc_runtime::worker::WorkerHandle<Work>,
     },
 }
@@ -82,9 +82,15 @@ impl Job {
 }
 
 #[derive(Default)]
+pub(super) struct Diagnostics {
+    pub(super) desktop: Option<fc_windows::desktop::DesktopMetrics>,
+    pub(super) events: VecDeque<DiagnosticEvent>,
+}
+
+#[derive(Default)]
 pub(super) struct State {
     pub(super) open_when_ready: bool,
-    diagnostics: Arc<Mutex<Option<fc_windows::desktop::DesktopMetrics>>>,
+    diagnostics: Arc<Mutex<Diagnostics>>,
     next_diagnostics: Option<Instant>,
     pending: Option<JobTicket<Result<Outcome>>>,
     pub(super) runtime: Option<LocalRuntime>,
@@ -123,7 +129,8 @@ impl App {
             .is_none_or(|next| Instant::now() >= next)
         {
             if let Ok(mut snapshot) = self.local_web.diagnostics.try_lock() {
-                *snapshot = Some(self.desktop.last_metrics());
+                snapshot.desktop = Some(self.desktop.last_metrics());
+                snapshot.events.clone_from(&self.diagnostic_events);
             }
             self.local_web.next_diagnostics = Some(Instant::now() + Duration::from_secs(1));
         }

@@ -1,3 +1,6 @@
+import AccountSecurityPanel, { TransferOutcomePanel } from './AccountSecurityPanel'
+import RecoveryCodeNotice from './RecoveryCodeNotice'
+import ForgotPasswordPanel from './ForgotPasswordPanel'
 import RepairPanel from './RepairPanel'
 import { repairBootstrap } from './api/repair-client'
 import MaintenancePanel from './MaintenancePanel'
@@ -62,6 +65,7 @@ function PasswordForm({ required, busy, notice, onSubmit, onCancel, onLogout }: 
   </CardContent></Card></main>
 }
 export default function App() {
+  const [forgot, setForgot] = useState(false)
   const [repair] = useState(repairBootstrap)
   const [resumeMaintenance, setResumeMaintenance] = useState(() => !!loadMaintenance())
   const [view, setView] = useState<ViewState>({ phase: 'checking' })
@@ -80,8 +84,9 @@ export default function App() {
   const connected = ['anonymous', 'setup', 'setting-up', 'logging-in', 'authenticated', 'logging-out', 'logout-unknown'].includes(view.phase)
   return <div className={view.phase === 'authenticated' ? 'app-shell authenticated-shell' : 'app-shell'}><div className="sr-only" role="status" aria-live="polite">{view.phase === 'authenticated' ? '白板已确认登录，管理页面已就绪。' : view.phase === 'logout-unknown' ? '注销结果尚未确认，需要主动核对白板会话。' : ''}</div><a className="skip-link" href="#main-content">跳到主要内容</a>
     <header className="site-header">{view.phase === 'authenticated' ? <div className="teacher-brand"><BookOpen size={30} /><strong>{view.session.principal.role === 'GLOBAL_ADMIN' ? '全局主管理员' : view.session.principal.role === 'TEACHER_ADMIN' ? '教师管理员' : '普通用户'} · {view.session.principal.displayName}</strong></div> : <Brand />}<div className="header-right"><span className={`connection-status ${connected ? 'connected' : ''}`}><span />{connected ? '白板连接已核验' : busy ? '正在检查连接' : '连接待核验'}</span>{view.phase === 'authenticated' ? <span className="teacher-identity"><UserRound size={20} />{view.session.principal.displayName}</span> : <span className="workspace-label">教室管理</span>}</div></header>
+    {view.phase === 'authenticated' && <TransferOutcomePanel session={view.session} />}
     {view.phase === 'authenticated' && view.notice && <p className="notice" role="status">{view.notice}</p>}
-    {view.phase === 'authenticated' ? view.session.mustChangePassword || view.passwordChange ? <PasswordForm required={!!view.session.mustChangePassword} busy={!!view.passwordBusy} notice={view.passwordNotice} onSubmit={form => { void controller.current?.changePassword(form) }} onCancel={() => controller.current?.cancelPasswordChange()} onLogout={() => { void controller.current?.logout() }} /> : <TeacherWorkspace onPasswordChange={() => controller.current?.showPasswordChange()} session={view.session} onLogout={() => { void controller.current?.logout() }} onRefresh={() => { void controller.current?.connect() }} onRevoked={() => controller.current?.invalidate()} /> : <main id="main-content" className="pairing-layout">
+    {view.phase === 'authenticated' ? view.session.recoveryCode ? <main className="workspace"><RecoveryCodeNotice code={view.session.recoveryCode} onDone={() => controller.current?.acknowledgeRecoveryCode()} /></main> : view.session.mustChangePassword || view.passwordChange ? <>{!view.session.mustChangePassword && <AccountSecurityPanel session={view.session} onRevoked={() => controller.current?.invalidate()} />}<PasswordForm required={!!view.session.mustChangePassword} busy={!!view.passwordBusy} notice={view.passwordNotice} onSubmit={form => { void controller.current?.changePassword(form) }} onCancel={() => controller.current?.cancelPasswordChange()} onLogout={() => { void controller.current?.logout() }} /></> : <TeacherWorkspace onPasswordChange={() => controller.current?.showPasswordChange()} session={view.session} onLogout={() => { void controller.current?.logout() }} onRefresh={() => { void controller.current?.connect() }} onRevoked={() => controller.current?.invalidate()} /> : <main id="main-content" className="pairing-layout">
       <section className="intro-panel"><span className="intro-tag"><Sparkles size={14} />让教学，轻松一步</span><h1>连接你的教室，<br />专注每一堂课<span>。</span></h1><p className="intro-description">从自己的设备安全连接白板。<br />课堂里的准备与协作，从这里开始。</p>
         <div className="classroom-illustration" aria-hidden="true"><div className="board-top"><span /><span /><span /></div><div className="board-content"><span className="board-caption">未来教室</span><div className="board-line long" /><div className="board-line short" /><div className="board-tiles"><span><BookOpen size={28} /></span><span><Radio size={26} /></span><span><FolderOpen size={28} /></span></div></div><div className="device-bubble"><Smartphone size={24} /><span>你的设备</span><i><Check size={12} /></i></div><div className="board-stand" /></div>
         <ol className="pairing-steps"><li><span>01</span><div><strong>使用已有账号</strong><p>输入用户名与密码即可登录</p></div></li><li><span>02</span><div><strong>管理你的教室</strong><p>按账号权限查看和管理内容</p></div></li><li><span>03</span><div><strong>专注当前工作</strong><p>切换页面或刷新无需重复登录</p></div></li></ol>
@@ -97,7 +102,7 @@ export default function App() {
           {view.phase === 'logout-unknown' && <div className="state-panel error-panel"><CircleAlert size={30} /><h2>注销结果尚未确认</h2><p>页面已清除会话信息，但还不能确认白板是否完成注销。不会自动重复提交。</p><Button variant="outline" onClick={() => { void controller.current?.connect() }}><RefreshCw />核对白板会话</Button></div>}
         </div>
         {view.phase === 'setup' && <><SetupForm onSubmit={form => { void controller.current?.setup(form) }} /><Button variant="ghost" onClick={() => { void controller.current?.connect() }}>重新检查初始化状态</Button></>}
-        {view.phase === 'anonymous' && <LoginForm enabled onSubmit={form => { void controller.current?.login(form) }} />}
+        {view.phase === 'anonymous' && (forgot ? <ForgotPasswordPanel done={() => setForgot(false)} /> : <><LoginForm enabled onSubmit={form => { void controller.current?.login(form) }} /><Button variant="ghost" onClick={() => setForgot(true)}>忘记密码？使用恢复码</Button></>)}
         {view.phase !== 'anonymous' && <div className="secure-footnote"><LockKeyhole size={14} />通过加密连接验证账号</div>}
       </CardContent></Card>
     </main>}

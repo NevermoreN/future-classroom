@@ -88,7 +88,7 @@
 
 | 原能力 | Web入口/API族（版本化、严格DTO） | 用例/平台边界 |
 | --- | --- | --- |
-| 首次初始化、登录/改密、账号与任教 | setup、session、accounts、assignments | M03/M15；初始化CAS、限速、角色/授权代次；不再配对审批 |
+| 首次初始化、登录/改密、恢复码轮换/忘密恢复、账号与任教、主管理员交接及本人结果查询 | setup、session、accounts、assignments及类型化凭据/交接命令 | M03/M15；初始化CAS、限速、角色/授权代次、原交接当前密码核验与receipt；新恢复码仅一次展示，不再配对审批，不增加管理员代改他人密码体系 |
 | 科目、学期/单双周课表、校历及默认老师 | subjects、schedules、calendars | M07/M08/M15；结构化网格、影响预览与联合修订 |
 | 显示/颜色/组件树、profile布局、时钟/倒计时 | display、layouts、profiles、preview | M02协调草稿，M16场景；服务端用同版内容/字体度量返回有界预览几何，Web呈现；预览不写正式课堂 |
 | 独立文字/图片、作业、资料、提醒及录音 | 既有content/materials/voice和扩展命令 | 原应用用例、上传配额与真实结果；教师范围不扩大 |

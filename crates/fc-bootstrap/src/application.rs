@@ -2525,6 +2525,7 @@ struct DiagnosticTiming {
     operation: &'static str,
     started: Instant,
 }
+#[derive(Clone)]
 struct DiagnosticEvent {
     after_ms: u128,
     operation: &'static str,

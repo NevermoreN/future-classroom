@@ -1761,7 +1761,6 @@ fn check_account_proof_binding(
     if issued.family != CommandFamily::Identity
         || issued.command_id != request.command_id
         || issued.owner != CommandOwner::authenticated(actor)
-        || actor.origin != TrustedOrigin::Local
         || !matches!(
             request.command,
             IdentityCommand::CreateAccount(_)
@@ -1860,8 +1859,7 @@ impl<S> TransactionTask<S> for AccountOutcomeTask {
                     || principal != *from
                     || principal != self.actor.principal_id
                     || school != self.actor.school_id
-                    || origin != TrustedOrigin::Local
-                    || self.actor.origin != TrustedOrigin::Local
+                    || origin != self.actor.origin
                     || (self.actor.auth_epoch != epoch
                         && epoch.next().ok() != Some(self.actor.auth_epoch))
                     || account.must_change_password
