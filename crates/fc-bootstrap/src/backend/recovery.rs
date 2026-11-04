@@ -205,8 +205,9 @@ impl RestoreConfirmation {
             return Err(StorageError::ExecutionCancelled.into());
         }
         let scoped_repository = self.access.repository.with_command_window(issued);
-        self.web.close();
-        self.voice.invalidate_runtime();
+        // The writer must still authenticate this exact Web actor at evaluation
+        // and precommit. The durable barrier advances every authorization epoch;
+        // close runtime admission only after that transaction has succeeded.
         let result = scoped_repository
             .try_advance_recovery_barrier(self.access.expected_revision, &self.access.actor, fence)
             .and_then(fc_storage::Ticket::wait);

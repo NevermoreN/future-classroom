@@ -127,6 +127,66 @@ fn lost_confirmation_notification_remains_claimable_and_commits_after_real_drain
     *fixture.backend.lock().unwrap() = fixture.reopen(&paths.database());
     assert!(fixture.backend.lock().unwrap().state().is_ok());
 }
+#[test]
+fn web_confirmation_authenticates_before_closing_runtime_and_cold_restore_finishes() {
+    let fixture = Fixture::new();
+    let (workflow, bundle) = preview(&fixture);
+    let original_revision = fixture.revision();
+    let service = fixture
+        .backend
+        .lock()
+        .unwrap()
+        .web_service()
+        .for_local_control();
+    service.set_local_control_ready(true);
+    let proof = fixture
+        .backend
+        .lock()
+        .unwrap()
+        .login_web_page("admin", crate::recovery::test_support::password(), &service)
+        .unwrap();
+    let lease = service.authenticate_page(&proof).unwrap().lease();
+    assert_eq!(lease.origin(), fc_domain::auth::TrustedOrigin::Web);
+    let backend = fixture.backend.clone();
+    let worker_workflow = workflow.clone();
+    let mut workers = crate::web_transfer::uploads::tests::Pool::new();
+    let confirmed = workers.call(move |_| {
+        worker_workflow
+            .confirm(bundle, backend, lease, Arc::new(|| true))
+            .unwrap()
+    });
+    workers.join().unwrap();
+    let control = fixture.backend.lock().unwrap().session_control();
+    assert!(control.is_recovering());
+    assert_eq!(
+        control.health_gate().status().revision,
+        original_revision.next().unwrap(),
+        "the authenticated writer must durably advance the recovery barrier"
+    );
+    assert!(service.authenticate_page(&proof).is_err());
+    let coordinator = PreparedCoordinator::<QuietTask>::prepare().unwrap();
+    let mut operation = coordinator.start(
+        confirmed,
+        fixture.backend.clone(),
+        WorkerPool::start().unwrap(),
+        VoiceRuntime::new(Arc::new(QuietFactory)),
+    );
+    let status = finish(&mut operation);
+    assert_eq!(status.phase, RestorePhase::Finished);
+    assert!(status.result.unwrap().is_ok());
+    assert!(workflow.is_idle());
+    let paths = DataPaths::isolated_test(fixture.root.clone()).unwrap();
+    assert_eq!(
+        RecoveryFiles::new(&paths)
+            .unwrap()
+            .reconcile_startup(&|| true)
+            .unwrap()
+            .installed,
+        1
+    );
+    *fixture.backend.lock().unwrap() = fixture.reopen(&paths.database());
+    assert!(fixture.backend.lock().unwrap().state().is_ok());
+}
 struct HeldTask {
     started: Arc<AtomicBool>,
     release: Arc<AtomicBool>,

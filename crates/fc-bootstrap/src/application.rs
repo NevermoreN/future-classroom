@@ -3263,6 +3263,7 @@ impl App {
             .control
             .as_ref()
             .is_some_and(SessionControl::is_recovering)
+            && (self.offscreen_probe || self.maintenance.service.is_none())
         {
             let _ = self.poll_backup();
         }
@@ -5495,7 +5496,11 @@ impl App {
         // return before its coordinator can take the original shared workers.
         self.poll_teacher_https()?;
         self.poll_web_maintenance()?;
-        self.poll_backup()?;
+        // A Web confirmation closes ordinary admission before its notification
+        // reaches this pump. Only its controller may own that cold handoff.
+        if self.offscreen_probe || self.maintenance.service.is_none() {
+            self.poll_backup()?;
+        }
         if self.backup.irreversible() {
             return Ok(());
         }
@@ -6781,6 +6786,18 @@ fn run_at_inner(
                     })
                 }))
         {
+            eprintln!(
+                "关闭所有权状态：fault={} irreversible={} writer_closed={} workers_finished={} shell_finished={} backup_exit_ready={} local_quiescent={} web_maintenance_pending={} exiting={}。",
+                app.terminate_required,
+                app.backup.irreversible(),
+                app.writer_closed,
+                app.pool.is_finished(),
+                app.shell.is_finished(),
+                app.backup.exit_ready(),
+                app.local_web_quiescent(),
+                app.maintenance.pending_work(),
+                app.exiting,
+            );
             eprintln!("未来教室关闭超时，停止当前进程并保留数据供启动核对。");
             std::process::exit(2);
         }

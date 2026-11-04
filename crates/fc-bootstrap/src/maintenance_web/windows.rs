@@ -585,6 +585,24 @@ impl MaintenanceWork {
                         active.lease,
                         fence.clone(),
                     );
+                    if let Err(error) = &confirmed {
+                        use crate::recovery_workflow::WorkflowError as W;
+                        let stage = match error {
+                            W::Busy => "busy",
+                            W::Cancelled => "cancelled",
+                            W::Backend(crate::backend::BackendError::Storage(
+                                fc_storage::StorageError::AuthorityUnavailable,
+                            )) => "writer-authority-unavailable",
+                            W::Backend(crate::backend::BackendError::Storage(
+                                fc_storage::StorageError::Conflict { .. },
+                            )) => "writer-revision-conflict",
+                            W::Backend(crate::backend::BackendError::Storage(_)) => "writer",
+                            W::Backend(_) => "backend",
+                            W::Files(_) => "files",
+                            W::Shutdown(_) => "shutdown",
+                        };
+                        eprintln!("未来教室恢复确认未完成：{stage}。");
+                    }
                     if let Some(bundle) = active.workflow.confirmed_bundle() {
                         active
                             .job
