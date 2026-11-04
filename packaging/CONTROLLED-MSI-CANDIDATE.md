@@ -9,7 +9,7 @@ fixtures remain separate
 from the original Win7-target MSVC CI admission; modern MSVC compilation is an
 additional check. Compiling a target does not establish runtime compatibility.
 
-Version 0.1.4 D12 implements unified Web management. Its exact compiler source,
+Version 0.1.5 implements unified Web management and the classroom desktop corrections. Its exact compiler source,
 CI run, package hashes and actual installation results are recorded separately
 in the delivered receipt. This document does not certify every deployment
 environment or change the behavior of previously delivered bundles.
@@ -19,9 +19,13 @@ complete direct-run directory and its adjacent web folder. Tray View Status and
 Settings open the actual loopback Web address. Login uses username/password;
 refresh, reconnect and ordinary idle retain the open page's session. Normal tab
 close/new open uses standard sessionStorage semantics and requires login again.
-Closing the browser does not stop the resident desktop. It remains nonactivating
-and topmost across ordinary foreground programs, with Windows lock/security
-desktop exceptions. Normal application exit is the tray Exit action.
+Closing the browser does not stop the resident desktop. It is shown without activation only while the Windows desktop is foreground.
+Opening PowerPoint, a browser or another application hides the information layer,
+including full-screen applications. Returning to the desktop restores it. Normal application exit is the tray Exit action.
+
+Layout editing uses plain-language item/group labels. Timetable columns align,
+each lesson has a visible left-side delete button, and time fields keep the
+HH:MM shape while accepting digits only.
 
 Application startup separately prepares its installation-owned IP-SAN certificate
 and CurrentUser trust for the local control endpoint. LAN access still requires
@@ -52,7 +56,8 @@ must not be mixed with ABI2 products.
 Do not install over an old version unless the successor explicitly carries an
 accepted predecessor record matching that deployment. Delivered 0.1.1/0.1.2
 FCLM73 bundles and the three-stream 0.1.3 bundle do not establish that permission
-for the 0.1.4 package. Without it, disable the old login startup, exit
+for the 0.1.5 package. The delivered three-stream 0.1.4 package also does not
+establish a qualified predecessor record for this package. Without it, disable the old login startup, exit
 the old app, and uninstall using that version's complete matching Setup/MSI pair.
 Default uninstall preserves school data. Then install the newly delivered full
 pair and verify the original accounts, timetable, layouts and materials. Do not
