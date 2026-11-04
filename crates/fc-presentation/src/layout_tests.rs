@@ -138,6 +138,82 @@ fn enclose_clock(tree: &mut LayoutTree, opacity: u8, glass: bool) {
     });
 }
 #[test]
+fn desktop_anchor_uses_visible_cards_with_padded_fixed_or_percentage_viewports() {
+    let work = Rect {
+        x: -1920.,
+        y: -200.,
+        width: 1600.,
+        height: 900.,
+    };
+    for width in [
+        AxisSize::Fixed(1200),
+        AxisSize::Percent {
+            basis_points: 9000,
+            min: 960,
+            max: 1600,
+        },
+    ] {
+        for anchor in [
+            Anchor::TopLeft,
+            Anchor::TopRight,
+            Anchor::BottomLeft,
+            Anchor::BottomRight,
+        ] {
+            let mut public = default_public_layout();
+            if let NodeKind::Root {
+                padding,
+                width: root_width,
+                anchor: root_anchor,
+                ..
+            } = &mut public.nodes[0].kind
+            {
+                *padding = 16;
+                *root_width = width;
+                *root_anchor = anchor;
+            }
+            let tree = compose_layout(&public, None, &specs(), work, &measure()).unwrap();
+            let occupied = occupied_bounds(&tree.nodes).unwrap();
+            if matches!(anchor, Anchor::TopRight | Anchor::BottomRight) {
+                assert!((occupied.x + occupied.width - work.x - work.width).abs() < 0.01);
+            } else {
+                assert!((occupied.x - work.x).abs() < 0.01);
+                assert!(tree.nodes[0].rect.x < work.x);
+            }
+            for node in &tree.nodes {
+                assert!(node.clip.x >= work.x);
+                assert!(node.clip.x + node.clip.width <= work.x + work.width + 0.01);
+            }
+        }
+    }
+}
+
+#[test]
+fn desktop_anchor_includes_material_backgrounds_independently_of_opacity() {
+    let mut public = default_public_layout();
+    if let NodeKind::Root { anchor, .. } = &mut public.nodes[0].kind {
+        *anchor = Anchor::TopLeft;
+    }
+    enclose_clock(&mut public, 0, true);
+    let ss: Vec<_> = specs()
+        .into_iter()
+        .filter(|s| s.kind == WidgetKind::Clock || s.kind == WidgetKind::Date)
+        .collect();
+    for group_opacity in [0, 100] {
+        if let NodeKind::Container(settings) = &mut public
+            .nodes
+            .iter_mut()
+            .find(|n| n.id == id(90))
+            .unwrap()
+            .kind
+        {
+            settings.group_opacity_percent = group_opacity;
+        }
+        let tree = compose_layout(&public, None, &ss, work(), &measure()).unwrap();
+        let group = tree.nodes.iter().find(|n| n.key.id == id(90)).unwrap();
+        assert!((group.rect.x - work().x).abs() < 0.01);
+    }
+}
+#[test]
 fn default_material_outlet_keeps_its_preferred_width_below_homework_in_public_and_subject_layouts()
 {
     let public = default_public_layout();
@@ -395,6 +471,11 @@ fn invalid_geometry_and_impossible_minimum_fail_before_measurement() {
 }
 #[test]
 fn recess_uses_continuous_remaining_desktop_without_intersecting_public_tree() {
+    let mut public = default_public_layout();
+    if let NodeKind::Root { width, .. } = &mut public.nodes[0].kind {
+        // An unused full-width viewport must not hide the free desktop region.
+        *width = AxisSize::Fixed(work().width as u16);
+    }
     let mut ss = specs();
     let mut recess = ss[0].clone();
     recess.kind = WidgetKind::Recess;
@@ -405,7 +486,7 @@ fn recess_uses_continuous_remaining_desktop_without_intersecting_public_tree() {
         .unwrap()
         .id;
     ss.push(recess);
-    let tree = compose_layout(&default_public_layout(), None, &ss, work(), &measure()).unwrap();
+    let tree = compose_layout(&public, None, &ss, work(), &measure()).unwrap();
     let r = tree
         .nodes
         .iter()

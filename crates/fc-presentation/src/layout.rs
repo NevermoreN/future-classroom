@@ -89,6 +89,25 @@ fn intersect(a: Rect, b: Rect) -> Rect {
         height: (a.y + a.height).min(b.y + b.height).max(y) - y,
     }
 }
+fn occupied_bounds(nodes: &[ScenePaintNode]) -> Option<Rect> {
+    nodes
+        .iter()
+        // Opacity controls painting/input, not layout occupancy. A transparent
+        // card or material background keeps its place when its alpha changes.
+        .filter(|n| n.widget_kind.is_some() || n.glass.is_some())
+        .map(|n| intersect(n.rect, n.clip))
+        .filter(|r| r.width > 0. && r.height > 0.)
+        .reduce(|a, b| {
+            let x = a.x.min(b.x);
+            let y = a.y.min(b.y);
+            Rect {
+                x,
+                y,
+                width: (a.x + a.width).max(b.x + b.width) - x,
+                height: (a.y + a.height).max(b.y + b.height) - y,
+            }
+        })
+}
 #[derive(Clone, Copy)]
 struct Ref<'a> {
     tree: &'a LayoutTree,
@@ -604,9 +623,25 @@ pub fn compose_layout(
         } else {
             0.
         };
-    let public_rect = b.rect;
+    let root_rect = b.rect;
     let mut nodes = Vec::new();
-    solver.publish(b, None, (0., 0.), work, 1., &mut nodes);
+    // Keep the measured viewport (including percentage sizing and padding),
+    // but anchor the card/background geometry rather than its empty margins.
+    // Clip to the desktop only after translation so no content is lost first.
+    solver.publish(b, None, (0., 0.), root_rect, 1., &mut nodes);
+    let occupied = occupied_bounds(&nodes).unwrap_or(root_rect);
+    let dx = if matches!(anchor, Anchor::TopRight | Anchor::BottomRight) {
+        work.x + work.width - occupied.x - occupied.width
+    } else {
+        work.x - occupied.x
+    };
+    for n in &mut nodes {
+        n.rect.x += dx;
+        n.clip.x += dx;
+        n.clip = intersect(n.clip, work);
+    }
+    // Empty viewport space must not consume the reserved recess region.
+    let public_rect = occupied_bounds(&nodes).unwrap_or(intersect(root_rect, work));
     if let Some(n) = public
         .nodes
         .iter()
