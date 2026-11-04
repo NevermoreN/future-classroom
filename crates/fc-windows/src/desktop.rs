@@ -2100,6 +2100,11 @@ fn system_hidden_reason() -> Result<Option<ContentHiddenReason>> {
                 == "Default";
         Ok(if !session_allows {
             Some(ContentHiddenReason::Session)
+        } else if crate::native::desktop_foreground() != fc_presentation::Foreground::Desktop {
+            // Recheck at publication and input boundaries. Ordinary windows,
+            // fullscreen applications and unknown foregrounds hide the entire
+            // scene; returning to the Shell desktop republishes it.
+            Some(ContentHiddenReason::App)
         } else {
             None
         })

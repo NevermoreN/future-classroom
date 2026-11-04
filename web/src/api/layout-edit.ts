@@ -16,9 +16,9 @@ function container(id: string, children: string[]): LayoutNode { return { id, ki
 /** Adding a content card keeps the existing public eight-surface budget: reuse
  * its content glass group or wrap existing outlet children once. */
 export function appendLayoutNode(layout: LayoutData, parentId: string, kind: LayoutAddition, scope: 'public' | 'subject'): { value: LayoutData; nodeId: string } {
-  if (!allowedLayoutAdditions(layout, parentId, scope).includes(kind)) throw new Error('当前父节点不允许添加此组件，请选择正确的根节点、科目插槽或内容容器。')
+  if (!allowedLayoutAdditions(layout, parentId, scope).includes(kind)) throw new Error('所选位置不能添加此项目，请先选择桌面整体、随课程切换的区域或背景分组。')
   const parent = layout.nodes.find(node => node.id === parentId)!, high = BigInt(layout.nodeIdHighWater)
-  if (high >= 18446744073709551614n) throw new Error('布局节点编号已达到上限，不能继续添加。')
+  if (high >= 18446744073709551614n) throw new Error('桌面项目编号已达上限，不能继续添加。')
   const id = (high + 1n).toString(), widget = kind !== 'container' && kind !== 'outlet'
   const newNode: LayoutNode = kind === 'container' ? container(id, []) : kind === 'outlet' ? { id, kind: 'outlet', children: [], width: { kind: 'content', min: 160, preferred: 320, max: 800 }, height: { kind: 'content', min: 64, preferred: 240, max: 1200 } } : { id, kind: 'widget', widget: kind, children: [] }
   let nodes = [...layout.nodes, newNode], nextHigh = id
@@ -26,7 +26,7 @@ export function appendLayoutNode(layout: LayoutData, parentId: string, kind: Lay
     const existing = layout.nodes.find(node => node.kind === 'container' && node.material && descendants(layout, parentId).has(node.id))
     if (existing) nodes = nodes.map(node => node.id === existing.id ? { ...node, children: [...node.children, id] } : node)
     else {
-      if (nodes.length >= 128) throw new Error('添加内容时需要一个共享玻璃容器，布局节点数量已达上限。')
+      if (nodes.length >= 128) throw new Error('添加内容需要一个背景分组，当前桌面项目数量已达上限。')
       nextHigh = (high + 2n).toString(); nodes = nodes.map(node => node.id === parentId ? { ...node, children: [nextHigh] } : node); nodes.push(container(nextHigh, [...parent.children, id]))
     }
   } else {
