@@ -1375,7 +1375,10 @@ impl Controller {
                 if fc_windows::desktop::is_read_only_capacity_error(&error) {
                     self.render_unavailable("课表、时钟或日期内容无法在当前尺寸完整显示；请由管理员调整布局或显示区域。桌面只读内容不提供点击翻页。");
                 } else {
-                    self.render_unavailable("桌面图形发布暂不可用，已隐藏并稍后重试。");
+                    self.render_unavailable(&format!(
+                        "桌面图形发布暂不可用，已隐藏并稍后重试。（错误码 0x{:08X}）",
+                        error.code().0 as u32
+                    ));
                 }
                 return Ok(());
             }

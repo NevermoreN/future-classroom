@@ -174,9 +174,19 @@ fn make_card(
     card: &SceneCard,
     scene: &SceneSnapshot,
     headless_leaf: bool,
+    manual_viewport: bool,
     total: &mut u64,
     max_dynamic_bytes: u64,
 ) -> Result<Card> {
+    // A small user viewport crops an ordinary-sized offscreen source. Dynamic
+    // clock insets and text measurement never receive negative dimensions.
+    let padded = manual_viewport.then(|| {
+        let mut source = card.clone();
+        source.rect.width = source.rect.width.max(160.);
+        source.rect.height = source.rect.height.max(160.);
+        source
+    });
+    let card = padded.as_ref().unwrap_or(card);
     validate_card(card)?;
     let note = if card.kind == ComponentKind::Materials {
         scene
@@ -191,6 +201,7 @@ fn make_card(
         card,
         scene.public_calendar_unverified,
         note,
+        manual_viewport,
     )?;
     let recess_regions = matches!(card.content, CardContent::Recess { .. })
         .then(|| recess_regions(&renderer.graphics, card, max_dynamic_bytes))
@@ -354,6 +365,9 @@ fn descendant(tree: &ScenePaintTree, index: usize, ancestor: usize) -> bool {
     false
 }
 fn drawable(tree: &ScenePaintTree, index: usize) -> bool {
+    if Area::clip(tree.nodes[index].clip).empty() {
+        return false;
+    }
     tree.nodes
         .iter()
         .enumerate()
@@ -503,7 +517,13 @@ fn group_bounds(tree: &ScenePaintTree, root: usize) -> Result<Rect> {
     if area.empty() {
         return Err(invalid());
     }
-    Ok(area.logical())
+    let mut rect = area.logical();
+    // Edge clipping can leave fewer than eight pixels visible. Retain a
+    // valid transparent backing surface; subtree clipping still limits ink
+    // and input to the actual one-pixel visible region.
+    rect.width = rect.width.max(8.);
+    rect.height = rect.height.max(8.);
+    Ok(rect)
 }
 fn background(g: &Graphics, node: &fc_presentation::scene::ScenePaintNode) -> Result<Surface> {
     let s = headless(node.rect)?;
@@ -869,7 +889,7 @@ pub(super) fn present(
                 page: Default::default(),
                 visible_leaf_limit: 1,
             };
-            let mut c = make_card(renderer, &card, scene, false, &mut total, 0)?;
+            let mut c = make_card(renderer, &card, scene, false, false, &mut total, 0)?;
             target_reserve = target_reserve.max(render_reserve(&c)?);
             if total + target_reserve > DIB_BUDGET {
                 return Err(oom());
@@ -900,6 +920,9 @@ pub(super) fn present(
                 card,
                 scene,
                 !recess,
+                source.nodes.iter().any(|node| {
+                    node.card_index == Some(i) && source.manual_viewports.contains(&node.key)
+                }),
                 &mut total,
                 max_dynamic_bytes,
             )?;
@@ -1133,6 +1156,7 @@ pub(super) fn present(
             }
             renderer.hidden = false;
         }
+        repair_desktop_layer()?;
         Ok(if changed || updated || restoring {
             PresentOutcome::Published
         } else {
@@ -1598,6 +1622,7 @@ mod tests {
                 visible_leaf_limit: 1,
             }],
             paint_tree: Some(ScenePaintTree {
+                manual_viewports: vec![],
                 public_layout_revision: Revision::new(1),
                 subject_profile: None,
                 selection_reason: fc_domain::profile::ProfileSelectionReason::Public,

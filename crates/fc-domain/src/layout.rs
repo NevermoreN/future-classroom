@@ -9,6 +9,8 @@ pub const MAX_LAYOUT_DEPTH: usize = 16;
 pub const MAX_TOP_LEVEL_GLASS: usize = 8;
 pub const MAX_VISIBLE_LEAVES: usize = 64;
 pub const MAX_LAYOUT_DIP: u16 = 16_384;
+pub const MIN_CANVAS_FRAME_DIP: u16 = 8;
+pub const MAX_CANVAS_FRAME_DIP: u16 = 8_192;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum LayoutScope {
@@ -161,10 +163,19 @@ pub struct LayoutNode {
     pub children: Vec<LayoutNodeId>,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CanvasFrame {
+    pub node_id: LayoutNodeId,
+    pub x: u16,
+    pub y: u16,
+    pub width: u16,
+    pub height: u16,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LayoutTree {
     pub scope: LayoutScope,
     pub root: LayoutNodeId,
     pub nodes: Vec<LayoutNode>,
+    pub canvas_frames: Vec<CanvasFrame>,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum LayoutError {
@@ -373,6 +384,35 @@ impl LayoutTree {
         if parents.keys().any(|id| !index.contains_key(id)) {
             return Err(LayoutError::MissingNode);
         }
+        let mut framed = HashSet::new();
+        if self.canvas_frames.len() > MAX_LAYOUT_NODES {
+            return Err(LayoutError::Capacity);
+        }
+        for f in &self.canvas_frames {
+            if f.node_id == self.root
+                || !index.contains_key(&f.node_id)
+                || !framed.insert(f.node_id)
+                || !(MIN_CANVAS_FRAME_DIP..=MAX_CANVAS_FRAME_DIP).contains(&f.width)
+                || !(MIN_CANVAS_FRAME_DIP..=MAX_CANVAS_FRAME_DIP).contains(&f.height)
+                || u32::from(f.x) + u32::from(f.width) > u32::from(MAX_LAYOUT_DIP)
+                || u32::from(f.y) + u32::from(f.height) > u32::from(MAX_LAYOUT_DIP)
+                || matches!(index[&f.node_id].kind, NodeKind::Widget(WidgetKind::Recess))
+            {
+                return Err(LayoutError::InvalidConstraint);
+            }
+        }
+        for n in &self.nodes {
+            let children = n
+                .children
+                .iter()
+                .filter(|id| !matches!(index[id].kind, NodeKind::Widget(WidgetKind::Recess)))
+                .collect::<Vec<_>>();
+            if children.iter().any(|id| framed.contains(id))
+                && children.iter().any(|id| !framed.contains(id))
+            {
+                return Err(LayoutError::InvalidConstraint);
+            }
+        }
         // Check all components for cycles, including disconnected malicious ones.
         fn visit(
             id: LayoutNodeId,
@@ -528,7 +568,12 @@ impl LayoutTree {
         self.nodes.iter().try_fold(
             self.nodes
                 .capacity()
-                .checked_mul(std::mem::size_of::<LayoutNode>())?,
+                .checked_mul(std::mem::size_of::<LayoutNode>())?
+                .checked_add(
+                    self.canvas_frames
+                        .capacity()
+                        .checked_mul(std::mem::size_of::<CanvasFrame>())?,
+                )?,
             |n, node| {
                 n.checked_add(
                     node.children
@@ -560,6 +605,9 @@ impl LayoutTree {
             for c in &mut n.children {
                 *c = *map.get(c).ok_or(LayoutError::MissingNode)?;
             }
+        }
+        for f in &mut result.canvas_frames {
+            f.node_id = *map.get(&f.node_id).ok_or(LayoutError::MissingNode)?;
         }
         Ok(result)
     }
@@ -598,6 +646,7 @@ pub fn default_public_layout() -> LayoutTree {
         })
     };
     LayoutTree {
+        canvas_frames: vec![],
         scope: LayoutScope::Public,
         root: fixed_id(1),
         nodes: vec![
@@ -648,6 +697,7 @@ pub fn default_public_layout() -> LayoutTree {
 }
 pub fn default_subject_layout(key: SubjectProfileKey) -> LayoutTree {
     LayoutTree {
+        canvas_frames: vec![],
         scope: LayoutScope::Subject(key),
         root: fixed_id(1),
         nodes: vec![

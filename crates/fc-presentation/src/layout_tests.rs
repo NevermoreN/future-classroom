@@ -99,6 +99,93 @@ fn key() -> SubjectProfileKey {
 fn id(n: u64) -> LayoutNodeId {
     LayoutNodeId::new(n).unwrap()
 }
+#[test]
+fn canvas_frames_preserve_absolute_position_size_and_parent_clip() {
+    let mut tree = default_public_layout();
+    let ids = tree.node(tree.root).unwrap().children.clone();
+    tree.canvas_frames = ids
+        .into_iter()
+        .filter(|id| {
+            !matches!(
+                tree.node(*id).unwrap().kind,
+                NodeKind::Widget(WidgetKind::Recess)
+            )
+        })
+        .enumerate()
+        .map(|(i, node_id)| CanvasFrame {
+            node_id,
+            x: 100 + i as u16 * 250,
+            y: 70,
+            width: 220,
+            height: 500,
+        })
+        .collect();
+    // Also position the clock inside its group, beyond the group's right edge.
+    let group = tree
+        .canvas_frames
+        .iter()
+        .find(|f| tree.node(f.node_id).unwrap().children.contains(&id(4)))
+        .map(|f| f.node_id);
+    if let Some(group) = group {
+        let children = tree.node(group).unwrap().children.clone();
+        for (i, node_id) in children.into_iter().enumerate() {
+            tree.canvas_frames.push(CanvasFrame {
+                node_id,
+                x: 180,
+                y: i as u16 * 90,
+                width: 100,
+                height: 80,
+            });
+        }
+    }
+    let result = compose_layout(&tree, None, &specs(), work(), &measure()).unwrap();
+    assert!(result.manual_viewports.iter().any(|key| key.id == id(4)));
+    assert!(!result
+        .manual_viewports
+        .iter()
+        .any(|key| key.id == tree.root));
+    let root = result.nodes.iter().find(|n| n.key.id == tree.root).unwrap();
+    assert_eq!(root.rect, work());
+    for frame in &tree.canvas_frames {
+        if let Some(n) = result
+            .nodes
+            .iter()
+            .find(|n| n.key.scope == LayoutScope::Public && n.key.id == frame.node_id)
+        {
+            let parent = result
+                .nodes
+                .iter()
+                .find(|p| Some(p.key) == n.parent)
+                .unwrap();
+            assert_eq!(n.rect.x, parent.rect.x + f32::from(frame.x));
+            assert_eq!(n.rect.y, parent.rect.y + f32::from(frame.y));
+            assert_eq!(n.rect.width, f32::from(frame.width));
+            assert_eq!(n.rect.height, f32::from(frame.height));
+            assert!(n.clip.x + n.clip.width <= parent.clip.x + parent.clip.width + 0.01);
+        }
+    }
+    let remapped = tree.remap_fresh_ids(100).unwrap();
+    assert!(remapped.canvas_frames.iter().all(|f| f.node_id.get() > 100));
+    let subject = default_subject_layout(key());
+    let selected = compose_layout(&tree, Some(&subject), &specs(), work(), &measure()).unwrap();
+    assert!(selected
+        .manual_viewports
+        .iter()
+        .any(|node| node.scope == LayoutScope::Subject(key())));
+    let mut invalid = tree.clone();
+    invalid.canvas_frames[0].width = MIN_CANVAS_FRAME_DIP - 1;
+    assert_eq!(invalid.validate(), Err(LayoutError::InvalidConstraint));
+    invalid.canvas_frames[0].width = MAX_CANVAS_FRAME_DIP + 1;
+    assert_eq!(invalid.validate(), Err(LayoutError::InvalidConstraint));
+    assert!(
+        compose_layout(&default_public_layout(), None, &specs(), work(), &measure())
+            .unwrap()
+            .manual_viewports
+            .is_empty()
+    );
+    tree.canvas_frames.pop();
+    assert_eq!(tree.validate(), Err(LayoutError::InvalidConstraint));
+}
 fn enclose_clock(tree: &mut LayoutTree, opacity: u8, glass: bool) {
     let clock = tree
         .nodes

@@ -61,7 +61,7 @@ function LayoutPanel({ session, revoked, onDirty }: { session: Session; revoked:
   const state = useResource('layout', session, revoked), [draft, setDraft] = useState<LayoutData | null>(null), [dirty, setDirty] = useState(false)
   useEffect(() => { if (state.document) { setDraft(clone(state.document.data)); setDirty(false); onDirty(false) } }, [state.document])
   function reload() { if (!dirty || window.confirm('重新读取会丢弃当前布局草稿，确认继续？')) void state.load() }
-  return <><ResourceStatus state={state} reload={reload} />{draft && <form onSubmit={e => { e.preventDefault(); void state.save({ action: 'save', candidate: draft }) }}><fieldset className="admin-fieldset" disabled={state.busy || state.uncertain}><LayoutTreeEditor value={draft} onChange={next => { setDraft(next); setDirty(true); onDirty(true) }} /><ServerLayoutPreview session={session} onRevoked={revoked} layout={draft} revision={state.document!.revision} /></fieldset><SaveBar busy={state.busy} uncertain={state.uncertain} dirty={dirty} /></form>}</>
+  return <><ResourceStatus state={state} reload={reload} />{draft && <form onSubmit={e => { e.preventDefault(); void state.save({ action: 'save', candidate: draft }) }}><fieldset className="admin-fieldset" disabled={state.busy || state.uncertain}><LayoutTreeEditor value={draft} session={session} revision={state.document!.revision} onRevoked={revoked} onChange={next => { setDraft(next); setDirty(true); onDirty(true) }} /></fieldset><SaveBar busy={state.busy} uncertain={state.uncertain} dirty={dirty} /></form>}</>
 }
 
 const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']

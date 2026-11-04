@@ -6,6 +6,42 @@ use fc_domain::{
     profile_content::{ContentNodeStyle, ImageFit},
 };
 use serde_json::{json, Value};
+#[cfg(test)]
+#[test]
+fn canvas_frames_web_roundtrip_and_legacy_default() {
+    let original = LayoutDocument::default();
+    let mut old = value(&original);
+    old.as_object_mut().unwrap().remove("canvasFrames");
+    assert_eq!(
+        candidate(old, original.revision, LayoutScope::Public).unwrap(),
+        original
+    );
+    let mut current = original;
+    current.tree.canvas_frames = current
+        .tree
+        .node(current.tree.root)
+        .unwrap()
+        .children
+        .iter()
+        .filter(|id| {
+            !matches!(
+                current.tree.node(**id).unwrap().kind,
+                NodeKind::Widget(WidgetKind::Recess)
+            )
+        })
+        .map(|id| CanvasFrame {
+            node_id: *id,
+            x: 20,
+            y: 30,
+            width: 450,
+            height: 700,
+        })
+        .collect();
+    assert_eq!(
+        candidate(value(&current), current.revision, LayoutScope::Public).unwrap(),
+        current
+    );
+}
 #[derive(Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 enum Axis {
@@ -132,6 +168,17 @@ struct Data {
     root: String,
     nodes: Vec<Node>,
     content_styles: Vec<Style>,
+    #[serde(default)]
+    canvas_frames: Vec<Frame>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct Frame {
+    node_id: String,
+    x: u16,
+    y: u16,
+    width: u16,
+    height: u16,
 }
 fn node_id(value: &str) -> Result<LayoutNodeId, ProtocolError> {
     LayoutNodeId::new(id(value)?).map_err(|_| ProtocolError::InvalidCommand)
@@ -201,7 +248,7 @@ pub fn value(d: &LayoutDocument) -> Value {
  let mut value=json!({"id":n.id.get().to_string(),"children":n.children.iter().map(|v|v.get().to_string()).collect::<Vec<_>>()});
  match n.kind{NodeKind::Root{flow:f,padding,gap,anchor:a,width,height}=>{value["kind"]=json!("root");value["flow"]=json!(flow(f));value["padding"]=json!(padding);value["gap"]=json!(gap);value["anchor"]=json!(anchor(a));value["width"]=axis(width);value["height"]=axis(height)},NodeKind::Container(ref c)=>{value["kind"]=json!("container");value["flow"]=json!(flow(c.flow));value["padding"]=json!(c.padding);value["gap"]=json!(c.gap);value["width"]=axis(c.width);value["height"]=axis(c.height);value["groupOpacityPercent"]=json!(c.group_opacity_percent);value["material"]=c.material.map(|m|json!({"surfacePercent":m.surface_percent,"edgePercent":m.edge_percent})).unwrap_or(Value::Null)},NodeKind::Outlet{width,height}=>{value["kind"]=json!("outlet");value["width"]=axis(width);value["height"]=axis(height)},NodeKind::Widget(w)=>{value["kind"]=json!("widget");value["widget"]=json!(display::kind(w.component_kind().expect("all built-in widgets map to component kinds")))}}value
  }).collect::<Vec<_>>();
-    json!({"nodeIdHighWater":d.node_id_high_water.to_string(),"root":d.tree.root.get().to_string(),"nodes":nodes,"contentStyles":d.content_styles.iter().map(|s|json!({"nodeId":s.node_id.get().to_string(),"component":display::Component::from(&s.component),"imageFit":"contain"})).collect::<Vec<_>>()})
+    json!({"nodeIdHighWater":d.node_id_high_water.to_string(),"root":d.tree.root.get().to_string(),"nodes":nodes,"contentStyles":d.content_styles.iter().map(|s|json!({"nodeId":s.node_id.get().to_string(),"component":display::Component::from(&s.component),"imageFit":"contain"})).collect::<Vec<_>>(),"canvasFrames":d.tree.canvas_frames.iter().map(|f|json!({"nodeId":f.node_id.get().to_string(),"x":f.x,"y":f.y,"width":f.width,"height":f.height})).collect::<Vec<_>>()})
 }
 pub fn document(d: &LayoutDocument) -> Result<Vec<u8>, ProtocolError> {
     encode(d.revision, &value(d))
@@ -235,6 +282,19 @@ fn domain_data(
         revision: expected,
         node_id_high_water: revision(&data.node_id_high_water)?.get(),
         tree: LayoutTree {
+            canvas_frames: data
+                .canvas_frames
+                .into_iter()
+                .map(|f| {
+                    Ok(CanvasFrame {
+                        node_id: node_id(&f.node_id)?,
+                        x: f.x,
+                        y: f.y,
+                        width: f.width,
+                        height: f.height,
+                    })
+                })
+                .collect::<Result<_, ProtocolError>>()?,
             scope,
             root: node_id(&data.root)?,
             nodes: data

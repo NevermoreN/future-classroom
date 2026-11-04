@@ -2,6 +2,35 @@
 use super::{codec::*, *};
 use fc_domain::{layout::*, profile::*};
 
+#[cfg(test)]
+#[test]
+fn canvas_tree_codec_roundtrip_and_legacy_without_frames() {
+    let mut original = default_public_layout();
+    let legacy = tree(&original);
+    assert!(legacy.get("canvas_frames").is_none());
+    assert_eq!(read_tree(&legacy).unwrap(), original);
+    original.canvas_frames = original
+        .node(original.root)
+        .unwrap()
+        .children
+        .iter()
+        .filter(|id| {
+            !matches!(
+                original.node(**id).unwrap().kind,
+                NodeKind::Widget(WidgetKind::Recess)
+            )
+        })
+        .map(|id| CanvasFrame {
+            node_id: *id,
+            x: 30,
+            y: 40,
+            width: 450,
+            height: 700,
+        })
+        .collect();
+    assert_eq!(read_tree(&tree(&original)).unwrap(), original);
+}
+
 pub(super) fn id<T>(
     v: &Value,
     k: &str,
@@ -208,15 +237,46 @@ fn read_node_kind(v: &Value) -> Result<NodeKind, StorageError> {
     }
 }
 pub(super) fn tree(t: &LayoutTree) -> Value {
-    json!({"scope":match t.scope {LayoutScope::Public=>json!("public"),LayoutScope::Subject(k)=>key(k)},"root":t.root.get(),"nodes":t.nodes.iter().map(|n|json!({"id":n.id.get(),"kind":node_kind(&n.kind),"children":n.children.iter().map(|c|c.get()).collect::<Vec<_>>()})).collect::<Vec<_>>()})
+    let mut value = json!({"scope":match t.scope {LayoutScope::Public=>json!("public"),LayoutScope::Subject(k)=>key(k)},"root":t.root.get(),"nodes":t.nodes.iter().map(|n|json!({"id":n.id.get(),"kind":node_kind(&n.kind),"children":n.children.iter().map(|c|c.get()).collect::<Vec<_>>()})).collect::<Vec<_>>()});
+    // Preserve the exact legacy tree shape until free placement is actually used.
+    if !t.canvas_frames.is_empty() {
+        value["canvas_frames"] = json!(t.canvas_frames.iter().map(|f|json!({"node":f.node_id.get(),"x":f.x,"y":f.y,"width":f.width,"height":f.height})).collect::<Vec<_>>());
+    }
+    value
 }
+
 fn read_tree(v: &Value) -> Result<LayoutTree, StorageError> {
-    object_fields(v, &["scope", "root", "nodes"])?;
+    let mut fields = vec!["scope", "root", "nodes"];
+    if v.get("canvas_frames").is_some() {
+        fields.push("canvas_frames");
+    }
+    object_fields(v, &fields)?;
     let nodes = array(v, "nodes")?;
     if nodes.len() > MAX_LAYOUT_NODES {
         return Err(StorageError::Database);
     }
     let t = LayoutTree {
+        canvas_frames: if v.get("canvas_frames").is_some() {
+            let frames = array(v, "canvas_frames")?;
+            if frames.len() > MAX_LAYOUT_NODES {
+                return Err(StorageError::Database);
+            }
+            frames
+                .iter()
+                .map(|f| {
+                    object_fields(f, &["node", "x", "y", "width", "height"])?;
+                    Ok(CanvasFrame {
+                        node_id: id(f, "node", LayoutNodeId::new)?,
+                        x: u16_field(f, "x")?,
+                        y: u16_field(f, "y")?,
+                        width: u16_field(f, "width")?,
+                        height: u16_field(f, "height")?,
+                    })
+                })
+                .collect::<Result<_, StorageError>>()?
+        } else {
+            vec![]
+        },
         scope: if v["scope"].as_str() == Some("public") {
             LayoutScope::Public
         } else {

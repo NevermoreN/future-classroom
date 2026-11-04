@@ -91,6 +91,7 @@ fn image_scene() -> (SceneSnapshot, PublishedContentSnapshot) {
         }),
     });
     scene.paint_tree = Some(ScenePaintTree {
+        manual_viewports: vec![],
         nodes: vec![ScenePaintNode {
             key: SceneNodeKey {
                 scope: LayoutScope::Public,

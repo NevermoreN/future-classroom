@@ -105,6 +105,7 @@ fn scene(cards: Vec<SceneCard>) -> SceneSnapshot {
         valid_until: None,
         cards,
         paint_tree: Some(ScenePaintTree {
+            manual_viewports: vec![],
             nodes,
             public_layout_revision: Revision::new(1),
             subject_profile: None,
@@ -250,6 +251,7 @@ fn system_high_contrast_colors_repaint_cached_flat_tree_and_image_text_without_s
                 c.visible_leaf_limit = 8;
             }
             scene.paint_tree = tree.then(|| ScenePaintTree {
+                manual_viewports: vec![],
                 nodes: scene
                     .cards
                     .iter()

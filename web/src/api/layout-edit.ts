@@ -1,4 +1,5 @@
 import type { ComponentKind, LayoutData, LayoutNode } from './admin-client'
+import { boundedFrame } from './canvas-edit'
 export type LayoutAddition = 'container' | 'outlet' | ComponentKind
 const contentKinds = ['materials', 'subject_text', 'subject_image']
 function descendants(layout: LayoutData, parent: string, found = new Set<string>()): Set<string> { if (found.has(parent)) return found; found.add(parent); layout.nodes.find(node => node.id === parent)?.children.forEach(id => descendants(layout, id, found)); return found }
@@ -33,5 +34,11 @@ export function appendLayoutNode(layout: LayoutData, parentId: string, kind: Lay
     nodes = nodes.map(node => node.id === parentId ? { ...node, children: [...node.children, id] } : node)
   }
   const styles = kind === 'subject_text' || kind === 'subject_image' ? [...layout.contentStyles, { nodeId: id, imageFit: 'contain' as const, component: { kind, visible: true, opacityPercent: 100, fontDip: 22, minWidth: 160, maxWidth: 800, minHeight: 64, maxHeight: 1200 } }] : layout.contentStyles
-  return { value: { ...layout, nodeIdHighWater: nextHigh, nodes, contentStyles: styles }, nodeId: id }
+  const canvasFrames = layout.canvasFrames?.length ? nodes.filter(node => node.id !== layout.root && node.widget !== 'recess').map(node => {
+    const existing = layout.canvasFrames!.find(frame => frame.nodeId === node.id)
+    if (existing) return existing
+    const children = layout.canvasFrames!.filter(frame => node.children.includes(frame.nodeId))
+    return boundedFrame({ nodeId: node.id, x: 24, y: 24, width: Math.max(280, ...children.map(frame => frame.x + frame.width + 24)), height: Math.max(160, ...children.map(frame => frame.y + frame.height + 24)) })
+  }) : layout.canvasFrames ?? []
+  return { value: { ...layout, nodeIdHighWater: nextHigh, nodes, contentStyles: styles, canvasFrames }, nodeId: id }
 }

@@ -310,14 +310,10 @@ impl Layer {
         paint_alpha: f32,
         paint: NativePaint,
     ) -> Result<Self> {
-        // SAFETY: initially hidden and always transparent/non-activating/topmost.
+        // SAFETY: initially hidden and always transparent/non-activating.
         let window = NativeWindow(unsafe {
             CreateWindowExW(
-                WS_EX_LAYERED
-                    | WS_EX_TRANSPARENT
-                    | WS_EX_NOACTIVATE
-                    | WS_EX_TOOLWINDOW
-                    | WS_EX_TOPMOST,
+                WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
                 BACKDROP_CLASS,
                 w!("未来教室课间静态玻璃"),
                 WS_POPUP,

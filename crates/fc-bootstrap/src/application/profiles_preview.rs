@@ -26,7 +26,8 @@ use fc_runtime::authority::AuthorityStore;
 use fc_windows::materials::raster::RasterCache;
 use fc_windows::{
     desktop::{
-        DesktopRenderer, NativeTextMeasure, PresentOutcome, PublicationGuard, DESKTOP_SCOPE,
+        display_monitors, select_monitor, DesktopRenderer, NativeTextMeasure, PresentOutcome,
+        PublicationGuard, DESKTOP_SCOPE,
     },
     workbench::{LayoutPreview, PreviewNode},
 };
@@ -35,13 +36,20 @@ use std::{
     time::{Duration, Instant},
 };
 
-const WORK: Rect = Rect {
-    x: 0.,
-    y: 0.,
-    width: 1920.,
-    height: 1080.,
-};
 const MAX_PREVIEW_BYTES: usize = 2 * 1024 * 1024;
+
+fn preview_work(public: &PublicLayoutState) -> Result<Rect, String> {
+    let monitors = display_monitors().map_err(|_| "无法读取桌面显示屏工作区。")?;
+    let selected = select_monitor(&monitors, public.display.target_monitor.as_deref())
+        .map_err(|_| "无法选择桌面显示屏工作区。")?;
+    // Use the same monitor selection and coordinate units as DesktopController.
+    // Web canvas coordinates start at the selected work area's own origin.
+    Ok(Rect {
+        x: 0.,
+        y: 0.,
+        ..selected.work
+    })
+}
 
 pub(super) fn render(
     identity: &IdentityState,
@@ -121,7 +129,7 @@ fn render_impl(
     text: Option<&dyn ContentTextSource>,
     raster: Arc<RasterCache>,
 ) -> Result<LayoutPreview, String> {
-    let scene = prepare_scene(identity, public, subject, sequence, now, contents, text)?;
+    let (scene, work) = prepare_scene(identity, public, subject, sequence, now, contents, text)?;
     let editable = subject.map_or(LayoutScope::Public, |p| LayoutScope::Subject(p.key));
     // This private, ephemeral gate is only for synthetic hidden DIB rendering.
     // It cannot authorize product effects, real classroom facts or file opening.
@@ -148,7 +156,7 @@ fn render_impl(
         _ => return Err("隔离预览被拒绝。".into()),
     }
     let image = renderer
-        .export_preview_bgra(WORK, 960, 540)
+        .export_preview_bgra(work, 960, 540)
         .map_err(|_| "预览位图超出预算或无法导出。")?;
     if image.bgra.len() > MAX_PREVIEW_BYTES || image.bgra.capacity() > MAX_PREVIEW_BYTES {
         return Err("预览位图超过 2 MiB。".into());
@@ -186,7 +194,7 @@ pub(super) fn image_requests_with_content(
     contents: &[PublishedContentSnapshot],
     text: &dyn ContentTextSource,
 ) -> Result<Vec<fc_windows::desktop::ImageRenderRequest>, String> {
-    let scene = prepare_scene(
+    let (scene, _) = prepare_scene(
         identity,
         public,
         subject,
@@ -206,7 +214,7 @@ fn prepare_scene(
     now: LocalDateTime,
     contents: Option<&[PublishedContentSnapshot]>,
     text: Option<&dyn ContentTextSource>,
-) -> Result<SceneSnapshot, String> {
+) -> Result<(SceneSnapshot, Rect), String> {
     if sequence == 0 {
         return Err("预览代次无效。".into());
     }
@@ -223,6 +231,7 @@ fn prepare_scene(
             .validate_structure()
             .map_err(|_| "科目预览结构无效。")?;
     }
+    let work = preview_work(public)?;
     let measure = NativeTextMeasure::new().map_err(|_| "无法初始化原生文字测量。")?;
     let base = samples(identity, public, subject, now)?;
     let samples = bound_samples(public, subject, &base, contents, text)?;
@@ -249,10 +258,10 @@ fn prepare_scene(
         &public.layout.tree,
         subject.map(|p| &p.tree),
         &specs,
-        WORK,
+        work,
         &measure,
     )
-    .map_err(|_| "布局在 1920×1080 示例工作区中无法完成排版，请检查尺寸和内容区约束。")?;
+    .map_err(|_| "布局在当前显示屏工作区中无法完成排版，请检查尺寸和内容区约束。")?;
     tree.public_layout_revision = public.layout.revision;
     tree.subject_profile = subject.map(|p| SceneProfileStamp {
         id: p.id,
@@ -324,7 +333,7 @@ fn prepare_scene(
         public_calendar_unverified: false,
         lesson_control: None,
     };
-    Ok(scene)
+    Ok((scene, work))
 }
 
 fn normalize(rect: Rect, work: Rect, sx: f32, sy: f32) -> Rect {
@@ -714,6 +723,12 @@ pub struct MeasuredPreviewNode {
     pub font_dip: Option<f32>,
     pub text_truncated: bool,
 }
+#[allow(dead_code)] // Shared source also builds in the binary without the Web geometry handler.
+pub struct MeasuredPreview {
+    pub width: u16,
+    pub height: u16,
+    pub nodes: Vec<MeasuredPreviewNode>,
+}
 #[allow(dead_code, clippy::too_many_arguments)]
 pub fn geometry_with_content(
     identity: &IdentityState,
@@ -723,8 +738,8 @@ pub fn geometry_with_content(
     now: LocalDateTime,
     contents: &[PublishedContentSnapshot],
     text: &dyn ContentTextSource,
-) -> Result<Vec<MeasuredPreviewNode>, String> {
-    let scene = prepare_scene(
+) -> Result<MeasuredPreview, String> {
+    let (scene, work) = prepare_scene(
         identity,
         public,
         subject,
@@ -735,7 +750,8 @@ pub fn geometry_with_content(
     )?;
     let editable = subject.map_or(LayoutScope::Public, |p| LayoutScope::Subject(p.key));
     let tree = scene.paint_tree.as_ref().ok_or("预览树缺失。")?;
-    tree.nodes
+    let nodes = tree
+        .nodes
         .iter()
         .filter(|node| node.key.scope == editable)
         .map(|node| {
@@ -765,7 +781,12 @@ pub fn geometry_with_content(
                 text_truncated: truncated,
             })
         })
-        .collect()
+        .collect::<Result<_, String>>()?;
+    Ok(MeasuredPreview {
+        width: work.width as u16,
+        height: work.height as u16,
+        nodes,
+    })
 }
 
 #[cfg(test)]
@@ -996,7 +1017,7 @@ mod tests {
             9 * 3600,
         )
         .unwrap();
-        let scene = prepare_scene(
+        let (scene, _) = prepare_scene(
             &IdentityState::default(),
             &public,
             None,

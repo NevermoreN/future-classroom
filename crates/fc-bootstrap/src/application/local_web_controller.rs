@@ -84,6 +84,7 @@ impl Job {
 #[derive(Default)]
 pub(super) struct Diagnostics {
     pub(super) desktop: Option<fc_windows::desktop::DesktopMetrics>,
+    pub(super) desktop_notice: String,
     pub(super) events: VecDeque<DiagnosticEvent>,
 }
 
@@ -130,6 +131,7 @@ impl App {
         {
             if let Ok(mut snapshot) = self.local_web.diagnostics.try_lock() {
                 snapshot.desktop = Some(self.desktop.last_metrics());
+                snapshot.desktop_notice.clone_from(&self.desktop_notice);
                 snapshot.events.clone_from(&self.diagnostic_events);
             }
             self.local_web.next_diagnostics = Some(Instant::now() + Duration::from_secs(1));

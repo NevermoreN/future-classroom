@@ -33,6 +33,9 @@ pub struct ScenePaintNode {
 pub struct ScenePaintTree {
     /// Parent precedes children. Scoped IDs are stable across geometry changes.
     pub nodes: Vec<ScenePaintNode>,
+    /// Explicit canvas frames and their descendants use a clipped manual viewport.
+    /// Automatic layout cards retain their complete-content measurement contract.
+    pub manual_viewports: Vec<SceneNodeKey>,
     pub public_layout_revision: fc_domain::ids::Revision,
     pub subject_profile: Option<SceneProfileStamp>,
     pub selection_reason: fc_domain::profile::ProfileSelectionReason,
@@ -135,6 +138,20 @@ struct Solver<'a> {
     measure: &'a dyn TextMeasure,
 }
 impl<'a> Solver<'a> {
+    fn frame(&self, n: Ref<'a>) -> Option<&'a CanvasFrame> {
+        n.tree.canvas_frames.iter().find(|f| f.node_id == n.id)
+    }
+    fn canvas_parent(&self, n: Ref<'a>) -> bool {
+        // A selected subject replaces the outlet's public fallback children;
+        // those fallback frames must not be applied to another tree's root.
+        if matches!(n.node().kind, NodeKind::Outlet { .. }) && self.subject.is_some() {
+            return false;
+        }
+        n.node()
+            .children
+            .iter()
+            .any(|id| n.tree.canvas_frames.iter().any(|f| f.node_id == *id))
+    }
     fn spec(&self, n: Ref<'_>) -> Option<&WidgetMeasure> {
         self.specs
             .iter()
@@ -212,6 +229,13 @@ impl<'a> Solver<'a> {
         })
     }
     fn widths(&self, n: Ref<'a>, available: f32) -> Result<(f32, f32, f32), TreeLayoutError> {
+        if let Some(f) = self.frame(n) {
+            let width = f32::from(f.width);
+            return Ok((width, width, width));
+        }
+        if self.canvas_parent(n) {
+            return Ok((available, available, available));
+        }
         if let NodeKind::Widget(_) = n.node().kind {
             let s = self.spec(n).ok_or(TreeLayoutError::InvalidGeometry)?;
             return Ok((
@@ -282,6 +306,9 @@ impl<'a> Solver<'a> {
         Ok((a.max(min), b.max(min), c))
     }
     fn min_height(&self, n: Ref<'a>) -> f32 {
+        if let Some(f) = self.frame(n) {
+            return f32::from(f.height);
+        }
         if let NodeKind::Widget(_) = n.node().kind {
             return self
                 .spec(n)
@@ -315,7 +342,50 @@ impl<'a> Solver<'a> {
         if width <= 0. || height_budget < 0. {
             return Err(TreeLayoutError::OutOfSpace);
         }
+        // Canvas coordinates are relative to the parent's unpadded rectangle.
+        // Frames retain their declared size even when clipped by a smaller parent.
+        if self.canvas_parent(n) {
+            let mut children = Vec::new();
+            for c in self.children(n).into_iter().filter(|c| self.active(*c)) {
+                let f = self.frame(c).expect("validated complete canvas siblings");
+                let mut child = self.layout(
+                    c,
+                    f32::from(f.width),
+                    f32::from(f.height),
+                    Some(f32::from(f.height)),
+                )?;
+                child.rect = Rect {
+                    x: f32::from(f.x),
+                    y: f32::from(f.y),
+                    width: f32::from(f.width),
+                    height: f32::from(f.height),
+                };
+                children.push(child);
+            }
+            return Ok(BoxNode {
+                node: n,
+                rect: Rect {
+                    x: 0.,
+                    y: 0.,
+                    width,
+                    height: height_budget,
+                },
+                children,
+            });
+        }
         if let NodeKind::Widget(_) = n.node().kind {
+            if self.frame(n).is_some() {
+                return Ok(BoxNode {
+                    node: n,
+                    rect: Rect {
+                        x: 0.,
+                        y: 0.,
+                        width,
+                        height: height_budget,
+                    },
+                    children: vec![],
+                });
+            }
             let s = self.spec(n).ok_or(TreeLayoutError::InvalidGeometry)?;
             let min_height = s.min_height.max(s.body.minimum_height());
             if width + 0.01 < s.min_width || height_budget + 0.01 < min_height {
@@ -630,7 +700,9 @@ pub fn compose_layout(
     // Clip to the desktop only after translation so no content is lost first.
     solver.publish(b, None, (0., 0.), root_rect, 1., &mut nodes);
     let occupied = occupied_bounds(&nodes).unwrap_or(root_rect);
-    let dx = if matches!(anchor, Anchor::TopRight | Anchor::BottomRight) {
+    let dx = if solver.canvas_parent(root) {
+        0.
+    } else if matches!(anchor, Anchor::TopRight | Anchor::BottomRight) {
         work.x + work.width - occupied.x - occupied.width
     } else {
         work.x - occupied.x
@@ -705,7 +777,23 @@ pub fn compose_layout(
     if nodes.len() > MAX_LAYOUT_NODES {
         return Err(TreeLayoutError::Capacity);
     }
+    let mut manual_viewports = Vec::new();
+    for node in &nodes {
+        let tree = if node.key.scope == public.scope {
+            Some(public)
+        } else {
+            subject.filter(|tree| tree.scope == node.key.scope)
+        };
+        if tree.is_some_and(|tree| tree.canvas_frames.iter().any(|f| f.node_id == node.key.id))
+            || node
+                .parent
+                .is_some_and(|parent| manual_viewports.contains(&parent))
+        {
+            manual_viewports.push(node.key);
+        }
+    }
     Ok(ScenePaintTree {
+        manual_viewports,
         nodes,
         public_layout_revision: Default::default(),
         subject_profile: None,
@@ -734,6 +822,7 @@ mod image_minimum_regression {
         }
         let id = |n| LayoutNodeId::new(n).unwrap();
         let tree = LayoutTree {
+            canvas_frames: vec![],
             scope: LayoutScope::Public,
             root: id(1),
             nodes: vec![

@@ -19,7 +19,7 @@ complete direct-run directory and its adjacent web folder. Tray View Status and
 Settings open the actual loopback Web address. Login uses username/password;
 refresh, reconnect and ordinary idle retain the open page's session. Normal tab
 close/new open uses standard sessionStorage semantics and requires login again.
-Closing the browser does not stop the resident desktop. It is shown without activation only while the Windows desktop is foreground.
+Closing the browser does not stop the resident desktop. Its nonactivating information windows remain below ordinary application windows and above the Shell desktop. Taskbar focus does not hide them; maximized and full-screen applications cover them naturally.
 Opening PowerPoint, a browser or another application hides the information layer,
 including full-screen applications. Returning to the desktop restores it. Normal application exit is the tray Exit action.
 

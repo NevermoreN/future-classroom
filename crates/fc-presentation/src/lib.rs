@@ -23,7 +23,7 @@ pub struct VisibilityInput {
     pub stopping: bool,
 }
 pub fn desktop_visible(i: VisibilityInput) -> bool {
-    i.foreground == Foreground::Desktop && i.session_active && i.healthy && !i.stopping
+    i.session_active && i.healthy && !i.stopping
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -362,22 +362,19 @@ mod tests {
         }
     }
     #[test]
-    fn desktop_only_visibility_hides_for_applications_unknown_focus_and_session_faults() {
+    fn desktop_layer_stays_available_across_focus_changes_but_hides_for_session_faults() {
         for foreground in [
             Foreground::Desktop,
             Foreground::ExternalApp,
             Foreground::Settings,
             Foreground::Unknown,
         ] {
-            assert_eq!(
-                desktop_visible(VisibilityInput {
-                    foreground,
-                    session_active: true,
-                    healthy: true,
-                    stopping: false
-                }),
-                foreground == Foreground::Desktop
-            );
+            assert!(desktop_visible(VisibilityInput {
+                foreground,
+                session_active: true,
+                healthy: true,
+                stopping: false
+            }));
         }
         assert!(!desktop_visible(VisibilityInput {
             foreground: Foreground::Desktop,

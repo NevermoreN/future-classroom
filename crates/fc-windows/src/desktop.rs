@@ -470,14 +470,10 @@ impl Drop for Class {
 struct NativeWindow(HWND);
 impl NativeWindow {
     fn new(class: &Class) -> Result<Self> {
-        // SAFETY: initially hidden, topmost, non-activating and always click-through.
+        // SAFETY: initially hidden, non-activating and always click-through.
         unsafe {
             Ok(Self(CreateWindowExW(
-                WS_EX_LAYERED
-                    | WS_EX_TRANSPARENT
-                    | WS_EX_NOACTIVATE
-                    | WS_EX_TOOLWINDOW
-                    | WS_EX_TOPMOST,
+                WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
                 w!("FutureClassroom.Desktop.v1"),
                 w!("未来教室桌面组件"),
                 WS_POPUP,
@@ -502,21 +498,73 @@ impl NativeWindow {
         }
     }
     fn show_resident(&self) -> Result<()> {
-        // SAFETY: owned UI-thread window; neither showing nor repairing its
-        // topmost layer activates it. Callers first verify the scene capability.
+        let mut windows = desktop_layer_windows()?;
+        windows.retain(|hwnd| *hwnd != self.0);
+        // Later surfaces (text/input) belong above earlier material layers.
+        // Position before showing so there is no transient frame above apps.
+        windows.insert(0, self.0);
+        position_desktop_layer(&windows, true)
+    }
+}
+
+fn desktop_layer_windows() -> Result<Vec<HWND>> {
+    // Keep only our visible desktop surfaces, in their current top-to-bottom
+    // order. Other programs' HWNDs are never used as insertion boundaries:
+    // elevated application windows can reject those references through UIPI.
+    unsafe extern "system" fn visit(hwnd: HWND, data: LPARAM) -> BOOL {
         unsafe {
-            let _ = ShowWindow(self.0, SW_SHOWNOACTIVATE);
-            SetWindowPos(
-                self.0,
-                Some(HWND_TOPMOST),
-                0,
-                0,
-                0,
-                0,
-                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER,
-            )
+            let windows = &mut *(data.0 as *mut Vec<HWND>);
+            if !IsWindowVisible(hwnd).as_bool() || IsIconic(hwnd).as_bool() {
+                return BOOL(1);
+            }
+            let mut name = [0u16; 128];
+            let len = GetClassNameW(hwnd, &mut name);
+            let class = String::from_utf16_lossy(&name[..len.max(0) as usize]);
+            let mut pid = 0;
+            GetWindowThreadProcessId(hwnd, Some(&mut pid));
+            if pid == GetCurrentProcessId()
+                && matches!(
+                    class.as_str(),
+                    "FutureClassroom.Desktop.v1" | "FutureClassroom.Desktop.Backdrop.v1"
+                )
+            {
+                windows.push(hwnd);
+            }
+            BOOL(1)
         }
     }
+    let mut windows = Vec::new();
+    // SAFETY: the synchronous callback only samples borrowed HWNDs and writes
+    // into this stack-owned accumulator; it retains no pointers or handles.
+    unsafe { EnumWindows(Some(visit), LPARAM((&raw mut windows) as isize))? };
+    Ok(windows)
+}
+fn position_desktop_layer(windows: &[HWND], show: bool) -> Result<()> {
+    // Put the top surface at the bottom of the application Z order, then put
+    // every following surface below its preceding owned HWND. This preserves
+    // the stack on repeated repairs without referencing any external process.
+    let mut below = HWND_BOTTOM;
+    for &hwnd in windows {
+        let flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER;
+        // SAFETY: all HWNDs belong to this UI thread's desktop renderers.
+        // The insertion boundary is either HWND_BOTTOM or an owned HWND.
+        unsafe {
+            SetWindowPos(
+                hwnd,
+                Some(below),
+                0,
+                0,
+                0,
+                0,
+                if show { flags | SWP_SHOWWINDOW } else { flags },
+            )?;
+        }
+        below = hwnd;
+    }
+    Ok(())
+}
+fn repair_desktop_layer() -> Result<()> {
+    position_desktop_layer(&desktop_layer_windows()?, false)
 }
 impl Drop for NativeWindow {
     fn drop(&mut self) {
@@ -1095,7 +1143,7 @@ impl DesktopRenderer {
         // these two small button rectangles receive input; no activation occurs.
         let window = NativeWindow(unsafe {
             CreateWindowExW(
-                WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST,
+                WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
                 w!("FutureClassroom.Desktop.v1"),
                 w!("只读翻页"),
                 WS_POPUP,
@@ -1721,6 +1769,7 @@ impl DesktopRenderer {
             }
             self.hidden = false;
         }
+        repair_desktop_layer()?;
         self.refresh_metrics();
         Ok(if changed || updated || restoring {
             PresentOutcome::Published
@@ -2100,11 +2149,6 @@ fn system_hidden_reason() -> Result<Option<ContentHiddenReason>> {
                 == "Default";
         Ok(if !session_allows {
             Some(ContentHiddenReason::Session)
-        } else if crate::native::desktop_foreground() != fc_presentation::Foreground::Desktop {
-            // Recheck at publication and input boundaries. Ordinary windows,
-            // fullscreen applications and unknown foregrounds hide the entire
-            // scene; returning to the Shell desktop republishes it.
-            Some(ContentHiddenReason::App)
         } else {
             None
         })
@@ -2149,13 +2193,14 @@ fn xy(x: f32, y: f32) -> D2D1_ELLIPSE {
     e
 }
 fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<ContentLayout> {
-    prepare_content_with_note(g, c, unverified, None)
+    prepare_content_with_note(g, c, unverified, None, false)
 }
 fn prepare_content_with_note(
     g: &Graphics,
     c: &SceneCard,
     unverified: bool,
     note: Option<&str>,
+    cropped: bool,
 ) -> Result<ContentLayout> {
     let spec = card_body_spec(c.kind, &c.content, unverified, note)
         .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
@@ -2301,6 +2346,29 @@ fn prepare_content_with_note(
         }
         _ => c.visible_leaf_limit as usize,
     };
+    if cropped {
+        let mut leaves = std::collections::HashSet::new();
+        blocks.retain(|block| {
+            if block.top >= viewport || block.top + block.height <= 0. {
+                return false;
+            }
+            if let Some(leaf) = block.leaf {
+                if !leaves.contains(&leaf) && leaves.len() >= limit {
+                    return false;
+                }
+                leaves.insert(leaf);
+            }
+            true
+        });
+        return Ok(ContentLayout {
+            top_inset,
+            bottom_inset: spec.bottom_inset,
+            blocks,
+            pages: vec![0.],
+            units,
+            visible_leaves: vec![leaves.len().max(1)],
+        });
+    }
     if read_only_classroom(c)
         && (total > viewport + 0.1
             || blocks

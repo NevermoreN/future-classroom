@@ -303,7 +303,10 @@ impl WebApplication {
         let candidate = subject
             .as_ref()
             .map_or(&public.layout.tree, |profile| &profile.tree);
+        let width = measured.width;
+        let height = measured.height;
         let nodes = measured
+            .nodes
             .into_iter()
             .map(|node| dto::Node {
                 id: node.key.id.get().to_string(),
@@ -337,8 +340,8 @@ impl WebApplication {
         admin::data_response(wire::encode(
             revision,
             &dto::Geometry {
-                width: 1920,
-                height: 1080,
+                width,
+                height,
                 nodes,
                 source_publication_revision: revision.get().to_string(),
                 identity_revision: identity.revision.get().to_string(),

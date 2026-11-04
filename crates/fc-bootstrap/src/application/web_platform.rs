@@ -37,9 +37,15 @@ pub(super) fn hook(
             .map_err(|_| PlatformError::Unavailable)?;
         match request {
             PlatformRequest::Status => {
-                let (desktop, events) = diagnostics
+                let (desktop, desktop_notice, events) = diagnostics
                     .try_lock()
-                    .map(|snapshot| (snapshot.desktop.clone(), snapshot.events.clone()))
+                    .map(|snapshot| {
+                        (
+                            snapshot.desktop.clone(),
+                            snapshot.desktop_notice.clone(),
+                            snapshot.events.clone(),
+                        )
+                    })
                     .unwrap_or_default();
                 let mut rows = Vec::with_capacity(12 + DIAGNOSTIC_EVENT_LIMIT);
                 let mut row = |label: &str, value: String| {
@@ -48,6 +54,9 @@ pub(super) fn hook(
                         value,
                     })
                 };
+                if !desktop_notice.is_empty() {
+                    row("桌面显示提示", desktop_notice);
+                }
                 if let Some(stats) = workers.try_stats() {
                     row(
                         "后台队列",
