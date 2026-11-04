@@ -33,7 +33,7 @@ export class MaterialController {
   }
   private begin() { this.operation?.abort(); this.operation = new AbortController(); return { id: ++this.sequence, signal: this.operation.signal } }
   private current(id: number) { return !this.disposed && id === this.sequence }
-  private unauthorized(e: unknown): boolean { if (!(e instanceof ApiError) || e.status !== 401 && e.status !== 403) return false; this.dispose(); this.revoked(); return true }
+  private unauthorized(e: unknown): boolean { if (!(e instanceof ApiError) || e.status !== 401) return false; this.dispose(); this.revoked(); return true }
   private hasPending() { return !!this.state.pending || !!this.state.pendingBatch || !!this.state.pendingDeleteBatch }
   hasRiskyDraft() { return this.state.deleteSelection.length > 0 || this.state.files.length > 0 || !!this.state.batch || !!this.state.pendingBatch || !!this.state.file || !!this.state.upload || this.hasPending() || this.state.phase === 'uploading' || this.state.phase === 'committing' }
   async loadScopes(offset = 0, confirmed = false) {

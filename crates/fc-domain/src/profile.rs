@@ -914,7 +914,7 @@ mod tests {
                 &actor(1, TrustedOrigin::Web),
                 now()
             )
-            .is_err());
+            .is_ok());
     }
     #[test]
     fn deleted_node_cannot_be_reused_after_save_reopen_and_reset_uses_fresh_ids() {

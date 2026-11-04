@@ -15,7 +15,7 @@ impl Backend {
         identity
             .authority(actor.principal_id)
             .map_err(|e| BackendError::Identity(IdentityRepositoryError::Domain(e)))?
-            .authorize_global_local(&actor, self.clock.now())
+            .authorize_global(&actor, self.clock.now())
             .map_err(|e| {
                 BackendError::Identity(IdentityRepositoryError::Domain(IdentityError::Permission(
                     e,

@@ -10,6 +10,7 @@ pub enum TlsHttpEvent {
     Head {
         head: RequestHead,
         admitted_at: Instant,
+        scope: TlsListenerScope,
     },
     Body {
         token: RequestToken,
@@ -31,6 +32,7 @@ struct BodyFlight {
     eof: bool,
 }
 const REQUEST_BUDGET: Duration = Duration::from_secs(120);
+const LOCAL_MAINTENANCE_BUDGET: Duration = Duration::from_secs(30 * 60);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum DeadlinePhase {
@@ -190,6 +192,21 @@ impl Stream {
             && deadline > now
             && deadline <= self.deadline
     }
+    fn local_maintenance_deadline_valid(
+        &self,
+        scope: TlsListenerScope,
+        deadline: Instant,
+        now: Instant,
+    ) -> bool {
+        scope == TlsListenerScope::LocalControl
+            && self
+                .request_started_at()
+                .and_then(|at| at.checked_add(LOCAL_MAINTENANCE_BUDGET))
+                .is_some_and(|end| deadline <= end)
+            && !self.admitted
+            && !self.expired_at(now)
+            && deadline > now
+    }
     /// The caller has checked the exact body length/state and original request
     /// lifetime before admitting the parser. This never establishes a new epoch.
     fn admit_until(&mut self, deadline: Instant) {
@@ -246,6 +263,60 @@ pub struct TlsHttpHost {
     drain_deadline: Option<Instant>,
 }
 impl TlsHttpHost {
+    /// A stable loopback control listener and an optional separately bound LAN
+    /// endpoint share this owner's four business slots and single SSPI worker.
+    pub fn open_local_and_lan(
+        control: &fc_domain::https_settings::HttpsConfiguration,
+        lan: Option<&fc_domain::https_settings::HttpsConfiguration>,
+    ) -> Result<Self, ConfiguredTlsError> {
+        let address = configured::endpoint(control)?;
+        if !address.ip().is_loopback() {
+            return Err(ConfiguredTlsError::UnsupportedAddress);
+        }
+        let mut host = Self::open_configured(control)?;
+        host.owner.control_mode = true;
+        for slot in &mut host.owner.resources.slots {
+            slot.listener_scope = TlsListenerScope::LocalControl;
+        }
+        if let Err(error) = host.configure_lan(lan) {
+            host.owner.lan_error = Some(error);
+            // A rejected LAN setting must leave the sole management entry
+            // usable. Only unproven native cleanup prevents startup entirely.
+            if error == ConfiguredTlsError::Cleanup || OWNER_FAULTED.load(Ordering::Acquire) {
+                let _ = host.owner.finish();
+                return Err(ConfiguredTlsError::Cleanup);
+            }
+        }
+        Ok(host)
+    }
+    pub fn local_port(&self) -> u16 {
+        self.owner.port_number
+    }
+    pub fn lan_port(&self) -> Option<u16> {
+        if self.owner.resources.lan_listener == INVALID_SOCKET {
+            None
+        } else {
+            configured::local_port(self.owner.resources.lan_listener).ok()
+        }
+    }
+    pub fn lan_phase(&self) -> super::super::LanListenerPhase {
+        if self.owner.pending_lan.is_some() {
+            super::super::LanListenerPhase::Draining
+        } else if self.owner.resources.lan_listener != INVALID_SOCKET {
+            super::super::LanListenerPhase::Listening
+        } else {
+            super::super::LanListenerPhase::Disabled
+        }
+    }
+    pub fn lan_error(&self) -> Option<ConfiguredTlsError> {
+        self.owner.lan_error
+    }
+    pub fn configure_lan(
+        &mut self,
+        configuration: Option<&fc_domain::https_settings::HttpsConfiguration>,
+    ) -> Result<(), ConfiguredTlsError> {
+        self.owner.configure_lan(configuration)
+    }
     /// Certificate selection is read-only. Only an explicit isolated loopback
     /// capability can enter this candidate; normal listening remains gated.
     pub fn open(thumbprint: &str, marker: &str) -> Result<Self, String> {
@@ -341,6 +412,7 @@ impl TlsHttpHost {
     pub fn acceptance_snapshot(&self) -> TlsAcceptSnapshot {
         let resources = &self.owner.resources;
         let bare = resources.accept.as_ref();
+        let lan_bare = resources.lan_accept.as_ref();
         TlsAcceptSnapshot {
             generation: self.owner.generation,
             posts: self.owner.report.accept_posts,
@@ -364,14 +436,17 @@ impl TlsHttpHost {
                 .iter()
                 .filter(|slot| slot.pending.is_some())
                 .count()
-                + usize::from(bare.is_some_and(|bare| bare.pending())),
+                + usize::from(bare.is_some_and(|bare| bare.pending()))
+                + usize::from(lan_bare.is_some_and(|bare| bare.pending())),
             owned_sockets: usize::from(resources.listener != INVALID_SOCKET)
                 + resources
                     .slots
                     .iter()
                     .filter(|slot| slot.socket != INVALID_SOCKET)
                     .count()
-                + usize::from(bare.is_some_and(|bare| bare.socket != INVALID_SOCKET)),
+                + usize::from(bare.is_some_and(|bare| bare.socket != INVALID_SOCKET))
+                + usize::from(resources.lan_listener != INVALID_SOCKET)
+                + usize::from(lan_bare.is_some_and(|bare| bare.socket != INVALID_SOCKET)),
         }
     }
     /// Latest fixed-slot observations only, not peer wire-close evidence or
@@ -398,6 +473,11 @@ impl TlsHttpHost {
     }
     pub fn poll(&mut self) -> Result<Vec<TlsHttpEvent>, String> {
         self.owner.poll()?;
+        if let Err(error) = self.owner.apply_lan_change() {
+            if OWNER_FAULTED.load(Ordering::Acquire) {
+                return Err(error);
+            }
+        }
         Ok(self.owner.take_http_events())
     }
     pub fn admit_body(
@@ -406,19 +486,49 @@ impl TlsHttpHost {
         exact_limit: u64,
         absolute_deadline: Instant,
     ) -> Result<(), String> {
+        self.admit_body_with_budget(token, exact_limit, absolute_deadline, false)
+    }
+    /// Only the coordinator's authenticated local maintenance file routes may
+    /// use this admission. The native listener scope is checked independently
+    /// of Host/URL and the extended budget keeps the original header epoch.
+    pub fn admit_local_maintenance_body(
+        &mut self,
+        token: RequestToken,
+        exact_limit: u64,
+        absolute_deadline: Instant,
+    ) -> Result<(), String> {
+        self.admit_body_with_budget(token, exact_limit, absolute_deadline, true)
+    }
+    fn admit_body_with_budget(
+        &mut self,
+        token: RequestToken,
+        exact_limit: u64,
+        absolute_deadline: Instant,
+        maintenance: bool,
+    ) -> Result<(), String> {
         let index = self.owner.http_index(token)?;
         let slot = &mut self.owner.resources.slots[index];
         let stream = slot.stream.as_mut().unwrap();
+        let now = Instant::now();
+        let local_extended = maintenance
+            && stream.local_maintenance_deadline_valid(slot.listener_scope, absolute_deadline, now);
         if slot.phase != Phase::Http
             || stream.expected_body != Some(exact_limit)
             || stream.event.is_some()
-            || !stream.admission_deadline_valid(absolute_deadline, Instant::now())
+            || if maintenance {
+                !local_extended
+            } else {
+                !stream.admission_deadline_valid(absolute_deadline, now)
+            }
         {
             return Err("HTTP body admission state or absolute deadline".into());
         }
         slot.parser
             .admit_body(exact_limit)
             .map_err(|e| format!("HTTP body admission: {e:?}"))?;
+        if maintenance {
+            stream.deadline = absolute_deadline;
+        }
         stream.admit_until(absolute_deadline);
         self.owner.drive(index)
     }
@@ -672,6 +782,7 @@ impl Owner {
     fn submit_http_call(&mut self, index: usize, call: Call) -> Result<(), String> {
         let slot = &mut self.resources.slots[index];
         let mut frame = slot.frame.take().ok_or("HTTP TLS frame busy")?;
+        frame.scope = slot.listener_scope;
         frame.call = call;
         match self
             .resources
@@ -772,7 +883,11 @@ impl Owner {
                 }
                 stream.head_only = head.method == "HEAD";
                 stream.expected_body = Some(head.content_length.unwrap_or(0));
-                stream.event = Some(TlsHttpEvent::Head { head, admitted_at });
+                stream.event = Some(TlsHttpEvent::Head {
+                    head,
+                    admitted_at,
+                    scope: slot.listener_scope,
+                });
                 self.report.parsed_requests += 1;
                 Ok(())
             }
@@ -1047,6 +1162,7 @@ impl Owner {
             .iter()
             .any(|slot| slot.pending.is_some() || slot.socket != INVALID_SOCKET)
             || self.resources.listener != INVALID_SOCKET
+            || self.resources.lan_listener != INVALID_SOCKET
             || !self.bare_released()
         {
             return Ok(false);

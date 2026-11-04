@@ -162,12 +162,24 @@ struct Session<'a> {
     current_class_id: Option<String>,
     assignments: Vec<Assignment>,
     csrf: &'a str,
+    must_change_password: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    page_token: Option<&'a str>,
 }
 pub fn session(
     account: &UserAccount,
     current_class: Option<ClassId>,
     assignments: &[TeachingAssignment],
     csrf: &str,
+) -> Result<Vec<u8>, ProtocolError> {
+    page_session(account, current_class, assignments, csrf, None)
+}
+pub fn page_session(
+    account: &UserAccount,
+    current_class: Option<ClassId>,
+    assignments: &[TeachingAssignment],
+    csrf: &str,
+    page_token: Option<&str>,
 ) -> Result<Vec<u8>, ProtocolError> {
     encode(&Session {
         schema_version: SCHEMA_VERSION,
@@ -191,6 +203,8 @@ pub fn session(
             })
             .collect(),
         csrf,
+        page_token,
+        must_change_password: account.must_change_password,
     })
 }
 #[derive(Serialize)]
@@ -203,6 +217,25 @@ pub fn error(code: ErrorCode) -> Result<Vec<u8>, ProtocolError> {
     encode(&Error {
         schema_version: SCHEMA_VERSION,
         code,
+    })
+}
+
+pub fn initialization_status(initialized: bool) -> Result<Vec<u8>, ProtocolError> {
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Status {
+        schema_version: u16,
+        api_version: u16,
+        ui_compatibility_version: u16,
+        online: bool,
+        initialized: bool,
+    }
+    encode(&Status {
+        schema_version: SCHEMA_VERSION,
+        api_version: 1,
+        ui_compatibility_version: 1,
+        online: true,
+        initialized,
     })
 }
 

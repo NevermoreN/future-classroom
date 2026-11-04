@@ -21,7 +21,14 @@ static CLEANUP_FAULTED: AtomicBool = AtomicBool::new(false);
 // process-wide admission lease bounds this quarantine to exactly one owner.
 static QUARANTINE: Mutex<Option<Owner>> = Mutex::new(None);
 
+#[derive(Default)]
+struct ConfigurationState {
+    pending: Option<Option<super::CredentialConfiguration>>,
+    working: bool,
+    complete: Option<Result<(), TlsError>>,
+}
 struct Shared {
+    configuration: Mutex<ConfigurationState>,
     stop: AtomicBool,
     faulted: AtomicBool,
     cleanup_error: Mutex<Option<TlsError>>,
@@ -56,6 +63,7 @@ struct Owner {
     in_flight: [Option<RequestToken>; CONNECTION_SLOTS],
     serials: [u64; CONNECTION_SLOTS],
     bound: [Option<RequestToken>; CONNECTION_SLOTS],
+    scopes: [super::TlsListenerScope; CONNECTION_SLOTS],
     retired: [bool; CONNECTION_SLOTS],
     in_flight_calls: [Option<Call>; CONNECTION_SLOTS],
     admitted: bool,
@@ -184,6 +192,7 @@ impl Worker {
         let (send, complete) = mpsc::sync_channel(CONNECTION_SLOTS);
         let (ready_send, ready) = mpsc::sync_channel(1);
         let shared = Arc::new(Shared {
+            configuration: Mutex::new(ConfigurationState::default()),
             stop: AtomicBool::new(false),
             faulted: AtomicBool::new(false),
             cleanup_error: Mutex::new(None),
@@ -212,11 +221,41 @@ impl Worker {
                 in_flight: [None; CONNECTION_SLOTS],
                 serials: [0; CONNECTION_SLOTS],
                 bound: [None; CONNECTION_SLOTS],
+                scopes: [super::TlsListenerScope::LocalControl; CONNECTION_SLOTS],
                 retired: [false; CONNECTION_SLOTS],
                 in_flight_calls: [None; CONNECTION_SLOTS],
                 admitted: true,
             }),
         })
+    }
+    pub(super) fn configure_lan(
+        &self,
+        configuration: Option<super::CredentialConfiguration>,
+    ) -> Result<(), TlsError> {
+        let owner = self.owner.as_ref().ok_or(TlsError::Stopped)?;
+        if owner.shared.stop.load(Ordering::Acquire) {
+            return Err(TlsError::Stopped);
+        }
+        let mut slot = owner
+            .shared
+            .configuration
+            .lock()
+            .map_err(|_| TlsError::Faulted)?;
+        if slot.pending.is_some() || slot.working || slot.complete.is_some() {
+            return Err(TlsError::Busy);
+        }
+        slot.pending = Some(configuration);
+        Ok(())
+    }
+    pub(super) fn poll_lan_configured(&self) -> Option<Result<(), TlsError>> {
+        self.owner
+            .as_ref()?
+            .shared
+            .configuration
+            .lock()
+            .ok()?
+            .complete
+            .take()
     }
     pub(super) fn poll_ready(&mut self) -> Option<Result<(), TlsError>> {
         let owner = self.owner.as_mut()?;
@@ -266,7 +305,7 @@ impl Worker {
             return Err((TlsError::Busy, frame));
         }
         let same = owner.bound[slot] == Some(token);
-        if (same && owner.retired[slot])
+        if (same && (owner.retired[slot] || frame.scope != owner.scopes[slot]))
             || (!same
                 && (frame.call != Call::Handshake
                     || token.serial() <= owner.serials[slot]
@@ -276,6 +315,7 @@ impl Worker {
             return Err((TlsError::InvalidInput, frame));
         }
         let call = frame.call;
+        let scope = frame.scope;
         frame.result = None;
         frame.output_len = 0;
         match owner.pending.try_send(frame) {
@@ -283,6 +323,7 @@ impl Worker {
                 owner.in_flight[slot] = Some(token);
                 owner.serials[slot] = token.serial();
                 owner.bound[slot] = Some(token);
+                owner.scopes[slot] = scope;
                 owner.retired[slot] = false;
                 owner.in_flight_calls[slot] = Some(call);
                 Ok(())
@@ -395,6 +436,40 @@ fn run(
         shared.stop.store(true, Ordering::Release);
     }
     loop {
+        let configuration = {
+            let mut slot = shared
+                .configuration
+                .lock()
+                .unwrap_or_else(|e| e.into_inner());
+            let pending = slot.pending.take();
+            if pending.is_some() {
+                slot.working = true;
+            }
+            pending
+        };
+        if let Some(configuration) = configuration {
+            let result = if shared.stop.load(Ordering::Acquire) {
+                Err(TlsError::Stopped)
+            } else {
+                match catch_unwind(AssertUnwindSafe(|| driver.configure_lan(configuration))) {
+                    Ok(result) => result,
+                    Err(_) => {
+                        shared.stop.store(true, Ordering::Release);
+                        shared.faulted.store(true, Ordering::Release);
+                        Err(TlsError::ThreadPanic)
+                    }
+                }
+            };
+            if let Err(error @ TlsError::Cleanup(_)) = result {
+                shared.record_cleanup_error(error);
+            }
+            let mut slot = shared
+                .configuration
+                .lock()
+                .unwrap_or_else(|e| e.into_inner());
+            slot.working = false;
+            slot.complete = Some(result);
+        }
         let mut frame = match pending.recv_timeout(Duration::from_millis(10)) {
             Ok(frame) => frame,
             Err(mpsc::RecvTimeoutError::Disconnected) => break,
@@ -407,6 +482,7 @@ fn run(
         };
         let token = frame.token;
         let call = frame.call;
+        let scope = frame.scope;
         let result = if shared.stop.load(Ordering::Acquire) {
             Err(TlsError::Stopped)
         } else {
@@ -423,13 +499,17 @@ fn run(
             shared.record_cleanup_error(error);
         }
         frame.result = Some(
-            if frame.token == token && frame.call == call && frame.output_len <= frame.output.len()
+            if frame.token == token
+                && frame.call == call
+                && frame.scope == scope
+                && frame.output_len <= frame.output.len()
             {
                 result
             } else {
                 shared.stop.store(true, Ordering::Release);
                 frame.token = token;
                 frame.call = call;
+                frame.scope = scope;
                 Err(TlsError::UnexpectedCompletion)
             },
         );

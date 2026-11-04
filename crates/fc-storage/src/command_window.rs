@@ -407,7 +407,7 @@ fn validate_profile_owner(
         || owner[0] != 1
         || owner[1..9] != admission.actor_id.get().to_be_bytes()
         || owner[17..25] != admission.auth_epoch.get().to_be_bytes()
-        || owner[25] != 1
+        || !matches!(owner[25], 1 | 2)
     {
         return Err(StorageError::Database);
     }

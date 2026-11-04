@@ -122,6 +122,17 @@ impl RecoveryWorkflow {
         access: OrdinaryBackupAccess,
         execution: ExecutionFence,
     ) -> Result<MigrationBundle> {
+        let source = selected
+            .open(fc_protocol::web::maintenance::MAX_PACKAGE_BYTES)
+            .map_err(|_| WorkflowError::Files(RecoveryFileError::Unavailable))?;
+        self.inspect_migration_pinned(source, access, execution)
+    }
+    pub fn inspect_migration_pinned(
+        &self,
+        source: fc_windows::materials::files::LockedFile,
+        access: OrdinaryBackupAccess,
+        execution: ExecutionFence,
+    ) -> Result<MigrationBundle> {
         let generation = self.slot.reserve().ok_or(WorkflowError::Busy)?;
         let mut reservation = Reservation {
             workflow: self.clone(),
@@ -135,7 +146,7 @@ impl RecoveryWorkflow {
                     .unwrap_or(false)
         });
         let files = RecoveryFiles::new(&self.paths)?;
-        let prepared = files.preflight_package(selected, &*fence)?;
+        let prepared = files.preflight_pinned(source, &*fence)?;
         let inspection = access.inspect_migration_source(
             prepared.ordinary_database().to_owned(),
             prepared.manifest().clone(),

@@ -143,12 +143,22 @@ impl AuthorityContext {
         actor: &ActorContext,
         now: LocalDateTime,
     ) -> Result<(), PermissionError> {
+        self.authorize_global(actor, now)?;
+        if actor.origin != TrustedOrigin::Local {
+            return Err(PermissionError::LocalOnly);
+        }
+        Ok(())
+    }
+    /// Global management is available to either trusted transport. The actor's
+    /// actual origin is preserved; platform-only operations can still require local.
+    pub fn authorize_global(
+        &self,
+        actor: &ActorContext,
+        now: LocalDateTime,
+    ) -> Result<(), PermissionError> {
         self.validate_actor(actor, now)?;
         if self.principal.role != Role::GlobalAdmin {
             return Err(PermissionError::RoleDenied);
-        }
-        if actor.origin != TrustedOrigin::Local {
-            return Err(PermissionError::LocalOnly);
         }
         Ok(())
     }

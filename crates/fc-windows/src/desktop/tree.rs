@@ -1104,11 +1104,7 @@ pub(super) fn present(
                 if !publication_allowed(scene, guard)? {
                     return Ok(PresentOutcome::Hidden);
                 }
-                // SAFETY: exact own root HWND; no nested node owns a window. The
-                // scene/lease/system sample was rechecked immediately above.
-                unsafe {
-                    let _ = ShowWindow(group.input.surface.window.0, SW_SHOWNOACTIVATE);
-                }
+                group.input.surface.window.show_resident()?;
             }
             for index in &t.special {
                 let card = &renderer.cards[*index];
@@ -1122,20 +1118,17 @@ pub(super) fn present(
                 }
                 let mut windows = Vec::new();
                 if let Some(b) = &card.backdrop {
-                    windows.push(b.fill.window.0);
-                    windows.push(b.edge.window.0);
+                    windows.push(&b.fill.window);
+                    windows.push(&b.edge.window);
                 }
-                windows.push(card.surface.window.0);
-                windows.extend(card.dynamic.iter().map(|s| s.window.0));
-                windows.extend(card.input.iter().map(|i| i.surface.window.0));
+                windows.push(&card.surface.window);
+                windows.extend(card.dynamic.iter().map(|s| &s.window));
+                windows.extend(card.input.iter().map(|i| &i.surface.window));
                 for window in windows {
                     if !publication_allowed(scene, guard)? {
                         return Ok(PresentOutcome::Hidden);
                     }
-                    // SAFETY: only this scene's own small utility/backdrop windows.
-                    unsafe {
-                        let _ = ShowWindow(window, SW_SHOWNOACTIVATE);
-                    }
+                    window.show_resident()?;
                 }
             }
             renderer.hidden = false;

@@ -6,12 +6,16 @@ use fc_domain::{ids::*, voice::*};
 use fc_ports::{http::*, voice::*};
 use serde::Deserialize;
 
+pub mod admin;
 pub mod assets;
 pub mod command_window;
 pub mod content;
+pub mod maintenance;
 pub mod materials;
 pub mod pairing;
+pub mod repair;
 pub mod responses;
+pub mod session;
 pub mod subject_visual;
 pub mod voice;
 
@@ -48,12 +52,27 @@ impl AllowedMethods {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Route {
     Status,
+    Admin {
+        resource: admin::Resource,
+        write: bool,
+    },
+    Maintenance {
+        resource: maintenance::Resource,
+        write: bool,
+    },
+    Repair {
+        resource: repair::Resource,
+    },
     CommandIssue,
     PairingCreate,
     PairingPoll {
         request_id: u64,
     },
     Session,
+    SessionLogin,
+    SessionResume,
+    SessionPassword,
+    Setup,
     SessionLogout,
     ContentScopes {
         kind: content::Kind,
@@ -103,6 +122,33 @@ pub enum Route {
 impl Route {
     pub fn allowed_methods(self) -> AllowedMethods {
         match self {
+            Self::Repair {
+                resource: repair::Resource::Status,
+            } => AllowedMethods::Get,
+            Self::Repair { .. } => AllowedMethods::Post,
+            Self::Maintenance { resource, .. } => match resource {
+                maintenance::Resource::Job(_) | maintenance::Resource::File(_) => {
+                    AllowedMethods::Get
+                }
+                _ => AllowedMethods::Post,
+            },
+            Self::Admin {
+                resource:
+                    admin::Resource::Status
+                    | admin::Resource::PreviewSource
+                    | admin::Resource::Profiles { .. }
+                    | admin::Resource::ImageMedia { .. },
+                ..
+            } => AllowedMethods::Get,
+            Self::Admin {
+                resource:
+                    admin::Resource::Preview { .. }
+                    | admin::Resource::ImageManifest { .. }
+                    | admin::Resource::ImageBytes { .. }
+                    | admin::Resource::ImageCancel { .. },
+                ..
+            } => AllowedMethods::Post,
+            Self::Admin { .. } => AllowedMethods::GetPost,
             Self::Materials { route } => route.allowed_methods(),
             Self::ContentRead { .. }
             | Self::ContentSave { .. }
@@ -115,12 +161,35 @@ impl Route {
     pub fn requires_session(self) -> bool {
         !matches!(
             self,
-            Self::Status | Self::PairingCreate | Self::PairingPoll { .. }
+            Self::Status
+                | Self::PairingCreate
+                | Self::PairingPoll { .. }
+                | Self::Setup
+                | Self::SessionLogin
+                | Self::SessionResume
+                | Self::Repair { .. }
         )
     }
     pub fn body_limit(self) -> u64 {
         match self {
+            Self::Repair {
+                resource: repair::Resource::Status,
+            } => 0,
+            Self::Repair { .. } => repair::MAX_BODY as u64,
+            Self::Maintenance {
+                resource: maintenance::Resource::Upload(_),
+                write: true,
+            } => maintenance::MAX_PACKAGE_BYTES,
+            Self::Maintenance { write: true, .. } => admin::MAX_ADMIN_JSON_BYTES as u64,
+            Self::Admin {
+                resource: admin::Resource::ImageBytes { .. },
+                write: true,
+            } => admin::images::CHUNK_BYTES as u64,
+            Self::Admin { write: true, .. } => admin::MAX_ADMIN_JSON_BYTES as u64,
             Self::Materials { route } => route.body_limit(),
+            Self::Setup | Self::SessionLogin | Self::SessionResume | Self::SessionPassword => {
+                session::MAX_SESSION_JSON_BYTES as u64
+            }
             Self::PairingCreate | Self::PairingPoll { .. } | Self::SessionLogout => {
                 pairing::MAX_PAIRING_JSON_BYTES as u64
             }
@@ -132,15 +201,34 @@ impl Route {
         }
     }
     fn requires_csrf(self) -> bool {
-        self.post() && !matches!(self, Self::PairingCreate | Self::PairingPoll { .. })
+        self.post()
+            && !matches!(
+                self,
+                Self::PairingCreate
+                    | Self::PairingPoll { .. }
+                    | Self::SessionLogin
+                    | Self::SessionResume
+                    | Self::Setup
+                    | Self::Repair { .. }
+            )
     }
     fn post(self) -> bool {
+        if let Self::Repair { resource } = self {
+            return resource != repair::Resource::Status;
+        }
+        if let Self::Admin { write, .. } | Self::Maintenance { write, .. } = self {
+            return write;
+        }
         if let Self::Materials { route } = self {
             return route.post();
         }
         matches!(
             self,
-            Self::PairingCreate
+            Self::Setup
+                | Self::SessionLogin
+                | Self::SessionResume
+                | Self::SessionPassword
+                | Self::PairingCreate
                 | Self::PairingPoll { .. }
                 | Self::SessionLogout
                 | Self::CommandIssue
@@ -229,6 +317,10 @@ impl WebBoundary {
             "commands" => Route::CommandIssue,
             "pairing/requests" => Route::PairingCreate,
             "session" => Route::Session,
+            "session/login" => Route::SessionLogin,
+            "session/resume" => Route::SessionResume,
+            "session/password" => Route::SessionPassword,
+            "setup" => Route::Setup,
             "session/logout" => Route::SessionLogout,
             "voice/capabilities" => Route::VoiceCapabilities,
             "voice/broadcasts" => {
@@ -239,7 +331,37 @@ impl WebBoundary {
                 }
             }
             _ => {
-                if let Some(path) = path.strip_prefix("materials/") {
+                if path.starts_with("repair/") {
+                    let resource = repair::recognize(&format!("/fc/api/v1/{path}"))
+                        .ok_or(WebError::NotFound)?;
+                    Route::Repair { resource }
+                } else if path == "admin/maintenance/jobs"
+                    || path.starts_with("admin/maintenance/jobs/")
+                {
+                    let resource = maintenance::recognize(&format!("/fc/api/v1/{path}"))
+                        .ok_or(WebError::NotFound)?;
+                    let write = !matches!(
+                        resource,
+                        maintenance::Resource::Job(_) | maintenance::Resource::File(_)
+                    );
+                    if (method == "POST") != write {
+                        return Err(WebError::Method);
+                    }
+                    Route::Maintenance { resource, write }
+                } else if let Some(path) = path.strip_prefix("admin/") {
+                    let resource = admin::Resource::path(path).ok_or(WebError::NotFound)?;
+                    let route = Route::Admin {
+                        resource,
+                        write: method == "POST",
+                    };
+                    if matches!(
+                        (route.allowed_methods(), method),
+                        (AllowedMethods::Get, "POST") | (AllowedMethods::Post, "GET")
+                    ) {
+                        return Err(WebError::Method);
+                    }
+                    route
+                } else if let Some(path) = path.strip_prefix("materials/") {
                     Route::Materials {
                         route: materials::route(path).ok_or(WebError::NotFound)?,
                     }
@@ -417,12 +539,13 @@ impl WebBoundary {
                 return Err(WebError::Origin);
             }
         }
-        // Only the two pairing bootstrap routes omit a pre-existing session
-        // CSRF token. They still require same-origin JSON requests; polling
-        // additionally proves the original unpredictable secret in its body.
+        // Login/resume and historical pairing bootstrap omit an existing CSRF
+        // token, but still require strict same-origin JSON. Resume proves the
+        // unpredictable page credential in its body.
         unique(head, "x-fc-csrf")?;
         // Cookie and Authorization must not be ambiguously combined by layers.
         unique(head, "cookie")?;
+        unique(head, "x-fc-page")?;
         if unique(head, "authorization")?.is_some()
             || unique(head, "transfer-encoding")?.is_some()
             || unique(head, "expect")?.is_some()
@@ -455,6 +578,12 @@ impl WebBoundary {
                 Route::Materials {
                     route: materials::MaterialRoute::UploadBytes { .. }
                         | materials::MaterialRoute::BatchUploadBytes { .. }
+                } | Route::Admin {
+                    resource: admin::Resource::ImageBytes { .. },
+                    write: true
+                } | Route::Maintenance {
+                    resource: maintenance::Resource::Upload(_),
+                    write: true
                 }
             ) {
                 b"application/octet-stream".as_slice()

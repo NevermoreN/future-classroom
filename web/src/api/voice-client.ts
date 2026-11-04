@@ -1,5 +1,5 @@
 import { commandIdentity, commandTicket, type CommandApi, type CommandIdentity } from './command-protocol'
-import { abortError, ApiError, NetworkFault, readJson } from './client'
+import { abortError, ApiError, NetworkFault, readJson, pageHeaders } from './client'
 import { MaterialHttpApi } from './material-client'
 import { decimal, errorCode, ProtocolFault, secret } from './protocol'
 import * as v from './voice-protocol'
@@ -23,7 +23,7 @@ export class VoiceHttpApi extends MaterialHttpApi implements VoiceApi {
     const operation = new AbortController(), abort = () => operation.abort()
     signal.addEventListener('abort', abort, { once: true }); const timer = setTimeout(abort, 120_000)
     try {
-      const response = await this.fetcher(new URL('voice/uploads?classId=' + classId, this.base), { method: 'POST', credentials: 'same-origin', cache: 'no-store', redirect: 'error', referrerPolicy: 'same-origin', headers: { Accept: 'application/json', 'Content-Type': 'audio/wav', 'X-FC-CSRF': secret(csrf) }, body: wav, signal: operation.signal })
+      const response = await this.fetcher(new URL('voice/uploads?classId=' + classId, this.base), { method: 'POST', credentials: 'same-origin', cache: 'no-store', redirect: 'error', referrerPolicy: 'same-origin', headers: { Accept: 'application/json', 'Content-Type': 'audio/wav', 'X-FC-CSRF': secret(csrf), ...pageHeaders() }, body: wav, signal: operation.signal })
       if (response.status === 401 || response.status === 403) { await response.body?.cancel().catch(() => undefined); throw new ApiError(response.status, response.status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN') }
       const value = await readJson(response, operation.signal)
       if (!response.ok) throw new ApiError(response.status, errorCode(value))

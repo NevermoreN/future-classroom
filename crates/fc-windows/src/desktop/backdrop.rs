@@ -38,11 +38,11 @@ fn cells(region: &Region, width: i32, height: i32, border: bool) -> Result<Vec<M
                 // and the opposite inner rail provide a quiet refracted rim.
                 let visible = !border
                     || if v < 0.08 {
-                        u < 0.60 || u > 0.88
+                        !(0.60..=0.88).contains(&u)
                     } else if v > 0.92 {
                         (0.30..0.84).contains(&u)
                     } else {
-                        v < 0.36 || v > 0.72
+                        !(0.36..=0.72).contains(&v)
                     };
                 if visible {
                     let rgb = if border {
@@ -310,10 +310,14 @@ impl Layer {
         paint_alpha: f32,
         paint: NativePaint,
     ) -> Result<Self> {
-        // SAFETY: initially hidden and always transparent/non-activating/non-topmost.
+        // SAFETY: initially hidden and always transparent/non-activating/topmost.
         let window = NativeWindow(unsafe {
             CreateWindowExW(
-                WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
+                WS_EX_LAYERED
+                    | WS_EX_TRANSPARENT
+                    | WS_EX_NOACTIVATE
+                    | WS_EX_TOOLWINDOW
+                    | WS_EX_TOPMOST,
                 BACKDROP_CLASS,
                 w!("未来教室课间静态玻璃"),
                 WS_POPUP,

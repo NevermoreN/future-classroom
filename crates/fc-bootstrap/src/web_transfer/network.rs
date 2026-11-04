@@ -18,7 +18,7 @@ use fc_protocol::{
     MAX_JSON_BYTES,
 };
 use fc_runtime::worker::{Rejection, Task};
-use fc_windows::tls_frontdoor::{TlsAcceptSnapshot, TlsHttpEvent, TlsHttpHost};
+use fc_windows::tls_frontdoor::{TlsAcceptSnapshot, TlsHttpEvent, TlsHttpHost, TlsListenerScope};
 use std::{
     any::Any,
     cell::RefCell,
@@ -169,6 +169,7 @@ struct Work<T> {
     state: JobState<T>,
 }
 struct Record<T> {
+    scope: TlsListenerScope,
     token: RequestToken,
     phase: Phase,
     head: Option<RequestHead>,
@@ -186,6 +187,8 @@ struct Record<T> {
     download_cursor: Option<DownloadCursor>,
     static_head: Option<ResponseHead>,
     static_body: Option<StaticBody>,
+    json_response_bytes: usize,
+    maintenance_detached: bool,
     static_cursor: Option<DownloadCursor>,
     deadline: Option<Instant>,
     hub_touched: bool,
@@ -202,6 +205,7 @@ impl<T: HttpTicket> Record<T> {
     fn new(token: RequestToken) -> Self {
         Self {
             token,
+            scope: TlsListenerScope::Lan,
             phase: Phase::Head,
             head: None,
             route: None,
@@ -218,6 +222,8 @@ impl<T: HttpTicket> Record<T> {
             download_cursor: None,
             static_head: None,
             static_body: None,
+            json_response_bytes: 0,
+            maintenance_detached: false,
             static_cursor: None,
             deadline: None,
             hub_touched: false,
@@ -282,11 +288,12 @@ impl<T: HttpTicket> Record<T> {
         eof: bool,
     ) -> Result<u64, ()> {
         let expected = self.head.as_ref().ok_or(())?.content_length.unwrap_or(0);
+        let limit = self.route.map_or(MAX_JSON_BYTES as u64, Route::body_limit);
         let end = offset.checked_add(bytes.len() as u64).ok_or(())?;
         if sequence != self.json_sequence
             || offset != self.json.len() as u64
-            || expected > MAX_JSON_BYTES as u64
-            || bytes.len() > MAX_JSON_BYTES
+            || expected > limit
+            || bytes.len() as u64 > limit
             || end > expected
             || (eof && end != expected)
             || (!eof && bytes.is_empty())
@@ -325,7 +332,7 @@ impl<T: HttpTicket> Record<T> {
         let static_body = self.static_body.as_ref().map_or(0, |body| {
             body.owned_bytes().saturating_sub(size_of::<StaticBody>())
         });
-        head + static_head + static_body + self.json.capacity() + pending
+        head + static_head + static_body + self.json.capacity() + self.json_response_bytes + pending
     }
 }
 struct Core<E: HttpExecutor> {
@@ -333,10 +340,14 @@ struct Core<E: HttpExecutor> {
     executor: E,
     backend: Weak<Mutex<Backend>>,
     app: Weak<WebApplication>,
+    local_app: Option<Weak<WebApplication>>,
+    local_assets: Option<Arc<StaticAssets>>,
     hub: UploadHub,
     downloads: DownloadHub,
     static_assets: Option<Arc<StaticAssets>>,
     execution: Option<super::ExecutionFence>,
+    maintenance: Option<crate::maintenance_web::MaintenanceControl>,
+    repair: Option<Arc<crate::repair_web::RepairService>>,
     started: bool,
     records: [Option<Record<E::Ticket>>; MAX_REQUESTS],
     report: NetworkReport,
@@ -372,6 +383,32 @@ where
         hub: UploadHub,
         downloads: DownloadHub,
     ) -> Self {
+        Self::with_context(
+            host,
+            executor,
+            Arc::downgrade(backend),
+            Arc::downgrade(app),
+            hub,
+            downloads,
+        )
+    }
+    /// The loopback control plane can serve its immutable UI before SQLite is opened.
+    pub fn new_unattached(
+        host: TlsHttpHost,
+        executor: E,
+        hub: UploadHub,
+        downloads: DownloadHub,
+    ) -> Self {
+        Self::with_context(host, executor, Weak::new(), Weak::new(), hub, downloads)
+    }
+    fn with_context(
+        host: TlsHttpHost,
+        executor: E,
+        backend: Weak<Mutex<Backend>>,
+        app: Weak<WebApplication>,
+        hub: UploadHub,
+        downloads: DownloadHub,
+    ) -> Self {
         // A retained original capability must be recovered, never superseded.
         RETAINED_CORE.with(|slot| assert!(slot.borrow().is_none(), "recover retained Net owner"));
         let mut records = std::array::from_fn(|_| None);
@@ -379,10 +416,18 @@ where
             records[index] = Some(Record::new(token));
         }
         let mut core = Box::new(Core {
+            repair: None,
+            maintenance: app.upgrade().and_then(|app| {
+                app.maintenance
+                    .as_ref()
+                    .map(|service| service.control.clone())
+            }),
             host,
             executor,
-            backend: Arc::downgrade(backend),
-            app: Arc::downgrade(app),
+            backend,
+            app,
+            local_app: None,
+            local_assets: None,
             hub,
             downloads,
             static_assets: None,
@@ -399,6 +444,90 @@ where
     }
     /// Install the immutable worker-verified package before any native poll or
     /// Head processing. It cannot be replaced during this owner's lifetime.
+    pub fn set_local_control(
+        &mut self,
+        app: &Arc<WebApplication>,
+        assets: Arc<StaticAssets>,
+    ) -> Result<(), String> {
+        let core = self.core_mut();
+        if core.started || core.local_app.is_some() {
+            return Err("local control must be installed before Net starts".into());
+        }
+        core.local_app = Some(Arc::downgrade(app));
+        core.maintenance = app
+            .maintenance
+            .as_ref()
+            .map(|service| service.control.clone());
+        core.local_assets = Some(assets);
+        Ok(())
+    }
+    pub fn set_local_assets(&mut self, assets: Arc<StaticAssets>) -> Result<(), String> {
+        let core = self.core_mut();
+        if core.started || core.local_assets.is_some() {
+            return Err("install local assets before polling".into());
+        }
+        core.local_assets = Some(assets);
+        core.refresh_report();
+        Ok(())
+    }
+    /// Called on this network owner after a worker has prepared the real Backend
+    /// and local Web adapter. This grants no session or administrator identity.
+    pub fn attach_backend(
+        &mut self,
+        backend: &Arc<Mutex<Backend>>,
+        app: &Arc<WebApplication>,
+    ) -> Result<(), String> {
+        let core = self.core_mut();
+        if core.backend.strong_count() != 0
+            || core
+                .local_app
+                .as_ref()
+                .is_some_and(|app| app.strong_count() != 0)
+        {
+            return Err("backend already attached".into());
+        }
+        core.backend = Arc::downgrade(backend);
+        core.maintenance = app
+            .maintenance
+            .as_ref()
+            .map(|service| service.control.clone());
+        core.app = Arc::downgrade(app);
+        core.local_app = Some(Arc::downgrade(app));
+        Ok(())
+    }
+    /// Only the explicit OS repair bootstrap owns this independent capability.
+    /// A repair host can never be attached to an ordinary teaching Backend.
+    pub fn attach_repair(
+        &mut self,
+        repair: Arc<crate::repair_web::RepairService>,
+    ) -> Result<(), String> {
+        let core = self.core_mut();
+        if core.repair.is_some() || core.backend.strong_count() != 0 || core.local_app.is_some() {
+            return Err("repair authority cannot replace an attached application".into());
+        }
+        core.repair = Some(repair);
+        Ok(())
+    }
+    pub fn configure_lan(
+        &mut self,
+        configuration: Option<&fc_domain::https_settings::HttpsConfiguration>,
+        app: Option<&Arc<WebApplication>>,
+        assets: Option<Arc<StaticAssets>>,
+    ) -> Result<(), String> {
+        if configuration.is_some() != app.is_some() || configuration.is_some() != assets.is_some() {
+            return Err("LAN configuration requires exact Web and asset bindings".into());
+        }
+        let core = self.core_mut();
+        core.host
+            .configure_lan(configuration)
+            .map_err(|_| "LAN endpoint could not be changed".to_owned())?;
+        if let Some(app) = app {
+            core.app = Arc::downgrade(app);
+        }
+        core.static_assets = assets;
+        core.refresh_report();
+        Ok(())
+    }
     pub fn set_execution_fence(&mut self, fence: super::ExecutionFence) -> Result<(), String> {
         let core = self.core_mut();
         if core.started || core.execution.is_some() {
@@ -449,6 +578,12 @@ where
     }
     pub fn port_number(&self) -> u16 {
         self.core().host.port_number()
+    }
+    pub fn lan_phase(&self) -> fc_windows::tls_frontdoor::LanListenerPhase {
+        self.core().host.lan_phase()
+    }
+    pub fn lan_error(&self) -> Option<fc_windows::tls_frontdoor::ConfiguredTlsError> {
+        self.core().host.lan_error()
     }
     pub fn generation(&self) -> u64 {
         self.core().host.generation()
@@ -572,14 +707,37 @@ impl<E: HttpExecutor> Core<E> {
                 .deadline
                 .is_some_and(|deadline| Instant::now() < deadline)
     }
-    fn composition(&self) -> Option<(Arc<Mutex<Backend>>, Arc<WebApplication>)> {
-        Some((self.backend.upgrade()?, self.app.upgrade()?))
+    fn application(&self, record: &Record<E::Ticket>) -> Option<Arc<WebApplication>> {
+        match record.scope {
+            TlsListenerScope::LocalControl => self.local_app.as_ref()?.upgrade(),
+            TlsListenerScope::Lan => self.app.upgrade(),
+        }
+    }
+    fn composition(
+        &self,
+        record: &Record<E::Ticket>,
+    ) -> Option<(Arc<Mutex<Backend>>, Arc<WebApplication>)> {
+        Some((self.backend.upgrade()?, self.application(record)?))
+    }
+    fn assets(&self, record: &Record<E::Ticket>) -> Option<&Arc<StaticAssets>> {
+        match record.scope {
+            TlsListenerScope::LocalControl => self.local_assets.as_ref(),
+            TlsListenerScope::Lan => self.static_assets.as_ref(),
+        }
     }
     fn send_response(&mut self, record: &mut Record<E::Ticket>, response: WebResponse) {
         if record.closed {
             return;
         }
-        let valid = response.body.len() <= MAX_JSON_BYTES
+        let valid = response.body.len()
+            <= if matches!(
+                record.route,
+                Some(Route::Admin { .. } | Route::Maintenance { .. })
+            ) {
+                fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES
+            } else {
+                MAX_JSON_BYTES
+            }
             && response.head.content_length == response.body.len() as u64
             && response.head.validate().is_ok();
         let response = if valid {
@@ -589,6 +747,15 @@ impl<E: HttpExecutor> Core<E> {
         };
         if response.head.status < 400 && !self.live(record) {
             self.close_record(record);
+            return;
+        }
+        if response.body.len() > CHUNK_BYTES {
+            record.json_response_bytes = response.body.len();
+            record.static_head = Some(response.head);
+            record.static_body = Some(StaticBody::from_owned(response.body));
+            if self.start_static_response(record).is_err() {
+                self.close_record(record);
+            }
             return;
         }
         if self
@@ -625,8 +792,7 @@ impl<E: HttpExecutor> Core<E> {
         record.life = Some(life.clone());
         record.head = Some(head.clone());
         if let Some(assets) = self
-            .static_assets
-            .as_ref()
+            .assets(record)
             .filter(|assets| !assets.is_api_target(&head.target))
         {
             match assets.dispatch(&head, b"") {
@@ -648,7 +814,52 @@ impl<E: HttpExecutor> Core<E> {
             }
             return Ok(());
         }
-        let Some((backend, app)) = self.composition() else {
+        if self
+            .maintenance
+            .as_ref()
+            .is_some_and(|control| control.detached_active())
+        {
+            let route = self
+                .application(record)
+                .and_then(|app| app.route_hint(&head).ok());
+            match (record.scope, route) {
+                (
+                    TlsListenerScope::LocalControl,
+                    Some(
+                        route @ Route::Maintenance {
+                            resource:
+                                fc_protocol::web::maintenance::Resource::Job(_)
+                                | fc_protocol::web::maintenance::Resource::Cancel(_),
+                            ..
+                        },
+                    ),
+                ) => {
+                    record.maintenance_detached = true;
+                    return self.admitted(record, route);
+                }
+                _ => {
+                    self.send_response(
+                        record,
+                        error_response(503, responses::ErrorCode::ServiceUnavailable),
+                    );
+                    return Ok(());
+                }
+            }
+        }
+        if let Some(repair) = &self.repair {
+            if record.scope != TlsListenerScope::LocalControl {
+                self.send_response(record, error_response(403, responses::ErrorCode::Forbidden));
+                return Ok(());
+            }
+            match repair.preflight(&head) {
+                Ok(resource) => return self.admitted(record, Route::Repair { resource }),
+                Err(error) => {
+                    self.send_response(record, crate::web_application::boundary_error(error));
+                    return Ok(());
+                }
+            }
+        }
+        let Some((backend, app)) = self.composition(record) else {
             self.send_response(
                 record,
                 error_response(503, responses::ErrorCode::ServiceUnavailable),
@@ -667,15 +878,41 @@ impl<E: HttpExecutor> Core<E> {
         }
         record.route = Some(route);
         self.report.admissions = self.report.admissions.saturating_add(1);
+        let maintenance_file = matches!(
+            route,
+            Route::Maintenance {
+                resource: fc_protocol::web::maintenance::Resource::Upload(_)
+                    | fc_protocol::web::maintenance::Resource::File(_),
+                ..
+            }
+        );
+        if maintenance_file {
+            if record.scope != TlsListenerScope::LocalControl {
+                self.close_record(record);
+                return Ok(());
+            }
+            let life = record
+                .life
+                .as_ref()
+                .unwrap()
+                .local_maintenance()
+                .map_err(|_| "maintenance transfer lifetime")?;
+            record.deadline = Some(life.deadline());
+            record.life = Some(life);
+        }
         let kind = match route {
             Route::VoiceUpload { .. } => Some(UploadKind::Voice),
+            Route::Maintenance {
+                resource: fc_protocol::web::maintenance::Resource::Upload(_),
+                ..
+            } => Some(UploadKind::Maintenance),
             Route::Materials {
                 route: MaterialRoute::UploadBytes { .. } | MaterialRoute::BatchUploadBytes { .. },
             } => Some(UploadKind::Material),
             _ => None,
         };
         if let Some(kind) = kind {
-            let Some(app) = self.app.upgrade() else {
+            let Some(app) = self.application(record) else {
                 self.close_record(record);
                 return Ok(());
             };
@@ -692,20 +929,51 @@ impl<E: HttpExecutor> Core<E> {
             record.deadline = Some(life.deadline());
             record.life = Some(life.clone());
             let control = record.control.take().ok_or("original upload control")?;
-            let task = UploadTask::begin(
-                self.hub.clone(),
-                &app,
-                kind,
-                record.head.as_ref().unwrap().clone(),
-                control,
-                life,
-            )
+            let task = if kind == UploadKind::Maintenance {
+                let Some(backend) = self.backend.upgrade() else {
+                    self.close_record(record);
+                    return Ok(());
+                };
+                UploadTask::begin_maintenance(
+                    self.hub.clone(),
+                    &app,
+                    &backend,
+                    record.head.as_ref().unwrap().clone(),
+                    control,
+                    life,
+                )
+            } else {
+                UploadTask::begin(
+                    self.hub.clone(),
+                    &app,
+                    kind,
+                    record.head.as_ref().unwrap().clone(),
+                    control,
+                    life,
+                )
+            }
             .map_err(|_| "bounded upload begin")?;
             record.phase = Phase::Beginning;
             record.queue(Purpose::Begin, HttpJob::Upload(Box::new(task)))
         } else {
             let count = record.head.as_ref().unwrap().content_length.unwrap_or(0);
-            if count > MAX_JSON_BYTES as u64 || count > route.body_limit() {
+            let total_reserved = self
+                .records
+                .iter()
+                .flatten()
+                .map(|entry| entry.json.capacity())
+                .sum::<usize>();
+            let limit = if matches!(route, Route::Admin { .. } | Route::Maintenance { .. }) {
+                fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES
+            } else {
+                MAX_JSON_BYTES
+            };
+            if count > limit as u64
+                || count > route.body_limit()
+                || count
+                    > fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES.saturating_sub(total_reserved)
+                        as u64
+            {
                 self.send_response(
                     record,
                     error_response(413, responses::ErrorCode::InvalidRequest),
@@ -714,11 +982,17 @@ impl<E: HttpExecutor> Core<E> {
             }
             record.json = Vec::with_capacity(count as usize);
             record.phase = Phase::JsonBody;
-            if self
-                .host
-                .admit_body(record.token, count, record.deadline.unwrap())
-                .is_err()
-            {
+            let admitted = if maintenance_file {
+                self.host.admit_local_maintenance_body(
+                    record.token,
+                    count,
+                    record.deadline.unwrap(),
+                )
+            } else {
+                self.host
+                    .admit_body(record.token, count, record.deadline.unwrap())
+            };
+            if admitted.is_err() {
                 self.close_record(record);
             }
             Ok(())
@@ -830,7 +1104,44 @@ impl<E: HttpExecutor> Core<E> {
                 }
                 self.report.body_acks = self.report.body_acks.saturating_add(1);
                 if eof {
-                    let Some((backend, app)) = self.composition() else {
+                    if matches!(record.route, Some(Route::Repair { .. })) {
+                        let Some(service) = &self.repair else {
+                            self.close_record(record);
+                            return Ok(());
+                        };
+                        let head = record.head.as_ref().unwrap().clone();
+                        let body = std::mem::take(&mut record.json);
+                        if let Some(response) = service.detached_response(&head, &body) {
+                            self.send_response(record, response);
+                        } else {
+                            let task = crate::repair_web::RepairHttpTask::new(
+                                service.clone(),
+                                head,
+                                body,
+                                record.life.as_ref().unwrap().clone(),
+                            )
+                            .map_err(|_| "repair HTTP task")?;
+                            record.phase = Phase::JsonWork;
+                            record.queue(Purpose::Json, HttpJob::Repair(Box::new(task)))?;
+                        }
+                        return Ok(());
+                    }
+                    if record.maintenance_detached {
+                        let response = match (&self.maintenance, record.route) {
+                            (Some(control), Some(Route::Maintenance { resource, .. })) => {
+                                crate::web_application::maintenance::detached(
+                                    control,
+                                    resource,
+                                    record.head.as_ref().unwrap(),
+                                    &record.json,
+                                )
+                            }
+                            _ => error_response(503, responses::ErrorCode::ServiceUnavailable),
+                        };
+                        self.send_response(record, response);
+                        return Ok(());
+                    }
+                    let Some((backend, app)) = self.composition(record) else {
                         self.close_record(record);
                         return Ok(());
                     };
@@ -840,9 +1151,14 @@ impl<E: HttpExecutor> Core<E> {
                     record.phase = Phase::JsonWork;
                     if matches!(
                         record.route,
-                        Some(Route::Materials {
-                            route: MaterialRoute::Download { .. }
-                        })
+                        Some(
+                            Route::Maintenance {
+                                resource: fc_protocol::web::maintenance::Resource::File(_),
+                                ..
+                            } | Route::Materials {
+                                route: MaterialRoute::Download { .. }
+                            }
+                        )
                     ) {
                         let task =
                             DownloadTask::begin(self.downloads.clone(), &app, &backend, head, life)
@@ -1119,11 +1435,20 @@ impl<E: HttpExecutor> Core<E> {
                             .map_err(|_| "upload admission cursor")?,
                         );
                         record.phase = Phase::UploadBody;
-                        if self
-                            .host
-                            .admit_body(record.token, admission.expected_bytes, admission.deadline)
-                            .is_err()
-                        {
+                        let admitted = if admission.key.kind() == UploadKind::Maintenance {
+                            self.host.admit_local_maintenance_body(
+                                record.token,
+                                admission.expected_bytes,
+                                admission.deadline,
+                            )
+                        } else {
+                            self.host.admit_body(
+                                record.token,
+                                admission.expected_bytes,
+                                admission.deadline,
+                            )
+                        };
+                        if admitted.is_err() {
                             self.close_record(record);
                         }
                     }
@@ -1154,7 +1479,7 @@ impl<E: HttpExecutor> Core<E> {
                                 self.close_record(record);
                                 return Ok(());
                             }
-                            let Some(app) = self.app.upgrade() else {
+                            let Some(app) = self.application(record) else {
                                 self.close_record(record);
                                 return Ok(());
                             };
@@ -1297,7 +1622,7 @@ impl<E: HttpExecutor> Core<E> {
                     deadline,
                 )))
             } else {
-                let Some(app) = self.app.upgrade() else {
+                let Some(app) = self.application(record) else {
                     record.cleanup_failed = true;
                     return Ok(());
                 };
@@ -1354,7 +1679,14 @@ impl<E: HttpExecutor> Core<E> {
         };
         let mut record = self.records[index].take().unwrap();
         let result = match event {
-            TlsHttpEvent::Head { head, admitted_at } => self.head(&mut record, head, admitted_at),
+            TlsHttpEvent::Head {
+                head,
+                admitted_at,
+                scope,
+            } => {
+                record.scope = scope;
+                self.head(&mut record, head, admitted_at)
+            }
             TlsHttpEvent::Body {
                 sequence,
                 offset,

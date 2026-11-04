@@ -1,9 +1,26 @@
-import { describe, expect, it, vi } from 'vitest'
-import { HttpApi, ApiError, readJson, trustedApiBase } from '../src/api/client'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { HttpApi, ApiError, readJson, trustedApiBase, setPageToken } from '../src/api/client'
 import { MAX_JSON_BYTES, ProtocolFault } from '../src/api/protocol'
 const signal = () => new AbortController().signal
 function json(value: unknown, status = 200) { return new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } }) }
+afterEach(() => setPageToken(undefined))
 describe('bounded same-origin HTTP', () => {
+  it('sends username/password only at login and a page token at resume and subsequent requests', async () => {
+    const pageToken = 'a'.repeat(128), csrf = 'b'.repeat(64)
+    const account = { schemaVersion: 1, status: 'AUTHENTICATED', principal: { id: '1', displayName: '管理员', role: 'GLOBAL_ADMIN' }, currentClassId: null, assignments: [], csrf, pageToken }
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json(account)).mockResolvedValueOnce(json(account)).mockResolvedValueOnce(json({ schemaVersion: 1, status: 'LOGGED_OUT' }))
+    const api = new HttpApi(new URL('https://board.school/fc/api/v1/'), fetcher)
+    expect(await api.login({ loginName: 'admin', password: 'private password' }, signal())).toMatchObject({ pageToken, csrf })
+    expect(fetcher.mock.calls[0]![1]?.body).toBe(JSON.stringify({ schemaVersion: 1, loginName: 'admin', password: 'private password' }))
+    setPageToken(pageToken)
+    expect(await api.resume(pageToken, signal())).toMatchObject({ principal: { role: 'GLOBAL_ADMIN' } })
+    await api.logout(csrf, signal())
+    expect(String(fetcher.mock.calls[1]![0])).toMatch(/session\/resume$/)
+    expect(fetcher.mock.calls[1]![1]?.body).toBe(JSON.stringify({ schemaVersion: 1, pageToken }))
+    for (const call of fetcher.mock.calls.slice(1)) expect(new Headers(call[1]?.headers).get('X-FC-Page')).toBe(pageToken)
+    expect(new Headers(fetcher.mock.calls[2]![1]?.headers).get('X-FC-CSRF')).toBe(csrf)
+    expect(fetcher.mock.calls.every(([url]) => !String(url).includes(pageToken) && !String(url).includes('password'))).toBe(true)
+  })
   it('binds the default native fetch receiver to the global browser context', async () => {
     const original = globalThis.fetch
     globalThis.fetch = function (this: unknown) {

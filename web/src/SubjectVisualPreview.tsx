@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw } from './components/icons'
 import { Button } from './components/ui/button'
 import { contentPath, type ContentDocument } from './api/content-protocol'
 import { SubjectVisualController, type SubjectVisualState } from './api/subject-visual-controller'

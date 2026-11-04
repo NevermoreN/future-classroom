@@ -1133,3 +1133,47 @@ fn teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_ch
 
 #[path = "https_settings_tests.rs"]
 mod https_settings_tests;
+
+#[test]
+fn signed_page_grants_resume_after_bounded_cache_eviction_without_device_leaks() {
+    let mut fixture = Fixture::new();
+    let service = fixture.service();
+    service.set_enabled(fixture.admin, true).unwrap();
+    let account = fixture
+        .backend
+        .state()
+        .unwrap()
+        .account(fixture.admin.principal_id())
+        .unwrap()
+        .clone();
+    let mut grants = Vec::new();
+    for _ in 0..MAX_WEB_DEVICES + 5 {
+        let grant = service.issue_page(&account).unwrap();
+        service.authenticate_page(&grant).unwrap();
+        grants.push(grant);
+        fixture.clock.advance(30_001);
+    }
+    {
+        let state = service.inner.state.lock().unwrap();
+        assert_eq!(state.pages.len(), MAX_WEB_DEVICES);
+        assert!(state.devices.is_empty());
+    }
+    service.authenticate_page(&grants[0]).unwrap();
+    service.authenticate_page(grants.last().unwrap()).unwrap();
+    let text = grants[0].expose_hex();
+    let mut tampered = text.as_str().as_bytes().to_vec();
+    tampered[20] = if tampered[20] == b'a' { b'b' } else { b'a' };
+    let altered = PageToken::parse_hex(String::from_utf8(tampered).unwrap()).unwrap();
+    assert!(matches!(
+        service.authenticate_page(&altered),
+        Err(WebServiceError::Denied)
+    ));
+    fixture
+        .backend
+        .logout_web_page(service.authenticate_page(&grants[0]).unwrap().lease())
+        .unwrap();
+    assert!(matches!(
+        service.authenticate_page(&grants[0]),
+        Err(WebServiceError::Denied)
+    ));
+}

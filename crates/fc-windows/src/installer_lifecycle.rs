@@ -13,6 +13,7 @@ pub mod broker;
 pub(crate) mod controlled;
 pub(crate) mod guard_contract;
 mod native;
+mod shortcuts;
 #[cfg(test)]
 mod tests;
 
@@ -29,6 +30,8 @@ pub enum LifecycleError {
     GuardianRunning,
     Unsettled,
     Faulted,
+    /// MSI already committed; the separate owned Shell-link step needs repair.
+    ShellIntegration,
     Native(HRESULT),
 }
 impl std::fmt::Display for LifecycleError {
@@ -37,6 +40,10 @@ impl std::fmt::Display for LifecycleError {
             return formatter.write_str(
                 "当前安装版本不支持这次更新，现有资料已保留。请使用与当前版本兼容的安装程序。",
             );
+        }
+        if *self == Self::ShellIntegration {
+            return formatter
+                .write_str("安装或卸载操作已完成，但快捷方式未能同步，请检查桌面和开始菜单中的未来教室启动项。");
         }
         write!(formatter, "installation lifecycle: {self:?}")
     }

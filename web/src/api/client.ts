@@ -2,6 +2,10 @@ import { issued, commandIdentity, type CommandApi, type CommandFamily, type Comm
 import { subjectVisual, type HomeworkTarget } from "./subject-visual-protocol"
 import { bodyText, commandResult, committed, content, contentPath, presentationResult, revision, sameKey, scopes, type CommandResult, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type PresentationResult, type ScopePage } from './content-protocol'
 import { decimal, errorCode, loggedOut, MAX_JSON_BYTES, pairingReceipt, pollResult, ProtocolFault, publicStatus, secret, session, strictJson, validateForm, type ErrorCode, type PairingForm, type PairingReceipt, type PollResult, type PublicStatus, type Session } from './protocol'
+import { pageCredential, pageSession, validateLogin, validatePasswordChange, validateSetup, type LoginForm, type PageSession, type PasswordChangeForm, type SetupForm } from './protocol'
+let activePageToken: string | undefined
+export function setPageToken(value: string | undefined): void { activePageToken = value === undefined ? undefined : pageCredential(value) }
+export function pageHeaders(): Record<string, string> { return activePageToken ? { 'X-FC-Page': activePageToken } : {} }
 export class ApiError extends Error {
   constructor(public readonly status: number, public readonly code: ErrorCode) { super('白板未能完成此次请求。'); this.name = 'ApiError' }
 }
@@ -16,11 +20,11 @@ export class NetworkFault extends Error {
 }
 export const abortError = () => new DOMException('操作已取消', 'AbortError')
 export const isAborted = (error: unknown) => error instanceof DOMException && error.name === 'AbortError'
-export async function readJson(response: Response, signal: AbortSignal): Promise<unknown> {
+export async function readJson(response: Response, signal: AbortSignal, maxBytes = MAX_JSON_BYTES): Promise<unknown> {
   const type = response.headers.get('content-type')?.toLowerCase().replace(/\s/g, '')
   if (type !== 'application/json' && type !== 'application/json;charset=utf-8') throw new ProtocolFault()
   const length = response.headers.get('content-length')
-  if (length !== null && (!/^(0|[1-9][0-9]*)$/.test(length) || BigInt(length) > BigInt(MAX_JSON_BYTES))) {
+  if (length !== null && (!/^(0|[1-9][0-9]*)$/.test(length) || BigInt(length) > BigInt(maxBytes))) {
     await response.body?.cancel(); throw new ProtocolFault()
   }
   if (!response.body) throw new ProtocolFault()
@@ -34,7 +38,7 @@ export async function readJson(response: Response, signal: AbortSignal): Promise
       const { done, value } = await reader.read()
       if (signal.aborted) throw abortError()
       if (done) break
-      if (value.byteLength > MAX_JSON_BYTES - total) { await reader.cancel(); throw new ProtocolFault() }
+      if (value.byteLength > maxBytes - total) { await reader.cancel(); throw new ProtocolFault() }
       total += value.byteLength; chunks.push(value)
     }
     if (length !== null && BigInt(total) !== BigInt(length)) throw new ProtocolFault()
@@ -53,6 +57,10 @@ export function trustedApiBase(base: string, pageUrl: string): URL {
 }
 export interface ServerApi {
   status(signal: AbortSignal): Promise<PublicStatus>
+  setup(form: SetupForm, signal: AbortSignal): Promise<PageSession>
+  login(form: LoginForm, signal: AbortSignal): Promise<PageSession>
+  resume(pageToken: string, signal: AbortSignal): Promise<PageSession>
+  changePassword(form: PasswordChangeForm, csrf: string, signal: AbortSignal): Promise<PageSession>
   session(signal: AbortSignal): Promise<Session>
   create(form: PairingForm, signal: AbortSignal): Promise<PairingReceipt>
   poll(id: string, proof: string, signal: AbortSignal): Promise<PollResult>
@@ -67,15 +75,15 @@ export interface ContentApi extends CommandApi {
 }
 export class HttpApi implements ServerApi, ContentApi {
   constructor(protected readonly base: URL, protected readonly fetcher: typeof fetch = globalThis.fetch.bind(globalThis)) {}
-  protected async request(path: string, signal: AbortSignal, input?: unknown, csrf?: string): Promise<{ status: number; value: unknown }> {
+  protected async request(path: string, signal: AbortSignal, input?: unknown, csrf?: string, maxBytes = MAX_JSON_BYTES): Promise<{ status: number; value: unknown }> {
     if (signal.aborted) throw abortError()
-    if (this.base.protocol !== 'https:') throw new ProtocolFault('请使用管理员提供的可信 HTTPS 地址。HTTP 预览不会发送配对码或会话凭据。')
+    if (this.base.protocol !== 'https:') throw new ProtocolFault('请使用管理员提供的可信 HTTPS 地址。HTTP 预览不会发送账号或会话凭据。')
     const controller = new AbortController()
     const abort = () => controller.abort()
     signal.addEventListener('abort', abort, { once: true })
     const timeout = setTimeout(abort, 15_000)
     try {
-      const headers = new Headers({ Accept: 'application/json' })
+      const headers = new Headers({ Accept: 'application/json', ...pageHeaders() })
       if (input !== undefined) headers.set('Content-Type', 'application/json')
       if (csrf !== undefined) headers.set('X-FC-CSRF', secret(csrf))
       const response = await this.fetcher(new URL(path, this.base), {
@@ -85,7 +93,7 @@ export class HttpApi implements ServerApi, ContentApi {
       })
       // A malformed error body cannot keep an unauthorized local session alive.
       if (response.status === 401 || response.status === 403) { await response.body?.cancel().catch(() => undefined); throw new ApiError(response.status, response.status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN') }
-      const value = await readJson(response, controller.signal)
+      const value = await readJson(response, controller.signal, maxBytes)
       if (!response.ok) throw new ApiError(response.status, errorCode(value))
       return { status: response.status, value }
     } catch (error) {
@@ -101,6 +109,29 @@ export class HttpApi implements ServerApi, ContentApi {
     return issued(r.value, family)
   }
   async status(signal: AbortSignal) { const r = await this.request('status', signal); if (r.status !== 200) throw new ProtocolFault(); return publicStatus(r.value) }
+  async login(form: LoginForm, signal: AbortSignal) {
+    validateLogin(form)
+    const r = await this.request('session/login', signal, { schemaVersion: 1, ...form })
+    if (r.status !== 200) throw new ProtocolFault()
+    return pageSession(r.value)
+  }
+  async setup(form: SetupForm, signal: AbortSignal) {
+    validateSetup(form)
+    const r = await this.request('setup', signal, { schemaVersion: 1, ...form })
+    if (r.status !== 200) throw new ProtocolFault()
+    return pageSession(r.value)
+  }
+  async resume(pageToken: string, signal: AbortSignal) {
+    const r = await this.request('session/resume', signal, { schemaVersion: 1, pageToken: pageCredential(pageToken) })
+    if (r.status !== 200) throw new ProtocolFault()
+    return pageSession(r.value)
+  }
+  async changePassword(form: PasswordChangeForm, csrf: string, signal: AbortSignal) {
+    validatePasswordChange(form)
+    const r = await this.request('session/password', signal, { schemaVersion: 1, ...form }, csrf)
+    if (r.status !== 200) throw new ProtocolFault()
+    return pageSession(r.value)
+  }
   async session(signal: AbortSignal) { const r = await this.request('session', signal); if (r.status !== 200) throw new ProtocolFault(); return session(r.value) }
   async create(form: PairingForm, signal: AbortSignal) {
     validateForm(form)

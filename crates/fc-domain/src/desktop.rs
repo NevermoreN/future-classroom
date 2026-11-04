@@ -552,10 +552,9 @@ mod tests {
             Err(DisplayError::RevisionConflict { .. })
         ));
         actor.origin = TrustedOrigin::Web;
-        assert!(matches!(
-            original.transition(candidate, Revision::default(), &identity, &actor, now),
-            Err(DisplayError::Identity(_))
-        ))
+        assert!(original
+            .transition(candidate, Revision::default(), &identity, &actor, now)
+            .is_ok())
     }
     #[test]
     fn date_watermark_and_paging_are_consistent_even_without_binding() {

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { AudioLines, CircleAlert, Clock3, Info, LoaderCircle, Mic, Minus, Plus, RefreshCw, Square, UsersRound, Volume2, X } from 'lucide-react'
+import { AudioLines, CircleAlert, Clock3, Info, LoaderCircle, Mic, Minus, Plus, RefreshCw, Square, UsersRound, Volume2, X } from './components/icons'
 import { Button } from './components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 import { newRecordingId, mayRecord, type VoiceController, type VoiceState } from './api/voice-controller'

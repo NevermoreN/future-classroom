@@ -43,9 +43,14 @@ describe('school subject visual read-only preview', () => {
     owner.dispose(); third.resolve(subjectVisual({ ...wire(), subjectId: '9', key: other }, other)); await c
     expect(states.at(-1)!.phase).toBe('loading'); expect(revoked).not.toHaveBeenCalled()
   })
+  it('reports a forbidden preview without invalidating the login', async () => {
+    const api = { subjectVisual: vi.fn().mockRejectedValueOnce(new ApiError(403, 'FORBIDDEN')) }, states: SubjectVisualState[] = [], revoked = vi.fn()
+    const owner = new SubjectVisualController(api, state => states.push(state), revoked); await owner.load(target)
+    expect(states.at(-1)?.phase).toBe('failed'); expect(revoked).not.toHaveBeenCalled(); owner.dispose()
+  })
   it('clears preview on denied current read and never publishes or acts on a late denial after disposal', async () => {
     const pending = deferred<SubjectVisualPreview>(), states: SubjectVisualState[] = [], revoked = vi.fn()
-    const api = { subjectVisual: vi.fn().mockRejectedValueOnce(new ApiError(403, 'FORBIDDEN')).mockReturnValueOnce(pending.promise) }
+    const api = { subjectVisual: vi.fn().mockRejectedValueOnce(new ApiError(401, 'UNAUTHORIZED')).mockReturnValueOnce(pending.promise) }
     const owner = new SubjectVisualController(api, s => states.push(s), revoked)
     await owner.load(target)
     expect(states.at(-1)?.preview).toBeNull(); expect(states.at(-1)?.phase).toBe('failed'); expect(revoked).toHaveBeenCalledTimes(1)

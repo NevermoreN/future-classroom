@@ -167,6 +167,16 @@ fn stale_reviews_and_unauthorized_leases_never_invoke_the_native_query() {
         })
         .is_err());
     };
+    // Web GlobalAdmin is now a supported manager; only the revoked exact page is unauthorized.
+    backend
+        .0
+        .lock()
+        .unwrap()
+        .ledger
+        .lock()
+        .unwrap()
+        .sessions
+        .revoke_exact(web);
     probe(web, review.clone());
     for kind in ["publication", "identity", "voice", "runtime"] {
         let mut stale = review.clone();

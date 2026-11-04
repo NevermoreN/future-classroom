@@ -32,7 +32,7 @@ describe('content draft and command lifecycle', () => {
     await f.controller.queryPresentation(); expect(f.api.contentPresentation).not.toHaveBeenCalled()
     f.api.commandResult.mockResolvedValueOnce({ ...identity('77'), state: 'COMMITTED', content: document(homeworkKey, '1', '原正文') }); await f.controller.query()
     await f.controller.queryPresentation(); expect(f.editor().presentation?.viewState).toBe('VISIBLE'); expect(f.editor().history?.text).toBe('原正文'); expect(f.editor().draft).toBe('原正文')
-    f.api.contentPresentation.mockRejectedValueOnce(new ApiError(403, 'FORBIDDEN')); await f.controller.queryPresentation()
+    f.api.contentPresentation.mockRejectedValueOnce(new ApiError(401, 'UNAUTHORIZED')); await f.controller.queryPresentation()
     expect(f.state().editor).toBeNull(); expect(f.revoked).toHaveBeenCalledOnce(); expect(f.api.saveContent).toHaveBeenCalledOnce(); f.controller.dispose()
   })
   it('rejects duplicated/rewound continuation scope keys and requires page reload', async () => {
@@ -122,7 +122,11 @@ describe('content draft and command lifecycle', () => {
     await vi.advanceTimersByTimeAsync(1000); expect(f.editor().expired).toBe(true); expect(f.editor().draft).toBe('午夜草稿')
     await f.controller.save(); expect(f.api.saveContent).not.toHaveBeenCalled(); f.controller.dispose(); expect(vi.getTimerCount()).toBe(0)
   })
-  it.each([401, 403])('HTTP %i clears all draft/command state and revokes the pairing controller mirror', async status => {
+  it('keeps login and the draft when a write is forbidden', async () => {
+    const f = fixture(); await open(f); f.controller.edit('保留草稿'); f.api.saveContent.mockRejectedValueOnce(new ApiError(403, 'FORBIDDEN')); await f.controller.save()
+    expect(f.revoked).not.toHaveBeenCalled(); expect(f.editor().draft).toBe('保留草稿'); f.controller.dispose()
+  })
+  it.each([401])('HTTP %i clears all draft/command state and revokes the pairing controller mirror', async status => {
     const f = fixture(); await open(f); f.controller.edit('敏感草稿'); f.api.saveContent.mockRejectedValueOnce(new ApiError(status, status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN')); await f.controller.save()
     expect(f.state().editor).toBeNull(); expect(f.state().page).toBeNull(); expect(f.revoked).toHaveBeenCalledOnce(); expect(JSON.stringify(f.state())).not.toContain('敏感草稿'); f.controller.dispose()
   })

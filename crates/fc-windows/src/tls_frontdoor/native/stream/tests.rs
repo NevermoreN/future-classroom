@@ -13,6 +13,92 @@ struct Calls {
     retire: Vec<RequestToken>,
     handshake: Vec<RequestToken>,
 }
+
+#[test]
+fn dual_listener_scope_and_local_slot_survive_lan_saturation_and_shutdown() {
+    use fc_domain::https_settings::{
+        HttpsCertificateRef, HttpsConfiguration, HttpsHost, HttpsSourceNetworks,
+    };
+    let _serial = SERIAL.lock().unwrap();
+    let mut fixture = Fixture::new();
+    fixture.host.owner.control_mode = true;
+    let control_port = fixture.host.local_port();
+    let reserved = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = reserved.local_addr().unwrap().port();
+    drop(reserved);
+    let configuration = HttpsConfiguration::new(
+        HttpsHost::parse("127.0.0.1").unwrap(),
+        port,
+        HttpsCertificateRef::parse(&"11".repeat(20)).unwrap(),
+    )
+    .unwrap()
+    .with_source_networks(HttpsSourceNetworks::parse("127.0.0.1/32").unwrap());
+    // The fixture supplies its existing fake record Driver; production calls
+    // validate_lan before this private bind step and requires real SAN/key trust.
+    fixture.host.owner.start_lan(configuration).unwrap();
+    let mut clients = Vec::new();
+    let mut lan_tokens = Vec::new();
+    let mut wire = vec![b'H'];
+    wire.extend(record(b"GET /fc/ HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n"));
+    for _ in 0..3 {
+        let mut client = TcpStream::connect((Ipv4Addr::LOCALHOST, port)).unwrap();
+        client.write_all(&wire).unwrap();
+        fixture.until(|event| match event {
+            TlsHttpEvent::Head { head, scope, .. } => {
+                assert_eq!(
+                    scope,
+                    TlsListenerScope::Lan,
+                    "Host cannot forge local-control scope"
+                );
+                assert_ne!(
+                    head.token.slot(),
+                    0,
+                    "LAN cannot consume the reserved local slot"
+                );
+                lan_tokens.push(head.token);
+                true
+            }
+            _ => false,
+        });
+        clients.push(client);
+    }
+    let _overflow = TcpStream::connect((Ipv4Addr::LOCALHOST, port)).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(3);
+    while fixture.host.owner.report.accept_capacity_rejections == 0 {
+        fixture.host.poll().unwrap();
+        assert!(Instant::now() < deadline);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    fixture.input(&wire);
+    let mut local_token = None;
+    fixture.until(|event| match event {
+        TlsHttpEvent::Head { head, scope, .. } => {
+            assert_eq!(scope, TlsListenerScope::LocalControl);
+            assert_eq!(head.token.slot(), 0);
+            local_token = Some(head.token);
+            true
+        }
+        _ => false,
+    });
+    fixture.host.configure_lan(None).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(3);
+    while fixture.host.lan_phase() != super::super::super::LanListenerPhase::Disabled {
+        for event in fixture.host.poll().unwrap() {
+            if let TlsHttpEvent::Retired(token) = event {
+                assert!(lan_tokens.contains(&token));
+                fixture.host.rearm(token).unwrap();
+            }
+        }
+        assert!(Instant::now() < deadline);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(fixture.host.local_port(), control_port);
+    assert!(
+        fixture.host.owner.resources.slots[local_token.unwrap().slot()].socket != INVALID_SOCKET
+    );
+    assert_eq!(fixture.host.lan_port(), None);
+    fixture.stop();
+}
 struct RecordDriver {
     calls: Arc<Mutex<Calls>>,
     closed: Arc<AtomicUsize>,
@@ -225,7 +311,10 @@ impl Fixture {
     fn head(&mut self) -> (RequestToken, Instant) {
         let mut result = None;
         self.until(|event| {
-            if let TlsHttpEvent::Head { head, admitted_at } = event {
+            if let TlsHttpEvent::Head {
+                head, admitted_at, ..
+            } = event
+            {
                 assert!(head.tls);
                 result = Some((head.token, admitted_at));
                 true
@@ -623,6 +712,32 @@ fn real_iocp_fake_records_deadline_is_absolute_and_closed_event_precedes_retirem
     let next = f.host.rearm(token).unwrap();
     assert_ne!(next, token);
     f.stop();
+}
+
+#[test]
+fn maintenance_admission_keeps_the_header_epoch_and_never_extends_lan_or_expired_work() {
+    let at = Instant::now();
+    let end = at + LOCAL_MAINTENANCE_BUDGET;
+    let mut stream = Stream::new();
+    stream.posted_header_at(at);
+    assert!(!stream.local_maintenance_deadline_valid(TlsListenerScope::LocalControl, end, at));
+    assert!(stream.complete_head_at(at));
+    assert!(stream.local_maintenance_deadline_valid(TlsListenerScope::LocalControl, end, at));
+    assert!(!stream.local_maintenance_deadline_valid(TlsListenerScope::Lan, end, at));
+    assert!(!stream.local_maintenance_deadline_valid(
+        TlsListenerScope::LocalControl,
+        end + Duration::from_nanos(1),
+        at
+    ));
+    assert!(!stream.local_maintenance_deadline_valid(
+        TlsListenerScope::LocalControl,
+        end,
+        at + REQUEST_BUDGET
+    ));
+    stream.deadline = end;
+    stream.admit_until(end);
+    assert_eq!(stream.request_started_at(), Some(at));
+    assert!(!stream.local_maintenance_deadline_valid(TlsListenerScope::LocalControl, end, at));
 }
 
 #[test]

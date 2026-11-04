@@ -263,7 +263,7 @@ impl IdentityState {
         now: LocalDateTime,
     ) -> Result<(), IdentityError> {
         self.authority(actor.principal_id)?
-            .authorize_global_local(actor, now)?;
+            .authorize_global(actor, now)?;
         if self.account(actor.principal_id)?.must_change_password {
             return Err(IdentityError::PasswordChangeRequired);
         }
@@ -522,9 +522,6 @@ impl IdentityState {
                         .validate_actor(actor, now)?;
                     if *id != actor.principal_id {
                         return Err(IdentityError::Permission(PermissionError::WrongOwner));
-                    }
-                    if self.account(*id)?.must_change_password {
-                        return Err(IdentityError::PasswordChangeRequired);
                     }
                 }
                 _ => self.authorize_management(actor, now)?,

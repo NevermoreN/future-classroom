@@ -45,7 +45,12 @@ pub fn run_setup(command: SetupCommand) -> Result<u32> {
         SetupCommand::Uninstall => Operation::Uninstall,
     };
     let result = controlled_owner::run_setup(operation)?;
-    if result.installation_succeeded() || result.install_return != 0 {
+    if result.installation_succeeded() {
+        // This is deliberately after original MSI settlement. A Shell failure
+        // cannot be reported as transaction rollback or authorize payload edits.
+        super::shortcuts::reconcile(command).map_err(|_| LifecycleError::ShellIntegration)?;
+        Ok(0)
+    } else if result.install_return != 0 {
         Ok(result.install_return)
     } else {
         Err(LifecycleError::Unsettled)

@@ -794,3 +794,80 @@ fn queued_exact_retire_on_stop_returns_stopped_without_retiring_or_releasing_own
     ready(&mut replacement).unwrap();
     stop_reap(&mut replacement);
 }
+
+#[test]
+fn lan_credential_configuration_is_single_flight_and_keeps_local_frame_scope() {
+    use crate::tls_frontdoor::{CertificateThumbprint, CredentialConfiguration, TlsListenerScope};
+    let _serial = SERIAL.lock().unwrap();
+    struct Configured {
+        entered: SyncSender<()>,
+        release: Option<Receiver<()>>,
+        seen: Arc<Mutex<Vec<Option<String>>>>,
+    }
+    impl Driver for Configured {
+        fn configure_lan(
+            &mut self,
+            configuration: Option<CredentialConfiguration>,
+        ) -> Result<(), TlsError> {
+            if let Some(release) = self.release.take() {
+                self.entered.send(()).unwrap();
+                release.recv().unwrap();
+            }
+            self.seen.lock().unwrap().push(configuration.map(|v| {
+                assert!(v.thumbprint == CertificateThumbprint::parse(&"11".repeat(20)).unwrap());
+                v.host
+            }));
+            Ok(())
+        }
+        fn call(&mut self, frame: &mut Frame) -> Result<Step, TlsError> {
+            Immediate.call(frame)
+        }
+    }
+    let (entered, received) = mpsc::sync_channel(1);
+    let (release, released) = mpsc::sync_channel(1);
+    let mut release = Release(Some(release));
+    let seen = Arc::new(Mutex::new(Vec::new()));
+    let observed = seen.clone();
+    let mut issuer = TokenIssuer::new().unwrap();
+    let mut worker = Worker::start_with_factory(issuer.generation(), move || {
+        Ok(Box::new(Configured {
+            entered,
+            release: Some(released),
+            seen: observed,
+        }))
+    })
+    .unwrap();
+    ready(&mut worker).unwrap();
+    worker
+        .configure_lan(Some(CredentialConfiguration {
+            thumbprint: CertificateThumbprint::parse(&"11".repeat(20)).unwrap(),
+            host: "192.0.2.125".into(),
+        }))
+        .unwrap();
+    received.recv_timeout(Duration::from_secs(5)).unwrap();
+    assert_eq!(worker.configure_lan(None), Err(TlsError::Busy));
+    let token = issuer.issue(0).unwrap();
+    submit(&mut worker, token);
+    assert!(worker.poll().unwrap().is_none());
+    release.now();
+    until(|| worker.poll_lan_configured() == Some(Ok(())));
+    let mut frame = take(&mut worker);
+    assert_eq!(frame.scope, TlsListenerScope::LocalControl);
+    frame.scope = TlsListenerScope::Lan;
+    let (error, mut frame) = worker.try_submit(frame).err().unwrap();
+    assert_eq!(error, TlsError::InvalidInput);
+    frame.scope = TlsListenerScope::LocalControl;
+    frame.call = Call::Retire;
+    frame.wipe();
+    worker
+        .try_submit(frame)
+        .unwrap_or_else(|_| panic!("original scoped retirement rejected"));
+    assert_eq!(take(&mut worker).result, Some(Ok(Step::Retired)));
+    worker.configure_lan(None).unwrap();
+    until(|| worker.poll_lan_configured() == Some(Ok(())));
+    assert_eq!(
+        *seen.lock().unwrap(),
+        vec![Some("192.0.2.125".into()), None]
+    );
+    stop_reap(&mut worker);
+}

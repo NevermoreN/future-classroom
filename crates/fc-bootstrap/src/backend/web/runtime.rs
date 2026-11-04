@@ -70,6 +70,7 @@ impl WebService {
     /// another worker. Exact old Web SQL guards observe this before/after actor.
     pub fn runtime_execution_current(&self) -> bool {
         self.inner.runtime_epoch.load(Ordering::Acquire) & 1 == 1
+            || self.inner.local_control_ready.load(Ordering::Acquire)
     }
     #[cfg(windows)]
     pub(crate) fn runtime_domain_current(&self) -> bool {

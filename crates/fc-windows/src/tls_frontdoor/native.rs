@@ -2,8 +2,8 @@
 //! explicitly configured listeners. No hard real-time TCP scheduling claim.
 use super::{
     worker::Worker, Call, CertificateThumbprint, ConfiguredTlsError, Frame, Step, TlsAcceptClose,
-    TlsAcceptSnapshot, TlsCloseSnapshot, TlsError, TlsHeaderClose, BUFFER_BYTES, CONNECTION_SLOTS,
-    HEADER_CLOSE_RESERVE, PLAINTEXT_BYTES,
+    TlsAcceptSnapshot, TlsCloseSnapshot, TlsError, TlsHeaderClose, TlsListenerScope, BUFFER_BYTES,
+    CONNECTION_SLOTS, HEADER_CLOSE_RESERVE, PLAINTEXT_BYTES,
 };
 use fc_ports::http::{RequestToken, ResponseHead, TokenIssuer};
 use fc_protocol::http1::{
@@ -30,6 +30,7 @@ use windows::{
 };
 mod accept;
 mod configured;
+mod dual;
 mod stream;
 pub use stream::{TlsHttpEvent, TlsHttpHost};
 const ACCEPT_ADDRESS_LENGTH: u32 = 48;
@@ -66,6 +67,8 @@ enum Phase {
     Closed,
 }
 struct Slot {
+    listener_index: usize,
+    listener_scope: TlsListenerScope,
     memory: Pin<Box<IoMemory>>,
     socket: SOCKET,
     pending: Option<Operation>,
@@ -110,6 +113,8 @@ struct Resources {
     winsock: bool,
     worker: Option<Worker>,
     accept: Option<accept::AcceptSlot>,
+    lan_listener: SOCKET,
+    lan_accept: Option<accept::AcceptSlot>,
 }
 #[derive(Debug, Default)]
 struct Report {
@@ -174,6 +179,13 @@ struct Owner {
     http_mode: bool,
     bind_address: std::net::SocketAddr,
     source_networks: Option<fc_domain::https_settings::HttpsSourceNetworks>,
+    control_mode: bool,
+    lan_credential_pending: bool,
+    lan_credential_target: Option<fc_domain::https_settings::HttpsConfiguration>,
+    lan_configuration: Option<fc_domain::https_settings::HttpsConfiguration>,
+    pending_lan: Option<Option<fc_domain::https_settings::HttpsConfiguration>>,
+    lan_error: Option<ConfiguredTlsError>,
+    lan_address: Option<std::net::SocketAddr>,
 }
 fn socket_handle(socket: SOCKET) -> HANDLE {
     HANDLE(socket.0 as *mut _)
@@ -265,6 +277,8 @@ impl Owner {
                         .issue(index)
                         .expect("four bounded initial token slots");
                     Slot {
+                        listener_index: 0,
+                        listener_scope: TlsListenerScope::Lan,
                         memory: Box::pin(IoMemory {
                             operation: UnsafeCell::new(OVERLAPPED::default()),
                             addresses: UnsafeCell::new([0; ACCEPT_ADDRESS_BYTES]),
@@ -294,6 +308,8 @@ impl Owner {
                 winsock: false,
                 worker: None,
                 accept: None,
+                lan_listener: INVALID_SOCKET,
+                lan_accept: None,
             }),
             started,
             generation,
@@ -313,6 +329,13 @@ impl Owner {
             http_mode: false,
             bind_address: "127.0.0.1:0".parse().expect("literal diagnostic loopback"),
             source_networks: None,
+            control_mode: false,
+            lan_credential_pending: false,
+            lan_credential_target: None,
+            lan_configuration: None,
+            pending_lan: None,
+            lan_error: None,
+            lan_address: None,
         })
     }
     fn start(&mut self, thumbprint: CertificateThumbprint) -> Result<(), String> {
@@ -691,6 +714,7 @@ impl Owner {
             return self.receive(index);
         }
         let mut frame = slot.frame.take().unwrap();
+        frame.scope = slot.listener_scope;
         frame.call = match slot.phase {
             Phase::Handshake => Call::Handshake,
             Phase::Http => Call::Decrypt,
@@ -938,7 +962,7 @@ impl Owner {
         if self.resources.port.is_invalid() {
             return Ok(());
         }
-        for _ in 0..(CONNECTION_SLOTS + usize::from(self.http_mode)) {
+        for _ in 0..(CONNECTION_SLOTS + 2 * usize::from(self.http_mode)) {
             self.service_deadlines()?;
             let (mut bytes, mut key, mut operation) = (0, 0, ptr::null_mut());
             // SAFETY: IOCP and all operation allocations remain owned and pinned.
@@ -959,14 +983,13 @@ impl Owner {
                 }
                 break;
             }
-            if self.http_mode
-                && self
-                    .resources
-                    .accept
-                    .as_ref()
-                    .is_some_and(|bare| bare.memory.operation.get() == operation)
-            {
-                self.complete_bare_accept(key, result.is_ok())?;
+            if let Some(listener_index) = (0..2).find(|&index| {
+                self.http_mode
+                    && self
+                        .bare_accept(index)
+                        .is_some_and(|bare| bare.memory.operation.get() == operation)
+            }) {
+                self.complete_bare_accept_for(listener_index, key, result.is_ok())?;
                 continue;
             }
             let index = self
@@ -1237,13 +1260,49 @@ impl Owner {
                 .accept
                 .as_ref()
                 .map_or(0, |_| size_of::<accept::AcceptMemory>())
+            + self
+                .resources
+                .lan_accept
+                .as_ref()
+                .map_or(0, |_| size_of::<accept::AcceptMemory>())
             + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
+            + self.lan_credential_target.as_ref().map_or(
+                0,
+                fc_domain::https_settings::HttpsConfiguration::allocation_bytes,
+            )
+            // Bound the worker's copied host payload until its configuration
+            // ACK is collected; provider/credential allocations remain excluded.
+            + if self.lan_credential_pending {
+                self.lan_credential_target
+                    .as_ref()
+                    .map_or(0, |configuration| configuration.host.as_str().len())
+            } else {
+                0
+            }
             + self.target.capacity()
             + self.marker.capacity()
             + self.source_networks.as_ref().map_or(
                 0,
                 fc_domain::https_settings::HttpsSourceNetworks::allocation_bytes,
             )
+            + self.lan_configuration.as_ref().map_or(0, |c| {
+                c.host.as_str().len()
+                    + c.source_networks.as_ref().map_or(
+                        0,
+                        fc_domain::https_settings::HttpsSourceNetworks::allocation_bytes,
+                    )
+            })
+            + self
+                .pending_lan
+                .as_ref()
+                .and_then(Option::as_ref)
+                .map_or(0, |c| {
+                    c.host.as_str().len()
+                        + c.source_networks.as_ref().map_or(
+                            0,
+                            fc_domain::https_settings::HttpsSourceNetworks::allocation_bytes,
+                        )
+                })
             + self
                 .resources
                 .slots
@@ -1294,6 +1353,9 @@ impl Owner {
         if let Err(error) = close(&mut self.resources.listener, true) {
             failure = Some(error);
         }
+        if let Err(error) = close(&mut self.resources.lan_listener, true) {
+            failure = Some(error);
+        }
         failure.map_or(Ok(()), Err)
     }
     fn finish(&mut self) -> Result<(), String> {
@@ -1310,6 +1372,7 @@ impl Owner {
                 .iter()
                 .all(|slot| slot.pending.is_none() && slot.socket == INVALID_SOCKET)
                 && self.resources.listener == INVALID_SOCKET
+                && self.resources.lan_listener == INVALID_SOCKET
                 && self.bare_released();
             let worker_done = match self.resources.worker.as_mut() {
                 Some(worker) => {

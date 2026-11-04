@@ -53,7 +53,7 @@ export class ContentController {
     }, remainingToday(document))
   }
   private unauthorized(error: unknown): boolean {
-    if (!(error instanceof ApiError) || error.status !== 401 && error.status !== 403) return false
+    if (!(error instanceof ApiError) || error.status !== 401) return false
     this.operation?.abort(); this.sequence++; this.clearTimer(); this.csrf = ''
     this.publish({ page: null, editor: null, busy: false, notice: '', pageBlocked: true }); this.disposed = true; this.revoked(); return true
   }

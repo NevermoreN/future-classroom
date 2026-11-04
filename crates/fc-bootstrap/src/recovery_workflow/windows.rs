@@ -242,6 +242,19 @@ impl RecoveryWorkflow {
         access: OrdinaryBackupAccess,
         execution: ExecutionFence,
     ) -> Result<ReviewBundle> {
+        let source = selected
+            .open(fc_protocol::web::maintenance::MAX_PACKAGE_BYTES)
+            .map_err(|_| WorkflowError::Files(RecoveryFileError::Unavailable))?;
+        self.preflight_pinned(source, access, execution)
+    }
+    /// An already-pinned, controlled Web upload enters the exact same complete
+    /// preflight; the browser never supplies a pathname or picker capability.
+    pub fn preflight_pinned(
+        &self,
+        source: fc_windows::materials::files::LockedFile,
+        access: OrdinaryBackupAccess,
+        execution: ExecutionFence,
+    ) -> Result<ReviewBundle> {
         let generation = self.slot.reserve().ok_or(WorkflowError::Busy)?;
         let mut reservation = Reservation {
             workflow: self.clone(),
@@ -255,7 +268,7 @@ impl RecoveryWorkflow {
                     .unwrap_or(false)
         });
         let files = RecoveryFiles::new(&self.paths)?;
-        let prepared = files.preflight_package(selected, &*fence)?;
+        let prepared = files.preflight_pinned(source, &*fence)?;
         let preview = access.preflight_restore(
             prepared.ordinary_database().to_owned(),
             prepared

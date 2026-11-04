@@ -103,6 +103,12 @@ enum Stage {
     MaterialBatch(ReceivingMaterialBatchUpload),
     BatchReady,
     Voice(ReceivingWebVoiceUpload),
+    Maintenance {
+        owner: crate::maintenance_web::MaintenanceUpload,
+        revision: fc_domain::ids::Revision,
+        sequence: u64,
+        offset: u64,
+    },
     MaterialReady,
     // The worker unwound, or a consuming operation could not prove clean
     // retirement. Only explicit cleanup plus pending/quarantine checks clears it.
@@ -596,6 +602,7 @@ fn cleanup_entry(entry: &mut Entry, app: &WebApplication) -> bool {
             app.discard_material_batch_in_cleanup(entry.batch_id.expect("batch owner"), &entry.life)
         }
         Stage::Voice(owner) => owner.abort(),
+        Stage::Maintenance { owner, .. } => owner.abort(),
         Stage::MaterialReady => {
             app.discard_material_transfer_in_cleanup(entry.key.token, entry.key.upload_id)
                 .is_ok()
@@ -987,6 +994,7 @@ impl UploadHub {
                     entry.life.deadline = entry.life.deadline.min(owner.deadline());
                     entry.stage = Stage::Material(owner);
                 }),
+            UploadKind::Maintenance => return Err(UploadHubError::Invalid.into()),
             UploadKind::Voice => app
                 .begin_voice_upload_in_job(head, entry.life.clone(), context)
                 .map(|owner| {
@@ -1018,6 +1026,74 @@ impl UploadHub {
                 .control
                 .as_ref()
                 .expect("admitted upload control")
+                .cancellation_handle(),
+        })
+    }
+    pub fn begin_maintenance(
+        &self,
+        app: &WebApplication,
+        backend: &Arc<Mutex<Backend>>,
+        head: &RequestHead,
+        control: TransferControl,
+        life: TransferLifetime,
+        context: &JobContext,
+    ) -> Result<UploadAdmission, UploadHubFailure> {
+        if head.token != life.token()
+            || !Arc::ptr_eq(&control.cancelled, &life.cancelled)
+            || !life.is_active()
+        {
+            return Err(UploadHubError::Invalid.into());
+        }
+        let shared = worker_shared(self, context, true)?;
+        shared.check_application(app)?;
+        reap_inactive(&shared, app, context)?;
+        let service = app.maintenance.as_ref().ok_or(UploadHubError::Closed)?;
+        let prepared = {
+            let mut locked = backend.lock().map_err(|_| UploadHubError::Closed)?;
+            let scoped = locked.begin_execution_scope(life.job_fence(context));
+            app.prepare_maintenance_transfer(&scoped, head)?
+        };
+        let revision = prepared.access.expected_revision();
+        let expected = head
+            .content_length
+            .filter(|n| *n > 0)
+            .ok_or(UploadHubError::Invalid)?;
+        let mut lease = shared.reserve(control, life, UploadKind::Maintenance, expected)?;
+        let entry = lease.entry();
+        let owner = match crate::maintenance_web::MaintenanceUpload::start(
+            service.clone(),
+            prepared.id,
+            &prepared.proof,
+            prepared.lease,
+            prepared.access,
+            context,
+        ) {
+            Ok(owner) => owner,
+            Err(error) => {
+                entry.stage = Stage::Complete;
+                return Err(crate::web_application::maintenance::error_response(error).into());
+            }
+        };
+        let bytes = owner.bytes();
+        entry.key.upload_id = prepared.id;
+        entry.stage = Stage::Maintenance {
+            owner,
+            revision,
+            sequence: 1,
+            offset: 0,
+        };
+        if bytes != expected {
+            return Err(UploadHubError::Invalid.into());
+        }
+        active_entry(entry, context)?;
+        Ok(UploadAdmission {
+            key: entry.key,
+            expected_bytes: expected,
+            deadline: entry.life.deadline(),
+            cancellation: entry
+                .control
+                .as_ref()
+                .expect("maintenance control")
                 .cancellation_handle(),
         })
     }
@@ -1059,6 +1135,28 @@ impl UploadHub {
         let ack = match &mut entry.stage {
             Stage::Material(owner) => owner.write(key.token, sequence, offset, bytes, context),
             Stage::MaterialBatch(owner) => owner.write(key.token, sequence, offset, bytes, context),
+            Stage::Maintenance {
+                owner,
+                sequence: next,
+                offset: written,
+                ..
+            } => {
+                if sequence != *next || offset != *written {
+                    return Err(UploadHubError::Invalid.into());
+                }
+                owner
+                    .write_chunk(offset, bytes, context)
+                    .map_err(crate::web_application::maintenance::error_response)?;
+                *next = next.checked_add(1).ok_or(UploadHubError::SerialExhausted)?;
+                *written = offset + bytes.len() as u64;
+                Ok(UploadAck::written(
+                    key.token,
+                    UploadKind::Maintenance,
+                    key.upload_id,
+                    sequence,
+                    *written,
+                ))
+            }
             Stage::Voice(owner) => owner.write_chunk(key.token, sequence, offset, bytes, context),
             _ => return Err(UploadHubError::Invalid.into()),
         }?;
@@ -1092,6 +1190,28 @@ impl UploadHub {
                 }
                 response
             }
+            Stage::Maintenance {
+                mut owner,
+                revision,
+                sequence,
+                offset,
+            } => match owner.finish(context) {
+                Ok(snapshot) => {
+                    entry.stage = Stage::Complete;
+                    crate::web_application::admin::data_response(
+                        fc_protocol::web::maintenance::status(revision, snapshot),
+                    )
+                }
+                Err(error) => {
+                    entry.stage = Stage::Maintenance {
+                        owner,
+                        revision,
+                        sequence,
+                        offset,
+                    };
+                    crate::web_application::maintenance::error_response(error)
+                }
+            },
             Stage::Voice(owner) => {
                 let response = match owner.finish(context) {
                     Ok(prepared) => {

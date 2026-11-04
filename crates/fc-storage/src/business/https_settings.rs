@@ -28,11 +28,15 @@ fn authorize(
     session: &SessionGuard,
 ) -> Result<(), StorageError> {
     session(identity, actor)?;
-    if actor.origin != TrustedOrigin::Local {
-        return Err(StorageError::HttpsSettings(HttpsSettingsError::Identity(
-            IdentityError::Permission(PermissionError::LocalOnly),
-        )));
-    }
+    identity
+        .authority(actor.principal_id)
+        .map_err(|error| StorageError::HttpsSettings(HttpsSettingsError::Identity(error)))?
+        .authorize_global(actor, clock.now())
+        .map_err(|error| {
+            StorageError::HttpsSettings(HttpsSettingsError::Identity(IdentityError::Permission(
+                error,
+            )))
+        })?;
     identity
         .authorize_management(actor, clock.now())
         .map_err(|e| StorageError::HttpsSettings(HttpsSettingsError::Identity(e)))

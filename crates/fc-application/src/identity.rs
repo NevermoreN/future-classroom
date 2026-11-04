@@ -83,6 +83,50 @@ pub struct IdentitySessions {
     sessions: Vec<LiveSession>,
 }
 impl IdentitySessions {
+    /// Independent browser page, admitted only after password verification or
+    /// possession of an existing page credential with the same account epoch.
+    /// Unlike local unlock, this never replaces another page's lease.
+    pub fn issue_verified_web_page(
+        &mut self,
+        account: &UserAccount,
+        tick: u64,
+        lifetime_millis: u64,
+        wall_expires_at: LocalDateTime,
+    ) -> Result<SessionLease, SessionError> {
+        if !account.principal.enabled {
+            return Err(SessionError::Revoked);
+        }
+        if lifetime_millis == 0 || lifetime_millis > MAX_SESSION_MILLIS {
+            return Err(SessionError::InvalidDuration);
+        }
+        let absolute_deadline = tick
+            .checked_add(lifetime_millis)
+            .ok_or(SessionError::Overflow)?;
+        let id = self.sequence.checked_add(1).ok_or(SessionError::Overflow)?;
+        if self.sessions.len() >= MAX_LIVE_LEASES {
+            return Err(SessionError::Capacity);
+        }
+        let proof = SessionLease {
+            id,
+            principal_id: account.principal.id,
+            auth_epoch: account.principal.auth_epoch,
+            origin: TrustedOrigin::Web,
+        };
+        self.sequence = id;
+        self.sessions.push(LiveSession {
+            proof,
+            issued: tick,
+            last_input: tick,
+            absolute_deadline,
+            wall_expires_at,
+            purpose: if account.must_change_password {
+                SessionPurpose::ChangeInitialPassword
+            } else {
+                SessionPurpose::Manage
+            },
+        });
+        Ok(proof)
+    }
     /// Only after successful password verification against precisely this account version.
     /// Completing asynchronous verification must re-read epoch/credential version first.
     pub fn issue_verified(

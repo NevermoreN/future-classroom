@@ -35,12 +35,14 @@ export function secret(value: unknown): string {
   if (typeof value !== 'string' || !/^[0-9a-f]{64}$/.test(value) || /^0+$/.test(value)) return fail()
   return value
 }
-export interface PublicStatus { online: boolean }
+export interface PublicStatus { online: boolean; initialized?: boolean }
 export function publicStatus(value: unknown): PublicStatus {
-  const v = object(value, ['schemaVersion', 'apiVersion', 'uiCompatibilityVersion', 'online'])
+  const hasInitialization = typeof value === 'object' && value !== null && 'initialized' in value
+  const v = object(value, ['schemaVersion', 'apiVersion', 'uiCompatibilityVersion', 'online', ...(hasInitialization ? ['initialized'] : [])])
   protocolVersions(v.schemaVersion, v.apiVersion, v.uiCompatibilityVersion)
   if (typeof v.online !== 'boolean') return fail()
-  return { online: v.online }
+  if (hasInitialization && typeof v.initialized !== 'boolean') return fail()
+  return { online: v.online, ...(hasInitialization ? { initialized: v.initialized as boolean } : {}) }
 }
 export interface PairingReceipt { requestId: string; pollSecret: string; retryAfterMs: number }
 export function pairingReceipt(value: unknown): PairingReceipt {
@@ -64,11 +66,41 @@ export interface Session {
   currentClassId: string | null
   assignments: { classId: string; subjectId: string }[]
   csrf: string
+  mustChangePassword?: boolean
+}
+export interface LoginForm { loginName: string; password: string }
+export interface SetupForm extends LoginForm { schoolName: string; displayName: string }
+export function validateSetup(form: SetupForm): void {
+  validateLogin(form); text(form.schoolName, 128); text(form.displayName, 128)
+  if ([...form.password].length < 12) fail()
+}
+export interface PasswordChangeForm { currentPassword: string; newPassword: string }
+export function validatePasswordChange(form: PasswordChangeForm): void {
+  if (typeof form.currentPassword !== 'string' || !form.currentPassword.length || [...form.currentPassword].length > 128
+    || typeof form.newPassword !== 'string' || [...form.newPassword].length < 12 || [...form.newPassword].length > 128) fail()
+  unicodeText(form.currentPassword); unicodeText(form.newPassword)
+}
+export interface PageSession extends Session { pageToken: string }
+export function pageCredential(value: unknown): string {
+  if (typeof value !== 'string' || !/^[0-9a-f]{128}$/.test(value) || /^0+$/.test(value)) return fail()
+  return value
+}
+export function validateLogin(form: LoginForm): void {
+  text(form.loginName)
+  if (typeof form.password !== 'string' || !form.password.length || [...form.password].length > 128) fail()
+  unicodeText(form.password)
+}
+export function pageSession(value: unknown): PageSession {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return fail()
+  const { pageToken, ...rest } = value as Record<string, unknown>
+  return { ...session(rest), pageToken: pageCredential(pageToken) }
 }
 export function session(value: unknown): Session {
-  const v = object(value, ['schemaVersion', 'status', 'principal', 'currentClassId', 'assignments', 'csrf'])
+  const hasPasswordState = typeof value === 'object' && value !== null && 'mustChangePassword' in value
+  const v = object(value, ['schemaVersion', 'status', 'principal', 'currentClassId', 'assignments', 'csrf', ...(hasPasswordState ? ['mustChangePassword'] : [])])
   protocolVersions(v.schemaVersion)
   if (v.status !== 'AUTHENTICATED') return fail()
+  if (hasPasswordState && typeof v.mustChangePassword !== 'boolean') return fail()
   const p = object(v.principal, ['id', 'displayName', 'role'])
   if (p.role !== 'GLOBAL_ADMIN' && p.role !== 'TEACHER_ADMIN' && p.role !== 'USER') return fail()
   if (!Array.isArray(v.assignments) || v.assignments.length > 4096) return fail()
@@ -85,6 +117,7 @@ export function session(value: unknown): Session {
     principal: { id: decimal(p.id), displayName: text(p.displayName, 128), role: p.role },
     currentClassId: v.currentClassId === null ? null : decimal(v.currentClassId),
     assignments, csrf: secret(v.csrf),
+    ...(hasPasswordState ? { mustChangePassword: v.mustChangePassword as boolean } : {}),
   }
 }
 function fixedStatus(value: unknown, expected: string): void {

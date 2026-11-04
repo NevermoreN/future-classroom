@@ -102,7 +102,11 @@ describe('material drafts, one-shot commands and exact result correlation', () =
   it('never deletes a version differing from the loaded row', async () => {
     const f = fixture(); await open(f); await f.controller.delete({ ...f.state().page!.items[0]!, resourceVersionId: '999' }); expect(f.api.deleteMaterial).not.toHaveBeenCalled(); f.controller.dispose()
   })
-  it.each([401, 403])('authentication failure %i clears all draft and command mirrors', async status => {
+  it('keeps login when an upload is forbidden', async () => {
+    const f = fixture(); await open(f); f.controller.pick(new File(['sensitive'], 'sensitive.txt')); f.api.createUpload.mockRejectedValueOnce(new ApiError(403, 'FORBIDDEN')); await f.controller.uploadFile()
+    expect(f.revoked).not.toHaveBeenCalled(); expect(f.state().selected).not.toBeNull(); f.controller.dispose()
+  })
+  it.each([401])('authentication failure %i clears all draft and command mirrors', async status => {
     const f = fixture(); await open(f); f.controller.pick(new File(['sensitive'], 'sensitive.txt')); f.api.createUpload.mockRejectedValueOnce(new ApiError(status, status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN')); await f.controller.uploadFile()
     expect(f.revoked).toHaveBeenCalledOnce(); expect(f.state().selected).toBeNull(); expect(f.state().page).toBeNull(); expect(f.state().file).toBeNull(); expect(f.state().pending).toBeNull(); expect(f.controller.hasRiskyDraft()).toBe(false); f.controller.dispose()
   })
@@ -279,7 +283,7 @@ it('single-file UNKNOWN remains manually queryable by its original pair after a 
   f.api.materialOutcome.mockResolvedValueOnce({ ...identity('77'), state: 'COMMITTED', scope: target, record: row() }); await f.controller.query()
   expect(f.api.materialOutcome).toHaveBeenCalledExactlyOnceWith(identity('77'), expect.any(AbortSignal)); expect(f.state().phase).toBe('result'); expect(f.state().pending).toBe(pending); expect(f.state().history).toEqual(row()); expect(f.api.issueCommand).toHaveBeenCalledOnce(); expect(f.api.append).toHaveBeenCalledOnce(); f.controller.dispose()
 })
-it.each([401, 403])('single-file blocked original-query authentication failure %i still revokes all mirrors', async status => {
+it.each([401])('single-file blocked original-query authentication failure %i still revokes all mirrors', async status => {
   const f = fixture(); await open(f); await transfer(f); f.api.append.mockRejectedValueOnce(new NetworkFault()); await f.controller.append()
   f.api.materialScopes.mockRejectedValueOnce(new NetworkFault()); await f.controller.loadScopes(0, true)
   f.api.materialOutcome.mockRejectedValueOnce(new ApiError(status, status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN')); await f.controller.query()
@@ -331,7 +335,7 @@ describe('bounded fixed-record batch deletion', () => {
     f.api.deleteBatch.mockResolvedValueOnce({ ...identity('77'), scope: target, records: [changed as MaterialRecord, { ...f.originals[1]!, status: 'DELETED', revision: '4' }] })
     await f.controller.deleteBatch(); expect(f.state().phase).toBe('unknown'); expect(f.state().deleteBatchHistory).toBeNull(); expect(f.state().pendingDeleteBatch?.originals).toEqual(f.originals); f.controller.dispose()
   })
-  it.each([401, 403])('clears deletion mirrors on query revocation %i', async status => {
+  it.each([401])('clears deletion mirrors on query revocation %i', async status => {
     const f = await deletionFixture(); f.controller.selectPageForDeletion(); f.api.deleteBatch.mockRejectedValueOnce(new NetworkFault()); await f.controller.deleteBatch()
     f.api.deleteBatchOutcome.mockRejectedValueOnce(new ApiError(status, status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN')); await f.controller.queryDeleteBatch()
     expect(f.revoked).toHaveBeenCalledOnce(); expect(f.state().pendingDeleteBatch).toBeNull(); expect(f.state().deleteSelection).toEqual([]); f.controller.dispose()

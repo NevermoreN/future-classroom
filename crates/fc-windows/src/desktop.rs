@@ -470,10 +470,14 @@ impl Drop for Class {
 struct NativeWindow(HWND);
 impl NativeWindow {
     fn new(class: &Class) -> Result<Self> {
-        // SAFETY: initially hidden, non-topmost, non-activating and always click-through.
+        // SAFETY: initially hidden, topmost, non-activating and always click-through.
         unsafe {
             Ok(Self(CreateWindowExW(
-                WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
+                WS_EX_LAYERED
+                    | WS_EX_TRANSPARENT
+                    | WS_EX_NOACTIVATE
+                    | WS_EX_TOOLWINDOW
+                    | WS_EX_TOPMOST,
                 w!("FutureClassroom.Desktop.v1"),
                 w!("未来教室桌面组件"),
                 WS_POPUP,
@@ -495,6 +499,22 @@ impl NativeWindow {
         }
         unsafe {
             let _ = ShowWindow(self.0, SW_HIDE);
+        }
+    }
+    fn show_resident(&self) -> Result<()> {
+        // SAFETY: owned UI-thread window; neither showing nor repairing its
+        // topmost layer activates it. Callers first verify the scene capability.
+        unsafe {
+            let _ = ShowWindow(self.0, SW_SHOWNOACTIVATE);
+            SetWindowPos(
+                self.0,
+                Some(HWND_TOPMOST),
+                0,
+                0,
+                0,
+                0,
+                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER,
+            )
         }
     }
 }
@@ -529,10 +549,9 @@ unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPAR
         match msg {
             WM_NCHITTEST => LRESULT(HTTRANSPARENT as isize),
             WM_MOUSEACTIVATE => LRESULT(MA_NOACTIVATE as isize),
-            WM_CLOSE => {
-                let _ = ShowWindow(hwnd, SW_HIDE);
-                LRESULT(0)
-            }
+            // The tray owns normal user exit; a Shell close of an individual
+            // transparent utility window must not hide part of the scene.
+            WM_CLOSE => LRESULT(0),
             _ => DefWindowProcW(hwnd, msg, wp, lp),
         }
     })) {
@@ -1076,7 +1095,7 @@ impl DesktopRenderer {
         // these two small button rectangles receive input; no activation occurs.
         let window = NativeWindow(unsafe {
             CreateWindowExW(
-                WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
+                WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST,
                 w!("FutureClassroom.Desktop.v1"),
                 w!("只读翻页"),
                 WS_POPUP,
@@ -1227,6 +1246,11 @@ impl DesktopRenderer {
     /// failed read remains dirty until the next permitted publication retries.
     pub fn invalidate_system_colors(&mut self) {
         self.system_colors_dirty = true;
+    }
+    /// Re-publish only after the next fresh scene/session/health check. This
+    /// repairs Shell minimize and layer order without exposing stale windows.
+    pub fn request_republish(&mut self) {
+        self.hidden = true;
     }
     /// Metadata only; shared workers perform all file verification and WIC work.
     pub fn image_requests(scene: &SceneSnapshot) -> Result<Vec<ImageRenderRequest>> {
@@ -1655,52 +1679,44 @@ impl DesktopRenderer {
                             self.hide();
                             return Ok(PresentOutcome::Hidden);
                         }
-                        // SAFETY: own constant-alpha background, freshly checked,
-                        // no activation or topmost placement is requested.
-                        unsafe {
-                            let backdrop = self.cards[index].backdrop.as_ref().unwrap();
-                            let layer = if side == 0 {
-                                &backdrop.fill
-                            } else {
-                                &backdrop.edge
-                            };
-                            let _ = ShowWindow(layer.window.0, SW_SHOWNOACTIVATE);
-                        }
+                        let backdrop = self.cards[index].backdrop.as_ref().unwrap();
+                        let layer = if side == 0 {
+                            &backdrop.fill
+                        } else {
+                            &backdrop.edge
+                        };
+                        layer.window.show_resident()?;
                     }
                 }
                 if !publication_allowed(scene, guard)? {
                     self.hide();
                     return Ok(PresentOutcome::Hidden);
                 }
-                // SAFETY: exact owned HWND, after fresh system/lease/date checks.
-                unsafe {
-                    let _ = ShowWindow(self.cards[index].surface.window.0, SW_SHOWNOACTIVATE);
-                }
+                self.cards[index].surface.window.show_resident()?;
                 if self.cards[index].dynamic.is_some() {
                     if !publication_allowed(scene, guard)? {
                         self.hide();
                         return Ok(PresentOutcome::Hidden);
                     }
-                    // SAFETY: exact owned overlay HWND, freshly rechecked above.
-                    unsafe {
-                        let _ = ShowWindow(
-                            self.cards[index].dynamic.as_ref().unwrap().window.0,
-                            SW_SHOWNOACTIVATE,
-                        );
-                    }
+                    self.cards[index]
+                        .dynamic
+                        .as_ref()
+                        .unwrap()
+                        .window
+                        .show_resident()?;
                 }
                 if self.cards[index].input.is_some() {
                     if !publication_allowed(scene, guard)? {
                         self.hide();
                         return Ok(PresentOutcome::Hidden);
                     }
-                    // SAFETY: exact owned overlay HWND, freshly rechecked above.
-                    unsafe {
-                        let _ = ShowWindow(
-                            self.cards[index].input.as_ref().unwrap().surface.window.0,
-                            SW_SHOWNOACTIVATE,
-                        );
-                    }
+                    self.cards[index]
+                        .input
+                        .as_ref()
+                        .unwrap()
+                        .surface
+                        .window
+                        .show_resident()?;
                 }
             }
             self.hidden = false;
@@ -2016,8 +2032,7 @@ fn validate_card(c: &SceneCard) -> Result<()> {
     Ok(())
 }
 fn scene_allowed(scene: &SceneSnapshot, now: LocalDateTime, g: &PublicationGuard<'_>) -> bool {
-    !g.settings_open
-        && g.current_generation == scene.generation
+    g.current_generation == scene.generation
         && g.lease.scope == DESKTOP_SCOPE
         && scene.valid_at(now)
         && g.gate.status().revision == scene.source_revision
@@ -2085,8 +2100,6 @@ fn system_hidden_reason() -> Result<Option<ContentHiddenReason>> {
                 == "Default";
         Ok(if !session_allows {
             Some(ContentHiddenReason::Session)
-        } else if crate::native::desktop_foreground() != fc_presentation::Foreground::Desktop {
-            Some(ContentHiddenReason::App)
         } else {
             None
         })
@@ -3539,8 +3552,15 @@ mod tests {
         assert!(after.0 <= before.0 + 2, "GDI {before:?}->{after:?}");
         assert!(after.1 <= before.1 + 2, "USER {before:?}->{after:?}");
         let initial = r.last_metrics();
+        let mut settings = guard(&gate, scene.generation);
+        settings.settings_open = true;
+        assert_ne!(
+            r.present(&scene, now, &settings).unwrap(),
+            PresentOutcome::Hidden,
+            "management visibility must not suppress the desktop"
+        );
         let mut denied = guard(&gate, scene.generation);
-        denied.settings_open = true;
+        denied.current_generation = scene.generation.next().unwrap();
         for _ in 0..100 {
             assert_eq!(
                 r.present(&scene, now, &denied).unwrap(),

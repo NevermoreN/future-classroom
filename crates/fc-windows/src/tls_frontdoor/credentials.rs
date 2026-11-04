@@ -8,6 +8,24 @@ use windows::Win32::Security::{
 
 mod host;
 
+pub(super) fn verify_configured_host(
+    thumbprint: CertificateThumbprint,
+    host: &str,
+) -> Result<(), TlsError> {
+    let mut selected = SelectedCertificate::open().map_err(|_| TlsError::Certificate)?;
+    let result = (|| {
+        if !selected
+            .find(thumbprint)
+            .map_err(|_| TlsError::Certificate)?
+        {
+            return Err(TlsError::Certificate);
+        }
+        host::verify(selected.certificate(), host)
+    })();
+    selected.close(true)?;
+    result
+}
+
 pub(super) struct Credentials {
     pub handle: SecHandle,
     acquired: bool,

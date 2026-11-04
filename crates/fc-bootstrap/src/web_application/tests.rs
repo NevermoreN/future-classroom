@@ -633,7 +633,7 @@ fn public_status_is_non_sensitive_and_frame_origin_cookie_fail_before_mutation()
     assert_eq!(status.head.status, 200);
     assert_eq!(
         text(&status.body),
-        r#"{"schemaVersion":1,"apiVersion":1,"uiCompatibilityVersion":1,"online":true}"#
+        r#"{"schemaVersion":1,"apiVersion":1,"uiCompatibilityVersion":1,"online":true,"initialized":true}"#
     );
     for (name, value) in [
         ("Cache-Control", "no-store"),
@@ -723,3 +723,696 @@ mod material_tests;
 
 #[path = "voice_tests.rs"]
 mod voice_tests;
+
+fn page_head(method: &str, route: &str, len: usize, page: &str, csrf: Option<&str>) -> RequestHead {
+    let mut request = head(method, route, len, None, csrf);
+    request.headers.push(Header {
+        name: "X-FC-Page".into(),
+        value: page.as_bytes().to_vec(),
+    });
+    request
+}
+fn direct_page_login(fixture: &mut BackendFixture) -> (String, String) {
+    let body = format!(r#"{{"schemaVersion":1,"loginName":"admin","password":"{PASSWORD}"}}"#);
+    let response = fixture.dispatch(
+        &head("POST", "session/login", body.len(), None, None),
+        body.as_bytes(),
+    );
+    assert_eq!(response.head.status, 200);
+    assert!(response
+        .head
+        .headers
+        .iter()
+        .all(|h| !h.name.eq_ignore_ascii_case("set-cookie")));
+    (
+        field(&response.body, "pageToken"),
+        field(&response.body, "csrf"),
+    )
+}
+#[test]
+fn direct_page_login_needs_no_pairing_and_cookie_cannot_restore_a_closed_page() {
+    let mut fixture = BackendFixture::new();
+    let (page, _) = direct_page_login(&mut fixture);
+    let response = fixture.dispatch(&page_head("GET", "session", 0, &page, None), b"");
+    assert_eq!(response.head.status, 200);
+    assert_eq!(field(&response.body, "role"), "GLOBAL_ADMIN");
+    let cookie = format!("__Host-FutureClassroom={page}");
+    assert_eq!(
+        fixture
+            .dispatch(&head("GET", "session", 0, Some(&cookie), None), b"")
+            .head
+            .status,
+        401
+    );
+    assert_eq!(
+        fixture
+            .dispatch(&head("GET", "session", 0, None, None), b"")
+            .head
+            .status,
+        401
+    );
+}
+#[test]
+fn page_resume_survives_idle_access_expiry_and_midnight_without_reviving_revoked_identity() {
+    let mut fixture = BackendFixture::new();
+    let (first, _) = direct_page_login(&mut fixture);
+    let (second, _) = direct_page_login(&mut fixture);
+    fixture.clock.0.fetch_add(86_401_000, Ordering::AcqRel);
+    fixture.clock.1.store(90_000, Ordering::Release);
+    for token in [&first, &second] {
+        let body = format!(r#"{{"schemaVersion":1,"pageToken":"{token}"}}"#);
+        assert_eq!(
+            fixture
+                .dispatch(
+                    &head("POST", "session/resume", body.len(), None, None),
+                    body.as_bytes()
+                )
+                .head
+                .status,
+            200
+        );
+    }
+    let session = fixture.dispatch(&page_head("GET", "session", 0, &first, None), b"");
+    let csrf = field(&session.body, "csrf");
+    let body = br#"{"schemaVersion":1}"#;
+    assert_eq!(
+        fixture
+            .dispatch(
+                &page_head("POST", "session/logout", body.len(), &first, Some(&csrf)),
+                body
+            )
+            .head
+            .status,
+        200
+    );
+    assert_eq!(
+        fixture
+            .dispatch(&page_head("GET", "session", 0, &second, None), b"")
+            .head
+            .status,
+        401
+    );
+}
+#[test]
+fn page_login_rejects_wrong_password_and_private_writes_still_require_csrf() {
+    let mut fixture = BackendFixture::new();
+    let wrong = br#"{"schemaVersion":1,"loginName":"admin","password":"Incorrect-password-2026"}"#;
+    assert_eq!(
+        fixture
+            .dispatch(
+                &head("POST", "session/login", wrong.len(), None, None),
+                wrong
+            )
+            .head
+            .status,
+        401
+    );
+    let (page, _) = direct_page_login(&mut fixture);
+    let body = br#"{"schemaVersion":1}"#;
+    assert_eq!(
+        fixture
+            .dispatch(
+                &page_head("POST", "session/logout", body.len(), &page, None),
+                body
+            )
+            .head
+            .status,
+        403
+    );
+}
+
+#[test]
+fn page_password_initial_login_is_restricted_and_change_returns_new_revoking_session() {
+    use fc_domain::{
+        auth::Role,
+        identity::{AssignmentScope, IdentityCommand, NewAccount, Rgb},
+        ids::{ClassId, PrincipalId, SubjectId},
+    };
+    let mut fixture = BackendFixture::new();
+    let initial = "Initial-teacher-password-2026";
+    let changed = "Changed-teacher-password-2026";
+    let admin = fixture.admin;
+    for command in [
+        IdentityCommand::CreateClass {
+            id: ClassId::new(1).unwrap(),
+            name: "Test class".into(),
+        },
+        IdentityCommand::PutSubject {
+            id: SubjectId::new(1).unwrap(),
+            name: "Math".into(),
+            enabled: true,
+            color: Rgb {
+                red: 20,
+                green: 80,
+                blue: 180,
+            },
+            expected_revision: None,
+        },
+    ] {
+        fixture
+            .backend
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| backend.identity(admin, command),
+            )
+            .unwrap();
+    }
+
+    drop(
+        fixture
+            .backend
+            .test_native_command(
+                fc_ports::command_window::CommandFamily::Identity,
+                Some(admin),
+                SessionPurpose::Manage,
+                |backend| {
+                    backend.create_account(
+                        admin,
+                        NewAccount {
+                            id: PrincipalId::new(2).unwrap(),
+                            login_name: "newteacher".into(),
+                            display_name: "New teacher".into(),
+                            role: Role::TeacherAdmin,
+                            scopes: vec![AssignmentScope {
+                                class_id: ClassId::new(1).unwrap(),
+                                subject_id: SubjectId::new(1).unwrap(),
+                            }],
+                        },
+                        Password::new(initial.into()).unwrap(),
+                    )
+                },
+            )
+            .unwrap(),
+    );
+    let body = format!(r#"{{"schemaVersion":1,"loginName":"newteacher","password":"{initial}"}}"#);
+    let login = fixture.dispatch(
+        &head("POST", "session/login", body.len(), None, None),
+        body.as_bytes(),
+    );
+    assert_eq!(login.head.status, 200);
+    assert!(text(&login.body).contains(r#""mustChangePassword":true"#));
+    let page = field(&login.body, "pageToken");
+    let csrf = field(&login.body, "csrf");
+    assert_eq!(
+        fixture
+            .dispatch(&page_head("GET", "voice/capabilities", 0, &page, None), b"")
+            .head
+            .status,
+        403
+    );
+    let wrong = format!(
+        r#"{{"schemaVersion":1,"currentPassword":"Incorrect-password-2026","newPassword":"{changed}"}}"#
+    );
+    assert_eq!(
+        fixture
+            .dispatch(
+                &page_head("POST", "session/password", wrong.len(), &page, Some(&csrf)),
+                wrong.as_bytes()
+            )
+            .head
+            .status,
+        403
+    );
+    let change =
+        format!(r#"{{"schemaVersion":1,"currentPassword":"{initial}","newPassword":"{changed}"}}"#);
+    let response = fixture.dispatch(
+        &page_head("POST", "session/password", change.len(), &page, Some(&csrf)),
+        change.as_bytes(),
+    );
+    assert_eq!(response.head.status, 200);
+    assert!(text(&response.body).contains(r#""mustChangePassword":false"#));
+    assert_eq!(field(&response.body, "role"), "TEACHER_ADMIN");
+    let fresh = field(&response.body, "pageToken");
+    assert_ne!(fresh, page);
+    assert_eq!(
+        fixture
+            .dispatch(&page_head("GET", "session", 0, &page, None), b"")
+            .head
+            .status,
+        401
+    );
+    assert_eq!(
+        fixture
+            .dispatch(&page_head("GET", "session", 0, &fresh, None), b"")
+            .head
+            .status,
+        200
+    );
+}
+
+#[test]
+fn local_setup_initializes_once_without_pairing_or_recovery_disclosure() {
+    let directory = Directory::new();
+    let clock = Arc::new(Time(AtomicU64::new(1000), AtomicU64::new(36000)));
+    let mut backend = BackendFixture::open(&directory, clock);
+    let prefix = ListenPrefix::https("https://board.school:443/fc/").unwrap();
+    let app = WebApplication::new_local(&prefix, backend.web_service()).unwrap();
+    let normal = WebApplication::new(&prefix, backend.web_service()).unwrap();
+    let status = app.dispatch(&mut backend, &head("GET", "status", 0, None, None), b"");
+    assert!(text(&status.body).contains(r#""initialized":false"#));
+    let body = format!(
+        r#"{{"schemaVersion":1,"schoolName":"Test setup","loginName":"admin","displayName":"Administrator","password":"{PASSWORD}"}}"#
+    );
+    assert_eq!(
+        normal
+            .dispatch(
+                &mut backend,
+                &head("POST", "setup", body.len(), None, None),
+                body.as_bytes()
+            )
+            .head
+            .status,
+        403
+    );
+    let created = app.dispatch(
+        &mut backend,
+        &head("POST", "setup", body.len(), None, None),
+        body.as_bytes(),
+    );
+    assert_eq!(created.head.status, 200);
+    assert!(!text(&created.body).contains("recovery"));
+    let page = field(&created.body, "pageToken");
+    assert_eq!(
+        app.dispatch(
+            &mut backend,
+            &page_head("GET", "session", 0, &page, None),
+            b""
+        )
+        .head
+        .status,
+        200
+    );
+    assert_eq!(
+        app.dispatch(
+            &mut backend,
+            &head("POST", "setup", body.len(), None, None),
+            body.as_bytes()
+        )
+        .head
+        .status,
+        409
+    );
+    backend.close().unwrap();
+}
+#[test]
+fn web_global_admin_updates_display_with_cas_and_identity_excludes_credential_metadata() {
+    let mut fixture = BackendFixture::new();
+    let (page, csrf) = direct_page_login(&mut fixture);
+    let identity = fixture.dispatch(&page_head("GET", "admin/identity", 0, &page, None), b"");
+    assert_eq!(identity.head.status, 200);
+    for forbidden in [
+        "credentialVersion",
+        "recoveryVersion",
+        "protectedRecord",
+        "authEpoch",
+    ] {
+        assert!(!text(&identity.body).contains(forbidden));
+    }
+    let original = fixture.dispatch(&page_head("GET", "admin/display", 0, &page, None), b"");
+    assert_eq!(original.head.status, 200);
+    let json = text(&original.body);
+    let revision = field(&original.body, "revision");
+    let start = json.find("\"data\":").unwrap() + 7;
+    let candidate = &json[start..json.len() - 1];
+    let changed = candidate.replace("\"glassSurfacePercent\":3", "\"glassSurfacePercent\":9");
+    let body = format!(
+        r#"{{"schemaVersion":1,"expectedRevision":"{revision}","action":"save","candidate":{changed}}}"#
+    );
+    let saved = fixture.dispatch(
+        &page_head("POST", "admin/display", body.len(), &page, Some(&csrf)),
+        body.as_bytes(),
+    );
+    assert_eq!(saved.head.status, 200);
+    assert!(text(&saved.body).contains("\"glassSurfacePercent\":9"));
+    assert_eq!(
+        fixture
+            .dispatch(
+                &page_head("POST", "admin/display", body.len(), &page, Some(&csrf)),
+                body.as_bytes()
+            )
+            .head
+            .status,
+        409
+    );
+}
+
+#[test]
+fn web_content_text_publish_clear_and_exact_undo_use_existing_public_node_writer() {
+    use fc_domain::{
+        ids::LayoutNodeId,
+        layout::{LayoutNode, NodeKind, WidgetKind},
+        profile_content::{ContentNodeStyle, ContentPayloadKind},
+    };
+    let mut fixture = BackendFixture::new();
+    let admin = fixture.admin;
+    let current = fixture.backend.read_public_layout(admin).unwrap();
+    let mut candidate = current.layout.clone();
+    let node = LayoutNodeId::new(candidate.node_id_high_water + 1).unwrap();
+    let group = LayoutNodeId::new(node.get() + 1).unwrap();
+    candidate.node_id_high_water = group.get();
+    let outlet = candidate
+        .tree
+        .nodes
+        .iter_mut()
+        .find(|n| matches!(n.kind, NodeKind::Outlet { .. }))
+        .unwrap();
+    let mut children = std::mem::replace(&mut outlet.children, vec![group]);
+    children.push(node);
+    candidate.tree.nodes.push(LayoutNode {
+        id: group,
+        kind: NodeKind::Container(fc_domain::layout::ContainerSettings {
+            flow: fc_domain::layout::Flow::Column,
+            padding: 8,
+            gap: 8,
+            width: fc_domain::layout::AxisSize::Fixed(500),
+            height: fc_domain::layout::AxisSize::Fixed(800),
+            group_opacity_percent: 100,
+            material: Some(fc_domain::layout::GlassMaterial::default()),
+        }),
+        children,
+    });
+    candidate.tree.nodes.push(LayoutNode {
+        id: node,
+        kind: NodeKind::Widget(WidgetKind::SubjectText),
+        children: vec![],
+    });
+    candidate
+        .content_styles
+        .push(ContentNodeStyle::new(node, ContentPayloadKind::Text));
+    fixture
+        .backend
+        .test_native_command(
+            fc_ports::command_window::CommandFamily::Profiles,
+            Some(admin),
+            SessionPurpose::Manage,
+            |backend| {
+                backend.save_public_layout(
+                    admin,
+                    current.layout.revision,
+                    current.display.revision,
+                    candidate,
+                    current.display,
+                )
+            },
+        )
+        .unwrap();
+    let (page, csrf) = direct_page_login(&mut fixture);
+    let path = format!("admin/content/public/{}", node.get());
+    let body=br#"{"schemaVersion":1,"expectedRevision":"0","action":"publishText","candidate":{"text":"Structured text\nsecond line"}}"#;
+    let published = fixture.dispatch(
+        &page_head("POST", &path, body.len(), &page, Some(&csrf)),
+        body,
+    );
+    assert_eq!(published.head.status, 200);
+    assert!(text(&published.body).contains("Structured text\\nsecond line"));
+    let revision = field(&published.body, "revision");
+    let clear = format!(
+        r#"{{"schemaVersion":1,"expectedRevision":"{revision}","action":"clear","candidate":{{}}}}"#
+    );
+    let cleared = fixture.dispatch(
+        &page_head("POST", &path, clear.len(), &page, Some(&csrf)),
+        clear.as_bytes(),
+    );
+    assert_eq!(cleared.head.status, 200);
+    let next = field(&cleared.body, "revision");
+    let undo = format!(
+        r#"{{"schemaVersion":1,"expectedRevision":"{next}","action":"undo","candidate":{{"targetRevision":"{revision}"}}}}"#
+    );
+    let restored = fixture.dispatch(
+        &page_head("POST", &path, undo.len(), &page, Some(&csrf)),
+        undo.as_bytes(),
+    );
+    assert_eq!(restored.head.status, 200);
+    assert!(text(&restored.body).contains("Structured text\\nsecond line"));
+}
+
+#[test]
+fn web_global_voice_policy_keeps_real_origin_and_writer_review_cas() {
+    use fc_domain::{auth::TrustedOrigin, voice::VoiceLimits};
+    let mut fixture = BackendFixture::new();
+    let (page, _csrf) = direct_page_login(&mut fixture);
+    let proof = PageToken::parse_hex(page).unwrap();
+    let lease = fixture.service.authenticate_page(&proof).unwrap().lease();
+    assert_eq!(lease.origin(), TrustedOrigin::Web);
+    let service = fixture.backend.voice_service();
+    let before = service.management_snapshot(lease).unwrap();
+    let issued = fixture
+        .backend
+        .issue_for_web_admin(lease, fc_ports::command_window::CommandFamily::Voice)
+        .unwrap();
+    let scoped = service.with_command_window(lease, issued).unwrap();
+    let limits = VoiceLimits {
+        max_duration_millis: 30_000,
+        max_pending_jobs: 3,
+        max_pending_per_owner: 1,
+        max_repeat_total: 4,
+    };
+    scoped
+        .set_limits_reviewed(
+            lease,
+            limits,
+            before.revision,
+            before.identity_revision,
+            before.runtime_generation,
+        )
+        .unwrap();
+    let after = service.management_snapshot(lease).unwrap();
+    assert_eq!(after.limits, limits);
+    assert!(after.revision > before.revision);
+    let issued = fixture
+        .backend
+        .issue_for_web_admin(lease, fc_ports::command_window::CommandFamily::Voice)
+        .unwrap();
+    let scoped = service.with_command_window(lease, issued).unwrap();
+    assert!(scoped
+        .set_limits_reviewed(
+            lease,
+            VoiceLimits::default(),
+            before.revision,
+            before.identity_revision,
+            before.runtime_generation
+        )
+        .is_err());
+    assert_eq!(service.management_snapshot(lease).unwrap().limits, limits);
+}
+
+#[cfg(windows)]
+#[test]
+fn web_images_real_wic_publish_range_and_cancel_retire_controlled_owners() {
+    use crate::web_transfer::{
+        uploads::tests::{Fixture, Pool},
+        TransferControl, WebCompletion, WebTask,
+    };
+    use fc_domain::{
+        ids::LayoutNodeId,
+        layout::{LayoutNode, NodeKind, WidgetKind},
+        profile_content::{ContentNodeStyle, ContentPayloadKind},
+    };
+    use fc_runtime::worker::Task;
+    use std::time::Instant;
+    let _physical = super::upload_test_guard();
+    let fixture = Fixture::new();
+    let mut pool = Pool::new();
+    let password = "Synthetic-Upload-Hub-Password-2026";
+    let login = format!(r#"{{"schemaVersion":1,"loginName":"admin","password":"{password}"}}"#);
+    let logged = fixture.app.dispatch(
+        &mut fixture.backend.lock().unwrap(),
+        &head("POST", "session/login", login.len(), None, None),
+        login.as_bytes(),
+    );
+    assert_eq!(logged.head.status, 200, "{}", text(&logged.body));
+    let (page, csrf) = (
+        field(&logged.body, "pageToken"),
+        field(&logged.body, "csrf"),
+    );
+    let lease = fixture
+        .app
+        .service
+        .authenticate_page(&PageToken::parse_hex(page.clone()).unwrap())
+        .unwrap()
+        .lease();
+    let node = {
+        let mut backend = fixture.backend.lock().unwrap();
+        let current = backend.read_public_layout(lease).unwrap();
+        let mut candidate = current.layout.clone();
+        let node = LayoutNodeId::new(candidate.node_id_high_water + 1).unwrap();
+        let group = LayoutNodeId::new(node.get() + 1).unwrap();
+        candidate.node_id_high_water = group.get();
+        let outlet = candidate
+            .tree
+            .nodes
+            .iter_mut()
+            .find(|n| matches!(n.kind, NodeKind::Outlet { .. }))
+            .unwrap();
+        let mut children = std::mem::replace(&mut outlet.children, vec![group]);
+        children.push(node);
+        candidate.tree.nodes.push(LayoutNode {
+            id: group,
+            kind: NodeKind::Container(fc_domain::layout::ContainerSettings {
+                flow: fc_domain::layout::Flow::Column,
+                padding: 8,
+                gap: 8,
+                width: fc_domain::layout::AxisSize::Fixed(500),
+                height: fc_domain::layout::AxisSize::Fixed(800),
+                group_opacity_percent: 100,
+                material: Some(fc_domain::layout::GlassMaterial::default()),
+            }),
+            children,
+        });
+        candidate.tree.nodes.push(LayoutNode {
+            id: node,
+            kind: NodeKind::Widget(WidgetKind::SubjectImage),
+            children: vec![],
+        });
+        candidate
+            .content_styles
+            .push(ContentNodeStyle::new(node, ContentPayloadKind::Images));
+        let issued = backend
+            .issue_for_web_admin(lease, fc_ports::command_window::CommandFamily::Profiles)
+            .unwrap();
+        backend
+            .begin_command_scope(issued)
+            .unwrap()
+            .save_public_layout(
+                lease,
+                current.layout.revision,
+                current.display.revision,
+                candidate,
+                current.display,
+            )
+            .unwrap();
+        node
+    };
+    let request = |request: RequestHead, body: Vec<u8>| {
+        let (control, life) = TransferControl::new(request.token, Instant::now()).unwrap();
+        let task = WebTask::json(&fixture.backend, &fixture.app, request, body, life).unwrap();
+        let response = pool.call(move |context| match task.run(context) {
+            WebCompletion::Response { response, .. } => response,
+            _ => panic!("expected image response"),
+        });
+        drop(control);
+        response
+    };
+    let expect = |response: WebResponse, status| {
+        assert_eq!(response.head.status, status, "{}", text(&response.body));
+        response
+    };
+    let png: Vec<u8> = vec![
+        137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 6,
+        0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 13, 73, 68, 65, 84, 120, 156, 99, 248, 207, 192, 240,
+        31, 0, 5, 0, 1, 255, 137, 153, 61, 29, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130,
+    ];
+    let slot = format!("admin/content/public/{}", node.get());
+    let manifest = format!(
+        r#"{{"schemaVersion":1,"expectedRevision":"0","items":[{{"name":"pixel.png","bytes":{}}}]}}"#,
+        png.len()
+    );
+    let created = expect(
+        request(
+            page_head(
+                "POST",
+                &format!("{slot}/uploads"),
+                manifest.len(),
+                &page,
+                Some(&csrf),
+            ),
+            manifest.into_bytes(),
+        ),
+        201,
+    );
+    let batch = field(&created.body, "batchId");
+    let upload = field(&created.body, "id");
+    for (offset, part) in [
+        (0, png[..png.len() / 2].to_vec()),
+        (png.len() / 2, png[png.len() / 2..].to_vec()),
+    ] {
+        let mut h = page_head(
+            "POST",
+            &format!("{slot}/uploads/{batch}/{upload}/bytes"),
+            part.len(),
+            &page,
+            Some(&csrf),
+        );
+        h.headers
+            .iter_mut()
+            .find(|h| h.name.eq_ignore_ascii_case("content-type"))
+            .unwrap()
+            .value = b"application/octet-stream".to_vec();
+        h.headers.push(Header {
+            name: "X-FC-Upload-Offset".into(),
+            value: offset.to_string().into_bytes(),
+        });
+        expect(request(h, part), 200);
+    }
+    let publish = format!(
+        r#"{{"schemaVersion":1,"expectedRevision":"0","action":"publishImages","candidate":{{"batchId":"{batch}","pages":[{{"source":"upload","uploadId":"{upload}"}}]}}}}"#
+    );
+    let saved = expect(
+        request(
+            page_head("POST", &slot, publish.len(), &page, Some(&csrf)),
+            publish.into_bytes(),
+        ),
+        200,
+    );
+    assert!(text(&saved.body).contains("\"format\":\"png\""));
+    assert!(text(&saved.body).contains("\"width\":1"));
+    let revision = field(&saved.body, "revision");
+    let media = field(&saved.body, "mediaVersionId");
+    let mut downloaded = Vec::new();
+    for (start, end) in [(0, png.len() / 2 - 1), (png.len() / 2, png.len() - 1)] {
+        let mut h = page_head("GET", &format!("{slot}/media/{media}"), 0, &page, None);
+        h.headers.push(Header {
+            name: "Range".into(),
+            value: format!("bytes={start}-{end}").into_bytes(),
+        });
+        let read = expect(request(h, vec![]), 206);
+        assert_eq!(read.head.content_length, (end - start + 1) as u64);
+        assert!(read
+            .head
+            .headers
+            .iter()
+            .any(|h| h.name.eq_ignore_ascii_case("content-type") && h.value == b"image/png"));
+        downloaded.extend(read.body);
+    }
+    assert_eq!(downloaded, png);
+    assert_eq!(fc_security::sha256(&downloaded), fc_security::sha256(&png));
+    let manifest = format!(
+        r#"{{"schemaVersion":1,"expectedRevision":"{revision}","items":[{{"name":"cancelled.png","bytes":{}}}]}}"#,
+        png.len()
+    );
+    let created = expect(
+        request(
+            page_head(
+                "POST",
+                &format!("{slot}/uploads"),
+                manifest.len(),
+                &page,
+                Some(&csrf),
+            ),
+            manifest.into_bytes(),
+        ),
+        201,
+    );
+    let batch = field(&created.body, "batchId");
+    let cancel = br#"{"schemaVersion":1}"#;
+    expect(
+        request(
+            page_head(
+                "POST",
+                &format!("{slot}/uploads/{batch}/cancel"),
+                cancel.len(),
+                &page,
+                Some(&csrf),
+            ),
+            cancel.to_vec(),
+        ),
+        200,
+    );
+    let app = fixture.app.clone();
+    assert!(pool.call(move |_| app.cleanup_profile_images()));
+    assert_eq!(super::quarantined_uploads(), 0);
+    pool.join().unwrap();
+    // Fixture Drop closes the real writer and removes its isolated controlled directory.
+}

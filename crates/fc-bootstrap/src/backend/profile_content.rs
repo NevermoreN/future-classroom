@@ -186,6 +186,77 @@ fn unavailable() -> BackendError {
     BackendError::ProfileContent(ProfileContentRepositoryError::Unavailable)
 }
 impl Backend {
+    fn current_content_page_scene(
+        &self,
+        slot: ContentSlotKey,
+        content: Revision,
+        view: Revision,
+    ) -> Result<(SceneGeneration, Revision)> {
+        let (generation, global) = {
+            let scene = self
+                .control
+                .0
+                .profile_content_scene
+                .lock()
+                .map_err(|_| unavailable())?;
+            let current = scene.current.as_ref().ok_or_else(unavailable)?;
+            (current.generation, current.revision)
+        };
+        if !self.control.profile_content_scene_matches(
+            (slot, content, view, global, generation),
+            self.clock.now(),
+            false,
+        ) {
+            return Err(unavailable());
+        }
+        Ok((generation, global))
+    }
+    pub fn web_profile_content_can_page(
+        &self,
+        lease: SessionLease,
+        document: &ProfileContentDocument,
+    ) -> bool {
+        self.profile_content_actor(lease).is_ok()
+            && matches!(document.current.as_ref().map(|v|&v.payload),Some(ContentPayload::Images(pages)) if !pages.is_empty())
+            && self
+                .current_content_page_scene(
+                    document.slot,
+                    document.revision,
+                    document.view_revision,
+                )
+                .is_ok()
+    }
+    pub fn page_profile_content_as_manager(
+        &mut self,
+        lease: SessionLease,
+        slot: ContentSlotKey,
+        content: Revision,
+        view: Revision,
+        page: u8,
+    ) -> Result<ProfileContentDocument> {
+        self.profile_content_actor(lease)?;
+        let (generation, global) = self.current_content_page_scene(slot, content, view)?;
+        let target = ProfilePageTarget {
+            slot,
+            expected_content_revision: content,
+            expected_view_revision: view,
+            page,
+        };
+        let web = self.web.clone();
+        let fence: Arc<dyn Fn() -> bool + Send + Sync> =
+            Arc::new(move || web.web_session_current(lease));
+        let issued = self.issue_profile_page_command(generation, global, &target, fence.clone())?;
+        let mut scope = self.begin_command_scope(issued)?;
+        let request = PageContentRequest {
+            command_id: scope.issued_command_id()?,
+            slot,
+            expected_content_revision: content,
+            expected_view_revision: view,
+            page,
+        };
+        scope.page_profile_content_while(generation, global, request, fence)?;
+        scope.read_profile_content(lease, slot)
+    }
     /// Local-global preparation admission. Every later check uses the current
     /// in-memory authority, not a captured DB revision. No Backend/SQLite access
     /// is needed while copying or decoding; no lock is held across either.

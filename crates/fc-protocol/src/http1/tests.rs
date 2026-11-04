@@ -158,7 +158,6 @@ fn exact_content_length_rejects_smuggling_variants_and_transfer_extensions() {
         "1 2",
         "1\t2",
         "18446744073709551616",
-        "52428801",
     ] {
         let mut p = parser();
         let bytes = format!("POST / HTTP/1.1\r\nContent-Length: {value}\r\n\r\n");
@@ -182,13 +181,16 @@ fn exact_content_length_rejects_smuggling_variants_and_transfer_extensions() {
         let bytes = format!("POST / HTTP/1.1\r\n{extra}\r\n\r\n");
         assert!(p.feed(bytes.as_bytes()).is_err(), "{extra}");
     }
+    let mut too_large = parser();
+    let oversized = format!(
+        "POST / HTTP/1.1\r\nContent-Length: {}\r\n\r\n",
+        MAX_TRANSFER_BYTES + 1
+    );
+    assert!(too_large.feed(oversized.as_bytes()).is_err());
     let mut p = parser();
+    let maximum = format!("POST / HTTP/1.1\r\nContent-Length:\t {MAX_TRANSFER_BYTES} \t\r\n\r\n");
     assert_eq!(
-        request_head(
-            &mut p,
-            b"POST / HTTP/1.1\r\nContent-Length:\t 52428800 \t\r\n\r\n"
-        )
-        .content_length,
+        request_head(&mut p, maximum.as_bytes()).content_length,
         Some(MAX_TRANSFER_BYTES)
     );
     assert_eq!(p.admit_body(1), Err(Error::BodyTooLarge));

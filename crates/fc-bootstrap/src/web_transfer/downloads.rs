@@ -79,6 +79,7 @@ impl DownloadHubCleanup {
 enum Stage {
     Starting,
     Live(Box<MaterialDownload>),
+    Maintenance(Box<crate::maintenance_web::MaintenanceDownload>),
     Retained,
     Complete,
 }
@@ -420,6 +421,7 @@ fn active(entry: &Entry, context: &JobContext) -> Result<(), DownloadHubError> {
     }
     match &entry.stage {
         Stage::Live(owner) if (owner.send_fence())() => Ok(()),
+        Stage::Maintenance(owner) if (owner.send_fence())() => Ok(()),
         _ => Err(DownloadHubError::Cancelled),
     }
 }
@@ -490,6 +492,72 @@ impl DownloadHub {
         shared.check_application(app)?;
         let mut lease = shared.reserve(life)?;
         let entry = lease.entry();
+        if matches!(
+            app.route_hint(head),
+            Ok(fc_protocol::web::Route::Maintenance {
+                resource: fc_protocol::web::maintenance::Resource::File(_),
+                write: false
+            })
+        ) {
+            let service = app.maintenance.as_ref().ok_or(DownloadHubError::Closed)?;
+            let prepared = {
+                let mut locked = backend.lock().map_err(|_| DownloadHubError::Closed)?;
+                let scoped = locked.begin_execution_scope(entry.life.job_fence(context));
+                app.prepare_maintenance_transfer(&scoped, head)?
+            };
+            let owner = match crate::maintenance_web::MaintenanceDownload::open(
+                service,
+                prepared.id,
+                &prepared.proof,
+                prepared.lease,
+                prepared.access,
+                context,
+            ) {
+                Ok(owner) => owner,
+                Err(error) => {
+                    entry.stage = Stage::Complete;
+                    return Err(crate::web_application::maintenance::error_response(error).into());
+                }
+            };
+            entry.expected = owner.bytes();
+            let fence = owner.send_fence();
+            let response = ResponseHead {
+                status: 200,
+                content_length: owner.bytes(),
+                headers: vec![
+                    fc_ports::http::Header {
+                        name: "Content-Type".into(),
+                        value: b"application/octet-stream".to_vec(),
+                    },
+                    fc_ports::http::Header {
+                        name: "Content-Disposition".into(),
+                        value: b"attachment; filename=classroom.fcbackup".to_vec(),
+                    },
+                    fc_ports::http::Header {
+                        name: "Cache-Control".into(),
+                        value: b"no-store".to_vec(),
+                    },
+                ],
+            };
+            entry.stage = Stage::Maintenance(Box::new(owner));
+            let Stage::Maintenance(owner) = &mut entry.stage else {
+                unreachable!()
+            };
+            let first = owner
+                .read_chunk(0, CHUNK_BYTES, context)
+                .map_err(crate::web_application::maintenance::error_response)?;
+            if first.is_empty() || first.len() > CHUNK_BYTES || response.validate().is_err() {
+                entry.failed = true;
+                return Err(DownloadHubError::ReadFailed.into());
+            }
+            entry.first = Some(first);
+            active(entry, context)?;
+            return Ok(DownloadAdmission {
+                key: entry.key,
+                head: response,
+                send_fence: fence,
+            });
+        }
         let owner = match app.begin_material_download_in_job(backend, head, &entry.life, context) {
             Ok(owner) => owner,
             Err(response) => {
@@ -547,11 +615,18 @@ impl DownloadHub {
         let bytes = if let Some(first) = entry.first.take() {
             first
         } else {
-            let Stage::Live(owner) = &mut entry.stage else {
-                unreachable!()
+            let bytes = match &mut entry.stage {
+                Stage::Live(owner) => owner
+                    .read_chunk_in_job(&entry.life, context)
+                    .map(|bytes| bytes.to_vec())
+                    .map_err(|_| DownloadHubError::ReadFailed),
+                Stage::Maintenance(owner) => owner
+                    .read_chunk(entry.next_offset, CHUNK_BYTES, context)
+                    .map_err(|_| DownloadHubError::ReadFailed),
+                _ => Err(DownloadHubError::Invalid),
             };
-            match owner.read_chunk_in_job(&entry.life, context) {
-                Ok(bytes) if !bytes.is_empty() && bytes.len() <= CHUNK_BYTES => bytes.to_vec(),
+            match bytes {
+                Ok(bytes) if !bytes.is_empty() && bytes.len() <= CHUNK_BYTES => bytes,
                 _ => {
                     entry.failed = true;
                     return Err(DownloadHubError::ReadFailed.into());

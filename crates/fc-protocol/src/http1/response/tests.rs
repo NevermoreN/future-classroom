@@ -451,7 +451,7 @@ fn replayed_old_chunk_ack_cannot_advance_or_retire_the_next_chunk() {
 }
 
 #[test]
-fn zero_length_body_needs_no_empty_chunk_and_fifty_mib_stream_needs_no_body_allocation() {
+fn zero_length_body_needs_no_empty_chunk_and_maximum_stream_needs_no_body_allocation() {
     let request = token();
     for status in [200, 204, 205, 304] {
         let mut input = head(0);

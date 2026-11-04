@@ -141,21 +141,20 @@ fn teacher_requires_actual_active_class_subject_pairs_and_unique_names() {
     assert!(state.account_by_login(" TEACHER2 ").is_ok());
 }
 #[test]
-fn roles_are_separate_from_teaching_scope_and_only_local_global_can_manage() {
+fn roles_are_separate_from_teaching_scope_and_trusted_global_can_manage() {
     let state = apply(catalog(), IdentityCommand::CreateAccount(teacher(2)));
     let mut a = actor(&state);
     a.origin = TrustedOrigin::Web;
-    assert_eq!(
-        state.transition(
+    assert!(state
+        .transition(
             &IdentityCommand::CreateClass {
                 id: ClassId::new(2).unwrap(),
                 name: "二班".into()
             },
             Some(&a),
             now()
-        ),
-        Err(IdentityError::Permission(PermissionError::LocalOnly))
-    );
+        )
+        .is_ok());
     a.principal_id = PrincipalId::new(2).unwrap();
     a.auth_epoch = AuthEpoch::new(1);
     a.origin = TrustedOrigin::Local;
@@ -323,7 +322,7 @@ fn transfer_requires_distinct_ready_accounts_current_version_and_local_authority
             0 => candidate.accounts[1].principal.enabled = false,
             1 => candidate.accounts[1].principal.role = Role::GlobalAdmin,
             2 => candidate.accounts[0].must_change_password = true,
-            3 => authority.origin = TrustedOrigin::Web,
+            3 => authority.auth_epoch = AuthEpoch::new(2),
             4 => {
                 request = IdentityCommand::TransferAdministrator {
                     from: admin(),
@@ -663,16 +662,31 @@ fn logout_requires_current_self_actor_and_expected_epoch_without_mutating_on_fai
     let mut initial_actor = actor(&state);
     initial_actor.principal_id = PrincipalId::new(2).unwrap();
     initial_actor.auth_epoch = AuthEpoch::new(1);
-    assert_eq!(
-        state.transition(
+    let initial_logout = state
+        .transition(
             &IdentityCommand::LogoutAccount {
                 id: initial_actor.principal_id,
-                expected_auth_epoch: initial_actor.auth_epoch
+                expected_auth_epoch: initial_actor.auth_epoch,
             },
             Some(&initial_actor),
-            now()
-        ),
-        Err(IdentityError::PasswordChangeRequired)
+            now(),
+        )
+        .unwrap();
+    assert!(
+        initial_logout
+            .next
+            .account(initial_actor.principal_id)
+            .unwrap()
+            .must_change_password
+    );
+    assert_ne!(
+        initial_logout
+            .next
+            .account(initial_actor.principal_id)
+            .unwrap()
+            .principal
+            .auth_epoch,
+        initial_actor.auth_epoch
     );
 }
 

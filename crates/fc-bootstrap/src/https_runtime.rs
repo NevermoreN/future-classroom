@@ -591,13 +591,13 @@ fn early_return(shared: &Arc<Mutex<Shared>>, error: RuntimeError, physical: bool
     fault(shared, error);
     shared.lock().unwrap_or_else(|e| e.into_inner()).returned = physical;
 }
-enum CleanupWork<T> {
+pub(crate) enum CleanupWork<T> {
     Pending(HttpJob),
     Running(T),
 }
 // Next original job/ticket owner plus a checked physical-drain observation.
 type CleanupPollResult<T> = Result<(Option<CleanupWork<T>>, bool), RuntimeError>;
-fn poll_cleanup<E: HttpExecutor>(
+pub(crate) fn poll_cleanup<E: HttpExecutor>(
     work: CleanupWork<E::Ticket>,
     executor: &E,
 ) -> CleanupPollResult<E::Ticket> {

@@ -136,13 +136,13 @@ unsafe fn paint(hwnd: HWND, dc: HDC, kind: usize) {
             let _ = LineTo(dc, x + 4, y - 2);
         }
         if focused {
-            let mut focus = RECT {
+            let focus = RECT {
                 left: 4,
                 top: 4,
                 right: bounds.right + if kind & 3 == CHOICE { 28 } else { 8 },
                 bottom: bounds.bottom - 4,
             };
-            let _ = DrawFocusRect(dc, &mut focus);
+            let _ = DrawFocusRect(dc, &focus);
         }
         let _ = RestoreDC(dc, saved);
     }

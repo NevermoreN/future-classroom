@@ -6,7 +6,12 @@ pub const MAX_HEADERS: usize = 64;
 pub const MAX_HEADER_BYTES: usize = 16 * 1024;
 pub const MAX_TARGET_BYTES: usize = 2048;
 pub const CHUNK_BYTES: usize = 64 * 1024;
-pub const MAX_TRANSFER_BYTES: u64 = 50 * 1024 * 1024;
+/// Wire framing ceiling only. Admission must retain each authenticated route's
+/// smaller business limit; only local maintenance can stream a full backup.
+pub const MAX_TRANSFER_BYTES: u64 = fc_domain::recovery::MAX_DATABASE_BYTES
+    + fc_domain::recovery::MAX_MEDIA_BYTES
+    + fc_domain::recovery::MAX_MANIFEST_BYTES as u64
+    + 20;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum HttpError {
     InvalidPrefix,

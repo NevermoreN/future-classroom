@@ -137,13 +137,14 @@ fn management_metadata_counts_jobs_and_disabled_setting_survives_reopen_and_cas_
 }
 
 #[test]
-fn management_rejects_web_stale_revoked_expired_and_lock_or_faulted_local_leases() {
+fn management_accepts_web_global_and_rejects_stale_revoked_expired_and_lock_or_faulted_local_leases(
+) {
     let _fixture = fixtures::VOICE_FIXTURE
         .lock()
         .unwrap_or_else(|p| p.into_inner());
     let (_directory, backend, web, _class) = fixtures::shared_fixture();
     let service = backend.0.lock().unwrap().voice_service();
-    assert!(service.management_snapshot(web).is_err());
+    assert!(service.management_snapshot(web).is_ok());
     assert!(service
         .test_set_enabled(web, false, service.inventory().unwrap().revision)
         .is_err());

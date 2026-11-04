@@ -142,7 +142,58 @@ pub struct ContentSources {
     token: [u8; 32],
     sources: Sources,
 }
+/// Internal controlled-upload handoff. A browser cannot construct a path or
+/// file selection; the Web owner supplies the exact sealed staging object.
+pub(crate) enum WebImageInput {
+    Uploaded {
+        source: LockedFile,
+        format: ImageFormat,
+    },
+    Existing(MediaReference),
+}
 impl ContentSources {
+    pub(crate) fn web_image_fingerprint(
+        slot: ContentSlotKey,
+        token: [u8; 32],
+    ) -> Result<[u8; 32], Error> {
+        Self {
+            token,
+            sources: Sources::Images(Vec::new()),
+        }
+        .intent_fingerprint(slot, ContentOperation::Publish(ContentPayloadKind::Images))
+    }
+    pub(crate) fn from_web_images(
+        images: Vec<WebImageInput>,
+        token: [u8; 32],
+    ) -> Result<Self, Error> {
+        if images.is_empty() || images.len() > MAX_CONTENT_PAGES {
+            return Err(Error::Domain(ProfileContentError::Capacity));
+        }
+        let sources = images
+            .into_iter()
+            .map(|image| match image {
+                WebImageInput::Uploaded { source, format } => {
+                    let bytes = source.len().map_err(unavailable)?;
+                    if bytes == 0 || bytes > MAX_CONTENT_IMAGE_BYTES {
+                        return Err(invalid());
+                    }
+                    Ok(SelectedImage::New {
+                        source,
+                        bytes,
+                        format,
+                    })
+                }
+                WebImageInput::Existing(reference) => {
+                    reference.validate().map_err(Error::Domain)?;
+                    Ok(SelectedImage::Existing(reference))
+                }
+            })
+            .collect::<Result<Vec<_>, Error>>()?;
+        Ok(Self {
+            token,
+            sources: Sources::Images(sources),
+        })
+    }
     /// Cheap source admission only: pin local immutable handles and inspect sizes.
     /// No payload copying, hashing, text decoding or WIC runs before durable Begin.
     pub fn open<R: RandomSource>(input: LocalContentInput, random: &mut R) -> Result<Self, Error> {
@@ -318,6 +369,25 @@ impl ControlledContentFiles {
     fn original(&self, id: MediaVersionId, format: ImageFormat) -> PathBuf {
         self.originals
             .join(format!("{:020}.{}", id.get(), extension(format)))
+    }
+    pub(crate) fn open_web_media(
+        &self,
+        reference: &MediaReference,
+        active: &dyn Fn() -> bool,
+    ) -> Result<LockedFile, Error> {
+        reference.validate().map_err(Error::Domain)?;
+        let mut source = LockedFile::open(
+            &self.original(reference.version_id, reference.format),
+            MAX_CONTENT_IMAGE_BYTES,
+        )
+        .map_err(unavailable)?;
+        let control = Control::new(active)?;
+        let (bytes, sha256) = hash_file(source.file_mut(), &control).map_err(validation)?;
+        if bytes != reference.bytes || sha256 != reference.sha256 {
+            return Err(invalid());
+        }
+        control.check()?;
+        Ok(source)
     }
     fn staging(&self, id: MediaVersionId) -> PathBuf {
         self.quarantine.join(format!("{:020}.part", id.get()))

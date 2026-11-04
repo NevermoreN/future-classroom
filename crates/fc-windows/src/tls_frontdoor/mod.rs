@@ -31,6 +31,19 @@ pub struct TlsAcceptSnapshot {
 /// TCP epoch guarantee.
 pub const HEADER_CLOSE_RESERVE: std::time::Duration = std::time::Duration::from_millis(25);
 
+/// Trusted accepting listener identity, assigned before parsing any HTTP bytes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TlsListenerScope {
+    LocalControl,
+    Lan,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LanListenerPhase {
+    Disabled,
+    Draining,
+    Listening,
+}
+
 /// Latest deadline close in one fixed business slot. Socket close, kernel IO
 /// return, Frame return and retirement remain separate observations. In
 /// particular, no timestamp here claims that the peer has observed EOF/RST.
@@ -166,6 +179,7 @@ pub(super) enum Step {
 pub(super) struct Frame {
     pub token: RequestToken,
     pub call: Call,
+    pub scope: TlsListenerScope,
     pub input: [u8; BUFFER_BYTES],
     pub input_len: usize,
     pub output: [u8; BUFFER_BYTES],
@@ -178,6 +192,7 @@ impl Frame {
         Box::new(Self {
             token,
             call: Call::Handshake,
+            scope: TlsListenerScope::LocalControl,
             input: [0; BUFFER_BYTES],
             input_len: 0,
             output: [0; BUFFER_BYTES],
@@ -209,14 +224,25 @@ impl Drop for Frame {
 }
 
 #[cfg(any(windows, test))]
+pub(super) struct CredentialConfiguration {
+    pub thumbprint: CertificateThumbprint,
+    pub host: String,
+}
+#[cfg(any(windows, test))]
 pub(super) trait Driver {
+    fn configure_lan(
+        &mut self,
+        _configuration: Option<CredentialConfiguration>,
+    ) -> Result<(), TlsError> {
+        Ok(())
+    }
     fn call(&mut self, frame: &mut Frame) -> Result<Step, TlsError>;
     fn close(&mut self) -> Result<(), TlsError> {
         Ok(())
     }
 }
-pub mod certificate_query;
 pub mod certificate_provision;
+pub mod certificate_query;
 #[cfg(windows)]
 mod certificate_selection;
 #[cfg(windows)]

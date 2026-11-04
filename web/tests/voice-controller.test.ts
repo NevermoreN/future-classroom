@@ -75,7 +75,11 @@ describe('voice recording and durable task lifecycle', () => {
     expect(f.state().pending).toBe(original); expect(f.state().phase).toBe('unknown'); expect(f.state().notice).toContain('未能确认'); await vi.advanceTimersByTimeAsync(30000); expect(f.api.cancelVoice).toHaveBeenCalledOnce()
     f.api.voiceOutcome.mockImplementationOnce(async pair => ({ ...pair, state: 'COMMITTED', job: job({ state: 'CANCELED', currentRepeat: 1, revision: '3' }) })); await f.controller.queryPending(); expect(f.state().pending).toBeNull(); expect(f.state().history?.job.state).toBe('CANCELED'); f.controller.dispose()
   })
-  it.each([401, 403])('HTTP%i clears task/draft/commands and invalidates paired session exactlyonce', async status => {
+  it('keeps login when a voice upload is forbidden', async () => {
+    const f = fixture(); await f.controller.open(); f.controller.beginRecording('recording-one'); f.api.uploadVoice.mockRejectedValueOnce(new ApiError(403, 'FORBIDDEN')); await f.controller.recorded(recording())
+    expect(f.revoked).not.toHaveBeenCalled(); expect(f.state().capabilities).not.toBeNull(); f.controller.dispose()
+  })
+  it.each([401])('HTTP%i clears task/draft/commands and invalidates paired session exactlyonce', async status => {
     const f = fixture(); await f.controller.open(); f.controller.beginRecording('recording-one'); f.api.uploadVoice.mockRejectedValueOnce(new ApiError(status, status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN')); await f.controller.recorded(recording())
     expect(f.revoked).toHaveBeenCalledOnce(); expect(f.cancelRecorder).toHaveBeenCalled(); expect(f.state().capabilities).toBeNull(); expect(f.state().jobs).toEqual([]); expect(f.state().context).toBeNull(); expect(f.state().pending).toBeNull(); expect(vi.getTimerCount()).toBe(0)
     await f.controller.open(); expect(f.api.voiceJobs).toHaveBeenCalledOnce(); f.controller.dispose()

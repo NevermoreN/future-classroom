@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { ArrowLeft, ArrowRight, Check, CircleAlert, Download, FileUp, FolderOpen, History, LoaderCircle, RefreshCw, Trash2, Upload, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, CircleAlert, Download, FileUp, FolderOpen, History, LoaderCircle, RefreshCw, Trash2, Upload, X } from './components/icons'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { MaterialController, MaterialState } from './api/material-controller'

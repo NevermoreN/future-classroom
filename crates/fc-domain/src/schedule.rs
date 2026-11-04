@@ -574,7 +574,7 @@ impl LessonOverride {
         now: LocalDateTime,
     ) -> Result<Self, ScheduleError> {
         authority
-            .authorize_global_local(actor, now)
+            .authorize_global(actor, now)
             .map_err(ScheduleError::Permission)?;
         authority
             .require_class(key.class_id)

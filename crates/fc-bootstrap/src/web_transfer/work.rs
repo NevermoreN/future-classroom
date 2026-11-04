@@ -59,7 +59,13 @@ impl WebTask {
         body: Vec<u8>,
         life: TransferLifetime,
     ) -> Result<Self, TransferError> {
-        if body.len() > MAX_JSON_BYTES || body.len() as u64 != head.content_length.unwrap_or(0) {
+        let limit = match application.route_hint(&head) {
+            Ok(Route::Admin { .. } | Route::Maintenance { .. }) => {
+                fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES
+            }
+            _ => MAX_JSON_BYTES,
+        };
+        if body.len() > limit || body.len() as u64 != head.content_length.unwrap_or(0) {
             return Err(TransferError::InvalidAdmission);
         }
         Self::new(backend, application, head, life, Operation::Json(body))
@@ -167,7 +173,10 @@ fn default_output_query(
     }
 }
 fn bounded_json(result: WebResponse) -> WebResponse {
-    if result.body.len() > MAX_JSON_BYTES
+    bounded_json_limit(result, MAX_JSON_BYTES)
+}
+fn bounded_json_limit(result: WebResponse, limit: usize) -> WebResponse {
+    if result.body.len() > limit
         || result.body.len() as u64 != result.head.content_length
         || result.head.validate().is_err()
     {
@@ -231,6 +240,76 @@ impl WebTask {
         else {
             return response(unavailable());
         };
+        #[cfg(windows)]
+        application.cleanup_expired_profile_images();
+        #[cfg(windows)]
+        if let Operation::Json(body) = &self.operation {
+            if application.is_admin_preview(&self.head) {
+                return response(bounded_json_limit(
+                    application
+                        .admin_preview_in_job(&backend, &self.head, body, &self.life, context),
+                    fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES,
+                ));
+            }
+        }
+        if matches!(
+            application.route_hint(&self.head),
+            Ok(Route::Admin {
+                resource: fc_protocol::web::admin::Resource::Voice,
+                ..
+            })
+        ) {
+            if let Operation::Json(body) = &self.operation {
+                let prepared = {
+                    let Ok(mut locked) = backend.lock() else {
+                        return response(unavailable());
+                    };
+                    application.prepare_admin_voice(
+                        &mut locked,
+                        &self.head,
+                        body,
+                        &self.life,
+                        context,
+                    )
+                };
+                return response(bounded_json_limit(
+                    match prepared {
+                        Ok(prepared) => prepared.execute(context, query),
+                        Err(error) => error,
+                    },
+                    fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES,
+                ));
+            }
+        }
+        #[cfg(windows)]
+        if let Operation::Json(body) = &self.operation {
+            if matches!(
+                application.route_hint(&self.head),
+                Ok(Route::Maintenance { .. })
+            ) {
+                let Some(service) = &application.maintenance else {
+                    return response(unavailable());
+                };
+                let prepared = {
+                    let Ok(mut locked) = backend.lock() else {
+                        return response(unavailable());
+                    };
+                    let scope = locked.begin_execution_scope(self.life.job_fence(context));
+                    application.prepare_maintenance(&scope, &self.head, body)
+                };
+                let request = match prepared {
+                    Ok(request) => request,
+                    Err(error) => return response(error),
+                };
+                if !self.life.is_active() || context.checkpoint().is_err() {
+                    return response(unavailable());
+                }
+                return response(bounded_json_limit(
+                    request.execute(service, &mut fc_windows::SystemRandom),
+                    fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES,
+                ));
+            }
+        }
         if matches!(&self.operation, Operation::Json(_))
             && application.route_hint(&self.head) == Ok(Route::VoiceCapabilities)
         {
@@ -240,6 +319,66 @@ impl WebTask {
                 context,
                 query,
             )));
+        }
+        if matches!(&self.operation, Operation::Json(_))
+            && matches!(
+                application.route_hint(&self.head),
+                Ok(Route::Admin {
+                    resource: fc_protocol::web::admin::Resource::Status
+                        | fc_protocol::web::admin::Resource::Network
+                        | fc_protocol::web::admin::Resource::Autostart,
+                    ..
+                })
+            )
+        {
+            let Operation::Json(body) = &self.operation else {
+                unreachable!()
+            };
+            let prepared = {
+                let Ok(mut locked) = backend.lock() else {
+                    return response(unavailable());
+                };
+                let fence = self.life.job_fence(context);
+                let scope = locked.begin_execution_scope(fence);
+                application.prepare_admin_platform(&scope, &self.head, body)
+            };
+            let (lease, request, hook) = match prepared {
+                Ok(value) => value,
+                Err(error) => return response(error),
+            };
+            if !self.life.is_active() || context.checkpoint().is_err() {
+                return response(unavailable());
+            }
+            let result = hook(lease, request, context);
+            if !self.life.is_active() || context.checkpoint().is_err() {
+                return response(unavailable());
+            }
+            let Ok(locked) = backend.lock() else {
+                return response(unavailable());
+            };
+            if locked
+                .check_session(lease, fc_application::identity::SessionPurpose::Manage)
+                .is_err()
+            {
+                return response(crate::web_application::failure(
+                    401,
+                    responses::ErrorCode::Unauthorized,
+                ));
+            }
+            return response(bounded_json_limit(
+                crate::web_application::admin_platform::response(result),
+                fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES,
+            ));
+        }
+        #[cfg(windows)]
+        if let Operation::Json(body) = &self.operation {
+            if application.is_profile_image_request(&self.head, body) {
+                return response(bounded_json_limit(
+                    application
+                        .profile_images_in_job(&backend, &self.head, body, &self.life, context),
+                    fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES,
+                ));
+            }
         }
         let Ok(mut backend) = backend.lock() else {
             return response(unavailable());
@@ -263,7 +402,13 @@ impl WebTask {
                     context,
                 );
                 // Streamed files/static payloads have separate chunk owners.
-                response(bounded_json(result))
+                let limit = match application.route_hint(&self.head) {
+                    Ok(Route::Admin { .. } | Route::Maintenance { .. }) => {
+                        fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES
+                    }
+                    _ => MAX_JSON_BYTES,
+                };
+                response(bounded_json_limit(result, limit))
             }
         }
     }

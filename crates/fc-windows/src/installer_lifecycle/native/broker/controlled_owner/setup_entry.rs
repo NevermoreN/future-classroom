@@ -93,7 +93,26 @@ fn template() -> Vec<u32> {
 }
 unsafe extern "system" fn dialog(hwnd: HWND, message: u32, w: WPARAM, _: LPARAM) -> isize {
     match message {
-        WM_INITDIALOG => 1,
+        WM_INITDIALOG => {
+            if let Ok(icon) = crate::startup::application_icon() {
+                // SAFETY: live dialog borrows the module-owned shared icon.
+                unsafe {
+                    SendMessageW(
+                        hwnd,
+                        WM_SETICON,
+                        Some(WPARAM(ICON_BIG as usize)),
+                        Some(LPARAM(icon.0 as isize)),
+                    );
+                    SendMessageW(
+                        hwnd,
+                        WM_SETICON,
+                        Some(WPARAM(ICON_SMALL as usize)),
+                        Some(LPARAM(icon.0 as isize)),
+                    );
+                }
+            }
+            1
+        }
         WM_CLOSE => {
             let _ = unsafe { EndDialog(hwnd, CANCEL as isize) };
             1
@@ -143,6 +162,10 @@ pub(crate) fn interactive() -> Result<u32> {
         Err(LifecycleError::UpgradeProtocolUnsupported) => (
             "当前安装版本不支持这次更新，现有资料已保留。请使用与当前版本兼容的安装程序。"
                 .to_owned(),
+            MB_ICONERROR,
+        ),
+        Err(LifecycleError::ShellIntegration) => (
+            "安装操作已完成，但桌面或开始菜单快捷方式未完成。请检查同名快捷方式，安装或修复可重新创建启动项。".to_owned(),
             MB_ICONERROR,
         ),
         Err(_) => (

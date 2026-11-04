@@ -591,6 +591,9 @@ impl Controller {
     pub(super) fn metrics(&self) -> DesktopMetrics {
         self.renderer.diagnostics()
     }
+    pub(super) fn last_metrics(&self) -> DesktopMetrics {
+        self.renderer.last_metrics()
+    }
     pub(super) fn take_lesson_event(&mut self) -> Option<DesktopLessonStamp> {
         self.lesson_event.take()
     }
@@ -620,6 +623,9 @@ impl Controller {
         self.cancel_pending();
         self.notice.failed(message);
         self.next_render = Instant::now() + RETRY;
+    }
+    pub(super) fn identity(&self) -> Option<&fc_domain::identity::IdentityState> {
+        self.facts.as_ref().map(|facts| &facts.identity)
     }
     fn lesson_stamp(&self) -> Option<DesktopLessonStamp> {
         let scene = self.scene.as_ref()?;
@@ -1153,7 +1159,7 @@ impl Controller {
         control: Option<&SessionControl>,
         pool: &WorkerPool<Work>,
         clock: &CurrentClock,
-        settings_open: bool,
+        _settings_open: bool,
         management_busy: bool,
         hints: HostHints,
     ) -> Result<(), String> {
@@ -1166,8 +1172,7 @@ impl Controller {
         if hints.contains(HostHints::DISPLAY_CHANGED) {
             self.renderer.invalidate_system_colors();
         }
-        // Display notifications can arrive while settings keep the desktop
-        // hidden. Retire the cached area now, before those early returns.
+        // Retire monitor geometry before session/health early returns.
         if hints.contains(HostHints::DISPLAY_CHANGED)
             || hints.contains(HostHints::POWER_CHANGED)
             || hints.contains(HostHints::SESSION_CHANGED)
@@ -1246,11 +1251,6 @@ impl Controller {
         if stale {
             self.invalidate();
             self.cancel_pending();
-        }
-        if settings_open {
-            self.hide();
-            self.clear_content_observation(ContentViewState::HiddenByApp);
-            return Ok(());
         }
         if self.facts.is_none() {
             self.hide();
@@ -1357,8 +1357,16 @@ impl Controller {
             gate: &gate,
             lease,
             current_generation: self.generation,
-            settings_open,
+            settings_open: false,
         };
+        if hints.contains(HostHints::FOREGROUND_CHANGED)
+            || hints.contains(HostHints::TASKBAR_RECREATED)
+            || hints.contains(HostHints::DISPLAY_CHANGED)
+        {
+            // Coalesced native events repair Shell/minimize and layer order;
+            // ordinary timer ticks never compete for the topmost position.
+            self.renderer.request_republish();
+        }
         let health_epoch = gate.status().health_epoch;
         let visibility_generation = control.content_presentation_generation();
         let outcome = match self.renderer.present(scene, now, &guard) {

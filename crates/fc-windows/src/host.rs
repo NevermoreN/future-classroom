@@ -51,11 +51,12 @@ impl HostHints {
     pub const SHUTDOWN: Self = Self(64);
     pub const OPEN_STATUS: Self = Self(128);
     pub const EMERGENCY_STOP_AUDIO: Self = Self(256);
-    /// Intent only. Bootstrap must authenticate before invoking controller.stop().
+    /// Explicit tray exit: bootstrap starts ordinary graceful shutdown without login.
     pub const EXIT_REQUESTED: Self = Self(512);
     pub const TASKBAR_RECREATED: Self = Self(1024);
     const TRAY_CONTEXT: Self = Self(2048);
     pub const FOREGROUND_CHANGED: Self = Self(4096);
+    pub const OPEN_SETTINGS: Self = Self(65536);
     /// Negative read-only sample at native message dispatch. The original OS
     /// event-to-dispatch latency is not measured or eliminated by this fence.
     pub const FOREGROUND_UNAVAILABLE: Self = Self(32768);
@@ -70,7 +71,7 @@ impl HostHints {
 #[derive(Clone)]
 pub struct HostControl(Arc<AtomicU32>);
 impl HostControl {
-    /// Composition root calls only after authorization, or during OS shutdown.
+    /// Composition root calls after graceful shutdown, or during OS shutdown.
     pub fn stop(&self) {
         self.0.fetch_or(STOP, Ordering::Release);
     }
@@ -439,8 +440,7 @@ impl HiddenHost {
             uID: 1,
             uFlags: NIF_ICON | NIF_MESSAGE | NIF_TIP,
             uCallbackMessage: TRAY_MESSAGE,
-            // SAFETY: shared stock icon; Shell_NotifyIcon copies it, no DestroyIcon.
-            hIcon: unsafe { LoadIconW(None, IDI_APPLICATION)? },
+            hIcon: crate::startup::application_icon()?,
             ..Default::default()
         };
         let mut tooltip = [0u16; 128];
@@ -501,9 +501,10 @@ impl HiddenHost {
         // mutable State borrow across the nested message loop, only shared atomics.
         unsafe {
             let menu = Menu(CreatePopupMenu()?);
-            AppendMenuW(menu.0, MF_STRING, 1, w!("查看状态 / 管理"))?;
+            AppendMenuW(menu.0, MF_STRING, 1, w!("查看状态"))?;
+            AppendMenuW(menu.0, MF_STRING, 4, w!("设置"))?;
             AppendMenuW(menu.0, MF_STRING, 2, w!("紧急停止全部语音"))?;
-            AppendMenuW(menu.0, MF_STRING, 3, w!("退出（需主管理员授权）"))?;
+            AppendMenuW(menu.0, MF_STRING, 3, w!("退出程序"))?;
             let mut point = POINT::default();
             GetCursorPos(&mut point)?;
             let _ = SetForegroundWindow(self.hwnd); // only in response to user's tray click
@@ -519,6 +520,7 @@ impl HiddenHost {
             .0;
             match selected {
                 1 => self.state.hint(HostHints::OPEN_STATUS),
+                4 => self.state.hint(HostHints::OPEN_SETTINGS),
                 2 => self.state.control_hint(HostHints::EMERGENCY_STOP_AUDIO),
                 3 => self.state.hint(HostHints::EXIT_REQUESTED),
                 _ => {}

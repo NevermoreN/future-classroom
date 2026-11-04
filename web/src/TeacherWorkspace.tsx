@@ -1,7 +1,8 @@
+import AdminWorkspace from './AdminWorkspace'
 import SubjectVisualPreview from "./SubjectVisualPreview"
 import type { SubjectVisualApi } from "./api/subject-visual-protocol"
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, CircleAlert, ClipboardList, FolderOpen, GraduationCap, History, LoaderCircle, LockKeyhole, LogOut, Radio, RefreshCw, Save, ShieldCheck, Trash2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, CircleAlert, ClipboardList, FolderOpen, GraduationCap, History, LoaderCircle, LockKeyhole, LogOut, Radio, RefreshCw, Save, Settings, ShieldCheck, Trash2 } from './components/icons'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { trustedApiBase } from './api/client'
@@ -44,8 +45,8 @@ function Editor({ editor: e, busy, controller, api, onRevoked }: { editor: Edito
     <div className="editor-actions"><Button disabled={!canSave} onClick={() => { void controller?.save() }}>{busy && e.phase === 'saving' ? <LoaderCircle className="spinner" /> : <Save />}保存当天内容</Button><Button variant="outline" disabled={busy || e.expired || e.phase !== 'ready'} onClick={() => { if (window.confirm('将以当前修订提交空内容，并替换本页草稿。确认清空今天的这个槽位？')) void controller?.save(true) }}><Trash2 />清空当天内容</Button>{['ready', 'conflict'].includes(e.phase) && <Button variant="ghost" disabled={busy || e.expired} onClick={() => { void controller?.loadLatest() }}><RefreshCw />{e.phase === 'conflict' ? '载入最新修订（保留草稿）' : '读取当前内容'}</Button>}</div>
   </CardContent></Card>
 }
-export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevoked }: { session: Session; onLogout: () => void; onRefresh: () => void; onRevoked: () => void }) {
-  const [page, setPage] = useState<'HOME' | 'MATERIALS' | 'VOICE' | ContentKind>('HOME'), [state, setState] = useState<ContentState>(empty)
+export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevoked, onPasswordChange }: { session: Session; onLogout: () => void; onRefresh: () => void; onRevoked: () => void; onPasswordChange: () => void }) {
+  const [page, setPage] = useState<'HOME' | 'ADMIN' | 'MATERIALS' | 'VOICE' | ContentKind>(session.principal.role === 'GLOBAL_ADMIN' && window.location.hash.includes('/admin') ? 'ADMIN' : 'HOME'), [state, setState] = useState<ContentState>(empty)
   const [materials, setMaterials] = useState<MaterialState>(emptyMaterials), materialOwner = useRef<MaterialController | undefined>(undefined)
   const [api] = useState(() => new VoiceHttpApi(trustedApiBase(import.meta.env.BASE_URL, window.location.href)))
   const [voice, setVoice] = useState<VoiceState>(emptyVoice), voiceOwner = useRef<VoiceController | undefined>(undefined)
@@ -62,30 +63,32 @@ export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevok
     window.addEventListener('beforeunload', beforeUnload)
     return () => { window.removeEventListener('beforeunload', beforeUnload); document.removeEventListener('visibilitychange', visibility); voiceController.dispose(); recorderController.dispose(); controller.dispose(); materialController.dispose(); owner.current = undefined; materialOwner.current = undefined; voiceOwner.current = undefined; recorder.current = undefined }
   }, [api, session.csrf])
+  const [adminDirty, setAdminDirty] = useState(false)
   const canManage = session.principal.role !== 'USER'
-  function consent() { return !(owner.current?.hasRiskyDraft() || materialOwner.current?.hasRiskyDraft() || voiceOwner.current?.hasRiskyDraft()) || window.confirm('本页有未保存草稿或结果尚未确认的命令。离开会丢弃本页内存信息，不会撤销已经提交的命令，也不会自动保存。确认离开？') }
+  function consent() { return !(adminDirty || owner.current?.hasRiskyDraft() || materialOwner.current?.hasRiskyDraft() || voiceOwner.current?.hasRiskyDraft()) || window.confirm('本页有未保存草稿或结果尚未确认的命令。离开会丢弃本页内存信息，不会撤销已经提交的命令，也不会自动保存。确认离开？') }
   function refreshPage() {
     if (!consent()) return
     owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true)
     window.location.reload()
   }
-  function open(kind: ContentKind) { if (!canManage || !consent()) return; materialOwner.current?.leave(true); voiceOwner.current?.leave(true); setPage(kind); void owner.current?.loadScopes(kind, 0, true) }
-  function home() { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); setPage('HOME') } }
-  function openMaterials() { if (!canManage || !consent()) return; owner.current?.leave(true); voiceOwner.current?.leave(true); setPage('MATERIALS'); void materialOwner.current?.loadScopes(0, true) }
-  function openVoice() { if (!canManage || !consent()) return; owner.current?.leave(true); materialOwner.current?.leave(true); setPage('VOICE'); void voiceOwner.current?.open() }
+  function open(kind: ContentKind) { if (!canManage || !consent()) return; materialOwner.current?.leave(true); voiceOwner.current?.leave(true); setAdminDirty(false); setPage(kind); void owner.current?.loadScopes(kind, 0, true) }
+  function home() { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); setAdminDirty(false); window.history.replaceState(null, '', window.location.pathname + window.location.search); setPage('HOME') } }
+  function openMaterials() { if (!canManage || !consent()) return; owner.current?.leave(true); voiceOwner.current?.leave(true); setAdminDirty(false); setPage('MATERIALS'); void materialOwner.current?.loadScopes(0, true) }
+  function openVoice() { if (!canManage || !consent()) return; owner.current?.leave(true); materialOwner.current?.leave(true); setAdminDirty(false); setPage('VOICE'); void voiceOwner.current?.open() }
   function select(item: ScopeItem) { if (consent()) void owner.current?.select(item, true) }
-  function reload(offset = 0) { if (page !== 'HOME' && page !== 'MATERIALS' && page !== 'VOICE' && consent()) void owner.current?.loadScopes(page, offset, true) }
+  function reload(offset = 0) { if (page !== 'HOME' && page !== 'MATERIALS' && page !== 'VOICE' && page !== 'ADMIN' && consent()) void owner.current?.loadScopes(page, offset, true) }
   const scopes = state.page
   return <main id="main-content" className="workspace teacher-workspace">
     <nav className="teacher-navigation" aria-label="教师内容入口">
+      {session.principal.role === 'GLOBAL_ADMIN' && <button type="button" aria-current={page === 'ADMIN' ? 'page' : undefined} onClick={() => { if (page !== 'ADMIN' && consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); setAdminDirty(false); setPage('ADMIN') } }}><Settings size={18} />全局设置</button>}
       <button type="button" aria-current={page === 'HOME' ? 'page' : undefined} onClick={home}><GraduationCap size={18} />工作台</button>
       <button type="button" disabled={!canManage} aria-current={page === 'HOMEWORK' ? 'page' : undefined} onClick={() => open('HOMEWORK')}><ClipboardList size={18} />我的今日作业</button>
       <button type="button" disabled={!canManage} aria-current={page === 'MATERIALS' ? 'page' : undefined} onClick={openMaterials}><FolderOpen size={18} />我的课堂资料</button>
       <button type="button" disabled={!canManage} aria-current={page === 'REMINDER' ? 'page' : undefined} onClick={() => open('REMINDER')}><BookOpen size={18} />今日提醒</button>
       <button type="button" disabled={!canManage} aria-current={page === 'VOICE' ? 'page' : undefined} onClick={openVoice}><Radio size={18} />语音播报</button>
     </nav>
-    <div className="workspace-heading"><div><p className="eyebrow">{page === 'HOME' ? '你的课堂，从这里连接' : '以白板实际日期与授权范围为准'}</p><h1>{page === 'HOME' ? `你好，${session.principal.displayName}` : page === 'VOICE' ? '语音播报' : page === 'MATERIALS' ? '我的课堂资料' : page === 'HOMEWORK' ? '我的今日作业' : '管理今日提醒'}<span className="hello-dot">。</span></h1><p>{page === 'HOME' ? '账号与内容范围由白板确认，提交结果与屏幕显示分开核验。' : page === 'VOICE' ? '核对白板当前班级，按住说话、松开发送。' : page === 'MATERIALS' ? '选择老师与科目目录，上传、校验后添加；下载到当前设备。' : page === 'HOMEWORK' ? '选择实际老师、班级和科目；每次保存检查当前修订。' : '共同提醒覆盖受管班级，不受你本人任教班级限制。'}</p></div><div className="workspace-top-actions">{page !== 'HOME' && <Button variant="outline" onClick={home}><ArrowLeft />返回工作台</Button>}<Button variant="outline" onClick={() => { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); onRefresh() } }}><RefreshCw />核对会话</Button><Button variant="outline" onClick={refreshPage}><RefreshCw />刷新页面</Button></div></div>
-    {page === 'HOME' ? <>
+    <div className="workspace-heading"><div><p className="eyebrow">{page === 'HOME' ? '你的课堂，从这里连接' : '以白板实际日期与授权范围为准'}</p><h1>{page === 'HOME' ? `你好，${session.principal.displayName}` : page === 'ADMIN' ? '全局设置' : page === 'VOICE' ? '语音播报' : page === 'MATERIALS' ? '我的课堂资料' : page === 'HOMEWORK' ? '我的今日作业' : '管理今日提醒'}<span className="hello-dot">。</span></h1><p>{page === 'ADMIN' ? '管理学校、桌面、课表和连接配置，所有操作按全局管理员权限执行。' : page === 'HOME' ? '账号与内容范围由白板确认，提交结果与屏幕显示分开核验。' : page === 'VOICE' ? '核对白板当前班级，按住说话、松开发送。' : page === 'MATERIALS' ? '选择老师与科目目录，上传、校验后添加；下载到当前设备。' : page === 'HOMEWORK' ? '选择实际老师、班级和科目；每次保存检查当前修订。' : '共同提醒覆盖受管班级，不受你本人任教班级限制。'}</p></div><div className="workspace-top-actions"><Button variant="outline" onClick={() => { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); onPasswordChange() } }}><LockKeyhole />修改密码</Button>{page !== 'HOME' && <Button variant="outline" onClick={home}><ArrowLeft />返回工作台</Button>}<Button variant="outline" onClick={() => { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); onRefresh() } }}><RefreshCw />核对会话</Button><Button variant="outline" onClick={refreshPage}><RefreshCw />刷新页面</Button></div></div>
+    {page === 'ADMIN' ? <AdminWorkspace session={session} onRevoked={onRevoked} onDirtyChange={setAdminDirty} /> : page === 'HOME' ? <>
       <section className="identity-summary" aria-label="当前授权"><div className="avatar"><GraduationCap size={28} /></div><div><strong>{session.principal.displayName}</strong><span>{roles[session.principal.role]}</span></div><div className="summary-divider" /><div><small>白板当前班级</small><strong>{session.currentClassId === null ? '尚未绑定班级' : `班级 ID ${session.currentClassId}`}</strong></div><span className="verified"><ShieldCheck size={15} />白板已确认</span></section>
       <div className="section-label"><h2>教师工作台</h2><span>保存、查询与结果核对</span></div>
       <div className="feature-grid">

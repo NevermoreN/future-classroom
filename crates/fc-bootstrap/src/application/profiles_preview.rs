@@ -702,6 +702,72 @@ fn samples(
     Ok(result)
 }
 
+/// Same native text measurement and composition as the isolated renderer,
+/// returning geometry only. No HWND, bitmap or desktop publication is created.
+#[allow(dead_code)] // The binary still shares this renderer source; Web consumes geometry in the library.
+pub struct MeasuredPreviewNode {
+    pub key: SceneNodeKey,
+    pub parent: Option<SceneNodeKey>,
+    pub rect: Rect,
+    pub clip: Rect,
+    pub text: Option<String>,
+    pub font_dip: Option<f32>,
+    pub text_truncated: bool,
+}
+#[allow(dead_code, clippy::too_many_arguments)]
+pub fn geometry_with_content(
+    identity: &IdentityState,
+    public: &PublicLayoutState,
+    subject: Option<&SubjectProfileDocument>,
+    sequence: u64,
+    now: LocalDateTime,
+    contents: &[PublishedContentSnapshot],
+    text: &dyn ContentTextSource,
+) -> Result<Vec<MeasuredPreviewNode>, String> {
+    let scene = prepare_scene(
+        identity,
+        public,
+        subject,
+        sequence,
+        now,
+        Some(contents),
+        Some(text),
+    )?;
+    let editable = subject.map_or(LayoutScope::Public, |p| LayoutScope::Subject(p.key));
+    let tree = scene.paint_tree.as_ref().ok_or("预览树缺失。")?;
+    tree.nodes
+        .iter()
+        .filter(|node| node.key.scope == editable)
+        .map(|node| {
+            let card = node.card_index.and_then(|index| scene.cards.get(index));
+            let text = card
+                .map(|card| card_body_spec(card.kind, &card.content, false, None))
+                .transpose()
+                .map_err(|_| "预览文字无法导出。")?
+                .map(|body| {
+                    body.blocks
+                        .into_iter()
+                        .map(|block| block.text)
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                })
+                .filter(|text| !text.is_empty());
+            let truncated = text
+                .as_ref()
+                .is_some_and(|text| text.chars().count() > 4096);
+            Ok(MeasuredPreviewNode {
+                key: node.key,
+                parent: node.parent.filter(|parent| parent.scope == editable),
+                rect: node.rect,
+                clip: node.clip,
+                text: text.map(|text| text.chars().take(4096).collect()),
+                font_dip: card.map(|card| card.font_dip),
+                text_truncated: truncated,
+            })
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

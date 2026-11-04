@@ -45,7 +45,7 @@ export class VoiceController {
   }
   private begin() { this.operation?.abort(); this.poll?.abort(); this.operation = new AbortController(); return { id: ++this.sequence, signal: this.operation.signal } }
   private current(id: number) { return !this.disposed && this.sequence === id }
-  private unauthorized(e: unknown) { if (!(e instanceof ApiError) || e.status !== 401 && e.status !== 403) return false; this.dispose(); this.revoked(); return true }
+  private unauthorized(e: unknown) { if (!(e instanceof ApiError) || e.status !== 401) return false; this.dispose(); this.revoked(); return true }
   hasRiskyDraft() { return !!this.state.context || !!this.state.pending || this.state.busy }
   setRepeat(value: number) { if (!this.incompatible && this.state.phase === 'idle' && !this.state.busy && Number.isInteger(value) && value >= 1 && value <= (this.state.capabilities?.maxRepeatTotal ?? 10)) this.publish({ repeatTotal: value }) }
   private checkUpdate(next: VoiceJob, previous: VoiceJob) {

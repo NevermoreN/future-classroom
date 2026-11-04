@@ -1,5 +1,19 @@
-//! Local per-installation IP certificates. No trust-store or listener changes.
+//! Per-installation IP certificates and explicit CurrentUser-only owned trust.
 use std::net::IpAddr;
+#[cfg(windows)]
+mod local_hosts;
+
+/// Assigned local unicast addresses only. This grants no peer/CIDR authority.
+pub fn local_certificate_hosts() -> Result<Vec<String>, CertificateProvisionError> {
+    #[cfg(windows)]
+    {
+        local_hosts::enumerate()
+    }
+    #[cfg(not(windows))]
+    {
+        Err(CertificateProvisionError::Unavailable)
+    }
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ProvisionedCertificate {
@@ -18,37 +32,95 @@ pub enum CertificateProvisionError {
 
 pub fn provision_ip_certificate(
     host: &str,
+    active: impl FnMut() -> bool,
+) -> Result<ProvisionedCertificate, CertificateProvisionError> {
+    provision_hosts_certificate(&[host], active)
+}
+pub fn provision_hosts_certificate(
+    hosts: &[&str],
     mut active: impl FnMut() -> bool,
 ) -> Result<ProvisionedCertificate, CertificateProvisionError> {
-    let ip = host
-        .parse::<IpAddr>()
-        .map_err(|_| CertificateProvisionError::InvalidIp)?;
-    if ip.is_unspecified() || ip.is_multicast() {
+    if hosts.is_empty() || hosts.len() > 16 {
         return Err(CertificateProvisionError::InvalidIp);
     }
+    let mut ips = hosts
+        .iter()
+        .map(|host| {
+            host.parse::<IpAddr>()
+                .map_err(|_| CertificateProvisionError::InvalidIp)
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    if ips
+        .iter()
+        .any(|ip| ip.is_unspecified() || ip.is_multicast())
+    {
+        return Err(CertificateProvisionError::InvalidIp);
+    }
+    ips.sort_unstable();
+    ips.dedup();
     if !active() {
         return Err(CertificateProvisionError::Cancelled);
     }
     #[cfg(windows)]
     {
-        native::provision(ip, &mut active)
+        native::provision(&ips, &mut active)
     }
     #[cfg(not(windows))]
     {
-        let _ = ip;
+        let _ = ips;
         Err(CertificateProvisionError::Unavailable)
     }
 }
 
-#[cfg(any(windows, test))]
+#[cfg(test)]
 fn san_der(ip: IpAddr) -> Vec<u8> {
-    let bytes = match ip {
-        IpAddr::V4(ip) => ip.octets().to_vec(),
-        IpAddr::V6(ip) => ip.octets().to_vec(),
+    hosts_san_der(&[ip])
+}
+#[cfg(any(windows, test))]
+fn hosts_san_der(ips: &[IpAddr]) -> Vec<u8> {
+    let mut content = Vec::new();
+    for ip in ips {
+        let bytes = match ip {
+            IpAddr::V4(ip) => ip.octets().to_vec(),
+            IpAddr::V6(ip) => ip.octets().to_vec(),
+        };
+        content.extend([0x87, bytes.len() as u8]);
+        content.extend(bytes);
+    }
+    let mut der = if content.len() < 128 {
+        vec![0x30, content.len() as u8]
+    } else if content.len() <= 255 {
+        vec![0x30, 0x81, content.len() as u8]
+    } else {
+        vec![0x30, 0x82, (content.len() >> 8) as u8, content.len() as u8]
     };
-    let mut der = vec![0x30, (bytes.len() + 2) as u8, 0x87, bytes.len() as u8];
-    der.extend(bytes);
+    der.extend(content);
     der
+}
+pub fn export_owned_certificate(
+    thumbprint: &str,
+) -> Result<ProvisionedCertificate, CertificateProvisionError> {
+    #[cfg(windows)]
+    {
+        native::export_owned(thumbprint)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = thumbprint;
+        Err(CertificateProvisionError::Unavailable)
+    }
+}
+
+pub fn trust_owned_certificate(thumbprint: &str) -> Result<(), CertificateProvisionError> {
+    #[cfg(windows)]
+    {
+        native::trust_owned(thumbprint)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = thumbprint;
+        Err(CertificateProvisionError::Unavailable)
+    }
 }
 
 #[cfg(windows)]
@@ -236,12 +308,137 @@ mod native {
             })
         }
     }
+    fn owned_public(
+        certificate: *const CERT_CONTEXT,
+    ) -> Result<ProvisionedCertificate, CertificateProvisionError> {
+        owned_container(certificate)?;
+        let raw_label = property(certificate, CERT_FRIENDLY_NAME_PROP_ID)?;
+        let label = String::from_utf16(
+            &raw_label
+                .chunks_exact(2)
+                .map(|b| u16::from_le_bytes([b[0], b[1]]))
+                .collect::<Vec<_>>(),
+        )
+        .map_err(|_| CertificateProvisionError::Unavailable)?;
+        let label = label.trim_end_matches('\0');
+        let identities = label
+            .strip_prefix(PREFIX)
+            .ok_or(CertificateProvisionError::Unavailable)?;
+        let ips = identities
+            .split(',')
+            .map(|v| {
+                v.parse::<IpAddr>()
+                    .map_err(|_| CertificateProvisionError::Unavailable)
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        if ips.is_empty()
+            || ips.len() > 16
+            || !matches(certificate, &wide(label), &hosts_san_der(&ips))
+        {
+            return Err(CertificateProvisionError::Unavailable);
+        }
+        result(certificate, true)
+    }
+    pub(super) fn export_owned(
+        thumbprint: &str,
+    ) -> Result<ProvisionedCertificate, CertificateProvisionError> {
+        let hash = super::super::CertificateThumbprint::parse(thumbprint)
+            .map_err(|_| CertificateProvisionError::Unavailable)?;
+        let mut selected =
+            super::super::certificate_selection::SelectedCertificate::open().map_err(native)?;
+        let outcome = (|| {
+            if !selected.find(hash).map_err(native)? {
+                return Err(CertificateProvisionError::Unavailable);
+            }
+            owned_public(selected.certificate())
+        })();
+        selected
+            .close(true)
+            .map_err(|_| CertificateProvisionError::Unavailable)?;
+        outcome
+    }
+    pub(super) fn trust_owned(thumbprint: &str) -> Result<(), CertificateProvisionError> {
+        let hash = super::super::CertificateThumbprint::parse(thumbprint)
+            .map_err(|_| CertificateProvisionError::Unavailable)?;
+        let mut selected =
+            super::super::certificate_selection::SelectedCertificate::open().map_err(native)?;
+        let mut root = Owner {
+            store: None,
+            cert: std::ptr::null_mut(),
+            provider: 0,
+            key: 0,
+            container: Vec::new(),
+            rollback: false,
+            stored: false,
+        };
+        let outcome = (|| {
+            if !selected.find(hash).map_err(native)? {
+                return Err(CertificateProvisionError::Unavailable);
+            }
+            let certificate = selected.certificate();
+            let public = owned_public(certificate)?;
+            // SAFETY: only the current user's ROOT store is opened. DER copying
+            // deliberately excludes the MY private-key/container properties.
+            root.store = Some(
+                unsafe {
+                    CertOpenStore(
+                        CERT_STORE_PROV_SYSTEM_W,
+                        CERT_QUERY_ENCODING_TYPE(0),
+                        None,
+                        CERT_OPEN_STORE_FLAGS(CERT_SYSTEM_STORE_CURRENT_USER),
+                        Some(windows::core::w!("ROOT").as_ptr().cast()),
+                    )
+                }
+                .map_err(native)?,
+            );
+            unsafe {
+                CertAddEncodedCertificateToStore(
+                    root.store,
+                    X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+                    &public.public_der,
+                    CERT_STORE_ADD_USE_EXISTING,
+                    None,
+                )
+            }
+            .map_err(native)?;
+            let blob = CRYPT_INTEGER_BLOB {
+                cbData: 20,
+                pbData: hash.bytes().as_ptr().cast_mut(),
+            };
+            root.cert = unsafe {
+                CertFindCertificateInStore(
+                    root.store.unwrap(),
+                    X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+                    0,
+                    CERT_FIND_HASH,
+                    Some((&blob as *const CRYPT_INTEGER_BLOB).cast()),
+                    None,
+                )
+            };
+            if root.cert.is_null() || result(root.cert, true)?.public_der != public.public_der {
+                return Err(CertificateProvisionError::Unavailable);
+            }
+            Ok(())
+        })();
+        let root_cleanup = root.close();
+        let source_cleanup = selected
+            .close(true)
+            .map_err(|_| CertificateProvisionError::Unavailable);
+        root_cleanup?;
+        source_cleanup?;
+        outcome
+    }
     pub(super) fn provision(
-        ip: IpAddr,
+        ips: &[IpAddr],
         active: &mut impl FnMut() -> bool,
     ) -> Result<ProvisionedCertificate, CertificateProvisionError> {
-        let label = wide(&format!("{PREFIX}{ip}"));
-        let san = san_der(ip);
+        let identity = ips
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(",");
+        let label = wide(&format!("{PREFIX}{identity}"));
+        let san = hosts_san_der(ips);
         let mut owner = Owner {
             store: None,
             cert: std::ptr::null_mut(),
@@ -347,7 +544,7 @@ mod native {
             }
             .map_err(native)?;
             check(active)?;
-            let subject = wide(&format!("CN=FutureClassroom {ip}"));
+            let subject = wide(&format!("CN=FutureClassroom {}", ips[0]));
             let mut subject_len = 0;
             unsafe {
                 CertStrToNameW(
@@ -597,6 +794,34 @@ pub use native::remove_test_certificate;
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn multi_host_san_has_exact_ip_entries_and_bounded_input() {
+        assert_eq!(
+            hosts_san_der(&["127.0.0.1".parse().unwrap(), "192.0.2.1".parse().unwrap()]),
+            [0x30, 12, 0x87, 4, 127, 0, 0, 1, 0x87, 4, 192, 0, 2, 1]
+        );
+        for hosts in [
+            vec![],
+            vec!["127.0.0.1"; 17],
+            vec!["127.0.0.1", "bad"],
+            vec!["0.0.0.0"],
+        ] {
+            assert_eq!(
+                provision_hosts_certificate(&hosts, || true),
+                Err(CertificateProvisionError::InvalidIp)
+            );
+        }
+        assert_eq!(
+            provision_hosts_certificate(&["127.0.0.1", "192.0.2.1"], || false),
+            Err(CertificateProvisionError::Cancelled)
+        );
+        let v6 = (1..=16)
+            .map(|n| format!("2001:db8::{n:x}").parse().unwrap())
+            .collect::<Vec<IpAddr>>();
+        let der = hosts_san_der(&v6);
+        assert_eq!(&der[..4], &[0x30, 0x82, 1, 32]);
+        assert_eq!(der.len(), 292);
+    }
     #[cfg(windows)]
     #[test]
     #[ignore = "creates a scoped CurrentUser MY certificate; explicit Win11 run only"]

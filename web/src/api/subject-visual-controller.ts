@@ -22,7 +22,7 @@ export class SubjectVisualController {
     } catch (error) {
       if (this.disposed || controller.signal.aborted || sequence !== this.sequence || isAborted(error)) return
       this.changed({ path, phase: 'failed', preview: null, notice: error instanceof ProtocolFault ? error.message : '无法读取学校配色预览。正文草稿不受影响，可主动重新读取。' })
-      if (error instanceof ApiError && [401, 403].includes(error.status)) { this.dispose(); this.revoked() }
+      if (error instanceof ApiError && error.status === 401) { this.dispose(); this.revoked() }
     }
   }
   dispose() { this.disposed = true; this.operation?.abort(); this.sequence++ }

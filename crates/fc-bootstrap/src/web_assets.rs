@@ -23,7 +23,7 @@ fn shared_byte_allocation(bytes: usize) -> usize {
     (ARC_HEADER_ALLOWANCE + bytes).next_multiple_of(align_of::<usize>())
 }
 
-pub const CONTENT_SECURITY_POLICY: &str = "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'";
+pub const CONTENT_SECURITY_POLICY: &str = "default-src 'none'; script-src 'self'; worker-src 'self'; frame-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'";
 // RFC 9110 §13.1.2 uses weak comparison and permits lists; commas inside
 // quoted opaque tags are data. Header bytes are already bounded by preflight.
 fn cache_matches(mut value: &[u8], etag: &[u8]) -> Result<bool, StaticError> {
@@ -81,6 +81,7 @@ pub enum StaticError {
     Boundary(WebError),
     NotFound,
 }
+#[derive(Clone)]
 struct PreparedAsset {
     metadata: Asset,
     bytes: Arc<[u8]>,
@@ -101,6 +102,16 @@ pub struct StaticBody {
     end: usize,
 }
 impl StaticBody {
+    /// Already bounded application JSON can use the same acknowledged chunk
+    /// sender. Its allocation is charged to the owning request, not the bundle.
+    pub(crate) fn from_owned(bytes: Vec<u8>) -> Self {
+        let end = bytes.len();
+        Self {
+            bytes: Arc::from(bytes),
+            offset: 0,
+            end,
+        }
+    }
     /// Unread source bytes. Advancing this cursor does not acknowledge a send.
     pub fn remaining_bytes(&self) -> usize {
         self.end - self.offset
@@ -153,6 +164,13 @@ impl StaticAssets {
     /// reopens files nor revalidates/copies payloads. The actual build base must
     /// match the new prefix; an ephemeral-port startup keeps the same `/fc/`
     /// base and changes only the trusted authority. No request selects this.
+    /// Share the exact verified byte Arcs across trusted loopback/LAN origins.
+    pub fn shared_for_prefix(&self, prefix: &ListenPrefix) -> Result<Self, StaticError> {
+        Ok(Self {
+            boundary: WebBoundary::new(prefix).map_err(StaticError::Boundary)?,
+            assets: self.assets.clone(),
+        })
+    }
     pub fn with_prefix(mut self, prefix: &ListenPrefix) -> Result<Self, StaticError> {
         self.boundary = WebBoundary::new(prefix).map_err(StaticError::Boundary)?;
         Ok(self)

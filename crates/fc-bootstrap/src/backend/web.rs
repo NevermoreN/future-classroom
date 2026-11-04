@@ -1,14 +1,18 @@
-//! Process-local teacher pairing and browser bearer/session ownership. All
+//! Process-local page login and historical pairing/session ownership. All
 //! critical sections contain bounded metadata only, never SQL/KDF/native work.
-//! A short code creates a request; only exact local administrator approval can
-//! issue a Web lease, and only the original polling secret can collect it.
+//! Direct pages verify the existing account password. Historical pairing still
+//! requires exact local approval and the original polling secret.
 use super::*;
+mod profile_content;
 mod runtime;
 use fc_runtime::{
     authority::AuthoritySnapshot,
     health::{GateError, Health},
 };
-use fc_security::web::{PairingCode, SecretText, SecretVerifier, WebSecret};
+use fc_security::web::{
+    page::{PageKey, PageToken},
+    PairingCode, SecretText, SecretVerifier, WebSecret,
+};
 #[cfg(windows)]
 pub(crate) use runtime::WebRuntimeReservation;
 
@@ -31,6 +35,165 @@ pub enum WebServiceError {
     Overflow,
 }
 type WebResult<T> = std::result::Result<T, WebServiceError>;
+
+impl Backend {
+    pub fn issue_for_web_admin(
+        &self,
+        lease: SessionLease,
+        family: fc_ports::command_window::CommandFamily,
+    ) -> Result<fc_ports::command_window::IssuedCommand> {
+        use fc_ports::command_window::{CommandFamily, CommandOwner};
+        if !matches!(
+            family,
+            CommandFamily::Identity
+                | CommandFamily::Display
+                | CommandFamily::Schedule
+                | CommandFamily::Profiles
+                | CommandFamily::ProfileContent
+                | CommandFamily::Voice
+                | CommandFamily::HttpsSettings
+                | CommandFamily::Autostart
+        ) {
+            return Err(BackendError::InvalidInput);
+        }
+        let state = self.state()?;
+        let (actor, _) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        state
+            .authorize_management(&actor, self.clock.now())
+            .map_err(|error| BackendError::Identity(IdentityRepositoryError::Domain(error)))?;
+        self.issue_for_owner(family, CommandOwner::authenticated(&actor))
+    }
+    pub fn initialize_web_page(
+        &mut self,
+        options: Initialize,
+        password: Password,
+        service: &WebService,
+    ) -> Result<PageToken> {
+        if !service.local_control || !self.web.same_instance(service) {
+            return Err(BackendError::InvalidInput);
+        }
+        if self.state()?.installation.is_some() {
+            return Err(BackendError::Identity(IdentityRepositoryError::Domain(
+                IdentityError::AlreadyInitialized,
+            )));
+        }
+        let login = options.login_name.clone();
+        drop(self.initialize(options, password)?);
+        let state = self.state()?;
+        let account = state
+            .account_by_login(&login)
+            .map_err(|_| BackendError::InvalidCredentials)?;
+        service
+            .issue_page(account)
+            .map_err(|_| BackendError::Closed)
+    }
+    /// Reuses the credential reservation/verification path; no pairing approval
+    /// and no local workbench unlock is involved in a browser page login.
+    pub fn login_web_page(
+        &mut self,
+        login: &str,
+        password: Password,
+        service: &WebService,
+    ) -> Result<PageToken> {
+        if !self.web.same_instance(service) {
+            return Err(BackendError::InvalidInput);
+        }
+        let state = self.state()?;
+        let id = state
+            .account_by_login(login)
+            .map_err(|_| BackendError::InvalidCredentials)?
+            .principal
+            .id;
+        let admission = self.admission(id, CredentialKind::Password)?;
+        let record = match self.codec.decode_password(
+            id,
+            admission.credential_version,
+            &admission.protected_record,
+        ) {
+            Ok(record) => record,
+            Err(_) => {
+                let _ = self.finish(admission.reservation, Verification::CorruptRecord);
+                return Err(BackendError::CorruptCredential);
+            }
+        };
+        let verified = self
+            .crypto
+            .verify_password(&password, &record)
+            .map_err(|_| BackendError::CryptoUnavailable)?;
+        let completion = self.finish(
+            admission.reservation,
+            if verified {
+                Verification::Verified
+            } else {
+                Verification::Rejected
+            },
+        )?;
+        let state = self.state()?;
+        self.authenticated(completion, &state, id)?;
+        let account = state
+            .account(id)
+            .map_err(|_| BackendError::InvalidCredentials)?;
+        service.issue_page(account).map_err(|error| match error {
+            WebServiceError::Denied => BackendError::InvalidCredentials,
+            _ => BackendError::Closed,
+        })
+    }
+    pub fn change_web_page_password(
+        &mut self,
+        lease: SessionLease,
+        old: Password,
+        new: Password,
+        service: &WebService,
+    ) -> Result<PageToken> {
+        if !self.web.same_instance(service) {
+            return Err(BackendError::InvalidInput);
+        }
+        let state = self.state()?;
+        let (actor, _) = self.actor(&state, lease, SessionPurpose::ChangeInitialPassword)?;
+        let issued = self.issue_for_owner(
+            fc_ports::command_window::CommandFamily::Identity,
+            fc_ports::command_window::CommandOwner::authenticated(&actor),
+        )?;
+        self.begin_command_scope(issued)?
+            .change_password(lease, old, new)?;
+        let state = self.state()?;
+        let account = state
+            .account(actor.principal_id)
+            .map_err(|_| BackendError::InvalidCredentials)?;
+        service
+            .issue_page(account)
+            .map_err(|_| BackendError::Closed)
+    }
+    pub fn logout_web_page(&mut self, lease: SessionLease) -> Result<()> {
+        let state = self.state()?;
+        let (actor, _) = self.actor(&state, lease, SessionPurpose::ChangeInitialPassword)?;
+        let issued = self.issue_for_owner(
+            fc_ports::command_window::CommandFamily::Identity,
+            fc_ports::command_window::CommandOwner::authenticated(&actor),
+        )?;
+        let mut scoped = self.begin_command_scope(issued)?;
+        let state = scoped.state()?;
+        let (actor, generation) =
+            scoped.actor(&state, lease, SessionPurpose::ChangeInitialPassword)?;
+        let request = scoped.request(
+            &state,
+            IdentityCommand::LogoutAccount {
+                id: actor.principal_id,
+                expected_auth_epoch: actor.auth_epoch,
+            },
+        )?;
+        let mut repository =
+            scoped.guarded(lease, generation, SessionPurpose::ChangeInitialPassword);
+        let transition = fc_application::identity::execute_identity(
+            &mut repository,
+            scoped.clock.as_ref(),
+            Some(&actor),
+            request,
+        )?;
+        scoped.apply(&transition)?;
+        Ok(())
+    }
+}
 
 pub struct PairingWindow {
     pub id: u64,
@@ -125,8 +288,15 @@ struct Device {
     lease: SessionLease,
     name: String,
 }
+struct PageSession {
+    verifier: SecretVerifier,
+    lease: SessionLease,
+    last_used: u64,
+}
 #[derive(Default)]
 struct State {
+    page_key: Option<PageKey>,
+    pages: Vec<PageSession>,
     enabled: bool,
     sequence: u64,
     last_tick: Option<u64>,
@@ -153,6 +323,8 @@ impl State {
             self.enabled = false;
             self.clear_pairing();
             self.devices.clear();
+            self.pages.clear();
+            self.page_key = None;
             return Err(WebServiceError::Denied);
         }
         self.last_tick = Some(tick);
@@ -170,6 +342,7 @@ struct Inner {
     runtime_stopping: AtomicBool,
     runtime_epoch: AtomicU64,
     runtime_native_generation: AtomicU64,
+    local_control_ready: AtomicBool,
     ledger: Arc<Mutex<Ledger>>,
     control: SessionControl,
     authority: fc_runtime::authority::AuthorityReader<IdentityState>,
@@ -215,8 +388,74 @@ impl Drop for ConfigurationEdit {
 pub struct WebService {
     inner: Arc<Inner>,
     execution: Option<TransactionExecutionFence>,
+    local_control: bool,
 }
 impl WebService {
+    pub fn for_lan(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+            execution: self.execution.clone(),
+            local_control: false,
+        }
+    }
+    pub fn for_local_control(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+            execution: self.execution.clone(),
+            local_control: true,
+        }
+    }
+    pub fn set_local_control_ready(&self, ready: bool) {
+        self.inner
+            .local_control_ready
+            .store(ready, Ordering::Release);
+    }
+    /// Non-blocking native-effect check. No Backend lock, database or password
+    /// work; an old queued Web administrator action cannot survive revocation.
+    pub fn web_session_current(&self, lease: SessionLease) -> bool {
+        if lease.origin() != TrustedOrigin::Web || !self.runtime_execution_current() {
+            return false;
+        }
+        let Ok(snapshot) = self.inner.authority.snapshot() else {
+            return false;
+        };
+        if self.current(&snapshot).is_err() {
+            return false;
+        }
+        let Ok(ledger) = self.inner.ledger.try_lock() else {
+            return false;
+        };
+        let now = self.inner.clock.now();
+        let Ok(actor) = ledger.sessions.actor(
+            &snapshot.data,
+            lease,
+            now,
+            self.inner.monotonic.monotonic_millis(),
+            SessionPurpose::Manage,
+        ) else {
+            return false;
+        };
+        snapshot.data.authorize_management(&actor, now).is_ok() && self.current(&snapshot).is_ok()
+    }
+    /// Native local-runtime callback only, after its exact configure_lan call
+    /// succeeded. LAN admission changes never revoke local page credentials.
+    pub(crate) fn set_lan_ready(&self, ready: bool) -> WebResult<()> {
+        let mut state = self
+            .inner
+            .state
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        if ready && !self.inner.local_control_ready.load(Ordering::Acquire) {
+            return Err(WebServiceError::Disabled);
+        }
+        state.enabled = ready;
+        if !ready {
+            state.clear_pairing();
+            state.devices.clear();
+        }
+        Ok(())
+    }
+
     #[cfg(windows)]
     pub(crate) fn has_execution_fence(&self) -> bool {
         self.execution.is_some()
@@ -234,6 +473,7 @@ impl WebService {
         Self {
             inner: self.inner.clone(),
             execution: Some(execution),
+            local_control: self.local_control,
         }
     }
     fn execution_checkpoint(&self) -> WebResult<()> {
@@ -266,6 +506,7 @@ impl WebService {
                 runtime_stopping: AtomicBool::new(false),
                 runtime_epoch: AtomicU64::new(0),
                 runtime_native_generation: AtomicU64::new(0),
+                local_control_ready: AtomicBool::new(false),
                 ledger,
                 control,
                 authority,
@@ -273,6 +514,7 @@ impl WebService {
                 monotonic,
             }),
             execution: None,
+            local_control: false,
         }
     }
     fn snapshot(&self) -> WebResult<Arc<AuthoritySnapshot<IdentityState>>> {
@@ -328,6 +570,15 @@ impl WebService {
         state: &IdentityState,
         lease: SessionLease,
     ) -> WebResult<u64> {
+        self.administrator(ledger, state, lease, true)
+    }
+    fn administrator(
+        &self,
+        ledger: &mut Ledger,
+        state: &IdentityState,
+        lease: SessionLease,
+        local_only: bool,
+    ) -> WebResult<u64> {
         let generation = self.inner.control.generation();
         self.inner
             .control
@@ -350,11 +601,15 @@ impl WebService {
                 SessionPurpose::Manage,
             )
             .map_err(|_| WebServiceError::Denied)?;
-        state
+        let authority = state
             .authority(actor.principal_id)
-            .map_err(|_| WebServiceError::Denied)?
-            .authorize_global_local(&actor, now)
             .map_err(|_| WebServiceError::Denied)?;
+        (if local_only {
+            authority.authorize_global_local(&actor, now)
+        } else {
+            authority.authorize_global(&actor, now)
+        })
+        .map_err(|_| WebServiceError::Denied)?;
         self.inner
             .control
             .check(lease, generation)
@@ -384,10 +639,12 @@ impl WebService {
         identity: &IdentityState,
         tick: u64,
     ) -> WebResult<()> {
-        if !self.runtime_execution_current() {
+        if !self.local_control && !self.runtime_execution_current() {
             state.enabled = false;
             state.clear_pairing();
             state.devices.clear();
+            state.pages.clear();
+            state.page_key = None;
             ledger.sessions.revoke_web();
         }
         if let Err(error) = state.tick(tick) {
@@ -449,8 +706,11 @@ impl WebService {
             .ledger
             .try_lock()
             .map_err(|_| WebServiceError::Busy)?;
-        let generation = self.admin(&mut ledger, &snapshot.data, admin)?;
-        self.admin_current(&snapshot, &mut ledger, admin, generation)?;
+        let generation = self.administrator(&mut ledger, &snapshot.data, admin, false)?;
+        self.current(&snapshot)?;
+        if self.administrator(&mut ledger, &snapshot.data, admin, false)? != generation {
+            return Err(WebServiceError::Denied);
+        }
         if state.enabled || self.inner.runtime_claim.load(Ordering::Acquire) != 0 {
             return Err(WebServiceError::Busy);
         }
@@ -509,6 +769,8 @@ impl WebService {
         if !enabled {
             state.clear_pairing();
             state.devices.clear();
+            state.pages.clear();
+            state.page_key = None;
             ledger.sessions.revoke_web();
         }
         Ok(())
@@ -518,6 +780,8 @@ impl WebService {
             state.enabled = false;
             state.clear_pairing();
             state.devices.clear();
+            state.pages.clear();
+            state.page_key = None;
             if let Ok(mut ledger) = self.inner.ledger.lock() {
                 ledger.sessions.revoke_web();
             }
@@ -1005,7 +1269,10 @@ impl WebService {
         self.current(&snapshot)?;
         let tick = self.inner.monotonic.monotonic_millis();
         self.sweep(&mut state, &mut ledger, &snapshot.data, tick)?;
-        if !state.enabled || !state.devices.iter().any(|d| d.lease == lease) {
+        if (!state.enabled && !self.local_control)
+            || !(state.devices.iter().any(|d| d.lease == lease)
+                || state.pages.iter().any(|p| p.lease == lease))
+        {
             return Err(WebServiceError::Denied);
         }
         let actor = ledger
@@ -1089,13 +1356,17 @@ impl WebService {
         let revision = snapshot.revision;
         let inner = self.inner.clone();
         let runtime_epoch = inner.runtime_epoch.load(Ordering::Acquire);
+        let local_control = self.local_control;
         let last_tick = AtomicU64::new(inner.monotonic.monotonic_millis());
         let invalid = AtomicBool::new(false);
         let fence: TransactionExecutionFence = Arc::new(move || {
             let check = || {
-                if runtime_epoch & 1 == 0
-                    || inner.runtime_epoch.load(Ordering::Acquire) != runtime_epoch
-                    || invalid.load(Ordering::Acquire)
+                if (if local_control {
+                    !inner.local_control_ready.load(Ordering::Acquire)
+                } else {
+                    runtime_epoch & 1 == 0
+                        || inner.runtime_epoch.load(Ordering::Acquire) != runtime_epoch
+                }) || invalid.load(Ordering::Acquire)
                     || cancelled.is_cancelled()
                     || inner.control.0.closed.load(Ordering::Acquire)
                     || inner.control.is_recovering()
@@ -1115,7 +1386,10 @@ impl WebService {
                     invalid.store(true, Ordering::Release);
                     return false;
                 }
-                if !state.enabled || !state.devices.iter().any(|d| d.lease == lease) {
+                if (!state.enabled && !local_control)
+                    || !(state.devices.iter().any(|d| d.lease == lease)
+                        || state.pages.iter().any(|p| p.lease == lease))
+                {
                     return false;
                 }
                 // The immutable snapshot's scope was authorized on the worker;
@@ -1146,6 +1420,161 @@ impl WebService {
             return Err(WebServiceError::Denied);
         }
         Ok((revision, fence))
+    }
+
+    fn issue_page(&self, account: &UserAccount) -> WebResult<PageToken> {
+        let snapshot = self.snapshot()?;
+        let mut state = self
+            .inner
+            .state
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        let mut ledger = self
+            .inner
+            .ledger
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        self.current(&snapshot)?;
+        let tick = self.inner.monotonic.monotonic_millis();
+        self.sweep(&mut state, &mut ledger, &snapshot.data, tick)?;
+        if !state.enabled && !self.local_control {
+            return Err(WebServiceError::Disabled);
+        }
+        let current = snapshot
+            .data
+            .account(account.principal.id)
+            .map_err(|_| WebServiceError::Denied)?;
+        if current != account || !account.principal.enabled {
+            return Err(WebServiceError::Denied);
+        }
+        if state.page_key.is_none() {
+            state.page_key = Some(
+                PageKey::generate(&mut PlatformRandom).map_err(|_| WebServiceError::Unavailable)?,
+            );
+        }
+        state
+            .page_key
+            .as_ref()
+            .ok_or(WebServiceError::Unavailable)?
+            .issue(
+                account.principal.id.get(),
+                account.principal.auth_epoch.get(),
+                &mut PlatformRandom,
+            )
+            .map_err(|_| WebServiceError::Unavailable)
+    }
+
+    /// Signed page credentials outlive the bounded access-lease cache. Eviction
+    /// never requires a still-open page to re-enter its password.
+    pub fn authenticate_page(&self, proof: &PageToken) -> WebResult<AuthenticatedWeb> {
+        let snapshot = self.snapshot()?;
+        let mut state = self
+            .inner
+            .state
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        let mut ledger = self
+            .inner
+            .ledger
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        self.current(&snapshot)?;
+        let now = self.inner.clock.now();
+        let tick = self.inner.monotonic.monotonic_millis();
+        self.sweep(&mut state, &mut ledger, &snapshot.data, tick)?;
+        if !state.enabled && !self.local_control {
+            return Err(WebServiceError::Disabled);
+        }
+        let key = state.page_key.as_ref().ok_or(WebServiceError::Denied)?;
+        let (id, epoch) = key.verify(proof).map_err(|_| WebServiceError::Denied)?;
+        let id = PrincipalId::new(id).map_err(|_| WebServiceError::Denied)?;
+        let account = snapshot
+            .data
+            .account(id)
+            .map_err(|_| WebServiceError::Denied)?;
+        if !account.principal.enabled
+            || account.principal.auth_epoch.get() != epoch
+            || Some(account.principal.school_id)
+                != snapshot.data.installation.as_ref().map(|i| i.school_id)
+        {
+            return Err(WebServiceError::Denied);
+        }
+        let csrf = key
+            .csrf(proof)
+            .map_err(|_| WebServiceError::Denied)?
+            .expose_hex();
+        let purpose = if account.must_change_password {
+            SessionPurpose::ChangeInitialPassword
+        } else {
+            SessionPurpose::Manage
+        };
+        let lease = if let Some(page) = state
+            .pages
+            .iter_mut()
+            .find(|page| proof.matches(&page.verifier))
+        {
+            page.last_used = tick;
+            if ledger
+                .sessions
+                .actor(&snapshot.data, page.lease, now, tick, purpose)
+                .is_err()
+            {
+                page.lease = ledger
+                    .sessions
+                    .issue_verified_web_page(
+                        account,
+                        tick,
+                        WEB_SESSION_MILLIS,
+                        next_day(now).map_err(|_| WebServiceError::Unavailable)?,
+                    )
+                    .map_err(|_| WebServiceError::Capacity)?;
+            }
+            page.lease
+        } else {
+            if state.pages.len() >= MAX_WEB_DEVICES {
+                let index = state
+                    .pages
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, page)| tick.saturating_sub(page.last_used) >= 30_000)
+                    .min_by_key(|(_, p)| p.last_used)
+                    .map(|(i, _)| i)
+                    .ok_or(WebServiceError::Capacity)?;
+                let old = state.pages.remove(index);
+                ledger.sessions.revoke_exact(old.lease);
+            }
+            let lease = ledger
+                .sessions
+                .issue_verified_web_page(
+                    account,
+                    tick,
+                    WEB_SESSION_MILLIS,
+                    next_day(now).map_err(|_| WebServiceError::Unavailable)?,
+                )
+                .map_err(|_| WebServiceError::Capacity)?;
+            state.pages.push(PageSession {
+                verifier: proof.verifier(),
+                lease,
+                last_used: tick,
+            });
+            lease
+        };
+        let authority = snapshot
+            .data
+            .authority(id)
+            .map_err(|_| WebServiceError::Denied)?;
+        self.current(&snapshot)?;
+        Ok(AuthenticatedWeb {
+            lease,
+            csrf,
+            account: account.clone(),
+            assignments: authority.assignments,
+            current_class: snapshot
+                .data
+                .installation
+                .as_ref()
+                .and_then(|i| i.current_class),
+        })
     }
 
     pub fn authenticate(&self, cookie: &WebSecret) -> WebResult<AuthenticatedWeb> {

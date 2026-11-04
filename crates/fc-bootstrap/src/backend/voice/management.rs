@@ -381,9 +381,6 @@ impl VoiceService {
         local_generation: u64,
         snapshot: &AuthoritySnapshot<IdentityState>,
     ) -> Result<ActorContext> {
-        if lease.origin() != TrustedOrigin::Local {
-            return Err(denied());
-        }
         let before = self.management_current(snapshot)?;
         self.inner.control.check(lease, local_generation)?;
         let actor = self.actor_from_state(lease, &snapshot.data)?;

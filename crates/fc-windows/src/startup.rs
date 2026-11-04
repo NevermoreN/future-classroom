@@ -1,6 +1,76 @@
 //! Explicit, synchronous startup failure feedback for an interactive caller.
 //! Merely loading this module never creates a window or changes console state.
 
+/// Open only the composition-owned HTTPS loopback endpoint. Shell sees a URL,
+/// never executable arguments or an untrusted path supplied by a Web request.
+#[cfg(windows)]
+pub fn open_local_management(url: &str) -> windows::core::Result<()> {
+    use windows::{
+        core::{w, Error, PCWSTR},
+        Win32::{
+            Foundation::E_INVALIDARG,
+            UI::{
+                Shell::{
+                    ShellExecuteExW, SEE_MASK_FLAG_NO_UI, SEE_MASK_NOASYNC, SHELLEXECUTEINFOW,
+                },
+                WindowsAndMessaging::SW_SHOWNORMAL,
+            },
+        },
+    };
+    let rest = url
+        .strip_prefix("https://127.0.0.1:")
+        .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+    let (port, route) = rest
+        .split_once("/fc/#")
+        .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+    if port.parse::<u16>().ok().filter(|p| *p != 0).is_none()
+        || !(matches!(route, "/admin/display" | "/admin/status")
+            || route.strip_prefix("/repair/").is_some_and(|cap| {
+                cap.len() == 64
+                    && cap
+                        .bytes()
+                        .all(|v| v.is_ascii_digit() || (b'a'..=b'f').contains(&v))
+                    && cap.bytes().any(|v| v != b'0')
+            }))
+    {
+        return Err(Error::from_hresult(E_INVALIDARG));
+    }
+    let value: Vec<u16> = url.encode_utf16().chain(Some(0)).collect();
+    let mut info = SHELLEXECUTEINFOW {
+        cbSize: std::mem::size_of::<SHELLEXECUTEINFOW>() as u32,
+        fMask: SEE_MASK_FLAG_NO_UI | SEE_MASK_NOASYNC,
+        lpVerb: w!("open"),
+        lpFile: PCWSTR(value.as_ptr()),
+        nShow: SW_SHOWNORMAL.0,
+        ..Default::default()
+    };
+    // SAFETY: all bounded URL/verb data remains live for this synchronous call;
+    // no process handle was requested and no native pointer escapes.
+    unsafe { ShellExecuteExW(&mut info) }
+}
+
+/// Shared icon from the generated resource embedded in both normal EXEs.
+/// LoadIcon returns a module-owned shared handle; callers must not destroy it.
+#[cfg(windows)]
+pub(crate) fn application_icon(
+) -> windows::core::Result<windows::Win32::UI::WindowsAndMessaging::HICON> {
+    use windows::{
+        core::PCWSTR,
+        Win32::{
+            Foundation::HINSTANCE, System::LibraryLoader::GetModuleHandleW,
+            UI::WindowsAndMessaging::LoadIconW,
+        },
+    };
+    // SAFETY: module handle is borrowed, and MAKEINTRESOURCE(101) selects the
+    // fixed icon group linked by fc-bootstrap/build.rs, not an input pointer.
+    unsafe {
+        LoadIconW(
+            Some(HINSTANCE(GetModuleHandleW(None)?.0)),
+            PCWSTR(101usize as *const u16),
+        )
+    }
+}
+
 /// Reports whether the calling process currently has a console window handle.
 /// A pseudoconsole can return a message-only HWND, so `true` does not imply a
 /// visible console. `false` is only this call's absence of an associated HWND.

@@ -990,9 +990,6 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
                 expected,
             } => {
                 (self.session)(&identity, &actor)?;
-                if actor.origin != TrustedOrigin::Local {
-                    return Err(err(VoiceError::Permission(PermissionError::LocalOnly)));
-                }
                 identity
                     .authorize_management(&actor, self.clock.now())
                     .map_err(StorageError::Identity)?;
@@ -1067,9 +1064,6 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
             Box::new(move || {
                 session(&identity, &actor)?;
                 if pre_management {
-                    if actor.origin != TrustedOrigin::Local {
-                        return Err(err(VoiceError::Permission(PermissionError::LocalOnly)));
-                    }
                     identity
                         .authorize_management(&actor, clock.now())
                         .map_err(StorageError::Identity)?;

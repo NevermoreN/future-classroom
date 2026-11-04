@@ -13,12 +13,21 @@ use fc_protocol::{
     web::{pairing, responses, Route, WebBoundary, WebError},
     ProtocolError,
 };
-use fc_security::web::{PairingCode, WebSecret};
+use fc_security::web::{page::PageToken, PairingCode, WebSecret};
 
+pub mod admin;
+pub(crate) mod admin_platform;
+#[cfg(windows)]
+pub(crate) mod admin_preview;
+pub(crate) mod admin_voice;
 mod content;
+#[cfg(windows)]
+pub mod maintenance;
 #[cfg(windows)]
 mod material_files;
 mod materials;
+#[cfg(windows)]
+mod profile_images;
 #[cfg(windows)]
 mod shared_upload;
 mod voice;
@@ -44,8 +53,15 @@ pub struct WebResponse {
     pub body: Vec<u8>,
 }
 pub struct WebApplication {
+    #[cfg(windows)]
+    profile_images:
+        std::sync::Arc<std::sync::Mutex<Option<std::sync::Arc<profile_images::ImageFiles>>>>,
     boundary: std::sync::Arc<WebBoundary>,
     service: WebService,
+    local_control: bool,
+    admin_platform: Option<admin::PlatformHook>,
+    #[cfg(windows)]
+    pub(crate) maintenance: Option<std::sync::Arc<crate::maintenance_web::MaintenanceService>>,
     #[cfg(windows)]
     upload_binding: std::sync::Arc<()>,
     #[cfg(windows)]
@@ -54,6 +70,24 @@ pub struct WebApplication {
     voice_files: std::sync::Arc<std::sync::Mutex<Option<std::sync::Arc<voice_files::VoiceFiles>>>>,
 }
 impl WebApplication {
+    fn page_session_response(&self, proof: &PageToken) -> WebResponse {
+        let session = match self.service.authenticate_page(proof) {
+            Ok(session) => session,
+            Err(error) => return authentication_error(error),
+        };
+        let token = proof.expose_hex();
+        response(
+            200,
+            responses::page_session(
+                &session.account,
+                session.current_class,
+                &session.assignments,
+                session.csrf.as_str(),
+                Some(token.as_str()),
+            ),
+            None,
+        )
+    }
     fn request_boundary_error(&self, head: &RequestHead, error: WebError) -> WebResponse {
         if error == WebError::Method {
             // Reuse strict target recognition only after the original boundary
@@ -88,6 +122,12 @@ impl WebApplication {
         Ok(Self {
             boundary: std::sync::Arc::new(WebBoundary::new(prefix)?),
             service,
+            local_control: false,
+            #[cfg(windows)]
+            profile_images: std::sync::Arc::new(std::sync::Mutex::new(None)),
+            admin_platform: None,
+            #[cfg(windows)]
+            maintenance: None,
             #[cfg(windows)]
             upload_binding: std::sync::Arc::new(()),
             #[cfg(windows)]
@@ -96,6 +136,37 @@ impl WebApplication {
             voice_files: std::sync::Arc::new(std::sync::Mutex::new(None)),
         })
     }
+    pub fn new_local(prefix: &ListenPrefix, service: WebService) -> Result<Self, WebError> {
+        let mut app = Self::new(prefix, service.for_local_control())?;
+        app.local_control = true;
+        Ok(app)
+    }
+    #[cfg(windows)]
+    pub fn with_maintenance_service(
+        mut self,
+        service: std::sync::Arc<crate::maintenance_web::MaintenanceService>,
+    ) -> Self {
+        self.maintenance = Some(service);
+        self
+    }
+    pub fn with_admin_platform_hook(mut self, hook: admin::PlatformHook) -> Self {
+        self.admin_platform = Some(hook);
+        self
+    }
+    pub fn local_variant(&self, prefix: &ListenPrefix) -> Result<Self, WebError> {
+        let mut app = self.for_execution(std::sync::Arc::new(|| true));
+        app.boundary = std::sync::Arc::new(WebBoundary::new(prefix)?);
+        app.service = self.service.for_local_control();
+        app.local_control = true;
+        Ok(app)
+    }
+    pub fn lan_variant(&self, prefix: &ListenPrefix) -> Result<Self, WebError> {
+        let mut app = self.for_execution(std::sync::Arc::new(|| true));
+        app.boundary = std::sync::Arc::new(WebBoundary::new(prefix)?);
+        app.service = self.service.for_lan();
+        app.local_control = false;
+        Ok(app)
+    }
     /// A short-lived view for one ordinary JSON dispatch. Stream owners use the
     /// original application and a current context on each call; retaining this
     /// job-bound view across jobs would incorrectly cancel their next chunk.
@@ -103,6 +174,12 @@ impl WebApplication {
         Self {
             boundary: self.boundary.clone(),
             service: self.service.with_execution_fence(fence),
+            local_control: self.local_control,
+            #[cfg(windows)]
+            profile_images: self.profile_images.clone(),
+            admin_platform: self.admin_platform.clone(),
+            #[cfg(windows)]
+            maintenance: self.maintenance.clone(),
             #[cfg(windows)]
             upload_binding: self.upload_binding.clone(),
             #[cfg(windows)]
@@ -150,6 +227,17 @@ impl WebApplication {
             .preflight(head)
             .map_err(|error| self.request_boundary_error(head, error))?;
         self.authenticate_route(head, route)?;
+        #[cfg(windows)]
+        if matches!(
+            route,
+            Route::Maintenance {
+                resource: fc_protocol::web::maintenance::Resource::Upload(_)
+                    | fc_protocol::web::maintenance::Resource::File(_),
+                ..
+            }
+        ) {
+            self.prepare_maintenance_transfer(backend, head)?;
+        }
         Ok(route)
     }
     pub fn admit_request_in_job(
@@ -177,21 +265,40 @@ impl WebApplication {
         route: Route,
     ) -> Result<Option<AuthenticatedWeb>, WebResponse> {
         let authenticated = if route.requires_session() {
-            let mut cookies = head
+            let mut pages = head
                 .headers
                 .iter()
-                .filter(|h| h.name.eq_ignore_ascii_case("cookie"));
-            let header = match (cookies.next(), cookies.next()) {
-                (Some(header), None) => header,
-                (None, _) => return Err(failure(401, responses::ErrorCode::Unauthorized)),
-                _ => return Err(boundary_error(WebError::Headers)),
-            };
-            let cookie = cookie_secret(&header.value).map_err(authentication_error)?;
-            Some(
-                self.service
-                    .authenticate(&cookie)
-                    .map_err(authentication_error)?,
-            )
+                .filter(|h| h.name.eq_ignore_ascii_case("x-fc-page"));
+            if let Some(header) = pages.next() {
+                if pages.next().is_some() {
+                    return Err(boundary_error(WebError::Headers));
+                }
+                let proof = std::str::from_utf8(&header.value)
+                    .ok()
+                    .and_then(|value| PageToken::parse_hex(value.to_owned()).ok())
+                    .ok_or_else(|| failure(401, responses::ErrorCode::Unauthorized))?;
+                Some(
+                    self.service
+                        .authenticate_page(&proof)
+                        .map_err(authentication_error)?,
+                )
+            } else {
+                let mut cookies = head
+                    .headers
+                    .iter()
+                    .filter(|h| h.name.eq_ignore_ascii_case("cookie"));
+                let header = match (cookies.next(), cookies.next()) {
+                    (Some(header), None) => header,
+                    (None, _) => return Err(failure(401, responses::ErrorCode::Unauthorized)),
+                    _ => return Err(boundary_error(WebError::Headers)),
+                };
+                let cookie = cookie_secret(&header.value).map_err(authentication_error)?;
+                Some(
+                    self.service
+                        .authenticate(&cookie)
+                        .map_err(authentication_error)?,
+                )
+            }
         } else {
             None
         };
@@ -201,6 +308,16 @@ impl WebApplication {
                 authenticated.as_ref().map(|session| session.csrf.as_str()),
             )
             .map_err(|error| self.request_boundary_error(head, error))?;
+        if authenticated
+            .as_ref()
+            .is_some_and(|session| session.account.must_change_password)
+            && !matches!(
+                route,
+                Route::Session | Route::SessionPassword | Route::SessionLogout
+            )
+        {
+            return Err(failure(403, responses::ErrorCode::Forbidden));
+        }
         Ok(authenticated)
     }
     pub fn dispatch(&self, backend: &mut Backend, head: &RequestHead, body: &[u8]) -> WebResponse {
@@ -236,7 +353,122 @@ impl WebApplication {
             Err(response) => return response,
         };
         match route {
-            Route::Status => response(200, responses::public_status(), None),
+            Route::Maintenance { .. } | Route::Repair { .. } => {
+                failure(503, responses::ErrorCode::ServiceUnavailable)
+            }
+            Route::Admin { resource, write } => {
+                let Some(session) = authenticated else {
+                    return failure(401, responses::ErrorCode::Unauthorized);
+                };
+                admin::dispatch(
+                    backend,
+                    session.lease(),
+                    resource,
+                    write.then_some(body),
+                    self.admin_platform.as_ref(),
+                )
+            }
+            Route::SessionLogin => {
+                let input = match fc_protocol::web::session::login(body) {
+                    Ok(input) => input,
+                    Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+                };
+                let password = match fc_security::Password::new(input.password) {
+                    Ok(password) => password,
+                    Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+                };
+                let proof = match backend.login_web_page(&input.login_name, password, &self.service)
+                {
+                    Ok(proof) => proof,
+                    Err(crate::backend::BackendError::InvalidCredentials) => {
+                        return failure(401, responses::ErrorCode::Unauthorized)
+                    }
+                    Err(crate::backend::BackendError::Session(
+                        fc_application::identity::SessionError::RateLimited { .. },
+                    )) => return failure(429, responses::ErrorCode::RateLimited),
+                    Err(crate::backend::BackendError::Storage(
+                        fc_storage::StorageError::LoginRateLimited { .. },
+                    )) => return failure(429, responses::ErrorCode::RateLimited),
+                    Err(_) => return failure(503, responses::ErrorCode::ServiceUnavailable),
+                };
+                self.page_session_response(&proof)
+            }
+            Route::SessionPassword => {
+                let input = match fc_protocol::web::session::password(body) {
+                    Ok(input) => input,
+                    Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+                };
+                let Some(session) = authenticated else {
+                    return failure(401, responses::ErrorCode::Unauthorized);
+                };
+                let old = match fc_security::Password::new(input.current_password) {
+                    Ok(value) => value,
+                    Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+                };
+                let new = match fc_security::Password::new(input.new_password) {
+                    Ok(value) => value,
+                    Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+                };
+                match backend.change_web_page_password(session.lease(), old, new, &self.service) {
+                    Ok(proof) => self.page_session_response(&proof),
+                    Err(crate::backend::BackendError::InvalidCredentials) => {
+                        failure(403, responses::ErrorCode::Forbidden)
+                    }
+                    Err(crate::backend::BackendError::Storage(
+                        fc_storage::StorageError::LoginRateLimited { .. },
+                    )) => failure(429, responses::ErrorCode::RateLimited),
+                    Err(_) => failure(503, responses::ErrorCode::ServiceUnavailable),
+                }
+            }
+            Route::SessionResume => {
+                let input = match fc_protocol::web::session::resume(body) {
+                    Ok(input) => input,
+                    Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+                };
+                let proof = match PageToken::parse_hex(input.page_token) {
+                    Ok(proof) => proof,
+                    Err(_) => return failure(401, responses::ErrorCode::Unauthorized),
+                };
+                self.page_session_response(&proof)
+            }
+            Route::Status => match backend.state() {
+                Ok(state) => response(
+                    200,
+                    responses::initialization_status(state.installation.is_some()),
+                    None,
+                ),
+                Err(_) => failure(503, responses::ErrorCode::ServiceUnavailable),
+            },
+            Route::Setup => {
+                if !self.local_control {
+                    return failure(403, responses::ErrorCode::Forbidden);
+                }
+                let input = match fc_protocol::web::session::setup(body) {
+                    Ok(input) => input,
+                    Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+                };
+                let password = match fc_security::Password::new(input.password) {
+                    Ok(value) => value,
+                    Err(_) => return failure(400, responses::ErrorCode::InvalidRequest),
+                };
+                match backend.initialize_web_page(
+                    crate::backend::Initialize {
+                        school_name: input.school_name,
+                        login_name: input.login_name,
+                        display_name: input.display_name,
+                    },
+                    password,
+                    &self.service,
+                ) {
+                    Ok(proof) => self.page_session_response(&proof),
+                    Err(crate::backend::BackendError::Identity(
+                        fc_ports::IdentityRepositoryError::Domain(
+                            fc_domain::identity::IdentityError::AlreadyInitialized,
+                        ),
+                    )) => failure(409, responses::ErrorCode::RevisionConflict),
+                    Err(_) => failure(503, responses::ErrorCode::ServiceUnavailable),
+                }
+            }
             Route::PairingCreate => {
                 let input = match pairing::create(body) {
                     Ok(input) => input,
@@ -321,7 +553,7 @@ impl WebApplication {
                 let Some(session) = authenticated else {
                     return failure(401, responses::ErrorCode::Unauthorized);
                 };
-                match backend.logout_account(session.lease()) {
+                match backend.logout_web_page(session.lease()) {
                     Ok(()) => response(
                         200,
                         responses::logged_out(),
@@ -406,7 +638,7 @@ fn response(
         body,
     }
 }
-fn failure(status: u16, code: responses::ErrorCode) -> WebResponse {
+pub(crate) fn failure(status: u16, code: responses::ErrorCode) -> WebResponse {
     response(status, responses::error(code), None)
 }
 fn command_failure(error: &crate::backend::BackendError) -> Option<WebResponse> {
@@ -418,7 +650,7 @@ fn command_failure(error: &crate::backend::BackendError) -> Option<WebResponse> 
         E::Clock => failure(503, responses::ErrorCode::CommandWindowUnavailable),
     })
 }
-fn boundary_error(error: WebError) -> WebResponse {
+pub(crate) fn boundary_error(error: WebError) -> WebResponse {
     match error {
         WebError::NotFound => failure(404, responses::ErrorCode::NotFound),
         WebError::Method => failure(405, responses::ErrorCode::MethodNotAllowed),
@@ -441,6 +673,7 @@ fn service_error(error: WebServiceError) -> WebResponse {
         WebServiceError::Invalid => failure(400, responses::ErrorCode::InvalidRequest),
         WebServiceError::Denied => failure(403, responses::ErrorCode::Forbidden),
         WebServiceError::RateLimited => failure(429, responses::ErrorCode::RateLimited),
+        WebServiceError::Capacity => failure(429, responses::ErrorCode::Capacity),
         _ => failure(503, responses::ErrorCode::ServiceUnavailable),
     }
 }

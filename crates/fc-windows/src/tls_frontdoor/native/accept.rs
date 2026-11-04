@@ -68,9 +68,14 @@ impl Owner {
             .accept
             .as_ref()
             .is_none_or(AcceptSlot::released)
+            && self
+                .resources
+                .lan_accept
+                .as_ref()
+                .is_none_or(AcceptSlot::released)
     }
-    fn close_bare_socket(&mut self) -> Result<(), String> {
-        let Some(bare) = self.resources.accept.as_mut() else {
+    fn close_bare_socket_for(&mut self, listener_index: usize) -> Result<(), String> {
+        let Some(bare) = self.resources.bare_accept_mut(listener_index) else {
             return Ok(());
         };
         let had_socket = bare.socket != INVALID_SOCKET;
@@ -122,11 +127,17 @@ impl Owner {
         Ok(())
     }
     pub(super) fn close_bare_accept(&mut self) -> Result<(), String> {
-        self.cancel_bare_accept(false)
+        let primary = self.cancel_bare_accept_for(0, false);
+        let lan = self.cancel_bare_accept_for(1, false);
+        primary.and(lan)
     }
-    fn cancel_bare_accept(&mut self, expired: bool) -> Result<(), String> {
-        let listener = self.resources.listener;
-        let Some(bare) = self.resources.accept.as_mut() else {
+    pub(super) fn cancel_bare_accept_for(
+        &mut self,
+        listener_index: usize,
+        expired: bool,
+    ) -> Result<(), String> {
+        let listener = self.listener(listener_index);
+        let Some(bare) = self.resources.bare_accept_mut(listener_index) else {
             return Ok(());
         };
         if let AcceptState::Pending { serial, deadline } = bare.state {
@@ -156,24 +167,40 @@ impl Owner {
                 let _ = CancelIoEx(socket_handle(listener), Some(bare.memory.operation.get()));
             }
         }
-        self.close_bare_socket()
+        self.close_bare_socket_for(listener_index)
     }
     pub(super) fn expire_bare_accept(&mut self, now: Instant) -> Result<(), String> {
-        if self.resources.accept.as_ref().is_some_and(
+        for listener_index in 0..2 {
+            if self.bare_accept(listener_index).is_some_and(
             |bare| matches!(bare.state, AcceptState::Pending { deadline, .. } if now >= header_close_alarm(deadline)),
         ) {
-            self.cancel_bare_accept(true)?;
+            self.cancel_bare_accept_for(listener_index, true)?;
+        }
         }
         Ok(())
     }
     pub(super) fn post_bare_accept(&mut self) -> Result<(), String> {
         self.post_bare_accept_with_clock(Instant::now(), Instant::now)
     }
+    pub(super) fn post_bare_accept_for(&mut self, listener_index: usize) -> Result<(), String> {
+        if self.listener(listener_index) == INVALID_SOCKET || self.stopping {
+            return Ok(());
+        }
+        self.post_bare_accept_for_with_clock(listener_index, Instant::now(), Instant::now)
+    }
     /// One captured origin covers preparation and the actual native post.
     /// Production always supplies the monotonic clock above; a private test
     /// clock can cross the boundary around real native IO without long sleeps.
     pub(super) fn post_bare_accept_with_clock(
         &mut self,
+        began_at: Instant,
+        now: impl FnMut() -> Instant,
+    ) -> Result<(), String> {
+        self.post_bare_accept_for_with_clock(0, began_at, now)
+    }
+    fn post_bare_accept_for_with_clock(
+        &mut self,
+        listener_index: usize,
         began_at: Instant,
         mut now: impl FnMut() -> Instant,
     ) -> Result<(), String> {
@@ -183,16 +210,15 @@ impl Owner {
         if self.stopping
             || OWNER_FAULTED.load(Ordering::Acquire)
             || !self.http_mode
-            || self.resources.listener == INVALID_SOCKET
+            || self.listener(listener_index) == INVALID_SOCKET
         {
             return Err("bare AcceptEx listener stopped".into());
         }
-        let listener = self.resources.listener;
-        let family = self.address_family();
+        let listener = self.listener(listener_index);
+        let family = self.listener_family(listener_index);
         let bare = self
             .resources
-            .accept
-            .as_mut()
+            .bare_accept_mut(listener_index)
             .ok_or("missing bare accept owner")?;
         if !bare.released() {
             return Err("bare AcceptEx still owns native debt or socket".into());
@@ -220,13 +246,13 @@ impl Owner {
         // A slow preparation must not issue an already-expired positive post.
         // There is no IOCP debt yet, so only the exact new socket is closed.
         if now() >= header_close_alarm(deadline) {
-            self.close_bare_socket()?;
+            self.close_bare_socket_for(listener_index)?;
             return Err("bare accept preparation consumed original deadline".into());
         }
         // SAFETY: the same unused pinned operation/socket remains exclusively
         // owned. Native post latency consumes the already-captured interval.
         let success = unsafe {
-            let bare = self.resources.accept.as_mut().unwrap();
+            let bare = self.resources.bare_accept_mut(listener_index).unwrap();
             let mut received = 0;
             accept(
                 listener,
@@ -242,33 +268,41 @@ impl Owner {
         };
         if !success && unsafe { WSAGetLastError() } != WSA_IO_PENDING {
             let failure = error("bare AcceptEx post");
-            self.close_bare_socket()?;
+            self.close_bare_socket_for(listener_index)?;
             return Err(failure);
         }
         // A successful/PENDING call owes a real IOCP packet even if the call
         // returned too late. Publish that exact debt BEFORE negative cleanup;
         // never return an uncharged operation or mint another five seconds.
-        let bare = self.resources.accept.as_mut().unwrap();
+        let bare = self.resources.bare_accept_mut(listener_index).unwrap();
         bare.serial = serial;
         bare.state = AcceptState::Pending { serial, deadline };
         self.report.submissions += 1;
         self.report.accept_posts += 1;
         if now() >= header_close_alarm(deadline) {
-            self.cancel_bare_accept(true)?;
+            self.cancel_bare_accept_for(listener_index, true)?;
         }
         Ok(())
     }
+    #[cfg(test)]
     pub(super) fn complete_bare_accept(
         &mut self,
         key: usize,
         succeeded: bool,
     ) -> Result<(), String> {
+        self.complete_bare_accept_for(0, key, succeeded)
+    }
+    pub(super) fn complete_bare_accept_for(
+        &mut self,
+        listener_index: usize,
+        key: usize,
+        succeeded: bool,
+    ) -> Result<(), String> {
         let bare = self
             .resources
-            .accept
-            .as_mut()
+            .bare_accept_mut(listener_index)
             .ok_or("foreign bare completion")?;
-        if key != 1 || !bare.pending() {
+        if key != Self::listener_key(listener_index) || !bare.pending() {
             return Err("bare accept completion key or unsubmitted operation".into());
         }
         let state = bare.state;
@@ -325,12 +359,16 @@ impl Owner {
             } else {
                 self.report.accept_error_discards += 1;
             }
-            self.close_bare_socket()?;
-        } else if let Some(index) = self
-            .resources
-            .slots
-            .iter()
-            .position(|slot| slot.phase == Phase::Ready)
+            self.close_bare_socket_for(listener_index)?;
+        } else if let Some(index) =
+            self.resources
+                .slots
+                .iter()
+                .enumerate()
+                .position(|(index, slot)| {
+                    slot.phase == Phase::Ready
+                        && !(self.control_mode && listener_index == 1 && index == 0)
+                })
         {
             let slot = &self.resources.slots[index];
             if slot.socket != INVALID_SOCKET
@@ -353,25 +391,24 @@ impl Owner {
             let association = unsafe {
                 check(
                     setsockopt(
-                        self.resources.accept.as_ref().unwrap().socket,
+                        self.bare_accept(listener_index).unwrap().socket,
                         SOL_SOCKET,
                         SO_UPDATE_ACCEPT_CONTEXT,
-                        Some(&self.resources.listener.0.to_ne_bytes()),
+                        Some(&self.listener(listener_index).0.to_ne_bytes()),
                     ),
                     "bare accept context",
                 )
                 .and_then(|()| {
                     let peer =
-                        configured::peer_address(self.resources.accept.as_ref().unwrap().socket)?;
+                        configured::peer_address(self.bare_accept(listener_index).unwrap().socket)?;
                     if self
-                        .source_networks
-                        .as_ref()
+                        .source_policy(listener_index)
                         .is_some_and(|policy| !policy.contains(peer))
                     {
                         return Ok(false);
                     }
                     CreateIoCompletionPort(
-                        socket_handle(self.resources.accept.as_ref().unwrap().socket),
+                        socket_handle(self.bare_accept(listener_index).unwrap().socket),
                         Some(self.resources.port),
                         index + 2,
                         1,
@@ -383,16 +420,16 @@ impl Owner {
             match association {
                 Err(error) => {
                     self.report.accept_error_discards += 1;
-                    self.close_bare_socket()?;
+                    self.close_bare_socket_for(listener_index)?;
                     return Err(error);
                 }
                 Ok(false) => {
                     self.report.accept_source_rejections += 1;
-                    self.close_bare_socket()?;
+                    self.close_bare_socket_for(listener_index)?;
                     // This actual packet was consumed; replenish only after the
                     // rejected socket really closed. No SSPI permit was used.
                     if !self.stopping {
-                        self.post_bare_accept()?;
+                        self.post_bare_accept_for(listener_index)?;
                     }
                     return Ok(());
                 }
@@ -402,7 +439,7 @@ impl Owner {
             if Instant::now() >= header_close_alarm(deadline) {
                 self.report.accept_expired_discards += 1;
                 self.report.close_observations.accept = Some(TlsAcceptClose {
-                    serial: self.resources.accept.as_ref().unwrap().serial,
+                    serial: self.bare_accept(listener_index).unwrap().serial,
                     hard_deadline: deadline,
                     alarm: header_close_alarm(deadline),
                     began_at: Instant::now(),
@@ -411,28 +448,38 @@ impl Owner {
                     failed: false,
                     completion_returned_at: Some(completed_at),
                 });
-                self.close_bare_socket()?;
+                self.close_bare_socket_for(listener_index)?;
             } else {
                 let socket = std::mem::replace(
-                    &mut self.resources.accept.as_mut().unwrap().socket,
+                    &mut self
+                        .resources
+                        .bare_accept_mut(listener_index)
+                        .unwrap()
+                        .socket,
                     INVALID_SOCKET,
                 );
                 let slot = &mut self.resources.slots[index];
                 slot.socket = socket;
+                slot.listener_index = listener_index;
+                slot.listener_scope = if self.control_mode && listener_index == 0 {
+                    TlsListenerScope::LocalControl
+                } else {
+                    TlsListenerScope::Lan
+                };
                 slot.stream.as_mut().unwrap().bind_header_deadline(deadline);
                 slot.phase = Phase::Handshake;
                 self.report.accepted += 1;
                 self.report.accept_handoffs += 1;
                 // Replenish the same single bare owner before business driving.
-                self.post_bare_accept()?;
+                self.post_bare_accept_for(listener_index)?;
                 return self.drive(index);
             }
         } else {
-            self.close_bare_socket()?;
+            self.close_bare_socket_for(listener_index)?;
             self.report.accept_capacity_rejections += 1;
         }
         if !self.stopping {
-            self.post_bare_accept()?;
+            self.post_bare_accept_for(listener_index)?;
         }
         Ok(())
     }

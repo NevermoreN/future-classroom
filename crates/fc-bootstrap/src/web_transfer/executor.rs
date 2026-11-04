@@ -7,6 +7,8 @@ use fc_runtime::worker::{JobContext, JobError, JobTicket, SubmitError, Task, Wor
 use std::time::Instant;
 
 pub enum HttpJob {
+    #[cfg(windows)]
+    Repair(Box<crate::repair_web::RepairHttpTask>),
     Web(Box<WebTask>),
     #[cfg(windows)]
     Cleanup(Box<super::live_cleanup::CleanupTask>),
@@ -27,6 +29,8 @@ pub enum HttpCompletion {
 impl HttpJob {
     pub fn deadline(&self) -> Instant {
         match self {
+            #[cfg(windows)]
+            Self::Repair(job) => job.deadline(),
             Self::Web(job) => job.deadline(),
             #[cfg(windows)]
             Self::Cleanup(job) => job.deadline(),
@@ -41,6 +45,8 @@ impl Task for HttpJob {
     type Output = HttpCompletion;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
+            #[cfg(windows)]
+            Self::Repair(job) => job.allocation_bytes(),
             #[cfg(windows)]
             Self::Cleanup(job) => job.allocation_bytes(),
             Self::Web(job) => job
@@ -58,6 +64,8 @@ impl Task for HttpJob {
     }
     fn run(self, context: &JobContext) -> HttpCompletion {
         match self {
+            #[cfg(windows)]
+            Self::Repair(job) => HttpCompletion::Web(job.run(context)),
             Self::Web(job) => HttpCompletion::Web(job.run(context)),
             #[cfg(windows)]
             Self::Cleanup(job) => HttpCompletion::Cleanup(job.run(context)),

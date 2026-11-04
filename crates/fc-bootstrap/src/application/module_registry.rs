@@ -169,6 +169,7 @@ pub(super) fn shutdown_complete(app: &App) -> bool {
     settled(Kind::AuthorityWriter, app)
         && app.backup.exit_ready()
         && settled(Kind::TeacherHttps, app)
+        && app.local_web_quiescent()
         && settled(Kind::SharedWorkers, app)
         && settled(Kind::MaterialOpen, app)
         && settled(Kind::VoicePlayback, app)

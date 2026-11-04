@@ -1,7 +1,7 @@
 //! Synchronous SSPI calls, exclusively owned by the fixed TLS worker thread.
 use super::{
-    credentials::Credentials, Call, CertificateThumbprint, Driver, Frame, Step, TlsError,
-    BUFFER_BYTES, CONNECTION_SLOTS, PLAINTEXT_BYTES,
+    credentials::Credentials, Call, CertificateThumbprint, CredentialConfiguration, Driver, Frame,
+    Step, TlsError, TlsListenerScope, BUFFER_BYTES, CONNECTION_SLOTS, PLAINTEXT_BYTES,
 };
 use fc_ports::http::RequestToken;
 use windows::Win32::{
@@ -20,6 +20,7 @@ const ALERT_BYTES: usize = 256;
 struct Context {
     handle: SecHandle,
     token: Option<RequestToken>,
+    scope: TlsListenerScope,
     last_token: Option<RequestToken>,
     shutting_down: bool,
     shutdown_complete: bool,
@@ -32,6 +33,7 @@ impl Default for Context {
         Self {
             handle: INVALID_HANDLE,
             token: None,
+            scope: TlsListenerScope::LocalControl,
             last_token: None,
             shutting_down: false,
             shutdown_complete: false,
@@ -45,9 +47,22 @@ impl Context {
     fn live(&self) -> bool {
         self.handle != INVALID_HANDLE
     }
+    #[cfg(test)]
     fn bind(&mut self, token: RequestToken, call: Call) -> Result<(), TlsError> {
+        self.bind_scoped(token, call, TlsListenerScope::LocalControl)
+    }
+    fn bind_scoped(
+        &mut self,
+        token: RequestToken,
+        call: Call,
+        scope: TlsListenerScope,
+    ) -> Result<(), TlsError> {
         if self.token == Some(token) {
-            return Ok(());
+            return if self.scope == scope {
+                Ok(())
+            } else {
+                Err(TlsError::InvalidInput)
+            };
         }
         let newer = self.last_token.is_none_or(|old| {
             (token.generation(), token.serial()) > (old.generation(), old.serial())
@@ -55,6 +70,7 @@ impl Context {
         if call != Call::Handshake || self.token.is_some() || !newer {
             return Err(TlsError::InvalidInput);
         }
+        self.scope = scope;
         self.token = Some(token);
         self.last_token = Some(token);
         Ok(())
@@ -99,6 +115,7 @@ pub(super) struct SchannelSet {
     // Rust drops fields in declaration order: contexts precede credentials.
     contexts: [Context; CONNECTION_SLOTS],
     credentials: Credentials,
+    lan_credentials: Option<Credentials>,
     cleanup_failure: Option<TlsError>,
     closed: bool,
 }
@@ -110,6 +127,7 @@ impl SchannelSet {
         Ok(Self {
             contexts: std::array::from_fn(|_| Context::default()),
             credentials: Credentials::new_configured(thumbprint, host)?,
+            lan_credentials: None,
             cleanup_failure: None,
             closed: false,
         })
@@ -118,12 +136,47 @@ impl SchannelSet {
         Ok(Self {
             contexts: std::array::from_fn(|_| Context::default()),
             credentials: Credentials::new(thumbprint)?,
+            lan_credentials: None,
             cleanup_failure: None,
             closed: false,
         })
     }
 }
 impl Driver for SchannelSet {
+    fn configure_lan(
+        &mut self,
+        configuration: Option<CredentialConfiguration>,
+    ) -> Result<(), TlsError> {
+        if self.closed {
+            return Err(TlsError::Stopped);
+        }
+        if self.cleanup_failure.is_some() {
+            return Err(TlsError::Faulted);
+        }
+        // A retired socket/frame is insufficient: reject replacement until all
+        // LAN SecurityContexts have returned their explicit retirement ACK.
+        if self
+            .contexts
+            .iter()
+            .any(|c| c.scope == TlsListenerScope::Lan && c.token.is_some())
+        {
+            return Err(TlsError::Busy);
+        }
+        if let Some(mut old) = self.lan_credentials.take() {
+            if let Err(error) = old.close() {
+                self.cleanup_failure = Some(error);
+                return Err(error);
+            }
+        }
+        if let Some(configuration) = configuration {
+            self.lan_credentials = Some(Credentials::new_configured(
+                configuration.thumbprint,
+                &configuration.host,
+            )?);
+        }
+        Ok(())
+    }
+
     fn call(&mut self, frame: &mut Frame) -> Result<Step, TlsError> {
         frame.output_len = 0;
         if self.closed {
@@ -136,7 +189,7 @@ impl Driver for SchannelSet {
             return Err(TlsError::InvalidInput);
         }
         let context = &mut self.contexts[frame.token.slot()];
-        context.bind(frame.token, frame.call)?;
+        context.bind_scoped(frame.token, frame.call, frame.scope)?;
         if frame.call == Call::Retire {
             let result = context.retire(frame);
             if let Err(error @ TlsError::Cleanup(_)) = result {
@@ -144,11 +197,15 @@ impl Driver for SchannelSet {
             }
             return result;
         }
+        let credentials = match frame.scope {
+            TlsListenerScope::LocalControl => &self.credentials,
+            TlsListenerScope::Lan => self.lan_credentials.as_ref().ok_or(TlsError::Certificate)?,
+        };
         let result = match frame.call {
             Call::Handshake
                 if !context.complete && !context.shutting_down && !context.peer_closed =>
             {
-                handshake(context, &self.credentials, frame)
+                handshake(context, credentials, frame)
             }
             Call::Decrypt if context.complete && !context.shutting_down && !context.peer_closed => {
                 decrypt(context, frame)
@@ -159,7 +216,7 @@ impl Driver for SchannelSet {
             Call::Shutdown
                 if context.complete && frame.input_len == 0 && !context.shutdown_complete =>
             {
-                shutdown(context, &self.credentials, frame)
+                shutdown(context, credentials, frame)
             }
             _ => Err(TlsError::Protocol),
         };
@@ -179,6 +236,11 @@ impl Driver for SchannelSet {
         self.closed = true;
         for context in &mut self.contexts {
             if let Err(error) = context.reset() {
+                self.cleanup_failure.get_or_insert(error);
+            }
+        }
+        if let Some(credentials) = self.lan_credentials.as_mut() {
+            if let Err(error) = credentials.close() {
                 self.cleanup_failure.get_or_insert(error);
             }
         }
@@ -815,5 +877,75 @@ mod tests {
             shutdown_result(&mut frame, &empty, SEC_E_INCOMPLETE_MESSAGE, 0),
             Err(TlsError::Native(_))
         ));
+    }
+}
+
+#[cfg(test)]
+mod dual_credential_tests {
+    use super::*;
+    use crate::tls_frontdoor::certificate_provision::{
+        provision_ip_certificate, remove_test_certificate,
+    };
+    #[test]
+    fn different_lan_certificate_uses_checked_credentials_and_waits_for_context_retirement() {
+        let _serial = crate::tls_frontdoor::worker::tests::SERIAL.lock().unwrap();
+        struct Cleanup(Vec<String>);
+        impl Drop for Cleanup {
+            fn drop(&mut self) {
+                for hash in &self.0 {
+                    remove_test_certificate(hash).unwrap();
+                }
+            }
+        }
+        let mut cleanup = Cleanup(Vec::new());
+        let local = provision_ip_certificate("192.0.2.124", || true).unwrap();
+        if !local.reused {
+            cleanup.0.push(local.thumbprint.clone());
+        }
+        let lan = provision_ip_certificate("192.0.2.125", || true).unwrap();
+        if !lan.reused {
+            cleanup.0.push(lan.thumbprint.clone());
+        }
+        assert_ne!(local.thumbprint, lan.thumbprint);
+        let mut driver = SchannelSet::new_configured(
+            CertificateThumbprint::parse(&local.thumbprint).unwrap(),
+            "192.0.2.124",
+        )
+        .unwrap();
+        let local_handle = (
+            driver.credentials.handle.dwLower,
+            driver.credentials.handle.dwUpper,
+        );
+        let configuration = || CredentialConfiguration {
+            thumbprint: CertificateThumbprint::parse(&lan.thumbprint).unwrap(),
+            host: "192.0.2.125".into(),
+        };
+        driver.configure_lan(Some(configuration())).unwrap();
+        assert!(driver.lan_credentials.is_some());
+        let mut issuer = fc_ports::http::TokenIssuer::new().unwrap();
+        let token = issuer.issue(1).unwrap();
+        driver.contexts[1]
+            .bind_scoped(token, Call::Handshake, TlsListenerScope::Lan)
+            .unwrap();
+        assert_eq!(driver.configure_lan(None), Err(TlsError::Busy));
+        assert!(driver.lan_credentials.is_some());
+        let mut frame = Frame::new(token);
+        frame.scope = TlsListenerScope::Lan;
+        frame.call = Call::Retire;
+        assert_eq!(driver.call(&mut frame), Ok(Step::Retired));
+        let mut bad = configuration();
+        bad.host = "192.0.2.126".into();
+        assert_eq!(driver.configure_lan(Some(bad)), Err(TlsError::Certificate));
+        assert!(driver.lan_credentials.is_none());
+        driver.configure_lan(Some(configuration())).unwrap();
+        driver.configure_lan(None).unwrap();
+        assert_eq!(
+            local_handle,
+            (
+                driver.credentials.handle.dwLower,
+                driver.credentials.handle.dwUpper
+            )
+        );
+        driver.close().unwrap();
     }
 }

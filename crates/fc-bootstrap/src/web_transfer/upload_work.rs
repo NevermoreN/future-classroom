@@ -22,6 +22,12 @@ use std::{
 mod tests;
 
 enum Operation {
+    BeginMaintenance {
+        backend: Weak<Mutex<Backend>>,
+        head: RequestHead,
+        control: TransferControl,
+        life: TransferLifetime,
+    },
     CreateBatch {
         backend: Weak<Mutex<Backend>>,
         head: RequestHead,
@@ -116,6 +122,39 @@ impl UploadTask {
                 life,
             },
         })
+    }
+    pub fn begin_maintenance(
+        hub: UploadHub,
+        application: &Arc<WebApplication>,
+        backend: &Arc<Mutex<Backend>>,
+        head: RequestHead,
+        control: TransferControl,
+        life: TransferLifetime,
+    ) -> Result<Self, TransferError> {
+        let mut task = Self::begin(
+            hub,
+            application,
+            UploadKind::Maintenance,
+            head,
+            control,
+            life,
+        )?;
+        let Operation::Begin {
+            head,
+            control,
+            life,
+            ..
+        } = task.operation
+        else {
+            unreachable!()
+        };
+        task.operation = Operation::BeginMaintenance {
+            backend: Arc::downgrade(backend),
+            head,
+            control,
+            life,
+        };
+        Ok(task)
     }
     pub fn write(
         hub: UploadHub,
@@ -346,12 +385,24 @@ impl UploadTask {
                     .create_batch(&application, &backend, &head, &body, control, life, context)
                     .map(UploadOperationResult::Finished)
             }
+            Operation::BeginMaintenance {
+                backend,
+                head,
+                control,
+                life,
+            } => {
+                let backend = backend.upgrade().ok_or(UploadHubError::Closed)?;
+                self.hub
+                    .begin_maintenance(&application, &backend, &head, control, life, context)
+                    .map(UploadOperationResult::Admitted)
+            }
             Operation::Begin {
                 kind,
                 head,
                 control,
                 life,
             } => match kind {
+                UploadKind::Maintenance => Err(UploadHubError::Invalid.into()),
                 UploadKind::Material => {
                     self.hub
                         .begin_material(&application, &head, control, life, context)
@@ -425,7 +476,9 @@ impl Task for UploadTask {
     type Output = UploadCompletion;
     fn allocation_bytes(&self) -> Option<usize> {
         match &self.operation {
-            Operation::Begin { head, .. } => head_allocation(head),
+            Operation::Begin { head, .. } | Operation::BeginMaintenance { head, .. } => {
+                head_allocation(head)
+            }
             Operation::Write { bytes, .. } => Some(bytes.capacity()),
             Operation::Append { head, body, .. }
             | Operation::AppendBatch { head, body, .. }

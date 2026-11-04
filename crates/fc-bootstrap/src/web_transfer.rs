@@ -127,6 +127,20 @@ pub struct TransferLifetime {
     domain: Option<ExecutionFence>,
 }
 impl TransferLifetime {
+    /// Granted only after authenticated LocalControl maintenance admission.
+    /// The original transport epoch and cancellation owner remain unchanged.
+    #[cfg(windows)]
+    pub(crate) fn local_maintenance(&self) -> Result<Self, TransferError> {
+        self.checkpoint()?;
+        let deadline = self
+            .admitted_at
+            .checked_add(Duration::from_secs(30 * 60))
+            .ok_or(TransferError::InvalidAdmission)?;
+        Ok(Self {
+            deadline,
+            ..self.clone()
+        })
+    }
     #[cfg(windows)]
     pub(crate) fn same_owner(&self, other: &Self) -> bool {
         self.token == other.token && Arc::ptr_eq(&self.cancelled, &other.cancelled)
@@ -211,6 +225,7 @@ impl TransferLifetime {
 pub enum UploadKind {
     Material,
     Voice,
+    Maintenance,
 }
 /// Positive write completion metadata only. It cannot release a physical owner
 /// and does not authorize another chunk without the receiver's exact comparison.

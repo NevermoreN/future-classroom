@@ -1,5 +1,5 @@
 import { commandIdentity, type CommandApi, type CommandIdentity } from './command-protocol'
-import { ApiError, abortError, HttpApi, NetworkFault, readJson } from './client'
+import { ApiError, abortError, HttpApi, NetworkFault, readJson, pageHeaders } from './client'
 import { decimal, errorCode, ProtocolFault, secret } from './protocol'
 import * as m from './material-protocol'
 export interface AppendMaterial extends CommandIdentity { uploadId: string; allowedClassIds: string[] }
@@ -81,7 +81,7 @@ export class MaterialHttpApi extends HttpApi implements MaterialApi {
     if (this.base.protocol !== 'https:') throw new ProtocolFault('请使用可信 HTTPS 地址，HTTP 预览不会传送文件或凭据。')
     const controller = new AbortController(), abort = () => controller.abort(); signal.addEventListener('abort', abort, { once: true }); const timer = setTimeout(abort, 120_000)
     try {
-      const headers = new Headers({ Accept: file ? 'application/json' : 'application/octet-stream' })
+      const headers = new Headers({ Accept: file ? 'application/json' : 'application/octet-stream', ...pageHeaders() })
       if (file) { headers.set('Content-Type', 'application/octet-stream'); headers.set('X-FC-CSRF', secret(csrf)) }
       const response = await this.fetcher(new URL(path, this.base), { method: file ? 'POST' : 'GET', credentials: 'same-origin', cache: 'no-store', redirect: 'error', referrerPolicy: 'same-origin', headers, signal: controller.signal, ...(file ? { body: file } : {}) })
       if (response.status === 401 || response.status === 403) { await response.body?.cancel().catch(() => undefined); throw new ApiError(response.status, response.status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN') }

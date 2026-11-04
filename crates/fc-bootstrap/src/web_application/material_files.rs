@@ -524,6 +524,7 @@ impl WebApplication {
         // Configuration requires an exclusive application reference. Filesystem
         // ownership/marker IO still occurs outside its short metadata lock.
         let configured = MaterialFiles::new(root)?;
+        self.configure_profile_images(root)?;
         let mut guard = self.material_files.lock().map_err(io_error)?;
         if guard.is_some() {
             drop(guard);
@@ -599,23 +600,9 @@ impl WebApplication {
         let Route::Materials { route } = route else {
             return Err(failure(404, responses::ErrorCode::NotFound));
         };
-        let mut cookies = head
-            .headers
-            .iter()
-            .filter(|h| h.name.eq_ignore_ascii_case("cookie"));
-        let header = match (cookies.next(), cookies.next()) {
-            (Some(h), None) => h,
-            (None, _) => return Err(failure(401, responses::ErrorCode::Unauthorized)),
-            _ => return Err(boundary_error(WebError::Headers)),
-        };
-        let cookie = cookie_secret(&header.value).map_err(authentication_error)?;
         let session = self
-            .service
-            .authenticate(&cookie)
-            .map_err(authentication_error)?;
-        self.boundary
-            .check(head, Some(session.csrf.as_str()))
-            .map_err(|error| self.request_boundary_error(head, error))?;
+            .authenticate_route(head, Route::Materials { route })?
+            .ok_or_else(|| failure(401, responses::ErrorCode::Unauthorized))?;
         Ok((session.lease(), route))
     }
     pub(super) fn material_create(

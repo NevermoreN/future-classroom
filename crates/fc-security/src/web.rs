@@ -6,6 +6,8 @@ use std::fmt;
 use subtle::ConstantTimeEq;
 use zeroize::Zeroizing;
 
+pub mod page;
+
 const SECRET_BYTES: usize = 32;
 const SECRET_HEX_BYTES: usize = SECRET_BYTES * 2;
 const CODE_BYTES: usize = 8;

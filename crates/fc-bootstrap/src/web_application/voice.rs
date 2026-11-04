@@ -193,22 +193,8 @@ pub(super) fn upload_auth(
     let Route::VoiceUpload { class_id } = route else {
         return Err(failure(400, responses::ErrorCode::InvalidRequest));
     };
-    let mut cookies = head
-        .headers
-        .iter()
-        .filter(|h| h.name.eq_ignore_ascii_case("cookie"));
-    let header = match (cookies.next(), cookies.next()) {
-        (Some(h), None) => h,
-        (None, _) => return Err(failure(401, responses::ErrorCode::Unauthorized)),
-        _ => return Err(boundary_error(WebError::Headers)),
-    };
-    let cookie = cookie_secret(&header.value).map_err(authentication_error)?;
     let session = app
-        .service
-        .authenticate(&cookie)
-        .map_err(authentication_error)?;
-    app.boundary
-        .check(head, Some(session.csrf.as_str()))
-        .map_err(|error| app.request_boundary_error(head, error))?;
+        .authenticate_route(head, route)?
+        .ok_or_else(|| failure(401, responses::ErrorCode::Unauthorized))?;
     Ok((session.lease(), class_id))
 }

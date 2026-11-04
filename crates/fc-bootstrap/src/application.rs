@@ -46,6 +46,9 @@ pub fn update_data_probe_stage(
 }
 mod http_business_probe;
 mod http_executor;
+mod local_web_controller;
+mod maintenance_controller;
+mod web_platform;
 pub fn tls_business_probe(thumbprint: &str, marker: &str) -> std::result::Result<(), String> {
     http_business_probe::run(thumbprint, marker)
 }
@@ -624,6 +627,8 @@ fn create_file(path: &Path, bytes: &[u8]) -> Result<()> {
 }
 
 enum Outcome {
+    MaintenanceFinished,
+    LocalWeb(local_web_controller::Completed),
     Http(fc_bootstrap::web_transfer::HttpCompletion),
     HttpProbe(Box<http_business_probe::Completion>),
     Backup(backup_controller::Completed),
@@ -1339,6 +1344,11 @@ impl NativeTarget {
     }
 }
 enum Work {
+    Maintenance(
+        Box<fc_bootstrap::maintenance_web::MaintenanceWork>,
+        Arc<Mutex<Backend>>,
+    ),
+    LocalWeb(Box<local_web_controller::Job>),
     Tracked(Box<Work>, NativeCommand),
     HttpsRuntime(Box<https_runtime_controller::Job>),
     Http(fc_bootstrap::web_transfer::HttpJob),
@@ -1443,6 +1453,8 @@ impl Task for Work {
     type Output = Result<Outcome>;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
+            Self::LocalWeb(job) => job.allocation_bytes(),
+            Self::Maintenance(job, _) => job.allocation_bytes(),
             Self::Tracked(work, _) => work
                 .allocation_bytes()?
                 .checked_add(std::mem::size_of::<NativeCommand>() + 128),
@@ -1780,6 +1792,11 @@ impl Work {
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         match self {
             Self::Tracked(..) => Err(Failure::Stopped),
+            Self::LocalWeb(job) => job.run(context),
+            Self::Maintenance(job, backend) => {
+                job.run(backend, context).map_err(|_| Failure::Stopped)?;
+                Ok(Outcome::MaintenanceFinished)
+            }
             Self::HttpsRuntime(job) => job.run(context),
             Self::Https(backend, lease, operation) => {
                 https_settings_controller::run(backend, lease, operation, context)
@@ -2520,6 +2537,8 @@ struct PendingLaunch {
     from_scene: bool,
 }
 struct App {
+    maintenance: maintenance_controller::State,
+    local_web: local_web_controller::State,
     window: Window,
     pool: shared_pool::SharedPool<Work>,
     clock: Arc<CurrentClock>,
@@ -2547,6 +2566,7 @@ struct App {
     record: Option<ContentRecord>,
     last_input: Instant,
     stopping: bool,
+    exiting: bool,
     shutdown: Option<JobTicket<Result<Outcome>>>,
     writer_closed: bool,
     shutdown_deadline: Option<Instant>,
@@ -3139,6 +3159,12 @@ impl App {
         }
     }
     fn render(&self) -> std::result::Result<(), String> {
+        // Product settings/login are Web-only. The native surface remains solely
+        // for the independent public classroom chooser and isolated old probes.
+        if !self.offscreen_probe && self.public_lesson_flow.is_none() {
+            self.window.hide();
+            return Ok(());
+        }
         window_registry::render(&self.window, self.screen, &self.view())
             .map_err(|_| "工作台渲染失败".to_owned())?;
         if self.screen == Screen::Web {
@@ -3222,6 +3248,14 @@ impl App {
         self.status.clear();
     }
     fn begin_shutdown(&mut self) {
+        self.exiting = true;
+        self.cancel_web_maintenance();
+        if let Some(service) = &self.maintenance.service {
+            service.request_close();
+        }
+        if let Some(runtime) = &self.local_web.runtime {
+            runtime.request_stop();
+        }
         module_registry::stop(module_registry::Kind::TeacherHttps, self);
         self.close_public_lesson();
         if self
@@ -3266,7 +3300,16 @@ impl App {
     fn schedule_shutdown(&mut self) {
         // Network workers may still need the original Writer for negative
         // cleanup. Do not close it or stop the common worker domain first.
-        if !self.teacher_https_quiescent() {
+        if !self.teacher_https_quiescent() || !self.local_web_quiescent() {
+            return;
+        }
+        if self.maintenance.pending_work()
+            || self
+                .maintenance
+                .service
+                .as_ref()
+                .is_some_and(|service| !service.retirement_complete())
+        {
             return;
         }
         if self.writer_closed {
@@ -4720,7 +4763,6 @@ impl App {
                 Screen::Login
             };
             self.status.clear();
-            self.desktop.hide();
         }
     }
     fn open_public_lesson(
@@ -5451,6 +5493,7 @@ impl App {
         // Even irreversible restore must observe the HTTP thread's actual
         // return before its coordinator can take the original shared workers.
         self.poll_teacher_https()?;
+        self.poll_web_maintenance()?;
         self.poll_backup()?;
         if self.backup.irreversible() {
             return Ok(());
@@ -6284,7 +6327,9 @@ impl App {
                 Ok(Outcome::ExitAuthorized) => self.begin_shutdown(),
                 Ok(Outcome::Closed) => return Err("关闭结果进入了普通请求通道".into()),
                 Ok(
-                    Outcome::Http(_)
+                    Outcome::LocalWeb(_)
+                    | Outcome::MaintenanceFinished
+                    | Outcome::Http(_)
                     | Outcome::HttpProbe(_)
                     | Outcome::Office(_)
                     | Outcome::Desktop(..)
@@ -6366,7 +6411,7 @@ impl App {
     }
 }
 
-/// Manual launch opens management; --autostart remains locked and hidden.
+/// Manual launch opens local Web management; autostart keeps the browser closed.
 pub fn run(autostart: bool) -> std::result::Result<(), String> {
     crate::installation_startup::run(|| {
         let paths = DataPaths::program_data().map_err(|_| "无法定位本机数据目录".to_owned())?;
@@ -6443,6 +6488,11 @@ fn run_at_inner(
     let clock = Arc::new(CurrentClock::new());
     let mut app = create_app(clock.clone(), probe)?;
     app.root = paths.root().to_owned();
+    if !probe {
+        app.maintenance.service = Some(fc_bootstrap::maintenance_web::MaintenanceService::new(
+            paths.clone(),
+        ));
+    }
     app.backup.workflow = Some(fc_bootstrap::recovery_workflow::RecoveryWorkflow::new(
         paths.clone(),
     ));
@@ -6490,9 +6540,11 @@ fn run_at_inner(
     }))
     .map_err(|_| "无法绑定会话撤销处理")?;
     app.render()?;
-    if !autostart {
+    if probe && !autostart {
         app.window.show(true);
     }
+    app.local_web.open_when_ready = !autostart && !probe;
+    app.start_local_web();
     module_registry::start_writer(&mut app, paths.clone(), clock)?;
     let started = Instant::now();
     let mut stage = 0u8;
@@ -6524,6 +6576,7 @@ fn run_at_inner(
         None
     };
     let result = host.run_with_host(|hints, host| {
+        app.poll_local_web();
         if app.pool.is_faulted() && !app.terminate_required {
             if let Some(control) = &app.control {
                 control.fault();
@@ -6551,18 +6604,14 @@ fn run_at_inner(
             app.window.hide();
             let _ = app.render();
         }
-        if hints.contains(HostHints::OPEN_STATUS) {
-            app.desktop.hide();
-            if !app.window.is_visible() {
-                let _ = app.render();
+        if hints.contains(HostHints::OPEN_STATUS) || hints.contains(HostHints::OPEN_SETTINGS) {
+            if let Err(message) = app.open_local_web(hints.contains(HostHints::OPEN_SETTINGS)) {
+                app.status = message.clone();
+                let _ = host.show_public_notice(&message);
             }
-            app.window.show(true);
         }
         if hints.contains(HostHints::EXIT_REQUESTED) {
-            app.desktop.hide();
-            app.window.show(true);
-            app.status = "请由主管理员登录后在工作台中退出。".into();
-            let _ = app.render();
+            app.begin_shutdown();
         }
         if app.lease.is_some()
             && (app.last_input.elapsed() >= Duration::from_secs(300)
@@ -6600,6 +6649,11 @@ fn run_at_inner(
             }
             if let Some(notice) = app.desktop.take_notice() {
                 app.desktop_notice = notice;
+            }
+            if let Some(identity) = app.desktop.identity() {
+                if identity.revision != app.state.revision {
+                    app.state = Arc::new(identity.clone());
+                }
             }
             if let Some(stamp) = app.desktop.take_lesson_event() {
                 if let Err(error) = app.open_public_lesson(stamp) {
@@ -6780,6 +6834,8 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         .set_empty_form_action(voice_editor::CHECK_OUTPUT)
         .map_err(|_| "无法注册默认输出检查操作".to_owned())?;
     Ok(App {
+        maintenance: maintenance_controller::State::default(),
+        local_web: local_web_controller::State::default(),
         window,
         pool: module_registry::create_workers()?,
         clock,
@@ -6807,6 +6863,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         record: None,
         last_input: Instant::now(),
         stopping: false,
+        exiting: false,
         shutdown: None,
         writer_closed: false,
         shutdown_deadline: None,

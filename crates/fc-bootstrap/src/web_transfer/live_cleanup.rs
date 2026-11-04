@@ -47,6 +47,7 @@ impl CleanupTask {
     pub fn run(self, context: &JobContext) -> CleanupStatus {
         // Inactive positive transfer lifetimes are expected here. Only this fresh
         // negative worker job's context is checked, never a fabricated old context.
+        let images = self.app.cleanup_profile_images();
         let uploads = self.uploads.cleanup_live(&self.app, context);
         let downloads = self.downloads.cleanup_live(context);
         match (uploads, downloads) {
@@ -54,7 +55,7 @@ impl CleanupTask {
                 upload_pending: a.pending_slots,
                 download_pending: b.pending_slots,
                 quarantined: a.quarantined,
-                checked: true,
+                checked: images,
             },
             _ => CleanupStatus::default(),
         }

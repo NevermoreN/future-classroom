@@ -333,7 +333,7 @@ impl<S: Send + 'static> TransactionTask<S> for TypedTask<S> {
             move || {
                 if let Some(actor) = &actor {
                     session(&identity, actor)?;
-                    if actor.origin != TrustedOrigin::Local {
+                    if actor.origin != TrustedOrigin::Local && !voice_policy {
                         return Err(if voice_policy {
                             StorageError::Voice(fc_domain::voice::VoiceError::Permission(
                                 fc_domain::auth::PermissionError::LocalOnly,

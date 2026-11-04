@@ -1465,8 +1465,15 @@ impl VoiceService {
         issued: fc_ports::command_window::IssuedCommand,
     ) -> Result<Self> {
         use fc_ports::command_window::*;
-        if lease.origin() != TrustedOrigin::Local
-            || issued.family != CommandFamily::Voice
+        if lease.origin() == TrustedOrigin::Web {
+            let snapshot = self
+                .inner
+                .authority
+                .snapshot()
+                .map_err(|_| BackendError::Closed)?;
+            self.management_actor(lease, self.inner.control.generation(), &snapshot)?;
+        }
+        if issued.family != CommandFamily::Voice
             || issued.owner != CommandOwner::authenticated(&self.actor(lease, false)?)
         {
             return Err(BackendError::Storage(StorageError::CommandNotIssued));
