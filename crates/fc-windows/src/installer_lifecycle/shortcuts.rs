@@ -8,7 +8,7 @@ use std::{
 use windows::{
     core::{Error, Interface, Result, HSTRING},
     Win32::{
-        Foundation::E_ACCESSDENIED,
+        Foundation::{E_ACCESSDENIED, E_FAIL},
         Storage::FileSystem::FILE_ATTRIBUTE_REPARSE_POINT,
         System::Com::{
             CoCreateInstance, CoInitializeEx, CoUninitialize, IPersistFile, CLSCTX_INPROC_SERVER,
@@ -153,24 +153,39 @@ fn reconcile_directory(directory: &Path, target: &Path, command: SetupCommand) -
     }
     Ok(())
 }
+fn on_shell_thread(action: impl FnOnce() -> Result<()> + Send + 'static) -> Result<()> {
+    // MSI discovery may initialize the caller's COM apartment as MTA. Shell
+    // integration owns one fresh STA, and joins it before returning; no COM
+    // object or apartment is transferred back to the transaction caller.
+    std::thread::Builder::new()
+        .name("fc-setup-shell".into())
+        .spawn(move || {
+            let _apartment = Apartment::new()?;
+            action()
+        })?
+        .join()
+        .map_err(|_| Error::from_hresult(E_FAIL))?
+}
 pub(super) fn reconcile(command: SetupCommand) -> Result<()> {
-    let _apartment = Apartment::new()?;
-    let identity =
-        InstallIdentity::for_current_user().map_err(|_| Error::from_hresult(E_ACCESSDENIED))?;
-    let target = identity
-        .local
-        .join("Programs")
-        .join("FutureClassroom")
-        .join("fc-bootstrap.exe");
-    for directory in [folder(&FOLDERID_Desktop)?, folder(&FOLDERID_Programs)?] {
-        reconcile_directory(&directory, &target, command)?;
-    }
-    Ok(())
+    on_shell_thread(move || {
+        let identity =
+            InstallIdentity::for_current_user().map_err(|_| Error::from_hresult(E_ACCESSDENIED))?;
+        let target = identity
+            .local
+            .join("Programs")
+            .join("FutureClassroom")
+            .join("fc-bootstrap.exe");
+        for directory in [folder(&FOLDERID_Desktop)?, folder(&FOLDERID_Programs)?] {
+            reconcile_directory(&directory, &target, command)?;
+        }
+        Ok(())
+    })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use windows::Win32::System::Com::COINIT_MULTITHREADED;
     #[test]
     fn repair_and_uninstall_preserve_unrelated_links_and_do_not_duplicate_owned_links() {
         let _serial = crate::NATIVE_TEST_SERIAL
@@ -202,5 +217,51 @@ mod tests {
         reconcile_directory(&directory, &target, SetupCommand::Uninstall).unwrap();
         assert!(!ours.exists());
         assert_eq!(std::fs::read(&unrelated).unwrap(), b"unrelated user file");
+    }
+
+    #[test]
+    fn mta_caller_removes_owned_link_after_target_directory_is_deleted() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        // Match a Setup thread whose earlier MSI discovery chose MTA. The old
+        // inline STA initialization rejects this exact caller with 0x80010106.
+        unsafe {
+            CoInitializeEx(None, COINIT_MULTITHREADED).ok().unwrap();
+        }
+        let _caller_apartment = Apartment;
+        let error = Apartment::new().err().expect("MTA cannot become STA");
+        assert_eq!(error.code(), windows::core::HRESULT(0x80010106u32 as i32));
+        eprintln!("INLINE_STA_HRESULT=0x{:08X}", error.code().0 as u32);
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let directory = std::env::temp_dir().join(format!(
+            "FC-Shortcut-Missing-{}-{unique}",
+            std::process::id()
+        ));
+        std::fs::create_dir(&directory).unwrap();
+        struct Cleanup(PathBuf);
+        impl Drop for Cleanup {
+            fn drop(&mut self) {
+                let _ = std::fs::remove_dir_all(&self.0);
+            }
+        }
+        let _cleanup = Cleanup(directory.clone());
+        let installed = directory.join("installed");
+        std::fs::create_dir(&installed).unwrap();
+        let target = installed.join("fc-bootstrap.exe");
+        std::fs::write(&target, b"isolated shortcut target").unwrap();
+        let work_directory = directory.clone();
+        on_shell_thread(move || {
+            reconcile_directory(&work_directory, &target, SetupCommand::Install)?;
+            std::fs::remove_file(&target)?;
+            std::fs::remove_dir(&installed)?;
+            assert_eq!(owned(&work_directory.join(NAMES[0]), &target)?, Some(true));
+            reconcile_directory(&work_directory, &target, SetupCommand::Uninstall)
+        })
+        .unwrap();
+        assert_eq!(std::fs::read_dir(&directory).unwrap().count(), 0);
     }
 }

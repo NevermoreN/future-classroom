@@ -48,7 +48,13 @@ pub fn run_setup(command: SetupCommand) -> Result<u32> {
     if result.installation_succeeded() {
         // This is deliberately after original MSI settlement. A Shell failure
         // cannot be reported as transaction rollback or authorize payload edits.
-        super::shortcuts::reconcile(command).map_err(|_| LifecycleError::ShellIntegration)?;
+        super::shortcuts::reconcile(command).map_err(|error| {
+            eprintln!(
+                "setup_shell_integration_failed hresult=0x{:08X}",
+                error.code().0 as u32
+            );
+            LifecycleError::ShellIntegration
+        })?;
         Ok(0)
     } else if result.install_return != 0 {
         Ok(result.install_return)
