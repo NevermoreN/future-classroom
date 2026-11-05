@@ -1,9 +1,33 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { runInNewContext } from 'node:vm'
 import { serviceWorkerSource } from '../scripts/pwa-build'
 import { installGuidance } from '../src/pwa-install'
+import PwaInstallPrompt from '../src/PwaInstallPrompt'
 
 describe('PWA installation guidance', () => {
+  afterEach(() => vi.unstubAllGlobals())
+  function renderPrompt(userAgent: string, installed = false, dismissed = false) {
+    vi.stubGlobal('window', { matchMedia: () => ({ matches: installed }), isSecureContext: true })
+    vi.stubGlobal('navigator', { userAgent, platform: 'iPhone', maxTouchPoints: 1, standalone: installed })
+    vi.stubGlobal('sessionStorage', { getItem: () => dismissed ? 'yes' : null })
+    return renderToStaticMarkup(createElement(PwaInstallPrompt))
+  }
+  it('shows iPhone sharing instructions immediately without a browser install event or extra click', () => {
+    const html = renderPrompt('iPhone Version/18.0 Mobile Safari/604.1')
+    expect(html).toContain('添加到桌面提示')
+    expect(html).toContain('分享')
+    expect(html).toContain('添加到主屏幕')
+    expect(html).toContain('编辑操作')
+    expect(html).not.toContain('>安装到桌面<')
+  })
+  it('directs embedded iPhone browsers to Safari and retains help after dismissal', () => {
+    expect(renderPrompt('iPhone MicroMessenger')).toContain('系统浏览器')
+    expect(renderPrompt('iPhone', false, true)).toContain('安装帮助')
+    expect(renderPrompt('iPhone', false, true)).not.toContain('添加到桌面提示')
+    expect(renderPrompt('iPhone', true)).toBe('')
+  })
   it('offers actual Safari steps on iPhone and touch iPad, and external-browser guidance inside chat apps', () => {
     const environment = { userAgent: 'iPhone', platform: 'iPhone', touchPoints: 1, standalone: false }
     expect(installGuidance(environment).steps).toContain('分享')

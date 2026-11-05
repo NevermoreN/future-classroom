@@ -34,7 +34,7 @@ export default function PwaInstallPrompt() {
   }
   if (installed) return null
   if ((hidden || !guidance.mobile) && !details) return <div className="pwa-help"><button type="button" onClick={() => setDetails(true)}>添加到桌面 / 安装帮助</button></div>
-  return <aside className="pwa-install" aria-label="添加到桌面提示"><div><strong>添加到手机桌面，下次直接打开</strong><p>无需安装也可正常使用，安装不会代替账号登录。</p>{details && <div className="pwa-install-details"><p>{guidance.steps}</p><p>首次使用请先由管理员协助信任学校证书，再通过可信 HTTPS 地址访问。安装到桌面与证书信任是两步操作。</p><p>当前若是教室直连，添加后仍连接此地址；学校入口部署后才提供全校班级选择。</p>{!window.isSecureContext && <p>当前页面不是可信安全连接，无法安装应用。请使用管理员提供并已完成证书信任的 HTTPS 地址。</p>}</div>}{notice && <p role="status">{notice}</p>}</div><div className="pwa-install-actions"><button type="button" disabled={busy} onClick={() => { void install() }}>{deferred ? '安装到桌面' : '查看添加方法'}</button><button type="button" onClick={later}>稍后</button></div></aside>
+  return <aside className="pwa-install" aria-label="添加到桌面提示"><div><strong>添加到手机桌面，下次直接打开</strong><p className="pwa-install-steps">{guidance.steps}</p>{details && <div className="pwa-install-details"><p>无需安装也可正常使用，安装不会代替账号登录。</p><p>首次使用请先由管理员协助信任学校证书，再通过可信 HTTPS 地址访问。安装到桌面与证书信任是两步操作。</p><p>当前若是教室直连，添加后仍连接此地址；学校入口部署后才提供全校班级选择。</p>{!window.isSecureContext && <p>当前页面不是可信安全连接，无法安装应用。请使用管理员提供并已完成证书信任的 HTTPS 地址。</p>}</div>}{notice && <p role="status">{notice}</p>}</div><div className="pwa-install-actions"><button type="button" disabled={busy} onClick={() => { void install() }}>{deferred ? '安装到桌面' : '连接与安装说明'}</button><button type="button" onClick={later}>稍后</button></div></aside>
 }
 
 export function registerPwaWorker() {
