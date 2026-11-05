@@ -161,7 +161,8 @@ pub(in crate::installer_lifecycle) fn qualify(
             .to_owned();
         for entry in &old.entries {
             let baseline = reader.resources.handles.len();
-            let file = reader.pin(&install.join(&entry.path), true)?;
+            let path = effects::manifest_path(&install, &entry.path)?;
+            let file = reader.pin(&path, true)?;
             if reader.size(file)? != u64::from(entry.bytes)
                 || reader.resources.digest(file, LIMIT, reader.deadline)? != entry.sha256
             {

@@ -918,7 +918,7 @@ impl Drop for Proof {
     }
 }
 
-fn manifest_path(base: &Path, relative: &str) -> Result<PathBuf> {
+pub(super) fn manifest_path(base: &Path, relative: &str) -> Result<PathBuf> {
     // The closed manifest uses '/' on the wire. Push only its validated single
     // components so the native DOS path never retains a wire separator. The
     // fixed base and the external/native path policy remain unchanged.
@@ -1375,6 +1375,17 @@ mod tests {
     use super::super::super::super::broker::manifest::Entry;
     use super::*;
     use std::{fs, os::windows::io::AsRawHandle};
+
+    #[test]
+    fn manifest_wire_paths_become_native_paths_without_relaxing_path_checks() {
+        let base = Path::new(r"C:\FutureClassroom");
+        assert!(valid_path(&base.join("web/index.html")).is_err());
+        let path = manifest_path(base, "web/index.html").unwrap();
+        assert_eq!(path, Path::new(r"C:\FutureClassroom\web\index.html"));
+        assert!(!path.as_os_str().to_string_lossy().contains('/'));
+        assert!(valid_path(&path).is_ok());
+        assert!(manifest_path(base, "web/../index.html").is_err());
+    }
 
     #[test]
     fn setup_uninstall_requires_same_manifest_and_absence_not_present_or_partial() {
