@@ -443,10 +443,11 @@ impl UpdateNetwork {
             }
             Ok(NetworkIoResult::Bytes { bytes, eof }) => {
                 let end = record.offset + bytes.len() as u64;
+                // A nonempty final Read need not observe physical file EOF.
                 if bytes.is_empty()
                     || bytes.len() > CHUNK
                     || end > record.end
-                    || eof != (end == record.end)
+                    || eof && end != record.end
                 {
                     record.closed = true;
                     let _ = host.cancel(token);

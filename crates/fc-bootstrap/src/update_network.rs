@@ -768,7 +768,7 @@ mod tests {
                         let end = (offset as usize + length).min(payload.len());
                         NetworkIoResult::Bytes {
                             bytes: payload[offset as usize..end].to_vec(),
-                            eof: end == payload.len(),
+                            eof: end == offset as usize,
                         }
                     }
                     NetworkOperation::BeginDownload { target: actual } => {
