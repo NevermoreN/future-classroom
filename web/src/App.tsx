@@ -86,10 +86,11 @@ export default function App() {
   if (route === '#/connect') return <QuickConnect />
   if (route === '#/about') return <About />
   const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(window.location.hostname)
+  if (route === '#/updates' && !loopback) return <main className="software-updates"><h1>软件更新</h1><p>请在教室电脑上右键未来教室图标，打开设置后管理软件更新。</p><a href="#/rooms">返回班级首页</a></main>
   if (route === '#/rooms' || !loopback && ['', '#', '#/'].includes(route)) return <ClassroomHome installed={installed} onInstallHelp={() => window.dispatchEvent(new Event(installHelpEvent))} />
-  return <>{route === '#/classroom' && <nav className="pwa-help" aria-label="班级切换"><a href="#/rooms">← 返回班级列表</a></nav>}<ManagementApp updates={route === '#/updates'} /></>
+  return <>{route === '#/classroom' && <nav className="pwa-help" aria-label="班级切换"><a href="#/rooms">← 返回班级列表</a></nav>}<ManagementApp updates={route === '#/updates'} localControl={loopback} /></>
 }
-function ManagementApp({ updates }: { updates: boolean }) {
+function ManagementApp({ updates, localControl }: { updates: boolean; localControl: boolean }) {
   const [forgot, setForgot] = useState(false)
   const [repair] = useState(repairBootstrap)
   const [resumeMaintenance, setResumeMaintenance] = useState(() => !!loadMaintenance())
@@ -111,7 +112,7 @@ function ManagementApp({ updates }: { updates: boolean }) {
   return <div className={view.phase === 'authenticated' ? 'app-shell authenticated-shell' : 'app-shell'}><div className="sr-only" role="status" aria-live="polite">{view.phase === 'authenticated' ? '白板已确认登录，管理页面已就绪。' : view.phase === 'logout-unknown' ? '注销结果尚未确认，需要主动核对白板会话。' : ''}</div><a className="skip-link" href="#main-content">跳到主要内容</a>
     <header className="site-header">{view.phase === 'authenticated' ? <div className="teacher-brand"><BookOpen size={30} /><strong>{view.session.principal.role === 'GLOBAL_ADMIN' ? '全局主管理员' : view.session.principal.role === 'TEACHER_ADMIN' ? '教师管理员' : '普通用户'} · {view.session.principal.displayName}</strong></div> : <Brand />}<div className="header-right"><span className={`connection-status ${connected ? 'connected' : ''}`}><span />{connected ? '白板连接已核验' : busy ? '正在检查连接' : '连接待核验'}</span>{view.phase === 'authenticated' ? <span className="teacher-identity"><UserRound size={20} />{view.session.principal.displayName}</span> : <span className="workspace-label">教室管理</span>}</div></header>
     {view.phase === 'authenticated' && <TransferOutcomePanel session={view.session} />}
-    {view.phase === 'authenticated' && view.session.principal.role === 'GLOBAL_ADMIN' && <nav className="pwa-help" aria-label="软件维护"><a href="#/updates">软件更新</a></nav>}
+    {localControl && view.phase === 'authenticated' && view.session.principal.role === 'GLOBAL_ADMIN' && <nav className="pwa-help" aria-label="软件维护"><a href="#/updates">软件更新</a></nav>}
     {view.phase === 'authenticated' && view.notice && <p className="notice" role="status">{view.notice}</p>}
     {view.phase === 'authenticated' ? view.session.recoveryCode ? <main className="workspace"><RecoveryCodeNotice code={view.session.recoveryCode} onDone={() => controller.current?.acknowledgeRecoveryCode()} /></main> : view.session.mustChangePassword || view.passwordChange ? <>{!view.session.mustChangePassword && <AccountSecurityPanel session={view.session} onRevoked={() => controller.current?.invalidate()} />}<PasswordForm required={!!view.session.mustChangePassword} busy={!!view.passwordBusy} notice={view.passwordNotice} onSubmit={form => { void controller.current?.changePassword(form) }} onCancel={() => controller.current?.cancelPasswordChange()} onLogout={() => { void controller.current?.logout() }} /></> : <TeacherWorkspace onPasswordChange={() => controller.current?.showPasswordChange()} session={view.session} onLogout={() => { void controller.current?.logout() }} onRefresh={() => { void controller.current?.connect() }} onRevoked={() => controller.current?.invalidate()} /> : <main id="main-content" className="pairing-layout">
       <section className="intro-panel"><span className="intro-tag"><Sparkles size={14} />让教学，轻松一步</span><h1>连接你的教室，<br />专注每一堂课<span>。</span></h1><p className="intro-description">从自己的设备安全连接白板。<br />课堂里的准备与协作，从这里开始。</p>
