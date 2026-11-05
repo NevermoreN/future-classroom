@@ -30,20 +30,21 @@ export function connectionInfo(raw: unknown): ConnectionInfo {
 }
 
 export function ConnectionDetails({ info }: { info: ConnectionInfo }) {
+  const entryUrl = info.entryUrl ? `${info.entryUrl}#/rooms` : null
   const [copyNotice, setCopyNotice] = useState('')
   useEffect(() => setCopyNotice(''), [info.entryUrl])
   async function copy() {
-    try { await navigator.clipboard.writeText(info.entryUrl!); setCopyNotice('地址已复制。') }
+    try { await navigator.clipboard.writeText(entryUrl!); setCopyNotice('地址已复制。') }
     catch { setCopyNotice('未能自动复制，请选中下方完整地址后复制。') }
   }
   return <>
     <p className="quick-connect-class"><strong>{info.schoolName}</strong><span>{info.className ?? '尚未绑定班级'}</span></p>
-    {info.entryUrl ? <>
-      <div className="quick-connect-qr"><QRCodeSVG value={info.entryUrl} size={288} marginSize={4} level="M" title="扫码打开班级入口" /></div>
+    {entryUrl ? <>
+      <div className="quick-connect-qr"><QRCodeSVG value={entryUrl} size={288} marginSize={4} level="M" title="扫码打开班级入口" /></div>
       <p className="quick-connect-kind">班级入口 · 由本教室提供</p>
       <p>扫码后先选择班级，再进入该教室网站。添加到手机桌面后，可从同一个入口查找和切换班级。</p>
-      <p className="quick-connect-address"><a href={info.entryUrl} target="_blank" rel="noopener noreferrer">{info.entryUrl}</a></p>
-      <div className="quick-connect-actions"><Button type="button" onClick={() => { void copy() }}>复制地址</Button><a className="quick-connect-open" href={info.entryUrl} target="_blank" rel="noopener noreferrer">打开网站</a></div>
+      <p className="quick-connect-address"><a href={entryUrl} target="_blank" rel="noopener noreferrer">{entryUrl}</a></p>
+      <div className="quick-connect-actions"><Button type="button" onClick={() => { void copy() }}>复制地址</Button><a className="quick-connect-open" href={entryUrl} target="_blank" rel="noopener noreferrer">打开网站</a></div>
       <p role="status">{copyNotice}</p>
       <p className="quick-connect-note">请保持提供入口的电脑在线，手机连接学校网络。自动查找范围受校园网络和 Wi-Fi 隔离设置影响。</p>
     </> : <p className="notice" role="status">{info.unavailableReason} 请管理员完成连接设置，再刷新本页。</p>}

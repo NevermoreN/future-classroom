@@ -8,7 +8,8 @@ describe('public quick connection', () => {
   it('renders a local SVG QR with visible complete URL and trust instructions', () => {
     const info = connectionInfo(ready), html = renderToStaticMarkup(createElement(ConnectionDetails, { info }))
     expect(html).toContain('<svg')
-    expect(html).toContain('https://192.168.10.212:8443/fc/')
+    expect(html).toContain('href="https://192.168.10.212:8443/fc/#/rooms"')
+    expect(html).not.toContain('href="https://192.168.10.212:8443/fc/"')
     expect(html).toContain('三年级二班')
     expect(html).toContain('复制地址')
     expect(html).toContain('学校根证书')
