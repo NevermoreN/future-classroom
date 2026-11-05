@@ -14,7 +14,7 @@ pub(super) fn unhex<const N: usize>(value: &[u8]) -> Option<[u8; N]> {
         return None;
     }
     let mut b = [0; N];
-    for (i, p) in value.chunks_exact(2).enumerate() {
+    for (i, p) in value.as_chunks::<2>().0.iter().enumerate() {
         let digit = |b| match b {
             b'0'..=b'9' => Some(b - b'0'),
             b'a'..=b'f' => Some(b - b'a' + 10),
