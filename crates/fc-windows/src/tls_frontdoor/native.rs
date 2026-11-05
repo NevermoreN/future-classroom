@@ -390,13 +390,15 @@ impl Owner {
                 return Err(format!("WSAStartup: {code}"));
             }
             self.resources.winsock = true;
+            // Win7 SP1 supports atomic non-inheritable creation. An update
+            // child must never retain a listener after its Net owner exits.
             self.resources.listener = WSASocketW(
                 self.address_family().0 as i32,
                 SOCK_STREAM.0,
                 IPPROTO_TCP.0,
                 None,
                 0,
-                WSA_FLAG_OVERLAPPED,
+                WSA_FLAG_OVERLAPPED | WSA_FLAG_NO_HANDLE_INHERIT,
             )
             .map_err(|e| format!("TLS listener: {e}"))?;
             check(
@@ -460,7 +462,7 @@ impl Owner {
                     IPPROTO_TCP.0,
                     None,
                     0,
-                    WSA_FLAG_OVERLAPPED,
+                    WSA_FLAG_OVERLAPPED | WSA_FLAG_NO_HANDLE_INHERIT,
                 )
                 .map_err(|e| format!("TLS accept socket: {e}"))?;
                 let success = accept(

@@ -147,13 +147,14 @@ impl Owner {
                 return Err(format!("WSAStartup: {code}"));
             }
             self.started_winsock = true;
+            // Keep sockets owned by this process even when a child is spawned.
             self.listener = WSASocketW(
                 AF_INET.0 as i32,
                 SOCK_STREAM.0,
                 IPPROTO_TCP.0,
                 None,
                 0,
-                WSA_FLAG_OVERLAPPED,
+                WSA_FLAG_OVERLAPPED | WSA_FLAG_NO_HANDLE_INHERIT,
             )
             .map_err(|e| format!("listener socket: {e}"))?;
             check(
@@ -222,7 +223,7 @@ impl Owner {
                     IPPROTO_TCP.0,
                     None,
                     0,
-                    WSA_FLAG_OVERLAPPED,
+                    WSA_FLAG_OVERLAPPED | WSA_FLAG_NO_HANDLE_INHERIT,
                 )
                 .map_err(|e| format!("accept socket: {e}"))?;
                 slot.deadline = Deadline::posted(Instant::now());

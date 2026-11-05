@@ -8,6 +8,7 @@ use windows::{core::HRESULT, Win32::Foundation::ERROR_SHARING_VIOLATION};
 
 pub mod broker;
 mod update_observation;
+pub(crate) use update_observation::reconcile_failed_update;
 pub use update_observation::{
     inspect_update_sources, qualify_update_predecessor, UpdateSourceFacts,
 };

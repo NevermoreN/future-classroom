@@ -53,7 +53,7 @@ impl TlsHttpHost {
                 IPPROTO_TCP.0,
                 None,
                 0,
-                WSA_FLAG_OVERLAPPED,
+                WSA_FLAG_OVERLAPPED | WSA_FLAG_NO_HANDLE_INHERIT,
             )
         }
         .map_err(|e| format!("update socket: {e}"))?;

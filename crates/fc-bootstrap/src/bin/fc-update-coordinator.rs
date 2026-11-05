@@ -5,6 +5,9 @@ fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let result = match args.as_slice() {
         [job] => fc_windows::update_install::run_handoff(job),
+        [mode, job] if mode == "--reconcile-failed" => {
+            fc_windows::update_install::reconcile_failed_handoff(job)
+        }
         _ => Err(fc_windows::update_install::UpdateInstallError::Invalid),
     };
     if result.is_err() {

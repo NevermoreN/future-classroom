@@ -24,3 +24,21 @@ pub fn inspect_update_sources(directory: &Path) -> Result<UpdateSourceFacts> {
 pub fn qualify_update_predecessor(wire: &[u8], expected: &ExactPredecessor) -> Result<()> {
     native::broker::maintenance::update::qualify(wire, expected)
 }
+
+pub(crate) fn reconcile_failed_update(
+    wire: &[u8],
+    expected: &ExactPredecessor,
+    target: &str,
+    setup: &Path,
+    coordinator: &Path,
+    commit_failed: impl FnOnce() -> Result<()>,
+) -> Result<()> {
+    native::broker::maintenance::update::reconcile_failed(
+        wire,
+        expected,
+        target,
+        setup,
+        coordinator,
+        commit_failed,
+    )
+}

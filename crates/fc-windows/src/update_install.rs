@@ -286,6 +286,48 @@ pub fn run_handoff(text: &str) -> Result<()> {
     result
 }
 
+/// Explicit same-user negative reconciliation. Never starts Setup, changes
+/// teaching data or infers a successful install from a process disappearing.
+pub fn reconcile_failed_handoff(text: &str) -> Result<()> {
+    let id = job_id(text)?;
+    let identity = InstallIdentity::for_current_user()?;
+    let path = record_path(&identity, id)?;
+    let mut file = open_record(&path, false)?;
+    let mut record = read_record(&mut file)?;
+    if record.sid != crate::system::current_user_sid()?
+        || record.request.job_id != id
+        || record.state != HandoffState::Installing
+    {
+        return Err(UpdateInstallError::ReconcileRequired);
+    }
+    let setup = record.request.ready_directory.join("Setup.exe");
+    let _setup = digest_file(&setup, record.request.setup_sha256, 64 * 1024 * 1024)?;
+    let _msi = digest_file(
+        &record.request.ready_directory.join("FutureClassroom.msi"),
+        record.request.msi_sha256,
+        64 * 1024 * 1024,
+    )?;
+    let facts = lifecycle::inspect_update_sources(&record.request.ready_directory)?;
+    if facts.product_code != record.product_code
+        || facts.version != record.version
+        || facts.installed_exe_sha256 != record.installed_exe_sha256
+    {
+        return Err(UpdateInstallError::Invalid);
+    }
+    lifecycle::reconcile_failed_update(
+        &facts.predecessor_wire,
+        &facts.predecessor,
+        &facts.product_code,
+        &setup,
+        &path.with_extension("coordinator.exe"),
+        || {
+            record.state = HandoffState::Failed;
+            write_record(&mut file, &record).map_err(|_| lifecycle::LifecycleError::Faulted)
+        },
+    )?;
+    Ok(())
+}
+
 fn run_install(identity: &InstallIdentity, file: &mut File, record: &mut Record) -> Result<()> {
     let request = &record.request;
     let facts = lifecycle::inspect_update_sources(&request.ready_directory)?;
@@ -307,10 +349,23 @@ fn run_install(identity: &InstallIdentity, file: &mut File, record: &mut Record)
     write_record(file, record)?;
     // Fixed complete official Setup grammar. Native Setup independently checks
     // the exact predecessor, Pending, same SID, source seal and MSI settlement.
-    let status = Command::new(&setup)
+    let mut child = match Command::new(&setup)
         .arg("install")
         .current_dir(&record.request.ready_directory)
-        .status()?;
+        .spawn()
+    {
+        Ok(child) => child,
+        Err(error) => {
+            // CreateProcess returned no child. This is a known negative result,
+            // unlike an error waiting on an already-created original process.
+            record.state = HandoffState::Failed;
+            write_record(file, record)?;
+            return Err(error.into());
+        }
+    };
+    // A failed wait cannot establish installation failure or physical return;
+    // preserve Installing for native reconciliation rather than replaying it.
+    let status = child.wait()?;
     if !status.success() {
         record.state = HandoffState::Failed;
         write_record(file, record)?;

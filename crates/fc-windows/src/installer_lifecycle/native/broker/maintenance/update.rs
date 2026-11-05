@@ -6,9 +6,9 @@ use crate::installer_lifecycle::{
 use fc_domain::updates::ExactPredecessor;
 use sha2::{Digest, Sha256};
 
-fn with_reader<T>(operation: impl FnOnce(&mut Reader) -> Result<T>) -> Result<T> {
+fn with_reader<T>(exclusive: bool, operation: impl FnOnce(&mut Reader) -> Result<T>) -> Result<T> {
     let identity = InstallIdentity::for_current_user()?;
-    let resources = Resources::open(&identity, false)?;
+    let resources = Resources::open(&identity, exclusive)?;
     let mut reader = Box::new(Reader {
         resources,
         deadline: Instant::now() + Duration::from_secs(30),
@@ -88,7 +88,7 @@ impl Reader {
 }
 
 pub(in crate::installer_lifecycle) fn inspect(directory: &Path) -> Result<UpdateSourceFacts> {
-    with_reader(|reader| {
+    with_reader(false, |reader| {
         let source = directory.join("FutureClassroom.msi");
         reader.pin(&source, true)?;
         let mut db = MSIHANDLE(0);
@@ -137,45 +137,148 @@ pub(in crate::installer_lifecycle) fn qualify(
     if &predecessor_facts(&record)? != expected {
         return Err(LifecycleError::Invalid);
     }
-    with_reader(|reader| {
-        let payload = record.payload()?;
-        let old = payload.payload();
-        let registration = registration::capture(&reader.resources, old, reader.deadline)?
-            .ok_or(LifecycleError::Invalid)?;
-        let cache = reader.pin(&registration.cache, true)?;
-        let cache_sha = reader.resources.digest(cache, LIMIT, reader.deadline)?;
-        reader.binary_facts(
-            &registration.cache,
-            payload.package(),
-            record.envelope(),
-            record.template_sha,
-            record.guard_sha,
-            false,
-        )?;
-        if reader.database(&registration.cache, payload.package())? != record.logical_sha {
+    with_reader(false, |reader| verify_predecessor(reader, &record))
+}
+
+fn verify_predecessor(
+    reader: &mut Reader,
+    record: &predecessor::PublishedPredecessor,
+) -> Result<()> {
+    let payload = record.payload()?;
+    let old = payload.payload();
+    let registration = registration::capture(&reader.resources, old, reader.deadline)?
+        .ok_or(LifecycleError::Invalid)?;
+    let cache = reader.pin(&registration.cache, true)?;
+    let cache_sha = reader.resources.digest(cache, LIMIT, reader.deadline)?;
+    reader.binary_facts(
+        &registration.cache,
+        payload.package(),
+        record.envelope(),
+        record.template_sha,
+        record.guard_sha,
+        false,
+    )?;
+    if reader.database(&registration.cache, payload.package())? != record.logical_sha {
+        return Err(LifecycleError::Invalid);
+    }
+    let install = crate::system::DataPaths::installed_bootstrap_for_current_user()?
+        .parent()
+        .ok_or(LifecycleError::Invalid)?
+        .to_owned();
+    for entry in &old.entries {
+        let baseline = reader.resources.handles.len();
+        let path = effects::manifest_path(&install, &entry.path)?;
+        let file = reader.pin(&path, true)?;
+        if reader.size(file)? != u64::from(entry.bytes)
+            || reader.resources.digest(file, LIMIT, reader.deadline)? != entry.sha256
+        {
             return Err(LifecycleError::Invalid);
         }
-        let install = crate::system::DataPaths::installed_bootstrap_for_current_user()?
-            .parent()
-            .ok_or(LifecycleError::Invalid)?
-            .to_owned();
-        for entry in &old.entries {
-            let baseline = reader.resources.handles.len();
-            let path = effects::manifest_path(&install, &entry.path)?;
-            let file = reader.pin(&path, true)?;
-            if reader.size(file)? != u64::from(entry.bytes)
-                || reader.resources.digest(file, LIMIT, reader.deadline)? != entry.sha256
-            {
-                return Err(LifecycleError::Invalid);
-            }
-            reader.close_temporary(baseline)?;
-        }
-        if reader.resources.digest(cache, LIMIT, reader.deadline)? != cache_sha
-            || registration::capture(&reader.resources, old, reader.deadline)?.as_ref()
-                != Some(&registration)
-        {
+        reader.close_temporary(baseline)?;
+    }
+    if reader.resources.digest(cache, LIMIT, reader.deadline)? != cache_sha
+        || registration::capture(&reader.resources, old, reader.deadline)?.as_ref()
+            != Some(&registration)
+    {
+        return Err(LifecycleError::Unsettled);
+    }
+    Ok(())
+}
+
+// The intent remains exclusively locked by the same-user caller throughout.
+// This scope additionally holds the real exclusive installer/startup lease.
+pub(in crate::installer_lifecycle) fn reconcile_failed(
+    wire: &[u8],
+    expected: &ExactPredecessor,
+    target: &str,
+    setup: &Path,
+    coordinator: &Path,
+    commit_failed: impl FnOnce() -> Result<()>,
+) -> Result<()> {
+    let record = predecessor::parse(wire)?;
+    if &predecessor_facts(&record)? != expected
+        || !manifest::uuid(target)
+        || record.payload()?.payload().product == target
+    {
+        return Err(LifecycleError::Invalid);
+    }
+    with_reader(true, |reader| {
+        reader.no_bound_processes(setup, coordinator)?;
+        verify_predecessor(reader, &record)?;
+        let mut value = [0u16; 16];
+        let mut length = value.len() as u32;
+        let rc = unsafe {
+            MsiGetProductInfoExW(
+                &HSTRING::from(format!("{{{target}}}")),
+                None,
+                MSIINSTALLCONTEXT_USERUNMANAGED,
+                &HSTRING::from("State"),
+                Some(PWSTR(value.as_mut_ptr())),
+                Some(&mut length),
+            )
+        };
+        if rc != ERROR_UNKNOWN_PRODUCT.0 {
             return Err(LifecycleError::Unsettled);
         }
-        Ok(())
+        reader.no_bound_processes(setup, coordinator)?;
+        reader.resources.absent_pending()?;
+        reader.time()?;
+        commit_failed()
     })
+}
+
+impl Reader {
+    fn no_bound_processes(&mut self, setup: &Path, coordinator: &Path) -> Result<()> {
+        let names = [setup, coordinator].map(|path| {
+            path.file_name()
+                .and_then(|name| name.to_str())
+                .ok_or(LifecycleError::Invalid)
+        });
+        let names = [names[0]?, names[1]?];
+        self.room(1)?;
+        let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)? };
+        self.resources.add(snapshot, Role::Control);
+        let mut entry = PROCESSENTRY32W {
+            dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32,
+            ..Default::default()
+        };
+        let mut next = unsafe { Process32FirstW(snapshot, &mut entry) };
+        for _ in 0..8192 {
+            self.time()?;
+            if let Err(error) = next {
+                if error.code() != ERROR_NO_MORE_FILES.to_hresult() {
+                    return Err(error.into());
+                }
+                return self.resources.close_handle(snapshot);
+            }
+            let end = entry
+                .szExeFile
+                .iter()
+                .position(|value| *value == 0)
+                .filter(|length| *length != 0)
+                .ok_or(LifecycleError::Unsettled)?;
+            let name = String::from_utf16(&entry.szExeFile[..end])
+                .map_err(|_| LifecycleError::Unsettled)?;
+            if names.iter().any(|bound| name.eq_ignore_ascii_case(bound)) {
+                self.room(1)?;
+                let process = self.resources.process(entry.th32ProcessID, Role::Control)?;
+                let image = image_path(process)?;
+                if [setup, coordinator].iter().any(|bound| {
+                    image
+                        .as_os_str()
+                        .to_string_lossy()
+                        .eq_ignore_ascii_case(&bound.as_os_str().to_string_lossy())
+                }) {
+                    match unsafe { WaitForSingleObject(process, 0) } {
+                        WAIT_OBJECT_0 => (),
+                        WAIT_TIMEOUT => return Err(LifecycleError::GuardianRunning),
+                        _ => return Err(LifecycleError::Unsettled),
+                    }
+                }
+                self.resources.close_handle(process)?;
+            }
+            next = unsafe { Process32NextW(snapshot, &mut entry) };
+        }
+        Err(LifecycleError::Invalid)
+    }
 }
