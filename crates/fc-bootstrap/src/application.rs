@@ -4750,9 +4750,14 @@ impl App {
     fn close_public_lesson(&mut self) {
         if let Some(flow) = self.public_lesson_flow.take() {
             flow.cancel();
+            // Explicit close also revokes the entry when the window was hidden
+            // or Windows emitted no foreground event. Renew it without repaint.
+            self.desktop.renew_lesson_entry();
             self.generation = self.generation.saturating_add(1);
             if let Some(pending) = &self.pending {
                 pending.ticket.cancel();
+            } else {
+                self.desktop.finish_lesson_transition();
             }
             self.public_lesson_editor = None;
             self.lesson_flow_active = false;
@@ -4846,7 +4851,11 @@ impl App {
             }
             Ok(public_lesson_editor::Command::Apply(action)) => {
                 if let Some(backend) = &self.backend {
+                    self.desktop.begin_lesson_transition();
                     self.submit(Work::ChangePublicLesson(backend.clone(), guard, action))?;
+                    if self.pending.is_none() {
+                        self.desktop.finish_lesson_transition();
+                    }
                 }
                 Ok(())
             }
@@ -5852,6 +5861,9 @@ impl App {
             self.native_readback_pending = false;
             let completed_pending = self.pending.take();
             let public_lesson = completed_pending.as_ref().is_some_and(|p| p.public_lesson);
+            if public_lesson {
+                self.desktop.finish_lesson_transition();
+            }
             let desktop_material_open = completed_pending
                 .as_ref()
                 .is_some_and(|p| p.desktop_material_open);

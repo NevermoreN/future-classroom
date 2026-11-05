@@ -32,9 +32,79 @@ struct Group {
     dirty: Option<RECT>,
 }
 impl TreeRenderer {
+    pub(super) fn clear_input(&self) {
+        for group in &self.groups {
+            group.input.clear_input();
+        }
+    }
     pub(super) fn hide(&self) {
         for g in &self.groups {
             g.input.hide();
+        }
+    }
+    fn fixed_public_group(&self, group: &Group) -> bool {
+        let mut has_card = false;
+        for (index, node) in self.tree.nodes.iter().enumerate() {
+            if !descendant(&self.tree, index, group.node) {
+                continue;
+            }
+            if node.key.scope != fc_domain::layout::LayoutScope::Public {
+                return false;
+            }
+            if let Some(index) = node.card_index {
+                has_card = true;
+                if !self.original_cards.get(index).is_some_and(|card| {
+                    matches!(
+                        card.kind,
+                        ComponentKind::Clock
+                            | ComponentKind::Date
+                            | ComponentKind::Schedule
+                            | ComponentKind::DateCountdown
+                            | ComponentKind::Homework
+                            | ComponentKind::Reminder
+                    ) && !matches!(card.content, CardContent::LessonControl { .. })
+                }) {
+                    return false;
+                }
+            }
+        }
+        has_card
+    }
+    pub(super) fn hide_lesson_content(&self) {
+        for group in &self.groups {
+            group.input.clear_input();
+            if !self.fixed_public_group(group) {
+                group.input.surface.window.hide();
+            }
+        }
+    }
+}
+pub(super) fn retain_lesson_windows(renderer: &mut DesktopRenderer) {
+    if !renderer.lesson_transition {
+        return;
+    }
+    if let Some(mut tree) = renderer.tree.take() {
+        let retained: Vec<_> = tree
+            .groups
+            .iter()
+            .map(|group| tree.fixed_public_group(group))
+            .collect();
+        for (group, fixed) in tree.groups.drain(..).zip(retained) {
+            group.input.clear_input();
+            // Only already visible owners may bridge one replacement. The
+            // validated tree admits at most 128 groups, with no retained DIBs.
+            if fixed
+                && renderer.retained_windows.len() < 128
+                && unsafe { IsWindowVisible(group.input.surface.window.0) }.as_bool()
+            {
+                let InputStrip { surface, state } = group.input;
+                renderer.retained_windows.push(RetainedDesktopWindow {
+                    key: tree.tree.nodes[group.node].key,
+                    rect: surface.rect,
+                    window: surface.window,
+                    state,
+                });
+            }
         }
     }
 }
@@ -842,6 +912,7 @@ pub(super) fn present(
         });
     if changed {
         renderer.hide();
+        retain_lesson_windows(renderer);
         renderer.tree = None;
         renderer.cards.clear();
         renderer.last_scene = None;
@@ -864,9 +935,21 @@ pub(super) fn present(
         for node in roots {
             let rect = group_bounds(source, node)?;
             charge(&mut total, rect)?;
+            let mut input = renderer.input_strip(rect)?;
+            if let Some(index) = renderer
+                .retained_windows
+                .iter()
+                .position(|old| old.key == source.nodes[node].key && old.rect == rect)
+            {
+                let old = renderer.retained_windows.swap_remove(index);
+                // Replace the pixels of the same layered HWND in one upload;
+                // overlapping old/new translucent windows would change opacity.
+                input.surface.window = old.window;
+                input.state = old.state;
+            }
             groups.push(Group {
                 node,
-                input: renderer.input_strip(rect)?,
+                input,
                 dirty: None,
             });
         }
@@ -1192,7 +1275,17 @@ pub(super) fn present(
     })();
     renderer.tree = Some(t);
     if result.as_ref().is_ok_and(|o| *o == PresentOutcome::Hidden) || result.is_err() {
+        if result.is_err() {
+            renderer.end_lesson_transition();
+        }
         renderer.hide();
+    } else if result.as_ref().is_ok_and(|o| {
+        matches!(
+            o,
+            PresentOutcome::Published | PresentOutcome::Unchanged | PresentOutcome::Offscreen
+        )
+    }) {
+        renderer.clear_retained_windows();
     }
     refresh_metrics(renderer);
     result
@@ -1699,6 +1792,130 @@ mod tests {
             clock_rollback: false,
             public_calendar_unverified: false,
             lesson_control: None,
+        }
+    }
+    #[test]
+    fn lesson_transition_keeps_only_fixed_public_windows_and_revokes_old_input() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let (_publisher, gate) = authority();
+        let mut scene = sample();
+        let mut clock = scene.cards[0].clone();
+        clock.kind = ComponentKind::Clock;
+        clock.rect.x += 260.;
+        scene.cards.push(clock);
+        let tree = scene.paint_tree.as_mut().unwrap();
+        let mut nodes = tree.nodes.clone();
+        for node in &mut nodes {
+            node.key = key(node.key.id.get() + 3);
+            node.parent = node.parent.map(|parent| key(parent.id.get() + 3));
+            node.rect.x += 260.;
+            node.clip.x += 260.;
+            if node.card_index.is_some() {
+                node.card_index = Some(1);
+                node.widget_kind = Some(fc_domain::layout::WidgetKind::Clock);
+            }
+        }
+        tree.nodes.extend(nodes);
+        let mut renderer = DesktopRenderer::new_hidden().unwrap();
+        assert_eq!(
+            renderer
+                .present(&scene, now(), &guard(&gate, scene.generation))
+                .unwrap(),
+            PresentOutcome::Offscreen
+        );
+        let previous = scene.generation;
+        let handles: Vec<_> = renderer
+            .tree
+            .as_ref()
+            .unwrap()
+            .groups
+            .iter()
+            .map(|g| g.input.surface.window.0)
+            .collect();
+        scene.generation = SceneGeneration::new(2);
+        renderer.renew_input_generation(previous, scene.generation);
+        assert!(renderer.tree.as_ref().unwrap().groups.iter().all(|g| g
+            .input
+            .state
+            .context
+            .borrow()
+            .is_none()));
+        renderer
+            .present(&scene, now(), &guard(&gate, scene.generation))
+            .unwrap();
+        assert_eq!(
+            handles,
+            renderer
+                .tree
+                .as_ref()
+                .unwrap()
+                .groups
+                .iter()
+                .map(|g| g.input.surface.window.0)
+                .collect::<Vec<_>>()
+        );
+        let (material, clock) = {
+            let tree = renderer.tree.as_ref().unwrap();
+            assert_eq!(tree.groups.len(), 2);
+            for group in &tree.groups {
+                assert!(group.input.state.context.borrow().is_some());
+                // No pixels are uploaded: make the fixture HWND visible solely
+                // to inspect retention without displaying test content.
+                unsafe {
+                    let _ = ShowWindow(group.input.surface.window.0, SW_SHOWNOACTIVATE);
+                }
+            }
+            (
+                tree.groups[0].input.surface.window.0,
+                tree.groups[1].input.surface.window.0,
+            )
+        };
+        renderer.begin_lesson_transition();
+        assert!(!unsafe { IsWindowVisible(material) }.as_bool());
+        assert!(unsafe { IsWindowVisible(clock) }.as_bool());
+        for group in &renderer.tree.as_ref().unwrap().groups {
+            assert!(group.input.state.context.borrow().is_none());
+            assert!(group.input.state.turns.borrow().is_empty());
+        }
+        renderer.release_surfaces();
+        assert_eq!(renderer.retained_windows.len(), 1);
+        assert!(unsafe { IsWindowVisible(clock) }.as_bool());
+        assert!(renderer.cards.is_empty());
+        scene.generation = SceneGeneration::new(3);
+        assert_eq!(
+            renderer
+                .present(&scene, now(), &guard(&gate, scene.generation))
+                .unwrap(),
+            PresentOutcome::Offscreen
+        );
+        assert!(renderer.retained_windows.is_empty());
+        assert!(unsafe { IsWindow(Some(clock)) }.as_bool());
+        assert_eq!(
+            renderer.tree.as_ref().unwrap().groups[1]
+                .input
+                .surface
+                .window
+                .0,
+            clock
+        );
+        assert!(renderer.lesson_transition);
+        renderer.end_lesson_transition();
+        for group in &renderer.tree.as_ref().unwrap().groups {
+            unsafe {
+                let _ = ShowWindow(group.input.surface.window.0, SW_SHOWNOACTIVATE);
+            }
+        }
+        let mut stale = guard(&gate, scene.generation);
+        stale.current_generation = SceneGeneration::new(1);
+        assert_eq!(
+            renderer.present(&scene, now(), &stale).unwrap(),
+            PresentOutcome::Hidden
+        );
+        for group in &renderer.tree.as_ref().unwrap().groups {
+            assert!(!unsafe { IsWindowVisible(group.input.surface.window.0) }.as_bool());
+            assert!(group.input.state.context.borrow().is_none());
         }
     }
     #[test]

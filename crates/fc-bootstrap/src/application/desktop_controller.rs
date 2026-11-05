@@ -7,7 +7,7 @@ use fc_bootstrap::backend::{
 use fc_bootstrap::profile_content_cache::TextFrame;
 use fc_domain::{
     desktop::{ComponentKind, DesktopFacts},
-    ids::{Revision, SceneGeneration},
+    ids::{AuthEpoch, Revision, SceneGeneration},
     materials::MaterialCursor,
     profile_content::{PublishedContentDescriptor, PublishedContentSnapshot},
     schedule::AcademicDay,
@@ -48,14 +48,10 @@ fn time_requires_scene(
     scene: Option<&SceneSnapshot>,
     previous: Option<LocalDateTime>,
     now: LocalDateTime,
-    hints: HostHints,
+    _hints: HostHints,
 ) -> bool {
     scene.is_none_or(|scene| !scene.valid_at(now))
         || previous.is_some_and(|previous| now < previous)
-        // An external foreground revokes the published local lesson capability.
-        // Re-publication must carry a new generation instead of replaying that
-        // revoked entry when the desktop becomes available again.
-        || hints.contains(HostHints::FOREGROUND_CHANGED)
 }
 
 fn voice_only_change(status: fc_runtime::health::HealthStatus, source: Revision) -> bool {
@@ -342,6 +338,7 @@ pub(super) struct Controller {
     control: Option<SessionControl>,
     material_events: Vec<DesktopEvent>,
     lesson_event: Option<DesktopLessonStamp>,
+    lesson_transition: Option<(AuthEpoch, bool)>,
     refresh_at: Option<LocalDateTime>,
     history: BatchHistory,
     next_fetch: Instant,
@@ -489,6 +486,7 @@ impl Controller {
             control: None,
             material_events: Vec::new(),
             lesson_event: None,
+            lesson_transition: None,
             refresh_at: None,
             history: BatchHistory::default(),
             next_fetch: Instant::now(),
@@ -540,6 +538,41 @@ impl Controller {
             self.cancel_pending();
         }
     }
+    pub(super) fn begin_lesson_transition(&mut self) {
+        if let Some(control) = &self.control {
+            let status = control.health_gate().status();
+            if status.health == Health::Healthy {
+                self.lesson_transition = Some((status.auth_epoch, false));
+                self.renderer.begin_lesson_transition();
+            }
+        }
+    }
+    pub(super) fn finish_lesson_transition(&mut self) {
+        if let Some((_, finished)) = &mut self.lesson_transition {
+            *finished = true;
+        }
+    }
+    pub(super) fn renew_lesson_entry(&mut self) {
+        let Some(scene) = &mut self.scene else { return };
+        let previous = self.generation;
+        let Ok(next) = previous.next() else {
+            self.render_unavailable("桌面场景代次已耗尽，请重启程序。");
+            self.stop();
+            return;
+        };
+        self.generation = next;
+        scene.generation = next;
+        self.renderer.renew_input_generation(previous, next);
+        if let Some((generation, _)) = &mut self.images_verified {
+            if *generation == previous {
+                *generation = next;
+            }
+        }
+    }
+    fn end_lesson_transition(&mut self) {
+        self.lesson_transition = None;
+        self.renderer.end_lesson_transition();
+    }
     pub(super) fn hide(&mut self) {
         self.clear_content_observation(if self.notice.failed {
             ContentViewState::RenderFailed
@@ -572,6 +605,7 @@ impl Controller {
     }
     pub(super) fn stop(&mut self) {
         self.stopped = true;
+        self.end_lesson_transition();
         self.hide();
         if let Some(pending) = self.pending.take() {
             pending.ticket.cancel();
@@ -630,6 +664,7 @@ impl Controller {
         }
     }
     fn render_unavailable(&mut self, message: &str) {
+        self.end_lesson_transition();
         self.invalidate();
         self.clear_content_observation(ContentViewState::RenderFailed);
         self.cancel_pending();
@@ -1243,6 +1278,7 @@ impl Controller {
             || hints.contains(HostHints::SESSION_CHANGED)
             || hints.contains(HostHints::POWER_CHANGED)
         {
+            self.end_lesson_transition();
             self.hide();
             self.clear_content_observation(ContentViewState::HiddenBySession);
             self.cancel_pending();
@@ -1255,6 +1291,12 @@ impl Controller {
         };
         let gate = control.health_gate();
         let status = gate.status();
+        if self.lesson_transition.is_some_and(|(epoch, _)| {
+            epoch != status.auth_epoch
+                || !matches!(status.health, Health::Healthy | Health::AuthorityUpdating)
+        }) {
+            self.end_lesson_transition();
+        }
         let now = match clock.try_now() {
             Ok(now) => now,
             Err(_) => {
@@ -1362,6 +1404,14 @@ impl Controller {
             || time_requires_scene(self.scene.as_ref(), self.last_sample, now, hints)
             || hints.contains(HostHints::TIME_CHANGED)
             || hints.contains(HostHints::DISPLAY_CHANGED);
+        if !recompose && hints.contains(HostHints::FOREGROUND_CHANGED) {
+            // Focus revokes public lesson entry, but changes no desktop pixels.
+            // Renew only its generation and clear old queued inputs in place.
+            self.renew_lesson_entry();
+            if self.stopped {
+                return Ok(());
+            }
+        }
         if recompose {
             self.hide();
             let generation = match self.generation.next() {
@@ -1449,6 +1499,18 @@ impl Controller {
             }
         };
         self.rendered(outcome, now, health_epoch, visibility_generation);
+        if self.lesson_transition.is_some_and(|(_, finished)| finished)
+            && matches!(
+                outcome,
+                PresentOutcome::Published | PresentOutcome::Unchanged
+            )
+            && self.scene.as_ref().is_some_and(|scene| {
+                let status = gate.status();
+                status.health == Health::Healthy && status.revision == scene.source_revision
+            })
+        {
+            self.end_lesson_transition();
+        }
         if outcome == PresentOutcome::ContentPending {
             return Ok(());
         }
@@ -1591,7 +1653,7 @@ mod tests {
             sample(20),
             HostHints::default()
         ));
-        assert!(time_requires_scene(
+        assert!(!time_requires_scene(
             Some(&scene),
             Some(sample(1)),
             sample(2),

@@ -406,11 +406,14 @@ struct InputStrip {
     state: Box<InputState>,
 }
 impl InputStrip {
-    fn hide(&self) {
+    fn clear_input(&self) {
         self.state.context.replace(None);
         self.state.pressed.set(None);
         self.state.hovered.set(None);
         self.state.turns.borrow_mut().clear();
+    }
+    fn hide(&self) {
+        self.clear_input();
         self.surface.window.hide();
     }
 }
@@ -1043,6 +1046,8 @@ pub struct DesktopRenderer {
     raster: Arc<RasterCache>,
     cards: Vec<Card>,
     tree: Option<tree::TreeRenderer>,
+    lesson_transition: bool,
+    retained_windows: Vec<RetainedDesktopWindow>,
     graphics: Graphics,
     class: Class,
     _apartment: Apartment,
@@ -1054,6 +1059,14 @@ pub struct DesktopRenderer {
     last_revision: Option<fc_domain::ids::Revision>,
     metrics: DesktopMetrics,
     _thread: PhantomData<Rc<()>>,
+}
+// HWND destruction must precede its WndProc state's destruction. Old layered
+// pixels belong to Windows; the application's old DIB is released immediately.
+struct RetainedDesktopWindow {
+    window: NativeWindow,
+    state: Box<InputState>,
+    key: fc_presentation::scene::SceneNodeKey,
+    rect: Rect,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ContentHiddenReason {
@@ -1293,6 +1306,8 @@ impl DesktopRenderer {
             raster: Arc::new(RasterCache::new()),
             cards: Vec::new(),
             tree: None,
+            lesson_transition: false,
+            retained_windows: Vec::new(),
             graphics: g,
             class,
             _apartment: a,
@@ -1321,6 +1336,22 @@ impl DesktopRenderer {
     pub fn request_republish(&mut self) {
         self.hidden = true;
     }
+    /// A focus change renews public input eligibility without changing pixels.
+    /// Only the current cached generation can be advanced; stale queues are revoked.
+    pub fn renew_input_generation(&mut self, previous: SceneGeneration, next: SceneGeneration) {
+        if self.last_scene != Some(previous) || next <= previous {
+            return;
+        }
+        self.last_scene = Some(next);
+        if let Some(tree) = &self.tree {
+            tree.clear_input();
+        }
+        for card in &self.cards {
+            if let Some(input) = &card.input {
+                input.clear_input();
+            }
+        }
+    }
     /// Metadata only; shared workers perform all file verification and WIC work.
     pub fn image_requests(scene: &SceneSnapshot) -> Result<Vec<ImageRenderRequest>> {
         content::requests(scene)
@@ -1348,8 +1379,15 @@ impl DesktopRenderer {
         metrics
     }
     pub fn hide(&mut self) {
+        if self.lesson_transition && !self.hidden_probe && !system_allows().unwrap_or(false) {
+            self.end_lesson_transition();
+        }
         if let Some(tree) = &self.tree {
-            tree.hide();
+            if self.lesson_transition {
+                tree.hide_lesson_content();
+            } else {
+                tree.hide();
+            }
         }
         for c in &mut self.cards {
             c.hide();
@@ -1362,11 +1400,29 @@ impl DesktopRenderer {
         self.metrics.visible_windows = 0;
         self.metrics.input_regions = 0;
     }
+    /// Retain only fixed public module pixels while an exact lesson-only update
+    /// replaces its facts. Every previous input capability is revoked immediately.
+    pub fn begin_lesson_transition(&mut self) {
+        self.lesson_transition = true;
+        self.hide();
+    }
+    /// End the bounded pixel bridge before session/security or ordinary changes.
+    pub fn end_lesson_transition(&mut self) {
+        self.lesson_transition = false;
+        self.clear_retained_windows();
+    }
+    fn clear_retained_windows(&mut self) {
+        for retained in &self.retained_windows {
+            retained.window.hide();
+        }
+        self.retained_windows.clear();
+    }
     /// Release this renderer's physical raster owners before a separate local
     /// preview renderer is admitted. Re-publication always rebuilds from a fresh
     /// guarded Scene; neither a hidden old image nor its input can reappear.
     pub fn release_surfaces(&mut self) {
         self.hide();
+        tree::retain_lesson_windows(self);
         self.tree = None;
         self.cards.clear();
         self.last_scene = None;
@@ -1400,6 +1456,7 @@ impl DesktopRenderer {
     ) -> Result<PresentOutcome> {
         let result = self.present_inner(scene, now, guard);
         if result.is_err() {
+            self.end_lesson_transition();
             self.hide();
             self.refresh_metrics();
         }
@@ -1417,6 +1474,7 @@ impl DesktopRenderer {
             return Ok(PresentOutcome::Hidden);
         }
         if !self.hidden_probe && !system_allows()? {
+            self.end_lesson_transition();
             self.hide();
             return Ok(PresentOutcome::Hidden);
         }
@@ -1444,6 +1502,7 @@ impl DesktopRenderer {
             return tree::present(self, scene, now, guard);
         }
         if self.tree.is_some() {
+            self.end_lesson_transition();
             self.hide();
             self.tree = None;
             self.cards.clear();
@@ -1950,6 +2009,7 @@ impl DesktopRenderer {
 }
 impl Drop for DesktopRenderer {
     fn drop(&mut self) {
+        self.end_lesson_transition();
         self.hide();
         self.tree = None;
         self.cards.clear();
