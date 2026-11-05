@@ -107,6 +107,7 @@ fn assets_never_fall_back_for_api_traversal_bad_headers_or_wrong_transport() {
         Err(StaticError::Boundary(WebError::Method))
     ));
     head.method = "GET".into();
+    head.target = "/fc/assets/app-01234567.js".into();
     head.headers.push(Header {
         name: "Origin".into(),
         value: b"https://evil.synthetic".to_vec(),
@@ -134,6 +135,73 @@ fn assets_never_fall_back_for_api_traversal_bad_headers_or_wrong_transport() {
         assets.dispatch(&duplicate, b""),
         Err(StaticError::Boundary(WebError::Headers))
     ));
+}
+#[test]
+fn external_scanner_navigation_can_open_only_public_html_without_bypassing_request_guards() {
+    let assets = assets();
+    for path in ["/fc/", "/fc/index.html"] {
+        let mut head = request(path);
+        head.headers.extend([
+            Header {
+                name: "Sec-Fetch-Site".into(),
+                value: b"cross-site".to_vec(),
+            },
+            Header {
+                name: "Sec-Fetch-Mode".into(),
+                value: b"navigate".to_vec(),
+            },
+            Header {
+                name: "Sec-Fetch-Dest".into(),
+                value: b"document".to_vec(),
+            },
+            Header {
+                name: "Origin".into(),
+                value: b"https://servicewechat.com".to_vec(),
+            },
+        ]);
+        assert_eq!(assets.dispatch(&head, b"").unwrap().head.status, 200);
+        // Older embedded browsers may omit Fetch Metadata entirely. The HTML
+        // shell is public and contains no session or classroom data.
+        let mut legacy = head.clone();
+        legacy.headers.retain(|h| !h.name.starts_with("Sec-Fetch-"));
+        assert_eq!(assets.dispatch(&legacy, b"").unwrap().head.status, 200);
+        for (mode, dest) in [
+            ("cors", "empty"),
+            ("no-cors", "image"),
+            ("navigate", "iframe"),
+        ] {
+            let mut nested = head.clone();
+            nested.headers[2].value = mode.as_bytes().to_vec();
+            nested.headers[3].value = dest.as_bytes().to_vec();
+            assert!(matches!(
+                assets.dispatch(&nested, b""),
+                Err(StaticError::Boundary(WebError::Origin))
+            ));
+        }
+        let mut script = head.clone();
+        script.target = "/fc/assets/app-01234567.js".into();
+        assert!(matches!(
+            assets.dispatch(&script, b""),
+            Err(StaticError::Boundary(WebError::Origin))
+        ));
+        let mut api = head.clone();
+        api.target = "/fc/api/v1/status".into();
+        assert_eq!(assets.boundary.preflight(&api), Err(WebError::Origin));
+        let mut wrong_host = head.clone();
+        wrong_host.headers[0].value = b"other.synthetic".to_vec();
+        assert!(matches!(
+            assets.dispatch(&wrong_host, b""),
+            Err(StaticError::Boundary(WebError::Host))
+        ));
+        head.headers.push(Header {
+            name: "origin".into(),
+            value: b"https://duplicate.synthetic".to_vec(),
+        });
+        assert!(matches!(
+            assets.dispatch(&head, b""),
+            Err(StaticError::Boundary(WebError::Headers))
+        ));
+    }
 }
 #[test]
 fn missing_extra_duplicate_and_corrupt_payloads_fail_closed_at_load() {

@@ -504,7 +504,7 @@ impl WebBoundary {
     pub fn preflight(&self, head: &RequestHead) -> Result<Route, WebError> {
         self.check_host(head)?;
         let route = self.route(&head.method, &head.target)?;
-        self.finish_preflight(head, route)
+        self.finish_preflight(head, route, false)
     }
     fn check_host(&self, head: &RequestHead) -> Result<(), WebError> {
         if !head.tls {
@@ -517,7 +517,8 @@ impl WebBoundary {
         }
         Ok(())
     }
-    /// Canonical public static paths share the transport/origin/framing gate.
+    /// Public HTML permits external top-level entry, including QR scanners.
+    /// Other static resources retain the same-origin transport/framing gate.
     /// API URLs can never fall through to the HTML entry document.
     pub fn static_path<'a>(&self, head: &'a RequestHead) -> Result<&'a str, WebError> {
         self.check_host(head)?;
@@ -536,17 +537,30 @@ impl WebBoundary {
         if !assets::valid_path(path) {
             return Err(WebError::NotFound);
         }
-        self.finish_preflight(head, Route::Status)?;
+        let public_navigation = path == "index.html"
+            && unique(head, "sec-fetch-mode")?.is_none_or(|mode| mode == b"navigate")
+            && unique(head, "sec-fetch-dest")?.is_none_or(|dest| dest == b"document");
+        self.finish_preflight(head, Route::Status, public_navigation)?;
         Ok(path)
     }
-    fn finish_preflight(&self, head: &RequestHead, route: Route) -> Result<Route, WebError> {
+    fn finish_preflight(
+        &self,
+        head: &RequestHead,
+        route: Route,
+        public_navigation: bool,
+    ) -> Result<Route, WebError> {
         let origin = unique(head, "origin")?;
-        if origin.is_some_and(|v| v != self.origin.as_bytes()) || (route.post() && origin.is_none())
+        if !public_navigation
+            && (origin.is_some_and(|v| v != self.origin.as_bytes())
+                || (route.post() && origin.is_none()))
         {
             return Err(WebError::Origin);
         }
         if let Some(site) = unique(head, "sec-fetch-site")? {
-            if site != b"same-origin" && !(site == b"none" && !route.post()) {
+            if site != b"same-origin"
+                && !(site == b"none" && !route.post())
+                && !(public_navigation && matches!(site, b"cross-site" | b"same-site"))
+            {
                 return Err(WebError::Origin);
             }
         }
