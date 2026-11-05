@@ -1815,6 +1815,41 @@ fn update_policy_uses_admin_issued_command_csrf_and_independent_revision() {
         r#"{{{},"expectedRevision":"0","enabled":false,"download":false,"share":false,"installMode":"automatic"}}"#,
         command.fields()
     );
+    for path in ["updates/status", "updates/group/export"] {
+        assert_eq!(
+            fixture
+                .dispatch(&head("GET", path, 0, Some(&cookie), None), b"")
+                .head
+                .status,
+            403,
+            "teacher listener cannot expose update configuration or joining credentials"
+        );
+    }
+    assert_eq!(
+        fixture
+            .dispatch(
+                &head(
+                    "POST",
+                    "updates/policy",
+                    body.len(),
+                    Some(&cookie),
+                    Some(&csrf)
+                ),
+                body.as_bytes()
+            )
+            .head
+            .status,
+        403,
+        "even an authenticated global administrator cannot mutate updates through teacher ingress"
+    );
+    assert_eq!(
+        fixture.backend.update_runtime_state().unwrap().revision,
+        fc_domain::ids::Revision::default()
+    );
+    fixture.app = fixture
+        .app
+        .local_variant(&ListenPrefix::https("https://board.school:443/fc/").unwrap())
+        .unwrap();
     assert_eq!(
         fixture
             .dispatch(

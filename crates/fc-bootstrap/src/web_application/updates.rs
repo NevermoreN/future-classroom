@@ -197,6 +197,9 @@ impl WebApplication {
         resource: Resource,
         body: &[u8],
     ) -> WebResponse {
+        if !self.local_control {
+            return failure(403, responses::ErrorCode::Forbidden);
+        }
         match backend.role(lease) {
             Ok(Role::GlobalAdmin) => (),
             Ok(_) => return failure(403, responses::ErrorCode::Forbidden),
