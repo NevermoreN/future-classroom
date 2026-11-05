@@ -103,7 +103,7 @@ export class HttpApi implements ServerApi, ContentApi {
     } finally { clearTimeout(timeout); signal.removeEventListener('abort', abort) }
   }
   async issueCommand(family: CommandFamily, csrf: string, signal: AbortSignal): Promise<CommandIdentity> {
-    if (!['content', 'materials', 'voice'].includes(family)) throw new ProtocolFault()
+    if (!['content', 'materials', 'voice', 'updates'].includes(family)) throw new ProtocolFault()
     const r = await this.request('commands', signal, { schemaVersion: 2, family }, csrf)
     if (r.status !== 201) throw new ProtocolFault()
     return issued(r.value, family)

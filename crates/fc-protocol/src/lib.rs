@@ -3,9 +3,9 @@
 pub mod calendar_feed;
 pub mod http1;
 pub mod recovery;
-pub mod web;
 pub mod update_discovery;
 pub mod update_release;
+pub mod web;
 
 use serde::de::{self, DeserializeOwned, DeserializeSeed, MapAccess, SeqAccess, Visitor};
 use serde::{Deserialize, Deserializer, Serialize};

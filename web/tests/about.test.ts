@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import About, { aboutInfo } from '../src/About'
 
-const current = { schemaVersion: 1, version: '0.1.5', automaticUpdates: false, updateAvailable: false, updateMessage: '自动更新功能尚未接通，当前不会下载或安装更新。' }
+const current = { schemaVersion: 1, version: '0.1.5', automaticUpdates: true, updateAvailable: false, updateMessage: '尚未加入学校更新群组。', actionToken: 'a'.repeat(64), phase: 'waiting', receivedBytes: 0, totalBytes: 0, groupId: null }
 
 describe('local about page', () => {
   it('accepts actual server version and honest unavailable update status', () => {

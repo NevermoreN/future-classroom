@@ -232,6 +232,21 @@ def instructions_bytes(source: Path, explicit: bytes | None = None) -> bytes:
     return explicit
 
 
+def require_admitted_artifacts(manifest: dict, payloads: dict, artifacts: dict, formal: bool) -> int:
+    """Pure assembly contract, not a replacement for CI or source admission."""
+    d14 = formal and B['version_parts'](manifest['version']) >= (0, 1, 5)
+    expected = {'product-compile', 'lifecycle-compile', 'guard-library-compile'}
+    if d14:
+        expected.add('update-coordinator-compile')
+    NEED(set(artifacts) == expected, 'Exact version-specific admitted normal artifact roles')
+    NEED(payloads.get('fc-bootstrap.exe') == artifacts['product-compile'][1],
+         'Ordinary installed product equals admitted normal artifact')
+    if d14:
+        NEED(payloads.get('fc-update-coordinator.exe') == artifacts['update-coordinator-compile'][1],
+             'Installed coordinator equals admitted same-CI normal artifact')
+    return B['require_payload_members'](manifest['version'], payloads, d14=d14)
+
+
 def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
         identity: dict, pass_status: str, verify_source, instructions: bytes | None = None,
         predecessor: bytes | None = None) -> dict:
@@ -243,7 +258,6 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
     predecessor_bytes(predecessor)
     source = a.source_root.absolute()
     require_source_protocol(source)
-    NEED(set(artifacts) == {'product-compile', 'lifecycle-compile', 'guard-library-compile'}, 'Exactly three admitted normal artifacts')
     NEED(set(identity) <= {'scope', 'formalCI', 'sourceBase', 'sourceEvidenceSha256',
         'normalProvenance', 'upgradeSourceBinding', 'webReportSha256', 'lifecycleMode',
         'normalGuardProvenance', 'builderSources', 'sourceZip', 'target',
@@ -254,7 +268,8 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
     product_version = a.product_version or manifest['version']
     B['version_parts'](product_version)
     payloads['MSI-CANDIDATE.txt'] = instructions_bytes(source, instructions)
-    NEED(len(payloads) == 14 and sum(map(len, payloads.values())) <= B['MAX_INSTALLED'], 'Complete14 payloads within30MiB')
+    expected_payload_count = require_admitted_artifacts(manifest, payloads, artifacts, identity.get('formalCI') is True)
+    NEED(sum(map(len, payloads.values())) <= B['MAX_INSTALLED'], 'Complete payloads within30MiB')
     helper = artifacts['lifecycle-compile'][1]
     dll = artifacts['guard-library-compile'][1]
     normal_extents = {name: extent(value[1], name == 'guard-library-compile') for name, value in artifacts.items()}
@@ -264,7 +279,7 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
     body = B['lifecycle_manifest'](product_version, payloads)
     envelope = C['make_payload_manifest'](package, body)
     decoded = C['parse_payload_manifest'](envelope)
-    NEED(decoded['product'] == B['product_code'](product_version) and decoded['version'] == product_version and len(decoded['entries']) == 14, 'Exact generated Product/version/payload envelope')
+    NEED(decoded['product'] == B['product_code'](product_version) and decoded['version'] == product_version and len(decoded['entries']) == expected_payload_count, 'Exact generated Product/version/payload envelope')
     tools = {name: B['tool_file'](getattr(a, name)) for name in ('wixl', 'msibuild', 'msiinfo', 'msiextract', 'objdump')}
     NEED(B['file_digest'](tools['msibuild']) == a.msibuild_sha256, 'Pinned msibuild actual bytes')
     output = B['fresh_output'](a.output_dir)
@@ -348,14 +363,14 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
         for p in extracted.rglob('*'):
             if p.is_dir(): B['PROBE']['real_directory'](p); continue
             NEED(p.is_relative_to(matches[0].parent), 'No extraction escape'); actual[p.relative_to(matches[0].parent).as_posix()] = B['PROBE']['bounded_regular_file'](p, B['MAX_INSTALLED'])
-        NEED(actual == payloads, 'Actual extracted14 payload exact bytes')
+        NEED(actual == payloads, 'Actual extracted complete payload exact bytes')
         verify_source()
         report.update(status=pass_status,
             msi={'path': msi.name, 'bytes': len(complete), 'sha256': B['digest'](complete)},
             setup={'path': 'Setup.exe', 'bytes': len(setup), 'sha256': B['digest'](setup)},
             template={'bytes': len(template), 'sha256': B['digest'](template), 'hole': hole, 'canonicalZero32': True, 'normalPrefixExact': True},
-            payloadManifest={'bytes': len(envelope), 'sha256': B['digest'](envelope), 'rawBodySha256': B['digest'](body), 'payloads': 14},
-            binaryReadback='ALL_THREE_EXACT' if predecessor is None else 'ALL_FOUR_EXACT', payloadReadback='ALL_FOURTEEN_EXACT', onlyExternal32HoleFilled=True)
+            payloadManifest={'bytes': len(envelope), 'sha256': B['digest'](envelope), 'rawBodySha256': B['digest'](body), 'payloads': expected_payload_count},
+            binaryReadback='ALL_THREE_EXACT' if predecessor is None else 'ALL_FOUR_EXACT', payloadReadback='ALL_FIFTEEN_EXACT' if expected_payload_count == 15 else 'ALL_FOURTEEN_EXACT', onlyExternal32HoleFilled=True)
         if predecessor is not None:
             report['publishedPredecessor'] = {'bytes': len(predecessor), 'sha256': B['digest'](predecessor)}
     except BaseException as error:

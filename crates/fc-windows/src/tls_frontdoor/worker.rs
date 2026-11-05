@@ -29,6 +29,7 @@ struct ConfigurationState {
 }
 struct Shared {
     configuration: Mutex<ConfigurationState>,
+    update_configuration: Mutex<ConfigurationState>,
     stop: AtomicBool,
     faulted: AtomicBool,
     cleanup_error: Mutex<Option<TlsError>>,
@@ -193,6 +194,7 @@ impl Worker {
         let (ready_send, ready) = mpsc::sync_channel(1);
         let shared = Arc::new(Shared {
             configuration: Mutex::new(ConfigurationState::default()),
+            update_configuration: Mutex::new(ConfigurationState::default()),
             stop: AtomicBool::new(false),
             faulted: AtomicBool::new(false),
             cleanup_error: Mutex::new(None),
@@ -252,6 +254,35 @@ impl Worker {
             .as_ref()?
             .shared
             .configuration
+            .lock()
+            .ok()?
+            .complete
+            .take()
+    }
+    pub(super) fn configure_update(
+        &self,
+        configuration: Option<super::CredentialConfiguration>,
+    ) -> Result<(), TlsError> {
+        let owner = self.owner.as_ref().ok_or(TlsError::Stopped)?;
+        if owner.shared.stop.load(Ordering::Acquire) {
+            return Err(TlsError::Stopped);
+        }
+        let mut slot = owner
+            .shared
+            .update_configuration
+            .lock()
+            .map_err(|_| TlsError::Faulted)?;
+        if slot.pending.is_some() || slot.working || slot.complete.is_some() {
+            return Err(TlsError::Busy);
+        }
+        slot.pending = Some(configuration);
+        Ok(())
+    }
+    pub(super) fn poll_update_configured(&self) -> Option<Result<(), TlsError>> {
+        self.owner
+            .as_ref()?
+            .shared
+            .update_configuration
             .lock()
             .ok()?
             .complete
@@ -465,6 +496,40 @@ fn run(
             }
             let mut slot = shared
                 .configuration
+                .lock()
+                .unwrap_or_else(|e| e.into_inner());
+            slot.working = false;
+            slot.complete = Some(result);
+        }
+        let configuration = {
+            let mut slot = shared
+                .update_configuration
+                .lock()
+                .unwrap_or_else(|e| e.into_inner());
+            let pending = slot.pending.take();
+            if pending.is_some() {
+                slot.working = true;
+            }
+            pending
+        };
+        if let Some(configuration) = configuration {
+            let result = if shared.stop.load(Ordering::Acquire) {
+                Err(TlsError::Stopped)
+            } else {
+                match catch_unwind(AssertUnwindSafe(|| driver.configure_update(configuration))) {
+                    Ok(result) => result,
+                    Err(_) => {
+                        shared.stop.store(true, Ordering::Release);
+                        shared.faulted.store(true, Ordering::Release);
+                        Err(TlsError::ThreadPanic)
+                    }
+                }
+            };
+            if let Err(error @ TlsError::Cleanup(_)) = result {
+                shared.record_cleanup_error(error);
+            }
+            let mut slot = shared
+                .update_configuration
                 .lock()
                 .unwrap_or_else(|e| e.into_inner());
             slot.working = false;

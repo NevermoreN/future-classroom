@@ -8,8 +8,10 @@ impl Resources {
     pub(super) fn bare_accept_mut(&mut self, index: usize) -> Option<&mut accept::AcceptSlot> {
         if index == 0 {
             self.accept.as_mut()
-        } else {
+        } else if index == 1 {
             self.lan_accept.as_mut()
+        } else {
+            self.update_accept.as_mut()
         }
     }
 }
@@ -17,29 +19,37 @@ impl Owner {
     pub(super) fn listener(&self, index: usize) -> SOCKET {
         if index == 0 {
             self.resources.listener
-        } else {
+        } else if index == 1 {
             self.resources.lan_listener
+        } else {
+            self.resources.update_listener
         }
     }
     pub(super) fn listener_key(index: usize) -> usize {
         if index == 0 {
             1
         } else {
-            CONNECTION_SLOTS + 2
+            CONNECTION_SLOTS + index + 1
         }
     }
     pub(super) fn bare_accept(&self, index: usize) -> Option<&accept::AcceptSlot> {
         if index == 0 {
             self.resources.accept.as_ref()
-        } else {
+        } else if index == 1 {
             self.resources.lan_accept.as_ref()
+        } else {
+            self.resources.update_accept.as_ref()
         }
     }
     pub(super) fn listener_family(&self, index: usize) -> ADDRESS_FAMILY {
         if index == 0 {
             return self.address_family();
         }
-        match self.lan_address {
+        match if index == 1 {
+            self.lan_address
+        } else {
+            self.update_address
+        } {
             Some(address) if address.is_ipv6() => AF_INET6,
             _ => AF_INET,
         }
@@ -48,9 +58,13 @@ impl Owner {
         if index == 0 {
             self.source_networks.as_ref()
         } else {
-            self.lan_configuration
-                .as_ref()
-                .and_then(|c| c.source_networks.as_ref())
+            (if index == 1 {
+                &self.lan_configuration
+            } else {
+                &self.update_configuration
+            })
+            .as_ref()
+            .and_then(|c| c.source_networks.as_ref())
         }
     }
     pub(super) fn validate_lan(

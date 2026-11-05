@@ -1731,3 +1731,134 @@ fn web_recovery_rotation_and_forgot_password_use_original_single_use_credential_
     );
     fixture.backend.close().unwrap();
 }
+
+#[cfg(not(windows))]
+fn test_update_control() -> crate::updates::UpdateControl {
+    crate::updates::UpdateControl::for_test(crate::updates::UpdateStatus {
+        version: env!("CARGO_PKG_VERSION").into(),
+        automatic_updates: true,
+        update_available: false,
+        update_message: "尚未加入学校更新群组。".into(),
+        action_token: "ab".repeat(32),
+        phase: "waiting".into(),
+        received_bytes: 0,
+        total_bytes: 0,
+        group_id: None,
+    })
+}
+
+#[cfg(not(windows))]
+#[test]
+fn about_check_requires_local_origin_and_current_nonce_and_get_never_requests_update() {
+    let mut fixture = BackendFixture::new();
+    let local = fixture
+        .app
+        .local_variant(&ListenPrefix::https("https://board.school:443/fc/").unwrap())
+        .unwrap();
+    let control = test_update_control();
+    fixture.app.set_update_control(control.clone());
+    let body = br#"{"schemaVersion":1}"#;
+    let mut request = head("POST", "about/check", body.len(), None, None);
+    request.headers.push(Header {
+        name: "X-FC-Update".into(),
+        value: "ab".repeat(32).into_bytes(),
+    });
+    assert_eq!(
+        fixture.dispatch(&request, body).head.status,
+        403,
+        "teacher listener cannot request a local action"
+    );
+    fixture.app = local;
+    assert_eq!(
+        fixture
+            .dispatch(&head("GET", "about", 0, None, None), b"")
+            .head
+            .status,
+        200
+    );
+    assert!(!control.test_check_requested());
+    request.headers.last_mut().unwrap().value = "cd".repeat(32).into_bytes();
+    assert_eq!(fixture.dispatch(&request, body).head.status, 403);
+    assert!(!control.test_check_requested());
+    request.headers.last_mut().unwrap().value = "ab".repeat(32).into_bytes();
+    let mut foreign = request.clone();
+    foreign
+        .headers
+        .iter_mut()
+        .find(|h| h.name == "Origin")
+        .unwrap()
+        .value = b"https://other.school".to_vec();
+    assert_eq!(fixture.dispatch(&foreign, body).head.status, 403);
+    assert_eq!(fixture.dispatch(&request, body).head.status, 200);
+    assert!(control.test_check_requested());
+    fixture.backend.close().unwrap();
+}
+
+#[cfg(not(windows))]
+#[test]
+fn update_policy_uses_admin_issued_command_csrf_and_independent_revision() {
+    let mut fixture = BackendFixture::new();
+    fixture.app.set_update_control(test_update_control());
+    let cookie = fixture.pair("Update-admin", false);
+    let session = fixture.dispatch(&head("GET", "session", 0, Some(&cookie), None), b"");
+    let csrf = field(&session.body, "csrf");
+    let teaching_revision = fixture.backend.state().unwrap().revision;
+    assert_eq!(
+        fixture
+            .dispatch(&head("GET", "updates/status", 0, None, None), b"")
+            .head
+            .status,
+        401
+    );
+    let command = fixture.issue(&cookie, "updates");
+    let body = format!(
+        r#"{{{},"expectedRevision":"0","enabled":false,"download":false,"share":false,"installMode":"automatic"}}"#,
+        command.fields()
+    );
+    assert_eq!(
+        fixture
+            .dispatch(
+                &head("POST", "updates/policy", body.len(), Some(&cookie), None),
+                body.as_bytes()
+            )
+            .head
+            .status,
+        403
+    );
+    let response = fixture.dispatch(
+        &head(
+            "POST",
+            "updates/policy",
+            body.len(),
+            Some(&cookie),
+            Some(&csrf),
+        ),
+        body.as_bytes(),
+    );
+    assert_eq!(response.head.status, 200, "{}", text(&response.body));
+    assert!(text(&response.body).contains("\"enabled\":false"));
+    assert_eq!(field(&response.body, "revision"), "1");
+    assert_eq!(fixture.backend.state().unwrap().revision, teaching_revision);
+    let next = fixture.issue(&cookie, "updates");
+    let stale = format!(
+        r#"{{{},"expectedRevision":"0","enabled":true,"download":true,"share":true,"installMode":"automatic"}}"#,
+        next.fields()
+    );
+    assert_eq!(
+        fixture
+            .dispatch(
+                &head(
+                    "POST",
+                    "updates/policy",
+                    stale.len(),
+                    Some(&cookie),
+                    Some(&csrf)
+                ),
+                stale.as_bytes()
+            )
+            .head
+            .status,
+        409
+    );
+    fixture.backend.close().unwrap();
+}

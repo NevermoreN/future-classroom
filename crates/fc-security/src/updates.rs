@@ -341,6 +341,58 @@ fn install_provider() -> Result<(), UpdateVerificationError> {
     }
 }
 
+struct UpdateHash(digest::Context);
+impl HashContext for UpdateHash {
+    fn update(&mut self, data: &[u8]) {
+        self.0.update(data);
+    }
+    fn finalize(self: Box<Self>) -> Vec<u8> {
+        self.0.finish().as_ref().to_vec()
+    }
+}
+impl CryptoProvider for UpdateCrypto {
+    fn hash(&self, algorithm: HashAlgorithm) -> sigstore_crypto::Result<Box<dyn HashContext>> {
+        let algorithm = match algorithm {
+            HashAlgorithm::Sha2256 => &digest::SHA256,
+            HashAlgorithm::Sha2384 => &digest::SHA384,
+            HashAlgorithm::Sha2512 => &digest::SHA512,
+            _ => {
+                return Err(sigstore_crypto::Error::UnsupportedAlgorithm(
+                    "update hash".into(),
+                ))
+            }
+        };
+        Ok(Box::new(UpdateHash(digest::Context::new(algorithm))))
+    }
+    fn verify_raw(
+        &self,
+        scheme: SigningScheme,
+        public: &[u8],
+        data: &[u8],
+        sig: &[u8],
+    ) -> sigstore_crypto::Result<()> {
+        if scheme != SigningScheme::Ed25519 {
+            return Err(sigstore_crypto::Error::UnsupportedAlgorithm(
+                "updates require Ed25519".into(),
+            ));
+        }
+        signature::UnparsedPublicKey::new(&signature::ED25519, public)
+            .verify(data, sig)
+            .map_err(|_| sigstore_crypto::Error::Verification("update signature".into()))
+    }
+    fn verify_prehashed(
+        &self,
+        _: SigningScheme,
+        _: &[u8],
+        _: &[u8],
+        _: &[u8],
+    ) -> sigstore_crypto::Result<()> {
+        Err(sigstore_crypto::Error::UnsupportedAlgorithm(
+            "Ed25519 requires the original message".into(),
+        ))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -561,56 +613,5 @@ mod tests {
         assert!(preflight(br#"{"signed":{"version":1,"version":2}}"#).is_err());
         assert!(preflight(br#"{"signed":{"version":1,"ver\u0073ion":2}}"#).is_err());
         assert!(preflight(format!("{}0{}", "[".repeat(34), "]".repeat(34)).as_bytes()).is_err());
-    }
-}
-struct UpdateHash(digest::Context);
-impl HashContext for UpdateHash {
-    fn update(&mut self, data: &[u8]) {
-        self.0.update(data);
-    }
-    fn finalize(self: Box<Self>) -> Vec<u8> {
-        self.0.finish().as_ref().to_vec()
-    }
-}
-impl CryptoProvider for UpdateCrypto {
-    fn hash(&self, algorithm: HashAlgorithm) -> sigstore_crypto::Result<Box<dyn HashContext>> {
-        let algorithm = match algorithm {
-            HashAlgorithm::Sha2256 => &digest::SHA256,
-            HashAlgorithm::Sha2384 => &digest::SHA384,
-            HashAlgorithm::Sha2512 => &digest::SHA512,
-            _ => {
-                return Err(sigstore_crypto::Error::UnsupportedAlgorithm(
-                    "update hash".into(),
-                ))
-            }
-        };
-        Ok(Box::new(UpdateHash(digest::Context::new(algorithm))))
-    }
-    fn verify_raw(
-        &self,
-        scheme: SigningScheme,
-        public: &[u8],
-        data: &[u8],
-        sig: &[u8],
-    ) -> sigstore_crypto::Result<()> {
-        if scheme != SigningScheme::Ed25519 {
-            return Err(sigstore_crypto::Error::UnsupportedAlgorithm(
-                "updates require Ed25519".into(),
-            ));
-        }
-        signature::UnparsedPublicKey::new(&signature::ED25519, public)
-            .verify(data, sig)
-            .map_err(|_| sigstore_crypto::Error::Verification("update signature".into()))
-    }
-    fn verify_prehashed(
-        &self,
-        _: SigningScheme,
-        _: &[u8],
-        _: &[u8],
-        _: &[u8],
-    ) -> sigstore_crypto::Result<()> {
-        Err(sigstore_crypto::Error::UnsupportedAlgorithm(
-            "Ed25519 requires the original message".into(),
-        ))
     }
 }

@@ -95,6 +95,46 @@ def formal_result_fixture():
     return r
 
 class FormalMsvcAbi2Contract(unittest.TestCase):
+    def test_d14_four_artifact_fifteen_payload_assembly_contract_and_legacy_replay(self):
+        # Synthetic bytes test the actual shared assembly preconditions and codec.
+        # They are never marked as CI evidence or executed as an installer.
+        shared=FORMAL['ABI2']; builder=shared['B']; pe=F['structural_pe']()
+        names=builder['LIFECYCLE_REQUIRED'] | {f'web/assets/f{i}.js' for i in range(5)}
+        old={name:name.encode() for name in names};old['fc-bootstrap.exe']=pe
+        artifacts={role:(Path('/synthetic-not-a-build')/role,pe) for role in
+                   ('product-compile','lifecycle-compile','guard-library-compile')}
+        self.assertEqual(shared['require_admitted_artifacts']({'version':'0.1.4'},old,artifacts,True),14)
+        current=dict(old, **{'fc-update-coordinator.exe':pe})
+        current_artifacts=dict(artifacts, **{'update-coordinator-compile':(Path('/synthetic-not-a-build/coordinator'),pe)})
+        self.assertEqual(shared['require_admitted_artifacts']({'version':'0.1.5'},current,current_artifacts,True),15)
+        body=builder['lifecycle_manifest']('0.1.5',current)
+        envelope=shared['C']['make_payload_manifest'](F['PACKAGE'],body)
+        self.assertEqual(set(shared['C']['parse_payload_manifest'](envelope)['entries']),set(current))
+        for changed,roles in [(old,current_artifacts),(current,artifacts),
+                              (dict(current,**{'fc-update-coordinator.exe':b'different'}),current_artifacts)]:
+            with self.assertRaises(ValueError):
+                shared['require_admitted_artifacts']({'version':'0.1.5'},changed,roles,True)
+        with self.assertRaises(ValueError):
+            builder['require_payload_members']('0.1.4',current)
+
+    def test_d14_requires_coordinator_without_rejecting_old_source_grammar(self):
+        legacy = formal_result_fixture()
+        FORMAL['check_compile_result'](legacy)
+        with self.assertRaises(ValueError):
+            FORMAL['check_compile_result'](legacy, require_coordinator=True)
+        phase = copy.deepcopy(legacy['commands'][1])
+        phase['name'] = 'update-coordinator-compile'
+        phase['arguments'][phase['arguments'].index('--bin') + 1] = 'fc-update-coordinator'
+        current = copy.deepcopy(legacy)
+        current['commands'].append(phase)
+        FORMAL['check_compile_result'](current, require_coordinator=True)
+        phase['arguments'][phase['arguments'].index('--bin') + 1] = 'fc-installer-lifecycle'
+        with self.assertRaises(ValueError):
+            FORMAL['check_compile_result'](current, require_coordinator=True)
+        self.assertEqual(len(FORMAL['B']['normal_product_targets']('0.1.4')), 2)
+        self.assertEqual({n for n, _, _ in FORMAL['B']['normal_product_targets']('0.1.5')},
+                         {'fc-bootstrap', 'fc-installer-lifecycle', 'fc-update-coordinator'})
+
     def test_closed_normal_command_matrix(self):
         FORMAL['check_compile_result'](formal_result_fixture())
         for index in range(3):

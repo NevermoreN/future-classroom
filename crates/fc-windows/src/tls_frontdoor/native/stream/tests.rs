@@ -2634,3 +2634,66 @@ fn real_iocp_and_winsock_release_failure_never_retries_or_becomes_quiescent_in_c
         assert!(!OWNER_ACTIVE.load(Ordering::Acquire));
     }
 }
+
+#[test]
+fn update_listener_preserves_teacher_and_control_slots_and_independent_stop() {
+    use fc_domain::https_settings::{
+        HttpsCertificateRef, HttpsConfiguration, HttpsHost, HttpsSourceNetworks,
+    };
+    let _serial = SERIAL.lock().unwrap();
+    let mut fixture = Fixture::new();
+    fixture.host.owner.control_mode = true;
+    let configuration = || {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        drop(listener);
+        HttpsConfiguration::new(
+            HttpsHost::parse("127.0.0.1").unwrap(),
+            port,
+            HttpsCertificateRef::parse(&"11".repeat(20)).unwrap(),
+        )
+        .unwrap()
+        .with_source_networks(HttpsSourceNetworks::parse("127.0.0.1/32").unwrap())
+    };
+    // Private fixture bypasses production certificate selection; this verifies
+    // actual socket/IOCP quotas with the existing deterministic record driver.
+    fixture.host.owner.start_update(configuration()).unwrap();
+    fixture.host.owner.start_lan(configuration()).unwrap();
+    let update_port = fixture.host.update_port().unwrap();
+    let teacher_port = fixture.host.lan_port().unwrap();
+    let mut wire = vec![b'H'];
+    wire.extend(record(
+        b"GET /update/v1/catalog HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n",
+    ));
+    let mut updates = Vec::new();
+    for _ in 0..2 {
+        let mut client = TcpStream::connect((Ipv4Addr::LOCALHOST, update_port)).unwrap();
+        client.write_all(&wire).unwrap();
+        fixture.until(|event| matches!(event, TlsHttpEvent::Head { head, scope: TlsListenerScope::UpdateServe, .. } if head.token.slot() >= 2));
+        updates.push(client);
+    }
+    let _overflow = TcpStream::connect((Ipv4Addr::LOCALHOST, update_port)).unwrap();
+    let mut teacher = TcpStream::connect((Ipv4Addr::LOCALHOST, teacher_port)).unwrap();
+    teacher.write_all(&wire).unwrap();
+    fixture.until(|event| matches!(event, TlsHttpEvent::Head { head, scope: TlsListenerScope::Lan, .. } if head.token.slot() == 1));
+    fixture.input(&wire);
+    fixture.until(|event| matches!(event, TlsHttpEvent::Head { head, scope: TlsListenerScope::LocalControl, .. } if head.token.slot() == 0));
+    fixture.host.configure_lan(None).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(3);
+    while fixture.host.lan_phase() != super::super::super::LanListenerPhase::Disabled {
+        for event in fixture.host.poll().unwrap() {
+            if let TlsHttpEvent::Retired(token) = event {
+                fixture.host.rearm(token).unwrap();
+            }
+        }
+        assert!(Instant::now() < deadline);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(fixture.host.update_port(), Some(update_port));
+    assert_eq!(
+        fixture.host.update_phase(),
+        super::super::super::LanListenerPhase::Listening
+    );
+    assert_eq!(fixture.host.acceptance_snapshot().bound_slots, 3);
+    fixture.stop();
+}

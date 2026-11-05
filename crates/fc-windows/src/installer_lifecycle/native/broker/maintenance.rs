@@ -8,6 +8,7 @@ mod format;
 mod logical;
 mod registration;
 mod schema;
+pub(in crate::installer_lifecycle) mod update;
 mod upgrade_capture;
 const LIMIT: u64 = 64 * 1024 * 1024;
 const RECEIPTS: usize = 256;

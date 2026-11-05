@@ -1,6 +1,6 @@
 import { decimal, ProtocolFault, ProtocolVersionFault } from './protocol'
 
-export type CommandFamily = 'content' | 'materials' | 'voice'
+export type CommandFamily = 'content' | 'materials' | 'voice' | 'updates'
 export interface CommandIdentity { commandId: string; commandTicket: string }
 export interface CommandApi { issueCommand(family: CommandFamily, csrf: string, signal: AbortSignal): Promise<CommandIdentity> }
 

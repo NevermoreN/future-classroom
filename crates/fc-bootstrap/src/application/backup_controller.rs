@@ -640,6 +640,10 @@ impl App {
             && !self.backup.start_failed
             && self.shell.is_finished()
             && self.teacher_https_quiescent()
+            // The updater retains original cache/download/file owners until
+            // its worker and network drain acknowledge actual return. Do not
+            // move the common pool into a restore/reset coordinator earlier.
+            && self.updates_quiescent()
             && (confirmed.is_some() || confirmation_failed)
         {
             // Validate every remaining owner before moving any out of the App.

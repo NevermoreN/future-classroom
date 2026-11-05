@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ABI2 candidate from three original Win7-target MSVC CI artifacts.
+"""ABI2 candidate from four original Win7-target MSVC CI artifacts.
 
 Default inert. This packages only; no compiled process or installer is run.
 CI proves compilation. Static packaging never grants product release readiness,
@@ -170,11 +170,12 @@ def validate_predecessor_runtime(runtime: dict, manifest: dict, package: dict) -
                  and removed.get('value') == 'FutureClassroom'
                  and removed.get('queryCode') == 2 and removed.get('absent') is True,
                  'Actual exact owned Run preserved by repair and removed by uninstall')
+        B['require_payload_members'](package['artifactVersion'], [x['path'] for x in package['payloads']])
         NEED(state.get('healthyPresent') is True
              and p[key].get('status') == 'PASS_READONLY_EXPECTED_PRESENT', 'Installed and repaired complete14 state')
         files = state['observations']['files']['files']
         NEED(state.get('sourceGit') == manifest['sourceGit'] and state.get('currentUserSid') == manifest['expectedUserSid']
-             and state.get('phaseErrors') == [] and len(files) == len(package['payloads']) == 14
+             and state.get('phaseErrors') == [] and len(files) == len(package['payloads'])
              and sorted((x['path'], x['bytes'], x['sha256']) for x in files)
                  == sorted((x['path'], x['size'], x['sha256']) for x in package['payloads'])
              and all(x.get('status') == 'EXACT' and x.get('links') == 1 for x in files),
@@ -247,7 +248,8 @@ def predecessor_package(q: dict, old_args, original: tuple) -> tuple[dict, bytes
     payloads = dict(payloads, **{'MSI-CANDIDATE.txt': instructions})
     ledger = [dict(path=n, size=len(data), sha256=B['digest'](data), component_guid=B['component_code'](n))
               for n, data in sorted(payloads.items())]
-    NEED(len(payloads) == 14 and package['payloads'] == ledger, 'Original complete14 static ledger')
+    B['require_payload_members'](artifact['version'], payloads)
+    NEED(package['payloads'] == ledger, 'Original complete version-specific static ledger')
     for name, data in payloads.items():
         NEED(original_file(root / 'payload' / name, B['MAX_INSTALLED']) == data, 'Exact old payload bytes')
     helper, dll = artifacts['lifecycle-compile'][1], artifacts['guard-library-compile'][1]
@@ -259,7 +261,7 @@ def predecessor_package(q: dict, old_args, original: tuple) -> tuple[dict, bytes
     body = B['lifecycle_manifest'](package['version'], payloads)
     envelope = ABI2['C']['make_payload_manifest'](package['packageCode'], body)
     NEED(package['productCode'] == B['product_code'](package['version'])
-         and package['payloadReadback'] == 'ALL_FOURTEEN_EXACT'
+         and package['payloadReadback'] == ('ALL_FIFTEEN_EXACT' if B['version_parts'](artifact['version']) >= (0, 1, 5) else 'ALL_FOURTEEN_EXACT')
          and package['onlyExternal32HoleFilled'] is True, 'Actual old ABI2 sealed complete14 package')
     prior_record = None
     if package['status'] == 'PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_SUCCESSOR_STATIC_CANDIDATE_NATIVE_NOT_RUN':
@@ -364,7 +366,7 @@ def prepare_predecessor(a, current: tuple) -> tuple[bytes, dict] | None:
         upgrade='NOT_RUN; native recaptures current actual old registration/cache before Begin')
 
 
-def check_compile_result(result: dict) -> None:
+def check_compile_result(result: dict, require_coordinator: bool = False) -> None:
     """A closed compilation contract, additional to the shared CI admissions."""
     NEED(result.get('status') == 'COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN'
          and result.get('baseline') == 'Win7' and result.get('target') == TARGET
@@ -376,10 +378,12 @@ def check_compile_result(result: dict) -> None:
     NEED(isinstance(commands, list) and 1 <= len(commands) <= 160
          and all(isinstance(row, dict) and row.get('passed') is True for row in commands),
          'Complete original CI command set must pass')
-    for phase, package, target in (
-            ('product-compile', 'fc-bootstrap', 'fc-bootstrap'),
-            ('lifecycle-compile', 'fc-bootstrap', 'fc-installer-lifecycle'),
-            ('guard-library-compile', 'fc-windows', None)):
+    phases = [('product-compile', 'fc-bootstrap', 'fc-bootstrap'),
+              ('lifecycle-compile', 'fc-bootstrap', 'fc-installer-lifecycle'),
+              ('guard-library-compile', 'fc-windows', None)]
+    if require_coordinator:
+        phases.append(('update-coordinator-compile', 'fc-bootstrap', 'fc-update-coordinator'))
+    for phase, package, target in phases:
         expected = ['-Z', 'build-std', 'build' if target is None else 'rustc',
             '-vv', '--release', '--locked', '--target', TARGET, '-p', package]
         expected += ['--lib'] if target is None else ['--bin', target]
@@ -406,17 +410,20 @@ def admit(a):
     guard, guard_provenance = B['admit_normal_guard'](a, provenance, manifest['version'])
     result_raw = B['PROBE']['bounded_regular_file'](a.build_evidence / 'result.json', B['MAX_LOG'])
     NEED(B['digest'](result_raw) == a.build_result_sha256 == provenance['result_sha256'],
-         'Same original result after all three artifact admissions')
+         'Same original result after all four artifact admissions')
     result = B['json_document'](result_raw)
-    check_compile_result(result)
+    require_coordinator = B['version_parts'](manifest['version']) >= (0, 1, 5)
+    check_compile_result(result, require_coordinator=require_coordinator)
     product = payloads['fc-bootstrap.exe']
-    for image in (product, helper, guard):
+    coordinator = payloads.get('fc-update-coordinator.exe')
+    for image in (product, helper, guard) + ((coordinator,) if require_coordinator else ()):
         pe = struct.unpack_from('<I', image, 60)[0]
         NEED(struct.unpack_from('<HH', image, pe + 72) == (6, 1),
              'Each actual original MSVC PE declares subsystem version6.1')
     artifacts = {
         'product-compile': (a.build_evidence / 'product/fc-bootstrap/fc-bootstrap.exe', product),
         'lifecycle-compile': (a.lifecycle_helper, helper),
+        **({'update-coordinator-compile': (a.build_evidence / 'product/fc-bootstrap/fc-update-coordinator.exe', coordinator)} if require_coordinator else {}),
         'guard-library-compile': (a.guard_library, guard),
     }
     return raw, manifest, payloads, artifacts, provenance, guard_provenance
@@ -472,7 +479,7 @@ def build(a) -> dict:
     def verify_source():
         current = admit(a)
         NEED(current == (raw, manifest, payloads_before, artifacts, provenance, guard_provenance),
-             'Original input ZIP, full source, CI result, metadata and three artifacts unchanged')
+             'Original input ZIP, full source, CI result, metadata and four artifacts unchanged')
         NEED(builder_sources() == original_builders, 'Exact reviewed assembly dependencies unchanged')
         NEED(read_candidate_instructions(a) == (original_instructions, instructions_fact),
              'Exact separately reviewed candidate instructions unchanged')

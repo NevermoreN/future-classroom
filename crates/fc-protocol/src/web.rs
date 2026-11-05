@@ -17,6 +17,7 @@ pub mod repair;
 pub mod responses;
 pub mod session;
 pub mod subject_visual;
+pub mod updates;
 pub mod voice;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -54,6 +55,10 @@ pub enum Route {
     Status,
     QuickConnect,
     About,
+    AboutCheck,
+    Updates {
+        resource: updates::Resource,
+    },
     Classrooms,
     Admin {
         resource: admin::Resource,
@@ -126,6 +131,13 @@ pub enum Route {
 impl Route {
     pub fn allowed_methods(self) -> AllowedMethods {
         match self {
+            Self::Updates { resource } => {
+                if resource.post() {
+                    AllowedMethods::Post
+                } else {
+                    AllowedMethods::Get
+                }
+            }
             Self::Repair {
                 resource: repair::Resource::Status,
             } => AllowedMethods::Get,
@@ -169,6 +181,7 @@ impl Route {
             Self::Status
                 | Self::QuickConnect
                 | Self::About
+                | Self::AboutCheck
                 | Self::Classrooms
                 | Self::PairingCreate
                 | Self::PairingPoll { .. }
@@ -181,6 +194,8 @@ impl Route {
     }
     pub fn body_limit(self) -> u64 {
         match self {
+            Self::AboutCheck => 32,
+            Self::Updates { resource } => resource.body_limit(),
             Self::Repair {
                 resource: repair::Resource::Status,
             } => 0,
@@ -222,9 +237,13 @@ impl Route {
                     | Self::SessionResume
                     | Self::Setup
                     | Self::Repair { .. }
+                    | Self::AboutCheck
             )
     }
     fn post(self) -> bool {
+        if let Self::Updates { resource } = self {
+            return resource.post();
+        }
         if let Self::Repair { resource } = self {
             return resource != repair::Resource::Status;
         }
@@ -237,6 +256,7 @@ impl Route {
         matches!(
             self,
             Self::Setup
+                | Self::AboutCheck
                 | Self::SessionLogin
                 | Self::AccountRecover
                 | Self::SessionResume
@@ -329,7 +349,11 @@ impl WebBoundary {
             "status" => Route::Status,
             "quick-connect" => Route::QuickConnect,
             "about" => Route::About,
+            "about/check" => Route::AboutCheck,
             "classrooms" => Route::Classrooms,
+            _ if path.starts_with("updates/") => Route::Updates {
+                resource: updates::route(path).ok_or(WebError::NotFound)?,
+            },
             "commands" => Route::CommandIssue,
             "pairing/requests" => Route::PairingCreate,
             "session" => Route::Session,
@@ -606,7 +630,9 @@ impl WebBoundary {
             let content_type = unique(head, "content-type")?.ok_or(WebError::Body)?;
             let allowed = if matches!(
                 route,
-                Route::Materials {
+                Route::Updates {
+                    resource: updates::Resource::ImportBytes { .. }
+                } | Route::Materials {
                     route: materials::MaterialRoute::UploadBytes { .. }
                         | materials::MaterialRoute::BatchUploadBytes { .. }
                 } | Route::Admin {

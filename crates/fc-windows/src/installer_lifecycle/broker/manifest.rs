@@ -72,6 +72,7 @@ pub(crate) fn path(text: &str) -> bool {
     if matches!(
         text,
         "fc-bootstrap.exe"
+            | "fc-update-coordinator.exe"
             | "LICENSE"
             | "PROBE-README.txt"
             | "THIRD-PARTY-NOTICES.txt"

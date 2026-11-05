@@ -20,19 +20,21 @@ Settings open the actual loopback Web address. Login uses username/password;
 refresh, reconnect and ordinary idle retain the open page's session. Normal tab
 close/new open uses standard sessionStorage semantics and requires login again.
 Closing the browser does not stop the resident desktop. Its nonactivating information windows remain below ordinary application windows and above the Shell desktop. Taskbar focus does not hide them; maximized and full-screen applications cover them naturally.
-Opening PowerPoint, a browser or another application hides the information layer,
-including full-screen applications. Returning to the desktop restores it. Normal application exit is the tray Exit action.
+Normal application exit is the tray Exit action.
 
 Layout editing uses plain-language item/group labels. Timetable columns align,
 each lesson has a visible left-side delete button, and time fields keep the
 HH:MM shape while accepting digits only.
 
 Application startup separately prepares its installation-owned IP-SAN certificate
-and CurrentUser trust for the local control endpoint. LAN access still requires
-explicit address/port/source configuration and enablement; teacher devices must
-trust the selected certificate or chain. LAN may use another eligible CurrentUser
+and CurrentUser trust for the local control endpoint. The teacher endpoint
+automatically prepares its eligible private-IPv4 HTTPS configuration at startup;
+teacher devices must trust the selected certificate or chain. Saved custom
+source restrictions remain in force. LAN may use another eligible CurrentUser
 MY server certificate without replacing the local certificate. Private keys are
-not distributed and no firewall rule is created automatically.
+not distributed. D14 separately prepares only this program's restricted update
+ingress rule where Windows policy and the current token allow it; otherwise
+sharing stays visibly restricted until an administrator prepares the LAN rules.
 
 Setup expresses only fixed install/repair/remove intent. No command line path,
 caller hash, PID, transaction number or success claim authorizes installation.
@@ -103,3 +105,30 @@ explicit packaging tools. It admits only successful original Win7-target MSVC
 CI artifacts and records reviewed builder/instructions separately from those
 compiled sources. Static packaging does not run the product or publish a
 release. The GNU DEV producers retain their own provenance rules.
+
+## D14 coordinator and current formal build
+
+Starting with version 0.1.5, the formal Win7-target MSVC build must contain three
+normal binaries: `fc-bootstrap`, `fc-installer-lifecycle`, and
+`fc-update-coordinator`. `scripts/windows-msvc-ci.ps1` captures each original
+Cargo JSON stream and all three exact EXEs in the same immutable artifact
+ledger. `package-probe.py --target i686-win7-windows-msvc` requires an explicit
+`--update-coordinator` from that run. Its complete `manifest.json` file list
+binds the coordinator; the MSI payload ledger and exact extraction check include
+it too. A copied GNU Showcase EXE or a separately rebuilt coordinator fails
+formal source admission. Older version <=0.1.4 sources retain their original
+two-binary admission so an old qualified predecessor can still be replayed.
+
+A real D14 baseline requires the committed source SHA to complete the existing
+`Windows 7 MSVC candidate COMPILE_ONLY` GitHub workflow, followed by the existing
+ABI2 source/package validation. This is a compatibility build, not a Win7
+hardware test. For a real upgrade test, first qualify that baseline on the
+Windows 11 test machine and capture its actual installed MSI/predecessor record.
+Build the successor from a separate commit with a genuinely higher Cargo/product
+version, then embed that exact predecessor record through
+`package-abi2-msvc-candidate.py`'s qualified predecessor input. Reusing a new
+version label around unchanged lower-version product bytes does not establish
+that the installed program was upgraded. The existing source/CI inventory,
+Setup/MSI binding, current-user lease and native guard checks remain required.
+The D14 public root in `packaging/update-root.json` must be part of that frozen
+source build; publishing private keys are never payload members.

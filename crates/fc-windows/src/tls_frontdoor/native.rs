@@ -32,6 +32,8 @@ mod accept;
 mod configured;
 mod dual;
 mod stream;
+mod update;
+pub(super) mod update_client;
 pub use stream::{TlsHttpEvent, TlsHttpHost};
 const ACCEPT_ADDRESS_LENGTH: u32 = 48;
 const ACCEPT_ADDRESS_BYTES: usize = 96;
@@ -67,6 +69,8 @@ enum Phase {
     Closed,
 }
 struct Slot {
+    external_update: bool,
+    update_result_ready: bool,
     listener_index: usize,
     listener_scope: TlsListenerScope,
     memory: Pin<Box<IoMemory>>,
@@ -115,6 +119,8 @@ struct Resources {
     accept: Option<accept::AcceptSlot>,
     lan_listener: SOCKET,
     lan_accept: Option<accept::AcceptSlot>,
+    update_listener: SOCKET,
+    update_accept: Option<accept::AcceptSlot>,
 }
 #[derive(Debug, Default)]
 struct Report {
@@ -186,6 +192,12 @@ struct Owner {
     pending_lan: Option<Option<fc_domain::https_settings::HttpsConfiguration>>,
     lan_error: Option<ConfiguredTlsError>,
     lan_address: Option<std::net::SocketAddr>,
+    update_credential_pending: bool,
+    update_credential_target: Option<fc_domain::https_settings::HttpsConfiguration>,
+    update_configuration: Option<fc_domain::https_settings::HttpsConfiguration>,
+    pending_update: Option<Option<fc_domain::https_settings::HttpsConfiguration>>,
+    update_error: Option<ConfiguredTlsError>,
+    update_address: Option<std::net::SocketAddr>,
 }
 fn socket_handle(socket: SOCKET) -> HANDLE {
     HANDLE(socket.0 as *mut _)
@@ -277,6 +289,8 @@ impl Owner {
                         .issue(index)
                         .expect("four bounded initial token slots");
                     Slot {
+                        external_update: false,
+                        update_result_ready: false,
                         listener_index: 0,
                         listener_scope: TlsListenerScope::Lan,
                         memory: Box::pin(IoMemory {
@@ -310,6 +324,8 @@ impl Owner {
                 accept: None,
                 lan_listener: INVALID_SOCKET,
                 lan_accept: None,
+                update_listener: INVALID_SOCKET,
+                update_accept: None,
             }),
             started,
             generation,
@@ -336,6 +352,12 @@ impl Owner {
             pending_lan: None,
             lan_error: None,
             lan_address: None,
+            update_credential_pending: false,
+            update_credential_target: None,
+            update_configuration: None,
+            pending_update: None,
+            update_error: None,
+            update_address: None,
         })
     }
     fn start(&mut self, thumbprint: CertificateThumbprint) -> Result<(), String> {
@@ -748,6 +770,15 @@ impl Owner {
         {
             return Err("TLS completion identity mismatch".into());
         }
+        if self.resources.slots[index].external_update
+            && frame.call != Call::Retire
+            && !self.stopping
+            && self.resources.slots[index].phase != Phase::Closed
+        {
+            self.resources.slots[index].update_result_ready = true;
+            self.resources.slots[index].frame = Some(frame);
+            return Ok(());
+        }
         let result = frame.result.take().ok_or("TLS result missing")?;
         let call = frame.call;
         if let Err(error) = result {
@@ -962,7 +993,7 @@ impl Owner {
         if self.resources.port.is_invalid() {
             return Ok(());
         }
-        for _ in 0..(CONNECTION_SLOTS + 2 * usize::from(self.http_mode)) {
+        for _ in 0..(CONNECTION_SLOTS + 3 * usize::from(self.http_mode)) {
             self.service_deadlines()?;
             let (mut bytes, mut key, mut operation) = (0, 0, ptr::null_mut());
             // SAFETY: IOCP and all operation allocations remain owned and pinned.
@@ -983,7 +1014,7 @@ impl Owner {
                 }
                 break;
             }
-            if let Some(listener_index) = (0..2).find(|&index| {
+            if let Some(listener_index) = (0..3).find(|&index| {
                 self.http_mode
                     && self
                         .bare_accept(index)
@@ -1192,7 +1223,10 @@ impl Owner {
         if self.http_mode && !self.stopping {
             self.expire_bare_accept(Instant::now())?;
             for index in 0..CONNECTION_SLOTS {
-                if self.resources.slots[index].phase != Phase::Closed && self.expired(index) {
+                if !self.resources.slots[index].external_update
+                    && self.resources.slots[index].phase != Phase::Closed
+                    && self.expired(index)
+                {
                     self.close_slot(index, true)?;
                 }
             }
@@ -1265,6 +1299,11 @@ impl Owner {
                 .lan_accept
                 .as_ref()
                 .map_or(0, |_| size_of::<accept::AcceptMemory>())
+            + self.resources.update_accept.as_ref().map_or(0, |_| size_of::<accept::AcceptMemory>())
+            + self.update_configuration.as_ref().map_or(0, fc_domain::https_settings::HttpsConfiguration::allocation_bytes)
+            + self.update_credential_target.as_ref().map_or(0, fc_domain::https_settings::HttpsConfiguration::allocation_bytes)
+            + self.pending_update.as_ref().and_then(Option::as_ref).map_or(0, fc_domain::https_settings::HttpsConfiguration::allocation_bytes)
+            + if self.update_credential_pending { self.update_credential_target.as_ref().map_or(0, |c| c.host.as_str().len()) } else { 0 }
             + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
             + self.lan_credential_target.as_ref().map_or(
                 0,
@@ -1353,6 +1392,9 @@ impl Owner {
         if let Err(error) = close(&mut self.resources.listener, true) {
             failure = Some(error);
         }
+        if let Err(error) = close(&mut self.resources.update_listener, true) {
+            failure = Some(error);
+        }
         if let Err(error) = close(&mut self.resources.lan_listener, true) {
             failure = Some(error);
         }
@@ -1373,6 +1415,7 @@ impl Owner {
                 .all(|slot| slot.pending.is_none() && slot.socket == INVALID_SOCKET)
                 && self.resources.listener == INVALID_SOCKET
                 && self.resources.lan_listener == INVALID_SOCKET
+                && self.resources.update_listener == INVALID_SOCKET
                 && self.bare_released();
             let worker_done = match self.resources.worker.as_mut() {
                 Some(worker) => {

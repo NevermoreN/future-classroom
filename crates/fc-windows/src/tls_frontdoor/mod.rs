@@ -36,6 +36,8 @@ pub const HEADER_CLOSE_RESERVE: std::time::Duration = std::time::Duration::from_
 pub enum TlsListenerScope {
     LocalControl,
     Lan,
+    UpdateServe,
+    UpdateFetch,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LanListenerPhase {
@@ -180,6 +182,7 @@ pub(super) struct Frame {
     pub token: RequestToken,
     pub call: Call,
     pub scope: TlsListenerScope,
+    pub peer: Option<UpdatePeerIdentity>,
     pub input: [u8; BUFFER_BYTES],
     pub input_len: usize,
     pub output: [u8; BUFFER_BYTES],
@@ -193,6 +196,7 @@ impl Frame {
             token,
             call: Call::Handshake,
             scope: TlsListenerScope::LocalControl,
+            peer: None,
             input: [0; BUFFER_BYTES],
             input_len: 0,
             output: [0; BUFFER_BYTES],
@@ -228,8 +232,21 @@ pub(super) struct CredentialConfiguration {
     pub thumbprint: CertificateThumbprint,
     pub host: String,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct UpdatePeerIdentity {
+    pub address: std::net::Ipv4Addr,
+    /// SHA-256 of the exact DER certificate, authenticated by the school group.
+    pub certificate_sha256: [u8; 32],
+}
+
 #[cfg(any(windows, test))]
 pub(super) trait Driver {
+    fn configure_update(
+        &mut self,
+        _configuration: Option<CredentialConfiguration>,
+    ) -> Result<(), TlsError> {
+        Ok(())
+    }
     fn configure_lan(
         &mut self,
         _configuration: Option<CredentialConfiguration>,
@@ -251,6 +268,8 @@ mod credentials;
 mod http_date;
 #[cfg(windows)]
 mod native;
+#[cfg(windows)]
+pub use native::update_client::{UpdateTlsCall, UpdateTlsCompletion, UpdateTlsStep};
 #[cfg(windows)]
 pub use native::{TlsHttpEvent, TlsHttpHost};
 #[cfg(windows)]
@@ -293,6 +312,40 @@ pub enum ConfiguredTlsError {
     Busy,
     Native,
     Cleanup,
+}
+
+/// Read the exact public DER fingerprint for authenticated update discovery.
+/// This neither exports a private key nor changes any browser trust store.
+#[cfg(windows)]
+pub fn certificate_der_sha256(thumbprint: CertificateThumbprint) -> Result<[u8; 32], TlsError> {
+    use sha2::{Digest, Sha256};
+    let mut selected =
+        certificate_selection::SelectedCertificate::open().map_err(|_| TlsError::Certificate)?;
+    let result = (|| {
+        if !selected
+            .find(thumbprint)
+            .map_err(|_| TlsError::Certificate)?
+        {
+            return Err(TlsError::Certificate);
+        }
+        // SAFETY: bounded encoded certificate belongs to the selected context.
+        let certificate = unsafe { &*selected.certificate() };
+        if certificate.cbCertEncoded == 0
+            || certificate.cbCertEncoded > 65536
+            || certificate.pbCertEncoded.is_null()
+        {
+            return Err(TlsError::Certificate);
+        }
+        let bytes = unsafe {
+            std::slice::from_raw_parts(
+                certificate.pbCertEncoded,
+                certificate.cbCertEncoded as usize,
+            )
+        };
+        Ok(Sha256::digest(bytes).into())
+    })();
+    selected.close(true)?;
+    result
 }
 
 #[cfg(test)]

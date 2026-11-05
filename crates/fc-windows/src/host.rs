@@ -176,6 +176,8 @@ pub struct HiddenHost {
     instance: HINSTANCE,
     foreground_hook: HWINEVENTHOOK,
     instance_owner: Option<File>,
+    idle_interval: u32,
+    background_pending: Cell<bool>,
     _thread: PhantomData<Rc<()>>,
 }
 #[derive(Debug, PartialEq, Eq)]
@@ -305,6 +307,8 @@ impl HiddenHost {
             instance,
             foreground_hook: HWINEVENTHOOK::default(),
             instance_owner: None,
+            idle_interval: interval_millis,
+            background_pending: Cell::new(false),
             _thread: PhantomData,
         };
         if host.state.taskbar_recreated == 0 {
@@ -375,6 +379,26 @@ impl HiddenHost {
     }
     pub fn controller(&self) -> HostControl {
         self.state.control.clone()
+    }
+    /// The original window timer paces bounded background work while an IO
+    /// owner is active. Idle hosts retain their original one-second cadence;
+    /// no additional timer, thread, queue, or foreground window is introduced.
+    pub fn set_background_work_pending(&self, pending: bool) -> Result<()> {
+        if self.background_pending.get() == pending {
+            return Ok(());
+        }
+        let interval = if pending {
+            self.idle_interval.min(20)
+        } else {
+            self.idle_interval
+        };
+        // SAFETY: this UI thread owns hwnd and the existing TIMER identifier.
+        // Replacing its interval retains the single coalescing WM_TIMER source.
+        if unsafe { SetTimer(Some(self.hwnd), TIMER, interval, None) } == 0 {
+            return Err(Error::from_thread());
+        }
+        self.background_pending.set(pending);
+        Ok(())
     }
     /// Callback runs on UI thread after dispatch, must remain bounded/nonblocking.
     /// Background shutdown is coordinated by bootstrap, never joined by this loop.

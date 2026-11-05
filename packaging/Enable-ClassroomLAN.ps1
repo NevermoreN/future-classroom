@@ -18,7 +18,7 @@ try {
     $digest = $sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($program.ToLowerInvariant()))
     $suffix = ([BitConverter]::ToString($digest)).Replace('-', '').Substring(0, 12)
 } finally { $sha.Dispose() }
-foreach ($rule in @(@('HTTPS', 'TCP', $HttpsPort), @('Discovery', 'UDP', 38443))) {
+foreach ($rule in @(@('HTTPS', 'TCP', $HttpsPort), @('Discovery', 'UDP', 38443), @('Update', 'TCP', 8445))) {
     $name = 'FutureClassroom-LAN-' + $suffix + '-' + $rule[0]
     # Only replace this installation path's product-owned rule; leave all
     # unrelated rules, SSH authorization and the firewall itself unchanged.
@@ -28,4 +28,4 @@ foreach ($rule in @(@('HTTPS', 'TCP', $HttpsPort), @('Discovery', 'UDP', 38443))
         'remoteip=10.0.0.0/8,172.16.0.0/12,192.168.0.0/16' 'profile=private,domain' enable=yes | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "Unable to prepare LAN rule: $name" }
 }
-Write-Output 'Classroom LAN rules prepared for private/domain networks only. HTTPS and UDP discovery still require the running application.'
+Write-Output 'Classroom LAN rules prepared for private/domain networks only. Teacher HTTPS, TCP 8445 updates and UDP discovery still require the running application.'

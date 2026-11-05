@@ -14,6 +14,8 @@ pub mod tcp_frontdoor;
 pub mod tls_frontdoor;
 pub mod update_cache;
 #[cfg(windows)]
+pub mod update_install;
+#[cfg(windows)]
 pub use native::{probe, program_data, InstanceGuard, NativeProbeReport, SystemRandom};
 #[cfg(windows)]
 pub mod host;
@@ -37,3 +39,6 @@ pub(crate) static NATIVE_TEST_SERIAL: std::sync::Mutex<()> = std::sync::Mutex::n
 
 #[cfg(windows)]
 pub mod materials;
+
+#[cfg(windows)]
+pub use system::update_windows_baseline;

@@ -552,9 +552,18 @@ impl MaintenanceWork {
                             .map_err(|_| MaintenanceError::Denied)?
                             .check_revision()
                             .map_err(|_| MaintenanceError::Denied)?;
-                        backend
-                            .close_reinitialization_admission()
-                            .map_err(|_| MaintenanceError::Retained)
+                        backend.close_reinitialization_admission().map_err(|error| {
+                            if matches!(
+                                error,
+                                crate::backend::BackendError::Storage(
+                                    fc_storage::StorageError::Busy
+                                )
+                            ) {
+                                MaintenanceError::Busy
+                            } else {
+                                MaintenanceError::Retained
+                            }
+                        })
                     })();
                     if let Err(error) = admitted {
                         if error != MaintenanceError::Retained {

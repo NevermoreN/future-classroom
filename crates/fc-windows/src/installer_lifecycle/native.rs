@@ -1242,3 +1242,34 @@ pub(super) fn owner_boundary_for_test() -> Result<()> {
     }
     resources.release()
 }
+
+/// Fixed update records use the same SID/parent/reparse/DACL boundary as the
+/// native lifecycle namespace, without creating a Pending installation intent.
+pub(super) fn update_directory(identity: &InstallIdentity) -> Result<PathBuf> {
+    let mut resources = Resources::open(identity, false)?;
+    let path = identity.local.join("FutureClassroom-Updates");
+    let result = (|| {
+        let created = with_security(&resources.sid, true, |attributes| unsafe {
+            CreateDirectoryW(&native_path(&path)?, Some(attributes))
+        });
+        if let Err(error) = created {
+            if error.code() != ERROR_ALREADY_EXISTS.to_hresult() {
+                return Err(LifecycleError::from(error));
+            }
+        }
+        let h = resources.open_file(
+            &path,
+            READ_CONTROL.0 | FILE_READ_ATTRIBUTES.0,
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            OPEN_EXISTING,
+            true,
+            false,
+        )?;
+        resources.add(h, Role::Parent);
+        verify_info(h, true)?;
+        verify_acl(h, &resources.sid, true)?;
+        Ok(path)
+    })();
+    resources.release()?;
+    result
+}

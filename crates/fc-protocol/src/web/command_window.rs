@@ -43,6 +43,7 @@ pub fn issue(bytes: &[u8]) -> Result<CommandFamily, ProtocolError> {
         "content" => Ok(CommandFamily::Content),
         "materials" => Ok(CommandFamily::Materials),
         "voice" => Ok(CommandFamily::Voice),
+        "updates" => Ok(CommandFamily::Updates),
         _ => Err(ProtocolError::InvalidCommand),
     }
 }
@@ -59,7 +60,10 @@ struct IssueReply {
 pub fn issued(command: IssuedCommand) -> Result<Vec<u8>, ProtocolError> {
     if !matches!(
         command.family,
-        CommandFamily::Content | CommandFamily::Materials | CommandFamily::Voice
+        CommandFamily::Content
+            | CommandFamily::Materials
+            | CommandFamily::Voice
+            | CommandFamily::Updates
     ) || command.window_millis != COMMAND_WINDOW_MILLIS
     {
         return Err(ProtocolError::InvalidCommand);

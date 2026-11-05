@@ -124,11 +124,17 @@ impl Backend {
     ) -> Result<IssuedCommand> {
         if !matches!(
             family,
-            CommandFamily::Content | CommandFamily::Materials | CommandFamily::Voice
+            CommandFamily::Content
+                | CommandFamily::Materials
+                | CommandFamily::Voice
+                | CommandFamily::Updates
         ) {
             return Err(BackendError::InvalidInput);
         }
         let owner = self.web_command_owner(lease)?;
+        if family == CommandFamily::Updates && self.role(lease)? != Role::GlobalAdmin {
+            return Err(BackendError::InvalidCredentials);
+        }
         let issued = self.issue_for_owner(family, owner)?;
         if self.web_command_owner(lease)? != owner {
             return Err(BackendError::Storage(StorageError::CommandNotIssued));
@@ -144,9 +150,15 @@ impl Backend {
     ) -> Result<IssuedCommand> {
         if !matches!(
             family,
-            CommandFamily::Content | CommandFamily::Materials | CommandFamily::Voice
+            CommandFamily::Content
+                | CommandFamily::Materials
+                | CommandFamily::Voice
+                | CommandFamily::Updates
         ) {
             return Err(BackendError::InvalidInput);
+        }
+        if family == CommandFamily::Updates && self.role(lease)? != Role::GlobalAdmin {
+            return Err(BackendError::InvalidCredentials);
         }
         let issued = IssuedCommand {
             ticket,

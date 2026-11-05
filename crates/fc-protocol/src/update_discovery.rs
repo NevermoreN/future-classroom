@@ -168,7 +168,7 @@ mod tests {
         let mut tail = encoded.to_vec();
         tail.push(0);
         assert!(decode_query(&tail, &Auth).is_err());
-        assert!(QUERY_BYTES <= 256 && REPLY_BYTES <= 1024);
+        const { assert!(QUERY_BYTES <= 256 && REPLY_BYTES <= 1024) };
     }
     #[test]
     fn reply_rejects_replay_referrals_and_invalid_endpoints() {

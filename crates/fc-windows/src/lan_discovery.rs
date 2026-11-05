@@ -1,7 +1,7 @@
 //! Bounded, native IPv4 LAN discovery. Browsers cannot send these UDP queries.
 //!
-//! The caller polls from its existing network loop only while a LAN HTTPS
-//! listener is active. Discovery advertises that listener; it grants no access.
+//! The caller polls from its existing network loop while teacher discovery or
+//! authenticated update discovery is enabled. Neither advert grants access.
 use std::borrow::Cow;
 use std::io;
 use std::net::{IpAddr, Ipv4Addr, UdpSocket};
@@ -22,6 +22,33 @@ pub struct DiscoveryResponder {
 }
 
 impl DiscoveryResponder {
+    /// Sends the already authenticated update query on the original shared
+    /// discovery socket. No second UDP owner or background scanner is created.
+    pub fn send_update_query(
+        &self,
+        bytes: &[u8],
+        destination: std::net::Ipv4Addr,
+    ) -> std::io::Result<()> {
+        if bytes.is_empty()
+            || bytes.len() > MAX_QUERY_BYTES
+            || (!destination.is_private() && destination != std::net::Ipv4Addr::BROADCAST)
+        {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                "update discovery destination or query",
+            ));
+        }
+        self.socket.set_broadcast(true)?;
+        let sent = self.socket.send_to(bytes, (destination, 38443))?;
+        if sent != bytes.len() {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::WriteZero,
+                "update query truncated",
+            ));
+        }
+        Ok(())
+    }
+
     /// Bind the product's own discovery port (not Emby's port or protocol).
     pub fn bind() -> io::Result<Self> {
         let socket = UdpSocket::bind((Ipv4Addr::UNSPECIFIED, DISCOVERY_PORT))?;
@@ -62,6 +89,15 @@ impl DiscoveryResponder {
         &mut self,
         public_json: Option<&[u8]>,
         allow_peer: impl Fn(IpAddr) -> bool,
+        update_reply: impl FnMut(&[u8], Ipv4Addr) -> Option<Vec<u8>>,
+    ) -> io::Result<usize> {
+        self.poll_services_filtered(public_json, &allow_peer, &allow_peer, update_reply)
+    }
+    pub fn poll_services_filtered(
+        &mut self,
+        public_json: Option<&[u8]>,
+        allow_teacher: impl Fn(IpAddr) -> bool,
+        allow_update: impl Fn(IpAddr) -> bool,
         mut update_reply: impl FnMut(&[u8], Ipv4Addr) -> Option<Vec<u8>>,
     ) -> io::Result<usize> {
         if public_json.is_some_and(|json| {
@@ -81,7 +117,7 @@ impl DiscoveryResponder {
         }
         // One extra byte distinguishes oversized packets even when recv_from
         // truncates them to the provided buffer on the host platform.
-        let mut buffer = [0_u8; MAX_QUERY_BYTES + 1];
+        let mut buffer = [0_u8; MAX_REPLY_BYTES + 1];
         let mut sent = 0;
         for _ in 0..MAX_PACKETS_PER_POLL {
             let (length, peer) = match self.socket.recv_from(&mut buffer) {
@@ -96,9 +132,13 @@ impl DiscoveryResponder {
                 continue;
             };
             if self.replies >= MAX_REPLIES_PER_SECOND
-                || length > MAX_QUERY_BYTES
+                || length > MAX_REPLY_BYTES
                 || !address.is_private()
-                || !allow_peer(peer.ip())
+                || if &buffer[..length] == DISCOVERY_QUERY {
+                    !allow_teacher(peer.ip())
+                } else {
+                    !allow_update(peer.ip())
+                }
             {
                 continue;
             }

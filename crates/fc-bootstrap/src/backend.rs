@@ -5,6 +5,7 @@
 mod account_management_tests;
 mod autostart;
 mod calendar;
+mod updates;
 pub use calendar::{CalendarManualStart, ManualCalendarFetch};
 mod command_window;
 mod content_web;
@@ -110,6 +111,7 @@ pub enum BackendError {
     Schedule(ScheduleRepositoryError),
     Calendar(fc_ports::CalendarRepositoryError),
     Autostart(fc_ports::autostart::AutostartRepositoryError),
+    Updates(fc_ports::updates::UpdateRepositoryError),
     Lesson(LessonRepositoryError),
     Display(DisplayRepositoryError),
     HttpsSettings(fc_ports::HttpsSettingsRepositoryError),
@@ -574,6 +576,9 @@ impl Backend {
     /// interrupter and writer alive for their actual physical drain. This is
     /// not a restore barrier and grants no filesystem reset capability.
     pub(crate) fn close_reinitialization_admission(&self) -> Result<()> {
+        // Serialize reset confirmation with the original writer's update
+        // Handoff before changing any process/session recovery capability.
+        self.repository.close_update_recovery_admission()?;
         self.control.0.recovering.store(true, Ordering::Release);
         self.control.lock_local();
         self.web.close();

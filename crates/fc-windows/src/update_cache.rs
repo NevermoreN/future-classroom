@@ -62,6 +62,7 @@ struct State {
     clock: u64,
     downloading: bool,
     reserved: u64,
+    external_reserved: u64,
 }
 #[derive(Clone)]
 pub struct UpdateCache {
@@ -143,6 +144,20 @@ fn open_file(path: &Path, write: bool, create: bool) -> Result<File, CacheError>
     Ok(file)
 }
 impl UpdateCache {
+    /// Temporary envelopes and extracted installer sources share the cache's
+    /// physical quota. Drop only after their file owners and files are gone.
+    pub fn reserve_external(&self, bytes: u64) -> Result<ExternalReservation, CacheError> {
+        let mut state = self.state.lock().map_err(|_| CacheError::Busy)?;
+        self.make_room(&mut state, bytes, None)?;
+        state.external_reserved = state
+            .external_reserved
+            .checked_add(bytes)
+            .ok_or(CacheError::Full)?;
+        Ok(ExternalReservation {
+            cache: self.clone(),
+            bytes,
+        })
+    }
     /// `protected` is the current and previous complete maintenance-source hash,
     /// read from authoritative local maintenance state before any reclamation.
     /// The directory must already exist with the application's private ACL.
@@ -219,6 +234,7 @@ impl UpdateCache {
                 clock,
                 downloading: false,
                 reserved: 0,
+                external_reserved: 0,
             })),
         };
         {
@@ -265,6 +281,7 @@ impl UpdateCache {
         let mut total: u64 = state.entries.values().map(|e| e.length).sum();
         while total
             .saturating_add(state.reserved)
+            .saturating_add(state.external_reserved)
             .saturating_add(additional)
             > self.quota
         {
@@ -422,6 +439,17 @@ fn hash_into(
     }
 }
 pub trait PackageReader: Read + Seek {}
+pub struct ExternalReservation {
+    cache: UpdateCache,
+    bytes: u64,
+}
+impl Drop for ExternalReservation {
+    fn drop(&mut self) {
+        if let Ok(mut state) = self.cache.state.lock() {
+            state.external_reserved -= self.bytes;
+        }
+    }
+}
 impl<T: Read + Seek> PackageReader for T {}
 pub struct Download {
     cache: UpdateCache,
@@ -646,6 +674,23 @@ mod tests {
             Err(CacheError::NotReady)
         ));
         assert!(cache.acquire(target(c)).is_ok());
+    }
+    #[test]
+    fn staging_reservation_shares_quota_and_returns_after_owner_drop() {
+        let fixture = Fixture::new();
+        let cache =
+            UpdateCache::open_with_quota(&fixture.0, &[target(b"keep").sha256], 12).unwrap();
+        ready(&cache, b"keep");
+        let staging = cache.reserve_external(8).unwrap();
+        assert!(matches!(
+            cache.begin(target(b"next")),
+            Err(CacheError::Full)
+        ));
+        assert!(cache.acquire(target(b"keep")).is_ok());
+        drop(staging);
+        ready(&cache, b"next");
+        assert!(cache.acquire(target(b"keep")).is_ok());
+        assert!(cache.acquire(target(b"next")).is_ok());
     }
     #[test]
     fn invalid_length_and_busy_download_do_not_publish() {

@@ -25,7 +25,7 @@ mod effects;
 mod installed_release;
 #[allow(dead_code)]
 // Same-source and sealed-publication Upgrade capture; runtime joint tests remain.
-mod maintenance;
+pub(in crate::installer_lifecycle) mod maintenance;
 mod retirement;
 #[allow(dead_code)]
 // Captured ABI2 facts alone grant no permission; native Plan checks stay separate.

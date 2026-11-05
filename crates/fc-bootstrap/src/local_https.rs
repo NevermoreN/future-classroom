@@ -103,6 +103,8 @@ struct Shared {
     attached: bool,
     pending: Option<Attachment>,
     pending_repair: Option<Arc<crate::repair_web::RepairService>>,
+    pending_updates: Option<crate::update_network::NetworkControl>,
+    update_control: Option<crate::update_network::NetworkControl>,
     service: Option<crate::backend::web::WebService>,
     lan_commands: std::collections::VecDeque<LanCommand>,
     lan_changing: bool,
@@ -149,6 +151,8 @@ impl LocalRuntime {
             attached: false,
             pending: None,
             pending_repair: None,
+            pending_updates: None,
+            update_control: None,
             service: None,
             lan_commands: std::collections::VecDeque::new(),
             lan_changing: false,
@@ -369,6 +373,22 @@ impl ConfigureTicket {
     }
 }
 impl LocalControlHandle {
+    pub fn attach_updates(
+        &self,
+        control: crate::update_network::NetworkControl,
+    ) -> Result<(), RuntimeError> {
+        let mut state = self.shared.lock().map_err(|_| RuntimeError::Faulted)?;
+        if state.stop_at.is_some()
+            || state.pending_updates.is_some()
+            || state.update_control.is_some()
+        {
+            return Err(RuntimeError::Busy);
+        }
+        state.pending_updates = Some(control.clone());
+        state.update_control = Some(control);
+        Ok(())
+    }
+
     pub fn discovery_state(&self) -> &'static str {
         self.shared
             .lock()
@@ -596,8 +616,20 @@ where
     let mut discovery_attempted = false;
     let mut browser = None;
     let mut discovery_poll_at = Instant::now();
+    let mut update_discovery_at = Instant::now();
     loop {
         if !stopping {
+            let pending_updates = shared
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .pending_updates
+                .take();
+            if let Some(control) = pending_updates {
+                if net.set_update_network(control).is_err() {
+                    fail(&shared, RuntimeError::Busy);
+                }
+            }
+
             let repair = shared
                 .lock()
                 .unwrap_or_else(|e| e.into_inner())
@@ -794,7 +826,9 @@ where
             if let Some(address) = discovery_control.quick_connect_url() {
                 if !discovery_attempted {
                     discovery_attempted = true;
-                    discovery = fc_windows::lan_discovery::DiscoveryResponder::bind().ok();
+                    if discovery.is_none() {
+                        discovery = fc_windows::lan_discovery::DiscoveryResponder::bind().ok();
+                    }
                     let host = shared
                         .lock()
                         .unwrap_or_else(|e| e.into_inner())
@@ -840,41 +874,70 @@ where
                 if let (Some(responder), Some(configuration), Some(attached)) =
                     (&mut discovery, configuration, &attachment)
                 {
-                    if let Ok(payload) = attached.app.binding().lan_discovery_payload(&address) {
-                        let _ = responder.poll(&payload, |peer| {
-                            configuration
-                                .source_networks
-                                .as_ref()
-                                .is_some_and(|policy| {
-                                    policy.contains(peer)
-                                        && !policy.networks().iter().any(|network| {
-                                            let Some((address, prefix)) =
-                                                network.as_str().split_once('/')
-                                            else {
-                                                return false;
-                                            };
-                                            match (
-                                                address.parse::<std::net::Ipv4Addr>(),
-                                                prefix.parse::<u32>(),
-                                                peer,
-                                            ) {
-                                                (
-                                                    Ok(network),
-                                                    Ok(prefix @ 1..=30),
-                                                    std::net::IpAddr::V4(peer),
-                                                ) => {
-                                                    u32::from(peer)
-                                                        == u32::from(network) | (u32::MAX >> prefix)
+                    {
+                        let payload = attached.app.binding().lan_discovery_payload(&address).ok();
+                        let update_control = shared
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner())
+                            .update_control
+                            .clone();
+                        let _ = responder.poll_services_filtered(
+                            payload.as_deref(),
+                            |peer| {
+                                configuration
+                                    .source_networks
+                                    .as_ref()
+                                    .is_some_and(|policy| {
+                                        policy.contains(peer)
+                                            && !policy.networks().iter().any(|network| {
+                                                let Some((address, prefix)) =
+                                                    network.as_str().split_once('/')
+                                                else {
+                                                    return false;
+                                                };
+                                                match (
+                                                    address.parse::<std::net::Ipv4Addr>(),
+                                                    prefix.parse::<u32>(),
+                                                    peer,
+                                                ) {
+                                                    (
+                                                        Ok(network),
+                                                        Ok(prefix @ 1..=30),
+                                                        std::net::IpAddr::V4(peer),
+                                                    ) => {
+                                                        u32::from(peer)
+                                                            == u32::from(network)
+                                                                | (u32::MAX >> prefix)
+                                                    }
+                                                    _ => false,
                                                 }
-                                                _ => false,
-                                            }
-                                        })
-                                })
-                        });
+                                            })
+                                    })
+                            },
+                            |peer| {
+                                update_control
+                                    .as_ref()
+                                    .is_some_and(|u| u.discovery_enabled())
+                                    && matches!(peer,std::net::IpAddr::V4(ip) if ip.is_private())
+                            },
+                            |bytes, source| {
+                                update_control
+                                    .as_ref()
+                                    .and_then(|u| u.discovery_message(bytes, source))
+                            },
+                        );
                     }
                 }
             } else {
-                discovery = None;
+                if !shared
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner())
+                    .update_control
+                    .as_ref()
+                    .is_some_and(|u| u.discovery_enabled())
+                {
+                    discovery = None;
+                }
                 browser = None;
                 discovery_attempted = false;
                 shared
@@ -887,6 +950,28 @@ where
                         discovery_available: false,
                         rooms: Vec::new(),
                     };
+            }
+        }
+        if !stopping && !business_draining && Instant::now() >= update_discovery_at {
+            update_discovery_at = Instant::now() + Duration::from_millis(100);
+            net.update_discovery(&mut discovery);
+            if discovery_control.quick_connect_url().is_none() {
+                let control = shared
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner())
+                    .update_control
+                    .clone();
+                if let (Some(responder), Some(control)) = (&mut discovery, control) {
+                    let enabled = control.discovery_enabled();
+                    let _ = responder.poll_services_filtered(
+                        None,
+                        |_| false,
+                        |peer| {
+                            enabled && matches!(peer,std::net::IpAddr::V4(ip) if ip.is_private())
+                        },
+                        |bytes, source| control.discovery_message(bytes, source),
+                    );
+                }
             }
         }
         if stopping || business_draining {
@@ -925,7 +1010,8 @@ where
             {
                 cleaned = false;
             }
-            let business_done = cleaned
+            let business_done = net.updates_idle()
+                && cleaned
                 && cleanup.is_none()
                 && report.pending_jobs == 0
                 && report.cleanup_pending == 0

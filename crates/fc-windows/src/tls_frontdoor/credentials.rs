@@ -6,7 +6,7 @@ use windows::Win32::Security::{
     Authentication::Identity::*, Credentials::SecHandle, Cryptography::*,
 };
 
-mod host;
+pub(super) mod host;
 
 pub(super) fn verify_configured_host(
     thumbprint: CertificateThumbprint,
@@ -229,6 +229,60 @@ fn empty_usage(last_error: u32) -> ServerAuthUsage {
 impl Drop for Credentials {
     fn drop(&mut self) {
         // Explicit worker shutdown observes close(); unwinding is best effort.
+        let _ = self.close();
+    }
+}
+
+/// Outbound credentials contain no client certificate or private key. Manual
+/// validation is confined to the authenticated update peer pin, never teachers.
+pub(super) struct ClientCredentials {
+    pub handle: SecHandle,
+    acquired: bool,
+}
+impl ClientCredentials {
+    pub fn new() -> Result<Self, TlsError> {
+        let mut result = Self {
+            handle: SecHandle::default(),
+            acquired: false,
+        };
+        let config = SCHANNEL_CRED {
+            dwVersion: SCHANNEL_CRED_VERSION,
+            grbitEnabledProtocols: SP_PROT_TLS1_2_CLIENT,
+            dwMinimumCipherStrength: 128,
+            dwFlags: SCH_USE_STRONG_CRYPTO
+                | SCH_CRED_MANUAL_CRED_VALIDATION
+                | SCH_CRED_NO_DEFAULT_CREDS,
+            ..Default::default()
+        };
+        // SAFETY: synchronous acquisition on the sole SSPI thread.
+        unsafe {
+            AcquireCredentialsHandleW(
+                windows::core::PCWSTR::null(),
+                UNISP_NAME_W,
+                SECPKG_CRED_OUTBOUND,
+                None,
+                Some((&config as *const SCHANNEL_CRED).cast()),
+                None,
+                None,
+                &mut result.handle,
+                None,
+            )
+        }
+        .map_err(|e| TlsError::Native(e.code().0))?;
+        result.acquired = true;
+        Ok(result)
+    }
+    pub fn close(&mut self) -> Result<(), TlsError> {
+        if std::mem::replace(&mut self.acquired, false) {
+            // SAFETY: every context is retired before its credential owner.
+            unsafe { FreeCredentialsHandle(&self.handle) }
+                .map_err(|e| TlsError::Cleanup(e.code().0))?;
+        }
+        Ok(())
+    }
+}
+impl Drop for ClientCredentials {
+    fn drop(&mut self) {
         let _ = self.close();
     }
 }

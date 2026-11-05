@@ -110,7 +110,7 @@ impl Stream {
             + self.event.as_ref().map_or(0, event_bytes)
             + self.deferred_final.as_ref().map_or(0, event_bytes)
     }
-    fn reset(&mut self) {
+    pub(super) fn reset(&mut self) {
         self.wipe_tx();
         self.deadline = Instant::now();
         self.deadline_phase = DeadlinePhase::AwaitingConnection;
@@ -259,7 +259,7 @@ fn event_bytes(event: &TlsHttpEvent) -> usize {
 /// One Net-domain owner, sharing the diagnostic's exact native/SSPI lifecycle.
 /// The caller must explicitly stop and poll_shutdown until true before Drop.
 pub struct TlsHttpHost {
-    owner: Owner,
+    pub(super) owner: Owner,
     drain_deadline: Option<Instant>,
 }
 impl TlsHttpHost {
@@ -316,6 +316,31 @@ impl TlsHttpHost {
         configuration: Option<&fc_domain::https_settings::HttpsConfiguration>,
     ) -> Result<(), ConfiguredTlsError> {
         self.owner.configure_lan(configuration)
+    }
+    pub fn update_port(&self) -> Option<u16> {
+        if self.owner.resources.update_listener == INVALID_SOCKET {
+            None
+        } else {
+            configured::local_port(self.owner.resources.update_listener).ok()
+        }
+    }
+    pub fn update_phase(&self) -> super::super::LanListenerPhase {
+        if self.owner.pending_update.is_some() {
+            super::super::LanListenerPhase::Draining
+        } else if self.owner.resources.update_listener != INVALID_SOCKET {
+            super::super::LanListenerPhase::Listening
+        } else {
+            super::super::LanListenerPhase::Disabled
+        }
+    }
+    pub fn update_error(&self) -> Option<ConfiguredTlsError> {
+        self.owner.update_error
+    }
+    pub fn configure_update(
+        &mut self,
+        configuration: Option<&fc_domain::https_settings::HttpsConfiguration>,
+    ) -> Result<(), ConfiguredTlsError> {
+        self.owner.configure_update(configuration)
     }
     /// Certificate selection is read-only. Only an explicit isolated loopback
     /// capability can enter this candidate; normal listening remains gated.
@@ -413,6 +438,7 @@ impl TlsHttpHost {
         let resources = &self.owner.resources;
         let bare = resources.accept.as_ref();
         let lan_bare = resources.lan_accept.as_ref();
+        let update_bare = resources.update_accept.as_ref();
         TlsAcceptSnapshot {
             generation: self.owner.generation,
             posts: self.owner.report.accept_posts,
@@ -437,7 +463,8 @@ impl TlsHttpHost {
                 .filter(|slot| slot.pending.is_some())
                 .count()
                 + usize::from(bare.is_some_and(|bare| bare.pending()))
-                + usize::from(lan_bare.is_some_and(|bare| bare.pending())),
+                + usize::from(lan_bare.is_some_and(|bare| bare.pending()))
+                + usize::from(update_bare.is_some_and(|bare| bare.pending())),
             owned_sockets: usize::from(resources.listener != INVALID_SOCKET)
                 + resources
                     .slots
@@ -446,7 +473,9 @@ impl TlsHttpHost {
                     .count()
                 + usize::from(bare.is_some_and(|bare| bare.socket != INVALID_SOCKET))
                 + usize::from(resources.lan_listener != INVALID_SOCKET)
-                + usize::from(lan_bare.is_some_and(|bare| bare.socket != INVALID_SOCKET)),
+                + usize::from(lan_bare.is_some_and(|bare| bare.socket != INVALID_SOCKET))
+                + usize::from(resources.update_listener != INVALID_SOCKET)
+                + usize::from(update_bare.is_some_and(|bare| bare.socket != INVALID_SOCKET)),
         }
     }
     /// Latest fixed-slot observations only, not peer wire-close evidence or
@@ -455,6 +484,14 @@ impl TlsHttpHost {
         let mut snapshot = self.owner.report.close_observations;
         snapshot.generation = self.owner.generation;
         snapshot
+    }
+    /// Exact connected native peer, independent of every HTTP header.
+    pub fn is_stopping(&self) -> bool {
+        self.owner.stopping
+    }
+    pub fn request_peer(&self, token: RequestToken) -> Result<std::net::IpAddr, String> {
+        let index = self.owner.http_index(token)?;
+        configured::peer_address(self.owner.resources.slots[index].socket)
     }
     pub fn tokens(&self) -> [RequestToken; CONNECTION_SLOTS] {
         std::array::from_fn(|n| self.owner.resources.slots[n].token)
@@ -473,6 +510,11 @@ impl TlsHttpHost {
     }
     pub fn poll(&mut self) -> Result<Vec<TlsHttpEvent>, String> {
         self.owner.poll()?;
+        if let Err(error) = self.owner.apply_update_change() {
+            if OWNER_FAULTED.load(Ordering::Acquire) {
+                return Err(error);
+            }
+        }
         if let Err(error) = self.owner.apply_lan_change() {
             if OWNER_FAULTED.load(Ordering::Acquire) {
                 return Err(error);
@@ -748,6 +790,7 @@ impl Owner {
             || self.stopping
             || index >= CONNECTION_SLOTS
             || self.resources.slots[index].token != token
+            || self.resources.slots[index].external_update
             || matches!(
                 self.resources.slots[index].phase,
                 Phase::Ready | Phase::Closed
@@ -761,6 +804,9 @@ impl Owner {
     fn take_http_events(&mut self) -> Vec<TlsHttpEvent> {
         let mut events = Vec::with_capacity(MAX_POLL_EVENTS);
         for slot in &mut self.resources.slots {
+            if slot.external_update && !self.stopping {
+                continue;
+            }
             let stream = slot.stream.as_mut().unwrap();
             if let Some(event) = stream.event.take() {
                 events.push(event);
@@ -1163,6 +1209,7 @@ impl Owner {
             .any(|slot| slot.pending.is_some() || slot.socket != INVALID_SOCKET)
             || self.resources.listener != INVALID_SOCKET
             || self.resources.lan_listener != INVALID_SOCKET
+            || self.resources.update_listener != INVALID_SOCKET
             || !self.bare_released()
         {
             return Ok(false);

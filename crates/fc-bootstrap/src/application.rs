@@ -48,6 +48,7 @@ mod http_business_probe;
 mod http_executor;
 mod local_web_controller;
 mod maintenance_controller;
+mod update_controller;
 mod web_platform;
 pub fn tls_business_probe(thumbprint: &str, marker: &str) -> std::result::Result<(), String> {
     http_business_probe::run(thumbprint, marker)
@@ -302,6 +303,7 @@ fn fatal(error: &Failure) -> bool {
                 | BackendError::Schedule(fc_ports::ScheduleRepositoryError::Faulted)
                 | BackendError::Calendar(fc_ports::CalendarRepositoryError::Faulted)
                 | BackendError::Autostart(fc_ports::autostart::AutostartRepositoryError::Faulted)
+                | BackendError::Updates(fc_ports::updates::UpdateRepositoryError::Faulted)
                 | BackendError::Lesson(fc_ports::LessonRepositoryError::Faulted)
                 | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
                 | BackendError::SubjectVisual(fc_ports::SubjectVisualRepositoryError::Faulted)
@@ -377,6 +379,7 @@ fn error_text(error: &Failure) -> String {
         Failure::Web(WebServiceError::Busy) => "教师设备状态正在更新，请稍后刷新。".into(),
         Failure::Web(_) => "教师设备操作未完成，请刷新核对当前状态。".into(),
         Failure::Backend(e) => match e {
+            BackendError::Updates(_) => "软件更新状态尚未确认，请在软件更新页面重新读取并核对。".into(),
             BackendError::HttpsSettings(fc_ports::HttpsSettingsRepositoryError::Domain(fc_domain::https_settings::HttpsSettingsError::ConfigurationUnavailable)) => "教师会话准入仍开启或另一配置任务未结束。请返回设备管理核对并明确停用后再保存。".into(),
             BackendError::HttpsSettings(_) => "配置的权限或版本已变化，请保留草稿并核对原操作结果。".into(),
             BackendError::SubjectVisual(_) => "科目配色或显示设置的权限、版本已变化，本次未确认保存。草稿保留，请核对后明确取消并重新加载。".into(),
@@ -627,6 +630,7 @@ fn create_file(path: &Path, bytes: &[u8]) -> Result<()> {
 }
 
 enum Outcome {
+    SoftwareUpdate(update_controller::Completed),
     MaintenanceFinished,
     LocalWeb(local_web_controller::Completed),
     Http(fc_bootstrap::web_transfer::HttpCompletion),
@@ -1344,6 +1348,7 @@ impl NativeTarget {
     }
 }
 enum Work {
+    SoftwareUpdate(Box<update_controller::Job>),
     Maintenance(
         Box<fc_bootstrap::maintenance_web::MaintenanceWork>,
         Arc<Mutex<Backend>>,
@@ -1453,6 +1458,7 @@ impl Task for Work {
     type Output = Result<Outcome>;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
+            Self::SoftwareUpdate(_) => Some(std::mem::size_of::<Self>() + 1024),
             Self::LocalWeb(job) => job.allocation_bytes(),
             Self::Maintenance(job, _) => job.allocation_bytes(),
             Self::Tracked(work, _) => work
@@ -1792,6 +1798,7 @@ impl Work {
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         match self {
             Self::Tracked(..) => Err(Failure::Stopped),
+            Self::SoftwareUpdate(job) => job.run(context),
             Self::LocalWeb(job) => job.run(context),
             Self::Maintenance(job, backend) => {
                 job.run(backend, context).map_err(|_| Failure::Stopped)?;
@@ -2538,6 +2545,7 @@ struct PendingLaunch {
     from_scene: bool,
 }
 struct App {
+    updates: update_controller::State,
     maintenance: maintenance_controller::State,
     local_web: local_web_controller::State,
     window: Window,
@@ -3302,7 +3310,10 @@ impl App {
     fn schedule_shutdown(&mut self) {
         // Network workers may still need the original Writer for negative
         // cleanup. Do not close it or stop the common worker domain first.
-        if !self.teacher_https_quiescent() || !self.local_web_quiescent() {
+        if !self.teacher_https_quiescent()
+            || !self.local_web_quiescent()
+            || !self.updates_quiescent()
+        {
             return;
         }
         if self.maintenance.pending_work()
@@ -6346,6 +6357,7 @@ impl App {
                 Ok(Outcome::Closed) => return Err("关闭结果进入了普通请求通道".into()),
                 Ok(
                     Outcome::LocalWeb(_)
+                    | Outcome::SoftwareUpdate(_)
                     | Outcome::MaintenanceFinished
                     | Outcome::Http(_)
                     | Outcome::HttpProbe(_)
@@ -6594,6 +6606,8 @@ fn run_at_inner(
         None
     };
     let result = host.run_with_host(|hints, host| {
+        app.poll_updates();
+        host.set_background_work_pending(app.updates_work_pending())?;
         app.poll_local_web();
         if app.pool.is_faulted() && !app.terminate_required {
             if let Some(control) = &app.control {
@@ -6876,6 +6890,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         .set_empty_form_action(voice_editor::CHECK_OUTPUT)
         .map_err(|_| "无法注册默认输出检查操作".to_owned())?;
     Ok(App {
+        updates: update_controller::State::default(),
         maintenance: maintenance_controller::State::default(),
         local_web: local_web_controller::State::default(),
         window,

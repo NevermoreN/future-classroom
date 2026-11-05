@@ -16,7 +16,10 @@ import zipfile
 
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.1.5"
+# Match the actual workspace version for successor builds; never re-label a
+# lower-version binary by an independent packaging constant.
+import tomllib
+VERSION = tomllib.loads((ROOT / "Cargo.toml").read_text())["workspace"]["package"]["version"]
 ARTIFACT = f"FutureClassroom-{VERSION}-windows-x86-dev.zip"
 TARGET_ROLES = {
     "i686-pc-windows-gnu": "modern-GNU-development-only",
@@ -176,7 +179,7 @@ def archive_bytes(archive: zipfile.ZipFile, name: str, data: bytes) -> None:
     archive.writestr(info, data)
 
 
-def build_package(executable: Path, output: Path, target: str, objdump: str, declared_toolchain: str | None, web_dist: Path | None = None) -> dict:
+def build_package(executable: Path, output: Path, target: str, objdump: str, declared_toolchain: str | None, web_dist: Path | None = None, update_coordinator: Path | None = None) -> dict:
     audit_pe = runpy.run_path(str(ROOT / "scripts" / "audit-pe.py"))["audit_pe"]
     audited_digest = sha256_file(executable)
     audit = audit_pe(executable, objdump)
@@ -193,6 +196,13 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
         "PROBE-README.txt": ROOT / "packaging" / "PROBE-README.txt",
         "THIRD-PARTY-NOTICES.txt": ROOT / "packaging" / "THIRD-PARTY-NOTICES.txt",
     }
+    if update_coordinator is not None:
+        coordinator_audit = audit_pe(update_coordinator, objdump)
+        if coordinator_audit["structural_errors"]:
+            raise ValueError("Update coordinator PE format rejected: " + "; ".join(coordinator_audit["structural_errors"]))
+        files["fc-update-coordinator.exe"] = update_coordinator
+    elif target == "i686-win7-windows-msvc":
+        raise ValueError("Formal D14 candidate requires --update-coordinator from the same original CI run.")
     web_files, frontend = frontend_payloads(web_dist) if web_dist is not None else ({}, {
         "included": False,
         "status": "NOT_INCLUDED",
@@ -312,9 +322,10 @@ def main() -> int:
     parser.add_argument("--objdump", default="i686-w64-mingw32-objdump")
     parser.add_argument("--toolchain", help="Optional declared build toolchain; does not certify binary provenance.")
     parser.add_argument("--web-dist", type=Path, help="Explicit built Web directory; only validated fc-assets.json entries and Web notices are included.")
+    parser.add_argument("--update-coordinator", type=Path, help="Explicit same-build fc-update-coordinator.exe; required for formal D14 candidates.")
     args = parser.parse_args()
     try:
-        manifest = build_package(args.exe.resolve(), args.output.resolve(), args.target, args.objdump, args.toolchain, args.web_dist)
+        manifest = build_package(args.exe.resolve(), args.output.resolve(), args.target, args.objdump, args.toolchain, args.web_dist, args.update_coordinator.resolve() if args.update_coordinator is not None else None)
     except (OSError, ValueError, subprocess.SubprocessError, zipfile.BadZipFile) as error:
         print(f"Probe package failed: {error}", file=sys.stderr)
         return 1

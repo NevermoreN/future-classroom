@@ -133,7 +133,7 @@ impl Reader {
             checked_msi_closes: self.closed_total,
         }))
     }
-    fn binary_hash(
+    pub(super) fn binary_hash(
         &mut self,
         db: MSIHANDLE,
         query: &'static str,
@@ -198,7 +198,7 @@ impl Reader {
         self.close_msi(view)?;
         self.hash_end(hash)
     }
-    fn binary_facts(
+    pub(super) fn binary_facts(
         &mut self,
         path: &Path,
         package: &str,

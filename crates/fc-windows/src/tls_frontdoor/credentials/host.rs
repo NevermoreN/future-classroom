@@ -7,7 +7,10 @@
 use super::*;
 use std::net::IpAddr;
 
-pub(super) fn verify(certificate: *const CERT_CONTEXT, host: &str) -> Result<(), TlsError> {
+pub(in crate::tls_frontdoor) fn verify(
+    certificate: *const CERT_CONTEXT,
+    host: &str,
+) -> Result<(), TlsError> {
     // SAFETY: selected live CERT_CONTEXT/CERT_INFO owns all extension pointers.
     let info = unsafe { &*(*certificate).pCertInfo };
     if info.cExtension == 0 || info.cExtension > 128 || info.rgExtension.is_null() {

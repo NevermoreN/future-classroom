@@ -57,7 +57,7 @@ function Get-BaselineCargoArguments([string]$Command, [string[]]$Arguments,
         if ($packageIndex -lt 0 -or $packageIndex + 1 -ge $Arguments.Length -or
             $Arguments[$packageIndex + 1] -cne 'fc-bootstrap' -or
             $binaryIndex -lt 0 -or $binaryIndex + 1 -ge $Arguments.Length -or
-            $Arguments[$binaryIndex + 1] -cnotin @('fc-bootstrap','fc-installer-lifecycle') -or
+            $Arguments[$binaryIndex + 1] -cnotin @('fc-bootstrap','fc-installer-lifecycle','fc-update-coordinator') -or
             @($Arguments | Where-Object { $_ -ceq '-p' }).Count -ne 1 -or
             @($Arguments | Where-Object { $_ -ceq '--bin' }).Count -ne 1 -or
             $Arguments -contains '--' -or $Arguments -contains '--all-targets' -or
@@ -741,6 +741,7 @@ try {
         Write-CrtFlagState 'before-product' $productRustFlags
         $binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200
         $lifecycle = Invoke-Logged 'lifecycle-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-installer-lifecycle','--message-format=json') $Baseline) 1200
+        $coordinator = Invoke-Logged 'update-coordinator-compile' $cargo (Get-BaselineCargoArguments 'rustc' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-update-coordinator','--message-format=json') $Baseline) 1200
         $guardLibrary = Invoke-Logged 'guard-library-compile' $cargo (Get-BaselineCargoArguments 'build' @('-vv','--release','--locked','--target',$Target,'-p','fc-windows','--lib','--message-format=json') $Baseline) 1200
         Require-Step $guardLibrary
     } finally {
@@ -749,14 +750,14 @@ try {
     }
     Invoke-Logged 'clippy' $cargo (Get-BaselineCargoArguments 'clippy' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') $Baseline) 1500 | Out-Null
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-    foreach ($build in @($tests, $binary, $lifecycle)) {
+    foreach ($build in @($tests, $binary, $lifecycle, $coordinator)) {
         foreach ($line in [IO.File]::ReadLines((Join-Path $Artifact $build.stdout), $Utf8)) {
             if (-not $line.StartsWith('{')) { continue }
             $message = $line | ConvertFrom-Json
             if ($message.reason -ne 'compiler-artifact' -or -not $message.executable -or -not $packages.ContainsKey($message.package_id)) { continue }
-            $role = if ($message.profile.test) { 'tests' } elseif ($build.name -in @('product-compile','lifecycle-compile') -and $message.target.kind -contains 'bin') { 'product' } else { continue }
+            $role = if ($message.profile.test) { 'tests' } elseif ($build.name -in @('product-compile','lifecycle-compile','update-coordinator-compile') -and $message.target.kind -contains 'bin') { 'product' } else { continue }
             if ($role -eq 'product') {
-                $expectedTarget = if ($build.name -ceq 'product-compile') { 'fc-bootstrap' } else { 'fc-installer-lifecycle' }
+                $expectedTarget = switch -CaseSensitive ($build.name) { 'product-compile' { 'fc-bootstrap' } 'lifecycle-compile' { 'fc-installer-lifecycle' } 'update-coordinator-compile' { 'fc-update-coordinator' } default { throw 'Unexpected normal product phase.' } }
                 if ($packages[$message.package_id].name -cne 'fc-bootstrap' -or $message.target.name -cne $expectedTarget) { throw 'Unexpected normal product Cargo target.' }
             }
             if (-not $seen.Add([string]$message.executable)) { continue }
@@ -776,10 +777,11 @@ try {
     Require-Step $guardExports
     if ((Read-Output $guardExports) -notmatch '(?m)^\s*\d+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+FcControlledInnerGuard(?:\s+=.*)?\s*$') { throw 'Missing exact undecorated Type1 guard export.' }
     if (@($executables | Where-Object { $_.role -eq 'tests' }).Count -lt 12 -or
-        @($executables | Where-Object { $_.role -eq 'product' }).Count -ne 2 -or
+        @($executables | Where-Object { $_.role -eq 'product' }).Count -ne 3 -or
         @($executables | Where-Object { $_.role -eq 'custom_action_library' }).Count -ne 1 -or
         @($executables | Where-Object { $_.role -eq 'product' -and $_.target -ceq 'fc-bootstrap' }).Count -ne 1 -or
-        @($executables | Where-Object { $_.role -eq 'product' -and $_.target -ceq 'fc-installer-lifecycle' }).Count -ne 1) { throw 'Required workspace test/two closed product executables missing.' }
+        @($executables | Where-Object { $_.role -eq 'product' -and $_.target -ceq 'fc-installer-lifecycle' }).Count -ne 1 -or
+        @($executables | Where-Object { $_.role -eq 'product' -and $_.target -ceq 'fc-update-coordinator' }).Count -ne 1) { throw 'Required workspace test/three closed product executables missing.' }
     [long]$payloadBytes = 0
     foreach ($executable in $executables) {
         [long]$size = $executable['bytes']

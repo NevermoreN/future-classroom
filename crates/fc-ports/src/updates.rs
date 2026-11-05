@@ -38,6 +38,31 @@ pub enum UpdateRepositoryError {
     Faulted,
 }
 pub trait UpdateMaintenanceRepository {
+    /// Trusted deployment/background composition only. This returns persisted
+    /// intent/facts, never a browser actor or permission to launch an installer.
+    fn update_runtime_state(&self) -> Result<UpdateMaintenanceState, UpdateRepositoryError>;
+    /// Persist a verified publisher release independently of downloads/install.
+    /// A lower sequence or same sequence with different bytes is never accepted.
+    fn accept_update_release(
+        &mut self,
+        expected_policy_revision: Revision,
+        release: ReleaseIdentity,
+    ) -> Result<UpdateMaintenanceState, UpdateRepositoryError>;
+    /// Called only after publisher/source validation by the process update
+    /// owner. The writer binds work to the exact current enrolled policy.
+    fn begin_background_update(
+        &mut self,
+        expected_revision: Revision,
+        expected_policy_revision: Revision,
+        release: ReleaseIdentity,
+    ) -> Result<UpdateMaintenanceState, UpdateRepositoryError>;
+    /// Exact durable job identity, not user-supplied Web state. Revoked policy
+    /// may settle a running physical result, but cannot create a new job.
+    fn advance_background_update(
+        &mut self,
+        job: &UpdateJob,
+        phase: UpdateJobPhase,
+    ) -> Result<UpdateMaintenanceState, UpdateRepositoryError>;
     fn update_status(
         &self,
         actor: &ActorContext,

@@ -31,6 +31,7 @@ mod materials;
 mod profile_images;
 #[cfg(windows)]
 mod shared_upload;
+mod updates;
 mod voice;
 mod voice_capabilities;
 #[cfg(windows)]
@@ -54,6 +55,8 @@ pub struct WebResponse {
     pub body: Vec<u8>,
 }
 pub struct WebApplication {
+    update_control: std::sync::Arc<std::sync::Mutex<Option<crate::updates::UpdateControl>>>,
+    update_uploads: std::sync::Arc<std::sync::Mutex<Vec<updates::Upload>>>,
     #[cfg(windows)]
     profile_images:
         std::sync::Arc<std::sync::Mutex<Option<std::sync::Arc<profile_images::ImageFiles>>>>,
@@ -124,6 +127,8 @@ impl WebApplication {
     }
     pub fn new(prefix: &ListenPrefix, service: WebService) -> Result<Self, WebError> {
         Ok(Self {
+            update_control: Default::default(),
+            update_uploads: Default::default(),
             boundary: std::sync::Arc::new(WebBoundary::new(prefix)?),
             service,
             account_receipts: Default::default(),
@@ -147,6 +152,18 @@ impl WebApplication {
         let mut app = Self::new(prefix, service.for_local_control())?;
         app.local_control = true;
         Ok(app)
+    }
+    pub fn with_update_control(self, control: crate::updates::UpdateControl) -> Self {
+        self.set_update_control(control);
+        self
+    }
+    /// A successful retry may attach updates after local Web already opened.
+    /// LAN variants share this memory cell and retain their original sessions.
+    pub fn set_update_control(&self, control: crate::updates::UpdateControl) {
+        *self
+            .update_control
+            .lock()
+            .expect("update control binding poisoned") = Some(control);
     }
     #[cfg(windows)]
     pub fn with_maintenance_service(
@@ -195,6 +212,8 @@ impl WebApplication {
     /// job-bound view across jobs would incorrectly cancel their next chunk.
     fn for_execution(&self, fence: crate::web_transfer::ExecutionFence) -> Self {
         Self {
+            update_control: self.update_control.clone(),
+            update_uploads: self.update_uploads.clone(),
             boundary: self.boundary.clone(),
             service: self.service.with_execution_fence(fence),
             account_receipts: self.account_receipts.clone(),
@@ -379,17 +398,13 @@ impl WebApplication {
             Err(response) => return response,
         };
         match route {
-            Route::About => {
-                if !self.local_control {
-                    return failure(403, responses::ErrorCode::Forbidden);
-                }
-                response(200, responses::about(&responses::About {
-                    schema_version: 1,
-                    version: env!("CARGO_PKG_VERSION"),
-                    automatic_updates: fc_domain::update_state::UpdatePolicy::default().enabled,
-                    update_available: false,
-                    update_message: "自动更新默认开启；下载和安装组件尚未就绪，当前还不能执行内网更新。功能就绪并加入学校更新群组后，将自动校验新版、退出安装并立即重启。",
-                }), None)
+            Route::About => self.about_response(),
+            Route::AboutCheck => self.check_update_response(head, body),
+            Route::Updates { resource } => {
+                let Some(session) = authenticated else {
+                    return failure(401, responses::ErrorCode::Unauthorized);
+                };
+                self.update_response(backend, session.lease(), resource, body)
             }
             Route::Classrooms => {
                 let directory = self
@@ -640,14 +655,17 @@ impl WebApplication {
                     return failure(401, responses::ErrorCode::Unauthorized);
                 };
                 match backend.logout_web_page(session.lease()) {
-                    Ok(()) => response(
-                        200,
-                        responses::logged_out(),
-                        Some(Header {
-                            name: "Set-Cookie".into(),
-                            value: CLEAR_SESSION_COOKIE.as_bytes().to_vec(),
-                        }),
-                    ),
+                    Ok(()) => {
+                        self.retire_update_uploads(session.lease());
+                        response(
+                            200,
+                            responses::logged_out(),
+                            Some(Header {
+                                name: "Set-Cookie".into(),
+                                value: CLEAR_SESSION_COOKIE.as_bytes().to_vec(),
+                            }),
+                        )
+                    }
                     Err(_) => failure(503, responses::ErrorCode::ResultUnknown),
                 }
             }

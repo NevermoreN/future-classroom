@@ -545,6 +545,11 @@ impl TransactionDocuments for CommandView<'_> {
 
 type Reply<T> = mpsc::Sender<Result<T, StorageError>>;
 enum Message<S> {
+    UpdateRecoveryGate(Reply<()>),
+    UpdateRuntime(
+        business::updates::RuntimeTask,
+        Reply<fc_domain::update_state::UpdateMaintenanceState>,
+    ),
     UpdateMaintenance(business::updates::Task, Reply<Vec<u8>>),
     MigrationInspect(
         recovery::InspectJob,
@@ -585,6 +590,7 @@ enum Message<S> {
 impl<S> Message<S> {
     fn queued_bytes(&self) -> Option<usize> {
         let allocations = match self {
+            Self::UpdateRuntime(_, _) | Self::UpdateRecoveryGate(_) => 0,
             Self::UpdateMaintenance(task, _) => task.allocation_bytes(),
             Self::MigrationInspect(job, _) => job.allocation_bytes(),
             Self::MigrationMap(job, _) => job.allocation_bytes(),
@@ -964,6 +970,9 @@ fn writer_loop<P: AuthorityPublisher>(
     let _ = ready.send(Ok(()));
     let mut login = login::Limiter::new(clock);
     let mut faulted = false;
+    // One-way for this physical writer lifetime; a fresh writer may open only
+    // after the recovery coordinator has actually returned the old owners.
+    let mut update_recovery_closed = false;
     while !stop.load(Ordering::Acquire) {
         let Envelope { message, lease } = match receiver.recv_timeout(Duration::from_millis(10)) {
             Ok(message) => message,
@@ -973,12 +982,54 @@ fn writer_loop<P: AuthorityPublisher>(
         // Queue ownership ends at pop. In-flight work is bounded to this one writer.
         drop(lease);
         match message {
+            Message::UpdateRecoveryGate(reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else {
+                    business::updates::close_recovery_admission(&mut db, &stop)
+                };
+                if result.is_ok() {
+                    update_recovery_closed = true;
+                }
+                let _ = reply.send(result);
+            }
+            Message::UpdateRuntime(task, reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else {
+                    match catch_unwind(AssertUnwindSafe(|| {
+                        business::updates::execute_runtime(
+                            &mut db,
+                            task,
+                            update_recovery_closed,
+                            &stop,
+                        )
+                    })) {
+                        Ok(value) => value,
+                        Err(_) => Err(StorageError::WorkerPanicked),
+                    }
+                };
+                if matches!(
+                    result,
+                    Err(StorageError::Indeterminate | StorageError::WorkerPanicked)
+                ) {
+                    mark_fault(&mut publisher, &mut faulted);
+                }
+                let _ = reply.send(result);
+            }
             Message::UpdateMaintenance(task, reply) => {
                 let result = if faulted {
                     Err(StorageError::AuthorityUnavailable)
                 } else {
                     match catch_unwind(AssertUnwindSafe(|| {
-                        business::updates::execute(&mut db, task, &stop)
+                        window.maintain(&mut db)?;
+                        business::updates::execute(
+                            &mut db,
+                            task,
+                            &window,
+                            update_recovery_closed,
+                            &stop,
+                        )
                     })) {
                         Ok(result) => result,
                         Err(_) => Err(StorageError::WorkerPanicked),
@@ -1188,7 +1239,12 @@ fn writer_loop<P: AuthorityPublisher>(
                             &mut faulted,
                         )
                     })) {
-                        Ok(result) => result.and_then(recovery::decode_barrier),
+                        Ok(result) => {
+                            if result.is_ok() {
+                                update_recovery_closed = true;
+                            }
+                            result.and_then(recovery::decode_barrier)
+                        }
                         Err(_) => {
                             mark_fault(&mut publisher, &mut faulted);
                             Err(StorageError::WorkerPanicked)
@@ -1203,6 +1259,12 @@ fn writer_loop<P: AuthorityPublisher>(
     for Envelope { message, lease } in receiver.try_iter() {
         drop(lease);
         match message {
+            Message::UpdateRecoveryGate(reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
+            Message::UpdateRuntime(_, reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
             Message::UpdateMaintenance(_, reply) => {
                 let _ = reply.send(Err(StorageError::Stopping));
             }
@@ -1541,6 +1603,9 @@ fn execute_transaction<P: AuthorityPublisher>(
         _ => None,
     };
     let retirement = task.retirement();
+    if retirement == CommandRetirement::DatabaseRestoreBarrier {
+        business::updates::ensure_recovery_allowed(&transaction)?;
+    }
     if let Some(family) = task.command_family() {
         if issued.is_none_or(|issued| issued.family != family) {
             return Err(StorageError::CommandNotIssued);

@@ -15,6 +15,7 @@ pub(super) enum Job {
         maintenance: Arc<fc_bootstrap::maintenance_web::MaintenanceService>,
         diagnostics: Arc<Mutex<Diagnostics>>,
         workers: fc_runtime::worker::WorkerHandle<Work>,
+        updates: Option<fc_bootstrap::updates::UpdateControl>,
     },
     StartLan {
         backend: Arc<Mutex<Backend>>,
@@ -24,7 +25,7 @@ pub(super) enum Job {
 }
 pub(super) enum Completed {
     Prepared(Box<PreparedLocal>),
-    Attached(Arc<Mutex<Backend>>, Arc<WebApplication>),
+    Attached(Arc<Mutex<Backend>>, Arc<WebApplication>, bool),
     LanStarted,
 }
 impl Job {
@@ -51,6 +52,7 @@ impl Job {
                 maintenance,
                 diagnostics,
                 workers,
+                updates,
             } => {
                 let web = {
                     let value = backend.lock().map_err(|_| Failure::Stopped)?;
@@ -59,6 +61,13 @@ impl Job {
                 context.checkpoint().map_err(|_| Failure::Stopped)?;
                 let mut app = WebApplication::new_local(&prefix, web.clone())
                     .map_err(|_| invalid("本机Web配置无效。"))?;
+                let updates_attached = updates.is_some();
+                if let Some(updates) = updates {
+                    control
+                        .attach_updates(updates.network())
+                        .map_err(|_| invalid("更新网络入口未能准备。"))?;
+                    app = app.with_update_control(updates);
+                }
                 app.configure_material_files(&root)
                     .map_err(|_| invalid("本机资料入口未能准备。"))?;
                 {
@@ -87,7 +96,7 @@ impl Job {
                 binding
                     .set(Arc::downgrade(&app))
                     .map_err(|_| Failure::Stopped)?;
-                Completed::Attached(backend, app)
+                Completed::Attached(backend, app, updates_attached)
             }
             Self::StartLan {
                 backend,
@@ -199,8 +208,8 @@ pub(super) struct State {
     pending: Option<JobTicket<Result<Outcome>>>,
     pub(super) runtime: Option<LocalRuntime>,
     prefix: Option<fc_ports::http::ListenPrefix>,
-    attached: bool,
-    lan_app: Option<Arc<WebApplication>>,
+    pub(super) attached: bool,
+    pub(super) lan_app: Option<Arc<WebApplication>>,
     lan_attempted: bool,
     failed: bool,
     pub(super) failure: Option<String>,
@@ -276,11 +285,14 @@ impl App {
                         }
                     }
                 }
-                Ok(Outcome::LocalWeb(Completed::Attached(backend, app))) if !self.stopping => {
+                Ok(Outcome::LocalWeb(Completed::Attached(backend, app, updates_attached)))
+                    if !self.stopping =>
+                {
                     if let Some(runtime) = &self.local_web.runtime {
                         match runtime.attach(backend, app.clone()) {
                             Ok(()) => {
                                 self.local_web.attached = true;
+                                self.updates.bound = updates_attached;
                                 self.local_web.lan_app = Some(app);
                             }
                             Err(error) => {
@@ -350,6 +362,7 @@ impl App {
         if !self.stopping
             && !self.local_web.failed
             && !self.local_web.attached
+            && self.updates.attempted
             && self.local_web.pending.is_none()
         {
             if let (Some(backend), Some(prefix), Some(runtime)) = (
@@ -369,6 +382,7 @@ impl App {
                         .expect("normal runtime maintenance owner"),
                     diagnostics: self.local_web.diagnostics.clone(),
                     workers: self.pool.handle(),
+                    updates: self.updates.control.clone(),
                 };
                 if let Ok(ticket) = self.pool.handle().try_submit(
                     Work::LocalWeb(Box::new(job)),

@@ -21,6 +21,7 @@ struct Context {
     handle: SecHandle,
     token: Option<RequestToken>,
     scope: TlsListenerScope,
+    peer: Option<super::UpdatePeerIdentity>,
     last_token: Option<RequestToken>,
     shutting_down: bool,
     shutdown_complete: bool,
@@ -34,6 +35,7 @@ impl Default for Context {
             handle: INVALID_HANDLE,
             token: None,
             scope: TlsListenerScope::LocalControl,
+            peer: None,
             last_token: None,
             shutting_down: false,
             shutdown_complete: false,
@@ -100,6 +102,7 @@ impl Context {
         self.shutdown_complete = false;
         self.peer_closed = false;
         self.complete = false;
+        self.peer = None;
         self.sizes = SecPkgContext_StreamSizes::default();
         result
     }
@@ -116,6 +119,8 @@ pub(super) struct SchannelSet {
     contexts: [Context; CONNECTION_SLOTS],
     credentials: Credentials,
     lan_credentials: Option<Credentials>,
+    update_credentials: Option<Credentials>,
+    fetch_credentials: Option<super::credentials::ClientCredentials>,
     cleanup_failure: Option<TlsError>,
     closed: bool,
 }
@@ -128,6 +133,8 @@ impl SchannelSet {
             contexts: std::array::from_fn(|_| Context::default()),
             credentials: Credentials::new_configured(thumbprint, host)?,
             lan_credentials: None,
+            update_credentials: None,
+            fetch_credentials: None,
             cleanup_failure: None,
             closed: false,
         })
@@ -137,12 +144,43 @@ impl SchannelSet {
             contexts: std::array::from_fn(|_| Context::default()),
             credentials: Credentials::new(thumbprint)?,
             lan_credentials: None,
+            update_credentials: None,
+            fetch_credentials: None,
             cleanup_failure: None,
             closed: false,
         })
     }
 }
 impl Driver for SchannelSet {
+    fn configure_update(
+        &mut self,
+        configuration: Option<CredentialConfiguration>,
+    ) -> Result<(), TlsError> {
+        if self.closed {
+            return Err(TlsError::Stopped);
+        }
+        if self.cleanup_failure.is_some() {
+            return Err(TlsError::Faulted);
+        }
+        if self
+            .contexts
+            .iter()
+            .any(|c| c.scope == TlsListenerScope::UpdateServe && c.token.is_some())
+        {
+            return Err(TlsError::Busy);
+        }
+        if let Some(mut old) = self.update_credentials.take() {
+            if let Err(error) = old.close() {
+                self.cleanup_failure = Some(error);
+                return Err(error);
+            }
+        }
+        if let Some(c) = configuration {
+            self.update_credentials = Some(Credentials::new_configured(c.thumbprint, &c.host)?);
+        }
+        Ok(())
+    }
+
     fn configure_lan(
         &mut self,
         configuration: Option<CredentialConfiguration>,
@@ -197,9 +235,41 @@ impl Driver for SchannelSet {
             }
             return result;
         }
+        if frame.scope == TlsListenerScope::UpdateFetch {
+            if self.fetch_credentials.is_none() {
+                self.fetch_credentials = Some(super::credentials::ClientCredentials::new()?);
+            }
+            let credentials = self.fetch_credentials.as_ref().unwrap();
+            let result = match frame.call {
+                Call::Handshake if !context.complete && !context.shutting_down => {
+                    client_handshake(context, credentials, frame)
+                }
+                Call::Decrypt if context.complete && !context.peer_closed => {
+                    decrypt(context, frame)
+                }
+                Call::Encrypt if context.complete && !context.peer_closed => {
+                    encrypt(context, frame)
+                }
+                _ => Err(TlsError::Protocol),
+            };
+            if result == Ok(Step::PeerClosed) {
+                context.peer_closed = true;
+            } else if result.is_err() {
+                if let Err(e) = context.reset() {
+                    self.cleanup_failure = Some(e);
+                    return Err(e);
+                }
+            }
+            return result;
+        }
         let credentials = match frame.scope {
             TlsListenerScope::LocalControl => &self.credentials,
             TlsListenerScope::Lan => self.lan_credentials.as_ref().ok_or(TlsError::Certificate)?,
+            TlsListenerScope::UpdateServe => self
+                .update_credentials
+                .as_ref()
+                .ok_or(TlsError::Certificate)?,
+            TlsListenerScope::UpdateFetch => unreachable!(),
         };
         let result = match frame.call {
             Call::Handshake
@@ -242,6 +312,16 @@ impl Driver for SchannelSet {
         if let Some(credentials) = self.lan_credentials.as_mut() {
             if let Err(error) = credentials.close() {
                 self.cleanup_failure.get_or_insert(error);
+            }
+        }
+        if let Some(credentials) = self.update_credentials.as_mut() {
+            if let Err(e) = credentials.close() {
+                self.cleanup_failure.get_or_insert(e);
+            }
+        }
+        if let Some(credentials) = self.fetch_credentials.as_mut() {
+            if let Err(e) = credentials.close() {
+                self.cleanup_failure.get_or_insert(e);
             }
         }
         if let Err(error) = self.credentials.close() {
@@ -946,6 +1026,314 @@ mod dual_credential_tests {
                 driver.credentials.handle.dwUpper
             )
         );
+        driver.close().unwrap();
+    }
+}
+
+/// Client handshake runs on the same fixed worker and borrows one of the same
+/// four contexts. Only a group-authenticated exact certificate pin is accepted.
+fn client_handshake(
+    context: &mut Context,
+    credentials: &super::credentials::ClientCredentials,
+    frame: &mut Frame,
+) -> Result<Step, TlsError> {
+    use sha2::{Digest, Sha256};
+    use windows::Win32::Security::Cryptography::*;
+    let peer = frame.peer.ok_or(TlsError::Certificate)?;
+    if !peer.address.is_private() || peer.certificate_sha256 == [0; 32] {
+        return Err(TlsError::Certificate);
+    }
+    if context.peer.is_some_and(|old| old != peer) {
+        return Err(TlsError::Certificate);
+    }
+    context.peer = Some(peer);
+    let mut input = [
+        buffer(SECBUFFER_TOKEN, frame.input.as_mut_ptr(), frame.input_len),
+        SecBuffer::default(),
+    ];
+    let input_desc = description(&mut input);
+    let mut output = [
+        buffer(
+            SECBUFFER_TOKEN,
+            frame.output.as_mut_ptr(),
+            BUFFER_BYTES - ALERT_BYTES,
+        ),
+        buffer(
+            SECBUFFER_ALERT,
+            frame.output[BUFFER_BYTES - ALERT_BYTES..].as_mut_ptr(),
+            ALERT_BYTES,
+        ),
+    ];
+    let mut output_desc = description(&mut output);
+    let host: Vec<u16> = peer
+        .address
+        .to_string()
+        .encode_utf16()
+        .chain(Some(0))
+        .collect();
+    let mut attributes = 0;
+    let existing = context
+        .live()
+        .then_some(&context.handle as *const SecHandle);
+    if existing.is_some() && frame.input_len == 0 {
+        return Ok(Step::NeedInput);
+    }
+    // SAFETY: all inputs/outputs are bounded frame-owned arrays, no allocated
+    // memory requested, exact target and credential remain live through call.
+    let status = unsafe {
+        InitializeSecurityContextW(
+            Some(&credentials.handle),
+            existing,
+            Some(host.as_ptr()),
+            ISC_REQ_CONFIDENTIALITY
+                | ISC_REQ_REPLAY_DETECT
+                | ISC_REQ_SEQUENCE_DETECT
+                | ISC_REQ_STREAM
+                | ISC_REQ_EXTENDED_ERROR
+                | ISC_REQ_MANUAL_CRED_VALIDATION,
+            0,
+            SECURITY_NATIVE_DREP,
+            (frame.input_len != 0).then_some(&input_desc as *const SecBufferDesc),
+            0,
+            Some(&mut context.handle),
+            Some(&mut output_desc),
+            &mut attributes,
+            None,
+        )
+    };
+    if attributes & ISC_RET_ALLOCATED_MEMORY != 0 {
+        return Err(TlsError::Protocol);
+    }
+    if status == SEC_E_INCOMPLETE_MESSAGE {
+        return Ok(Step::NeedInput);
+    }
+    if status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED {
+        return Err(TlsError::Native(status.0));
+    }
+    if !context.live() || output[0].BufferType != SECBUFFER_TOKEN {
+        return Err(TlsError::Protocol);
+    }
+    let len = output[0].cbBuffer as usize;
+    if len > 0 {
+        let range = checked_range(
+            output[0].pvBuffer,
+            len,
+            frame.output.as_ptr(),
+            BUFFER_BYTES - ALERT_BYTES,
+        )?;
+        frame.output.copy_within(range, 0);
+    }
+    frame.output_len = len;
+    let used = if frame.input_len == 0 {
+        0
+    } else {
+        consumed(&input, frame.input_len)?
+    };
+    if status == SEC_E_OK {
+        let required = ISC_RET_CONFIDENTIALITY | ISC_RET_STREAM;
+        if attributes & required != required {
+            return Err(TlsError::Protocol);
+        }
+        let mut certificate: *const CERT_CONTEXT = std::ptr::null();
+        // SAFETY: completed context returns one owned remote certificate context.
+        unsafe {
+            QueryContextAttributesW(
+                &context.handle,
+                SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                (&mut certificate as *mut *const CERT_CONTEXT).cast(),
+            )
+        }
+        .map_err(|e| TlsError::Native(e.code().0))?;
+        if certificate.is_null() {
+            return Err(TlsError::Certificate);
+        }
+        let verified = (|| {
+            // SAFETY: native context owns bounded DER and certificate info.
+            let cert = unsafe { &*certificate };
+            if cert.cbCertEncoded == 0
+                || cert.cbCertEncoded > 65536
+                || cert.pbCertEncoded.is_null()
+                || cert.pCertInfo.is_null()
+            {
+                return Err(TlsError::Certificate);
+            }
+            let der = unsafe {
+                std::slice::from_raw_parts(cert.pbCertEncoded, cert.cbCertEncoded as usize)
+            };
+            let digest: [u8; 32] = Sha256::digest(der).into();
+            if digest != peer.certificate_sha256
+                || unsafe { CertVerifyTimeValidity(None, cert.pCertInfo) } != 0
+                || super::credentials::server_auth_usage(certificate)?
+                    != super::credentials::ServerAuthUsage::Explicit
+            {
+                return Err(TlsError::Certificate);
+            }
+            super::credentials::host::verify(certificate, &peer.address.to_string())?;
+            let info = unsafe { &*cert.pCertInfo };
+            if info.SignatureAlgorithm.pszObjId.is_null() {
+                return Err(TlsError::Certificate);
+            }
+            let key = &info.SubjectPublicKeyInfo;
+            if key.Algorithm.pszObjId.is_null() {
+                return Err(TlsError::Certificate);
+            }
+            let key_oid = unsafe { key.Algorithm.pszObjId.as_bytes() };
+            // Current automatic certificates use RSA. Reject weak or unknown
+            // public-key profiles rather than relying on the signature OID.
+            if key_oid != b"1.2.840.113549.1.1.1"
+                || unsafe { CertGetPublicKeyLength(X509_ASN_ENCODING, key) } < 2048
+            {
+                return Err(TlsError::Certificate);
+            }
+            let oid = unsafe { info.SignatureAlgorithm.pszObjId.as_bytes() };
+            if !matches!(
+                oid,
+                b"1.2.840.113549.1.1.11"
+                    | b"1.2.840.113549.1.1.12"
+                    | b"1.2.840.113549.1.1.13"
+                    | b"1.2.840.10045.4.3.2"
+                    | b"1.2.840.10045.4.3.3"
+                    | b"1.2.840.10045.4.3.4"
+            ) {
+                return Err(TlsError::Certificate);
+            }
+            let mut connection = SecPkgContext_ConnectionInfo::default();
+            unsafe {
+                QueryContextAttributesW(
+                    &context.handle,
+                    SECPKG_ATTR_CONNECTION_INFO,
+                    (&mut connection as *mut SecPkgContext_ConnectionInfo).cast(),
+                )
+                .map_err(|e| TlsError::Native(e.code().0))?;
+                QueryContextAttributesW(
+                    &context.handle,
+                    SECPKG_ATTR_STREAM_SIZES,
+                    (&mut context.sizes as *mut SecPkgContext_StreamSizes).cast(),
+                )
+                .map_err(|e| TlsError::Native(e.code().0))?;
+            }
+            let sizes = context.sizes;
+            if connection.dwProtocol != SP_PROT_TLS1_2_CLIENT
+                || connection.dwCipherStrength < 128
+                || connection.dwExchStrength < 128
+                || sizes.cbMaximumMessage == 0
+                || sizes.cbMaximumMessage as usize > PLAINTEXT_BYTES
+                || sizes.cBuffers != 4
+                || u64::from(sizes.cbHeader)
+                    + u64::from(sizes.cbMaximumMessage)
+                    + u64::from(sizes.cbTrailer)
+                    > BUFFER_BYTES as u64
+            {
+                return Err(TlsError::Protocol);
+            }
+            Ok(())
+        })();
+        // SAFETY: remote certificate reference returned by QueryContextAttributes.
+        let released = unsafe { CertFreeCertificateContext(Some(certificate)) };
+        if !released.as_bool() {
+            return Err(TlsError::Cleanup(0));
+        }
+        verified?;
+        context.complete = true;
+    }
+    Ok(Step::Handshake {
+        consumed: used,
+        complete: context.complete,
+    })
+}
+
+#[cfg(test)]
+mod update_client_tests {
+    use super::*;
+    use crate::tls_frontdoor::{
+        certificate_der_sha256,
+        certificate_provision::{provision_ip_certificate, remove_test_certificate},
+        UpdatePeerIdentity,
+    };
+    #[test]
+    fn update_native_client_accepts_only_authenticated_der_pin_and_retires_same_pool() {
+        let _serial = crate::tls_frontdoor::worker::tests::SERIAL.lock().unwrap();
+        struct Cleanup(Option<String>);
+        impl Drop for Cleanup {
+            fn drop(&mut self) {
+                if let Some(hash) = &self.0 {
+                    remove_test_certificate(hash).unwrap();
+                }
+            }
+        }
+        let certificate = provision_ip_certificate("192.168.253.254", || true).unwrap();
+        let _cleanup = Cleanup((!certificate.reused).then(|| certificate.thumbprint.clone()));
+        let thumbprint = CertificateThumbprint::parse(&certificate.thumbprint).unwrap();
+        let digest = certificate_der_sha256(thumbprint).unwrap();
+        let mut driver = SchannelSet::new_configured(thumbprint, "192.168.253.254").unwrap();
+        driver
+            .configure_update(Some(CredentialConfiguration {
+                thumbprint,
+                host: "192.168.253.254".into(),
+            }))
+            .unwrap();
+        let mut issuer = fc_ports::http::TokenIssuer::new().unwrap();
+        for correct_pin in [false, true] {
+            let mut client = Frame::new(issuer.issue(2).unwrap());
+            client.scope = TlsListenerScope::UpdateFetch;
+            client.peer = Some(UpdatePeerIdentity {
+                address: "192.168.253.254".parse().unwrap(),
+                certificate_sha256: if correct_pin { digest } else { [7; 32] },
+            });
+            let mut server = Frame::new(issuer.issue(3).unwrap());
+            server.scope = TlsListenerScope::UpdateServe;
+            let mut client_bytes = Vec::new();
+            let mut server_bytes = Vec::new();
+            let mut client_complete = false;
+            let mut server_complete = false;
+            let mut rejected = false;
+            for round in 0..32 {
+                if !client_complete && (round == 0 || !client_bytes.is_empty()) {
+                    client.input[..client_bytes.len()].copy_from_slice(&client_bytes);
+                    client.input_len = client_bytes.len();
+                    match driver.call(&mut client) {
+                        Ok(Step::Handshake { consumed, complete }) => {
+                            client_bytes.drain(..consumed);
+                            client_complete = complete;
+                        }
+                        Ok(Step::NeedInput) => (),
+                        Err(TlsError::Certificate) if !correct_pin => {
+                            rejected = true;
+                            break;
+                        }
+                        result => panic!("client handshake result: {result:?}"),
+                    }
+                    server_bytes.extend_from_slice(&client.output[..client.output_len]);
+                }
+                if !server_complete && !server_bytes.is_empty() {
+                    server.input[..server_bytes.len()].copy_from_slice(&server_bytes);
+                    server.input_len = server_bytes.len();
+                    match driver.call(&mut server).unwrap() {
+                        Step::Handshake { consumed, complete } => {
+                            server_bytes.drain(..consumed);
+                            server_complete = complete;
+                        }
+                        Step::NeedInput => (),
+                        step => panic!("server handshake result: {step:?}"),
+                    }
+                    client_bytes.extend_from_slice(&server.output[..server.output_len]);
+                }
+                if client_complete && server_complete {
+                    break;
+                }
+            }
+            assert_eq!(client_complete && server_complete, correct_pin);
+            assert_eq!(rejected, !correct_pin);
+            assert_eq!(driver.configure_update(None), Err(TlsError::Busy));
+            for frame in [&mut client, &mut server] {
+                frame.call = Call::Retire;
+                frame.input_len = 0;
+                assert_eq!(driver.call(frame), Ok(Step::Retired));
+            }
+            assert!(driver.fetch_credentials.is_some());
+            assert_eq!(driver.contexts.len(), 4);
+        }
+        driver.configure_update(None).unwrap();
         driver.close().unwrap();
     }
 }

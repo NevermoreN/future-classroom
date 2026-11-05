@@ -127,17 +127,40 @@ pub struct UpdateCommandReceipt {
     pub auth_epoch: AuthEpoch,
     pub fingerprint: [u8; 32],
 }
+/// Audit of the administrator who enrolled/configured this deployment. This
+/// persists across page logout; it is not a browser session or installer grant.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct UpdatePolicyOwner {
+    pub principal_id: PrincipalId,
+    pub auth_epoch: AuthEpoch,
+}
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct UpdateMaintenanceState {
     pub revision: Revision,
     pub sequence: u64,
     pub policy: UpdatePolicy,
+    pub policy_owner: Option<UpdatePolicyOwner>,
+    /// Publisher-verified high-water mark survives failed/cancelled jobs and pruning.
+    pub accepted_release: Option<ReleaseIdentity>,
+    /// Written only with a physically reconciled successful install outcome.
+    pub installed_release: Option<ReleaseIdentity>,
     pub jobs: Vec<UpdateJob>,
     pub receipts: Vec<UpdateCommandReceipt>,
 }
 impl UpdateMaintenanceState {
     pub fn validate(&self) -> bool {
         self.policy.validate()
+            && self
+                .accepted_release
+                .is_none_or(|r| r.payload_sha256 != [0; 32])
+            && self.installed_release.is_none_or(|installed| {
+                self.accepted_release.is_some_and(|accepted| {
+                    installed.payload_sha256 != [0; 32]
+                        && installed.sequence <= accepted.sequence
+                        && (installed.sequence != accepted.sequence
+                            || installed.payload_sha256 == accepted.payload_sha256)
+                })
+            })
             && self.policy.revision <= self.revision
             && self.jobs.len() <= MAX_UPDATE_JOBS
             && self.receipts.len() <= MAX_UPDATE_RECEIPTS
@@ -145,6 +168,11 @@ impl UpdateMaintenanceState {
                 job.id != 0
                     && job.id <= self.sequence
                     && job.release.payload_sha256 != [0; 32]
+                    && self.accepted_release.is_some_and(|accepted| {
+                        job.release.sequence <= accepted.sequence
+                            && (job.release.sequence != accepted.sequence
+                                || job.release.payload_sha256 == accepted.payload_sha256)
+                    })
                     && job.policy_revision <= self.policy.revision
             })
             && self.jobs.windows(2).all(|pair| pair[0].id < pair[1].id)

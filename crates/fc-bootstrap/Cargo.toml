@@ -11,7 +11,7 @@ publish.workspace = true
 [features]
 default = []
 owned-test-removal = ["fc-windows/owned-test-removal"]
-school-gateway = ["dep:rcgen", "dep:rustls", "dep:rsa", "dep:rand", "dep:pkcs8", "dep:time", "dep:serde", "dep:serde_json", "dep:sha2"]
+school-gateway = ["dep:rcgen", "dep:rustls", "dep:rsa", "dep:rand", "dep:pkcs8", "dep:time", "dep:serde", "dep:sha2"]
 
 [[bin]]
 name = "fc-bootstrap"
@@ -20,6 +20,10 @@ path = "src/main.rs"
 [[bin]]
 name = "fc-installer-lifecycle"
 path = "src/bin/fc-installer-lifecycle.rs"
+
+[[bin]]
+name = "fc-update-coordinator"
+path = "src/bin/fc-update-coordinator.rs"
 
 [[bin]]
 name = "fc-school-gateway"
@@ -45,5 +49,7 @@ rand = { version = "=0.8.8", optional = true }
 pkcs8 = { version = "=0.10.2", features = ["encryption", "pem"], optional = true }
 time = { version = "=0.3.55", optional = true }
 serde = { workspace = true, optional = true }
-serde_json = { workspace = true, optional = true }
+serde_json.workspace = true
+zip = { version = "=4.6.1", default-features = false, features = ["deflate-flate2"] }
+flate2 = { version = "=1.1.10", default-features = false, features = ["rust_backend"] }
 sha2 = { workspace = true, optional = true }

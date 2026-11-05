@@ -348,6 +348,7 @@ struct Core<E: HttpExecutor> {
     execution: Option<super::ExecutionFence>,
     maintenance: Option<crate::maintenance_web::MaintenanceControl>,
     repair: Option<Arc<crate::repair_web::RepairService>>,
+    updates: Option<crate::update_network::UpdateNetwork>,
     started: bool,
     records: [Option<Record<E::Ticket>>; MAX_REQUESTS],
     report: NetworkReport,
@@ -432,6 +433,7 @@ where
             downloads,
             static_assets: None,
             execution: None,
+            updates: None,
             started: false,
             records,
             report: NetworkReport {
@@ -460,6 +462,28 @@ where
             .map(|service| service.control.clone());
         core.local_assets = Some(assets);
         Ok(())
+    }
+    pub fn set_update_network(
+        &mut self,
+        control: crate::update_network::NetworkControl,
+    ) -> Result<(), String> {
+        let core = self.core_mut();
+        if core.updates.is_some() || core.report.stopping {
+            return Err("update network already attached or stopping".into());
+        }
+        core.updates = Some(crate::update_network::UpdateNetwork::new(control));
+        Ok(())
+    }
+    pub fn updates_idle(&self) -> bool {
+        self.core().updates.as_ref().is_none_or(|u| u.is_idle())
+    }
+    pub fn update_discovery(
+        &mut self,
+        responder: &mut Option<fc_windows::lan_discovery::DiscoveryResponder>,
+    ) {
+        if let Some(updates) = self.core_mut().updates.as_mut() {
+            updates.poll_discovery(responder);
+        }
     }
     pub fn set_local_assets(&mut self, assets: Arc<StaticAssets>) -> Result<(), String> {
         let core = self.core_mut();
@@ -596,7 +620,9 @@ where
         self.core().host.close_snapshot()
     }
     pub fn is_idle(&self) -> bool {
-        self.core().report.native_drained && self.core().records.iter().all(Option::is_none)
+        self.core().report.native_drained
+            && self.core().records.iter().all(Option::is_none)
+            && self.core().updates.as_ref().is_none_or(|u| u.is_idle())
     }
     pub fn poll(&mut self) -> Result<NetworkReport, String> {
         self.core_mut().poll()
@@ -711,6 +737,7 @@ impl<E: HttpExecutor> Core<E> {
         match record.scope {
             TlsListenerScope::LocalControl => self.local_app.as_ref()?.upgrade(),
             TlsListenerScope::Lan => self.app.upgrade(),
+            TlsListenerScope::UpdateServe | TlsListenerScope::UpdateFetch => None,
         }
     }
     fn composition(
@@ -723,6 +750,7 @@ impl<E: HttpExecutor> Core<E> {
         match record.scope {
             TlsListenerScope::LocalControl => self.local_assets.as_ref(),
             TlsListenerScope::Lan => self.static_assets.as_ref(),
+            TlsListenerScope::UpdateServe | TlsListenerScope::UpdateFetch => None,
         }
     }
     fn send_response(&mut self, record: &mut Record<E::Ticket>, response: WebResponse) {
@@ -1862,7 +1890,31 @@ impl<E: HttpExecutor> Core<E> {
         }
         for event in events {
             self.host.service_deadlines()?;
+            if let Some(updates) = self.updates.as_mut() {
+                if updates.service_update_event(&event, &mut self.host)? {
+                    continue;
+                }
+            }
             self.event(event)?;
+        }
+        if let Some(updates) = self.updates.as_mut() {
+            updates.poll(&mut self.host)?;
+        }
+        // Outbound update contexts retire through their private client API.
+        // Their former business descriptors were never admitted or used; renew
+        // only those pristine descriptors after actual client retirement.
+        for token in self.host.tokens() {
+            if find_record(&self.records, token).is_none() {
+                if let Some(record) = self.records.iter_mut().flatten().find(|r| {
+                    r.token.slot() == token.slot()
+                        && r.phase == Phase::Head
+                        && r.head.is_none()
+                        && r.work.is_none()
+                        && !r.closed
+                }) {
+                    *record = Record::new(token);
+                }
+            }
         }
         for index in 0..MAX_REQUESTS {
             self.host.service_deadlines()?;
@@ -1898,6 +1950,9 @@ impl<E: HttpExecutor> Core<E> {
             return Ok(());
         }
         self.report.stopping = true;
+        if let Some(updates) = self.updates.as_mut() {
+            updates.stop(&mut self.host);
+        }
         let result = self.host.request_stop();
         for record in self.records.iter_mut().flatten() {
             record.cancel();

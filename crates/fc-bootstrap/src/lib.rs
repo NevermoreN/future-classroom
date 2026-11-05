@@ -24,6 +24,10 @@ pub mod reinitialization_files;
 pub mod reinitialization_workflow;
 #[cfg(windows)]
 pub mod repair_web;
+#[cfg(windows)]
+pub mod update_network;
+pub mod update_packages;
+pub mod updates;
 pub mod voice_runtime;
 pub mod web_application;
 pub mod web_assets;

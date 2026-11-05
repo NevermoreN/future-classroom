@@ -84,6 +84,10 @@ impl App {
         if self.maintenance.confirmed.is_some()
             && self.shell.is_finished()
             && self.teacher_https_quiescent()
+            // The updater retains original cache/download/file owners until
+            // its worker and network drain acknowledge actual return. Do not
+            // move the common pool into a restore/reset coordinator earlier.
+            && self.updates_quiescent()
             && self
                 .local_web
                 .runtime

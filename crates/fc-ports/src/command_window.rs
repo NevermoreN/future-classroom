@@ -92,6 +92,7 @@ pub enum CommandFamily {
     Materials,
     Voice,
     Autostart,
+    Updates,
 }
 impl CommandFamily {
     pub const fn name(self) -> &'static str {
@@ -111,6 +112,7 @@ impl CommandFamily {
             Self::Materials => "materials",
             Self::Voice => "voice",
             Self::Autostart => "autostart",
+            Self::Updates => "updates",
         }
     }
 }

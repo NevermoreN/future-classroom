@@ -100,6 +100,11 @@ pub struct About<'a> {
     pub automatic_updates: bool,
     pub update_available: bool,
     pub update_message: &'a str,
+    pub action_token: &'a str,
+    pub phase: &'a str,
+    pub received_bytes: u64,
+    pub total_bytes: u64,
+    pub group_id: Option<&'a str>,
 }
 pub fn about(value: &About<'_>) -> Result<Vec<u8>, ProtocolError> {
     encode(value)

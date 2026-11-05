@@ -48,6 +48,7 @@ LIFECYCLE_MAGIC = b"FCLM73\0\0"
 LIFECYCLE_FOOTER = b"FCLIFE73-END-v1\0"
 LIFECYCLE_REQUIRED = {"fc-bootstrap.exe", "LICENSE", "PROBE-README.txt", "THIRD-PARTY-NOTICES.txt", "manifest.json",
                       "MSI-CANDIDATE.txt", "web/index.html", "web/fc-assets.json", "web/THIRD-PARTY-NOTICES.txt"}
+OPTIONAL_NATIVE = {"fc-update-coordinator.exe"}
 BASE = {"fc-bootstrap.exe", "LICENSE", "PROBE-README.txt", "THIRD-PARTY-NOTICES.txt"}
 MANIFEST_KEYS = {"schema_version", "product", "version", "artifact_name", "artifact_type", "status", "target", "target_role", "toolchain", "sha256", "frontend", "features", "gates", "files", "pe_audit"}
 LIMITATIONS = [
@@ -119,7 +120,7 @@ def version_parts(value: object) -> tuple[int, int, int]:
 
 
 def valid_path(name: object) -> bool:
-    return isinstance(name, str) and (name in BASE | {"manifest.json", "web/fc-assets.json", "web/THIRD-PARTY-NOTICES.txt"}
+    return isinstance(name, str) and (name in BASE | OPTIONAL_NATIVE | {"manifest.json", "web/fc-assets.json", "web/THIRD-PARTY-NOTICES.txt"}
         or (name.startswith("web/") and PROBE["valid_web_path"](name[4:])))
 
 
@@ -338,6 +339,34 @@ def configure_source_root(source_root: Path) -> None:
     PE = runpy.run_path(str(ROOT / "scripts/audit-pe.py"))
 
 
+def require_payload_members(version: str, names, *, d14: bool | None = None) -> int:
+    """Fixed reviewed classroom payload grammar, including its optional-era ABI.
+
+    Explicit DEV assembly can retain its older grammar; formal/current sources
+    and predecessor replay derive the coordinator requirement from the version.
+    Exact file bytes/hashes still require the separate complete ledger comparison.
+    """
+    d14 = version_parts(version) >= (0, 1, 5) if d14 is None else d14
+    names = list(names)
+    members = set(names)
+    expected = 15 if d14 else 14
+    required = LIFECYCLE_REQUIRED | ({"fc-update-coordinator.exe"} if d14 else set())
+    if (len(names) != expected or len(members) != expected or not required <= members
+        or ("fc-update-coordinator.exe" in members) != d14
+        or not all(valid_path(name) or name == "MSI-CANDIDATE.txt" for name in members)):
+        raise ValueError("Version-specific complete payload membership differs")
+    return expected
+
+
+def normal_product_targets(version: str) -> tuple[tuple[str, str, str], ...]:
+    """Old signed sources retain their original two-artifact provenance grammar."""
+    targets = (("fc-bootstrap", "src/main.rs", "product-compile"),
+               ("fc-installer-lifecycle", "src/bin/fc-installer-lifecycle.rs", "lifecycle-compile"))
+    if version_parts(version) >= (0, 1, 5):
+        targets += (("fc-update-coordinator", "src/bin/fc-update-coordinator.rs", "update-coordinator-compile"),)
+    return targets
+
+
 def cargo_metadata_normal_package(root: Path, result: dict, version: str) -> tuple[dict, dict, str]:
     """Read the original successful metadata command; Cargo package IDs are opaque."""
     steps = [row for row in result["commands"] if row.get("name") == "cargo-metadata"]
@@ -378,7 +407,7 @@ def cargo_metadata_normal_package(root: Path, result: dict, version: str) -> tup
         or not isinstance(package.get("targets"), list)):
         raise ValueError("Metadata workspace package/version/manifest differs from the admitted ZIP")
     targets = {}
-    for name, relative in (("fc-bootstrap", "src/main.rs"), ("fc-installer-lifecycle", "src/bin/fc-installer-lifecycle.rs")):
+    for name, relative, _phase in normal_product_targets(version):
         rows = [t for t in package["targets"] if t.get("name") == name]
         if (len(rows) != 1 or rows[0].get("kind") != ["bin"] or rows[0].get("crate_types") != ["bin"]
             or not isinstance(rows[0].get("src_path"), str)
@@ -395,7 +424,7 @@ def match_normal_metadata(message: dict, target: str, package: dict, targets: di
 
 
 def admit_normal_helper(args, payloads: dict[str, bytes], version: str) -> tuple[bytes, dict]:
-    """Bind both actual non-test compiler artifacts to one original CI ledger."""
+    """Bind all three actual non-test compiler artifacts to one original CI ledger."""
     root = args.build_evidence.absolute()
     PROBE["real_directory"](root)
     result_raw = PROBE["bounded_regular_file"](root / "result.json", MAX_LOG)
@@ -428,10 +457,11 @@ def admit_normal_helper(args, payloads: dict[str, bytes], version: str) -> tuple
         raise ValueError("Normal artifact ledger is not bound by the accepted CI result")
     ledger = json_document(ledger_raw)
     normals = [row for row in ledger if row.get("role") == "product"]
-    if len(normals) != 2 or {row.get("target") for row in normals} != {"fc-bootstrap", "fc-installer-lifecycle"}:
-        raise ValueError("CI ledger must contain exactly the two normal product targets")
+    required_targets = normal_product_targets(version)
+    if len(normals) != len(required_targets) or {row.get("target") for row in normals} != {name for name, _relative, _phase in required_targets}:
+        raise ValueError("CI ledger must contain exactly this version's normal product targets")
     admitted = {}
-    for target, phase in (("fc-bootstrap", "product-compile"), ("fc-installer-lifecycle", "lifecycle-compile")):
+    for target, _relative, phase in required_targets:
         row = next(row for row in normals if row["target"] == target)
         if row.get("package") != "fc-bootstrap" or row.get("cargo_profile_test") is not False or row.get("pe_subsystem") != 2:
             raise ValueError("A test executable or wrong package cannot be a normal helper")
@@ -463,10 +493,13 @@ def admit_normal_helper(args, payloads: dict[str, bytes], version: str) -> tuple
             raise ValueError("Cargo normal executable identity differs")
         admitted[target] = data
     helper = PROBE["bounded_regular_file"](args.lifecycle_helper.absolute(), 32 * 1024 * 1024)
-    if digest(helper) != args.lifecycle_helper_sha256 or helper != admitted["fc-installer-lifecycle"] or payloads["fc-bootstrap.exe"] != admitted["fc-bootstrap"]:
-        raise ValueError("Both ordinary payload and helper must be exact same-source normal CI bytes")
+    if (digest(helper) != args.lifecycle_helper_sha256 or helper != admitted["fc-installer-lifecycle"]
+        or payloads["fc-bootstrap.exe"] != admitted["fc-bootstrap"]
+        or ("fc-update-coordinator" in admitted and payloads.get("fc-update-coordinator.exe") != admitted["fc-update-coordinator"])):
+        raise ValueError("Product, coordinator and helper must be exact same-source normal CI bytes")
     return helper, {"result_sha256": digest(result_raw), "source_sha": head, "normal_helper_sha256": digest(helper),
-                    "main_sha256": digest(admitted["fc-bootstrap"]), "profile_test": False, "current_inputs_verified": len(selected),
+                    "main_sha256": digest(admitted["fc-bootstrap"]),
+                    **({"coordinator_sha256": digest(admitted["fc-update-coordinator"])} if "fc-update-coordinator" in admitted else {}), "profile_test": False, "current_inputs_verified": len(selected),
                     "cargo_metadata_sha256": metadata_sha, "cargo_package_id": package["id"], "cargo_manifest_path": package["manifest_path"]}
 
 
@@ -947,7 +980,7 @@ def assemble(args, raw: bytes, source: Path, manifest: dict, payloads: dict[str,
               "script_sha256": digest(Path(__file__).read_bytes()),
               "builder_source": {"script_path": str(Path(__file__).absolute()), "script_sha256": digest(Path(__file__).read_bytes()), "default_root": str(BUILDER_ROOT)},
               "source_checkout": {"path": str(ROOT), "head": helper_provenance["source_sha"], "original_ci_inputs_verified": helper_provenance["current_inputs_verified"]},
-              "commands": [], "limitations": (["CONTROLLED JOINT MSI AND FULL FOURTEEN-PAYLOAD DAMAGED REPAIR NOT_EXERCISED", "Same sealed source bundle required; standard ARP removal and moved/deleted bundle remain unsupported", "Source/cache selection, failure rollback, full P5/Q13 and Win7/Win10/Seewo actual acceptance remain independent", "No production listener, Run cleanup or school data deletion is authorized"] if controlled else LIMITATIONS),
+              "commands": [], "limitations": (["CONTROLLED JOINT MSI AND FULL DECLARED-PAYLOAD DAMAGED REPAIR NOT_EXERCISED", "Same sealed source bundle required; standard ARP removal and moved/deleted bundle remain unsupported", "Source/cache selection, failure rollback, full P5/Q13 and Win7/Win10/Seewo actual acceptance remain independent", "No production listener, Run cleanup or school data deletion is authorized"] if controlled else LIMITATIONS),
               "lifecycle_capabilities": lifecycle_capabilities(controlled),
               "normal_helper_provenance": helper_provenance,
               "installation_scope": "per-user; fixed LocalAppData/Programs/FutureClassroom; business data remains original protected ProgramData",
@@ -994,8 +1027,8 @@ def assemble(args, raw: bytes, source: Path, manifest: dict, payloads: dict[str,
             raise ValueError("Lifecycle helper PE/static runtime audit failed")
         template = None
         if controlled:
-            if len(payloads) != 14:
-                raise ValueError("Controlled product requires the complete fourteen payloads")
+            require_payload_members(manifest["version"], payloads,
+                d14=helper_provenance.get("target", TARGET) == TARGET and version_parts(manifest["version"]) >= (0, 1, 5))
             seal = runpy.run_path(str(ROOT / "scripts/controlled-setup-seal.py"))
             template = seal["make_setup_template"](image)
             (lifecycle / "guard-client-template.exe").write_bytes(template)

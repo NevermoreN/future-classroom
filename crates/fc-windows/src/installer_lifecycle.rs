@@ -7,6 +7,10 @@ use std::{path::PathBuf, time::Instant};
 use windows::{core::HRESULT, Win32::Foundation::ERROR_SHARING_VIOLATION};
 
 pub mod broker;
+mod update_observation;
+pub use update_observation::{
+    inspect_update_sources, qualify_update_predecessor, UpdateSourceFacts,
+};
 // This private foundation has no production installation entry until the
 // original native API owner and broker are integrated and jointly validated.
 #[allow(dead_code)]
@@ -70,6 +74,10 @@ pub struct InstallIdentity {
     leaf: Option<String>,
 }
 impl InstallIdentity {
+    /// A fixed private current-SID namespace, separate from teaching data.
+    pub fn update_directory(&self) -> Result<PathBuf> {
+        native::update_directory(self)
+    }
     pub fn for_current_user() -> Result<Self> {
         native::identity()
     }
@@ -128,6 +136,12 @@ pub struct Settlement {
 
 pub struct LifecycleGate;
 impl LifecycleGate {
+    /// A physical exclusive probe, without creating Pending or claiming an MSI
+    /// transaction. Busy means an original startup/resource lease still exists.
+    pub fn probe_quiescent(identity: &InstallIdentity) -> Result<()> {
+        let mut resources = native::Resources::open(identity, true)?;
+        resources.release()
+    }
     pub fn acquire_startup(identity: &InstallIdentity) -> Result<StartupLease> {
         Ok(StartupLease {
             resources: native::Resources::open(identity, false)?,

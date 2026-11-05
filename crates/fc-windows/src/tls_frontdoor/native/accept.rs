@@ -73,6 +73,11 @@ impl Owner {
                 .lan_accept
                 .as_ref()
                 .is_none_or(AcceptSlot::released)
+            && self
+                .resources
+                .update_accept
+                .as_ref()
+                .is_none_or(AcceptSlot::released)
     }
     fn close_bare_socket_for(&mut self, listener_index: usize) -> Result<(), String> {
         let Some(bare) = self.resources.bare_accept_mut(listener_index) else {
@@ -170,7 +175,7 @@ impl Owner {
         self.close_bare_socket_for(listener_index)
     }
     pub(super) fn expire_bare_accept(&mut self, now: Instant) -> Result<(), String> {
-        for listener_index in 0..2 {
+        for listener_index in 0..3 {
             if self.bare_accept(listener_index).is_some_and(
             |bare| matches!(bare.state, AcceptState::Pending { deadline, .. } if now >= header_close_alarm(deadline)),
         ) {
@@ -367,7 +372,8 @@ impl Owner {
                 .enumerate()
                 .position(|(index, slot)| {
                     slot.phase == Phase::Ready
-                        && !(self.control_mode && listener_index == 1 && index == 0)
+                        && !(self.control_mode && listener_index != 0 && index == 0)
+                        && !(listener_index == 2 && index < 2)
                 })
         {
             let slot = &self.resources.slots[index];
@@ -461,7 +467,9 @@ impl Owner {
                 let slot = &mut self.resources.slots[index];
                 slot.socket = socket;
                 slot.listener_index = listener_index;
-                slot.listener_scope = if self.control_mode && listener_index == 0 {
+                slot.listener_scope = if listener_index == 2 {
+                    TlsListenerScope::UpdateServe
+                } else if self.control_mode && listener_index == 0 {
                     TlsListenerScope::LocalControl
                 } else {
                     TlsListenerScope::Lan

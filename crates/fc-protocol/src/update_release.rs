@@ -12,7 +12,7 @@ struct Descriptor {
     channel: String,
     release_sequence: u64,
     version: String,
-    minimum_windows: Windows,
+    minimum_windows: WindowsRequirement,
     architecture: Architecture,
     installer_abi: u16,
     guard_capability: u16,
@@ -22,7 +22,7 @@ struct Descriptor {
     allowed_predecessors: Vec<Predecessor>,
 }
 #[derive(Deserialize)]
-enum Windows {
+enum WindowsRequirement {
     Windows7Sp1,
     Windows10,
     Windows11,
@@ -170,9 +170,9 @@ impl ReleaseClaims {
             version: ReleaseVersion::parse(&d.version)?,
             payload_bytes,
             minimum_windows: match d.minimum_windows {
-                Windows::Windows7Sp1 => WindowsBaseline::Windows7Sp1,
-                Windows::Windows10 => WindowsBaseline::Windows10,
-                Windows::Windows11 => WindowsBaseline::Windows11,
+                WindowsRequirement::Windows7Sp1 => WindowsBaseline::Windows7Sp1,
+                WindowsRequirement::Windows10 => WindowsBaseline::Windows10,
+                WindowsRequirement::Windows11 => WindowsBaseline::Windows11,
             },
             architecture: match d.architecture {
                 Architecture::X86 => UpdateArchitecture::X86,
