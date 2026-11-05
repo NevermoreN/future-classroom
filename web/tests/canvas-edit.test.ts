@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { boundedFrame, canvasLayout, setCanvasFrame } from '../src/api/canvas-edit'
+import { boundedFrame, canvasLayout, setCanvasFrame, singleLayerLayout, snapModule, MODULE_GAP } from '../src/api/canvas-edit'
 import { appendLayoutNode } from '../src/api/layout-edit'
 import type { LayoutData } from '../src/api/admin-client'
 import type { PreviewGeometry } from '../src/api/preview-client'
@@ -30,5 +30,33 @@ describe('desktop canvas editing', () => {
   })
   it('keeps dragged and resized coordinates integral and within the shared protocol bounds', () => {
     expect(boundedFrame({ nodeId: '3', x: -3.4, y: 16382.6, width: 0, height: 100 })).toEqual({ nodeId: '3', x: 0, y: 16376, width: 8, height: 8 })
+  })
+  it('flattens legacy groups while keeping module screen positions and edited nested offsets', () => {
+    const flat = singleLayerLayout(layout, geometry)
+    expect(flat.nodes.find(node => node.id === '1')!.children).toEqual(['3', '4'])
+    expect(flat.nodes.some(node => node.kind === 'container')).toBe(false)
+    expect(flat.canvasFrames?.find(frame => frame.nodeId === '3')).toMatchObject({ x: 1532, y: 32, width: 260, height: 100 })
+    const edited = setCanvasFrame(canvasLayout(layout, geometry), { nodeId: '3', x: 40, y: 50, width: 260, height: 100 })
+    expect(singleLayerLayout(edited, geometry).canvasFrames?.find(frame => frame.nodeId === '3')).toMatchObject({ x: 1556, y: 66 })
+    expect(singleLayerLayout(flat, geometry)).toEqual(flat)
+    expect(layout.nodes[1]!.children).toEqual(['3'])
+  })
+  it('retains the course outlet and its content as one atomic desktop module', () => {
+    const content: LayoutData = { ...layout, nodeIdHighWater: '6', nodes: [...layout.nodes.map(node => node.id === '2' ? { ...node, children: ['3', '5'] } : node), { id: '5', kind: 'outlet', children: ['6'], width: { kind: 'fixed', value: 300 }, height: { kind: 'fixed', value: 200 } }, { id: '6', kind: 'widget', widget: 'materials', children: [] }] }
+    const flat = singleLayerLayout(content, geometry)
+    expect(flat.nodes.find(node => node.id === '1')!.children).toEqual(['3', '5', '4'])
+    expect(flat.nodes.find(node => node.id === '5')!.children).toEqual(['6'])
+    expect(flat.canvasFrames?.map(frame => frame.nodeId)).toEqual(['3', '5', '4'])
+  })
+  it('snaps side-by-side and stacked modules with a small gap and aligned edges', () => {
+    const other = { nodeId: 'a', x: 100, y: 100, width: 200, height: 100 }, viewport = { width: 1920, height: 1080 }
+    expect(snapModule({ nodeId: 'b', x: 316, y: 103, width: 160, height: 80 }, [other], viewport, 'move')).toMatchObject({ x: 300 + MODULE_GAP, y: 100 })
+    expect(snapModule({ nodeId: 'b', x: 104, y: 216, width: 160, height: 80 }, [other], viewport, 'move')).toMatchObject({ x: 100, y: 200 + MODULE_GAP })
+    expect(snapModule({ nodeId: 'b', x: 10, y: 100, width: 74, height: 100 }, [other], viewport, 'resize').width).toBe(100 - MODULE_GAP - 10)
+  })
+  it('does not attract distant modules and snaps exactly to the desktop edge', () => {
+    const frame = { nodeId: 'b', x: 316, y: 700, width: 160, height: 80 }, viewport = { width: 1920, height: 1080 }
+    expect(snapModule(frame, [{ nodeId: 'a', x: 100, y: 100, width: 200, height: 100 }], viewport, 'move')).toEqual(frame)
+    expect(snapModule({ ...frame, x: 4 }, [], viewport, 'move').x).toBe(0)
   })
 })
