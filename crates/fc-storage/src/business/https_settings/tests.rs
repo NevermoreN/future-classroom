@@ -310,6 +310,26 @@ fn request(
     }
 }
 #[test]
+fn startup_configuration_reads_saved_state_without_session_or_writes() {
+    let f = Fixture::new();
+    let repository = f.repository(actor(1, TrustedOrigin::Local));
+    assert_eq!(repository.startup_https_configuration().unwrap(), None);
+    let base = f.read();
+    let configuration = config("192.168.10.212", 8443);
+    f.save(request(&f, 82, &base, Some(configuration.clone())))
+        .unwrap();
+    let revision = f.revision();
+    f.active.store(false, Ordering::Release);
+    assert!(repository
+        .https_settings(&actor(1, TrustedOrigin::Local))
+        .is_err());
+    assert_eq!(
+        repository.startup_https_configuration().unwrap(),
+        Some(configuration)
+    );
+    assert_eq!(f.revision(), revision);
+}
+#[test]
 fn canonical_save_clear_replay_and_cold_reopen_preserve_identity_and_never_create_voice_or_autostart(
 ) {
     let mut f = Fixture::new();

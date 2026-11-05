@@ -103,6 +103,32 @@ pub struct QuickConnect<'a> {
 pub fn quick_connect(value: &QuickConnect<'_>) -> Result<Vec<u8>, ProtocolError> {
     encode(value)
 }
+pub fn lan_discovery(
+    address: &str,
+    school_name: &str,
+    class_name: Option<&str>,
+) -> Result<Vec<u8>, ProtocolError> {
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Discovery<'a> {
+        schema_version: u16,
+        product: &'static str,
+        address: &'a str,
+        school_name: &'a str,
+        class_name: Option<&'a str>,
+    }
+    let bytes = encode(&Discovery {
+        schema_version: 1,
+        product: "FutureClassroom",
+        address,
+        school_name,
+        class_name,
+    })?;
+    if bytes.len() > 1024 {
+        return Err(ProtocolError::TooLarge);
+    }
+    Ok(bytes)
+}
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct PairingRequested<'a> {

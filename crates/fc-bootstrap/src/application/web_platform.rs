@@ -54,6 +54,7 @@ pub(super) fn hook(
                         value,
                     })
                 };
+                row("局域网自动发现", control.discovery_state().into());
                 if !desktop_notice.is_empty() {
                     row("桌面显示提示", desktop_notice);
                 }
@@ -188,9 +189,9 @@ pub(super) fn hook(
                             .map_err(|_| PlatformError::Unavailable)?;
                     }
                     dto::NetworkChange::Start => {
-                        let configuration = current
-                            .settings
-                            .configuration
+                        let configuration = control
+                            .startup_configuration()
+                            .or(current.settings.configuration)
                             .ok_or(PlatformError::Invalid)?;
                         let prefix = fc_ports::http::ListenPrefix::https(&format!(
                             "{}/fc/",
@@ -297,6 +298,7 @@ pub(super) fn hook(
                             .map_err(map_backend)?;
                         drop(scoped);
                         drop(value);
+                        control.remember_startup_configuration(configuration.clone());
                         if resume_lan {
                             let prefix = fc_ports::http::ListenPrefix::https(&format!(
                                 "{}/fc/",
@@ -366,7 +368,8 @@ fn network(
         .map_err(|_| PlatformError::Unavailable)?
         .read_https_settings(lease)
         .map_err(map_backend)?;
-    let c = state.settings.configuration.as_ref();
+    let startup = control.startup_configuration();
+    let c = startup.as_ref().or(state.settings.configuration.as_ref());
     let selected_certificate = c.map_or(control.certificate(), |c| c.certificate);
     let certificate = fc_windows::tls_frontdoor::certificate_provision::export_owned_certificate(
         &selected_certificate.to_hex(),

@@ -54,8 +54,14 @@ export function ConnectionDetails({ info }: { info: ConnectionInfo }) {
 export default function QuickConnect() {
   const [info, setInfo] = useState<ConnectionInfo | null>(null), [error, setError] = useState(''), [refresh, setRefresh] = useState(0)
   useEffect(() => {
+    const update = () => { if (document.visibilityState === 'visible') setRefresh(value => value + 1) }
+    const timer = window.setInterval(update, 5000)
+    document.addEventListener('visibilitychange', update)
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', update) }
+  }, [])
+  useEffect(() => {
     const controller = new AbortController()
-    setInfo(null); setError('')
+    setError('')
     async function load() {
       try {
         const base = trustedApiBase(import.meta.env.BASE_URL, window.location.href)
@@ -63,7 +69,7 @@ export default function QuickConnect() {
         if (!response.ok) throw new Error('连接信息尚未就绪，请稍后刷新。')
         const next = connectionInfo(await readJson(response, controller.signal))
         if (!controller.signal.aborted) setInfo(next)
-      } catch { if (!controller.signal.aborted) setError('暂时无法读取连接信息。请在教室电脑上通过托盘“快捷连接”打开，并稍后刷新。') }
+      } catch { if (!controller.signal.aborted) { setInfo(null); setError('暂时无法读取连接信息。请在教室电脑上通过托盘“快捷连接”打开，并稍后刷新。') } }
     }
     void load()
     return () => controller.abort()

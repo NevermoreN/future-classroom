@@ -7,6 +7,35 @@ use fc_ports::{
 };
 
 pub(crate) const DOCUMENT: &str = "business/security/https/v1";
+impl<S: Send + 'static> BusinessRepository<S> {
+    /// Trusted startup only: read the saved non-secret listener configuration
+    /// through the existing sole writer. This grants no account or write access.
+    pub fn startup_https_configuration(&self) -> Result<Option<HttpsConfiguration>, StorageError> {
+        let bytes = self.handle.try_transaction(ReadStartupSettings)?.wait()?;
+        Ok(read_state(&codec::value(&bytes)?)?.settings.configuration)
+    }
+}
+struct ReadStartupSettings;
+impl<S: Send> TransactionTask<S> for ReadStartupSettings {
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+    }
+    fn evaluate(
+        self: Box<Self>,
+        d: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        let identity = load_identity(d)?;
+        let value = HttpsSettingsState {
+            identity_revision: identity.revision,
+            settings: load(d, &identity)?,
+        };
+        Ok(TransactionDecision {
+            outcome: codec::bytes(&state(&value))?,
+            commit: None,
+            precommit: None,
+        })
+    }
+}
 fn error(error: StorageError) -> HttpsSettingsRepositoryError {
     if let Some(error) = error.command_window_error() {
         return HttpsSettingsRepositoryError::CommandWindow(error);

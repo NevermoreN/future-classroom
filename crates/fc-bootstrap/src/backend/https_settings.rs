@@ -9,6 +9,15 @@ fn unavailable() -> BackendError {
     BackendError::HttpsSettings(HttpsSettingsRepositoryError::Unavailable)
 }
 impl Backend {
+    /// Native startup composition only; deliberately not a Web management API.
+    pub fn startup_https_configuration(
+        &self,
+    ) -> Result<Option<fc_domain::https_settings::HttpsConfiguration>> {
+        self.check_open()?;
+        let value = self.repository.startup_https_configuration()?;
+        self.check_open()?;
+        Ok(value)
+    }
     fn https_manager(&self, lease: SessionLease) -> Result<(ActorContext, u64)> {
         let identity = self.state()?;
         let (actor, generation) = self.actor(&identity, lease, SessionPurpose::Manage)?;

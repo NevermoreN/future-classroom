@@ -6,6 +6,7 @@ pub mod calendar_download;
 #[cfg(windows)]
 mod com_task;
 pub mod http;
+pub mod lan_discovery;
 #[cfg(windows)]
 mod native;
 pub mod startup;

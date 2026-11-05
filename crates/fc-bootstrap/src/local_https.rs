@@ -112,6 +112,8 @@ struct Shared {
     lan_quiescent: bool,
     lan_status: LanStatus,
     lan_configuration: Option<HttpsConfiguration>,
+    startup_configuration: Option<HttpsConfiguration>,
+    discovery_status: &'static str,
 }
 static CLAIMED: AtomicBool = AtomicBool::new(false);
 pub struct LocalRuntime {
@@ -158,6 +160,8 @@ impl LocalRuntime {
                 error: None,
             },
             lan_configuration: None,
+            startup_configuration: None,
+            discovery_status: "未启动",
         }));
         let state = shared.clone();
         let thread = match std::thread::Builder::new()
@@ -359,6 +363,25 @@ impl ConfigureTicket {
     }
 }
 impl LocalControlHandle {
+    pub fn discovery_state(&self) -> &'static str {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .discovery_status
+    }
+    pub fn remember_startup_configuration(&self, configuration: HttpsConfiguration) {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .startup_configuration = Some(configuration);
+    }
+    pub fn startup_configuration(&self) -> Option<HttpsConfiguration> {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .startup_configuration
+            .clone()
+    }
     /// Irreversible business shutdown while the local native control listener
     /// stays alive. Complete this on the original pool before cold handoff.
     pub fn request_business_drain(&self) {
@@ -394,6 +417,14 @@ impl LocalControlHandle {
 
     pub fn lan_status(&self) -> LanStatus {
         self.lan_state()
+    }
+    /// Native composition readiness; does not grant browser administration.
+    pub fn backend_attached(&self) -> bool {
+        let state = self.shared.lock().unwrap_or_else(|e| e.into_inner());
+        state.attached
+            && state.pending.is_none()
+            && state.stop_at.is_none()
+            && !state.business_drain_requested
     }
     /// No saved drafts or loopback maintenance URLs are published to phones.
     pub fn quick_connect_url(&self) -> Option<String> {
@@ -542,6 +573,15 @@ where
     let mut cleanup = None;
     let mut cleaned = false;
     let mut business_draining = false;
+    let discovery_control = LocalControlHandle {
+        shared: shared.clone(),
+        certificate: prepared.configuration.certificate,
+        port: prepared.port,
+        assets: prepared.assets.clone(),
+    };
+    let mut discovery = None;
+    let mut discovery_attempted = false;
+    let mut discovery_poll_at = Instant::now();
     loop {
         if !stopping {
             let repair = shared
@@ -734,6 +774,71 @@ where
                 && state.lan_commands.is_empty()
                 && retired_lan.is_empty();
             state.report = Some(report);
+        }
+        if !stopping && !business_draining && Instant::now() >= discovery_poll_at {
+            discovery_poll_at = Instant::now() + Duration::from_millis(100);
+            if let Some(address) = discovery_control.quick_connect_url() {
+                if !discovery_attempted {
+                    discovery_attempted = true;
+                    discovery = fc_windows::lan_discovery::DiscoveryResponder::bind().ok();
+                    shared
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner())
+                        .discovery_status = if discovery.is_some() {
+                        "UDP 38443 已启用"
+                    } else {
+                        "UDP 38443 不可用，仍可扫码连接"
+                    };
+                }
+                let configuration = shared
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner())
+                    .lan_configuration
+                    .clone();
+                if let (Some(responder), Some(configuration), Some(attached)) =
+                    (&mut discovery, configuration, &attachment)
+                {
+                    if let Ok(payload) = attached.app.binding().lan_discovery_payload(&address) {
+                        let _ = responder.poll(&payload, |peer| {
+                            configuration
+                                .source_networks
+                                .as_ref()
+                                .is_some_and(|policy| {
+                                    policy.contains(peer)
+                                        && !policy.networks().iter().any(|network| {
+                                            let Some((address, prefix)) =
+                                                network.as_str().split_once('/')
+                                            else {
+                                                return false;
+                                            };
+                                            match (
+                                                address.parse::<std::net::Ipv4Addr>(),
+                                                prefix.parse::<u32>(),
+                                                peer,
+                                            ) {
+                                                (
+                                                    Ok(network),
+                                                    Ok(prefix @ 1..=30),
+                                                    std::net::IpAddr::V4(peer),
+                                                ) => {
+                                                    u32::from(peer)
+                                                        == u32::from(network) | (u32::MAX >> prefix)
+                                                }
+                                                _ => false,
+                                            }
+                                        })
+                                })
+                        });
+                    }
+                }
+            } else {
+                discovery = None;
+                discovery_attempted = false;
+                shared
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner())
+                    .discovery_status = "未启动";
+            }
         }
         if stopping || business_draining {
             if cleanup.is_none() && !cleaned {

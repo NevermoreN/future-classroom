@@ -406,6 +406,36 @@ pub struct WebService {
     local_control: bool,
 }
 impl WebService {
+    /// Single nonblocking authority read for the existing network loop; no SQL,
+    /// credentials, session lease, waiting or account details enter discovery.
+    pub(crate) fn lan_discovery_payload(&self, address: &str) -> WebResult<Vec<u8>> {
+        let snapshot = self
+            .inner
+            .authority
+            .snapshot()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        let health = self.inner.control.health_gate().status();
+        if health.health != Health::Healthy || health.revision != snapshot.revision {
+            return Err(WebServiceError::Unavailable);
+        }
+        let installation = snapshot.data.installation.as_ref();
+        let class_name = installation
+            .and_then(|i| i.current_class)
+            .and_then(|id| {
+                snapshot
+                    .data
+                    .classes
+                    .iter()
+                    .find(|c| c.id == id && c.enabled)
+            })
+            .map(|c| c.name.as_str());
+        fc_protocol::web::responses::lan_discovery(
+            address,
+            installation.map_or("未来教室", |i| i.school_name.as_str()),
+            class_name,
+        )
+        .map_err(|_| WebServiceError::Unavailable)
+    }
     pub fn for_lan(&self) -> Self {
         Self {
             inner: self.inner.clone(),
