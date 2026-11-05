@@ -132,7 +132,7 @@ def _guid(value: bytes) -> str:
 
 
 def _path(name: str) -> bool:
-    if name in _BUILDER["LIFECYCLE_REQUIRED"] | _BUILDER["OPTIONAL_NATIVE"]:
+    if name in _BUILDER["LIFECYCLE_REQUIRED"] | _BUILDER["OPTIONAL_NATIVE"] | _BUILDER["PWA_PAYLOADS"]:
         return True
     if not name.startswith("web/assets/"):
         return False

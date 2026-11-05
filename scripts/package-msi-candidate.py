@@ -49,6 +49,7 @@ LIFECYCLE_FOOTER = b"FCLIFE73-END-v1\0"
 LIFECYCLE_REQUIRED = {"fc-bootstrap.exe", "LICENSE", "PROBE-README.txt", "THIRD-PARTY-NOTICES.txt", "manifest.json",
                       "MSI-CANDIDATE.txt", "web/index.html", "web/fc-assets.json", "web/THIRD-PARTY-NOTICES.txt"}
 OPTIONAL_NATIVE = {"fc-update-coordinator.exe"}
+PWA_PAYLOADS = {"web/" + name for name in PROBE["PWA_ROOT_FILES"]}
 BASE = {"fc-bootstrap.exe", "LICENSE", "PROBE-README.txt", "THIRD-PARTY-NOTICES.txt"}
 MANIFEST_KEYS = {"schema_version", "product", "version", "artifact_name", "artifact_type", "status", "target", "target_role", "toolchain", "sha256", "frontend", "features", "gates", "files", "pe_audit"}
 LIMITATIONS = [
@@ -349,13 +350,23 @@ def require_payload_members(version: str, names, *, d14: bool | None = None) -> 
     d14 = version_parts(version) >= (0, 1, 5) if d14 is None else d14
     names = list(names)
     members = set(names)
-    expected = 15 if d14 else 14
+    pwa = bool(members & PWA_PAYLOADS)
+    if pwa and not d14:
+        raise ValueError("Complete PWA payloads require the D14 source grammar")
+    expected = (15 if d14 else 14) + (5 if pwa else 0)
     required = LIFECYCLE_REQUIRED | ({"fc-update-coordinator.exe"} if d14 else set())
+    if pwa:
+        required |= PWA_PAYLOADS
     if (len(names) != expected or len(members) != expected or not required <= members
         or ("fc-update-coordinator.exe" in members) != d14
         or not all(valid_path(name) or name == "MSI-CANDIDATE.txt" for name in members)):
         raise ValueError("Version-specific complete payload membership differs")
     return expected
+
+
+def payload_readback_label(count: int) -> str:
+    return {14: "ALL_FOURTEEN_EXACT", 15: "ALL_FIFTEEN_EXACT",
+            20: "ALL_TWENTY_EXACT"}[count]
 
 
 def normal_product_targets(version: str) -> tuple[tuple[str, str, str], ...]:

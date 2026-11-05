@@ -370,7 +370,7 @@ def assemble_admitted(a, manifest: dict, payloads: dict, artifacts: dict,
             setup={'path': 'Setup.exe', 'bytes': len(setup), 'sha256': B['digest'](setup)},
             template={'bytes': len(template), 'sha256': B['digest'](template), 'hole': hole, 'canonicalZero32': True, 'normalPrefixExact': True},
             payloadManifest={'bytes': len(envelope), 'sha256': B['digest'](envelope), 'rawBodySha256': B['digest'](body), 'payloads': expected_payload_count},
-            binaryReadback='ALL_THREE_EXACT' if predecessor is None else 'ALL_FOUR_EXACT', payloadReadback='ALL_FIFTEEN_EXACT' if expected_payload_count == 15 else 'ALL_FOURTEEN_EXACT', onlyExternal32HoleFilled=True)
+            binaryReadback='ALL_THREE_EXACT' if predecessor is None else 'ALL_FOUR_EXACT', payloadReadback=B['payload_readback_label'](expected_payload_count), onlyExternal32HoleFilled=True)
         if predecessor is not None:
             report['publishedPredecessor'] = {'bytes': len(predecessor), 'sha256': B['digest'](predecessor)}
     except BaseException as error:
