@@ -232,7 +232,7 @@ fn decode_sha256(value: &str) -> Option<[u8; 32]> {
         return None;
     }
     let mut out = [0u8; 32];
-    for (slot, pair) in out.iter_mut().zip(value.as_bytes().chunks_exact(2)) {
+    for (slot, pair) in out.iter_mut().zip(value.as_bytes().as_chunks::<2>().0) {
         let nibble = |b: u8| match b {
             b'0'..=b'9' => Some(b - b'0'),
             b'a'..=b'f' => Some(b - b'a' + 10),

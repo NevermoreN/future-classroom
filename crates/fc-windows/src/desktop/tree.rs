@@ -1999,8 +1999,10 @@ mod tests {
         let stride = renderer.cards[0].input.as_ref().unwrap().surface.dib.width as usize;
         let mut changed = 0;
         for (i, (a, b)) in before
-            .chunks_exact(4)
-            .zip(after.chunks_exact(4))
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .zip(after.as_chunks::<4>().0)
             .enumerate()
         {
             if a != b {
