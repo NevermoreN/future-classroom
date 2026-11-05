@@ -10,7 +10,7 @@ const assets = []; let total = 0, compressedJsCss = 0
 for (const path of paths.sort()) {
   const name = relative(root, path).replaceAll('\\', '/')
   if (name === 'fc-assets.json' || name === 'build-budget.json') continue
-  if (!(name === 'index.html' || /^assets\/[A-Za-z0-9_-][A-Za-z0-9._-]*\.(?:js|css|svg|png)$/.test(name)) || name.includes('..')) throw new Error(`Unsupported deployment path: ${name}`)
+  if (!(['index.html', 'offline.html', 'manifest.webmanifest', 'sw.js', 'pwa-icon-192.png', 'pwa-icon-512.png'].includes(name) || /^assets\/[A-Za-z0-9_-][A-Za-z0-9._-]*\.(?:js|css|svg|png)$/.test(name)) || name.includes('..')) throw new Error(`Unsupported deployment path: ${name}`)
   const bytes = await readFile(path); total += bytes.byteLength
   if (/\.(js|css)$/.test(name)) compressedJsCss += gzipSync(bytes, { level: 9 }).byteLength
   assets.push({ path: name, sizeBytes: bytes.byteLength, sha256: createHash('sha256').update(bytes).digest('hex') })

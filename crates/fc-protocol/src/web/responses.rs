@@ -90,6 +90,19 @@ pub fn public_status() -> Result<Vec<u8>, ProtocolError> {
         online: true,
     })
 }
+/// Minimal public connection information; no account, TLS key or session data.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QuickConnect<'a> {
+    pub schema_version: u16,
+    pub school_name: &'a str,
+    pub class_name: Option<&'a str>,
+    pub entry_url: Option<&'a str>,
+    pub unavailable_reason: Option<&'a str>,
+}
+pub fn quick_connect(value: &QuickConnect<'_>) -> Result<Vec<u8>, ProtocolError> {
+    encode(value)
+}
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct PairingRequested<'a> {

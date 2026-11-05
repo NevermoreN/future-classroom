@@ -57,6 +57,7 @@ impl HostHints {
     const TRAY_CONTEXT: Self = Self(2048);
     pub const FOREGROUND_CHANGED: Self = Self(4096);
     pub const OPEN_SETTINGS: Self = Self(65536);
+    pub const OPEN_QUICK_CONNECT: Self = Self(131072);
     /// Negative read-only sample at native message dispatch. The original OS
     /// event-to-dispatch latency is not measured or eliminated by this fence.
     pub const FOREGROUND_UNAVAILABLE: Self = Self(32768);
@@ -503,6 +504,7 @@ impl HiddenHost {
             let menu = Menu(CreatePopupMenu()?);
             AppendMenuW(menu.0, MF_STRING, 1, w!("查看状态"))?;
             AppendMenuW(menu.0, MF_STRING, 4, w!("设置"))?;
+            AppendMenuW(menu.0, MF_STRING, 5, w!("快捷连接"))?;
             AppendMenuW(menu.0, MF_STRING, 2, w!("紧急停止全部语音"))?;
             AppendMenuW(menu.0, MF_STRING, 3, w!("退出程序"))?;
             let mut point = POINT::default();
@@ -521,6 +523,7 @@ impl HiddenHost {
             match selected {
                 1 => self.state.hint(HostHints::OPEN_STATUS),
                 4 => self.state.hint(HostHints::OPEN_SETTINGS),
+                5 => self.state.hint(HostHints::OPEN_QUICK_CONNECT),
                 2 => self.state.control_hint(HostHints::EMERGENCY_STOP_AUDIO),
                 3 => self.state.hint(HostHints::EXIT_REQUESTED),
                 _ => {}

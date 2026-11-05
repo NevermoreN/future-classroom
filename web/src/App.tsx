@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { HttpApi, trustedApiBase } from './api/client'
 import { SessionController, type ViewState } from './api/controller'
 import TeacherWorkspace from './TeacherWorkspace'
+import QuickConnect from './QuickConnect'
 function Brand() { return <a className="brand" href={import.meta.env.BASE_URL} aria-label="未来教室首页"><span className="brand-icon"><GraduationCap size={25} strokeWidth={1.8} /></span><span>未来教室<small>TEACHER WORKSPACE</small></span></a> }
 function LoginForm({ enabled, onSubmit }: { enabled: boolean; onSubmit: (form: { loginName: string; password: string }) => void }) {
   const [loginName, setLoginName] = useState(''), [password, setPassword] = useState('')
@@ -65,6 +66,15 @@ function PasswordForm({ required, busy, notice, onSubmit, onCancel, onLogout }: 
   </CardContent></Card></main>
 }
 export default function App() {
+  const [route, setRoute] = useState(() => window.location.hash)
+  useEffect(() => {
+    const changed = () => setRoute(window.location.hash)
+    window.addEventListener('hashchange', changed)
+    return () => window.removeEventListener('hashchange', changed)
+  }, [])
+  return route === '#/connect' ? <QuickConnect /> : <ManagementApp />
+}
+function ManagementApp() {
   const [forgot, setForgot] = useState(false)
   const [repair] = useState(repairBootstrap)
   const [resumeMaintenance, setResumeMaintenance] = useState(() => !!loadMaintenance())

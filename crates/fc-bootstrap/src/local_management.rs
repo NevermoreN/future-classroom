@@ -18,6 +18,11 @@ pub fn url(settings: bool) -> Option<String> {
     })
 }
 
+pub fn quick_connect_url() -> Option<String> {
+    let port = PORT.load(Ordering::Acquire);
+    (port != 0).then(|| format!("https://127.0.0.1:{port}/fc/#/connect"))
+}
+
 /// The network owner publishes only after native bind/TLS readiness and clears
 /// before stopping admission. This does not grant application authorization.
 pub(crate) fn publish(port: u16) {
@@ -37,7 +42,12 @@ mod tests {
             super::url(false).as_deref(),
             Some("https://127.0.0.1:18443/fc/#/admin/status")
         );
+        assert_eq!(
+            super::quick_connect_url().as_deref(),
+            Some("https://127.0.0.1:18443/fc/#/connect")
+        );
         super::publish(0);
         assert!(super::url(true).is_none());
+        assert!(super::quick_connect_url().is_none());
     }
 }

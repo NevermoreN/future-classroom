@@ -52,6 +52,7 @@ impl AllowedMethods {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Route {
     Status,
+    QuickConnect,
     Admin {
         resource: admin::Resource,
         write: bool,
@@ -164,6 +165,7 @@ impl Route {
         !matches!(
             self,
             Self::Status
+                | Self::QuickConnect
                 | Self::PairingCreate
                 | Self::PairingPoll { .. }
                 | Self::Setup
@@ -321,6 +323,7 @@ impl WebBoundary {
         let path = target.strip_prefix(&self.base).ok_or(WebError::NotFound)?;
         let route = match path {
             "status" => Route::Status,
+            "quick-connect" => Route::QuickConnect,
             "commands" => Route::CommandIssue,
             "pairing/requests" => Route::PairingCreate,
             "session" => Route::Session,

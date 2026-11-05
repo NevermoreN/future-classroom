@@ -29,6 +29,9 @@ pub mod web_application;
 pub mod web_assets;
 pub mod web_transfer;
 
+#[cfg(feature = "school-gateway")]
+pub mod school_gateway;
+
 #[cfg(windows)]
 pub mod voice_files;
 

@@ -24,7 +24,7 @@ pub fn open_local_management(url: &str) -> windows::core::Result<()> {
         .split_once("/fc/#")
         .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
     if port.parse::<u16>().ok().filter(|p| *p != 0).is_none()
-        || !(matches!(route, "/admin/display" | "/admin/status")
+        || !(matches!(route, "/admin/display" | "/admin/status" | "/connect")
             || route.strip_prefix("/repair/").is_some_and(|cap| {
                 cap.len() == 64
                     && cap

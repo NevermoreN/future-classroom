@@ -6616,6 +6616,12 @@ fn run_at_inner(
                 let _ = host.show_public_notice(&message);
             }
         }
+        if hints.contains(HostHints::OPEN_QUICK_CONNECT) {
+            if let Err(message) = app.open_quick_connect() {
+                app.status = message.clone();
+                let _ = host.show_public_notice(&message);
+            }
+        }
         if hints.contains(HostHints::EXIT_REQUESTED) {
             app.begin_shutdown();
         }

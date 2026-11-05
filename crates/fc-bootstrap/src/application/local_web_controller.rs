@@ -61,8 +61,12 @@ impl Job {
                 }
                 context.checkpoint().map_err(|_| Failure::Stopped)?;
                 let binding = Arc::new(OnceLock::new());
+                let quick_connect_control = control.clone();
                 let app = Arc::new(
                     app.with_maintenance_service(maintenance)
+                        .with_quick_connect_url(Arc::new(move || {
+                            quick_connect_control.quick_connect_url()
+                        }))
                         .with_admin_platform_hook(web_platform::hook(
                             &backend,
                             control,
@@ -248,6 +252,12 @@ impl App {
     }
     pub(super) fn open_local_web(&self, settings: bool) -> std::result::Result<(), String> {
         let url = fc_bootstrap::local_management::url(settings)
+            .ok_or_else(|| "本机Web入口尚未就绪，请稍后重试；程序仍在运行。".to_owned())?;
+        fc_windows::startup::open_local_management(&url)
+            .map_err(|_| "无法打开系统浏览器，请检查默认浏览器设置。".to_owned())
+    }
+    pub(super) fn open_quick_connect(&self) -> std::result::Result<(), String> {
+        let url = fc_bootstrap::local_management::quick_connect_url()
             .ok_or_else(|| "本机Web入口尚未就绪，请稍后重试；程序仍在运行。".to_owned())?;
         fc_windows::startup::open_local_management(&url)
             .map_err(|_| "无法打开系统浏览器，请检查默认浏览器设置。".to_owned())

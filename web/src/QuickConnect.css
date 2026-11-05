@@ -1,0 +1,15 @@
+.quick-connect-page { min-height: 100vh; padding: 32px 16px; display: grid; place-items: start center; background: #f4f7fd; }
+.quick-connect-card { width: min(100%, 680px); text-align: center; }
+.quick-connect-class { display: grid; gap: 6px; margin: 4px 0 20px; font-size: 1.15rem; }
+.quick-connect-class span, .quick-connect-note { color: #52627a; }
+.quick-connect-qr { margin: 0 auto; width: min(100%, 288px); background: white; }
+.quick-connect-qr svg { width: 100%; height: auto; display: block; }
+.quick-connect-kind { font-weight: 700; color: #345bba; margin: 12px 0; }
+.quick-connect-address { overflow-wrap: anywhere; user-select: text; padding: 14px; background: #eef3ff; border-radius: 12px; }
+.quick-connect-address a, .quick-connect-open { color: #244b9d; text-decoration: underline; }
+.quick-connect-actions { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+.quick-connect-note { font-size: .9rem; line-height: 1.7; }
+.quick-connect-trust { text-align: left; border-top: 1px solid #e2e8f0; margin: 24px 0; padding-top: 18px; }
+.quick-connect-trust h2 { font-size: 1rem; font-weight: 700; }
+.quick-connect-trust ol { padding-left: 22px; list-style: decimal; }
+.quick-connect-trust li { margin: 10px 0; line-height: 1.7; }

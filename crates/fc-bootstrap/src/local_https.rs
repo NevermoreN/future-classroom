@@ -111,6 +111,7 @@ struct Shared {
     business_quiescent: bool,
     lan_quiescent: bool,
     lan_status: LanStatus,
+    lan_configuration: Option<HttpsConfiguration>,
 }
 static CLAIMED: AtomicBool = AtomicBool::new(false);
 pub struct LocalRuntime {
@@ -156,6 +157,7 @@ impl LocalRuntime {
                 phase: LanListenerPhase::Disabled,
                 error: None,
             },
+            lan_configuration: None,
         }));
         let state = shared.clone();
         let thread = match std::thread::Builder::new()
@@ -392,6 +394,31 @@ impl LocalControlHandle {
 
     pub fn lan_status(&self) -> LanStatus {
         self.lan_state()
+    }
+    /// No saved drafts or loopback maintenance URLs are published to phones.
+    pub fn quick_connect_url(&self) -> Option<String> {
+        let state = self.shared.lock().unwrap_or_else(|e| e.into_inner());
+        if state.lan_status.phase != LanListenerPhase::Listening
+            || state.lan_status.error.is_some()
+            || state.lan_changing
+            || !state.lan_commands.is_empty()
+            || state.negative_lan_stop
+            || state.business_drain_requested
+            || state.stop_at.is_some()
+        {
+            return None;
+        }
+        let config = state.lan_configuration.as_ref()?;
+        let address: std::net::IpAddr = config.host.as_str().parse().ok()?;
+        if address.is_loopback()
+            || address.is_unspecified()
+            || address.is_multicast()
+            || matches!(address, std::net::IpAddr::V4(ip) if ip.is_broadcast())
+            || matches!(address, std::net::IpAddr::V6(ip) if ip.is_unicast_link_local() || ip.to_ipv4_mapped().is_some_and(|ip| ip.is_loopback() || ip.is_unspecified() || ip.is_multicast() || ip.is_broadcast()))
+        {
+            return None;
+        }
+        Some(format!("{}/fc/", config.origin()))
     }
     pub fn assets_for_prefix(
         &self,
@@ -675,6 +702,13 @@ where
                 let mut state = shared.lock().unwrap_or_else(|e| e.into_inner());
                 state.lan_status = LanStatus { phase, error };
                 state.lan_changing = !complete;
+                if complete {
+                    state.lan_configuration = if error.is_none() {
+                        command.configuration.clone()
+                    } else {
+                        None
+                    };
+                }
             }
             if complete {
                 if let Some(attached) = &attachment {

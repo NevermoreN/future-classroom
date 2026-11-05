@@ -299,6 +299,48 @@ fn head(
 }
 
 #[test]
+fn quick_connect_is_local_public_and_reads_live_url_without_disclosing_accounts() {
+    let mut fixture = BackendFixture::new();
+    let request = head("GET", "quick-connect", 0, None, None);
+    assert_eq!(fixture.dispatch(&request, b"").head.status, 403);
+    fixture.app = fixture
+        .app
+        .local_variant(&ListenPrefix::https("https://board.school:443/fc/").unwrap())
+        .unwrap();
+    let unavailable = fixture.dispatch(&request, b"");
+    assert_eq!(unavailable.head.status, 200);
+    assert_eq!(
+        field(&unavailable.body, "schoolName"),
+        "Synthetic private school"
+    );
+    assert!(text(&unavailable.body).contains("\"entryUrl\":null"));
+    assert!(text(&unavailable.body).contains("\"unavailableReason\":\""));
+    let live = Arc::new(std::sync::Mutex::new(Some(
+        "https://192.168.10.212:8443/fc/".to_owned(),
+    )));
+    let provider = live.clone();
+    fixture.app = fixture
+        .app
+        .local_variant(&ListenPrefix::https("https://board.school:443/fc/").unwrap())
+        .unwrap()
+        .with_quick_connect_url(Arc::new(move || provider.lock().unwrap().clone()));
+    let ready = fixture.dispatch(&request, b"");
+    assert_eq!(
+        field(&ready.body, "entryUrl"),
+        "https://192.168.10.212:8443/fc/"
+    );
+    assert!(text(&ready.body).contains("\"unavailableReason\":null"));
+    assert!(!text(&ready.body).contains("admin"));
+    assert!(!text(&ready.body).contains(PASSWORD));
+    *live.lock().unwrap() = None;
+    let stopped = fixture.dispatch(&request, b"");
+    assert!(text(&stopped.body).contains("\"entryUrl\":null"));
+    let post = head("POST", "quick-connect", 0, None, None);
+    assert_eq!(fixture.dispatch(&post, b"").head.status, 405);
+    fixture.backend.close().unwrap();
+}
+
+#[test]
 fn method_rejections_report_exact_allowed_methods_without_changing_other_boundary_errors() {
     let mut fixture = BackendFixture::new();
     for (route, allowed) in [

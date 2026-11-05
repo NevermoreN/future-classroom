@@ -61,6 +61,7 @@ pub struct WebApplication {
     service: WebService,
     account_receipts: std::sync::Arc<std::sync::Mutex<Vec<account_security::Receipt>>>,
     local_control: bool,
+    quick_connect_url: Option<std::sync::Arc<dyn Fn() -> Option<String> + Send + Sync>>,
     admin_platform: Option<admin::PlatformHook>,
     #[cfg(windows)]
     pub(crate) maintenance: Option<std::sync::Arc<crate::maintenance_web::MaintenanceService>>,
@@ -126,6 +127,7 @@ impl WebApplication {
             service,
             account_receipts: Default::default(),
             local_control: false,
+            quick_connect_url: None,
             #[cfg(windows)]
             profile_images: std::sync::Arc::new(std::sync::Mutex::new(None)),
             admin_platform: None,
@@ -156,6 +158,15 @@ impl WebApplication {
         self.admin_platform = Some(hook);
         self
     }
+    /// Trusted native composition supplies only the currently confirmed LAN URL.
+    /// The provider must be a bounded memory-only snapshot, not a backend call.
+    pub fn with_quick_connect_url(
+        mut self,
+        provider: std::sync::Arc<dyn Fn() -> Option<String> + Send + Sync>,
+    ) -> Self {
+        self.quick_connect_url = Some(provider);
+        self
+    }
     pub fn local_variant(&self, prefix: &ListenPrefix) -> Result<Self, WebError> {
         let mut app = self.for_execution(std::sync::Arc::new(|| true));
         app.boundary = std::sync::Arc::new(WebBoundary::new(prefix)?);
@@ -179,6 +190,7 @@ impl WebApplication {
             service: self.service.with_execution_fence(fence),
             account_receipts: self.account_receipts.clone(),
             local_control: self.local_control,
+            quick_connect_url: self.quick_connect_url.clone(),
             #[cfg(windows)]
             profile_images: self.profile_images.clone(),
             admin_platform: self.admin_platform.clone(),
@@ -357,6 +369,36 @@ impl WebApplication {
             Err(response) => return response,
         };
         match route {
+            Route::QuickConnect => {
+                if !self.local_control {
+                    return failure(403, responses::ErrorCode::Forbidden);
+                }
+                let state = match backend.state() {
+                    Ok(state) => state,
+                    Err(_) => return failure(503, responses::ErrorCode::ServiceUnavailable),
+                };
+                let installation = state.installation.as_ref();
+                let class_name = installation
+                    .and_then(|value| value.current_class)
+                    .and_then(|id| {
+                        state
+                            .classes
+                            .iter()
+                            .find(|class| class.id == id && class.enabled)
+                    })
+                    .map(|class| class.name.as_str());
+                let url = self
+                    .quick_connect_url
+                    .as_ref()
+                    .and_then(|provider| provider());
+                response(200, responses::quick_connect(&responses::QuickConnect {
+                    schema_version: 1,
+                    school_name: installation.map_or("未来教室", |value| value.school_name.as_str()),
+                    class_name,
+                    entry_url: url.as_deref(),
+                    unavailable_reason: url.is_none().then_some("尚无可用的校内 HTTPS 连接地址，请管理员在网络设置中完成配置并启动连接。"),
+                }), None)
+            }
             Route::Maintenance { .. } | Route::Repair { .. } => {
                 failure(503, responses::ErrorCode::ServiceUnavailable)
             }

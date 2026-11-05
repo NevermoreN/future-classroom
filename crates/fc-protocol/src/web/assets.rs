@@ -32,7 +32,15 @@ pub struct Manifest {
     pub assets: Vec<Asset>,
 }
 pub fn valid_path(path: &str) -> bool {
-    if path == "index.html" {
+    if matches!(
+        path,
+        "index.html"
+            | "manifest.webmanifest"
+            | "sw.js"
+            | "offline.html"
+            | "pwa-icon-192.png"
+            | "pwa-icon-512.png"
+    ) {
         return true;
     }
     let Some(name) = path.strip_prefix("assets/") else {
@@ -57,8 +65,11 @@ pub fn valid_path(path: &str) -> bool {
 }
 
 pub fn mime(path: &str) -> Option<&'static str> {
-    if path == "index.html" {
+    if matches!(path, "index.html" | "offline.html") {
         return Some("text/html; charset=utf-8");
+    }
+    if path == "manifest.webmanifest" {
+        return Some("application/manifest+json");
     }
     match path.rsplit_once('.')?.1 {
         "js" => Some("text/javascript; charset=utf-8"),
@@ -169,6 +180,37 @@ impl Asset {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn pwa_metadata_is_explicit_and_revalidated_while_unknown_root_files_stay_rejected() {
+        for (path, expected) in [
+            ("manifest.webmanifest", "application/manifest+json"),
+            ("sw.js", "text/javascript; charset=utf-8"),
+            ("offline.html", "text/html; charset=utf-8"),
+            ("pwa-icon-192.png", "image/png"),
+            ("pwa-icon-512.png", "image/png"),
+        ] {
+            assert!(valid_path(path));
+            assert_eq!(mime(path), Some(expected));
+            assert_eq!(
+                Asset {
+                    path: path.into(),
+                    size_bytes: 1,
+                    sha256: [0; 32]
+                }
+                .cache_control(),
+                "no-cache"
+            );
+        }
+        for path in [
+            "other.html",
+            "credentials.json",
+            "../sw.js",
+            "sw.js?x=1",
+            "SW.js",
+        ] {
+            assert!(!valid_path(path));
+        }
+    }
     const HASH: &str = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
     fn entry(path: &str, size: u64) -> String {
         format!(r#"{{"path":"{path}","sizeBytes":{size},"sha256":"{HASH}"}}"#)
