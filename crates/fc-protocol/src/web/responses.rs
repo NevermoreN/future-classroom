@@ -90,6 +90,20 @@ pub fn public_status() -> Result<Vec<u8>, ProtocolError> {
         online: true,
     })
 }
+
+/// Only local product/version facts. No account or school identity disclosure.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct About<'a> {
+    pub schema_version: u16,
+    pub version: &'a str,
+    pub automatic_updates: bool,
+    pub update_available: bool,
+    pub update_message: &'a str,
+}
+pub fn about(value: &About<'_>) -> Result<Vec<u8>, ProtocolError> {
+    encode(value)
+}
 /// Minimal public connection information; no account, TLS key or session data.
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

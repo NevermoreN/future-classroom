@@ -147,6 +147,61 @@ fn release(sequence: u64) -> ReleaseIdentity {
 }
 
 #[test]
+fn policy_codec_keeps_existing_mode_numbers_and_roundtrips_immediate_restart() {
+    for (number, mode) in [
+        (0, UpdateInstallMode::NotifyOnly),
+        (1, UpdateInstallMode::ManualInstall),
+        (2, UpdateInstallMode::MaintenanceWindow),
+        (3, UpdateInstallMode::AutomaticAfterDownload),
+    ] {
+        let mut state = UpdateMaintenanceState::default();
+        state.policy = UpdatePolicy {
+            install_mode: mode,
+            download: true,
+            ..joined_policy()
+        };
+        let bytes = encode(&state).unwrap();
+        let value = codec::value(&bytes).unwrap();
+        assert_eq!(value["policy"]["mode"], json!(number));
+        assert_eq!(decode(&bytes).unwrap(), state);
+    }
+    let mut disabled = UpdateMaintenanceState::default();
+    disabled.policy = UpdatePolicy {
+        enabled: false,
+        download: false,
+        share: false,
+        install_mode: UpdateInstallMode::NotifyOnly,
+        ..joined_policy()
+    };
+    assert_eq!(decode(&encode(&disabled).unwrap()).unwrap(), disabled);
+    assert!(!disabled.policy.participation_enabled());
+}
+
+#[test]
+fn default_updates_cannot_prepare_a_job_before_group_enrollment() {
+    let (directory, published) = fixture();
+    let writer = open_writer(&directory, &published);
+    let mut repository = repo(&writer);
+    assert!(repository.update_status(&actor(1)).unwrap().policy.enabled);
+    assert_eq!(
+        repository.change_update(
+            request(
+                1,
+                0,
+                UpdateMutation::PrepareJob { release: release(2) }
+            ),
+            &actor(1)
+        ),
+        Err(UpdateRepositoryError::Invalid)
+    );
+    assert_eq!(
+        repository.update_status(&actor(1)).unwrap(),
+        UpdateMaintenanceState::default()
+    );
+    writer.shutdown().unwrap();
+}
+
+#[test]
 fn maintenance_cas_replay_and_cold_reopen_leave_teaching_authority_unchanged() {
     let (directory, published) = fixture();
     let writer = open_writer(&directory, &published);

@@ -6637,6 +6637,12 @@ fn run_at_inner(
         if hints.contains(HostHints::EXIT_REQUESTED) {
             app.begin_shutdown();
         }
+        if hints.contains(HostHints::OPEN_ABOUT) {
+            if let Err(message) = app.open_about() {
+                app.status = message.clone();
+                let _ = host.show_public_notice(&message);
+            }
+        }
         if app.lease.is_some()
             && (app.last_input.elapsed() >= Duration::from_secs(300)
                 || (app

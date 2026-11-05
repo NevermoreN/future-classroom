@@ -14,6 +14,7 @@ import { HttpApi, trustedApiBase } from './api/client'
 import { SessionController, type ViewState } from './api/controller'
 import TeacherWorkspace from './TeacherWorkspace'
 import QuickConnect from './QuickConnect'
+import About from './About'
 import ClassroomHome from './ClassroomHome'
 import { installHelpEvent } from './pwa-install'
 import { isPwaInstalled } from './PwaInstallPrompt'
@@ -82,6 +83,7 @@ export default function App() {
     return () => { window.removeEventListener('hashchange', changed); media.removeEventListener('change', installationChanged); window.removeEventListener('appinstalled', didInstall) }
   }, [])
   if (route === '#/connect') return <QuickConnect />
+  if (route === '#/about') return <About />
   const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(window.location.hostname)
   if (route === '#/rooms' || !loopback && ['', '#', '#/'].includes(route)) return <ClassroomHome installed={installed} onInstallHelp={() => window.dispatchEvent(new Event(installHelpEvent))} />
   return <>{route === '#/classroom' && <nav className="pwa-help" aria-label="班级切换"><a href="#/rooms">← 返回班级列表</a></nav>}<ManagementApp /></>

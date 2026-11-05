@@ -247,6 +247,8 @@ impl MaintenanceWindow {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AutomaticInstallBlocker {
+    AutomaticAfterDownloadDisabled,
+    WorkerOwnersPending,
     UnknownActivity,
     UntrustedTime,
     OutsideMaintenanceWindow,
@@ -258,6 +260,43 @@ pub enum AutomaticInstallBlocker {
     WriterBusy,
     RecoveryPending,
     FullscreenApplication,
+}
+
+/// Physical ownership observations after requesting a normal shutdown. A
+/// cancellation request or timeout is not evidence that an owner has returned.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct UpdateHandoffActivity {
+    pub writer_busy: bool,
+    pub recovery_pending: bool,
+    pub worker_owners_returned: bool,
+    pub audio_owners_returned: bool,
+    pub file_owners_returned: bool,
+}
+
+/// For an already authenticated, verified and locally qualified update only.
+/// Explicit immediate-restart consent bypasses classroom, foreground, input and
+/// maintenance-window scheduling, but never bypasses physical resource return.
+/// This prefilter neither authorizes Setup nor permits terminating an owner.
+pub fn automatic_after_download_blocker(
+    policy: &crate::update_state::UpdatePolicy,
+    activity: Option<&UpdateHandoffActivity>,
+) -> Option<AutomaticInstallBlocker> {
+    use AutomaticInstallBlocker::*;
+    if !policy.automatic_after_download_enabled() {
+        return Some(AutomaticAfterDownloadDisabled);
+    }
+    let Some(activity) = activity else {
+        return Some(UnknownActivity);
+    };
+    [
+        (activity.writer_busy, WriterBusy),
+        (activity.recovery_pending, RecoveryPending),
+        (!activity.worker_owners_returned, WorkerOwnersPending),
+        (!activity.audio_owners_returned, Audio),
+        (!activity.file_owners_returned, FilePreparation),
+    ]
+    .into_iter()
+    .find_map(|(blocked, reason)| blocked.then_some(reason))
 }
 
 /// The adapter must provide a coherent current snapshot and repeat this check
@@ -316,6 +355,80 @@ pub fn automatic_install_blocker(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn immediate_restart_waits_for_actual_owners_but_has_no_lesson_or_idle_gate() {
+        use crate::update_state::{UpdateInstallMode, UpdatePolicy};
+        let mut policy = UpdatePolicy {
+            group_id: Some([1; 16]),
+            enabled: true,
+            download: true,
+            install_mode: UpdateInstallMode::AutomaticAfterDownload,
+            ..Default::default()
+        };
+        let ready = UpdateHandoffActivity {
+            writer_busy: false,
+            recovery_pending: false,
+            worker_owners_returned: true,
+            audio_owners_returned: true,
+            file_owners_returned: true,
+        };
+        assert_eq!(
+            automatic_after_download_blocker(&policy, Some(&ready)),
+            None
+        );
+        for (activity, expected) in [
+            (
+                UpdateHandoffActivity {
+                    writer_busy: true,
+                    ..ready
+                },
+                AutomaticInstallBlocker::WriterBusy,
+            ),
+            (
+                UpdateHandoffActivity {
+                    recovery_pending: true,
+                    ..ready
+                },
+                AutomaticInstallBlocker::RecoveryPending,
+            ),
+            (
+                UpdateHandoffActivity {
+                    worker_owners_returned: false,
+                    ..ready
+                },
+                AutomaticInstallBlocker::WorkerOwnersPending,
+            ),
+            (
+                UpdateHandoffActivity {
+                    audio_owners_returned: false,
+                    ..ready
+                },
+                AutomaticInstallBlocker::Audio,
+            ),
+            (
+                UpdateHandoffActivity {
+                    file_owners_returned: false,
+                    ..ready
+                },
+                AutomaticInstallBlocker::FilePreparation,
+            ),
+        ] {
+            assert_eq!(
+                automatic_after_download_blocker(&policy, Some(&activity)),
+                Some(expected)
+            );
+        }
+        assert_eq!(
+            automatic_after_download_blocker(&policy, None),
+            Some(AutomaticInstallBlocker::UnknownActivity)
+        );
+        policy.install_mode = UpdateInstallMode::MaintenanceWindow;
+        assert_eq!(
+            automatic_after_download_blocker(&policy, Some(&ready)),
+            Some(AutomaticInstallBlocker::AutomaticAfterDownloadDisabled)
+        );
+    }
 
     fn identity(sequence: u64) -> ReleaseIdentity {
         ReleaseIdentity {

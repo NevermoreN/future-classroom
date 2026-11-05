@@ -385,6 +385,31 @@ fn quick_connect_is_local_public_and_reads_live_url_without_disclosing_accounts(
 }
 
 #[test]
+fn about_reports_running_version_locally_without_login_or_install_side_effects() {
+    let mut fixture = BackendFixture::new();
+    let request = head("GET", "about", 0, None, None);
+    assert_eq!(fixture.dispatch(&request, b"").head.status, 403);
+    fixture.app = fixture
+        .app
+        .local_variant(&ListenPrefix::https("https://board.school:443/fc/").unwrap())
+        .unwrap();
+    let response = fixture.dispatch(&request, b"");
+    assert_eq!(response.head.status, 200);
+    assert_eq!(field(&response.body, "version"), env!("CARGO_PKG_VERSION"));
+    assert!(text(&response.body).contains("\"automaticUpdates\":true"));
+    assert!(text(&response.body).contains("\"updateAvailable\":false"));
+    assert!(!text(&response.body).contains(PASSWORD));
+    assert_eq!(
+        fixture
+            .dispatch(&head("POST", "about", 0, None, None), b"")
+            .head
+            .status,
+        405
+    );
+    fixture.backend.close().unwrap();
+}
+
+#[test]
 fn method_rejections_report_exact_allowed_methods_without_changing_other_boundary_errors() {
     let mut fixture = BackendFixture::new();
     for (route, allowed) in [

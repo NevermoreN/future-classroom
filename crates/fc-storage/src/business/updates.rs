@@ -199,7 +199,7 @@ pub(crate) fn execute(
                 .map_err(|_| StorageError::ResourceQuota)?;
         }
         UpdateMutation::PrepareJob { release } => {
-            if !state.policy.enabled || release.payload_sha256 == [0; 32] {
+            if !state.policy.participation_enabled() || release.payload_sha256 == [0; 32] {
                 return Err(StorageError::InvalidCommand);
             }
             if !state.reserve_job() {
@@ -272,7 +272,7 @@ fn phase(phase: UpdateJobPhase) -> usize {
 }
 fn policy_value(policy: &UpdatePolicy) -> Value {
     json!({"revision":policy.revision.get(),"group":policy.group_id,"enabled":policy.enabled,"channel":policy.channel,
-        "download":policy.download,"share":policy.share,"mode":match policy.install_mode { UpdateInstallMode::NotifyOnly=>0,UpdateInstallMode::ManualInstall=>1,UpdateInstallMode::MaintenanceWindow=>2 },
+        "download":policy.download,"share":policy.share,"mode":match policy.install_mode { UpdateInstallMode::NotifyOnly=>0,UpdateInstallMode::ManualInstall=>1,UpdateInstallMode::MaintenanceWindow=>2,UpdateInstallMode::AutomaticAfterDownload=>3 },
         "start":policy.maintenance.start.get(),"end":policy.maintenance.end.get(),"downloadRate":policy.download_bytes_per_second,"uploadRate":policy.upload_bytes_per_second})
 }
 fn mutation_value(mutation: &UpdateMutation) -> Value {
@@ -362,6 +362,7 @@ fn policy_read(value: &Value) -> Result<UpdatePolicy, StorageError> {
             0 => UpdateInstallMode::NotifyOnly,
             1 => UpdateInstallMode::ManualInstall,
             2 => UpdateInstallMode::MaintenanceWindow,
+            3 => UpdateInstallMode::AutomaticAfterDownload,
             _ => return Err(StorageError::Database),
         },
         maintenance: MaintenanceWindow {

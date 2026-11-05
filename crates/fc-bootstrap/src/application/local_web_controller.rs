@@ -399,4 +399,10 @@ impl App {
         fc_windows::startup::open_local_management(&url)
             .map_err(|_| "无法打开系统浏览器，请检查默认浏览器设置。".to_owned())
     }
+    pub(super) fn open_about(&self) -> std::result::Result<(), String> {
+        let url = fc_bootstrap::local_management::about_url()
+            .ok_or_else(|| "本机Web入口尚未就绪，请稍后重试；程序仍在运行。".to_owned())?;
+        fc_windows::startup::open_local_management(&url)
+            .map_err(|_| "无法打开系统浏览器，请检查默认浏览器设置。".to_owned())
+    }
 }

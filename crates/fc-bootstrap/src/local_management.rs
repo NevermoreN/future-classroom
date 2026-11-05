@@ -23,6 +23,11 @@ pub fn quick_connect_url() -> Option<String> {
     (port != 0).then(|| format!("https://127.0.0.1:{port}/fc/#/connect"))
 }
 
+pub fn about_url() -> Option<String> {
+    let port = PORT.load(Ordering::Acquire);
+    (port != 0).then(|| format!("https://127.0.0.1:{port}/fc/#/about"))
+}
+
 /// The network owner publishes only after native bind/TLS readiness and clears
 /// before stopping admission. This does not grant application authorization.
 pub(crate) fn publish(port: u16) {
@@ -46,7 +51,12 @@ mod tests {
             super::quick_connect_url().as_deref(),
             Some("https://127.0.0.1:18443/fc/#/connect")
         );
+        assert_eq!(
+            super::about_url().as_deref(),
+            Some("https://127.0.0.1:18443/fc/#/about")
+        );
         super::publish(0);
+        assert!(super::about_url().is_none());
         assert!(super::url(true).is_none());
         assert!(super::quick_connect_url().is_none());
     }

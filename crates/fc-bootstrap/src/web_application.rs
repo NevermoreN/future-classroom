@@ -379,6 +379,18 @@ impl WebApplication {
             Err(response) => return response,
         };
         match route {
+            Route::About => {
+                if !self.local_control {
+                    return failure(403, responses::ErrorCode::Forbidden);
+                }
+                response(200, responses::about(&responses::About {
+                    schema_version: 1,
+                    version: env!("CARGO_PKG_VERSION"),
+                    automatic_updates: fc_domain::update_state::UpdatePolicy::default().enabled,
+                    update_available: false,
+                    update_message: "自动更新默认开启；下载和安装组件尚未就绪，当前还不能执行内网更新。功能就绪并加入学校更新群组后，将自动校验新版、退出安装并立即重启。",
+                }), None)
+            }
             Route::Classrooms => {
                 let directory = self
                     .classrooms
