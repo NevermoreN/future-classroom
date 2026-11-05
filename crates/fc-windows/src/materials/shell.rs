@@ -535,11 +535,11 @@ fn execute(request: &LaunchRequest, shared: &Shared, probe: Option<&ProbeConfig>
         Err(e) => LaunchOutcome::Failed(e.code().0),
     }
 }
-fn system_allows(origin: LaunchOrigin) -> Result<bool> {
-    if !crate::native::input_desktop_available()
-        || origin == LaunchOrigin::CurrentDesktop
-            && crate::native::desktop_foreground() != fc_presentation::Foreground::Desktop
-    {
+fn system_allows(_origin: LaunchOrigin) -> Result<bool> {
+    // A public desktop click is authorized by its exact scene/version guard.
+    // Exposed desktop items can be clicked while another normal window retains
+    // foreground; the non-activating desktop deliberately does not steal it.
+    if !crate::native::input_desktop_available() {
         return Ok(false);
     }
     // SAFETY: owned WTS output is released on every path; pseudo-process/session

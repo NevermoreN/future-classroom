@@ -48,9 +48,14 @@ fn time_requires_scene(
     scene: Option<&SceneSnapshot>,
     previous: Option<LocalDateTime>,
     now: LocalDateTime,
+    hints: HostHints,
 ) -> bool {
     scene.is_none_or(|scene| !scene.valid_at(now))
         || previous.is_some_and(|previous| now < previous)
+        // An external foreground revokes the published local lesson capability.
+        // Re-publication must carry a new generation instead of replaying that
+        // revoked entry when the desktop becomes available again.
+        || hints.contains(HostHints::FOREGROUND_CHANGED)
 }
 
 fn voice_only_change(status: fc_runtime::health::HealthStatus, source: Revision) -> bool {
@@ -819,6 +824,10 @@ impl Controller {
                 facts.global_revision = status.revision;
                 scene.source_revision = status.revision;
                 self.renderer.adopt_voice_revision(scene, gate);
+                // The local lesson entry is bound to its exact revision. A
+                // voice-only commit keeps its pixels, but its replacement
+                // capability still needs a fresh scene generation.
+                self.needs_scene = true;
                 if self.images_verified == Some((scene.generation, previous)) {
                     self.images_verified = Some((scene.generation, status.revision));
                 }
@@ -1350,7 +1359,7 @@ impl Controller {
         let recompose = self.needs_scene
             || received
             || self.work != Some(work)
-            || time_requires_scene(self.scene.as_ref(), self.last_sample, now)
+            || time_requires_scene(self.scene.as_ref(), self.last_sample, now, hints)
             || hints.contains(HostHints::TIME_CHANGED)
             || hints.contains(HostHints::DISPLAY_CHANGED);
         if recompose {
@@ -1561,31 +1570,47 @@ mod tests {
         assert!(!time_requires_scene(
             Some(&scene),
             Some(sample(1)),
-            sample(2)
+            sample(2),
+            HostHints::default()
         ));
         assert!(!time_requires_scene(
             Some(&scene),
             Some(sample(58)),
-            sample(59)
+            sample(59),
+            HostHints::default()
         ));
         assert!(time_requires_scene(
             Some(&scene),
             Some(sample(59)),
-            sample(60)
+            sample(60),
+            HostHints::default()
         ));
         assert!(time_requires_scene(
             Some(&scene),
             Some(sample(25)),
-            sample(20)
+            sample(20),
+            HostHints::default()
+        ));
+        assert!(time_requires_scene(
+            Some(&scene),
+            Some(sample(1)),
+            sample(2),
+            HostHints::FOREGROUND_CHANGED
         ));
         let tomorrow =
             LocalDateTime::new(fc_domain::time::LocalDate::new(2026, 10, 31).unwrap(), 0).unwrap();
         assert!(time_requires_scene(
             Some(&scene),
             Some(sample(59)),
-            tomorrow
+            tomorrow,
+            HostHints::default()
         ));
-        assert!(time_requires_scene(None, Some(sample(1)), sample(2)));
+        assert!(time_requires_scene(
+            None,
+            Some(sample(1)),
+            sample(2),
+            HostHints::default()
+        ));
     }
     #[test]
     fn bounded_page_history_reverses_actual_variable_batch_starts_without_skip() {

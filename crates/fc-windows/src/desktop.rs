@@ -398,6 +398,7 @@ struct InputState {
     targets: RefCell<Vec<HitTarget>>,
     layout_epoch: Cell<u64>,
     pressed: Cell<Option<(SceneGeneration, u64, usize)>>,
+    hovered: Cell<Option<usize>>,
     turns: RefCell<VecDeque<(SceneGeneration, InputAction)>>,
 }
 struct InputStrip {
@@ -408,6 +409,7 @@ impl InputStrip {
     fn hide(&self) {
         self.state.context.replace(None);
         self.state.pressed.set(None);
+        self.state.hovered.set(None);
         self.state.turns.borrow_mut().clear();
         self.surface.window.hide();
     }
@@ -1000,6 +1002,7 @@ struct Card {
     subject_backdrop: SubjectBackdrop,
     calendar_unverified: bool,
     render_pending: bool,
+    painted_hover: Option<usize>,
     input: Option<InputStrip>,
     body: ContentLayout,
     page: usize,
@@ -1154,6 +1157,7 @@ impl DesktopRenderer {
             targets: RefCell::new(Vec::new()),
             layout_epoch: Cell::new(0),
             pressed: Cell::new(None),
+            hovered: Cell::new(None),
             turns: RefCell::new(VecDeque::with_capacity(2)),
         });
         // SAFETY: stable UI-owned Box is retained through HWND destruction. Only
@@ -1595,6 +1599,7 @@ impl DesktopRenderer {
                     subject_backdrop: SubjectBackdrop::planar(card.surface_alpha, scene.text_tone),
                     calendar_unverified: scene.public_calendar_unverified,
                     render_pending: true,
+                    painted_hover: None,
                     input,
                     body,
                     page,
@@ -1623,6 +1628,7 @@ impl DesktopRenderer {
         // rendering is explicit and stays completely offscreen on any foreground.
         let mut updated = false;
         for c in &mut self.cards {
+            refresh_hover(c);
             if c.source.component_alpha == 0. {
                 continue;
             }
@@ -2936,6 +2942,42 @@ fn input_message(hwnd: HWND, msg: u32, lp: LPARAM, state: &InputState) -> Option
     };
     match msg {
         WM_MOUSEACTIVATE => Some(LRESULT(MA_NOACTIVATE as isize)),
+        WM_SETCURSOR => {
+            if state.context.borrow().as_ref().is_some_and(input_allowed) {
+                unsafe {
+                    SetCursor(LoadCursorW(None, IDC_HAND).ok());
+                }
+                Some(LRESULT(1))
+            } else {
+                None
+            }
+        }
+        WM_MOUSEMOVE => {
+            let point = local(false);
+            let hovered = state
+                .context
+                .borrow()
+                .as_ref()
+                .filter(|c| input_allowed(c))
+                .and_then(|_| {
+                    state
+                        .targets
+                        .borrow()
+                        .iter()
+                        .position(|t| t.rect.contains(point.x as f32, point.y as f32))
+                });
+            state.hovered.set(hovered);
+            unsafe {
+                let mut tracking = TRACKMOUSEEVENT {
+                    cbSize: std::mem::size_of::<TRACKMOUSEEVENT>() as u32,
+                    dwFlags: TME_LEAVE,
+                    hwndTrack: hwnd,
+                    dwHoverTime: 0,
+                };
+                let _ = TrackMouseEvent(&mut tracking);
+            }
+            Some(LRESULT(0))
+        }
         WM_NCHITTEST => {
             let point = local(true);
             let allowed = state.context.borrow().as_ref().is_some_and(input_allowed)
@@ -2997,6 +3039,7 @@ fn input_message(hwnd: HWND, msg: u32, lp: LPARAM, state: &InputState) -> Option
         }
         WM_CANCELMODE | WM_MOUSELEAVE => {
             state.pressed.set(None);
+            state.hovered.set(None);
             Some(LRESULT(0))
         }
         WM_CLOSE => {
@@ -3009,6 +3052,13 @@ fn input_message(hwnd: HWND, msg: u32, lp: LPARAM, state: &InputState) -> Option
             Some(LRESULT(0))
         }
         _ => None,
+    }
+}
+fn refresh_hover(card: &mut Card) {
+    let hovered = card.input.as_ref().and_then(|i| i.state.hovered.get());
+    if card.painted_hover != hovered {
+        card.painted_hover = hovered;
+        card.render_pending = true;
     }
 }
 fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
@@ -3093,6 +3143,7 @@ fn render_input_strip(g: &Graphics, c: &mut Card) -> Result<()> {
     }
     if *input.state.targets.borrow() != targets {
         input.state.pressed.set(None);
+        input.state.hovered.set(None);
         input
             .state
             .layout_epoch
@@ -3115,7 +3166,7 @@ fn render_input_strip(g: &Graphics, c: &mut Card) -> Result<()> {
             None,
         )?;
         if material || image {
-            for item in &targets {
+            for (index, item) in targets.iter().enumerate() {
                 if !matches!(item.action, InputAction::Page(_)) {
                     let r = item.rect;
                     target.FillRectangle(
@@ -3127,6 +3178,35 @@ fn render_input_strip(g: &Graphics, c: &mut Card) -> Result<()> {
                         },
                         &hit,
                     );
+                    if material && c.painted_hover == Some(index) {
+                        let fill = target.CreateSolidColorBrush(
+                            &D2D1_COLOR_F {
+                                r: 0.45,
+                                g: 0.7,
+                                b: 1.,
+                                a: 0.18,
+                            },
+                            None,
+                        )?;
+                        let edge = target.CreateSolidColorBrush(
+                            &D2D1_COLOR_F {
+                                r: 0.65,
+                                g: 0.83,
+                                b: 1.,
+                                a: 0.85,
+                            },
+                            None,
+                        )?;
+                        let outline = bounds(
+                            r.x + 0.5,
+                            r.y + 0.5,
+                            r.x + r.width - 0.5,
+                            r.y + r.height - 0.5,
+                            4.,
+                        );
+                        target.FillRoundedRectangle(&outline, &fill);
+                        target.DrawRoundedRectangle(&outline, &edge, 1., None);
+                    }
                 }
             }
         }

@@ -153,6 +153,7 @@ fn state() -> Box<InputState> {
         targets: RefCell::new(Vec::new()),
         layout_epoch: Cell::new(0),
         pressed: Cell::new(None),
+        hovered: Cell::new(None),
         turns: RefCell::new(VecDeque::with_capacity(2)),
     })
 }
@@ -306,6 +307,7 @@ fn make_card(
         subject_backdrop: SubjectBackdrop::planar(card.surface_alpha, scene.text_tone),
         calendar_unverified: scene.public_calendar_unverified,
         render_pending: true,
+        painted_hover: None,
         input,
         body,
         page: 0,
@@ -753,6 +755,7 @@ fn aggregate_inputs(t: &mut TreeRenderer, cards: &[Card]) {
         }
         if *group.input.state.targets.borrow() != targets {
             group.input.state.pressed.set(None);
+            group.input.state.hovered.set(None);
             group
                 .input
                 .state
@@ -977,9 +980,31 @@ pub(super) fn present(
     }
     let mut t = renderer.tree.take().ok_or_else(invalid)?;
     let result = (|| -> Result<PresentOutcome> {
+        for card in renderer.cards.iter_mut().take(t.card_count) {
+            let Some(input) = &card.input else { continue };
+            let action = t.groups.iter().find_map(|group| {
+                let index = group.input.state.hovered.get()?;
+                group
+                    .input
+                    .state
+                    .targets
+                    .borrow()
+                    .get(index)
+                    .map(|t| t.action.clone())
+            });
+            input.state.hovered.set(action.and_then(|action| {
+                input
+                    .state
+                    .targets
+                    .borrow()
+                    .iter()
+                    .position(|t| t.action == action)
+            }));
+        }
         let mut patches = Vec::new();
         let mut updated = false;
         for (index, card) in renderer.cards.iter_mut().enumerate() {
+            refresh_hover(card);
             let effective = if index < t.card_count {
                 t.tree
                     .nodes
@@ -1675,6 +1700,132 @@ mod tests {
             public_calendar_unverified: false,
             lesson_control: None,
         }
+    }
+    #[test]
+    fn material_hover_highlights_only_the_row_and_single_click_opens_once() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let (_publisher, gate) = authority();
+        let mut scene = sample();
+        scene.cards =
+            vec![
+                super::super::tests::material_scene(crate::native::local_now().unwrap())
+                    .cards
+                    .into_iter()
+                    .find(|card| card.kind == ComponentKind::Materials)
+                    .unwrap(),
+            ];
+        scene.captured_at = crate::native::local_now().unwrap();
+        let area = rect(20., 20., 520., 900.);
+        scene.cards[0].rect = area;
+        for node in &mut scene.paint_tree.as_mut().unwrap().nodes {
+            node.rect = area;
+            node.clip = area;
+            if node.card_index.is_some() {
+                node.local_opacity = scene.cards[0].component_alpha;
+                node.effective_opacity = 0.5 * node.local_opacity;
+                node.glass = Some(PaintGlass {
+                    surface_alpha: scene.cards[0].surface_alpha,
+                    edge_alpha: scene.cards[0].edge_alpha,
+                });
+            }
+        }
+        let mut renderer = DesktopRenderer::new_hidden().unwrap();
+        renderer
+            .present(&scene, scene.captured_at, &guard(&gate, scene.generation))
+            .unwrap();
+        let group = &renderer.tree.as_ref().unwrap().groups[0];
+        let index = group
+            .input
+            .state
+            .targets
+            .borrow()
+            .iter()
+            .position(|t| matches!(t.action, InputAction::MaterialOpen { .. }))
+            .unwrap();
+        let hit = group.input.state.targets.borrow()[index].rect;
+        let hwnd = group.input.surface.window.0;
+        let before = renderer.cards[0]
+            .input
+            .as_ref()
+            .unwrap()
+            .surface
+            .dib
+            .pixels()
+            .to_vec();
+        let local_hit = renderer.cards[0]
+            .input
+            .as_ref()
+            .unwrap()
+            .state
+            .targets
+            .borrow()[index]
+            .rect;
+        let lp = LPARAM(
+            (((hit.y + hit.height / 2.) as i32) << 16 | (hit.x + hit.width / 2.) as i32) as isize,
+        );
+        unsafe {
+            SendMessageW(hwnd, WM_MOUSEMOVE, None, Some(lp));
+        }
+        renderer
+            .present(&scene, scene.captured_at, &guard(&gate, scene.generation))
+            .unwrap();
+        assert!(renderer.take_events().unwrap().is_empty());
+        let after = renderer.cards[0]
+            .input
+            .as_ref()
+            .unwrap()
+            .surface
+            .dib
+            .pixels();
+        let stride = renderer.cards[0].input.as_ref().unwrap().surface.dib.width as usize;
+        let mut changed = 0;
+        for (i, (a, b)) in before
+            .chunks_exact(4)
+            .zip(after.chunks_exact(4))
+            .enumerate()
+        {
+            if a != b {
+                let (x, y) = ((i % stride) as f32, (i / stride) as f32);
+                // Fractional DirectWrite row bounds can cover part of the first
+                // pixel; test pixel coverage, not its integer top-left point.
+                assert!(
+                    x >= local_hit.x.floor()
+                        && x < (local_hit.x + local_hit.width).ceil()
+                        && y >= local_hit.y.floor()
+                        && y < (local_hit.y + local_hit.height).ceil(),
+                    "changed pixel {x},{y} outside {local_hit:?}"
+                );
+                changed += 1;
+            }
+        }
+        assert!(
+            changed > 100,
+            "hover must paint a visible row outline and fill"
+        );
+        let group = &renderer.tree.as_ref().unwrap().groups[0];
+        send_probe(&group.input, hit).unwrap();
+        assert!(matches!(
+            renderer.take_events().unwrap().as_slice(),
+            [DesktopEvent::MaterialOpen { .. }]
+        ));
+        unsafe {
+            SendMessageW(hwnd, WM_MOUSELEAVE, None, None);
+        }
+        renderer
+            .present(&scene, scene.captured_at, &guard(&gate, scene.generation))
+            .unwrap();
+        assert_eq!(
+            renderer.cards[0]
+                .input
+                .as_ref()
+                .unwrap()
+                .surface
+                .dib
+                .pixels(),
+            before
+        );
     }
     #[test]
     fn manual_card_keeps_all_four_edges_inside_the_visible_frame() {
