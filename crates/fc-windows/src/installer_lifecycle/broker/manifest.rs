@@ -5,6 +5,13 @@ pub(crate) const MAGIC: &[u8; 8] = b"FCLM73\0\0";
 pub(crate) const FOOTER: &[u8; 16] = b"FCLIFE73-END-v1\0";
 pub(crate) const MAX_MANIFEST: usize = 32768;
 pub(crate) const MAX_PAYLOAD: u32 = 30 * 1024 * 1024;
+const PWA_FILES: [&str; 5] = [
+    "web/manifest.webmanifest",
+    "web/offline.html",
+    "web/pwa-icon-192.png",
+    "web/pwa-icon-512.png",
+    "web/sw.js",
+];
 
 #[derive(Debug)]
 pub(crate) struct Entry {
@@ -69,19 +76,21 @@ pub(crate) fn path(text: &str) -> bool {
     if text.is_empty() || text.len() > 240 || !text.is_ascii() {
         return false;
     }
-    if matches!(
-        text,
-        "fc-bootstrap.exe"
-            | "fc-update-coordinator.exe"
-            | "LICENSE"
-            | "PROBE-README.txt"
-            | "THIRD-PARTY-NOTICES.txt"
-            | "manifest.json"
-            | "MSI-CANDIDATE.txt"
-            | "web/index.html"
-            | "web/fc-assets.json"
-            | "web/THIRD-PARTY-NOTICES.txt"
-    ) {
+    if PWA_FILES.contains(&text)
+        || matches!(
+            text,
+            "fc-bootstrap.exe"
+                | "fc-update-coordinator.exe"
+                | "LICENSE"
+                | "PROBE-README.txt"
+                | "THIRD-PARTY-NOTICES.txt"
+                | "manifest.json"
+                | "MSI-CANDIDATE.txt"
+                | "web/index.html"
+                | "web/fc-assets.json"
+                | "web/THIRD-PARTY-NOTICES.txt"
+        )
+    {
         return true;
     }
     let Some(name) = text.strip_prefix("web/assets/") else {
@@ -171,6 +180,13 @@ pub(crate) fn parse(mut bytes: &[u8]) -> Result<Manifest> {
             return invalid();
         }
     }
+    // Historical packages have no PWA root files. A package introducing the
+    // offline entry must include its complete fixed shell, not a partial set.
+    if PWA_FILES.iter().any(|name| paths.contains(*name))
+        && !PWA_FILES.iter().all(|name| paths.contains(*name))
+    {
+        return invalid();
+    }
     // A file cannot simultaneously be the ancestor of another declared file.
     if !bytes.is_empty()
         || entries.iter().any(|a| {
@@ -202,15 +218,22 @@ mod tests {
             "C:/x",
             "web//a",
             "web/.hidden",
+            "web/other.html",
+            "web/sw.js/child",
+            "web/SW.js",
+            "web/pwa-icon-256.png",
         ] {
             assert!(!path(value), "{value}");
         }
         assert!(!path("web/资料.js"));
         assert!(path("web/assets/main-1.js"));
+        for name in PWA_FILES {
+            assert!(path(name), "{name}");
+        }
     }
 
-    fn fixture() -> Vec<u8> {
-        let mut names = [
+    fn fixture(extra: &[&str]) -> Vec<u8> {
+        let mut names = vec![
             "fc-bootstrap.exe",
             "LICENSE",
             "PROBE-README.txt",
@@ -221,6 +244,7 @@ mod tests {
             "web/fc-assets.json",
             "web/THIRD-PARTY-NOTICES.txt",
         ];
+        names.extend_from_slice(extra);
         names.sort();
         let mut b = MAGIC.to_vec();
         b.extend(1u16.to_le_bytes());
@@ -239,7 +263,7 @@ mod tests {
     }
     #[test]
     fn actual_closed_format_accepts_full_set_and_rejects_truncation_tail_and_aliases() {
-        let b = fixture();
+        let b = fixture(&[]);
         let value = parse(&b).unwrap();
         assert_eq!(value.entries.len(), 9);
         assert_eq!(value.version, "0.1.0");
@@ -262,5 +286,30 @@ mod tests {
         let first: Vec<_> = duplicate[positions[0]..positions[0] + 36].to_vec();
         duplicate[positions[1]..positions[1] + 36].copy_from_slice(&first);
         assert!(parse(&duplicate).is_err());
+    }
+
+    #[test]
+    fn pwa_shell_is_complete_while_historical_payloads_remain_valid() {
+        let assets = [
+            "web/assets/a.js",
+            "web/assets/b.js",
+            "web/assets/c.js",
+            "web/assets/d.css",
+            "web/assets/e.png",
+        ];
+        assert_eq!(parse(&fixture(&assets)).unwrap().entries.len(), 14);
+        let mut current = assets.to_vec();
+        current.push("fc-update-coordinator.exe");
+        assert_eq!(parse(&fixture(&current)).unwrap().entries.len(), 15);
+        current.extend(PWA_FILES);
+        assert_eq!(parse(&fixture(&current)).unwrap().entries.len(), 20);
+        for omitted in PWA_FILES {
+            let partial: Vec<_> = current
+                .iter()
+                .copied()
+                .filter(|name| *name != omitted)
+                .collect();
+            assert!(parse(&fixture(&partial)).is_err(), "missing {omitted}");
+        }
     }
 }

@@ -31,6 +31,7 @@ MAX_WEB_FILES = 64
 MAX_WEB_BYTES = 5 * 1024 * 1024
 MAX_WEB_MANIFEST_BYTES = 64 * 1024
 MAX_WEB_NOTICE_BYTES = 1024 * 1024
+PWA_ROOT_FILES = {"manifest.webmanifest", "sw.js", "offline.html", "pwa-icon-192.png", "pwa-icon-512.png"}
 
 
 def real_directory(path: Path) -> None:
@@ -63,7 +64,7 @@ def bounded_regular_file(path: Path, limit: int) -> bytes:
 
 def valid_web_path(path: object) -> bool:
     """Match the Rust static manifest's flat ASCII allowlist, including Win32 aliases."""
-    if path == "index.html":
+    if path == "index.html" or isinstance(path, str) and path in PWA_ROOT_FILES:
         return True
     if not isinstance(path, str) or not path.startswith("assets/"):
         return False
@@ -76,7 +77,7 @@ def valid_web_path(path: object) -> bool:
     return "." in name and name.rsplit(".", 1)[-1] in {"js", "css", "svg", "png", "jpg", "jpeg", "webp"}
 
 
-def frontend_payloads(web_dist: Path) -> tuple[dict[str, bytes], dict]:
+def frontend_payloads(web_dist: Path, source_root: Path = ROOT) -> tuple[dict[str, bytes], dict]:
     """Only a validated manifest chooses payloads. No directory glob or request path."""
     real_directory(web_dist)
     raw = bounded_regular_file(web_dist / "fc-assets.json", MAX_WEB_MANIFEST_BYTES)
@@ -133,8 +134,8 @@ def frontend_payloads(web_dist: Path) -> tuple[dict[str, bytes], dict]:
         if len(data) != size or hashlib.sha256(data).hexdigest() != digest:
             raise ValueError("Web asset size or digest mismatch: " + path)
         payloads["web/" + path] = data
-    real_directory(ROOT / "web")
-    notices = bounded_regular_file(ROOT / "web" / "THIRD-PARTY-NOTICES.txt", MAX_WEB_NOTICE_BYTES)
+    real_directory(source_root / "web")
+    notices = bounded_regular_file(source_root / "web" / "THIRD-PARTY-NOTICES.txt", MAX_WEB_NOTICE_BYTES)
     if not notices:
         raise ValueError("Web third-party notices are empty.")
     payloads["web/THIRD-PARTY-NOTICES.txt"] = notices
@@ -179,7 +180,10 @@ def archive_bytes(archive: zipfile.ZipFile, name: str, data: bytes) -> None:
     archive.writestr(info, data)
 
 
-def build_package(executable: Path, output: Path, target: str, objdump: str, declared_toolchain: str | None, web_dist: Path | None = None, update_coordinator: Path | None = None) -> dict:
+def build_package(executable: Path, output: Path, target: str, objdump: str, declared_toolchain: str | None, web_dist: Path | None = None, update_coordinator: Path | None = None, source_root: Path = ROOT) -> dict:
+    source_root = source_root.absolute()
+    real_directory(source_root)
+    version = tomllib.loads(bounded_regular_file(source_root / "Cargo.toml", MAX_WEB_MANIFEST_BYTES).decode("utf-8"))["workspace"]["package"]["version"]
     audit_pe = runpy.run_path(str(ROOT / "scripts" / "audit-pe.py"))["audit_pe"]
     audited_digest = sha256_file(executable)
     audit = audit_pe(executable, objdump)
@@ -192,9 +196,9 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
     toolchain = subprocess.run(["rustc", "-Vv"], cwd=ROOT, check=True, capture_output=True, text=True, timeout=30).stdout.strip()
     files = {
         "fc-bootstrap.exe": executable,
-        "LICENSE": ROOT / "LICENSE",
-        "PROBE-README.txt": ROOT / "packaging" / "PROBE-README.txt",
-        "THIRD-PARTY-NOTICES.txt": ROOT / "packaging" / "THIRD-PARTY-NOTICES.txt",
+        "LICENSE": source_root / "LICENSE",
+        "PROBE-README.txt": source_root / "packaging" / "PROBE-README.txt",
+        "THIRD-PARTY-NOTICES.txt": source_root / "packaging" / "THIRD-PARTY-NOTICES.txt",
     }
     if update_coordinator is not None:
         coordinator_audit = audit_pe(update_coordinator, objdump)
@@ -203,7 +207,7 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
         files["fc-update-coordinator.exe"] = update_coordinator
     elif target == "i686-win7-windows-msvc":
         raise ValueError("Formal D14 candidate requires --update-coordinator from the same original CI run.")
-    web_files, frontend = frontend_payloads(web_dist) if web_dist is not None else ({}, {
+    web_files, frontend = frontend_payloads(web_dist, source_root) if web_dist is not None else ({}, {
         "included": False,
         "status": "NOT_INCLUDED",
         "scope": "No browser payload in this package; local features remain available. Pass an explicit --web-dist to include the teacher UI required by normal HTTPS hosting.",
@@ -215,7 +219,7 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
     manifest = {
         "schema_version": 1,
         "product": "FutureClassroom",
-        "version": VERSION,
+        "version": version,
         "artifact_name": output.name,
         "artifact_type": "development-probe",
         "status": "NOT_VALIDATED",
@@ -323,9 +327,10 @@ def main() -> int:
     parser.add_argument("--toolchain", help="Optional declared build toolchain; does not certify binary provenance.")
     parser.add_argument("--web-dist", type=Path, help="Explicit built Web directory; only validated fc-assets.json entries and Web notices are included.")
     parser.add_argument("--update-coordinator", type=Path, help="Explicit same-build fc-update-coordinator.exe; required for formal D14 candidates.")
+    parser.add_argument("--source-root", type=Path, default=ROOT, help="Original source checkout supplying the actual workspace version and notices.")
     args = parser.parse_args()
     try:
-        manifest = build_package(args.exe.resolve(), args.output.resolve(), args.target, args.objdump, args.toolchain, args.web_dist, args.update_coordinator.resolve() if args.update_coordinator is not None else None)
+        manifest = build_package(args.exe.resolve(), args.output.resolve(), args.target, args.objdump, args.toolchain, args.web_dist, args.update_coordinator.resolve() if args.update_coordinator is not None else None, args.source_root)
     except (OSError, ValueError, subprocess.SubprocessError, zipfile.BadZipFile) as error:
         print(f"Probe package failed: {error}", file=sys.stderr)
         return 1

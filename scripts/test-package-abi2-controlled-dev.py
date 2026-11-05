@@ -95,7 +95,7 @@ def formal_result_fixture():
     return r
 
 class FormalMsvcAbi2Contract(unittest.TestCase):
-    def test_d14_four_artifact_fifteen_payload_assembly_contract_and_legacy_replay(self):
+    def test_d14_complete_pwa_assembly_contract_and_legacy_replay(self):
         # Synthetic bytes test the actual shared assembly preconditions and codec.
         # They are never marked as CI evidence or executed as an installer.
         shared=FORMAL['ABI2']; builder=shared['B']; pe=F['structural_pe']()
@@ -107,6 +107,17 @@ class FormalMsvcAbi2Contract(unittest.TestCase):
         current=dict(old, **{'fc-update-coordinator.exe':pe})
         current_artifacts=dict(artifacts, **{'update-coordinator-compile':(Path('/synthetic-not-a-build/coordinator'),pe)})
         self.assertEqual(shared['require_admitted_artifacts']({'version':'0.1.5'},current,current_artifacts,True),15)
+        complete=dict(current, **{name:name.encode() for name in builder['PWA_PAYLOADS']})
+        self.assertEqual(shared['require_admitted_artifacts']({'version':'0.1.5'},complete,current_artifacts,True),20)
+        self.assertEqual(builder['payload_readback_label'](20),'ALL_TWENTY_EXACT')
+        for name in builder['PWA_PAYLOADS']:
+            incomplete=dict(complete);del incomplete[name]
+            with self.assertRaises(ValueError):
+                shared['require_admitted_artifacts']({'version':'0.1.5'},incomplete,current_artifacts,True)
+        invalid=dict(complete);invalid['web/sw.js?x']=invalid.pop('web/sw.js')
+        with self.assertRaises(ValueError):
+            shared['require_admitted_artifacts']({'version':'0.1.5'},invalid,current_artifacts,True)
+        current=complete
         body=builder['lifecycle_manifest']('0.1.5',current)
         envelope=shared['C']['make_payload_manifest'](F['PACKAGE'],body)
         self.assertEqual(set(shared['C']['parse_payload_manifest'](envelope)['entries']),set(current))

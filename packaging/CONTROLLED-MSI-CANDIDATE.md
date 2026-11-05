@@ -3,8 +3,8 @@
 This bundle contains Setup.exe and the fixed sibling FutureClassroom.msi. Keep
 both complete files together. It is not a validated release or a general MSI
 wrapper. The normal product, helper and guard DLL must be non-test artifacts
-from the admitted same-source compiler inputs. The complete fourteen-payload
-set also binds the Web build, license texts and reviewed instructions. GNU DEV
+from the admitted same-source compiler inputs. The complete payload ledger
+also binds the Web build, license texts and reviewed instructions. GNU DEV
 fixtures remain separate
 from the original Win7-target MSVC CI admission; modern MSVC compilation is an
 additional check. Compiling a target does not establish runtime compatibility.
@@ -48,7 +48,7 @@ binds each version's own normal helper/template/DLL, including a four-stream
 predecessor, without recursively executing its older publication. Earlier
 capability0 internal bundles need a compatible installer; their data is retained.
 The manifest
-binds the actual compiler-generated PackageCode, product/version and fourteen
+binds the actual compiler-generated PackageCode, product/version and complete
 payload identities. The final MSI is completed first; only the external
 Setup's fixed32 digest slot is filled afterwards. Its normal compiler prefix
 stays byte-for-byte unchanged. Neither the embedded template nor the DLL hashes
@@ -118,6 +118,16 @@ binds the coordinator; the MSI payload ledger and exact extraction check include
 it too. A copied GNU Showcase EXE or a separately rebuilt coordinator fails
 formal source admission. Older version <=0.1.4 sources retain their original
 two-binary admission so an old qualified predecessor can still be replayed.
+
+The current complete D14 MSI has twenty payload files: the coordinator plus
+the original payload set and all five fixed PWA files (`manifest.webmanifest`,
+`sw.js`, `offline.html`, `pwa-icon-192.png`, `pwa-icon-512.png` under `web/`).
+The five PWA files are admitted together; a partial set is rejected. Historical
+fourteen-file published sources and the earlier unpublished fifteen-file D14
+contract retain their original exact replay grammar. The source ZIP contains
+nineteen files before the MSI builder adds its reviewed instructions. Pass
+`package-probe.py --source-root` for the frozen source checkout so its Cargo
+version and license/notices cannot come from a different builder checkout.
 
 A real D14 baseline requires the committed source SHA to complete the existing
 `Windows 7 MSVC candidate COMPILE_ONLY` GitHub workflow, followed by the existing

@@ -261,7 +261,7 @@ def predecessor_package(q: dict, old_args, original: tuple) -> tuple[dict, bytes
     body = B['lifecycle_manifest'](package['version'], payloads)
     envelope = ABI2['C']['make_payload_manifest'](package['packageCode'], body)
     NEED(package['productCode'] == B['product_code'](package['version'])
-         and package['payloadReadback'] == ('ALL_FIFTEEN_EXACT' if B['version_parts'](artifact['version']) >= (0, 1, 5) else 'ALL_FOURTEEN_EXACT')
+         and package['payloadReadback'] == B['payload_readback_label'](len(payloads))
          and package['onlyExternal32HoleFilled'] is True, 'Actual old ABI2 sealed complete14 package')
     prior_record = None
     if package['status'] == 'PASS_ORIGINAL_WIN7_MSVC_CI_ABI2_SUCCESSOR_STATIC_CANDIDATE_NATIVE_NOT_RUN':
