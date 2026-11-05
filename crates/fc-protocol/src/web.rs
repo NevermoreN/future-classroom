@@ -53,6 +53,7 @@ impl AllowedMethods {
 pub enum Route {
     Status,
     QuickConnect,
+    Classrooms,
     Admin {
         resource: admin::Resource,
         write: bool,
@@ -166,6 +167,7 @@ impl Route {
             self,
             Self::Status
                 | Self::QuickConnect
+                | Self::Classrooms
                 | Self::PairingCreate
                 | Self::PairingPoll { .. }
                 | Self::Setup
@@ -324,6 +326,7 @@ impl WebBoundary {
         let route = match path {
             "status" => Route::Status,
             "quick-connect" => Route::QuickConnect,
+            "classrooms" => Route::Classrooms,
             "commands" => Route::CommandIssue,
             "pairing/requests" => Route::PairingCreate,
             "session" => Route::Session,

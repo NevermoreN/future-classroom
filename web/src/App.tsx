@@ -14,6 +14,9 @@ import { HttpApi, trustedApiBase } from './api/client'
 import { SessionController, type ViewState } from './api/controller'
 import TeacherWorkspace from './TeacherWorkspace'
 import QuickConnect from './QuickConnect'
+import ClassroomHome from './ClassroomHome'
+import { installHelpEvent } from './pwa-install'
+import { isPwaInstalled } from './PwaInstallPrompt'
 function Brand() { return <a className="brand" href={import.meta.env.BASE_URL} aria-label="未来教室首页"><span className="brand-icon"><GraduationCap size={25} strokeWidth={1.8} /></span><span>未来教室<small>TEACHER WORKSPACE</small></span></a> }
 function LoginForm({ enabled, onSubmit }: { enabled: boolean; onSubmit: (form: { loginName: string; password: string }) => void }) {
   const [loginName, setLoginName] = useState(''), [password, setPassword] = useState('')
@@ -67,12 +70,21 @@ function PasswordForm({ required, busy, notice, onSubmit, onCancel, onLogout }: 
 }
 export default function App() {
   const [route, setRoute] = useState(() => window.location.hash)
+  const [installed, setInstalled] = useState(isPwaInstalled)
   useEffect(() => {
     const changed = () => setRoute(window.location.hash)
     window.addEventListener('hashchange', changed)
-    return () => window.removeEventListener('hashchange', changed)
+    const media = window.matchMedia('(display-mode: standalone)')
+    const installationChanged = () => setInstalled(isPwaInstalled())
+    const didInstall = () => setInstalled(true)
+    media.addEventListener('change', installationChanged)
+    window.addEventListener('appinstalled', didInstall)
+    return () => { window.removeEventListener('hashchange', changed); media.removeEventListener('change', installationChanged); window.removeEventListener('appinstalled', didInstall) }
   }, [])
-  return route === '#/connect' ? <QuickConnect /> : <ManagementApp />
+  if (route === '#/connect') return <QuickConnect />
+  const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(window.location.hostname)
+  if (route === '#/rooms' || !loopback && ['', '#', '#/'].includes(route)) return <ClassroomHome installed={installed} onInstallHelp={() => window.dispatchEvent(new Event(installHelpEvent))} />
+  return <>{route === '#/classroom' && <nav className="pwa-help" aria-label="班级切换"><a href="#/rooms">← 返回班级列表</a></nav>}<ManagementApp /></>
 }
 function ManagementApp() {
   const [forgot, setForgot] = useState(false)

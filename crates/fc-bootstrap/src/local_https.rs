@@ -114,6 +114,7 @@ struct Shared {
     lan_configuration: Option<HttpsConfiguration>,
     startup_configuration: Option<HttpsConfiguration>,
     discovery_status: &'static str,
+    classrooms: fc_protocol::web::responses::Classrooms,
 }
 static CLAIMED: AtomicBool = AtomicBool::new(false);
 pub struct LocalRuntime {
@@ -162,6 +163,11 @@ impl LocalRuntime {
             lan_configuration: None,
             startup_configuration: None,
             discovery_status: "未启动",
+            classrooms: fc_protocol::web::responses::Classrooms {
+                schema_version: 1,
+                discovery_available: false,
+                rooms: Vec::new(),
+            },
         }));
         let state = shared.clone();
         let thread = match std::thread::Builder::new()
@@ -451,6 +457,13 @@ impl LocalControlHandle {
         }
         Some(format!("{}/fc/", config.origin()))
     }
+    pub fn classrooms(&self) -> fc_protocol::web::responses::Classrooms {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .classrooms
+            .clone()
+    }
     pub fn assets_for_prefix(
         &self,
         prefix: &ListenPrefix,
@@ -581,6 +594,7 @@ where
     };
     let mut discovery = None;
     let mut discovery_attempted = false;
+    let mut browser = None;
     let mut discovery_poll_at = Instant::now();
     loop {
         if !stopping {
@@ -781,6 +795,15 @@ where
                 if !discovery_attempted {
                     discovery_attempted = true;
                     discovery = fc_windows::lan_discovery::DiscoveryResponder::bind().ok();
+                    let host = shared
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner())
+                        .lan_configuration
+                        .as_ref()
+                        .and_then(|config| config.host.as_str().parse::<std::net::Ipv4Addr>().ok());
+                    browser = host.and_then(|host| {
+                        fc_windows::lan_discovery::DiscoveryBrowser::bind(host).ok()
+                    });
                     shared
                         .lock()
                         .unwrap_or_else(|e| e.into_inner())
@@ -790,6 +813,25 @@ where
                         "UDP 38443 不可用，仍可扫码连接"
                     };
                 }
+                let available = browser
+                    .as_mut()
+                    .is_some_and(|browser| browser.poll().is_ok());
+                let mut rooms = browser
+                    .as_ref()
+                    .map_or_else(Vec::new, |browser| browser.rooms());
+                if let Some(attached) = &attachment {
+                    if let Ok(current) = attached.app.binding().current_classroom(&address) {
+                        rooms.retain(|room| room.address != current.address);
+                        rooms.insert(0, current);
+                        rooms.truncate(64);
+                    }
+                }
+                shared.lock().unwrap_or_else(|e| e.into_inner()).classrooms =
+                    fc_protocol::web::responses::Classrooms {
+                        schema_version: 1,
+                        discovery_available: available,
+                        rooms,
+                    };
                 let configuration = shared
                     .lock()
                     .unwrap_or_else(|e| e.into_inner())
@@ -833,11 +875,18 @@ where
                 }
             } else {
                 discovery = None;
+                browser = None;
                 discovery_attempted = false;
                 shared
                     .lock()
                     .unwrap_or_else(|e| e.into_inner())
                     .discovery_status = "未启动";
+                shared.lock().unwrap_or_else(|e| e.into_inner()).classrooms =
+                    fc_protocol::web::responses::Classrooms {
+                        schema_version: 1,
+                        discovery_available: false,
+                        rooms: Vec::new(),
+                    };
             }
         }
         if stopping || business_draining {

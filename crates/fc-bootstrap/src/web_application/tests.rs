@@ -299,6 +299,50 @@ fn head(
 }
 
 #[test]
+fn classrooms_are_public_memory_candidates_and_keep_business_authentication() {
+    let mut fixture = BackendFixture::new();
+    let directory = Arc::new(std::sync::Mutex::new(responses::Classrooms {
+        schema_version: 1,
+        discovery_available: true,
+        rooms: vec![responses::ClassroomEntry {
+            address: "https://192.168.10.212:8443/fc/".into(),
+            school_name: "校园".into(),
+            class_name: Some("七年级一班".into()),
+            is_current: true,
+        }],
+    }));
+    let provider = directory.clone();
+    fixture.app = fixture
+        .app
+        .lan_variant(&ListenPrefix::https("https://board.school:443/fc/").unwrap())
+        .unwrap()
+        .with_classrooms(Arc::new(move || provider.lock().unwrap().clone()));
+    let request = head("GET", "classrooms", 0, None, None);
+    let response = fixture.dispatch(&request, b"");
+    assert_eq!(response.head.status, 200);
+    assert!(text(&response.body).contains("\"discoveryAvailable\":true"));
+    assert!(text(&response.body).contains("七年级一班"));
+    assert!(!text(&response.body).contains(PASSWORD));
+    directory.lock().unwrap().rooms.clear();
+    assert!(text(&fixture.dispatch(&request, b"").body).contains("\"rooms\":[]"));
+    assert_eq!(
+        fixture
+            .dispatch(&head("POST", "classrooms", 0, None, None), b"")
+            .head
+            .status,
+        405
+    );
+    assert_eq!(
+        fixture
+            .dispatch(&head("GET", "session", 0, None, None), b"")
+            .head
+            .status,
+        401
+    );
+    fixture.backend.close().unwrap();
+}
+
+#[test]
 fn quick_connect_is_local_public_and_reads_live_url_without_disclosing_accounts() {
     let mut fixture = BackendFixture::new();
     let request = head("GET", "quick-connect", 0, None, None);

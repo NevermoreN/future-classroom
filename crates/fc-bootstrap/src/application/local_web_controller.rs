@@ -69,11 +69,13 @@ impl Job {
                 context.checkpoint().map_err(|_| Failure::Stopped)?;
                 let binding = Arc::new(OnceLock::new());
                 let quick_connect_control = control.clone();
+                let classrooms_control = control.clone();
                 let app = Arc::new(
                     app.with_maintenance_service(maintenance)
                         .with_quick_connect_url(Arc::new(move || {
                             quick_connect_control.quick_connect_url()
                         }))
+                        .with_classrooms(Arc::new(move || classrooms_control.classrooms()))
                         .with_admin_platform_hook(web_platform::hook(
                             &backend,
                             control,

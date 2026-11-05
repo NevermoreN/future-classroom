@@ -18,10 +18,13 @@ self.addEventListener('activate', event => event.waitUntil((async () => {
 self.addEventListener('fetch', event => {
   const request = event.request, url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin || url.search) return;
-  if (STATIC.includes(url.pathname)) {
+  if (request.mode === 'navigate' && (url.pathname === ${JSON.stringify(base)} || url.pathname === ${JSON.stringify(base + 'index.html')})) {
+    event.respondWith(fetch(request).catch(async () => {
+      const cache = await caches.open(CACHE);
+      return await cache.match(${JSON.stringify(base + 'index.html')}) || await cache.match(${JSON.stringify(base + 'offline.html')});
+    }));
+  } else if (STATIC.includes(url.pathname)) {
     event.respondWith(caches.open(CACHE).then(cache => cache.match(url.pathname)).then(hit => hit || fetch(request)));
-  } else if (request.mode === 'navigate' && url.pathname === ${JSON.stringify(base)}) {
-    event.respondWith(fetch(request).catch(() => caches.open(CACHE).then(cache => cache.match(${JSON.stringify(base + 'offline.html')}))));
   }
 });
 `
@@ -34,7 +37,7 @@ export function pwaBuild(): Plugin {
     apply: 'build',
     configResolved(config) { base = config.base },
     generateBundle(_options, bundle) {
-      const manifest = { id: base, name: '未来教室', short_name: '未来教室', lang: 'zh-CN', start_url: base, scope: base, display: 'standalone', background_color: '#f5f7fa', theme_color: '#f5f7fa', description: '安全连接教室，使用现有账号管理教学内容。', icons: [
+      const manifest = { id: base, name: '未来教室', short_name: '未来教室', lang: 'zh-CN', start_url: base, scope: base, display: 'standalone', background_color: '#f5f7fa', theme_color: '#f5f7fa', description: '选择班级，安全进入教室网站。', icons: [
         { src: 'pwa-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
         { src: 'pwa-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
       ] }
@@ -46,7 +49,9 @@ export function pwaBuild(): Plugin {
         'pwa-icon-512.png': readFileSync(new URL('../src/assets/icons/pwa-512.png', import.meta.url)),
       }
       for (const [fileName, source] of Object.entries(extra)) this.emitFile({ type: 'asset', fileName, source })
-      const staticFiles = [...Object.keys(bundle).filter(name => /^assets\/[A-Za-z0-9_.-]+\.(js|css|png|svg)$/.test(name)), ...Object.keys(extra)].sort()
+      // index.html is public app shell only; it contains no account or class
+      // data. Vite emits it after this hook, but it exists when SW install runs.
+      const staticFiles = ['index.html', ...Object.keys(bundle).filter(name => /^assets\/[A-Za-z0-9_.-]+\.(js|css|png|svg)$/.test(name)), ...Object.keys(extra)].sort()
       const hash = createHash('sha256')
       for (const name of Object.keys(bundle).sort()) {
         const item = bundle[name]!

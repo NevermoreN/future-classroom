@@ -409,6 +409,18 @@ impl WebService {
     /// Single nonblocking authority read for the existing network loop; no SQL,
     /// credentials, session lease, waiting or account details enter discovery.
     pub(crate) fn lan_discovery_payload(&self, address: &str) -> WebResult<Vec<u8>> {
+        let room = self.current_classroom(address)?;
+        fc_protocol::web::responses::lan_discovery(
+            address,
+            &room.school_name,
+            room.class_name.as_deref(),
+        )
+        .map_err(|_| WebServiceError::Unavailable)
+    }
+    pub(crate) fn current_classroom(
+        &self,
+        address: &str,
+    ) -> WebResult<fc_protocol::web::responses::ClassroomEntry> {
         let snapshot = self
             .inner
             .authority
@@ -429,12 +441,14 @@ impl WebService {
                     .find(|c| c.id == id && c.enabled)
             })
             .map(|c| c.name.as_str());
-        fc_protocol::web::responses::lan_discovery(
-            address,
-            installation.map_or("未来教室", |i| i.school_name.as_str()),
-            class_name,
-        )
-        .map_err(|_| WebServiceError::Unavailable)
+        Ok(fc_protocol::web::responses::ClassroomEntry {
+            address: address.to_owned(),
+            school_name: installation
+                .map_or("未来教室", |i| i.school_name.as_str())
+                .to_owned(),
+            class_name: class_name.map(str::to_owned),
+            is_current: true,
+        })
     }
     pub fn for_lan(&self) -> Self {
         Self {

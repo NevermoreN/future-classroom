@@ -39,13 +39,13 @@ export function ConnectionDetails({ info }: { info: ConnectionInfo }) {
   return <>
     <p className="quick-connect-class"><strong>{info.schoolName}</strong><span>{info.className ?? '尚未绑定班级'}</span></p>
     {info.entryUrl ? <>
-      <div className="quick-connect-qr"><QRCodeSVG value={info.entryUrl} size={288} marginSize={4} level="M" title="扫码打开本教室网站" /></div>
-      <p className="quick-connect-kind">本教室直连</p>
-      <p>请使用手机相机扫码，或复制完整地址在浏览器中打开。</p>
+      <div className="quick-connect-qr"><QRCodeSVG value={info.entryUrl} size={288} marginSize={4} level="M" title="扫码打开班级入口" /></div>
+      <p className="quick-connect-kind">班级入口 · 由本教室提供</p>
+      <p>扫码后先选择班级，再进入该教室网站。添加到手机桌面后，可从同一个入口查找和切换班级。</p>
       <p className="quick-connect-address"><a href={info.entryUrl} target="_blank" rel="noopener noreferrer">{info.entryUrl}</a></p>
       <div className="quick-connect-actions"><Button type="button" onClick={() => { void copy() }}>复制地址</Button><a className="quick-connect-open" href={info.entryUrl} target="_blank" rel="noopener noreferrer">打开网站</a></div>
       <p role="status">{copyNotice}</p>
-      <p className="quick-connect-note">手机需连接学校网络。入口已由本机确认准备好，手机是否能访问还取决于校园网络和 Wi-Fi 隔离设置。</p>
+      <p className="quick-connect-note">请保持提供入口的电脑在线，手机连接学校网络。自动查找范围受校园网络和 Wi-Fi 隔离设置影响。</p>
     </> : <p className="notice" role="status">{info.unavailableReason} 请管理员完成连接设置，再刷新本页。</p>}
     <section className="quick-connect-trust"><h2>首次使用</h2><ol><li>先请学校管理员提供学校根证书及指纹，按照手机系统说明安装并信任。不要忽略证书警告继续登录。</li><li>打开网站后，可按提示“安装到手机”或“添加到主屏幕”，以后从图标直接打开；也可以稍后安装，先使用网页。</li><li>登录时使用已有用户名和密码。二维码仅包含公开网址，不会自动登录。</li></ol></section>
   </>

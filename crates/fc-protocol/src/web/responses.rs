@@ -1,5 +1,5 @@
-//! Explicit response disclosures. Secret text is borrowed only while serializing
-//! the outbound body; these DTOs have no Debug, Deserialize, or retained state.
+//! Explicit response disclosures. Secret-bearing DTOs borrow secret text only
+//! while serializing; public directory DTOs retain bounded labels and addresses.
 use crate::{ProtocolError, MAX_JSON_BYTES, SCHEMA_VERSION};
 use fc_domain::{auth::*, identity::UserAccount, ids::ClassId};
 use serde::Serialize;
@@ -102,6 +102,76 @@ pub struct QuickConnect<'a> {
 }
 pub fn quick_connect(value: &QuickConnect<'_>) -> Result<Vec<u8>, ProtocolError> {
     encode(value)
+}
+/// Public, unverified LAN candidates. TLS and each classroom's own login remain
+/// mandatory when opening an address from this list.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClassroomEntry {
+    pub address: String,
+    pub school_name: String,
+    pub class_name: Option<String>,
+    pub is_current: bool,
+}
+#[derive(Clone, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Classrooms {
+    pub schema_version: u16,
+    pub discovery_available: bool,
+    pub rooms: Vec<ClassroomEntry>,
+}
+pub fn classrooms(value: &Classrooms) -> Result<Vec<u8>, ProtocolError> {
+    encode(value)
+}
+
+/// Validate a UDP candidate at the trust boundary, including its actual sender.
+pub fn parse_lan_discovery(
+    bytes: &[u8],
+    peer: std::net::Ipv4Addr,
+) -> Result<ClassroomEntry, ProtocolError> {
+    #[derive(serde::Deserialize)]
+    #[serde(rename_all = "camelCase", deny_unknown_fields)]
+    struct Discovery {
+        schema_version: u16,
+        product: String,
+        address: String,
+        school_name: String,
+        class_name: Option<String>,
+    }
+    if bytes.len() > 1024 || !peer.is_private() {
+        return Err(ProtocolError::InvalidCommand);
+    }
+    let value: Discovery = crate::parse(bytes)?;
+    let endpoint = value
+        .address
+        .strip_prefix("https://")
+        .and_then(|address| address.strip_suffix("/fc/"))
+        .and_then(|host| host.parse::<std::net::SocketAddrV4>().ok())
+        .ok_or(ProtocolError::InvalidCommand)?;
+    if value.schema_version != 1
+        || value.product != "FutureClassroom"
+        || *endpoint.ip() != peer
+        || endpoint.port() == 0
+        || value.school_name.len() > 512
+        || value.school_name.trim().is_empty()
+        || value
+            .class_name
+            .as_ref()
+            .is_some_and(|name| name.len() > 512 || name.trim().is_empty())
+        || value.school_name.chars().any(char::is_control)
+        || value
+            .class_name
+            .as_ref()
+            .is_some_and(|name| name.chars().any(char::is_control))
+    {
+        return Err(ProtocolError::InvalidCommand);
+    }
+    Ok(ClassroomEntry {
+        address: format!("https://{endpoint}/fc/"),
+        school_name: value.school_name,
+        class_name: value.class_name,
+        is_current: false,
+    })
 }
 pub fn lan_discovery(
     address: &str,
@@ -280,6 +350,28 @@ pub fn initialization_status(initialized: bool) -> Result<Vec<u8>, ProtocolError
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn discovery_rejects_blank_labels_and_accepts_bounded_chinese_names() {
+        let address = "https://192.168.10.2:8443/fc/";
+        let peer = "192.168.10.2".parse().unwrap();
+        for school in ["", "  ", "　"] {
+            let bytes = super::lan_discovery(address, school, None).unwrap();
+            assert!(super::parse_lan_discovery(&bytes, peer).is_err());
+        }
+        for class in ["", "  ", "　"] {
+            let bytes = super::lan_discovery(address, "学校", Some(class)).unwrap();
+            assert!(super::parse_lan_discovery(&bytes, peer).is_err());
+        }
+        let name = "学".repeat(128);
+        let bytes = super::lan_discovery(address, &name, Some("一班")).unwrap();
+        assert_eq!(
+            super::parse_lan_discovery(&bytes, peer)
+                .unwrap()
+                .school_name,
+            name
+        );
+    }
+
     use super::*;
     #[test]
     fn public_response_is_an_exact_non_sensitive_field_set() {

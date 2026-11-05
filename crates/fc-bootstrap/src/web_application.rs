@@ -62,6 +62,7 @@ pub struct WebApplication {
     account_receipts: std::sync::Arc<std::sync::Mutex<Vec<account_security::Receipt>>>,
     local_control: bool,
     quick_connect_url: Option<std::sync::Arc<dyn Fn() -> Option<String> + Send + Sync>>,
+    classrooms: Option<std::sync::Arc<dyn Fn() -> responses::Classrooms + Send + Sync>>,
     admin_platform: Option<admin::PlatformHook>,
     #[cfg(windows)]
     pub(crate) maintenance: Option<std::sync::Arc<crate::maintenance_web::MaintenanceService>>,
@@ -128,6 +129,7 @@ impl WebApplication {
             account_receipts: Default::default(),
             local_control: false,
             quick_connect_url: None,
+            classrooms: None,
             #[cfg(windows)]
             profile_images: std::sync::Arc::new(std::sync::Mutex::new(None)),
             admin_platform: None,
@@ -167,6 +169,13 @@ impl WebApplication {
         self.quick_connect_url = Some(provider);
         self
     }
+    pub fn with_classrooms(
+        mut self,
+        provider: std::sync::Arc<dyn Fn() -> responses::Classrooms + Send + Sync>,
+    ) -> Self {
+        self.classrooms = Some(provider);
+        self
+    }
     pub fn local_variant(&self, prefix: &ListenPrefix) -> Result<Self, WebError> {
         let mut app = self.for_execution(std::sync::Arc::new(|| true));
         app.boundary = std::sync::Arc::new(WebBoundary::new(prefix)?);
@@ -191,6 +200,7 @@ impl WebApplication {
             account_receipts: self.account_receipts.clone(),
             local_control: self.local_control,
             quick_connect_url: self.quick_connect_url.clone(),
+            classrooms: self.classrooms.clone(),
             #[cfg(windows)]
             profile_images: self.profile_images.clone(),
             admin_platform: self.admin_platform.clone(),
@@ -369,6 +379,18 @@ impl WebApplication {
             Err(response) => return response,
         };
         match route {
+            Route::Classrooms => {
+                let directory = self
+                    .classrooms
+                    .as_ref()
+                    .map(|provider| provider())
+                    .unwrap_or_else(|| responses::Classrooms {
+                        schema_version: 1,
+                        discovery_available: false,
+                        rooms: Vec::new(),
+                    });
+                response(200, responses::classrooms(&directory), None)
+            }
             Route::QuickConnect => {
                 if !self.local_control {
                     return failure(403, responses::ErrorCode::Forbidden);

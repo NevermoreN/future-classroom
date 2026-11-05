@@ -1,4 +1,5 @@
 export const installDismissKey = 'fc.pwa.install-dismissed'
+export const installHelpEvent = 'fc:show-install-help'
 export type InstallEnvironment = { userAgent: string; platform: string; touchPoints: number; standalone: boolean }
 export function installGuidance(environment: InstallEnvironment): { mobile: boolean; steps: string } {
   const ua = environment.userAgent

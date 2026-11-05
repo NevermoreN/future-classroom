@@ -101,9 +101,136 @@ fn valid_query(query: &[u8], sender: IpAddr) -> bool {
     query == DISCOVERY_QUERY && matches!(sender, IpAddr::V4(address) if address.is_private())
 }
 
+/// A bounded discovery client owned and polled by the existing network loop.
+/// Advertisements are labels only, never an authentication decision.
+pub struct DiscoveryBrowser {
+    socket: UdpSocket,
+    next_query: Instant,
+    candidates: Vec<(fc_protocol::web::responses::ClassroomEntry, Instant)>,
+}
+impl DiscoveryBrowser {
+    pub fn bind(address: Ipv4Addr) -> io::Result<Self> {
+        if !address.is_private() {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "private IPv4 required",
+            ));
+        }
+        let socket = UdpSocket::bind((address, 0))?;
+        socket.set_nonblocking(true)?;
+        socket.set_broadcast(true)?;
+        Ok(Self {
+            socket,
+            next_query: Instant::now(),
+            candidates: Vec::new(),
+        })
+    }
+    pub fn poll(&mut self) -> io::Result<()> {
+        let now = Instant::now();
+        self.candidates
+            .retain(|(_, seen)| now.duration_since(*seen) < Duration::from_secs(90));
+        if now >= self.next_query {
+            self.next_query = now + Duration::from_secs(15);
+            // Limited broadcast stays on the bound LAN interface; it does not
+            // cross routers or claim to penetrate school network isolation.
+            match self
+                .socket
+                .send_to(DISCOVERY_QUERY, (Ipv4Addr::BROADCAST, DISCOVERY_PORT))
+            {
+                Ok(_) => {}
+                Err(error)
+                    if matches!(
+                        error.kind(),
+                        io::ErrorKind::WouldBlock | io::ErrorKind::Interrupted
+                    ) => {}
+                Err(error) => return Err(error),
+            }
+        }
+        let mut bytes = [0u8; MAX_REPLY_BYTES + 1];
+        for _ in 0..MAX_PACKETS_PER_POLL {
+            let (length, peer) = match self.socket.recv_from(&mut bytes) {
+                Ok(value) => value,
+                Err(error) if error.kind() == io::ErrorKind::WouldBlock => break,
+                Err(error)
+                    if error.kind() == io::ErrorKind::Interrupted
+                        || error.raw_os_error() == Some(10040) =>
+                {
+                    continue
+                }
+                Err(error) => return Err(error),
+            };
+            let IpAddr::V4(peer) = peer.ip() else {
+                continue;
+            };
+            if let Ok(candidate) =
+                fc_protocol::web::responses::parse_lan_discovery(&bytes[..length], peer)
+            {
+                if let Some(existing) = self
+                    .candidates
+                    .iter_mut()
+                    .find(|(room, _)| room.address == candidate.address)
+                {
+                    *existing = (candidate, now);
+                } else if self.candidates.len() < 64 {
+                    self.candidates.push((candidate, now));
+                }
+            }
+        }
+        Ok(())
+    }
+    pub fn rooms(&self) -> Vec<fc_protocol::web::responses::ClassroomEntry> {
+        self.candidates
+            .iter()
+            .map(|(room, _)| room.clone())
+            .collect()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn discovered_addresses_must_match_the_private_sender_and_cannot_include_credentials_or_paths()
+    {
+        let peer = "192.168.10.2".parse().unwrap();
+        let valid = fc_protocol::web::responses::lan_discovery(
+            "https://192.168.10.2:8443/fc/",
+            "学校",
+            Some("一班"),
+        )
+        .unwrap();
+        let room = fc_protocol::web::responses::parse_lan_discovery(&valid, peer).unwrap();
+        assert_eq!(room.class_name.as_deref(), Some("一班"));
+        assert!(!room.is_current);
+        let alias = fc_protocol::web::responses::lan_discovery(
+            "https://192.168.10.2:08443/fc/",
+            "学校",
+            Some("一班"),
+        )
+        .unwrap();
+        assert_eq!(
+            fc_protocol::web::responses::parse_lan_discovery(&alias, peer)
+                .unwrap()
+                .address,
+            room.address
+        );
+        for address in [
+            "http://192.168.10.2:8443/fc/",
+            "https://192.168.10.3:8443/fc/",
+            "https://user@192.168.10.2:8443/fc/",
+            "https://192.168.10.2:8443/fc/?token=x",
+            "https://192.168.10.2:8443/fc/#/",
+            "https://192.168.10.2:0/fc/",
+        ] {
+            let bytes = fc_protocol::web::responses::lan_discovery(address, "学校", None).unwrap();
+            assert!(fc_protocol::web::responses::parse_lan_discovery(&bytes, peer).is_err());
+        }
+        assert!(
+            fc_protocol::web::responses::parse_lan_discovery(&valid, Ipv4Addr::LOCALHOST).is_err()
+        );
+        assert!(fc_protocol::web::responses::parse_lan_discovery(&[b'x'; 1025], peer).is_err());
+    }
 
     #[test]
     fn only_exact_product_query_from_private_ipv4_is_eligible() {
