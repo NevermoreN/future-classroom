@@ -11,6 +11,8 @@ use zeroize::Zeroizing;
 mod codec;
 mod recovery;
 pub mod web;
+pub mod updates;
+pub mod update_group;
 pub use codec::{CredentialRecordCodec, EncodedCredential, CREDENTIAL_RECORD_BYTES};
 pub use recovery::{
     create_recovery_record, verify_recovery, RecoveryCode, RecoveryRecord, RECOVERY_FORMAT,

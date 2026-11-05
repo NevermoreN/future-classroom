@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 pub mod audio;
 pub mod autostart;
+pub mod updates;
 pub use autostart::*;
 pub mod calendar;
 pub use calendar::*;
@@ -714,3 +715,4 @@ pub use desktop_lesson::*;
 
 pub mod https_settings;
 pub use https_settings::*;
+pub mod update_discovery;

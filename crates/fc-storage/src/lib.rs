@@ -545,6 +545,7 @@ impl TransactionDocuments for CommandView<'_> {
 
 type Reply<T> = mpsc::Sender<Result<T, StorageError>>;
 enum Message<S> {
+    UpdateMaintenance(business::updates::Task, Reply<Vec<u8>>),
     MigrationInspect(
         recovery::InspectJob,
         Reply<recovery::MigrationSourceReceipt>,
@@ -584,6 +585,7 @@ enum Message<S> {
 impl<S> Message<S> {
     fn queued_bytes(&self) -> Option<usize> {
         let allocations = match self {
+            Self::UpdateMaintenance(task, _) => task.allocation_bytes(),
             Self::MigrationInspect(job, _) => job.allocation_bytes(),
             Self::MigrationMap(job, _) => job.allocation_bytes(),
             Self::RecoveryBarrier(task, _, _) => task.allocation_bytes(),
@@ -919,6 +921,7 @@ fn open_connection(path: &Path) -> Result<Connection, StorageError> {
         .map_err(|_| StorageError::Database)?;
     db.prepare("SELECT command_id,fingerprint,revision FROM command_journal LIMIT 0")
         .map_err(|_| StorageError::Database)?;
+    business::updates::initialize(&db)?;
     Ok(db)
 }
 
@@ -970,6 +973,25 @@ fn writer_loop<P: AuthorityPublisher>(
         // Queue ownership ends at pop. In-flight work is bounded to this one writer.
         drop(lease);
         match message {
+            Message::UpdateMaintenance(task, reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else {
+                    match catch_unwind(AssertUnwindSafe(|| {
+                        business::updates::execute(&mut db, task, &stop)
+                    })) {
+                        Ok(result) => result,
+                        Err(_) => Err(StorageError::WorkerPanicked),
+                    }
+                };
+                if matches!(
+                    result,
+                    Err(StorageError::Indeterminate | StorageError::WorkerPanicked)
+                ) {
+                    mark_fault(&mut publisher, &mut faulted);
+                }
+                let _ = reply.send(result);
+            }
             Message::Login(operation, reply) => {
                 let result = if faulted {
                     Err(StorageError::AuthorityUnavailable)
@@ -1181,6 +1203,9 @@ fn writer_loop<P: AuthorityPublisher>(
     for Envelope { message, lease } in receiver.try_iter() {
         drop(lease);
         match message {
+            Message::UpdateMaintenance(_, reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
             Message::MigrationInspect(_, reply) => {
                 let _ = reply.send(Err(StorageError::Stopping));
             }

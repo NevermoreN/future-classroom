@@ -22,3 +22,5 @@ pub mod voice;
 pub mod subject_visual;
 
 pub mod https_settings;
+pub mod updates;
+pub mod update_state;

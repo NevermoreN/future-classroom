@@ -2,13 +2,14 @@
 //!
 //! The caller polls from its existing network loop only while a LAN HTTPS
 //! listener is active. Discovery advertises that listener; it grants no access.
+use std::borrow::Cow;
 use std::io;
 use std::net::{IpAddr, Ipv4Addr, UdpSocket};
 use std::time::{Duration, Instant};
 
 pub const DISCOVERY_PORT: u16 = 38443;
 pub const DISCOVERY_QUERY: &[u8] = b"who is FutureClassroom? v1";
-const MAX_QUERY_BYTES: usize = 128;
+const MAX_QUERY_BYTES: usize = 256;
 const MAX_REPLY_BYTES: usize = 1024;
 const MAX_PACKETS_PER_POLL: usize = 8;
 const MAX_REPLIES_PER_SECOND: usize = 8;
@@ -49,10 +50,25 @@ impl DiscoveryResponder {
         public_json: &[u8],
         allow_peer: impl Fn(IpAddr) -> bool,
     ) -> io::Result<usize> {
-        if public_json.len() > MAX_REPLY_BYTES
-            || public_json.first() != Some(&b'{')
-            || public_json.last() != Some(&b'}')
-        {
+        self.poll_services(Some(public_json), allow_peer, |_, _| None)
+    }
+
+    /// Share this same socket and poll budget with the authenticated updater.
+    /// `None` disables the public teacher advertisement independently. The
+    /// callback must authenticate an exact update query before returning a reply;
+    /// no group proof or update catalog goes into the public teacher response.
+    /// Both services must use the caller's explicit allowed-source policy.
+    pub fn poll_services(
+        &mut self,
+        public_json: Option<&[u8]>,
+        allow_peer: impl Fn(IpAddr) -> bool,
+        mut update_reply: impl FnMut(&[u8], Ipv4Addr) -> Option<Vec<u8>>,
+    ) -> io::Result<usize> {
+        if public_json.is_some_and(|json| {
+            json.len() > MAX_REPLY_BYTES
+                || json.first() != Some(&b'{')
+                || json.last() != Some(&b'}')
+        }) {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "LAN discovery requires a public JSON object of at most 1024 bytes",
@@ -76,17 +92,26 @@ impl DiscoveryResponder {
                 Err(error) if error.raw_os_error() == Some(10040) => continue,
                 Err(error) => return Err(error),
             };
+            let IpAddr::V4(address) = peer.ip() else {
+                continue;
+            };
             if self.replies >= MAX_REPLIES_PER_SECOND
-                || !valid_query(&buffer[..length], peer.ip())
+                || length > MAX_QUERY_BYTES
+                || !address.is_private()
                 || !allow_peer(peer.ip())
             {
                 continue;
             }
+            let Some(response) =
+                service_reply(&buffer[..length], address, public_json, &mut update_reply)
+            else {
+                continue;
+            };
             // Charge attempts as well as successes to keep work bounded when
             // the network refuses outgoing packets.
             self.replies += 1;
-            match self.socket.send_to(public_json, peer) {
-                Ok(length) if length == public_json.len() => sent += 1,
+            match self.socket.send_to(&response, peer) {
+                Ok(length) if length == response.len() => sent += 1,
                 Ok(_) => {}
                 Err(error) if error.kind() == io::ErrorKind::WouldBlock => {}
                 Err(error) if error.kind() == io::ErrorKind::Interrupted => {}
@@ -95,6 +120,24 @@ impl DiscoveryResponder {
         }
         Ok(sent)
     }
+}
+
+fn service_reply<'a>(
+    query: &[u8],
+    address: Ipv4Addr,
+    public_json: Option<&'a [u8]>,
+    update_reply: &mut impl FnMut(&[u8], Ipv4Addr) -> Option<Vec<u8>>,
+) -> Option<Cow<'a, [u8]>> {
+    if valid_query(query, IpAddr::V4(address)) {
+        return public_json.map(Cow::Borrowed);
+    }
+    // The injected codec authenticates an exact update query. Unknown packets
+    // never fall back to a public directory or amplify an unauthenticated reply.
+    let reply = update_reply(query, address)?;
+    if reply.is_empty() || reply.len() > MAX_REPLY_BYTES {
+        return None;
+    }
+    Some(Cow::Owned(reply))
 }
 
 fn valid_query(query: &[u8], sender: IpAddr) -> bool {
@@ -288,4 +331,27 @@ mod tests {
             io::ErrorKind::InvalidInput
         );
     }
+}
+#[test]
+fn teacher_and_authenticated_update_advertisements_have_independent_lifetimes() {
+    let peer = Ipv4Addr::new(192, 168, 10, 212);
+    let mut updates = |query: &[u8], _: Ipv4Addr| {
+        (query == b"authenticated-update-fixture").then(|| b"private-reply".to_vec())
+    };
+    assert!(service_reply(DISCOVERY_QUERY, peer, None, &mut updates).is_none());
+    assert_eq!(
+        service_reply(b"authenticated-update-fixture", peer, None, &mut updates)
+            .unwrap()
+            .as_ref(),
+        b"private-reply"
+    );
+    assert_eq!(
+        service_reply(DISCOVERY_QUERY, peer, Some(b"{}"), &mut updates)
+            .unwrap()
+            .as_ref(),
+        b"{}"
+    );
+    assert!(service_reply(b"unknown", peer, Some(b"{}"), &mut updates).is_none());
+    let mut oversized = |_: &[u8], _: Ipv4Addr| Some(vec![0; MAX_REPLY_BYTES + 1]);
+    assert!(service_reply(b"unknown", peer, None, &mut oversized).is_none());
 }

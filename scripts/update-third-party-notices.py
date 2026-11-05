@@ -2,6 +2,8 @@
 """Audit or append Cargo.lock notices using checksum-verified cached .crate archives.
 
 Run `python3 scripts/update-third-party-notices.py --update` after cargo fetch.
+Missing archive texts require an exact reviewed upstream-commit allowlist;
+the audit never downloads replacements or substitutes SPDX templates.
 Default mode checks without writes. Existing component entries and all original
 registry/native/toolchain license texts are retained byte for byte. This tool does
 not automatically choose new SPDX alternatives or replace toolchain legal reviews.
@@ -68,6 +70,54 @@ def component_blocks(notice: bytes) -> dict[tuple[str, str], bytes]:
     return result
 
 
+def reviewed_license_files(package: dict, manifest: dict, vcs: dict | None) -> dict[str, bytes]:
+    """Use only explicitly reviewed, commit-pinned originals omitted by a crate.
+
+    This is an offline allowlist, not a fallback to arbitrary SPDX templates or
+    another package version. Package/checksum/manifest/VCS and original bytes
+    must all match the reviewed record; unknown missing texts still hard-fail.
+    """
+    path = ROOT / "packaging" / "REVIEWED-UPSTREAM-LICENSES.json"
+    reviewed = json.loads(path.read_text())
+    if reviewed.get("schemaVersion") != 1:
+        raise ValueError("Unsupported reviewed upstream license schema")
+    entries = [entry for entry in reviewed["packages"]
+               if (entry["name"], entry["version"]) == (package["name"], package["version"])]
+    if len(entries) != 1:
+        raise ValueError(f"No unique reviewed upstream license: {package['name']} {package['version']}")
+    entry = entries[0]
+    expected = (package["checksum"], manifest.get("license"), manifest.get("repository"),
+                (vcs or {}).get("git", {}).get("sha1"), (vcs or {}).get("path_in_vcs"))
+    recorded = tuple(entry[key] for key in ("crateSha256", "manifestLicense", "repository", "vcsCommit", "vcsPath"))
+    if expected != recorded:
+        raise ValueError(f"Reviewed upstream package/VCS mismatch: {package['name']} {package['version']}")
+    repository = entry["repository"].removesuffix(".git")
+    if not repository.startswith("https://github.com/") or not re.fullmatch(r"[a-f0-9]{40}", entry["vcsCommit"]):
+        raise ValueError("Reviewed source must pin an exact GitHub commit")
+    licenses = {}
+    for file in entry["files"]:
+        local = PurePosixPath(file["file"])
+        upstream = PurePosixPath(file["upstreamPath"])
+        if len(local.parts) != 1 or local.is_absolute() or ".." in local.parts or upstream.is_absolute() or ".." in upstream.parts:
+            raise ValueError("Invalid reviewed license path")
+        url = f"https://raw.githubusercontent.com/{repository.removeprefix('https://github.com/')}/{entry['vcsCommit']}/{upstream}"
+        if file["url"] != url:
+            raise ValueError("Reviewed license source does not match pinned repository/commit")
+        data = (ROOT / "packaging" / "upstream-licenses" / local).read_bytes()
+        if len(data) > 4 * 1024 * 1024 or digest(data) != file["sha256"]:
+            raise ValueError("Reviewed original license checksum/length mismatch")
+        data.decode("utf-8")
+        name = f"reviewed-upstream/{entry['vcsCommit']}/{upstream}"
+        if name in licenses:
+            raise ValueError("Duplicate reviewed original license")
+        licenses[name] = data
+    if not licenses:
+        raise ValueError("Reviewed original license texts are empty")
+    manifest["_reviewed_sources"] = [file["url"] for file in entry["files"]]
+    manifest["_reviewed_selection"] = entry.get("selectedLicense")
+    return licenses
+
+
 def source_files(package: dict, cargo_home: Path) -> tuple[dict, dict[str, bytes]]:
     name, version = package["name"], package["version"]
     if package["source"] != "registry+https://github.com/rust-lang/crates.io-index":
@@ -80,6 +130,7 @@ def source_files(package: dict, cargo_home: Path) -> tuple[dict, dict[str, bytes
     prefix = f"{name}-{version}/"
     licenses = {}
     manifest = None
+    vcs = None
     # Nothing is extracted to disk. License bytes come directly from the verified
     # upstream archive, avoiding modified local unpacked sources and temp residue.
     with tarfile.open(verified[0], "r:gz") as archive:
@@ -92,7 +143,7 @@ def source_files(package: dict, cargo_home: Path) -> tuple[dict, dict[str, bytes
                 raise ValueError(f"Unexpected archive path: {name} {version}")
             base = parts.name.upper()
             wanted = any(base.startswith(token) for token in ("LICENSE", "COPYING", "COPYRIGHT", "NOTICE", "UNLICENSE"))
-            if relative != "Cargo.toml" and not wanted:
+            if relative not in ("Cargo.toml", ".cargo_vcs_info.json") and not wanted:
                 continue
             if entry.size > 4 * 1024 * 1024:
                 raise ValueError(f"Oversized license/manifest: {name} {version}/{relative}")
@@ -103,6 +154,8 @@ def source_files(package: dict, cargo_home: Path) -> tuple[dict, dict[str, bytes
             data.decode("utf-8")  # Refuse lossy replacement of original legal text.
             if relative == "Cargo.toml":
                 manifest = tomllib.loads(data.decode())["package"]
+            elif relative == ".cargo_vcs_info.json":
+                vcs = json.loads(data)
             elif wanted:
                 if relative in licenses:
                     raise ValueError(f"Duplicate license archive entry: {name} {version}/{relative}")
@@ -110,7 +163,7 @@ def source_files(package: dict, cargo_home: Path) -> tuple[dict, dict[str, bytes
     if manifest is None or manifest.get("name") != name or manifest.get("version") != version:
         raise ValueError(f"Upstream package identity mismatch: {name} {version}")
     if not licenses:
-        raise ValueError(f"No license files found: {name} {version}; requires manual upstream review")
+        licenses = reviewed_license_files(package, manifest, vcs)
     return manifest, licenses
 
 
@@ -135,6 +188,12 @@ def reconcile(lock_bytes: bytes, notice: bytes, cargo_home: Path) -> tuple[bytes
             raise ValueError(f"No SPDX manifest declaration: {name} {version}; requires review")
         if key in existing:
             block = existing[key]
+            for url in manifest.get("_reviewed_sources", []):
+                if f"Reviewed upstream original: {url}\n".encode() not in block:
+                    raise ValueError(f"Reviewed source provenance missing: {name} {version}")
+            selection = manifest.get("_reviewed_selection")
+            if selection and f"Reviewed license selection: {selection}\n".encode() not in block:
+                raise ValueError(f"Reviewed license selection differs: {name} {version}")
             if f"Cargo.lock SHA-256: {package['checksum']}\n".encode() not in block:
                 raise ValueError(f"Existing component checksum differs: {name} {version}")
             if f"Manifest license: {expression}\n".encode() not in block:
@@ -152,6 +211,9 @@ def reconcile(lock_bytes: bytes, notice: bytes, cargo_home: Path) -> tuple[bytes
         authors = "; ".join(manifest.get("authors", [])) or "See copyright notices below."
         lines = [f"Component: {name} {version}", f"Manifest license: {expression}", f"Authors: {authors}",
                  f"Source: https://crates.io/crates/{name}/{version}", f"Cargo.lock SHA-256: {package['checksum']}"]
+        lines.extend(f"Reviewed upstream original: {url}" for url in manifest.get("_reviewed_sources", []))
+        if manifest.get("_reviewed_selection"):
+            lines.append(f"Reviewed license selection: {manifest['_reviewed_selection']}")
         for file, data in sorted(licenses.items()):
             sha = digest(data)
             identifier = by_hash.get(sha)

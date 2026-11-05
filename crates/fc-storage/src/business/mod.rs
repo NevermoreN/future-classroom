@@ -1,6 +1,7 @@
 //! Typed business repositories on the existing SQLite writer. The synchronous
 //! facade is for application workers; native/HTTP event loops poll tickets.
 pub(crate) mod autostart;
+pub(crate) mod updates;
 mod autostart_codec;
 mod calendar;
 pub use calendar::{ManualFetchPermit, ManualFetchStart};

@@ -12,6 +12,7 @@ mod native;
 pub mod startup;
 pub mod tcp_frontdoor;
 pub mod tls_frontdoor;
+pub mod update_cache;
 #[cfg(windows)]
 pub use native::{probe, program_data, InstanceGuard, NativeProbeReport, SystemRandom};
 #[cfg(windows)]

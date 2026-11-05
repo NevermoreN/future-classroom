@@ -14,3 +14,10 @@ sha2.workspace = true
 subtle = "=2.6.1"
 zeroize = "=1.8.2"
 hmac = "=0.12.1"
+sigstore-tuf = { version = "=0.15.1", default-features = false }
+sigstore-crypto = { version = "=0.15.1", default-features = false }
+sigstore-types = "=0.15.1"
+ring = "=0.17.14"
+jiff = { version = "=0.2.38", default-features = false, features = ["std"] }
+serde_json.workspace = true
+serde.workspace = true
