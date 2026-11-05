@@ -160,6 +160,11 @@ fn run_owned() -> Result<(), String> {
         check(Password::new(PASSWORD.into()))?,
         TrustedOrigin::Web,
     ))?;
+    let desktop_revision = backend
+        .session_control()
+        .health_gate()
+        .status()
+        .desktop_revision;
     let files = check(ControlledVoiceFiles::new(&root.0))?;
     let input = root.0.join("voice-input.wav");
     let data_bytes = 16_000u32; // 0.5s, every PCM sample is zero.
@@ -241,6 +246,15 @@ fn run_owned() -> Result<(), String> {
                 return Err(format!("voice executor failed: {error:?}"));
             }
             phase("direct-status");
+            if backend
+                .session_control()
+                .health_gate()
+                .status()
+                .desktop_revision
+                != desktop_revision
+            {
+                return Err("voice playback invalidated desktop data".into());
+            }
             let current = check(backend.voice_status(web, job.id))?;
             if current.authorization.is_some() {
                 return Err("public voice status leaked private authorization".into());
@@ -282,6 +296,9 @@ fn run_owned() -> Result<(), String> {
         }
     }
     drop(output);
+    println!(
+        "VOICE_DESKTOP_REVISION_PASS real_reserve_publish_submit_play_cancel_preserve_desktop=PASS"
+    );
     if !unavailable {
         normal_runtime_probe(
             &mut backend,

@@ -17,7 +17,7 @@ use fc_presentation::{
     scene::{CardContent, SceneCard, SceneContentIdentity, SceneSnapshot},
     Rect,
 };
-use fc_runtime::health::{EffectIntent, EffectLease, HealthGate};
+use fc_runtime::health::{EffectIntent, EffectLease, Health, HealthGate};
 use std::{
     cell::{Cell, RefCell},
     collections::VecDeque,
@@ -1056,6 +1056,21 @@ pub enum ContentHiddenReason {
     Session,
 }
 impl DesktopRenderer {
+    /// Reuse the exact pixels after commits proven not to change desktop data.
+    /// Input contexts are renewed by present(), never by this revision adoption.
+    pub fn adopt_voice_revision(&mut self, scene: &SceneSnapshot, gate: &HealthGate) {
+        let status = gate.status();
+        if status.health == Health::Healthy
+            && scene.source_revision <= status.revision
+            && scene.source_revision >= status.desktop_revision
+            && self.last_scene == Some(scene.generation)
+            && self.last_revision.is_some_and(|revision| {
+                revision >= status.desktop_revision && revision <= scene.source_revision
+            })
+        {
+            self.last_revision = Some(scene.source_revision);
+        }
+    }
     /// Only the current physically published page may contribute displayed revisions.
     /// Diagnostic offscreen DIBs and a prepared-but-unpublished page are excluded.
     pub fn displayed_content(&self, scene: &SceneSnapshot) -> Vec<ContentDisplayRef> {
@@ -2081,11 +2096,12 @@ fn validate_card(c: &SceneCard) -> Result<()> {
     Ok(())
 }
 fn scene_allowed(scene: &SceneSnapshot, now: LocalDateTime, g: &PublicationGuard<'_>) -> bool {
+    let status = g.gate.status();
     g.current_generation == scene.generation
         && g.lease.scope == DESKTOP_SCOPE
         && scene.valid_at(now)
-        && g.gate.status().revision == scene.source_revision
-        && g.gate
+        && ((status.revision == scene.source_revision
+            && g.gate
             .try_start(
                 g.lease,
                 EffectIntent {
@@ -2094,7 +2110,16 @@ fn scene_allowed(scene: &SceneSnapshot, now: LocalDateTime, g: &PublicationGuard
                 },
             )
             .and_then(|p| g.gate.check_permit(&p))
-            .is_ok()
+            .is_ok())
+            // Only display publication can survive a voice-only commit. All
+            // clicks still use input_allowed's exact revision and fresh permit.
+            || (scene.source_revision >= status.desktop_revision
+                && scene.source_revision <= status.revision
+                && status.auth_epoch == g.lease.auth_epoch
+                && std::time::Instant::now() < g.lease.expires_at
+                && (status.health == Health::Healthy && scene.source_revision != status.revision
+                    || status.health == Health::AuthorityUpdating
+                        && !status.desktop_update_pending)))
 }
 fn publication_allowed(scene: &SceneSnapshot, g: &PublicationGuard<'_>) -> Result<bool> {
     Ok(system_allows()? && scene_allowed(scene, crate::native::local_now()?, g))
@@ -3463,6 +3488,65 @@ mod tests {
         if let Some(path) = std::env::var_os("FC_DESKTOP_CAPTURE") {
             r.probe_capture_bmp(Path::new(&path)).unwrap();
         }
+    }
+    #[test]
+    fn voice_publications_keep_native_surfaces_and_ordinary_updates_hide_them() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let (mut publisher, gate) = authority();
+        let now = crate::native::local_now().unwrap();
+        let mut scene = scene(now);
+        let mut renderer = DesktopRenderer::new().unwrap();
+        let first = guard(&gate, scene.generation);
+        assert_eq!(
+            renderer.present(&scene, now, &first).unwrap(),
+            PresentOutcome::Published
+        );
+        let handles: Vec<_> = renderer
+            .cards
+            .iter()
+            .map(|card| card.surface.window.0)
+            .collect();
+        let visible = renderer.last_metrics().visible_windows;
+        assert!(visible > 0);
+        for revision in 6..=9 {
+            let prepared = publisher
+                .prepare((), Revision::new(revision), AuthEpoch::new(1))
+                .unwrap();
+            let update = publisher.begin_update_preserving_desktop().unwrap();
+            assert!(scene_allowed(&scene, now, &first));
+            assert!(gate
+                .try_start(
+                    first.lease,
+                    EffectIntent {
+                        scope: DESKTOP_SCOPE,
+                        job_id: scene.generation.get()
+                    }
+                )
+                .is_err());
+            publisher.publish(update, prepared).unwrap();
+            scene.source_revision = Revision::new(revision);
+            renderer.adopt_voice_revision(&scene, &gate);
+            renderer
+                .present(&scene, now, &guard(&gate, scene.generation))
+                .unwrap();
+            assert_eq!(renderer.last_metrics().visible_windows, visible);
+            assert_eq!(
+                renderer
+                    .cards
+                    .iter()
+                    .map(|card| card.surface.window.0)
+                    .collect::<Vec<_>>(),
+                handles
+            );
+        }
+        let _update = publisher.begin_update().unwrap();
+        assert_eq!(
+            renderer.present(&scene, now, &first).unwrap(),
+            PresentOutcome::Hidden
+        );
+        assert_eq!(renderer.last_metrics().visible_windows, 0);
     }
     #[test]
     fn stale_gate_generation_revision_expired_date_and_alpha_zero_never_draw() {

@@ -44,6 +44,7 @@ pub struct AuthorityUpdateToken {
     gate: HealthGate,
     epoch: u64,
     settled: bool,
+    preserve_desktop: bool,
 }
 
 impl Drop for AuthorityUpdateToken {
@@ -140,6 +141,15 @@ impl<S> AuthorityPublisher<S> {
         prepare(&self.inner.gate, data, revision, auth_epoch)
     }
     pub fn begin_update(&mut self) -> Result<AuthorityUpdateToken, GateError> {
+        self.begin_update_with_desktop(false)
+    }
+    pub fn begin_update_preserving_desktop(&mut self) -> Result<AuthorityUpdateToken, GateError> {
+        self.begin_update_with_desktop(true)
+    }
+    fn begin_update_with_desktop(
+        &mut self,
+        preserve_desktop: bool,
+    ) -> Result<AuthorityUpdateToken, GateError> {
         let mut state = self.inner.gate.lock();
         HealthGate::require_healthy(&state)?;
         let epoch = match state.status.health_epoch.checked_add(1) {
@@ -156,11 +166,18 @@ impl<S> AuthorityPublisher<S> {
             return Err(GateError::EpochExhausted);
         }
         state.status.health = Health::AuthorityUpdating;
+        state.status.desktop_update_pending = !preserve_desktop;
+        if !preserve_desktop {
+            // A rolled-back ordinary update still revoked the old display
+            // capability; later voice commits must not bridge that barrier.
+            state.status.desktop_revision = state.status.revision;
+        }
         self.inner.gate.raise(ControlSignal::AuthorityInvalidated);
         Ok(AuthorityUpdateToken {
             gate: self.inner.gate.clone(),
             epoch,
             settled: false,
+            preserve_desktop,
         })
     }
     /// Call only after COMMIT is known successful. No allocation or observer callback
@@ -195,6 +212,10 @@ impl<S> AuthorityPublisher<S> {
             }
         };
         state.status.revision = snapshot.0.revision;
+        if !update.preserve_desktop || snapshot.0.auth_epoch != state.status.auth_epoch {
+            state.status.desktop_revision = snapshot.0.revision;
+        }
+        state.status.desktop_update_pending = false;
         state.status.auth_epoch = snapshot.0.auth_epoch;
         let old = std::mem::replace(&mut *current, snapshot.0);
         state.status.health = Health::Healthy;
@@ -219,6 +240,7 @@ impl<S> AuthorityPublisher<S> {
             return Err(GateError::Faulted);
         }
         state.status.health = Health::Healthy;
+        state.status.desktop_update_pending = false;
         Ok(())
     }
     pub fn fault(&mut self) {
@@ -252,6 +274,9 @@ impl<S> fc_ports::AuthorityPublisher for AuthorityPublisher<S> {
     }
     fn begin_update(&mut self) -> Result<Self::Update, Self::Error> {
         self.begin_update()
+    }
+    fn begin_update_preserving_desktop(&mut self) -> Result<Self::Update, Self::Error> {
+        self.begin_update_preserving_desktop()
     }
     fn publish(
         &mut self,
@@ -305,6 +330,46 @@ mod tests {
             },
         )
         .unwrap()
+    }
+
+    #[test]
+    fn voice_only_publications_keep_desktop_revision_but_revoke_execution() {
+        let (mut writer, reader) = ready();
+        let permit = start(&reader);
+        for revision in 2..=3 {
+            let prepared = writer
+                .prepare("old", Revision::new(revision), AuthEpoch::new(1))
+                .unwrap();
+            let update = writer.begin_update_preserving_desktop().unwrap();
+            let status = reader.gate().status();
+            assert_eq!(status.health, Health::AuthorityUpdating);
+            assert!(!status.desktop_update_pending);
+            assert_eq!(status.desktop_revision, Revision::new(1));
+            assert!(reader.gate().check_permit(&permit).is_err());
+            writer.publish(update, prepared).unwrap();
+            assert_eq!(reader.gate().status().revision, Revision::new(revision));
+            assert_eq!(reader.gate().status().desktop_revision, Revision::new(1));
+        }
+        let prepared = writer
+            .prepare("new", Revision::new(4), AuthEpoch::new(2))
+            .unwrap();
+        let update = writer.begin_update().unwrap();
+        assert_eq!(reader.gate().status().desktop_revision, Revision::new(3));
+        writer.rollback(update).unwrap();
+        assert_eq!(reader.gate().status().desktop_revision, Revision::new(3));
+        assert!(!reader.gate().status().desktop_update_pending);
+        let update = writer.begin_update().unwrap();
+        assert!(reader.gate().status().desktop_update_pending);
+        writer.publish(update, prepared).unwrap();
+        assert_eq!(reader.gate().status().desktop_revision, Revision::new(4));
+        assert!(!reader.gate().status().desktop_update_pending);
+        let update = writer.begin_update().unwrap();
+        writer.rollback(update).unwrap();
+        assert!(!reader.gate().status().desktop_update_pending);
+        assert_eq!(reader.gate().status().desktop_revision, Revision::new(4));
+        let update = writer.begin_update_preserving_desktop().unwrap();
+        drop(update);
+        assert_eq!(reader.gate().status().health, Health::Faulted);
     }
 
     #[test]

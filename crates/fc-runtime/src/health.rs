@@ -34,6 +34,10 @@ pub struct HealthStatus {
     pub health_epoch: u64,
     pub auth_epoch: AuthEpoch,
     pub revision: Revision,
+    /// Oldest desktop revision allowed across voice-only publications. Ordinary
+    /// update barriers advance this floor even when their transaction rolls back.
+    pub desktop_revision: Revision,
+    pub desktop_update_pending: bool,
     pub cancellation_generation: u64,
 }
 
@@ -101,6 +105,8 @@ impl HealthGate {
                     health_epoch: 0,
                     auth_epoch,
                     revision,
+                    desktop_revision: revision,
+                    desktop_update_pending: false,
                     cancellation_generation: 0,
                 },
                 next_start: 0,

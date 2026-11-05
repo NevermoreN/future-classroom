@@ -1591,6 +1591,15 @@ fn execute_transaction<P: AuthorityPublisher>(
     let next_i64 = i64::try_from(next.get()).map_err(|_| StorageError::InvalidCommand)?;
     // Apply the exact same allocation/key/value bounds as generic writes.
     let mut validated = CommitCommand::new("transaction-validation".into(), current, mutations)?;
+    // Classify only the operation's real mutations, before adding writer-owned
+    // command receipts. Unknown and mixed writes retain the desktop barrier.
+    let preserve_desktop = !validated.mutations.is_empty()
+        && validated.mutations.iter().all(|mutation| {
+            let key = match mutation {
+                Mutation::Put { key, .. } | Mutation::Delete { key } => key,
+            };
+            key == "business/voice/v1" || key.starts_with("business/voice-receipt/v1/")
+        });
     command_window::register_profile_negative_receipts(&transaction, &validated.mutations)?;
     if let Some(issued) = issued {
         command_window::register_documents(&transaction, issued, &mut validated.mutations)?;
@@ -1607,7 +1616,13 @@ fn execute_transaction<P: AuthorityPublisher>(
     if publisher.snapshot_revision(&snapshot) != next {
         return Err(StorageError::InvalidCommand);
     }
-    let update = match catch_unwind(AssertUnwindSafe(|| publisher.begin_update())) {
+    let update = match catch_unwind(AssertUnwindSafe(|| {
+        if preserve_desktop {
+            publisher.begin_update_preserving_desktop()
+        } else {
+            publisher.begin_update()
+        }
+    })) {
         Ok(Ok(update)) => update,
         Ok(Err(_)) => return Err(StorageError::AuthorityUnavailable),
         Err(_) => {
@@ -1885,6 +1900,7 @@ mod tests {
         published: u64,
         faulted: bool,
         rollback: u64,
+        desktop_preserved: u64,
     }
     enum PublishMode {
         Success,
@@ -1920,6 +1936,10 @@ mod tests {
             }
             Ok(())
         }
+        fn begin_update_preserving_desktop(&mut self) -> Result<(), ()> {
+            self.state.lock().unwrap().desktop_preserved += 1;
+            self.begin_update()
+        }
         fn publish(&mut self, _: (), snapshot: u64) -> Result<(), ()> {
             match self.mode {
                 PublishMode::Success => {
@@ -1948,6 +1968,68 @@ mod tests {
             }],
         )
         .unwrap()
+    }
+
+    #[test]
+    fn voice_transactions_preserve_desktop_but_mixed_writes_do_not() {
+        struct Write(Vec<Mutation>);
+        impl TransactionTask<u64> for Write {
+            fn allocation_bytes(&self) -> usize {
+                1024
+            }
+            fn evaluate(
+                self: Box<Self>,
+                documents: &dyn TransactionDocuments,
+            ) -> Result<TransactionDecision<u64>, StorageError> {
+                Ok(TransactionDecision {
+                    precommit: None,
+                    outcome: vec![],
+                    commit: Some((self.0, documents.revision()?.get() + 1)),
+                })
+            }
+        }
+        let temp = TempDatabase::new();
+        let publisher = Publisher::new(PublishMode::Success);
+        let state = publisher.state.clone();
+        let writer = StorageWriter::open(temp.path(), 8, publisher).unwrap();
+        let handle = writer.handle();
+        let mutation = |key: &str| Mutation::Put {
+            key: key.into(),
+            value: if key == "business/voice/v1" {
+                br#"{"format":1,"revision":0,"enabled":true,"sequence":0,"generation":0,"observed":null,"assets":[],"jobs":[]}"#.to_vec()
+            } else {
+                b"state".to_vec()
+            },
+        };
+        handle
+            .try_transaction(Write(vec![
+                mutation("business/voice/v1"),
+                mutation("business/voice-receipt/v1/1"),
+            ]))
+            .unwrap()
+            .wait()
+            .unwrap();
+        assert_eq!(state.lock().unwrap().desktop_preserved, 1);
+        handle
+            .try_transaction(Write(vec![
+                mutation("business/voice/v1"),
+                mutation("business/identity/v1"),
+            ]))
+            .unwrap()
+            .wait()
+            .unwrap();
+        handle
+            .try_transaction(Write(vec![mutation("business/voice/v10")]))
+            .unwrap()
+            .wait()
+            .unwrap();
+        assert_eq!(state.lock().unwrap().desktop_preserved, 1);
+        assert_eq!(state.lock().unwrap().published, 3);
+        assert_eq!(
+            handle.try_revision().unwrap().wait().unwrap(),
+            Revision::new(3)
+        );
+        writer.shutdown().unwrap();
     }
 
     #[test]

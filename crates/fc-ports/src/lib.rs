@@ -335,6 +335,11 @@ pub trait AuthorityPublisher {
     type Error;
     fn snapshot_revision(&self, snapshot: &Self::Snapshot) -> Revision;
     fn begin_update(&mut self) -> Result<Self::Update, Self::Error>;
+    /// Only for writes proven not to change any desktop data or authorization.
+    /// Execution leases are still revoked by the ordinary update barrier.
+    fn begin_update_preserving_desktop(&mut self) -> Result<Self::Update, Self::Error> {
+        self.begin_update()
+    }
     fn publish(
         &mut self,
         update: Self::Update,

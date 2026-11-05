@@ -53,6 +53,13 @@ fn time_requires_scene(
         || previous.is_some_and(|previous| now < previous)
 }
 
+fn voice_only_change(status: fc_runtime::health::HealthStatus, source: Revision) -> bool {
+    source >= status.desktop_revision
+        && source <= status.revision
+        && (status.health == Health::Healthy && source != status.revision
+            || status.health == Health::AuthorityUpdating && !status.desktop_update_pending)
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Navigation {
     Refresh,
@@ -709,7 +716,7 @@ impl Controller {
                         scene.captured_at,
                         scene.valid_until,
                     ) {
-                        self.hide();
+                        self.hide_unless_voice_update(now);
                         return;
                     }
                     self.published_content = Some(scene.generation);
@@ -767,7 +774,7 @@ impl Controller {
                     reminder_enabled: enabled(ComponentKind::Reminder),
                     displayed: self.renderer.displayed_content(scene),
                 }) {
-                    self.hide();
+                    self.hide_unless_voice_update(now);
                     return;
                 }
             }
@@ -785,6 +792,38 @@ impl Controller {
         }
         self.probe_presented = outcome == PresentOutcome::Offscreen;
         self.notice.rendered(outcome);
+    }
+    fn hide_unless_voice_update(&mut self, now: LocalDateTime) {
+        let retain = self.control.as_ref().is_some_and(|control| {
+            self.scene.as_ref().is_some_and(|scene| {
+                scene.valid_at(now)
+                    && voice_only_change(control.health_gate().status(), scene.source_revision)
+            })
+        });
+        if !retain {
+            self.hide();
+        }
+    }
+    fn adopt_voice_revision(
+        &mut self,
+        status: fc_runtime::health::HealthStatus,
+        now: LocalDateTime,
+        gate: &HealthGate,
+    ) {
+        if let (Some(facts), Some(scene)) = (&mut self.facts, &mut self.scene) {
+            if voice_only_change(status, facts.global_revision)
+                && scene.source_revision == facts.global_revision
+                && scene.valid_at(now)
+            {
+                let previous = scene.source_revision;
+                facts.global_revision = status.revision;
+                scene.source_revision = status.revision;
+                self.renderer.adopt_voice_revision(scene, gate);
+                if self.images_verified == Some((scene.generation, previous)) {
+                    self.images_verified = Some((scene.generation, status.revision));
+                }
+            }
+        }
     }
     fn invalidate(&mut self) {
         self.hide();
@@ -1001,10 +1040,17 @@ impl Controller {
         let Some(scene) = &self.scene else {
             return Ok(false);
         };
+        let requests = DesktopRenderer::image_requests(scene).map_err(|_| "桌面图片描述无效。")?;
+        if (requests.is_empty()
+            || self.images_verified == Some((scene.generation, scene.source_revision)))
+            && scene.valid_at(now)
+            && voice_only_change(gate.status(), scene.source_revision)
+        {
+            return Ok(true);
+        }
         if !content_scene_current(scene, self.generation, scene.source_revision, now, gate) {
             return Ok(false);
         }
-        let requests = DesktopRenderer::image_requests(scene).map_err(|_| "桌面图片描述无效。")?;
         if requests.is_empty() {
             return Ok(true);
         }
@@ -1200,7 +1246,23 @@ impl Controller {
         };
         let gate = control.health_gate();
         let status = gate.status();
+        let now = match clock.try_now() {
+            Ok(now) => now,
+            Err(_) => {
+                self.invalidate();
+                self.cancel_pending();
+                return Ok(());
+            }
+        };
         if status.health != Health::Healthy {
+            if self.scene.as_ref().is_some_and(|scene| {
+                scene.valid_at(now) && voice_only_change(status, scene.source_revision)
+            }) && DesktopRenderer::hidden_content_state().ok() == Some(None)
+            {
+                // The writer still revokes every input/worker permit. Keep only
+                // already published pixels while its voice-only commit settles.
+                return Ok(());
+            }
             if status.health == Health::AuthorityUpdating
                 && self.page.as_ref().is_some_and(|page| !page.cancelled)
             {
@@ -1222,14 +1284,7 @@ impl Controller {
             }
             return Ok(());
         }
-        let now = match clock.try_now() {
-            Ok(now) => now,
-            Err(_) => {
-                self.invalidate();
-                self.cancel_pending();
-                return Ok(());
-            }
-        };
+        self.adopt_voice_revision(status, now, &gate);
         self.poll_content_jobs(&gate, now, control)?;
         if management_busy {
             self.cancel_pending();
@@ -1237,9 +1292,10 @@ impl Controller {
         let received = self.poll(&gate, now, control)?;
         let status = gate.status();
         if status.health != Health::Healthy {
-            self.hide();
+            self.hide_unless_voice_update(now);
             return Ok(());
         }
+        self.adopt_voice_revision(status, now, &gate);
         let stale = self.facts.as_ref().is_some_and(|f| {
             f.global_revision != status.revision
                 || f.captured_at.date != now.date
@@ -1350,7 +1406,7 @@ impl Controller {
         let Ok(lease) =
             gate.lease_for_authorized_scope(DESKTOP_SCOPE, Instant::now() + DISPLAY_LEASE)
         else {
-            self.hide();
+            self.hide_unless_voice_update(now);
             return Ok(());
         };
         let guard = PublicationGuard {
