@@ -991,6 +991,8 @@ fn theme_backdrop(tone: TextTone) -> f32 {
     }
 }
 struct Card {
+    // The visible frame stays exact even when content needs a larger measurement source.
+    frame_rect: Rect,
     image: Option<Arc<RasterFrame>>,
     source: SceneCard,
     tone: TextTone,
@@ -1585,6 +1587,7 @@ impl DesktopRenderer {
                     .find(|(kind, offset, _)| *kind == card.kind && *offset == card.page.offset)
                     .map_or(0, |(_, _, page)| (*page).min(body.pages.len() - 1));
                 let mut c = Card {
+                    frame_rect: card.rect,
                     image: content::frame(&self.raster, card)?,
                     source: card.clone(),
                     tone: scene.text_tone,
@@ -2551,12 +2554,23 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
             if c.backdrop.is_none() {
                 backdrop::draw_material(
                     &target,
-                    w,
-                    h,
+                    c.frame_rect.width,
+                    c.frame_rect.height,
                     c.source.surface_alpha,
                     c.source.edge_alpha,
                 )?;
             }
+            let inset_x = 8_f32.min(c.frame_rect.width / 2.);
+            let inset_y = 8_f32.min(c.frame_rect.height / 2.);
+            target.PushAxisAlignedClip(
+                &D2D_RECT_F {
+                    left: inset_x,
+                    top: inset_y,
+                    right: c.frame_rect.width - inset_x,
+                    bottom: c.frame_rect.height - inset_y,
+                },
+                D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,
+            );
             let is_recess = matches!(c.source.content, CardContent::Recess { .. });
             let heading = g.layout(
                 if is_recess {
@@ -2695,6 +2709,7 @@ fn render_frame(g: &Graphics, c: &mut Card) -> Result<()> {
             }
             target.PopAxisAlignedClip();
             (registry::hooks(c.source.kind)?.decorate)(&target, c)?;
+            target.PopAxisAlignedClip();
         }
         target.EndDraw(None, None)?;
     }

@@ -332,6 +332,31 @@ impl<'a> Solver<'a> {
         };
         content.max(min)
     }
+    fn fit_single_content(&self, n: Ref<'a>, width: f32, height: f32) -> Option<BoxNode<'a>> {
+        let children = if matches!(n.node().kind, NodeKind::Widget(_)) {
+            vec![]
+        } else {
+            let children: Vec<_> = self
+                .children(n)
+                .into_iter()
+                .filter(|c| self.active(*c))
+                .collect();
+            if children.len() != 1 {
+                return None;
+            }
+            vec![self.fit_single_content(children[0], width, height)?]
+        };
+        Some(BoxNode {
+            node: n,
+            rect: Rect {
+                x: 0.,
+                y: 0.,
+                width,
+                height,
+            },
+            children,
+        })
+    }
     fn layout(
         &self,
         n: Ref<'a>,
@@ -341,6 +366,13 @@ impl<'a> Solver<'a> {
     ) -> Result<BoxNode<'a>, TreeLayoutError> {
         if width <= 0. || height_budget < 0. {
             return Err(TreeLayoutError::OutOfSpace);
+        }
+        // A single course-content module fills its explicit desktop frame.
+        // Old fallback/subject offsets must not crop the card's right/bottom rim.
+        if matches!(n.node().kind, NodeKind::Outlet { .. }) && self.frame(n).is_some() {
+            if let Some(fitted) = self.fit_single_content(n, width, height_budget) {
+                return Ok(fitted);
+            }
         }
         // Canvas coordinates are relative to the parent's unpadded rectangle.
         // Frames retain their declared size even when clipped by a smaller parent.

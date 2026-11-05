@@ -178,6 +178,7 @@ fn make_card(
     total: &mut u64,
     max_dynamic_bytes: u64,
 ) -> Result<Card> {
+    let frame_rect = card.rect;
     // A small user viewport crops an ordinary-sized offscreen source. Dynamic
     // clock insets and text measurement never receive negative dimensions.
     let padded = manual_viewport.then(|| {
@@ -297,6 +298,7 @@ fn make_card(
         source.component_alpha = 1.;
     }
     Ok(Card {
+        frame_rect,
         image: content::frame(&renderer.raster, card)?,
         source,
         tone: scene.text_tone,
@@ -1672,6 +1674,52 @@ mod tests {
             clock_rollback: false,
             public_calendar_unverified: false,
             lesson_control: None,
+        }
+    }
+    #[test]
+    fn manual_card_keeps_all_four_edges_inside_the_visible_frame() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let renderer = DesktopRenderer::new_hidden().unwrap();
+        let scene = sample();
+        let mut corner = None;
+        for (width, height) in [(80., 64.), (280., 84.), (467., 630.)] {
+            let mut source = scene.cards[0].clone();
+            source.rect = rect(31., 47., width, height);
+            source.surface_alpha = 0.;
+            source.edge_alpha = 1.;
+            let mut total = 0;
+            let mut card =
+                make_card(&renderer, &source, &scene, true, true, &mut total, 0).unwrap();
+            render_card(&renderer.graphics, &mut card).unwrap();
+            assert_eq!(card.frame_rect, source.rect);
+            let stride = card.surface.rect.width.ceil() as usize;
+            let alpha = |x: usize, y: usize| card.surface.dib.pixels()[(y * stride + x) * 4 + 3];
+            let w = width as usize;
+            let h = height as usize;
+            // GDI round regions exclude their right/bottom bounds. Check the
+            // complete edge band instead of assuming a symmetric pixel origin.
+            let strokes = [
+                (0..8).filter(|&y| alpha(w / 2, y) > 0).count(),
+                (h - 8..h).filter(|&y| alpha(w / 2, y) > 0).count(),
+                (0..8).filter(|&x| alpha(x, h / 2) > 0).count(),
+                (w - 8..w).filter(|&x| alpha(x, h / 2) > 0).count(),
+            ];
+            assert_eq!(strokes, [2; 4], "frame edges at {width}x{height}");
+            assert_eq!(alpha(0, 0), 0);
+            let rim: Vec<_> = (0..24)
+                .flat_map(|y| (0..24).map(move |x| (x, y)))
+                .filter(|(x, y)| *x < 8 || *y < 8)
+                .map(|(x, y)| alpha(x, y))
+                .collect();
+            if let Some(previous) = &corner {
+                assert_eq!(previous, &rim);
+            } else {
+                corner = Some(rim);
+            }
+            // The fixed two-pixel rim never expands with the padded text source.
+            assert_eq!(alpha(w - 5, h / 2), 0);
         }
     }
     #[test]

@@ -186,6 +186,47 @@ fn canvas_frames_preserve_absolute_position_size_and_parent_clip() {
     tree.canvas_frames.pop();
     assert_eq!(tree.validate(), Err(LayoutError::InvalidConstraint));
 }
+#[test]
+fn framed_single_course_card_fills_module_instead_of_clipping_legacy_child_frame() {
+    let mut tree = default_public_layout();
+    tree.nodes
+        .retain(|n| [id(1), id(10), id(12)].contains(&n.id));
+    tree.nodes
+        .iter_mut()
+        .find(|n| n.id == id(1))
+        .unwrap()
+        .children = vec![id(10)];
+    for (width, height) in [(467, 630), (120, 80), (700, 400)] {
+        tree.canvas_frames = vec![
+            CanvasFrame {
+                node_id: id(10),
+                x: 100,
+                y: 70,
+                width,
+                height,
+            },
+            CanvasFrame {
+                node_id: id(12),
+                x: 9,
+                y: 3,
+                width: 520,
+                height: 569,
+            },
+        ];
+        for subject in [None, Some(default_subject_layout(key()))] {
+            let result =
+                compose_layout(&tree, subject.as_ref(), &specs(), work(), &measure()).unwrap();
+            let outlet = result.nodes.iter().find(|n| n.key.id == id(10)).unwrap();
+            let card = result
+                .nodes
+                .iter()
+                .find(|n| n.widget_kind == Some(WidgetKind::Materials))
+                .unwrap();
+            assert_eq!(card.rect, outlet.rect);
+            assert_eq!(card.clip, card.rect);
+        }
+    }
+}
 fn enclose_clock(tree: &mut LayoutTree, opacity: u8, glass: bool) {
     let clock = tree
         .nodes

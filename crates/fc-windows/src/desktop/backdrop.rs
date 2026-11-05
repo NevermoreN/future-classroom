@@ -34,43 +34,33 @@ fn cells(region: &Region, width: i32, height: i32, border: bool) -> Result<Vec<M
                 };
                 let u = (x + right) as f32 / (2. * width as f32);
                 let v = (y + bottom) as f32 / (2. * height as f32);
-                // Separate arcs rather than a uniform white outline. Curvature
-                // and the opposite inner rail provide a quiet refracted rim.
-                let visible = !border
-                    || if v < 0.08 {
-                        !(0.60..=0.88).contains(&u)
-                    } else if v > 0.92 {
-                        (0.30..0.84).contains(&u)
-                    } else {
-                        !(0.36..=0.72).contains(&v)
-                    };
-                if visible {
-                    let rgb = if border {
-                        let shine = (1. - ((u - 0.20) * 2.).abs()).max(0.);
-                        let distance = ((x + right) as f32 / 2.)
-                            .min(width as f32 - (x + right) as f32 / 2.)
-                            .min((y + bottom) as f32 / 2.)
-                            .min(height as f32 - (y + bottom) as f32 / 2.);
-                        let refracted = if distance > 2. { 0.08 } else { 0. };
-                        let light = (0.48 + 0.39 * (1. - v) + 0.13 * shine - refracted).min(1.);
-                        [
-                            (255. * light) as u8,
-                            (255. * (light + 0.025).min(1.)) as u8,
-                            (255. * (light + 0.07).min(1.)) as u8,
-                        ]
-                    } else {
-                        [255; 3]
-                    };
-                    result.push(MaterialCell {
-                        rect: RECT {
-                            left: x,
-                            top: y,
-                            right,
-                            bottom,
-                        },
-                        rgb,
-                    });
-                }
+                // Keep a continuous fixed-width rim; only its lighting varies.
+                let rgb = if border {
+                    let shine = (1. - ((u - 0.20) * 2.).abs()).max(0.);
+                    let distance = ((x + right) as f32 / 2.)
+                        .min(width as f32 - (x + right) as f32 / 2.)
+                        .min((y + bottom) as f32 / 2.)
+                        .min(height as f32 - (y + bottom) as f32 / 2.);
+                    let refracted = if distance > 2. { 0.08 } else { 0. };
+                    let light = (0.48 + 0.39 * (1. - v) + 0.13 * shine - refracted).min(1.);
+                    [
+                        (255. * light) as u8,
+                        (255. * (light + 0.025).min(1.)) as u8,
+                        (255. * (light + 0.07).min(1.)) as u8,
+                    ]
+                } else {
+                    [255; 3]
+                };
+                result.push(MaterialCell {
+                    rect: RECT {
+                        left: x,
+                        top: y,
+                        right,
+                        bottom,
+                    },
+                    rgb,
+                });
+
                 x = right;
             }
             y = bottom;

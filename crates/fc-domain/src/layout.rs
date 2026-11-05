@@ -514,6 +514,9 @@ impl LayoutTree {
         }
         let mut replaced = self.clone();
         replaced.nodes.retain(|n| !fallback.contains(&n.id));
+        replaced
+            .canvas_frames
+            .retain(|f| !fallback.contains(&f.node_id));
         for node in &mut replaced.nodes {
             node.children.retain(|id| !fallback.contains(id));
         }
