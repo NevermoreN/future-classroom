@@ -59,7 +59,7 @@ export default function ClassroomHome({ onInstallHelp, installed = false }: { on
   }
   return <main id="main-content" className="classroom-home">
     <header className="classroom-home-header"><span className="classroom-home-mark"><img src={brand} alt="" /></span><div><p>未来教室</p><h1>选择班级</h1><p>选择班级后打开该教室网站。</p></div></header>
-    {!installed && <section className="classroom-install"><div><h2><Download size={20} aria-hidden="true" /> 添加到手机，班级随手可达</h2><p>把这个入口添加到主屏幕，保留收藏和最近使用的班级。离线时可以查看已保存名单，进入教室需要连接学校网络。</p></div><Button type="button" onClick={onInstallHelp}>安装到手机 / 查看步骤</Button></section>}
+    {!installed && <section className="classroom-install"><div><h2><Download size={20} aria-hidden="true" /> 添加到手机，班级随手可达</h2><p>点击即可请求浏览器安装。若浏览器不支持弹出安装框，将显示添加步骤。离线可查看已保存名单，进入教室需要连接学校网络。</p></div><Button type="button" onClick={onInstallHelp}>添加到桌面</Button></section>}
     <section className="classroom-directory" aria-label="班级列表">
       <div className="classroom-toolbar"><label className="classroom-search"><Search size={18} aria-hidden="true" /><span className="sr-only">搜索学校、班级或地址</span><input value={search} onChange={event => setSearch(event.target.value)} placeholder="搜索学校或班级" /></label><Button type="button" variant="outline" disabled={loading} onClick={() => setRefresh(value => value + 1)}><RefreshCw size={16} aria-hidden="true" />{loading ? '正在查找…' : '刷新班级'}</Button></div>
       <div className="classroom-filters" aria-label="筛选班级">{[['all', '全部班级'], ['favorite', '我的收藏'], ['recent', '最近使用']].map(([value, text]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value!)}>{text}</button>)}</div>
