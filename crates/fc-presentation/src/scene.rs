@@ -680,7 +680,7 @@ pub fn build_scene_with_content(
             .map_or("当前班级", |item| item.name.as_str());
         let caption = format!("{class_name} · {caption}");
         let width = (work.width * 0.48).clamp(320., 960.).min(work.width);
-        let text_width = width - if can_change { 180. } else { 32. };
+        let text_width = width - 180.;
         if text_width < 80. {
             return Err(SceneError::Layout(LayoutError::OutOfSpace));
         }

@@ -2796,7 +2796,7 @@ fn render_lesson_control(
     let left = 16.;
     let layout = g.layout(
         &caption,
-        c.source.rect.width - if can_change { 180. } else { 32. },
+        c.source.rect.width - 180.,
         c.source.font_dip,
         false,
     )?;
@@ -2822,6 +2822,27 @@ fn render_lesson_control(
             &text,
             D2D1_DRAW_TEXT_OPTIONS_NONE,
         );
+        if !can_change {
+            let x = c.source.rect.width - 152.;
+            let background = target.CreateSolidColorBrush(
+                &D2D1_COLOR_F {
+                    r: 1.,
+                    g: 1.,
+                    b: 1.,
+                    a: 0.10,
+                },
+                None,
+            )?;
+            let disabled = target.CreateSolidColorBrush(&ink(c.tone, c.system_ink, 0.5), None)?;
+            target.FillRoundedRectangle(&bounds(x, 8., x + 144., 48., 10.), &background);
+            let label = g.layout("临时换课 ▾", 144., 16., true)?;
+            target.DrawTextLayout(
+                xy(x, 17.).point,
+                &label,
+                &disabled,
+                D2D1_DRAW_TEXT_OPTIONS_NONE,
+            );
+        }
         target.EndDraw(None, None)?;
     }
     drop(target);
@@ -4373,6 +4394,12 @@ mod tests {
             .unwrap();
         assert!(renderer.cards[0].input.is_none());
         assert!(renderer.probe_lesson_control().is_err());
+        let card = &renderer.cards[0];
+        let pixel = ((20 * card.surface.dib.width as usize) + 760) * 4 + 3;
+        assert!(
+            card.surface.dib.pixels()[pixel] > (card.source.surface_alpha * 255.).round() as u8,
+            "disabled button keeps its visible background"
+        );
         assert_eq!(renderer.last_metrics().visible_windows, 0);
     }
 }

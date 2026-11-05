@@ -163,9 +163,7 @@ impl CardBodySpec {
     pub fn text_width(&self, outer_width: f32) -> Result<f32, CardBodyError> {
         let inset = match &self.dynamic {
             CardBodyDynamic::Static => 2. * CARD_BODY_TEXT_INSET,
-            CardBodyDynamic::LessonControl {
-                can_change: true, ..
-            } => 180.,
+            CardBodyDynamic::LessonControl { .. } => 180.,
             _ => 32.,
         };
         if !outer_width.is_finite() || outer_width <= inset || outer_width > 16_384. {
