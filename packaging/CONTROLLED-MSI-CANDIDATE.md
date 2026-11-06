@@ -119,7 +119,7 @@ it too. A copied GNU Showcase EXE or a separately rebuilt coordinator fails
 formal source admission. Older version <=0.1.4 sources retain their original
 two-binary admission so an old qualified predecessor can still be replayed.
 
-The current complete D14 MSI has twenty payload files: the coordinator plus
+The complete D14 MSI without tutorial images has twenty payload files: the coordinator plus
 the original payload set and all five fixed PWA files (`manifest.webmanifest`,
 `sw.js`, `offline.html`, `pwa-icon-192.png`, `pwa-icon-512.png` under `web/`).
 The five PWA files are admitted together; a partial set is rejected. Historical
@@ -128,6 +128,13 @@ contract retain their original exact replay grammar. The source ZIP contains
 nineteen files before the MSI builder adds its reviewed instructions. Pass
 `package-probe.py --source-root` for the frozen source checkout so its Cargo
 version and license/notices cannot come from a different builder checkout.
+
+Sources at version 0.1.8 or newer can additionally contain the complete eleven
+reviewed tutorial screenshots under hashed `web/assets/*.png` paths. This makes
+thirty-one MSI payload files (thirty before the builder adds its instructions).
+Partial or duplicate screenshot sets are rejected. The historical fourteen,
+fifteen and twenty-file grammars remain available for exact predecessor replay;
+the new screenshot assets do not replace any existing member or source seal.
 
 A real D14 baseline requires the committed source SHA to complete the existing
 `Windows 7 MSVC candidate COMPILE_ONLY` GitHub workflow, followed by the existing
