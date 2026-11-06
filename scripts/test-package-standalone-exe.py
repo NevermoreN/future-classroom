@@ -32,4 +32,15 @@ class StandaloneTests(unittest.TestCase):
         with self.assertRaises(ValueError):S['package'](self.helper,dict(self.members,**{'FutureClassroom.msi':b'other'}))
         with self.assertRaises(ValueError):S['package'](self.helper,dict(self.members,**{'../other':b'bad'}))
 
+    def test_previous_maintenance_pair_is_bounded_and_covered_by_v2_digest(self):
+        members = dict(self.members, **{'previous/Setup.exe': self.members['Setup.exe'],
+            'previous/FutureClassroom.msi': self.members['FutureClassroom.msi']})
+        image = S['package'](self.helper, members)
+        self.assertEqual(image[-104:-88], b'FC-SFX-PACK\0v2\0\0')
+        self.assertEqual(S['inspect'](image), (self.helper, members))
+        for offset in (-105, -70, -1):
+            changed=bytearray(image);changed[offset]^=1
+            with self.assertRaises(ValueError):S['inspect'](bytes(changed))
+        with self.assertRaises(ValueError):S['package'](self.helper,dict(self.members, **{'previous/Setup.exe':b'partial'}))
+
 if __name__ == '__main__':unittest.main()

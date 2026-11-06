@@ -123,6 +123,12 @@ pub fn trust_owned_certificate(thumbprint: &str) -> Result<(), CertificateProvis
     }
 }
 
+/// Explicit full uninstall only; unrelated certificates and machine stores are untouched.
+#[cfg(windows)]
+pub(crate) fn remove_all_owned_certificates() -> Result<(), CertificateProvisionError> {
+    native::remove_all_owned()
+}
+
 #[cfg(windows)]
 mod native {
     use super::*;
@@ -724,9 +730,53 @@ mod native {
         }
     }
 
-    /// Only for an explicitly selected test-created certificate. Never matches legacy deployment labels.
-    #[cfg(test)]
-    pub fn remove_test_certificate(thumbprint: &str) -> Result<(), CertificateProvisionError> {
+    pub(super) fn remove_all_owned() -> Result<(), CertificateProvisionError> {
+        let mut owner = Owner {
+            store: None,
+            cert: std::ptr::null_mut(),
+            provider: 0,
+            key: 0,
+            container: Vec::new(),
+            rollback: false,
+            stored: false,
+        };
+        owner.store = Some(
+            unsafe {
+                CertOpenStore(
+                    CERT_STORE_PROV_SYSTEM_W,
+                    CERT_QUERY_ENCODING_TYPE(0),
+                    None,
+                    CERT_OPEN_STORE_FLAGS(CERT_SYSTEM_STORE_CURRENT_USER)
+                        | CERT_STORE_OPEN_EXISTING_FLAG,
+                    Some(windows::core::w!("MY").as_ptr().cast()),
+                )
+            }
+            .map_err(native)?,
+        );
+        let mut hashes = Vec::new();
+        loop {
+            owner.cert =
+                unsafe { CertEnumCertificatesInStore(owner.store.unwrap(), Some(owner.cert)) };
+            if owner.cert.is_null() {
+                break;
+            }
+            if owned_container(owner.cert).is_ok() {
+                let hash = property(owner.cert, CERT_HASH_PROP_ID)?;
+                if hash.len() != 20 {
+                    return Err(CertificateProvisionError::Unavailable);
+                }
+                hashes.push(hash.iter().map(|b| format!("{b:02X}")).collect::<String>());
+            }
+        }
+        owner.close()?;
+        for hash in hashes {
+            remove_owned_certificate(&hash)?;
+        }
+        Ok(())
+    }
+
+    /// Only this product's labeled, current-user CSP key containers are removable.
+    pub fn remove_owned_certificate(thumbprint: &str) -> Result<(), CertificateProvisionError> {
         let hash = super::super::CertificateThumbprint::parse(thumbprint)
             .map_err(|_| CertificateProvisionError::InvalidIp)?;
         let mut owner = Owner {
@@ -787,6 +837,55 @@ mod native {
             return Err(CertificateProvisionError::Unavailable);
         }
         owner.container = owned_container(owner.cert)?;
+        let mut trusted = Owner {
+            store: None,
+            cert: std::ptr::null_mut(),
+            provider: 0,
+            key: 0,
+            container: Vec::new(),
+            rollback: false,
+            stored: false,
+        };
+        trusted.store = Some(
+            unsafe {
+                CertOpenStore(
+                    CERT_STORE_PROV_SYSTEM_W,
+                    CERT_QUERY_ENCODING_TYPE(0),
+                    None,
+                    CERT_OPEN_STORE_FLAGS(CERT_SYSTEM_STORE_CURRENT_USER)
+                        | CERT_STORE_OPEN_EXISTING_FLAG,
+                    Some(windows::core::w!("ROOT").as_ptr().cast()),
+                )
+            }
+            .map_err(native)?,
+        );
+        trusted.cert = unsafe {
+            CertFindCertificateInStore(
+                trusted.store.unwrap(),
+                X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+                0,
+                CERT_FIND_HASH,
+                Some((&blob as *const CRYPT_INTEGER_BLOB).cast()),
+                None,
+            )
+        };
+        if !trusted.cert.is_null() {
+            let same = unsafe {
+                std::slice::from_raw_parts(
+                    (*trusted.cert).pbCertEncoded,
+                    (*trusted.cert).cbCertEncoded as usize,
+                ) == std::slice::from_raw_parts(
+                    (*owner.cert).pbCertEncoded,
+                    (*owner.cert).cbCertEncoded as usize,
+                )
+            };
+            if !same {
+                return Err(CertificateProvisionError::Unavailable);
+            }
+            trusted.rollback = true;
+            trusted.stored = true;
+        }
+        trusted.close()?;
         owner.rollback = true;
         owner.stored = true;
         owner.close()
@@ -794,7 +893,7 @@ mod native {
 }
 
 #[cfg(all(test, windows))]
-pub use native::remove_test_certificate;
+pub use native::remove_owned_certificate as remove_test_certificate;
 
 #[cfg(test)]
 mod tests {

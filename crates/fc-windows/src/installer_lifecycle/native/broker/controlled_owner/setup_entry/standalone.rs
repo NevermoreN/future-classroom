@@ -6,20 +6,22 @@ use std::{
     fs::{File, OpenOptions},
     io::{Read, Seek, SeekFrom, Write},
     os::windows::fs::OpenOptionsExt,
-    process::{Child, Command},
 };
 
 pub(super) const MAGIC: &[u8; 16] = b"FC-SFX-PACK\0v1\0\0";
 const FOOTER: u64 = 88;
-const NAMES: [&str; 4] = [
+const MAGIC_V2: &[u8; 16] = b"FC-SFX-PACK\0v2\0\0";
+const NAMES: [&str; 6] = [
     "Setup.exe",
     "FutureClassroom.msi",
     "LICENSE",
     "THIRD-PARTY-NOTICES.txt",
+    "previous/Setup.exe",
+    "previous/FutureClassroom.msi",
 ];
 // Fixed members total at most 166 MiB; the executable prefix is capped at
 // 32 MiB separately. Notices include the complete bundled dependency licenses.
-const LIMITS: [u64; 4] = [32 << 20, 128 << 20, 2 << 20, 4 << 20];
+const LIMITS: [u64; 6] = [32 << 20, 128 << 20, 2 << 20, 4 << 20, 32 << 20, 128 << 20];
 fn io<T>(value: std::io::Result<T>) -> Result<T> {
     value.map_err(|e| {
         LifecycleError::Native(HRESULT::from_win32(e.raw_os_error().unwrap_or(1) as u32))
@@ -29,9 +31,9 @@ fn io<T>(value: std::io::Result<T>) -> Result<T> {
 pub(super) struct Package {
     image: File,
     offset: u64,
-    lengths: [u64; 4],
+    lengths: Vec<u64>,
     digest: [u8; 32],
-    header: [u8; 56],
+    header: Vec<u8>,
 }
 impl Package {
     fn discover() -> Result<Option<Self>> {
@@ -44,34 +46,41 @@ impl Package {
         if size < FOOTER {
             return Ok(None);
         }
-        io(image.seek(SeekFrom::End(-(FOOTER as i64))))?;
-        let mut footer = [0; FOOTER as usize];
+        let mut tail = [0; 16];
+        if size >= 104 {
+            io(image.seek(SeekFrom::End(-104)))?;
+            io(image.read_exact(&mut tail))?;
+        }
+        let footer_size = if &tail == MAGIC_V2 { 104 } else { FOOTER };
+        io(image.seek(SeekFrom::End(-(footer_size as i64))))?;
+        let mut footer = vec![0; footer_size as usize];
         io(image.read_exact(&mut footer))?;
-        if &footer[..16] != MAGIC {
+        if &footer[..16] != if footer_size == 104 { MAGIC_V2 } else { MAGIC } {
             return Ok(None);
         }
         let number = |offset| u64::from_le_bytes(footer[offset..offset + 8].try_into().unwrap());
         let offset = number(16);
-        let lengths = [number(24), number(32), number(40), number(48)];
+        let count = if footer_size == 104 { 6 } else { 4 };
+        let lengths: Vec<_> = (0..count).map(|i| number(24 + 8 * i)).collect();
         let mut end = offset;
         if !(512..=32 << 20).contains(&offset) {
             return Err(LifecycleError::Invalid);
         }
-        for (length, limit) in lengths.into_iter().zip(LIMITS) {
+        for (&length, limit) in lengths.iter().zip(LIMITS) {
             if length == 0 || length > limit {
                 return Err(LifecycleError::Invalid);
             }
             end = end.checked_add(length).ok_or(LifecycleError::Invalid)?;
         }
-        if end.checked_add(FOOTER) != Some(size) {
+        if end.checked_add(footer_size) != Some(size) {
             return Err(LifecycleError::Invalid);
         }
         Ok(Some(Self {
             image,
             offset,
             lengths,
-            digest: footer[56..].try_into().unwrap(),
-            header: footer[..56].try_into().unwrap(),
+            digest: footer[footer.len() - 32..].try_into().unwrap(),
+            header: footer[..footer.len() - 32].to_vec(),
         }))
     }
     pub(super) fn extract(&mut self) -> Result<Extracted> {
@@ -90,7 +99,11 @@ impl Package {
             root,
             pins: Vec::new(),
             directory: None,
+            previous: self.lengths.len() == 6,
         };
+        if extracted.previous {
+            io(std::fs::create_dir(extracted.root.join("previous")))?;
+        }
         extracted.directory = Some(io(OpenOptions::new()
             .read(true)
             .share_mode(FILE_SHARE_READ.0 | FILE_SHARE_WRITE.0)
@@ -98,9 +111,9 @@ impl Package {
             .open(&extracted.root))?);
         io(self.image.seek(SeekFrom::Start(self.offset)))?;
         let mut digest = Sha256::new();
-        digest.update(self.header);
+        digest.update(&self.header);
         let mut buffer = [0u8; 65536];
-        for (name, length) in NAMES.into_iter().zip(self.lengths) {
+        for (index, (name, &length)) in NAMES.into_iter().zip(&self.lengths).enumerate() {
             let path = extracted.root.join(name);
             let mut output = io(OpenOptions::new()
                 .write(true)
@@ -108,15 +121,27 @@ impl Package {
                 .share_mode(0)
                 .open(&path))?;
             let mut remaining = length;
+            let mut member_digest = Sha256::new();
             while remaining > 0 {
                 let count = remaining.min(buffer.len() as u64) as usize;
                 io(self.image.read_exact(&mut buffer[..count]))?;
                 digest.update(&buffer[..count]);
+                member_digest.update(&buffer[..count]);
                 io(output.write_all(&buffer[..count]))?;
                 remaining -= count as u64;
             }
             io(output.sync_all())?;
             drop(output);
+            if index >= 4 {
+                let expected = if index == 4 {
+                    super::previous_source::SETUP_SHA
+                } else {
+                    super::previous_source::MSI_SHA
+                };
+                if <[u8; 32]>::from(member_digest.finalize()) != expected {
+                    return Err(LifecycleError::Invalid);
+                }
+            }
             extracted.pins.push(io(OpenOptions::new()
                 .read(true)
                 .share_mode(FILE_SHARE_READ.0)
@@ -129,17 +154,12 @@ impl Package {
     }
 }
 pub(super) struct Extracted {
-    root: PathBuf,
+    pub(super) root: PathBuf,
     pins: Vec<File>,
     directory: Option<File>,
+    pub(super) previous: bool,
 }
 impl Extracted {
-    pub(super) fn start(&self, operation: &str) -> Result<Child> {
-        io(Command::new(self.root.join("Setup.exe"))
-            .arg(operation)
-            .current_dir(&self.root)
-            .spawn())
-    }
     pub(super) fn cleanup(&mut self) -> Result<()> {
         self.pins.clear();
         self.directory.take();
@@ -148,7 +168,7 @@ impl Extracted {
         }
         // Delete only the four fixed files we created, never recurse through an
         // unexpected object that an unrelated process may have placed here.
-        for name in NAMES {
+        for name in NAMES.into_iter().take(if self.previous { 6 } else { 4 }) {
             match std::fs::remove_file(self.root.join(name)) {
                 Ok(()) => (),
                 Err(e) if e.kind() == std::io::ErrorKind::NotFound => (),
@@ -156,6 +176,9 @@ impl Extracted {
                     io::<()>(Err(e))?;
                 }
             }
+        }
+        if self.previous {
+            io(std::fs::remove_dir(self.root.join("previous")))?;
         }
         io(std::fs::remove_dir(&self.root))
     }
@@ -172,55 +195,34 @@ pub(crate) fn dispatch(args: &[String]) -> Option<Result<u32>> {
         Ok(Some(v)) => v,
         Err(e) => return Some(Err(e)),
     };
-    if args.is_empty() {
-        let installed = match crate::system::DataPaths::installed_bootstrap_for_current_user() {
-            Ok(path) => path,
-            Err(e) => return Some(Err(e.into())),
-        };
-        if installed.is_file() {
-            return Some(update_installed(package, &installed));
-        }
-        return Some(super::setup_ui::show(package));
+    if args.is_empty() || matches!(args, [one] if one == "uninstall" || one == "maintenance") {
+        return Some(super::setup_ui::show(
+            package,
+            matches!(args, [one] if one == "uninstall"),
+        ));
     }
-    let operation = match args {
-        [s] if matches!(s.as_str(), "install" | "repair" | "uninstall") => s.as_str(),
-        _ => return Some(Err(LifecycleError::Invalid)),
-    };
-    Some((|| {
-        let mut package = package;
-        let mut extracted = package.extract()?;
-        let mut child = extracted.start(operation)?;
-        let status = io(child.wait())?;
-        extracted.cleanup()?;
-        Ok(status.code().ok_or(LifecycleError::Unsettled)? as u32)
-    })())
-}
-
-fn update_installed(mut package: Package, installed: &std::path::Path) -> Result<u32> {
-    // A manual double-click uses the exact same sealed Install operation as
-    // automatic updates. Only success starts the newly installed product.
-    let result = (|| {
-        let mut extracted = package.extract()?;
-        let status = io(extracted.start("install")?.wait())?;
-        let code = status.code().unwrap_or(1603) as u32;
-        extracted.cleanup()?;
-        if code == 0 {
-            io(Command::new(installed)
-                .current_dir(installed.parent().ok_or(LifecycleError::Invalid)?)
-                .spawn())?;
-        }
-        Ok(code)
-    })();
-    if !matches!(result, Ok(0)) {
-        use windows::Win32::UI::WindowsAndMessaging::*;
-        unsafe {
-            MessageBoxW(
-                None,
-                windows::core::w!("更新未完成，原有资料已保留。请确认安装包支持当前版本，稍后重试；如仍失败，请联系管理员。"),
-                windows::core::w!("未来教室更新"),
-                MB_OK | MB_ICONERROR,
-            );
+    if let [mode, force, data] = args {
+        if matches!(
+            mode.as_str(),
+            "maintain-install" | "maintain-repair" | "maintain-uninstall"
+        ) && matches!(force.as_str(), "normal" | "force")
+            && matches!(data.as_str(), "keep" | "delete")
+        {
+            return Some(super::maintenance::run(
+                package,
+                mode,
+                force == "force",
+                data == "delete",
+            ));
         }
     }
-    result
+    match args {
+        [one] if one == "install" || one == "repair" => Some(super::maintenance::run(
+            package,
+            "maintain-repair",
+            false,
+            false,
+        )),
+        _ => Some(Err(LifecycleError::Invalid)),
+    }
 }

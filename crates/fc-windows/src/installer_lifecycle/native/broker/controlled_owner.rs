@@ -512,15 +512,16 @@ impl ApiOwner {
         if self.begin != 0 || self.ended {
             return Err(LifecycleError::Invalid);
         }
-        let quiet =
-            windows::core::w!("REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown");
+        let quiet = windows::core::w!(
+            "ARPSYSTEMCOMPONENT=1 REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown"
+        );
         Ok(unsafe {
             match operation {
                 1 | 4 => MsiInstallProductW(&HSTRING::from(path.as_os_str()), quiet),
                 2 => MsiInstallProductW(
                     &HSTRING::from(path.as_os_str()),
                     windows::core::w!(
-                        "REINSTALL=ALL REINSTALLMODE=vamus REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown"
+                        "REINSTALL=ALL REINSTALLMODE=vamus ARPSYSTEMCOMPONENT=1 REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown"
                     ),
                 ),
                 // Fixed sealed source, not ConfigureProductEx's registered
@@ -530,7 +531,7 @@ impl ApiOwner {
                 3 => MsiInstallProductW(
                     &HSTRING::from(path.as_os_str()),
                     windows::core::w!(
-                        "REMOVE=ALL REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown"
+                        "REMOVE=ALL ARPSYSTEMCOMPONENT=1 REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown"
                     ),
                 ),
                 _ => return Err(LifecycleError::Invalid),
@@ -780,17 +781,17 @@ struct ControlledEffectsOwner {
 
 /// Read-only admission before asking a live product to stop. The real Setup
 /// repeats admission under its maintenance gate after physical process exit.
-fn prepare_running_upgrade(deadline: Instant) -> Result<()> {
+fn prepare_running_maintenance(deadline: Instant, operation: Operation) -> Result<()> {
     use windows::Win32::UI::WindowsAndMessaging::{
         FindWindowW, GetWindowThreadProcessId, PostMessageW, WM_CLOSE,
     };
     let mut s = Session::new(deadline)?;
     package(&mut s)?;
     s.capture_maintenance()?;
-    captured_operation(&s, Operation::Install)?;
+    captured_operation(&s, operation)?;
     // A fresh install has nobody to stop. Same-version/rejected predecessors
     // never gain permission to close an unrelated application.
-    if s.verified_upgrade.is_none() {
+    if s.verified_upgrade.is_none() && s.verified_maintenance.is_none() {
         return s.resources.release();
     }
     let paths = crate::system::DataPaths::program_data()?;
@@ -832,10 +833,8 @@ fn prepare_running_upgrade(deadline: Instant) -> Result<()> {
 /// source can enter; the request supplies no authority or caller-selected path.
 pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
     let deadline = Instant::now() + super::super::super::broker::BROKER_BUDGET;
-    if operation == Operation::Install
-        && crate::system::DataPaths::installed_bootstrap_for_current_user()?.is_file()
-    {
-        prepare_running_upgrade(deadline)?;
+    if crate::system::DataPaths::installed_bootstrap_for_current_user()?.is_file() {
+        prepare_running_maintenance(deadline, operation)?;
     }
     let mut s = Session::new(deadline)?;
     s.sealed_package_sha.ok_or(LifecycleError::Invalid)?;

@@ -18,37 +18,45 @@ MAGIC = b'FC-SFX-PACK\0v1\0\0'
 NAMES = ('Setup.exe', 'FutureClassroom.msi', 'LICENSE', 'THIRD-PARTY-NOTICES.txt')
 LIMITS = (32 << 20, 128 << 20, 2 << 20, 4 << 20)
 FOOTER = 88
+MAGIC_V2 = b'FC-SFX-PACK\0v2\0\0'
+PREVIOUS_NAMES = ('previous/Setup.exe', 'previous/FutureClassroom.msi')
+PREVIOUS_LIMITS = (32 << 20, 128 << 20)
 
 
 def package(helper: bytes, members: dict[str, bytes]) -> bytes:
-    if set(members) != set(NAMES) or not 512 <= len(helper) <= 32 << 20:
+    previous = set(members) == set(NAMES + PREVIOUS_NAMES)
+    names, limits = (NAMES + PREVIOUS_NAMES, LIMITS + PREVIOUS_LIMITS) if previous else (NAMES, LIMITS)
+    if set(members) != set(names) or not 512 <= len(helper) <= 32 << 20:
         raise ValueError('Exact normal helper and four fixed members required')
-    for name, limit in zip(NAMES, LIMITS):
+    for name, limit in zip(names, limits):
         if type(members[name]) is not bytes or not 1 <= len(members[name]) <= limit:
             raise ValueError('Member exceeds its bound: ' + name)
     template = C['make_carrier_template'](helper)
     C['verify_carrier_binding'](template, members['Setup.exe'], members['FutureClassroom.msi'])
-    header = MAGIC + struct.pack('<5Q', len(helper), *(len(members[n]) for n in NAMES))
-    payload = b''.join(members[name] for name in NAMES)
+    header = (MAGIC_V2 if previous else MAGIC) + struct.pack('<'+str(1+len(names))+'Q', len(helper), *(len(members[n]) for n in names))
+    payload = b''.join(members[name] for name in names)
     return helper + payload + header + hashlib.sha256(header + payload).digest()
 
 
 def inspect(image: bytes) -> tuple[bytes, dict[str, bytes]]:
-    if not FOOTER + 512 <= len(image) <= (32 << 20) + sum(LIMITS) + FOOTER:
+    previous = len(image) >= 104 and image[-104:-88] == MAGIC_V2
+    size, names, limits = (104, NAMES + PREVIOUS_NAMES, LIMITS + PREVIOUS_LIMITS) if previous else (FOOTER, NAMES, LIMITS)
+    header_size = size - 32
+    if not size + 512 <= len(image) <= (32 << 20) + sum(limits) + size:
         raise ValueError('Standalone image size out of bounds')
-    footer = image[-FOOTER:]
-    if footer[:16] != MAGIC:
+    footer = image[-size:]
+    if footer[:16] != (MAGIC_V2 if previous else MAGIC):
         raise ValueError('Wrong standalone footer')
-    prefix, *lengths = struct.unpack('<5Q', footer[16:56])
-    if (not 512 <= prefix <= 32 << 20 or prefix + sum(lengths) + FOOTER != len(image)
-        or any(not 1 <= size <= limit for size, limit in zip(lengths, LIMITS))):
+    prefix, *lengths = struct.unpack('<'+str(1+len(names))+'Q', footer[16:header_size])
+    if (not 512 <= prefix <= 32 << 20 or prefix + sum(lengths) + size != len(image)
+        or any(not 1 <= length <= limit for length, limit in zip(lengths, limits))):
         raise ValueError('Standalone lengths differ')
-    if hashlib.sha256(footer[:56] + image[prefix:-FOOTER]).digest() != footer[56:]:
+    if hashlib.sha256(footer[:header_size] + image[prefix:-size]).digest() != footer[header_size:]:
         raise ValueError('Standalone checksum differs')
     members, offset = {}, prefix
-    for name, size in zip(NAMES, lengths):
-        members[name] = image[offset:offset + size]
-        offset += size
+    for name, length in zip(names, lengths):
+        members[name] = image[offset:offset + length]
+        offset += length
     helper = image[:prefix]
     C['verify_carrier_binding'](C['make_carrier_template'](helper), members['Setup.exe'], members['FutureClassroom.msi'])
     return helper, members
@@ -59,6 +67,7 @@ def main():
     for name in ('helper', 'bundle', 'output'):
         p.add_argument('--' + name, type=Path, required=True)
     p.add_argument('--report-sha256', required=True)
+    p.add_argument('--previous-setup', type=Path, help='Exact previously published EXE, bound to reviewed baseline')
     a = p.parse_args()
     report_raw = C['_BUILDER']['PROBE']['bounded_regular_file'](a.bundle / 'report.json', 16 << 20)
     if hashlib.sha256(report_raw).hexdigest() != a.report_sha256:
@@ -78,6 +87,23 @@ def main():
             {'bytes': row['size'], 'sha256': row['sha256']} for row in report['payloads'] if row['path'] == name)
         if len(members[name]) != fact['bytes'] or hashlib.sha256(members[name]).hexdigest() != fact['sha256']:
             raise ValueError('Formal member bytes differ: ' + name)
+    if a.previous_setup:
+        from_version = '1.0.0.' + str(int(report['version'].split('.')[-1]) - 1)
+        baseline = json.loads((Path(report['sourceRoot']) / 'packaging/release-baselines' / (from_version+'.json')).read_bytes())
+        old = C['_BUILDER']['PROBE']['bounded_regular_file'](a.previous_setup, 384 << 20)
+        if {'bytes': len(old), 'sha256': hashlib.sha256(old).hexdigest()} != baseline['setupExe']:
+            raise ValueError('Previous public installer differs from reviewed baseline')
+        _, previous = inspect(old)
+        if {'bytes':len(previous['FutureClassroom.msi']), 'sha256':hashlib.sha256(previous['FutureClassroom.msi']).hexdigest()} != baseline['msi']:
+            raise ValueError('Previous MSI differs from reviewed baseline')
+        import re
+        source = (Path(report['sourceRoot']) / 'crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/setup_entry/previous_source.rs').read_text()
+        for symbol, member in [('SETUP_SHA', 'Setup.exe'), ('MSI_SHA', 'FutureClassroom.msi')]:
+            match = re.search(r'const '+symbol+r':\s*\[u8;\s*32\]\s*=\s*\[(.*?)\];', source, re.S)
+            expected = bytes(int(x,16) for x in re.findall(r'0x([0-9a-fA-F]{2})', match[1])) if match else b''
+            if expected != hashlib.sha256(previous[member]).digest():
+                raise ValueError('Previous member differs from same-CI native maintenance binding: '+member)
+        members.update({name:previous[name.removeprefix('previous/')] for name in PREVIOUS_NAMES})
     image = package(helper, members)
     if inspect(image) != (helper, members):
         raise ValueError('Standalone complete readback failed')
@@ -85,7 +111,7 @@ def main():
         stream.write(image)
     print(json.dumps({'output': str(a.output), 'bytes': len(image), 'sha256': hashlib.sha256(image).hexdigest(),
                       'sourceCommit': report['sourceBase'], 'internalVersion': report['version'],
-                      'members': list(NAMES), 'readback': 'COMPLETE_EXACT',
+                      'members': list(members), 'readback': 'COMPLETE_EXACT',
                       'installationAuthority': 'original sealed inner Setup/MSI; wrapper is presentation only'}))
 
 

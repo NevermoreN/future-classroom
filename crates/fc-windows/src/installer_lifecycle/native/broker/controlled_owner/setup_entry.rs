@@ -5,6 +5,8 @@ use super::super::super::super::broker::{self as entry, SetupCommand};
 use super::*;
 use windows::Win32::{System::LibraryLoader::GetModuleHandleW, UI::WindowsAndMessaging::*};
 
+pub(crate) mod maintenance;
+mod previous_source;
 mod setup_ui;
 mod standalone;
 pub(crate) use standalone::dispatch as standalone;

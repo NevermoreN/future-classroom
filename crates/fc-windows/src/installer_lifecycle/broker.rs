@@ -46,6 +46,13 @@ pub fn run_setup(command: SetupCommand) -> Result<u32> {
     };
     let result = controlled_owner::run_setup(operation)?;
     if result.installation_succeeded() {
+        if command != SetupCommand::Uninstall {
+            native::broker::controlled_owner::setup_entry::maintenance::register_source()
+                .map_err(|_| LifecycleError::ShellIntegration)?;
+        } else {
+            native::broker::controlled_owner::setup_entry::maintenance::remove_entry()
+                .map_err(|_| LifecycleError::ShellIntegration)?;
+        }
         // This is deliberately after original MSI settlement. A Shell failure
         // cannot be reported as transaction rollback or authorize payload edits.
         super::shortcuts::reconcile(command).map_err(|error| {

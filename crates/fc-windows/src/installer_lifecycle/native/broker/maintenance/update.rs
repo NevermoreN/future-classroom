@@ -282,3 +282,99 @@ impl Reader {
         Err(LifecycleError::Invalid)
     }
 }
+
+/// Explicit installer repair of an unregistered orphan. Only paths declared
+/// by the verified current/previous source are removed; teaching data is outside
+/// this fixed installation directory. Pending/live owners still reject entry.
+pub(in crate::installer_lifecycle) fn remove_orphaned(directory: &Path) -> Result<()> {
+    with_reader(true, |reader| {
+        let mut related = [0u16; 39];
+        let family = HSTRING::from(format!("{{{INSTALL_FAMILY}}}"));
+        if unsafe { MsiEnumRelatedProductsW(&family, None, 0, PWSTR(related.as_mut_ptr())) }
+            != ERROR_NO_MORE_ITEMS.0
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        let root = crate::system::DataPaths::installed_bootstrap_for_current_user()?
+            .parent()
+            .ok_or(LifecycleError::Invalid)?
+            .to_owned();
+        if !root.exists() {
+            return Ok(());
+        }
+        let mut allowed = BTreeSet::new();
+        for source in [
+            directory.join("FutureClassroom.msi"),
+            directory.join("previous/FutureClassroom.msi"),
+        ] {
+            if !source.exists() {
+                continue;
+            }
+            reader.pin(&source, true)?;
+            let mut db = MSIHANDLE(0);
+            let rc =
+                unsafe { MsiOpenDatabaseW(&native_path(&source)?, MSIDBOPEN_READONLY, &mut db) };
+            let db = reader.acquired(rc, db)?;
+            let wire =
+                reader.update_blob(db, payload_manifest::QUERY, payload_manifest::MAX_BYTES)?;
+            let payload = payload_manifest::parse(&wire)?;
+            for entry in &payload.payload().entries {
+                allowed.insert(entry.path.to_ascii_lowercase());
+            }
+            reader.close_msi(db)?;
+        }
+        let h = reader.resources.open_file(
+            &root,
+            READ_CONTROL.0 | FILE_READ_ATTRIBUTES.0,
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            OPEN_EXISTING,
+            true,
+            false,
+        )?;
+        verify_info(h, true)?;
+        verify_acl(h, &reader.resources.sid, true)?;
+        reader.resources.add(h, Role::Parent);
+        let files = crate::materials::files::ControlledFiles::new(&root)?;
+        let mut pending = vec![root.clone()];
+        let mut directories = Vec::new();
+        let mut leaves = Vec::new();
+        while let Some(path) = pending.pop() {
+            for child in files.entries(&path, 32768)? {
+                let relative = child
+                    .strip_prefix(&root)
+                    .map_err(|_| LifecycleError::Invalid)?
+                    .to_string_lossy()
+                    .replace('\\', "/")
+                    .to_ascii_lowercase();
+                if child.is_dir() {
+                    if !allowed
+                        .iter()
+                        .any(|n| n.starts_with(&(relative.clone() + "/")))
+                    {
+                        return Err(LifecycleError::Invalid);
+                    }
+                    directories.push(child.clone());
+                    pending.push(child);
+                } else {
+                    if !allowed.contains(&relative) {
+                        return Err(LifecycleError::Invalid);
+                    }
+                    leaves.push(child);
+                }
+            }
+        }
+        for path in leaves {
+            files.remove(&path)?;
+        }
+        directories.sort_by_key(|p| std::cmp::Reverse(p.components().count()));
+        for path in directories {
+            files.remove_empty_directory(&path)?;
+        }
+        reader.resources.close_handle(h)?;
+        crate::materials::files::ControlledFiles::new(
+            root.parent().ok_or(LifecycleError::Invalid)?,
+        )?
+        .remove_empty_directory(&root)?;
+        Ok(())
+    })
+}

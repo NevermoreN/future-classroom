@@ -1,7 +1,7 @@
 //! Native, runtime-free visual shell. Only the original sealed Setup child can
 //! authorize installation. Its process is polled on the window thread; closing
 //! the window never kills or abandons a live installation.
-use super::standalone::{Extracted, Package};
+use super::standalone::Package;
 use super::*;
 use std::process::Child;
 use windows::{
@@ -16,9 +16,14 @@ use windows::{
 };
 const PRIMARY: usize = 201;
 const CLOSE: usize = 202;
+const UNINSTALL: usize = 203;
+const DELETE_DATA: usize = 204;
+const FORCE: usize = 205;
 struct State {
-    package: Package,
-    extracted: Option<Extracted>,
+    _package: Package,
+    installed: bool,
+    uninstall: bool,
+    delete_data: bool,
     child: Option<Child>,
     result: u32,
     complete: bool,
@@ -138,7 +143,15 @@ unsafe fn repaint(hwnd: HWND, state: &State) {
             dc,
             state.font,
             COLORREF(0x008f7568),
-            &format!("版本 {} · 安装向导", fc_domain::PRODUCT_DISPLAY_VERSION),
+            &format!(
+                "版本 {} · {}",
+                fc_domain::PRODUCT_DISPLAY_VERSION,
+                if state.uninstall {
+                    "卸载向导"
+                } else {
+                    "安装与维护"
+                }
+            ),
             RECT {
                 left: 110,
                 top: 87,
@@ -151,11 +164,25 @@ unsafe fn repaint(hwnd: HWND, state: &State) {
             state.heading,
             COLORREF(0x005b3526),
             if state.complete {
-                "安装完成"
+                if state.uninstall {
+                    "卸载完成"
+                } else {
+                    "安装完成"
+                }
             } else if state.child.is_some() {
-                "正在安装，请稍候"
+                if state.uninstall {
+                    "正在卸载，请稍候"
+                } else {
+                    "正在修复安装，请稍候"
+                }
             } else {
-                "让课堂准备更轻松"
+                if state.uninstall {
+                    "卸载未来教室"
+                } else if state.installed {
+                    "修复或卸载未来教室"
+                } else {
+                    "让课堂准备更轻松"
+                }
             },
             RECT {
                 left: 46,
@@ -173,18 +200,22 @@ unsafe fn repaint(hwnd: HWND, state: &State) {
                 left: 46,
                 top: 206,
                 right: 575,
-                bottom: 325,
+                bottom: 274,
             },
         );
         label(
             dc,
             state.font,
             COLORREF(0x009e8b7b),
-            "资料与课表会保留在这台电脑。",
+            if state.delete_data {
+                "将清除账号、设置、课表和课堂资料。"
+            } else {
+                "账号、设置、课表和课堂资料会保留。"
+            },
             RECT {
                 left: 26,
                 top: 377,
-                right: 355,
+                right: 260,
                 bottom: 420,
             },
         );
@@ -206,13 +237,27 @@ unsafe fn update(hwnd: HWND, state: &State) {
             hwnd,
             PRIMARY as i32,
             if state.complete {
-                "打开未来教室"
+                "完成"
             } else if state.child.is_some() {
-                "正在安装…"
+                if state.uninstall {
+                    "正在卸载…"
+                } else {
+                    "正在安装…"
+                }
             } else if state.result != 1602 {
-                "重试安装"
+                if state.uninstall {
+                    "重试卸载"
+                } else {
+                    "重试修复"
+                }
             } else {
-                "立即安装"
+                if state.uninstall {
+                    "确认卸载"
+                } else if state.installed {
+                    "修复并保留数据"
+                } else {
+                    "立即安装"
+                }
             },
             state.child.is_none(),
         );
@@ -222,6 +267,22 @@ unsafe fn update(hwnd: HWND, state: &State) {
             if state.complete { "完成" } else { "退出" },
             state.child.is_none(),
         );
+        set_button(
+            hwnd,
+            UNINSTALL as i32,
+            if state.uninstall { "返回" } else { "卸载" },
+            state.child.is_none(),
+        );
+        for (id, visible) in [
+            (UNINSTALL, state.installed && !state.complete),
+            (DELETE_DATA, state.uninstall && !state.complete),
+            (FORCE, state.installed && !state.complete),
+        ] {
+            if let Ok(control) = GetDlgItem(Some(hwnd), id as i32) {
+                let _ = ShowWindow(control, if visible { SW_SHOW } else { SW_HIDE });
+                let _ = EnableWindow(control, state.child.is_none());
+            }
+        }
         let _ = InvalidateRect(Some(hwnd), None, true);
     }
 }
@@ -247,23 +308,33 @@ fn finish_child(hwnd: HWND, state: &mut State) {
     state.result = status.code().unwrap_or(1603) as u32;
     state.complete = state.result == 0;
     state.message = if state.complete {
-        "安装成功！点击下方按钮打开未来教室。\n桌面和开始菜单也已准备好启动图标。".to_owned()
+        if state.uninstall {
+            if state.delete_data {
+                "未来教室及所选数据已清理。关闭本窗口后，维护缓存会自动清除。".to_owned()
+            } else {
+                "未来教室已卸载，原有账号、设置和课堂资料已保留。下次安装可以继续使用。".to_owned()
+            }
+        } else {
+            "安装完成，未来教室已自动启动。桌面和开始菜单的启动图标已准备好。".to_owned()
+        }
+    } else if matches!(state.result, 5101..=5104) {
+        match state.result {
+            5104 => if state.uninstall {"卸载已执行，但维护入口或快捷方式未完全清理。可再次运行卸载重试；数据不会因失败而删除。"} else {"程序已安装，但维护入口或快捷方式尚未准备完整。请再次运行安装包选择修复，已有数据会保留。"},
+            5101 => {
+                "程序已卸载，但部分数据未能清理。请关闭占用资料的窗口后重试卸载；再次安装仍可进行。"
+            }
+            5102 => "程序已卸载，但系统卸载入口清理未完成。可重新运行卸载进行清理。",
+            _ => "程序已卸载，但维护缓存清理未能安排。原有数据的选择已执行。",
+        }
+        .to_owned()
     } else if state.result == 1602 {
         "安装已取消，原有账号、课表和资料会保留。可以点击重试安装。".to_owned()
     } else {
         format!(
-            "安装没有完成（返回代码 {}）。\n原有资料会保留，请关闭正在运行的未来教室后重试；如仍失败，请将代码告知管理员。",
+            "操作没有完成（代码 {}），不会当作卸载成功。\n可勾选强制停止后重试。若仍失败，请将代码告知管理员；原数据不会因安装失败被自动删除。",
             state.result
         )
     };
-    if let Some(mut extracted) = state.extracted.take() {
-        if extracted.cleanup().is_err() {
-            state
-                .message
-                .push_str("\n临时安装文件未能清理，请关闭相关文件窗口后再退出。");
-            state.extracted = Some(extracted);
-        }
-    }
     unsafe {
         update(hwnd, state);
     }
@@ -289,6 +360,13 @@ unsafe extern "system" fn procedure(
                 repaint(hwnd, state);
                 LRESULT(0)
             }
+            WM_CTLCOLORBTN | WM_CTLCOLORSTATIC => {
+                let dc = HDC(wparam.0 as *mut _);
+                SetBkMode(dc, TRANSPARENT);
+                SetTextColor(dc, COLORREF(0x00816a5b));
+                SetBkColor(dc, COLORREF(0x00ffffff));
+                LRESULT(GetStockObject(WHITE_BRUSH).0 as isize)
+            }
             WM_ERASEBKGND => LRESULT(1),
             WM_TIMER => {
                 finish_child(hwnd, state);
@@ -306,35 +384,60 @@ unsafe extern "system" fn procedure(
             WM_COMMAND if wparam.0 >> 16 == 0 => {
                 match wparam.0 & 0xffff {
                     PRIMARY if state.child.is_none() && state.complete => {
-                        match crate::system::DataPaths::installed_bootstrap_for_current_user() {
-                            Ok(path) => {
-                                if std::process::Command::new(path).spawn().is_ok() {
-                                    let _ = DestroyWindow(hwnd);
-                                } else {
-                                    state.message =
-                                        "未来教室已安装，但暂时无法打开。请从桌面或开始菜单启动。"
-                                            .to_owned();
-                                    update(hwnd, state);
-                                }
-                            }
-                            Err(_) => {
-                                state.message =
-                                    "未来教室已安装，请从桌面或开始菜单启动。".to_owned();
-                                update(hwnd, state);
-                            }
+                        let _ = DestroyWindow(hwnd);
+                    }
+                    UNINSTALL if state.child.is_none() => {
+                        state.uninstall = !state.uninstall;
+                        state.result = 1602;
+                        state.delete_data = false;
+                        if let Ok(control) = GetDlgItem(Some(hwnd), DELETE_DATA as i32) {
+                            SendMessageW(control, BM_SETCHECK, Some(WPARAM(0)), None);
                         }
+                        state.message = if state.uninstall {
+                            "默认保留原有账号、设置和资料。需要彻底清理时，勾选下方删除数据；无法退出时可选择强制停止。".to_owned()
+                        } else {
+                            "修复会重新安装程序文件，并保留原有账号、设置、课表和资料。".to_owned()
+                        };
+                        update(hwnd, state);
+                    }
+                    DELETE_DATA => {
+                        state.delete_data = GetDlgItem(Some(hwnd), DELETE_DATA as i32)
+                            .is_ok_and(|c| SendMessageW(c, BM_GETCHECK, None, None).0 == 1);
+                        update(hwnd, state);
                     }
                     PRIMARY if state.child.is_none() => {
+                        state.delete_data = state.uninstall
+                            && GetDlgItem(Some(hwnd), DELETE_DATA as i32)
+                                .is_ok_and(|c| SendMessageW(c, BM_GETCHECK, None, None).0 == 1);
+                        if state.delete_data && MessageBoxW(Some(hwnd), w!("将永久删除未来教室的账号、设置、课表、课堂资料及更新缓存。确定完整清理吗？"), w!("确认删除全部数据"), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES { return LRESULT(0); }
+                        let force = GetDlgItem(Some(hwnd), FORCE as i32)
+                            .is_ok_and(|c| SendMessageW(c, BM_GETCHECK, None, None).0 == 1);
                         let started = (|| {
-                            let extracted = state.package.extract()?;
-                            let child = extracted.start("install")?;
-                            Ok::<_, LifecycleError>((extracted, child))
+                            let path =
+                                std::env::current_exe().map_err(|_| LifecycleError::Invalid)?;
+                            std::process::Command::new(path)
+                                .args([
+                                    if state.uninstall {
+                                        "maintain-uninstall"
+                                    } else if state.installed {
+                                        "maintain-repair"
+                                    } else {
+                                        "maintain-install"
+                                    },
+                                    if force { "force" } else { "normal" },
+                                    if state.delete_data { "delete" } else { "keep" },
+                                ])
+                                .spawn()
+                                .map_err(|_| LifecycleError::Invalid)
                         })();
                         match started {
-                            Ok((extracted, child)) => {
-                                state.extracted = Some(extracted);
+                            Ok(child) => {
                                 state.child = Some(child);
-                                state.message="正在核验并安装未来教室。\n如果出现 Windows 权限提示，请确认是本安装程序后允许。".to_owned();
+                                state.message = if state.uninstall {
+                                    "正在停止未来教室并卸载，请稍候。只有实际卸载成功后才会清理所选数据。".to_owned()
+                                } else {
+                                    "正在修复安装，原有数据会保留。完成后自动启动；系统权限提示仍需允许。".to_owned()
+                                };
                             }
                             Err(_) => {
                                 state.result = 1603;
@@ -403,7 +506,7 @@ unsafe extern "system" fn procedure(
         }
     }
 }
-pub(super) fn show(package: Package) -> Result<u32> {
+pub(super) fn show(package: Package, uninstall: bool) -> Result<u32> {
     unsafe {
         let module = GetModuleHandleW(None)?;
         let instance = HINSTANCE(module.0);
@@ -421,7 +524,27 @@ pub(super) fn show(package: Package) -> Result<u32> {
         let _class = WindowClass(instance);
         // The asInvoker manifest leaves DPI virtualization to Windows (also
         // available on Windows 7); GDI and child controls share these units.
-        let mut state=State{package,extracted:None,child:None,result:1602,complete:false,message:"将未来教室安装到当前 Windows 账号。\n已有账号、课表、桌面排布和课堂资料会保留。\n点击“立即安装”开始。".to_owned(),font:font(15,400),heading:font(25,600)};
+        let installed = uninstall || super::maintenance::exists()?;
+        let mut state = State {
+            _package: package,
+            installed,
+            uninstall,
+            delete_data: false,
+            child: None,
+            result: 1602,
+            complete: false,
+            message: if uninstall {
+                "默认保留原有账号、设置和资料。需要完整清理时，请勾选删除数据。".to_owned()
+            } else if installed {
+                "检测到已有安装或残留。修复会重新安装程序文件，并保留设置和课堂资料；也可选择卸载。"
+                    .to_owned()
+            } else {
+                "将未来教室安装到当前Windows账号。点击立即安装开始。".to_owned()
+            },
+            font: font(15, 400),
+            heading: font(25, 600),
+        };
+
         let mut bounds = RECT {
             left: 0,
             top: 0,
@@ -435,7 +558,7 @@ pub(super) fn show(package: Package) -> Result<u32> {
         let hwnd = CreateWindowExW(
             WINDOW_EX_STYLE(0),
             class,
-            w!("未来教室安装"),
+            w!("未来教室安装与维护"),
             style,
             (GetSystemMetrics(SM_CXSCREEN) - width) / 2,
             (GetSystemMetrics(SM_CYSCREEN) - height) / 2,
@@ -470,8 +593,39 @@ pub(super) fn show(package: Package) -> Result<u32> {
             );
             Ok(())
         };
-        create(PRIMARY, "立即安装", 358, 148)?;
-        create(CLOSE, "退出", 518, 98)?;
+        create(PRIMARY, "立即安装", 280, 176)?;
+        create(UNINSTALL, "卸载", 464, 70)?;
+        create(CLOSE, "退出", 542, 74)?;
+        for (id, caption, y) in [
+            (DELETE_DATA, "删除全部数据（账号、设置、课表和资料）", 282),
+            (
+                FORCE,
+                "无法退出时强制停止未来教室（可能中断未保存操作）",
+                310,
+            ),
+        ] {
+            let checkbox = CreateWindowExW(
+                WINDOW_EX_STYLE(0),
+                w!("BUTTON"),
+                &HSTRING::from(caption),
+                WS_VISIBLE | WS_CHILD | WS_TABSTOP | WINDOW_STYLE(BS_AUTOCHECKBOX as u32),
+                46,
+                y,
+                540,
+                24,
+                Some(hwnd),
+                Some(HMENU(id as *mut _)),
+                Some(instance),
+                None,
+            )?;
+            SendMessageW(
+                checkbox,
+                WM_SETFONT,
+                Some(WPARAM(state.font.0 as usize)),
+                Some(LPARAM(1)),
+            );
+        }
+        update(hwnd, &state);
         if let Ok(icon) = crate::startup::application_icon() {
             SendMessageW(
                 hwnd,
