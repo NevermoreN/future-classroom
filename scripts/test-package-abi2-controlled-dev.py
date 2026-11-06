@@ -110,6 +110,14 @@ class FormalMsvcAbi2Contract(unittest.TestCase):
         complete=dict(current, **{name:name.encode() for name in builder['PWA_PAYLOADS']})
         self.assertEqual(shared['require_admitted_artifacts']({'version':'0.1.5'},complete,current_artifacts,True),20)
         self.assertEqual(builder['payload_readback_label'](20),'ALL_TWENTY_EXACT')
+        screenshots={f'web/assets/{name}-ABCDEFGH.png' for name in builder['TUTORIAL_SCREENSHOTS']}
+        tutorial=set(complete) | screenshots
+        self.assertEqual(builder['require_payload_members']('0.1.8',tutorial),31)
+        self.assertEqual(builder['payload_readback_label'](31),'ALL_THIRTY_ONE_EXACT')
+        with self.assertRaises(ValueError):
+            builder['require_payload_members']('0.1.8',tutorial - {next(iter(screenshots))})
+        with self.assertRaises(ValueError):
+            builder['require_payload_members']('0.1.5',tutorial)
         for name in builder['PWA_PAYLOADS']:
             incomplete=dict(complete);del incomplete[name]
             with self.assertRaises(ValueError):
