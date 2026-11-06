@@ -698,6 +698,77 @@ pub fn default_public_layout() -> LayoutTree {
         ],
     }
 }
+/// Appearance-only first-install preset captured from the approved desktop.
+/// The historical structural template remains available for old layout operations.
+pub fn first_install_public_layout() -> LayoutTree {
+    let mut tree = default_public_layout();
+    tree.nodes
+        .retain(|n| ![fixed_id(2), fixed_id(3)].contains(&n.id));
+    tree.nodes[0].children = [8, 10, 4, 5, 6, 7, 9, 11]
+        .into_iter()
+        .map(fixed_id)
+        .collect();
+    tree.canvas_frames = vec![
+        CanvasFrame {
+            node_id: fixed_id(8),
+            x: 1788,
+            y: 0,
+            width: 480,
+            height: 362,
+        },
+        CanvasFrame {
+            node_id: fixed_id(10),
+            x: 1801,
+            y: 374,
+            width: 467,
+            height: 630,
+        },
+        CanvasFrame {
+            node_id: fixed_id(4),
+            x: 2280,
+            y: 16,
+            width: 280,
+            height: 160,
+        },
+        CanvasFrame {
+            node_id: fixed_id(5),
+            x: 2280,
+            y: 188,
+            width: 280,
+            height: 84,
+        },
+        CanvasFrame {
+            node_id: fixed_id(6),
+            x: 2263,
+            y: 547,
+            width: 297,
+            height: 845,
+        },
+        CanvasFrame {
+            node_id: fixed_id(7),
+            x: 2274,
+            y: 296,
+            width: 286,
+            height: 239,
+        },
+        CanvasFrame {
+            node_id: fixed_id(9),
+            x: 1485,
+            y: 0,
+            width: 291,
+            height: 208,
+        },
+        CanvasFrame {
+            node_id: fixed_id(12),
+            x: 9,
+            y: 3,
+            width: 520,
+            height: 569,
+        },
+    ];
+    tree
+}
+
 pub fn default_subject_layout(key: SubjectProfileKey) -> LayoutTree {
     LayoutTree {
         canvas_frames: vec![],

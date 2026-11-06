@@ -395,7 +395,10 @@ fn about_reports_running_version_locally_without_login_or_install_side_effects()
         .unwrap();
     let response = fixture.dispatch(&request, b"");
     assert_eq!(response.head.status, 200);
-    assert_eq!(field(&response.body, "version"), env!("CARGO_PKG_VERSION"));
+    assert_eq!(
+        field(&response.body, "version"),
+        fc_domain::PRODUCT_DISPLAY_VERSION
+    );
     assert!(text(&response.body).contains("\"automaticUpdates\":true"));
     assert!(text(&response.body).contains("\"updateAvailable\":false"));
     assert!(!text(&response.body).contains(PASSWORD));

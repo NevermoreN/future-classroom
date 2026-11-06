@@ -1243,6 +1243,14 @@ impl<S: Send> TransactionTask<S> for IdentityTask<S> {
                     key: recovery::INSTALLATION.into(),
                     value: recovery::installation_bytes(id)?,
                 });
+                let revision = d
+                    .revision()?
+                    .next()
+                    .map_err(|_| StorageError::InvalidCommand)?;
+                let mut settings = fc_domain::desktop::first_install_display_settings();
+                settings.revision = revision;
+                mutations.push(display::mutation(&settings)?);
+                mutations.extend(profiles::first_install_mutations(revision)?);
             }
         }
         if transition.next.installation.is_some() {

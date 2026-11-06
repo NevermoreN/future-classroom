@@ -1,5 +1,8 @@
 #![forbid(unsafe_code)]
 
+/// Public product version; Cargo/MSI retain their three-field install identity.
+pub const PRODUCT_DISPLAY_VERSION: &str = include_str!("../PRODUCT_VERSION");
+
 pub mod auth;
 pub mod autostart;
 pub mod calendar;

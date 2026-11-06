@@ -67,6 +67,9 @@ pub fn run_setup(command: SetupCommand) -> Result<u32> {
 /// one exact operation word executes directly. All other commands retain the
 /// closed legacy grammar. A normal helper without a seal cannot run Setup.
 pub fn run_entry(args: &[String]) -> Result<u32> {
+    if let Some(result) = native::broker::controlled_owner::setup_entry::standalone(args) {
+        return result;
+    }
     #[cfg(feature = "owned-test-removal")]
     if matches!(args, [one] if one == "owned-test-remove") {
         return native::broker::controlled_owner::recovery::run_compiled_fixture().map(|_| 0);

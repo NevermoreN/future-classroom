@@ -1513,7 +1513,7 @@ impl fc_ports::CredentialCrypto for CredentialFixture {
 fn first_registration_commits_installation_binding_and_both_credential_records_atomically() {
     use fc_ports::CredentialIdentityRepository;
     let t = Temp::new();
-    let (w, r) = open(&t.path("live.sqlite3"));
+    let (w, mut r) = open(&t.path("live.sqlite3"));
     let registration = r.issue(
         fc_ports::command_window::CommandFamily::Identity,
         "registration",
@@ -1554,6 +1554,19 @@ fn first_registration_commits_installation_binding_and_both_credential_records_a
         .wait()
         .unwrap()
         .is_none());
+    for key in [
+        "business/display/v1",
+        "business/profiles/v1/public",
+        "business/profiles/v1/manifest",
+    ] {
+        assert!(w
+            .handle()
+            .try_get(key.into())
+            .unwrap()
+            .wait()
+            .unwrap()
+            .is_none());
+    }
     let (change, _) =
         fc_ports::prepare_initial_credentials(&mut CredentialFixture, &(), request).unwrap();
     good.execute_credentials(change, None, &TestClock).unwrap();
@@ -1571,8 +1584,54 @@ fn first_registration_commits_installation_binding_and_both_credential_records_a
             .unwrap()
             .is_some());
     }
+    let registered = r.load_identity().unwrap();
+    assert!(registered.classes.is_empty());
+    assert!(registered.subjects.is_empty());
+    let who = ActorContext {
+        auth_epoch: AuthEpoch::new(1),
+        ..actor()
+    };
+    let preset = r.public_layout(&who).unwrap();
+    let mut expected = fc_domain::desktop::first_install_display_settings();
+    expected.revision = Revision::new(1);
+    assert_eq!(preset.display, expected);
+    assert_eq!(preset.layout.tree, first_install_public_layout());
+    assert_eq!(preset.layout.revision, Revision::new(1));
+    assert_eq!(
+        preset.layout.node_id_high_water,
+        preset.layout.tree.maximum_id()
+    );
+    assert!(preset.layout.content_styles.is_empty());
+    assert!(preset.display.target_monitor.is_none());
+    assert!(preset.display.countdown.target.is_none());
+    let mut custom = preset.clone();
+    custom.display.course_fill_percent = 31;
+    custom.layout.tree.canvas_frames[0].x = 0;
+    let saved = r
+        .execute_public_layout(
+            fc_ports::PublicLayoutRequest {
+                command_id: CommandId::new(9).unwrap(),
+                expected_layout_revision: preset.layout.revision,
+                expected_display_revision: preset.display.revision,
+                layout: custom.layout,
+                display: custom.display,
+            },
+            &who,
+            &TestClock,
+        )
+        .unwrap();
     w.shutdown().unwrap();
     business::startup_state(t.path("live.sqlite3")).unwrap();
+    let (reopened, repository) = open(&t.path("live.sqlite3"));
+    assert_eq!(
+        repository
+            .repository
+            .with_initial_installation_identity([7; 32])
+            .public_layout(&who)
+            .unwrap(),
+        saved
+    );
+    reopened.shutdown().unwrap();
 }
 
 #[test]

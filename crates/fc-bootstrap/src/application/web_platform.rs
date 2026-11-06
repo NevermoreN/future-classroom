@@ -132,7 +132,7 @@ pub(super) fn hook(
                 Ok(PlatformReply::Status(
                     value.global_revision().map_err(map_backend)?,
                     dto::Status {
-                        application_version: env!("CARGO_PKG_VERSION").into(),
+                        application_version: fc_domain::PRODUCT_DISPLAY_VERSION.into(),
                         school_name: installation.map(|i| i.school_name.clone()),
                         current_class_id: installation
                             .and_then(|i| i.current_class.map(|id| id.get().to_string())),

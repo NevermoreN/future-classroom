@@ -27,7 +27,7 @@ const chapters: Chapter[] = [
     <Figure src={workspace} alt="教师工作台，标出全局设置、作业、资料和语音入口" note="①全局设置　②作业　③课堂资料　④语音播报" />
   </> },
   { id:'install', group:'从零开始', title:'1. 安装与打开', keywords:'安装包 解压 安装 桌面 开始菜单 托盘 设置 退出', content:<>
-    <ol><li>在教室电脑上找到老师或管理员提供的未来教室安装压缩包，先<strong>完整解压</strong>到一个文件夹。</li><li>打开解压后的文件夹，双击 <strong>Install.cmd</strong>，按屏幕提示完成安装。</li><li>从电脑桌面或 Windows 开始菜单打开“未来教室”。</li><li>在屏幕右下角找到未来教室图标，右键点击，选择<strong>设置</strong>，打开本机管理网页。看不到图标时，先点任务栏右下角的“∧”。</li></ol>
+    <ol><li>在教室电脑上找到管理员提供的未来教室 <strong>.exe 安装程序</strong>，双击打开安装向导。</li><li>点<strong>立即安装</strong>，等待显示“安装完成”，再点<strong>打开未来教室</strong>。</li><li>从电脑桌面或 Windows 开始菜单打开“未来教室”。</li><li>在屏幕右下角找到未来教室图标，右键点击，选择<strong>设置</strong>，打开本机管理网页。看不到图标时，先点任务栏右下角的“∧”。</li></ol>
     <Tip>需要结束程序时，右键右下角图标选择“退出”。打开其他窗口或最大化软件时，桌面信息会被窗口挡住，回到桌面即可查看。</Tip>
   </> },
   { id:'setup', group:'从零开始', title:'2. 首次创建管理员', keywords:'初始化 密码 恢复码 学校 首次 账号 登录', content:<>

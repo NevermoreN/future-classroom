@@ -194,7 +194,7 @@ impl UpdateControl {
         Ok(Self {
             inner: Arc::new(Mutex::new(State {
                 status: UpdateStatus {
-                    version: env!("CARGO_PKG_VERSION").into(),
+                    version: fc_domain::PRODUCT_DISPLAY_VERSION.into(),
                     automatic_updates: state.policy.enabled
                         && state.policy.download
                         && state.policy.install_mode == UpdateInstallMode::AutomaticAfterDownload,

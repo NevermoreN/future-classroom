@@ -128,6 +128,24 @@ impl Default for DisplaySettings {
         }
     }
 }
+/// Appearance only: no school, course, teacher, file or countdown data.
+pub fn first_install_display_settings() -> DisplaySettings {
+    let mut settings = DisplaySettings {
+        clock_mode: ClockMode::Analog,
+        course_fill_percent: 67,
+        homework_fill_percent: 24,
+        glass_surface_percent: 54,
+        edge_reflection_percent: 68,
+        ..DisplaySettings::default()
+    };
+    for component in &mut settings.components {
+        if component.kind == ComponentKind::Schedule {
+            component.font_dip = 30;
+        }
+    }
+    settings
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DisplayError {
     Identity(IdentityError),

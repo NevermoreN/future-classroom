@@ -8,6 +8,7 @@ const current = { schemaVersion: 1, version: '0.1.5', automaticUpdates: true, up
 describe('local about page', () => {
   it('accepts actual server version and honest unavailable update status', () => {
     expect(aboutInfo(current)).toEqual(current)
+    expect(aboutInfo({ ...current, version: '1.0.0.1' }).version).toBe('1.0.0.1')
     expect(aboutInfo({ ...current, version: '0.2.0-beta.1' }).version).toBe('0.2.0-beta.1')
     for (const value of [{ ...current, version: '' }, { ...current, version: '0.1.5<script>' }, { ...current, automaticUpdates: 'false' }, { ...current, updateMessage: '' }, { ...current, secret: 'unexpected' }]) {
       expect(() => aboutInfo(value)).toThrow()

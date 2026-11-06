@@ -12,7 +12,7 @@ export function aboutInfo(raw: unknown): AboutInfo {
   const fields = ['schemaVersion', 'version', 'automaticUpdates', 'updateAvailable', 'updateMessage', 'actionToken', 'phase', 'receivedBytes', 'totalBytes', 'groupId']
   if (Object.keys(value).length !== fields.length || Object.keys(value).some(key => !fields.includes(key))
     || value.schemaVersion !== 1 || typeof value.automaticUpdates !== 'boolean' || typeof value.updateAvailable !== 'boolean'
-    || typeof value.version !== 'string' || !/^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/.test(value.version) || value.version.length > 128
+    || typeof value.version !== 'string' || !/^[0-9]+\.[0-9]+\.[0-9]+(?:\.[0-9]+)?(?:[-+][0-9A-Za-z.-]+)?$/.test(value.version) || value.version.length > 128
     || typeof value.updateMessage !== 'string' || value.updateMessage.length === 0 || value.updateMessage.length > 1024
     || /[\u0000-\u001f\u007f]/u.test(value.updateMessage)
     || typeof value.actionToken !== 'string' || !/^(?:[0-9a-f]{64})?$/.test(value.actionToken)

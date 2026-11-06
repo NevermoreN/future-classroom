@@ -126,7 +126,7 @@ impl WebApplication {
             200,
             responses::about(&responses::About {
                 schema_version: 1,
-                version: env!("CARGO_PKG_VERSION"),
+                version: fc_domain::PRODUCT_DISPLAY_VERSION,
                 automatic_updates: true,
                 update_available: false,
                 update_message: "自动更新默认开启，更新服务暂未启动。",

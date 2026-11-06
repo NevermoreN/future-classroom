@@ -72,6 +72,25 @@ impl Catalog {
         ProfileId::new(self.count).map_err(|_| StorageError::Database)
     }
 }
+/// Seed only the real first-registration transaction; missing old documents keep
+/// their historical read behavior rather than silently acquiring a new preset.
+pub(super) fn first_install_mutations(revision: Revision) -> Result<Vec<Mutation>, StorageError> {
+    let tree = fc_domain::layout::first_install_public_layout();
+    let layout = LayoutDocument {
+        revision,
+        node_id_high_water: tree.maximum_id(),
+        tree,
+        content_styles: Vec::new(),
+    };
+    Ok(vec![
+        put(PUBLIC.into(), dto::public(&layout))?,
+        Catalog {
+            count: 0,
+            public: true,
+        }
+        .mutation()?,
+    ])
+}
 fn entry(v: &Value) -> Result<fc_ports::ProfileSummary, StorageError> {
     codec::object_fields(v, &["id", "key", "revision", "enabled"])?;
     let e = fc_ports::ProfileSummary {

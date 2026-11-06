@@ -404,10 +404,7 @@ fn run() -> Result<(), String> {
             Err("native application probe must run on Windows".into())
         }
         [flag] if flag == "--version" => {
-            println!(
-                "FutureClassroom {} / D11 / development; Win7/Win10/Win11 product acceptance NOT_VALIDATED",
-                env!("CARGO_PKG_VERSION")
-            );
+            println!("FutureClassroom {}", fc_domain::PRODUCT_DISPLAY_VERSION);
             Ok(())
         }
         [flag] if flag == "--self-check" => self_check(),

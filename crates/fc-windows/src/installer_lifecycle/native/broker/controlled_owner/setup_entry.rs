@@ -5,6 +5,10 @@ use super::super::super::super::broker::{self as entry, SetupCommand};
 use super::*;
 use windows::Win32::{System::LibraryLoader::GetModuleHandleW, UI::WindowsAndMessaging::*};
 
+mod setup_ui;
+mod standalone;
+pub(crate) use standalone::dispatch as standalone;
+
 const INSTALL: u16 = 101;
 const REPAIR: u16 = 102;
 const UNINSTALL: u16 = 103;

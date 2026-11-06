@@ -3,6 +3,7 @@ fn main() {
     // the final binary when it changes instead of reusing a stale linked EXE.
     println!("cargo:rerun-if-changed=../../scripts/link-win7-gnu.sh");
     println!("cargo:rerun-if-changed=../../assets/icons/future-classroom.ico");
+    println!("cargo:rerun-if-changed=../fc-domain/PRODUCT_VERSION");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {
         return;
     }
@@ -12,11 +13,50 @@ fn main() {
         output.join("future-classroom.ico"),
     )
     .expect("copy generated application icon");
-    std::fs::write(
-        output.join("application.rc"),
-        b"101 ICON \"future-classroom.ico\"\r\n1 24 \"application.manifest\"\r\n",
-    )
-    .expect("write application icon resource");
+    let version = std::fs::read_to_string("../fc-domain/PRODUCT_VERSION")
+        .expect("read public product version");
+    let fields: Vec<u16> = version
+        .split('.')
+        .map(|field| field.parse().expect("numeric file version"))
+        .collect();
+    assert!(fields.len() == 4, "four-field public file version");
+    let numeric = fields
+        .iter()
+        .map(u16::to_string)
+        .collect::<Vec<_>>()
+        .join(",");
+    let resource = format!(
+        r#"101 ICON "future-classroom.ico"
+1 24 "application.manifest"
+1 VERSIONINFO
+FILEVERSION {numeric}
+PRODUCTVERSION {numeric}
+FILEFLAGSMASK 0x3fL
+FILEFLAGS 0x0L
+FILEOS 0x40004L
+FILETYPE 0x1L
+FILESUBTYPE 0x0L
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904b0"
+    BEGIN
+      VALUE "CompanyName", "FutureClassroom\0"
+      VALUE "FileDescription", "FutureClassroom\0"
+      VALUE "FileVersion", "{version}\0"
+      VALUE "ProductName", "FutureClassroom\0"
+      VALUE "ProductVersion", "{version}\0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0409, 1200
+  END
+END
+"#
+    );
+    std::fs::write(output.join("application.rc"), resource)
+        .expect("write application icon resource");
     // Declare the current-user entry explicitly. Legacy installer detection
     // otherwise treats the sealed Setup.exe name as requiring elevation before
     // its native per-user installer can apply the actual Windows/MSI policy.
