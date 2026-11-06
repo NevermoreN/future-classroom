@@ -11,17 +11,29 @@ use std::{
 pub(super) const MAGIC: &[u8; 16] = b"FC-SFX-PACK\0v1\0\0";
 const FOOTER: u64 = 88;
 const MAGIC_V2: &[u8; 16] = b"FC-SFX-PACK\0v2\0\0";
-const NAMES: [&str; 6] = [
+const MAGIC_V3: &[u8; 16] = b"FC-SFX-PACK\0v3\0\0";
+const NAMES: [&str; 8] = [
     "Setup.exe",
     "FutureClassroom.msi",
     "LICENSE",
     "THIRD-PARTY-NOTICES.txt",
     "previous/Setup.exe",
     "previous/FutureClassroom.msi",
+    "legacy/Setup.exe",
+    "legacy/FutureClassroom.msi",
 ];
-// Fixed members total at most 166 MiB; the executable prefix is capped at
-// 32 MiB separately. Notices include the complete bundled dependency licenses.
-const LIMITS: [u64; 6] = [32 << 20, 128 << 20, 2 << 20, 4 << 20, 32 << 20, 128 << 20];
+// Each original maintenance pair has its own fixed bounds; the executable
+// prefix is capped at 32 MiB separately. Notices include the complete bundled dependency licenses.
+const LIMITS: [u64; 8] = [
+    32 << 20,
+    128 << 20,
+    2 << 20,
+    4 << 20,
+    32 << 20,
+    128 << 20,
+    32 << 20,
+    128 << 20,
+];
 fn io<T>(value: std::io::Result<T>) -> Result<T> {
     value.map_err(|e| {
         LifecycleError::Native(HRESULT::from_win32(e.raw_os_error().unwrap_or(1) as u32))
@@ -51,16 +63,41 @@ impl Package {
             io(image.seek(SeekFrom::End(-104)))?;
             io(image.read_exact(&mut tail))?;
         }
-        let footer_size = if &tail == MAGIC_V2 { 104 } else { FOOTER };
+        let mut third = [0; 16];
+        if size >= 120 {
+            io(image.seek(SeekFrom::End(-120)))?;
+            io(image.read_exact(&mut third))?;
+        }
+        let footer_size = if &third == MAGIC_V3 {
+            120
+        } else if &tail == MAGIC_V2 {
+            104
+        } else {
+            FOOTER
+        };
         io(image.seek(SeekFrom::End(-(footer_size as i64))))?;
         let mut footer = vec![0; footer_size as usize];
         io(image.read_exact(&mut footer))?;
-        if &footer[..16] != if footer_size == 104 { MAGIC_V2 } else { MAGIC } {
+        if &footer[..16]
+            != if footer_size == 120 {
+                MAGIC_V3
+            } else if footer_size == 104 {
+                MAGIC_V2
+            } else {
+                MAGIC
+            }
+        {
             return Ok(None);
         }
         let number = |offset| u64::from_le_bytes(footer[offset..offset + 8].try_into().unwrap());
         let offset = number(16);
-        let count = if footer_size == 104 { 6 } else { 4 };
+        let count = if footer_size == 120 {
+            8
+        } else if footer_size == 104 {
+            6
+        } else {
+            4
+        };
         let lengths: Vec<_> = (0..count).map(|i| number(24 + 8 * i)).collect();
         let mut end = offset;
         if !(512..=32 << 20).contains(&offset) {
@@ -99,10 +136,14 @@ impl Package {
             root,
             pins: Vec::new(),
             directory: None,
-            previous: self.lengths.len() == 6,
+            previous: self.lengths.len() >= 6,
+            legacy: self.lengths.len() == 8,
         };
         if extracted.previous {
             io(std::fs::create_dir(extracted.root.join("previous")))?;
+        }
+        if extracted.legacy {
+            io(std::fs::create_dir(extracted.root.join("legacy")))?;
         }
         extracted.directory = Some(io(OpenOptions::new()
             .read(true)
@@ -133,10 +174,11 @@ impl Package {
             io(output.sync_all())?;
             drop(output);
             if index >= 4 {
-                let expected = if index == 4 {
-                    super::previous_source::SETUP_SHA
-                } else {
-                    super::previous_source::MSI_SHA
+                let expected = match index {
+                    4 => super::previous_source::SETUP_SHA,
+                    5 => super::previous_source::MSI_SHA,
+                    6 => super::previous_source::LEGACY_SETUP_SHA,
+                    _ => super::previous_source::LEGACY_MSI_SHA,
                 };
                 if <[u8; 32]>::from(member_digest.finalize()) != expected {
                     return Err(LifecycleError::Invalid);
@@ -158,6 +200,7 @@ pub(super) struct Extracted {
     pins: Vec<File>,
     directory: Option<File>,
     pub(super) previous: bool,
+    pub(super) legacy: bool,
 }
 impl Extracted {
     pub(super) fn cleanup(&mut self) -> Result<()> {
@@ -166,9 +209,15 @@ impl Extracted {
         if !self.root.exists() {
             return Ok(());
         }
-        // Delete only the four fixed files we created, never recurse through an
+        // Delete only the fixed files we created, never recurse through an
         // unexpected object that an unrelated process may have placed here.
-        for name in NAMES.into_iter().take(if self.previous { 6 } else { 4 }) {
+        for name in NAMES.into_iter().take(if self.legacy {
+            8
+        } else if self.previous {
+            6
+        } else {
+            4
+        }) {
             match std::fs::remove_file(self.root.join(name)) {
                 Ok(()) => (),
                 Err(e) if e.kind() == std::io::ErrorKind::NotFound => (),
@@ -176,6 +225,9 @@ impl Extracted {
                     io::<()>(Err(e))?;
                 }
             }
+        }
+        if self.legacy {
+            io(std::fs::remove_dir(self.root.join("legacy")))?;
         }
         if self.previous {
             io(std::fs::remove_dir(self.root.join("previous")))?;
@@ -208,21 +260,13 @@ pub(crate) fn dispatch(args: &[String]) -> Option<Result<u32>> {
         ) && matches!(force.as_str(), "normal" | "force")
             && matches!(data.as_str(), "keep" | "delete")
         {
-            return Some(super::maintenance::run(
-                package,
-                mode,
-                force == "force",
-                data == "delete",
-            ));
+            return Some(super::maintenance::run(package, mode, data == "delete"));
         }
     }
     match args {
-        [one] if one == "install" || one == "repair" => Some(super::maintenance::run(
-            package,
-            "maintain-repair",
-            false,
-            false,
-        )),
+        [one] if one == "install" || one == "repair" => {
+            Some(super::maintenance::run(package, "maintain-repair", false))
+        }
         _ => Some(Err(LifecycleError::Invalid)),
     }
 }

@@ -43,4 +43,17 @@ class StandaloneTests(unittest.TestCase):
             with self.assertRaises(ValueError):S['inspect'](bytes(changed))
         with self.assertRaises(ValueError):S['package'](self.helper,dict(self.members, **{'previous/Setup.exe':b'partial'}))
 
+    def test_legacy_bridge_pair_requires_complete_v3_envelope(self):
+        members = dict(self.members)
+        for names in (S['PREVIOUS_NAMES'], S['LEGACY_NAMES']):
+            members.update(dict(zip(names, [self.members['Setup.exe'], self.members['FutureClassroom.msi']])))
+        image = S['package'](self.helper, members)
+        self.assertEqual(image[-120:-104], S['MAGIC_V3'])
+        self.assertEqual(S['inspect'](image), (self.helper, members))
+        for offset in (-121, -110, -1):
+            changed = bytearray(image); changed[offset] ^= 1
+            with self.assertRaises(ValueError): S['inspect'](bytes(changed))
+        del members['legacy/FutureClassroom.msi']
+        with self.assertRaises(ValueError): S['package'](self.helper, members)
+
 if __name__ == '__main__':unittest.main()

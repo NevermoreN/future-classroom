@@ -18,7 +18,6 @@ const PRIMARY: usize = 201;
 const CLOSE: usize = 202;
 const UNINSTALL: usize = 203;
 const DELETE_DATA: usize = 204;
-const FORCE: usize = 205;
 struct State {
     _package: Package,
     installed: bool,
@@ -276,7 +275,6 @@ unsafe fn update(hwnd: HWND, state: &State) {
         for (id, visible) in [
             (UNINSTALL, state.installed && !state.complete),
             (DELETE_DATA, state.uninstall && !state.complete),
-            (FORCE, state.installed && !state.complete),
         ] {
             if let Ok(control) = GetDlgItem(Some(hwnd), id as i32) {
                 let _ = ShowWindow(control, if visible { SW_SHOW } else { SW_HIDE });
@@ -331,7 +329,7 @@ fn finish_child(hwnd: HWND, state: &mut State) {
         "安装已取消，原有账号、课表和资料会保留。可以点击重试安装。".to_owned()
     } else {
         format!(
-            "操作没有完成（代码 {}），不会当作卸载成功。\n可勾选强制停止后重试。若仍失败，请将代码告知管理员；原数据不会因安装失败被自动删除。",
+            "操作没有完成（代码 {}），不会当作卸载成功。\n请将代码告知管理员；原数据不会因安装失败被自动删除。",
             state.result
         )
     };
@@ -376,7 +374,7 @@ unsafe extern "system" fn procedure(
                 if state.child.is_none() {
                     let _ = DestroyWindow(hwnd);
                 } else {
-                    state.message="正在安装，请等待完成后再关闭。\n不要关闭电脑；安装完成后可以直接打开未来教室。".to_owned();
+                    state.message="正在处理，请等待完成后再关闭。\n安装或修复成功后，未来教室会立即自动启动。".to_owned();
                     update(hwnd, state);
                 }
                 LRESULT(0)
@@ -394,7 +392,7 @@ unsafe extern "system" fn procedure(
                             SendMessageW(control, BM_SETCHECK, Some(WPARAM(0)), None);
                         }
                         state.message = if state.uninstall {
-                            "默认保留原有账号、设置和资料。需要彻底清理时，勾选下方删除数据；无法退出时可选择强制停止。".to_owned()
+                            "默认保留原有账号、设置和资料。需要彻底清理时，勾选下方删除数据；运行中的未来教室会自动结束。".to_owned()
                         } else {
                             "修复会重新安装程序文件，并保留原有账号、设置、课表和资料。".to_owned()
                         };
@@ -410,8 +408,6 @@ unsafe extern "system" fn procedure(
                             && GetDlgItem(Some(hwnd), DELETE_DATA as i32)
                                 .is_ok_and(|c| SendMessageW(c, BM_GETCHECK, None, None).0 == 1);
                         if state.delete_data && MessageBoxW(Some(hwnd), w!("将永久删除未来教室的账号、设置、课表、课堂资料及更新缓存。确定完整清理吗？"), w!("确认删除全部数据"), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES { return LRESULT(0); }
-                        let force = GetDlgItem(Some(hwnd), FORCE as i32)
-                            .is_ok_and(|c| SendMessageW(c, BM_GETCHECK, None, None).0 == 1);
                         let started = (|| {
                             let path =
                                 std::env::current_exe().map_err(|_| LifecycleError::Invalid)?;
@@ -424,7 +420,7 @@ unsafe extern "system" fn procedure(
                                     } else {
                                         "maintain-install"
                                     },
-                                    if force { "force" } else { "normal" },
+                                    "force",
                                     if state.delete_data { "delete" } else { "keep" },
                                 ])
                                 .spawn()
@@ -434,9 +430,9 @@ unsafe extern "system" fn procedure(
                             Ok(child) => {
                                 state.child = Some(child);
                                 state.message = if state.uninstall {
-                                    "正在停止未来教室并卸载，请稍候。只有实际卸载成功后才会清理所选数据。".to_owned()
+                                    "正在自动结束未来教室并卸载，请稍候。只有实际卸载成功后才会清理所选数据。".to_owned()
                                 } else {
-                                    "正在修复安装，原有数据会保留。完成后自动启动；系统权限提示仍需允许。".to_owned()
+                                    "正在自动结束未来教室并安装，原有数据会保留。完成后立即启动；系统权限提示仍需允许。".to_owned()
                                 };
                             }
                             Err(_) => {
@@ -596,14 +592,8 @@ pub(super) fn show(package: Package, uninstall: bool) -> Result<u32> {
         create(PRIMARY, "立即安装", 280, 176)?;
         create(UNINSTALL, "卸载", 464, 70)?;
         create(CLOSE, "退出", 542, 74)?;
-        for (id, caption, y) in [
-            (DELETE_DATA, "删除全部数据（账号、设置、课表和资料）", 282),
-            (
-                FORCE,
-                "无法退出时强制停止未来教室（可能中断未保存操作）",
-                310,
-            ),
-        ] {
+        {
+            let (id, caption, y) = (DELETE_DATA, "删除全部数据（账号、设置、课表和资料）", 282);
             let checkbox = CreateWindowExW(
                 WINDOW_EX_STYLE(0),
                 w!("BUTTON"),

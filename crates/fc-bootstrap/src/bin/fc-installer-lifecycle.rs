@@ -8,6 +8,13 @@ fn main() {
     let code =
         fc_windows::installer_lifecycle::broker::run_entry(&arguments).unwrap_or_else(|error| {
             use fc_windows::installer_lifecycle::LifecycleError;
+            if arguments.is_empty()
+                || matches!(arguments.as_slice(), [one] if one == "uninstall" || one == "maintenance")
+            {
+                let _ = fc_windows::startup::show_startup_failure(&format!(
+                    "无法打开未来教室安装与维护界面。\n错误：{error:?}\n请保留此信息以便排查；已有设置和资料不会因此删除。"
+                ));
+            }
             match error {
                 LifecycleError::Busy | LifecycleError::GuardianRunning => 1618,
                 LifecycleError::Pending | LifecycleError::Unsettled => 1604,

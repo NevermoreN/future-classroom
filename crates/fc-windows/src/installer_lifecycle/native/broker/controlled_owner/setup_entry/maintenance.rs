@@ -63,7 +63,7 @@ pub(super) fn exists() -> Result<bool> {
             .exists())
 }
 
-fn stop_product(force: bool) -> Result<()> {
+fn stop_product() -> Result<()> {
     let paths = crate::system::DataPaths::program_data()?;
     let title = HSTRING::from(paths.root().join("runtime/instance.lock").as_os_str());
     let Ok(hwnd) =
@@ -78,13 +78,7 @@ fn stop_product(force: bool) -> Result<()> {
     }
     let mut resources = Resources::empty()?;
     resources.sid = resources.token_sid(unsafe { GetCurrentProcess() })?;
-    let rights = PROCESS_QUERY_LIMITED_INFORMATION
-        | PROCESS_SYNCHRONIZE
-        | if force {
-            PROCESS_TERMINATE
-        } else {
-            PROCESS_ACCESS_RIGHTS(0)
-        };
+    let rights = PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_SYNCHRONIZE | PROCESS_TERMINATE;
     let process = unsafe { OpenProcess(rights, false, pid)? };
     resources.add(process, Role::Control);
     let target = crate::system::DataPaths::installed_bootstrap_for_current_user()?;
@@ -99,11 +93,11 @@ fn stop_product(force: bool) -> Result<()> {
     unsafe {
         PostMessageW(Some(hwnd), WM_CLOSE, WPARAM(0), LPARAM(0))?;
     }
-    let deadline = Instant::now() + Duration::from_secs(if force { 5 } else { 30 });
+    let deadline = Instant::now() + Duration::from_secs(5);
     while unsafe { WaitForSingleObject(process, 0) } == WAIT_TIMEOUT && Instant::now() < deadline {
         std::thread::sleep(Duration::from_millis(40));
     }
-    if unsafe { WaitForSingleObject(process, 0) } == WAIT_TIMEOUT && force {
+    if unsafe { WaitForSingleObject(process, 0) } == WAIT_TIMEOUT {
         unsafe {
             TerminateProcess(process, 1602)?;
         }
@@ -116,11 +110,12 @@ fn stop_product(force: bool) -> Result<()> {
     resources.release()
 }
 
-pub(super) fn run(mut package: Package, mode: &str, force: bool, delete_data: bool) -> Result<u32> {
+pub(super) fn run(mut package: Package, mode: &str, delete_data: bool) -> Result<u32> {
     let mut source = package.extract()?;
-    stop_product(force)?;
+    stop_product()?;
     let old = installed()?;
     let previous = old.as_deref() == Some(super::previous_source::VERSION);
+    let legacy = old.as_deref() == Some(super::previous_source::LEGACY_VERSION);
     let invoke = |directory: &std::path::Path, operation: &str| -> Result<u32> {
         let mut child = io(Command::new(directory.join("Setup.exe"))
             .arg(operation)
@@ -129,19 +124,26 @@ pub(super) fn run(mut package: Package, mode: &str, force: bool, delete_data: bo
         Ok(io(child.wait())?.code().ok_or(LifecycleError::Unsettled)? as u32)
     };
     let mut code;
-    if previous {
-        if !source.previous {
+    if previous || legacy {
+        if !source.previous || (legacy && !source.legacy) {
             return Err(LifecycleError::UpgradeProtocolUnsupported);
         }
         let prior = source.root.join("previous");
         code = invoke(
-            &prior,
+            &if legacy {
+                source.root.join("legacy")
+            } else {
+                prior.clone()
+            },
             if mode == "maintain-uninstall" {
                 "uninstall"
             } else {
                 "repair"
             },
         )?;
+        if code == 0 && legacy && mode != "maintain-uninstall" {
+            code = invoke(&prior, "install")?;
+        }
         if code == 0 && mode != "maintain-uninstall" {
             code = invoke(&source.root, "install")?;
         }
@@ -161,6 +163,19 @@ pub(super) fn run(mut package: Package, mode: &str, force: bool, delete_data: bo
         } else {
             invoke(&source.root, operation)?
         };
+    }
+    // The exact old 1.0.0.2/3 helpers can fail their Shell cleanup after MSI
+    // already removed the directory. Reconcile actual absence under the native
+    // exclusive gate; never turn an unsettled MSI transaction into success.
+    if mode == "maintain-uninstall"
+        && (previous || legacy)
+        && matches!(code, 1603 | 5104)
+        && installed()?.is_none()
+    {
+        super::super::super::maintenance::update::remove_orphaned(&source.root)?;
+        crate::installer_lifecycle::shortcuts::reconcile(entry::SetupCommand::Uninstall)
+            .map_err(|_| LifecycleError::ShellIntegration)?;
+        code = 0;
     }
     if code != 0 {
         return Ok(code);
@@ -424,7 +439,7 @@ fn schedule_cache_cleanup() -> Result<()> {
         return Err(LifecycleError::Invalid);
     }
     let script = format!(
-        r#"$ErrorActionPreference='Stop';$r=[IO.Path]::Combine([Environment]::GetFolderPath('LocalApplicationData'),'FutureClassroom-Maintenance');$g='{generation}';if([IO.File]::GetAttributes($r) -band [IO.FileAttributes]::ReparsePoint){{exit}};Get-Process | Where-Object {{try {{$_.Path -and ([IO.Path]::GetDirectoryName($_.Path) -eq $r)}}catch {{$false}}}} | ForEach-Object {{try {{$_.WaitForExit()}}catch {{}}}};$l=[IO.File]::Open([IO.Path]::Combine($r,'maintenance.lock'),'OpenOrCreate','ReadWrite','None');try {{if([IO.File]::ReadAllText([IO.Path]::Combine($r,'generation')) -ne $g){{exit}};Get-ChildItem -LiteralPath $r | Where-Object {{$_.Name -match '^FutureClassroom-1\.0\.0\.[0-9]+\.exe$' -and -not ($_.Attributes -band [IO.FileAttributes]::ReparsePoint)}} | ForEach-Object {{[IO.File]::Delete($_.FullName)}};[IO.File]::Delete([IO.Path]::Combine($r,'generation'))}}finally {{$l.Dispose()}};[IO.File]::Delete([IO.Path]::Combine($r,'maintenance.lock'));[IO.Directory]::Delete($r)"#
+        r#"$ErrorActionPreference='Stop';$r=[IO.Path]::Combine([Environment]::GetFolderPath('LocalApplicationData'),'FutureClassroom-Maintenance');$g='{generation}';if([IO.File]::GetAttributes($r) -band [IO.FileAttributes]::ReparsePoint){{exit}};Get-Process | Where-Object {{try {{$_.Path -and ([IO.Path]::GetDirectoryName($_.Path) -eq $r)}}catch {{$false}}}} | ForEach-Object {{try {{$_.WaitForExit()}}catch {{}}}};$l=[IO.File]::Open([IO.Path]::Combine($r,'maintenance.lock'),'OpenOrCreate','ReadWrite','None');try {{if([IO.File]::ReadAllText([IO.Path]::Combine($r,'generation')) -ne $g){{exit}};Get-ChildItem -LiteralPath $r | Where-Object {{$_.Name -match '^FutureClassroom-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.exe$' -and -not ($_.Attributes -band [IO.FileAttributes]::ReparsePoint)}} | ForEach-Object {{[IO.File]::Delete($_.FullName)}};[IO.File]::Delete([IO.Path]::Combine($r,'generation'))}}finally {{$l.Dispose()}};[IO.File]::Delete([IO.Path]::Combine($r,'maintenance.lock'));[IO.Directory]::Delete($r)"#
     );
     // EncodedCommand is a literal script, never a shell-interpolated path.
     let bytes: Vec<u8> = script.encode_utf16().flat_map(u16::to_le_bytes).collect();

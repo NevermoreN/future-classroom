@@ -21,11 +21,15 @@ FOOTER = 88
 MAGIC_V2 = b'FC-SFX-PACK\0v2\0\0'
 PREVIOUS_NAMES = ('previous/Setup.exe', 'previous/FutureClassroom.msi')
 PREVIOUS_LIMITS = (32 << 20, 128 << 20)
+MAGIC_V3 = b'FC-SFX-PACK\0v3\0\0'
+LEGACY_NAMES = ('legacy/Setup.exe', 'legacy/FutureClassroom.msi')
 
 
 def package(helper: bytes, members: dict[str, bytes]) -> bytes:
-    previous = set(members) == set(NAMES + PREVIOUS_NAMES)
-    names, limits = (NAMES + PREVIOUS_NAMES, LIMITS + PREVIOUS_LIMITS) if previous else (NAMES, LIMITS)
+    legacy = set(members) == set(NAMES + PREVIOUS_NAMES + LEGACY_NAMES)
+    previous = legacy or set(members) == set(NAMES + PREVIOUS_NAMES)
+    names = NAMES + (PREVIOUS_NAMES if previous else ()) + (LEGACY_NAMES if legacy else ())
+    limits = LIMITS + PREVIOUS_LIMITS * (2 if legacy else 1 if previous else 0)
     if set(members) != set(names) or not 512 <= len(helper) <= 32 << 20:
         raise ValueError('Exact normal helper and four fixed members required')
     for name, limit in zip(names, limits):
@@ -33,19 +37,22 @@ def package(helper: bytes, members: dict[str, bytes]) -> bytes:
             raise ValueError('Member exceeds its bound: ' + name)
     template = C['make_carrier_template'](helper)
     C['verify_carrier_binding'](template, members['Setup.exe'], members['FutureClassroom.msi'])
-    header = (MAGIC_V2 if previous else MAGIC) + struct.pack('<'+str(1+len(names))+'Q', len(helper), *(len(members[n]) for n in names))
+    header = (MAGIC_V3 if legacy else MAGIC_V2 if previous else MAGIC) + struct.pack('<'+str(1+len(names))+'Q', len(helper), *(len(members[n]) for n in names))
     payload = b''.join(members[name] for name in names)
     return helper + payload + header + hashlib.sha256(header + payload).digest()
 
 
 def inspect(image: bytes) -> tuple[bytes, dict[str, bytes]]:
-    previous = len(image) >= 104 and image[-104:-88] == MAGIC_V2
-    size, names, limits = (104, NAMES + PREVIOUS_NAMES, LIMITS + PREVIOUS_LIMITS) if previous else (FOOTER, NAMES, LIMITS)
+    legacy = len(image) >= 120 and image[-120:-104] == MAGIC_V3
+    previous = legacy or len(image) >= 104 and image[-104:-88] == MAGIC_V2
+    size = 120 if legacy else 104 if previous else FOOTER
+    names = NAMES + (PREVIOUS_NAMES if previous else ()) + (LEGACY_NAMES if legacy else ())
+    limits = LIMITS + PREVIOUS_LIMITS * (2 if legacy else 1 if previous else 0)
     header_size = size - 32
     if not size + 512 <= len(image) <= (32 << 20) + sum(limits) + size:
         raise ValueError('Standalone image size out of bounds')
     footer = image[-size:]
-    if footer[:16] != (MAGIC_V2 if previous else MAGIC):
+    if footer[:16] != (MAGIC_V3 if legacy else MAGIC_V2 if previous else MAGIC):
         raise ValueError('Wrong standalone footer')
     prefix, *lengths = struct.unpack('<'+str(1+len(names))+'Q', footer[16:header_size])
     if (not 512 <= prefix <= 32 << 20 or prefix + sum(lengths) + size != len(image)
@@ -68,7 +75,10 @@ def main():
         p.add_argument('--' + name, type=Path, required=True)
     p.add_argument('--report-sha256', required=True)
     p.add_argument('--previous-setup', type=Path, help='Exact previously published EXE, bound to reviewed baseline')
+    p.add_argument('--legacy-setup', type=Path, help='Exact official bridge installer; requires previous source')
     a = p.parse_args()
+    if a.legacy_setup and not a.previous_setup:
+        raise ValueError('Legacy bridge requires the exact predecessor source')
     report_raw = C['_BUILDER']['PROBE']['bounded_regular_file'](a.bundle / 'report.json', 16 << 20)
     if hashlib.sha256(report_raw).hexdigest() != a.report_sha256:
         raise ValueError('Explicit formal report digest differs')
@@ -88,22 +98,28 @@ def main():
         if len(members[name]) != fact['bytes'] or hashlib.sha256(members[name]).hexdigest() != fact['sha256']:
             raise ValueError('Formal member bytes differ: ' + name)
     if a.previous_setup:
-        from_version = '1.0.0.' + str(int(report['version'].split('.')[-1]) - 1)
-        baseline = json.loads((Path(report['sourceRoot']) / 'packaging/release-baselines' / (from_version+'.json')).read_bytes())
-        old = C['_BUILDER']['PROBE']['bounded_regular_file'](a.previous_setup, 384 << 20)
-        if {'bytes': len(old), 'sha256': hashlib.sha256(old).hexdigest()} != baseline['setupExe']:
-            raise ValueError('Previous public installer differs from reviewed baseline')
-        _, previous = inspect(old)
-        if {'bytes':len(previous['FutureClassroom.msi']), 'sha256':hashlib.sha256(previous['FutureClassroom.msi']).hexdigest()} != baseline['msi']:
-            raise ValueError('Previous MSI differs from reviewed baseline')
         import re
         source = (Path(report['sourceRoot']) / 'crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/setup_entry/previous_source.rs').read_text()
-        for symbol, member in [('SETUP_SHA', 'Setup.exe'), ('MSI_SHA', 'FutureClassroom.msi')]:
-            match = re.search(r'const '+symbol+r':\s*\[u8;\s*32\]\s*=\s*\[(.*?)\];', source, re.S)
-            expected = bytes(int(x,16) for x in re.findall(r'0x([0-9a-fA-F]{2})', match[1])) if match else b''
-            if expected != hashlib.sha256(previous[member]).digest():
-                raise ValueError('Previous member differs from same-CI native maintenance binding: '+member)
-        members.update({name:previous[name.removeprefix('previous/')] for name in PREVIOUS_NAMES})
+        for argument, prefix, names in [(a.previous_setup, '', PREVIOUS_NAMES), (a.legacy_setup, 'LEGACY_', LEGACY_NAMES)]:
+            if argument is None:
+                continue
+            version = re.search(r'const '+prefix+r'VERSION:\s*&str\s*=\s*"([0-9.]+)";', source)[1]
+            from_version = '1.0.' + '.'.join(version.split('.')[1:])
+            if not prefix and from_version != report['predecessorPublication']['baseline']['publicVersion']:
+                raise ValueError('Maintenance source must match the formal exact predecessor')
+            baseline = json.loads((Path(report['sourceRoot']) / 'packaging/release-baselines' / (from_version+'.json')).read_bytes())
+            old = C['_BUILDER']['PROBE']['bounded_regular_file'](argument, 384 << 20)
+            if {'bytes': len(old), 'sha256': hashlib.sha256(old).hexdigest()} != baseline['setupExe']:
+                raise ValueError('Previous public installer differs from reviewed baseline')
+            _, previous = inspect(old)
+            if {'bytes':len(previous['FutureClassroom.msi']), 'sha256':hashlib.sha256(previous['FutureClassroom.msi']).hexdigest()} != baseline['msi']:
+                raise ValueError('Previous MSI differs from reviewed baseline')
+            for symbol, member in [('SETUP_SHA', 'Setup.exe'), ('MSI_SHA', 'FutureClassroom.msi')]:
+                match = re.search(r'const '+prefix+symbol+r':\s*\[u8;\s*32\]\s*=\s*\[(.*?)\];', source, re.S)
+                expected = bytes(int(x,16) for x in re.findall(r'0x([0-9a-fA-F]{2})', match[1])) if match else b''
+                if expected != hashlib.sha256(previous[member]).digest():
+                    raise ValueError('Previous member differs from same-CI native maintenance binding: '+member)
+            members.update({name:previous[name.split('/',1)[1]] for name in names})
     image = package(helper, members)
     if inspect(image) != (helper, members):
         raise ValueError('Standalone complete readback failed')

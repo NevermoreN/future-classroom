@@ -318,12 +318,7 @@ impl DataPaths {
             let value = raw.to_string();
             memory.free(raw.0.cast());
             let local = PathBuf::from(value?);
-            let path = local
-                .join("Programs")
-                .join("FutureClassroom")
-                .join("fc-bootstrap.exe");
-            check_local_ancestors(&path)?;
-            Ok(path)
+            installation_path_at(&local)
         })
     }
     /// Explicit deployment operation. Creates only this project's directories with
@@ -664,6 +659,21 @@ pub fn current_user_sid() -> Result<String> {
     }
 }
 
+fn installation_path_at(local: &Path) -> Result<PathBuf> {
+    // Discovery is read-only and must also work before the first installation
+    // and after uninstall. Validate every existing parent, not a missing suffix.
+    check_local_ancestors(&local.join(".install-parent"))?;
+    let root = local.join("Programs").join("FutureClassroom");
+    for directory in [local.join("Programs"), root.clone()] {
+        match std::fs::symlink_metadata(directory) {
+            Ok(m) if m.is_dir() && m.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT.0 == 0 => (),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => break,
+            _ => return Err(Error::from_hresult(E_ACCESSDENIED)),
+        }
+    }
+    Ok(root.join("fc-bootstrap.exe"))
+}
+
 fn check_local_ancestors(root: &Path) -> Result<()> {
     let text = root
         .to_str()
@@ -900,6 +910,26 @@ mod tests {
         .read_back()
         .unwrap();
         (scratch, canonical, legacy)
+    }
+    #[test]
+    fn installation_path_discovery_survives_uninstall_without_creating_directories() {
+        let scratch = scratch("InstallDiscovery");
+        std::fs::create_dir_all(&scratch.0).unwrap();
+        let programs = scratch.0.join("Programs");
+        let root = programs.join("FutureClassroom");
+        let expected = root.join("fc-bootstrap.exe");
+        assert_eq!(installation_path_at(&scratch.0).unwrap(), expected);
+        assert!(!programs.exists());
+        std::fs::create_dir(&programs).unwrap();
+        assert_eq!(installation_path_at(&scratch.0).unwrap(), expected);
+        assert!(!root.exists());
+        std::fs::create_dir(&root).unwrap();
+        assert_eq!(installation_path_at(&scratch.0).unwrap(), expected);
+        std::fs::remove_dir(&root).unwrap();
+        assert_eq!(installation_path_at(&scratch.0).unwrap(), expected);
+        assert!(!root.exists());
+        std::fs::write(&root, b"not an installation directory").unwrap();
+        assert!(installation_path_at(&scratch.0).is_err());
     }
     #[test]
     fn absent_application_root_discovery_is_canonical_and_read_only() {

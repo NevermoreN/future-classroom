@@ -235,6 +235,20 @@ class FormalSuccessorContract(unittest.TestCase):
             with self.assertRaises(ValueError):
                 FORMAL['prepare_published_predecessor'](args, (), spec, {})
 
+    def test_reviewed_public_minor_release_maps_to_msi_minor_version(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory(prefix='fc-published-minor-') as directory:
+            root = Path(directory)
+            baseline = root / 'packaging/release-baselines/1.0.1.0.json'
+            baseline.parent.mkdir(parents=True)
+            baseline.write_text(json.dumps(dict(publicVersion='1.0.1.0', internalVersion='1.1.0',
+                sourceCommit='a'*40, ciRun=1,
+                releaseUrl='https://github.com/NevermoreN/future-classroom/releases/tag/v1.0.1.0',
+                setupExe={}, msi={})))
+            spec = dict(publishedRelease='1.0.1.0', formalArguments={}, packageReport={}, publishedSetup={})
+            with self.assertRaisesRegex(ValueError, 'Original closed normal MSVC argument set'):
+                FORMAL['prepare_published_predecessor'](SimpleNamespace(source_root=root), (), spec, {})
+
     """Synthetic boundary checks only; never publication or native evidence."""
     def record(self, target=1):
         payloads={n:n.encode() for n in FORMAL['B']['LIFECYCLE_REQUIRED']}

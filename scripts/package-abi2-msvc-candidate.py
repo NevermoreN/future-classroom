@@ -302,14 +302,15 @@ def prepare_published_predecessor(a, current: tuple, spec: dict, spec_fact: dict
     NEED(set(spec) == {'publishedRelease', 'formalArguments', 'packageReport', 'publishedSetup'},
          'Closed published-release predecessor spec')
     version = spec['publishedRelease']
-    NEED(isinstance(version, str) and re.fullmatch(r'1\.0\.0\.[1-9][0-9]*', version),
-         'Only the current 1.0.0.x official release series may be a new baseline')
+    NEED(isinstance(version, str) and re.fullmatch(r'1\.0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', version)
+         and version != '1.0.0.0',
+         'Only the current 1.0.x.y official release series may be a new baseline')
     baseline_path = a.source_root / 'packaging/release-baselines' / (version + '.json')
     baseline_raw = original_file(baseline_path)
     baseline = B['json_document'](baseline_raw)
     NEED(set(baseline) == {'publicVersion', 'internalVersion', 'sourceCommit', 'ciRun', 'releaseUrl', 'setupExe', 'msi'}
          and baseline['publicVersion'] == version
-         and baseline['internalVersion'] == '1.0.' + version.rsplit('.', 1)[1]
+         and baseline['internalVersion'] == '1.' + '.'.join(version.split('.')[2:])
          and baseline['releaseUrl'] == 'https://github.com/NevermoreN/future-classroom/releases/tag/v' + version,
          'Reviewed official release baseline and exact public/internal version mapping')
     args = spec['formalArguments']
@@ -332,7 +333,7 @@ def prepare_published_predecessor(a, current: tuple, spec: dict, spec_fact: dict
     helper, members = sfx['inspect'](outer)
     root = Path(spec['packageReport']['path']).parent
     NEED(helper == original[3]['lifecycle-compile'][1]
-         and members == {'Setup.exe': original_file(root / 'Setup.exe'), 'FutureClassroom.msi': msi,
+         and {n: members[n] for n in sfx['NAMES']} == {'Setup.exe': original_file(root / 'Setup.exe'), 'FutureClassroom.msi': msi,
                          'LICENSE': original_file(root / 'payload/LICENSE'),
                          'THIRD-PARTY-NOTICES.txt': original_file(root / 'payload/THIRD-PARTY-NOTICES.txt')},
          'Published EXE contains the exact original admitted helper and complete formal members')

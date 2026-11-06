@@ -306,6 +306,7 @@ pub(in crate::installer_lifecycle) fn remove_orphaned(directory: &Path) -> Resul
         for source in [
             directory.join("FutureClassroom.msi"),
             directory.join("previous/FutureClassroom.msi"),
+            directory.join("legacy/FutureClassroom.msi"),
         ] {
             if !source.exists() {
                 continue;
