@@ -15,7 +15,7 @@ pub enum UpdateInstallMode {
     ManualInstall,
     MaintenanceWindow,
     /// Download a qualified update and restart as soon as the normal shutdown
-    /// has returned every in-flight owner. This is the default joined policy.
+    /// has returned every in-flight owner. This is the default installation policy.
     AutomaticAfterDownload,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -52,9 +52,9 @@ impl Default for UpdatePolicy {
     }
 }
 impl UpdatePolicy {
-    /// The default update intent stays dormant until school-group enrollment.
+    /// Built-in LAN participation needs no account or private-group enrollment.
     pub fn participation_enabled(&self) -> bool {
-        self.enabled && self.group_id.is_some_and(|group| group != [0; 16])
+        self.enabled && self.group_id != Some([0; 16])
     }
 
     pub fn automatic_after_download_enabled(&self) -> bool {
@@ -113,8 +113,8 @@ impl UpdateJobPhase {
 pub struct UpdateJob {
     pub id: u64,
     pub command_id: CommandId,
-    pub principal_id: PrincipalId,
-    pub auth_epoch: AuthEpoch,
+    /// None identifies the built-in automatic policy; never a synthetic administrator.
+    pub owner: Option<UpdatePolicyOwner>,
     pub policy_revision: Revision,
     pub release: ReleaseIdentity,
     pub phase: UpdateJobPhase,
@@ -203,7 +203,7 @@ impl UpdateMaintenanceState {
 mod tests {
     use super::*;
     #[test]
-    fn defaults_enable_updates_but_participation_waits_for_group_enrollment() {
+    fn defaults_enable_lan_updates_without_group_enrollment() {
         let mut policy = UpdatePolicy::default();
         assert!(policy.validate());
         assert!(policy.enabled && policy.download && policy.share);
@@ -211,8 +211,8 @@ mod tests {
             policy.install_mode,
             UpdateInstallMode::AutomaticAfterDownload
         );
-        assert!(!policy.participation_enabled());
-        assert!(!policy.automatic_after_download_enabled());
+        assert!(policy.participation_enabled());
+        assert!(policy.automatic_after_download_enabled());
         policy.group_id = Some([1; 16]);
         assert!(policy.participation_enabled());
         assert!(policy.automatic_after_download_enabled());
@@ -241,7 +241,7 @@ mod tests {
         assert!(!policy.automatic_after_download_enabled());
         policy.install_mode = UpdateInstallMode::AutomaticAfterDownload;
         policy.group_id = None;
-        assert!(!policy.automatic_after_download_enabled());
+        assert!(policy.automatic_after_download_enabled());
     }
     #[test]
     fn physical_handoff_cannot_be_cancelled_or_report_success_before_installing() {

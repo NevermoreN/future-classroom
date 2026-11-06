@@ -204,16 +204,14 @@ impl UpdateControl {
                     } else if state.policy.group_id.is_some() {
                         "正在启动更新服务。"
                     } else {
-                        "自动更新已开启；加入学校更新组后开始发现。"
+                        "正在启动默认局域网更新服务。"
                     }
                     .into(),
                     action_token: hex(&random::<32>()?),
                     phase: if !state.policy.enabled {
                         "disabled"
-                    } else if state.policy.group_id.is_some() {
-                        "starting"
                     } else {
-                        "waiting-group"
+                        "starting"
                     }
                     .into(),
                     received_bytes: 0,
@@ -473,6 +471,34 @@ fn commit_group(root: &Path, token: [u8; 16]) -> Result<(), String> {
     }
     Ok(())
 }
+fn restore_private_group(root: &Path, group: [u8; 16]) -> Result<UpdateGroupKey, String> {
+    let path = root.join(format!("{}.group", hex(&group)));
+    // A DB commit can succeed just before a power loss during group-file
+    // promotion. Only the DB's already-authorized group may be recovered.
+    if !path.try_exists().map_err(err)? {
+        for entry in fs::read_dir(root).map_err(err)?.take(128) {
+            let entry = entry.map_err(err)?;
+            let name = entry.file_name();
+            let Some(name) = name.to_str() else { continue };
+            if let Some(token) = name
+                .strip_suffix(".pending")
+                .and_then(|s| unhex::<16>(s).ok())
+            {
+                let pending = secret(&entry.path())?;
+                if pending.expose().len() == 48 && pending.expose()[..16] == group {
+                    commit_group(root, token)?;
+                    break;
+                }
+            }
+        }
+    }
+    let data = secret(&path)?;
+    if data.expose().len() != 48 || data.expose()[..16] != group {
+        return Err("学校更新组密钥不可用，请重新加入。".into());
+    }
+    UpdateGroupKey::new(group, data.expose()[16..].try_into().unwrap())
+        .ok_or_else(|| "学校组密钥无效。".into())
+}
 fn job_key(job: &UpdateJob) -> [u8; 16] {
     let mut out = [0; 16];
     out[..8].copy_from_slice(&job.id.to_le_bytes());
@@ -519,6 +545,9 @@ impl Native {
         if self.policy.as_ref() == Some(policy) {
             return Ok(());
         }
+        // A failed private-group restore must not retain the previous public
+        // LAN configuration (or another private group's configuration).
+        control.network.set_configuration(None)?;
         control.network.publish(None)?;
         self.candidate = None;
         self.restored = false;
@@ -533,56 +562,17 @@ impl Native {
             if let Some(upload) = self.upload.take() {
                 self.remove_upload(upload)?;
             }
-            control.network.set_configuration(None)?;
-            control.network.publish(None)?;
             self.policy = Some(policy.clone());
-            return self.notice(
-                control,
-                if policy.enabled {
-                    "waiting-group"
-                } else {
-                    "disabled"
-                },
-                if policy.enabled {
-                    "自动更新已开启；加入学校更新组后开始发现。"
-                } else {
-                    "自动更新已关闭。"
-                },
-            );
+            return self.notice(control, "disabled", "自动更新已关闭。");
         }
         if policy.share {
             let status = fc_windows::system::prepare_update_firewall();
             self.firewall = Some((status.can_share(), status.message().to_string()));
         }
-        let group = policy.group_id.unwrap();
-        let path = self.root.join(format!("{}.group", hex(&group)));
-        // A DB commit can succeed just before a power loss during group-file
-        // promotion. Only the DB's already-authorized group may be recovered.
-        if !path.try_exists().map_err(err)? {
-            for entry in fs::read_dir(&self.root).map_err(err)?.take(128) {
-                let entry = entry.map_err(err)?;
-                let name = entry.file_name();
-                let Some(name) = name.to_str() else { continue };
-                if let Some(token) = name
-                    .strip_suffix(".pending")
-                    .and_then(|s| unhex::<16>(s).ok())
-                {
-                    let pending = secret(&entry.path())?;
-                    if pending.expose().len() == 48 && pending.expose()[..16] == group {
-                        commit_group(&self.root, token)?;
-                        break;
-                    }
-                }
-            }
-        }
-        let data = secret(&path)?;
-        if data.expose().len() != 48 || data.expose()[..16] != group {
-            return Err("学校更新组密钥不可用，请重新加入。".into());
-        }
-        let auth = Arc::new(
-            UpdateGroupKey::new(group, data.expose()[16..].try_into().unwrap())
-                .ok_or("学校组密钥无效。")?,
-        );
+        let auth = Arc::new(match policy.group_id {
+            Some(group) => restore_private_group(&self.root, group)?,
+            None => UpdateGroupKey::public_lan(),
+        });
         if self.transport.is_none() {
             use fc_windows::tls_frontdoor::{
                 certificate_der_sha256, certificate_provision as certificates,

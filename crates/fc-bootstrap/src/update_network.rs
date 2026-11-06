@@ -667,7 +667,7 @@ mod tests {
         .unwrap()
         .with_source_networks(HttpsSourceNetworks::parse("127.0.0.1/32").unwrap());
         let configuration = NetworkConfiguration {
-            auth: Arc::new(UpdateGroupKey::new([41; 16], [42; 32]).unwrap()),
+            auth: Arc::new(UpdateGroupKey::public_lan()),
             node: [43; 16],
             listener: HttpsConfiguration::new(
                 HttpsHost::parse(&address.to_string()).unwrap(),

@@ -218,28 +218,162 @@ fn policy_codec_keeps_existing_mode_numbers_and_roundtrips_immediate_restart() {
 }
 
 #[test]
-fn default_updates_cannot_prepare_a_job_before_group_enrollment() {
+fn built_in_updates_run_without_an_account_and_survive_cold_reopen() {
+    let directory = Directory(std::env::temp_dir().join(format!(
+        "fc-updates-unconfigured-{}-{}",
+        std::process::id(),
+        NEXT.fetch_add(1, Ordering::Relaxed)
+    )));
+    std::fs::create_dir(&directory.0).unwrap();
+    let published = Arc::new(AtomicUsize::new(0));
+    let writer = open_writer(&directory, &published);
+    let mut repository =
+        repo(&writer).with_session_guard(Arc::new(|_, _| Err(StorageError::InvalidCommand)));
+    let mut state = repository.update_runtime_state().unwrap();
+    assert_eq!(state, UpdateMaintenanceState::default());
+    assert!(state.policy.automatic_after_download_enabled());
+    state = repository
+        .accept_update_release(state.policy.revision, release(2))
+        .unwrap();
+    state = repository
+        .begin_background_update(state.revision, state.policy.revision, release(2))
+        .unwrap();
+    assert_eq!(state.jobs[0].owner, None);
+    for phase in [
+        UpdateJobPhase::Ready,
+        UpdateJobPhase::Handoff,
+        UpdateJobPhase::Installing,
+        UpdateJobPhase::Succeeded,
+    ] {
+        let job = state.jobs[0].clone();
+        state = repository.advance_background_update(&job, phase).unwrap();
+    }
+    assert_eq!(state.installed_release, Some(release(2)));
+    assert_eq!(
+        codec::value(&encode(&state).unwrap()).unwrap()["format"],
+        json!(4)
+    );
+    drop(repository);
+    writer.shutdown().unwrap();
+    let writer = open_writer(&directory, &published);
+    assert_eq!(repo(&writer).update_runtime_state().unwrap(), state);
+    assert_eq!(published.load(Ordering::Acquire), 0);
+    writer.shutdown().unwrap();
+}
+
+#[test]
+fn job_owner_codec_preserves_old_audit_and_rejects_missing_legacy_identity() {
+    let mut state = UpdateMaintenanceState {
+        sequence: 1,
+        accepted_release: Some(release(2)),
+        ..Default::default()
+    };
+    state.jobs.push(UpdateJob {
+        id: 1,
+        command_id: CommandId::new(1).unwrap(),
+        owner: Some(UpdatePolicyOwner {
+            principal_id: PrincipalId::new(7).unwrap(),
+            auth_epoch: AuthEpoch::new(3),
+        }),
+        policy_revision: Revision::default(),
+        release: release(2),
+        phase: UpdateJobPhase::Prepared,
+    });
+    let bytes = encode(&state).unwrap();
+    let legacy = codec::value(&bytes).unwrap();
+    assert_eq!(legacy["format"], json!(3));
+    for format in 1..=3 {
+        let mut value = legacy.clone();
+        value["format"] = json!(format);
+        if format < 3 {
+            value.as_object_mut().unwrap().remove("accepted");
+            value.as_object_mut().unwrap().remove("installed");
+        }
+        if format == 1 {
+            value.as_object_mut().unwrap().remove("owner");
+        }
+        assert_eq!(decode(&codec::bytes(&value).unwrap()).unwrap(), state);
+    }
+    let mut bad = legacy.clone();
+    bad["jobs"][0].as_object_mut().unwrap().remove("principal");
+    assert!(decode(&codec::bytes(&bad).unwrap()).is_err());
+    let mut bad = legacy;
+    bad["jobs"][0].as_object_mut().unwrap().remove("epoch");
+    assert!(decode(&codec::bytes(&bad).unwrap()).is_err());
+    let legacy_owner = state.jobs[0].owner;
+    state.sequence = 2;
+    let mut builtin = state.jobs[0].clone();
+    builtin.id = 2;
+    builtin.command_id = CommandId::new(2).unwrap();
+    builtin.owner = None;
+    state.jobs.push(builtin);
+    let bytes = encode(&state).unwrap();
+    let value = codec::value(&bytes).unwrap();
+    assert_eq!(value["format"], json!(4));
+    assert_eq!(value["jobs"][0]["owner"], json!([7, 3]));
+    assert!(value["jobs"][1]["owner"].is_null());
+    assert_eq!(decode(&bytes).unwrap(), state);
+    assert_eq!(decode(&bytes).unwrap().jobs[0].owner, legacy_owner);
+    let mut bad = value;
+    bad["jobs"][1].as_object_mut().unwrap().remove("owner");
+    assert!(decode(&codec::bytes(&bad).unwrap()).is_err());
+}
+
+#[test]
+fn disabled_and_private_policies_persist_without_becoming_public_defaults() {
     let (directory, published) = fixture();
     let writer = open_writer(&directory, &published);
-    let repository = repo(&writer);
-    assert!(repository.update_status(&actor(1)).unwrap().policy.enabled);
+    let mut repository = repo(&writer);
+    let disabled = UpdatePolicy {
+        enabled: false,
+        download: false,
+        share: false,
+        ..joined_policy()
+    };
+    let mut state = repository
+        .change_update_issued(
+            request(1, 0, UpdateMutation::SetPolicy(disabled.clone())),
+            &actor(1),
+        )
+        .unwrap();
     assert_eq!(
-        repository.change_update_issued(
-            request(
-                1,
-                0,
-                UpdateMutation::PrepareJob {
-                    release: release(2)
-                }
-            ),
-            &actor(1)
-        ),
+        repository.accept_update_release(state.policy.revision, release(2)),
         Err(UpdateRepositoryError::Invalid)
     );
     assert_eq!(
-        repository.update_status(&actor(1)).unwrap(),
-        UpdateMaintenanceState::default()
+        repository.begin_background_update(state.revision, state.policy.revision, release(2)),
+        Err(UpdateRepositoryError::Invalid)
     );
+    writer.shutdown().unwrap();
+    let writer = open_writer(&directory, &published);
+    let mut repository = repo(&writer);
+    assert_eq!(repository.update_runtime_state().unwrap(), state);
+    assert_eq!(state.policy.group_id, Some([1; 16]));
+    state = repository
+        .change_update_issued(
+            request(
+                2,
+                state.revision.get(),
+                UpdateMutation::SetPolicy(UpdatePolicy {
+                    revision: state.policy.revision,
+                    ..joined_policy()
+                }),
+            ),
+            &actor(1),
+        )
+        .unwrap();
+    state = repository
+        .begin_background_update(state.revision, state.policy.revision, release(2))
+        .unwrap();
+    assert_eq!(state.jobs.last().unwrap().owner, state.policy_owner);
+    assert!(state.jobs.last().unwrap().owner.is_some());
+    assert_eq!(
+        codec::value(&encode(&state).unwrap()).unwrap()["format"],
+        json!(3)
+    );
+    writer.shutdown().unwrap();
+    let writer = open_writer(&directory, &published);
+    assert_eq!(repo(&writer).update_runtime_state().unwrap(), state);
     writer.shutdown().unwrap();
 }
 

@@ -322,7 +322,7 @@ pub(crate) fn execute_runtime(
                     current: state.revision,
                 });
             }
-            if !state.policy.participation_enabled() || state.policy_owner.is_none() {
+            if !state.policy.participation_enabled() {
                 return Err(StorageError::InvalidCommand);
             }
             if state.accepted_release == Some(release) {
@@ -343,7 +343,6 @@ pub(crate) fn execute_runtime(
                     current: state.revision,
                 });
             }
-            let owner = state.policy_owner.ok_or(StorageError::InvalidCommand)?;
             if !state.policy.participation_enabled() || release.payload_sha256 == [0; 32] {
                 return Err(StorageError::InvalidCommand);
             }
@@ -375,8 +374,7 @@ pub(crate) fn execute_runtime(
             state.jobs.push(UpdateJob {
                 id: state.sequence,
                 command_id,
-                principal_id: owner.principal_id,
-                auth_epoch: owner.auth_epoch,
+                owner: state.policy_owner,
                 policy_revision: state.policy.revision,
                 release,
                 phase: UpdateJobPhase::Prepared,
@@ -563,8 +561,10 @@ pub(crate) fn execute(
             state.jobs.push(UpdateJob {
                 id: state.sequence,
                 command_id: request.command_id,
-                principal_id: task.actor.principal_id,
-                auth_epoch: task.actor.auth_epoch,
+                owner: Some(UpdatePolicyOwner {
+                    principal_id: task.actor.principal_id,
+                    auth_epoch: task.actor.auth_epoch,
+                }),
                 policy_revision: state.policy.revision,
                 release: *release,
                 phase: UpdateJobPhase::Prepared,
@@ -665,12 +665,27 @@ fn encode(state: &UpdateMaintenanceState) -> Result<Vec<u8>, StorageError> {
     if !state.validate() {
         return Err(StorageError::InvalidCommand);
     }
-    let jobs: Vec<_> = state.jobs.iter().map(|job| json!({"id":job.id,"command":job.command_id.get(),"principal":job.principal_id.get(),
-        "epoch":job.auth_epoch.get(),"policy":job.policy_revision.get(),"sequence":job.release.sequence.get(),"hash":job.release.payload_sha256,"phase":phase(job.phase)})).collect();
+    // Existing administrator-owned records retain the exact format3 layout. Only
+    // built-in automatic jobs require the explicit nullable owner in format4.
+    let format = if state.jobs.iter().any(|job| job.owner.is_none()) {
+        4
+    } else {
+        3
+    };
+    let jobs: Vec<_> = state.jobs.iter().map(|job| {
+        let mut value = json!({"id":job.id,"command":job.command_id.get(),"policy":job.policy_revision.get(),"sequence":job.release.sequence.get(),"hash":job.release.payload_sha256,"phase":phase(job.phase)});
+        if format == 4 {
+            value["owner"] = job.owner.map_or(Value::Null, |o| json!([o.principal_id.get(),o.auth_epoch.get()]));
+        } else if let Some(owner) = job.owner {
+            value["principal"] = json!(owner.principal_id.get());
+            value["epoch"] = json!(owner.auth_epoch.get());
+        }
+        value
+    }).collect();
     let receipts: Vec<_> = state.receipts.iter().map(|receipt| json!({"command":receipt.command_id.get(),"expected":receipt.expected_revision.get(),
         "principal":receipt.principal_id.get(),"epoch":receipt.auth_epoch.get(),"hash":receipt.fingerprint})).collect();
     let bytes = codec::bytes(
-        &json!({"format":3,"revision":state.revision.get(),"sequence":state.sequence,"policy":policy_value(&state.policy),"owner":state.policy_owner.map(|o|json!([o.principal_id.get(),o.auth_epoch.get()])),"accepted":release_value(state.accepted_release),"installed":release_value(state.installed_release),"jobs":jobs,"receipts":receipts}),
+        &json!({"format":format,"revision":state.revision.get(),"sequence":state.sequence,"policy":policy_value(&state.policy),"owner":state.policy_owner.map(|o|json!([o.principal_id.get(),o.auth_epoch.get()])),"accepted":release_value(state.accepted_release),"installed":release_value(state.installed_release),"jobs":jobs,"receipts":receipts}),
     )?;
     if bytes.len() > MAX_VALUE_BYTES {
         return Err(StorageError::DocumentTooLarge);
@@ -749,6 +764,20 @@ fn policy_read(value: &Value) -> Result<UpdatePolicy, StorageError> {
             .map_err(|_| StorageError::Database)?,
     })
 }
+fn owner_read(value: &Value) -> Result<Option<UpdatePolicyOwner>, StorageError> {
+    if value.is_null() {
+        return Ok(None);
+    }
+    let owner = value
+        .as_array()
+        .filter(|v| v.len() == 2)
+        .ok_or(StorageError::Database)?;
+    Ok(Some(UpdatePolicyOwner {
+        principal_id: PrincipalId::new(owner[0].as_u64().ok_or(StorageError::Database)?)
+            .map_err(|_| StorageError::Database)?,
+        auth_epoch: AuthEpoch::new(owner[1].as_u64().ok_or(StorageError::Database)?),
+    }))
+}
 fn decode(bytes: &[u8]) -> Result<UpdateMaintenanceState, StorageError> {
     let value = codec::value(bytes)?;
     let format = number(&value, "format")?;
@@ -774,7 +803,7 @@ fn decode(bytes: &[u8]) -> Result<UpdateMaintenanceState, StorageError> {
         match format {
             1 => fields_v1,
             2 => fields_v2,
-            3 => fields_v3,
+            3 | 4 => fields_v3,
             _ => return Err(StorageError::Database),
         },
     )?;
@@ -782,18 +811,10 @@ fn decode(bytes: &[u8]) -> Result<UpdateMaintenanceState, StorageError> {
         revision: Revision::new(number(&value, "revision")?),
         sequence: number(&value, "sequence")?,
         policy: policy_read(&value["policy"])?,
-        policy_owner: if format == 1 || value["owner"].is_null() {
+        policy_owner: if format == 1 {
             None
         } else {
-            let owner = value["owner"]
-                .as_array()
-                .filter(|v| v.len() == 2)
-                .ok_or(StorageError::Database)?;
-            Some(UpdatePolicyOwner {
-                principal_id: PrincipalId::new(owner[0].as_u64().ok_or(StorageError::Database)?)
-                    .map_err(|_| StorageError::Database)?,
-                auth_epoch: AuthEpoch::new(owner[1].as_u64().ok_or(StorageError::Database)?),
-            })
+            owner_read(&value["owner"])?
         },
         accepted_release: if format < 3 {
             None
@@ -814,26 +835,34 @@ fn decode(bytes: &[u8]) -> Result<UpdateMaintenanceState, StorageError> {
         return Err(StorageError::Database);
     }
     for value in jobs {
-        codec::object_fields(
-            value,
-            &[
-                "id",
-                "command",
-                "principal",
-                "epoch",
-                "policy",
-                "sequence",
-                "hash",
-                "phase",
-            ],
-        )?;
+        let old_fields = &[
+            "id",
+            "command",
+            "principal",
+            "epoch",
+            "policy",
+            "sequence",
+            "hash",
+            "phase",
+        ][..];
+        let new_fields = &[
+            "id", "command", "owner", "policy", "sequence", "hash", "phase",
+        ][..];
+        codec::object_fields(value, if format == 4 { new_fields } else { old_fields })?;
+        let owner = if format == 4 {
+            owner_read(&value["owner"])?
+        } else {
+            Some(UpdatePolicyOwner {
+                principal_id: PrincipalId::new(number(value, "principal")?)
+                    .map_err(|_| StorageError::Database)?,
+                auth_epoch: AuthEpoch::new(number(value, "epoch")?),
+            })
+        };
         state.jobs.push(UpdateJob {
             id: number(value, "id")?,
             command_id: CommandId::new(number(value, "command")?)
                 .map_err(|_| StorageError::Database)?,
-            principal_id: PrincipalId::new(number(value, "principal")?)
-                .map_err(|_| StorageError::Database)?,
-            auth_epoch: AuthEpoch::new(number(value, "epoch")?),
+            owner,
             policy_revision: Revision::new(number(value, "policy")?),
             release: ReleaseIdentity {
                 sequence: ReleaseSequence::new(number(value, "sequence")?)
