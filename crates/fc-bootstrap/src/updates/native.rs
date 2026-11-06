@@ -1257,7 +1257,7 @@ impl Native {
             for legacy in catalog
                 .targets
                 .iter()
-                .filter(|target| target.path().ends_with("/legacy-payload.zip"))
+                .filter(|target| target.path().ends_with("/legacy/payload.zip"))
             {
                 let target = VerifiedTarget {
                     sha256: legacy.sha256(),
@@ -1269,8 +1269,8 @@ impl Native {
                     Err(error) => return Err(err(error)),
                 }
                 let Some(universal) = catalog.targets.iter().find(|source| {
-                    source.path().strip_suffix("/universal-payload.zip")
-                        == legacy.path().strip_suffix("/legacy-payload.zip")
+                    source.path().strip_suffix("/universal/payload.zip")
+                        == legacy.path().strip_suffix("/legacy/payload.zip")
                 }) else {
                     continue;
                 };
@@ -1383,10 +1383,10 @@ impl Native {
             if claims.channel != state.policy.channel
                 || claims.version
                     <= ReleaseVersion::parse(env!("CARGO_PKG_VERSION")).map_err(err)?
-                || (target.path().ends_with("/legacy-payload.zip")
+                || (target.path().ends_with("/legacy/payload.zip")
                     && catalog.targets.iter().any(|source| {
-                        source.path().strip_suffix("/universal-payload.zip")
-                            == target.path().strip_suffix("/legacy-payload.zip")
+                        source.path().strip_suffix("/universal/payload.zip")
+                            == target.path().strip_suffix("/legacy/payload.zip")
                     }))
                 || claims.identity.sequence.get()
                     <= state.installed_release.map_or(1, |r| r.sequence.get())

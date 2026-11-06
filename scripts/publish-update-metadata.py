@@ -71,6 +71,27 @@ def signer_for(root, keys, role):
         raise ValueError("private role key must be a mode-0600 regular file")
     return CryptoSigner.from_priv_key_uri("file2:" + str(path), root.signed.keys[role_keys[0]])
 
+def target_path(channel, sequence, payload_name, multiple):
+    """Keep the existing consumer contract ending in /payload.zip.
+
+    Multiple targets use a safe basename-derived directory: legacy-payload.zip
+    becomes legacy/payload.zip; another-name.zip becomes another-name/payload.zip.
+    Single-target catalogs retain channel/sequence/payload.zip.
+    """
+    parts = [channel, str(sequence)]
+    if multiple:
+        if not payload_name.endswith(".zip"):
+            raise ValueError("multi-target payloads need distinct safe .zip basenames")
+        segment = payload_name[:-4].removesuffix("-payload")
+        parts.append(segment)
+    parts.append("payload.zip")
+    path = "/".join(parts)
+    if len(path) > 200 or any(not part or part in (".", "..") or any(
+        c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-"
+        for c in part) for part in parts):
+        raise ValueError("target path violates the installed consumer contract")
+    return path
+
 def publish(args):
     # Reuse the canonical bounded transport inspector, not arbitrary ZIP extraction.
     import runpy
@@ -112,16 +133,13 @@ def publish(args):
         raise ValueError("invalid release channel")
     target_files, results = {}, []
     for payload, claims, size in inspected:
-        name = "payload.zip" if len(inspected) == 1 else payload.name
-        if not name.endswith(".zip") or any(c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-" for c in name):
-            raise ValueError("multi-target payloads need distinct safe .zip basenames")
-        target_path = f"{channel}/{sequence}/{name}"
-        if target_path in target_files:
+        path = target_path(channel, sequence, payload.name, len(inspected) > 1)
+        if path in target_files:
             raise ValueError("duplicate target path")
-        target = TargetFile.from_file(target_path, str(payload), ["sha256"])
+        target = TargetFile.from_file(path, str(payload), ["sha256"])
         target.unrecognized_fields["custom"] = claims
-        target_files[target_path] = target
-        results.append({"target": target_path, "payloadBytes": size, "sha256": target.hashes["sha256"]})
+        target_files[path] = target
+        results.append({"target": path, "payloadBytes": size, "sha256": target.hashes["sha256"]})
     targets = Metadata(Targets(version=sequence, spec_version="1.0.36", expires=now + timedelta(days=365), targets=target_files))
     targets.sign(signer_for(root, keys, "targets"))
     targets_bytes = targets.to_bytes()
@@ -153,7 +171,7 @@ def main():
         command.add_argument("--" + name, type=Path, required=True)
     command.add_argument("--additional-target", type=Path, nargs=2, action="append",
         metavar=("PAYLOAD_ZIP", "CLAIMS_JSON"),
-        help="Sign another payload/claims pair in the same catalog and advance the sequence once")
+        help="Sign another pair once; legacy-payload.zip maps to legacy/payload.zip under channel/sequence")
     args = parser.parse_args()
     try:
         init_root(args) if args.command == "init-root" else publish(args)

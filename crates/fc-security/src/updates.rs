@@ -522,6 +522,56 @@ mod tests {
     }
 
     #[test]
+    fn two_current_source_variants_use_legacy_compatible_target_paths() {
+        let key = key(6);
+        let id = hex(key.public_key().as_ref());
+        let installed = root(1, &key, None);
+        for (paths, accepted) in [
+            (
+                [
+                    "stable/1/legacy/payload.zip",
+                    "stable/1/universal/payload.zip",
+                ],
+                true,
+            ),
+            (
+                [
+                    "stable/1/legacy-payload.zip",
+                    "stable/1/universal-payload.zip",
+                ],
+                false,
+            ),
+        ] {
+            let mut bundle = Bundle::new(&key, 1, 1, FUTURE);
+            let mut target: Value = serde_json::from_slice(&bundle.targets).unwrap();
+            let entry = target["signed"]["targets"]["stable/1/payload.zip"].clone();
+            target["signed"]["targets"] = json!({ paths[0]: entry, paths[1]: entry });
+            bundle.targets = envelope(target["signed"].take(), &[(id.as_str(), &key)]);
+            let mut snapshot: Value = serde_json::from_slice(&bundle.snapshot).unwrap();
+            snapshot["signed"]["meta"]["targets.json"] = pin(&bundle.targets, 1);
+            bundle.snapshot = envelope(snapshot["signed"].take(), &[(id.as_str(), &key)]);
+            let mut timestamp: Value = serde_json::from_slice(&bundle.timestamp).unwrap();
+            timestamp["signed"]["meta"]["snapshot.json"] = pin(&bundle.snapshot, 1);
+            bundle.timestamp = envelope(timestamp["signed"].take(), &[(id.as_str(), &key)]);
+            let result = UpdateTrust::from_installed_root(&installed)
+                .unwrap()
+                .refresh(bundle.metadata(&[]), NOW);
+            if accepted {
+                let verified = result.unwrap();
+                assert_eq!(
+                    verified
+                        .iter()
+                        .map(|target| target.path())
+                        .collect::<Vec<_>>(),
+                    paths
+                );
+            } else {
+                assert!(result.is_err());
+            }
+        }
+    }
+
+    #[test]
     fn rollback_and_stale_equal_timestamp_are_rejected() {
         let key = key(2);
         let mut trust = UpdateTrust::from_installed_root(&root(1, &key, None)).unwrap();
