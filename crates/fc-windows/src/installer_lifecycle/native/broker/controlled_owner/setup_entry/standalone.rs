@@ -173,6 +173,13 @@ pub(crate) fn dispatch(args: &[String]) -> Option<Result<u32>> {
         Err(e) => return Some(Err(e)),
     };
     if args.is_empty() {
+        let installed = match crate::system::DataPaths::installed_bootstrap_for_current_user() {
+            Ok(path) => path,
+            Err(e) => return Some(Err(e.into())),
+        };
+        if installed.is_file() {
+            return Some(update_installed(package, &installed));
+        }
         return Some(super::setup_ui::show(package));
     }
     let operation = match args {
@@ -187,4 +194,33 @@ pub(crate) fn dispatch(args: &[String]) -> Option<Result<u32>> {
         extracted.cleanup()?;
         Ok(status.code().ok_or(LifecycleError::Unsettled)? as u32)
     })())
+}
+
+fn update_installed(mut package: Package, installed: &std::path::Path) -> Result<u32> {
+    // A manual double-click uses the exact same sealed Install operation as
+    // automatic updates. Only success starts the newly installed product.
+    let result = (|| {
+        let mut extracted = package.extract()?;
+        let status = io(extracted.start("install")?.wait())?;
+        let code = status.code().unwrap_or(1603) as u32;
+        extracted.cleanup()?;
+        if code == 0 {
+            io(Command::new(installed)
+                .current_dir(installed.parent().ok_or(LifecycleError::Invalid)?)
+                .spawn())?;
+        }
+        Ok(code)
+    })();
+    if !matches!(result, Ok(0)) {
+        use windows::Win32::UI::WindowsAndMessaging::*;
+        unsafe {
+            MessageBoxW(
+                None,
+                windows::core::w!("更新未完成，原有资料已保留。请确认安装包支持当前版本，稍后重试；如仍失败，请联系管理员。"),
+                windows::core::w!("未来教室更新"),
+                MB_OK | MB_ICONERROR,
+            );
+        }
+    }
+    result
 }

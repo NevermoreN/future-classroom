@@ -778,10 +778,65 @@ struct ControlledEffectsOwner {
     admission: effects::Admitted,
 }
 
+/// Read-only admission before asking a live product to stop. The real Setup
+/// repeats admission under its maintenance gate after physical process exit.
+fn prepare_running_upgrade(deadline: Instant) -> Result<()> {
+    use windows::Win32::UI::WindowsAndMessaging::{
+        FindWindowW, GetWindowThreadProcessId, PostMessageW, WM_CLOSE,
+    };
+    let mut s = Session::new(deadline)?;
+    package(&mut s)?;
+    s.capture_maintenance()?;
+    captured_operation(&s, Operation::Install)?;
+    // A fresh install has nobody to stop. Same-version/rejected predecessors
+    // never gain permission to close an unrelated application.
+    if s.verified_upgrade.is_none() {
+        return s.resources.release();
+    }
+    let paths = crate::system::DataPaths::program_data()?;
+    let title = HSTRING::from(paths.root().join("runtime/instance.lock").as_os_str());
+    if let Ok(hwnd) =
+        unsafe { FindWindowW(windows::core::w!("FutureClassroom.HiddenHost.v1"), &title) }
+    {
+        paths.verify_root_for_current_user()?;
+        let mut pid = 0;
+        unsafe { GetWindowThreadProcessId(hwnd, Some(&mut pid)) };
+        let process = unsafe {
+            OpenProcess(
+                PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_SYNCHRONIZE,
+                false,
+                pid,
+            )?
+        };
+        s.resources.add(process, Role::Control);
+        let installed = crate::system::DataPaths::installed_bootstrap_for_current_user()?;
+        if s.resources.token_sid(process)? != s.resources.sid
+            || image_path(process)?
+                .canonicalize()
+                .map_err(|_| LifecycleError::Invalid)?
+                != installed
+                    .canonicalize()
+                    .map_err(|_| LifecycleError::Invalid)?
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        // WM_CLOSE follows the same ordinary draining path as tray Exit. Keep
+        // the original process handle until exit; no taskkill or lease bypass.
+        unsafe { PostMessageW(Some(hwnd), WM_CLOSE, WPARAM(0), LPARAM(0))? };
+        returned_zero(process, deadline)?;
+    }
+    s.resources.release()
+}
+
 /// Actual closed Setup adapter. Only a separately sealed image with its fixed
 /// source can enter; the request supplies no authority or caller-selected path.
 pub(crate) fn run_setup(operation: Operation) -> Result<SetupResult> {
     let deadline = Instant::now() + super::super::super::broker::BROKER_BUDGET;
+    if operation == Operation::Install
+        && crate::system::DataPaths::installed_bootstrap_for_current_user()?.is_file()
+    {
+        prepare_running_upgrade(deadline)?;
+    }
     let mut s = Session::new(deadline)?;
     s.sealed_package_sha.ok_or(LifecycleError::Invalid)?;
     let identity = InstallIdentity::for_current_user()?;
