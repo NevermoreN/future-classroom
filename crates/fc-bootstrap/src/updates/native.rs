@@ -28,6 +28,9 @@ use std::{
 
 const ROOT: &[u8] = include_bytes!("../../../../packaging/update-root.json");
 const MAX_IMPORT: u64 = 128 * 1024 * 1024;
+// Extracted sources and the complete executable coexist until native handoff.
+// Reserve both under the existing quota rather than hiding the retained copy.
+const MAX_INSTALL_STAGE: u64 = MAX_IMPORT * 2 + (32 << 20) + 64;
 pub enum UpdateTick {
     Idle,
     Handoff(update_install::PreparedHandoff),
@@ -64,9 +67,12 @@ pub(super) struct Native {
     next_handle: u64,
     policy: Option<UpdatePolicy>,
     candidate: Option<Candidate>,
+    seed_candidate: Option<Candidate>,
     transport: Option<(HttpsConfiguration, [u8; 32])>,
     handoff: bool,
     restored: bool,
+    restored_installer: bool,
+    installed_seed: Option<[u8; 32]>,
     recovered_staging: bool,
     validated_stage: Option<[u8; 16]>,
     firewall: Option<(bool, String)>,
@@ -229,9 +235,12 @@ impl UpdateControl {
                 next_handle: 0,
                 policy: None,
                 candidate: None,
+                seed_candidate: None,
                 transport: None,
                 handoff: false,
                 restored: false,
+                restored_installer: false,
+                installed_seed: None,
                 recovered_staging: false,
                 validated_stage: None,
                 firewall: None,
@@ -653,6 +662,7 @@ impl Native {
                 .strip_suffix(".fcupdate")
                 .or_else(|| name.strip_prefix("share-"))
                 .or_else(|| name.strip_prefix("verify-"))
+                .or_else(|| name.strip_prefix("seed-"))
                 .is_some_and(|token| unhex::<16>(token).is_ok());
             if key.is_none() && !temporary {
                 continue;
@@ -673,7 +683,9 @@ impl Native {
                 }) {
                     self.stages.insert(
                         path.clone(),
-                        self.cache.reserve_external(MAX_IMPORT).map_err(err)?,
+                        self.cache
+                            .reserve_external(MAX_INSTALL_STAGE)
+                            .map_err(err)?,
                     );
                     continue;
                 }
@@ -708,7 +720,11 @@ impl Native {
             .nth(1)
             .map(|j| j.release.payload_sha256);
         self.cache
-            .protect_sources(state.installed_release.map(|r| r.payload_sha256), previous)
+            .protect_sources(
+                self.installed_seed
+                    .or(state.installed_release.map(|r| r.payload_sha256)),
+                previous,
+            )
             .map_err(err)?;
         if !self.recovered_staging {
             self.recover_staging(&state, cancelled)?;
@@ -736,6 +752,36 @@ impl Native {
         }
         if !state.policy.participation_enabled() {
             return Ok(UpdateTick::Idle);
+        }
+        if state.policy.share && !self.restored_installer {
+            self.restored_installer = true;
+            if let Some(path) = installer_lifecycle::installed_distribution_source().map_err(err)? {
+                let source = packages::import_envelope_cancellable(
+                    &path,
+                    ROOT,
+                    &self.root.join("checkpoints"),
+                    now()?,
+                    &Protection,
+                    &self.cache,
+                    cancelled,
+                );
+                match source {
+                    Ok(source) => {
+                        if source.claims.version
+                            != ReleaseVersion::parse(env!("CARGO_PKG_VERSION")).map_err(err)?
+                        {
+                            return Err("本机安装源版本与正在运行的程序不一致。".into());
+                        }
+                        self.installed_seed = Some(source.target.sha256);
+                        self.catalog(control, backend, source.metadata, None, cancelled)?;
+                    }
+                    Err(error) => self.notice(
+                        control,
+                        "seed-unavailable",
+                        &format!("本机安装源暂不可分享，继续查找内网可信更新：{error}"),
+                    )?,
+                }
+            }
         }
         if !self.restored {
             if let Some(metadata) =
@@ -785,6 +831,13 @@ impl Native {
                     self.catalog(control, backend, metadata, Some(peer), cancelled)?
                 }
                 NetworkEvent::Downloaded { target } => {
+                    if let Some(seed) = self
+                        .seed_candidate
+                        .as_mut()
+                        .filter(|c| c.target.sha256 == target.sha256)
+                    {
+                        seed.ready = true;
+                    }
                     if let Some(candidate) = self
                         .candidate
                         .as_mut()
@@ -802,6 +855,41 @@ impl Native {
                 }
                 NetworkEvent::Status(message) => self.notice(control, "discovering", message)?,
             }
+        }
+        if self
+            .seed_candidate
+            .as_ref()
+            .is_some_and(|candidate| candidate.ready)
+        {
+            let source = self.seed_candidate.take().unwrap();
+            let stage = self
+                .root
+                .join("staging")
+                .join(format!("seed-{}", hex(&random::<16>()?)));
+            let reservation = self
+                .cache
+                .reserve_external(MAX_INSTALL_STAGE)
+                .map_err(err)?;
+            fs::create_dir(&stage).map_err(err)?;
+            self.stages.insert(stage.clone(), reservation);
+            let result = (|| {
+                let mut blob = self
+                    .cache
+                    .acquire_cancellable(source.target, cancelled)
+                    .map_err(err)?;
+                let original = stage.join("OriginalInstaller.exe");
+                packages::reconstruct_installer(&mut blob, &source.metadata, &original, cancelled)
+                    .map_err(err)?;
+                packages::verify_installer_distribution(&original, ROOT, now()?, None, None)
+                    .map_err(err)?;
+                installer_lifecycle::cache_distribution_source(&original).map_err(err)?;
+                Ok::<(), String>(())
+            })();
+            fs::remove_dir_all(&stage).map_err(err)?;
+            self.stages.remove(&stage);
+            result?;
+            self.installed_seed = Some(source.target.sha256);
+            self.catalog(control, backend, source.metadata, None, cancelled)?;
         }
         let Some(candidate) = self.candidate.as_ref().filter(|c| c.ready) else {
             return Ok(UpdateTick::Idle);
@@ -863,7 +951,10 @@ impl Native {
         let directory = self.root.join("staging").join(hex(&key));
         if self.validated_stage != Some(key) {
             self.remove_stage(key)?;
-            let reservation = self.cache.reserve_external(MAX_IMPORT).map_err(err)?;
+            let reservation = self
+                .cache
+                .reserve_external(MAX_INSTALL_STAGE)
+                .map_err(err)?;
             fs::create_dir(&directory).map_err(err)?;
             self.stages.insert(directory.clone(), reservation);
             let result = (|| {
@@ -873,6 +964,15 @@ impl Native {
                     .map_err(err)?;
                 packages::extract_install_sources_cancellable(&mut blob, &directory, cancelled)
                     .map_err(err)?;
+                blob.seek(SeekFrom::Start(0)).map_err(err)?;
+                packages::reconstruct_installer(
+                    &mut blob,
+                    &metadata,
+                    &directory.join("OriginalInstaller.exe"),
+                    cancelled,
+                )
+                .map_err(err)?;
+                installer_lifecycle::materialize_installer_source(&directory).map_err(err)?;
                 let facts = installer_lifecycle::inspect_update_sources(&directory).map_err(err)?;
                 if !claims.allowed_predecessors.contains(&facts.predecessor) {
                     return Err("更新包的升级前驱与签名声明不一致。".into());
@@ -1139,10 +1239,67 @@ impl Native {
         )
         .map_err(err)?;
         self.candidate = None;
+        self.seed_candidate = None;
         control.network.publish(None)?;
         let state = backend.update_runtime_state().map_err(err)?;
         let mut candidates = Vec::new();
         let mut shareable = Vec::new();
+        let own_version = ReleaseVersion::parse(env!("CARGO_PKG_VERSION")).map_err(err)?;
+        let newer_release = catalog.targets.iter().any(|target| {
+            target
+                .custom()
+                .and_then(|custom| custom.get("version"))
+                .and_then(|v| v.as_str())
+                .and_then(|v| ReleaseVersion::parse(v).ok())
+                .is_some_and(|version| version > own_version)
+        });
+        if state.policy.share {
+            for legacy in catalog
+                .targets
+                .iter()
+                .filter(|target| target.path().ends_with("/legacy-payload.zip"))
+            {
+                let target = VerifiedTarget {
+                    sha256: legacy.sha256(),
+                    length: legacy.length(),
+                };
+                match self.cache.acquire_cancellable(target, cancelled) {
+                    Ok(_) => continue,
+                    Err(update_cache::CacheError::NotReady) => (),
+                    Err(error) => return Err(err(error)),
+                }
+                let Some(universal) = catalog.targets.iter().find(|source| {
+                    source.path().strip_suffix("/universal-payload.zip")
+                        == legacy.path().strip_suffix("/legacy-payload.zip")
+                }) else {
+                    continue;
+                };
+                let mut source = match self.cache.acquire_cancellable(
+                    VerifiedTarget {
+                        sha256: universal.sha256(),
+                        length: universal.length(),
+                    },
+                    cancelled,
+                ) {
+                    Ok(source) => source,
+                    Err(update_cache::CacheError::NotReady) => continue,
+                    Err(error) => return Err(err(error)),
+                };
+                let _reservation = self.cache.reserve_external(target.length).map_err(err)?;
+                let bytes =
+                    packages::derive_legacy_payload(&mut source, target, cancelled).map_err(err)?;
+                let mut download = match self.cache.begin_cancellable(target, cancelled) {
+                    Ok(download) => download,
+                    Err(update_cache::CacheError::Busy) => continue,
+                    Err(error) => return Err(err(error)),
+                };
+                let offset = download.offset() as usize;
+                download.append(&bytes[offset..]).map_err(err)?;
+                download
+                    .finish(|reader| packages::preflight_payload_cancellable(reader, cancelled))
+                    .map_err(err)?;
+            }
+        }
         for target in &catalog.targets {
             if cancelled() {
                 return Err("更新任务已取消。".into());
@@ -1157,6 +1314,34 @@ impl Native {
                 sha256: target.sha256(),
                 length: target.length(),
             };
+            // Old four-member coordinators can install this release but cannot
+            // carry its universal EXE. Recover that same-version source without
+            // changing release floors or creating an installation job.
+            if claims.version == own_version
+                && !newer_release
+                && claims.channel == state.policy.channel
+                && claims.minimum_coordinator >= ReleaseVersion::parse("1.2.0").unwrap()
+                && claims.minimum_coordinator <= own_version
+                && self.installed_seed != Some(cached.sha256)
+                && state.policy.share
+            {
+                let ready = match self.cache.acquire_cancellable(cached, cancelled) {
+                    Ok(_) => true,
+                    Err(update_cache::CacheError::NotReady) => false,
+                    Err(error) => return Err(err(error)),
+                };
+                if !ready && state.policy.download {
+                    if let Some(peer) = peer.as_ref() {
+                        control.network.request_blob(*peer, cached)?;
+                    }
+                }
+                self.seed_candidate = Some(Candidate {
+                    claims: claims.clone(),
+                    target: cached,
+                    metadata: catalog.metadata.clone(),
+                    ready,
+                });
+            }
             if state.policy.share
                 && self.firewall.as_ref().is_some_and(|(allowed, _)| *allowed)
                 && claims.channel == state.policy.channel
@@ -1196,6 +1381,13 @@ impl Native {
                 }
             }
             if claims.channel != state.policy.channel
+                || claims.version
+                    <= ReleaseVersion::parse(env!("CARGO_PKG_VERSION")).map_err(err)?
+                || (target.path().ends_with("/legacy-payload.zip")
+                    && catalog.targets.iter().any(|source| {
+                        source.path().strip_suffix("/universal-payload.zip")
+                            == target.path().strip_suffix("/legacy-payload.zip")
+                    }))
                 || claims.identity.sequence.get()
                     <= state.installed_release.map_or(1, |r| r.sequence.get())
             {
@@ -1239,7 +1431,11 @@ impl Native {
             .nth(1)
             .map(|j| j.release.payload_sha256);
         self.cache
-            .protect_sources(state.installed_release.map(|r| r.payload_sha256), previous)
+            .protect_sources(
+                self.installed_seed
+                    .or(state.installed_release.map(|r| r.payload_sha256)),
+                previous,
+            )
             .map_err(err)?;
         candidates.sort_by_key(|(c, _)| c.identity.sequence);
         let Some((claims, target)) = candidates.pop() else {

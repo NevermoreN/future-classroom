@@ -15,7 +15,7 @@ fn io<T>(v: std::io::Result<T>) -> Result<T> {
     v.map_err(|e| LifecycleError::Native(HRESULT::from_win32(e.raw_os_error().unwrap_or(1) as u32)))
 }
 
-pub(super) fn installed() -> Result<Option<String>> {
+pub(crate) fn installed() -> Result<Option<String>> {
     let mut product = [0u16; 39];
     let family = HSTRING::from(format!("{{{INSTALL_FAMILY}}}"));
     let rc = unsafe {
@@ -61,6 +61,119 @@ pub(super) fn exists() -> Result<bool> {
             .parent()
             .ok_or(LifecycleError::Invalid)?
             .exists())
+}
+
+fn registered_property(name: &str) -> Result<Option<String>> {
+    let mut product = [0u16; 39];
+    let family = HSTRING::from(format!("{{{INSTALL_FAMILY}}}"));
+    let rc = unsafe {
+        MsiEnumRelatedProductsW(&family, None, 0, windows::core::PWSTR(product.as_mut_ptr()))
+    };
+    if rc == ERROR_NO_MORE_ITEMS.0 {
+        return Ok(None);
+    }
+    if rc != 0 {
+        return Err(LifecycleError::Invalid);
+    }
+    if name == "ProductCode" {
+        return Ok(Some(
+            String::from_utf16(&product[..38]).map_err(|_| LifecycleError::Invalid)?,
+        ));
+    }
+    let code =
+        HSTRING::from(String::from_utf16(&product[..38]).map_err(|_| LifecycleError::Invalid)?);
+    let mut text = [0u16; 512];
+    let mut length = 512;
+    let rc = unsafe {
+        MsiGetProductInfoExW(
+            &code,
+            None,
+            MSIINSTALLCONTEXT_USERUNMANAGED,
+            &HSTRING::from(name),
+            Some(windows::core::PWSTR(text.as_mut_ptr())),
+            Some(&mut length),
+        )
+    };
+    if rc != 0 || length >= 512 {
+        return Err(LifecycleError::Invalid);
+    }
+    Ok(Some(
+        String::from_utf16(&text[..length as usize]).map_err(|_| LifecycleError::Invalid)?,
+    ))
+}
+
+/// Reconstruct only this release's exact sealed source, using registration to
+/// select its predecessor. All source qualification is repeated by native Setup.
+pub(crate) fn materialize_source(directory: &std::path::Path) -> Result<()> {
+    let setup = io(fs::read(directory.join("Setup.exe")))?;
+    let msi = io(fs::read(directory.join("FutureClassroom.msi")))?;
+    let raw = io(fs::read(directory.join("installer-variants.bin")))?;
+    let package = fc_protocol::installer_variants::Package::parse(&raw)
+        .map_err(|_| LifecycleError::Invalid)?;
+    package
+        .validate_base(&setup, &msi)
+        .map_err(|_| LifecycleError::Invalid)?;
+    let old = installed()?;
+    let selected = if let Some(version) = old.as_deref() {
+        let parse = |version: &str| -> Result<Vec<u32>> {
+            version
+                .split('.')
+                .map(|p| p.parse().map_err(|_| LifecycleError::Invalid))
+                .collect()
+        };
+        if parse(version)? > parse(env!("CARGO_PKG_VERSION"))? {
+            return Err(LifecycleError::UpgradeProtocolUnsupported);
+        }
+        if version == env!("CARGO_PKG_VERSION") {
+            let code = registered_property("PackageCode")?.ok_or(LifecycleError::Invalid)?;
+            let code = code.trim_matches(['{', '}']);
+            if code.eq_ignore_ascii_case(&package.catalog.base_package_code) {
+                None
+            } else {
+                Some(
+                    package
+                        .catalog
+                        .variants
+                        .iter()
+                        .position(|v| v.package_code.eq_ignore_ascii_case(code))
+                        .ok_or(LifecycleError::UpgradeProtocolUnsupported)?,
+                )
+            }
+        } else {
+            let product = registered_property("ProductCode")?.ok_or(LifecycleError::Invalid)?;
+            let product = product.trim_matches(['{', '}']);
+            if package.catalog.base_predecessor_version == version
+                && package
+                    .catalog
+                    .base_predecessor_product
+                    .eq_ignore_ascii_case(product)
+            {
+                None
+            } else {
+                Some(
+                    package
+                        .catalog
+                        .variants
+                        .iter()
+                        .position(|v| {
+                            v.predecessor_version == version
+                                && v.predecessor_product.eq_ignore_ascii_case(product)
+                        })
+                        .ok_or(LifecycleError::UpgradeProtocolUnsupported)?,
+                )
+            }
+        }
+    } else {
+        None
+    };
+    if let Some(index) = selected {
+        let (setup, msi) = package
+            .materialize(index, &setup, &msi)
+            .map_err(|_| LifecycleError::Invalid)?;
+        io(fs::write(directory.join("Setup.exe"), setup))?;
+        io(fs::write(directory.join("FutureClassroom.msi"), msi))?;
+    }
+    Ok(())
 }
 
 fn stop_product() -> Result<()> {
@@ -114,69 +227,29 @@ pub(super) fn run(mut package: Package, mode: &str, delete_data: bool) -> Result
     let mut source = package.extract()?;
     stop_product()?;
     let old = installed()?;
-    let previous = old.as_deref() == Some(super::previous_source::VERSION);
-    let legacy = old.as_deref() == Some(super::previous_source::LEGACY_VERSION);
-    let invoke = |directory: &std::path::Path, operation: &str| -> Result<u32> {
-        let mut child = io(Command::new(directory.join("Setup.exe"))
+    let invoke = |operation: &str| -> Result<u32> {
+        let mut child = io(Command::new(source.root.join("Setup.exe"))
             .arg(operation)
-            .current_dir(directory)
+            .current_dir(&source.root)
             .spawn())?;
         Ok(io(child.wait())?.code().ok_or(LifecycleError::Unsettled)? as u32)
     };
-    let mut code;
-    if previous || legacy {
-        if !source.previous || (legacy && !source.legacy) {
-            return Err(LifecycleError::UpgradeProtocolUnsupported);
-        }
-        let prior = source.root.join("previous");
-        code = invoke(
-            &if legacy {
-                source.root.join("legacy")
-            } else {
-                prior.clone()
-            },
-            if mode == "maintain-uninstall" {
-                "uninstall"
-            } else {
-                "repair"
-            },
-        )?;
-        if code == 0 && legacy && mode != "maintain-uninstall" {
-            code = invoke(&prior, "install")?;
-        }
-        if code == 0 && mode != "maintain-uninstall" {
-            code = invoke(&source.root, "install")?;
-        }
+    let target = env!("CARGO_PKG_VERSION");
+    let operation = if mode == "maintain-uninstall" {
+        "uninstall"
+    } else if old.as_deref() == Some(target) {
+        "repair"
     } else {
-        let operation = if mode == "maintain-uninstall" {
-            "uninstall"
-        } else if old.is_some() {
-            "repair"
-        } else {
-            "install"
-        };
-        if old.is_none() {
-            super::super::super::maintenance::update::remove_orphaned(&source.root)?;
-        }
-        code = if mode == "maintain-uninstall" && old.is_none() {
-            0
-        } else {
-            invoke(&source.root, operation)?
-        };
-    }
-    // The exact old 1.0.0.2/3 helpers can fail their Shell cleanup after MSI
-    // already removed the directory. Reconcile actual absence under the native
-    // exclusive gate; never turn an unsettled MSI transaction into success.
-    if mode == "maintain-uninstall"
-        && (previous || legacy)
-        && matches!(code, 1603 | 5104)
-        && installed()?.is_none()
-    {
+        "install"
+    };
+    if old.is_none() {
         super::super::super::maintenance::update::remove_orphaned(&source.root)?;
-        crate::installer_lifecycle::shortcuts::reconcile(entry::SetupCommand::Uninstall)
-            .map_err(|_| LifecycleError::ShellIntegration)?;
-        code = 0;
     }
+    let code = if mode == "maintain-uninstall" && old.is_none() {
+        0
+    } else {
+        invoke(operation)?
+    };
     if code != 0 {
         return Ok(code);
     }
@@ -278,6 +351,31 @@ fn cache_file(root: &std::path::Path) -> PathBuf {
         fc_domain::PRODUCT_DISPLAY_VERSION
     ))
 }
+pub(super) fn local_legacy_cache(path: &std::path::Path) -> Result<bool> {
+    if installed()?.as_deref() != Some(env!("CARGO_PKG_VERSION"))
+        || path != cache_file(&cache_root()?)
+    {
+        return Ok(false);
+    }
+    let identity = InstallIdentity::for_current_user()?;
+    let mut resources = Resources::empty()?;
+    let root = cache_root()?;
+    let pin = resources.open_file(
+        &root,
+        READ_CONTROL.0 | FILE_READ_ATTRIBUTES.0,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        OPEN_EXISTING,
+        true,
+        false,
+    )?;
+    resources.add(pin, Role::Parent);
+    verify_info(pin, true)?;
+    verify_acl(pin, &identity.sid, true)?;
+    let attributes =
+        std::os::windows::fs::MetadataExt::file_attributes(&io(fs::symlink_metadata(path))?);
+    resources.release()?;
+    Ok(attributes & FILE_ATTRIBUTE_REPARSE_POINT.0 == 0)
+}
 fn set_string(key: HKEY, name: &str, value: &str) -> Result<()> {
     let wide: Vec<u16> = value.encode_utf16().chain(Some(0)).collect();
     let bytes: Vec<u8> = wide.iter().flat_map(|v| v.to_le_bytes()).collect();
@@ -294,39 +392,71 @@ pub(crate) fn remove_entry() -> Result<()> {
     Ok(())
 }
 
-/// Invoked only after settled successful native install/repair. The canonical
-/// four-member source is also cached for background LAN updates, not only SFX.
-pub(crate) fn register_source() -> Result<()> {
-    use crate::installer_lifecycle::broker::carrier;
-    let image = io(std::env::current_exe())?;
-    let directory = image.parent().ok_or(LifecycleError::Invalid)?;
-    let sealed = io(fs::read(&image))?;
-    let carrier = carrier::parse(&sealed)?;
-    let msi = io(fs::read(directory.join("FutureClassroom.msi")))?;
-    if <[u8; 32]>::from(Sha256::digest(&msi)) != carrier.digest_format_value() {
+pub(crate) fn distribution_source() -> Result<Option<PathBuf>> {
+    if installed()?.as_deref() != Some(env!("CARGO_PKG_VERSION")) {
+        return Ok(None);
+    }
+    let root = cache_root()?;
+    if !root.exists() {
+        return Ok(None);
+    }
+    let identity = InstallIdentity::for_current_user()?;
+    let mut resources = Resources::empty()?;
+    let pin = resources.open_file(
+        &root,
+        READ_CONTROL.0 | FILE_READ_ATTRIBUTES.0,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        OPEN_EXISTING,
+        true,
+        false,
+    )?;
+    resources.add(pin, Role::Parent);
+    verify_info(pin, true)?;
+    verify_acl(pin, &identity.sid, true)?;
+    let target = cache_file(&root);
+    if !target.exists() {
+        resources.release()?;
+        return Ok(None);
+    }
+    let mut package = Package::open(&target)?.ok_or(LifecycleError::Invalid)?;
+    if !package.unified() {
+        resources.release()?;
+        return Ok(None);
+    }
+    package.members()?;
+    resources.release()?;
+    Ok(Some(target))
+}
+pub(crate) fn cache_distribution(path: &std::path::Path) -> Result<()> {
+    let mut package = Package::open(path)?.ok_or(LifecycleError::Invalid)?;
+    if !package.unified() {
         return Err(LifecycleError::Invalid);
     }
-    let installed = crate::system::DataPaths::installed_bootstrap_for_current_user()?;
-    let app = installed.parent().ok_or(LifecycleError::Invalid)?;
-    let members = [
-        sealed.as_slice(),
-        msi.as_slice(),
-        &io(fs::read(app.join("LICENSE")))?,
-        &io(fs::read(app.join("THIRD-PARTY-NOTICES.txt")))?,
-    ];
-    let mut header = super::standalone::MAGIC.to_vec();
-    for n in std::iter::once(carrier.normal_helper().len()).chain(members.iter().map(|b| b.len())) {
-        header.extend_from_slice(&(n as u64).to_le_bytes());
+    if installed()?.as_deref() != Some(env!("CARGO_PKG_VERSION")) {
+        return Err(LifecycleError::Invalid);
     }
-    let mut digest = Sha256::new();
-    digest.update(&header);
-    let mut output = carrier.normal_helper().to_vec();
-    for bytes in members {
-        output.extend_from_slice(bytes);
-        digest.update(bytes);
+    let members = package.members()?;
+    let raw = &members
+        .iter()
+        .find(|(n, _)| *n == "installer-variants.bin")
+        .ok_or(LifecycleError::Invalid)?
+        .1;
+    let catalog = fc_protocol::installer_variants::Package::parse(raw)
+        .map_err(|_| LifecycleError::Invalid)?
+        .catalog;
+    let code = registered_property("PackageCode")?.ok_or(LifecycleError::Invalid)?;
+    let code = code.trim_matches(['{', '}']);
+    if !catalog.base_package_code.eq_ignore_ascii_case(code)
+        && !catalog
+            .variants
+            .iter()
+            .any(|v| v.package_code.eq_ignore_ascii_case(code))
+    {
+        return Err(LifecycleError::Invalid);
     }
-    output.extend_from_slice(&header);
-    output.extend_from_slice(&digest.finalize());
+    store_distribution(&package.original()?).map(|_| ())
+}
+fn store_distribution(output: &[u8]) -> Result<PathBuf> {
     let identity = InstallIdentity::for_current_user()?;
     let root = cache_root()?;
     let created = with_security(&identity.sid, true, |sa| unsafe {
@@ -358,29 +488,136 @@ pub(crate) fn register_source() -> Result<()> {
         .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT.0)
         .open(root.join("maintenance.lock")))?;
     let target = cache_file(&root);
-    match fs::read(&target) {
-        Ok(existing) if existing == output => (),
-        Ok(_) => return Err(LifecycleError::Invalid),
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-            let mut file = io(fs::OpenOptions::new()
-                .write(true)
-                .create_new(true)
-                .share_mode(0)
-                .open(&target))?;
-            io(file.write_all(&output))?;
-            io(file.sync_all())?;
+    let write = match fs::read(&target) {
+        Ok(existing) if existing.as_slice() == output => false,
+        Ok(_) => {
+            let mut old = Package::open(&target)?.ok_or(LifecycleError::Invalid)?;
+            if old.unified()
+                || output.len() < 64
+                || &output[output.len() - 64..output.len() - 48] != b"FC-SFX-PACK\0v4\0\0"
+            {
+                return Err(LifecycleError::Invalid);
+            }
+            old.members()?;
+            drop(old);
+            true
         }
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => true,
         Err(e) => {
             return Err(LifecycleError::Native(HRESULT::from_win32(
                 e.raw_os_error().unwrap_or(1) as u32,
             )))
         }
-    }
+    };
     use fc_ports::RandomSource;
     let mut nonce = [0; 16];
     crate::SystemRandom.fill(&mut nonce)?;
     let generation: String = nonce.iter().map(|v| format!("{v:02x}")).collect();
+    if write {
+        let temporary = root.join(format!("source-{generation}.tmp"));
+        let result: Result<()> = (|| {
+            let mut file = io(fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .share_mode(0)
+                .open(&temporary))?;
+            io(file.write_all(output))?;
+            io(file.sync_all())?;
+            drop(file);
+            unsafe {
+                windows::Win32::Storage::FileSystem::MoveFileExW(
+                    &native_path(&temporary)?,
+                    &native_path(&target)?,
+                    windows::Win32::Storage::FileSystem::MOVEFILE_REPLACE_EXISTING
+                        | windows::Win32::Storage::FileSystem::MOVEFILE_WRITE_THROUGH,
+                )?;
+            }
+            Ok(())
+        })();
+        if result.is_err() {
+            let _ = fs::remove_file(&temporary);
+        }
+        result?;
+    }
     io(fs::write(root.join("generation"), generation))?;
+    drop(lock);
+    resources.release()?;
+    Ok(target)
+}
+
+/// Invoked only after settled successful native install/repair. Preserve the
+/// complete original signed distribution for maintenance and LAN sharing.
+pub(crate) fn register_source() -> Result<()> {
+    let image = io(std::env::current_exe())?;
+    let directory = image.parent().ok_or(LifecycleError::Invalid)?;
+    let original = directory.join("OriginalInstaller.exe");
+    let setup = io(fs::read(directory.join("Setup.exe")))?;
+    let msi = io(fs::read(directory.join("FutureClassroom.msi")))?;
+    let installed = crate::system::DataPaths::installed_bootstrap_for_current_user()?;
+    let app = installed.parent().ok_or(LifecycleError::Invalid)?;
+    let output = if original.exists() {
+        let mut package = Package::open(&original)?.ok_or(LifecycleError::Invalid)?;
+        let members = package.members()?;
+        let variants_raw = members
+            .iter()
+            .find(|(n, _)| *n == "installer-variants.bin")
+            .ok_or(LifecycleError::Invalid)?
+            .1
+            .as_slice();
+        let variants = fc_protocol::installer_variants::Package::parse(variants_raw)
+            .map_err(|_| LifecycleError::Invalid)?;
+        let matches = |s: &fc_protocol::installer_variants::Source, bytes: &[u8]| {
+            s.bytes == bytes.len() && s.sha256 == format!("{:x}", Sha256::digest(bytes))
+        };
+        if !(matches(&variants.catalog.base_setup, &setup)
+            && matches(&variants.catalog.base_msi, &msi))
+            && !variants
+                .catalog
+                .variants
+                .iter()
+                .any(|v| matches(&v.setup, &setup) && matches(&v.msi, &msi))
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        package.original()?
+    } else {
+        // Compatibility only for the previous coordinator's four-member stage.
+        // Native Setup already settled its exact target source. This local-only
+        // fallback is never advertised as a signed universal LAN distribution.
+        if self::installed()?.as_deref() != Some(env!("CARGO_PKG_VERSION")) {
+            return Err(LifecycleError::Invalid);
+        }
+        let carrier = crate::installer_lifecycle::broker::carrier::parse(&setup)?;
+        if Sha256::digest(&msi).as_slice() != carrier.digest_format_value() {
+            return Err(LifecycleError::Invalid);
+        }
+        let license = io(fs::read(app.join("LICENSE")))?;
+        let notices = io(fs::read(app.join("THIRD-PARTY-NOTICES.txt")))?;
+        let members = [
+            setup.as_slice(),
+            msi.as_slice(),
+            license.as_slice(),
+            notices.as_slice(),
+        ];
+        let mut header = super::standalone::LEGACY_MAGIC.to_vec();
+        for size in
+            std::iter::once(carrier.normal_helper().len()).chain(members.iter().map(|b| b.len()))
+        {
+            header.extend_from_slice(&(size as u64).to_le_bytes());
+        }
+        let mut digest = Sha256::new();
+        digest.update(&header);
+        let mut bytes = carrier.normal_helper().to_vec();
+        for member in members {
+            digest.update(member);
+            bytes.extend_from_slice(member);
+        }
+        bytes.extend_from_slice(&header);
+        bytes.extend_from_slice(&digest.finalize());
+        bytes
+    };
+    let target = store_distribution(&output)?;
+    let mut resources = Resources::empty()?;
     let mut key = HKEY::default();
     unsafe {
         RegCreateKeyExW(
@@ -417,7 +654,6 @@ pub(crate) fn register_source() -> Result<()> {
     ] {
         set_string(key, name, &value)?;
     }
-    drop(lock);
     resources.release()
 }
 

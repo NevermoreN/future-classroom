@@ -43,6 +43,95 @@ impl From<CacheError> for PackageError {
     }
 }
 type Result<T> = std::result::Result<T, PackageError>;
+/// Seek is relative to the bounded official archive inside the single EXE.
+/// ZIP offsets never address the executable prefix or the outer trailer.
+struct EnvelopeReader {
+    file: File,
+    start: u64,
+    length: u64,
+    position: u64,
+}
+impl Read for EnvelopeReader {
+    fn read(&mut self, bytes: &mut [u8]) -> std::io::Result<usize> {
+        let count = bytes.len().min((self.length - self.position) as usize);
+        let count = self.file.read(&mut bytes[..count])?;
+        self.position += count as u64;
+        Ok(count)
+    }
+}
+impl Seek for EnvelopeReader {
+    fn seek(&mut self, seek: SeekFrom) -> std::io::Result<u64> {
+        let position = match seek {
+            SeekFrom::Start(position) => i128::from(position),
+            SeekFrom::End(offset) => i128::from(self.length) + i128::from(offset),
+            SeekFrom::Current(offset) => i128::from(self.position) + i128::from(offset),
+        };
+        if position < 0 || position > i128::from(self.length) {
+            return Err(std::io::ErrorKind::InvalidInput.into());
+        }
+        self.position = position as u64;
+        self.file
+            .seek(SeekFrom::Start(self.start + self.position))?;
+        Ok(self.position)
+    }
+}
+fn open_envelope(path: &Path, cancelled: &dyn Fn() -> bool) -> Result<EnvelopeReader> {
+    let mut file = File::open(path)?;
+    let size = file.metadata()?.len();
+    if size > MAX + (32 << 20) + 64 {
+        return Err(PackageError::Invalid);
+    }
+    let mut head = [0; 4];
+    file.read_exact(&mut head)?;
+    if head == *b"PK\x03\x04" {
+        file.seek(SeekFrom::Start(0))?;
+        return Ok(EnvelopeReader {
+            file,
+            start: 0,
+            length: size,
+            position: 0,
+        });
+    }
+    if &head[..2] != b"MZ" || size < 64 {
+        return Err(PackageError::Invalid);
+    }
+    file.seek(SeekFrom::End(-64))?;
+    let mut trailer = [0; 64];
+    file.read_exact(&mut trailer)?;
+    let prefix = u64::from_le_bytes(trailer[16..24].try_into().unwrap());
+    let length = u64::from_le_bytes(trailer[24..32].try_into().unwrap());
+    if &trailer[..16] != b"FC-SFX-PACK\0v4\0\0"
+        || !(64..=32 << 20).contains(&prefix)
+        || !(22..=MAX).contains(&length)
+        || prefix.checked_add(length).and_then(|n| n.checked_add(64)) != Some(size)
+    {
+        return Err(PackageError::Invalid);
+    }
+    file.seek(SeekFrom::Start(prefix))?;
+    let mut reader = EnvelopeReader {
+        file,
+        start: prefix,
+        length,
+        position: 0,
+    };
+    let mut hash = fc_security::Sha256Stream::default();
+    let mut bytes = [0; 65536];
+    loop {
+        if cancelled() {
+            return Err(CacheError::Cancelled.into());
+        }
+        let count = reader.read(&mut bytes)?;
+        if count == 0 {
+            break;
+        }
+        hash.update(&bytes[..count]);
+    }
+    if hash.finish() != trailer[32..64] {
+        return Err(PackageError::Invalid);
+    }
+    reader.seek(SeekFrom::Start(0))?;
+    Ok(reader)
+}
 /// Protect the 32-byte checkpoint digest with current-user DPAPI. No school key
 /// or publisher key may substitute for this local integrity binding.
 pub trait CheckpointProtection {
@@ -471,6 +560,155 @@ fn metadata_from_archive<R: Read + Seek>(zip: &mut ZipArchive<R>) -> Result<Owne
     m.validate()?;
     Ok(m)
 }
+/// Official signatures and source membership for the public installation entry.
+/// `maintenance_version` is read from Windows registration, never UI/argv. Only
+/// exactly that signed target may use historical signature time for maintenance;
+/// the native same-source/cache admission still runs before any MSI operation.
+pub fn verify_installer_distribution(
+    path: &Path,
+    anchor: &[u8],
+    now: i64,
+    maintenance_version: Option<&str>,
+    selected_sources: Option<(&Path, &Path)>,
+) -> Result<ReleaseClaims> {
+    let reader = open_envelope(path, &|| false)?;
+    if reader.start == 0 {
+        return Err(PackageError::Invalid);
+    }
+    let prefix_length = reader.start;
+    let mut zip = archive(reader, 36)?;
+    let metadata = metadata_from_archive(&mut zip)?;
+    let payload = read_member(&mut zip, "payload.zip", MAX as usize)?;
+    preflight_payload(&mut std::io::Cursor::new(&payload))?;
+    let roots: Vec<_> = metadata
+        .roots
+        .iter()
+        .map(|(_, raw)| raw.as_slice())
+        .collect();
+    let verify = |time| {
+        UpdateTrust::from_installed_root(anchor)
+            .and_then(|mut trust| trust.refresh(metadata.borrowed(&roots), time))
+    };
+    let targets = match verify(now) {
+        Ok(targets) => targets,
+        Err(_) if maintenance_version.is_some() => {
+            verify(historical_time(anchor, &metadata)?).map_err(|_| PackageError::Trust)?
+        }
+        Err(_) => return Err(PackageError::Trust),
+    };
+    let digest = fc_security::sha256(&payload);
+    let mut matching = targets
+        .iter()
+        .filter(|t| t.sha256() == digest && t.length() == payload.len() as u64);
+    let target = matching.next().ok_or(PackageError::Trust)?;
+    if matching.next().is_some() {
+        return Err(PackageError::Trust);
+    }
+    let claims = ReleaseClaims::from_verified_custom(
+        &serde_json::to_vec(target.custom().ok_or(PackageError::Trust)?)
+            .map_err(|_| PackageError::Trust)?,
+        digest,
+        payload.len() as u64,
+    )
+    .map_err(|_| PackageError::Trust)?;
+    // Historical expiry is maintenance-only; never allow it to introduce a
+    // different release into a fresh machine or an older registered product.
+    if verify(now).is_err()
+        && maintenance_version.and_then(|v| fc_domain::updates::ReleaseVersion::parse(v).ok())
+            != Some(claims.version)
+    {
+        return Err(PackageError::Trust);
+    }
+    let mut sources = archive(std::io::Cursor::new(&payload), 6)?;
+    let setup = read_member(&mut sources, "Setup.exe", 32 << 20)?;
+    let msi = read_member(&mut sources, "FutureClassroom.msi", 64 << 20)?;
+    let prefix = read_prefix(path, prefix_length as usize)?;
+    if prefix != setup[..setup.len() - 132] {
+        return Err(PackageError::Trust);
+    }
+    if let Some((selected_setup, selected_msi)) = selected_sources {
+        let actual_setup = read_bound(selected_setup, 32 << 20)?;
+        let actual_msi = read_bound(selected_msi, 64 << 20)?;
+        let mut matched = actual_setup == setup && actual_msi == msi;
+        if !matched && sources.file_names().any(|n| n == "installer-variants.bin") {
+            let raw = read_member(
+                &mut sources,
+                "installer-variants.bin",
+                fc_protocol::installer_variants::MAX_BYTES,
+            )?;
+            let variants = fc_protocol::installer_variants::Package::parse(&raw)
+                .map_err(|_| PackageError::Invalid)?;
+            for index in 0..variants.catalog.variants.len() {
+                let pair = variants
+                    .materialize(index, &setup, &msi)
+                    .map_err(|_| PackageError::Invalid)?;
+                if pair.0 == actual_setup && pair.1 == actual_msi {
+                    matched = true;
+                    break;
+                }
+            }
+        }
+        if !matched {
+            return Err(PackageError::Trust);
+        }
+    }
+    Ok(claims)
+}
+fn read_prefix(path: &Path, length: usize) -> Result<Vec<u8>> {
+    let mut prefix = vec![0; length];
+    File::open(path)?.read_exact(&mut prefix)?;
+    Ok(prefix)
+}
+fn historical_time(anchor: &[u8], metadata: &OwnedMetadata) -> Result<i64> {
+    let mut minimum = i64::MAX;
+    for raw in std::iter::once(anchor)
+        .chain(metadata.roots.iter().map(|(_, raw)| raw.as_slice()))
+        .chain([
+            metadata.timestamp.as_slice(),
+            metadata.snapshot.as_slice(),
+            metadata.targets.as_slice(),
+        ])
+    {
+        let value: serde_json::Value =
+            serde_json::from_slice(raw).map_err(|_| PackageError::Invalid)?;
+        let expiry = value["signed"]["expires"]
+            .as_str()
+            .ok_or(PackageError::Invalid)?;
+        if !expiry.is_ascii()
+            || expiry.len() != 20
+            || &expiry[4..5] != "-"
+            || &expiry[7..8] != "-"
+            || &expiry[10..11] != "T"
+            || &expiry[13..14] != ":"
+            || &expiry[16..17] != ":"
+            || &expiry[19..] != "Z"
+        {
+            return Err(PackageError::Invalid);
+        }
+        let number = |a: usize, b: usize| {
+            expiry[a..b]
+                .parse::<u32>()
+                .map_err(|_| PackageError::Invalid)
+        };
+        let date = fc_domain::time::LocalDate::new(
+            number(0, 4)? as i32,
+            number(5, 7)? as u8,
+            number(8, 10)? as u8,
+        )
+        .map_err(|_| PackageError::Invalid)?;
+        let hour = number(11, 13)?;
+        let minute = number(14, 16)?;
+        let second = number(17, 19)?;
+        if hour > 23 || minute > 59 || second > 59 {
+            return Err(PackageError::Invalid);
+        }
+        let epoch = fc_domain::time::LocalDate::new(1970, 1, 1).unwrap();
+        minimum = minimum.min(
+            date.days_since(epoch) * 86400 + i64::from(hour * 3600 + minute * 60 + second) - 1,
+        );
+    }
+    Ok(minimum)
+}
 /// Copies into cache at its resumed offset. Only freshly TUF-verified targets
 /// with valid product claims and complete formal source binding become ready.
 pub fn import_envelope(
@@ -504,7 +742,7 @@ pub fn import_envelope_cancellable(
     if cancelled() {
         return Err(CacheError::Cancelled.into());
     }
-    let mut zip = archive(File::open(path)?, 36)?;
+    let mut zip = archive(open_envelope(path, cancelled)?, 36)?;
     let metadata = metadata_from_archive(&mut zip)?;
     let catalog = TrustedCatalog::refresh(anchor, checkpoint_dir, metadata, now, protection)?;
     let length = zip.by_name("payload.zip")?.size();
@@ -617,6 +855,183 @@ pub struct SourceFiles {
     pub setup: PathBuf,
     pub msi: PathBuf,
 }
+/// Recreate the public single installer from the signed, hash-verified payload
+/// and original metadata bytes. ZIP fields match package-update-envelope.py;
+/// no peer executable, publisher key or unsigned executable prefix is accepted.
+pub fn reconstruct_installer(
+    reader: &mut dyn PackageReader,
+    metadata: &OwnedMetadata,
+    output: &Path,
+    cancelled: &dyn Fn() -> bool,
+) -> Result<()> {
+    metadata.validate()?;
+    preflight_payload_cancellable(reader, cancelled)?;
+    reader.seek(SeekFrom::Start(0))?;
+    let mut zip = archive(&mut *reader, 6)?;
+    let setup = read_member(&mut zip, "Setup.exe", 32 << 20)?;
+    let helper = &setup[..setup.len() - 132];
+    drop(zip);
+    reader.seek(SeekFrom::Start(0))?;
+    let length = reader.seek(SeekFrom::End(0))?;
+    reader.seek(SeekFrom::Start(0))?;
+    let mut crc = flate2::Crc::new();
+    let mut buffer = [0; 65536];
+    loop {
+        if cancelled() {
+            return Err(CacheError::Cancelled.into());
+        }
+        let n = reader.read(&mut buffer)?;
+        if n == 0 {
+            break;
+        }
+        crc.update(&buffer[..n]);
+    }
+    reader.seek(SeekFrom::Start(0))?;
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(output)?;
+    let result = (|| {
+        file.write_all(helper)?;
+        let mut writer = ArchiveWriter {
+            file: &mut file,
+            hash: fc_security::Sha256Stream::default(),
+            count: 0,
+        };
+        let mut central = Vec::new();
+        let mut count = 0u16;
+        for (name, raw) in [
+            ("snapshot.json", &metadata.snapshot),
+            ("targets.json", &metadata.targets),
+            ("timestamp.json", &metadata.timestamp),
+        ] {
+            write_archive_member(
+                &mut writer,
+                &mut central,
+                &format!("metadata/{name}"),
+                raw.len() as u64,
+                checksum(raw),
+                &mut std::io::Cursor::new(raw),
+                cancelled,
+            )?;
+            count += 1;
+        }
+        for (version, raw) in &metadata.roots {
+            write_archive_member(
+                &mut writer,
+                &mut central,
+                &format!("metadata/{version}.root.json"),
+                raw.len() as u64,
+                checksum(raw),
+                &mut std::io::Cursor::new(raw),
+                cancelled,
+            )?;
+            count += 1;
+        }
+        write_archive_member(
+            &mut writer,
+            &mut central,
+            "payload.zip",
+            length,
+            crc.sum(),
+            reader,
+            cancelled,
+        )?;
+        count += 1;
+        let offset = writer.count as u32;
+        writer.write_all(&central)?;
+        writer.write_all(b"PK\x05\x06")?;
+        for number in [0u16, 0, count, count] {
+            writer.write_all(&number.to_le_bytes())?;
+        }
+        writer.write_all(&(central.len() as u32).to_le_bytes())?;
+        writer.write_all(&offset.to_le_bytes())?;
+        writer.write_all(&0u16.to_le_bytes())?;
+        let archive_length = writer.count;
+        let hash = writer.hash.finish();
+        file.write_all(b"FC-SFX-PACK\0v4\0\0")?;
+        file.write_all(&(helper.len() as u64).to_le_bytes())?;
+        file.write_all(&archive_length.to_le_bytes())?;
+        file.write_all(&hash)?;
+        file.sync_all()?;
+        Ok(())
+    })();
+    drop(file);
+    if result.is_err() {
+        let _ = fs::remove_file(output);
+    }
+    result
+}
+struct ArchiveWriter<'a, W: Write + ?Sized> {
+    file: &'a mut W,
+    hash: fc_security::Sha256Stream,
+    count: u64,
+}
+impl<W: Write + ?Sized> Write for ArchiveWriter<'_, W> {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        let count = self.file.write(bytes)?;
+        self.hash.update(&bytes[..count]);
+        self.count += count as u64;
+        Ok(count)
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.file.flush()
+    }
+}
+fn checksum(bytes: &[u8]) -> u32 {
+    let mut crc = flate2::Crc::new();
+    crc.update(bytes);
+    crc.sum()
+}
+fn write_archive_member(
+    writer: &mut ArchiveWriter<'_, impl Write>,
+    central: &mut Vec<u8>,
+    name: &str,
+    length: u64,
+    crc: u32,
+    source: &mut dyn Read,
+    cancelled: &dyn Fn() -> bool,
+) -> Result<()> {
+    if length == 0 || length > MAX || writer.count + length > MAX {
+        return Err(PackageError::Invalid);
+    }
+    let offset = writer.count as u32;
+    writer.write_all(b"PK\x03\x04")?;
+    for n in [20u16, 0, 0, 0, 33] {
+        writer.write_all(&n.to_le_bytes())?;
+    }
+    for n in [crc, length as u32, length as u32] {
+        writer.write_all(&n.to_le_bytes())?;
+    }
+    writer.write_all(&(name.len() as u16).to_le_bytes())?;
+    writer.write_all(&0u16.to_le_bytes())?;
+    writer.write_all(name.as_bytes())?;
+    let mut remaining = length;
+    let mut buffer = [0; 65536];
+    while remaining > 0 {
+        if cancelled() {
+            return Err(CacheError::Cancelled.into());
+        }
+        let count = (remaining as usize).min(buffer.len());
+        source.read_exact(&mut buffer[..count])?;
+        writer.write_all(&buffer[..count])?;
+        remaining -= count as u64;
+    }
+    central.extend_from_slice(b"PK\x01\x02");
+    for n in [0x314u16, 20, 0, 0, 0, 33] {
+        central.extend_from_slice(&n.to_le_bytes());
+    }
+    for n in [crc, length as u32, length as u32] {
+        central.extend_from_slice(&n.to_le_bytes());
+    }
+    for n in [name.len() as u16, 0, 0, 0, 0] {
+        central.extend_from_slice(&n.to_le_bytes());
+    }
+    central.extend_from_slice(&0x81800000u32.to_le_bytes());
+    central.extend_from_slice(&offset.to_le_bytes());
+    central.extend_from_slice(name.as_bytes());
+    Ok(())
+}
 pub fn extract_install_sources(
     reader: &mut dyn PackageReader,
     directory: &Path,
@@ -640,8 +1055,57 @@ pub fn extract_install_sources_cancellable(
         msi: directory.join("FutureClassroom.msi"),
     })
 }
+/// Derive the latest old coordinator's four-member representation from the
+/// current base. Its independent signed target digest remains mandatory.
+pub fn derive_legacy_payload(
+    reader: &mut dyn PackageReader,
+    target: VerifiedTarget,
+    cancelled: &dyn Fn() -> bool,
+) -> Result<Vec<u8>> {
+    reader.seek(SeekFrom::Start(0))?;
+    let mut zip = archive(reader, 6)?;
+    let mut output = Vec::new();
+    let mut writer = ArchiveWriter {
+        file: &mut output,
+        hash: fc_security::Sha256Stream::default(),
+        count: 0,
+    };
+    let mut central = Vec::new();
+    for name in [
+        "Setup.exe",
+        "FutureClassroom.msi",
+        "LICENSE",
+        "THIRD-PARTY-NOTICES.txt",
+    ] {
+        let mut member = zip.by_name(name)?;
+        let size = member.size();
+        let crc = member.crc32();
+        write_archive_member(
+            &mut writer,
+            &mut central,
+            name,
+            size,
+            crc,
+            &mut member,
+            cancelled,
+        )?;
+    }
+    let offset = writer.count as u32;
+    writer.write_all(&central)?;
+    writer.write_all(b"PK\x05\x06")?;
+    for n in [0u16, 0, 4, 4] {
+        writer.write_all(&n.to_le_bytes())?;
+    }
+    writer.write_all(&(central.len() as u32).to_le_bytes())?;
+    writer.write_all(&offset.to_le_bytes())?;
+    writer.write_all(&0u16.to_le_bytes())?;
+    if writer.count != target.length || writer.hash.finish() != target.sha256 {
+        return Err(PackageError::Trust);
+    }
+    Ok(output)
+}
 fn inspect_payload(reader: &mut dyn PackageReader, destination: Option<&Path>) -> Result<()> {
-    let mut zip = archive(reader, 5)?;
+    let mut zip = archive(reader, 6)?;
     let mut setup_tail = Vec::new();
     let mut msi_hash = None;
     let mut required = BTreeSet::new();
@@ -653,6 +1117,7 @@ fn inspect_payload(reader: &mut dyn PackageReader, destination: Option<&Path>) -
             "Setup.exe" | "FutureClassroom.msi" => 64 * 1024 * 1024,
             "LICENSE" | "THIRD-PARTY-NOTICES.txt" => 30 * 1024 * 1024,
             "manifest.json" => 32768,
+            "installer-variants.bin" => fc_protocol::installer_variants::MAX_BYTES as u64,
             _ => return Err(PackageError::Invalid),
         };
         if file.size() > max {
@@ -662,7 +1127,10 @@ fn inspect_payload(reader: &mut dyn PackageReader, destination: Option<&Path>) -
         if total > MAX {
             return Err(PackageError::Invalid);
         }
-        let is_source = matches!(name.as_str(), "Setup.exe" | "FutureClassroom.msi");
+        let is_source = matches!(
+            name.as_str(),
+            "Setup.exe" | "FutureClassroom.msi" | "installer-variants.bin"
+        );
         let mut output = if is_source {
             if let Some(dir) = destination {
                 Some(
@@ -749,6 +1217,28 @@ fn inspect_payload(reader: &mut dyn PackageReader, destination: Option<&Path>) -
         || &t[116..] != b"FCCR2-END-v2\0\0\0\0"
     {
         return Err(PackageError::Invalid);
+    }
+    if zip
+        .file_names()
+        .any(|name| name == "installer-variants.bin")
+    {
+        let raw = read_member(
+            &mut zip,
+            "installer-variants.bin",
+            fc_protocol::installer_variants::MAX_BYTES,
+        )?;
+        let variants = fc_protocol::installer_variants::Package::parse(&raw)
+            .map_err(|_| PackageError::Invalid)?;
+        let setup = read_member(&mut zip, "Setup.exe", 32 << 20)?;
+        let msi = read_member(&mut zip, "FutureClassroom.msi", 64 << 20)?;
+        variants
+            .validate_base(&setup, &msi)
+            .map_err(|_| PackageError::Invalid)?;
+        for index in 0..variants.catalog.variants.len() {
+            variants
+                .materialize(index, &setup, &msi)
+                .map_err(|_| PackageError::Invalid)?;
+        }
     }
     Ok(())
 }
@@ -858,5 +1348,37 @@ mod tests {
         let mut ambiguous = ENVELOPE.to_vec();
         ambiguous[30] ^= 1;
         assert!(super::archive(std::io::Cursor::new(ambiguous), 36).is_err());
+    }
+    #[test]
+    fn reconstructed_single_installer_preserves_python_archive_and_official_source() {
+        let path = stage();
+        let mut archive = super::archive(std::io::Cursor::new(ENVELOPE), 36).unwrap();
+        let metadata = metadata_from_archive(&mut archive).unwrap();
+        let payload = read_member(&mut archive, "payload.zip", MAX as usize).unwrap();
+        let output = path.join("installer.exe");
+        reconstruct_installer(
+            &mut std::io::Cursor::new(&payload),
+            &metadata,
+            &output,
+            &|| false,
+        )
+        .unwrap();
+        let mut reader = open_envelope(&output, &|| false).unwrap();
+        let mut original = Vec::new();
+        reader.read_to_end(&mut original).unwrap();
+        assert_eq!(original, ENVELOPE);
+        let claims = verify_installer_distribution(&output, ROOT, NOW, None, None).unwrap();
+        assert_eq!(claims.release_id, "TEST-ONLY-NOT-INSTALLABLE");
+        // Historical signatures cannot authorize fresh or cross-version installs.
+        let expired = 2_000_000_000;
+        assert!(verify_installer_distribution(&output, ROOT, expired, None, None).is_err());
+        assert!(
+            verify_installer_distribution(&output, ROOT, expired, Some("99.0.0"), None).is_err()
+        );
+        assert!(verify_installer_distribution(&output, ROOT, expired, Some("0.2.0"), None).is_ok());
+        let mut damaged = fs::read(&output).unwrap();
+        damaged[2] ^= 1;
+        fs::write(&output, &damaged).unwrap();
+        assert!(verify_installer_distribution(&output, ROOT, NOW, None, None).is_err());
     }
 }

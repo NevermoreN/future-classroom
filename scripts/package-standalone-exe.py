@@ -11,6 +11,8 @@ import json
 from pathlib import Path
 import runpy
 import struct
+import io
+import zipfile
 
 HERE = Path(__file__).resolve().parent
 C = runpy.run_path(str(HERE / 'installer-carrier-format.py'))
@@ -23,6 +25,56 @@ PREVIOUS_NAMES = ('previous/Setup.exe', 'previous/FutureClassroom.msi')
 PREVIOUS_LIMITS = (32 << 20, 128 << 20)
 MAGIC_V3 = b'FC-SFX-PACK\0v3\0\0'
 LEGACY_NAMES = ('legacy/Setup.exe', 'legacy/FutureClassroom.msi')
+MAGIC_V4 = b'FC-SFX-PACK\0v4\0\0'
+
+
+def distribution_archive(image: bytes) -> tuple[bytes, bytes]:
+    if len(image) < 576 or image[-64:-48] != MAGIC_V4:
+        raise ValueError('Unified distribution footer required')
+    prefix, length = struct.unpack('<2Q', image[-48:-32])
+    if not 512 <= prefix <= 32 << 20 or not 1 <= length <= 128 << 20 or prefix + length + 64 != len(image):
+        raise ValueError('Unified distribution bounds differ')
+    archive = image[prefix:-64]
+    if hashlib.sha256(archive).digest() != image[-32:]:
+        raise ValueError('Unified distribution checksum differs')
+    return image[:prefix], archive
+
+
+def distribution_members(archive: bytes) -> dict[str, bytes]:
+    envelope = runpy.run_path(str(HERE / 'package-update-envelope.py'))
+    # Reuse the closed canonical transport parser, including duplicate/path and
+    # ZIP bounds checks. Signatures remain the existing publisher responsibility.
+    source = io.BytesIO(archive)
+    envelope['zip_directory'](source, len(archive), 36)
+    with zipfile.ZipFile(source) as outer:
+        files = envelope['members'](outer, envelope=True)
+        names = set(files)
+        if 'payload.zip' not in names or any(n != 'payload.zip' and not n.startswith('metadata/') for n in names):
+            raise ValueError('Duplicate or missing distribution payload')
+        envelope['metadata_names']({n.removeprefix('metadata/') for n in names if n != 'payload.zip'})
+        if any(files[n].file_size > 256 << 10 for n in names if n != 'payload.zip') or sum(files[n].file_size for n in names if n != 'payload.zip') > 2 << 20:
+            raise ValueError('Distribution metadata exceeds bounds')
+        raw, _ = envelope['stream_member'](outer, files['payload.zip'], 128 << 20, collect=True)
+        payload_source = io.BytesIO(raw)
+        envelope['zip_directory'](payload_source, len(raw), 32)
+        with zipfile.ZipFile(payload_source) as payload:
+            files = envelope['members'](payload, envelope=False)
+            if not set(NAMES + ('installer-variants.bin',)).issubset(files) or not set(files).issubset(NAMES + ('installer-variants.bin', 'manifest.json')):
+                raise ValueError('Unified payload requires only current source and its variants')
+            members = {}
+            for name, limit in zip(NAMES, LIMITS):
+                if not 1 <= payload.getinfo(name).file_size <= limit:
+                    raise ValueError('Payload bound differs: ' + name)
+                members[name] = payload.read(name)
+            return members
+
+
+def package_distribution(helper: bytes, archive: bytes) -> bytes:
+    members = distribution_members(archive)
+    C['verify_carrier_binding'](C['make_carrier_template'](helper), members['Setup.exe'], members['FutureClassroom.msi'])
+    if not 512 <= len(helper) <= 32 << 20 or not 1 <= len(archive) <= 128 << 20:
+        raise ValueError('Unified distribution bounds differ')
+    return helper + archive + MAGIC_V4 + struct.pack('<2Q', len(helper), len(archive)) + hashlib.sha256(archive).digest()
 
 
 def package(helper: bytes, members: dict[str, bytes]) -> bytes:
@@ -43,6 +95,11 @@ def package(helper: bytes, members: dict[str, bytes]) -> bytes:
 
 
 def inspect(image: bytes) -> tuple[bytes, dict[str, bytes]]:
+    if len(image) >= 64 and image[-64:-48] == MAGIC_V4:
+        helper, archive = distribution_archive(image)
+        members = distribution_members(archive)
+        C['verify_carrier_binding'](C['make_carrier_template'](helper), members['Setup.exe'], members['FutureClassroom.msi'])
+        return helper, members
     legacy = len(image) >= 120 and image[-120:-104] == MAGIC_V3
     previous = legacy or len(image) >= 104 and image[-104:-88] == MAGIC_V2
     size = 120 if legacy else 104 if previous else FOOTER
@@ -74,11 +131,8 @@ def main():
     for name in ('helper', 'bundle', 'output'):
         p.add_argument('--' + name, type=Path, required=True)
     p.add_argument('--report-sha256', required=True)
-    p.add_argument('--previous-setup', type=Path, help='Exact previously published EXE, bound to reviewed baseline')
-    p.add_argument('--legacy-setup', type=Path, help='Exact official bridge installer; requires previous source')
+    p.add_argument('--update-envelope', type=Path, required=True, help='Exact signed official update archive')
     a = p.parse_args()
-    if a.legacy_setup and not a.previous_setup:
-        raise ValueError('Legacy bridge requires the exact predecessor source')
     report_raw = C['_BUILDER']['PROBE']['bounded_regular_file'](a.bundle / 'report.json', 16 << 20)
     if hashlib.sha256(report_raw).hexdigest() != a.report_sha256:
         raise ValueError('Explicit formal report digest differs')
@@ -97,30 +151,10 @@ def main():
             {'bytes': row['size'], 'sha256': row['sha256']} for row in report['payloads'] if row['path'] == name)
         if len(members[name]) != fact['bytes'] or hashlib.sha256(members[name]).hexdigest() != fact['sha256']:
             raise ValueError('Formal member bytes differ: ' + name)
-    if a.previous_setup:
-        import re
-        source = (Path(report['sourceRoot']) / 'crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/setup_entry/previous_source.rs').read_text()
-        for argument, prefix, names in [(a.previous_setup, '', PREVIOUS_NAMES), (a.legacy_setup, 'LEGACY_', LEGACY_NAMES)]:
-            if argument is None:
-                continue
-            version = re.search(r'const '+prefix+r'VERSION:\s*&str\s*=\s*"([0-9.]+)";', source)[1]
-            from_version = '1.0.' + '.'.join(version.split('.')[1:])
-            if not prefix and from_version != report['predecessorPublication']['baseline']['publicVersion']:
-                raise ValueError('Maintenance source must match the formal exact predecessor')
-            baseline = json.loads((Path(report['sourceRoot']) / 'packaging/release-baselines' / (from_version+'.json')).read_bytes())
-            old = C['_BUILDER']['PROBE']['bounded_regular_file'](argument, 384 << 20)
-            if {'bytes': len(old), 'sha256': hashlib.sha256(old).hexdigest()} != baseline['setupExe']:
-                raise ValueError('Previous public installer differs from reviewed baseline')
-            _, previous = inspect(old)
-            if {'bytes':len(previous['FutureClassroom.msi']), 'sha256':hashlib.sha256(previous['FutureClassroom.msi']).hexdigest()} != baseline['msi']:
-                raise ValueError('Previous MSI differs from reviewed baseline')
-            for symbol, member in [('SETUP_SHA', 'Setup.exe'), ('MSI_SHA', 'FutureClassroom.msi')]:
-                match = re.search(r'const '+prefix+symbol+r':\s*\[u8;\s*32\]\s*=\s*\[(.*?)\];', source, re.S)
-                expected = bytes(int(x,16) for x in re.findall(r'0x([0-9a-fA-F]{2})', match[1])) if match else b''
-                if expected != hashlib.sha256(previous[member]).digest():
-                    raise ValueError('Previous member differs from same-CI native maintenance binding: '+member)
-            members.update({name:previous[name.split('/',1)[1]] for name in names})
-    image = package(helper, members)
+    archive = C['_BUILDER']['PROBE']['bounded_regular_file'](a.update_envelope, 128 << 20)
+    if distribution_members(archive) != members:
+        raise ValueError('Signed archive differs from formal current source')
+    image = package_distribution(helper, archive)
     if inspect(image) != (helper, members):
         raise ValueError('Standalone complete readback failed')
     with a.output.open('xb') as stream:

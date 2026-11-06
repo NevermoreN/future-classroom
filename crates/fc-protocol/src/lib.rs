@@ -2,6 +2,7 @@
 #![forbid(unsafe_code)]
 pub mod calendar_feed;
 pub mod http1;
+pub mod installer_variants;
 pub mod recovery;
 pub mod update_discovery;
 pub mod update_release;

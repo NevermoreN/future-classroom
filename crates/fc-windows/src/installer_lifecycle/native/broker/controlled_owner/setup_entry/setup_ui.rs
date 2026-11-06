@@ -21,6 +21,7 @@ const DELETE_DATA: usize = 204;
 struct State {
     _package: Package,
     installed: bool,
+    upgrading: bool,
     uninstall: bool,
     delete_data: bool,
     child: Option<Child>,
@@ -177,6 +178,8 @@ unsafe fn repaint(hwnd: HWND, state: &State) {
             } else {
                 if state.uninstall {
                     "卸载未来教室"
+                } else if state.upgrading {
+                    "升级未来教室"
                 } else if state.installed {
                     "修复或卸载未来教室"
                 } else {
@@ -252,6 +255,8 @@ unsafe fn update(hwnd: HWND, state: &State) {
             } else {
                 if state.uninstall {
                     "确认卸载"
+                } else if state.upgrading {
+                    "升级并保留数据"
                 } else if state.installed {
                     "修复并保留数据"
                 } else {
@@ -273,7 +278,10 @@ unsafe fn update(hwnd: HWND, state: &State) {
             state.child.is_none(),
         );
         for (id, visible) in [
-            (UNINSTALL, state.installed && !state.complete),
+            (
+                UNINSTALL,
+                state.installed && !state.upgrading && !state.complete,
+            ),
             (DELETE_DATA, state.uninstall && !state.complete),
         ] {
             if let Ok(control) = GetDlgItem(Some(hwnd), id as i32) {
@@ -521,9 +529,12 @@ pub(super) fn show(package: Package, uninstall: bool) -> Result<u32> {
         // The asInvoker manifest leaves DPI virtualization to Windows (also
         // available on Windows 7); GDI and child controls share these units.
         let installed = uninstall || super::maintenance::exists()?;
+        let upgrading =
+            super::maintenance::installed()?.is_some_and(|v| v != env!("CARGO_PKG_VERSION"));
         let mut state = State {
             _package: package,
             installed,
+            upgrading,
             uninstall,
             delete_data: false,
             child: None,
@@ -531,6 +542,9 @@ pub(super) fn show(package: Package, uninstall: bool) -> Result<u32> {
             complete: false,
             message: if uninstall {
                 "默认保留原有账号、设置和资料。需要完整清理时，请勾选删除数据。".to_owned()
+            } else if upgrading {
+                "检测到较低版本。将直接升级到本安装包的版本，保留账号、设置、课表和资料。"
+                    .to_owned()
             } else if installed {
                 "检测到已有安装或残留。修复会重新安装程序文件，并保留设置和课堂资料；也可选择卸载。"
                     .to_owned()

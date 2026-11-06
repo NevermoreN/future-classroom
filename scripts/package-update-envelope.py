@@ -35,7 +35,7 @@ ROLE_NAMES = {"timestamp.json", "snapshot.json", "targets.json"}
 ROOT_NAME = re.compile(r"([1-9][0-9]{0,9})\.root\.json\Z")
 INNER_LIMITS = {"Setup.exe": MAX_SOURCE, "FutureClassroom.msi": MAX_SOURCE,
                 "LICENSE": MAX_LICENSE, "THIRD-PARTY-NOTICES.txt": MAX_LICENSE,
-                "manifest.json": MAX_MANIFEST}
+                "manifest.json": MAX_MANIFEST, "installer-variants.bin": 32 * 1024 * 1024}
 REQUIRED_INNER = {"Setup.exe", "FutureClassroom.msi"}
 
 

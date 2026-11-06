@@ -75,17 +75,32 @@ def publish(args):
     # Reuse the canonical bounded transport inspector, not arbitrary ZIP extraction.
     import runpy
     transport = runpy.run_path(str(Path(__file__).with_name("package-update-envelope.py")))
-    size = transport["regular"](args.payload).st_size
-    with args.payload.open("rb") as source:
-        transport["inspect_payload"](source, size)
-    root = read_public_root(args.root)
-    keys = private_directory(args.key_dir)
-    custom = json.loads(args.claims.read_text(encoding="utf-8"))
+    inputs = [(args.payload, args.claims)] + list(getattr(args, "additional_target", None) or [])
+    if len(inputs) > 16:
+        raise ValueError("at most sixteen targets per signed catalog")
+    inspected = []
+    for payload, claims in inputs:
+        size = transport["regular"](payload).st_size
+        with payload.open("rb") as source:
+            transport["inspect_payload"](source, size)
+        custom = json.loads(claims.read_text(encoding="utf-8"))
+        current_sequence = custom.get("releaseSequence")
+        if type(current_sequence) is not int or not 1 <= current_sequence < 2**63:
+            raise ValueError("releaseSequence must be a positive monotonic integer")
+        if custom.get("product") != "FutureClassroom" or custom.get("installerAbi") != 2 or custom.get("guardCapability") != 3 or not custom.get("allowedPredecessors"):
+            raise ValueError("formal ABI2/capability3 release and exact predecessors required")
+        inspected.append((payload, custom, size))
+    custom = inspected[0][1]
     sequence = custom.get("releaseSequence")
     if not isinstance(sequence, int) or isinstance(sequence, bool) or not 1 <= sequence < 2**63:
         raise ValueError("releaseSequence must be a positive monotonic integer")
-    if custom.get("product") != "FutureClassroom" or custom.get("installerAbi") != 2 or custom.get("guardCapability") != 3 or not custom.get("allowedPredecessors"):
-        raise ValueError("formal ABI2/capability3 release and exact predecessors required")
+    for _, other, _ in inspected[1:]:
+        if any(other.get(key) != custom.get(key) for key in (
+            "releaseSequence", "channel", "version", "product", "architecture",
+            "minimumWindows", "installerAbi", "guardCapability", "sourceSchema", "sourceProtocol")):
+            raise ValueError("all targets must describe the same release, platform and protocol")
+    root = read_public_root(args.root)
+    keys = private_directory(args.key_dir)
     state = keys / "last-release-sequence"
     if state.exists() and sequence <= int(state.read_text(encoding="ascii")):
         raise ValueError("release sequence must exceed the maintainer's durable high-water mark")
@@ -95,10 +110,19 @@ def publish(args):
     channel = custom.get("channel", "")
     if not channel or any(c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-" for c in channel):
         raise ValueError("invalid release channel")
-    target_path = f"{channel}/{sequence}/payload.zip"
-    target = TargetFile.from_file(target_path, str(args.payload), ["sha256"])
-    target.unrecognized_fields["custom"] = custom
-    targets = Metadata(Targets(version=sequence, spec_version="1.0.36", expires=now + timedelta(days=365), targets={target_path: target}))
+    target_files, results = {}, []
+    for payload, claims, size in inspected:
+        name = "payload.zip" if len(inspected) == 1 else payload.name
+        if not name.endswith(".zip") or any(c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-" for c in name):
+            raise ValueError("multi-target payloads need distinct safe .zip basenames")
+        target_path = f"{channel}/{sequence}/{name}"
+        if target_path in target_files:
+            raise ValueError("duplicate target path")
+        target = TargetFile.from_file(target_path, str(payload), ["sha256"])
+        target.unrecognized_fields["custom"] = claims
+        target_files[target_path] = target
+        results.append({"target": target_path, "payloadBytes": size, "sha256": target.hashes["sha256"]})
+    targets = Metadata(Targets(version=sequence, spec_version="1.0.36", expires=now + timedelta(days=365), targets=target_files))
     targets.sign(signer_for(root, keys, "targets"))
     targets_bytes = targets.to_bytes()
     snapshot = Metadata(Snapshot(version=sequence, spec_version="1.0.36", expires=now + timedelta(days=365), meta={"targets.json": MetaFile.from_data(sequence, targets_bytes, ["sha256"])}))
@@ -114,7 +138,9 @@ def publish(args):
     pending = keys / "last-release-sequence.pending"
     exclusive(pending, str(sequence).encode("ascii"), 0o600)
     os.replace(pending, state)
-    print(json.dumps({"target": target_path, "payloadBytes": size, "sha256": target.hashes["sha256"], "rootVersion": root.signed.version}))
+    result = dict(results[0]) if len(results) == 1 else {"targets": results}
+    result["rootVersion"] = root.signed.version
+    print(json.dumps(result))
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -125,6 +151,9 @@ def main():
     command = commands.add_parser("publish")
     for name in ("root", "key-dir", "payload", "claims", "output-dir"):
         command.add_argument("--" + name, type=Path, required=True)
+    command.add_argument("--additional-target", type=Path, nargs=2, action="append",
+        metavar=("PAYLOAD_ZIP", "CLAIMS_JSON"),
+        help="Sign another payload/claims pair in the same catalog and advance the sequence once")
     args = parser.parse_args()
     try:
         init_root(args) if args.command == "init-root" else publish(args)

@@ -6,9 +6,9 @@ use super::*;
 use windows::Win32::{System::LibraryLoader::GetModuleHandleW, UI::WindowsAndMessaging::*};
 
 pub(crate) mod maintenance;
-mod previous_source;
 mod setup_ui;
 mod standalone;
+pub(crate) use standalone::archive as standalone_archive;
 pub(crate) use standalone::dispatch as standalone;
 
 const INSTALL: u16 = 101;

@@ -7,6 +7,24 @@ use std::{path::PathBuf, time::Instant};
 use windows::{core::HRESULT, Win32::Foundation::ERROR_SHARING_VIOLATION};
 
 pub mod broker;
+/// Original signed distribution archive carried by this executable, if any.
+pub fn standalone_archive() -> Result<Option<Vec<u8>>> {
+    native::broker::controlled_owner::setup_entry::standalone_archive()
+}
+pub fn maintenance_version() -> Result<Option<String>> {
+    native::broker::controlled_owner::setup_entry::maintenance::installed()
+}
+pub fn materialize_installer_source(directory: &std::path::Path) -> Result<()> {
+    native::broker::controlled_owner::setup_entry::maintenance::materialize_source(directory)
+}
+pub fn installed_distribution_source() -> Result<Option<PathBuf>> {
+    native::broker::controlled_owner::setup_entry::maintenance::distribution_source()
+}
+/// Preserve an already TUF-verified distribution of this installed version.
+/// Future-version downloads remain in their staging directory until installation.
+pub fn cache_distribution_source(path: &std::path::Path) -> Result<()> {
+    native::broker::controlled_owner::setup_entry::maintenance::cache_distribution(path)
+}
 mod update_observation;
 pub(crate) use update_observation::reconcile_failed_update;
 pub use update_observation::{
