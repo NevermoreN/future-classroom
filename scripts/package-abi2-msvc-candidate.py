@@ -292,6 +292,73 @@ def predecessor_package(q: dict, old_args, original: tuple) -> tuple[dict, bytes
     return package, msi, streams
 
 
+def prepare_published_predecessor(a, current: tuple, spec: dict, spec_fact: dict) -> tuple[bytes, dict]:
+    """Publish an exact released 1.0.0.x source, without inventing runtime receipts.
+
+    The reviewed baseline pins the public EXE and original MSI. All original CI,
+    source, table, payload and carrier admissions are replayed. Native Setup
+    still verifies the actual installed predecessor before Begin.
+    """
+    NEED(set(spec) == {'publishedRelease', 'formalArguments', 'packageReport', 'publishedSetup'},
+         'Closed published-release predecessor spec')
+    version = spec['publishedRelease']
+    NEED(isinstance(version, str) and re.fullmatch(r'1\.0\.0\.[1-9][0-9]*', version),
+         'Only the current 1.0.0.x official release series may be a new baseline')
+    baseline_path = a.source_root / 'packaging/release-baselines' / (version + '.json')
+    baseline_raw = original_file(baseline_path)
+    baseline = B['json_document'](baseline_raw)
+    NEED(set(baseline) == {'publicVersion', 'internalVersion', 'sourceCommit', 'ciRun', 'releaseUrl', 'setupExe', 'msi'}
+         and baseline['publicVersion'] == version
+         and baseline['internalVersion'] == '1.0.' + version.rsplit('.', 1)[1]
+         and baseline['releaseUrl'] == 'https://github.com/NevermoreN/future-classroom/releases/tag/v' + version,
+         'Reviewed official release baseline and exact public/internal version mapping')
+    args = spec['formalArguments']
+    NEED(set(args) == ARG_PATHS | ARG_HASHES, 'Original closed normal MSVC argument set')
+    old_args = SimpleNamespace(**{name: Path(value) if name in ARG_PATHS else value for name, value in args.items()})
+    old_admit = runpy.run_path(str(HERE / 'package-abi2-msvc-candidate.py'))['admit']
+    original = old_admit(old_args)
+    package, msi, streams = predecessor_package({'packageReport': spec['packageReport']}, old_args, original)
+    bootstrap = B['json_document'](original_file(old_args.build_evidence / 'bootstrap.json', B['MAX_LOG']))
+    NEED(package['sourceBase'] == baseline['sourceCommit'] == original[4]['source_sha']
+         and package['version'] == baseline['internalVersion']
+         and bootstrap['run_id'] == str(baseline['ciRun'])
+         and dict(bytes=len(msi), sha256=B['digest'](msi)) == baseline['msi'],
+         'Exact previously released MSI, source and original CI run')
+    validate_successor_identity(package, a.product_version or current[1]['version'], streams, current[3])
+    outer = bound_fact(spec['publishedSetup'], 198 << 20)
+    NEED(dict(bytes=len(outer), sha256=B['digest'](outer)) == baseline['setupExe'],
+         'Exact public release EXE pinned in the reviewed source baseline')
+    sfx = runpy.run_path(str(HERE / 'package-standalone-exe.py'))
+    helper, members = sfx['inspect'](outer)
+    root = Path(spec['packageReport']['path']).parent
+    NEED(helper == original[3]['lifecycle-compile'][1]
+         and members == {'Setup.exe': original_file(root / 'Setup.exe'), 'FutureClassroom.msi': msi,
+                         'LICENSE': original_file(root / 'payload/LICENSE'),
+                         'THIRD-PARTY-NOTICES.txt': original_file(root / 'payload/THIRD-PARTY-NOTICES.txt')},
+         'Published EXE contains the exact original admitted helper and complete formal members')
+    schema = PUBLICATION['schema_from_rust'](original_file(old_args.source_root /
+        'crates/fc-windows/src/installer_lifecycle/native/broker/maintenance/schema.rs').decode('utf-8'))
+    tables = PUBLICATION['capture'](root / 'FutureClassroom.msi', B['digest'](msi), schema)
+    NEED(dict(next(rows for name, _, rows in tables if name == 'Binary')) == streams,
+         'Actual readonly MSI Binary streams match the complete original replay')
+    inventory = original_file(old_args.build_evidence / 'input-sha256.json', B['MAX_LOG'])
+    meta = dict(target=1, source_commit=baseline['sourceCommit'], source_manifest_sha=B['digest'](inventory),
+        producer_sha=old_args.build_result_sha256, source_msi_sha=B['digest'](msi),
+        template_sha=B['digest'](streams[B['TEMPLATE_BINARY']]), template_bytes=len(streams[B['TEMPLATE_BINARY']]),
+        guard_sha=B['digest'](streams[B['GUARD_BINARY']]), logical_sha=PUBLICATION['signature'](tables)[0])
+    record = PUBLICATION['encode_format'](meta, streams[ABI2['MANIFEST_BINARY']], ABI2['C']['parse_payload_manifest'])
+    NEED(decode_predecessor(record) == meta and old_admit(old_args) == original,
+         'Final exact released source replay and predecessor encode/decode')
+    return record, dict(status='BOUND_ORIGINAL_MSVC_PREDECESSOR_STATIC_NOT_NATIVE_UPGRADE_PASS',
+        qualificationBasis='REVIEWED_PUBLISHED_1_0_0_X_SOURCE_REPLAY', spec=spec_fact,
+        baseline=dict(publicVersion=version, bytes=len(baseline_raw), sha256=B['digest'](baseline_raw)),
+        package=spec['packageReport'], publishedSetup=spec['publishedSetup'], meta=meta,
+        previousNormalProvenance=original[4], previousNormalGuardProvenance=original[5],
+        record=dict(bytes=len(record), sha256=B['digest'](record)),
+        runtime='NOT_RUN; no new install/repair/uninstall receipt asserted',
+        upgrade='NOT_RUN; native recaptures actual current registration/cache and all installed payloads before Begin')
+
+
 def prepare_predecessor(a, current: tuple) -> tuple[bytes, dict] | None:
     spec_path, pin = getattr(a, 'predecessor_spec', None), getattr(a, 'predecessor_spec_sha256', None)
     NEED(bool(spec_path) == bool(pin), 'Predecessor spec path and SHA must be supplied together')
@@ -300,6 +367,9 @@ def prepare_predecessor(a, current: tuple) -> tuple[bytes, dict] | None:
     raw = original_file(Path(spec_path).absolute(), B['MAX_LOG'])
     NEED(isinstance(pin, str) and re.fullmatch('[0-9a-f]{64}', pin) and B['digest'](raw) == pin, 'Pinned explicit predecessor spec')
     spec = B['json_document'](raw)
+    if 'publishedRelease' in spec:
+        return prepare_published_predecessor(a, current, spec,
+            dict(path=str(spec_path), bytes=len(raw), sha256=pin))
     NEED(set(spec) == {'qualification', 'runtime', 'downloadRoot'}, 'Closed predecessor original-evidence spec; no caller permit fields')
     q = B['json_document'](bound_fact(spec['qualification'], B['MAX_LOG']))
     NEED(set(q) == {'status', 'sourceGit', 'expectedUserSid', 'formalArguments', 'packageReport'}
@@ -501,7 +571,7 @@ def main() -> int:
         help='Exact original CI checkout bytes; builder identity is recorded separately')
     parser.add_argument('--product-version', help='Separate MSI identity; never rewrites original compiler bytes or artifact version')
     parser.add_argument('--predecessor-spec', type=Path,
-        help='Pinned original qualification/runtime/download evidence for capability3 formal3-or4-to4 successor')
+        help='Pinned reviewed 1.0.0.x published-source baseline, or original historical qualification evidence')
     parser.add_argument('--predecessor-spec-sha256')
     for name in ('input-zip', 'lifecycle-helper', 'guard-library', 'build-evidence', 'candidate-instructions',
             'output-dir', 'wixl', 'msibuild', 'msiinfo', 'msiextract', 'objdump'):

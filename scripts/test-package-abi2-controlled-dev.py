@@ -217,6 +217,24 @@ class FormalMsvcAbi2Contract(unittest.TestCase):
 
 
 class FormalSuccessorContract(unittest.TestCase):
+    def test_published_baseline_requires_current_series_and_reviewed_source_record(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory(prefix='fc-published-baseline-') as directory:
+            root = Path(directory)
+            args = SimpleNamespace(source_root=root)
+            spec = dict(publishedRelease='1.0.0.1', formalArguments={}, packageReport={}, publishedSetup={})
+            for version in ('0.1.9', '0.1.8', '1.0.0.0', '1.0.0.01', '../1.0.0.1'):
+                with self.assertRaises(ValueError):
+                    FORMAL['prepare_published_predecessor'](args, (), dict(spec, publishedRelease=version), {})
+            with self.assertRaises(ValueError):
+                FORMAL['prepare_published_predecessor'](args, (), dict(spec, runtime={'status': 'PASS'}), {})
+            baseline = root / 'packaging/release-baselines/1.0.0.1.json'
+            baseline.parent.mkdir(parents=True)
+            baseline.write_text(json.dumps(dict(publicVersion='1.0.0.1', internalVersion='0.1.9',
+                sourceCommit='a'*40, ciRun=1, releaseUrl='https://example.invalid', setupExe={}, msi={})))
+            with self.assertRaises(ValueError):
+                FORMAL['prepare_published_predecessor'](args, (), spec, {})
+
     """Synthetic boundary checks only; never publication or native evidence."""
     def record(self, target=1):
         payloads={n:n.encode() for n in FORMAL['B']['LIFECYCLE_REQUIRED']}

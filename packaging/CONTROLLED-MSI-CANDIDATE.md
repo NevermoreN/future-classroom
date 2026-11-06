@@ -9,10 +9,11 @@ fixtures remain separate
 from the original Win7-target MSVC CI admission; modern MSVC compilation is an
 additional check. Compiling a target does not establish runtime compatibility.
 
-Version 0.1.5 implements unified Web management and the classroom desktop corrections. Its exact compiler source,
-CI run, package hashes and actual installation results are recorded separately
-in the delivered receipt. This document does not certify every deployment
-environment or change the behavior of previously delivered bundles.
+Current public releases use 1.0.0.x. The exact compiler source, CI run, package
+hashes and actual installation results are recorded separately in the delivered
+receipt. Retired 0.1.x versions are historical evidence, not current installation
+prerequisites. This document does not certify every deployment environment or
+change the behavior of previously delivered bundles.
 
 For D12, start the application from the desktop/Start menu shortcut, or keep the
 complete direct-run directory and its adjacent web folder. Tray View Status and
