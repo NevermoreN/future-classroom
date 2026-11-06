@@ -114,6 +114,13 @@ class FormalMsvcAbi2Contract(unittest.TestCase):
         tutorial=set(complete) | screenshots
         self.assertEqual(builder['require_payload_members']('0.1.8',tutorial),31)
         self.assertEqual(builder['payload_readback_label'](31),'ALL_THIRTY_ONE_EXACT')
+        social_codes={f'web/assets/{name}-ABCDEFGH.png' for name in builder['SOCIAL_QR_IMAGES']}
+        self.assertEqual(builder['require_payload_members']('1.0.2',tutorial | social_codes),33)
+        self.assertEqual(builder['payload_readback_label'](33),'ALL_THIRTY_THREE_EXACT')
+        with self.assertRaises(ValueError):
+            builder['require_payload_members']('1.0.2',tutorial | {next(iter(social_codes))})
+        with self.assertRaises(ValueError):
+            builder['require_payload_members']('1.0.1',tutorial | social_codes)
         with self.assertRaises(ValueError):
             builder['require_payload_members']('0.1.8',tutorial - {next(iter(screenshots))})
         with self.assertRaises(ValueError):

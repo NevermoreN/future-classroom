@@ -7,6 +7,6 @@ import { pwaBuild } from './scripts/pwa-build.ts'
 export default defineConfig(({ command }) => ({
   base: (() => { const base = process.env.FC_WEB_BASE ?? '/fc/'; if (!/^\/(?:[A-Za-z0-9_-]+\/)*$/.test(base)) throw new Error('Invalid static base'); return base })(), plugins: [react(), tailwindcss(), pwaBuild()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
-  build: { assetsInlineLimit: filePath => filePath.endsWith('.png') && !filePath.replaceAll('\\', '/').includes('/assets/tutorial/'), target: 'es2022', sourcemap: false, rolldownOptions: { output: { postBanner: command === 'build' ? '/*!\n' + readFileSync('THIRD-PARTY-NOTICES.txt', 'utf8').replaceAll('*/', '* /') + '\n*/' : '' } } },
+  build: { assetsInlineLimit: filePath => filePath.endsWith('.png') && !/\/assets\/(?:tutorial|social)\//.test(filePath.replaceAll('\\', '/')), target: 'es2022', sourcemap: false, rolldownOptions: { output: { postBanner: command === 'build' ? '/*!\n' + readFileSync('THIRD-PARTY-NOTICES.txt', 'utf8').replaceAll('*/', '* /') + '\n*/' : '' } } },
   test: { include: ['tests/**/*.test.ts'], environment: 'node', restoreMocks: true },
 }))

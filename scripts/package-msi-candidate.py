@@ -342,6 +342,7 @@ def configure_source_root(source_root: Path) -> None:
 
 TUTORIAL_SCREENSHOTS = frozenset(('setup', 'login', 'workspace', 'identity', 'term',
                                   'timetable', 'calendar', 'layout', 'materials', 'voice', 'rooms'))
+SOCIAL_QR_IMAGES = frozenset(('xiaohongshu-original', 'douyin-original'))
 
 
 def require_payload_members(version: str, names, *, d14: bool | None = None) -> int:
@@ -369,6 +370,14 @@ def require_payload_members(version: str, names, *, d14: bool | None = None) -> 
             or len(screenshots) != len(TUTORIAL_SCREENSHOTS) or stems != TUTORIAL_SCREENSHOTS):
             raise ValueError('Incomplete tutorial screenshot payload')
         expected += len(TUTORIAL_SCREENSHOTS)
+    social_pattern = r'web/assets/(' + '|'.join(sorted(SOCIAL_QR_IMAGES)) + r')-[A-Za-z0-9_-]+\.png'
+    social_codes = [name for name in names if re.fullmatch(social_pattern, name)]
+    if social_codes:
+        stems = {re.fullmatch(social_pattern, name).group(1) for name in social_codes}
+        if (version_parts(version) < (1, 0, 2) or not screenshots
+            or len(social_codes) != len(SOCIAL_QR_IMAGES) or stems != SOCIAL_QR_IMAGES):
+            raise ValueError('Incomplete social account QR payload')
+        expected += len(SOCIAL_QR_IMAGES)
     if (len(names) != expected or len(members) != expected or not required <= members
         or ("fc-update-coordinator.exe" in members) != d14
         or not all(valid_path(name) or name == "MSI-CANDIDATE.txt" for name in members)):
@@ -378,7 +387,8 @@ def require_payload_members(version: str, names, *, d14: bool | None = None) -> 
 
 def payload_readback_label(count: int) -> str:
     return {14: "ALL_FOURTEEN_EXACT", 15: "ALL_FIFTEEN_EXACT",
-            20: "ALL_TWENTY_EXACT", 31: "ALL_THIRTY_ONE_EXACT"}[count]
+            20: "ALL_TWENTY_EXACT", 31: "ALL_THIRTY_ONE_EXACT",
+            33: "ALL_THIRTY_THREE_EXACT"}[count]
 
 
 def normal_product_targets(version: str) -> tuple[tuple[str, str, str], ...]:
