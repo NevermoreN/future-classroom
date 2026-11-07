@@ -2,6 +2,7 @@
   <img src="assets/icons/future-classroom-master.png" alt="未来教室图标" width="112" />
   <h1>未来教室</h1>
   <p><strong>让课堂信息更清晰，让老师的日常工作更便捷。</strong></p>
+  <p>手机浏览器即可轻松管理教室，随时完成日常操作。</p>
   <p>完全免费、简单易用的课堂桌面助手 · GPL-3.0 开源</p>
   <p>
     <a href="https://github.com/NevermoreN/future-classroom/releases/latest">下载最新版本</a> ·
