@@ -98,7 +98,7 @@
   </tr>
   <tr>
     <td align="center"><a href="web/src/assets/social/xiaohongshu-original.png"><img src="web/src/assets/social/xiaohongshu-square.svg" alt="小红书关注二维码" width="260" /></a></td>
-    <td align="center"><a href="web/src/assets/social/douyin-original.png"><img src="web/src/assets/social/douyin-original.png" alt="抖音关注二维码" width="260" /></a></td>
+    <td align="center"><a href="web/src/assets/social/douyin-original.png"><img src="web/src/assets/social/douyin-original.png" alt="抖音关注二维码" width="203" /></a></td>
   </tr>
 </table>
 
