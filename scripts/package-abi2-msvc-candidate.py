@@ -10,11 +10,13 @@ from __future__ import annotations
 import argparse
 import base64
 import hashlib
+import io
 import json
 from pathlib import Path
 import re
 import runpy
 import struct
+import zipfile
 from types import SimpleNamespace
 
 HERE = Path(__file__).resolve().parent
@@ -292,6 +294,49 @@ def predecessor_package(q: dict, old_args, original: tuple) -> tuple[dict, bytes
     return package, msi, streams
 
 
+def validate_published_variants(raw: bytes, members: dict, reviewed: list,
+                                package_code: str, setup: bytes, msi: bytes) -> None:
+    """Bind a selected original source to the public EXE's exact variant bytes."""
+    codec = runpy.run_path(str(HERE / 'package-installer-variants.py'))
+    NEED(20 <= len(raw) <= codec['MAX_BYTES'] and raw[:16] == codec['MAGIC'],
+         'Exact bounded published source variant container')
+    length, = struct.unpack_from('<I', raw, 16)
+    NEED(0 < length <= 65536 and 20 + length <= len(raw), 'Published variant catalog bound')
+    catalog = B['json_document'](raw[20:20 + length])
+    NEED(set(catalog) == {'base_package_code', 'base_predecessor_version',
+        'base_predecessor_product', 'base_predecessor_msi_sha256', 'base_setup', 'base_msi', 'variants'}
+        and isinstance(catalog['variants'], list) and 1 <= len(catalog['variants']) <= 16,
+        'Closed published source variant catalog')
+    declared = [dict(packageCode=catalog['base_package_code'],
+                     setup=catalog['base_setup'], msi=catalog['base_msi'])]
+    NEED(catalog['base_setup'] == codec['fact'](members['Setup.exe'])
+         and catalog['base_msi'] == codec['fact'](members['FutureClassroom.msi']),
+         'Published base sources match the actual embedded sealed members')
+    selected = ((members['Setup.exe'], members['FutureClassroom.msi'])
+                if package_code == catalog['base_package_code'] else None)
+    offset = 20 + length
+    for row in catalog['variants']:
+        NEED(isinstance(row, dict) and set(row) == {'package_code', 'predecessor_version',
+            'predecessor_product', 'predecessor_msi_sha256', 'setup', 'msi',
+            'setup_delta_bytes', 'msi_delta_bytes'}, 'Closed published source variant entry')
+        first, second = row['setup_delta_bytes'], row['msi_delta_bytes']
+        NEED(type(first) is int and type(second) is int and first > 0 and second > 0
+             and offset + first + second <= len(raw), 'Published source delta bounds')
+        declared.append(dict(packageCode=row['package_code'], setup=row['setup'], msi=row['msi']))
+        if row['package_code'] == package_code:
+            selected = (codec['apply'](members['Setup.exe'], raw[offset:offset + first], row['setup']),
+                        codec['apply'](members['FutureClassroom.msi'],
+                                       raw[offset + first:offset + first + second], row['msi']))
+        offset += first + second
+    NEED(offset == len(raw) and len({row['packageCode'] for row in declared}) == len(declared),
+         'Complete unique published source variants without trailing bytes')
+    expected = [{key: row[key] for key in ('packageCode', 'setup', 'msi')} for row in reviewed]
+    NEED(sorted(declared, key=lambda row: row['packageCode'])
+         == sorted(expected, key=lambda row: row['packageCode']),
+         'Entire published source set matches the reviewed release baseline')
+    NEED(selected == (setup, msi), 'Exact selected published source delta reconstruction')
+
+
 def prepare_published_predecessor(a, current: tuple, spec: dict, spec_fact: dict) -> tuple[bytes, dict]:
     """Publish an exact released 1.0.0.x source, without inventing runtime receipts.
 
@@ -308,7 +353,8 @@ def prepare_published_predecessor(a, current: tuple, spec: dict, spec_fact: dict
     baseline_path = a.source_root / 'packaging/release-baselines' / (version + '.json')
     baseline_raw = original_file(baseline_path)
     baseline = B['json_document'](baseline_raw)
-    NEED(set(baseline) == {'publicVersion', 'internalVersion', 'sourceCommit', 'ciRun', 'releaseUrl', 'setupExe', 'msi'}
+    baseline_keys = {'publicVersion', 'internalVersion', 'sourceCommit', 'ciRun', 'releaseUrl', 'setupExe', 'msi'}
+    NEED(set(baseline) in (baseline_keys, baseline_keys | {'currentSourceVariants'})
          and baseline['publicVersion'] == version
          and baseline['internalVersion'] == '1.' + '.'.join(version.split('.')[2:])
          and baseline['releaseUrl'] == 'https://github.com/NevermoreN/future-classroom/releases/tag/v' + version,
@@ -319,11 +365,24 @@ def prepare_published_predecessor(a, current: tuple, spec: dict, spec_fact: dict
     old_admit = runpy.run_path(str(HERE / 'package-abi2-msvc-candidate.py'))['admit']
     original = old_admit(old_args)
     package, msi, streams = predecessor_package({'packageReport': spec['packageReport']}, old_args, original)
+    reviewed = baseline.get('currentSourceVariants')
+    source_msi = baseline['msi']
+    if reviewed is not None:
+        NEED(isinstance(reviewed, list) and 2 <= len(reviewed) <= 16
+             and all(isinstance(row, dict) and set(row) == {'packageCode', 'msi', 'setup', 'formalReportSha256'}
+                     and isinstance(row['packageCode'], str) for row in reviewed)
+             and len({row['packageCode'] for row in reviewed}) == len(reviewed),
+             'Reviewed complete source variants and unique actual PackageCodes')
+        selected = [row for row in reviewed if row['packageCode'] == package['packageCode']]
+        NEED(len(selected) == 1 and selected[0]['formalReportSha256'] == spec['packageReport']['sha256']
+             and selected[0]['setup'] == {key: package['setup'][key] for key in ('bytes', 'sha256')},
+             'Selected published original report and Setup match the reviewed source identity')
+        source_msi = selected[0]['msi']
     bootstrap = B['json_document'](original_file(old_args.build_evidence / 'bootstrap.json', B['MAX_LOG']))
     NEED(package['sourceBase'] == baseline['sourceCommit'] == original[4]['source_sha']
          and package['version'] == baseline['internalVersion']
          and bootstrap['run_id'] == str(baseline['ciRun'])
-         and dict(bytes=len(msi), sha256=B['digest'](msi)) == baseline['msi'],
+         and dict(bytes=len(msi), sha256=B['digest'](msi)) == source_msi,
          'Exact previously released MSI, source and original CI run')
     validate_successor_identity(package, a.product_version or current[1]['version'], streams, current[3])
     outer = bound_fact(spec['publishedSetup'], 198 << 20)
@@ -333,10 +392,25 @@ def prepare_published_predecessor(a, current: tuple, spec: dict, spec_fact: dict
     helper, members = sfx['inspect'](outer)
     root = Path(spec['packageReport']['path']).parent
     NEED(helper == original[3]['lifecycle-compile'][1]
-         and {n: members[n] for n in sfx['NAMES']} == {'Setup.exe': original_file(root / 'Setup.exe'), 'FutureClassroom.msi': msi,
-                         'LICENSE': original_file(root / 'payload/LICENSE'),
-                         'THIRD-PARTY-NOTICES.txt': original_file(root / 'payload/THIRD-PARTY-NOTICES.txt')},
-         'Published EXE contains the exact original admitted helper and complete formal members')
+         and all(members[name] == original_file(root / 'payload' / name)
+                 for name in ('LICENSE', 'THIRD-PARTY-NOTICES.txt')),
+         'Published EXE contains the exact admitted helper and license members')
+    setup = original_file(root / 'Setup.exe')
+    if reviewed is None:
+        NEED(members['Setup.exe'] == setup and members['FutureClassroom.msi'] == msi,
+             'Published EXE contains the exact original admitted sealed MSI/Setup')
+    else:
+        NEED(dict(bytes=len(members['FutureClassroom.msi']),
+                  sha256=B['digest'](members['FutureClassroom.msi'])) == baseline['msi'],
+             'Reviewed primary MSI is the actual public EXE base source')
+        _, archive = sfx['distribution_archive'](outer)
+        with zipfile.ZipFile(io.BytesIO(archive)) as envelope:
+            payload = envelope.read('payload.zip')
+        with zipfile.ZipFile(io.BytesIO(payload)) as inner:
+            NEED(inner.getinfo('installer-variants.bin').file_size <= 32 << 20,
+                 'Bounded published source variants')
+            variants = inner.read('installer-variants.bin')
+        validate_published_variants(variants, members, reviewed, package['packageCode'], setup, msi)
     schema = PUBLICATION['schema_from_rust'](original_file(old_args.source_root /
         'crates/fc-windows/src/installer_lifecycle/native/broker/maintenance/schema.rs').decode('utf-8'))
     tables = PUBLICATION['capture'](root / 'FutureClassroom.msi', B['digest'](msi), schema)

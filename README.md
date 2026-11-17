@@ -85,7 +85,7 @@
 
 手机和教室电脑需要处于可互通的校园网络；首次连接时，请按学校管理员的说明信任教室提供的证书。教室电脑在线且音频设备可用时，老师才能向该教室发送语音播报。
 
-> 当前版本为 [1.0.2.0](https://github.com/NevermoreN/future-classroom/releases/tag/v1.0.2.0)，安装包名称为 `FutureClassroom-1.0.2.0-Setup.exe`。已安装 1.0.1.0 的设备可通过兼容的自动更新接收本版；1.0.0.1～1.0.0.3 请手动运行新安装包直接升级。升级和修复默认保留已有设置与资料。
+> 当前版本为 [1.0.2.1](https://github.com/NevermoreN/future-classroom/releases/tag/v1.0.2.1)，安装包名称为 `FutureClassroom-1.0.2.1-Setup.exe`。本版修复开机时 Windows 尚未就绪导致的启动失败，并完善托盘恢复和错误诊断。升级和修复默认保留已有设置与资料；旧版本可运行本版安装包直接升级。
 
 ## 运行环境与说明
 

@@ -68,7 +68,7 @@ jobs:
         run: |
           ./scripts/windows-msvc-ci.ps1 -Baseline Win7 -Mode Build -RunRoot $env:FC_MSVC_RUN_ROOT -ExpectedSourceSha $env:FC_MSVC_EXPECTED_SHA
 
-      - name: Run only installation-path regression on hosted Windows Server
+      - name: Run startup recovery regressions on hosted Windows Server
         timeout-minutes: 2
         run: |
           $ErrorActionPreference = 'Stop'
@@ -79,17 +79,21 @@ jobs:
           if ($rows.Count -ne 1 -or $rows[0].relative_path -cnotmatch '^tests/fc-windows/fc_windows-[0-9a-f]+\.exe$') { throw 'Expected one exact compiled fc-windows unit executable.' }
           $source = Join-Path $artifact $rows[0].relative_path
           if ((Get-FileHash -LiteralPath $source).Hash.ToLowerInvariant() -cne $rows[0].sha256) { throw 'Compiled regression executable hash differs.' }
-          $temporary = Join-Path $env:RUNNER_TEMP "FutureClassroom-InstallPath-Regression-$env:GITHUB_RUN_ID"
+          $temporary = Join-Path $env:RUNNER_TEMP "FutureClassroom-Startup-Regression-$env:GITHUB_RUN_ID"
           New-Item -ItemType Directory -Path $temporary -ErrorAction Stop | Out-Null
           try {
-            $copy = Join-Path $temporary 'path-regression.exe'
+            $copy = Join-Path $temporary 'startup-regression.exe'
             Copy-Item -LiteralPath $source -Destination $copy
-            $test = 'system::paths::tests::installation_path_discovery_survives_uninstall_without_creating_directories'
-            $output = & $copy $test --exact --test-threads=1 2>&1
-            $exit = $LASTEXITCODE
-            $output | Write-Output
-            if ($exit -ne 0 -or ($output -join "`n") -notlike "*test $test ... ok*") { throw 'Installation-path regression did not pass exactly once.' }
-            'Hosted Windows Server 2022: copied CI executable passed the missing-directory / uninstall path regression. This is not Windows 7/10/11 machine testing.' >> $env:GITHUB_STEP_SUMMARY
+            foreach ($test in @(
+              'host::tests::readiness_wait_can_be_cancelled_without_consuming_open_request',
+              'host::tests::recovery_timeout_delivers_shutdown_before_returning_error'
+            )) {
+              $output = & $copy $test --exact --test-threads=1 2>&1
+              $exit = $LASTEXITCODE
+              $output | Write-Output
+              if ($exit -ne 0 -or ($output -join "`n") -notlike "*test $test ... ok*") { throw "Startup regression failed: $test" }
+            }
+            'Hosted Windows Server 2022: copied CI executable passed two isolated startup cancellation / recovery shutdown regressions. This is not Windows 7/10/11 machine testing or a real school boot reproduction.' >> $env:GITHUB_STEP_SUMMARY
           } finally {
             Remove-Item -LiteralPath $temporary -Recurse -Force
           }
