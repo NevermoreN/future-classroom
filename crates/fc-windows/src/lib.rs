@@ -19,6 +19,8 @@ pub mod update_install;
 pub use native::{probe, program_data, InstanceGuard, NativeProbeReport, SystemRandom};
 #[cfg(windows)]
 pub mod host;
+#[cfg(any(windows, test))]
+mod host_retry;
 #[cfg(windows)]
 pub mod installer_lifecycle;
 #[cfg(windows)]

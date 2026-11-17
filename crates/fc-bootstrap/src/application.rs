@@ -54,6 +54,7 @@ pub fn tls_business_probe(thumbprint: &str, marker: &str) -> std::result::Result
     http_business_probe::run(thumbprint, marker)
 }
 mod shared_pool;
+mod startup_diagnostics;
 pub fn autostart_probe() -> std::result::Result<(), String> {
     autostart_probe::run()
 }
@@ -6508,12 +6509,36 @@ fn run_at_inner(
         }
         Err(_) => return Err("无法取得未来教室数据目录的独占运行锁，请核对目录权限。".into()),
     };
+    let host_started = Instant::now();
     let host = if probe {
         HiddenHost::for_isolated_probe()
     } else {
         HiddenHost::for_instance(paths.root(), true)
     }
-    .map_err(|_| "无法创建托盘宿主".to_owned())?;
+    .map_err(|error| {
+        startup_diagnostics::host_failure(
+            &paths,
+            autostart,
+            probe,
+            "host-create",
+            error.code().0 as u32,
+            &error.to_string(),
+            host_started.elapsed(),
+        )
+    })?;
+    if !host.wait_until_ready().map_err(|error| {
+        startup_diagnostics::host_failure(
+            &paths,
+            autostart,
+            probe,
+            "host-readiness",
+            error.code().0 as u32,
+            &error.to_string(),
+            host_started.elapsed(),
+        )
+    })? {
+        return Ok(false);
+    }
     let stop = host.controller();
     let clock = Arc::new(CurrentClock::new());
     let mut app = create_app(clock.clone(), probe)?;
@@ -6568,7 +6593,17 @@ fn run_at_inner(
             }
         }
     }))
-    .map_err(|_| "无法绑定会话撤销处理")?;
+    .map_err(|error| {
+        startup_diagnostics::host_failure(
+            &paths,
+            autostart,
+            probe,
+            "control-callback",
+            error.code().0 as u32,
+            &error.to_string(),
+            host_started.elapsed(),
+        )
+    })?;
     app.render()?;
     if probe && !autostart {
         app.window.show(true);
@@ -6844,9 +6879,23 @@ fn run_at_inner(
         }
         Ok(())
     });
+    let result = result.map_err(|error| {
+        startup_diagnostics::host_failure(
+            &paths,
+            autostart,
+            probe,
+            "host-runtime",
+            error.code().0 as u32,
+            &error.to_string(),
+            host_started.elapsed(),
+        )
+    });
     // Native pump has ended. Normal authorized exit already closed SQLite on its
     // worker. Do not join a still-running domain from this UI owner.
-    if result.is_err() || !app.shutdown_complete() {
+    if !app.shutdown_complete() {
+        if let Err(error) = &result {
+            eprintln!("{error}");
+        }
         if let Some(control) = &app.control {
             control.fault();
         }
@@ -6860,7 +6909,7 @@ fn run_at_inner(
     if app.pool.is_finished() {
         module_registry::join_workers(app.pool)?;
     }
-    result.map_err(|_| "原生宿主已因错误关闭，请核对数据后重新启动".to_owned())?;
+    result?;
     if let Some(error) = probe_error {
         return Err(error);
     }

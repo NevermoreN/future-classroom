@@ -1,5 +1,6 @@
 //! One UI-thread hidden top-level host, tray, coalesced system hints and shutdown.
 //! No writer/network joins, secret material, or privileged settings live here.
+use crate::host_retry::{HostRetry, RetryDecision};
 use std::{
     cell::{Cell, RefCell},
     fs::{File, OpenOptions},
@@ -13,13 +14,20 @@ use std::{
         atomic::{AtomicU32, Ordering},
         Arc,
     },
+    time::Instant,
 };
 use windows::{
     core::{w, Error, Result, HSTRING},
     Win32::{
         Foundation::*,
         Storage::FileSystem::*,
-        System::{LibraryLoader::*, RemoteDesktop::*, Threading::GetCurrentProcessId},
+        System::{
+            LibraryLoader::*,
+            RemoteDesktop::*,
+            Threading::{
+                GetCurrentProcessId, OpenEventW, WaitForSingleObject, SYNCHRONIZATION_SYNCHRONIZE,
+            },
+        },
         UI::{Accessibility::*, Shell::*, WindowsAndMessaging::*},
     },
 };
@@ -28,6 +36,20 @@ const TIMER: usize = 0xfc01;
 const TRAY_MESSAGE: u32 = WM_APP + 41;
 const FOREGROUND_MESSAGE: u32 = WM_APP + 42;
 const OPEN_INSTANCE_MESSAGE: u32 = WM_APP + 43;
+
+fn host_error(stage: &str, error: Error) -> Error {
+    Error::new(
+        error.code(),
+        format!("{stage}失败（HRESULT {:#010X}）", error.code().0),
+    )
+}
+
+fn host_io_error(stage: &str, error: std::io::Error) -> Error {
+    let code = error
+        .raw_os_error()
+        .map_or(E_FAIL, |v| windows::core::HRESULT::from_win32(v as u32));
+    host_error(stage, Error::from_hresult(code))
+}
 thread_local! {
     // Out-of-context callbacks are delivered on the hook owner's UI thread.
     // Only an HWND value is retained; there is no cross-thread State pointer.
@@ -170,8 +192,12 @@ impl State {
 pub struct HiddenHost {
     hwnd: HWND,
     state: Box<State>,
-    tray: bool,
-    session_registered: bool,
+    tray_requested: bool,
+    tray: Cell<bool>,
+    session_registered: Cell<bool>,
+    session_ready_event: Cell<HANDLE>,
+    retry: RefCell<Option<HostRetry>>,
+    retry_error: RefCell<Option<Error>>,
     class: u16,
     instance: HINSTANCE,
     foreground_hook: HWINEVENTHOOK,
@@ -203,8 +229,8 @@ impl HiddenHost {
         let pid = unsafe { GetCurrentProcessId() };
         let mut session = 0;
         unsafe {
-            ProcessIdToSessionId(pid, &mut session)?;
-            SetWindowTextW(host.hwnd, &title)?;
+            ProcessIdToSessionId(pid, &mut session).map_err(|e| host_error("读取启动会话", e))?;
+            SetWindowTextW(host.hwnd, &title).map_err(|e| host_error("设置实例窗口标识", e))?;
         }
         let mut owner = OpenOptions::new()
             .write(true)
@@ -213,14 +239,14 @@ impl HiddenHost {
             .share_mode(FILE_SHARE_READ.0)
             .custom_flags(FILE_FLAG_DELETE_ON_CLOSE.0 | FILE_FLAG_OPEN_REPARSE_POINT.0)
             .open(root.join("runtime/instance.owner"))
-            .map_err(|_| Error::from_hresult(E_ACCESSDENIED))?;
+            .map_err(|e| host_io_error("创建实例路由记录", e))?;
         let mut record = [0u8; 12];
         record[..4].copy_from_slice(b"FCI1");
         record[4..8].copy_from_slice(&pid.to_le_bytes());
         record[8..].copy_from_slice(&session.to_le_bytes());
         owner
             .write_all(&record)
-            .map_err(|_| Error::from_hresult(E_FAIL))?;
+            .map_err(|e| host_io_error("写入实例路由记录", e))?;
         host.instance_owner = Some(owner);
         Ok(host)
     }
@@ -279,7 +305,11 @@ impl HiddenHost {
     }
     fn with_interval(enable_tray: bool, interval_millis: u32) -> Result<Self> {
         // SAFETY: module pseudohandle retained only for same-process class lifetime.
-        let instance = HINSTANCE(unsafe { GetModuleHandleW(None)? }.0);
+        let instance = HINSTANCE(
+            unsafe { GetModuleHandleW(None) }
+                .map_err(|e| host_error("读取程序模块", e))?
+                .0,
+        );
         let class_name = w!("FutureClassroom.HiddenHost.v1");
         let class = WNDCLASSW {
             hInstance: instance,
@@ -290,7 +320,7 @@ impl HiddenHost {
         // SAFETY: static class name and correct ABI callback, alive until unregister.
         let atom = unsafe { RegisterClassW(&class) };
         if atom == 0 {
-            return Err(Error::from_thread());
+            return Err(host_error("注册宿主窗口类", Error::from_thread()));
         }
         let mut host = Self {
             hwnd: HWND::default(),
@@ -301,8 +331,12 @@ impl HiddenHost {
                 // SAFETY: fixed application-known registered message name.
                 taskbar_recreated: unsafe { RegisterWindowMessageW(w!("TaskbarCreated")) },
             }),
-            tray: false,
-            session_registered: false,
+            tray_requested: enable_tray,
+            tray: Cell::new(false),
+            session_registered: Cell::new(false),
+            session_ready_event: Cell::new(HANDLE::default()),
+            retry: RefCell::new(Some(HostRetry::new(Instant::now()))),
+            retry_error: RefCell::new(None),
             class: atom,
             instance,
             foreground_hook: HWINEVENTHOOK::default(),
@@ -312,7 +346,7 @@ impl HiddenHost {
             _thread: PhantomData,
         };
         if host.state.taskbar_recreated == 0 {
-            return Err(Error::from_thread());
+            return Err(host_error("注册任务栏恢复消息", Error::from_thread()));
         }
         // SAFETY: Box pointee never moves and outlives the HWND. WM_NCDESTROY clears
         // userdata before Box release. Top-level hidden window receives broadcasts.
@@ -330,13 +364,9 @@ impl HiddenHost {
                 None,
                 Some(instance),
                 Some((&raw const *host.state).cast()),
-            )?
+            )
+            .map_err(|e| host_error("创建隐藏宿主窗口", e))?
         };
-        // SAFETY: host owns the window and unregisters notifications in Drop.
-        unsafe {
-            WTSRegisterSessionNotification(host.hwnd, NOTIFY_FOR_THIS_SESSION)?;
-        }
-        host.session_registered = true;
         FOREGROUND_TARGET.with(|target| target.set(host.hwnd));
         FOREGROUND_PENDING.with(|pending| pending.set(false));
         // SAFETY: callback is out-of-context on this UI thread and only posts a
@@ -353,17 +383,169 @@ impl HiddenHost {
             )
         };
         if host.foreground_hook.is_invalid() {
-            return Err(Error::from_thread());
+            return Err(host_error("注册前台窗口通知", Error::from_thread()));
         }
         // SAFETY: window-owned timer has no callback/raw pointers; messages coalesce.
         if unsafe { SetTimer(Some(host.hwnd), TIMER, interval_millis, None) } == 0 {
-            return Err(Error::from_thread());
+            return Err(host_error("创建宿主定时器", Error::from_thread()));
         }
-        if enable_tray {
-            host.add_tray()?;
-            host.tray = true;
-        }
+        host.advance_readiness()?;
         Ok(host)
+    }
+
+    fn is_ready(&self) -> bool {
+        self.session_registered.get() && (!self.tray_requested || self.tray.get())
+    }
+
+    /// Keep one host and one UI timer while Windows finishes logon. No business
+    /// state may be initialized until this succeeds. False is ordinary cancellation.
+    pub fn wait_until_ready(&self) -> Result<bool> {
+        loop {
+            let control = self.state.control.0.load(Ordering::Acquire);
+            if control & FAULT != 0 {
+                return Err(host_error(
+                    "等待系统启动",
+                    Error::from_hresult(E_UNEXPECTED),
+                ));
+            }
+            let pending = HostHints(self.state.hints.load(Ordering::Acquire));
+            if control & STOP != 0
+                || pending.contains(HostHints::SHUTDOWN)
+                || pending.contains(HostHints::EXIT_REQUESTED)
+            {
+                return Ok(false);
+            }
+            self.advance_readiness()?;
+            if self.is_ready() {
+                return Ok(true);
+            }
+            let mut message = MSG::default();
+            // SAFETY: this UI thread dispatches its original windows/timer only;
+            // no nested business callbacks or background worker is started.
+            let status = unsafe { GetMessageW(&mut message, None, 0, 0) }.0;
+            if status == -1 {
+                return Err(host_error("等待启动消息", Error::from_thread()));
+            }
+            if status == 0 {
+                return if message.wParam.0 == 0 {
+                    Ok(false)
+                } else {
+                    Err(host_error(
+                        "等待启动消息",
+                        Error::from_hresult(E_UNEXPECTED),
+                    ))
+                };
+            }
+            unsafe {
+                let _ = TranslateMessage(&message);
+                DispatchMessageW(&message);
+            }
+            // Retain OPEN_STATUS and safety hints for normal initialization.
+            let pending = self.state.hints.fetch_and(
+                !(HostHints::TASKBAR_RECREATED.0 | HostHints::TRAY_CONTEXT.0),
+                Ordering::AcqRel,
+            );
+            if pending & HostHints::TASKBAR_RECREATED.0 != 0 {
+                self.taskbar_recreated();
+            }
+            if pending & HostHints::TRAY_CONTEXT.0 != 0
+                && pending & (HostHints::SHUTDOWN.0 | HostHints::EXIT_REQUESTED.0) == 0
+            {
+                self.tray_menu()?;
+            }
+        }
+    }
+
+    fn taskbar_recreated(&self) {
+        if self.tray_requested {
+            self.tray.set(false);
+            // Repeated broadcasts during the same outage must not extend it.
+            self.retry
+                .borrow_mut()
+                .get_or_insert_with(|| HostRetry::new(Instant::now()));
+        }
+    }
+
+    fn advance_readiness(&self) -> Result<()> {
+        if self.is_ready() {
+            self.retry.borrow_mut().take();
+            self.retry_error.borrow_mut().take();
+            return Ok(());
+        }
+        let (decision, attempts) = {
+            let mut retry = self.retry.borrow_mut();
+            let retry = retry.get_or_insert_with(|| HostRetry::new(Instant::now()));
+            (retry.decide(Instant::now()), retry.attempts)
+        };
+        match decision {
+            RetryDecision::Wait => return Ok(()),
+            RetryDecision::Expired => {
+                let last = self.retry_error.borrow();
+                let code = last.as_ref().map_or(E_FAIL, Error::code);
+                return Err(Error::new(
+                    code,
+                    format!(
+                        "等待 Windows 会话服务或任务栏就绪已超时（60秒，尝试{attempts}次）；{}",
+                        last.as_ref().map(ToString::to_string).unwrap_or_default()
+                    ),
+                ));
+            }
+            RetryDecision::Attempt => {}
+        }
+        if !self.session_registered.get() {
+            let event = self.session_ready_event.get();
+            // The readiness event is advisory. If it is unavailable, probe WTS
+            // once per second instead; never change a Windows service setting.
+            let event_pending =
+                !event.is_invalid() && unsafe { WaitForSingleObject(event, 0) } == WAIT_TIMEOUT;
+            if !event_pending {
+                match unsafe { WTSRegisterSessionNotification(self.hwnd, NOTIFY_FOR_THIS_SESSION) }
+                {
+                    Ok(()) => self.session_registered.set(true),
+                    Err(e)
+                        if e.code()
+                            // RPC_S_INVALID_BINDING (1702), documented by WTS.
+                            == windows::core::HRESULT::from_win32(1702) =>
+                    {
+                        *self.retry_error.borrow_mut() =
+                            Some(host_error("注册会话通知，系统服务尚未就绪", e));
+                        if event.is_invalid() {
+                            match unsafe {
+                                OpenEventW(
+                                    SYNCHRONIZATION_SYNCHRONIZE,
+                                    false,
+                                    w!("Global\\TermSrvReadyEvent"),
+                                )
+                            } {
+                                Ok(event) => self.session_ready_event.set(event),
+                                Err(event_error) => {
+                                    *self.retry_error.borrow_mut() = Some(Error::new(
+                                        windows::core::HRESULT::from_win32(1702),
+                                        format!("注册会话通知失败（RPC 1702）；就绪事件不可用（HRESULT {:#010X}），已改为定时重试", event_error.code().0),
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                    Err(e) => return Err(host_error("注册会话通知", e)),
+                }
+            }
+        }
+        if self.tray_requested && !self.tray.get() {
+            if self.add_tray()? {
+                self.tray.set(true);
+            } else if self.session_registered.get() {
+                *self.retry_error.borrow_mut() = Some(host_error(
+                    "注册托盘图标，任务栏暂不可用",
+                    Error::from_hresult(E_FAIL),
+                ));
+            }
+        }
+        if self.is_ready() {
+            self.retry.borrow_mut().take();
+            self.retry_error.borrow_mut().take();
+        }
+        Ok(())
     }
     /// Invoked synchronously by control-message dispatch, including native modal
     /// nested pumps. The trusted callback must only revoke/clear in-memory state:
@@ -410,6 +592,10 @@ impl HiddenHost {
         self,
         mut on_hints: impl FnMut(HostHints, &Self) -> Result<()>,
     ) -> Result<()> {
+        if !self.wait_until_ready()? {
+            return Ok(());
+        }
+        let mut recovery_error = None;
         let mut message = MSG::default();
         loop {
             let control = self.state.control.0.load(Ordering::Acquire);
@@ -417,7 +603,7 @@ impl HiddenHost {
                 return Err(Error::from_hresult(E_UNEXPECTED));
             }
             if control & STOP != 0 {
-                return Ok(());
+                return recovery_error.map_or(Ok(()), Err);
             }
             // SAFETY: MSG is exclusively owned; no filter means all this thread's UI
             // windows are dispatched. No HWND/payload pointer crosses threads.
@@ -439,11 +625,23 @@ impl HiddenHost {
                     DispatchMessageW(&message);
                 }
             }
-            let hints = HostHints(self.state.hints.swap(0, Ordering::AcqRel));
-            if hints.contains(HostHints::TASKBAR_RECREATED) && self.tray {
-                self.add_tray()?;
+            let mut hints = HostHints(self.state.hints.swap(0, Ordering::AcqRel));
+            if hints.contains(HostHints::TASKBAR_RECREATED) {
+                self.taskbar_recreated();
             }
-            if hints.contains(HostHints::TRAY_CONTEXT) {
+            // Do not return a tray failure across active writer/audio ownership.
+            // Revoke through the original callback, then drain ordinary shutdown.
+            if recovery_error.is_none()
+                && !hints.contains(HostHints::SHUTDOWN)
+                && !hints.contains(HostHints::EXIT_REQUESTED)
+            {
+                if let Err(error) = self.advance_readiness() {
+                    recovery_error = Some(error);
+                    self.state.control_hint(HostHints::SHUTDOWN);
+                    hints.0 |= HostHints::SHUTDOWN.0;
+                }
+            }
+            if hints.contains(HostHints::TRAY_CONTEXT) && !hints.contains(HostHints::SHUTDOWN) {
                 self.tray_menu()?;
             }
             // Child workbench commands can produce no host hints. Always let the
@@ -479,18 +677,18 @@ impl HiddenHost {
         data.szTip = tooltip;
         Ok(data)
     }
-    fn add_tray(&self) -> Result<()> {
-        let data = self.icon_data()?;
+    fn add_tray(&self) -> Result<bool> {
+        let data = self
+            .icon_data()
+            .map_err(|e| host_error("加载托盘图标资源", e))?;
         // SAFETY: valid window and icon; Shell copies data; NIM_DELETE pairs in Drop.
-        if !unsafe { Shell_NotifyIconW(NIM_ADD, &data) }.as_bool() {
-            return Err(Error::from_hresult(E_FAIL));
-        }
-        Ok(())
+        // This API only documents a BOOL result, not a reliable GetLastError.
+        Ok(unsafe { Shell_NotifyIconW(NIM_ADD, &data) }.as_bool())
     }
     /// Reuse the single tray icon for public, nonsecret feedback. Shell owns the
     /// notification UI; this does not activate a window, play sound or open login.
     pub fn show_public_notice(&self, message: &str) -> Result<()> {
-        if !self.tray {
+        if !self.tray.get() {
             return Ok(());
         }
         let mut data = self.icon_data()?;
@@ -572,19 +770,23 @@ impl Drop for HiddenHost {
                 let _ = UnhookWinEvent(self.foreground_hook);
             }
             if !self.hwnd.is_invalid() {
-                if self.tray {
+                if self.tray.get() {
                     if let Ok(data) = self.icon_data() {
                         let _ = Shell_NotifyIconW(NIM_DELETE, &data);
                     }
                 }
                 let _ = KillTimer(Some(self.hwnd), TIMER);
-                if self.session_registered {
+                if self.session_registered.get() {
                     let _ = WTSUnRegisterSessionNotification(self.hwnd);
                 }
                 let _ = DestroyWindow(self.hwnd);
             }
             if self.class != 0 {
                 let _ = UnregisterClassW(w!("FutureClassroom.HiddenHost.v1"), Some(self.instance));
+            }
+            let event = self.session_ready_event.get();
+            if !event.is_invalid() {
+                let _ = CloseHandle(event);
             }
         }
     }
@@ -767,6 +969,68 @@ pub fn probe_lifecycle(seconds: u32, with_tray: bool) -> Result<HostLifecycleRep
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn readiness_wait_can_be_cancelled_without_consuming_open_request() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let mut host = HiddenHost::new(false).unwrap();
+        host.wait_until_ready().unwrap();
+        // Only the retry scheduling is synthetic; no real Shell registration
+        // fails and no system service or taskbar is changed by this test.
+        host.tray_requested = true;
+        let mut retry = HostRetry::new(Instant::now());
+        retry.decide(Instant::now());
+        *host.retry.borrow_mut() = Some(retry);
+        host.state.hint(HostHints::OPEN_STATUS);
+        unsafe {
+            PostMessageW(Some(host.hwnd), WM_CLOSE, WPARAM(0), LPARAM(0)).unwrap();
+        }
+        assert!(!host.wait_until_ready().unwrap());
+        assert!(
+            HostHints(host.state.hints.load(Ordering::Acquire)).contains(HostHints::OPEN_STATUS)
+        );
+    }
+
+    #[test]
+    fn recovery_timeout_delivers_shutdown_before_returning_error() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let mut host = HiddenHost::new(false).unwrap();
+        host.wait_until_ready().unwrap();
+        // Model an already-added icon; no real icon is installed in this test.
+        host.tray_requested = true;
+        host.tray.set(true);
+        let stop = host.controller();
+        let revoked = Arc::new(AtomicU32::new(0));
+        let seen = revoked.clone();
+        host.set_control_callback(Arc::new(move |hints| {
+            seen.fetch_or(hints.0, Ordering::Release);
+        }))
+        .unwrap();
+        let mut recovering = false;
+        let mut shutdown = false;
+        let error = host
+            .run_with_host(|hints, host| {
+                if hints.contains(HostHints::SHUTDOWN) {
+                    shutdown = true;
+                    assert_ne!(revoked.load(Ordering::Acquire) & HostHints::SHUTDOWN.0, 0);
+                    stop.stop();
+                } else if !recovering {
+                    host.taskbar_recreated();
+                    *host.retry.borrow_mut() = Some(HostRetry::new(
+                        Instant::now() - std::time::Duration::from_secs(61),
+                    ));
+                    recovering = true;
+                }
+                Ok(())
+            })
+            .unwrap_err();
+        assert!(shutdown);
+        assert!(error.to_string().contains("超时"));
+    }
+
     #[test]
     fn repeated_start_requests_only_the_original_root_without_foreground_changes() {
         use std::os::windows::process::CommandExt;
