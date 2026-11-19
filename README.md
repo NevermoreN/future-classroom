@@ -76,7 +76,7 @@
 
 ## 快速开始
 
-项目**完全免费**。最新安装包约 **19.7 MiB**，下载一个 EXE，双击即可开始一键安装，安装完成后自动运行：
+项目**完全免费**。最新安装包约 **19.8 MiB**。下载一个 EXE，双击即可开始一键安装，安装完成后自动运行。
 
 1. 前往 [GitHub Releases](https://github.com/NevermoreN/future-classroom/releases/latest)，下载最新版本的 `FutureClassroom-版本号-Setup.exe` 安装包。
 2. 在教室电脑上双击安装包，按界面提示完成安装，程序会自动启动。
@@ -85,7 +85,7 @@
 
 手机和教室电脑需要处于可互通的校园网络；首次连接时，请按学校管理员的说明信任教室提供的证书。教室电脑在线且音频设备可用时，老师才能向该教室发送语音播报。
 
-> 当前版本为 [1.0.2.2](https://github.com/NevermoreN/future-classroom/releases/tag/v1.0.2.2)，安装包名称为 `FutureClassroom-1.0.2.2-Setup.exe`。本版取消 `instance.owner` 磁盘运行记录，改用 Windows 窗口定位原程序，避免旧记录残留阻挡启动；保留防重复运行及用户、会话核验。升级和修复默认保留已有设置与资料；旧版本可运行本版安装包直接升级。
+> 当前版本为 **1.0.2.3**，修复本机网页就绪、播报时桌面闪烁和安装选源问题。已安装 **1.0.2.2** 的电脑请双击新版 EXE 手动升级，保留原有设置与资料。更早版本的适用路径和离线安装有效期见发布说明。 [1.0.2.3 发布说明](https://github.com/NevermoreN/future-classroom/releases/tag/v1.0.2.3)
 
 ## 运行环境与说明
 
