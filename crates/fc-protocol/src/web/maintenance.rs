@@ -53,7 +53,11 @@ impl Phase {
     pub fn waiting_for_input(self) -> bool {
         matches!(
             self,
-            Self::Waiting | Self::ReadyForUpload | Self::Uploaded | Self::MappingRequired | Self::ReviewReady
+            Self::Waiting
+                | Self::ReadyForUpload
+                | Self::Uploaded
+                | Self::MappingRequired
+                | Self::ReviewReady
         )
     }
 }

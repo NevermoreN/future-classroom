@@ -431,15 +431,13 @@ impl App {
                     }
                 }
                 Ok(Outcome::LocalWeb(Completed::LanChecked)) => {}
-                Err(error) if !self.exiting => {
-                    if !self.local_web.attached {
-                        start_error = Some(error_text(&error));
-                        self.local_web.failure_reason = Some(if self.local_web.runtime.is_some() {
-                            "local-web-backend-preparation"
-                        } else {
-                            "local-web-listener-preparation"
-                        });
-                    }
+                Err(error) if !self.exiting && !self.local_web.attached => {
+                    start_error = Some(error_text(&error));
+                    self.local_web.failure_reason = Some(if self.local_web.runtime.is_some() {
+                        "local-web-backend-preparation"
+                    } else {
+                        "local-web-listener-preparation"
+                    });
                 }
                 _ => {}
             }

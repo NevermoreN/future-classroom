@@ -318,7 +318,14 @@ impl WebTask {
             }) = application.route_hint(&self.head)
             {
                 return response(bounded_json_limit(
-                    application.calendar_in_job(&backend, &self.head, write.then_some(body), year, &self.life, context),
+                    application.calendar_in_job(
+                        &backend,
+                        &self.head,
+                        write.then_some(body),
+                        year,
+                        &self.life,
+                        context,
+                    ),
                     fc_protocol::web::admin::MAX_ADMIN_JSON_BYTES,
                 ));
             }

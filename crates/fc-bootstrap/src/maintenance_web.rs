@@ -106,7 +106,9 @@ impl JobContext {
         current.snapshot.phase = phase;
         current.snapshot.can_cancel = phase.can_cancel();
         current.snapshot.cancellation_requested = current.cancelled.load(Ordering::Acquire);
-        current.input_deadline = phase.waiting_for_input().then(|| Instant::now() + INPUT_WAIT_BUDGET);
+        current.input_deadline = phase
+            .waiting_for_input()
+            .then(|| Instant::now() + INPUT_WAIT_BUDGET);
         if matches!(
             phase,
             Phase::Draining
@@ -242,16 +244,20 @@ impl MaintenanceControl {
     /// No operation proof or sensitive preflight results leave this route.
     pub fn active_summary(&self) -> Result<Option<ActiveJob>> {
         let state = self.0.lock().map_err(|_| MaintenanceError::Retained)?;
-        Ok(state.current.as_ref().filter(|v| !v.snapshot.phase.terminal()).map(|v| {
-            let cancelled = v.cancelled.load(Ordering::Acquire);
-            ActiveJob {
-                id: v.snapshot.id.clone(),
-                kind: v.snapshot.kind,
-                phase: v.snapshot.phase,
-                can_abandon: v.snapshot.phase.waiting_for_input() && !cancelled,
-                cancellation_requested: cancelled,
-            }
-        }))
+        Ok(state
+            .current
+            .as_ref()
+            .filter(|v| !v.snapshot.phase.terminal())
+            .map(|v| {
+                let cancelled = v.cancelled.load(Ordering::Acquire);
+                ActiveJob {
+                    id: v.snapshot.id.clone(),
+                    kind: v.snapshot.kind,
+                    phase: v.snapshot.phase,
+                    can_abandon: v.snapshot.phase.waiting_for_input() && !cancelled,
+                    cancellation_requested: cancelled,
+                }
+            }))
     }
     pub fn abandon_waiting(&self, id: u64) -> Result<()> {
         let state = self.0.lock().map_err(|_| MaintenanceError::Retained)?;
@@ -345,7 +351,13 @@ mod tests {
         job.expire_waiting(Instant::now());
         assert!(job.active());
         job.expire_waiting(Instant::now() + INPUT_WAIT_BUDGET);
-        assert!(control.active_summary().unwrap().unwrap().cancellation_requested);
+        assert!(
+            control
+                .active_summary()
+                .unwrap()
+                .unwrap()
+                .cancellation_requested
+        );
         assert!(!job.active());
         job.update(Phase::Cancelled, |_| {}).unwrap();
         assert!(control.active_summary().unwrap().is_none());
@@ -355,8 +367,14 @@ mod tests {
             .unwrap();
         job.update(Phase::Confirming, |_| {}).unwrap();
         job.expire_waiting(Instant::now() + INPUT_WAIT_BUDGET);
-        assert_eq!(control.abandon_waiting(next.id), Err(MaintenanceError::Conflict));
-        assert_eq!(control.abandon_waiting(first.id), Err(MaintenanceError::Stale));
+        assert_eq!(
+            control.abandon_waiting(next.id),
+            Err(MaintenanceError::Conflict)
+        );
+        assert_eq!(
+            control.abandon_waiting(first.id),
+            Err(MaintenanceError::Stale)
+        );
         assert!(job.active());
         job.update(Phase::ReviewReady, |_| {}).unwrap();
         control.abandon_waiting(next.id).unwrap();

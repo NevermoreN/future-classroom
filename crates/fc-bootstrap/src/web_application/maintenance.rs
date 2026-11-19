@@ -78,8 +78,11 @@ impl WebApplication {
         let revision = backend.global_revision().map_err(admin::backend_error)?;
         let invalid = || failure(400, responses::ErrorCode::InvalidRequest);
         let action = match resource {
-            Resource::Jobs if matches!(route, Route::Maintenance { write: false, .. })
-                && body.is_empty() => Action::Active,
+            Resource::Jobs
+                if matches!(route, Route::Maintenance { write: false, .. }) && body.is_empty() =>
+            {
+                Action::Active
+            }
             Resource::Jobs => {
                 let create = wire::Create::decode(body).map_err(|_| invalid())?;
                 if create.revision().map_err(|_| invalid())? != revision {
@@ -184,7 +187,9 @@ impl MaintenanceRequest {
                 }
                 return active_response(
                     revision,
-                    service.control.abandon_waiting(id)
+                    service
+                        .control
+                        .abandon_waiting(id)
                         .and_then(|_| service.control.active_summary()),
                 );
             }
@@ -240,7 +245,10 @@ fn snapshot_response(revision: Revision, result: jobs::Result<wire::Snapshot>) -
         Err(e) => error_response(e),
     }
 }
-fn active_response(revision: Revision, result: jobs::Result<Option<wire::ActiveJob>>) -> WebResponse {
+fn active_response(
+    revision: Revision,
+    result: jobs::Result<Option<wire::ActiveJob>>,
+) -> WebResponse {
     match result {
         Ok(job) => admin::data_response(wire::active(revision, job)),
         Err(error) => error_response(error),

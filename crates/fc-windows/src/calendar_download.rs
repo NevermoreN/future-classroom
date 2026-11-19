@@ -152,24 +152,40 @@ impl fc_ports::calendar::CalendarProvider for HolidayCnProvider {
         year: i32,
         validators: Option<&fc_ports::calendar::CalendarFetchValidators>,
         cancelled: &dyn Fn() -> bool,
-    ) -> Result<fc_ports::calendar::CalendarProviderResponse, fc_ports::calendar::CalendarFetchFailure> {
-        use fc_ports::calendar::{CalendarFetchFailure as Failure, CalendarProviderResponse as Response};
+    ) -> Result<
+        fc_ports::calendar::CalendarProviderResponse,
+        fc_ports::calendar::CalendarFetchFailure,
+    > {
+        use fc_ports::calendar::{
+            CalendarFetchFailure as Failure, CalendarProviderResponse as Response,
+        };
         let validators = validators.map(|value| Validators {
             etag: value.etag.clone(),
             last_modified: value.last_modified.clone(),
         });
-        let download = fetch(year, validators.as_ref(), cancelled).map_err(|error| match error {
-            DownloadError::Cancelled => Failure::Cancelled,
-            DownloadError::Timeout => Failure::Deadline,
-            DownloadError::Tls => Failure::Tls,
-            DownloadError::TooLarge => Failure::TooLarge,
-            DownloadError::Forbidden | DownloadError::NotFound | DownloadError::HttpStatus => Failure::Http,
-            DownloadError::InvalidYear | DownloadError::InvalidValidator | DownloadError::InvalidResponse => Failure::InvalidData,
-            DownloadError::Unavailable | DownloadError::Busy | DownloadError::Network => Failure::Network,
-        })?;
+        let download =
+            fetch(year, validators.as_ref(), cancelled).map_err(|error| match error {
+                DownloadError::Cancelled => Failure::Cancelled,
+                DownloadError::Timeout => Failure::Deadline,
+                DownloadError::Tls => Failure::Tls,
+                DownloadError::TooLarge => Failure::TooLarge,
+                DownloadError::Forbidden | DownloadError::NotFound | DownloadError::HttpStatus => {
+                    Failure::Http
+                }
+                DownloadError::InvalidYear
+                | DownloadError::InvalidValidator
+                | DownloadError::InvalidResponse => Failure::InvalidData,
+                DownloadError::Unavailable | DownloadError::Busy | DownloadError::Network => {
+                    Failure::Network
+                }
+            })?;
         match download {
             Download::NotModified => Ok(Response::NotModified),
-            Download::Modified { bytes, etag, last_modified } => {
+            Download::Modified {
+                bytes,
+                etag,
+                last_modified,
+            } => {
                 let now = crate::system::CurrentClock::new()
                     .try_now()
                     .map_err(|_| Failure::InvalidData)?;

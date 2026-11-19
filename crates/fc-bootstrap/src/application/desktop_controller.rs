@@ -1394,9 +1394,7 @@ impl Controller {
             .display
             .target_monitor
             .as_deref();
-        if self.monitor.is_none()
-            || self.monitor_target.as_deref() != target
-            || self.monitor_dirty
+        if self.monitor.is_none() || self.monitor_target.as_deref() != target || self.monitor_dirty
         {
             let monitor = match self.renderer.work_area_for(target) {
                 Ok(monitor) => monitor,

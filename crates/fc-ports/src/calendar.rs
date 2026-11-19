@@ -2,8 +2,8 @@
 use fc_domain::{
     auth::{ActorContext, Role},
     calendar::CalendarCandidate,
-    ids::{AuthEpoch, CommandId, PrincipalId, Revision},
     identity::IdentityState,
+    ids::{AuthEpoch, CommandId, PrincipalId, Revision},
     schedule_document::ScheduleDocument,
     time::LocalDateTime,
 };
@@ -21,18 +21,19 @@ pub struct CalendarAutoPolicy {
 }
 impl CalendarAutoPolicy {
     pub fn authorized(&self, identity: &IdentityState) -> bool {
-        self.enabled && self.grant.as_ref().is_some_and(|grant| {
-            identity.accounts.iter().any(|account| {
-                account.principal.id == grant.principal_id
-                    && account.principal.auth_epoch == grant.auth_epoch
-                    && account.principal.enabled
-                    && account.principal.role == Role::GlobalAdmin
-                    && !account.must_change_password
-                    && identity.installation.as_ref().is_some_and(|installation| {
-                        installation.school_id == account.principal.school_id
-                    })
+        self.enabled
+            && self.grant.as_ref().is_some_and(|grant| {
+                identity.accounts.iter().any(|account| {
+                    account.principal.id == grant.principal_id
+                        && account.principal.auth_epoch == grant.auth_epoch
+                        && account.principal.enabled
+                        && account.principal.role == Role::GlobalAdmin
+                        && !account.must_change_password
+                        && identity.installation.as_ref().is_some_and(|installation| {
+                            installation.school_id == account.principal.school_id
+                        })
+                })
             })
-        })
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

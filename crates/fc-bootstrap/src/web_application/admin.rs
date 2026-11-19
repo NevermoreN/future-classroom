@@ -4,11 +4,11 @@ use crate::backend::BackendError;
 use fc_application::identity::SessionLease;
 use fc_domain::{auth::Role, ids::Revision};
 use fc_protocol::web::admin::{self as wire, Resource};
+#[cfg(windows)]
+mod calendar;
 mod profile_content;
 mod profiles;
 mod schedule;
-#[cfg(windows)]
-mod calendar;
 pub enum PlatformRequest {
     Status,
     Network,

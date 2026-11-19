@@ -506,14 +506,21 @@ pub fn preview_calendar(
     let class = id(&request.class_id, ClassId::new)?;
     let mut draft = current.clone();
     apply_calendar(&mut draft, request.candidate)?;
-    draft.validate(identity).map_err(|_| ProtocolError::InvalidCommand)?;
-    let day = draft.resolve_day(class, actual).map_err(|_| ProtocolError::InvalidCommand)?;
+    draft
+        .validate(identity)
+        .map_err(|_| ProtocolError::InvalidCommand)?;
+    let day = draft
+        .resolve_day(class, actual)
+        .map_err(|_| ProtocolError::InvalidCommand)?;
     let result = match day {
         AcademicDay::OutOfTerm => json!({"result": "outOfTerm"}),
         AcademicDay::Rest => json!({"result": "rest"}),
         AcademicDay::Unconfirmed => {
             let outside = draft.calendar_mode == CalendarMode::School
-                && draft.school_calendar.school_coverage.is_none_or(|(start, end)| actual < start || actual > end);
+                && draft
+                    .school_calendar
+                    .school_coverage
+                    .is_none_or(|(start, end)| actual < start || actual > end);
             json!({"result": if outside { "outsideCoverage" } else { "unconfirmed" }})
         }
         AcademicDay::Scheduled(day) => {
@@ -737,17 +744,39 @@ mod tests {
     use super::*;
     #[test]
     fn calendar_preview_uses_the_source_day_and_reports_missing_school_coverage() {
-        use fc_domain::{auth::{Principal, Role}, identity::*};
+        use fc_domain::{
+            auth::{Principal, Role},
+            identity::*,
+        };
         use serde_json::{json, Value};
         let class = ClassId::new(1).unwrap();
         let school = SchoolId::new(1).unwrap();
         let identity = IdentityState {
-            installation: Some(Installation { school_id: school, school_name: "测试学校".into(), current_class: Some(class) }),
+            installation: Some(Installation {
+                school_id: school,
+                school_name: "测试学校".into(),
+                current_class: Some(class),
+            }),
             accounts: vec![UserAccount {
-                principal: Principal { id: PrincipalId::new(1).unwrap(), school_id: school, auth_epoch: AuthEpoch::new(1), role: Role::GlobalAdmin, enabled: true },
-                login_name: "admin".into(), display_name: "主管理员".into(), must_change_password: false, credential_version: 1, recovery_version: 1,
+                principal: Principal {
+                    id: PrincipalId::new(1).unwrap(),
+                    school_id: school,
+                    auth_epoch: AuthEpoch::new(1),
+                    role: Role::GlobalAdmin,
+                    enabled: true,
+                },
+                login_name: "admin".into(),
+                display_name: "主管理员".into(),
+                must_change_password: false,
+                credential_version: 1,
+                recovery_version: 1,
             }],
-            classes: vec![SchoolClass { id: class, school_id: school, name: "测试班".into(), enabled: true }],
+            classes: vec![SchoolClass {
+                id: class,
+                school_id: school,
+                name: "测试班".into(),
+                enabled: true,
+            }],
             ..IdentityState::default()
         };
         let (.., current) = mutation(
@@ -764,8 +793,10 @@ mod tests {
             },
         });
         let preview = |request: &Value| {
-            let value = preview_calendar(&serde_json::to_vec(request).unwrap(), &current, &identity)
-                .unwrap().unwrap();
+            let value =
+                preview_calendar(&serde_json::to_vec(request).unwrap(), &current, &identity)
+                    .unwrap()
+                    .unwrap();
             serde_json::from_slice::<Value>(&value).unwrap()["data"].clone()
         };
         assert_eq!(preview(&request)["result"], "outsideCoverage");

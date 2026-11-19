@@ -22,7 +22,9 @@ pub enum Resource {
     AccountSecurity,
     Display,
     Schedule,
-    Calendar { year: i32 },
+    Calendar {
+        year: i32,
+    },
     CalendarPreview,
     Layout,
     Network,
@@ -67,7 +69,9 @@ impl Resource {
             return Some(Self::CalendarPreview);
         }
         if let Some(year) = path.strip_prefix("calendar/") {
-            return Some(Self::Calendar { year: calendar::year(year)? });
+            return Some(Self::Calendar {
+                year: calendar::year(year)?,
+            });
         }
         if let Some(path) = path.strip_prefix("preview/") {
             if path == "public" {
