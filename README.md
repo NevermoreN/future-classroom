@@ -76,7 +76,7 @@
 
 ## 快速开始
 
-项目**完全免费**。最新安装包约 **19.6 MiB**，下载一个 EXE，双击即可开始一键安装，安装完成后自动运行：
+项目**完全免费**。最新安装包约 **19.7 MiB**，下载一个 EXE，双击即可开始一键安装，安装完成后自动运行：
 
 1. 前往 [GitHub Releases](https://github.com/NevermoreN/future-classroom/releases/latest)，下载最新版本的 `FutureClassroom-版本号-Setup.exe` 安装包。
 2. 在教室电脑上双击安装包，按界面提示完成安装，程序会自动启动。
