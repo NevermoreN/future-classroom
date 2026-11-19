@@ -22,11 +22,20 @@ impl OrdinaryBackupAccess {
     /// Revalidate after pinning every immutable object. A revision change during
     /// pin acquisition rejects the package rather than combining generations.
     pub fn check_revision(&self) -> Result<()> {
+        self.check_access(Some(self.expected_revision))
+    }
+    /// Independent of content revisions, for operations that read a sealed
+    /// archive or cancel an unconfirmed maintenance task.
+    #[cfg(windows)]
+    pub(crate) fn check_session(&self) -> Result<()> {
+        self.check_access(None)
+    }
+    fn check_access(&self, revision: Option<Revision>) -> Result<()> {
         let snapshot = self
             .authority
             .snapshot()
             .map_err(|_| BackendError::Closed)?;
-        if snapshot.revision != self.expected_revision {
+        if revision.is_some_and(|expected| snapshot.revision != expected) {
             return Err(StorageError::Conflict {
                 current: snapshot.revision,
             }

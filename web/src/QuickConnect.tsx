@@ -3,7 +3,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { readJson, trustedApiBase } from './api/client'
-import { ProtocolFault } from './api/protocol'
+import { errorCode, ProtocolFault } from './api/protocol'
 import './QuickConnect.css'
 
 export interface ConnectionInfo { schoolName: string; className: string | null; entryUrl: string | null; unavailableReason: string | null }
@@ -62,14 +62,17 @@ export default function QuickConnect() {
   }, [])
   useEffect(() => {
     const controller = new AbortController()
-    setError('')
     async function load() {
       try {
         const base = trustedApiBase(import.meta.env.BASE_URL, window.location.href)
         const response = await fetch(new URL('quick-connect', base), { signal: controller.signal, credentials: 'omit', cache: 'no-store', redirect: 'error' })
+        if (response.status === 503 && errorCode(await readJson(response, controller.signal)) === 'STARTING') {
+          if (!controller.signal.aborted) { setInfo(null); setError('未来教室正在启动，就绪后会自动显示连接信息。') }
+          return
+        }
         if (!response.ok) throw new Error('连接信息尚未就绪，请稍后刷新。')
         const next = connectionInfo(await readJson(response, controller.signal))
-        if (!controller.signal.aborted) setInfo(next)
+        if (!controller.signal.aborted) { setInfo(next); setError('') }
       } catch { if (!controller.signal.aborted) { setInfo(null); setError('暂时无法读取连接信息。请在教室电脑上通过托盘“快捷连接”打开，并稍后刷新。') } }
     }
     void load()

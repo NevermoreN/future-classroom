@@ -9,6 +9,7 @@ export interface MaintenanceReview { schoolId: string; sourceRevision: string; c
 export interface MaintenanceCatalog { schoolId: string; schoolName: string; classes: { id: string; name: string }[]; subjects: { id: string; name: string }[]; principals: { id: string; name: string }[] }
 export interface MappingReview { source: MaintenanceCatalog; target: MaintenanceCatalog; currentRevision: string }
 export interface MaintenanceSnapshot { id: string; kind: MaintenanceKind; phase: MaintenancePhase; canCancel: boolean; cancellationRequested: boolean; expectedRevision: string; fileName: string | null; bytes: string | null; sha256: string | null; resetReview: { presentTreeCount: number; scope: string[] } | null; review: MaintenanceReview | null; mapping: MappingReview | null; error: string | null; restartRequired: boolean }
+export interface ActiveMaintenanceJob { id: string; kind: MaintenanceKind; phase: MaintenancePhase; canAbandon: boolean; cancellationRequested: boolean }
 export interface MaintenanceCredential { id: string; proof: string }
 export interface MaintenanceMapping { expectedRevision: string; sourceSchoolId: string; targetSchoolId: string; classes: { source: string; target: string }[]; subjects: { source: string; target: string }[]; principals: { source: string; target: string }[] }
 export type CreateMaintenance = { expectedRevision: string; kind: 'EXPORT' | 'RESET' } | { expectedRevision: string; kind: 'IMPORT'; mode: 'ORDINARY' | 'MAPPED'; fileName: string; bytes: string }
@@ -34,6 +35,13 @@ function snapshot(v: unknown): MaintenanceSnapshot {
   if (v.resetReview !== null) { obj(v.resetReview); count(v.resetReview.presentTreeCount, 1024); if (!Array.isArray(v.resetReview.scope) || v.resetReview.scope.length > 128) throw new ProtocolFault(); v.resetReview.scope.forEach(item => str(item)) }
   return v as unknown as MaintenanceSnapshot
 }
+function activeJob(v: unknown): ActiveMaintenanceJob | null {
+  if (v === null) return null
+  obj(v)
+  const id = decimal(v.id), kind = v.kind as MaintenanceKind, phase = v.phase as MaintenancePhase
+  if (!['EXPORT', 'IMPORT', 'RESET'].includes(kind) || !maintenancePhases.includes(phase) || maintenanceTerminal(phase) || typeof v.canAbandon !== 'boolean' || typeof v.cancellationRequested !== 'boolean') throw new ProtocolFault()
+  return { id, kind, phase, canAbandon: v.canAbandon, cancellationRequested: v.cancellationRequested }
+}
 export class MaintenanceHttpApi extends HttpApi {
   private async maintenanceRequest(path: string, method: 'GET' | 'POST', signal: AbortSignal, csrf?: string, credential?: MaintenanceCredential, input?: unknown, file?: File): Promise<unknown> {
     if (signal.aborted) throw abortError(); if (this.base.protocol !== 'https:') throw new ProtocolFault('维护操作需要可信 HTTPS 本机入口。')
@@ -50,6 +58,12 @@ export class MaintenanceHttpApi extends HttpApi {
     rev(input.expectedRevision)
     if (input.kind === 'IMPORT') { if (!input.fileName || /[\\/:\u0000-\u001f]/.test(input.fileName) || new TextEncoder().encode(input.fileName).length > 256 || !/^[1-9][0-9]*$/.test(input.bytes) || BigInt(input.bytes) > BigInt(MAX_BACKUP_BYTES)) throw new ProtocolFault() }
     return adminEnvelope(await this.maintenanceRequest('', 'POST', signal, csrf, undefined, { schemaVersion: 1, ...input }), value => { obj(value); return { job: snapshot(value.job), proof: secret(value.proof) } })
+  }
+  async readActive(signal: AbortSignal): Promise<ActiveMaintenanceJob | null> {
+    return adminEnvelope(await this.maintenanceRequest('', 'GET', signal), value => { obj(value); return activeJob(value.job) }).data
+  }
+  async abandon(id: string, csrf: string, signal: AbortSignal): Promise<ActiveMaintenanceJob | null> {
+    return adminEnvelope(await this.maintenanceRequest('/' + decimal(id) + '/abandon', 'POST', signal, csrf, undefined, { schemaVersion: 1 }), value => { obj(value); return activeJob(value.job) }).data
   }
   async readStatus(credential: MaintenanceCredential, signal: AbortSignal): Promise<AdminDocument<{ job: MaintenanceSnapshot }>> { return this.readJob(await this.maintenanceRequest('/' + decimal(credential.id), 'GET', signal, undefined, credential), credential) }
   async upload(credential: MaintenanceCredential, file: File, csrf: string, signal: AbortSignal): Promise<AdminDocument<{ job: MaintenanceSnapshot }>> { if (!file.size || file.size > MAX_BACKUP_BYTES) throw new ProtocolFault(); return this.readJob(await this.maintenanceRequest('/' + decimal(credential.id) + '/upload', 'POST', signal, csrf, credential, undefined, file), credential) }

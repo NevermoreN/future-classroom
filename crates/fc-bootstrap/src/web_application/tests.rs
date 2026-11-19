@@ -668,7 +668,7 @@ fn pairing_session_csrf_and_account_logout_cross_the_real_backend_and_persist_ep
     ] {
         assert!(voice_body.contains(expected));
     }
-    let logout = br#"{"schemaVersion":1}"#;
+    let logout = br#"{"schemaVersion":1,"scope":"ACCOUNT"}"#;
     let denied = fixture.dispatch(
         &head("POST", "session/logout", logout.len(), Some(&first), None),
         logout,
@@ -887,7 +887,7 @@ fn direct_page_login_needs_no_pairing_and_cookie_cannot_restore_a_closed_page() 
     );
 }
 #[test]
-fn page_resume_survives_idle_access_expiry_and_midnight_without_reviving_revoked_identity() {
+fn page_resume_survives_idle_and_logout_revokes_only_its_grant() {
     let mut fixture = BackendFixture::new();
     let (first, _) = direct_page_login(&mut fixture);
     let (second, _) = direct_page_login(&mut fixture);
@@ -921,10 +921,28 @@ fn page_resume_survives_idle_access_expiry_and_midnight_without_reviving_revoked
     );
     assert_eq!(
         fixture
-            .dispatch(&page_head("GET", "session", 0, &second, None), b"")
+            .dispatch(&page_head("GET", "session", 0, &first, None), b"")
             .head
             .status,
         401
+    );
+    let resume = format!(r#"{{"schemaVersion":1,"pageToken":"{first}"}}"#);
+    assert_eq!(
+        fixture
+            .dispatch(
+                &head("POST", "session/resume", resume.len(), None, None),
+                resume.as_bytes()
+            )
+            .head
+            .status,
+        401
+    );
+    assert_eq!(
+        fixture
+            .dispatch(&page_head("GET", "session", 0, &second, None), b"")
+            .head
+            .status,
+        200
     );
 }
 #[test]

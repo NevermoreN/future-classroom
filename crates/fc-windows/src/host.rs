@@ -72,6 +72,9 @@ impl HostHints {
     pub const OPEN_SETTINGS: Self = Self(65536);
     pub const OPEN_QUICK_CONNECT: Self = Self(131072);
     pub const OPEN_ABOUT: Self = Self(262144);
+    pub const TRAY_UNAVAILABLE: Self = Self(524288);
+    pub const TRAY_RESTORED: Self = Self(1048576);
+    pub const TRAY_MENU_UNAVAILABLE: Self = Self(2097152);
     /// Negative read-only sample at native message dispatch. The original OS
     /// event-to-dispatch latency is not measured or eliminated by this fence.
     pub const FOREGROUND_UNAVAILABLE: Self = Self(32768);
@@ -201,6 +204,19 @@ pub enum InstanceRequest {
     Requested,
     OtherSession(u32),
 }
+
+#[derive(Debug)]
+pub struct HostLoopError {
+    pub stage: &'static str,
+    pub error: Error,
+}
+
+impl HostLoopError {
+    fn new(stage: &'static str, error: Error) -> Self {
+        Self { stage, error }
+    }
+}
+
 impl HiddenHost {
     /// A tray is required in normal interactive operation. Headless tests can
     /// disable it explicitly; that does not count as a real tray acceptance test.
@@ -545,6 +561,12 @@ impl HiddenHost {
     pub fn controller(&self) -> HostControl {
         self.state.control.clone()
     }
+    pub fn tray_error(&self) -> Option<i32> {
+        self.retry_error
+            .borrow()
+            .as_ref()
+            .map(|error| error.code().0)
+    }
     /// The original window timer paces bounded background work while an IO
     /// owner is active. Idle hosts retain their original one-second cadence;
     /// no additional timer, thread, queue, or foreground window is introduced.
@@ -569,36 +591,49 @@ impl HiddenHost {
     /// Background shutdown is coordinated by bootstrap, never joined by this loop.
     pub fn run(self, mut on_hints: impl FnMut(HostHints) -> Result<()>) -> Result<()> {
         self.run_with_host(|hints, _| on_hints(hints))
+            .map_err(|failure| failure.error)
     }
     /// The callback may use this host's tray without retaining a native handle.
     pub fn run_with_host(
         self,
         mut on_hints: impl FnMut(HostHints, &Self) -> Result<()>,
-    ) -> Result<()> {
-        if !self.wait_until_ready()? {
+    ) -> std::result::Result<(), HostLoopError> {
+        if !self
+            .wait_until_ready()
+            .map_err(|e| HostLoopError::new("host-readiness", e))?
+        {
             return Ok(());
         }
-        let mut recovery_error = None;
+        let mut tray_retry_paused = false;
         let mut message = MSG::default();
         loop {
             let control = self.state.control.0.load(Ordering::Acquire);
             if control & FAULT != 0 {
-                return Err(Error::from_hresult(E_UNEXPECTED));
+                return Err(HostLoopError::new(
+                    "host-control-fault",
+                    Error::from_hresult(E_UNEXPECTED),
+                ));
             }
             if control & STOP != 0 {
-                return recovery_error.map_or(Ok(()), Err);
+                return Ok(());
             }
             // SAFETY: MSG is exclusively owned; no filter means all this thread's UI
             // windows are dispatched. No HWND/payload pointer crosses threads.
             let result = unsafe { GetMessageW(&mut message, None, 0, 0) }.0;
             if result == -1 {
-                return Err(Error::from_thread());
+                return Err(HostLoopError::new(
+                    "host-read-message",
+                    Error::from_thread(),
+                ));
             }
             if result == 0 {
                 return if message.wParam.0 == 0 {
                     Ok(())
                 } else {
-                    Err(Error::from_hresult(E_UNEXPECTED))
+                    Err(HostLoopError::new(
+                        "host-dispatch-fault",
+                        Error::from_hresult(E_UNEXPECTED),
+                    ))
                 };
             }
             // SAFETY: message produced by GetMessage; window procedures handle ABI panics.
@@ -609,31 +644,50 @@ impl HiddenHost {
                 }
             }
             let mut hints = HostHints(self.state.hints.swap(0, Ordering::AcqRel));
-            if hints.contains(HostHints::TASKBAR_RECREATED) {
+            if hints.contains(HostHints::TASKBAR_RECREATED)
+                || (tray_retry_paused && hints.contains(HostHints::OPEN_STATUS))
+            {
                 self.taskbar_recreated();
+                tray_retry_paused = false;
             }
-            // Do not return a tray failure across active writer/audio ownership.
-            // Revoke through the original callback, then drain ordinary shutdown.
-            if recovery_error.is_none()
+            if !tray_retry_paused
                 && !hints.contains(HostHints::SHUTDOWN)
                 && !hints.contains(HostHints::EXIT_REQUESTED)
             {
+                let tray_missing = self.tray_requested && !self.tray.get();
                 if let Err(error) = self.advance_readiness() {
-                    recovery_error = Some(error);
-                    self.state.control_hint(HostHints::SHUTDOWN);
-                    hints.0 |= HostHints::SHUTDOWN.0;
+                    if !self.session_registered.get() || !tray_missing {
+                        return Err(HostLoopError::new("host-session", error));
+                    }
+                    self.retry.borrow_mut().take();
+                    *self.retry_error.borrow_mut() = Some(error);
+                    tray_retry_paused = true;
+                    hints.0 |= HostHints::TRAY_UNAVAILABLE.0;
+                } else if tray_missing && self.tray.get() {
+                    hints.0 |= HostHints::TRAY_RESTORED.0;
                 }
             }
-            if hints.contains(HostHints::TRAY_CONTEXT) && !hints.contains(HostHints::SHUTDOWN) {
-                self.tray_menu()?;
+            if self.tray.get()
+                && hints.contains(HostHints::TRAY_CONTEXT)
+                && !hints.contains(HostHints::SHUTDOWN)
+            {
+                if let Err(error) = self.tray_menu() {
+                    *self.retry_error.borrow_mut() = Some(error);
+                    hints.0 |= HostHints::TRAY_MENU_UNAVAILABLE.0;
+                }
             }
             // Child workbench commands can produce no host hints. Always let the
             // composition drain its bounded UI events immediately after dispatch.
             match catch_unwind(AssertUnwindSafe(|| on_hints(hints, &self))) {
-                Ok(result) => result?,
+                Ok(result) => {
+                    result.map_err(|e| HostLoopError::new("host-application-callback", e))?
+                }
                 Err(_) => {
                     self.state.control.fault();
-                    return Err(Error::from_hresult(E_UNEXPECTED));
+                    return Err(HostLoopError::new(
+                        "host-application-panic",
+                        Error::from_hresult(E_UNEXPECTED),
+                    ));
                 }
             }
             // SHUTDOWN is an intent, not completion. The composition root owns
@@ -976,7 +1030,7 @@ mod tests {
     }
 
     #[test]
-    fn recovery_timeout_delivers_shutdown_before_returning_error() {
+    fn recovery_timeout_keeps_the_host_running() {
         let _serial = crate::NATIVE_TEST_SERIAL
             .lock()
             .unwrap_or_else(|p| p.into_inner());
@@ -993,25 +1047,25 @@ mod tests {
         }))
         .unwrap();
         let mut recovering = false;
-        let mut shutdown = false;
-        let error = host
-            .run_with_host(|hints, host| {
-                if hints.contains(HostHints::SHUTDOWN) {
-                    shutdown = true;
-                    assert_ne!(revoked.load(Ordering::Acquire) & HostHints::SHUTDOWN.0, 0);
-                    stop.stop();
-                } else if !recovering {
-                    host.taskbar_recreated();
-                    *host.retry.borrow_mut() = Some(HostRetry::new(
-                        Instant::now() - std::time::Duration::from_secs(61),
-                    ));
-                    recovering = true;
-                }
-                Ok(())
-            })
-            .unwrap_err();
-        assert!(shutdown);
-        assert!(error.to_string().contains("超时"));
+        let mut unavailable = false;
+        host.run_with_host(|hints, host| {
+            if hints.contains(HostHints::TRAY_UNAVAILABLE) {
+                unavailable = true;
+                assert!(host.tray_error().is_some());
+                assert!(!hints.contains(HostHints::SHUTDOWN));
+                assert_eq!(revoked.load(Ordering::Acquire) & HostHints::SHUTDOWN.0, 0);
+                stop.stop();
+            } else if !recovering {
+                host.taskbar_recreated();
+                *host.retry.borrow_mut() = Some(HostRetry::new(
+                    Instant::now() - std::time::Duration::from_secs(61),
+                ));
+                recovering = true;
+            }
+            Ok(())
+        })
+        .unwrap();
+        assert!(unavailable);
     }
 
     #[test]

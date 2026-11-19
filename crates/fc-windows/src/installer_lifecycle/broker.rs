@@ -2,6 +2,7 @@
 //! capability; only the actual guardian Join/End/exit and reconciled effects
 //! permit settlement. Image retirement follows the original broker exit.
 use super::{native, LifecycleError, Result};
+use fc_protocol::update_release::ReleaseClaims;
 use std::time::{Duration, Instant};
 
 pub(super) mod manifest;
@@ -16,6 +17,8 @@ pub(super) mod published_host;
 /// One original budget for startup, authenticated IPC, transaction observation,
 /// effect verification and cleanup. A timeout never grants a replacement owner.
 pub const BROKER_BUDGET: Duration = Duration::from_secs(120);
+/// Setup confirms MSI settlement, but one or more optional integration steps failed.
+pub const SETUP_SHELL_INCOMPLETE: u32 = 5104;
 
 /// A local request only. The sealed image, fixed source and actual native
 /// admission/guard/effect proofs independently decide whether it may execute.
@@ -46,24 +49,28 @@ pub fn run_setup(command: SetupCommand) -> Result<u32> {
     };
     let result = controlled_owner::run_setup(operation)?;
     if result.installation_succeeded() {
-        if command != SetupCommand::Uninstall {
+        let maintenance = if command != SetupCommand::Uninstall {
             native::broker::controlled_owner::setup_entry::maintenance::register_source()
-                .map_err(|_| LifecycleError::ShellIntegration)?;
         } else {
             native::broker::controlled_owner::setup_entry::maintenance::remove_entry()
-                .map_err(|_| LifecycleError::ShellIntegration)?;
+        };
+        if let Err(error) = &maintenance {
+            eprintln!("setup_maintenance_entry_incomplete {error:?}");
         }
         // This is deliberately after original MSI settlement. A Shell failure
         // cannot be reported as transaction rollback or authorize payload edits.
-        super::shortcuts::reconcile(command).map_err(|error| {
+        let shortcuts = super::shortcuts::reconcile(command);
+        if let Err(error) = &shortcuts {
             eprintln!(
                 "setup_shell_integration_failed hresult=0x{:08X}",
                 error.code().0 as u32
             );
-            LifecycleError::ShellIntegration
-        })?;
+        }
+        if maintenance.is_err() || shortcuts.is_err() {
+            return Err(LifecycleError::ShellIntegration);
+        }
         Ok(0)
-    } else if result.install_return != 0 {
+    } else if result.install_return != 0 && result.install_return != SETUP_SHELL_INCOMPLETE {
         Ok(result.install_return)
     } else {
         Err(LifecycleError::Unsettled)
@@ -73,8 +80,8 @@ pub fn run_setup(command: SetupCommand) -> Result<u32> {
 /// GUI helper/outer Setup entry. Empty argv asks the user for a local intent;
 /// one exact operation word executes directly. All other commands retain the
 /// closed legacy grammar. A normal helper without a seal cannot run Setup.
-pub fn run_entry(args: &[String]) -> Result<u32> {
-    if let Some(result) = native::broker::controlled_owner::setup_entry::standalone(args) {
+pub fn run_entry(args: &[String], release: Option<&ReleaseClaims>) -> Result<u32> {
+    if let Some(result) = native::broker::controlled_owner::setup_entry::standalone(args, release) {
         return result;
     }
     #[cfg(feature = "owned-test-removal")]
@@ -190,7 +197,7 @@ mod tests {
         // actual current-image discovery: it must refuse before a GUI window,
         // maintenance gate, Pending, original G launch or native Begin exists.
         for words in [vec![], vec!["install"], vec!["repair"], vec!["uninstall"]] {
-            assert!(run_entry(&args(&words)).is_err());
+            assert!(run_entry(&args(&words), None).is_err());
         }
     }
 

@@ -190,7 +190,11 @@ impl App {
                     e.message().into()
                 }));
             }
-            if status.phase == RuntimePhase::Running && !self.opened && !self.closing {
+            if status.phase == RuntimePhase::Running
+                && runtime.control().backend_attached()
+                && !self.opened
+                && !self.closing
+            {
                 let url = self.url.take().ok_or("修复浏览器入口已失效。")?;
                 fc_windows::startup::open_local_management(&url)
                     .map_err(|_| "无法打开本机修复网页。")?;

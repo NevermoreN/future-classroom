@@ -14,6 +14,7 @@ pub enum ErrorCode {
     NotFound,
     MethodNotAllowed,
     RateLimited,
+    Starting,
     ServiceUnavailable,
     ResultUnknown,
     CommandExpired,

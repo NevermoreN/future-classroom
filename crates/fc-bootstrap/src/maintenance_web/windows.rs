@@ -195,6 +195,7 @@ impl MaintenanceService {
             return Err(MaintenanceError::Conflict);
         }
         current.snapshot.phase = Phase::Working;
+        current.input_deadline = None;
         *queue = Some(MaintenanceWork {
             service: self.clone(),
             id,
@@ -255,12 +256,14 @@ impl MaintenanceService {
         }
         let active = self.active.try_lock().ok()?;
         let active = active.as_ref()?;
+        active.job.expire_waiting(Instant::now());
         if active.job.cancelled.load(Ordering::Acquire)
             && !active.workflow.has_confirmed()
             && active.job.snapshot().is_ok_and(|s| {
                 !matches!(
                     s.phase,
-                    Phase::Draining
+                    Phase::Uploading
+                        | Phase::Draining
                         | Phase::PreparingDatabase
                         | Phase::Sealing
                         | Phase::Committing

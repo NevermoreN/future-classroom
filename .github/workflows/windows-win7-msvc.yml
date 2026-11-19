@@ -86,7 +86,7 @@ jobs:
             Copy-Item -LiteralPath $source -Destination $copy
             foreach ($test in @(
               'host::tests::readiness_wait_can_be_cancelled_without_consuming_open_request',
-              'host::tests::recovery_timeout_delivers_shutdown_before_returning_error',
+              'host::tests::recovery_timeout_keeps_the_host_running',
               'host::tests::repeated_start_requests_only_the_original_root_without_foreground_changes'
             )) {
               $output = & $copy $test --exact --test-threads=1 2>&1
@@ -94,7 +94,7 @@ jobs:
               $output | Write-Output
               if ($exit -ne 0 -or ($output -join "`n") -notlike "*test $test ... ok*") { throw "Startup regression failed: $test" }
             }
-            'Hosted Windows Server 2022: copied CI executable passed three isolated startup cancellation, recovery shutdown and owner-file-free instance routing regressions. This is not Windows 7/10/11 machine testing or a real school boot reproduction.' >> $env:GITHUB_STEP_SUMMARY
+            'Hosted Windows Server 2022: copied CI executable passed three isolated startup cancellation, tray recovery isolation and owner-file-free instance routing regressions. This is not Windows 7/10/11 machine testing or a real school boot reproduction.' >> $env:GITHUB_STEP_SUMMARY
           } finally {
             Remove-Item -LiteralPath $temporary -Recurse -Force
           }

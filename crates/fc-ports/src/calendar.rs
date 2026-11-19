@@ -1,8 +1,9 @@
 //! Non-active public-calendar cache and narrowly authorized adoption capabilities.
 use fc_domain::{
-    auth::ActorContext,
+    auth::{ActorContext, Role},
     calendar::CalendarCandidate,
     ids::{AuthEpoch, CommandId, PrincipalId, Revision},
+    identity::IdentityState,
     schedule_document::ScheduleDocument,
     time::LocalDateTime,
 };
@@ -17,6 +18,22 @@ pub struct CalendarAutoPolicy {
     pub revision: Revision,
     pub enabled: bool,
     pub grant: Option<CalendarPolicyGrant>,
+}
+impl CalendarAutoPolicy {
+    pub fn authorized(&self, identity: &IdentityState) -> bool {
+        self.enabled && self.grant.as_ref().is_some_and(|grant| {
+            identity.accounts.iter().any(|account| {
+                account.principal.id == grant.principal_id
+                    && account.principal.auth_epoch == grant.auth_epoch
+                    && account.principal.enabled
+                    && account.principal.role == Role::GlobalAdmin
+                    && !account.must_change_password
+                    && identity.installation.as_ref().is_some_and(|installation| {
+                        installation.school_id == account.principal.school_id
+                    })
+            })
+        })
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CalendarFetchFailure {

@@ -10,7 +10,7 @@ use windows::Win32::{
     Networking::WinSock::*,
 };
 
-pub(super) fn enumerate() -> Result<Vec<String>, CertificateProvisionError> {
+pub(super) fn enumerate() -> Result<(Vec<String>, Option<Ipv4Addr>), CertificateProvisionError> {
     let mut size = 16 * 1024u32;
     for _ in 0..3 {
         if size > 256 * 1024 {
@@ -26,7 +26,8 @@ pub(super) fn enumerate() -> Result<Vec<String>, CertificateProvisionError> {
                 GAA_FLAG_SKIP_ANYCAST
                     | GAA_FLAG_SKIP_MULTICAST
                     | GAA_FLAG_SKIP_DNS_SERVER
-                    | GAA_FLAG_SKIP_FRIENDLY_NAME,
+                    | GAA_FLAG_SKIP_FRIENDLY_NAME
+                    | GAA_FLAG_INCLUDE_GATEWAYS,
                 None,
                 Some(first),
                 &mut size,
@@ -36,12 +37,13 @@ pub(super) fn enumerate() -> Result<Vec<String>, CertificateProvisionError> {
             continue;
         }
         if result == ERROR_NO_DATA.0 {
-            return Ok(vec!["127.0.0.1".into()]);
+            return Ok((vec!["127.0.0.1".into()], None));
         }
         if result != 0 {
             return Err(CertificateProvisionError::Native(result as i32));
         }
         let mut hosts = BTreeSet::from([IpAddr::V4(Ipv4Addr::LOCALHOST)]);
+        let mut preferred = None;
         let mut adapter = first;
         // Bounds cap traversal as well as retained SAN names. API lists are
         // native outputs, and no pointer escapes the owned backing allocation.
@@ -51,6 +53,23 @@ pub(super) fn enumerate() -> Result<Vec<String>, CertificateProvisionError> {
             }
             let current = unsafe { &*adapter };
             if current.OperStatus == IfOperStatusUp {
+                let mut gateway = current.FirstGatewayAddress;
+                let mut ipv4_gateway = false;
+                for _ in 0..32 {
+                    if gateway.is_null() {
+                        break;
+                    }
+                    let value = unsafe { &*gateway };
+                    let address = value.Address;
+                    if !address.lpSockaddr.is_null()
+                        && address.iSockaddrLength as usize >= std::mem::size_of::<SOCKADDR_IN>()
+                        && unsafe { (*address.lpSockaddr).sa_family == AF_INET }
+                    {
+                        ipv4_gateway = true;
+                        break;
+                    }
+                    gateway = value.Next;
+                }
                 let mut unicast = current.FirstUnicastAddress;
                 for _ in 0..128 {
                     if unicast.is_null() {
@@ -80,6 +99,20 @@ pub(super) fn enumerate() -> Result<Vec<String>, CertificateProvisionError> {
                             } else {
                                 None
                             };
+                        if let Some(IpAddr::V4(ip)) = ip.filter(|ip| !ip.is_loopback()) {
+                            if ip.is_private() {
+                                // Prefer an Ethernet/Wi-Fi adapter with an IPv4
+                                // gateway, then the interface metric. LANs
+                                // without a gateway can still use a local NIC.
+                                let other_interface = !matches!(
+                                    current.IfType,
+                                    IF_TYPE_ETHERNET_CSMACD | IF_TYPE_IEEE80211
+                                );
+                                let rank = (other_interface, !ipv4_gateway, current.Ipv4Metric, ip);
+                                preferred =
+                                    Some(preferred.map_or(rank, |old| std::cmp::min(old, rank)));
+                            }
+                        }
                         if let Some(ip) = ip.filter(|ip| {
                             !ip.is_unspecified()
                                 && !ip.is_multicast()
@@ -94,7 +127,10 @@ pub(super) fn enumerate() -> Result<Vec<String>, CertificateProvisionError> {
             }
             adapter = current.Next;
         }
-        return Ok(hosts.into_iter().map(|ip| ip.to_string()).collect());
+        return Ok((
+            hosts.into_iter().map(|ip| ip.to_string()).collect(),
+            preferred.map(|(_, _, _, ip)| ip),
+        ));
     }
     Err(CertificateProvisionError::Unavailable)
 }

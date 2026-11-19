@@ -244,20 +244,7 @@ fn authorize(
         .map_err(StorageError::Identity)
 }
 fn grant_valid(c: &Cache, identity: &IdentityState) -> bool {
-    c.policy.enabled
-        && c.policy.grant.as_ref().is_some_and(|g| {
-            identity.accounts.iter().any(|a| {
-                a.principal.id == g.principal_id
-                    && a.principal.auth_epoch == g.auth_epoch
-                    && a.principal.enabled
-                    && a.principal.role == Role::GlobalAdmin
-                    && !a.must_change_password
-                    && identity
-                        .installation
-                        .as_ref()
-                        .is_some_and(|i| i.school_id == a.principal.school_id)
-            })
-        })
+    c.policy.authorized(identity)
 }
 fn tomorrow(now: LocalDateTime) -> Result<LocalDateTime, StorageError> {
     let d = now.date;

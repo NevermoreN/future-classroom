@@ -213,6 +213,9 @@ impl MaintenanceDownload {
             .as_ref()
             .filter(|v| v.job.id() == id && v.kind == Kind::Export)
             .ok_or(MaintenanceError::Stale)?;
+        if job.snapshot()?.phase != Phase::Finished {
+            return Err(MaintenanceError::Conflict);
+        }
         let receipt = state.exported.as_ref().ok_or(MaintenanceError::Conflict)?;
         let mut file = LockedFile::open(&receipt.path, wire::MAX_PACKAGE_BYTES)
             .map_err(|_| MaintenanceError::Unavailable)?;
@@ -222,7 +225,7 @@ impl MaintenanceDownload {
         let mut hash = Sha256Stream::default();
         let mut buffer = [0u8; fc_ports::http::CHUNK_BYTES];
         loop {
-            if context.checkpoint().is_err() || !job.active() || access.check_revision().is_err() {
+            if context.checkpoint().is_err() || !job.active() || access.check_session().is_err() {
                 return Err(MaintenanceError::Denied);
             }
             let n = file
@@ -255,7 +258,7 @@ impl MaintenanceDownload {
     pub fn send_fence(&self) -> ExecutionFence {
         let job = self.job.clone();
         let access = self.access.clone();
-        Arc::new(move || job.active() && access.check_revision().is_ok())
+        Arc::new(move || job.active() && access.check_session().is_ok())
     }
     pub fn sha256(&self) -> [u8; 32] {
         self.sha256
@@ -271,7 +274,7 @@ impl MaintenanceDownload {
     ) -> Result<Vec<u8>> {
         if context.checkpoint().is_err()
             || !self.job.active()
-            || self.access.check_revision().is_err()
+            || self.access.check_session().is_err()
         {
             return Err(MaintenanceError::Denied);
         }

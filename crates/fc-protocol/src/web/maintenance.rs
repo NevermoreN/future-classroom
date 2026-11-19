@@ -50,6 +50,12 @@ impl Phase {
             Self::Committing | Self::Retained | Self::Finished | Self::Cancelled | Self::Failed
         )
     }
+    pub fn waiting_for_input(self) -> bool {
+        matches!(
+            self,
+            Self::Waiting | Self::ReadyForUpload | Self::Uploaded | Self::MappingRequired | Self::ReviewReady
+        )
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Resource {
@@ -61,6 +67,7 @@ pub enum Resource {
     Mapping(u64),
     Confirm(u64),
     Cancel(u64),
+    Abandon(u64),
 }
 pub fn recognize(path: &str) -> Option<Resource> {
     if path == BASE {
@@ -77,6 +84,7 @@ pub fn recognize(path: &str) -> Option<Resource> {
         "mapping" => Resource::Mapping(id),
         "confirm" => Resource::Confirm(id),
         "cancel" => Resource::Cancel(id),
+        "abandon" => Resource::Abandon(id),
         _ => return None,
     })
 }
@@ -189,6 +197,15 @@ pub struct Snapshot {
     pub mapping: Option<MappingReview>,
     pub error: Option<String>,
     pub restart_required: bool,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ActiveJob {
+    pub id: String,
+    pub kind: Kind,
+    pub phase: Phase,
+    pub can_abandon: bool,
+    pub cancellation_requested: bool,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
@@ -312,6 +329,13 @@ pub fn status(revision: Revision, job: Snapshot) -> Result<Vec<u8>, ProtocolErro
     #[derive(Serialize)]
     struct Status {
         job: Snapshot,
+    }
+    super::admin::encode(revision, &Status { job })
+}
+pub fn active(revision: Revision, job: Option<ActiveJob>) -> Result<Vec<u8>, ProtocolError> {
+    #[derive(Serialize)]
+    struct Status {
+        job: Option<ActiveJob>,
     }
     super::admin::encode(revision, &Status { job })
 }

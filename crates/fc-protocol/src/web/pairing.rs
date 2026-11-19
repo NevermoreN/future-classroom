@@ -92,6 +92,27 @@ pub fn logout(bytes: &[u8]) -> Result<(), ProtocolError> {
     schema(dto.schema_version)
 }
 
+#[derive(Default, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum LogoutScope {
+    #[default]
+    Page,
+    Account,
+}
+
+pub fn logout_scope(bytes: &[u8]) -> Result<LogoutScope, ProtocolError> {
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase", deny_unknown_fields)]
+    struct Request {
+        schema_version: u16,
+        #[serde(default)]
+        scope: LogoutScope,
+    }
+    let dto: Request = bounded(bytes)?;
+    schema(dto.schema_version)?;
+    Ok(dto.scope)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

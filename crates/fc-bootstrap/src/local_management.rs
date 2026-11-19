@@ -28,8 +28,8 @@ pub fn about_url() -> Option<String> {
     (port != 0).then(|| format!("https://127.0.0.1:{port}/fc/#/about"))
 }
 
-/// The network owner publishes only after native bind/TLS readiness and clears
-/// before stopping admission. This does not grant application authorization.
+/// The network owner publishes after native TLS and application attachment,
+/// and clears before stopping admission. This grants no user authorization.
 pub(crate) fn publish(port: u16) {
     PORT.store(port, Ordering::Release);
 }

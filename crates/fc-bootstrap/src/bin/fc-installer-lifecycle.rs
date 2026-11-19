@@ -5,14 +5,17 @@
 #[cfg(windows)]
 fn main() {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
-    if let Err(error) = verify_source(&arguments) {
-        let _ = fc_windows::startup::show_startup_failure(&format!(
-            "无法验证未来教室官方安装源。\n错误：{error}\n请重新获取完整官方安装包；已有设置和资料不会因此删除。"
-        ));
-        std::process::exit(1603);
-    }
+    let release = match verify_source(&arguments) {
+        Ok(release) => release,
+        Err(error) => {
+            let _ = fc_windows::startup::show_startup_failure(&format!(
+                "无法验证未来教室官方安装源。\n错误：{error}\n请核对电脑日期，或重新获取完整官方安装包。已有设置和资料会保留。"
+            ));
+            std::process::exit(1603);
+        }
+    };
     let code =
-        fc_windows::installer_lifecycle::broker::run_entry(&arguments).unwrap_or_else(|error| {
+        fc_windows::installer_lifecycle::broker::run_entry(&arguments, release.as_ref()).unwrap_or_else(|error| {
             use fc_windows::installer_lifecycle::LifecycleError;
             if arguments.is_empty()
                 || matches!(arguments.as_slice(), [one] if one == "uninstall" || one == "maintenance")
@@ -25,7 +28,7 @@ fn main() {
                 LifecycleError::Busy | LifecycleError::GuardianRunning => 1618,
                 LifecycleError::Pending | LifecycleError::Unsettled => 1604,
                 LifecycleError::UpgradeProtocolUnsupported => 1638,
-                LifecycleError::ShellIntegration => 5104,
+                LifecycleError::ShellIntegration => fc_windows::installer_lifecycle::broker::SETUP_SHELL_INCOMPLETE,
                 _ => 1603,
             }
         });
@@ -35,7 +38,9 @@ fn main() {
 }
 
 #[cfg(windows)]
-fn verify_source(arguments: &[String]) -> Result<(), String> {
+fn verify_source(
+    arguments: &[String],
+) -> Result<Option<fc_protocol::update_release::ReleaseClaims>, String> {
     use fc_windows::installer_lifecycle;
     let map = |error| format!("{error:?}");
     let executable = std::env::current_exe().map_err(|error| error.to_string())?;
@@ -47,7 +52,7 @@ fn verify_source(arguments: &[String]) -> Result<(), String> {
     if !outer && !operation {
         // Original native begin/broker/guardian roles retain their closed
         // pinned-image grammar and are never authorized by public metadata.
-        return Ok(());
+        return Ok(None);
     }
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -64,7 +69,7 @@ fn verify_source(arguments: &[String]) -> Result<(), String> {
         // The already released four-member coordinator cannot provide a v4
         // carrier. It retains its original compiled/native sealed-source path;
         // this does not admit a new unsealed source or a network executable.
-        return Ok(());
+        return Ok(None);
     }
     let msi = directory.join("FutureClassroom.msi");
     fc_bootstrap::update_packages::verify_installer_distribution(
@@ -74,8 +79,8 @@ fn verify_source(arguments: &[String]) -> Result<(), String> {
         version.as_deref(),
         (!outer).then_some((executable.as_path(), msi.as_path())),
     )
-    .map_err(|error| error.to_string())?;
-    Ok(())
+    .map(Some)
+    .map_err(|error| error.to_string())
 }
 
 #[cfg(not(windows))]

@@ -49,6 +49,23 @@ describe('page-scoped username and password login', () => {
     expect(f.last().phase).toBe('error'); expect(f.token()).toBe(proof); await f.controller.connect()
     expect(f.last().phase).toBe('authenticated'); f.controller.dispose()
   })
+  it('retries only status while the local backend attaches and then resumes the same page', async () => {
+    vi.useFakeTimers()
+    const f = fixture(proof)
+    try {
+      f.api.status.mockRejectedValueOnce(new ApiError(503, 'STARTING'))
+      const ready = f.controller.connect()
+      await vi.advanceTimersByTimeAsync(0)
+      expect(f.last()).toEqual({ phase: 'checking', starting: true })
+      expect(f.token()).toBe(proof)
+      expect(f.api.resume).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(2000)
+      await ready
+      expect(f.last().phase).toBe('authenticated')
+      expect(f.api.resume).toHaveBeenCalledExactlyOnceWith(proof, expect.any(AbortSignal))
+      expect(f.api.login).not.toHaveBeenCalled()
+    } finally { f.controller.dispose(); vi.useRealTimers() }
+  })
   it('clears revoked credentials and returns to login', async () => {
     const f = fixture(proof); f.api.resume.mockRejectedValueOnce(new ApiError(401, 'UNAUTHORIZED')); await f.controller.connect()
     expect(f.last().phase).toBe('anonymous'); expect(f.token()).toBeUndefined(); f.controller.dispose()

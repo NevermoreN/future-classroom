@@ -5,7 +5,9 @@ mod crypto;
 mod paths;
 mod thread_exit;
 mod update_firewall;
-pub use update_firewall::{prepare_update_firewall, UpdateFirewallStatus};
+pub use update_firewall::{
+    prepare_teacher_firewall, prepare_update_firewall, UpdateFirewallStatus,
+};
 mod update_version;
 pub use autorun::{AutostartReadback, RunAtLogin, RunScope};
 pub use clock::CurrentClock;

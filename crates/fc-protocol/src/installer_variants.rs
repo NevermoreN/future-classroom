@@ -135,6 +135,43 @@ impl<'a> Package<'a> {
         }
         Ok(())
     }
+    /// Match the original source MSI digest from the signed predecessor claim.
+    /// Windows Installer may store a byte-different cache of the same MSI.
+    pub fn predecessor_variant(
+        &self,
+        version: &str,
+        product: &str,
+        source_msi_sha256: [u8; 32],
+    ) -> Result<Option<usize>, InvalidVariants> {
+        let digest: String = source_msi_sha256
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect();
+        let matches = |candidate_version: &str, candidate_product: &str, candidate_digest: &str| {
+            candidate_version == version
+                && candidate_product.eq_ignore_ascii_case(product)
+                && candidate_digest == digest
+        };
+        if matches(
+            &self.catalog.base_predecessor_version,
+            &self.catalog.base_predecessor_product,
+            &self.catalog.base_predecessor_msi_sha256,
+        ) {
+            return Ok(None);
+        }
+        self.catalog
+            .variants
+            .iter()
+            .position(|variant| {
+                matches(
+                    &variant.predecessor_version,
+                    &variant.predecessor_product,
+                    &variant.predecessor_msi_sha256,
+                )
+            })
+            .map(Some)
+            .ok_or(InvalidVariants)
+    }
     pub fn materialize(
         &self,
         index: usize,
@@ -221,8 +258,8 @@ mod tests {
             "base_predecessor_msi_sha256":"2".repeat(64),
         "base_setup":source(b"ab"),"base_msi":source(b"ab"),"variants":[{
             "package_code":"22222222-2222-2222-2222-222222222222",
-            "predecessor_version":"1.0.2",
-            "predecessor_product":"33333333-3333-3333-3333-333333333333",
+            "predecessor_version":"1.1.0",
+            "predecessor_product":"44444444-4444-4444-4444-444444444444",
             "predecessor_msi_sha256":"1".repeat(64),
             "setup":source(b"ab!"),"msi":source(b"ab!"),
             "setup_delta_bytes":patch.len(),"msi_delta_bytes":patch.len()
@@ -234,6 +271,24 @@ mod tests {
         raw.extend_from_slice(&patch);
         raw.extend_from_slice(&patch);
         raw
+    }
+    #[test]
+    fn different_exact_sources_with_the_same_version_and_product_select_distinct_pairs() {
+        let raw = fixture();
+        let package = Package::parse(&raw).unwrap();
+        let product = "44444444-4444-4444-4444-444444444444";
+        assert_eq!(
+            package.predecessor_variant("1.1.0", product, [0x22; 32]),
+            Ok(None)
+        );
+        assert_eq!(
+            package.predecessor_variant("1.1.0", product, [0x11; 32]),
+            Ok(Some(0))
+        );
+        assert_eq!(
+            package.predecessor_variant("1.1.0", product, [0x33; 32]),
+            Err(InvalidVariants)
+        );
     }
     #[test]
     fn reconstruct_exact_pair_and_reject_wrong_source_tamper_and_truncation() {

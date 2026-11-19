@@ -2,12 +2,15 @@
 //! teaching sessions, the database and the shared worker pool have stopped.
 use fc_domain::ids::{PrincipalId, Revision};
 use fc_ports::RandomPort;
-use fc_protocol::web::maintenance::{Kind, Phase, Snapshot};
+use fc_protocol::web::maintenance::{ActiveJob, Kind, Phase, Snapshot};
 use fc_security::web::{SecretText, SecretVerifier, WebSecret};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, Mutex,
 };
+use std::time::{Duration, Instant};
+
+const INPUT_WAIT_BUDGET: Duration = Duration::from_secs(30 * 60);
 
 #[cfg(windows)]
 mod windows;
@@ -32,6 +35,7 @@ struct Current {
     verifier: SecretVerifier,
     snapshot: Snapshot,
     cancelled: Arc<AtomicBool>,
+    input_deadline: Option<Instant>,
 }
 #[derive(Default)]
 struct State {
@@ -102,6 +106,7 @@ impl JobContext {
         current.snapshot.phase = phase;
         current.snapshot.can_cancel = phase.can_cancel();
         current.snapshot.cancellation_requested = current.cancelled.load(Ordering::Acquire);
+        current.input_deadline = phase.waiting_for_input().then(|| Instant::now() + INPUT_WAIT_BUDGET);
         if matches!(
             phase,
             Phase::Draining
@@ -128,6 +133,18 @@ impl JobContext {
             },
             |s| s.error = Some(error.chars().take(256).collect()),
         )
+    }
+    #[cfg(any(windows, test))]
+    pub(super) fn expire_waiting(&self, now: Instant) {
+        if let Ok(state) = self.control.0.lock() {
+            if let Some(current) = state.current.as_ref().filter(|v| v.id == self.id) {
+                if current.snapshot.phase.waiting_for_input()
+                    && current.input_deadline.is_some_and(|end| now >= end)
+                {
+                    current.cancelled.store(true, Ordering::Release);
+                }
+            }
+        }
     }
 }
 impl MaintenanceControl {
@@ -192,6 +209,7 @@ impl MaintenanceControl {
             verifier: secret.verifier(),
             snapshot: snapshot.clone(),
             cancelled: cancelled.clone(),
+            input_deadline: Some(Instant::now() + INPUT_WAIT_BUDGET),
         });
         Ok((
             CreatedJob {
@@ -219,6 +237,34 @@ impl MaintenanceControl {
         let mut snapshot = current.snapshot.clone();
         snapshot.cancellation_requested = current.cancelled.load(Ordering::Acquire);
         Ok(snapshot)
+    }
+    /// Caller has authenticated a current local installation administrator.
+    /// No operation proof or sensitive preflight results leave this route.
+    pub fn active_summary(&self) -> Result<Option<ActiveJob>> {
+        let state = self.0.lock().map_err(|_| MaintenanceError::Retained)?;
+        Ok(state.current.as_ref().filter(|v| !v.snapshot.phase.terminal()).map(|v| {
+            let cancelled = v.cancelled.load(Ordering::Acquire);
+            ActiveJob {
+                id: v.snapshot.id.clone(),
+                kind: v.snapshot.kind,
+                phase: v.snapshot.phase,
+                can_abandon: v.snapshot.phase.waiting_for_input() && !cancelled,
+                cancellation_requested: cancelled,
+            }
+        }))
+    }
+    pub fn abandon_waiting(&self, id: u64) -> Result<()> {
+        let state = self.0.lock().map_err(|_| MaintenanceError::Retained)?;
+        let current = state
+            .current
+            .as_ref()
+            .filter(|v| v.id == id)
+            .ok_or(MaintenanceError::Stale)?;
+        if !current.snapshot.phase.waiting_for_input() {
+            return Err(MaintenanceError::Conflict);
+        }
+        current.cancelled.store(true, Ordering::Release);
+        Ok(())
     }
     pub fn authorize(&self, id: u64, proof: &WebSecret, owner: PrincipalId) -> Result<JobContext> {
         let state = self.0.lock().map_err(|_| MaintenanceError::Retained)?;
@@ -285,6 +331,36 @@ mod tests {
             bytes.fill(self.0);
             Ok(())
         }
+    }
+    #[test]
+    fn abandoned_and_expired_waits_release_only_before_preparation() {
+        let control = MaintenanceControl::default();
+        let owner = PrincipalId::new(1).unwrap();
+        let mut random = Random(0);
+        let (first, job) = control
+            .begin(owner, Revision::new(1), Kind::Import, &mut random)
+            .unwrap();
+        job.update(Phase::ReadyForUpload, |_| {}).unwrap();
+        assert!(control.active_summary().unwrap().unwrap().can_abandon);
+        job.expire_waiting(Instant::now());
+        assert!(job.active());
+        job.expire_waiting(Instant::now() + INPUT_WAIT_BUDGET);
+        assert!(control.active_summary().unwrap().unwrap().cancellation_requested);
+        assert!(!job.active());
+        job.update(Phase::Cancelled, |_| {}).unwrap();
+        assert!(control.active_summary().unwrap().is_none());
+
+        let (next, job) = control
+            .begin(owner, Revision::new(1), Kind::Import, &mut random)
+            .unwrap();
+        job.update(Phase::Confirming, |_| {}).unwrap();
+        job.expire_waiting(Instant::now() + INPUT_WAIT_BUDGET);
+        assert_eq!(control.abandon_waiting(next.id), Err(MaintenanceError::Conflict));
+        assert_eq!(control.abandon_waiting(first.id), Err(MaintenanceError::Stale));
+        assert!(job.active());
+        job.update(Phase::ReviewReady, |_| {}).unwrap();
+        control.abandon_waiting(next.id).unwrap();
+        assert!(!job.active());
     }
     #[test]
     fn proof_is_job_scoped_and_replacement_revokes_the_old_context() {

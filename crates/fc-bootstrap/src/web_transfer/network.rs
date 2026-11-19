@@ -342,6 +342,7 @@ struct Core<E: HttpExecutor> {
     app: Weak<WebApplication>,
     local_app: Option<Weak<WebApplication>>,
     local_assets: Option<Arc<StaticAssets>>,
+    local_backend_starting: bool,
     hub: UploadHub,
     downloads: DownloadHub,
     static_assets: Option<Arc<StaticAssets>>,
@@ -429,6 +430,7 @@ where
             app,
             local_app: None,
             local_assets: None,
+            local_backend_starting: false,
             hub,
             downloads,
             static_assets: None,
@@ -518,6 +520,9 @@ where
         core.app = Arc::downgrade(app);
         core.local_app = Some(Arc::downgrade(app));
         Ok(())
+    }
+    pub(crate) fn set_local_backend_starting(&mut self, starting: bool) {
+        self.core_mut().local_backend_starting = starting;
     }
     /// Only the explicit OS repair bootstrap owns this independent capability.
     /// A repair host can never be attached to an ordinary teaching Backend.
@@ -888,10 +893,15 @@ impl<E: HttpExecutor> Core<E> {
             }
         }
         let Some((backend, app)) = self.composition(record) else {
-            self.send_response(
-                record,
-                error_response(503, responses::ErrorCode::ServiceUnavailable),
-            );
+            let code = if self.local_backend_starting
+                && record.scope == TlsListenerScope::LocalControl
+                && head.method == "GET"
+            {
+                responses::ErrorCode::Starting
+            } else {
+                responses::ErrorCode::ServiceUnavailable
+            };
+            self.send_response(record, error_response(503, code));
             return Ok(());
         };
         let task =

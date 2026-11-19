@@ -3685,13 +3685,15 @@ mod tests {
             .map(|card| card.surface.window.0)
             .collect();
         let visible = renderer.last_metrics().visible_windows;
+        let drawn = renderer.last_metrics().drawn_frames;
         assert!(visible > 0);
         for revision in 6..=9 {
+            let previous_guard = guard(&gate, scene.generation);
             let prepared = publisher
                 .prepare((), Revision::new(revision), AuthEpoch::new(1))
                 .unwrap();
             let update = publisher.begin_update_preserving_desktop().unwrap();
-            assert!(scene_allowed(&scene, now, &first));
+            assert!(scene_allowed(&scene, now, &previous_guard));
             assert!(gate
                 .try_start(
                     first.lease,
@@ -3704,10 +3706,14 @@ mod tests {
             publisher.publish(update, prepared).unwrap();
             scene.source_revision = Revision::new(revision);
             renderer.adopt_voice_revision(&scene, &gate);
+            let previous = scene.generation;
+            scene.generation = previous.next().unwrap();
+            renderer.renew_input_generation(previous, scene.generation);
             renderer
                 .present(&scene, now, &guard(&gate, scene.generation))
                 .unwrap();
             assert_eq!(renderer.last_metrics().visible_windows, visible);
+            assert_eq!(renderer.last_metrics().drawn_frames, drawn);
             assert_eq!(
                 renderer
                     .cards
@@ -3717,9 +3723,10 @@ mod tests {
                 handles
             );
         }
+        let current = guard(&gate, scene.generation);
         let _update = publisher.begin_update().unwrap();
         assert_eq!(
-            renderer.present(&scene, now, &first).unwrap(),
+            renderer.present(&scene, now, &current).unwrap(),
             PresentOutcome::Hidden
         );
         assert_eq!(renderer.last_metrics().visible_windows, 0);

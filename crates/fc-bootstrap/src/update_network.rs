@@ -221,6 +221,7 @@ impl NetworkControl {
         s.candidates.clear();
         s.nonce = None;
         s.requested = None;
+        s.listener_ready = false;
         Ok(())
     }
     pub fn publish(&self, repository: Option<PublishedRepository>) -> Result<(), String> {
@@ -234,6 +235,9 @@ impl NetworkControl {
                 p.checked = None;
             }
         }
+    }
+    pub(crate) fn listener_ready(&self) -> bool {
+        self.0.lock().is_ok_and(|state| state.listener_ready)
     }
     pub fn request_blob(&self, peer: Peer, target: VerifiedTarget) -> Result<(), String> {
         if !peer.address.is_private()

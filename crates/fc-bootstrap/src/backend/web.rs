@@ -19,6 +19,7 @@ pub(crate) use runtime::WebRuntimeReservation;
 pub const PAIR_WINDOW_MILLIS: u64 = 120_000;
 pub const MAX_PAIR_REQUESTS: usize = 8;
 pub const MAX_WEB_DEVICES: usize = 64;
+const MAX_REVOKED_PAGES: usize = 4096;
 pub const WEB_SESSION_MILLIS: u64 = 28_800_000;
 const PAIR_ATTEMPTS: u32 = 10;
 const COOKIE_NAME: &str = "__Host-FutureClassroom";
@@ -62,6 +63,7 @@ impl Backend {
             CommandFamily::Identity
                 | CommandFamily::Display
                 | CommandFamily::Schedule
+                | CommandFamily::Calendar
                 | CommandFamily::Profiles
                 | CommandFamily::ProfileContent
                 | CommandFamily::Voice
@@ -308,10 +310,16 @@ struct PageSession {
     lease: SessionLease,
     last_used: u64,
 }
+struct RevokedPage {
+    verifier: SecretVerifier,
+    principal: PrincipalId,
+    epoch: AuthEpoch,
+}
 #[derive(Default)]
 struct State {
     page_key: Option<PageKey>,
     pages: Vec<PageSession>,
+    revoked_pages: Vec<RevokedPage>,
     enabled: bool,
     sequence: u64,
     last_tick: Option<u64>,
@@ -333,13 +341,17 @@ impl State {
         self.window = None;
         self.requests.clear();
     }
+    fn clear_pages(&mut self) {
+        self.pages.clear();
+        self.revoked_pages.clear();
+        self.page_key = None;
+    }
     fn tick(&mut self, tick: u64) -> WebResult<()> {
         if self.last_tick.is_some_and(|last| tick < last) {
             self.enabled = false;
             self.clear_pairing();
             self.devices.clear();
-            self.pages.clear();
-            self.page_key = None;
+            self.clear_pages();
             return Err(WebServiceError::Denied);
         }
         self.last_tick = Some(tick);
@@ -702,8 +714,7 @@ impl WebService {
             state.enabled = false;
             state.clear_pairing();
             state.devices.clear();
-            state.pages.clear();
-            state.page_key = None;
+            state.clear_pages();
             ledger.sessions.revoke_web();
         }
         if let Err(error) = state.tick(tick) {
@@ -828,8 +839,7 @@ impl WebService {
         if !enabled {
             state.clear_pairing();
             state.devices.clear();
-            state.pages.clear();
-            state.page_key = None;
+            state.clear_pages();
             ledger.sessions.revoke_web();
         }
         Ok(())
@@ -839,8 +849,7 @@ impl WebService {
             state.enabled = false;
             state.clear_pairing();
             state.devices.clear();
-            state.pages.clear();
-            state.page_key = None;
+            state.clear_pages();
             if let Ok(mut ledger) = self.inner.ledger.lock() {
                 ledger.sessions.revoke_web();
             }
@@ -1551,10 +1560,16 @@ impl WebService {
             .data
             .account(id)
             .map_err(|_| WebServiceError::Denied)?;
+        let verifier = proof.verifier();
         if !account.principal.enabled
             || account.principal.auth_epoch.get() != epoch
             || Some(account.principal.school_id)
                 != snapshot.data.installation.as_ref().map(|i| i.school_id)
+            || state.revoked_pages.iter().any(|page| {
+                page.principal == id
+                    && page.epoch == account.principal.auth_epoch
+                    && verifier.matches(&page.verifier)
+            })
         {
             return Err(WebServiceError::Denied);
         }
@@ -1570,7 +1585,7 @@ impl WebService {
         let lease = if let Some(page) = state
             .pages
             .iter_mut()
-            .find(|page| proof.matches(&page.verifier))
+            .find(|page| verifier.matches(&page.verifier))
         {
             page.last_used = tick;
             if ledger
@@ -1612,7 +1627,7 @@ impl WebService {
                 )
                 .map_err(|_| WebServiceError::Capacity)?;
             state.pages.push(PageSession {
-                verifier: proof.verifier(),
+                verifier,
                 lease,
                 last_used: tick,
             });
@@ -1634,6 +1649,67 @@ impl WebService {
                 .as_ref()
                 .and_then(|i| i.current_class),
         })
+    }
+
+    /// Revoke the authenticated browser grant, including attempts to resume it
+    /// after its access lease expires. Other grants and the account epoch stay live.
+    pub(crate) fn logout_session(&self, lease: SessionLease) -> WebResult<()> {
+        let snapshot = self.snapshot()?;
+        let mut state = self
+            .inner
+            .state
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        let mut ledger = self
+            .inner
+            .ledger
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        let tick = self.inner.monotonic.monotonic_millis();
+        self.current(&snapshot)?;
+        self.sweep(&mut state, &mut ledger, &snapshot.data, tick)?;
+        let (principal, epoch) = {
+            let actor = ledger
+                .sessions
+                .actor(
+                    &snapshot.data,
+                    lease,
+                    self.inner.clock.now(),
+                    tick,
+                    SessionPurpose::ChangeInitialPassword,
+                )
+                .map_err(|_| WebServiceError::Denied)?;
+            (actor.principal_id, actor.auth_epoch)
+        };
+        self.current(&snapshot)?;
+        if let Some(index) = state.pages.iter().position(|page| page.lease == lease) {
+            state.revoked_pages.retain(|page| {
+                snapshot.data.account(page.principal).is_ok_and(|account| {
+                    account.principal.enabled && account.principal.auth_epoch == page.epoch
+                })
+            });
+            // A signed proof has no idle expiry. Never evict a current
+            // revocation or silently rotate the grants of other users.
+            if state.revoked_pages.len() >= MAX_REVOKED_PAGES {
+                return Err(WebServiceError::Capacity);
+            }
+            let page = state.pages.swap_remove(index);
+            state.revoked_pages.push(RevokedPage {
+                verifier: page.verifier,
+                principal,
+                epoch,
+            });
+        } else if let Some(index) = state
+            .devices
+            .iter()
+            .position(|device| device.lease == lease)
+        {
+            state.devices.swap_remove(index);
+        } else {
+            return Err(WebServiceError::Denied);
+        }
+        ledger.sessions.revoke_exact(lease);
+        Ok(())
     }
 
     pub fn authenticate(&self, cookie: &WebSecret) -> WebResult<AuthenticatedWeb> {

@@ -3,6 +3,7 @@ use crate::{ProtocolError, SCHEMA_VERSION};
 use fc_domain::ids::Revision;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 pub mod account_security;
+pub mod calendar;
 pub mod display;
 pub mod identity;
 pub mod images;
@@ -21,6 +22,8 @@ pub enum Resource {
     AccountSecurity,
     Display,
     Schedule,
+    Calendar { year: i32 },
+    CalendarPreview,
     Layout,
     Network,
     Autostart,
@@ -59,6 +62,12 @@ impl Resource {
     pub fn path(path: &str) -> Option<Self> {
         if path == "preview/source" {
             return Some(Self::PreviewSource);
+        }
+        if path == "calendar/preview" {
+            return Some(Self::CalendarPreview);
+        }
+        if let Some(year) = path.strip_prefix("calendar/") {
+            return Some(Self::Calendar { year: calendar::year(year)? });
         }
         if let Some(path) = path.strip_prefix("preview/") {
             if path == "public" {

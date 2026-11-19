@@ -311,6 +311,52 @@ impl TlsHttpHost {
     pub fn lan_error(&self) -> Option<ConfiguredTlsError> {
         self.owner.lan_error
     }
+    /// Check a candidate without disturbing the native listener. A same-address
+    /// change is checked by the real switch after the prior socket is returned.
+    pub fn preflight_lan(
+        configuration: &fc_domain::https_settings::HttpsConfiguration,
+        previous: Option<&fc_domain::https_settings::HttpsConfiguration>,
+    ) -> Result<(), ConfiguredTlsError> {
+        let address = configured::endpoint(configuration)?;
+        if address.ip().is_loopback() {
+            return Err(ConfiguredTlsError::UnsupportedAddress);
+        }
+        super::super::verify_listener_certificate(
+            configuration.certificate,
+            configuration.host.as_str(),
+        )?;
+        if previous.and_then(|prior| configured::endpoint(prior).ok()) == Some(address) {
+            return Ok(());
+        }
+        // The process-owned HTTPS domain has initialized Winsock. This short
+        // address check owns a single socket which never listens or accepts.
+        let family = if address.is_ipv4() { AF_INET } else { AF_INET6 };
+        let mut socket = unsafe {
+            WSASocketW(
+                family.0 as i32,
+                SOCK_STREAM.0,
+                IPPROTO_TCP.0,
+                None,
+                0,
+                WSA_FLAG_NO_HANDLE_INHERIT,
+            )
+        }
+        .map_err(|_| ConfiguredTlsError::Native)?;
+        let result = unsafe {
+            check(
+                setsockopt(
+                    socket,
+                    SOL_SOCKET,
+                    SO_EXCLUSIVEADDRUSE,
+                    Some(&1i32.to_ne_bytes()),
+                ),
+                "LAN preflight exclusive bind",
+            )
+        }
+        .and_then(|()| configured::bind_exact(socket, address));
+        close(&mut socket, false).map_err(|_| ConfiguredTlsError::Cleanup)?;
+        result.map_err(|_| ConfiguredTlsError::AddressUnavailable)
+    }
     pub fn configure_lan(
         &mut self,
         configuration: Option<&fc_domain::https_settings::HttpsConfiguration>,

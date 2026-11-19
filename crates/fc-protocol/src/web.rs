@@ -143,6 +143,7 @@ impl Route {
             } => AllowedMethods::Get,
             Self::Repair { .. } => AllowedMethods::Post,
             Self::Maintenance { resource, .. } => match resource {
+                maintenance::Resource::Jobs => AllowedMethods::GetPost,
                 maintenance::Resource::Job(_) | maintenance::Resource::File(_) => {
                     AllowedMethods::Get
                 }
@@ -159,6 +160,7 @@ impl Route {
             Self::Admin {
                 resource:
                     admin::Resource::AccountSecurity
+                    | admin::Resource::CalendarPreview
                     | admin::Resource::Preview { .. }
                     | admin::Resource::ImageManifest { .. }
                     | admin::Resource::ImageBytes { .. }
@@ -381,14 +383,15 @@ impl WebBoundary {
                 {
                     let resource = maintenance::recognize(&format!("/fc/api/v1/{path}"))
                         .ok_or(WebError::NotFound)?;
-                    let write = !matches!(
-                        resource,
-                        maintenance::Resource::Job(_) | maintenance::Resource::File(_)
-                    );
-                    if (method == "POST") != write {
+                    let write = method == "POST";
+                    let route = Route::Maintenance { resource, write };
+                    if matches!(
+                        (route.allowed_methods(), write),
+                        (AllowedMethods::Get, true) | (AllowedMethods::Post, false)
+                    ) {
                         return Err(WebError::Method);
                     }
-                    Route::Maintenance { resource, write }
+                    route
                 } else if let Some(path) = path.strip_prefix("admin/") {
                     let resource = admin::Resource::path(path).ok_or(WebError::NotFound)?;
                     let route = Route::Admin {
@@ -915,6 +918,10 @@ mod tests {
             ("pairing/requests/1/poll", AllowedMethods::Post),
             ("session", AllowedMethods::Get),
             ("session/logout", AllowedMethods::Post),
+            ("admin/maintenance/jobs", AllowedMethods::GetPost),
+            ("admin/maintenance/jobs/1/abandon", AllowedMethods::Post),
+            ("admin/calendar/2026", AllowedMethods::GetPost),
+            ("admin/calendar/preview", AllowedMethods::Post),
             ("content/homework/scopes/0", AllowedMethods::Get),
             ("content/reminders/scopes/0", AllowedMethods::Get),
             ("content/homework/1/2/3/2026-10-30", AllowedMethods::GetPost),

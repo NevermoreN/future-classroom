@@ -366,7 +366,10 @@ fn run_install(identity: &InstallIdentity, file: &mut File, record: &mut Record)
     // A failed wait cannot establish installation failure or physical return;
     // preserve Installing for native reconciliation rather than replaying it.
     let status = child.wait()?;
-    if !status.success() {
+    // A verified Setup may have committed the MSI even if optional Shell
+    // integration failed. Only independent target verification can proceed.
+    if !status.success() && status.code() != Some(lifecycle::broker::SETUP_SHELL_INCOMPLETE as i32)
+    {
         record.state = HandoffState::Failed;
         write_record(file, record)?;
         return Err(UpdateInstallError::SetupFailed(

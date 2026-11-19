@@ -69,6 +69,7 @@ pub(super) struct Native {
     candidate: Option<Candidate>,
     seed_candidate: Option<Candidate>,
     transport: Option<(HttpsConfiguration, [u8; 32])>,
+    next_address_check: Option<Instant>,
     handoff: bool,
     restored: bool,
     restored_installer: bool,
@@ -237,6 +238,7 @@ impl UpdateControl {
                 candidate: None,
                 seed_candidate: None,
                 transport: None,
+                next_address_check: None,
                 handoff: false,
                 restored: false,
                 restored_installer: false,
@@ -549,18 +551,24 @@ impl Native {
         &mut self,
         control: &UpdateControl,
         policy: &UpdatePolicy,
+        check_now: bool,
         cancelled: &dyn Fn() -> bool,
     ) -> Result<(), String> {
-        if self.policy.as_ref() == Some(policy) {
+        let policy_changed = self.policy.as_ref() != Some(policy);
+        let now = Instant::now();
+        if !policy_changed
+            && (!policy.participation_enabled()
+                || (!check_now && self.next_address_check.is_some_and(|due| now < due)))
+        {
             return Ok(());
         }
-        // A failed private-group restore must not retain the previous public
-        // LAN configuration (or another private group's configuration).
-        control.network.set_configuration(None)?;
-        control.network.publish(None)?;
-        self.candidate = None;
-        self.restored = false;
-        {
+        if policy_changed {
+            // Never keep serving another school's (or the public) update scope
+            // after a policy change, even if restoration of the new one fails.
+            control.network.set_configuration(None)?;
+            control.network.publish(None)?;
+            self.candidate = None;
+            self.restored = false;
             let mut state = control.inner.lock().map_err(err)?;
             state.status.automatic_updates = policy.enabled
                 && policy.download
@@ -574,35 +582,51 @@ impl Native {
             self.policy = Some(policy.clone());
             return self.notice(control, "disabled", "自动更新已关闭。");
         }
-        if policy.share {
+        self.next_address_check = Some(now + Duration::from_secs(15));
+        let sharing_before = self.firewall.as_ref().is_some_and(|(allowed, _)| *allowed);
+        if policy.share && (policy_changed || !sharing_before) {
             let status = fc_windows::system::prepare_update_firewall();
             self.firewall = Some((status.can_share(), status.message().to_string()));
+        }
+        use fc_windows::tls_frontdoor::{
+            certificate_der_sha256, certificate_provision as certificates, CertificateThumbprint,
+        };
+        let Some(address) = certificates::preferred_private_ipv4().map_err(err)? else {
+            if self.transport.take().is_some() {
+                control.network.set_configuration(None)?;
+            }
+            self.policy = Some(policy.clone());
+            return self.notice(control, "discovering", "正在等待可用的校园网 IPv4 地址。");
+        };
+        let host = address.to_string();
+        let same_address = self
+            .transport
+            .as_ref()
+            .is_some_and(|(listener, _)| listener.host.as_str() == host);
+        let sharing_allowed = self.firewall.as_ref().is_some_and(|(allowed, _)| *allowed);
+        if !policy_changed
+            && same_address
+            && sharing_before == sharing_allowed
+            && (!policy.share || !sharing_allowed || control.network.listener_ready())
+        {
+            return Ok(());
+        }
+        if !same_address && self.transport.take().is_some() {
+            control.network.set_configuration(None)?;
         }
         let auth = Arc::new(match policy.group_id {
             Some(group) => restore_private_group(&self.root, group)?,
             None => UpdateGroupKey::public_lan(),
         });
         if self.transport.is_none() {
-            use fc_windows::tls_frontdoor::{
-                certificate_der_sha256, certificate_provision as certificates,
-                CertificateThumbprint,
-            };
-            let hosts = certificates::local_certificate_hosts().map_err(err)?;
-            let host = hosts
-                .iter()
-                .find(|s| {
-                    s.parse::<std::net::Ipv4Addr>()
-                        .is_ok_and(|ip| ip.is_private())
-                })
-                .ok_or("未找到校园网IPv4地址。")?;
             let certificate =
-                certificates::provision_ip_certificate(host, || !cancelled()).map_err(err)?;
+                certificates::provision_ip_certificate(&host, || !cancelled()).map_err(err)?;
             let pin = certificate_der_sha256(
                 CertificateThumbprint::parse(&certificate.thumbprint).map_err(err)?,
             )
             .map_err(err)?;
             let listener = HttpsConfiguration::new(
-                HttpsHost::parse(host).map_err(err)?,
+                HttpsHost::parse(&host).map_err(err)?,
                 8445,
                 HttpsCertificateRef::parse(&certificate.thumbprint).map_err(err)?,
             )
@@ -623,7 +647,7 @@ impl Native {
                 certificate_sha256: *pin,
                 seeds: Vec::new(),
                 download: policy.download,
-                share: policy.share && self.firewall.as_ref().is_some_and(|(allowed, _)| *allowed),
+                share: policy.share && sharing_allowed,
             }))?;
         self.policy = Some(policy.clone());
         self.notice(control, "discovering", "正在查找学校内网中的可信更新。")
@@ -730,7 +754,6 @@ impl Native {
             self.recover_staging(&state, cancelled)?;
             self.recovered_staging = true;
         }
-        self.configure(control, &state.policy, cancelled)?;
         if self.handoff {
             return Ok(UpdateTick::Idle);
         }
@@ -738,6 +761,7 @@ impl Native {
             let mut state = control.inner.lock().map_err(err)?;
             std::mem::take(&mut state.check)
         };
+        self.configure(control, &state.policy, check, cancelled)?;
         if check {
             control.network.check_now();
         }
@@ -972,7 +996,8 @@ impl Native {
                     cancelled,
                 )
                 .map_err(err)?;
-                installer_lifecycle::materialize_installer_source(&directory).map_err(err)?;
+                installer_lifecycle::materialize_installer_source(&directory, &claims)
+                    .map_err(err)?;
                 let facts = installer_lifecycle::inspect_update_sources(&directory).map_err(err)?;
                 if !claims.allowed_predecessors.contains(&facts.predecessor) {
                     return Err("更新包的升级前驱与签名声明不一致。".into());

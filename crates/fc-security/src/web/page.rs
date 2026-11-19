@@ -94,7 +94,6 @@ impl PageToken {
         SecretVerifier(bytes)
     }
     pub fn matches(&self, verifier: &SecretVerifier) -> bool {
-        use subtle::ConstantTimeEq;
-        bool::from(self.verifier().0[..].ct_eq(&verifier.0[..]))
+        self.verifier().matches(verifier)
     }
 }

@@ -18,11 +18,13 @@ pub struct MaintenanceRequest {
 }
 enum Action {
     Create(wire::Create),
+    Active,
     Status(u64, WebSecret),
     Preflight(u64, WebSecret),
     Mapping(u64, WebSecret, wire::Mapping),
     Confirm(u64, WebSecret, wire::Confirm),
     Cancel(u64, WebSecret),
+    Abandon(u64, Box<OrdinaryBackupAccess>),
 }
 pub struct MaintenanceTransfer {
     pub lease: SessionLease,
@@ -76,6 +78,8 @@ impl WebApplication {
         let revision = backend.global_revision().map_err(admin::backend_error)?;
         let invalid = || failure(400, responses::ErrorCode::InvalidRequest);
         let action = match resource {
+            Resource::Jobs if matches!(route, Route::Maintenance { write: false, .. })
+                && body.is_empty() => Action::Active,
             Resource::Jobs => {
                 let create = wire::Create::decode(body).map_err(|_| invalid())?;
                 if create.revision().map_err(|_| invalid())? != revision {
@@ -101,6 +105,13 @@ impl WebApplication {
             Resource::Cancel(id) => {
                 wire::empty_action(body).map_err(|_| invalid())?;
                 Action::Cancel(id, proof(head)?)
+            }
+            Resource::Abandon(id) => {
+                wire::empty_action(body).map_err(|_| invalid())?;
+                let access = backend
+                    .ordinary_backup_access(lease, revision)
+                    .map_err(admin::backend_error)?;
+                Action::Abandon(id, Box::new(access))
             }
             _ => return Err(invalid()),
         };
@@ -150,6 +161,7 @@ impl MaintenanceRequest {
                     Err(e) => error_response(e),
                 }
             }
+            Action::Active => return active_response(revision, service.control.active_summary()),
             Action::Status(id, proof) => service
                 .context(id, &proof, self.lease)
                 .and_then(|_| service.control.snapshot(id, &proof)),
@@ -166,6 +178,16 @@ impl MaintenanceRequest {
                 .context(id, &proof, self.lease)
                 .and_then(|_| service.control.cancel(id, &proof))
                 .and_then(|_| service.control.snapshot(id, &proof)),
+            Action::Abandon(id, access) => {
+                if let Err(error) = access.check_session() {
+                    return admin::backend_error(error);
+                }
+                return active_response(
+                    revision,
+                    service.control.abandon_waiting(id)
+                        .and_then(|_| service.control.active_summary()),
+                );
+            }
         };
         snapshot_response(revision, result)
     }
@@ -216,6 +238,12 @@ fn snapshot_response(revision: Revision, result: jobs::Result<wire::Snapshot>) -
     match result {
         Ok(job) => admin::data_response(wire::status(revision, job)),
         Err(e) => error_response(e),
+    }
+}
+fn active_response(revision: Revision, result: jobs::Result<Option<wire::ActiveJob>>) -> WebResponse {
+    match result {
+        Ok(job) => admin::data_response(wire::active(revision, job)),
+        Err(error) => error_response(error),
     }
 }
 pub fn error_response(error: MaintenanceError) -> WebResponse {

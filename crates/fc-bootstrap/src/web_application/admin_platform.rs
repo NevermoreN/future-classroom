@@ -81,5 +81,6 @@ pub(crate) fn response(result: Result<PlatformReply, PlatformError>) -> WebRespo
         Err(PlatformError::Invalid) => failure(400, responses::ErrorCode::InvalidRequest),
         Err(PlatformError::Conflict) => failure(409, responses::ErrorCode::RevisionConflict),
         Err(PlatformError::Unavailable) => failure(503, responses::ErrorCode::ServiceUnavailable),
+        Err(PlatformError::ResultUnknown) => failure(503, responses::ErrorCode::ResultUnknown),
     }
 }

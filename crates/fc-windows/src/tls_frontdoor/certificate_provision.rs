@@ -7,12 +7,19 @@ mod local_hosts;
 pub fn local_certificate_hosts() -> Result<Vec<String>, CertificateProvisionError> {
     #[cfg(windows)]
     {
-        local_hosts::enumerate()
+        local_hosts::enumerate().map(|(hosts, _)| hosts)
     }
     #[cfg(not(windows))]
     {
         Err(CertificateProvisionError::Unavailable)
     }
+}
+
+/// Preferred assigned RFC1918 address, based on the up interfaces, IPv4
+/// gateways and Windows interface metric. No network probes are sent.
+#[cfg(windows)]
+pub fn preferred_private_ipv4() -> Result<Option<std::net::Ipv4Addr>, CertificateProvisionError> {
+    local_hosts::enumerate().map(|(_, preferred)| preferred)
 }
 
 #[derive(Debug, PartialEq, Eq)]

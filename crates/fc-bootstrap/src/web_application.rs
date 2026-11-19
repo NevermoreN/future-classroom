@@ -648,13 +648,22 @@ impl WebApplication {
                 }
             }
             Route::SessionLogout => {
-                if pairing::logout(body).is_err() {
+                let Ok(scope) = pairing::logout_scope(body) else {
                     return failure(400, responses::ErrorCode::InvalidRequest);
-                }
+                };
                 let Some(session) = authenticated else {
                     return failure(401, responses::ErrorCode::Unauthorized);
                 };
-                match backend.logout_web_page(session.lease()) {
+                let result = match scope {
+                    pairing::LogoutScope::Page => self
+                        .service
+                        .logout_session(session.lease())
+                        .map_err(authentication_error),
+                    pairing::LogoutScope::Account => backend
+                        .logout_web_page(session.lease())
+                        .map_err(|_| failure(503, responses::ErrorCode::ResultUnknown)),
+                };
+                match result {
                     Ok(()) => {
                         self.retire_update_uploads(session.lease());
                         response(
@@ -666,7 +675,7 @@ impl WebApplication {
                             }),
                         )
                     }
-                    Err(_) => failure(503, responses::ErrorCode::ResultUnknown),
+                    Err(error) => error,
                 }
             }
             Route::VoiceCapabilities

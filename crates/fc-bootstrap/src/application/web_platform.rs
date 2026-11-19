@@ -55,6 +55,8 @@ pub(super) fn hook(
                     })
                 };
                 row("局域网自动发现", control.discovery_state().into());
+                row("校园教师入口", control.lan_notice().into());
+                row("校园入站规则", control.firewall_notice().into());
                 if !desktop_notice.is_empty() {
                     row("桌面显示提示", desktop_notice);
                 }
@@ -171,6 +173,9 @@ pub(super) fn hook(
                 expected_revision,
                 change,
             } => {
+                let mut edit = control
+                    .begin_lan_edit()
+                    .map_err(|_| PlatformError::Unavailable)?;
                 let current = backend
                     .lock()
                     .map_err(|_| PlatformError::Unavailable)?
@@ -181,47 +186,57 @@ pub(super) fn hook(
                 }
                 match change {
                     dto::NetworkChange::Stop => {
+                        control.set_automatic_lan(false);
                         let authority = Arc::new(move || service.web_session_current(lease));
                         control
                             .configure_lan(None, None, None, context, authority)
                             .map_err(|_| PlatformError::Unavailable)?
                             .wait_in_job(context)
                             .map_err(|_| PlatformError::Unavailable)?;
+                        control.set_lan_notice("本次运行已手动关闭校园入口");
                     }
                     dto::NetworkChange::Start => {
+                        control.set_automatic_lan(true);
                         let configuration = control
                             .startup_configuration()
                             .or(current.settings.configuration)
-                            .ok_or(PlatformError::Invalid)?;
-                        let prefix = fc_ports::http::ListenPrefix::https(&format!(
-                            "{}/fc/",
-                            configuration.origin()
-                        ))
-                        .map_err(|_| PlatformError::Invalid)?;
-                        let original = app
-                            .get()
-                            .and_then(Weak::upgrade)
-                            .ok_or(PlatformError::Unavailable)?;
-                        let lan = Arc::new(
-                            original
-                                .lan_variant(&prefix)
-                                .map_err(|_| PlatformError::Invalid)?,
-                        );
-                        let assets = control
-                            .assets_for_prefix(&prefix)
-                            .map_err(|_| PlatformError::Unavailable)?;
-                        let authority = Arc::new(move || service.web_session_current(lease));
-                        control
-                            .configure_lan(
-                                Some(configuration),
-                                Some(lan),
-                                Some(assets),
-                                context,
-                                authority,
-                            )
-                            .map_err(|_| PlatformError::Unavailable)?
-                            .wait_in_job(context)
-                            .map_err(|_| PlatformError::Unavailable)?;
+                            .filter(|cfg| {
+                                !cfg.host
+                                    .as_str()
+                                    .parse::<std::net::IpAddr>()
+                                    .is_ok_and(|ip| ip.is_loopback())
+                            });
+                        if let Some(configuration) = configuration {
+                            if control.live_lan_configuration().as_ref() != Some(&configuration) {
+                                let original = app
+                                    .get()
+                                    .and_then(Weak::upgrade)
+                                    .ok_or(PlatformError::Unavailable)?;
+                                let (lan, assets) = local_web_controller::lan_resources(
+                                    &original,
+                                    &control,
+                                    &configuration,
+                                )
+                                .map_err(|_| PlatformError::Unavailable)?;
+                                control
+                                    .configure_lan(
+                                        Some(configuration.clone()),
+                                        Some(lan),
+                                        Some(assets),
+                                        context,
+                                        Arc::new(move || service.web_session_current(lease)),
+                                    )
+                                    .and_then(|ticket| ticket.wait_in_job(context))
+                                    .map_err(|_| PlatformError::Unavailable)?;
+                                local_web_controller::prepare_teacher_firewall(
+                                    &control,
+                                    configuration.port,
+                                );
+                                control.set_lan_notice("校园HTTPS监听已就绪");
+                            }
+                        } else {
+                            control.set_lan_notice("正在准备校园入口");
+                        }
                     }
                     change => {
                         let (host, port, certificate, networks) = match change {
@@ -233,18 +248,19 @@ pub(super) fn hook(
                                 value.source_networks,
                             ),
                             dto::NetworkChange::Generate(value) => {
-                                // The startup owner already generated/trusted one
-                                // per-installation certificate for actual local IPs.
-                                let hosts=fc_windows::tls_frontdoor::certificate_provision::local_certificate_hosts().map_err(|_|PlatformError::Unavailable)?;
+                                let hosts = fc_windows::tls_frontdoor::certificate_provision::local_certificate_hosts()
+                                    .map_err(|_| PlatformError::Unavailable)?;
                                 if !hosts.contains(&value.host) {
                                     return Err(PlatformError::Invalid);
                                 }
-                                (
-                                    value.host,
-                                    value.port,
-                                    control.certificate(),
-                                    value.source_networks,
-                                )
+                                let certificate =
+                                    local_web_controller::provision_teacher_certificate(
+                                        &value.host,
+                                        context,
+                                        || service.web_session_current(lease),
+                                    )
+                                    .map_err(|_| PlatformError::Unavailable)?;
+                                (value.host, value.port, certificate, value.source_networks)
                             }
                             _ => return Err(PlatformError::Invalid),
                         };
@@ -257,77 +273,56 @@ pub(super) fn hook(
                         )
                         .map_err(|_| PlatformError::Invalid)?
                         .with_source_networks(policy);
-                        let resume_lan = control.lan_status().phase
-                            == fc_windows::tls_frontdoor::LanListenerPhase::Listening;
-                        if resume_lan {
-                            let service = service.clone();
-                            control
-                                .configure_lan(
-                                    None,
-                                    None,
-                                    None,
-                                    context,
-                                    Arc::new(move || service.web_session_current(lease)),
-                                )
-                                .map_err(|_| PlatformError::Unavailable)?
-                                .wait_in_job(context)
-                                .map_err(|_| PlatformError::Unavailable)?;
-                        }
-                        context
-                            .checkpoint()
-                            .map_err(|_| PlatformError::Unavailable)?;
-                        let mut value = backend.lock().map_err(|_| PlatformError::Unavailable)?;
-                        let issued = value
-                            .issue_for_web_admin(
-                                lease,
-                                fc_ports::command_window::CommandFamily::HttpsSettings,
-                            )
-                            .map_err(map_backend)?;
-                        let mut scoped = value.begin_command_scope(issued).map_err(map_backend)?;
-                        let command_id = scoped.issued_command_id().map_err(map_backend)?;
-                        scoped
-                            .save_https_settings(
-                                lease,
-                                fc_ports::HttpsSettingsRequest {
-                                    command_id,
-                                    expected_revision,
-                                    expected_identity_revision: current.identity_revision,
-                                    configuration: Some(configuration.clone()),
-                                },
-                            )
-                            .map_err(map_backend)?;
-                        drop(scoped);
-                        drop(value);
-                        control.remember_startup_configuration(configuration.clone());
-                        if resume_lan {
-                            let prefix = fc_ports::http::ListenPrefix::https(&format!(
-                                "{}/fc/",
-                                configuration.origin()
-                            ))
-                            .map_err(|_| PlatformError::Invalid)?;
+                        let previous = control.live_lan_configuration();
+                        fc_windows::tls_frontdoor::TlsHttpHost::preflight_lan(
+                            &configuration,
+                            previous.as_ref(),
+                        )
+                        .map_err(|_| PlatformError::Invalid)?;
+                        if let Some(prior) = &previous {
                             let original = app
                                 .get()
                                 .and_then(Weak::upgrade)
                                 .ok_or(PlatformError::Unavailable)?;
-                            let lan = Arc::new(
-                                original
-                                    .lan_variant(&prefix)
-                                    .map_err(|_| PlatformError::Invalid)?,
+                            let (lan, assets) = local_web_controller::lan_resources(
+                                &original,
+                                &control,
+                                &configuration,
+                            )
+                            .map_err(|_| PlatformError::Invalid)?;
+                            let (prior_lan, prior_assets) =
+                                local_web_controller::lan_resources(&original, &control, prior)
+                                    .map_err(|_| PlatformError::Unavailable)?;
+                            edit.preview(
+                                configuration.clone(),
+                                lan,
+                                assets,
+                                Some((prior.clone(), prior_lan, prior_assets)),
+                                context,
+                                Arc::new(move || service.web_session_current(lease)),
+                            )
+                            .and_then(|ticket| ticket.wait_in_job(context))
+                            .map_err(|_| PlatformError::Unavailable)?;
+                        }
+                        context
+                            .checkpoint()
+                            .map_err(|_| PlatformError::Unavailable)?;
+                        save_network(
+                            &backend,
+                            lease,
+                            expected_revision,
+                            current.identity_revision,
+                            &configuration,
+                        )?;
+                        control.remember_startup_configuration(configuration.clone());
+                        if previous.is_some() {
+                            edit.activate(&configuration)
+                                .map_err(|_| PlatformError::ResultUnknown)?;
+                            local_web_controller::prepare_teacher_firewall(
+                                &control,
+                                configuration.port,
                             );
-                            let assets = control
-                                .assets_for_prefix(&prefix)
-                                .map_err(|_| PlatformError::Unavailable)?;
-                            control
-                                .configure_lan(
-                                    Some(configuration),
-                                    Some(lan),
-                                    Some(assets),
-                                    context,
-                                    Arc::new(move || service.web_session_current(lease)),
-                                )
-                                .map_err(|_| PlatformError::Unavailable)?
-                                .wait_in_job(context)
-                                .map_err(|_| PlatformError::Unavailable)?;
+                            control.set_lan_notice("校园HTTPS监听已就绪");
                         }
                     }
                 }
@@ -335,6 +330,44 @@ pub(super) fn hook(
             }
         }
     })
+}
+
+fn save_network(
+    backend: &Mutex<Backend>,
+    lease: SessionLease,
+    expected_revision: fc_domain::ids::Revision,
+    expected_identity_revision: fc_domain::ids::Revision,
+    configuration: &HttpsConfiguration,
+) -> std::result::Result<(), PlatformError> {
+    let mut value = backend.lock().map_err(|_| PlatformError::Unavailable)?;
+    let issued = value
+        .issue_for_web_admin(
+            lease,
+            fc_ports::command_window::CommandFamily::HttpsSettings,
+        )
+        .map_err(map_backend)?;
+    let mut scoped = value.begin_command_scope(issued).map_err(map_backend)?;
+    let request = fc_ports::HttpsSettingsRequest {
+        command_id: scoped.issued_command_id().map_err(map_backend)?,
+        expected_revision,
+        expected_identity_revision,
+        configuration: Some(configuration.clone()),
+    };
+    let result = scoped.save_https_settings(lease, request.clone());
+    drop(scoped);
+    match result {
+        Ok(_) => Ok(()),
+        Err(error) => {
+            let mapped = map_backend(error);
+            if !matches!(mapped, PlatformError::Unavailable) {
+                return Err(mapped);
+            }
+            match value.query_https_settings_outcome(lease, request) {
+                Ok(Some(_)) => Ok(()),
+                _ => Err(PlatformError::ResultUnknown),
+            }
+        }
+    }
 }
 fn map_backend(error: BackendError) -> PlatformError {
     match error {
@@ -354,7 +387,13 @@ fn lan_label(control: &LocalControlHandle) -> String {
         fc_windows::tls_frontdoor::LanListenerPhase::Listening => "已开启",
     };
     status.error.map_or_else(
-        || label.into(),
+        || {
+            format!(
+                "{label}；{}；{}",
+                control.lan_notice(),
+                control.firewall_notice()
+            )
+        },
         |error| format!("{label}；{}", error.message()),
     )
 }
@@ -390,7 +429,9 @@ fn network(
                 }),
             listener_state: lan_label(control),
             local_management_url: format!("https://127.0.0.1:{}/fc/", control.port()),
-            teacher_url: c.map(|c| format!("{}/fc/", c.origin())),
+            teacher_url: control
+                .live_lan_configuration()
+                .map(|c| format!("{}/fc/", c.origin())),
             certificate_trusted: (selected_certificate == control.certificate()).then_some(true),
             certificate_expires_at: None,
             certificate_public_pem: certificate

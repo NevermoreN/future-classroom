@@ -1,6 +1,9 @@
 //! User-selected maintenance. MSI settlement remains inside original sealed Setup.
 use super::standalone::Package;
 use super::*;
+use crate::installer_lifecycle::{broker::SETUP_SHELL_INCOMPLETE, LifecycleGate};
+use fc_domain::updates::ReleaseVersion;
+use fc_protocol::{installer_variants, update_release::ReleaseClaims};
 use sha2::{Digest, Sha256};
 use std::{
     fs,
@@ -15,7 +18,14 @@ fn io<T>(v: std::io::Result<T>) -> Result<T> {
     v.map_err(|e| LifecycleError::Native(HRESULT::from_win32(e.raw_os_error().unwrap_or(1) as u32)))
 }
 
-pub(crate) fn installed() -> Result<Option<String>> {
+#[derive(PartialEq, Eq)]
+pub(super) struct RegisteredProduct {
+    product: String,
+    version: String,
+    package: String,
+}
+
+fn registered() -> Result<Option<RegisteredProduct>> {
     let mut product = [0u16; 39];
     let family = HSTRING::from(format!("{{{INSTALL_FAMILY}}}"));
     let rc = unsafe {
@@ -34,26 +44,21 @@ pub(crate) fn installed() -> Result<Option<String>> {
     {
         return Err(LifecycleError::Unsettled);
     }
-    let code =
-        HSTRING::from(String::from_utf16(&product[..38]).map_err(|_| LifecycleError::Invalid)?);
-    let mut text = [0u16; 64];
-    let mut len = 64;
-    let rc = unsafe {
-        MsiGetProductInfoExW(
-            &code,
-            None,
-            MSIINSTALLCONTEXT_USERUNMANAGED,
-            windows::core::w!("VersionString"),
-            Some(windows::core::PWSTR(text.as_mut_ptr())),
-            Some(&mut len),
-        )
-    };
-    if rc != 0 || len >= 64 {
+    if product[38] != 0 {
         return Err(LifecycleError::Invalid);
     }
-    Ok(Some(
-        String::from_utf16(&text[..len as usize]).map_err(|_| LifecycleError::Invalid)?,
-    ))
+    let product = String::from_utf16(&product[..38]).map_err(|_| LifecycleError::Invalid)?;
+    let version = registered_property(&product, "VersionString")?;
+    let package = registered_property(&product, "PackageCode")?;
+    Ok(Some(RegisteredProduct {
+        product,
+        version,
+        package,
+    }))
+}
+
+pub(crate) fn installed() -> Result<Option<String>> {
+    Ok(registered()?.map(|value| value.version))
 }
 pub(super) fn exists() -> Result<bool> {
     Ok(installed()?.is_some()
@@ -63,30 +68,12 @@ pub(super) fn exists() -> Result<bool> {
             .exists())
 }
 
-fn registered_property(name: &str) -> Result<Option<String>> {
-    let mut product = [0u16; 39];
-    let family = HSTRING::from(format!("{{{INSTALL_FAMILY}}}"));
-    let rc = unsafe {
-        MsiEnumRelatedProductsW(&family, None, 0, windows::core::PWSTR(product.as_mut_ptr()))
-    };
-    if rc == ERROR_NO_MORE_ITEMS.0 {
-        return Ok(None);
-    }
-    if rc != 0 {
-        return Err(LifecycleError::Invalid);
-    }
-    if name == "ProductCode" {
-        return Ok(Some(
-            String::from_utf16(&product[..38]).map_err(|_| LifecycleError::Invalid)?,
-        ));
-    }
-    let code =
-        HSTRING::from(String::from_utf16(&product[..38]).map_err(|_| LifecycleError::Invalid)?);
+fn registered_property(product: &str, name: &str) -> Result<String> {
     let mut text = [0u16; 512];
     let mut length = 512;
     let rc = unsafe {
         MsiGetProductInfoExW(
-            &code,
+            &HSTRING::from(product),
             None,
             MSIINSTALLCONTEXT_USERUNMANAGED,
             &HSTRING::from(name),
@@ -94,39 +81,49 @@ fn registered_property(name: &str) -> Result<Option<String>> {
             Some(&mut length),
         )
     };
-    if rc != 0 || length >= 512 {
+    if rc != 0 || length >= 512 || text[length as usize] != 0 {
         return Err(LifecycleError::Invalid);
     }
-    Ok(Some(
-        String::from_utf16(&text[..length as usize]).map_err(|_| LifecycleError::Invalid)?,
-    ))
+    String::from_utf16(&text[..length as usize]).map_err(|_| LifecycleError::Invalid)
 }
 
-/// Reconstruct only this release's exact sealed source, using registration to
-/// select its predecessor. All source qualification is repeated by native Setup.
-pub(crate) fn materialize_source(directory: &std::path::Path) -> Result<()> {
+fn matching_code(registered: &str, signed: &[u8; 16]) -> bool {
+    let hex: String = signed.iter().map(|byte| format!("{byte:02x}")).collect();
+    registered
+        .trim_matches(['{', '}'])
+        .replace('-', "")
+        .eq_ignore_ascii_case(&hex)
+}
+
+pub(crate) fn materialize_source(
+    directory: &std::path::Path,
+    release: &ReleaseClaims,
+) -> Result<()> {
+    materialize_for(directory, release, registered()?.as_ref())
+}
+
+/// Registration identifies an exact signed predecessor. Native Setup still
+/// checks the actual cached MSI, complete installation and resource gates.
+pub(super) fn materialize_for(
+    directory: &std::path::Path,
+    release: &ReleaseClaims,
+    installed: Option<&RegisteredProduct>,
+) -> Result<()> {
     let setup = io(fs::read(directory.join("Setup.exe")))?;
     let msi = io(fs::read(directory.join("FutureClassroom.msi")))?;
     let raw = io(fs::read(directory.join("installer-variants.bin")))?;
-    let package = fc_protocol::installer_variants::Package::parse(&raw)
-        .map_err(|_| LifecycleError::Invalid)?;
+    let package = installer_variants::Package::parse(&raw).map_err(|_| LifecycleError::Invalid)?;
     package
         .validate_base(&setup, &msi)
         .map_err(|_| LifecycleError::Invalid)?;
-    let old = installed()?;
-    let selected = if let Some(version) = old.as_deref() {
-        let parse = |version: &str| -> Result<Vec<u32>> {
-            version
-                .split('.')
-                .map(|p| p.parse().map_err(|_| LifecycleError::Invalid))
-                .collect()
-        };
-        if parse(version)? > parse(env!("CARGO_PKG_VERSION"))? {
+    let selected = if let Some(installed) = installed {
+        let version =
+            ReleaseVersion::parse(&installed.version).map_err(|_| LifecycleError::Invalid)?;
+        if version > release.version {
             return Err(LifecycleError::UpgradeProtocolUnsupported);
         }
-        if version == env!("CARGO_PKG_VERSION") {
-            let code = registered_property("PackageCode")?.ok_or(LifecycleError::Invalid)?;
-            let code = code.trim_matches(['{', '}']);
+        let code = installed.package.trim_matches(['{', '}']);
+        if version == release.version {
             if code.eq_ignore_ascii_case(&package.catalog.base_package_code) {
                 None
             } else {
@@ -140,28 +137,23 @@ pub(crate) fn materialize_source(directory: &std::path::Path) -> Result<()> {
                 )
             }
         } else {
-            let product = registered_property("ProductCode")?.ok_or(LifecycleError::Invalid)?;
-            let product = product.trim_matches(['{', '}']);
-            if package.catalog.base_predecessor_version == version
-                && package
-                    .catalog
-                    .base_predecessor_product
-                    .eq_ignore_ascii_case(product)
-            {
-                None
-            } else {
-                Some(
-                    package
-                        .catalog
-                        .variants
-                        .iter()
-                        .position(|v| {
-                            v.predecessor_version == version
-                                && v.predecessor_product.eq_ignore_ascii_case(product)
-                        })
-                        .ok_or(LifecycleError::UpgradeProtocolUnsupported)?,
-                )
+            let mut matches = release.allowed_predecessors.iter().filter(|claim| {
+                matching_code(&installed.product, &claim.product_code)
+                    && matching_code(code, &claim.package_code)
+            });
+            let predecessor = matches
+                .next()
+                .ok_or(LifecycleError::UpgradeProtocolUnsupported)?;
+            if matches.next().is_some() {
+                return Err(LifecycleError::Invalid);
             }
+            package
+                .predecessor_variant(
+                    &installed.version,
+                    installed.product.trim_matches(['{', '}']),
+                    predecessor.cached_msi_sha256,
+                )
+                .map_err(|_| LifecycleError::UpgradeProtocolUnsupported)?
         }
     } else {
         None
@@ -223,21 +215,49 @@ fn stop_product() -> Result<()> {
     resources.release()
 }
 
-pub(super) fn run(mut package: Package, mode: &str, delete_data: bool) -> Result<u32> {
-    let mut source = package.extract()?;
-    stop_product()?;
-    let old = installed()?;
-    let invoke = |operation: &str| -> Result<u32> {
-        let mut child = io(Command::new(source.root.join("Setup.exe"))
-            .arg(operation)
-            .current_dir(&source.root)
-            .spawn())?;
-        Ok(io(child.wait())?.code().ok_or(LifecycleError::Unsettled)? as u32)
-    };
+pub(super) fn run(
+    mut package: Package,
+    release: Option<&ReleaseClaims>,
+    mode: &str,
+    delete_data: bool,
+) -> Result<u32> {
+    let registration = registered()?;
+    let old = registration.as_ref().map(|value| value.version.as_str());
     let target = env!("CARGO_PKG_VERSION");
+    if package.unified() && release.map(|claim| claim.version) != ReleaseVersion::parse(target).ok()
+    {
+        return Err(LifecycleError::Invalid);
+    }
+    let upgrade = old.is_some_and(|version| version != target);
+    if mode == "maintain-uninstall" && upgrade {
+        return Err(LifecycleError::UpgradeProtocolUnsupported);
+    }
+    let mut source = package.extract(release, registration.as_ref())?;
+    // An intact predecessor can be checked while the current program is
+    // running. Any unsupported/corrupt source must fail before asking it to stop.
+    let predecessor = if upgrade {
+        let release = release.ok_or(LifecycleError::Invalid)?;
+        let facts = crate::installer_lifecycle::inspect_update_sources(&source.root)?;
+        if ReleaseVersion::parse(&facts.version).ok() != Some(release.version)
+            || !release.allowed_predecessors.contains(&facts.predecessor)
+        {
+            return Err(LifecycleError::Invalid);
+        }
+        crate::installer_lifecycle::qualify_update_predecessor(
+            &facts.predecessor_wire,
+            &facts.predecessor,
+        )?;
+        Some(facts)
+    } else {
+        None
+    };
+    if registered()? != registration {
+        return Err(LifecycleError::Unsettled);
+    }
+    stop_product()?;
     let operation = if mode == "maintain-uninstall" {
         "uninstall"
-    } else if old.as_deref() == Some(target) {
+    } else if old == Some(target) {
         "repair"
     } else {
         "install"
@@ -246,35 +266,85 @@ pub(super) fn run(mut package: Package, mode: &str, delete_data: bool) -> Result
         super::super::super::maintenance::update::remove_orphaned(&source.root)?;
     }
     let code = if mode == "maintain-uninstall" && old.is_none() {
-        0
+        Ok(0)
     } else {
-        invoke(operation)?
+        let child = io(Command::new(source.root.join("Setup.exe"))
+            .arg(operation)
+            .current_dir(&source.root)
+            .spawn());
+        match child {
+            Ok(mut child) => {
+                // Recover a transient wait error only while the original
+                // handle can still prove that this Setup has exited.
+                let status = match child.wait() {
+                    Ok(status) => status,
+                    Err(_) => io(child.try_wait())?.ok_or(LifecycleError::Unsettled)?,
+                };
+                Ok(status.code().ok_or(LifecycleError::Unsettled)? as u32)
+            }
+            Err(error) => Err(error),
+        }
     };
-    if code != 0 {
-        return Ok(code);
+    if !code
+        .as_ref()
+        .is_ok_and(|&code| code == 0 || code == SETUP_SHELL_INCOMPLETE)
+    {
+        if let Some(facts) = predecessor {
+            let identity = InstallIdentity::for_current_user()?;
+            if LifecycleGate::probe_quiescent(&identity).is_ok()
+                && crate::installer_lifecycle::qualify_update_predecessor(
+                    &facts.predecessor_wire,
+                    &facts.predecessor,
+                )
+                .is_ok()
+            {
+                let _ = start_product();
+            }
+        }
+        return code;
     }
+    let mut result = code?;
     if mode == "maintain-uninstall" {
         // Never delete teaching data after a failed/unknown MSI transaction.
         if installed()?.is_some() {
             return Err(LifecycleError::Unsettled);
         }
         if delete_data && purge_data().is_err() {
-            return Ok(5101);
+            result = 5101;
         }
-        if remove_entry().is_err() {
-            return Ok(5102);
+        if remove_entry().is_err() && result != 5101 {
+            result = 5102;
         }
     } else {
-        let target = crate::system::DataPaths::installed_bootstrap_for_current_user()?;
-        io(Command::new(&target)
-            .current_dir(target.parent().ok_or(LifecycleError::Invalid)?)
-            .spawn())?;
+        if installed()?.as_deref() != Some(target) {
+            return Err(LifecycleError::Unsettled);
+        }
+        if start_product().is_err() {
+            result = 5105;
+        }
     }
-    source.cleanup()?;
-    if mode == "maintain-uninstall" && schedule_cache_cleanup().is_err() {
-        return Ok(5103);
+    let extracted_cleaned = source.cleanup().is_ok();
+    if mode == "maintain-uninstall" {
+        // Keep the cached maintenance entry available when a requested data
+        // purge needs a retry. A shortcut failure does not block cache cleanup.
+        if result != 5101 && result != 5102 {
+            let scheduled = schedule_cache_cleanup().is_ok();
+            if result == 0 && (!extracted_cleaned || !scheduled) {
+                result = 5103;
+            }
+        }
+    } else if result == 0 && !extracted_cleaned {
+        result = SETUP_SHELL_INCOMPLETE;
     }
-    Ok(0)
+    Ok(result)
+}
+
+fn start_product() -> Result<()> {
+    let target = crate::system::DataPaths::installed_bootstrap_for_current_user()?;
+    io(Command::new(&target)
+        .current_dir(target.parent().ok_or(LifecycleError::Invalid)?)
+        .spawn())?;
+    Ok(())
 }
 
 fn remove_tree(root: &std::path::Path) -> Result<()> {
@@ -306,6 +376,9 @@ fn remove_tree(root: &std::path::Path) -> Result<()> {
 fn purge_data() -> Result<()> {
     let identity = InstallIdentity::for_current_user()?;
     let mut gate = Resources::open(&identity, true)?;
+    if registered()?.is_some() {
+        return Err(LifecycleError::Unsettled);
+    }
     let paths = crate::system::DataPaths::program_data()?;
     if paths.root().exists() {
         paths.verify_root_for_current_user()?;
@@ -432,7 +505,8 @@ pub(crate) fn cache_distribution(path: &std::path::Path) -> Result<()> {
     if !package.unified() {
         return Err(LifecycleError::Invalid);
     }
-    if installed()?.as_deref() != Some(env!("CARGO_PKG_VERSION")) {
+    let installed = registered()?.ok_or(LifecycleError::Invalid)?;
+    if installed.version != env!("CARGO_PKG_VERSION") {
         return Err(LifecycleError::Invalid);
     }
     let members = package.members()?;
@@ -444,8 +518,7 @@ pub(crate) fn cache_distribution(path: &std::path::Path) -> Result<()> {
     let catalog = fc_protocol::installer_variants::Package::parse(raw)
         .map_err(|_| LifecycleError::Invalid)?
         .catalog;
-    let code = registered_property("PackageCode")?.ok_or(LifecycleError::Invalid)?;
-    let code = code.trim_matches(['{', '}']);
+    let code = installed.package.trim_matches(['{', '}']);
     if !catalog.base_package_code.eq_ignore_ascii_case(code)
         && !catalog
             .variants

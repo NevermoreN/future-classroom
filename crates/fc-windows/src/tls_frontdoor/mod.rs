@@ -264,6 +264,19 @@ pub mod certificate_query;
 mod certificate_selection;
 #[cfg(windows)]
 mod credentials;
+
+/// Validate the selected CurrentUser server certificate before changing the
+/// live listener. The native owner repeats the check when binding.
+#[cfg(windows)]
+pub fn verify_listener_certificate(
+    certificate: fc_domain::https_settings::HttpsCertificateRef,
+    host: &str,
+) -> Result<(), ConfiguredTlsError> {
+    let thumbprint = CertificateThumbprint::parse(&certificate.to_hex())
+        .map_err(|_| ConfiguredTlsError::InvalidConfiguration)?;
+    credentials::verify_configured_host(thumbprint, host)
+        .map_err(|_| ConfiguredTlsError::Certificate)
+}
 #[cfg(any(windows, test))]
 mod http_date;
 #[cfg(windows)]

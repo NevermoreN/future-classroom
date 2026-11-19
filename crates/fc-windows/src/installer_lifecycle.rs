@@ -14,8 +14,13 @@ pub fn standalone_archive() -> Result<Option<Vec<u8>>> {
 pub fn maintenance_version() -> Result<Option<String>> {
     native::broker::controlled_owner::setup_entry::maintenance::installed()
 }
-pub fn materialize_installer_source(directory: &std::path::Path) -> Result<()> {
-    native::broker::controlled_owner::setup_entry::maintenance::materialize_source(directory)
+pub fn materialize_installer_source(
+    directory: &std::path::Path,
+    release: &fc_protocol::update_release::ReleaseClaims,
+) -> Result<()> {
+    native::broker::controlled_owner::setup_entry::maintenance::materialize_source(
+        directory, release,
+    )
 }
 pub fn installed_distribution_source() -> Result<Option<PathBuf>> {
     native::broker::controlled_owner::setup_entry::maintenance::distribution_source()

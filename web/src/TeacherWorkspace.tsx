@@ -45,7 +45,7 @@ function Editor({ editor: e, busy, controller, api, onRevoked }: { editor: Edito
     <div className="editor-actions"><Button disabled={!canSave} onClick={() => { void controller?.save() }}>{busy && e.phase === 'saving' ? <LoaderCircle className="spinner" /> : <Save />}保存当天内容</Button><Button variant="outline" disabled={busy || e.expired || e.phase !== 'ready'} onClick={() => { if (window.confirm('将以当前修订提交空内容，并替换本页草稿。确认清空今天的这个槽位？')) void controller?.save(true) }}><Trash2 />清空当天内容</Button>{['ready', 'conflict'].includes(e.phase) && <Button variant="ghost" disabled={busy || e.expired} onClick={() => { void controller?.loadLatest() }}><RefreshCw />{e.phase === 'conflict' ? '载入最新修订（保留草稿）' : '读取当前内容'}</Button>}</div>
   </CardContent></Card>
 }
-export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevoked, onPasswordChange }: { session: Session; onLogout: () => void; onRefresh: () => void; onRevoked: () => void; onPasswordChange: () => void }) {
+export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevoked, onPasswordChange }: { session: Session; onLogout: (allDevices?: boolean) => void; onRefresh: () => void; onRevoked: () => void; onPasswordChange: () => void }) {
   const [page, setPage] = useState<'HOME' | 'ADMIN' | 'MATERIALS' | 'VOICE' | ContentKind>(session.principal.role === 'GLOBAL_ADMIN' && window.location.hash.includes('/admin') ? 'ADMIN' : 'HOME'), [state, setState] = useState<ContentState>(empty)
   const [materials, setMaterials] = useState<MaterialState>(emptyMaterials), materialOwner = useRef<MaterialController | undefined>(undefined)
   const [api] = useState(() => new VoiceHttpApi(trustedApiBase(import.meta.env.BASE_URL, window.location.href)))
@@ -66,6 +66,13 @@ export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevok
   const [adminDirty, setAdminDirty] = useState(false)
   const canManage = session.principal.role !== 'USER'
   function consent() { return !(adminDirty || owner.current?.hasRiskyDraft() || materialOwner.current?.hasRiskyDraft() || voiceOwner.current?.hasRiskyDraft()) || window.confirm('本页有未保存草稿或结果尚未确认的命令。离开会丢弃本页内存信息，不会撤销已经提交的命令，也不会自动保存。确认离开？') }
+  function logout(allDevices: boolean) {
+    if (!consent() || (allDevices && !window.confirm('退出所有设备后，这个账号在其他页面也需要重新登录。继续退出？'))) return
+    owner.current?.leave(true)
+    materialOwner.current?.leave(true)
+    voiceOwner.current?.leave(true)
+    onLogout(allDevices)
+  }
   function refreshPage() {
     if (!consent()) return
     owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true)
@@ -106,7 +113,7 @@ export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevok
       {state.editor && <Editor editor={state.editor} busy={state.busy} controller={owner.current} api={api} onRevoked={onRevoked} />}
       {state.busy && scopes && <p className="loading-content" role="status"><LoaderCircle className="spinner" />正在向白板核对…</p>}
     </>}
-    <div className="logout-row"><LockKeyhole size={16} /><p>注销会使这个账号的全部渠道授权失效。</p><Button variant="outline" onClick={() => { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); onLogout() } }}><LogOut />注销账号</Button></div>
+    <div className="logout-row"><Button variant="ghost" onClick={() => logout(true)}>退出所有设备</Button><Button variant="outline" onClick={() => logout(false)}><LogOut />退出本页</Button></div>
     <aside className="bottom-reminder-action" aria-label="今日提醒快捷入口"><Button disabled={!canManage} onClick={() => open('REMINDER')}><Radio size={20} />管理今日提醒<ChevronRight size={17} /></Button></aside>
   </main>
 }

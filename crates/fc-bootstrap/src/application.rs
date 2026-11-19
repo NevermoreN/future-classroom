@@ -2581,6 +2581,7 @@ struct App {
     writer_closed: bool,
     shutdown_deadline: Option<Instant>,
     terminate_required: bool,
+    runtime_failure: Option<&'static str>,
     reinitialize_requested: bool,
     schedule: Option<ScheduleEditor>,
     calendar: Option<calendar_editor::Editor>,
@@ -3355,6 +3356,8 @@ impl App {
                     | fc_runtime::worker::Rejection::Deadline => {}
                     _ => {
                         self.terminate_required = true;
+                        self.runtime_failure
+                            .get_or_insert("writer-shutdown-admission");
                         module_registry::stop(module_registry::Kind::SharedWorkers, self);
                     }
                 },
@@ -5504,6 +5507,7 @@ impl App {
     fn poll(&mut self) -> std::result::Result<(), String> {
         if self.shell.reap_nonblocking().is_err() && !self.terminate_required {
             self.terminate_required = true;
+            self.runtime_failure.get_or_insert("shell-worker");
             self.begin_shutdown();
         }
         if self
@@ -5515,12 +5519,18 @@ impl App {
         }
         // Even irreversible restore must observe the HTTP thread's actual
         // return before its coordinator can take the original shared workers.
-        self.poll_teacher_https()?;
-        self.poll_web_maintenance()?;
+        self.poll_teacher_https().inspect_err(|_| {
+            self.runtime_failure.get_or_insert("teacher-https-poll");
+        })?;
+        self.poll_web_maintenance().inspect_err(|_| {
+            self.runtime_failure.get_or_insert("web-maintenance-poll");
+        })?;
         // A Web confirmation closes ordinary admission before its notification
         // reaches this pump. Only its controller may own that cold handoff.
         if self.offscreen_probe || self.maintenance.service.is_none() {
-            self.poll_backup()?;
+            self.poll_backup().inspect_err(|_| {
+                self.runtime_failure.get_or_insert("backup-poll");
+            })?;
         }
         if self.backup.irreversible() {
             return Ok(());
@@ -5536,12 +5546,17 @@ impl App {
             // Independent Web/voice writers can fault authority while this UI
             // is idle. Revoke its preview without waiting for a user action or
             // for the shared worker pool itself to fail.
+            self.runtime_failure.get_or_insert("authority-unavailable");
             self.begin_shutdown();
             self.status = "数据健康状态已失效，正在关闭；请保留数据供修复。".into();
             self.render()?;
         }
-        self.poll_voice_management()?;
-        self.poll_https_settings()?;
+        self.poll_voice_management().inspect_err(|_| {
+            self.runtime_failure.get_or_insert("voice-management-poll");
+        })?;
+        self.poll_https_settings().inspect_err(|_| {
+            self.runtime_failure.get_or_insert("https-settings-poll");
+        })?;
         if self
             .web_editor
             .as_mut()
@@ -5600,6 +5615,7 @@ impl App {
         if let Some(audio) = &self.audio {
             if audio.reap_nonblocking().is_err() && !self.stopping {
                 self.terminate_required = true;
+                self.runtime_failure.get_or_insert("audio-worker");
                 self.begin_shutdown();
             }
         }
@@ -5610,6 +5626,7 @@ impl App {
                     && fc_windows::host::interactive_session_available();
                 if audio.set_available(available).is_err() {
                     self.terminate_required = true;
+                    self.runtime_failure.get_or_insert("audio-availability");
                     self.begin_shutdown();
                 }
             }
@@ -5617,15 +5634,23 @@ impl App {
         if self.stopping {
             self.schedule_shutdown();
         }
-        if let Some(ticket) = self.voice_maintenance.as_mut() {
+        if let Some(ticket) = self
+            .voice_maintenance
+            .as_mut()
+            .filter(|ticket| ticket.is_finished())
+        {
             match ticket.try_result() {
                 Ok(None) => {}
                 Ok(Some(Ok(Outcome::MaterialCleaned))) => {
                     self.voice_maintenance = None;
                 }
-                Ok(Some(Err(Failure::Stopped))) => {
-                    // Backend was occupied by a foreground management worker;
-                    // maintenance never waits behind its KDF or extends a lease.
+                Ok(Some(Err(Failure::Stopped)))
+                | Err(
+                    fc_runtime::worker::JobError::Deadline
+                    | fc_runtime::worker::JobError::Cancelled,
+                ) => {
+                    // Slow or cancelled background maintenance is retryable once
+                    // the shared worker has physically returned the ticket.
                     self.voice_maintenance = None;
                     self.next_voice_maintenance = Instant::now() + Duration::from_secs(1);
                 }
@@ -5633,6 +5658,7 @@ impl App {
                     self.voice_maintenance = None;
                 }
                 _ => {
+                    self.runtime_failure.get_or_insert("voice-data-maintenance");
                     if let Some(control) = &self.control {
                         control.fault();
                     }
@@ -5667,6 +5693,8 @@ impl App {
                         Instant::now() + Duration::from_secs(if pending { 1 } else { 30 });
                 }
                 Ok(Some(Err(error))) if fatal(&error) => {
+                    self.runtime_failure
+                        .get_or_insert("content-data-maintenance");
                     if let Some(control) = &self.control {
                         control.fault();
                     }
@@ -5726,6 +5754,7 @@ impl App {
                 _ => {
                     self.shutdown = None;
                     self.terminate_required = true;
+                    self.runtime_failure.get_or_insert("writer-shutdown-result");
                     module_registry::stop(module_registry::Kind::SharedWorkers, self);
                 }
             }
@@ -6509,39 +6538,27 @@ fn run_at_inner(
         }
         Err(_) => return Err("无法取得未来教室数据目录的独占运行锁，请核对目录权限。".into()),
     };
-    let host_started = Instant::now();
+    const APP_FAILURE: u32 = 0x80004005;
+    const TIMEOUT: u32 = 0x800705B4;
+    let mut diagnostics = startup_diagnostics::RuntimeDiagnostics::new(&paths, autostart, probe);
     let host = if probe {
         HiddenHost::for_isolated_probe()
     } else {
         HiddenHost::for_instance(paths.root(), true)
     }
     .map_err(|error| {
-        startup_diagnostics::host_failure(
-            &paths,
-            autostart,
-            probe,
-            "host-create",
-            error.code().0 as u32,
-            &error.to_string(),
-            host_started.elapsed(),
-        )
+        diagnostics.report_failure("host-create", error.code().0 as u32, &error.to_string())
     })?;
     if !host.wait_until_ready().map_err(|error| {
-        startup_diagnostics::host_failure(
-            &paths,
-            autostart,
-            probe,
-            "host-readiness",
-            error.code().0 as u32,
-            &error.to_string(),
-            host_started.elapsed(),
-        )
+        diagnostics.report_failure("host-readiness", error.code().0 as u32, &error.to_string())
     })? {
         return Ok(false);
     }
+    diagnostics.note("host-ready", None);
     let stop = host.controller();
     let clock = Arc::new(CurrentClock::new());
-    let mut app = create_app(clock.clone(), probe)?;
+    let mut app = create_app(clock.clone(), probe)
+        .map_err(|error| diagnostics.report_failure("application-create", APP_FAILURE, &error))?;
     app.root = paths.root().to_owned();
     if !probe {
         app.maintenance.service = Some(fc_bootstrap::maintenance_web::MaintenanceService::new(
@@ -6594,23 +6611,21 @@ fn run_at_inner(
         }
     }))
     .map_err(|error| {
-        startup_diagnostics::host_failure(
-            &paths,
-            autostart,
-            probe,
+        diagnostics.report_failure(
             "control-callback",
             error.code().0 as u32,
             &error.to_string(),
-            host_started.elapsed(),
         )
     })?;
-    app.render()?;
+    app.render()
+        .map_err(|error| diagnostics.report_failure("startup-render", APP_FAILURE, &error))?;
     if probe && !autostart {
         app.window.show(true);
     }
     app.local_web.open_when_ready = !autostart && !probe;
     app.start_local_web();
-    module_registry::start_writer(&mut app, paths.clone(), clock)?;
+    module_registry::start_writer(&mut app, paths.clone(), clock)
+        .map_err(|error| diagnostics.report_failure("writer-start", APP_FAILURE, &error))?;
     let started = Instant::now();
     let mut stage = 0u8;
     let mut lesson_stage = 0u8;
@@ -6640,15 +6655,48 @@ fn run_at_inner(
     } else {
         None
     };
+    let mut last_web_state = None;
+    let mut callback_failure = None;
     let result = host.run_with_host(|hints, host| {
+        if hints.contains(HostHints::TASKBAR_RECREATED) {
+            diagnostics.note("taskbar-recreated", None);
+        }
+        for (hint, event) in [
+            (HostHints::TRAY_UNAVAILABLE, "tray-unavailable"),
+            (HostHints::TRAY_MENU_UNAVAILABLE, "tray-menu-unavailable"),
+        ] {
+            if hints.contains(hint) {
+                let code = host.tray_error().map_or(APP_FAILURE, |code| code as u32);
+                diagnostics.note(event, Some(code));
+                diagnostics.warning(event, code);
+            }
+        }
+        if hints.contains(HostHints::TRAY_RESTORED) {
+            diagnostics.note("tray-restored", None);
+        }
         app.poll_updates();
-        host.set_background_work_pending(app.updates_work_pending())?;
+        host.set_background_work_pending(app.updates_work_pending()).inspect_err(|error| {
+            diagnostics.failure("host-timer", error.code().0 as u32);
+        })?;
         app.poll_local_web();
+        let web_state = app.local_web_runtime_state();
+        let web_reason = app.local_web_runtime_reason();
+        if last_web_state != Some((web_state, web_reason)) {
+            last_web_state = Some((web_state, web_reason));
+            diagnostics.note(web_state, None);
+            if let Some(reason) = web_reason {
+                diagnostics.note(reason, None);
+            }
+            if web_state == "local-web-failed" {
+                diagnostics.warning(web_state, APP_FAILURE);
+            }
+        }
         if app.pool.is_faulted() && !app.terminate_required {
             if let Some(control) = &app.control {
                 control.fault();
             }
             app.terminate_required = true;
+            app.runtime_failure.get_or_insert("shared-worker-pool");
             app.begin_shutdown();
         }
         if hints.contains(HostHints::SHUTDOWN) {
@@ -6703,13 +6751,26 @@ fn run_at_inner(
             app.lock();
             let _ = app.render();
         }
-        for event in app.window.take_events()? {
-            if app.event(event).is_err() {
+        for event in app.window.take_events().inspect_err(|error| {
+            diagnostics.failure("workbench-events", error.code().0 as u32);
+        })? {
+            if let Err(error) = app.event(event) {
+                diagnostics.failure("application-event", APP_FAILURE);
+                callback_failure = Some(error);
                 stop.fault();
                 return Ok(());
             }
         }
-        if app.poll().is_err() {
+        let poll = app.poll();
+        let app_failure = app.runtime_failure.take();
+        if let Some(stage) = app_failure {
+            diagnostics.failure(stage, APP_FAILURE);
+        }
+        if let Err(error) = poll {
+            if app_failure.is_none() {
+                diagnostics.failure("application-poll", APP_FAILURE);
+            }
+            callback_failure = Some(error);
             stop.fault();
             return Ok(());
         }
@@ -6723,6 +6784,7 @@ fn run_at_inner(
                 app.pending.is_some(),
                 hints,
             ) {
+                diagnostics.failure("desktop-present", APP_FAILURE);
                 probe_error = Some(error);
                 app.begin_shutdown();
             }
@@ -6736,6 +6798,7 @@ fn run_at_inner(
             }
             if let Some(stamp) = app.desktop.take_lesson_event() {
                 if let Err(error) = app.open_public_lesson(stamp) {
+                    diagnostics.failure("desktop-open-lesson", APP_FAILURE);
                     probe_error = Some(error);
                     app.begin_shutdown();
                 }
@@ -6751,8 +6814,7 @@ fn run_at_inner(
                     ..
                 } = event
                 {
-                    if app
-                        .submit_material(material_flow::Job::Open(
+                    if let Err(error) = app.submit_material(material_flow::Job::Open(
                             material_flow::OpenRequest::Scene {
                                 source,
                                 generation,
@@ -6760,8 +6822,9 @@ fn run_at_inner(
                                 version: resource_version,
                             },
                         ))
-                        .is_err()
                     {
+                        diagnostics.failure("desktop-open-material", APP_FAILURE);
+                        callback_failure = Some(error);
                         stop.fault();
                         return Ok(());
                     }
@@ -6859,6 +6922,20 @@ fn run_at_inner(
                     })
                 }))
         {
+            for (pending, owner) in [
+                (!app.writer_closed, "writer-pending"),
+                (!app.pool.is_finished(), "worker-pending"),
+                (!app.shell.is_finished(), "shell-pending"),
+                (!app.backup.exit_ready(), "backup-pending"),
+                (!app.local_web_quiescent(), "local-web-pending"),
+                (app.maintenance.pending_work(), "web-maintenance-pending"),
+            ] {
+                if pending {
+                    diagnostics.note(owner, None);
+                }
+            }
+            let report = diagnostics.report_failure("shutdown-timeout", TIMEOUT, "关闭时部分后台任务未在时限内归还");
+            eprintln!("{report}");
             eprintln!(
                 "关闭所有权状态：fault={} irreversible={} writer_closed={} workers_finished={} shell_finished={} backup_exit_ready={} local_quiescent={} web_maintenance_pending={} exiting={}。",
                 app.terminate_required,
@@ -6879,22 +6956,22 @@ fn run_at_inner(
         }
         Ok(())
     });
-    let result = result.map_err(|error| {
-        startup_diagnostics::host_failure(
-            &paths,
-            autostart,
-            probe,
-            "host-runtime",
-            error.code().0 as u32,
-            &error.to_string(),
-            host_started.elapsed(),
-        )
+    let result = result.map_err(|failure| {
+        let detail = callback_failure.unwrap_or_else(|| failure.error.to_string());
+        diagnostics.report_failure(failure.stage, failure.error.code().0 as u32, &detail)
     });
     // Native pump has ended. Normal authorized exit already closed SQLite on its
     // worker. Do not join a still-running domain from this UI owner.
     if !app.shutdown_complete() {
         if let Err(error) = &result {
             eprintln!("{error}");
+        } else {
+            let report = diagnostics.report_failure(
+                "host-exit-with-owners",
+                APP_FAILURE,
+                "Windows 宿主在资源归还前退出",
+            );
+            eprintln!("{report}");
         }
         if let Some(control) = &app.control {
             control.fault();
@@ -6910,6 +6987,7 @@ fn run_at_inner(
         module_registry::join_workers(app.pool)?;
     }
     result?;
+    diagnostics.flush_failure();
     if let Some(error) = probe_error {
         return Err(error);
     }
@@ -6974,6 +7052,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         writer_closed: false,
         shutdown_deadline: None,
         terminate_required: false,
+        runtime_failure: None,
         reinitialize_requested: false,
         schedule: None,
         calendar: None,

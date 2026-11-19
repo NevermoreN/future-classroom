@@ -134,6 +134,10 @@ impl SecretVerifier {
 
     pub fn verify(&self, candidate: &WebSecret) -> bool {
         let candidate = candidate.verifier();
+        self.matches(&candidate)
+    }
+
+    pub fn matches(&self, candidate: &Self) -> bool {
         bool::from(self.0[..].ct_eq(&candidate.0[..]))
     }
 }

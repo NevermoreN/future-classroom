@@ -11,7 +11,7 @@ export function useResource<R extends keyof AdminResources>(resource: R, session
     if (error instanceof ApiError && error.status === 401) { onRevoked.current(); return }
     if (error instanceof ApiError && error.status === 403) { setNotice('当前账号无权执行此操作，登录仍然保留。'); return }
     if (error instanceof ApiError && error.status === 409) { setNotice('设置已被其他操作修改。请重新读取最新版本，核对后再保存。'); setUncertain(true); return }
-    if (write && !(error instanceof ApiError)) { setUncertain(true); setNotice('保存结果尚未确认。请重新读取实际设置核对；不会自动重复提交。'); return }
+    if (write && (!(error instanceof ApiError) || error.code === 'RESULT_UNKNOWN')) { setUncertain(true); setNotice('保存结果尚未确认。请重新读取实际设置核对；页面仅在读取实际状态后接受再次提交。'); return }
     setNotice(error instanceof ProtocolFault ? error.message : error instanceof ApiError && error.status === 400 ? '设置未被接受，请检查必填项、数值范围、时间重叠和引用关系。' : '暂时无法读取或保存设置，请检查连接后重试。')
   }
   const load = useCallback(async () => {

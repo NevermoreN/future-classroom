@@ -37,8 +37,8 @@ pub(super) enum Completed {
 pub(super) struct State {
     pub(super) control: Option<UpdateControl>,
     pub(super) initialized: bool,
-    pub(super) attempted: bool,
     pub(super) bound: bool,
+    pub(super) recover_network: bool,
     pending: Option<JobTicket<Result<Outcome>>>,
     next: Option<Instant>,
     next_io: Option<Instant>,
@@ -118,7 +118,6 @@ impl App {
                 });
         if let Some(completed) = completed {
             self.updates.pending = None;
-            self.updates.attempted = true;
             match completed {
                 Ok(Outcome::SoftwareUpdate(Completed::Opened(control))) => {
                     self.updates.control = Some(control);
@@ -175,6 +174,22 @@ impl App {
         if self.updates.pending.is_some() {
             return;
         }
+        if self.updates.recover_network
+            && self.updates.retired
+            && !self.exiting
+            && self.local_web.attached
+            && self
+                .updates
+                .control
+                .as_ref()
+                .is_none_or(|control| control.network().is_idle())
+        {
+            self.updates.control = None;
+            self.updates.initialized = false;
+            self.updates.bound = false;
+            self.updates.retired = false;
+            self.updates.recover_network = false;
+        }
         let job = if let (Some(job_id), Some(control), Some(backend)) = (
             self.updates.abort,
             self.updates.control.clone(),
@@ -185,7 +200,7 @@ impl App {
                 backend,
                 job_id,
             }
-        } else if self.stopping || self.exiting {
+        } else if self.stopping || self.exiting || self.updates.recover_network {
             if self.updates.retired {
                 return;
             }

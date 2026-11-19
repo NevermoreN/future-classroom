@@ -1,6 +1,7 @@
 //! One distribution: normal helper + unchanged signed official archive.
 //! The sealed native source retains all MSI admission and owner checks.
 use super::*;
+use fc_protocol::update_release::ReleaseClaims;
 use sha2::{Digest, Sha256};
 use std::{
     fs::{File, OpenOptions},
@@ -217,7 +218,11 @@ impl Package {
         }
         Ok(())
     }
-    pub(super) fn extract(&mut self) -> Result<Extracted> {
+    pub(super) fn extract(
+        &mut self,
+        release: Option<&ReleaseClaims>,
+        installed: Option<&super::maintenance::RegisteredProduct>,
+    ) -> Result<Extracted> {
         use fc_ports::RandomSource;
         let members = self.members()?;
         let identity = identity()?;
@@ -254,7 +259,11 @@ impl Package {
             io(file.sync_all())?;
         }
         if self.legacy.is_none() {
-            super::maintenance::materialize_source(&extracted.root)?;
+            super::maintenance::materialize_for(
+                &extracted.root,
+                release.ok_or(LifecycleError::Invalid)?,
+                installed,
+            )?;
         }
         for name in NAMES
             .iter()
@@ -307,12 +316,15 @@ impl Drop for Extracted {
     }
 }
 
-pub(crate) fn dispatch(args: &[String]) -> Option<Result<u32>> {
+pub(crate) fn dispatch(args: &[String], release: Option<&ReleaseClaims>) -> Option<Result<u32>> {
     let package = match Package::discover() {
         Ok(None) => return None,
         Ok(Some(v)) => v,
         Err(e) => return Some(Err(e)),
     };
+    if package.unified() && release.is_none() {
+        return Some(Err(LifecycleError::Invalid));
+    }
     if args.is_empty() || matches!(args, [one] if one == "uninstall" || one == "maintenance") {
         return Some(super::setup_ui::show(
             package,
@@ -326,13 +338,21 @@ pub(crate) fn dispatch(args: &[String]) -> Option<Result<u32>> {
         ) && matches!(force.as_str(), "normal" | "force")
             && matches!(data.as_str(), "keep" | "delete")
         {
-            return Some(super::maintenance::run(package, mode, data == "delete"));
+            return Some(super::maintenance::run(
+                package,
+                release,
+                mode,
+                data == "delete",
+            ));
         }
     }
     match args {
-        [one] if one == "install" || one == "repair" => {
-            Some(super::maintenance::run(package, "maintain-repair", false))
-        }
+        [one] if one == "install" || one == "repair" => Some(super::maintenance::run(
+            package,
+            release,
+            "maintain-repair",
+            false,
+        )),
         _ => Some(Err(LifecycleError::Invalid)),
     }
 }

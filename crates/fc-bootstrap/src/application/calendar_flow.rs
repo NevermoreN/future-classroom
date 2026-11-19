@@ -6,40 +6,8 @@ use fc_bootstrap::backend::Backend;
 use fc_domain::{ids::*, schedule_document::ScheduleDocument};
 use fc_ports::calendar::*;
 use fc_runtime::worker::JobContext;
-use fc_windows::{calendar_download as download, system::CurrentClock};
+use fc_windows::calendar_download::HolidayCnProvider;
 use std::sync::{Arc, Mutex};
-
-/// The replaceable source adapter owns transport plus decoding. The writer only
-/// accepts validated candidates; source data never carries an actor or grant.
-struct HolidayCnProvider;
-impl CalendarProvider for HolidayCnProvider {
-    fn fetch(
-        &self,
-        year: i32,
-        validators: Option<&CalendarFetchValidators>,
-        cancelled: &dyn Fn() -> bool,
-    ) -> std::result::Result<CalendarProviderResponse, CalendarFetchFailure> {
-        let validators = validators.map(|v| download::Validators {
-            etag: v.etag.clone(),
-            last_modified: v.last_modified.clone(),
-        });
-        match download::fetch(year, validators.as_ref(), cancelled).map_err(failure)? {
-            download::Download::NotModified => Ok(CalendarProviderResponse::NotModified),
-            download::Download::Modified {
-                bytes,
-                etag,
-                last_modified,
-            } => {
-                let now = CurrentClock::new()
-                    .try_now()
-                    .map_err(|_| CalendarFetchFailure::InvalidData)?;
-                fc_protocol::calendar_feed::parse(year, &bytes, now, etag, last_modified)
-                    .map(CalendarProviderResponse::Downloaded)
-                    .map_err(|_| CalendarFetchFailure::InvalidData)
-            }
-        }
-    }
-}
 
 pub(super) enum Operation {
     Load(i32),
@@ -262,20 +230,6 @@ impl Job {
     }
 }
 
-fn failure(error: download::DownloadError) -> CalendarFetchFailure {
-    use download::DownloadError as E;
-    match error {
-        E::Cancelled => CalendarFetchFailure::Cancelled,
-        E::Timeout => CalendarFetchFailure::Deadline,
-        E::Tls => CalendarFetchFailure::Tls,
-        E::TooLarge => CalendarFetchFailure::TooLarge,
-        E::Forbidden | E::NotFound | E::HttpStatus => CalendarFetchFailure::Http,
-        E::InvalidYear | E::InvalidValidator | E::InvalidResponse => {
-            CalendarFetchFailure::InvalidData
-        }
-        E::Unavailable | E::Busy | E::Network => CalendarFetchFailure::Network,
-    }
-}
 fn message(outcome: &CalendarFetchOutcome) -> &'static str {
     match outcome {
         CalendarFetchOutcome::Downloaded(_) => {

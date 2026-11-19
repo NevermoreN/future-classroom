@@ -18,11 +18,15 @@ pub enum PackageError {
     Io(std::io::Error),
     Invalid,
     Trust,
+    InstallerMetadataExpired,
     Checkpoint,
     Cache(CacheError),
 }
 impl std::fmt::Display for PackageError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if matches!(self, Self::InstallerMetadataExpired) {
+            return f.write_str("安装包的签名授权已过期，或电脑时间超出授权有效期。");
+        }
         write!(f, "{self:?}")
     }
 }
@@ -589,12 +593,15 @@ pub fn verify_installer_distribution(
         UpdateTrust::from_installed_root(anchor)
             .and_then(|mut trust| trust.refresh(metadata.borrowed(&roots), time))
     };
-    let targets = match verify(now) {
-        Ok(targets) => targets,
-        Err(_) if maintenance_version.is_some() => {
-            verify(historical_time(anchor, &metadata)?).map_err(|_| PackageError::Trust)?
+    let (targets, current) = match verify(now) {
+        Ok(targets) => (targets, true),
+        Err(_) => {
+            let time = historical_time(anchor, &metadata).map_err(|_| PackageError::Trust)?;
+            if now <= time {
+                return Err(PackageError::Trust);
+            }
+            (verify(time).map_err(|_| PackageError::Trust)?, false)
         }
-        Err(_) => return Err(PackageError::Trust),
     };
     let digest = fc_security::sha256(&payload);
     let mut matching = targets
@@ -611,14 +618,6 @@ pub fn verify_installer_distribution(
         payload.len() as u64,
     )
     .map_err(|_| PackageError::Trust)?;
-    // Historical expiry is maintenance-only; never allow it to introduce a
-    // different release into a fresh machine or an older registered product.
-    if verify(now).is_err()
-        && maintenance_version.and_then(|v| fc_domain::updates::ReleaseVersion::parse(v).ok())
-            != Some(claims.version)
-    {
-        return Err(PackageError::Trust);
-    }
     let mut sources = archive(std::io::Cursor::new(&payload), 6)?;
     let setup = read_member(&mut sources, "Setup.exe", 32 << 20)?;
     let msi = read_member(&mut sources, "FutureClassroom.msi", 64 << 20)?;
@@ -651,6 +650,14 @@ pub fn verify_installer_distribution(
         if !matched {
             return Err(PackageError::Trust);
         }
+    }
+    // Historical verification can diagnose an authentic expired installer.
+    // It only admits maintenance of the very same already registered release.
+    if !current
+        && maintenance_version.and_then(|v| fc_domain::updates::ReleaseVersion::parse(v).ok())
+            != Some(claims.version)
+    {
+        return Err(PackageError::InstallerMetadataExpired);
     }
     Ok(claims)
 }
@@ -1371,10 +1378,12 @@ mod tests {
         assert_eq!(claims.release_id, "TEST-ONLY-NOT-INSTALLABLE");
         // Historical signatures cannot authorize fresh or cross-version installs.
         let expired = 2_000_000_000;
-        assert!(verify_installer_distribution(&output, ROOT, expired, None, None).is_err());
-        assert!(
-            verify_installer_distribution(&output, ROOT, expired, Some("99.0.0"), None).is_err()
-        );
+        for installed in [None, Some("0.1.0"), Some("99.0.0")] {
+            assert!(matches!(
+                verify_installer_distribution(&output, ROOT, expired, installed, None),
+                Err(PackageError::InstallerMetadataExpired)
+            ));
+        }
         assert!(verify_installer_distribution(&output, ROOT, expired, Some("0.2.0"), None).is_ok());
         let mut damaged = fs::read(&output).unwrap();
         damaged[2] ^= 1;

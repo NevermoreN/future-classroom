@@ -7,6 +7,8 @@ use fc_protocol::web::admin::{self as wire, Resource};
 mod profile_content;
 mod profiles;
 mod schedule;
+#[cfg(windows)]
+mod calendar;
 pub enum PlatformRequest {
     Status,
     Network,
@@ -31,6 +33,7 @@ pub enum PlatformError {
     Invalid,
     Conflict,
     Unavailable,
+    ResultUnknown,
 }
 pub type PlatformHook = std::sync::Arc<
     dyn Fn(
@@ -134,6 +137,9 @@ pub(super) fn dispatch(
     }
     if resource == Resource::Schedule {
         return schedule::dispatch(backend, lease, body);
+    }
+    if resource == Resource::CalendarPreview {
+        return body.map_or_else(invalid, |bytes| schedule::preview(backend, lease, bytes));
     }
     if body.is_none() {
         return match resource {

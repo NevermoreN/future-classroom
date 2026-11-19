@@ -468,6 +468,82 @@ fn calendar_domain(dto: Calendar, old: &CalendarConfig) -> Result<CalendarConfig
         .collect::<Result<_>>()?;
     Ok(c)
 }
+fn apply_calendar(d: &mut ScheduleDocument, candidate: SaveCalendar) -> Result<()> {
+    d.calendar_mode = match candidate.calendar_mode.as_str() {
+        "school" => CalendarMode::School,
+        "public" => CalendarMode::Public,
+        _ => return invalid(),
+    };
+    d.automatic_gaps = candidate.automatic_gaps;
+    d.school_calendar = calendar_domain(candidate.school_calendar, &d.school_calendar)?;
+    d.public_calendar = calendar_domain(candidate.public_calendar, &d.public_calendar)?;
+    Ok(())
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CalendarPreview {
+    schema_version: u16,
+    expected_revision: String,
+    class_id: String,
+    date: String,
+    candidate: SaveCalendar,
+}
+pub fn preview_calendar(
+    bytes: &[u8],
+    current: &ScheduleDocument,
+    identity: &fc_domain::identity::IdentityState,
+) -> Result<Option<Vec<u8>>> {
+    use serde_json::json;
+    let request: CalendarPreview = parse(bytes)?;
+    if request.schema_version != crate::SCHEMA_VERSION {
+        return Err(ProtocolError::UnsupportedSchema);
+    }
+    if super::revision(&request.expected_revision)? != current.revision {
+        return Ok(None);
+    }
+    let actual = date(&request.date)?;
+    let class = id(&request.class_id, ClassId::new)?;
+    let mut draft = current.clone();
+    apply_calendar(&mut draft, request.candidate)?;
+    draft.validate(identity).map_err(|_| ProtocolError::InvalidCommand)?;
+    let day = draft.resolve_day(class, actual).map_err(|_| ProtocolError::InvalidCommand)?;
+    let result = match day {
+        AcademicDay::OutOfTerm => json!({"result": "outOfTerm"}),
+        AcademicDay::Rest => json!({"result": "rest"}),
+        AcademicDay::Unconfirmed => {
+            let outside = draft.calendar_mode == CalendarMode::School
+                && draft.school_calendar.school_coverage.is_none_or(|(start, end)| actual < start || actual > end);
+            json!({"result": if outside { "outsideCoverage" } else { "unconfirmed" }})
+        }
+        AcademicDay::Scheduled(day) => {
+            let weekday = day.source_date.weekday();
+            let rows = day.table.rows.iter()
+                .filter(|row| row.enabled_days[weekday.index()])
+                .map(|row| {
+                    let label = match row.kind {
+                        RowKind::Course => row.courses[weekday.index()].as_ref()
+                            .and_then(|cell| identity.subjects.iter().find(|subject| subject.id == cell.subject_id))
+                            .map_or("空课节", |subject| subject.name.as_str()),
+                        RowKind::Rest(RestPurpose::Lunch) => "午休",
+                        RowKind::Rest(RestPurpose::Recess) => "课间",
+                        RowKind::Rest(_) => "休息",
+                        RowKind::Activity => "活动",
+                    };
+                    json!({"begin": row.range.begin.get(), "end": row.range.end.get(), "label": label})
+                })
+                .collect::<Vec<_>>();
+            json!({
+                "result": "scheduled",
+                "sourceDate": date_text(day.source_date),
+                "weekday": weekday.index(),
+                "unverified": day.public_data_unverified,
+                "rows": rows,
+            })
+        }
+    };
+    super::encode(current.revision, &result).map(Some)
+}
 pub fn mutation(
     bytes: &[u8],
     current: &ScheduleDocument,
@@ -646,15 +722,7 @@ pub fn mutation(
             }
         }
         "saveCalendar" => {
-            let c: SaveCalendar = candidate(r.candidate)?;
-            d.calendar_mode = match c.calendar_mode.as_str() {
-                "school" => CalendarMode::School,
-                "public" => CalendarMode::Public,
-                _ => return invalid(),
-            };
-            d.automatic_gaps = c.automatic_gaps;
-            d.school_calendar = calendar_domain(c.school_calendar, &d.school_calendar)?;
-            d.public_calendar = calendar_domain(c.public_calendar, &d.public_calendar)?;
+            apply_calendar(&mut d, candidate(r.candidate)?)?;
         }
         _ => return invalid(),
     }
@@ -667,6 +735,49 @@ pub fn mutation(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn calendar_preview_uses_the_source_day_and_reports_missing_school_coverage() {
+        use fc_domain::{auth::{Principal, Role}, identity::*};
+        use serde_json::{json, Value};
+        let class = ClassId::new(1).unwrap();
+        let school = SchoolId::new(1).unwrap();
+        let identity = IdentityState {
+            installation: Some(Installation { school_id: school, school_name: "测试学校".into(), current_class: Some(class) }),
+            accounts: vec![UserAccount {
+                principal: Principal { id: PrincipalId::new(1).unwrap(), school_id: school, auth_epoch: AuthEpoch::new(1), role: Role::GlobalAdmin, enabled: true },
+                login_name: "admin".into(), display_name: "主管理员".into(), must_change_password: false, credential_version: 1, recovery_version: 1,
+            }],
+            classes: vec![SchoolClass { id: class, school_id: school, name: "测试班".into(), enabled: true }],
+            ..IdentityState::default()
+        };
+        let (.., current) = mutation(
+            br#"{"schemaVersion":1,"expectedRevision":"0","action":"createSemester","candidate":{"classId":"1","name":"Term","start":"2026-09-01","end":"2027-01-31","firstWeekMonday":"2026-08-31"}}"#,
+            &ScheduleDocument::default(),
+            &identity,
+        ).unwrap();
+        let mut request = json!({
+            "schemaVersion":1, "expectedRevision":"0", "classId":"1", "date":"2026-10-10",
+            "candidate": {
+                "calendarMode":"school", "automaticGaps":false,
+                "schoolCalendar":{"coverage":null,"verifiedYears":[],"entries":[]},
+                "publicCalendar":{"coverage":null,"verifiedYears":[],"entries":[]},
+            },
+        });
+        let preview = |request: &Value| {
+            let value = preview_calendar(&serde_json::to_vec(request).unwrap(), &current, &identity)
+                .unwrap().unwrap();
+            serde_json::from_slice::<Value>(&value).unwrap()["data"].clone()
+        };
+        assert_eq!(preview(&request)["result"], "outsideCoverage");
+        request["candidate"]["schoolCalendar"]["coverage"] = json!(["2026-09-01", "2027-01-31"]);
+        request["candidate"]["schoolCalendar"]["entries"] = json!([{
+            "semesterId":current.semesters[0].semester.id.get().to_string(), "date":"2026-10-10", "mapping":"source", "sourceDate":"2026-10-14",
+        }]);
+        let result = preview(&request);
+        assert_eq!(result["sourceDate"], "2026-10-14");
+        assert_eq!(result["weekday"], 2);
+        assert!(current.school_calendar.entries.is_empty());
+    }
     #[test]
     fn adding_a_synchronized_dual_row_keeps_shared_timing_and_distinct_physical_ids() {
         let identity = fc_domain::identity::IdentityState::default();

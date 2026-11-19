@@ -54,10 +54,7 @@ impl PreparedLocal {
             StaticAssets::load_in_job(&prefix, &root, context)
                 .map_err(|_| RuntimeError::StaticAssets)?,
         );
-        let hosts = local_certificate_hosts().map_err(|_| RuntimeError::AddressUnavailable)?;
-        if !hosts.iter().any(|host| host == "127.0.0.1") {
-            return Err(RuntimeError::AddressUnavailable);
-        }
+        let hosts = local_certificate_hosts().unwrap_or_else(|_| vec!["127.0.0.1".into()]);
         let hosts = hosts.iter().map(String::as_str).collect::<Vec<_>>();
         let certificate = provision_hosts_certificate(&hosts, || context.checkpoint().is_ok())
             .map_err(|_| RuntimeError::Certificate)?;
@@ -101,6 +98,7 @@ struct Shared {
     report: Option<NetworkReport>,
     returned: bool,
     attached: bool,
+    backend_starting: bool,
     pending: Option<Attachment>,
     pending_repair: Option<Arc<crate::repair_web::RepairService>>,
     pending_updates: Option<crate::update_network::NetworkControl>,
@@ -108,6 +106,9 @@ struct Shared {
     service: Option<crate::backend::web::WebService>,
     lan_commands: std::collections::VecDeque<LanCommand>,
     lan_changing: bool,
+    lan_editing: bool,
+    lan_exposed: bool,
+    automatic_lan: bool,
     negative_lan_stop: bool,
     business_drain_requested: bool,
     business_quiescent: bool,
@@ -116,6 +117,8 @@ struct Shared {
     lan_configuration: Option<HttpsConfiguration>,
     startup_configuration: Option<HttpsConfiguration>,
     discovery_status: &'static str,
+    firewall_notice: &'static str,
+    lan_notice: &'static str,
     classrooms: fc_protocol::web::responses::Classrooms,
 }
 static CLAIMED: AtomicBool = AtomicBool::new(false);
@@ -149,6 +152,7 @@ impl LocalRuntime {
             report: None,
             returned: false,
             attached: false,
+            backend_starting: true,
             pending: None,
             pending_repair: None,
             pending_updates: None,
@@ -156,6 +160,9 @@ impl LocalRuntime {
             service: None,
             lan_commands: std::collections::VecDeque::new(),
             lan_changing: false,
+            lan_editing: false,
+            lan_exposed: false,
+            automatic_lan: true,
             negative_lan_stop: false,
             business_drain_requested: false,
             business_quiescent: false,
@@ -167,6 +174,8 @@ impl LocalRuntime {
             lan_configuration: None,
             startup_configuration: None,
             discovery_status: "未启动",
+            firewall_notice: "待准备",
+            lan_notice: "正在准备校园入口",
             classrooms: fc_protocol::web::responses::Classrooms {
                 schema_version: 1,
                 discovery_available: false,
@@ -240,12 +249,18 @@ impl LocalRuntime {
         shared.pending_repair = Some(service);
         Ok(())
     }
+    pub fn abandon_backend_startup(&self) {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .backend_starting = false;
+    }
     pub fn request_stop(&self) {
         self.request_stop_at(Instant::now())
     }
     pub fn request_stop_at(&self, at: Instant) {
-        crate::local_management::publish(0);
         let mut shared = self.shared.lock().unwrap_or_else(|e| e.into_inner());
+        crate::local_management::publish(0);
         if let Some(service) = &shared.service {
             service.set_local_control_ready(false);
         }
@@ -260,6 +275,14 @@ impl LocalRuntime {
     pub fn is_quiescent(&self) -> bool {
         self.quiescent
     }
+    pub fn can_retry(&self) -> bool {
+        self.thread.is_some()
+            && self.shared.lock().is_ok_and(|state| {
+                state
+                    .stop_at
+                    .is_none_or(|at| Instant::now() < at + STOP_BUDGET)
+            })
+    }
     pub fn poll(&mut self) -> RuntimeStatus {
         if self
             .thread
@@ -273,10 +296,12 @@ impl LocalRuntime {
                 .join();
             let mut state = self.shared.lock().unwrap_or_else(|e| e.into_inner());
             self.quiescent = state.returned && joined.is_ok();
-            if self.quiescent && state.status.error.is_none() {
-                state.status.phase = RuntimePhase::Disabled;
+            if self.quiescent {
                 CLAIMED.store(false, Ordering::Release);
-            } else if !self.quiescent {
+                if state.status.error.is_none() {
+                    state.status.phase = RuntimePhase::Disabled;
+                }
+            } else {
                 state.status.phase = RuntimePhase::Faulted;
                 state.status.error = Some(RuntimeError::Faulted);
             }
@@ -347,8 +372,99 @@ struct LanCommand {
     configuration: Option<HttpsConfiguration>,
     app: Option<Arc<WebApplication>>,
     assets: Option<Arc<StaticAssets>>,
+    expose: bool,
     active: crate::web_transfer::ExecutionFence,
     reply: mpsc::SyncSender<Result<(), RuntimeError>>,
+}
+
+/// One settings or automatic network change at a time. A preview reserves
+/// the native listener while the business routes stay disabled until commit.
+pub struct LanEdit<'a> {
+    control: &'a LocalControlHandle,
+    rollback: Option<LanCommand>,
+}
+
+impl LanEdit<'_> {
+    pub fn preview(
+        &mut self,
+        configuration: HttpsConfiguration,
+        app: Arc<WebApplication>,
+        assets: Arc<StaticAssets>,
+        previous: Option<(HttpsConfiguration, Arc<WebApplication>, Arc<StaticAssets>)>,
+        context: &JobContext,
+        authority: crate::web_transfer::ExecutionFence,
+    ) -> Result<ConfigureTicket, RuntimeError> {
+        let ticket = self.control.queue_lan(
+            Some(configuration),
+            Some(app),
+            Some(assets),
+            false,
+            context,
+            authority,
+        )?;
+        let (configuration, app, assets) = previous
+            .map_or((None, None, None), |(configuration, app, assets)| {
+                (Some(configuration), Some(app), Some(assets))
+            });
+        let (reply, _result) = mpsc::sync_channel(1);
+        self.rollback = Some(LanCommand {
+            configuration,
+            app,
+            assets,
+            expose: true,
+            active: Arc::new(|| true),
+            reply,
+        });
+        Ok(ticket)
+    }
+
+    pub fn activate(&mut self, configuration: &HttpsConfiguration) -> Result<(), RuntimeError> {
+        let mut state = self
+            .control
+            .shared
+            .lock()
+            .map_err(|_| RuntimeError::Faulted)?;
+        if state.stop_at.is_some() || state.business_drain_requested || state.negative_lan_stop {
+            return Err(RuntimeError::Cancelled);
+        }
+        if state.lan_configuration.as_ref() != Some(configuration)
+            || state.lan_status.phase != LanListenerPhase::Listening
+            || state.lan_status.error.is_some()
+        {
+            return Err(RuntimeError::Faulted);
+        }
+        // This exact preview has been durably saved by the writer. Returning an
+        // unknown-result UI response must never reinstate an older binding.
+        self.rollback = None;
+        state.startup_configuration = Some(configuration.clone());
+        state
+            .service
+            .as_ref()
+            .ok_or(RuntimeError::Faulted)?
+            .set_lan_ready(true)
+            .map_err(|_| RuntimeError::BackendUnavailable)?;
+        state.lan_exposed = true;
+        Ok(())
+    }
+}
+
+impl Drop for LanEdit<'_> {
+    fn drop(&mut self) {
+        let mut state = self
+            .control
+            .shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        state.lan_editing = false;
+        if let Some(rollback) = self.rollback.take() {
+            if state.stop_at.is_none()
+                && !state.business_drain_requested
+                && !state.negative_lan_stop
+            {
+                state.lan_commands.push_back(rollback);
+            }
+        }
+    }
 }
 pub struct ConfigureTicket {
     result: mpsc::Receiver<Result<(), RuntimeError>>,
@@ -373,6 +489,74 @@ impl ConfigureTicket {
     }
 }
 impl LocalControlHandle {
+    pub fn begin_lan_edit(&self) -> Result<LanEdit<'_>, RuntimeError> {
+        let mut state = self.shared.lock().map_err(|_| RuntimeError::Faulted)?;
+        if state.lan_editing
+            || state.lan_changing
+            || !state.lan_commands.is_empty()
+            || state.stop_at.is_some()
+            || state.business_drain_requested
+            || state.negative_lan_stop
+        {
+            return Err(RuntimeError::Busy);
+        }
+        state.lan_editing = true;
+        Ok(LanEdit {
+            control: self,
+            rollback: None,
+        })
+    }
+
+    pub fn automatic_lan(&self) -> bool {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .automatic_lan
+    }
+    pub fn set_automatic_lan(&self, enabled: bool) {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .automatic_lan = enabled;
+    }
+    pub fn lan_notice(&self) -> &'static str {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .lan_notice
+    }
+    pub fn set_lan_notice(&self, notice: &'static str) {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .lan_notice = notice;
+    }
+    pub fn firewall_notice(&self) -> &'static str {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .firewall_notice
+    }
+    pub fn set_firewall_notice(&self, notice: &'static str) {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .firewall_notice = notice;
+    }
+    /// Only a published binding can be restored after a failed settings write.
+    pub fn live_lan_configuration(&self) -> Option<HttpsConfiguration> {
+        let state = self.shared.lock().unwrap_or_else(|e| e.into_inner());
+        if state.lan_exposed
+            && state.lan_status.phase == LanListenerPhase::Listening
+            && !state.lan_changing
+            && state.lan_commands.is_empty()
+            && state.stop_at.is_none()
+        {
+            state.lan_configuration.clone()
+        } else {
+            None
+        }
+    }
     pub fn attach_updates(
         &self,
         control: crate::update_network::NetworkControl,
@@ -416,6 +600,8 @@ impl LocalControlHandle {
             state.business_drain_requested = true;
             state.business_quiescent = false;
             state.negative_lan_stop = true;
+            state.automatic_lan = false;
+            state.lan_exposed = false;
             state.lan_quiescent = false;
         }
     }
@@ -429,6 +615,8 @@ impl LocalControlHandle {
     pub fn request_lan_stop(&self) {
         let mut state = self.shared.lock().unwrap_or_else(|e| e.into_inner());
         state.negative_lan_stop = true;
+        state.automatic_lan = false;
+        state.lan_exposed = false;
         state.lan_quiescent = false;
         if let Some(service) = &state.service {
             let _ = service.set_lan_ready(false);
@@ -452,11 +640,19 @@ impl LocalControlHandle {
             && state.stop_at.is_none()
             && !state.business_drain_requested
     }
+    pub fn updates_bound(&self) -> bool {
+        self.shared
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .update_control
+            .is_some()
+    }
     /// No saved drafts or loopback maintenance URLs are published to phones.
     pub fn quick_connect_url(&self) -> Option<String> {
         let state = self.shared.lock().unwrap_or_else(|e| e.into_inner());
         if state.lan_status.phase != LanListenerPhase::Listening
             || state.lan_status.error.is_some()
+            || !state.lan_exposed
             || state.lan_changing
             || !state.lan_commands.is_empty()
             || state.negative_lan_stop
@@ -467,12 +663,10 @@ impl LocalControlHandle {
         }
         let config = state.lan_configuration.as_ref()?;
         let address: std::net::IpAddr = config.host.as_str().parse().ok()?;
-        if address.is_loopback()
-            || address.is_unspecified()
-            || address.is_multicast()
-            || matches!(address, std::net::IpAddr::V4(ip) if ip.is_broadcast())
-            || matches!(address, std::net::IpAddr::V6(ip) if ip.is_unicast_link_local() || ip.to_ipv4_mapped().is_some_and(|ip| ip.is_loopback() || ip.is_unspecified() || ip.is_multicast() || ip.is_broadcast()))
-        {
+        if !match address {
+            std::net::IpAddr::V4(ip) => ip.is_private(),
+            std::net::IpAddr::V6(ip) => ip.is_unique_local(),
+        } {
             return None;
         }
         Some(format!("{}/fc/", config.origin()))
@@ -514,6 +708,18 @@ impl LocalControlHandle {
         context: &JobContext,
         authority: crate::web_transfer::ExecutionFence,
     ) -> Result<ConfigureTicket, RuntimeError> {
+        self.queue_lan(configuration, app, assets, true, context, authority)
+    }
+
+    fn queue_lan(
+        &self,
+        configuration: Option<HttpsConfiguration>,
+        app: Option<Arc<WebApplication>>,
+        assets: Option<Arc<StaticAssets>>,
+        expose: bool,
+        context: &JobContext,
+        authority: crate::web_transfer::ExecutionFence,
+    ) -> Result<ConfigureTicket, RuntimeError> {
         context.checkpoint().map_err(|_| RuntimeError::Cancelled)?;
         if configuration.is_some() != app.is_some() || configuration.is_some() != assets.is_some() {
             return Err(RuntimeError::InvalidConfiguration);
@@ -522,6 +728,8 @@ impl LocalControlHandle {
         if !shared.attached
             || shared.pending.is_some()
             || shared.stop_at.is_some()
+            || shared.negative_lan_stop
+            || shared.business_drain_requested
             || shared.lan_commands.len() + usize::from(shared.lan_changing) >= 2
         {
             return Err(RuntimeError::Busy);
@@ -532,6 +740,7 @@ impl LocalControlHandle {
             configuration,
             app,
             assets,
+            expose,
             active: Arc::new(move || job() && authority()),
             reply,
         });
@@ -541,8 +750,12 @@ impl LocalControlHandle {
 fn fail(shared: &Arc<Mutex<Shared>>, error: RuntimeError) {
     let mut state = shared.lock().unwrap_or_else(|e| e.into_inner());
     state.status.phase = RuntimePhase::Faulted;
-    state.status.error = Some(error);
+    state.status.error.get_or_insert(error);
     state.stop_at.get_or_insert_with(Instant::now);
+    if let Some(service) = &state.service {
+        service.set_local_control_ready(false);
+    }
+    crate::local_management::publish(0);
 }
 fn early(shared: &Arc<Mutex<Shared>>, error: RuntimeError, returned: bool) {
     fail(shared, error);
@@ -595,7 +808,6 @@ where
         state.status.generation = net.generation();
         if state.status.error.is_none() {
             state.status.phase = RuntimePhase::Running;
-            crate::local_management::publish(prepared.port);
         }
     }
     let mut attachment: Option<Attachment> = None;
@@ -613,7 +825,8 @@ where
         assets: prepared.assets.clone(),
     };
     let mut discovery = None;
-    let mut discovery_attempted = false;
+    let mut discovery_binding = None;
+    let mut discovery_retry = Instant::now();
     let mut browser = None;
     let mut discovery_poll_at = Instant::now();
     let mut update_discovery_at = Instant::now();
@@ -637,24 +850,35 @@ where
                 .take();
             if let Some(repair) = repair {
                 if net.attach_repair(repair).is_ok() {
-                    shared.lock().unwrap_or_else(|e| e.into_inner()).attached = true;
+                    let mut state = shared.lock().unwrap_or_else(|e| e.into_inner());
+                    state.attached = true;
+                    if state.stop_at.is_none() {
+                        crate::local_management::publish(prepared.port);
+                    }
                 } else {
                     fail(&shared, RuntimeError::BackendUnavailable);
                 }
             }
-            let pending = shared
-                .lock()
-                .unwrap_or_else(|e| e.into_inner())
-                .pending
-                .take();
+            let (pending, starting) = {
+                let mut state = shared.lock().unwrap_or_else(|e| e.into_inner());
+                (
+                    state.pending.take(),
+                    state.backend_starting && state.stop_at.is_none(),
+                )
+            };
+            net.set_local_backend_starting(starting);
             if let Some(pending) = pending {
                 match net.attach_backend(&pending.backend, &pending.app) {
                     Ok(()) => {
-                        pending.app.binding().set_local_control_ready(true);
-                        shared.lock().unwrap_or_else(|e| e.into_inner()).service =
-                            Some(pending.app.binding());
+                        let mut state = shared.lock().unwrap_or_else(|e| e.into_inner());
+                        if state.stop_at.is_none() && !state.business_drain_requested {
+                            pending.app.binding().set_local_control_ready(true);
+                            crate::local_management::publish(prepared.port);
+                        }
+                        state.service = Some(pending.app.binding());
                         attachment = Some(pending);
-                        shared.lock().unwrap_or_else(|e| e.into_inner()).attached = true;
+                        state.attached = true;
+                        state.backend_starting = false;
                     }
                     Err(_) => {
                         fail(&shared, RuntimeError::BackendUnavailable);
@@ -669,6 +893,8 @@ where
                 for command in state.lan_commands.drain(..) {
                     let _ = command.reply.send(Err(RuntimeError::Cancelled));
                 }
+                state.lan_configuration = None;
+                state.lan_exposed = false;
             }
             requested
         };
@@ -687,7 +913,7 @@ where
                 .unwrap_or_else(|e| e.into_inner())
                 .lan_changing = false;
         }
-        if !stopping && changing.is_none() {
+        if !stopping && changing.is_none() && retired_lan.len() < 2 {
             let command = {
                 let mut state = shared.lock().unwrap_or_else(|e| e.into_inner());
                 let command = state.lan_commands.pop_front();
@@ -697,12 +923,7 @@ where
             if let Some(command) = command {
                 let result = if !(command.active)() {
                     Err(RuntimeError::Cancelled)
-                } else if retired_lan.len() >= 2 {
-                    Err(RuntimeError::Busy)
                 } else {
-                    if let Some(attached) = &attachment {
-                        let _ = attached.app.binding().set_lan_ready(false);
-                    }
                     net.configure_lan(
                         command.configuration.as_ref(),
                         command.app.as_ref(),
@@ -712,6 +933,10 @@ where
                 };
                 match result {
                     Ok(()) => {
+                        if let Some(attached) = &attachment {
+                            let _ = attached.app.binding().set_lan_ready(false);
+                        }
+                        shared.lock().unwrap_or_else(|e| e.into_inner()).lan_exposed = false;
                         if let Some(previous) = lan_owner.take() {
                             retired_lan.push(previous);
                         }
@@ -722,9 +947,10 @@ where
                         let _ = command.reply.send(Err(error));
                         let mut state = shared.lock().unwrap_or_else(|e| e.into_inner());
                         state.lan_changing = false;
+                        let phase = net.lan_phase();
                         state.lan_status = LanStatus {
-                            phase: net.lan_phase(),
-                            error: Some(error),
+                            phase,
+                            error: (phase != LanListenerPhase::Listening).then_some(error),
                         };
                     }
                 }
@@ -789,6 +1015,15 @@ where
                 state.lan_status = LanStatus { phase, error };
                 state.lan_changing = !complete;
                 if complete {
+                    let expose = error.is_none()
+                        && command.configuration.is_some()
+                        && command.expose
+                        && state.stop_at.is_none()
+                        && !state.business_drain_requested
+                        && !state.negative_lan_stop;
+                    state.lan_exposed = attachment.as_ref().is_some_and(|attached| {
+                        attached.app.binding().set_lan_ready(expose).is_ok() && expose
+                    });
                     state.lan_configuration = if error.is_none() {
                         command.configuration.clone()
                     } else {
@@ -797,12 +1032,6 @@ where
                 }
             }
             if complete {
-                if let Some(attached) = &attachment {
-                    let _ = attached
-                        .app
-                        .binding()
-                        .set_lan_ready(error.is_none() && command.configuration.is_some());
-                }
                 let _ = command.reply.send(error.map_or(Ok(()), Err));
             } else {
                 changing = Some((command, started, error));
@@ -824,17 +1053,17 @@ where
         if !stopping && !business_draining && Instant::now() >= discovery_poll_at {
             discovery_poll_at = Instant::now() + Duration::from_millis(100);
             if let Some(address) = discovery_control.quick_connect_url() {
-                if !discovery_attempted {
-                    discovery_attempted = true;
+                let host = discovery_control
+                    .live_lan_configuration()
+                    .and_then(|config| config.host.as_str().parse::<std::net::Ipv4Addr>().ok());
+                if discovery_binding != host
+                    || (Instant::now() >= discovery_retry && discovery.is_none())
+                {
                     if discovery.is_none() {
                         discovery = fc_windows::lan_discovery::DiscoveryResponder::bind().ok();
                     }
-                    let host = shared
-                        .lock()
-                        .unwrap_or_else(|e| e.into_inner())
-                        .lan_configuration
-                        .as_ref()
-                        .and_then(|config| config.host.as_str().parse::<std::net::Ipv4Addr>().ok());
+                    discovery_retry = Instant::now() + Duration::from_secs(5);
+                    discovery_binding = host;
                     browser = host.and_then(|host| {
                         fc_windows::lan_discovery::DiscoveryBrowser::bind(host).ok()
                     });
@@ -939,7 +1168,7 @@ where
                     discovery = None;
                 }
                 browser = None;
-                discovery_attempted = false;
+                discovery_binding = None;
                 shared
                     .lock()
                     .unwrap_or_else(|e| e.into_inner())

@@ -324,7 +324,14 @@ impl<S: Send + 'static> TransactionTask<S> for TypedTask<S> {
         d: &dyn TransactionDocuments,
     ) -> Result<TransactionDecision<S>, StorageError> {
         let identity = load_identity(d)?;
-        let voice_policy = matches!(&self.intent, TypedCommandIntent::VoicePolicy(_));
+        // Calendar Web callers first prove LocalControl transport. Keep their
+        // real Web identity and recheck the exact owner/session at the writer.
+        let web_management = matches!(
+            &self.intent,
+            TypedCommandIntent::VoicePolicy(_)
+                | TypedCommandIntent::CalendarPolicy { .. }
+                | TypedCommandIntent::CalendarManualFetch { .. }
+        );
         let check = {
             let identity = identity.clone();
             let actor = self.actor.clone();
@@ -333,14 +340,8 @@ impl<S: Send + 'static> TransactionTask<S> for TypedTask<S> {
             move || {
                 if let Some(actor) = &actor {
                     session(&identity, actor)?;
-                    if actor.origin != TrustedOrigin::Local && !voice_policy {
-                        return Err(if voice_policy {
-                            StorageError::Voice(fc_domain::voice::VoiceError::Permission(
-                                fc_domain::auth::PermissionError::LocalOnly,
-                            ))
-                        } else {
-                            StorageError::InvalidCommand
-                        });
+                    if actor.origin != TrustedOrigin::Local && !web_management {
+                        return Err(StorageError::InvalidCommand);
                     }
                     identity
                         .authorize_management(actor, clock.now())

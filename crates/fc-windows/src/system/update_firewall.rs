@@ -1,5 +1,5 @@
-//! Product-owned update ingress only. Never modifies firewall profiles, SSH,
-//! unrelated rules or the existing teacher/discovery rules. Win7 Firewall COM.
+//! Allow only the product's required private/domain LAN ingress. Firewall
+//! profiles and unrelated rules are never modified. Win7 Firewall COM.
 use sha2::{Digest, Sha256};
 use windows::{
     core::{Result, BSTR},
@@ -59,7 +59,7 @@ fn remote_matches(value: &str) -> bool {
     values.sort_unstable();
     values == ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
 }
-fn matches(rule: &INetFwRule, program: &str) -> Result<bool> {
+fn matches(rule: &INetFwRule, program: &str, protocol: i32, port: &str) -> Result<bool> {
     // COM interfaces and returned BSTRs stay on this synchronous worker. No
     // borrowed interface or apartment owner escapes the operation.
     unsafe {
@@ -67,8 +67,8 @@ fn matches(rule: &INetFwRule, program: &str) -> Result<bool> {
             .ApplicationName()?
             .to_string()
             .eq_ignore_ascii_case(program)
-            && rule.Protocol()? == 6
-            && rule.LocalPorts()? == "8445"
+            && rule.Protocol()? == protocol
+            && rule.LocalPorts()? == port
             && remote_matches(&rule.RemoteAddresses()?.to_string())
             && rule.Profiles()? == 3
             && rule.Direction()? == NET_FW_RULE_DIR_IN
@@ -80,7 +80,7 @@ fn matches(rule: &INetFwRule, program: &str) -> Result<bool> {
             && rule.EdgeTraversal()?.0 == 0)
     }
 }
-fn prepare() -> Result<UpdateFirewallStatus> {
+fn prepare(name_suffix: &str, protocol: i32, port: u16) -> Result<UpdateFirewallStatus> {
     let program =
         std::env::current_exe().map_err(|_| windows::core::Error::from_hresult(E_FAIL))?;
     if program
@@ -97,14 +97,15 @@ fn prepare() -> Result<UpdateFirewallStatus> {
         .iter()
         .map(|byte| format!("{byte:02X}"))
         .collect();
-    let name = BSTR::from(format!("FutureClassroom-LAN-{suffix}-Update"));
+    let name = BSTR::from(format!("FutureClassroom-LAN-{suffix}-{name_suffix}"));
+    let port = port.to_string();
     let _apartment = Apartment::open()?;
     let policy: INetFwPolicy2 =
         unsafe { CoCreateInstance(&NetFwPolicy2, None, CLSCTX_INPROC_SERVER) }?;
     let rules = unsafe { policy.Rules() }?;
     match unsafe { rules.Item(&name) } {
         Ok(rule) => {
-            if !matches(&rule, program)? {
+            if !matches(&rule, program, protocol, &port)? {
                 return Ok(UpdateFirewallStatus::Restricted);
             }
         }
@@ -114,11 +115,11 @@ fn prepare() -> Result<UpdateFirewallStatus> {
             unsafe {
                 rule.SetName(&name)?;
                 rule.SetDescription(&BSTR::from(
-                    "FutureClassroom school update distribution; private/domain RFC1918 only",
+                    "FutureClassroom school LAN; private/domain RFC1918 only",
                 ))?;
                 rule.SetApplicationName(&BSTR::from(program))?;
-                rule.SetProtocol(6)?;
-                rule.SetLocalPorts(&BSTR::from("8445"))?;
+                rule.SetProtocol(protocol)?;
+                rule.SetLocalPorts(&BSTR::from(port.as_str()))?;
                 rule.SetRemotePorts(&BSTR::from("*"))?;
                 rule.SetLocalAddresses(&BSTR::from("*"))?;
                 rule.SetRemoteAddresses(&BSTR::from(REMOTE))?;
@@ -134,7 +135,7 @@ fn prepare() -> Result<UpdateFirewallStatus> {
                     return Err(error);
                 }
             }
-            if !matches(&unsafe { rules.Item(&name) }?, program)? {
+            if !matches(&unsafe { rules.Item(&name) }?, program, protocol, &port)? {
                 return Ok(UpdateFirewallStatus::Restricted);
             }
         }
@@ -163,7 +164,20 @@ const HRESULT_FROM_WIN32_FILE_NOT_FOUND: windows::core::HRESULT =
 /// Try to add only this executable's missing exact update rule. Standard-user
 /// access denial is a disclosed restriction; no UAC bypass or broad rule fallback.
 pub fn prepare_update_firewall() -> UpdateFirewallStatus {
-    match prepare() {
+    prepare_rule("Update", 6, 8445)
+}
+
+/// Same executable/profile/scope rules as the deployment script; current
+/// permissions and Group Policy determine whether rule preparation can succeed.
+pub fn prepare_teacher_firewall(https_port: u16) -> (UpdateFirewallStatus, UpdateFirewallStatus) {
+    (
+        prepare_rule("HTTPS", 6, https_port),
+        prepare_rule("Discovery", 17, 38443),
+    )
+}
+
+fn prepare_rule(name: &str, protocol: i32, port: u16) -> UpdateFirewallStatus {
+    match prepare(name, protocol, port) {
         Ok(value) => value,
         Err(error) if error.code() == E_ACCESSDENIED => UpdateFirewallStatus::NeedsAdministrator,
         Err(_) => UpdateFirewallStatus::Restricted,

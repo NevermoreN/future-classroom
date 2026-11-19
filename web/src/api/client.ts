@@ -64,7 +64,7 @@ export interface ServerApi {
   session(signal: AbortSignal): Promise<Session>
   create(form: PairingForm, signal: AbortSignal): Promise<PairingReceipt>
   poll(id: string, proof: string, signal: AbortSignal): Promise<PollResult>
-  logout(csrf: string, signal: AbortSignal): Promise<void>
+  logout(csrf: string, signal: AbortSignal, allDevices?: boolean): Promise<void>
 }
 export interface ContentApi extends CommandApi {
   scopes(kind: ContentKind, offset: number, signal: AbortSignal): Promise<ScopePage>
@@ -145,8 +145,9 @@ export class HttpApi implements ServerApi, ContentApi {
     if (r.status !== (result.status === 'PENDING' ? 202 : 200)) throw new ProtocolFault()
     return result
   }
-  async logout(csrf: string, signal: AbortSignal) {
-    const r = await this.request('session/logout', signal, { schemaVersion: 1 }, csrf)
+  async logout(csrf: string, signal: AbortSignal, allDevices = false) {
+    const body = allDevices ? { schemaVersion: 1, scope: 'ACCOUNT' } : { schemaVersion: 1 }
+    const r = await this.request('session/logout', signal, body, csrf)
     if (r.status !== 200) throw new ProtocolFault()
     loggedOut(r.value)
   }

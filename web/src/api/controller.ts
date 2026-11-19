@@ -1,7 +1,7 @@
 import { ApiError, isAborted, setPageToken, type ServerApi } from './client'
 import { ProtocolFault, ProtocolVersionFault, pageCredential, validateLogin, validatePasswordChange, validateSetup, type LoginForm, type PageSession, type PasswordChangeForm, type Session, type SetupForm } from './protocol'
 export type ViewState =
-  | { phase: 'checking' }
+  | { phase: 'checking'; starting?: boolean }
   | { phase: 'anonymous'; notice?: string }
   | { phase: 'setup'; notice?: string }
   | { phase: 'setting-up' }
@@ -50,18 +50,34 @@ export class SessionController {
     if (previous && !(error instanceof ProtocolFault)) {
       this.publish({ phase: 'authenticated', session: previous, notice: '连接暂时中断，当前页面登录已保留。请检查网络后重试。' }); return
     }
-    this.publish({ phase: 'error', message: error instanceof ProtocolFault ? error.message : '暂时无法连接白板。登录信息已保留，请检查网络后重新连接。', ...(error instanceof ProtocolVersionFault ? { refreshRequired: true } : {}) })
+    this.publish({ phase: 'error', message: error instanceof ProtocolFault ? error.message : error instanceof ApiError && error.code === 'STARTING' ? '未来教室仍在准备，请稍后重新连接。' : '暂时无法连接白板。登录信息已保留，请检查网络后重新连接。', ...(error instanceof ProtocolVersionFault ? { refreshRequired: true } : {}) })
   }
   async connect(): Promise<void> {
     if (this.disposed || this.state.phase === 'logging-in' || this.state.phase === 'logging-out' || this.state.phase === 'setting-up') return
     const previous = this.state.phase === 'authenticated' ? this.state.session : undefined
     const { controller, id } = this.begin(); this.publish({ phase: 'checking' }); this.compatible = false
     try {
-      const status = await this.api.status(controller.signal)
-      if (!status.online) throw new Error('offline')
-      if (!this.current(id)) return
-      this.compatible = true
-      if (status.initialized === false) { this.clear(); this.publish({ phase: 'setup' }); return }
+      for (let attempt = 0; ; attempt++) {
+        try {
+          const status = await this.api.status(controller.signal)
+          if (!status.online) throw new Error('offline')
+          if (!this.current(id)) return
+          this.compatible = true
+          if (status.initialized === false) { this.clear(); this.publish({ phase: 'setup' }); return }
+          break
+        } catch (error) {
+          if (!this.current(id)) return
+          if (!(error instanceof ApiError && error.status === 503 && error.code === 'STARTING') || attempt >= 5) throw error
+          this.publish({ phase: 'checking', starting: true })
+          await new Promise<void>(resolve => {
+            const done = () => { clearTimeout(timer); controller.signal.removeEventListener('abort', done); resolve() }
+            const timer = setTimeout(done, 2000)
+            controller.signal.addEventListener('abort', done, { once: true })
+            if (controller.signal.aborted) done()
+          })
+          if (!this.current(id)) return
+        }
+      }
       const token = this.pageToken ?? this.credentials.load()
       // Never allow an existing cookie alone to log a new tab into the account.
       if (!token) { setPageToken(undefined); this.publish({ phase: 'anonymous' }); return }
@@ -97,13 +113,13 @@ export class SessionController {
       this.publish({ phase: 'setup', notice: error instanceof ApiError && error.status === 403 ? '请在白板本机通过托盘打开设置，完成首次初始化。' : error instanceof ApiError && error.status === 400 ? '初始化资料未被接受，请检查必填项和密码长度。' : '初始化结果尚未确认，请重新检查连接核对当前状态。不会自动重复创建管理员。' })
     }
   }
-  async logout(): Promise<void> {
+  async logout(allDevices = false): Promise<void> {
     if (this.disposed || this.state.phase !== 'authenticated') return
     const csrf = this.state.session.csrf
     const { controller, id } = this.begin(); this.publish({ phase: 'logging-out' }); this.credentials.clear()
     try {
-      await this.api.logout(csrf, controller.signal)
-      if (this.current(id)) this.publish({ phase: 'anonymous', notice: '已退出登录。' })
+      await this.api.logout(csrf, controller.signal, allDevices)
+      if (this.current(id)) this.publish({ phase: 'anonymous', notice: allDevices ? '所有设备已退出登录。' : '已退出登录。' })
     } catch (error) {
       if (!this.current(id) || isAborted(error)) return
       if (error instanceof ApiError && [401, 403].includes(error.status)) this.publish({ phase: 'anonymous', notice: '原会话已失效，请重新登录。' })

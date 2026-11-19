@@ -5,7 +5,7 @@ import { Field, Section, Toggle } from './AdminForms'
 import { Download, FileUp, RefreshCw, ShieldCheck, Trash2 } from './components/icons'
 import { AdminHttpApi } from './api/admin-client'
 import { ApiError, isAborted, trustedApiBase } from './api/client'
-import { MaintenanceHttpApi, MAX_BACKUP_BYTES, forgetMaintenance, loadMaintenance, maintenanceTerminal, rememberMaintenance, type MaintenanceCredential, type MaintenanceKind, type MaintenanceMapping, type MaintenancePhase, type MaintenanceSnapshot, type MappingReview } from './api/maintenance-client'
+import { MaintenanceHttpApi, MAX_BACKUP_BYTES, forgetMaintenance, loadMaintenance, maintenanceTerminal, rememberMaintenance, type ActiveMaintenanceJob, type MaintenanceCredential, type MaintenanceKind, type MaintenanceMapping, type MaintenancePhase, type MaintenanceSnapshot, type MappingReview } from './api/maintenance-client'
 import { ProtocolFault, type Session } from './api/protocol'
 import { downloadMaintenance } from './maintenance-download'
 const phaseLabels: Record<MaintenancePhase, string> = { WAITING: '等待维护处理', READY_FOR_UPLOAD: '等待上传备份文件', UPLOADING: '正在传输备份', UPLOADED: '备份已上传，等待预检', WORKING: '正在检查与准备', MAPPING_REQUIRED: '等待明确跨安装映射', REVIEW_READY: '预检完成，等待核对与确认', CONFIRMING: '正在确认恢复边界', DRAINING: '正在停止普通请求与播放', PREPARING_DATABASE: '正在准备数据切换', SEALING: '正在封存切换资料', COMMITTING: '正在提交切换，请勿中断', RETAINED: '已保留现场，需要重新启动核对', FINISHED: '任务已完成', CANCELLED: '任务已取消', FAILED: '任务未完成' }
@@ -23,6 +23,8 @@ export default function MaintenancePanel({ session, onDirty = noDirty, onClose }
   const [api] = useState(() => new MaintenanceHttpApi(trustedApiBase(import.meta.env.BASE_URL, window.location.href))), [admin] = useState(() => new AdminHttpApi(trustedApiBase(import.meta.env.BASE_URL, window.location.href)))
   const credential = useRef<MaintenanceCredential | undefined>(loadMaintenance()), [job, setJob] = useState<MaintenanceSnapshot | null>(null), jobRef = useRef<MaintenanceSnapshot | null>(null), [taskId, setTaskId] = useState(credential.current?.id ?? ''), [file, setFile] = useState<File | null>(null), [mode, setMode] = useState<'ORDINARY' | 'MAPPED'>('ORDINARY'), [busy, setBusy] = useState(false), [notice, setNotice] = useState(''), [reviewed, setReviewed] = useState(false), [replacement, setReplacement] = useState(false), [mappingDirty, setMappingDirty] = useState(false), [downloaded, setDownloaded] = useState(0), [downloading, setDownloading] = useState(false)
   const operation = useRef<AbortController | null>(null), poll = useRef<AbortController | null>(null), locked = useRef(false), live = useRef(true), failures = useRef(0), csrf = useRef(session?.csrf); csrf.current = session?.csrf
+  const [otherJob, setOtherJob] = useState<ActiveMaintenanceJob | null>(null)
+  const hasSession = !!session, otherTaskActive = otherJob !== null
   useEffect(() => { onDirty(busy || mappingDirty || file !== null) }, [busy, mappingDirty, file, onDirty])
   function apply(next: MaintenanceSnapshot) { const previous = jobRef.current; if (previous?.phase !== next.phase || previous?.review?.currentRevision !== next.review?.currentRevision) { setReviewed(false); setReplacement(false) } jobRef.current = next; setJob(next); failures.current = 0 }
   function failed(error: unknown, mutation = false) {
@@ -39,10 +41,46 @@ export default function MaintenancePanel({ session, onDirty = noDirty, onClose }
     try { const result = await api.readStatus(current, controller.signal); if (live.current && credential.current?.id === current.id) { apply(result.data.job); if (explicit) setNotice('已读取当前维护状态。') } }
     catch (error) { if (live.current) failed(error) }
   }
+  async function refreshActive(explicit = false) {
+    if (!csrf.current || credential.current) return
+    const controller = new AbortController(); poll.current?.abort(); poll.current = controller
+    try {
+      const current = await api.readActive(controller.signal)
+      if (live.current && !credential.current && poll.current === controller) {
+        setOtherJob(current)
+        if (explicit || !current && otherTaskActive) setNotice(current ? '已读取当前维护状态。' : '维护位置已释放，可以开始新任务。')
+      }
+    } catch (error) { if (explicit && live.current) failed(error) }
+  }
+  async function abandon() {
+    const token = csrf.current
+    if (!token || !otherJob?.canAbandon || locked.current) return
+    if (!window.confirm('取消等待中的维护任务？已上传的暂存文件将清理，正式资料不会被修改。')) return
+    const controller = new AbortController(); operation.current = controller; locked.current = true; setBusy(true)
+    poll.current?.abort()
+    try {
+      const current = await api.abandon(otherJob.id, token, controller.signal)
+      if (live.current) {
+        setOtherJob(current)
+        setNotice(current ? '已请求取消，正在等待资源清理。' : '维护位置已释放，可以开始新任务。')
+      }
+    } catch (error) { if (live.current) { failed(error, true); await refreshActive() } }
+    finally { if (operation.current === controller) { locked.current = false; if (live.current) setBusy(false) } }
+  }
   useEffect(() => {
     live.current = true; if (credential.current) void refresh(false)
     return () => { live.current = false; operation.current?.abort(); poll.current?.abort() }
   }, [])
+  useEffect(() => {
+    if (taskId || !hasSession) return
+    let stopped = false, timer: ReturnType<typeof setTimeout> | undefined
+    const tick = async () => {
+      if (!locked.current && document.visibilityState === 'visible') await refreshActive()
+      if (!stopped && otherTaskActive) timer = setTimeout(tick, 2000)
+    }
+    void tick()
+    return () => { stopped = true; if (timer) clearTimeout(timer) }
+  }, [taskId, hasSession, otherTaskActive])
   useEffect(() => {
     if (!taskId) return
     let stopped = false, timer: ReturnType<typeof setTimeout> | undefined
@@ -61,7 +99,7 @@ export default function MaintenancePanel({ session, onDirty = noDirty, onClose }
       if (!live.current) return
       setTaskId(capability.id); apply(result.data.job); setMappingDirty(false); setNotice(kind === 'IMPORT' ? '任务已建立，正在上传所选备份…' : '维护任务已建立，正在准备…')
       if (kind === 'IMPORT') { const uploaded = await api.upload(capability, file!, session.csrf, controller.signal); if (live.current) { apply(uploaded.data.job); setFile(null); setNotice('备份上传已完成；请先执行只读预检，再核对恢复范围。') } }
-    } catch (error) { if (live.current) failed(error, true) }
+    } catch (error) { if (live.current) { failed(error, true); if (!credential.current) await refreshActive() } }
     finally { if (operation.current === controller) { locked.current = false; if (live.current) setBusy(false) } }
   }
   async function action(name: 'preflight' | 'mapping' | 'confirm' | 'cancel', input?: MaintenanceMapping | { expectedRevision: string; reviewedData: true; understoodReplacement: true }) {
@@ -81,5 +119,16 @@ export default function MaintenancePanel({ session, onDirty = noDirty, onClose }
   }
   function closeTask() { if ((!job || !maintenanceTerminal(job.phase)) && !window.confirm('当前维护操作可能仍在继续。关闭此任务入口不会撤销已提交的恢复，确认继续？')) return; operation.current?.abort(); poll.current?.abort(); forgetMaintenance(); credential.current = undefined; jobRef.current = null; setJob(null); setTaskId(''); setNotice(''); setFile(null); setMappingDirty(false); onDirty(false); onClose?.() }
   const active = !!job && !maintenanceTerminal(job.phase), canStart = !!session && !busy && !active && !taskId, review = job?.review
+  if (!taskId && session && otherJob) return <section className="maintenance-workspace">
+    <p role="status" className="admin-resource-status">{notice || '本机已有维护任务。完成或取消后即可开始新任务。'}</p>
+    <Section title={`${kindLabels[otherJob.kind]} · 任务 ${otherJob.id}`}>
+      <div className="maintenance-phase"><ShieldCheck size={24} /><strong>{phaseLabels[otherJob.phase]}</strong></div>
+      {otherJob.cancellationRequested && <p>正在等待资源清理。</p>}
+      <div className="admin-action-row">
+        <Button type="button" variant="outline" disabled={busy} onClick={() => { void refreshActive(true) }}><RefreshCw />读取当前进度</Button>
+        {otherJob.canAbandon && <Button type="button" variant="outline" disabled={busy} onClick={() => { void abandon() }}>取消等待中的任务</Button>}
+      </div>
+    </Section>
+  </section>
   return <section className="maintenance-workspace"><p role="status" className="admin-resource-status">{notice || (taskId && !job ? '正在读取当前页面的维护任务…' : '管理完整备份与资料恢复。')}</p>{!taskId && session && <><div className="admin-two-columns"><Section title="导出完整备份" description="包含课表、设置布局、教学内容与资料原件；不包含账号口令或恢复码，恢复保留当前安装账号与权限。请妥善保管备份文件。"><Button type="button" disabled={!canStart} onClick={() => { void create('EXPORT') }}><Download />创建完整备份</Button></Section><Section title="上传完整备份并预检" description="上传和预检不等于确认恢复；核对范围并明确确认后才会切换资料。"><Field label="完整备份文件"><Input type="file" disabled={busy} onChange={e => { setFile(e.target.files?.[0] ?? null); e.target.value = '' }} /></Field>{file && <p>{file.name} · {bytesLabel(file.size)}</p>}<Field label="恢复方式"><select disabled={busy} value={mode} onChange={e => setMode(e.target.value as 'ORDINARY' | 'MAPPED')}><option value="ORDINARY">恢复本安装的完整备份</option><option value="MAPPED">跨安装恢复：明确映射后预检</option></select></Field><Button type="button" disabled={!canStart || !file} onClick={() => { void create('IMPORT') }}><FileUp />建立任务并上传</Button></Section></div><Section title="重新初始化" description="清除本安装中的教学资料并重新创建学校与管理员。先准备范围清单，不会在这一步清除资料。"><p>建议先导出完整备份；最终确认后，恢复当前资料需要已有的完整备份。</p><Button type="button" variant="outline" disabled={!canStart} onClick={() => { if (window.confirm('开始读取重新初始化的实际影响范围？这一步不会执行清除。')) void create('RESET') }}><Trash2 />核对重新初始化范围</Button></Section></>}{taskId && <Section title={job ? `${kindLabels[job.kind]} · 任务 ${job.id}` : `维护任务 ${taskId}`}><div className="maintenance-phase"><ShieldCheck size={24} /><strong>{job ? phaseLabels[job.phase] : '等待实际任务状态'}</strong></div>{job && <><p>{job.fileName ?? ''}{job.bytes ? ` · ${bytesLabel(job.bytes)}` : ''}</p>{job.cancellationRequested && !maintenanceTerminal(job.phase) && <p>取消请求已送达，正在等待资源清理。</p>}{job.error && <p role="alert" className="notice">{job.error}</p>}{job.phase === 'COMMITTING' && <p className="notice">正在执行不可取消的资料切换，请不要关闭程序或断电。</p>}{job.phase === 'RETAINED' && <p className="notice">资料切换未完成，系统已保留现场。请保留现有文件并重新启动核对。</p>}{job.restartRequired && <p>此任务需要重新启动未来教室。请从桌面或开始菜单再次启动，并使用当前安装的账号重新登录；重新初始化完成后需重新建立学校与管理员。</p>}</>}<div className="admin-action-row"><Button type="button" variant="outline" onClick={() => { void refresh() }}><RefreshCw />读取当前进度</Button>{job?.canCancel && <Button type="button" variant="outline" disabled={job.cancellationRequested} onClick={() => { if (window.confirm('请求安全取消当前维护任务？已越过资料切换边界的操作无法撤销。')) void action('cancel') }}>请求安全取消</Button>}{downloading && <Button type="button" variant="outline" onClick={() => operation.current?.abort()}>停止本次下载</Button>}{job?.phase === 'UPLOADED' && <Button type="button" disabled={busy || !session} onClick={() => { void action('preflight') }}>只读预检此备份</Button>}{(!job || maintenanceTerminal(job.phase)) && <Button type="button" variant="outline" disabled={busy} onClick={closeTask}>{job ? '结束本页任务' : '关闭此任务入口'}</Button>}</div>{job?.kind === 'EXPORT' && job.phase === 'FINISHED' && <><p>SHA-256：<code className="maintenance-digest">{job.sha256 ?? '服务未返回摘要'}</code></p><Button type="button" disabled={busy || !session} onClick={() => { void download() }}><Download />保存完整备份文件</Button>{downloading && job.bytes && <div className="maintenance-download-progress"><progress value={downloaded} max={Number(job.bytes)} /><span>{bytesLabel(downloaded)} / {bytesLabel(job.bytes)}</span></div>}</>}</Section>}{job?.phase === 'MAPPING_REQUIRED' && job.mapping && <MappingEditor key={`${job.id}/${job.mapping.currentRevision}`} value={job.mapping} busy={busy || !session} dirty={() => setMappingDirty(true)} submit={mapping => { void action('mapping', mapping) }} />}{job?.phase === 'REVIEW_READY' && (review || job.resetReview) && <Section title={job.kind === 'RESET' ? '重新初始化影响范围' : '实际备份预检结果'} description="请完整核对，再勾选两项确认。页面刷新、连接中断不会自动再次提交恢复。">{review && <dl className="admin-status-grid">{[['备份所属学校', review.schoolId], ['备份修订', review.sourceRevision], ['当前资料修订', review.currentRevision], ['文档记录', review.documentCount], ['课堂资料原件', String(review.materialCount)], ['独立图片原件', String(review.profileMediaCount)], ['数据库', bytesLabel(review.databaseBytes)], ['资料原件大小', bytesLabel(review.materialBytes)], ['独立图片大小', bytesLabel(review.profileMediaBytes)], ['完整数据大小', bytesLabel(review.payloadBytes)]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>}{job.resetReview && <><p>已核对本安装的 {job.resetReview.presentTreeCount} 类实际资料目录，影响范围：</p><ul>{job.resetReview.scope.map(scope => <li key={scope}>{scope}</li>)}</ul></>}<div className="maintenance-confirmations"><Toggle label="我已核对以上资料、来源和影响范围" value={reviewed} onChange={setReviewed} /><Toggle label={job.kind === 'RESET' ? '我理解确认后将清除本安装资料并重新初始化' : '我理解确认后将替换当前安装资料，原有连接会停止'} value={replacement} onChange={setReplacement} /></div><Button type="button" disabled={busy || !session || !reviewed || !replacement} onClick={() => { void action('confirm', { expectedRevision: review?.currentRevision ?? job.expectedRevision, reviewedData: true, understoodReplacement: true }) }}>{job.kind === 'RESET' ? '明确确认重新初始化' : '明确确认恢复此备份'}</Button></Section>}{!session && <p className="notice">当前仅保留这个任务的有限维护进度能力，不能借此进入管理后台或创建其他任务。</p>}</section>
 }

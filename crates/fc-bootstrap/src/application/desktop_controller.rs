@@ -332,6 +332,7 @@ pub(super) struct Controller {
     work: Option<Rect>,
     monitor: Option<MonitorWorkArea>,
     monitor_target: Option<String>,
+    monitor_dirty: bool,
     monitor_notice_changed: bool,
     pending: Option<Pending>,
     requested: Option<Request>,
@@ -480,6 +481,7 @@ impl Controller {
             work: None,
             monitor: None,
             monitor_target: None,
+            monitor_dirty: true,
             monitor_notice_changed: false,
             pending: None,
             requested: None,
@@ -563,6 +565,8 @@ impl Controller {
         self.generation = next;
         scene.generation = next;
         self.renderer.renew_input_generation(previous, next);
+        self.material_events.clear();
+        self.lesson_event = None;
         if let Some((generation, _)) = &mut self.images_verified {
             if *generation == previous {
                 *generation = next;
@@ -850,24 +854,26 @@ impl Controller {
         now: LocalDateTime,
         gate: &HealthGate,
     ) {
-        if let (Some(facts), Some(scene)) = (&mut self.facts, &mut self.scene) {
-            if voice_only_change(status, facts.global_revision)
-                && scene.source_revision == facts.global_revision
-                && scene.valid_at(now)
-            {
-                let previous = scene.source_revision;
-                facts.global_revision = status.revision;
-                scene.source_revision = status.revision;
-                self.renderer.adopt_voice_revision(scene, gate);
-                // The local lesson entry is bound to its exact revision. A
-                // voice-only commit keeps its pixels, but its replacement
-                // capability still needs a fresh scene generation.
-                self.needs_scene = true;
-                if self.images_verified == Some((scene.generation, previous)) {
-                    self.images_verified = Some((scene.generation, status.revision));
-                }
-            }
+        let (Some(facts), Some(scene)) = (&mut self.facts, &mut self.scene) else {
+            return;
+        };
+        if !voice_only_change(status, facts.global_revision)
+            || scene.source_revision != facts.global_revision
+            || !scene.valid_at(now)
+        {
+            return;
         }
+        let previous = scene.source_revision;
+        facts.global_revision = status.revision;
+        scene.source_revision = status.revision;
+        self.renderer.adopt_voice_revision(scene, gate);
+        if self.images_verified == Some((scene.generation, previous)) {
+            self.images_verified = Some((scene.generation, status.revision));
+        }
+        // The lesson entry requires a new generation after every revocation.
+        // The voice commit did not change the image or layout, so renew only
+        // input and keep the physically verified surface and raster owners.
+        self.renew_lesson_entry();
     }
     fn invalidate(&mut self) {
         self.hide();
@@ -1262,12 +1268,13 @@ impl Controller {
         if hints.contains(HostHints::DISPLAY_CHANGED) {
             self.renderer.invalidate_system_colors();
         }
-        // Retire monitor geometry before session/health early returns.
+        // Keep the previous geometry for comparison, but remember the query
+        // even if the current session/health state prevents publication.
         if hints.contains(HostHints::DISPLAY_CHANGED)
             || hints.contains(HostHints::POWER_CHANGED)
             || hints.contains(HostHints::SESSION_CHANGED)
         {
-            self.monitor = None;
+            self.monitor_dirty = true;
         }
         self.expire_content_jobs();
         if hints.contains(HostHints::SHUTDOWN) {
@@ -1336,6 +1343,9 @@ impl Controller {
             return Ok(());
         }
         self.adopt_voice_revision(status, now, &gate);
+        if self.stopped {
+            return Ok(());
+        }
         self.poll_content_jobs(&gate, now, control)?;
         if management_busy {
             self.cancel_pending();
@@ -1347,6 +1357,9 @@ impl Controller {
             return Ok(());
         }
         self.adopt_voice_revision(status, now, &gate);
+        if self.stopped {
+            return Ok(());
+        }
         let stale = self.facts.as_ref().is_some_and(|f| {
             f.global_revision != status.revision
                 || f.captured_at.date != now.date
@@ -1383,7 +1396,7 @@ impl Controller {
             .as_deref();
         if self.monitor.is_none()
             || self.monitor_target.as_deref() != target
-            || hints.contains(HostHints::DISPLAY_CHANGED)
+            || self.monitor_dirty
         {
             let monitor = match self.renderer.work_area_for(target) {
                 Ok(monitor) => monitor,
@@ -1396,14 +1409,14 @@ impl Controller {
             self.monitor_target = target.map(str::to_owned);
             self.monitor_notice_changed |= self.monitor.as_ref() != Some(&monitor);
             self.monitor = Some(monitor);
+            self.monitor_dirty = false;
         }
         let work = self.monitor.as_ref().expect("monitor selected above").work;
         let recompose = self.needs_scene
             || received
             || self.work != Some(work)
             || time_requires_scene(self.scene.as_ref(), self.last_sample, now, hints)
-            || hints.contains(HostHints::TIME_CHANGED)
-            || hints.contains(HostHints::DISPLAY_CHANGED);
+            || hints.contains(HostHints::TIME_CHANGED);
         if !recompose && hints.contains(HostHints::FOREGROUND_CHANGED) {
             // Focus revokes public lesson entry, but changes no desktop pixels.
             // Renew only its generation and clear old queued inputs in place.
