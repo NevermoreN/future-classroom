@@ -10,6 +10,7 @@ mod update_version;
 pub use autorun::{AutostartReadback, RunAtLogin, RunScope};
 pub use clock::CurrentClock;
 pub use crypto::{CurrentUserDpapi, SecretBytes};
+pub(crate) use paths::process_user_sid;
 pub use paths::{current_user_sid, DataPaths, DeploymentDirectory, DirectoryAclReadback};
 pub use thread_exit::thread_is_finished;
 pub use update_version::update_windows_baseline;

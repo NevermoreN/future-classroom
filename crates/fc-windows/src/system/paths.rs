@@ -625,10 +625,15 @@ impl Drop for Token {
     }
 }
 pub fn current_user_sid() -> Result<String> {
+    // SAFETY: borrowed current-process pseudohandle, not retained or closed.
+    process_user_sid(unsafe { GetCurrentProcess() })
+}
+
+pub(crate) fn process_user_sid(process: HANDLE) -> Result<String> {
     let mut handle = HANDLE::default();
-    // SAFETY: pseudohandle does not transfer ownership; returned token does.
+    // SAFETY: process is borrowed; only the returned token transfers ownership.
     unsafe {
-        OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut handle)?;
+        OpenProcessToken(process, TOKEN_QUERY, &mut handle)?;
     }
     let token = Token(handle);
     // u64 alignment satisfies TOKEN_USER on both x86 and x64, fixed 4096-byte bound.

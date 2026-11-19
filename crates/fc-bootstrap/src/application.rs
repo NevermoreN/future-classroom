@@ -6504,7 +6504,7 @@ fn run_at_inner(
                 Ok(fc_windows::host::InstanceRequest::OtherSession(session)) => Err(format!(
                     "未来教室已在Windows会话{session}中运行。请在原会话正常退出后再启动；不会激活其他会话的桌面。"
                 )),
-                Err(_) => Err("未来教室已运行或正在启动，但暂时无法请求原入口。请使用原实例托盘，或稍后重试；不会另开数据连接。".into()),
+                Err(_) => Err("未来教室已运行或正在启动，但当前桌面暂时没有可确认的入口；也可能运行在其他Windows会话。请在原会话使用托盘，或稍后重试；不会另开数据连接。".into()),
             };
         }
         Err(_) => return Err("无法取得未来教室数据目录的独占运行锁，请核对目录权限。".into()),

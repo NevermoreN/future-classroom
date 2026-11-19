@@ -3,13 +3,8 @@
 use crate::host_retry::{HostRetry, RetryDecision};
 use std::{
     cell::{Cell, RefCell},
-    fs::{File, OpenOptions},
-    io::{Read, Write},
     marker::PhantomData,
-    os::windows::{
-        fs::{MetadataExt, OpenOptionsExt},
-        io::AsRawHandle,
-    },
+    os::windows::ffi::OsStringExt,
     panic::{catch_unwind, AssertUnwindSafe},
     path::Path,
     rc::Rc,
@@ -20,10 +15,9 @@ use std::{
     time::Instant,
 };
 use windows::{
-    core::{w, Error, Result, HSTRING},
+    core::{w, Error, Owned, Result, HSTRING, PWSTR},
     Win32::{
         Foundation::*,
-        Storage::FileSystem::*,
         System::{
             LibraryLoader::*,
             RemoteDesktop::*,
@@ -47,81 +41,6 @@ fn host_error(stage: &str, error: Error) -> Error {
     )
 }
 
-fn host_io_error(stage: &str, error: std::io::Error) -> Error {
-    let code = error
-        .raw_os_error()
-        .map_or(E_FAIL, |v| windows::core::HRESULT::from_win32(v as u32));
-    host_error(stage, Error::from_hresult(code))
-}
-
-/// Caller holds the original InstanceGuard and checked runtime directory.
-/// A crash or a restored disk image can retain a record after its OS handles
-/// disappeared. Never use its PID to terminate a process or infer ownership.
-fn create_instance_owner(root: &Path) -> Result<File> {
-    let path = root.join("runtime/instance.owner");
-    let create = || {
-        OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .access_mode(GENERIC_WRITE.0 | DELETE.0)
-            .share_mode(FILE_SHARE_READ.0)
-            .custom_flags(FILE_FLAG_DELETE_ON_CLOSE.0 | FILE_FLAG_OPEN_REPARSE_POINT.0)
-            .open(&path)
-    };
-    match create() {
-        Ok(file) => return Ok(file),
-        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => (),
-        Err(error) => return Err(host_io_error("创建实例路由记录", error)),
-    }
-    // Exclusive open refuses a live publisher or reader. Deletion is scheduled
-    // only AFTER validating this exact file's shape and contents.
-    let mut stale = OpenOptions::new()
-        .read(true)
-        .access_mode(GENERIC_READ.0 | DELETE.0)
-        .share_mode(0)
-        .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT.0)
-        .open(&path)
-        .map_err(|e| host_io_error("独占检查残留实例路由记录", e))?;
-    let handle = HANDLE(stale.as_raw_handle());
-    let mut info = BY_HANDLE_FILE_INFORMATION::default();
-    // SAFETY: stale owns the exclusive live file handle; no path is followed.
-    unsafe { GetFileInformationByHandle(handle, &mut info) }
-        .map_err(|e| host_error("检查残留实例路由记录属性", e))?;
-    if info.dwFileAttributes & (FILE_ATTRIBUTE_REPARSE_POINT.0 | FILE_ATTRIBUTE_DIRECTORY.0) != 0
-        || info.nNumberOfLinks != 1
-        || info.nFileSizeHigh != 0
-        || info.nFileSizeLow != 12
-    {
-        return Err(host_error(
-            "残留实例路由记录格式不符，未删除",
-            Error::from_hresult(E_INVALIDARG),
-        ));
-    }
-    let mut record = [0u8; 12];
-    stale
-        .read_exact(&mut record)
-        .map_err(|e| host_io_error("读取残留实例路由记录", e))?;
-    if &record[..4] != b"FCI1" {
-        return Err(host_error(
-            "残留实例路由记录内容不符，未删除",
-            Error::from_hresult(E_INVALIDARG),
-        ));
-    }
-    let disposition = FILE_DISPOSITION_INFO { DeleteFile: true };
-    // SAFETY: the validated, exclusively held file has DELETE access. Delete
-    // by handle, then CREATE_NEW; never truncate or overwrite a replacement.
-    unsafe {
-        SetFileInformationByHandle(
-            handle,
-            FileDispositionInfo,
-            &disposition as *const _ as _,
-            std::mem::size_of_val(&disposition) as u32,
-        )
-    }
-    .map_err(|e| host_error("清理残留实例路由记录", e))?;
-    drop(stale);
-    create().map_err(|e| host_io_error("重建实例路由记录", e))
-}
 thread_local! {
     // Out-of-context callbacks are delivered on the hook owner's UI thread.
     // Only an HWND value is retained; there is no cross-thread State pointer.
@@ -273,7 +192,6 @@ pub struct HiddenHost {
     class: u16,
     instance: HINSTANCE,
     foreground_hook: HWINEVENTHOOK,
-    instance_owner: Option<File>,
     idle_interval: u32,
     background_pending: Cell<bool>,
     _thread: PhantomData<Rc<()>>,
@@ -290,73 +208,74 @@ impl HiddenHost {
         Self::with_interval(enable_tray, 1000)
     }
     /// Publish only while the caller holds this root's original InstanceGuard.
-    /// The readable owner record is deleted by the OS when this host closes,
-    /// including process termination. It is routing information, not authority.
+    /// The hidden window publishes this root only in the current desktop. Its
+    /// lifetime belongs to Windows; no disk record needs creation or cleanup.
     pub fn for_instance(root: &Path, enable_tray: bool) -> Result<Self> {
         if !root.is_absolute() {
             return Err(Error::from_hresult(E_INVALIDARG));
         }
-        let mut host = Self::new(enable_tray)?;
+        let host = Self::new(enable_tray)?;
         let title = HSTRING::from(root.join("runtime/instance.lock").as_os_str());
-        let pid = unsafe { GetCurrentProcessId() };
-        let mut session = 0;
         unsafe {
-            ProcessIdToSessionId(pid, &mut session).map_err(|e| host_error("读取启动会话", e))?;
             SetWindowTextW(host.hwnd, &title).map_err(|e| host_error("设置实例窗口标识", e))?;
         }
-        let mut owner = create_instance_owner(root)?;
-        let mut record = [0u8; 12];
-        record[..4].copy_from_slice(b"FCI1");
-        record[4..8].copy_from_slice(&pid.to_le_bytes());
-        record[8..].copy_from_slice(&session.to_le_bytes());
-        owner
-            .write_all(&record)
-            .map_err(|e| host_io_error("写入实例路由记录", e))?;
-        host.instance_owner = Some(owner);
         Ok(host)
     }
     /// Called only after the root's lock is busy. No data connection is opened,
     /// and no message is sent to another Windows session or another data root.
     pub fn request_existing(root: &Path) -> Result<InstanceRequest> {
-        let mut file = OpenOptions::new()
-            .read(true)
-            .share_mode(FILE_SHARE_READ.0 | FILE_SHARE_WRITE.0 | FILE_SHARE_DELETE.0)
-            .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT.0)
-            .open(root.join("runtime/instance.owner"))
-            .map_err(|_| Error::from_hresult(E_FAIL))?;
-        let metadata = file.metadata().map_err(|_| Error::from_hresult(E_FAIL))?;
-        if !metadata.is_file()
-            || metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT.0 != 0
-            || metadata.len() != 12
-        {
-            return Err(Error::from_hresult(E_INVALIDARG));
-        }
-        let mut record = [0u8; 12];
-        file.read_exact(&mut record)
-            .map_err(|_| Error::from_hresult(E_FAIL))?;
-        if &record[..4] != b"FCI1" {
-            return Err(Error::from_hresult(E_INVALIDARG));
-        }
-        let pid = u32::from_le_bytes(record[4..8].try_into().unwrap());
-        let session = u32::from_le_bytes(record[8..].try_into().unwrap());
+        use windows::Win32::System::Threading::{
+            OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_WIN32,
+            PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_SYNCHRONIZE,
+        };
+        let title = HSTRING::from(root.join("runtime/instance.lock").as_os_str());
         let mut observed = 0;
         let mut current = 0;
-        // SAFETY: scalar process/session identities only. FindWindow searches
-        // this desktop; the matching title binds the original data root.
+        // SAFETY: only query the process owning this root's known host window.
+        // The owned process handle remains live across identity checks and post.
         unsafe {
-            ProcessIdToSessionId(pid, &mut observed)?;
-            if session != observed {
-                return Err(Error::from_hresult(E_INVALIDARG));
-            }
-            ProcessIdToSessionId(GetCurrentProcessId(), &mut current)?;
-            if session != current {
-                return Ok(InstanceRequest::OtherSession(session));
-            }
-            let title = HSTRING::from(root.join("runtime/instance.lock").as_os_str());
             let hwnd = FindWindowW(w!("FutureClassroom.HiddenHost.v1"), &title)?;
+            let mut pid = 0;
+            GetWindowThreadProcessId(hwnd, Some(&mut pid));
+            let process = Owned::new(OpenProcess(
+                PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_SYNCHRONIZE,
+                false,
+                pid,
+            )?);
+            if crate::system::process_user_sid(*process)? != crate::system::current_user_sid()? {
+                return Err(Error::from_hresult(E_ACCESSDENIED));
+            }
+            ProcessIdToSessionId(pid, &mut observed)?;
+            ProcessIdToSessionId(GetCurrentProcessId(), &mut current)?;
+            if observed != current {
+                return Ok(InstanceRequest::OtherSession(observed));
+            }
+            let mut image = [0u16; 32768];
+            let mut length = image.len() as u32;
+            QueryFullProcessImageNameW(
+                *process,
+                PROCESS_NAME_WIN32,
+                PWSTR(image.as_mut_ptr()),
+                &mut length,
+            )?;
+            let image =
+                std::path::PathBuf::from(std::ffi::OsString::from_wide(&image[..length as usize]));
+            let expected = std::env::current_exe()
+                .and_then(std::fs::canonicalize)
+                .map_err(|_| Error::from_hresult(E_FAIL))?;
+            if image
+                .canonicalize()
+                .map_err(|_| Error::from_hresult(E_FAIL))?
+                != expected
+            {
+                return Err(Error::from_hresult(E_ACCESSDENIED));
+            }
             let mut actual_pid = 0;
             GetWindowThreadProcessId(hwnd, Some(&mut actual_pid));
-            if actual_pid != pid {
+            if actual_pid != pid
+                || WaitForSingleObject(*process, 0) != WAIT_TIMEOUT
+                || FindWindowW(w!("FutureClassroom.HiddenHost.v1"), &title)? != hwnd
+            {
                 return Err(Error::from_hresult(E_INVALIDARG));
             }
             PostMessageW(Some(hwnd), OPEN_INSTANCE_MESSAGE, WPARAM(0), LPARAM(0))?;
@@ -405,7 +324,6 @@ impl HiddenHost {
             class: atom,
             instance,
             foreground_hook: HWINEVENTHOOK::default(),
-            instance_owner: None,
             idle_interval: interval_millis,
             background_pending: Cell::new(false),
             _thread: PhantomData,
@@ -1035,59 +953,6 @@ pub fn probe_lifecycle(seconds: u32, with_tray: bool) -> Result<HostLifecycleRep
 mod tests {
     use super::*;
     #[test]
-    fn instance_owner_recovers_stale_record_and_preserves_live_or_unknown_files() {
-        let root = std::env::temp_dir().join(format!(
-            "FutureClassroom-Test-StaleInstanceOwner-{}",
-            std::process::id()
-        ));
-        std::fs::create_dir(&root).unwrap();
-        struct Scratch(std::path::PathBuf);
-        impl Drop for Scratch {
-            fn drop(&mut self) {
-                let result = std::fs::remove_dir_all(&self.0);
-                if !std::thread::panicking() {
-                    result.unwrap();
-                }
-            }
-        }
-        let _scratch = Scratch(root.clone());
-        let _guard = crate::InstanceGuard::acquire(&root).unwrap();
-        let path = root.join("runtime/instance.owner");
-        let mut old = [0u8; 12];
-        old[..4].copy_from_slice(b"FCI1");
-        old[4..8].copy_from_slice(&u32::MAX.to_le_bytes());
-        std::fs::write(&path, old).unwrap();
-
-        // A valid file with no owner is replaced while the original lock stays
-        // held, then retains the normal delete-on-close publication lifetime.
-        let mut owner = create_instance_owner(&root).unwrap();
-        assert_eq!(owner.metadata().unwrap().len(), 0);
-        owner.write_all(&old).unwrap();
-        let error = create_instance_owner(&root).unwrap_err();
-        assert_eq!(
-            error.code(),
-            windows::core::HRESULT::from_win32(ERROR_SHARING_VIOLATION.0)
-        );
-        assert_eq!(std::fs::read(&path).unwrap(), old);
-        drop(owner);
-        assert!(!path.exists());
-
-        // Same-sized unknown files and hard links are never deleted or reset.
-        let unknown = b"not-instance";
-        assert_eq!(unknown.len(), 12);
-        std::fs::write(&path, unknown).unwrap();
-        assert!(create_instance_owner(&root).is_err());
-        assert_eq!(std::fs::read(&path).unwrap(), unknown);
-        std::fs::remove_file(&path).unwrap();
-        std::fs::write(&path, old).unwrap();
-        let link = root.join("keep.bin");
-        std::fs::hard_link(&path, &link).unwrap();
-        assert!(create_instance_owner(&root).is_err());
-        assert_eq!(std::fs::read(&link).unwrap(), old);
-        assert!(path.exists());
-    }
-
-    #[test]
     fn readiness_wait_can_be_cancelled_without_consuming_open_request() {
         let _serial = crate::NATIVE_TEST_SERIAL
             .lock()
@@ -1184,6 +1049,9 @@ mod tests {
             crate::InstanceGuard::acquire(&root).err().unwrap().code(),
             windows::core::HRESULT::from_win32(ERROR_SHARING_VIOLATION.0)
         );
+        // A leftover record, even invalid, is unrelated to window publication.
+        let legacy_record = root.join("runtime/instance.owner");
+        std::fs::write(&legacy_record, b"obsolete routing record").unwrap();
         let host = HiddenHost::for_instance(&root, false).unwrap();
         assert!(HiddenHost::request_existing(&root.join("other-root")).is_err());
         assert_eq!(
@@ -1219,7 +1087,16 @@ mod tests {
         })
         .unwrap();
         assert!(requested);
-        assert!(!root.join("runtime/instance.owner").exists());
+        assert_eq!(
+            std::fs::read(&legacy_record).unwrap(),
+            b"obsolete routing record"
+        );
+        assert!(HiddenHost::request_existing(&root).is_err());
+        std::fs::remove_file(&legacy_record).unwrap();
+        let fresh = HiddenHost::for_instance(&root, false).unwrap();
+        assert!(!legacy_record.exists());
+        drop(fresh);
+        assert!(!legacy_record.exists());
         assert_eq!(unsafe { GetForegroundWindow() }, foreground);
         drop(guard);
         drop(crate::InstanceGuard::acquire(&root).unwrap());
