@@ -904,7 +904,7 @@ impl Native {
                 let original = stage.join("OriginalInstaller.exe");
                 packages::reconstruct_installer(&mut blob, &source.metadata, &original, cancelled)
                     .map_err(err)?;
-                packages::verify_installer_distribution(&original, ROOT, now()?, None, None)
+                packages::verify_installer_distribution(&original, ROOT, now()?, None)
                     .map_err(err)?;
                 installer_lifecycle::cache_distribution_source(&original).map_err(err)?;
                 Ok::<(), String>(())

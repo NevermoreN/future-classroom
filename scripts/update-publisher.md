@@ -27,7 +27,7 @@ python3 scripts/package-update-envelope.py create \
   --output /公开发布目录/FutureClassroom.fcupdate
 ```
 
-每次输出到新目录/新文件，保留已有交付物。TUF签名对象是外部角色文件里的原始 `payload.zip` hash。Targets 和 Snapshot 有效期一年，Timestamp 九十天，初始 Root 五年。元数据过期会停止接收该更新，v4 正式 EXE 的首次安装及跨版升级也会拒绝该包。同版维护通过历史签名路径复核已安装版本，正在运行的教学软件可继续使用。离线部署应核对安装包的有效期与电脑时钟。 [单文件安装与维护](../packaging/STANDALONE-EXE.md)
+每次输出到新目录或新文件，保留已有交付物。TUF 签名绑定 `payload.zip` 的原始字节摘要。Targets 和 Snapshot 有效期一年，Timestamp 九十天，初始 Root 五年。校内自动更新继续检查当前有效期及回退水位。支持长期离线安装的正式 EXE 在手动运行时按历史时点核验完整官方签名，再由原生安装器核对版本和安装资格。已发布的旧 EXE 适用包内既有校验。 [单文件安装与维护](../packaging/STANDALONE-EXE.md)
 
 `package-update-envelope.py`只检查传输结构；签名发布工具检查发布格式；接收端独立验TUF、完整hash、ZIP白名单及原Setup/MSI绑定。真正安装还需原生安装器检查已签来源、精确前驱、Windows当前用户及运行lease，不能用任一工具成功代替完整安装资格。
 

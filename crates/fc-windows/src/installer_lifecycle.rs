@@ -11,9 +11,6 @@ pub mod broker;
 pub fn standalone_archive() -> Result<Option<Vec<u8>>> {
     native::broker::controlled_owner::setup_entry::standalone_archive()
 }
-pub fn maintenance_version() -> Result<Option<String>> {
-    native::broker::controlled_owner::setup_entry::maintenance::installed()
-}
 pub fn materialize_installer_source(
     directory: &std::path::Path,
     release: &fc_protocol::update_release::ReleaseClaims,

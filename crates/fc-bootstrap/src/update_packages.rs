@@ -18,15 +18,11 @@ pub enum PackageError {
     Io(std::io::Error),
     Invalid,
     Trust,
-    InstallerMetadataExpired,
     Checkpoint,
     Cache(CacheError),
 }
 impl std::fmt::Display for PackageError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if matches!(self, Self::InstallerMetadataExpired) {
-            return f.write_str("安装包的签名授权已过期，或电脑时间超出授权有效期。");
-        }
         write!(f, "{self:?}")
     }
 }
@@ -564,15 +560,31 @@ fn metadata_from_archive<R: Read + Seek>(zip: &mut ZipArchive<R>) -> Result<Owne
     m.validate()?;
     Ok(m)
 }
-/// Official signatures and source membership for the public installation entry.
-/// `maintenance_version` is read from Windows registration, never UI/argv. Only
-/// exactly that signed target may use historical signature time for maintenance;
-/// the native same-source/cache admission still runs before any MSI operation.
+/// Automatic installation and cache seeding require current signed metadata.
 pub fn verify_installer_distribution(
     path: &Path,
     anchor: &[u8],
     now: i64,
-    maintenance_version: Option<&str>,
+    selected_sources: Option<(&Path, &Path)>,
+) -> Result<ReleaseClaims> {
+    verify_distribution(path, anchor, Some(now), selected_sources)
+}
+
+/// A manual EXE remains usable offline regardless of the computer's clock.
+/// The original signed roles and payload still authenticate every source;
+/// the installer separately verifies version and exact native eligibility.
+pub fn verify_offline_installer_distribution(
+    path: &Path,
+    anchor: &[u8],
+    selected_sources: Option<(&Path, &Path)>,
+) -> Result<ReleaseClaims> {
+    verify_distribution(path, anchor, None, selected_sources)
+}
+
+fn verify_distribution(
+    path: &Path,
+    anchor: &[u8],
+    current_time: Option<i64>,
     selected_sources: Option<(&Path, &Path)>,
 ) -> Result<ReleaseClaims> {
     let reader = open_envelope(path, &|| false)?;
@@ -589,20 +601,13 @@ pub fn verify_installer_distribution(
         .iter()
         .map(|(_, raw)| raw.as_slice())
         .collect();
-    let verify = |time| {
-        UpdateTrust::from_installed_root(anchor)
-            .and_then(|mut trust| trust.refresh(metadata.borrowed(&roots), time))
+    let verification_time = match current_time {
+        Some(now) => now,
+        None => historical_time(anchor, &metadata).map_err(|_| PackageError::Trust)?,
     };
-    let (targets, current) = match verify(now) {
-        Ok(targets) => (targets, true),
-        Err(_) => {
-            let time = historical_time(anchor, &metadata).map_err(|_| PackageError::Trust)?;
-            if now <= time {
-                return Err(PackageError::Trust);
-            }
-            (verify(time).map_err(|_| PackageError::Trust)?, false)
-        }
-    };
+    let targets = UpdateTrust::from_installed_root(anchor)
+        .and_then(|mut trust| trust.refresh(metadata.borrowed(&roots), verification_time))
+        .map_err(|_| PackageError::Trust)?;
     let digest = fc_security::sha256(&payload);
     let mut matching = targets
         .iter()
@@ -650,14 +655,6 @@ pub fn verify_installer_distribution(
         if !matched {
             return Err(PackageError::Trust);
         }
-    }
-    // Historical verification can diagnose an authentic expired installer.
-    // It only admits maintenance of the very same already registered release.
-    if !current
-        && maintenance_version.and_then(|v| fc_domain::updates::ReleaseVersion::parse(v).ok())
-            != Some(claims.version)
-    {
-        return Err(PackageError::InstallerMetadataExpired);
     }
     Ok(claims)
 }
@@ -1374,20 +1371,40 @@ mod tests {
         let mut original = Vec::new();
         reader.read_to_end(&mut original).unwrap();
         assert_eq!(original, ENVELOPE);
-        let claims = verify_installer_distribution(&output, ROOT, NOW, None, None).unwrap();
+        let claims = verify_installer_distribution(&output, ROOT, NOW, None).unwrap();
         assert_eq!(claims.release_id, "TEST-ONLY-NOT-INSTALLABLE");
-        // Historical signatures cannot authorize fresh or cross-version installs.
+        // Manual installation authenticates the same signed artifact without
+        // using the computer's clock. Automatic installation still expires.
         let expired = 2_000_000_000;
-        for installed in [None, Some("0.1.0"), Some("99.0.0")] {
-            assert!(matches!(
-                verify_installer_distribution(&output, ROOT, expired, installed, None),
-                Err(PackageError::InstallerMetadataExpired)
-            ));
-        }
-        assert!(verify_installer_distribution(&output, ROOT, expired, Some("0.2.0"), None).is_ok());
+        assert!(matches!(
+            verify_installer_distribution(&output, ROOT, expired, None),
+            Err(PackageError::Trust)
+        ));
+        let manual = verify_offline_installer_distribution(&output, ROOT, None).unwrap();
+        assert_eq!(manual.identity, claims.identity);
+        assert_eq!(manual.version, claims.version);
+
+        let mut sources = super::archive(std::io::Cursor::new(&payload), 6).unwrap();
+        let setup = path.join("Setup.exe");
+        let msi = path.join("FutureClassroom.msi");
+        fs::write(
+            &setup,
+            read_member(&mut sources, "Setup.exe", 32 << 20).unwrap(),
+        )
+        .unwrap();
+        let mut msi_bytes = read_member(&mut sources, "FutureClassroom.msi", 64 << 20).unwrap();
+        fs::write(&msi, &msi_bytes).unwrap();
+        let selected = Some((setup.as_path(), msi.as_path()));
+        assert!(verify_offline_installer_distribution(&output, ROOT, selected).is_ok());
+        msi_bytes[0] ^= 1;
+        fs::write(&msi, &msi_bytes).unwrap();
+        assert!(matches!(
+            verify_offline_installer_distribution(&output, ROOT, selected),
+            Err(PackageError::Trust)
+        ));
         let mut damaged = fs::read(&output).unwrap();
         damaged[2] ^= 1;
         fs::write(&output, &damaged).unwrap();
-        assert!(verify_installer_distribution(&output, ROOT, NOW, None, None).is_err());
+        assert!(verify_offline_installer_distribution(&output, ROOT, None).is_err());
     }
 }

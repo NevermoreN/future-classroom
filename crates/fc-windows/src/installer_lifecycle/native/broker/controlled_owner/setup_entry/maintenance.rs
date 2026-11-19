@@ -224,8 +224,8 @@ pub(super) fn run(
     let registration = registered()?;
     let old = registration.as_ref().map(|value| value.version.as_str());
     let target = env!("CARGO_PKG_VERSION");
-    if package.unified() && release.map(|claim| claim.version) != ReleaseVersion::parse(target).ok()
-    {
+    let unified = package.unified();
+    if unified && release.map(|claim| claim.version) != ReleaseVersion::parse(target).ok() {
         return Err(LifecycleError::Invalid);
     }
     let upgrade = old.is_some_and(|version| version != target);
@@ -259,6 +259,8 @@ pub(super) fn run(
         "uninstall"
     } else if old == Some(target) {
         "repair"
+    } else if unified {
+        crate::installer_lifecycle::broker::OFFLINE_INSTALL_COMMAND
     } else {
         "install"
     };

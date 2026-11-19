@@ -19,6 +19,8 @@ pub(super) mod published_host;
 pub const BROKER_BUDGET: Duration = Duration::from_secs(120);
 /// Setup confirms MSI settlement, but one or more optional integration steps failed.
 pub const SETUP_SHELL_INCOMPLETE: u32 = 5104;
+/// The signed manual EXE invokes this mode for its exact sealed Setup child.
+pub const OFFLINE_INSTALL_COMMAND: &str = "install-offline";
 
 /// A local request only. The sealed image, fixed source and actual native
 /// admission/guard/effect proofs independently decide whether it may execute.
@@ -90,6 +92,11 @@ pub fn run_entry(args: &[String], release: Option<&ReleaseClaims>) -> Result<u32
     }
     if args.is_empty() {
         native::broker::controlled_owner::setup_entry::interactive()
+    } else if matches!(args, [one] if one == OFFLINE_INSTALL_COMMAND) {
+        if release.is_none() {
+            return Err(LifecycleError::Invalid);
+        }
+        run_setup(SetupCommand::Install)
     } else if let Some(command) = setup_command(args) {
         run_setup(command)
     } else {

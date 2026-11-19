@@ -9,7 +9,7 @@ fn main() {
         Ok(release) => release,
         Err(error) => {
             let _ = fc_windows::startup::show_startup_failure(&format!(
-                "无法验证未来教室官方安装源。\n错误：{error}\n请核对电脑日期，或重新获取完整官方安装包。已有设置和资料会保留。"
+                "无法验证未来教室官方安装源。\n错误：{error}\n请重新获取完整官方安装包。已有设置和资料会保留。"
             ));
             std::process::exit(1603);
         }
@@ -42,23 +42,21 @@ fn verify_source(
     arguments: &[String],
 ) -> Result<Option<fc_protocol::update_release::ReleaseClaims>, String> {
     use fc_windows::installer_lifecycle;
+    use fc_windows::installer_lifecycle::broker::OFFLINE_INSTALL_COMMAND;
     let map = |error| format!("{error:?}");
     let executable = std::env::current_exe().map_err(|error| error.to_string())?;
     let outer = installer_lifecycle::standalone_archive()
         .map_err(map)?
         .is_some();
-    let operation = arguments.is_empty()
+    let offline_install = matches!(arguments, [one] if one == OFFLINE_INSTALL_COMMAND);
+    let operation = offline_install
+        || arguments.is_empty()
         || matches!(arguments, [one] if matches!(one.as_str(), "install" | "repair" | "uninstall" | "maintenance"));
     if !outer && !operation {
         // Original native begin/broker/guardian roles retain their closed
         // pinned-image grammar and are never authorized by public metadata.
         return Ok(None);
     }
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_err(|error| error.to_string())?
-        .as_secs() as i64;
-    let version = installer_lifecycle::maintenance_version().map_err(map)?;
     let directory = executable.parent().ok_or("安装源目录无效。")?;
     let archive = if outer {
         executable.clone()
@@ -66,21 +64,29 @@ fn verify_source(
         directory.join("OriginalInstaller.exe")
     };
     if !outer && !archive.try_exists().map_err(|error| error.to_string())? {
+        if offline_install {
+            return Err("离线安装缺少原始官方安装包。".into());
+        }
         // The already released four-member coordinator cannot provide a v4
         // carrier. It retains its original compiled/native sealed-source path;
         // this does not admit a new unsealed source or a network executable.
         return Ok(None);
     }
     let msi = directory.join("FutureClassroom.msi");
-    fc_bootstrap::update_packages::verify_installer_distribution(
-        &archive,
-        include_bytes!("../../../../packaging/update-root.json"),
-        now,
-        version.as_deref(),
-        (!outer).then_some((executable.as_path(), msi.as_path())),
-    )
-    .map(Some)
-    .map_err(|error| error.to_string())
+    let selected = (!outer).then_some((executable.as_path(), msi.as_path()));
+    let root = include_bytes!("../../../../packaging/update-root.json");
+    use fc_bootstrap::update_packages;
+    let release = if !outer && matches!(arguments, [one] if one == "install") {
+        // The coordinator invokes the sealed child directly with `install`.
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|error| error.to_string())?
+            .as_secs() as i64;
+        update_packages::verify_installer_distribution(&archive, root, now, selected)
+    } else {
+        update_packages::verify_offline_installer_distribution(&archive, root, selected)
+    };
+    release.map(Some).map_err(|error| error.to_string())
 }
 
 #[cfg(not(windows))]
@@ -97,6 +103,7 @@ mod tests {
             vec!["--setup".into()],
             vec!["--run".into(), "msiexec.exe".into()],
             vec!["begin".into(), "effects_reconciled=true".into()],
+            vec![fc_windows::installer_lifecycle::broker::OFFLINE_INSTALL_COMMAND.into()],
         ] {
             assert!(fc_windows::installer_lifecycle::broker::run_helper(&arguments).is_err());
         }
